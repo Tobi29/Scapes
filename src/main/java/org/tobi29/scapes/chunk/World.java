@@ -1,0 +1,87 @@
+/*
+ * Copyright 2012-2015 Tobi29
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.tobi29.scapes.chunk;
+
+import org.tobi29.scapes.block.BlockType;
+import org.tobi29.scapes.block.GameRegistry;
+import org.tobi29.scapes.connection.PlayConnection;
+import org.tobi29.scapes.engine.utils.math.vector.Vector3;
+import org.tobi29.scapes.engine.utils.math.vector.Vector3i;
+import org.tobi29.scapes.engine.utils.task.TaskExecutor;
+import org.tobi29.scapes.plugins.Plugins;
+
+public abstract class World {
+    protected final PlayConnection connection;
+    protected final BlockType air;
+    protected final Plugins plugins;
+    protected final TaskExecutor taskExecutor;
+    protected final GameRegistry registry;
+    protected WorldEnvironment environment;
+    protected Vector3 spawn = new Vector3i(0, 0, 0);
+    protected long seed, tick;
+    @SuppressWarnings("CanBeFinal")
+    protected double gravitation = 9.8;
+
+    protected World(PlayConnection connection, Plugins plugins,
+            TaskExecutor taskExecutor, GameRegistry registry) {
+        this.connection = connection;
+        this.plugins = plugins;
+        this.taskExecutor = taskExecutor;
+        this.registry = registry;
+        air = registry.getAir();
+    }
+
+    public Plugins getPlugins() {
+        return plugins;
+    }
+
+    public BlockType getAir() {
+        return air;
+    }
+
+    public PlayConnection getConnection() {
+        return connection;
+    }
+
+    public WorldEnvironment getEnvironment() {
+        return environment;
+    }
+
+    public long getSeed() {
+        return seed;
+    }
+
+    public Vector3 getSpawn() {
+        return spawn;
+    }
+
+    public TaskExecutor getTaskExecutor() {
+        return taskExecutor;
+    }
+
+    public GameRegistry getRegistry() {
+        return registry;
+    }
+
+    public long getTick() {
+        return tick;
+    }
+
+    public double getGravitation() {
+        return gravitation;
+    }
+}

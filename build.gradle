@@ -1,0 +1,58 @@
+/*
+ * Copyright 2012-2015 Tobi29
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+apply from: "$rootDir/resources/scapesengineapplication.gradle"
+
+version = "0.0.0_1"
+
+application {
+    fullName = "Scapes"
+    version = project.version
+    company = "Tobi29"
+    copyright = "© 2014 Tobi29"
+    mainClass = "org.tobi29.scapes.Scapes"
+}
+
+dependencies {
+    compile project(":Engine")
+    compile project(":Engine:Utils")
+    compile project(":ControlPanel")
+    compile files("$rootDir/resources/Util/Scapes.Engine.SWTLoader-0.0.0_1.jar")
+    compile "org.slf4j:slf4j-api:1.7.10"
+    compile "commons-cli:commons-cli:1.2"
+
+    provided "org.eclipse.swt:org.eclipse.swt.win32.win32.x86:4.4"
+
+    testCompile "junit:junit:4.12"
+
+    runtime project(":Engine:LWJGL3Backend")
+    runtime project(":Engine:SWTPlatform")
+    runtime project(":Engine:CodecOGG")
+    runtime project(":Engine:CodecMP3")
+    runtime project(":Engine:CodecWAV")
+    runtime "org.apache.logging.log4j:log4j-api:2.1"
+    runtime "org.apache.logging.log4j:log4j-core:2.1"
+    runtime "org.apache.logging.log4j:log4j-slf4j-impl:2.1"
+}
+
+idea {
+    module {
+        excludeDirs += file("$rootDir/resources/Util/Inno Setup 5")
+        excludeDirs += file("$rootDir/resources/Util/JRE")
+        excludeDirs += file("$rootDir/resources/Util/Launch4j")
+    }
+}

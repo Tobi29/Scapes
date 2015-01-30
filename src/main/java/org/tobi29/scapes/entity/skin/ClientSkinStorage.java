@@ -1,0 +1,78 @@
+/*
+ * Copyright 2012-2015 Tobi29
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.tobi29.scapes.entity.skin;
+
+import org.tobi29.scapes.client.connection.ClientConnection;
+import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.texture.Texture;
+import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
+import org.tobi29.scapes.packets.PacketSkin;
+
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
+
+public class ClientSkinStorage {
+    private final Map<String, ClientSkin> skins = new ConcurrentHashMap<>();
+    private final Queue<String> skinRequests = new ConcurrentLinkedQueue<>();
+    private final ByteBuffer defaultSkin;
+
+    public ClientSkinStorage(Texture defaultTexture) {
+        defaultSkin = defaultTexture.getBuffer();
+    }
+
+    public void update(GraphicsSystem graphics, ClientConnection connection) {
+        List<ClientSkin> oldSkins = skins.values().stream()
+                .filter(skin -> skin.increaseTicks() > 1200)
+                .collect(Collectors.toList());
+        oldSkins.forEach(skin -> {
+            skins.remove(skin.getChecksum());
+            skin.dispose(graphics);
+        });
+        while (!skinRequests.isEmpty()) {
+            connection.send(new PacketSkin(skinRequests.poll()));
+        }
+    }
+
+    public void dispose(GraphicsSystem graphics) {
+        skins.values().forEach(skin -> skin.dispose(graphics));
+    }
+
+    public void addSkin(String checksum, byte... image) {
+        ByteBuffer buffer = BufferCreatorDirect.byteBuffer(image.length);
+        buffer.put(image);
+        buffer.rewind();
+        ClientSkin skin = skins.get(checksum);
+        if (skin != null) {
+            skin.setImage(buffer);
+        }
+    }
+
+    public Texture getSkin(String checksum) {
+        ClientSkin skin = skins.get(checksum);
+        if (skin == null) {
+            skin = new ClientSkin(defaultSkin, checksum);
+            skins.put(checksum, skin);
+            skinRequests.add(checksum);
+        }
+        return skin;
+    }
+}

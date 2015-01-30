@@ -1,0 +1,353 @@
+/*
+ * Copyright 2012-2015 Tobi29
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+
+apply from: "$rootDir/resources/scapesenginemodule.gradle"
+
+apply plugin: ScapesEngineApplication
+
+class ScapesEngineApplication implements Plugin<Project> {
+    private ScapesEngineApplicationExtension appExtension
+
+    @Override
+    void apply(Project target) {
+        // Application properties
+        target.extensions.
+                create("application", ScapesEngineApplicationExtension)
+
+        // Run task
+        Task runTask = target.tasks.create("run", JavaExec)
+        runTask.description = "Runs this project as a JVM application"
+        runTask.group = "Run"
+        runTask.conventionMapping.main = { target.application.mainClass }
+        runTask.classpath = target.sourceSets.main.runtimeClasspath
+        runTask.jvmArgs "-Xms1024M", "-Xmx2048M", "-XX:+UseG1GC",
+                "-XX:MaxGCPauseMillis=1"
+        if (target.hasProperty("runArgs")) {
+            runTask.args Eval.me(target.runArgs)
+        }
+        if (target.hasProperty("jvmArgs")) {
+            runTask.jvmArgs Eval.me(target.jvmArgs)
+        }
+        if (System.properties["os.name"].toLowerCase().contains("mac")) {
+            runTask.jvmArgs "-XstartOnFirstThread"
+        }
+        runTask.standardInput = System.in
+        runTask.dependsOn target.classes
+
+        // Platform deploy tasks
+        Task deployUniversalTask = addDeployUniversalTask(target)
+        Task deployMacOSXTask = addDeployMacOSXTask(target)
+        Task deployWindowsTask = addDeployWindowsTask(target)
+
+        // Full deploy task
+        Task deployTask = target.tasks.create("deploy", Task)
+        deployTask.group = "Deployment"
+        if (deployUniversalTask != null) {
+            deployTask.dependsOn deployUniversalTask
+        }
+        if (deployMacOSXTask != null) {
+            deployTask.dependsOn deployMacOSXTask
+        }
+        if (deployWindowsTask != null) {
+            deployTask.dependsOn deployWindowsTask
+        }
+    }
+
+    private Task addDeployUniversalTask(Project target) {
+        // Main task
+        Tar task = target.tasks.create("deployUniversal", Tar)
+        task.description =
+                "Archive containing necessary files to run the game on any supported platform"
+        task.group = "Deployment"
+        task.dependsOn target.jar
+        task.baseName = "${target.project.name}-Universal"
+        task.compression = Compression.GZIP
+        task.from(target.configurations.runtime) { into "lib" }
+        task.from(target.jar) { rename { "${target.project.name}.jar" } }
+        return task
+    }
+
+    private Task addDeployMacOSXTask(Project target) {
+        File jre = getJRE(target, "MacOSX")
+        if (jre == null) {
+            target.logger.warn "No JRE for Mac OS X found!"
+            return
+        }
+        // Bundle task
+        AppBundlerTask bundleTask = target.tasks.
+                create("bundleMacOSX", AppBundlerTask)
+        bundleTask.dependsOn target.jar
+        bundleTask.fullName = "${-> target.application.fullName}"
+        bundleTask.version = "${-> target.application.version}"
+        bundleTask.company = "${-> target.application.company}"
+        bundleTask.copyright = "${-> target.application.copyright}"
+        bundleTask.mainClass = "${-> target.application.mainClass}"
+        bundleTask.appbundler =
+                new File(target.rootDir, "resources/Util/appbundler-1.0ea.jar")
+        bundleTask.jre = jre
+        bundleTask.icon =
+                new File(target.rootDir, "resources/Project/Icon.icns")
+        bundleTask.classpath =
+                target.configurations.runtime + target.files(target.jar)
+        bundleTask.output =
+                "${bundleTask.temporaryDir}/${target.project.name}.app"
+
+        // Main task
+        Tar task = target.tasks.create("deployMacOSX", Tar)
+        task.description =
+                "Mac OS X Application containing necessary files to run the game"
+        task.group = "Deployment"
+        task.dependsOn bundleTask
+        task.baseName = "${target.project.name}-MacOSX"
+        task.compression = Compression.GZIP
+        task.from bundleTask.output.parentFile
+        return task
+    }
+
+    private Task addDeployWindowsTask(Project target) {
+        File jre32 = new File(target.buildDir,
+                "tmp/prepareWindows/install/32/jre")
+        if (!jre32.exists()) {
+            File extracted = getJRE(target, "Windows/32", jre32.parentFile)
+            if (extracted == null) {
+                target.logger.warn "No 32-Bit JRE for Windows found!"
+                return
+            }
+            extracted.renameTo(jre32)
+        }
+        File jre64 = new File(target.buildDir,
+                "tmp/prepareWindows/install/64/jre")
+        if (!jre64.exists()) {
+            File extracted = getJRE(target, "Windows/64", jre64.parentFile)
+            if (extracted == null) {
+                target.logger.warn "No 64-Bit JRE for Windows found!"
+                return
+            }
+            extracted.renameTo(jre64)
+        }
+
+        // Bootstrap task
+        Launch4jTask programTask = target.tasks.
+                create("programWindows", Launch4jTask)
+        programTask.dependsOn target.jar
+        programTask.fullName = "${-> target.application.fullName}"
+        programTask.version = "${-> target.application.version}"
+        programTask.company = "${-> target.application.company}"
+        programTask.copyright = "${-> target.application.copyright}"
+        programTask.mainClass = "${-> target.application.mainClass}"
+        programTask.launch4j =
+                new File(target.rootDir, "resources/Util/Launch4j/launch4j.jar")
+        programTask.icon =
+                new File(target.rootDir, "resources/Project/Icon.ico")
+        programTask.jar = target.files(target.jar)
+        programTask.exeMemoryMin = 1024
+        programTask.exeMemoryMax = 2048
+        programTask.exeClasspath = "lib/*"
+        programTask.exeJRE = "jre"
+        programTask.manifest =
+                new File(target.rootDir, "resources/Util/Program.manifest")
+        programTask.output = new File(programTask.temporaryDir,
+                target.project.name + ".exe")
+
+        // Prepare Task
+        Copy prepareTask = target.tasks.create("prepareWindows", Copy)
+        prepareTask.dependsOn programTask
+        prepareTask.dependsOn target.jar
+        prepareTask.from new File(target.rootDir, "resources/Project/installer")
+        prepareTask.from(programTask.output, { into "install/common" })
+        prepareTask.from(target.configurations.runtime,
+                { into "install/common/lib" })
+        prepareTask.into prepareTask.temporaryDir
+
+        // Pack task
+        Exec packTask = target.tasks.create("packWindows", Exec)
+        packTask.dependsOn prepareTask
+        String innoEXE = new File(target.rootDir,
+                "resources/Util/Inno Setup 5/ISCC.exe").absolutePath
+        String innoISS = new File(prepareTask.temporaryDir,
+                "Setup.iss").absolutePath
+        if (System.properties["os.name"].toLowerCase().contains("win")) {
+            packTask.commandLine innoEXE, innoISS
+        } else {
+            packTask.commandLine "wine", innoEXE, "Z:${innoISS}"
+        }
+
+        // Main task
+        Copy task = target.tasks.create("deployWindows", Copy)
+        task.dependsOn packTask
+        task.group = "Deployment"
+        task.description = "Windows Installer with bundled JRE"
+        task.from new File(prepareTask.temporaryDir, "output/setup.exe")
+        task.rename({
+            "${-> target.project.name}-Setup-${-> target.project.version}.exe"
+        })
+        task.into new File(target.buildDir, "distributions")
+        return task
+    }
+
+    private
+    static File getJRE(Project target, String platform) {
+        return getJRE(target, platform,
+                new File(target.buildDir, "jres/" + platform))
+    }
+
+    private
+    static File getJRE(Project target, String platform, File file) {
+        File[] jres = new File(target.rootDir,
+                "resources/Util/JRE/" + platform).listFiles((FileFilter) {
+            !it.isDirectory() && !it.isHidden()
+        })
+        if (jres == null || jres.length == 0) {
+            return null
+        }
+        // Workaround for automatic expanding failing on 2nd build
+        if (!file.exists()) {
+            target.copy {
+                from {
+                    target.tarTree(jres[0])
+                }
+                into file
+            }
+        }
+        File[] jre = file.listFiles((FileFilter) {
+            it.isDirectory() && !it.isHidden()
+        })
+        if (jre == null || jre.length == 0) {
+            return null
+        }
+        return jre[0]
+    }
+}
+
+class ScapesEngineApplicationExtension {
+    def String fullName
+    def String version
+    def String company
+    def String copyright
+    def String mainClass
+}
+
+class BootstrapPropertiesTask extends DefaultTask {
+    @OutputFile
+    def File output
+
+    @TaskAction
+    void run() {
+        Properties properties = new Properties()
+        properties.put("MainClass", project.application.mainClass)
+        properties.store(output.newWriter(), "")
+    }
+}
+
+class AppBundlerTask extends DefaultTask {
+    def String output
+    @Input
+    def fullName, version, company, copyright, mainClass
+    @InputDirectory
+    def File jre
+    @InputFile
+    def File appbundler, icon
+    @InputFiles
+    def FileCollection classpath
+
+    @OutputDirectory
+    File getOutput() {
+        project.file(output)
+    }
+
+    @TaskAction
+    void run() {
+        File outputFile = getOutput()
+        ant.taskdef(name: "bundleapp",
+                classpath: appbundler.absolutePath,
+                classname: "com.oracle.appbundler.AppBundlerTask")
+        ant.bundleapp(outputdirectory: outputFile.parentFile.absolutePath,
+                name: outputFile.name - ".app",
+                displayname: fullName,
+                identifier: "org.tobi29.scapes.engine",
+                shortversion: version,
+                icon: icon.absolutePath,
+                mainclassname: mainClass,
+                copyright: copyright,
+                applicationCategory: "public.app-category.games",
+                executableName: fullName) {
+            classpath.addToAntBuilder(ant, "classpath",
+                    FileCollection.AntType.FileSet)
+            arch(name: "x86_64")
+            runtime(dir: jre.absolutePath + "/Contents/Home")
+            option(value: "-XstartOnFirstThread")
+            option(value: "-Xms1024M")
+            option(value: "-Xmx2048M")
+            option(value: "-XX:+UseG1GC")
+            option(value: "-XX:MaxGCPauseMillis=1")
+            option(value: "-Xdock:icon=Contents/resources/Icon.icns")
+            option(value: "-Duser.dir=\$APP_ROOT/Contents/Resources")
+        }
+    }
+}
+
+class Launch4jTask extends DefaultTask {
+    def File output
+    @Input
+    def exeMemoryMin, exeMemoryMax, exeJRE, exeClasspath, fullName, version, company, copyright, mainClass
+    @InputFile
+    def File launch4j, icon, manifest
+    @InputFiles
+    def FileCollection jar
+
+    @OutputFile
+    File getOutput() {
+        project.file(output)
+    }
+
+    @TaskAction
+    void run() {
+        ant.taskdef(name: "launch4j",
+                classpath: launch4j.absolutePath,
+                classname: "net.sf.launch4j.ant.Launch4jTask")
+        Map<String, String> configMap = [headerType: "gui",
+                outfile: getOutput().absolutePath,
+                dontWrapJar: "false",
+                jar: jar.singleFile.absolutePath,
+                icon: icon.absolutePath,
+                manifest: manifest.absolutePath]
+        Map<String, String> jreMap = [initialheapsize: exeMemoryMin,
+                maxheapsize: exeMemoryMax]
+        jreMap.put("path", exeJRE)
+        def winVersion = version.replaceAll("_", ".")
+        ant.launch4j {
+            config(configMap) {
+                classPath(mainClass: mainClass, cp: exeClasspath)
+                jre(jreMap)
+                versioninfo(fileversion: winVersion,
+                        txtfileversion: version,
+                        filedescription: fullName,
+                        copyright: copyright,
+                        productversion: winVersion,
+                        productname: fullName,
+                        txtproductversion: version,
+                        companyname: company,
+                        internalname: fullName,
+                        originalfilename: output.name)
+            }
+        }
+    }
+}

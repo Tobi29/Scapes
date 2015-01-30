@@ -1,0 +1,7 @@
+{
+  "Name": "Vanilla Basics",
+  "Version": "0.0.0_1",
+  "ScapesVersion": "0.0.0_01",
+  "Parent": "WorldType",
+  "MainClass": "org.tobi29.scapes.vanilla.basics.VanillaBasics"
+}
