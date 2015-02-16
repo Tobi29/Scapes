@@ -38,22 +38,22 @@ public class Inventory {
         if (add == null) {
             throw new IllegalArgumentException("Item cannot be null!");
         }
-        int hasToStack = add.getAmount();
-        for (ItemStack item1 : items) {
-            if (item1.canStack(add) > 0 &&
-                    item1.getMaterial() != registry.getAir() &&
-                    item1.getAmount() > 0) {
-                if ((hasToStack -= item1.stack(add)) <= 0) {
+        for (ItemStack item : items) {
+            if (item.canStack(add) > 0 &&
+                    item.getMaterial() != registry.getAir()) {
+                add.setAmount(add.getAmount() - item.stack(add));
+                if (add.getAmount() <= 0) {
                     return add.getAmount();
                 }
             }
         }
         for (ItemStack item : items) {
-            if ((hasToStack -= item.stack(add)) <= 0) {
+            add.setAmount(add.getAmount() - item.stack(add));
+            if (add.getAmount() <= 0) {
                 return add.getAmount();
             }
         }
-        return add.getAmount() - hasToStack;
+        return add.getAmount();
     }
 
     public int canAdd(ItemStack add) {
@@ -62,7 +62,8 @@ public class Inventory {
         }
         int hasToStack = add.getAmount();
         for (ItemStack item : items) {
-            if ((hasToStack -= item.canStack(add)) <= 0) {
+            hasToStack -= item.canStack(add);
+            if (hasToStack <= 0) {
                 return add.getAmount();
             }
         }

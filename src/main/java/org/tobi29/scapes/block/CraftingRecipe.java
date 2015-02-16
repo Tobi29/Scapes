@@ -68,7 +68,7 @@ public class CraftingRecipe {
     }
 
     public ItemStack getResult() {
-        return result;
+        return new ItemStack(result);
     }
 
     public interface Ingredient {

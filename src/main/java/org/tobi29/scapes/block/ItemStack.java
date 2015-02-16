@@ -59,32 +59,35 @@ public class ItemStack {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public ItemStack setAmount(int amount) {
         this.amount = amount;
         if (this.amount <= 0 || material == registry.getAir()) {
             metaData = new TagStructure();
             this.amount = 0;
             material = registry.getAir();
         }
+        return this;
     }
 
     public int getData() {
         return data;
     }
 
-    public void setData(short data) {
+    public ItemStack setData(int data) {
         this.data = data;
+        return this;
     }
 
     public Material getMaterial() {
         return material;
     }
 
-    public void setMaterial(Material material) {
+    public ItemStack setMaterial(Material material) {
         if (material == null) {
             material = registry.getAir();
         }
         this.material = material;
+        return this;
     }
 
     public int canStack(ItemStack add) {
