@@ -30,7 +30,8 @@ import java.util.List;
 public class GuiCrafting extends GuiInventory {
     private final GuiComponentScrollPaneList scrollPaneTypes, scrollPaneRecipes;
     private final boolean table;
-    private int type;
+    private int type, example;
+    private long nextExample;
 
     public GuiCrafting(boolean table, MobPlayerClientMain player) {
         super("Crafting" + (table ? " Table" : ""), player);
@@ -59,6 +60,19 @@ public class GuiCrafting extends GuiInventory {
         }
     }
 
+    @Override
+    public void updateComponent() {
+        super.updateComponent();
+        if (System.currentTimeMillis() > nextExample) {
+            if (example == Integer.MAX_VALUE) {
+                example = 0;
+            } else {
+                example++;
+            }
+            updateRecipes();
+        }
+    }
+
     private void updateRecipes() {
         scrollPaneRecipes.removeAll();
         CraftingRecipeType recipeType =
@@ -69,6 +83,7 @@ public class GuiCrafting extends GuiInventory {
             Element element = new Element(recipe, type, id++);
             scrollPaneRecipes.add(element);
         }
+        nextExample = System.currentTimeMillis() + 1000;
     }
 
     private class ElementType extends GuiComponentPane {
@@ -79,6 +94,7 @@ public class GuiCrafting extends GuiInventory {
                             recipe.getName());
             label.addLeftClick(event -> {
                 type = id;
+                example = 0;
                 updateRecipes();
             });
             add(label);
@@ -106,7 +122,7 @@ public class GuiCrafting extends GuiInventory {
                         .getIngredients()) {
                     GuiComponentItemButton b =
                             new GuiComponentItemButton(x, 7, 25, 25,
-                                    ingredient.example(0));
+                                    ingredient.example(example));
                     b.addHover(
                             event -> setTooltip(b.getItem(), "Ingredient:\n"));
                     add(b);
@@ -121,7 +137,7 @@ public class GuiCrafting extends GuiInventory {
                     .getRequirements()) {
                 GuiComponentItemButton b =
                         new GuiComponentItemButton(x, 7, 25, 25,
-                                requirement.example(0));
+                                requirement.example(example));
                 b.addHover(event -> setTooltip(b.getItem(), "Requirement:\n"));
                 add(b);
                 x += 35;
