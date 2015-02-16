@@ -21,13 +21,12 @@ import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tobi29.scapes.engine.swt.util.InputDialog;
 import org.tobi29.scapes.engine.utils.BufferCreator;
+import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.server.controlpanel.ServerInfo;
 
@@ -36,20 +35,18 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Collection;
-import java.util.regex.Pattern;
 
 public class BookmarkPanel extends ScrolledComposite {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(BookmarkPanel.class);
-    private static final Pattern SPLIT_PATTERN = Pattern.compile(":");
     private static final byte[] CONNECTION_HEADER =
             {'S', 'c', 'a', 'p', 'e', 's'};
     private final ControlPanelShell shell;
-    private final Collection<String> bookmarks;
+    private final Collection<Pair<String, Integer>> bookmarks;
     private final Composite composite;
 
     public BookmarkPanel(Composite parent, ControlPanelShell shell,
-            Collection<String> bookmarks) {
+            Collection<Pair<String, Integer>> bookmarks) {
         super(parent, SWT.V_SCROLL);
         this.shell = shell;
         this.bookmarks = bookmarks;
@@ -71,7 +68,8 @@ public class BookmarkPanel extends ScrolledComposite {
     }
 
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
-    public void addBookmark(String bookmark) {
+    public void addBookmark(String address, int port) {
+        Pair<String, Integer> bookmark = new Pair<>(address, port);
         bookmarks.add(bookmark);
         new Bookmark(bookmark);
         setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
@@ -90,17 +88,11 @@ public class BookmarkPanel extends ScrolledComposite {
         private int readState;
         private ByteBuffer buffer;
 
-        private Bookmark(String address) {
+        private Bookmark(Pair<String, Integer> bookmark) {
             display = getDisplay();
-            String[] ipSplit = SPLIT_PATTERN.split(address, 2);
-            int port;
-            if (ipSplit.length > 1) {
-                port = Integer.valueOf(ipSplit[1]);
-            } else {
-                port = 12345;
-            }
+            String address = bookmark.a;
             InetSocketAddress socketAddress =
-                    new InetSocketAddress(ipSplit[0], port);
+                    new InetSocketAddress(address, bookmark.b);
             outBuffer = BufferCreator.byteBuffer(CONNECTION_HEADER.length + 1);
             outBuffer.put(CONNECTION_HEADER);
             outBuffer.put((byte) 1);
@@ -121,10 +113,12 @@ public class BookmarkPanel extends ScrolledComposite {
                     new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1));
             connect.setText("Connect");
             connect.addListener(SWT.Selection, event -> {
-                String password = new PasswordDialog(shell).open();
-                if (password != null) {
-                    shell.addTab(address, password);
-                }
+                InputDialog dialog =
+                        new InputDialog(shell, "Connect...", "Connect");
+                Text passwordField = dialog.add("Password",
+                        d -> new Text(d, SWT.BORDER | SWT.PASSWORD));
+                dialog.open(() -> shell
+                        .addTab(address, bookmark.b, passwordField.getText()));
             });
 
             Button remove = new Button(composite, SWT.NONE);
@@ -136,7 +130,7 @@ public class BookmarkPanel extends ScrolledComposite {
                 label.dispose();
                 connect.dispose();
                 remove.dispose();
-                bookmarks.remove(address);
+                bookmarks.remove(bookmark);
                 setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
                 layout(true, true);
             });

@@ -19,6 +19,7 @@ package org.tobi29.scapes.server.controlpanel;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.server.controlpanel.ui.ControlPanelShell;
 
 import java.util.ArrayList;
@@ -33,11 +34,16 @@ public class ScapesControlPanelContainer {
     public void run() {
         Preferences node =
                 Preferences.userRoot().node("Scapes").node("ControlPanel");
-        List<String> bookmarks = new ArrayList<>();
+        List<Pair<String, Integer>> bookmarks = new ArrayList<>();
         try {
-            String[] children = node.keys();
+            String[] children = node.childrenNames();
             for (String child : children) {
-                bookmarks.add(node.get(child, ""));
+                Preferences childNode = node.node(child);
+                String address = childNode.get("Address", null);
+                int port = childNode.getInt("Port", -1);
+                if (address != null && port >= 0 && port <= 65535) {
+                    bookmarks.add(new Pair<>(address, port));
+                }
             }
         } catch (BackingStoreException e) {
             LOGGER.warn("Failed to load bookmarks", e);
@@ -54,9 +60,15 @@ public class ScapesControlPanelContainer {
         }
         display.dispose();
         try {
-            node.clear();
+            String[] children = node.childrenNames();
+            for (String child : children) {
+                node.node(child).removeNode();
+            }
             for (int i = 0; i < bookmarks.size(); i++) {
-                node.put(String.valueOf(i), bookmarks.get(i));
+                Preferences child = node.node(String.valueOf(i));
+                Pair<String, Integer> bookmark = bookmarks.get(i);
+                child.put("Address", bookmark.a);
+                child.putInt("Port", bookmark.b);
             }
         } catch (BackingStoreException e) {
             LOGGER.warn("Failed to store bookmarks", e);

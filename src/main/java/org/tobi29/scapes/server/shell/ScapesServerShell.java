@@ -18,18 +18,15 @@ package org.tobi29.scapes.server.shell;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.*;
 import org.tobi29.scapes.Scapes;
 import org.tobi29.scapes.engine.swt.util.Dialogs;
+import org.tobi29.scapes.engine.swt.util.InputDialog;
 import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileSystem;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
 import org.tobi29.scapes.server.ControlPanel;
 import org.tobi29.scapes.server.ScapesServer;
-import org.tobi29.scapes.server.controlpanel.ui.MessageDialog;
-import org.tobi29.scapes.server.controlpanel.ui.OperatorDialog;
 import org.tobi29.scapes.server.controlpanel.ui.ServerPanel;
 
 import java.io.IOException;
@@ -86,13 +83,14 @@ public class ScapesServerShell extends ScapesStandaloneServer
             ScapesServer server = this.server;
             if (server != null) {
                 for (String player : serverPanel.players.getSelection()) {
-                    int level =
-                            new OperatorDialog(serverPanel.getShell()).open();
-                    if (level >= 0) {
-                        server.getCommandRegistry()
-                                .get("op -p " + player + " -l " +
-                                        level, this).execute();
-                    }
+                    InputDialog dialog = new InputDialog(serverPanel.getShell(),
+                            "Operator...");
+                    Spinner levelField =
+                            dialog.add("Level", d -> new Spinner(d, SWT.NONE));
+                    levelField.setValues(9, 0, 10, 0, 1, 10);
+                    dialog.open(() -> server.getCommandRegistry()
+                            .get("op -p " + player + " -l " +
+                                    levelField.getText(), this).execute());
                 }
             }
         });
@@ -100,13 +98,13 @@ public class ScapesServerShell extends ScapesStandaloneServer
             ScapesServer server = this.server;
             if (server != null) {
                 for (String player : serverPanel.players.getSelection()) {
-                    String message =
-                            new MessageDialog(serverPanel.getShell()).open();
-                    if (message != null) {
-                        server.getCommandRegistry()
-                                .get("tell -p " + player + ' ' + message, this)
-                                .execute();
-                    }
+                    InputDialog dialog = new InputDialog(serverPanel.getShell(),
+                            "Message...");
+                    Text messageField =
+                            dialog.add("Message", d -> new Text(d, SWT.BORDER));
+                    dialog.open(() -> server.getCommandRegistry()
+                            .get("tell -t " + player + ' ' +
+                                    messageField.getText(), this).execute());
                 }
             }
         });

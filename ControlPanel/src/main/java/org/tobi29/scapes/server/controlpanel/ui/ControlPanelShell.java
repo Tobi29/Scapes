@@ -22,6 +22,8 @@ import org.eclipse.swt.widgets.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.swt.util.Dialogs;
+import org.tobi29.scapes.engine.swt.util.InputDialog;
+import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.server.controlpanel.RemoteControlPanel;
 
 import java.io.IOException;
@@ -37,7 +39,8 @@ public class ControlPanelShell extends Shell {
     private final Map<TabItem, RemoteControlPanel> controlPanels =
             new ConcurrentHashMap<>();
 
-    public ControlPanelShell(Display display, Collection<String> bookmarks) {
+    public ControlPanelShell(Display display,
+            Collection<Pair<String, Integer>> bookmarks) {
         super(display, SWT.SHELL_TRIM);
         setText("Scapes Control Panel");
         setMinimumSize(640, 480);
@@ -62,11 +65,16 @@ public class ControlPanelShell extends Shell {
         MenuItem connectConnectTo = new MenuItem(connectionMenu, SWT.NONE);
         connectConnectTo.setText("Connect to...");
         connectConnectTo.addListener(SWT.Selection, event -> {
-            ConnectDialog dialog = new ConnectDialog(this);
-            ConnectDialog.Output login = dialog.open();
-            if (login != null) {
-                addTab(login.address, login.password);
-            }
+            InputDialog dialog = new InputDialog(this, "Connect...", "Connect");
+            Text addressField =
+                    dialog.add("Address", d -> new Text(d, SWT.BORDER));
+            Spinner portField =
+                    dialog.add("Address", d -> new Spinner(d, SWT.NONE));
+            portField.setValues(12345, 0, 65535, 0, 1, 100);
+            Text passwordField = dialog.add("Password",
+                    d -> new Text(d, SWT.BORDER | SWT.PASSWORD));
+            dialog.open(() -> addTab(addressField.getText(),
+                    portField.getSelection(), passwordField.getText()));
         });
 
         MenuItem connectDisconnect = new MenuItem(connectionMenu, SWT.NONE);
@@ -78,12 +86,12 @@ public class ControlPanelShell extends Shell {
         connectBookmark.addListener(SWT.Selection, event -> bookmarkTab());
     }
 
-    public void addTab(String address, String password) {
+    public void addTab(String address, int port, String password) {
         TabItem tabItem = new TabItem(tabFolder, SWT.NONE);
         ServerPanel serverPanel = new ServerPanel(tabFolder);
         try {
             RemoteControlPanel controlPanel =
-                    new RemoteControlPanel(address, password, tabItem,
+                    new RemoteControlPanel(address, port, password, tabItem,
                             serverPanel);
             tabItem.setText(controlPanel.getName());
             tabItem.setToolTipText(controlPanel.getTip());
@@ -115,7 +123,7 @@ public class ControlPanelShell extends Shell {
         for (TabItem tabItem : tabFolder.getSelection()) {
             RemoteControlPanel tab = controlPanels.get(tabItem);
             if (tab != null) {
-                bookmarkPanel.addBookmark(tab.getAddress());
+                bookmarkPanel.addBookmark(tab.getAddress(), tab.getPort());
             }
         }
     }

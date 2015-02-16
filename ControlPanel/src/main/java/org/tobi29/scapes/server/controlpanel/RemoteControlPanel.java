@@ -17,14 +17,15 @@
 package org.tobi29.scapes.server.controlpanel;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.TabItem;
+import org.eclipse.swt.widgets.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.swt.util.Dialogs;
+import org.tobi29.scapes.engine.swt.util.InputDialog;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.SleepUtil;
-import org.tobi29.scapes.server.controlpanel.ui.MessageDialog;
-import org.tobi29.scapes.server.controlpanel.ui.OperatorDialog;
 import org.tobi29.scapes.server.controlpanel.ui.ServerPanel;
 
 import java.io.IOException;
@@ -34,33 +35,25 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
 
 public class RemoteControlPanel implements Runnable {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(RemoteControlPanel.class);
-    private static final Pattern SPLIT_PATTERN = Pattern.compile(":");
     private static final byte[] SALT =
             "Scapes-Control-Panel".getBytes(StandardCharsets.UTF_8);
     private final String address, name, tip;
+    private final int port;
     private final TabItem tabItem;
     private final ServerPanel serverPanel;
     private final ControlPanelProtocol connection;
 
-    public RemoteControlPanel(String address, String password, TabItem tabItem,
-            ServerPanel serverPanel) throws IOException {
+    public RemoteControlPanel(String address, int port, String password,
+            TabItem tabItem, ServerPanel serverPanel) throws IOException {
         this.address = address;
+        this.port = port;
         this.tabItem = tabItem;
         this.serverPanel = serverPanel;
-        String[] addressSplit = SPLIT_PATTERN.split(address, 2);
-        String ip = addressSplit[0];
-        int port;
-        if (addressSplit.length > 1) {
-            port = Integer.valueOf(addressSplit[1]);
-        } else {
-            port = 12345;
-        }
-        InetSocketAddress socketAddress = new InetSocketAddress(ip, port);
+        InetSocketAddress socketAddress = new InetSocketAddress(address, port);
         if (socketAddress.isUnresolved()) {
             throw new IOException("Could not resolve address");
         }
@@ -104,21 +97,23 @@ public class RemoteControlPanel implements Runnable {
         });
         serverPanel.playerOP.addListener(SWT.Selection, event -> {
             for (String player : serverPanel.players.getSelection()) {
-                int level = new OperatorDialog(serverPanel.getShell()).open();
-                if (level >= 0) {
-                    connection.send("scapescmd",
-                            "op -p " + player + " -l " + level);
-                }
+                InputDialog dialog =
+                        new InputDialog(serverPanel.getShell(), "Operator...");
+                Spinner levelField =
+                        dialog.add("Level", d -> new Spinner(d, SWT.NONE));
+                levelField.setValues(9, 0, 10, 0, 1, 10);
+                dialog.open(() -> connection.send("scapescmd",
+                        "op -p " + player + " -l " + levelField.getText()));
             }
         });
         serverPanel.playerMessage.addListener(SWT.Selection, event -> {
             for (String player : serverPanel.players.getSelection()) {
-                String message =
-                        new MessageDialog(serverPanel.getShell()).open();
-                if (message != null) {
-                    connection.send("scapescmd",
-                            "tell -t " + player + ' ' + message);
-                }
+                InputDialog dialog =
+                        new InputDialog(serverPanel.getShell(), "Message...");
+                Text messageField =
+                        dialog.add("Message", d -> new Text(d, SWT.BORDER));
+                dialog.open(() -> connection.send("scapescmd",
+                        "tell -t " + player + ' ' + messageField.getText()));
             }
         });
         serverPanel.getDisplay().timerExec(100, this);
@@ -156,6 +151,10 @@ public class RemoteControlPanel implements Runnable {
 
     public String getAddress() {
         return address;
+    }
+
+    public int getPort() {
+        return port;
     }
 
     public String getName() {
