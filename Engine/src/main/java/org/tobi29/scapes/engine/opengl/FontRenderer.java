@@ -34,8 +34,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class FontRenderer {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(FontRenderer.class);
+    private static final GlyphPage[] EMPTY_GLYPH_PAGE = new GlyphPage[0];
+    private static final TextVAO[] EMPTY_TEXT_VAO = new TextVAO[0];
     private final GlyphRenderer glyphRenderer;
-    private GlyphPage[] pages = new GlyphPage[0];
+    private GlyphPage[] pages = EMPTY_GLYPH_PAGE;
 
     public FontRenderer(GlyphRenderer glyphRenderer) {
         this.glyphRenderer = glyphRenderer;
@@ -167,7 +169,7 @@ public class FontRenderer {
         private final int length;
 
         private Text() {
-            this(new TextVAO[0], 0);
+            this(EMPTY_TEXT_VAO, 0);
         }
 
         private Text(TextVAO[] vaos, int length) {

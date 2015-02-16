@@ -35,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * {@code OutputStream} to make it usable in networking code
  */
 public class TagStructure {
+    private static final byte[] EMPTY_BYTE = new byte[0];
     private Map<String, Object> tags = new ConcurrentHashMap<>();
 
     /**
@@ -79,7 +80,7 @@ public class TagStructure {
      */
     public byte[] getByteArray(String key) {
         Object tag = tags.get(key);
-        return tag instanceof byte[] ? (byte[]) tag : new byte[]{};
+        return tag instanceof byte[] ? (byte[]) tag : EMPTY_BYTE;
     }
 
     /**
@@ -655,7 +656,7 @@ public class TagStructure {
                 tags = newTags;
                 return TagStructureReader.SpecialNext.LIST_TERMINATE;
             } else if (tag == TagStructureReader.SpecialNext.LIST_EMPTY) {
-                tag = new ArrayList<>();
+                tag = new StructureList();
             }
             newTags.put(next.a, tag);
         }

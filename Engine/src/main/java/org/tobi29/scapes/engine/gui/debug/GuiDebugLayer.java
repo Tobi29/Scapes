@@ -20,11 +20,11 @@ import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiAlignment;
 
 public class GuiDebugLayer extends Gui {
-    private final GuiWidgetDebugValues debugValues;
+    private final GuiWidgetDebugValues debugValues = new GuiWidgetDebugValues();
 
     public GuiDebugLayer() {
         super(GuiAlignment.STRETCH);
-        add(debugValues = new GuiWidgetDebugValues());
+        add(debugValues);
         debugValues.setVisible(false);
     }
 

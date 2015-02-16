@@ -56,9 +56,10 @@ public class TaskExecutor {
     }
 
     public void tick() {
+        long time = System.currentTimeMillis();
         synchronized (tasks) {
-            long time = System.currentTimeMillis();
-            for (int i = 0; i < tasks.size(); i++) {
+            int i = 0;
+            while (i < tasks.size()) {
                 TaskWorker task = tasks.get(i);
                 if (time >= task.delay) {
                     try {
@@ -68,8 +69,7 @@ public class TaskExecutor {
                                 if (delay < 0) {
                                     task.stopped = true;
                                 } else {
-                                    task.delay =
-                                            System.currentTimeMillis() + delay;
+                                    task.delay = time + delay;
                                 }
                             }, task.name);
                         } else {
@@ -77,7 +77,7 @@ public class TaskExecutor {
                             if (delay < 0) {
                                 task.stopped = true;
                             } else {
-                                task.delay = System.currentTimeMillis() + delay;
+                                task.delay = time + delay;
                             }
                         }
                     } catch (Throwable e) {
@@ -86,7 +86,9 @@ public class TaskExecutor {
                     }
                 }
                 if (task.stopped) {
-                    tasks.remove(i--);
+                    tasks.remove(i);
+                } else {
+                    i++;
                 }
             }
         }
@@ -104,9 +106,9 @@ public class TaskExecutor {
     }
 
     public void addTask(Task task, String name, long delay, boolean async) {
+        delay += System.currentTimeMillis();
         synchronized (tasks) {
-            tasks.add(new TaskWorker(task, name,
-                    System.currentTimeMillis() + delay, async));
+            tasks.add(new TaskWorker(task, name, delay, async));
         }
     }
 

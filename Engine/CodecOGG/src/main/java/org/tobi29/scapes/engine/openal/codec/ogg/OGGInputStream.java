@@ -148,8 +148,8 @@ public class OGGInputStream extends AudioInputStream {
         if (block.synthesis(packet) == 0) {
             dspState.synthesis_blockin(block);
             int offset = 0;
-            int samples;
-            while ((samples = dspState.synthesis_pcmout(pcm, index)) > 0) {
+            int samples = dspState.synthesis_pcmout(pcm, index);
+            while (samples > 0) {
                 float[][] pcmSamples = pcm[0];
                 int length = FastMath.min(samples, BUFFER_SIZE);
                 for (int i = 0; i < channels; i++) {
@@ -174,6 +174,7 @@ public class OGGInputStream extends AudioInputStream {
                 }
                 dspState.synthesis_read(length);
                 offset += length * channels << 1;
+                samples = dspState.synthesis_pcmout(pcm, index);
             }
             return offset;
         } else {

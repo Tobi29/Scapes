@@ -32,16 +32,17 @@ public class GuiControlsList extends Gui {
                 inputMode -> inputModes.put(inputMode.toString(), inputMode));
         GuiComponentVisiblePane pane =
                 new GuiComponentVisiblePane(200, 0, 400, 512);
-        int y = 40;
+        int y = 80;
         for (InputMode inputMode : inputModes.values()) {
             GuiComponentTextButton controls =
-                    new GuiComponentTextButton(16, y += 40, 368, 30, 18,
+                    new GuiComponentTextButton(16, y, 368, 30, 18,
                             inputMode.toString());
             controls.addLeftClick(event -> {
                 state.remove(this);
                 state.add(inputMode.createControlsGui(state, this));
             });
             pane.add(controls);
+            y += 40;
         }
         GuiComponentTextButton back =
                 new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");

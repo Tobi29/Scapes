@@ -37,7 +37,8 @@ public class GuiWidget extends Gui {
         mesh.addVertex(0.0f, height, 0.0f, 0.0f, 0.0f, 0.0f, 0.3f, 0.0f, 0.0f);
         mesh.addVertex(width, height, 0.0f, 0.0f, 0.0f, 0.0f, 0.3f, 0.0f, 0.0f);
         vao = mesh.finish();
-        add(titleBar = new GuiComponentVisiblePane(0, -16, width, 16));
+        titleBar = new GuiComponentVisiblePane(0, -16, width, 16);
+        add(titleBar);
         titleBar.add(new GuiComponentText(2, 2, 12, name));
     }
 
@@ -65,7 +66,7 @@ public class GuiWidget extends Gui {
 
     @Override
     public void renderComponent(GraphicsSystem graphics, Shader shader,
-            FontRenderer font) {
+            FontRenderer font, double delta) {
         graphics.getTextureManager().unbind(graphics);
         OpenGL openGL = graphics.getOpenGL();
         openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);

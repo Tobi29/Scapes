@@ -92,7 +92,8 @@ public class TagStructureReaderJSON extends TagStructureJSON
                                 case 8:
                                     ByteArrayOutputStream byteStreamOut =
                                             new ByteArrayOutputStream();
-                                    while ((array = reader.next()) !=
+                                    array = reader.next();
+                                    while (array !=
                                             JsonParser.Event.END_ARRAY) {
                                         if (array ==
                                                 JsonParser.Event.VALUE_NUMBER) {
@@ -102,6 +103,7 @@ public class TagStructureReaderJSON extends TagStructureJSON
                                             throw new IOException(
                                                     "Illegal contents of byte array");
                                         }
+                                        array = reader.next();
                                     }
                                     tag = new Pair<>(key,
                                             byteStreamOut.toByteArray());

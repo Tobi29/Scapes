@@ -130,6 +130,7 @@ public class TagStructureArchive {
         return tagStructures.keySet();
     }
 
+    @SuppressWarnings("AccessToStaticFieldLockedOnInstance")
     public synchronized void write(OutputStream streamOut) throws IOException {
         List<Pair<String, byte[]>> entries = tagStructures.entrySet().stream()
                 .map(entry -> new Pair<>(entry.getKey(), entry.getValue()))

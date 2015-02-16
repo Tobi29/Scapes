@@ -19,13 +19,14 @@ package org.tobi29.scapes.engine.opengl;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 public class Mesh {
+    private static final float[] EMPTY_FLOAT = new float[0];
     private static final int BATCH_SIZE = 12;
     private final boolean triangles, color;
     private int pos, remaining;
-    private float[] vertexArray = new float[0];
-    private float[] colorArray = new float[0];
-    private float[] textureArray = new float[0];
-    private float[] normalArray = new float[0];
+    private float[] vertexArray = EMPTY_FLOAT;
+    private float[] colorArray = EMPTY_FLOAT;
+    private float[] textureArray = EMPTY_FLOAT;
+    private float[] normalArray = EMPTY_FLOAT;
     private float r;
     private float g;
     private float b;
@@ -135,13 +136,15 @@ public class Mesh {
             }
         } else {
             indexArray = new int[(int) (pos * 1.5)];
-            for (int i = 0, p = 0; i < indexArray.length; p += 4) {
+            int i = 0, p = 0;
+            while (i < indexArray.length) {
                 indexArray[i++] = p;
                 indexArray[i++] = p + 1;
                 indexArray[i++] = p + 2;
                 indexArray[i++] = p;
                 indexArray[i++] = p + 2;
                 indexArray[i++] = p + 3;
+                p += 4;
             }
         }
         VAO vao;

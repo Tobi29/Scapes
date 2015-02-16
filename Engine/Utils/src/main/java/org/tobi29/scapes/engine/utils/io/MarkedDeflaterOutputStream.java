@@ -84,9 +84,8 @@ public class MarkedDeflaterOutputStream extends DeflaterOutputStream {
     @Override
     public void flush() throws IOException {
         if (!def.finished()) {
-            int len;
-            while ((len =
-                    def.deflate(buf, 0, buf.length, Deflater.SYNC_FLUSH)) > 0) {
+            int len = def.deflate(buf, 0, buf.length, Deflater.SYNC_FLUSH);
+            while (len > 0) {
                 if (len > Short.MAX_VALUE) {
                     throw new IOException(
                             "Length was too long, unable to mark!");
@@ -97,6 +96,7 @@ public class MarkedDeflaterOutputStream extends DeflaterOutputStream {
                 if (len < buf.length) {
                     break;
                 }
+                len = def.deflate(buf, 0, buf.length, Deflater.SYNC_FLUSH);
             }
         }
         out.flush();

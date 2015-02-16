@@ -27,7 +27,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 public class CommandRegistry {
-    private static final Pattern PATTERN = Pattern.compile("[ ]+(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
+    private static final String[] EMPTY_STRING = new String[0];
+    private static final Pattern PATTERN =
+            Pattern.compile("[ ]+(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
     private final Map<String, CommandParser> commands =
             new ConcurrentHashMap<>();
 
@@ -41,7 +43,7 @@ public class CommandRegistry {
         String commandName = split[0];
         String[] commandArgs;
         if (split.length == 1) {
-            commandArgs = new String[0];
+            commandArgs = EMPTY_STRING;
         } else {
             commandArgs = PATTERN.split(split[1]);
         }

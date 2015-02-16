@@ -54,7 +54,8 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
     public void updateServer(double delta) {
         if (state.id >= State.LOADED.id) {
             synchronized (delayedUpdates) {
-                for (int i = 0; i < delayedUpdates.size(); i++) {
+                int i = 0;
+                while (i < delayedUpdates.size()) {
                     Update update = delayedUpdates.get(i);
                     if (update.isValid()) {
                         if (update.delay(delta) <= 0) {
@@ -66,8 +67,9 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
                                 update.run(terrain);
                             }
                         }
+                        i++;
                     } else {
-                        delayedUpdates.remove(i--);
+                        delayedUpdates.remove(i);
                     }
                 }
             }

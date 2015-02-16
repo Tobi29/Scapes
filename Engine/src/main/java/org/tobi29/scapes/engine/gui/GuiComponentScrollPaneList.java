@@ -38,10 +38,11 @@ public class GuiComponentScrollPaneList extends GuiComponentScrollPane {
     public void update(double mouseX, double mouseY, boolean mouseInside,
             ScapesEngine engine) {
         super.update(mouseX, mouseY, mouseInside, engine);
-        int i = -scrollStep;
+        int i = 0;
         for (GuiComponent component : components) {
-            component.setY(i += scrollStep);
+            component.setY(i);
+            i += scrollStep;
         }
-        maxY = i;
+        maxY = i - scrollStep;
     }
 }

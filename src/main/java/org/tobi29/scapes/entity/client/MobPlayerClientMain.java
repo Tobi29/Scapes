@@ -50,16 +50,16 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class MobPlayerClientMain extends MobPlayerClient {
-    protected final GameStateGameMP game;
-    protected int blockWait;
-    protected Gui currentGui;
-    protected long punchLeft = -1, punchRight = -1;
-    protected boolean flying;
-    protected int swim;
-    protected double gravitationMultiplier = 1.0, airFriction = 0.2,
+    private final GameStateGameMP game;
+    private int blockWait;
+    private Gui currentGui;
+    private long punchLeft = -1, punchRight = -1;
+    private boolean flying;
+    private int swim;
+    private double gravitationMultiplier = 1.0, airFriction = 0.2,
             groundFriction = 1.6, wallFriction = 2.0, waterFriction = 8.0,
             stepHeight = 1.0;
-    protected float chargeLeft, chargeRight;
+    private float chargeLeft, chargeRight;
 
     public MobPlayerClientMain(WorldClient world, Vector3 pos, Vector3 speed,
             double xRot, double zRot, String nickname, String skin) {
@@ -72,7 +72,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
                 .map(AABBElement::getAABB).iterator();
     }
 
-    protected void updateVelocity(double gravitation, double delta) {
+    private void updateVelocity(double gravitation, double delta) {
         speed.div(1.0 + airFriction * delta);
         if (inWater) {
             speed.div(1.0 + waterFriction * delta);
@@ -87,7 +87,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
         speed.plusZ(-gravitation * gravitationMultiplier * delta);
     }
 
-    protected void move(AABB aabb, Pool<AABBElement> aabbs, double goX,
+    private void move(AABB aabb, Pool<AABBElement> aabbs, double goX,
             double goY, double goZ) {
         boolean ground = false;
         boolean slidingWall = false;
@@ -174,7 +174,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
         this.slidingWall = slidingWall;
     }
 
-    protected void collide(AABB aabb, Pool<AABBElement> aabbs) {
+    private void collide(AABB aabb, Pool<AABBElement> aabbs) {
         boolean inWater = false;
         boolean swimming;
         for (AABBElement element : aabbs) {

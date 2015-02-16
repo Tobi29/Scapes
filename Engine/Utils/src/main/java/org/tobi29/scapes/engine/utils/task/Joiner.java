@@ -67,11 +67,9 @@ public class Joiner {
             joiner = new Joiner(this);
         }
 
-        public void join() {
+        public synchronized void join() {
             joining = true;
-            synchronized (this) {
-                notifyAll();
-            }
+            notifyAll();
         }
 
         public Joiner getJoiner() {

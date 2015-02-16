@@ -30,7 +30,8 @@ public class GuiWidgetDebugValues extends GuiWidget {
 
     public GuiWidgetDebugValues() {
         super(32, 32, 360, 240, "Debug Values");
-        add(scrollPane = new GuiComponentScrollPaneList(10, 10, 340, 220, 20));
+        scrollPane = new GuiComponentScrollPaneList(10, 10, 340, 220, 20);
+        add(scrollPane);
     }
 
     public synchronized Element get(String key) {
@@ -54,7 +55,8 @@ public class GuiWidgetDebugValues extends GuiWidget {
         private Element(String key) {
             super(0, 0, 378, 20);
             add(new GuiComponentTextButton(10, 2, 180, 15, 12, key));
-            add(value = new GuiComponentText(200, 5, 12, ""));
+            value = new GuiComponentText(200, 5, 12, "");
+            add(value);
         }
 
         public void setValue(String value) {

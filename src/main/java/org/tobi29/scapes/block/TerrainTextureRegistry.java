@@ -147,13 +147,13 @@ public class TerrainTextureRegistry {
                 height = 16;
             }
             if (animated) {
-                textures.put(path, texture =
-                        new AnimatedTerrainTexture(buffer, width, height,
-                                shaderAnimation, this));
+                texture = new AnimatedTerrainTexture(buffer, width, height,
+                        shaderAnimation, this);
+                textures.put(path, texture);
             } else {
-                textures.put(path, texture =
-                        new TerrainTexture(buffer, width, shaderAnimation,
-                                this));
+                texture = new TerrainTexture(buffer, width, shaderAnimation,
+                        this);
+                textures.put(path, texture);
             }
         }
         return texture;
@@ -249,9 +249,11 @@ public class TerrainTextureRegistry {
                     texture.tileY = yy;
                     texture.size = (float) texture.resolution / imageSize;
                     int scansize = texture.resolution << 2;
-                    for (int row = 0; row < texture.resolution; ) {
+                    int row = 0;
+                    while (row < texture.resolution) {
                         buffer.position((yy + row) * imageSize + xx << 2);
-                        texture.buffer.limit(scansize * ++row);
+                        row++;
+                        texture.buffer.limit(scansize * row);
                         buffer.put(texture.buffer);
                     }
                     texture.buffer.rewind();

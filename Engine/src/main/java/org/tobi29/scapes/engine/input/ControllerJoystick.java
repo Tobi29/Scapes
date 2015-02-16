@@ -114,7 +114,7 @@ public class ControllerJoystick implements Controller {
     }
 
     public double getAxis(int axis) {
-        if (axis < 0 | axis >= axes.length) {
+        if (axis < 0 || axis >= axes.length) {
             return 0.0;
         }
         return axes[axis];

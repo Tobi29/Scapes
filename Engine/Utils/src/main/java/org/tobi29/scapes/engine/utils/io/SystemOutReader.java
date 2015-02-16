@@ -37,12 +37,12 @@ public class SystemOutReader implements Closeable {
      */
     public SystemOutReader() throws IOException {
         consoleStream = new PipedOutputStream();
-        System.setOut(new PrintStream(
-                copyOut = new CopyOutputStream(System.out, consoleStream)));
-        System.setErr(new PrintStream(
-                copyErr = new CopyOutputStream(System.err, consoleStream)));
+        copyOut = new CopyOutputStream(System.out, consoleStream);
+        copyErr = new CopyOutputStream(System.err, consoleStream);
         logReader = new BufferedReader(
                 new InputStreamReader(new PipedInputStream(consoleStream)));
+        System.setOut(new PrintStream(copyOut));
+        System.setErr(new PrintStream(copyErr));
     }
 
     /**

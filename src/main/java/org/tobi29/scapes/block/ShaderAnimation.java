@@ -18,7 +18,7 @@ package org.tobi29.scapes.block;
 
 public enum ShaderAnimation {
     NONE((byte) 0),
-    LEAVE((byte) 1),
+    LEAVES((byte) 1),
     TALL_GRASS((byte) 1),
     WATER((byte) 2);
     private final byte id;

@@ -51,11 +51,12 @@ public class GuiComponentChat extends GuiComponent {
 
     @Override
     public void renderComponent(GraphicsSystem graphics, Shader shader,
-            FontRenderer font) {
+            FontRenderer font, double delta) {
         MatrixStack matrixStack = graphics.getMatrixStack();
         if (this.font != font) {
             this.font = font;
         }
+        long time = System.currentTimeMillis();
         synchronized (meshText) {
             int yy = -16;
             for (ChatLine line : meshText) {
@@ -65,7 +66,6 @@ public class GuiComponentChat extends GuiComponent {
                 matrixStack.pop();
                 yy -= 20;
             }
-            long time = System.currentTimeMillis();
             meshText.removeAll(
                     meshText.stream().filter(line -> time - line.time > 10000)
                             .collect(Collectors.toList()));

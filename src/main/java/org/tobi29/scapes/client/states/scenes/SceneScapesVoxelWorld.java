@@ -178,9 +178,9 @@ public class SceneScapesVoxelWorld extends Scene {
     }
 
     @Override
-    public void renderGui(GraphicsSystem graphics, Shader shader) {
+    public void renderGui(GraphicsSystem graphics, Shader shader, double delta) {
         if (!guiHide) {
-            super.renderGui(graphics, shader);
+            super.renderGui(graphics, shader, delta);
         }
     }
 
@@ -231,7 +231,7 @@ public class SceneScapesVoxelWorld extends Scene {
     }
 
     @Override
-    public void renderScene(GraphicsSystem graphics) {
+    public void renderScene(GraphicsSystem graphics, double delta) {
         MobPlayerClientMain player = world.getPlayer();
         MobModel playerModel = world.getPlayerModel();
         float blackout = 1.0f -
@@ -240,9 +240,9 @@ public class SceneScapesVoxelWorld extends Scene {
         brightness += (blackout - brightness) * 0.1;
         brightness = FastMath.clamp(brightness, 0, 1);
         mouseGrabbed = !player.hasGui();
-        float pitch = (float) player.getXRot();
-        float tilt = (float) player.getYRot();
-        float yaw = (float) player.getZRot();
+        float pitch = playerModel.getPitch();
+        float tilt = 0.0f;
+        float yaw = playerModel.getYaw();
         long flashDiff = flashTime - flashStart, flashPos =
                 System.currentTimeMillis() - flashStart;
         if (flashDiff > 0.0f && flashPos > 0.0f) {
@@ -265,7 +265,7 @@ public class SceneScapesVoxelWorld extends Scene {
         if (renderDistance > newRenderDistance) {
             renderDistance = newRenderDistance;
         } else {
-            float div = (float) FastMath.max(1.0d, graphics.getSync().getTPS());
+            double div = 1.0 + 4096.0 * delta;
             renderDistance += (newRenderDistance - renderDistance) / div;
         }
         if (!Float.isFinite(renderDistance)) {
@@ -275,8 +275,7 @@ public class SceneScapesVoxelWorld extends Scene {
                         .sqrt(FastMath.sqr(player.getXSpeed()) +
                                 FastMath.sqr(player.getYSpeed())) * 2.0f +
                         90.0f, 120.0f);
-        float div =
-                (float) FastMath.max(1.0d, graphics.getSync().getTPS() / 2.0d);
+        double div = 1.0 + 256.0 * delta;
         fov += (newFov - fov) / div;
         if (!Float.isFinite(fov)) {
             fov = 90.0f;
@@ -298,8 +297,8 @@ public class SceneScapesVoxelWorld extends Scene {
         sunLightDebug.setValue(world.getTerrain().getSunLight(xx, yy, zz));
         terrainTextureRegistry.render(graphics);
         renderWorld(graphics, cam);
-        world.updateRender(graphics, cam);
-        skybox.renderUpdate(graphics, cam);
+        world.updateRender(graphics, cam, delta);
+        skybox.renderUpdate(graphics, cam, delta);
         skinStorage.update(graphics, player.getGame().getClient());
     }
 

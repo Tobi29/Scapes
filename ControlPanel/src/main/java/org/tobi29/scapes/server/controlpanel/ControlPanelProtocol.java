@@ -151,7 +151,7 @@ public class ControlPanelProtocol {
             channel.queueBundle();
             processing = true;
         }
-        return channel.process() | processing;
+        return channel.process() || processing;
     }
 
     public void addCommand(String command, PacketListener packetListener) {

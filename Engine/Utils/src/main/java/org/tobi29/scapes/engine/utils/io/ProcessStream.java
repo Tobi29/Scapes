@@ -94,13 +94,13 @@ public final class ProcessStream {
             StreamProcessor<E> processor, int bufferSize) throws IOException {
         try {
             byte[] buffer = new byte[bufferSize];
-            int read;
-            do {
-                read = streamIn.read(buffer);
+            int read = streamIn.read(buffer);
+            while (read != -1) {
                 if (read > 0) {
                     processor.process(buffer, 0, read);
                 }
-            } while (read != -1);
+                read = streamIn.read(buffer);
+            }
         } finally {
             streamIn.close();
         }

@@ -70,8 +70,8 @@ public class ShaderManager {
     public ShaderCompileInformation getCompileInformation(String asset) {
         ShaderCompileInformation information = compileInformation.get(asset);
         if (information == null) {
-            compileInformation
-                    .put(asset, information = new ShaderCompileInformation());
+            information = new ShaderCompileInformation();
+            compileInformation.put(asset, information);
         }
         return information;
     }

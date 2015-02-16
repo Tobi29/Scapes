@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChunkMesh {
+    private static final float[] EMPTY_FLOAT = new float[0];
+    private static final byte[] EMPTY_BYTE = new byte[0];
     private static final int BATCH_SIZE = 1200;
     private final SmoothLight.FloatTriple triple =
             new SmoothLight.FloatTriple();
@@ -192,13 +194,15 @@ public class ChunkMesh {
     public VAO finish() {
         computeNormals();
         int[] indexArray = new int[pos * 3 / 2];
-        for (int i = 0, p = 0; i < indexArray.length; p += 4) {
+        int i = 0, p = 0;
+        while (i < indexArray.length) {
             indexArray[i++] = p;
             indexArray[i++] = p + 1;
             indexArray[i++] = p + 2;
             indexArray[i++] = p;
             indexArray[i++] = p + 2;
             indexArray[i++] = p + 3;
+            p += 4;
         }
         List<VAO.VAOAttribute> vaoAttributes = new ArrayList<>(6);
         vaoAttributes
@@ -230,11 +234,11 @@ public class ChunkMesh {
     }
 
     public static class VertexArrays {
-        public float[] vertexArray = new float[0];
-        public float[] colorArray = new float[0];
-        public float[] textureArray = new float[0];
-        public float[] normalArray = new float[0];
-        public float[] lightArray = new float[0];
-        public byte[] animationArray = new byte[0];
+        public float[] vertexArray = EMPTY_FLOAT;
+        public float[] colorArray = EMPTY_FLOAT;
+        public float[] textureArray = EMPTY_FLOAT;
+        public float[] normalArray = EMPTY_FLOAT;
+        public float[] lightArray = EMPTY_FLOAT;
+        public byte[] animationArray = EMPTY_BYTE;
     }
 }
