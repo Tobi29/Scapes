@@ -25,7 +25,6 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.ui.font.GlyphRenderer;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 public class SWTGlyphRenderer implements GlyphRenderer {
     private static final PaletteData PALETTE_DATA =
@@ -35,9 +34,9 @@ public class SWTGlyphRenderer implements GlyphRenderer {
     private final int tiles, pageTiles, pageTileBits, pageTileMask, size,
             glyphSize, imageSize, renderX, renderY;
     private final float tileSize;
-    private final byte[] alpha;
-    private final ImageData imageData;
+    private final int[] color;
     private Font font;
+    private Image image;
 
     public SWTGlyphRenderer(String fontName, int size) {
         this.fontName = fontName;
@@ -52,25 +51,36 @@ public class SWTGlyphRenderer implements GlyphRenderer {
         imageSize = glyphSize << tileBits;
         renderX = size / 2;
         renderY = FastMath.round(size * 0.375);
-        alpha = new byte[imageSize * imageSize];
-        Arrays.fill(alpha, (byte) 0);
-        imageData = new ImageData(imageSize, imageSize, 8, PALETTE_DATA);
-        imageData.setAlphas(0, 0, imageSize * imageSize, alpha, 0);
+        color = new int[imageSize * imageSize];
     }
 
+    @SuppressWarnings("AccessToStaticFieldLockedOnInstance")
     @Override
     public synchronized GlyphPage getPage(int id) {
         float[] width = new float[pageTiles];
-        MutableSingle<ImageData> output = new MutableSingle<>(imageData);
+        MutableSingle<ImageData> output = new MutableSingle<>(null);
         Display display = Display.getDefault();
         display.syncExec(() -> {
             if (font == null) {
-                font = new Font(display, fontName, FastMath.round(size * 0.75),
+                double fontSize;
+                if ("gtk".equals(SWT.getPlatform())) {
+                    fontSize = size * 0.7; // Note to self: SWT is NOT platform independent by any means
+                } else {
+                    fontSize = size;
+                }
+                font = new Font(display, fontName, FastMath.round(fontSize),
                         SWT.NONE);
             }
-            Image image = new Image(display, imageData);
+            if (image == null) {
+                ImageData imageData =
+                        new ImageData(imageSize, imageSize, 24, PALETTE_DATA);
+                image = new Image(display, imageData);
+            }
             GC gc = new GC(image);
             gc.setFont(font);
+            gc.setForeground(display.getSystemColor(SWT.COLOR_WHITE));
+            gc.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
+            gc.fillRectangle(0, 0, imageSize, imageSize);
             int i = 0;
             int offset = id << pageTileBits;
             for (int y = 0; y < tiles; y++) {
@@ -83,17 +93,16 @@ public class SWTGlyphRenderer implements GlyphRenderer {
                     width[i++] = (float) gc.stringExtent(str).x / size;
                 }
             }
-            output.a = image.getImageData();
             gc.dispose();
-            image.dispose();
+            output.a = image.getImageData();
         });
-        output.a.getAlphas(0, 0, imageSize * imageSize, alpha, 0);
+        output.a.getPixels(0, 0, imageSize * imageSize, color, 0);
         ByteBuffer buffer =
                 BufferCreatorDirect.byteBuffer(imageSize * imageSize << 2);
         int i = 0;
         while (buffer.hasRemaining()) {
             buffer.put(WHITE);
-            buffer.put(alpha[i]);
+            buffer.put((byte) (color[i] & 0xFF));
             i++;
         }
         buffer.rewind();
@@ -114,6 +123,9 @@ public class SWTGlyphRenderer implements GlyphRenderer {
     public void dispose() {
         if (font != null) {
             font.dispose();
+        }
+        if (image != null) {
+            image.dispose();
         }
     }
 }
