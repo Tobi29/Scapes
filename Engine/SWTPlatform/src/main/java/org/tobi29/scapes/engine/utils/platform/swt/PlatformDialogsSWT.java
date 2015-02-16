@@ -26,6 +26,8 @@ import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
 import java.io.File;
 
 public class PlatformDialogsSWT implements PlatformDialogs {
+    private static final File[] EMPTY_FILE = new File[0];
+    private static final boolean IS_COCOA = "cocoa".equals(SWT.getPlatform());
     private final Shell shell;
 
     public PlatformDialogsSWT() {
@@ -56,7 +58,7 @@ public class PlatformDialogsSWT implements PlatformDialogs {
         fileDialog.setFilterNames(filterNames);
         boolean successful = fileDialog.open() != null;
         if (!successful) {
-            return new File[0];
+            return EMPTY_FILE;
         }
         String filterPath = fileDialog.getFilterPath();
         String[] fileNames = fileDialog.getFileNames();
@@ -117,7 +119,7 @@ public class PlatformDialogsSWT implements PlatformDialogs {
 
     @Override
     public boolean renderTick(boolean force) {
-        return shell.getDisplay().readAndDispatch();
+        return !IS_COCOA && shell.getDisplay().readAndDispatch(); // Avoid jvm crash on osx
     }
 
     @Override
