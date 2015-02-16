@@ -211,6 +211,7 @@ public class ContainerGLFW extends ContainerLWJGL3 {
         recreateContext = true;
     }
 
+    @SuppressWarnings("ForLoopThatDoesntUseLoopVariable")
     @Override
     public void render(boolean active) {
         active |= dialogs.renderTick(active);
@@ -296,16 +297,14 @@ public class ContainerGLFW extends ContainerLWJGL3 {
         GLFW.glfwDefaultWindowHints();
         GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GL11.GL_FALSE);
         TagStructure tagStructure = engine.getTagStructure();
-        if (tagStructure.has("Compatibility")) {
-            if (!engine.getTagStructure().getStructure("Compatibility")
-                    .getBoolean("ForceLegacyGL")) {
-                GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);
-                GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 2);
-                GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE,
-                        GLFW.GLFW_OPENGL_CORE_PROFILE);
-                GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT,
-                        GL11.GL_TRUE);
-            }
+        if (!tagStructure.has("Compatibility") ||
+                !engine.getTagStructure().getStructure("Compatibility")
+                        .getBoolean("ForceLegacyGL")) {
+            GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);
+            GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 2);
+            GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE,
+                    GLFW.GLFW_OPENGL_CORE_PROFILE);
+            GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GL11.GL_TRUE);
         }
         if (fullscreen) {
             window = GLFW.glfwCreateWindow(monitorWidth, monitorHeight, title,
