@@ -100,14 +100,14 @@ public abstract class GameState {
         newScene = scene;
     }
 
-    public void step() {
+    public void step(double delta) {
         if (scene != null) {
             scene.stepGui(engine);
         }
-        stepComponent();
+        stepComponent(delta);
     }
 
-    public abstract void stepComponent();
+    public abstract void stepComponent(double delta);
 
     public void render(GraphicsSystem graphics, boolean updateSize) {
         if (newScene != null) {
@@ -152,12 +152,13 @@ public abstract class GameState {
                 scene.initFBO(2, fboBack);
             }
         }
+        double delta = graphics.getSync().getSpeedFactor();
         OpenGL openGL = graphics.getOpenGL();
         openGL.checkError("Initializing-Scene-Rendering");
         fboScene.activate(graphics);
         openGL.viewport(0, 0, sceneWidth, sceneHeight);
         openGL.clearDepth();
-        scene.renderScene(graphics);
+        scene.renderScene(graphics, delta);
         fboScene.deactivate(graphics);
         openGL.checkError("Scene-Rendering");
         graphics.setProjectionOrthogonal(0.0f, 0.0f, 800.0f, 512.0f);
@@ -210,7 +211,7 @@ public abstract class GameState {
         openGL.checkError("Post-Processing");
         Shader shader = graphics.getShaderManager()
                 .getShader("Engine:shader/Gui", graphics);
-        scene.renderGui(graphics, shader);
+        scene.renderGui(graphics, shader, delta);
         openGL.checkError("Gui-Rendering");
     }
 

@@ -55,7 +55,7 @@ public class GuiComponentIcon extends GuiComponent {
 
     @Override
     public void renderComponent(GraphicsSystem graphics, Shader shader,
-            FontRenderer font) {
+            FontRenderer font, double delta) {
         texture.bind(graphics);
         graphics.getOpenGL().setAttribute4f(OpenGL.COLOR_ATTRIBUTE, r, g, b, a);
         vao.render(graphics, shader);

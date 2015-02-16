@@ -92,6 +92,6 @@ public class GameStateMenu extends GameState {
     }
 
     @Override
-    public void stepComponent() {
+    public void stepComponent(double delta) {
     }
 }

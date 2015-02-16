@@ -50,7 +50,7 @@ public class GuiComponentText extends GuiComponent {
 
     @Override
     public void renderComponent(GraphicsSystem graphics, Shader shader,
-            FontRenderer font) {
+            FontRenderer font, double delta) {
         if (this.font != font) {
             this.font = font;
             updateText();

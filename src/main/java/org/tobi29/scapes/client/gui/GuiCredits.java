@@ -49,9 +49,10 @@ public class GuiCredits extends Gui {
         StringBuilder credits = new StringBuilder(200);
         try (BufferedReader reader = state.getEngine().getFiles()
                 .getResource("Scapes:Readme.txt").reader()) {
-            String line;
-            while ((line = reader.readLine()) != null) {
+            String line = reader.readLine();
+            while (line != null) {
                 credits.append(line).append('\n');
+                line = reader.readLine();
             }
             credits.append(
                     "\n\n\n\n\n\n\n\n\n\nThanks for playing!\n\nHave a nice day!" +
@@ -77,8 +78,8 @@ public class GuiCredits extends Gui {
 
     @Override
     public void renderComponent(GraphicsSystem graphics, Shader shader,
-            FontRenderer font) {
-        y += 40 * state.getEngine().getGraphics().getSync().getSpeedFactor();
+            FontRenderer font, double delta) {
+        y += 40.0 * delta;
         MatrixStack matrixStack = graphics.getMatrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(0, (float) -y, 0);

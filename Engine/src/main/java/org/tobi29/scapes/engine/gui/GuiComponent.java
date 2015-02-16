@@ -171,21 +171,21 @@ public abstract class GuiComponent
     }
 
     public void render(GraphicsSystem graphics, Shader shader,
-            FontRenderer font) {
+            FontRenderer font, double delta) {
         if (visible) {
             MatrixStack matrixStack = graphics.getMatrixStack();
             Matrix matrix = matrixStack.push();
             transform(matrix);
-            renderComponent(graphics, shader, font);
-            components.stream().forEach(
-                    component -> component.render(graphics, shader, font));
+            renderComponent(graphics, shader, font, delta);
+            components.stream().forEach(component -> component
+                    .render(graphics, shader, font, delta));
             renderOverlay(graphics, shader, font);
             matrixStack.pop();
         }
     }
 
     public void renderComponent(GraphicsSystem graphics, Shader shader,
-            FontRenderer font) {
+            FontRenderer font, double delta) {
     }
 
     public void renderOverlay(GraphicsSystem graphics, Shader shader,

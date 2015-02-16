@@ -74,7 +74,7 @@ public class GameStateLoadMP extends GameState {
     }
 
     @Override
-    public void stepComponent() {
+    public void stepComponent(double delta) {
         try {
             switch (step) {
                 case 0:

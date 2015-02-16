@@ -39,7 +39,7 @@ public class SceneImage extends Scene {
     }
 
     @Override
-    public void renderScene(GraphicsSystem graphics) {
+    public void renderScene(GraphicsSystem graphics, double delta) {
     }
 
     @Override

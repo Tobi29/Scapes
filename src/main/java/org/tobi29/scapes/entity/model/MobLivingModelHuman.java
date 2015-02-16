@@ -183,26 +183,27 @@ public class MobLivingModelHuman implements MobModel {
     }
 
     @Override
-    public void renderUpdate(GraphicsSystem graphics, WorldClient world) {
-        double div = FastMath.max(1.0, graphics.getSync().getTPS() / 10.0);
-        double div2 = FastMath.max(1.0, graphics.getSync().getTPS() / 2.0);
-        double speedFactor = graphics.getSync().getSpeedFactor();
+    public void renderUpdate(GraphicsSystem graphics, WorldClient world,
+            double delta) {
+        double divPos = 1.0 + 256.0 * delta;
+        double divRot = 1.0 + 64.0 * delta;
+        double divSpeed = 1.0 + 1024.0 * delta;
         double moveSpeed = FastMath.min(
                 FastMath.sqrt(FastMath.length((Vector2) entity.getSpeed())),
                 2.0);
-        xRotRender -= FastMath.angleDiff(entity.getXRot(), xRotRender) / div;
-        zRotRender -= FastMath.angleDiff(entity.getZRot(), zRotRender) / div;
-        pos.plus(entity.getPos().minus(pos.now()).div(div));
-        swing += moveSpeed * 2.0 * speedFactor;
+        xRotRender -= FastMath.angleDiff(entity.getXRot(), xRotRender) / divRot;
+        zRotRender -= FastMath.angleDiff(entity.getZRot(), zRotRender) / divRot;
+        pos.plus(entity.getPos().minus(pos.now()).div(divPos));
+        swing += moveSpeed * 2.0 * delta;
         swing %= FastMath.TWO_PI;
-        lazyName += speedFactor;
+        lazyName += delta;
         lazyName %= FastMath.TWO_PI;
-        moveSpeedRender += (moveSpeed - moveSpeedRender) / div2;
+        moveSpeedRender += (moveSpeed - moveSpeedRender) / divSpeed;
         float newChargeLeft = entity.getLeftCharge();
         ItemStack weaponLeft = entity.getLeftWeapon();
         if (newChargeLeft > 0.01f) {
-            armDirLeft2 += 2.4 * speedFactor;
-            armDirLeft2 -= armDirLeft2 * 2.7 * speedFactor;
+            armDirLeft2 += 2.4 * delta;
+            armDirLeft2 -= armDirLeft2 * 2.7 * delta;
         } else {
             if (armDirLeft > 0.01f) {
                 if (armDirLeft >= 0.45f) {
@@ -214,21 +215,21 @@ public class MobLivingModelHuman implements MobModel {
                 }
             }
             if (armDirLeft < 0.01f) {
-                armDirLeft2 -= armDirLeft2 * 2.7 * speedFactor;
+                armDirLeft2 -= armDirLeft2 * 2.7 * delta;
             }
         }
         armDirLeft = newChargeLeft;
         if (weaponLeft.getMaterial().isWeapon(weaponLeft) &&
                 armDirLeftRender < -0.6f) {
-            armDirLeftRender += (armDirLeft - armDirLeftRender) / div / 12.0;
+            armDirLeftRender += (armDirLeft - armDirLeftRender) / divPos / 12.0;
         } else {
-            armDirLeftRender += (armDirLeft - armDirLeftRender) / div;
+            armDirLeftRender += (armDirLeft - armDirLeftRender) / divPos;
         }
         float newChargeRight = entity.getRightCharge();
         ItemStack weaponRight = entity.getRightWeapon();
         if (newChargeRight > 0.01f) {
-            armDirRight2 += 2.4 * speedFactor;
-            armDirRight2 -= armDirRight2 * 2.7 * speedFactor;
+            armDirRight2 += 2.4 * delta;
+            armDirRight2 -= armDirRight2 * 2.7 * delta;
         } else {
             if (armDirRight > 0.01f) {
                 if (armDirRight >= 0.45f) {
@@ -240,15 +241,16 @@ public class MobLivingModelHuman implements MobModel {
                 }
             }
             if (armDirRight < 0.01f) {
-                armDirRight2 -= armDirRight2 * 2.7 * speedFactor;
+                armDirRight2 -= armDirRight2 * 2.7 * delta;
             }
         }
         armDirRight = newChargeRight;
         if (weaponRight.getMaterial().isWeapon(weaponRight) &&
                 armDirRightRender < -0.6f) {
-            armDirRightRender += (armDirRight - armDirRightRender) / div / 12.0;
+            armDirRightRender +=
+                    (armDirRight - armDirRightRender) / divPos / 12.0;
         } else {
-            armDirRightRender += (armDirRight - armDirRightRender) / div;
+            armDirRightRender += (armDirRight - armDirRightRender) / divPos;
         }
     }
 

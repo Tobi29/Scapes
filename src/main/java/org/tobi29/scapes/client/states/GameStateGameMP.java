@@ -90,12 +90,11 @@ public class GameStateGameMP extends GameState {
     }
 
     @Override
-    public void stepComponent() {
+    public void stepComponent(double delta) {
         if (!(scene instanceof SceneScapesVoxelWorld)) {
             sync.init();
             return;
         }
-        double delta = sync.getSpeedFactor();
         SceneScapesVoxelWorld scene = (SceneScapesVoxelWorld) this.scene;
         if (engine.getController().isPressed(ControllerKey.KEY_F1)) {
             scene.setGuiHide(!scene.isGuiHidden());

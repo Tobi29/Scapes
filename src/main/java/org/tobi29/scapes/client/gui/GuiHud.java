@@ -38,16 +38,16 @@ public class GuiHud extends Gui {
 
     @Override
     public void render(GraphicsSystem graphics, Shader shader,
-            FontRenderer font) {
+            FontRenderer font, double delta) {
         if (visible) {
-            super.render(graphics, shader, font);
+            super.render(graphics, shader, font, delta);
             MatrixStack matrixStack = graphics.getMatrixStack();
             Matrix matrix = matrixStack.push();
             float ratio = (float) graphics.getSceneHeight() /
                     graphics.getSceneWidth() * 1.5625f;
             matrix.scale(ratio, 1.0f, 1.0f);
             matrix.translate(-400.0f + 400.0f / ratio, 0.0f, 0.0f);
-            cross.render(graphics, shader, font);
+            cross.render(graphics, shader, font, delta);
             matrixStack.pop();
         }
     }

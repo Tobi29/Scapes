@@ -24,7 +24,6 @@ import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
-import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3;
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
@@ -57,8 +56,9 @@ public class MobModelBlock implements MobModel {
     }
 
     @Override
-    public void renderUpdate(GraphicsSystem graphics, WorldClient world) {
-        double div = FastMath.max(1.0, graphics.getSync().getTPS() / 10.0);
+    public void renderUpdate(GraphicsSystem graphics, WorldClient world,
+            double delta) {
+        double div = 1.0 + 256.0 * delta;
         pos.plus(entity.getPos().minus(pos.now()).div(div));
     }
 

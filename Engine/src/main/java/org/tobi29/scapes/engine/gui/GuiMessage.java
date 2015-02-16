@@ -43,8 +43,8 @@ public class GuiMessage extends Gui {
 
     @Override
     public void renderComponent(GraphicsSystem graphics, Shader shader,
-            FontRenderer font) {
-        progress += speed * graphics.getSync().getSpeedFactor();
+            FontRenderer font, double delta) {
+        progress += speed * delta;
         graphics.getTextureManager().unbind(graphics);
         OpenGL openGL = graphics.getOpenGL();
         openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);

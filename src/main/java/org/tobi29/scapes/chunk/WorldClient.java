@@ -136,10 +136,10 @@ public class WorldClient extends World {
         spawn = player.getPos();
     }
 
-    public void updateRender(GraphicsSystem graphics, Cam cam) {
-        playerModel.renderUpdate(graphics, this);
+    public void updateRender(GraphicsSystem graphics, Cam cam, double delta) {
+        playerModel.renderUpdate(graphics, this, delta);
         entityModels.values()
-                .forEach(model -> model.renderUpdate(graphics, this));
+                .forEach(model -> model.renderUpdate(graphics, this, delta));
         terrain.getTerrainRenderer().renderUpdate(graphics, cam);
     }
 

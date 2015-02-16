@@ -54,8 +54,8 @@ public class GuiComponentTextButton extends GuiComponentButton {
 
     @Override
     public void renderComponent(GraphicsSystem graphics, Shader shader,
-            FontRenderer font) {
-        super.renderComponent(graphics, shader, font);
+            FontRenderer font, double delta) {
+        super.renderComponent(graphics, shader, font, delta);
         if (this.font != font) {
             this.font = font;
             updateText(textFilter.filter(text));

@@ -55,7 +55,7 @@ public class GuiComponentSliderVert extends GuiComponent {
 
     @Override
     public void renderComponent(GraphicsSystem graphics, Shader shader,
-            FontRenderer font) {
+            FontRenderer font, double delta) {
         float slider = (float) value * (height - 16) + y + 8;
         graphics.getTextureManager().unbind(graphics);
         MatrixStack matrixStack = graphics.getMatrixStack();

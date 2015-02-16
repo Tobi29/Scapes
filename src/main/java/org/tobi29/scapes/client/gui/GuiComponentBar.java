@@ -59,9 +59,9 @@ public class GuiComponentBar extends GuiComponent {
 
     @Override
     public void renderComponent(GraphicsSystem graphics, Shader shader,
-            FontRenderer font) {
-        value += (FastMath.clamp(supplier.get(), 0.0, 1.0) - value) /
-                FastMath.max(1.0, graphics.getSync().getTPS());
+            FontRenderer font, double delta) {
+        double div = 1.0 + 4096.0 * delta;
+        value += (FastMath.clamp(supplier.get(), 0.0, 1.0) - value) / div;
         graphics.getTextureManager().unbind(graphics);
         MatrixStack matrixStack = graphics.getMatrixStack();
         Matrix matrix = matrixStack.push();

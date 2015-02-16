@@ -25,7 +25,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 public interface EntityModel {
     Vector3 getPos();
 
-    void renderUpdate(GraphicsSystem graphics, WorldClient world);
+    void renderUpdate(GraphicsSystem graphics, WorldClient world, double delta);
 
     void render(GraphicsSystem graphics, WorldClient world, Cam cam,
             Shader shader);

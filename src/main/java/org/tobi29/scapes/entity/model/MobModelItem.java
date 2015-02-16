@@ -58,10 +58,11 @@ public class MobModelItem implements MobModel {
     }
 
     @Override
-    public void renderUpdate(GraphicsSystem graphics, WorldClient world) {
-        double div = FastMath.max(1.0, graphics.getSync().getTPS() / 10.0);
+    public void renderUpdate(GraphicsSystem graphics, WorldClient world,
+            double delta) {
+        double div = 1.0 + 256.0 * delta;
         pos.plus(entity.getPos().minus(pos.now()).div(div));
-        dir += graphics.getSync().getSpeedFactor() * 45.0f;
+        dir += 45.0 * delta;
         dir %= 360.0f;
     }
 

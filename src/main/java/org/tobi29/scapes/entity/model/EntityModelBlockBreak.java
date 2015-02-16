@@ -55,8 +55,9 @@ public class EntityModelBlockBreak implements EntityModel {
     }
 
     @Override
-    public void renderUpdate(GraphicsSystem graphics, WorldClient world) {
-        double div = FastMath.max(1.0, graphics.getSync().getTPS() / 10.0);
+    public void renderUpdate(GraphicsSystem graphics, WorldClient world,
+            double delta) {
+        double div = 1.0 + 256.0 * delta;
         pos.plus(entity.getPos().minus(pos.now()).div(div));
     }
 

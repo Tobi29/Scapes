@@ -38,10 +38,10 @@ public class Gui extends GuiComponent {
 
     @Override
     public void render(GraphicsSystem graphics, Shader shader,
-            FontRenderer font) {
+            FontRenderer font, double delta) {
         if (visible) {
             if (alignment == GuiAlignment.STRETCH) {
-                super.render(graphics, shader, font);
+                super.render(graphics, shader, font, delta);
             } else {
                 MatrixStack matrixStack = graphics.getMatrixStack();
                 Matrix matrix = matrixStack.push();
@@ -56,7 +56,7 @@ public class Gui extends GuiComponent {
                         matrix.translate(-800.0f + 800.0f / ratio, 0.0f, 0.0f);
                         break;
                 }
-                super.render(graphics, shader, font);
+                super.render(graphics, shader, font, delta);
                 matrixStack.pop();
             }
         }

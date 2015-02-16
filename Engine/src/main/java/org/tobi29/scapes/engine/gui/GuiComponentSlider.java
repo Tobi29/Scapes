@@ -74,7 +74,7 @@ public class GuiComponentSlider extends GuiComponent {
 
     @Override
     public void renderComponent(GraphicsSystem graphics, Shader shader,
-            FontRenderer font) {
+            FontRenderer font, double delta) {
         float slider = (float) value * (width - 16) + 8;
         graphics.getTextureManager().unbind(graphics);
         vaoShadow.render(graphics, shader);

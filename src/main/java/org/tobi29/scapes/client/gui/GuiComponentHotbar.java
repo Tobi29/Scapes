@@ -49,7 +49,7 @@ public class GuiComponentHotbar extends GuiComponent {
 
     @Override
     public void renderComponent(GraphicsSystem graphics, Shader shader,
-            FontRenderer font) {
+            FontRenderer font, double delta) {
         MatrixStack matrixStack = graphics.getMatrixStack();
         OpenGL openGL = graphics.getOpenGL();
         for (int i = 0; i < 10; i++) {

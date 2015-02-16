@@ -57,7 +57,7 @@ public class GameStateStartup extends GameState {
     }
 
     @Override
-    public void stepComponent() {
+    public void stepComponent(double delta) {
         GuiComponentIcon image = scene.getImage();
         if (image != null) {
             if (warmUp > 20) {

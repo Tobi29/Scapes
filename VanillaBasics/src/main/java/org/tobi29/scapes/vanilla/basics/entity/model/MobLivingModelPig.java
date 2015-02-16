@@ -64,19 +64,20 @@ public class MobLivingModelPig implements MobModel {
     }
 
     @Override
-    public void renderUpdate(GraphicsSystem graphics, WorldClient world) {
-        double div = FastMath.max(1.0, graphics.getSync().getTPS() / 10.0);
-        double div2 = FastMath.max(1.0, graphics.getSync().getTPS() / 2.0);
-        double speedFactor = graphics.getSync().getSpeedFactor();
+    public void renderUpdate(GraphicsSystem graphics, WorldClient world,
+            double delta) {
+        double divPos = 1.0 + 256.0 * delta;
+        double divRot = 1.0 + 64.0 * delta;
+        double divSpeed = 1.0 + 1024.0 * delta;
         double moveSpeed = FastMath.min(
                 FastMath.sqrt(FastMath.length((Vector2) entity.getSpeed())),
                 2.0);
-        xRotRender -= FastMath.angleDiff(entity.getXRot(), xRotRender) / div;
-        zRotRender -= FastMath.angleDiff(entity.getZRot(), zRotRender) / div;
-        pos.plus(entity.getPos().minus(pos.now()).div(div));
-        swing += moveSpeed * 2.0 * speedFactor;
+        xRotRender -= FastMath.angleDiff(entity.getXRot(), xRotRender) / divRot;
+        zRotRender -= FastMath.angleDiff(entity.getZRot(), zRotRender) / divRot;
+        pos.plus(entity.getPos().minus(pos.now()).div(divPos));
+        swing += moveSpeed * 2.0 * delta;
         swing %= FastMath.TWO_PI;
-        moveSpeedRender += (moveSpeed - moveSpeedRender) / div2;
+        moveSpeedRender += (moveSpeed - moveSpeedRender) / divSpeed;
     }
 
     @Override
@@ -90,8 +91,8 @@ public class MobLivingModelPig implements MobModel {
         double swingDir = FastMath.cosTable(swing) * moveSpeedRender * 0.5;
         OpenGL openGL = graphics.getOpenGL();
         openGL.setAttribute2f(4, world.getTerrain()
-                        .getBlockLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f,
-                world.getTerrain()
+                        .getBlockLight(pos.intX(), pos.intY(), pos.intZ()) /
+                        15.0f, world.getTerrain()
                         .getSunLight(pos.intX(), pos.intY(), pos.intZ()) /
                         15.0f);
         texture.bind(graphics);

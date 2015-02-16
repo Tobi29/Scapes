@@ -37,7 +37,7 @@ public class GuiComponentVisiblePane extends GuiComponent {
 
     @Override
     public void renderComponent(GraphicsSystem graphics, Shader shader,
-            FontRenderer font) {
+            FontRenderer font, double delta) {
         graphics.getTextureManager().unbind(graphics);
         OpenGL openGL = graphics.getOpenGL();
         openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);

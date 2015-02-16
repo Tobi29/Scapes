@@ -51,6 +51,6 @@ public class GameStateServerDisconnect extends GameState {
     }
 
     @Override
-    public void stepComponent() {
+    public void stepComponent(double delta) {
     }
 }

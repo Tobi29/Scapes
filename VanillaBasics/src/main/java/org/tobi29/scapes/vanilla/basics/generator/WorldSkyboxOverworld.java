@@ -286,10 +286,10 @@ public class WorldSkyboxOverworld implements WorldSkybox {
     }
 
     @Override
-    public void renderUpdate(GraphicsSystem graphics, Cam cam) {
+    public void renderUpdate(GraphicsSystem graphics, Cam cam, double delta) {
         MobPlayerClient player = world.getPlayer();
         SceneScapesVoxelWorld scene = world.getScene();
-        float div = (float) FastMath.max(1.0d, graphics.getSync().getTPS());
+        double div = 1.0 + 256.0 * delta;
         if (world.getTerrain().getSunLight(scene.getCam().position.intX(),
                 scene.getCam().position.intY(),
                 scene.getCam().position.intZ()) > 0) {

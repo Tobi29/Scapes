@@ -104,8 +104,8 @@ public class SceneMenu extends Scene {
     }
 
     @Override
-    public void renderScene(GraphicsSystem graphics) {
-        yaw -= graphics.getSync().getSpeedFactor() * speed;
+    public void renderScene(GraphicsSystem graphics, double delta) {
+        yaw -= speed * delta;
         yaw %= 360;
         cam.setPerspective(
                 (float) graphics.getSceneWidth() / graphics.getSceneHeight(),

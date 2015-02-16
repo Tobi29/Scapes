@@ -197,11 +197,12 @@ public class GraphicsSystem {
             } else {
                 fboSizeDirty = false;
             }
+            double delta = sync.getSpeedFactor();
             engine.step();
             GameState state = engine.getState();
             state.render(this, fboSizeDirty);
             Shader shader = shaderManager.getShader("Engine:shader/Gui", this);
-            engine.getGlobalGui().render(this, shader, defaultFont);
+            engine.getGlobalGui().render(this, shader, defaultFont, delta);
             GuiController guiController = engine.getGuiController();
             if (guiController.isSoftwareMouse() && !state.isMouseGrabbed()) {
                 setProjectionOrthogonal(0.0f, 0.0f, contentWidth,

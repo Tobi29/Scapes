@@ -359,7 +359,7 @@ public class ScapesEngine implements Crashable {
         if (debug && controller.isPressed(ControllerKey.KEY_F3)) {
             debugGui.toggleDebugValues();
         }
-        state.step();
+        state.step(delta);
         globalGui.update(this);
         game.step();
         guiController.update(delta);
