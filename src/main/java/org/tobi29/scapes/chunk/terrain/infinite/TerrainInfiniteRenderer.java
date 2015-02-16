@@ -26,7 +26,6 @@ import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.SleepUtil;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.math.AABB;
-import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i;
 import org.tobi29.scapes.engine.utils.task.Joiner;
@@ -248,36 +247,44 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                 chunk -> chunk.getRendererChunk().resetPrepareVisible());
         TerrainInfiniteChunkClient startChunk =
                 terrain.getChunkNoLoad(playerX, playerY);
-        checkVisible(playerX, playerY, playerZ, 1, 0, 0, 1, (byte) 2, Face.UP,
-                true, startChunk);
-        checkVisible(playerX, playerY, playerZ, 1, 0, 0, 1, (byte) 1, Face.DOWN,
-                true, startChunk);
-        checkVisible(playerX, playerY, playerZ, 1, 0, 1, 0, (byte) 16,
-                Face.NORTH, true, startChunk);
-        checkVisible(playerX, playerY, playerZ, 1, 1, 0, 0, (byte) 32,
-                Face.EAST, true, startChunk);
-        checkVisible(playerX, playerY, playerZ, 1, 0, 1, 0, (byte) 4,
-                Face.SOUTH, true, startChunk);
-        checkVisible(playerX, playerY, playerZ, 1, 1, 0, 0, (byte) 8, Face.WEST,
-                true, startChunk);
+        checkVisible(playerX, playerY, playerZ, startChunk);
         terrain.getLoadedChunks().stream()
                 .map(TerrainInfiniteChunkClient::getRendererChunk)
                 .forEach(TerrainInfiniteRendererChunk::updateVisible);
     }
 
-    private void checkVisible(int x, int y, int z, int l, int xl, int yl,
-            int zl, byte face, Face primary, boolean prime,
+    private void checkVisible(int x, int y, int z,
             TerrainInfiniteChunkClient chunk) {
-        cullingPool1.push()
-                .set(x, y, z, l, xl, yl, zl, face, primary, prime, chunk);
+        if (chunk != null) {
+            chunk.getRendererChunk().setPrepareVisible(z);
+            cullingPool1.push()
+                    .set(x, y, z + 1, chunk, chunk.getRendererChunk());
+            cullingPool1.push()
+                    .set(x, y, z - 1, chunk, chunk.getRendererChunk());
+        }
+        chunk = terrain.getChunkNoLoad(x, y - 1);
+        if (chunk != null) {
+            cullingPool1.push()
+                    .set(x, y - 1, z, chunk, chunk.getRendererChunk());
+        }
+        chunk = terrain.getChunkNoLoad(x + 1, y);
+        if (chunk != null) {
+            cullingPool1.push()
+                    .set(x + 1, y, z, chunk, chunk.getRendererChunk());
+        }
+        chunk = terrain.getChunkNoLoad(x, y + 1);
+        if (chunk != null) {
+            cullingPool1.push()
+                    .set(x, y + 1, z, chunk, chunk.getRendererChunk());
+        }
+        chunk = terrain.getChunkNoLoad(x - 1, y);
+        if (chunk != null) {
+            cullingPool1.push()
+                    .set(x - 1, y, z, chunk, chunk.getRendererChunk());
+        }
         while (!cullingPool1.isEmpty()) {
             cullingPool1.stream()
-                    .filter(update -> update.prime && update.chunk != null &&
-                            !update.rendererChunk.isCulled(update.z))
-                    .forEach(update -> checkVisible(update, cullingPool2));
-            cullingPool1.stream()
-                    .filter(update -> !update.prime && update.chunk != null &&
-                            !update.rendererChunk.isCulled(update.z))
+                    .filter(update -> !update.rendererChunk.isCulled(update.z))
                     .forEach(update -> checkVisible(update, cullingPool2));
             Pool<VisibleUpdate> swap = cullingPool1;
             swap.reset();
@@ -292,86 +299,73 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
         update.rendererChunk.setPrepareVisible(update.z);
         if (update.rendererChunk.setCulled(update.z, true) &&
                 !update.rendererChunk.isSolid(update.z)) {
-            if ((update.face & 1) != 1) {
-                if (update.primary == Face.UP) {
+            int x = update.x - playerX;
+            int y = update.y - playerY;
+            int z = update.z - playerZ;
+            if (z >= 0) {
+                TerrainInfiniteRendererChunk rendererChunk =
+                        update.chunk.getRendererChunk();
+                if (!rendererChunk.isCulled(update.z + 1)) {
                     pool.push()
-                            .set(update.x, update.y, update.z + 1, 1, 0, 0, 1,
-                                    (byte) (update.face | 2), update.primary,
-                                    true, update.chunk);
-                } else if (update.zl <= update.l) {
-                    pool.push().set(update.x, update.y, update.z + 1, update.l,
-                            update.xl, update.yl, update.zl + 1,
-                            (byte) (update.face | 2), update.primary, false,
-                            update.chunk);
+                            .set(update.x, update.y, update.z + 1, update.chunk,
+                                    rendererChunk);
                 }
             }
-            if ((update.face & 2) != 2) {
-                if (update.primary == Face.DOWN) {
+            if (z <= 0) {
+                TerrainInfiniteRendererChunk rendererChunk =
+                        update.chunk.getRendererChunk();
+                if (!rendererChunk.isCulled(update.z - 1)) {
                     pool.push()
-                            .set(update.x, update.y, update.z - 1, 1, 0, 0, 1,
-                                    (byte) (update.face | 1), update.primary,
-                                    true, update.chunk);
-                } else if (update.zl <= update.l) {
-                    pool.push().set(update.x, update.y, update.z - 1, update.l,
-                            update.xl, update.yl, update.zl + 1,
-                            (byte) (update.face | 1), update.primary, false,
-                            update.chunk);
+                            .set(update.x, update.y, update.z - 1, update.chunk,
+                                    rendererChunk);
                 }
             }
-            if ((update.face & 4) != 4) {
-                if (update.primary == Face.NORTH) {
-                    pool.push()
-                            .set(update.x, update.y - 1, update.z, 1, 0, 1, 0,
-                                    (byte) (update.face | 16), update.primary,
-                                    true, terrain.getChunkNoLoad(update.x,
-                                            update.y - 1));
-                } else if (update.yl <= update.l) {
-                    pool.push().set(update.x, update.y - 1, update.z, update.l,
-                            update.xl, update.yl + 1, update.zl,
-                            (byte) (update.face | 16), update.primary, false,
-                            terrain.getChunkNoLoad(update.x, update.y - 1));
+            if (y <= 0) {
+                TerrainInfiniteChunkClient chunk =
+                        terrain.getChunkNoLoad(update.x, update.y - 1);
+                if (chunk != null) {
+                    TerrainInfiniteRendererChunk rendererChunk =
+                            chunk.getRendererChunk();
+                    if (!rendererChunk.isCulled(update.z)) {
+                        pool.push().set(update.x, update.y - 1, update.z, chunk,
+                                rendererChunk);
+                    }
                 }
             }
-            if ((update.face & 8) != 8) {
-                if (update.primary == Face.EAST) {
-                    pool.push()
-                            .set(update.x + 1, update.y, update.z, 1, 1, 0, 0,
-                                    (byte) (update.face | 32), update.primary,
-                                    true, terrain.getChunkNoLoad(update.x + 1,
-                                            update.y));
-                } else if (update.xl <= update.l) {
-                    pool.push().set(update.x + 1, update.y, update.z, update.l,
-                            update.xl + 1, update.yl, update.zl,
-                            (byte) (update.face | 32), update.primary, false,
-                            terrain.getChunkNoLoad(update.x + 1, update.y));
+            if (x >= 0) {
+                TerrainInfiniteChunkClient chunk =
+                        terrain.getChunkNoLoad(update.x + 1, update.y);
+                if (chunk != null) {
+                    TerrainInfiniteRendererChunk rendererChunk =
+                            chunk.getRendererChunk();
+                    if (!rendererChunk.isCulled(update.z)) {
+                        pool.push().set(update.x + 1, update.y, update.z, chunk,
+                                rendererChunk);
+                    }
                 }
             }
-            if ((update.face & 16) != 16) {
-                if (update.primary == Face.SOUTH) {
-                    pool.push()
-                            .set(update.x, update.y + 1, update.z, 1, 0, 1, 0,
-                                    (byte) (update.face | 4), update.primary,
-                                    true, terrain.getChunkNoLoad(update.x,
-                                            update.y + 1));
-                } else if (update.yl <= update.l) {
-                    pool.push().set(update.x, update.y + 1, update.z, update.l,
-                            update.xl, update.yl + 1, update.zl,
-                            (byte) (update.face | 4), update.primary, false,
-                            terrain.getChunkNoLoad(update.x, update.y + 1));
+            if (y >= 0) {
+                TerrainInfiniteChunkClient chunk =
+                        terrain.getChunkNoLoad(update.x, update.y + 1);
+                if (chunk != null) {
+                    TerrainInfiniteRendererChunk rendererChunk =
+                            chunk.getRendererChunk();
+                    if (!rendererChunk.isCulled(update.z)) {
+                        pool.push().set(update.x, update.y + 1, update.z, chunk,
+                                rendererChunk);
+                    }
                 }
             }
-            if ((update.face & 32) != 32) {
-                if (update.primary == Face.WEST) {
-                    pool.push()
-                            .set(update.x - 1, update.y, update.z, 1, 1, 0, 0,
-                                    (byte) (update.face | 8), update.primary,
-                                    true, terrain.getChunkNoLoad(update.x - 1,
-                                            update.y));
-                } else if (update.xl <= update.l) {
-                    pool.push().set(update.x - 1, update.y, update.z, update.l,
-                            update.xl + 1, update.yl, update.zl,
-                            (byte) (update.face | 8), update.primary, false,
-                            terrain.getChunkNoLoad(update.x - 1, update.y));
+            if (x <= 0) {
+                TerrainInfiniteChunkClient chunk =
+                        terrain.getChunkNoLoad(update.x - 1, update.y);
+                if (chunk != null) {
+                    TerrainInfiniteRendererChunk rendererChunk =
+                            chunk.getRendererChunk();
+                    if (!rendererChunk.isCulled(update.z)) {
+                        pool.push().set(update.x - 1, update.y, update.z, chunk,
+                                rendererChunk);
+                    }
                 }
             }
         }
@@ -385,35 +379,17 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     }
 
     private static class VisibleUpdate {
-        private int x, y, z, l, xl, yl, zl;
-        private byte face;
-        private Face primary;
-        private boolean prime;
+        private int x, y, z;
         private TerrainInfiniteChunkClient chunk;
         private TerrainInfiniteRendererChunk rendererChunk;
 
-        public VisibleUpdate() {
-        }
-
-        public void set(int x, int y, int z, int l, int xl, int yl, int zl,
-                byte face, Face primary, boolean prime,
-                TerrainInfiniteChunkClient chunk) {
+        public void set(int x, int y, int z, TerrainInfiniteChunkClient chunk,
+                TerrainInfiniteRendererChunk rendererChunk) {
             this.x = x;
             this.y = y;
             this.z = z;
-            this.l = l;
-            this.xl = xl;
-            this.yl = yl;
-            this.zl = zl;
-            this.face = face;
-            this.primary = primary;
-            this.prime = prime;
             this.chunk = chunk;
-            if (chunk == null) {
-                rendererChunk = null;
-            } else {
-                rendererChunk = chunk.getRendererChunk();
-            }
+            this.rendererChunk = rendererChunk;
         }
     }
 
