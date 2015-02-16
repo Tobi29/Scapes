@@ -47,12 +47,12 @@ public class GuiComponentScrollPane extends GuiComponentVisiblePane {
 
     @Override
     public void render(GraphicsSystem graphics, Shader shader,
-            FontRenderer font) {
+            FontRenderer font, double delta) {
         if (visible) {
             MatrixStack matrixStack = graphics.getMatrixStack();
             Matrix matrix = matrixStack.push();
             matrix.translate(x, y, 0.0f);
-            renderComponent(graphics, shader, font);
+            renderComponent(graphics, shader, font, delta);
             matrix = matrixStack.push();
             matrix.translate(0.0f, (float) -scroll, 0.0f);
             int yy = y;
@@ -69,11 +69,11 @@ public class GuiComponentScrollPane extends GuiComponentVisiblePane {
             components.stream().filter(component ->
                     component.getY() - scroll > -scrollStep &&
                             component.getY() - scroll < height).forEach(
-                    component -> component.render(graphics, shader, font));
+                    component -> component.render(graphics, shader, font, delta));
             openGL.disableScissor();
             matrixStack.pop();
             renderOverlay(graphics, shader, font);
-            slider.render(graphics, shader, font);
+            slider.render(graphics, shader, font, delta);
             matrixStack.pop();
         }
     }
@@ -105,9 +105,8 @@ public class GuiComponentScrollPane extends GuiComponentVisiblePane {
     protected void updateChild(GuiComponent component, double mouseX,
             double mouseY, boolean inside, ScapesEngine engine) {
         double y = component.getY() - scroll;
-        if (y > -scrollStep && y < height) {
-            component.update(mouseX, mouseY + scroll, inside, engine);
-        }
+        component.update(mouseX, mouseY + scroll,
+                inside && y > -scrollStep && y < height, engine);
     }
 
     public void setMaxY(int maxY) {
