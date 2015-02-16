@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.engine.utils.io.filesystem.javanio;
 
+import org.apache.tika.Tika;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileAttributes;
 
 import java.io.IOException;
@@ -26,6 +27,7 @@ import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 
 public class JavaNIOAttributes implements FileAttributes {
+    private static final Tika TIKA = new Tika();
     final Path path;
 
     public JavaNIOAttributes(Path path) {
@@ -50,7 +52,11 @@ public class JavaNIOAttributes implements FileAttributes {
 
     @Override
     public String getMIMEType() throws IOException {
-        return Files.probeContentType(path);
+        String mime = Files.probeContentType(path);
+        if (mime == null) {
+            mime = TIKA.detect(path.toFile());
+        }
+        return mime;
     }
 
     @Override
