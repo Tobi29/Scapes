@@ -162,11 +162,8 @@ public class BlockSapling extends VanillaBlock {
         List<TreeType> types = treeRegistry.values();
         textures = new TerrainTexture[types.size()];
         for (int i = 0; i < types.size(); i++) {
-            TreeType type = types.get(i);
-            String texture = type.getTexture();
-            String textureRoot = type.getTextureRoot();
-            textures[i] = registry.registerTexture(textureRoot + "/sapling/" +
-                    texture + ".png");
+            String texture = types.get(i).getTexture();
+            textures[i] = registry.registerTexture(texture + "/Sapling.png");
         }
     }
 
@@ -198,8 +195,7 @@ public class BlockSapling extends VanillaBlock {
     @Override
     public void renderInventory(ItemStack item, GraphicsSystem graphics,
             Shader shader, float r, float g, float b, float a) {
-        modelsItem[item.getData()]
-                .renderInventory(graphics, shader);
+        modelsItem[item.getData()].renderInventory(graphics, shader);
     }
 
     @Override

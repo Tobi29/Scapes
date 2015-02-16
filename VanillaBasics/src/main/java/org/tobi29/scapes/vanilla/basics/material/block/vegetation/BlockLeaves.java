@@ -237,15 +237,12 @@ public class BlockLeaves extends VanillaBlock {
         texturesFancy = new TerrainTexture[types.size()];
         texturesFast = new TerrainTexture[types.size()];
         for (int i = 0; i < types.size(); i++) {
-            TreeType type = types.get(i);
-            String texture = type.getTexture();
-            String textureRoot = type.getTextureRoot();
+            String texture = types.get(i).getTexture();
             texturesFancy[i] =
-                    registry.registerTexture(textureRoot + "/leaves/fancy/" +
-                            texture + ".png", ShaderAnimation.LEAVE);
+                    registry.registerTexture(texture + "/LeavesFancy.png",
+                            ShaderAnimation.LEAVES);
             texturesFast[i] =
-                    registry.registerTexture(textureRoot + "/leaves/fast/" +
-                            texture + ".png");
+                    registry.registerTexture(texture + "/LeavesFast.png");
         }
     }
 

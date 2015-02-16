@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics;
 
+import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.World;
@@ -30,9 +31,12 @@ import org.tobi29.scapes.vanilla.basics.material.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class VanillaBasics implements WorldType {
+    public final Config c = new Config();
     private final List<FurnaceFuel> furnaceFuels = new ArrayList<>();
     private final List<ResearchRecipe> researchRecipes = new ArrayList<>();
     private final Map<String, MetalType> metalTypes = new ConcurrentHashMap<>();
@@ -155,7 +159,7 @@ public class VanillaBasics implements WorldType {
         VanillaBasicsRegisters.registerUpdates(registry);
         VanillaBasicsRegisters.registerPackets(registry);
         VanillaBasicsRegisters.registerFuels(this);
-        VanillaBasicsRegisters.registerOres(this, stoneRegistry);
+        VanillaBasicsRegisters.registerOres(this);
         VanillaBasicsRegisters.registerResearch(this);
         VanillaBasicsRegisters.registerMetals(this);
         VanillaBasicsRegisters.registerVegetation(this);
@@ -163,8 +167,8 @@ public class VanillaBasics implements WorldType {
 
     @Override
     public void initEnd(GameRegistry registry) {
-        VanillaBasicsRegisters.registerRecipes(registry, materials);
         locked = true;
+        VanillaBasicsRegisters.registerRecipes(registry, materials);
     }
 
     @Override
@@ -189,7 +193,7 @@ public class VanillaBasics implements WorldType {
 
     @Override
     public String getVersion() {
-        return "0.0.1";
+        return "0.0.0_1";
     }
 
     @Override
@@ -207,5 +211,47 @@ public class VanillaBasics implements WorldType {
 
     public VanillaMaterial getMaterials() {
         return materials;
+    }
+
+    public class Config {
+        public void research(String name, String text, String... items) {
+            addResearchRecipe(new ResearchRecipe(name, text, items));
+        }
+
+        public void biomeDecorator(BiomeGenerator.Biome biome, String name,
+                int weight, Consumer<BiomeDecorator> config) {
+            config.accept(addBiomeDecorator(biome, name, weight));
+        }
+
+        public void metal(String id, String name, float r, float g, float b,
+                float meltingPoint, double toolEfficiency, double toolStrength,
+                double toolDamage, int toolLevel,
+                Consumer<Map<String, Double>> config) {
+            metal(id, name, name, r, g, b, meltingPoint, toolEfficiency,
+                    toolStrength, toolDamage, toolLevel, config);
+        }
+
+        public void metal(String id, String name, String ingotName, float r,
+                float g, float b, float meltingPoint, double toolEfficiency,
+                double toolStrength, double toolDamage, int toolLevel,
+                Consumer<Map<String, Double>> config) {
+            Map<String, Double> ingredients = new ConcurrentHashMap<>();
+            config.accept(ingredients);
+            addMetalType(
+                    new MetalType(id, name, ingotName, ingredients, r, g, b,
+                            meltingPoint, toolEfficiency, toolStrength,
+                            toolDamage, toolLevel));
+        }
+
+        public void ore(BlockType type, int rarity, double size, int chance,
+                int rockChance, StoneType... stoneTypes) {
+            GameRegistry.Registry<StoneType> stoneRegistry = materials.registry
+                    .<StoneType>get("VanillaBasics", "StoneType");
+            List<Integer> stoneTypeList =
+                    Arrays.stream(stoneTypes).map(stoneRegistry::get)
+                            .collect(Collectors.toList());
+            addOreType(new OreType(type, rarity, size, chance, rockChance,
+                    stoneTypeList));
+        }
     }
 }

@@ -149,19 +149,19 @@ public class ChunkGeneratorOverworld implements ChunkGeneratorInfinite {
                     } else if (zzzShifted == 96) {
                         stoneType = (short) stoneLayers[0].getInt(xxx, yyy);
                     }
-                    short blockId;
+                    short blockID;
                     short blockData = 0;
                     if (zzz < output.height) {
                         if (zzz == 0) {
-                            blockId = materials.bedrock.getID();
+                            blockID = materials.bedrock.getID();
                         } else if (zzz < output.magmaHeight) {
-                            blockId = materials.lava.getID();
+                            blockID = materials.lava.getID();
                         } else {
                             if (sandType < 3) {
                                 if (lastFree - zzz < 9) {
                                     if (lastFree - zzz <
                                             5 + random.nextInt(3)) {
-                                        blockId = materials.sand.getID();
+                                        blockID = materials.sand.getID();
                                         blockData = sandType;
                                         if (blockData == 1) {
                                             if (random.nextInt(4) == 0 && zzz <
@@ -182,28 +182,27 @@ public class ChunkGeneratorOverworld implements ChunkGeneratorInfinite {
                                             }
                                         }
                                     } else {
-                                        blockId = materials.stoneRaw.getID();
+                                        blockID = materials.stoneRaw.getID();
                                     }
                                 } else {
-                                    blockId = materials.stoneRaw.getID();
+                                    blockID = materials.stoneRaw.getID();
                                 }
                             } else if (lastFree > 254) {
                                 if (zzz == lastFree) {
                                     if (output.soiled) {
-                                        blockId = materials.grass.getID();
-                                        blockData = (short) random.nextInt(9);
+                                        blockID = materials.grass.getID();
                                     } else {
                                         if (output.lavaChance > 0 &&
                                                 random.nextInt(
                                                         output.lavaChance) ==
                                                         0) {
-                                            blockId = materials.lava.getID();
+                                            blockID = materials.lava.getID();
                                             chunk.addDelayedUpdate(
                                                     new UpdateLavaFlow()
                                                             .set(xxx, yyy, zzz,
                                                                     0.0));
                                         } else {
-                                            blockId =
+                                            blockID =
                                                     materials.stoneRaw.getID();
                                         }
                                     }
@@ -218,37 +217,37 @@ public class ChunkGeneratorOverworld implements ChunkGeneratorInfinite {
                                     if (lastFree - zzz <
                                             5 + random.nextInt(5)) {
                                         if (output.soiled) {
-                                            blockId = materials.dirt.getID();
+                                            blockID = materials.dirt.getID();
                                         } else {
-                                            blockId =
+                                            blockID =
                                                     materials.stoneRaw.getID();
                                         }
                                     } else {
-                                        blockId = materials.stoneRaw.getID();
+                                        blockID = materials.stoneRaw.getID();
                                     }
                                 } else {
-                                    blockId = materials.stoneRaw.getID();
+                                    blockID = materials.stoneRaw.getID();
                                 }
                             } else {
-                                blockId = materials.stoneRaw.getID();
+                                blockID = materials.stoneRaw.getID();
                             }
                         }
-                        if (blockId == materials.stoneRaw.getID()) {
+                        if (blockID == materials.stoneRaw.getID()) {
                             if (output.caveRiver >
                                     FastMath.abs(zzz - output.caveRiverHeight) /
                                             16.0d) {
                                 if (zzz < 128) {
-                                    blockId = materials.water.getID();
+                                    blockID = materials.water.getID();
                                 } else {
-                                    blockId = materials.air.getID();
+                                    blockID = materials.air.getID();
                                 }
                             } else if (output.cave >
                                     FastMath.abs(zzz - output.caveHeight) /
                                             8.0d) {
-                                blockId = materials.air.getID();
+                                blockID = materials.air.getID();
                             } else {
                                 if (sandstone && zzz > 240) {
-                                    blockId = materials.sandstone.getID();
+                                    blockID = materials.sandstone.getID();
                                     blockData = sandstoneLayers[zzz];
                                 } else {
                                     blockData = stoneType;
@@ -268,14 +267,14 @@ public class ChunkGeneratorOverworld implements ChunkGeneratorInfinite {
                         }
                     } else {
                         if (zzz < output.waterHeight) {
-                            blockId = materials.water.getID();
+                            blockID = materials.water.getID();
                         } else {
-                            blockId = materials.air.getID();
+                            blockID = materials.air.getID();
                         }
                         lastFree = zzz - 1;
                     }
-                    if (blockId != materials.air.getID()) {
-                        bId.setData(xx, yy, zzz, 0, blockId);
+                    if (blockID != materials.air.getID()) {
+                        bId.setData(xx, yy, zzz, 0, blockID);
                         if (blockData != 0) {
                             bData.setData(xx, yy, zzz, 0, blockData);
                         }

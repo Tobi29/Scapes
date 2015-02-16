@@ -33,30 +33,25 @@ public class TreeType {
     public static final TreeType BIRCH =
             new TreeType("Birch", ROOT, new Vector3f(0.6f, 0.9f, 0.5f),
                     new Vector3f(0.6f, 0.8f, 0.1f),
-                    new Vector3f(1.0f, 0.8f, 0.0f), 20,
-                    new TreeBirch());
+                    new Vector3f(1.0f, 0.8f, 0.0f), 20, new TreeBirch());
     public static final TreeType SPRUCE =
             new TreeType("Spruce", ROOT, new Vector3f(0.2f, 0.5f, 0.2f),
-                    new Vector3f(0.2f, 0.5f, 0.0f), 10,
-                    new TreeSpruce());
+                    new Vector3f(0.2f, 0.5f, 0.0f), 10, new TreeSpruce());
     public static final TreeType PALM =
             new TreeType("Palm", ROOT, new Vector3f(0.5f, 0.9f, 0.4f),
                     new Vector3f(0.5f, 0.8f, 0.0f), 3, new TreePalm());
     public static final TreeType MAPLE =
             new TreeType("Maple", ROOT, new Vector3f(0.5f, 0.9f, 0.4f),
                     new Vector3f(0.5f, 0.8f, 0.0f),
-                    new Vector3f(1.0f, 0.4f, 0.0f), 70,
-                    new TreeMaple());
+                    new Vector3f(1.0f, 0.4f, 0.0f), 70, new TreeMaple());
     public static final TreeType SEQUOIA =
             new TreeType("Sequoia", ROOT, new Vector3f(0.2f, 0.5f, 0.2f),
-                    new Vector3f(0.2f, 0.5f, 0.0f), 200,
-                    new TreeSequoia());
+                    new Vector3f(0.2f, 0.5f, 0.0f), 200, new TreeSequoia());
     public static final TreeType WILLOW =
             new TreeType("Willow", ROOT, new Vector3f(0.5f, 0.9f, 0.4f),
                     new Vector3f(0.5f, 0.8f, 0.0f),
-                    new Vector3f(0.9f, 0.7f, 0.0f), 100,
-                    new TreeWillow());
-    private final String name, texture, textureRoot;
+                    new Vector3f(0.9f, 0.7f, 0.0f), 100, new TreeWillow());
+    private final String name, texture;
     private final Vector3 colorCold, colorWarm, colorAutumn;
     private final int dropChance;
     private final Tree generator;
@@ -79,8 +74,8 @@ public class TreeType {
             Vector3 colorWarm, Vector3 colorAutumn, int dropChance,
             Tree generator, boolean evergreen) {
         this.name = name;
-        texture = REPLACE.matcher(name).replaceAll("");
-        this.textureRoot = textureRoot;
+        texture = textureRoot + '/' +
+                REPLACE.matcher(name).replaceAll("").toLowerCase();
         this.colorCold = colorCold;
         this.colorWarm = colorWarm;
         this.colorAutumn = colorAutumn;
@@ -95,10 +90,6 @@ public class TreeType {
 
     public String getTexture() {
         return texture;
-    }
-
-    public String getTextureRoot() {
-        return textureRoot;
     }
 
     public Vector3 getColorCold() {

@@ -108,13 +108,10 @@ public class BlockLog extends VanillaBlock {
         texturesTop = new TerrainTexture[types.size()];
         texturesSide = new TerrainTexture[types.size()];
         for (int i = 0; i < types.size(); i++) {
-            TreeType type = types.get(i);
-            String texture = type.getTexture();
-            String textureRoot = type.getTextureRoot();
-            texturesTop[i] = registry.registerTexture(textureRoot + "/log/" +
-                    texture + "Top.png");
-            texturesSide[i] = registry.registerTexture(textureRoot + "/log/" +
-                    texture + "Side.png");
+            String texture = types.get(i).getTexture();
+            texturesTop[i] = registry.registerTexture(texture + "/LogTop.png");
+            texturesSide[i] =
+                    registry.registerTexture(texture + "/LogSide.png");
         }
     }
 

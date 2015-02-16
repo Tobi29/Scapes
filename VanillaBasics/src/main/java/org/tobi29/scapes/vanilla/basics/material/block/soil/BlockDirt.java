@@ -103,7 +103,7 @@ public class BlockDirt extends BlockSoil {
                 (WorldEnvironmentOverworld) terrain.getWorld().getEnvironment();
         ClimateGenerator climateGenerator = environment.getClimateGenerator();
         double humidity = climateGenerator.getHumidity(x, y, z);
-        if (humidity < 0.2) {
+        if (humidity < 0.3) {
             return textureSand;
         } else {
             return textureDirt;
@@ -118,7 +118,7 @@ public class BlockDirt extends BlockSoil {
                 (WorldEnvironmentOverworld) terrain.getWorld().getEnvironment();
         ClimateGenerator climateGenerator = environment.getClimateGenerator();
         double humidity = climateGenerator.getHumidity(x, y, z);
-        if (humidity < 0.2) {
+        if (humidity < 0.3) {
             modelSand.addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz, 1.0f,
                     1.0f, 1.0f, 1.0f);
         } else {

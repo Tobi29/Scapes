@@ -20,6 +20,7 @@ import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.block.Update;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
+import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator;
 import org.tobi29.scapes.vanilla.basics.generator.WorldEnvironmentOverworld;
@@ -48,12 +49,19 @@ public class UpdateGrassGrowth extends Update {
             ClimateGenerator climateGenerator =
                     environment.getClimateGenerator();
             double humidity = climateGenerator.getHumidity(x, y, z);
-            Random random = ThreadLocalRandom.current();
             if (humidity < 0.2) {
                 terrain.setBlockType(x, y, z, materials.dirt);
-            } else if (terrain.getBlockData(x, y, z) == 0 ||
-                    random.nextInt(9) == 0) {
-                terrain.setBlockData(x, y, z, (short) random.nextInt(9));
+            } else {
+                Random random = ThreadLocalRandom.current();
+                if (random.nextInt(32) == 0) {
+                    int data = terrain.getBlockData(x, y, z);
+                    if (random.nextInt(data < 4 ? 3 : 2) == 0) {
+                        data = FastMath.max(data - 1, 0);
+                    } else {
+                        data = FastMath.min(data + 1, 8);
+                    }
+                    terrain.setBlockData(x, y, z, data);
+                }
             }
         } else if (type == materials.dirt) {
             WorldEnvironmentOverworld environment =

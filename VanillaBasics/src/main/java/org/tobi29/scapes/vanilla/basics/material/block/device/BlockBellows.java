@@ -109,9 +109,9 @@ public class BlockBellows extends VanillaBlock {
     @Override
     public void registerTextures(TerrainTextureRegistry registry) {
         textureFrame = registry.registerTexture(
-                "VanillaBasics:image/terrain/tree/planks/Oak.png");
+                "VanillaBasics:image/terrain/tree/oak/Planks.png");
         textureInside = registry.registerTexture(
-                "VanillaBasics:image/terrain/tree/planks/Birch.png");
+                "VanillaBasics:image/terrain/tree/birch/Planks.png");
     }
 
     @Override

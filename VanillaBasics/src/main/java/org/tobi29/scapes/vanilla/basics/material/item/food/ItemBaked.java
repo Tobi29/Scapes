@@ -64,10 +64,8 @@ public class ItemBaked extends VanillaItem {
         textures = new TerrainTexture[types.size()];
         int i = 0;
         for (CropType type : types) {
-            textures[i++] =
-                    registry.registerTexture(type.getTextureRoot() + "/baked/" +
-                            type.getTexture() +
-                            ".png");
+            textures[i++] = registry.registerTexture(
+                    type.getTexture() + "/Baked.png");
         }
     }
 

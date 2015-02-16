@@ -69,8 +69,7 @@ public class BlockWood extends BlockSimpleData {
     @Override
     protected String getTexture(int data) {
         TreeType type = treeRegistry.get(data);
-        return type.getTextureRoot() + "/planks/" +
-                type.getTexture() + ".png";
+        return type.getTexture() + "/Planks.png";
     }
 
     @Override

@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.server;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.Material;
@@ -86,7 +85,6 @@ public class EntityAlloyServer extends EntityAbstractContainerServer {
     public void update(double delta) {
         VanillaBasics plugin =
                 (VanillaBasics) world.getPlugins().getPlugin("VanillaBasics");
-        GameRegistry registry = world.getRegistry();
         VanillaMaterial materials = plugin.getMaterials();
         temperature /= 1.002f;
         ItemStack input = inventory.getItem(0);

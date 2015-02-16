@@ -83,7 +83,7 @@ public class ItemCookedMeat extends VanillaItem implements ItemHeatable {
     public void registerTextures(TerrainTextureRegistry registry) {
         textures = new TerrainTexture[1];
         textures[0] = registry.registerTexture(
-                "VanillaBasics:image/terrain/food/meat/CookedPork.png");
+                "VanillaBasics:image/terrain/food/meat/pork/Cooked.png");
     }
 
     @Override

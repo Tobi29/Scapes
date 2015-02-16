@@ -107,7 +107,7 @@ public class BlockResearchTable extends VanillaBlock {
         textureSide2 = registry.registerTexture(
                 "VanillaBasics:image/terrain/device/ResearchTableSide2.png");
         textureBottom = registry.registerTexture(
-                "VanillaBasics:image/terrain/tree/planks/Spruce.png");
+                "VanillaBasics:image/terrain/tree/spruce/Planks.png");
     }
 
     @Override

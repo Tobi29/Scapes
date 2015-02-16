@@ -199,7 +199,7 @@ public class BlockGrass extends VanillaBlock {
         if (lod) {
             modelBlockGrass.addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz,
                     (float) grassR, (float) grassG, (float) grassB, 1.0f);
-            if (humidity < 0.2) {
+            if (humidity < 0.3) {
                 modelBlockSand
                         .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz,
                                 1.0f, 1.0f, 1.0f, 1.0f);
@@ -221,7 +221,7 @@ public class BlockGrass extends VanillaBlock {
                     .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz,
                             (float) grassR, (float) grassG, (float) grassB,
                             1.0f);
-            if (humidity < 0.2) {
+            if (humidity < 0.3) {
                 modelBlockFastSand
                         .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz,
                                 1.0f, 1.0f, 1.0f, 1.0f);
@@ -236,7 +236,7 @@ public class BlockGrass extends VanillaBlock {
     @Override
     public boolean needsLodUpdate(int data, TerrainClient terrain, int x, int y,
             int z) {
-        return data > 0;
+        return true;
     }
 
     @Override

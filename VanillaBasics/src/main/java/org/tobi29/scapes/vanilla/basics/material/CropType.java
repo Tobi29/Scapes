@@ -25,7 +25,7 @@ public class CropType {
     private static final String ROOT = "VanillaBasics:image/terrain/crops";
     public static final CropType WHEAT =
             new CropType("Wheat", "Bread", ROOT, 10000.0, 0);
-    private final String name, bakedName, texture, textureRoot;
+    private final String name, bakedName, texture;
     private final double time;
     private final int nutrient;
 
@@ -33,8 +33,8 @@ public class CropType {
             double time, int nutrient) {
         this.name = name;
         this.bakedName = bakedName;
-        texture = REPLACE.matcher(name).replaceAll("");
-        this.textureRoot = textureRoot;
+        texture = textureRoot + '/' +
+                REPLACE.matcher(name).replaceAll("").toLowerCase();
         this.time = time;
         this.nutrient = nutrient;
     }
@@ -49,10 +49,6 @@ public class CropType {
 
     public String getTexture() {
         return texture;
-    }
-
-    public String getTextureRoot() {
-        return textureRoot;
     }
 
     public double getTime() {

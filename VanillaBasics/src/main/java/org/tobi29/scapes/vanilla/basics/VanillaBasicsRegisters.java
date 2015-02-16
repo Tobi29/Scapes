@@ -31,7 +31,6 @@ import org.tobi29.scapes.vanilla.basics.entity.client.*;
 import org.tobi29.scapes.vanilla.basics.entity.server.*;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator;
 import org.tobi29.scapes.vanilla.basics.generator.WorldEnvironmentOverworld;
-import org.tobi29.scapes.vanilla.basics.generator.decorator.BiomeDecorator;
 import org.tobi29.scapes.vanilla.basics.generator.decorator.LayerPatch;
 import org.tobi29.scapes.vanilla.basics.generator.decorator.LayerTree;
 import org.tobi29.scapes.vanilla.basics.generator.tree.*;
@@ -41,8 +40,11 @@ import org.tobi29.scapes.vanilla.basics.packet.*;
 import org.tobi29.scapes.vanilla.basics.util.IngotUtil;
 import org.tobi29.scapes.vanilla.basics.util.ToolUtil;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator.Biome.*;
 
@@ -229,6 +231,9 @@ class VanillaBasicsRegisters {
         registry.registerEntity(EntityResearchTableServer::new,
                 EntityResearchTableClient::new, EntityResearchTableServer.class,
                 "vanilla.basics.entity.ResearchTable");
+        registry.registerEntity(EntityFarmlandServer::new,
+                EntityFarmlandClient::new, EntityFarmlandServer.class,
+                "vanilla.basics.entity.Farmland");
     }
 
     static void registerUpdates(GameRegistry registry) {
@@ -269,9 +274,11 @@ class VanillaBasicsRegisters {
             VanillaMaterial materials) {
         GameRegistry.Registry<CropType> cropRegistry =
                 registry.<CropType>get("VanillaBasics", "CropType");
+        GameRegistry.Registry<TreeType> treeRegistry =
+                registry.<TreeType>get("VanillaBasics", "TreeType");
         GameRegistry.Registry<StoneType> stoneRegistry =
                 registry.<StoneType>get("VanillaBasics", "StoneType");
-        registerRecipesBasics(registry, materials, stoneRegistry);
+        registerRecipesBasics(registry, materials, treeRegistry, stoneRegistry);
         registerRecipesStone(registry, materials, stoneRegistry);
         registerRecipesFood(registry, materials, cropRegistry, stoneRegistry);
         registerRecipesMetal(registry, materials, stoneRegistry);
@@ -280,6 +287,7 @@ class VanillaBasicsRegisters {
 
     static void registerRecipesBasics(GameRegistry registry,
             VanillaMaterial materials,
+            GameRegistry.Registry<TreeType> treeRegistry,
             GameRegistry.Registry<StoneType> stoneRegistry) {
         CraftingRecipeType recipeType = new CraftingRecipeType() {
             @Override
@@ -297,25 +305,24 @@ class VanillaBasicsRegisters {
                 return true;
             }
         };
-        ItemStack hammerItem = new ItemStack(materials.hammer, (short) 1);
-        hammerItem.getMetaData("Vanilla").setString("MetalType", "Stone");
-        hammerItem.getMetaData("Vanilla").setDouble("ToolEfficiency", 1.0d);
-        hammerItem.getMetaData("Vanilla").setDouble("ToolStrength", 1.0d);
-        hammerItem.getMetaData("Vanilla").setDouble("ToolDamageAdd", 0.01);
+        ItemStack ingotItem = new ItemStack(materials.ingot, (short) 1);
+        IngotUtil.createIngot(materials.plugin, ingotItem, "Stone", 0.0f);
+        ItemStack hammerItem = new ItemStack(ingotItem);
+        ToolUtil.createTool(materials.plugin, hammerItem, "Hammer");
+        hammerItem.setData(1);
         CraftingRecipe.Ingredient hammer =
                 new CraftingRecipe.IngredientList(hammerItem);
-        ItemStack sawItem = new ItemStack(materials.saw, (short) 1);
-        sawItem.getMetaData("Vanilla").setString("MetalType", "Stone");
-        sawItem.getMetaData("Vanilla").setDouble("ToolEfficiency", 1.0d);
-        sawItem.getMetaData("Vanilla").setDouble("ToolStrength", 1.0d);
-        sawItem.getMetaData("Vanilla").setDouble("ToolDamageAdd", 0.01);
+        ItemStack sawItem = new ItemStack(ingotItem);
+        ToolUtil.createTool(materials.plugin, sawItem, "Saw");
+        sawItem.setData(1);
         List<StoneType> stoneTypes = stoneRegistry.values();
         CraftingRecipe.Ingredient saw =
                 new CraftingRecipe.IngredientList(sawItem);
         CraftingRecipe.Ingredient plank = new CraftingRecipe.IngredientList(
-                new ItemStack(materials.wood, (short) 0, 1),
-                new ItemStack(materials.wood, (short) 1, 1),
-                new ItemStack(materials.wood, (short) 2, 1));
+                treeRegistry.values().stream()
+                        .map(tree -> new ItemStack(materials.wood,
+                                tree.getData(registry)))
+                        .collect(Collectors.toList()));
 
         recipeType.getRecipes()
                 .add(new CraftingRecipe(Collections.singletonList(plank),
@@ -330,11 +337,12 @@ class VanillaBasicsRegisters {
                         new ItemStack(materials.string, (short) 1))),
                 Collections.singletonList(saw),
                 new ItemStack(materials.researchTable, (short) 0)));
-        for (int i = 0; i < stoneTypes.size(); i++) {
+        for (StoneType stoneType : stoneTypes) {
+            int data = stoneType.getData(registry);
             recipeType.getRecipes().add(new CraftingRecipe(
-                    new ItemStack(materials.cobblestone, i),
+                    new ItemStack(materials.cobblestone, data),
                     new CraftingRecipe.IngredientList(
-                            new ItemStack(materials.stoneRock, i, 9))));
+                            new ItemStack(materials.stoneRock, data, 9))));
         }
         recipeType.getRecipes().add(new CraftingRecipe(
                 new ItemStack(materials.torch, (short) 0),
@@ -365,8 +373,8 @@ class VanillaBasicsRegisters {
                 return true;
             }
         };
-        ItemStack ingotItem = new ItemStack(materials.ingot, (short) 1);
-        ingotItem.getMetaData("Vanilla").setString("MetalType", "Stone");
+        ItemStack ingotItem = new ItemStack(materials.ingot, 1);
+        IngotUtil.createIngot(materials.plugin, ingotItem, "Stone", 0.0f);
         CraftingRecipe.Ingredient ingot =
                 new CraftingRecipe.IngredientList(ingotItem);
         List<StoneType> stoneTypes = stoneRegistry.values();
@@ -379,48 +387,42 @@ class VanillaBasicsRegisters {
         CraftingRecipe.Ingredient rocks =
                 new CraftingRecipe.IngredientList(rockItems);
         recipeType.getRecipes().add(new CraftingRecipe(ingotItem, rocks));
-        ItemStack hoeItem = new ItemStack(materials.hoe, (short) 0);
-        hoeItem.getMetaData("Vanilla").setString("MetalType", "Stone");
-        hoeItem.getMetaData("Vanilla").setDouble("ToolEfficiency", 1.0d);
-        hoeItem.getMetaData("Vanilla").setDouble("ToolStrength", 1.0d);
-        hoeItem.getMetaData("Vanilla").setDouble("ToolDamageAdd", 0.01);
-        ItemStack hammerItem = new ItemStack(materials.hammer, (short) 0);
-        hammerItem.getMetaData("Vanilla").setString("MetalType", "Stone");
-        hammerItem.getMetaData("Vanilla").setDouble("ToolEfficiency", 1.0d);
-        hammerItem.getMetaData("Vanilla").setDouble("ToolStrength", 1.0d);
-        hammerItem.getMetaData("Vanilla").setDouble("ToolDamageAdd", 0.01);
-        ItemStack sawItem = new ItemStack(materials.saw, (short) 0);
-        sawItem.getMetaData("Vanilla").setString("MetalType", "Stone");
-        sawItem.getMetaData("Vanilla").setDouble("ToolEfficiency", 1.0d);
-        sawItem.getMetaData("Vanilla").setDouble("ToolStrength", 1.0d);
-        sawItem.getMetaData("Vanilla").setDouble("ToolDamageAdd", 0.01);
-        ItemStack axeItem = new ItemStack(materials.axe, (short) 0);
-        axeItem.getMetaData("Vanilla").setString("MetalType", "Stone");
-        axeItem.getMetaData("Vanilla").setDouble("ToolEfficiency", 1.0d);
-        axeItem.getMetaData("Vanilla").setDouble("ToolStrength", 3.0d);
-        axeItem.getMetaData("Vanilla").setDouble("ToolDamageAdd", 0.01);
-        ItemStack shovelItem = new ItemStack(materials.shovel, (short) 0);
-        shovelItem.getMetaData("Vanilla").setString("MetalType", "Stone");
-        shovelItem.getMetaData("Vanilla").setDouble("ToolEfficiency", 1.0d);
-        shovelItem.getMetaData("Vanilla").setDouble("ToolStrength", 1.0d);
-        shovelItem.getMetaData("Vanilla").setDouble("ToolDamageAdd", 0.01);
-        ItemStack pickaxeItem = new ItemStack(materials.pickaxe, (short) 0);
-        pickaxeItem.getMetaData("Vanilla").setString("MetalType", "Stone");
-        pickaxeItem.getMetaData("Vanilla").setDouble("ToolEfficiency", 1.0d);
-        pickaxeItem.getMetaData("Vanilla").setDouble("ToolStrength", 1.0d);
-        pickaxeItem.getMetaData("Vanilla").setDouble("ToolDamageAdd", 0.01);
-        ItemStack swordItem = new ItemStack(materials.sword, (short) 0);
-        swordItem.getMetaData("Vanilla").setString("MetalType", "Stone");
-        swordItem.getMetaData("Vanilla").setDouble("ToolStrength", 2.0d);
-        swordItem.getMetaData("Vanilla").setDouble("ToolDamageAdd", 0.01);
+        ItemStack hoeItem = new ItemStack(ingotItem);
+        ToolUtil.createTool(materials.plugin, hoeItem, "Hoe");
+        ItemStack hoeHeadItem = new ItemStack(hoeItem);
+        ItemStack hammerItem = new ItemStack(ingotItem);
+        ToolUtil.createTool(materials.plugin, hammerItem, "Hammer");
+        ItemStack hammerHeadItem = new ItemStack(hammerItem);
+        ItemStack sawItem = new ItemStack(ingotItem);
+        ToolUtil.createTool(materials.plugin, sawItem, "Saw");
+        ItemStack sawHeadItem = new ItemStack(sawItem);
+        ItemStack axeItem = new ItemStack(ingotItem);
+        ToolUtil.createTool(materials.plugin, axeItem, "Axe");
+        ItemStack axeHeadItem = new ItemStack(axeItem);
+        ItemStack shovelItem = new ItemStack(ingotItem);
+        ToolUtil.createTool(materials.plugin, shovelItem, "Shovel");
+        ItemStack shovelHeadItem = new ItemStack(shovelItem);
+        ItemStack pickaxeItem = new ItemStack(ingotItem);
+        ToolUtil.createTool(materials.plugin, pickaxeItem, "Pickaxe");
+        ItemStack pickaxeHeadItem = new ItemStack(pickaxeItem);
+        ItemStack swordItem = new ItemStack(ingotItem);
+        ToolUtil.createTool(materials.plugin, swordItem, "Sword");
+        ItemStack swordHeadItem = new ItemStack(swordItem);
 
-        recipeType.getRecipes().add(new CraftingRecipe(hoeItem, ingot));
-        recipeType.getRecipes().add(new CraftingRecipe(hammerItem, ingot));
-        recipeType.getRecipes().add(new CraftingRecipe(sawItem, ingot));
-        recipeType.getRecipes().add(new CraftingRecipe(axeItem, ingot));
-        recipeType.getRecipes().add(new CraftingRecipe(shovelItem, ingot));
-        recipeType.getRecipes().add(new CraftingRecipe(pickaxeItem, ingot));
-        recipeType.getRecipes().add(new CraftingRecipe(swordItem, ingot));
+        recipeType.getRecipes().add(new CraftingRecipe(hoeHeadItem, ingot));
+        recipeType.getRecipes().add(new CraftingRecipe(hammerHeadItem, ingot));
+        recipeType.getRecipes().add(new CraftingRecipe(sawHeadItem, ingot));
+        recipeType.getRecipes().add(new CraftingRecipe(axeHeadItem, ingot));
+        recipeType.getRecipes().add(new CraftingRecipe(shovelHeadItem, ingot));
+        recipeType.getRecipes().add(new CraftingRecipe(pickaxeHeadItem, ingot));
+        recipeType.getRecipes().add(new CraftingRecipe(swordHeadItem, ingot));
+        recipeType.getRecipes().add(new CraftingRecipe(Collections
+                .singletonList(
+                        new CraftingRecipe.IngredientList(hoeItem, hammerItem,
+                                sawItem, axeItem, shovelItem, pickaxeItem,
+                                swordItem, hoeHeadItem, hammerHeadItem,
+                                sawHeadItem, axeHeadItem, shovelHeadItem,
+                                pickaxeHeadItem, swordHeadItem)), ingotItem));
         recipeType.getRecipes().add(new CraftingRecipe(Collections
                 .singletonList(new CraftingRecipe.IngredientList(
                         new ItemStack(materials.grassBundle, (short) 0, 2))),
@@ -635,146 +637,18 @@ class VanillaBasicsRegisters {
                         200, 0.8f, 60));
     }
 
-    static void registerOres(VanillaBasics plugin,
-            GameRegistry.Registry<StoneType> stoneRegistry) {
-        VanillaMaterial materials = plugin.getMaterials();
-        plugin.addOreType(new OreType(materials.oreCoal, 8, 32.0d, 3, 20,
-                Collections.singletonList(
-                        stoneRegistry.get(StoneType.DIRT_STONE))));
-        plugin.addOreType(new OreType(materials.oreCoal, 5, 24.0d, 3, 20,
-                Arrays.asList(stoneRegistry.get(StoneType.CHALK),
-                        stoneRegistry.get(StoneType.CHERT),
-                        stoneRegistry.get(StoneType.CLAYSTONE),
-                        stoneRegistry.get(StoneType.CONGLOMERATE),
-                        stoneRegistry.get(StoneType.MARBLE),
-                        stoneRegistry.get(StoneType.ANDESITE),
-                        stoneRegistry.get(StoneType.BASALT),
-                        stoneRegistry.get(StoneType.DACITE),
-                        stoneRegistry.get(StoneType.RHYOLITE),
-                        stoneRegistry.get(StoneType.DIORITE),
-                        stoneRegistry.get(StoneType.GABBRO),
-                        stoneRegistry.get(StoneType.GRANITE))));
-        plugin.addOreType(new OreType(materials.oreCassiterite, 3, 6.0d, 4, 6,
-                Arrays.asList(stoneRegistry.get(StoneType.ANDESITE),
-                        stoneRegistry.get(StoneType.BASALT),
-                        stoneRegistry.get(StoneType.DACITE),
-                        stoneRegistry.get(StoneType.RHYOLITE),
-                        stoneRegistry.get(StoneType.GRANITE))));
-        plugin.addOreType(new OreType(materials.oreSphalerite, 3, 6.0d, 3, 4,
-                Collections
-                        .singletonList(stoneRegistry.get(StoneType.MARBLE))));
-        plugin.addOreType(new OreType(materials.oreBismuthinite, 2, 3.0d, 8, 9,
-                Arrays.asList(stoneRegistry.get(StoneType.CHALK),
-                        stoneRegistry.get(StoneType.CHERT),
-                        stoneRegistry.get(StoneType.CLAYSTONE),
-                        stoneRegistry.get(StoneType.CONGLOMERATE),
-                        stoneRegistry.get(StoneType.MARBLE),
-                        stoneRegistry.get(StoneType.DIORITE),
-                        stoneRegistry.get(StoneType.GABBRO),
-                        stoneRegistry.get(StoneType.GRANITE))));
-        plugin.addOreType(new OreType(materials.oreChalcocite, 6, 8.0d, 2, 1,
-                Arrays.asList(stoneRegistry.get(StoneType.CHALK),
-                        stoneRegistry.get(StoneType.CHERT),
-                        stoneRegistry.get(StoneType.CLAYSTONE),
-                        stoneRegistry.get(StoneType.CONGLOMERATE))));
-        plugin.addOreType(new OreType(materials.oreMagnetite, 4, 5.0d, 9, 10,
-                Arrays.asList(stoneRegistry.get(StoneType.CHALK),
-                        stoneRegistry.get(StoneType.CHERT),
-                        stoneRegistry.get(StoneType.CLAYSTONE),
-                        stoneRegistry.get(StoneType.CONGLOMERATE))));
-        plugin.addOreType(new OreType(materials.orePyrite, 3, 4.0d, 11, 13,
-                Arrays.asList(stoneRegistry.get(StoneType.CHALK),
-                        stoneRegistry.get(StoneType.CHERT),
-                        stoneRegistry.get(StoneType.CLAYSTONE),
-                        stoneRegistry.get(StoneType.CONGLOMERATE),
-                        stoneRegistry.get(StoneType.MARBLE))));
-        plugin.addOreType(new OreType(materials.oreSilver, 2, 3.0d, 4, 8,
-                Collections
-                        .singletonList(stoneRegistry.get(StoneType.GRANITE))));
-        plugin.addOreType(new OreType(materials.oreGold, 1, 2.0d, 4, 32,
-                Arrays.asList(stoneRegistry.get(StoneType.ANDESITE),
-                        stoneRegistry.get(StoneType.BASALT),
-                        stoneRegistry.get(StoneType.DACITE),
-                        stoneRegistry.get(StoneType.RHYOLITE),
-                        stoneRegistry.get(StoneType.DIORITE),
-                        stoneRegistry.get(StoneType.GABBRO),
-                        stoneRegistry.get(StoneType.GRANITE))));
-    }
-
     static void registerResearch(VanillaBasics plugin) {
-        plugin.addResearchRecipe(
-                new ResearchRecipe(new String[]{"vanilla.basics.item.Crop"},
-                        "Food",
-                        "Using a Quern, you can\ncreate grain out of this."));
-        plugin.addResearchRecipe(
-                new ResearchRecipe(new String[]{"vanilla.basics.item.Grain"},
-                        "Food", "Try making dough out of this?"));
-        plugin.addResearchRecipe(new ResearchRecipe(
-                new String[]{"vanilla.basics.item.OreChunk.Chalcocite"},
-                "Metal",
-                "You could try heating this on\na forge and let it melt\ninto a" +
-                        " ceramic mold.\nMaybe you can find a way\nto shape it," +
-                        " to create\nhandy tools?"));
-        plugin.addResearchRecipe(new ResearchRecipe(
-                new String[]{"vanilla.basics.item.OreChunk.Magnetite"}, "Iron",
-                "Maybe you can figure out\na way to create a strong\nmetal out" +
-                        " of this ore..."));
-    }
-
-    static void registerMetals(VanillaBasics plugin) {
-        Map<String, Double> ingredients = new ConcurrentHashMap<>();
-        ingredients.put("Stone", 1.0);
-        plugin.addMetalType(
-                new MetalType("Stone", "Stone", "Worked Stone", ingredients,
-                        0.5f, 0.5f, 0.5f, 1200.0f, 1.0, 4.0, 0.004, 10));
-        ingredients = new ConcurrentHashMap<>();
-        ingredients.put("Tin", 1.0);
-        plugin.addMetalType(
-                new MetalType("Tin", "Tin", ingredients, 1.0f, 1.0f, 1.0f,
-                        231.0f, 0.1d, 2.0, 0.01, 0));
-        ingredients = new ConcurrentHashMap<>();
-        ingredients.put("Zinc", 1.0);
-        plugin.addMetalType(
-                new MetalType("Zinc", "Zinc", ingredients, 1.0f, 0.9f, 0.9f,
-                        419.0f, 1.0, 4.0, 0.004, 10));
-        ingredients = new ConcurrentHashMap<>();
-        ingredients.put("Bismuth", 1.0);
-        plugin.addMetalType(
-                new MetalType("Bismuth", "Bismuth", ingredients, 0.8f, 0.9f,
-                        0.9f, 271.0f, 1.0, 4.0, 0.004, 10));
-        ingredients = new ConcurrentHashMap<>();
-        ingredients.put("Copper", 1.0);
-        plugin.addMetalType(
-                new MetalType("Copper", "Copper", ingredients, 0.8f, 0.2f, 0.0f,
-                        1084.0f, 6.0, 8.0, 0.001, 20));
-        ingredients = new ConcurrentHashMap<>();
-        ingredients.put("Iron", 1.0);
-        plugin.addMetalType(
-                new MetalType("Iron", "Iron", ingredients, 0.7f, 0.7f, 0.7f,
-                        1538.0f, 30.0, 12.0, 0.0001, 40));
-        ingredients = new ConcurrentHashMap<>();
-        ingredients.put("Silver", 1.0);
-        plugin.addMetalType(
-                new MetalType("Silver", "Silver", ingredients, 0.9f, 0.9f, 1.0f,
-                        961.0f, 1.0, 4.0, 0.004, 10));
-        ingredients = new ConcurrentHashMap<>();
-        ingredients.put("Gold", 1.0);
-        plugin.addMetalType(
-                new MetalType("Gold", "Gold", ingredients, 1.0f, 0.3f, 0.0f,
-                        1064.0f, 0.1, 2.0, 0.01, 0));
-        ingredients = new ConcurrentHashMap<>();
-        ingredients.put("Tin", 0.25);
-        ingredients.put("Copper", 0.75);
-        plugin.addMetalType(
-                new MetalType("Bronze", "Bronze", ingredients, 0.6f, 0.4f, 0.0f,
-                        800.0f, 10.0d, 10.0, 0.0005, 30));
-        ingredients = new ConcurrentHashMap<>();
-        ingredients.put("Bismuth", 0.2);
-        ingredients.put("Zinc", 0.2);
-        ingredients.put("Copper", 0.6);
-        plugin.addMetalType(
-                new MetalType("BismuthBronze", "Bismuth Bronze", ingredients,
-                        1.0f, 0.8f, 0.8f, 800.0f, 10.0d, 10.0, 0.0005, 30));
+        plugin.c.research("Food",
+                "Using a Quern, you can\ncreate grain out of this.",
+                "vanilla.basics.item.Crop");
+        plugin.c.research("Food", "Try making dough out of this?",
+                "vanilla.basics.item.Grain");
+        plugin.c.research("Metal",
+                "You could try heating this on\na forge and let it melt\ninto a ceramic mold.\nMaybe you can find a way\nto shape it, to create\nhandy tools?",
+                "vanilla.basics.item.OreChunk.Chalcocite");
+        plugin.c.research("Iron",
+                "Maybe you can figure out\na way to create a strong\nmetal out of this ore...",
+                "vanilla.basics.item.OreChunk.Magnetite");
     }
 
     static GameRegistry.Registry<TreeType> registerTreeTypes(
@@ -826,122 +700,205 @@ class VanillaBasicsRegisters {
         return stoneRegistry;
     }
 
+    static void registerOres(VanillaBasics plugin) {
+        VanillaMaterial materials = plugin.getMaterials();
+        plugin.c.ore(materials.oreCoal, 8, 32.0d, 3, 20, StoneType.DIRT_STONE);
+        plugin.c.ore(materials.oreCoal, 5, 24.0d, 3, 20, StoneType.CHALK,
+                StoneType.CHERT, StoneType.CLAYSTONE, StoneType.CONGLOMERATE,
+                StoneType.MARBLE, StoneType.ANDESITE, StoneType.BASALT,
+                StoneType.DACITE, StoneType.RHYOLITE, StoneType.DIORITE,
+                StoneType.GABBRO, StoneType.GRANITE);
+        plugin.c.ore(materials.oreCassiterite, 3, 6.0d, 4, 6,
+                StoneType.ANDESITE, StoneType.BASALT, StoneType.DACITE,
+                StoneType.RHYOLITE, StoneType.GRANITE);
+        plugin.c.ore(materials.oreSphalerite, 3, 6.0d, 3, 4, StoneType.MARBLE);
+        plugin.c.ore(materials.oreBismuthinite, 2, 3.0d, 8, 9, StoneType.CHALK,
+                StoneType.CHERT, StoneType.CLAYSTONE, StoneType.CONGLOMERATE,
+                StoneType.MARBLE, StoneType.DIORITE, StoneType.GABBRO,
+                StoneType.GRANITE);
+        plugin.c.ore(materials.oreChalcocite, 6, 8.0d, 2, 1, StoneType.CHALK,
+                StoneType.CHERT, StoneType.CLAYSTONE, StoneType.CONGLOMERATE);
+        plugin.c.ore(materials.oreMagnetite, 4, 5.0d, 9, 10, StoneType.CHALK,
+                StoneType.CHERT, StoneType.CLAYSTONE, StoneType.CONGLOMERATE);
+        plugin.c.ore(materials.orePyrite, 3, 4.0d, 11, 13, StoneType.CHALK,
+                StoneType.CHERT, StoneType.CLAYSTONE, StoneType.CONGLOMERATE,
+                StoneType.MARBLE);
+        plugin.c.ore(materials.oreSilver, 2, 3.0d, 4, 8, StoneType.GRANITE);
+        plugin.c.ore(materials.oreGold, 1, 2.0d, 4, 32, StoneType.ANDESITE,
+                StoneType.BASALT, StoneType.DACITE, StoneType.RHYOLITE,
+                StoneType.DIORITE, StoneType.GABBRO, StoneType.GRANITE);
+    }
+
+    @SuppressWarnings("CodeBlock2Expr")
+    static void registerMetals(VanillaBasics plugin) {
+        plugin.c.metal("Stone", "Stone", "Worked Stone", 0.5f, 0.5f, 0.5f,
+                1200.0f, 1.0, 4.0, 0.004, 10, i -> {
+                    i.put("Stone", 1.0);
+                });
+        plugin.c.metal("Tin", "Tin", 1.0f, 1.0f, 1.0f, 231.0f, 0.1d, 2.0, 0.01,
+                0, i -> {
+                    i.put("Tin", 1.0);
+                });
+        plugin.c.metal("Zinc", "Zinc", 1.0f, 0.9f, 0.9f, 419.0f, 1.0, 4.0,
+                0.004, 10, i -> {
+                    i.put("Zinc", 1.0);
+                });
+        plugin.c.metal("Bismuth", "Bismuth", 0.8f, 0.9f, 0.9f, 271.0f, 1.0, 4.0,
+                0.004, 10, i -> {
+                    i.put("Bismuth", 1.0);
+                });
+        plugin.c.metal("Copper", "Copper", 0.8f, 0.2f, 0.0f, 1084.0f, 6.0, 8.0,
+                0.001, 20, i -> {
+                    i.put("Copper", 1.0);
+                });
+        plugin.c.metal("Iron", "Iron", 0.7f, 0.7f, 0.7f, 1538.0f, 30.0, 12.0,
+                0.0001, 40, i -> {
+                    i.put("Iron", 1.0);
+                });
+        plugin.c.metal("Silver", "Silver", 0.9f, 0.9f, 1.0f, 961.0f, 1.0, 4.0,
+                0.004, 10, i -> {
+                    i.put("Silver", 1.0);
+                });
+        plugin.c.metal("Gold", "Gold", 1.0f, 0.3f, 0.0f, 1064.0f, 0.1, 2.0,
+                0.01, 0, i -> {
+                    i.put("Gold", 1.0);
+                });
+        plugin.c.metal("Bronze", "Bronze", 0.6f, 0.4f, 0.0f, 800.0f, 10.0d,
+                10.0, 0.0005, 30, i -> {
+                    i.put("Tin", 0.25);
+                    i.put("Copper", 0.75);
+                });
+        plugin.c.metal("BismuthBronze", "Bismuth Bronze", 1.0f, 0.8f, 0.8f,
+                800.0f, 10.0d, 10.0, 0.0005, 30, i -> {
+                    i.put("Bismuth", 0.2);
+                    i.put("Zinc", 0.2);
+                    i.put("Copper", 0.6);
+                });
+    }
+
+    @SuppressWarnings("CodeBlock2Expr")
     static void registerVegetation(VanillaBasics plugin) {
         VanillaMaterial materials = plugin.getMaterials();
         // Polar
-        plugin.addBiomeDecorator(POLAR, "Waste", 10);
+        plugin.c.biomeDecorator(POLAR, "Waste", 10, d -> {
+        });
 
         // Tundra
-        plugin.addBiomeDecorator(TUNDRA, "Waste", 10);
-        {
-            BiomeDecorator d = plugin.addBiomeDecorator(TUNDRA, "Spruce", 1);
+        plugin.c.biomeDecorator(TUNDRA, "Waste", 10, d -> {
+        });
+        plugin.c.biomeDecorator(TUNDRA, "Spruce", 1, d -> {
             d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 256));
-        }
+        });
 
         // Taiga
-        {
-            BiomeDecorator d = plugin.addBiomeDecorator(TAIGA, "Spruce", 10);
+        plugin.c.biomeDecorator(TAIGA, "Spruce", 10, d -> {
             d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 32));
-        }
-        {
-            BiomeDecorator d = plugin.addBiomeDecorator(TAIGA, "Sequoia", 2);
+        });
+        plugin.c.biomeDecorator(TAIGA, "Sequoia", 2, d -> {
             d.addLayer(new LayerTree(TreeSequoia.INSTANCE, 256));
             d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 128));
-        }
+        });
 
         // Wasteland
-        plugin.addBiomeDecorator(WASTELAND, "Waste", 10);
+        plugin.c.biomeDecorator(WASTELAND, "Waste", 10, d -> {
+        });
 
         // Steppe
-        plugin.addBiomeDecorator(STEPPE, "Waste", 10);
-        {
-            BiomeDecorator d = plugin.addBiomeDecorator(STEPPE, "Spruce", 10);
+        plugin.c.biomeDecorator(STEPPE, "Waste", 10, d -> {
+        });
+        plugin.c.biomeDecorator(STEPPE, "Spruce", 10, d -> {
             d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 512));
-        }
+            d.addLayer(new LayerPatch(materials.bush, 0, 16, 64, 1 << 17,
+                    (terrain, x, y, z) -> terrain.getBlockType(x, y, z - 1) ==
+                            materials.grass));
+        });
 
         // Forest
-        {
-            BiomeDecorator d =
-                    plugin.addBiomeDecorator(FOREST, "Deciduous", 10);
+        plugin.c.biomeDecorator(FOREST, "Deciduous", 10, d -> {
             d.addLayer(new LayerTree(TreeOak.INSTANCE, 64));
             d.addLayer(new LayerTree(TreeMaple.INSTANCE, 32));
             for (int i = 0; i < 20; i++) {
-                d.addLayer(new LayerPatch(materials.flower, i, 16, 24, 16384,
+                d.addLayer(new LayerPatch(materials.flower, i, 16, 24, 1 << 14,
                         (terrain, x, y, z) ->
                                 terrain.getBlockType(x, y, z - 1) ==
                                         materials.grass));
             }
-        }
-        {
-            BiomeDecorator d = plugin.addBiomeDecorator(FOREST, "Spruce", 10);
+            d.addLayer(new LayerPatch(materials.bush, 0, 6, 8, 2048,
+                    (terrain, x, y, z) -> terrain.getBlockType(x, y, z - 1) ==
+                            materials.grass));
+        });
+        plugin.c.biomeDecorator(FOREST, "Spruce", 10, d -> {
             d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 32));
             for (int i = 0; i < 20; i++) {
-                d.addLayer(new LayerPatch(materials.flower, i, 16, 24, 16384,
+                d.addLayer(new LayerPatch(materials.flower, i, 16, 24, 1 << 14,
                         (terrain, x, y, z) ->
                                 terrain.getBlockType(x, y, z - 1) ==
                                         materials.grass));
             }
-        }
-        {
-            BiomeDecorator d = plugin.addBiomeDecorator(FOREST, "Willow", 10);
+            d.addLayer(new LayerPatch(materials.bush, 0, 4, 8, 4096,
+                    (terrain, x, y, z) -> terrain.getBlockType(x, y, z - 1) ==
+                            materials.grass));
+        });
+        plugin.c.biomeDecorator(FOREST, "Willow", 10, d -> {
             d.addLayer(new LayerTree(TreeWillow.INSTANCE, 64));
             for (int i = 0; i < 20; i++) {
-                d.addLayer(new LayerPatch(materials.flower, i, 16, 24, 16384,
+                d.addLayer(new LayerPatch(materials.flower, i, 16, 24, 1 << 14,
                         (terrain, x, y, z) ->
                                 terrain.getBlockType(x, y, z - 1) ==
                                         materials.grass));
             }
-        }
-        {
-            BiomeDecorator d = plugin.addBiomeDecorator(FOREST, "Sequoia", 2);
+        });
+        plugin.c.biomeDecorator(FOREST, "Sequoia", 2, d -> {
             d.addLayer(new LayerTree(TreeSequoia.INSTANCE, 256));
-        }
+        });
 
         // Desert
-        plugin.addBiomeDecorator(DESERT, "Waste", 10);
+        plugin.c.biomeDecorator(DESERT, "Waste", 10, d -> {
+        });
 
         // Waste
-        plugin.addBiomeDecorator(SAVANNA, "Waste", 10);
+        plugin.c.biomeDecorator(SAVANNA, "Waste", 10, d -> {
+        });
 
         // Oasis
-        {
-            BiomeDecorator d = plugin.addBiomeDecorator(OASIS, "Palm", 10);
+        plugin.c.biomeDecorator(OASIS, "Palm", 10, d -> {
             d.addLayer(new LayerTree(TreePalm.INSTANCE, 128));
-        }
+        });
 
         // Rainforest
-        {
-            BiomeDecorator d =
-                    plugin.addBiomeDecorator(RAINFOREST, "Deciduous", 10);
+        plugin.c.biomeDecorator(RAINFOREST, "Deciduous", 10, d -> {
             d.addLayer(new LayerTree(TreeOak.INSTANCE, 64));
             d.addLayer(new LayerTree(TreeMaple.INSTANCE, 32));
             for (int i = 0; i < 20; i++) {
-                d.addLayer(new LayerPatch(materials.flower, i, 16, 24, 8192,
+                d.addLayer(new LayerPatch(materials.flower, i, 16, 24, 1 << 13,
                         (terrain, x, y, z) ->
                                 terrain.getBlockType(x, y, z - 1) ==
                                         materials.grass));
             }
-        }
-        {
-            BiomeDecorator d =
-                    plugin.addBiomeDecorator(RAINFOREST, "Willow", 4);
+            d.addLayer(new LayerPatch(materials.bush, 0, 4, 8, 1024,
+                    (terrain, x, y, z) -> terrain.getBlockType(x, y, z - 1) ==
+                            materials.grass));
+        });
+        plugin.c.biomeDecorator(RAINFOREST, "Willow", 4, d -> {
             d.addLayer(new LayerTree(TreeWillow.INSTANCE, 48));
             for (int i = 0; i < 20; i++) {
-                d.addLayer(new LayerPatch(materials.flower, i, 16, 24, 8192,
+                d.addLayer(new LayerPatch(materials.flower, i, 16, 24, 1 << 13,
                         (terrain, x, y, z) ->
                                 terrain.getBlockType(x, y, z - 1) ==
                                         materials.grass));
             }
-        }
-        {
-            BiomeDecorator d = plugin.addBiomeDecorator(RAINFOREST, "Palm", 3);
+            d.addLayer(new LayerPatch(materials.bush, 0, 4, 8, 1024,
+                    (terrain, x, y, z) -> terrain.getBlockType(x, y, z - 1) ==
+                            materials.grass));
+        });
+        plugin.c.biomeDecorator(RAINFOREST, "Palm", 3, d -> {
             d.addLayer(new LayerTree(TreePalm.INSTANCE, 96));
             for (int i = 0; i < 20; i++) {
-                d.addLayer(new LayerPatch(materials.flower, i, 16, 24, 8192,
+                d.addLayer(new LayerPatch(materials.flower, i, 16, 24, 1 << 13,
                         (terrain, x, y, z) ->
                                 terrain.getBlockType(x, y, z - 1) ==
                                         materials.grass));
             }
-        }
+        });
     }
 }

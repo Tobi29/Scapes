@@ -86,7 +86,7 @@ public class BlockCraftingTable extends VanillaBlock {
         textureSide2 = registry.registerTexture(
                 "VanillaBasics:image/terrain/device/CraftingTableSide2.png");
         textureBottom = registry.registerTexture(
-                "VanillaBasics:image/terrain/tree/planks/Oak.png");
+                "VanillaBasics:image/terrain/tree/oak/Planks.png");
     }
 
     @Override

@@ -69,10 +69,8 @@ public class ItemSeed extends VanillaItem {
         textures = new TerrainTexture[types.size()];
         int i = 0;
         for (CropType type : types) {
-            textures[i++] =
-                    registry.registerTexture(type.getTextureRoot() + "/seed/" +
-                            type.getTexture() +
-                            ".png");
+            textures[i++] = registry.registerTexture(
+                    type.getTexture() + "/Seed.png");
         }
     }
 

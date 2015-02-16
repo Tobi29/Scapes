@@ -155,9 +155,7 @@ public class BlockCrop extends VanillaBlock {
         for (CropType type : types) {
             for (int j = 1; j < 9; j++) {
                 textures[i++] = registry.registerTexture(
-                        type.getTextureRoot() + "/crop/" +
-                                type.getTexture() +
-                                j + ".png");
+                        type.getTexture() + "/Crop" + j + ".png");
             }
         }
     }

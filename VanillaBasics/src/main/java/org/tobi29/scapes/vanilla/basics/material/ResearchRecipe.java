@@ -17,11 +17,11 @@
 package org.tobi29.scapes.vanilla.basics.material;
 
 public class ResearchRecipe {
+    private final String[] items;
     private final String name;
     private final String text;
-    private final String[] items;
 
-    public ResearchRecipe(String[] items, String name, String text) {
+    public ResearchRecipe(String name, String text, String[] items) {
         this.items = items;
         this.name = name;
         this.text = text;

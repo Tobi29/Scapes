@@ -51,33 +51,6 @@ public class BlockBush extends VanillaBlock {
         super(materials, "vanilla.basics.block.Bush");
     }
 
-    private static String getColor(int color) {
-        switch (color) {
-            case 0:
-                return "Red";
-            case 1:
-                return "Orange";
-            case 2:
-                return "Yellows";
-            case 3:
-                return "Green";
-            case 4:
-                return "Blue";
-            case 5:
-                return "Purple";
-            case 6:
-                return "Black";
-            case 7:
-                return "Dark Gray";
-            case 8:
-                return "Light Gray";
-            case 9:
-                return "White";
-            default:
-                return "Unknown";
-        }
-    }
-
     @Override
     public void addPointerCollision(int data, Pool<PointerPane> pointerPanes,
             int x, int y, int z) {
@@ -137,18 +110,13 @@ public class BlockBush extends VanillaBlock {
     }
 
     @Override
-    public boolean isSolid(Terrain terrain, int x, int y, int z) {
-        return false;
-    }
-
-    @Override
     public boolean isTransparent(Terrain terrain, int x, int y, int z) {
         return true;
     }
 
     @Override
     public byte lightTrough(Terrain terrain, int x, int y, int z) {
-        return -1;
+        return -3;
     }
 
     @Override
@@ -204,11 +172,15 @@ public class BlockBush extends VanillaBlock {
                             1.0f, 1.0f);
             shape.rotateZ(45.0f);
             shapes.add(shape);
-            shape = new BlockModelComplex.ShapeBox(texturesOutside[i],
-                    texturesOutside[i], texturesOutside[i], texturesOutside[i],
-                    texturesOutside[i], texturesOutside[i], -8.0f, -8.0f, -8.0f,
-                    8.0f, 8.0f, 8.0f, 1.0f, 1.0f, 1.0f, 1.0f);
-            shapes.add(shape);
+            for (int j = 0; j < 4; j++) {
+                float r = 5.0f + j;
+                shape = new BlockModelComplex.ShapeBox(texturesOutside[i],
+                        texturesOutside[i], texturesOutside[i],
+                        texturesOutside[i], texturesOutside[i],
+                        texturesOutside[i], -r, -r, -r, r, r, r, 1.0f, 1.0f,
+                        1.0f, 1.0f);
+                shapes.add(shape);
+            }
             models[i] = new BlockModelComplex(registry, shapes, 0.0625f);
         }
     }
@@ -227,8 +199,7 @@ public class BlockBush extends VanillaBlock {
 
     @Override
     public String getName(ItemStack item) {
-        return getColor(item.getData() % 10) +
-                (item.getData() / 10 == 0 ? " Rose" : " Flower");
+        return "Bush";
     }
 
     @Override

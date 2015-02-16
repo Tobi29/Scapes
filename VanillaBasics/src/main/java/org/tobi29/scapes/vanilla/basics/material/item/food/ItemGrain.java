@@ -48,10 +48,8 @@ public class ItemGrain extends VanillaItem implements ItemResearch {
         textures = new TerrainTexture[types.size()];
         int i = 0;
         for (CropType type : types) {
-            textures[i++] =
-                    registry.registerTexture(type.getTextureRoot() + "/grain/" +
-                            type.getTexture() +
-                            ".png");
+            textures[i++] = registry.registerTexture(
+                    type.getTexture() + "/Grain.png");
         }
     }
 
