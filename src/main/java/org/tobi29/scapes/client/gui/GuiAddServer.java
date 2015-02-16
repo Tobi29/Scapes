@@ -27,11 +27,19 @@ public class GuiAddServer extends Gui {
                 new GuiComponentVisiblePane(200, 0, 400, 512);
         GuiComponentTextField ip =
                 new GuiComponentTextField(16, 110, 368, 30, 18, "");
+        GuiComponentTextField port =
+                new GuiComponentTextField(16, 180, 368, 30, 18, "12345");
         GuiComponentTextButton create =
                 new GuiComponentTextButton(112, 466, 176, 30, 18, "Create");
         create.addLeftClick(event -> {
             TagStructure tagStructure = new TagStructure();
-            tagStructure.setString("IP", ip.getText());
+            tagStructure.setString("Address", ip.getText());
+            try {
+                tagStructure
+                        .setInteger("Port", Integer.valueOf(port.getText()));
+            } catch (NumberFormatException e) {
+                tagStructure.setInteger("Port", 12345);
+            }
             prev.addServer(tagStructure);
             state.remove(this);
             prev.updateServers();
@@ -41,6 +49,8 @@ public class GuiAddServer extends Gui {
         pane.add(new GuiComponentSeparator(24, 64, 352, 2));
         pane.add(new GuiComponentText(16, 80, 18, "IP:"));
         pane.add(ip);
+        pane.add(new GuiComponentText(16, 150, 18, "Port:"));
+        pane.add(port);
         pane.add(new GuiComponentSeparator(24, 448, 352, 2));
         pane.add(create);
         add(pane);

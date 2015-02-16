@@ -41,12 +41,10 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class GuiServerSelect extends Gui {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GuiServerSelect.class);
-    private static final Pattern SPLIT_PATTERN = Pattern.compile(":");
     private static final byte[] CONNECTION_HEADER = ConnectionInfo.getHeader();
     private final List<TagStructure> servers = new ArrayList<>();
     private final List<Element> elements = new ArrayList<>();
@@ -110,12 +108,10 @@ public class GuiServerSelect extends Gui {
 
     public void updateServers() {
         disposeServers();
-        int i = 0;
         for (TagStructure tagStructure : servers) {
-            Element element = new Element(tagStructure.getString("IP"), i);
+            Element element = new Element(tagStructure);
             elements.add(element);
             scrollPane.add(element);
-            i++;
         }
     }
 
@@ -142,17 +138,12 @@ public class GuiServerSelect extends Gui {
         private int readState;
         private ByteBuffer buffer;
 
-        public Element(String address, int i) {
+        public Element(TagStructure tagStructure) {
             super(0, 70, 378, 70);
-            String[] ipSplit = SPLIT_PATTERN.split(address, 2);
-            int port;
-            if (ipSplit.length > 1) {
-                port = Integer.valueOf(ipSplit[1]);
-            } else {
-                port = 12345;
-            }
+            String address = tagStructure.getString("Address");
+            int port = tagStructure.getInteger("Port");
             InetSocketAddress socketAddress =
-                    new InetSocketAddress(ipSplit[0], port);
+                    new InetSocketAddress(address, port);
             label = new GuiComponentTextButton(70, 20, 200, 30, 18,
                     "Pinging...");
             label.addLeftClick(event -> state.getEngine().setState(
@@ -161,7 +152,7 @@ public class GuiServerSelect extends Gui {
             GuiComponentTextButton delete =
                     new GuiComponentTextButton(280, 20, 60, 30, 18, "Delete");
             delete.addLeftClick(event -> {
-                servers.remove(i);
+                servers.remove(tagStructure);
                 TagStructure scapesTag = state.getEngine().getTagStructure()
                         .getStructure("Scapes");
                 scapesTag.setList("Servers", servers);
