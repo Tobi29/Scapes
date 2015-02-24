@@ -555,21 +555,44 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
 
     private void simulateSeason(TerrainInfiniteChunk chunk, int chance) {
         Random random = ThreadLocalRandom.current();
+        int sx = chunk.getX() << 4;
+        int sy = chunk.getY() << 4;
+        double humidity00 = climateGenerator.getHumidity(sx, sy);
+        double temperature00 = climateGenerator.getTemperature(sx, sy);
+        double humidity10 = climateGenerator.getHumidity(sx + 15, sy);
+        double temperature10 = climateGenerator.getTemperature(sx + 15, sy);
+        double humidity01 = climateGenerator.getHumidity(sx, sy + 15);
+        double temperature01 = climateGenerator.getTemperature(sx, sy + 15);
+        double humidity11 = climateGenerator.getHumidity(sx + 15, sy + 15);
+        double temperature11 =
+                climateGenerator.getTemperature(sx + 15, sy + 15);
         for (int y = 0; y < 16; y++) {
-            int yy = y + (chunk.getY() << 4);
+            double mixY = y / 15.0;
+            double humidity0 = FastMath.mix(humidity00, humidity01, mixY);
+            double humidity1 = FastMath.mix(humidity10, humidity11, mixY);
+            double temperature0 =
+                    FastMath.mix(temperature00, temperature01, mixY);
+            double temperature1 =
+                    FastMath.mix(temperature10, temperature11, mixY);
             for (int x = 0; x < 16; x++) {
-                int xx = x + (chunk.getX() << 4);
                 if (random.nextInt(chance) == 0) {
                     int z = chunk.getHighestTerrainBlockZAt(x, y);
+                    double mixX = x / 15.0;
+                    double humidity = FastMath.mix(humidity0, humidity1, mixX);
+                    double temperature = climateGenerator.getTemperatureD(
+                            FastMath.mix(temperature0, temperature1, mixX), z);
                     BlockType spaceType = chunk.getBlockType(x, y, z);
                     BlockType groundType = chunk.getBlockType(x, y, z - 1);
-                    double humidity = climateGenerator.getHumidity(xx, yy);
-                    double temperature =
-                            climateGenerator.getTemperature(xx, yy, z);
                     if (humidity > 0.2) {
                         if (groundType == materials.dirt) {
-                            chunk.setBlockIdAndData(x, y, z - 1,
-                                    materials.grass, (short) 0);
+                            if (random.nextInt(chance) == 0) {
+                                chunk.setBlockIdAndData(x, y, z - 1,
+                                        materials.grass,
+                                        (short) random.nextInt(9));
+                            } else {
+                                chunk.setBlockIdAndData(x, y, z - 1,
+                                        materials.grass, (short) 0);
+                            }
                         } else if (groundType == materials.grass) {
                             chunk.setBlockData(x, y, z - 1,
                                     (short) random.nextInt(9));

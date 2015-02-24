@@ -112,9 +112,10 @@ public class ClimateGenerator {
     public double getSunElevationD(double hourAngleCos, double declination,
             double latitude) {
         return FastMath.asin(FastMath.sinTable(latitude) *
-                FastMath.sinTable(declination) + FastMath.cosTable(latitude) *
-                FastMath.cosTable(declination) *
-                hourAngleCos);
+                        FastMath.sinTable(declination) +
+                        FastMath.cosTable(latitude) *
+                                FastMath.cosTable(declination) *
+                                hourAngleCos);
     }
 
     public double getSunIntensity(double y, double factor) {
@@ -179,6 +180,10 @@ public class ClimateGenerator {
 
     public double getTemperature(int x, int y, int z) {
         return getTemperature(x, y) - FastMath.max(z - 300, 0) / 10.0;
+    }
+
+    public double getTemperatureD(double temperature, int z) {
+        return temperature - FastMath.max(z - 300, 0) / 10.0;
     }
 
     public double getTemperature(double x, double y) {
