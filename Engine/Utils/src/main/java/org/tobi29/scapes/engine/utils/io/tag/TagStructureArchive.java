@@ -40,7 +40,7 @@ public class TagStructureArchive {
         this.byteStreamOut = byteStreamOut;
     }
 
-    public static TagStructure extract(String name, InputStream streamIn)
+    public static Optional<TagStructure> extract(String name, InputStream streamIn)
             throws IOException {
         List<Entry> entries = readHeader(streamIn);
         int offset = 0;
@@ -49,11 +49,11 @@ public class TagStructureArchive {
                 new DataInputStream(streamIn).skipBytes(offset);
                 TagStructure tagStructure = new TagStructure();
                 tagStructure.read(new TagStructureReaderBinary(streamIn));
-                return tagStructure;
+                return Optional.of(tagStructure);
             }
             offset += entry.length;
         }
-        return null;
+        return Optional.empty();
     }
 
     public static List<Entry> readHeader(InputStream streamIn)
