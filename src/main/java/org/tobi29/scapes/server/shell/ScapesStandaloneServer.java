@@ -41,8 +41,16 @@ public abstract class ScapesStandaloneServer
         implements Crashable, Command.Executor {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ScapesStandaloneServer.class);
+    private static final Runtime RUNTIME = Runtime.getRuntime();
     protected final FileSystem files;
     protected final Directory directory;
+    private final Thread shutdownHook = new Thread(() -> {
+        try {
+            stopServer();
+        } catch (IOException e) {
+            LOGGER.error("Failed to terminate server: {}", e.toString());
+        }
+    });
     protected ScapesServer server;
 
     protected ScapesStandaloneServer(FileSystem files) throws IOException {
@@ -56,6 +64,7 @@ public abstract class ScapesStandaloneServer
 
     protected void start(Collection<ControlPanel> initialControlPanels)
             throws IOException {
+        RUNTIME.addShutdownHook(shutdownHook);
         TagStructure tagStructure;
         tagStructure = loadConfig(files.getResource("Server.json"));
         TagStructure serverTag = tagStructure.getStructure("Server");
@@ -70,11 +79,20 @@ public abstract class ScapesStandaloneServer
         server.start(tagStructure.getInteger("ServerPort"));
     }
 
-    protected ScapesServer.ShutdownReason stop() throws IOException {
+    private ScapesServer.ShutdownReason stopServer() throws IOException {
+        if (server == null) {
+            return ScapesServer.ShutdownReason.STOP;
+        }
         server.getWorldFormat().save();
         ScapesServer server = this.server;
         this.server = null;
         return server.getShutdownReason();
+    }
+
+    protected ScapesServer.ShutdownReason stop() throws IOException {
+        ScapesServer.ShutdownReason shutdownReason = stopServer();
+        RUNTIME.removeShutdownHook(shutdownHook);
+        return shutdownReason;
     }
 
     protected TagStructure loadConfig(File file) throws IOException {
