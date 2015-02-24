@@ -18,10 +18,10 @@ package org.tobi29.scapes.client.states;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.client.ScapesClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.client.gui.GuiLoading;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
+import org.tobi29.scapes.connection.Account;
 import org.tobi29.scapes.connection.ConnectionCloseException;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
@@ -96,8 +96,9 @@ public class GameStateLoadMP extends GameState {
                             engine.getTagStructure().getStructure("Scapes")
                                     .getFloat("RenderDistance") * 246) /
                             16.0f) << 4;
-                    client = new ClientConnection(engine, channel,
-                            ((ScapesClient) engine.getGame()).getAccount(),
+                    Account.Client account = Account.read(engine.getFiles()
+                            .getFile("File:Account.properties"));
+                    client = new ClientConnection(engine, channel, account,
                             loadingRadius + 16);
                     step++;
                     break;

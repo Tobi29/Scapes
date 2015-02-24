@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.client.gui;
 
-import org.tobi29.scapes.client.ScapesClient;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
 
@@ -52,8 +51,7 @@ public class GuiOptions extends Gui {
                 new GuiComponentTextButton(16, 240, 368, 30, 18, "Account");
         account.addLeftClick(event -> {
             state.remove(this);
-            state.add(new GuiAccount(state, this,
-                    ((ScapesClient) state.getEngine().getGame()).getAccount()));
+            state.add(new GuiAccount(state, this));
         });
         GuiComponentTextButton back =
                 new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");

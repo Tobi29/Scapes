@@ -34,7 +34,10 @@ import org.tobi29.scapes.plugins.Plugins;
 import org.tobi29.scapes.server.ScapesServer;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class WorldFormat {
@@ -49,7 +52,6 @@ public class WorldFormat {
     private final TagStructure worldsTagStructure;
     private final Map<String, WorldServer> worlds = new ConcurrentHashMap<>();
     private final long seed;
-    private final UUID uuid;
 
     public WorldFormat(ScapesServer server, Directory directory)
             throws IOException {
@@ -63,11 +65,6 @@ public class WorldFormat {
         plugins.init();
         plugins.initServer(server);
         seed = tagStructure.getLong("Seed");
-        if (tagStructure.has("UUID")) {
-            uuid = tagStructure.getUUID("UUID");
-        } else {
-            uuid = UUID.randomUUID();
-        }
         worldsTagStructure = tagStructure.getStructure("Worlds");
         for (Dimension dimension : plugins.getDimensions()) {
             registerWorld(dimension);
@@ -88,10 +85,6 @@ public class WorldFormat {
 
     public long getSeed() {
         return seed;
-    }
-
-    public UUID getUUID() {
-        return uuid;
     }
 
     public Plugins getPlugins() {
@@ -154,7 +147,6 @@ public class WorldFormat {
         TagStructure tagStructure = new TagStructure();
         tagStructure.setLong("LastPlayed", System.currentTimeMillis());
         tagStructure.setLong("Seed", seed);
-        tagStructure.setUUID("UUID", uuid);
         tagStructure.setStructure("IDs", idStorage.save());
         tagStructure.setStructure("Worlds", worldsTagStructure);
         directory.getResource("Data.stag").write(streamOut -> TagStructureBinary

@@ -18,20 +18,16 @@ package org.tobi29.scapes.client.states;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.client.ClientAccount;
-import org.tobi29.scapes.client.ScapesClient;
 import org.tobi29.scapes.client.gui.GuiAccount;
 import org.tobi29.scapes.client.gui.GuiMainMenu;
 import org.tobi29.scapes.client.gui.GuiVersion;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
+import org.tobi29.scapes.connection.Account;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.utils.io.filesystem.File;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-import java.util.UUID;
 
 public class GameStateMenu extends GameState {
     private static final Logger LOGGER =
@@ -48,30 +44,18 @@ public class GameStateMenu extends GameState {
 
     @Override
     public void init() {
-        ClientAccount account = ((ScapesClient) engine.getGame()).getAccount();
         try {
             File file = engine.getFiles().getFile("File:Account.properties");
-            if (file.exists()) {
-                Properties properties = new Properties();
-                try (InputStream streamIn = file.read()) {
-                    properties.load(streamIn);
-                    account.setUUID(
-                            UUID.fromString(properties.getProperty("UUID")));
-                    account.setPassword(properties.getProperty("Password"));
-                    account.setNickname(properties.getProperty("Nickname"));
-                    if (account.isValid()) {
-                        add(new GuiMainMenu(this));
-                    } else {
-                        add(new GuiAccount(this, new GuiMainMenu(this),
-                                account));
-                    }
-                }
+            Account.Client account = Account.read(file);
+            if (account.valid()) {
+                add(new GuiMainMenu(this));
             } else {
-                add(new GuiAccount(this, new GuiMainMenu(this), account));
+                account.write(file);
+                add(new GuiAccount(this, new GuiMainMenu(this)));
             }
         } catch (IOException e) {
             LOGGER.error("Failed to read account file: {}", e.toString());
-            add(new GuiAccount(this, new GuiMainMenu(this), account));
+            add(new GuiAccount(this, new GuiMainMenu(this)));
         }
         add(new GuiVersion());
     }

@@ -48,8 +48,6 @@ public class ScapesClient extends Game {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ScapesClient.class);
     private final List<InputMode> inputModes = new ArrayList<>();
-    private final ClientAccount account =
-            new ClientAccount(UUID.randomUUID(), "", "");
     private Image icon;
     private InputMode inputMode;
 
@@ -63,7 +61,7 @@ public class ScapesClient extends Game {
         }
     }
 
-    private static InputMode loadService(ScapesEngine engine,
+    private static Optional<InputMode> loadService(ScapesEngine engine,
             Controller controller, TagStructure tagStructure) {
         for (InputModeProvider provider : ServiceLoader
                 .load(InputModeProvider.class)) {
@@ -73,7 +71,7 @@ public class ScapesClient extends Game {
                 if (inputMode != null) {
                     LOGGER.debug("Loaded input mode: {}",
                             provider.getClass().getName());
-                    return inputMode;
+                    return Optional.of(inputMode);
                 }
             } catch (ServiceConfigurationError e) {
                 LOGGER.warn("Unable to load input mode provider: {}",
@@ -81,26 +79,17 @@ public class ScapesClient extends Game {
             }
         }
         if (controller instanceof ControllerDefault) {
-            return new InputModeKeyboard(engine, (ControllerDefault) controller,
-                    tagStructure);
+            return Optional.of(new InputModeKeyboard(engine,
+                    (ControllerDefault) controller, tagStructure));
         } else if (controller instanceof ControllerJoystick) {
-            return new InputModeGamepad(engine, (ControllerJoystick) controller,
-                    tagStructure);
+            return Optional.of(new InputModeGamepad(engine,
+                    (ControllerJoystick) controller, tagStructure));
         }
-        return null;
+        return Optional.empty();
     }
 
     public InputMode getInputMode() {
         return inputMode;
-    }
-
-    public ClientAccount getAccount() {
-        SecurityManager securityManager = System.getSecurityManager();
-        if (securityManager != null) {
-            securityManager
-                    .checkPermission(new RuntimePermission("accountAccess"));
-        }
-        return account;
     }
 
     @Override
@@ -192,21 +181,19 @@ public class ScapesClient extends Game {
         TagStructure tagStructure =
                 engine.getTagStructure().getStructure("Scapes")
                         .getStructure("Input");
-        InputMode inputModeDefault =
+        Optional<InputMode> inputModeDefault =
                 loadService(engine, engine.getController(), tagStructure);
-        if (inputModeDefault == null) {
+        if (!inputModeDefault.isPresent()) {
             throw new IllegalStateException("No keyboard controller installed");
         }
         inputModes.clear();
-        inputModes.add(inputModeDefault);
+        inputModeDefault.ifPresent(inputModes::add);
         for (ControllerJoystick joystick : engine.getGraphics().getContainer()
                 .getJoysticks()) {
-            InputMode inputMode = loadService(engine, joystick, tagStructure);
-            if (inputMode != null) {
-                inputModes.add(inputMode);
-            }
+            loadService(engine, joystick, tagStructure)
+                    .ifPresent(inputModes::add);
         }
-        inputMode = inputModeDefault;
+        inputMode = inputModes.get(0);
         engine.setGuiController(inputMode.getGuiController());
     }
 

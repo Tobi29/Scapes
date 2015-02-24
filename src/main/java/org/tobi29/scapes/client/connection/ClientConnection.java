@@ -20,9 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.chunk.IDStorage;
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.client.ClientAccount;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.client.states.GameStateServerDisconnect;
+import org.tobi29.scapes.connection.Account;
 import org.tobi29.scapes.connection.ConnectionCloseException;
 import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.connection.PlayConnection;
@@ -96,7 +96,7 @@ public class ClientConnection
     }
 
     public ClientConnection(ScapesEngine engine, SocketChannel channel,
-            ClientAccount account, int loadingDistance) {
+            Account.Client account, int loadingDistance) {
         this.engine = engine;
         this.loadingDistance = loadingDistance;
         this.channel = new PacketBundleChannel(channel);
@@ -116,10 +116,10 @@ public class ClientConnection
                     state = State.LOGIN_STEP_2;
                 }
             case LOGIN_STEP_2:
-                InputStream channelStreamIn = channel.fetch();
-                if (channelStreamIn != null) {
-                    try (DataInputStream streamIn = new DataInputStream(
-                            channelStreamIn)) {
+                Optional<DataInputStream> bundle = channel.fetch();
+                if (bundle.isPresent()) {
+                    DataInputStream streamIn = bundle.get();
+                    try {
                         byte[] array = new byte[streamIn.readInt()];
                         streamIn.readFully(array);
                         int keyLength = streamIn.readInt();
@@ -139,6 +139,10 @@ public class ClientConnection
                         streamOut.write(cipher.doFinal(keyClient));
                         channel.queueBundle();
                         channel.setKey(keyClient, keyServer);
+                        KeyPair keyPair = loginData.account.getKeyPair();
+                        array = keyPair.getPublic().getEncoded();
+                        streamOut.write(array);
+                        channel.queueBundle();
                         while (channel.process()) {
                             SleepUtil.sleep(10);
                         }
@@ -149,59 +153,65 @@ public class ClientConnection
                 }
                 break;
             case LOGIN_STEP_3:
-                channelStreamIn = channel.fetch();
-                if (channelStreamIn != null) {
-                    try (DataInputStream streamIn = new DataInputStream(
-                            channelStreamIn)) {
-                        DataOutputStream streamOut = channel.getOutputStream();
-                        UUID uuid = new UUID(streamIn.readLong(),
-                                streamIn.readLong());
-                        int length = streamIn.readInt();
-                        for (int i = 0; i < length; i++) {
-                            File file = checkPlugin(streamIn);
-                            if (file == null) {
-                                loginData.pluginRequests.add(i);
-                                loginData.plugins.add(null);
-                            } else {
-                                loginData.plugins.add(new PluginFile(file));
-                            }
+                bundle = channel.fetch();
+                if (bundle.isPresent()) {
+                    DataInputStream streamIn = bundle.get();
+                    byte[] challenge = new byte[512];
+                    streamIn.readFully(challenge);
+                    try {
+                        Cipher cipher = Cipher.getInstance("RSA");
+                        cipher.init(Cipher.DECRYPT_MODE,
+                                loginData.account.getKeyPair().getPrivate());
+                        challenge = cipher.doFinal(challenge);
+                    } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException e) {
+                        throw new IOException(e);
+                    }
+                    int length = streamIn.readInt();
+                    for (int i = 0; i < length; i++) {
+                        Optional<File> file = checkPlugin(streamIn);
+                        if (file.isPresent()) {
+                            loginData.plugins.add(new PluginFile(file.get()));
+                        } else {
+                            loginData.pluginRequests.add(i);
+                            loginData.plugins.add(null);
                         }
-                        readIDStorage(streamIn);
-                        streamOut.writeUTF(loginData.account.getID(uuid));
-                        streamOut.writeUTF(loginData.account.getKey(uuid));
-                        streamOut.writeUTF(loginData.account.getNickname());
-                        streamOut.writeInt(loadingDistance);
-                        sendSkin(streamOut);
-                        streamOut.writeInt(loginData.pluginRequests.size());
-                        for (Integer request : loginData.pluginRequests) {
-                            streamOut.writeInt(request);
-                        }
-                        channel.queueBundle();
-                        while (channel.process()) {
-                            SleepUtil.sleep(10);
-                        }
+                    }
+                    readIDStorage(streamIn);
+                    DataOutputStream streamOut = channel.getOutputStream();
+                    streamOut.write(challenge);
+                    streamOut.writeUTF(loginData.account.getNickname());
+                    streamOut.writeInt(loadingDistance);
+                    sendSkin(streamOut);
+                    streamOut.writeInt(loginData.pluginRequests.size());
+                    for (Integer request : loginData.pluginRequests) {
+                        streamOut.writeInt(request);
+                    }
+                    channel.queueBundle();
+                    while (channel.process()) {
+                        SleepUtil.sleep(10);
                     }
                     state = State.LOGIN_STEP_4;
                 }
                 break;
             case LOGIN_STEP_4:
-                channelStreamIn = channel.fetch();
-                if (channelStreamIn != null) {
-                    try (DataInputStream streamIn = new DataInputStream(
-                            channelStreamIn)) {
-                        if (streamIn.readBoolean()) {
-                            throw new ConnectionCloseException(
-                                    streamIn.readUTF());
-                        }
-                        for (Integer request : loginData.pluginRequests) {
-                            File file = cache.retrieve(cache.store(
-                                    new LimitedInputStream(streamIn,
-                                            streamIn.readInt()), "plugins"));
-                            loginData.plugins
-                                    .set(request, new PluginFile(file));
-                        }
-                        loginData.pluginRequests.clear();
+                bundle = channel.fetch();
+                if (bundle.isPresent()) {
+                    DataInputStream streamIn = bundle.get();
+                    if (streamIn.readBoolean()) {
+                        throw new ConnectionCloseException(streamIn.readUTF());
                     }
+                    for (Integer request : loginData.pluginRequests) {
+                        Optional<File> file = cache.retrieve(cache.store(
+                                new LimitedInputStream(streamIn,
+                                        streamIn.readInt()), "plugins"));
+                        if (!file.isPresent()) {
+                            throw new IllegalStateException(
+                                    "Concurrent cache modification");
+                        }
+                        loginData.plugins
+                                .set(request, new PluginFile(file.get()));
+                    }
+                    loginData.pluginRequests.clear();
                     plugins = new Plugins(loginData.plugins, idStorage);
                     state = State.OPEN;
                     loginData = null;
@@ -221,7 +231,8 @@ public class ClientConnection
         idStorage.load(idsTag);
     }
 
-    private File checkPlugin(DataInputStream streamIn) throws IOException {
+    private Optional<File> checkPlugin(DataInputStream streamIn)
+            throws IOException {
         byte[] checksum = new byte[streamIn.readInt()];
         streamIn.readFully(checksum);
         FileCache.Location location =
@@ -265,17 +276,15 @@ public class ClientConnection
                     ((PacketServer) packet).sendServer(this, streamOut);
                 }
                 channel.queueBundle();
-                InputStream channelStreamIn = channel.fetch();
-                if (channelStreamIn != null) {
-                    try (DataInputStream streamIn = new DataInputStream(
-                            channelStreamIn)) {
-                        while (streamIn.available() > 0) {
-                            PacketClient packet = (PacketClient) Packet
-                                    .makePacket(plugins.getRegistry(),
-                                            streamIn.readShort());
-                            packet.parseClient(this, streamIn);
-                            packet.runClient(this, world);
-                        }
+                Optional<DataInputStream> bundle = channel.fetch();
+                if (bundle.isPresent()) {
+                    DataInputStream streamIn = bundle.get();
+                    while (streamIn.available() > 0) {
+                        PacketClient packet = (PacketClient) Packet
+                                .makePacket(plugins.getRegistry(),
+                                        streamIn.readShort());
+                        packet.parseClient(this, streamIn);
+                        packet.runClient(this, world);
                     }
                 } else {
                     if (!channel.process()) {
@@ -349,7 +358,7 @@ public class ClientConnection
             TagStructure tagStructure) {
         LOGGER.info("Received player entity: {} with id: {}", entity, playerID);
         this.world = world;
-        entity =world.getPlayer();
+        entity = world.getPlayer();
         entity.read(tagStructure);
         world.addEntity(entity, playerID);
         game.setScene(world.getScene());
@@ -372,12 +381,12 @@ public class ClientConnection
         private final SocketChannel channel;
         private final List<Integer> pluginRequests = new ArrayList<>();
         private final List<PluginFile> plugins = new ArrayList<>();
-        private final ClientAccount account;
+        private final Account.Client account;
         private final ByteBuffer headerBuffer = BufferCreator
                 .wrap(new byte[]{'S', 'c', 'a', 'p', 'e', 's',
                         ConnectionType.PLAY.getData()});
 
-        private LoginData(SocketChannel channel, ClientAccount account) {
+        private LoginData(SocketChannel channel, Account.Client account) {
             this.channel = channel;
             this.account = account;
         }

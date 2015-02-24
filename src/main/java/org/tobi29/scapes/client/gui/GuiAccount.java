@@ -18,34 +18,65 @@ package org.tobi29.scapes.client.gui;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.client.ClientAccount;
+import org.tobi29.scapes.connection.Account;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
+import org.tobi29.scapes.engine.utils.io.ChecksumUtil;
 import org.tobi29.scapes.engine.utils.io.filesystem.File;
 import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
 
 import java.io.IOException;
-import java.util.Properties;
-import java.util.UUID;
+import java.security.KeyPair;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 public class GuiAccount extends Gui {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GuiAccount.class);
-    private final GuiComponentVisiblePane pane;
-    private boolean failed;
+    private static final Pattern REPLACE = Pattern.compile("[^A-Za-z0-9+/= ]");
+    private KeyPair keyPair;
+    private String nickname = "";
 
-    public GuiAccount(GameState state, Gui prev, ClientAccount account) {
+    public GuiAccount(GameState state, Gui prev) {
         super(GuiAlignment.CENTER);
-        pane = new GuiComponentVisiblePane(200, 0, 400, 512);
-        GuiComponentTextField uuid =
-                new GuiComponentTextField(16, 100, 368, 30, 18,
-                        account.getUUID().toString());
-        GuiComponentTextField password =
-                new GuiComponentTextField(16, 160, 368, 30, 18,
-                        account.getPassword(), true);
+        try {
+            Account.Client account = Account.read(state.getEngine().getFiles()
+                    .getFile("File:Account.properties"));
+            keyPair = account.getKeyPair();
+            nickname = account.getNickname();
+        } catch (IOException e) {
+            LOGGER.error("Failed to read account file: {}", e.toString());
+        }
+        GuiComponentVisiblePane pane =
+                new GuiComponentVisiblePane(200, 0, 400, 512);
+        GuiComponentText hash = new GuiComponentText(16, 140, 12, "Hash: " +
+                ChecksumUtil.getChecksum(keyPair.getPrivate().getEncoded()));
+        GuiComponentText id = new GuiComponentText(16, 160, 12, "ID: " +
+                ChecksumUtil.getChecksum(keyPair.getPublic().getEncoded()));
+        GuiComponentText error = new GuiComponentText(16, 320, 18, "");
+        GuiComponentButton keyCopy =
+                new GuiComponentTextButton(16, 100, 174, 30, 18, "Copy");
+        keyCopy.addLeftClick(event -> state.getEngine().getController()
+                .clipboardCopy(Account.key(keyPair)));
+        GuiComponentButton keyPaste =
+                new GuiComponentTextButton(210, 100, 174, 30, 18, "Paste");
+        keyPaste.addLeftClick(event -> {
+            String str = state.getEngine().getController().clipboardPaste();
+            Optional<KeyPair> keyPair =
+                    Account.key(REPLACE.matcher(str).replaceAll(""));
+            if (keyPair.isPresent()) {
+                this.keyPair = keyPair.get();
+                hash.setText("Hash: " + ChecksumUtil
+                        .getChecksum(this.keyPair.getPrivate().getEncoded()));
+                id.setText("ID: " + ChecksumUtil
+                        .getChecksum(this.keyPair.getPublic().getEncoded()));
+                error.setText("");
+            } else {
+                error.setText("Invalid key!");
+            }
+        });
         GuiComponentTextField nickname =
-                new GuiComponentTextField(16, 220, 368, 30, 18,
-                        account.getNickname());
+                new GuiComponentTextField(16, 200, 368, 30, 18, this.nickname);
         GuiComponentTextButton skin =
                 new GuiComponentTextButton(112, 260, 176, 30, 18, "Skin");
         skin.addLeftClick(event -> {
@@ -63,54 +94,34 @@ public class GuiAccount extends Gui {
         GuiComponentTextButton save =
                 new GuiComponentTextButton(112, 466, 176, 30, 18, "Save");
         save.addLeftClick(event -> {
-            try {
-                account.setUUID(UUID.fromString(uuid.getText()));
-                account.setPassword(password.getText());
-                account.setNickname(nickname.getText());
-                if (account.isValid()) {
-                    try {
-                        File file = state.getEngine().getFiles()
-                                .getFile("File:Account.properties");
-                        Properties properties = new Properties();
-                        properties.setProperty("UUID",
-                                account.getUUID().toString());
-                        properties
-                                .setProperty("Password", account.getPassword());
-                        properties
-                                .setProperty("Nickname", account.getNickname());
-                        file.write(
-                                streamOut -> properties.store(streamOut, ""));
-                    } catch (IOException e) {
-                        LOGGER.error("Failed to write account file: {}",
-                                e.toString());
-                    }
-                    state.remove(this);
-                    state.add(prev);
-                } else if (!failed) {
-                    failSave();
-                }
-            } catch (IllegalArgumentException e) {
-                failSave();
+            this.nickname = nickname.getText();
+            if (!Account.valid(this.nickname)) {
+                error.setText("Invalid Nickname!");
+                return;
             }
+            try {
+                new Account.Client(keyPair, this.nickname)
+                        .write(state.getEngine().getFiles()
+                                .getFile("File:Account.properties"));
+            } catch (IOException e) {
+                LOGGER.error("Failed to write account file: {}", e.toString());
+            }
+            state.remove(this);
+            state.add(prev);
         });
-        pane.add(new GuiComponentText(16, 16, 32, "Login"));
+        pane.add(new GuiComponentText(16, 16, 32, "Account"));
         pane.add(new GuiComponentSeparator(24, 64, 352, 2));
-        pane.add(uuid);
-        pane.add(new GuiComponentText(16, 80, 18, "UUID:"));
-        pane.add(password);
-        pane.add(new GuiComponentText(16, 140, 18, "Password:"));
+        pane.add(new GuiComponentText(16, 80, 18, "Key:"));
+        pane.add(keyCopy);
+        pane.add(keyPaste);
+        pane.add(hash);
+        pane.add(id);
+        pane.add(new GuiComponentText(16, 180, 18, "Nickname:"));
         pane.add(nickname);
-        pane.add(new GuiComponentText(16, 200, 18, "Nickname:"));
         pane.add(skin);
+        pane.add(error);
         pane.add(new GuiComponentSeparator(24, 448, 352, 2));
         pane.add(save);
         add(pane);
-    }
-
-    private void failSave() {
-        if (!failed) {
-            pane.add(new GuiComponentText(16, 320, 18, "Invalid account!"));
-            failed = true;
-        }
     }
 }

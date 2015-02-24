@@ -18,6 +18,8 @@ package org.tobi29.scapes.engine.utils;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.function.*;
 import java.util.regex.Pattern;
 
@@ -164,6 +166,15 @@ public final class ArrayUtil {
                     .parseUnsignedInt(text.substring(i, i + 2), 16);
         }
         return array;
+    }
+
+    public static String toBase64(byte... array) {
+        return new String(Base64.getEncoder().encode(array),
+                StandardCharsets.UTF_8);
+    }
+
+    public static byte[] fromBase64(String text) {
+        return Base64.getDecoder().decode(text);
     }
 
     public static void fill(int[] array, IntSupplier supplier) {

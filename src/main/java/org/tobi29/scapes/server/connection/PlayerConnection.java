@@ -22,6 +22,7 @@ import org.tobi29.scapes.Scapes;
 import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.connection.*;
+import org.tobi29.scapes.engine.utils.io.ChecksumUtil;
 import org.tobi29.scapes.engine.utils.io.PacketBundleChannel;
 import org.tobi29.scapes.engine.utils.io.ProcessStream;
 import org.tobi29.scapes.engine.utils.io.filesystem.File;
@@ -47,13 +48,10 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketException;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
-import java.util.UUID;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -67,10 +65,12 @@ public class PlayerConnection
     private final GameRegistry registry;
     private final Queue<Packet> sendQueue = new ConcurrentLinkedQueue<>();
     private final AtomicInteger sendQueueSize = new AtomicInteger();
+    private final byte[] key = new byte[550];
     private State state = State.LOGIN_STEP_1;
+    private byte[] challenge;
     private MobPlayerServer entity;
     private ServerSkin skin;
-    private String id = "Error", key = "Error", nickname = "_Error_";
+    private String id, nickname = "_Error_";
     private int loadingRadius, permissionLevel;
     private PlayerStatistics statistics;
 
@@ -89,8 +89,8 @@ public class PlayerConnection
             ServerConnection server) throws IOException {
         this.channel = channel;
         this.server = server;
-        registry = server.getServer().getWorldFormat().getPlugins()
-                .getRegistry();
+        registry =
+                server.getServer().getWorldFormat().getPlugins().getRegistry();
         loginStep1();
     }
 
@@ -146,27 +146,39 @@ public class PlayerConnection
             throw new IOException(e);
         }
         channel.setKey(keyServer, keyClient);
+    }
+
+    private void loginStep3(DataInputStream streamIn) throws IOException {
+        streamIn.readFully(key);
+        id = ChecksumUtil.getChecksum(key);
+        challenge = new byte[501];
+        new SecureRandom().nextBytes(challenge);
         DataOutputStream streamOut = channel.getOutputStream();
+        try {
+            PublicKey rsaKey = KeyFactory.getInstance("RSA")
+                    .generatePublic(new X509EncodedKeySpec(key));
+            Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.ENCRYPT_MODE, rsaKey);
+            streamOut.write(cipher.doFinal(challenge));
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidKeySpecException e) {
+            throw new IOException(e);
+        }
         List<PluginFile> plugins =
                 server.getServer().getWorldFormat().getPlugins().getFiles();
-        UUID uuid = server.getServer().getWorldFormat().getUUID();
-        streamOut.writeLong(uuid.getMostSignificantBits());
-        streamOut.writeLong(uuid.getLeastSignificantBits());
         streamOut.writeInt(plugins.size());
         plugins.forEach(plugin -> sendPluginChecksum(plugin, streamOut));
         TagStructureBinary
                 .write(server.getServer().getWorldFormat().getIDStorage()
                         .save(), streamOut);
-        streamOut.flush();
         channel.queueBundle();
     }
 
-    private void loginStep3(DataInputStream streamIn)
+    private void loginStep4(DataInputStream streamIn)
             throws IOException, ConnectionCloseException {
         List<PluginFile> plugins =
                 server.getServer().getWorldFormat().getPlugins().getFiles();
-        id = streamIn.readUTF();
-        key = streamIn.readUTF();
+        byte[] challenge = new byte[this.challenge.length];
+        streamIn.readFully(challenge);
         nickname = streamIn.readUTF();
         loadingRadius = streamIn.readInt();
         byte[] array = new byte[64 * 64 * 4];
@@ -177,29 +189,29 @@ public class PlayerConnection
         while (length-- > 0) {
             requests.add(streamIn.readInt());
         }
-        String response = generateResponse();
-        if (response == null) {
+        DataOutputStream streamOut = channel.getOutputStream();
+        Optional<String> response =
+                generateResponse(Arrays.equals(challenge, this.challenge));
+        if (!response.isPresent()) {
             response = start();
         }
-        DataOutputStream streamOut = channel.getOutputStream();
-        if (response == null) {
+        if (response.isPresent()) {
+            streamOut.writeBoolean(true);
+            streamOut.writeUTF(response.get());
+            streamOut.flush();
+            channel.queueBundle();
+            throw new ConnectionCloseException(response.get());
+        } else {
             streamOut.writeBoolean(false);
             for (int request : requests) {
                 sendPlugin(plugins.get(request).getFile(), streamOut);
             }
-            streamOut.flush();
             channel.queueBundle();
             LOGGER.info("Client accepted: {}", channel.toString());
-        } else {
-            streamOut.writeBoolean(true);
-            streamOut.writeUTF(response);
-            streamOut.flush();
-            channel.queueBundle();
-            throw new ConnectionCloseException(response);
         }
     }
 
-    private String start() {
+    private Optional<String> start() {
         WorldFormat worldFormat = server.getServer().getWorldFormat();
         TagStructure tagStructure = worldFormat.getPlayerData().load(id);
         WorldServer world =
@@ -229,31 +241,25 @@ public class PlayerConnection
         return server.addPlayer(this);
     }
 
-    private String generateResponse() {
-        String nicknameCheck = AccountUtil.isNameValid(nickname);
+    private Optional<String> generateResponse(boolean challengeMatch) {
+        if (!server.getAllowsJoin()) {
+            return Optional.of("Server not public!");
+        }
+        if (!challengeMatch) {
+            return Optional.of("Invalid private key!");
+        }
+        if (!server.getServer().getWorldFormat().getPlayerData()
+                .playerExists(id)) {
+            if (!server.getAllowsCreation()) {
+                return Optional
+                        .of("This server does not allow account creation!");
+            }
+        }
+        Optional<String> nicknameCheck = Account.isNameValid(nickname);
         if (nicknameCheck != null) {
             return nicknameCheck;
         }
-        if (!server.getAllowsJoin()) {
-            return "Server not public!";
-        }
-        if (server.getServer().getWorldFormat().getPlayerData()
-                .playerExists(id)) {
-            if (!server.getServer().getWorldFormat().getPlayerData()
-                    .checkKey(id, key)) {
-                return "Invalid password!";
-            }
-        } else {
-            LOGGER.info("Trying to create player account for: {}", id);
-            if (!server.getAllowsCreation()) {
-                return "This server does not allow account creation!";
-            }
-            if (server.getServer().getWorldFormat().getPlayerData()
-                    .playerExists(id)) {
-                return "Account already exists!";
-            }
-        }
-        return null;
+        return Optional.empty();
     }
 
     @Override
@@ -333,17 +339,25 @@ public class PlayerConnection
         try {
             switch (state) {
                 case LOGIN_STEP_1: {
-                    InputStream channelStreamIn = channel.fetch();
-                    if (channelStreamIn != null) {
-                        loginStep2(new DataInputStream(channelStreamIn));
+                    Optional<DataInputStream> bundle = channel.fetch();
+                    if (bundle.isPresent()) {
+                        loginStep2(bundle.get());
                         state = State.LOGIN_STEP_2;
                     }
                     return channel.process();
                 }
                 case LOGIN_STEP_2: {
-                    InputStream channelStreamIn = channel.fetch();
-                    if (channelStreamIn != null) {
-                        loginStep3(new DataInputStream(channelStreamIn));
+                    Optional<DataInputStream> bundle = channel.fetch();
+                    if (bundle.isPresent()) {
+                        loginStep3(bundle.get());
+                        state = State.LOGIN_STEP_3;
+                    }
+                    return channel.process();
+                }
+                case LOGIN_STEP_3: {
+                    Optional<DataInputStream> bundle = channel.fetch();
+                    if (bundle.isPresent()) {
+                        loginStep4(bundle.get());
                     }
                     return channel.process();
                 }
@@ -357,17 +371,14 @@ public class PlayerConnection
                         }
                     }
                     channel.queueBundle();
-                    InputStream channelStreamIn = channel.fetch();
-                    if (channelStreamIn != null) {
-                        try (DataInputStream streamIn = new DataInputStream(
-                                channelStreamIn)) {
-                            while (streamIn.available() > 0) {
-                                PacketServer packet = (PacketServer) Packet
-                                        .makePacket(registry,
-                                                streamIn.readShort());
-                                packet.parseServer(this, streamIn);
-                                packet.runServer(this, entity.getWorld());
-                            }
+                    Optional<DataInputStream> bundle = channel.fetch();
+                    if (bundle.isPresent()) {
+                        DataInputStream streamIn = bundle.get();
+                        while (streamIn.available() > 0) {
+                            PacketServer packet = (PacketServer) Packet
+                                    .makePacket(registry, streamIn.readShort());
+                            packet.parseServer(this, streamIn);
+                            packet.runServer(this, entity.getWorld());
                         }
                     }
                     return channel.process();
@@ -406,7 +417,6 @@ public class PlayerConnection
                 world.removePlayer(entity);
                 TagStructure tagStructure = new TagStructure();
                 tagStructure.setStructure("Entity", entity.write(false));
-                tagStructure.setString("Key", key);
                 tagStructure.setString("World", world.getName());
                 tagStructure.setList("Statistics", statistics.save());
                 tagStructure.setInteger("Permissions", permissionLevel);
@@ -417,8 +427,8 @@ public class PlayerConnection
     }
 
     @Override
-    public String getPlayerName() {
-        return nickname;
+    public Optional<String> getPlayerName() {
+        return Optional.of(nickname);
     }
 
     @Override
@@ -446,6 +456,7 @@ public class PlayerConnection
     enum State {
         LOGIN_STEP_1,
         LOGIN_STEP_2,
+        LOGIN_STEP_3,
         OPEN,
         CLOSING,
         CLOSED
