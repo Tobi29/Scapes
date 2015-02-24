@@ -37,6 +37,7 @@ import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class BlockBellows extends VanillaBlock {
     private TerrainTexture textureFrame, textureInside;
@@ -75,9 +76,9 @@ public class BlockBellows extends VanillaBlock {
     }
 
     @Override
-    public TerrainTexture getParticleTexture(Face face, TerrainClient terrain,
-            int x, int y, int z) {
-        return textureFrame;
+    public Optional<TerrainTexture> getParticleTexture(Face face,
+            TerrainClient terrain, int x, int y, int z) {
+        return Optional.of(textureFrame);
     }
 
     @Override

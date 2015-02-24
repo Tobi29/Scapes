@@ -21,7 +21,11 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector2i;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.packets.PacketRequestChunk;
 
+import java.util.Optional;
+
 public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
+    private final Optional<TerrainInfiniteChunkClient> optional =
+            Optional.of(this);
     private final TerrainInfiniteClient terrain;
     private final TerrainInfiniteRendererChunk rendererChunk;
 
@@ -31,6 +35,10 @@ public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
         super(pos, terrain, terrain.getWorld(), zSize);
         this.terrain = terrain;
         rendererChunk = new TerrainInfiniteRendererChunk(this, renderer);
+    }
+
+    public Optional<TerrainInfiniteChunkClient> getOptional() {
+        return optional;
     }
 
     public void updateClient() {

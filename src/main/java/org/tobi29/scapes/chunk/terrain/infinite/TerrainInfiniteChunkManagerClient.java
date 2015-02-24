@@ -46,30 +46,36 @@ public class TerrainInfiniteChunkManagerClient
         }
     }
 
-    public synchronized TerrainInfiniteChunkClient remove(int x, int y) {
+    public synchronized Optional<TerrainInfiniteChunkClient> remove(int x,
+            int y) {
         int xx = x - this.x;
         int yy = y - this.y;
         if (xx >= 0 && xx < size && yy >= 0 && yy < size) {
             int i = yy * size + xx;
             TerrainInfiniteChunkClient chunk = array[i];
             array[i] = null;
-            return chunk;
+            if (chunk != null) {
+                return chunk.getOptional();
+            }
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public TerrainInfiniteChunkClient get(int x, int y) {
+    public Optional<TerrainInfiniteChunkClient> get(int x, int y) {
         long stamp = lock.get();
-        TerrainInfiniteChunkClient value;
         int xx = x - this.x;
         int yy = y - this.y;
         if (xx >= 0 && xx < size && yy >= 0 && yy < size) {
             int i = yy * size + xx;
-            value = array[i];
+            TerrainInfiniteChunkClient value = array[i];
             long validate = lock.get();
             if (stamp == validate && (validate & 1) == 0) {
-                return value;
+                if (value == null) {
+                    return Optional.empty();
+                } else {
+                    return value.getOptional();
+                }
             }
         }
         synchronized (this) {
@@ -77,9 +83,14 @@ public class TerrainInfiniteChunkManagerClient
             yy = y - this.y;
             if (xx >= 0 && xx < size && yy >= 0 && yy < size) {
                 int i = yy * size + xx;
-                return array[i];
+                TerrainInfiniteChunkClient value = array[i];
+                if (value == null) {
+                    return Optional.empty();
+                } else {
+                    return value.getOptional();
+                }
             } else {
-                return null;
+                return Optional.empty();
             }
         }
     }

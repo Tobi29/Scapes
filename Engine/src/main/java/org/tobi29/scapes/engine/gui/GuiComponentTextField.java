@@ -87,8 +87,7 @@ public class GuiComponentTextField extends GuiComponentTextButton {
     public void update(double mouseX, double mouseY, boolean mouseInside,
             ScapesEngine engine) {
         super.update(mouseX, mouseY, mouseInside, engine);
-        Gui gui = getGui();
-        if (gui != null) {
+        getGui().ifPresent(gui -> {
             if (gui.getLastClicked() == this || major) {
                 if (engine.getGuiController().processTextField(data, false)) {
                     if (data.text.length() > maxLength) {
@@ -101,7 +100,7 @@ public class GuiComponentTextField extends GuiComponentTextButton {
                 data.selectionStart = -1;
                 data.cursor = data.text.length();
             }
-        }
+        });
     }
 
     @Override
@@ -116,14 +115,13 @@ public class GuiComponentTextField extends GuiComponentTextButton {
         openGL.setBlending(BlendingMode.INVERT);
         vaoSelection.render(graphics, shader, false);
         openGL.setBlending(BlendingMode.NORMAL);
-        Gui gui = getGui();
-        if (gui != null) {
+        getGui().ifPresent(gui -> {
             if (gui.getLastClicked() == this || major) {
                 cursor = System.currentTimeMillis() / 600 % 2 == 0;
             } else if (cursor) {
                 cursor = false;
             }
-        }
+        });
     }
 
     @Override

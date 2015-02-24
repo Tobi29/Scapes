@@ -20,6 +20,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector2i;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TerrainInfiniteChunkManagerServer
@@ -41,16 +42,20 @@ public class TerrainInfiniteChunkManagerServer
     }
 
     @Override
-    public TerrainInfiniteChunkServer get(int x, int y) {
+    public Optional<TerrainInfiniteChunkServer> get(int x, int y) {
         TerrainInfiniteChunkServer lastChunk = lastLookup;
         if (lastChunk != null) {
             if (lastChunk.getX() == x && lastChunk.getY() == y) {
-                return lastChunk;
+                return lastChunk.getOptional();
             }
         }
         TerrainInfiniteChunkServer chunk = chunks.get(new Vector2i(x, y));
         lastChunk = chunk;
-        return chunk;
+        if (chunk == null) {
+            return Optional.empty();
+        } else {
+            return chunk.getOptional();
+        }
     }
 
     @Override

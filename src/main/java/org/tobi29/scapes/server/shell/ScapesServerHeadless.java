@@ -26,6 +26,7 @@ import org.tobi29.scapes.server.ScapesServer;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Optional;
 
 public class ScapesServerHeadless extends ScapesStandaloneServer {
     private static final Logger LOGGER =
@@ -65,8 +66,8 @@ public class ScapesServerHeadless extends ScapesStandaloneServer {
     }
 
     @Override
-    public String getPlayerName() {
-        return null;
+    public Optional<String> getPlayerName() {
+        return Optional.empty();
     }
 
     @Override

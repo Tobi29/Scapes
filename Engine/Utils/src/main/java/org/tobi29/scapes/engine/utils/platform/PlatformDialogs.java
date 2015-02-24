@@ -17,12 +17,13 @@
 package org.tobi29.scapes.engine.utils.platform;
 
 import java.io.File;
+import java.util.Optional;
 
 public interface PlatformDialogs {
     File[] openFileDialog(Extension[] extensions, String title,
             boolean multiple);
 
-    File saveFileDialog(Extension[] extensions, String title);
+    Optional<File> saveFileDialog(Extension[] extensions, String title);
 
     void message(MessageType messageType, String title, String message);
 

@@ -42,7 +42,8 @@ final class ScapesServerCommands {
             options.add("d", "data", true, "Data value of item");
             options.add("a", "amount", true, "Amount of item in stack");
         }, (args, executor, commands) -> {
-            String playerName = args.getOption('p', executor.getPlayerName());
+            String playerName =
+                    args.getOption('p', executor.getPlayerName().orElse(null));
             Command.require(playerName, 'p');
             String materialName = args.getOption('m');
             Command.require(materialName, 'm');
@@ -63,8 +64,8 @@ final class ScapesServerCommands {
                         .add("p", "player", true,
                                 "Player whose inventory will be cleared"),
                 (args, executor, commands) -> {
-                    String playerName =
-                            args.getOption('p', executor.getPlayerName());
+                    String playerName = args.getOption('p',
+                            executor.getPlayerName().orElse(null));
                     Command.require(playerName, 'p');
                     commands.add(() -> {
                         PlayerConnection player = server.getConnection()
@@ -81,10 +82,22 @@ final class ScapesServerCommands {
             options.add("l", "location", 3,
                     "Target that the player will be teleported to");
         }, (args, executor, commands) -> {
-            String playerName = args.getOption('p', executor.getPlayerName());
+            String playerName =
+                    args.getOption('p', executor.getPlayerName().orElse(null));
             Command.require(playerName, 'p');
-            if (args.hasOption('t')) {
-                String targetName = args.getOption('t');
+            if (args.hasOption('l')) {
+                String[] locationStr = args.getOptionArray('l');
+                Command.require(locationStr, 'l');
+                Vector3d location = Command.getVector3d(locationStr);
+                commands.add(() -> {
+                    PlayerConnection player =
+                            server.getConnection().getPlayerByName(playerName);
+                    Command.require(player, playerName);
+                    player.getMob().setPos(location);
+                });
+            } else {
+                String targetName = args.getOption('t',
+                        executor.getPlayerName().orElse(null));
                 Command.require(playerName, 't');
                 commands.add(() -> {
                     PlayerConnection player =
@@ -94,16 +107,6 @@ final class ScapesServerCommands {
                             server.getConnection().getPlayerByName(targetName);
                     Command.require(target, targetName);
                     player.getMob().setPos(target.getMob().getPos());
-                });
-            } else {
-                String[] locationStr = args.getOptionArray('l');
-                Command.require(locationStr, 'l');
-                Vector3d location = Command.getVector3d(locationStr);
-                commands.add(() -> {
-                    PlayerConnection player =
-                            server.getConnection().getPlayerByName(playerName);
-                    Command.require(player, playerName);
-                    player.getMob().setPos(location);
                 });
             }
         });
@@ -188,7 +191,8 @@ final class ScapesServerCommands {
                     "Player whose hunger values will be changed");
             options.add("l", "level", true, "Permission level (0-10)");
         }, (args, executor, commands) -> {
-            String playerName = args.getOption('p', executor.getPlayerName());
+            String playerName =
+                    args.getOption('p', executor.getPlayerName().orElse(null));
             Command.require(playerName, 'p');
             Command.require(args, 'l');
             int permissionLevel = Command.getInt(args.getOption('l'));

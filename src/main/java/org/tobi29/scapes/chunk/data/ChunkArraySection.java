@@ -18,6 +18,8 @@ package org.tobi29.scapes.chunk.data;
 
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
+import java.util.Optional;
+
 public interface ChunkArraySection {
     int getData(int x, int y, int z, int offset);
 
@@ -31,7 +33,7 @@ public interface ChunkArraySection {
 
     boolean compress();
 
-    TagStructure save();
+    Optional<TagStructure> save();
 
     void load(TagStructure tag);
 }

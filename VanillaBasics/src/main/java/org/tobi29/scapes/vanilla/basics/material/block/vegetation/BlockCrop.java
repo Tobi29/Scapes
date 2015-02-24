@@ -107,9 +107,9 @@ public class BlockCrop extends VanillaBlock {
     }
 
     @Override
-    public TerrainTexture getParticleTexture(Face face, TerrainClient terrain,
-            int x, int y, int z) {
-        return textures[terrain.getBlockData(x, y, z)];
+    public Optional<TerrainTexture> getParticleTexture(Face face,
+            TerrainClient terrain, int x, int y, int z) {
+        return Optional.of(textures[terrain.getBlockData(x, y, z)]);
     }
 
     @Override

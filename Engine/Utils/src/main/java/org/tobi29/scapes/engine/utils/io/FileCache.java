@@ -29,6 +29,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -89,9 +90,8 @@ public class FileCache {
             write.move(getFile(type, name));
             return new Location(type, array);
         } catch (NoSuchAlgorithmException e) {
-            LOGGER.error("Unsupported algorithm: {}", e.toString());
+            throw new IllegalStateException(e);
         }
-        return null;
     }
 
     /**
@@ -100,14 +100,14 @@ public class FileCache {
      * @param location The location that will be looked up
      * @return A {@code File} pointing at the file in cache or null if the cache doesn't contain a matching file
      */
-    public synchronized File retrieve(Location location) throws IOException {
+    public synchronized Optional<File> retrieve(Location location) throws IOException {
         String name = ArrayUtil.toHexadecimal(location.array);
         File file = getFile(location.type, name);
         if (file.exists()) {
             file.getAttributes().setLastModifiedTime(Instant.now());
-            return file;
+            return Optional.of(file);
         }
-        return null;
+        return Optional.empty();
     }
 
     /**

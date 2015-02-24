@@ -37,6 +37,7 @@ import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class BlockQuern extends VanillaBlock {
     private TerrainTexture textureTop, textureSide, textureBottom;
@@ -89,9 +90,9 @@ public class BlockQuern extends VanillaBlock {
     }
 
     @Override
-    public TerrainTexture getParticleTexture(Face face, TerrainClient terrain,
-            int x, int y, int z) {
-        return textureSide;
+    public Optional<TerrainTexture> getParticleTexture(Face face,
+            TerrainClient terrain, int x, int y, int z) {
+        return Optional.of(textureSide);
     }
 
     @Override

@@ -17,9 +17,10 @@
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface TerrainInfiniteChunkManager {
-    TerrainInfiniteChunk get(int x, int y);
+    Optional<? extends TerrainInfiniteChunk> get(int x, int y);
 
     boolean has(int x, int y);
 

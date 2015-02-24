@@ -25,6 +25,9 @@ import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.MobPositionHandler;
 import org.tobi29.scapes.entity.MobileEntity;
+import org.tobi29.scapes.entity.model.MobModel;
+
+import java.util.Optional;
 
 public abstract class MobClient extends EntityClient implements MobileEntity {
     protected final AABB collision;
@@ -53,6 +56,11 @@ public abstract class MobClient extends EntityClient implements MobileEntity {
                 pos.doubleZ());
         tagStructure.getMultiTag("Speed", speed);
         tagStructure.getMultiTag("Rot", rot);
+    }
+
+    @Override
+    public Optional<? extends MobModel> createModel() {
+        return Optional.empty();
     }
 
     protected MobPositionHandler createPositionHandler(

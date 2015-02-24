@@ -23,8 +23,10 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
-import org.tobi29.scapes.entity.model.EntityModel;
+import org.tobi29.scapes.entity.model.MobModel;
 import org.tobi29.scapes.entity.model.MobModelBlock;
+
+import java.util.Optional;
 
 public class MobFlyingBlockClient extends MobClient {
     private final ItemStack item;
@@ -46,7 +48,7 @@ public class MobFlyingBlockClient extends MobClient {
     }
 
     @Override
-    public EntityModel createModel() {
-        return new MobModelBlock(this, item);
+    public Optional<MobModel> createModel() {
+        return Optional.of(new MobModelBlock(this, item));
     }
 }

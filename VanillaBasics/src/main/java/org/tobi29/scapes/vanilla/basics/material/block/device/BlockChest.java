@@ -35,6 +35,8 @@ import org.tobi29.scapes.vanilla.basics.entity.server.EntityChestServer;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer;
 
+import java.util.Optional;
+
 public class BlockChest extends VanillaBlockContainer {
     private TerrainTexture textureTop, textureFront, textureSide;
     private BlockModel[] models;
@@ -79,9 +81,9 @@ public class BlockChest extends VanillaBlockContainer {
     }
 
     @Override
-    public TerrainTexture getParticleTexture(Face face, TerrainClient terrain,
-            int x, int y, int z) {
-        return textureSide;
+    public Optional<TerrainTexture> getParticleTexture(Face face,
+            TerrainClient terrain, int x, int y, int z) {
+        return Optional.of(textureSide);
     }
 
     @Override

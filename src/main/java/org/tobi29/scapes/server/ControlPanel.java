@@ -19,11 +19,12 @@ package org.tobi29.scapes.server;
 import org.tobi29.scapes.server.command.Command;
 
 import java.util.Map;
+import java.util.Optional;
 
 public interface ControlPanel extends Command.Executor {
     @Override
-    default String getPlayerName() {
-        return null;
+    default Optional<String> getPlayerName() {
+        return Optional.empty();
     }
 
     @Override

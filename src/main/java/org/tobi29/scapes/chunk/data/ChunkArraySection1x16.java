@@ -18,6 +18,7 @@ package org.tobi29.scapes.chunk.data;
 
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class ChunkArraySection1x16 implements ChunkArraySection {
@@ -120,18 +121,18 @@ public class ChunkArraySection1x16 implements ChunkArraySection {
     }
 
     @Override
-    public synchronized TagStructure save() {
+    public synchronized Optional<TagStructure> save() {
         TagStructure tag = new TagStructure();
         if (data == null) {
             if (defaultValue == 0) {
-                return null;
+                return Optional.empty();
             } else {
                 tag.setShort("Default", defaultValue);
             }
         } else {
             tag.setByteArray("Array", data);
         }
-        return tag;
+        return Optional.of(tag);
     }
 
     @Override

@@ -37,6 +37,7 @@ import org.tobi29.scapes.vanilla.basics.material.update.UpdateLavaFlow;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -88,9 +89,9 @@ public class BlockLava extends VanillaBlock {
     }
 
     @Override
-    public TerrainTexture getParticleTexture(Face face, TerrainClient terrain,
-            int x, int y, int z) {
-        return null;
+    public Optional<TerrainTexture> getParticleTexture(Face face,
+            TerrainClient terrain, int x, int y, int z) {
+        return Optional.empty();
     }
 
     @Override

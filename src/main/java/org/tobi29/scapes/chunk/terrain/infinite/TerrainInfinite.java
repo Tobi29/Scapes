@@ -27,6 +27,7 @@ import org.tobi29.scapes.engine.utils.math.PointerPane;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public abstract class TerrainInfinite implements Terrain {
     protected static final ThreadLocal<Pool<AABBElement>> AABBS =
@@ -35,9 +36,9 @@ public abstract class TerrainInfinite implements Terrain {
             ThreadLocal.withInitial(() -> new Pool<>(PointerPane::new));
     protected final int zSize, cxMin, cxMax, cyMin, cyMax;
     protected final BlockType voidBlock;
-    protected volatile boolean dispose;
     protected final TerrainInfiniteChunkManager chunkManager;
     protected final LightingEngine lighting;
+    protected volatile boolean dispose;
 
     protected TerrainInfinite(int zSize,
             TerrainInfiniteChunkManager chunkManager, TaskExecutor taskExecutor,
@@ -53,7 +54,8 @@ public abstract class TerrainInfinite implements Terrain {
         lighting = new LightingEngineThreaded(this, taskExecutor);
     }
 
-    public TerrainInfiniteChunk getChunkNoLoad(int x, int y) {
+    public Optional<? extends TerrainInfiniteChunk> getChunkNoLoad(int x,
+            int y) {
         return chunkManager.get(x, y);
     }
 
@@ -62,13 +64,13 @@ public abstract class TerrainInfinite implements Terrain {
         if (z < 0 || z >= zSize) {
             return;
         }
-        TerrainInfiniteChunk chunk =
+        Optional<? extends TerrainInfiniteChunk> chunk =
                 getChunk(FastMath.floor(x / 16.0d), FastMath.floor(y / 16.0d));
-        if (chunk == null) {
-            return;
+        if (chunk.isPresent()) {
+            TerrainInfiniteChunk chunk2 = chunk.get();
+            chunk2.setSunLight(x - (chunk2.getX() << 4),
+                    y - (chunk2.getY() << 4), z, light);
         }
-        chunk.setSunLight(x - (chunk.getX() << 4), y - (chunk.getY() << 4), z,
-                light);
     }
 
     @Override
@@ -76,13 +78,13 @@ public abstract class TerrainInfinite implements Terrain {
         if (z < 0 || z >= zSize) {
             return;
         }
-        TerrainInfiniteChunk chunk =
+        Optional<? extends TerrainInfiniteChunk> chunk =
                 getChunk(FastMath.floor(x / 16.0d), FastMath.floor(y / 16.0d));
-        if (chunk == null) {
-            return;
+        if (chunk.isPresent()) {
+            TerrainInfiniteChunk chunk2 = chunk.get();
+            chunk2.setBlockLight(x - (chunk2.getX() << 4),
+                    y - (chunk2.getY() << 4), z, light);
         }
-        chunk.setBlockLight(x - (chunk.getX() << 4), y - (chunk.getY() << 4), z,
-                light);
     }
 
     @Override
@@ -90,14 +92,14 @@ public abstract class TerrainInfinite implements Terrain {
         if (z < 0 || z >= zSize) {
             return voidBlock;
         }
-        TerrainInfiniteChunk chunk =
+        Optional<? extends TerrainInfiniteChunk> chunk =
                 getChunk(FastMath.floor(x / 16.0d), FastMath.floor(y / 16.0d));
-        if (chunk == null) {
-            return voidBlock;
+        if (chunk.isPresent()) {
+            TerrainInfiniteChunk chunk2 = chunk.get();
+            return chunk2.getBlockType(x - (chunk2.getX() << 4),
+                    y - (chunk2.getY() << 4), z);
         }
-        return chunk
-                .getBlockType(x - (chunk.getX() << 4), y - (chunk.getY() << 4),
-                        z);
+        return voidBlock;
     }
 
     @Override
@@ -105,14 +107,14 @@ public abstract class TerrainInfinite implements Terrain {
         if (z < 0 || z >= zSize) {
             return 0;
         }
-        TerrainInfiniteChunk chunk =
+        Optional<? extends TerrainInfiniteChunk> chunk =
                 getChunk(FastMath.floor(x / 16.0d), FastMath.floor(y / 16.0d));
-        if (chunk == null) {
-            return (short) 0;
+        if (chunk.isPresent()) {
+            TerrainInfiniteChunk chunk2 = chunk.get();
+            return chunk2.getBlockData(x - (chunk2.getX() << 4),
+                    y - (chunk2.getY() << 4), z);
         }
-        return chunk
-                .getBlockData(x - (chunk.getX() << 4), y - (chunk.getY() << 4),
-                        z);
+        return (short) 0;
     }
 
     @Override
@@ -120,13 +122,14 @@ public abstract class TerrainInfinite implements Terrain {
         if (z < 0 || z >= zSize) {
             return 0;
         }
-        TerrainInfiniteChunk chunk =
+        Optional<? extends TerrainInfiniteChunk> chunk =
                 getChunk(FastMath.floor(x / 16.0d), FastMath.floor(y / 16.0d));
-        if (chunk == null) {
-            return (byte) 0;
+        if (chunk.isPresent()) {
+            TerrainInfiniteChunk chunk2 = chunk.get();
+            return chunk2.getLight(x - (chunk2.getX() << 4),
+                    y - (chunk2.getY() << 4), z);
         }
-        return chunk
-                .getLight(x - (chunk.getX() << 4), y - (chunk.getY() << 4), z);
+        return (byte) 0;
     }
 
     @Override
@@ -134,14 +137,14 @@ public abstract class TerrainInfinite implements Terrain {
         if (z < 0 || z >= zSize) {
             return 0;
         }
-        TerrainInfiniteChunk chunk =
+        Optional<? extends TerrainInfiniteChunk> chunk =
                 getChunk(FastMath.floor(x / 16.0d), FastMath.floor(y / 16.0d));
-        if (chunk == null) {
-            return (byte) 0;
+        if (chunk.isPresent()) {
+            TerrainInfiniteChunk chunk2 = chunk.get();
+            return chunk2.getSunLight(x - (chunk2.getX() << 4),
+                    y - (chunk2.getY() << 4), z);
         }
-        return chunk
-                .getSunLight(x - (chunk.getX() << 4), y - (chunk.getY() << 4),
-                        z);
+        return (byte) 0;
     }
 
     @Override
@@ -149,36 +152,38 @@ public abstract class TerrainInfinite implements Terrain {
         if (z < 0 || z >= zSize) {
             return 0;
         }
-        TerrainInfiniteChunk chunk =
+        Optional<? extends TerrainInfiniteChunk> chunk =
                 getChunk(FastMath.floor(x / 16.0d), FastMath.floor(y / 16.0d));
-        if (chunk == null) {
-            return (byte) 0;
+        if (chunk.isPresent()) {
+            TerrainInfiniteChunk chunk2 = chunk.get();
+            return chunk2.getBlockLight(x - (chunk2.getX() << 4),
+                    y - (chunk2.getY() << 4), z);
         }
-        return chunk
-                .getBlockLight(x - (chunk.getX() << 4), y - (chunk.getY() << 4),
-                        z);
+        return (byte) 0;
     }
 
     @Override
     public int getHighestBlockZAt(int x, int y) {
-        TerrainInfiniteChunk chunk =
+        Optional<? extends TerrainInfiniteChunk> chunk =
                 getChunk(FastMath.floor(x / 16.0d), FastMath.floor(y / 16.0d));
-        if (chunk == null) {
-            return 1;
+        if (chunk.isPresent()) {
+            TerrainInfiniteChunk chunk2 = chunk.get();
+            return chunk2.getHighestBlockZAt(x - (chunk2.getX() << 4),
+                    y - (chunk2.getY() << 4));
         }
-        return chunk.getHighestBlockZAt(x - (chunk.getX() << 4),
-                y - (chunk.getY() << 4));
+        return 1;
     }
 
     @Override
     public int getHighestTerrainBlockZAt(int x, int y) {
-        TerrainInfiniteChunk chunk =
+        Optional<? extends TerrainInfiniteChunk> chunk =
                 getChunk(FastMath.floor(x / 16.0d), FastMath.floor(y / 16.0d));
-        if (chunk == null) {
-            return 1;
+        if (chunk.isPresent()) {
+            TerrainInfiniteChunk chunk2 = chunk.get();
+            return chunk2.getHighestTerrainBlockZAt(x - (chunk2.getX() << 4),
+                    y - (chunk2.getY() << 4));
         }
-        return chunk.getHighestTerrainBlockZAt(x - (chunk.getX() << 4),
-                y - (chunk.getY() << 4));
+        return 1;
     }
 
     @Override
@@ -186,9 +191,10 @@ public abstract class TerrainInfinite implements Terrain {
         if (z < 0 || z >= zSize) {
             return false;
         }
-        TerrainInfiniteChunk chunk = getChunkNoLoad(FastMath.floor(x / 16.0d),
-                FastMath.floor(y / 16.0d));
-        return chunk != null;
+        Optional<? extends TerrainInfiniteChunk> chunk =
+                getChunkNoLoad(FastMath.floor(x / 16.0d),
+                        FastMath.floor(y / 16.0d));
+        return chunk.isPresent();
     }
 
     @Override
@@ -196,16 +202,18 @@ public abstract class TerrainInfinite implements Terrain {
         if (z < 0 || z >= zSize) {
             return false;
         }
-        TerrainInfiniteChunk chunk = getChunkNoLoad(FastMath.floor(x / 16.0d),
-                FastMath.floor(y / 16.0d));
-        return chunk != null && chunk.isLoaded();
+        Optional<? extends TerrainInfiniteChunk> chunk =
+                getChunkNoLoad(FastMath.floor(x / 16.0d),
+                        FastMath.floor(y / 16.0d));
+        return chunk.isPresent() && chunk.get().isLoaded();
     }
 
     @Override
     public boolean isBlockTicking(int x, int y, int z) {
-        TerrainInfiniteChunk chunk = getChunkNoLoad(FastMath.floor(x / 16.0d),
-                FastMath.floor(y / 16.0d));
-        return chunk != null && chunk.isLoaded();
+        Optional<? extends TerrainInfiniteChunk> chunk =
+                getChunkNoLoad(FastMath.floor(x / 16.0d),
+                        FastMath.floor(y / 16.0d));
+        return chunk.isPresent() && chunk.get().isLoaded();
     }
 
     @Override
@@ -216,14 +224,15 @@ public abstract class TerrainInfinite implements Terrain {
         maxZ = FastMath.max(maxZ, zSize);
         for (int x = minX; x <= maxX; x++) {
             for (int y = minY; y <= maxY; y++) {
-                TerrainInfiniteChunk chunk =
+                Optional<? extends TerrainInfiniteChunk> chunk =
                         getChunkNoLoad(FastMath.floor(x / 16.0d),
                                 FastMath.floor(y / 16.0d));
-                if (chunk != null && chunk.isLoaded()) {
+                if (chunk.isPresent() && chunk.get().isLoaded()) {
+                    TerrainInfiniteChunk chunk2 = chunk.get();
                     for (int z = minZ; z <= maxZ; z++) {
                         if (z >= 0 && z < zSize) {
-                            chunk.getBlockType(x - (chunk.getX() << 4),
-                                    y - (chunk.getY() << 4), z)
+                            chunk2.getBlockType(x - (chunk2.getX() << 4),
+                                    y - (chunk2.getY() << 4), z)
                                     .addCollision(aabbs, this, x, y, z);
                         }
                     }
@@ -246,15 +255,16 @@ public abstract class TerrainInfinite implements Terrain {
                 for (int zz = -range; zz <= range; zz++) {
                     int zzz = z + zz;
                     if (zzz >= 0 && zzz < zSize) {
-                        TerrainInfiniteChunk chunk =
+                        Optional<? extends TerrainInfiniteChunk> chunk =
                                 getChunk(FastMath.floor(xxx / 16.0d),
                                         FastMath.floor(yyy / 16.0d));
-                        if (chunk != null) {
-                            chunk.getBlockType(xxx - (chunk.getX() << 4),
-                                    yyy - (chunk.getY() << 4), zzz)
-                                    .addPointerCollision(chunk.getBlockData(
-                                                    xxx - (chunk.getX() << 4),
-                                                    yyy - (chunk.getY() << 4),
+                        if (chunk.isPresent()) {
+                            TerrainInfiniteChunk chunk2 = chunk.get();
+                            chunk2.getBlockType(xxx - (chunk2.getX() << 4),
+                                    yyy - (chunk2.getY() << 4), zzz)
+                                    .addPointerCollision(chunk2.getBlockData(
+                                                    xxx - (chunk2.getX() << 4),
+                                                    yyy - (chunk2.getY() << 4),
                                                     zzz), pointerPanes, xxx,
                                             yyy, zzz);
                         }
@@ -275,15 +285,16 @@ public abstract class TerrainInfinite implements Terrain {
         return chunkManager.has(x, y);
     }
 
-    public TerrainInfiniteChunk getChunk(int x, int y) {
-        TerrainInfiniteChunk chunk = chunkManager.get(x, y);
-        if (chunk == null) {
-            return addChunk(x, y);
+    public Optional<? extends TerrainInfiniteChunk> getChunk(int x, int y) {
+        Optional<? extends TerrainInfiniteChunk> chunk = chunkManager.get(x, y);
+        if (chunk.isPresent()) {
+            return chunk;
         }
-        return chunk;
+        return addChunk(x, y);
     }
 
-    public abstract TerrainInfiniteChunk addChunk(int x, int y);
+    public abstract Optional<? extends TerrainInfiniteChunk> addChunk(int x,
+            int y);
 
     public LightingEngine getLighting() {
         return lighting;

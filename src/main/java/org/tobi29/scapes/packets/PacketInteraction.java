@@ -28,6 +28,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Optional;
 
 public class PacketInteraction extends Packet
         implements PacketClient, PacketServer {
@@ -130,11 +131,10 @@ public class PacketInteraction extends Packet
                 player.send(new PacketOpenGui(player.getMob()));
                 break;
             case CLOSE_INVENTORY:
-                if (player.getMob().getInventory().getHold() != null) {
-                    player.getMob()
-                            .dropItem(player.getMob().getInventory().getHold());
-                    player.getMob().getInventory().setHold(null);
-                }
+                player.getMob().getInventory().getHold().ifPresent(hold -> {
+                    player.getMob().dropItem(hold);
+                    player.getMob().getInventory().setHold(Optional.empty());
+                });
                 player.send(new PacketCloseGui());
                 break;
             case OPEN_STATISTICS:

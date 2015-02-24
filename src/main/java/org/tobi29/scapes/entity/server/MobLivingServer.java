@@ -31,6 +31,7 @@ import org.tobi29.scapes.packets.PacketMobDamage;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class MobLivingServer extends MobServer {
@@ -102,10 +103,11 @@ public abstract class MobLivingServer extends MobServer {
         double distanceSqr = distance * distance;
         PointerPane closest = null;
         for (PointerPane pane : pointerPanes) {
-            Intersection intersection =
+            Optional<Intersection> intersection =
                     Intersection.intersectPointerPane(f, t, pane);
-            if (intersection != null) {
-                double check = FastMath.pointDistance(f, intersection.getPos());
+            if (intersection.isPresent()) {
+                double check =
+                        FastMath.pointDistance(f, intersection.get().getPos());
                 if (check < distanceSqr) {
                     closest = pane;
                     distanceSqr = check;

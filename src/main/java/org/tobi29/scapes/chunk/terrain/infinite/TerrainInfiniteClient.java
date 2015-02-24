@@ -27,15 +27,16 @@ import org.tobi29.scapes.packets.PacketBlockChange;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public class TerrainInfiniteClient extends TerrainInfinite
         implements TerrainClient {
+    protected final TerrainInfiniteRenderer renderer;
     private final WorldClient world;
     private final MobPlayerClientMain player;
     private final TerrainInfiniteChunkManagerClient chunkManager;
     private final int loadingRadius, loadingRadiusSqr;
     protected int requestedChunks;
-    protected final TerrainInfiniteRenderer renderer;
 
     public TerrainInfiniteClient(WorldClient world, int loadingRadius,
             int zSize, TaskExecutor taskExecutor) {
@@ -95,17 +96,11 @@ public class TerrainInfiniteClient extends TerrainInfinite
                 if (xxx >= cxMin && xxx <= cxMax && yyy >= cyMin &&
                         yyy <= cyMax) {
                     if (x * x + y * y < loadingRadiusSqr) {
-                        TerrainInfiniteChunkClient chunk =
-                                chunkManager.get(xxx, yyy);
-                        if (chunk == null) {
+                        if (!chunkManager.get(xxx, yyy).isPresent()) {
                             addChunk(xxx, yyy);
                         }
                     } else {
-                        TerrainInfiniteChunkClient chunk =
-                                chunkManager.get(xxx, yyy);
-                        if (chunk != null) {
-                            removeChunk(chunk);
-                        }
+                        chunkManager.get(xxx, yyy).ifPresent(this::removeChunk);
                     }
                 }
             }
@@ -127,19 +122,17 @@ public class TerrainInfiniteClient extends TerrainInfinite
         int x = packet.getX();
         int y = packet.getY();
         int z = packet.getZ();
-        TerrainInfiniteChunk chunk = getChunk(FastMath.floor((double) x / 16),
-                FastMath.floor((double) y / 16));
-        if (chunk == null) {
-            return;
-        }
-        chunk.setBlockIdAndData(x - (chunk.getX() << 4),
-                y - (chunk.getY() << 4), z,
-                world.getPlugins().getRegistry().getBlock(packet.getBlockId()),
-                packet.getBlockData());
+        getChunk(FastMath.floor((double) x / 16),
+                FastMath.floor((double) y / 16)).ifPresent(chunk -> chunk
+                .setBlockIdAndData(x - (chunk.getX() << 4),
+                        y - (chunk.getY() << 4), z,
+                        world.getPlugins().getRegistry()
+                                .getBlock(packet.getBlockId()),
+                        packet.getBlockData()));
     }
 
     @Override
-    public TerrainInfiniteChunkClient getChunkNoLoad(int x, int y) {
+    public Optional<TerrainInfiniteChunkClient> getChunkNoLoad(int x, int y) {
         return chunkManager.get(x, y);
     }
 
@@ -150,26 +143,28 @@ public class TerrainInfiniteClient extends TerrainInfinite
     }
 
     @Override
-    public TerrainInfiniteChunkClient getChunk(int x, int y) {
-        TerrainInfiniteChunkClient chunk = chunkManager.get(x, y);
-        if (chunk == null) {
-            return addChunk(x, y);
+    public Optional<TerrainInfiniteChunkClient> getChunk(int x, int y) {
+        Optional<TerrainInfiniteChunkClient> chunk = chunkManager.get(x, y);
+        if (chunk.isPresent()) {
+            return chunk;
         }
-        return chunk;
+        return addChunk(x, y);
     }
 
     @Override
-    public TerrainInfiniteChunkClient addChunk(int x, int y) {
+    public Optional<TerrainInfiniteChunkClient> addChunk(int x, int y) {
         if (x < cxMin || x > cxMax || y < cyMin || y > cyMax) {
-            return null;
+            return Optional.empty();
         }
-        TerrainInfiniteChunkClient chunk;
+        Optional<TerrainInfiniteChunkClient> chunk;
         synchronized (chunkManager) {
             chunk = chunkManager.get(x, y);
-            if (chunk == null) {
-                chunk = new TerrainInfiniteChunkClient(new Vector2i(x, y), this,
-                        zSize, renderer);
-                chunkManager.add(chunk);
+            if (!chunk.isPresent()) {
+                TerrainInfiniteChunkClient chunk2 =
+                        new TerrainInfiniteChunkClient(new Vector2i(x, y), this,
+                                zSize, renderer);
+                chunkManager.add(chunk2);
+                chunk = chunk2.getOptional();
             }
         }
         return chunk;

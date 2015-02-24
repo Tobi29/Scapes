@@ -31,6 +31,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Optional;
 
 public class PacketSendChunk extends Packet implements PacketClient {
     private int x, y;
@@ -69,18 +70,21 @@ public class PacketSendChunk extends Packet implements PacketClient {
         if (terrain instanceof TerrainInfiniteClient) {
             TerrainInfiniteClient terrainInfinite =
                     (TerrainInfiniteClient) terrain;
-            TerrainInfiniteChunkClient chunk =
+            Optional<TerrainInfiniteChunkClient> chunk =
                     terrainInfinite.getChunkNoLoad(x, y);
-            if (chunk != null) {
-                chunk.load(tag);
-                chunk.setLoaded();
+            if (chunk.isPresent()) {
+                TerrainInfiniteChunkClient chunk2 = chunk.get();
+                chunk2.load(tag);
+                chunk2.setLoaded();
                 for (int x = -1; x <= 1; x++) {
                     for (int y = -1; y <= 1; y++) {
-                        TerrainInfiniteChunkClient geomRenderer =
-                                terrainInfinite.getChunkNoLoad(chunk.getX() + x,
-                                        chunk.getY() + y);
-                        if (geomRenderer != null) {
-                            geomRenderer.getRendererChunk().setGeometryDirty();
+                        Optional<TerrainInfiniteChunkClient> geomRenderer =
+                                terrainInfinite
+                                        .getChunkNoLoad(chunk2.getX() + x,
+                                                chunk2.getY() + y);
+                        if (geomRenderer.isPresent()) {
+                            geomRenderer.get().getRendererChunk()
+                                    .setGeometryDirty();
                         }
                     }
                 }

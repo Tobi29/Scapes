@@ -26,6 +26,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.CreatureType;
 import org.tobi29.scapes.packets.PacketMobDamage;
 
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -59,10 +60,11 @@ public abstract class MobLivingClient extends MobClient {
         double distanceSqr = distance * distance;
         PointerPane closest = null;
         for (PointerPane pane : pointerPanes) {
-            Intersection intersection =
+            Optional<Intersection> intersection =
                     Intersection.intersectPointerPane(f, t, pane);
-            if (intersection != null) {
-                double check = FastMath.pointDistance(f, intersection.getPos());
+            if (intersection.isPresent()) {
+                double check =
+                        FastMath.pointDistance(f, intersection.get().getPos());
                 if (check < distanceSqr) {
                     closest = pane;
                     distanceSqr = check;

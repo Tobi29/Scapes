@@ -25,6 +25,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -137,7 +138,7 @@ public interface Command {
     }
 
     interface Executor {
-        String getPlayerName();
+        Optional<String> getPlayerName();
 
         String getName();
 

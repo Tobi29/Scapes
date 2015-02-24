@@ -16,6 +16,8 @@
 
 package org.tobi29.scapes.engine.gui;
 
+import java.util.Optional;
+
 public interface GuiController {
     void update(double delta);
 
@@ -60,22 +62,23 @@ public interface GuiController {
             selectionEnd = cursor;
         }
 
-        public String copy() {
+        public Optional<String> copy() {
             if (selectionStart >= 0) {
-                return text.substring(selectionStart, selectionEnd);
+                return Optional
+                        .of(text.substring(selectionStart, selectionEnd));
             }
-            return null;
+            return Optional.empty();
         }
 
-        public String cut() {
+        public Optional<String> cut() {
             if (selectionStart >= 0) {
                 String cut = text.substring(selectionStart, selectionEnd);
                 text.delete(selectionStart, selectionEnd);
                 cursor = selectionStart;
                 selectionStart = -1;
-                return cut;
+                return Optional.of(cut);
             }
-            return null;
+            return Optional.empty();
         }
 
         public void paste(String paste) {

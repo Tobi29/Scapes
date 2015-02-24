@@ -34,6 +34,7 @@ import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class BlockLog extends VanillaBlock {
     private final GameRegistry.Registry<TreeType> treeRegistry;
@@ -85,12 +86,12 @@ public class BlockLog extends VanillaBlock {
     }
 
     @Override
-    public TerrainTexture getParticleTexture(Face face, TerrainClient terrain,
-            int x, int y, int z) {
+    public Optional<TerrainTexture> getParticleTexture(Face face,
+            TerrainClient terrain, int x, int y, int z) {
         if (face == Face.UP || face == Face.DOWN) {
-            return texturesTop[terrain.getBlockData(x, y, z)];
+            return Optional.of(texturesTop[terrain.getBlockData(x, y, z)]);
         }
-        return texturesSide[terrain.getBlockData(x, y, z)];
+        return Optional.of(texturesSide[terrain.getBlockData(x, y, z)]);
     }
 
     @Override

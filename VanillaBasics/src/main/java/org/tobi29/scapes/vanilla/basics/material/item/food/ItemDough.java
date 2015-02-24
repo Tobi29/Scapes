@@ -151,11 +151,6 @@ public class ItemDough extends VanillaItem
     }
 
     @Override
-    public String getInfoText(ItemStack item) {
-        return null;
-    }
-
-    @Override
     public String[] getIdentifiers(ItemStack item) {
         return new String[]{"vanilla.basics.item.Dough",
                 "vanilla.basics.item.Dough." + materials.crop.getName(item)};

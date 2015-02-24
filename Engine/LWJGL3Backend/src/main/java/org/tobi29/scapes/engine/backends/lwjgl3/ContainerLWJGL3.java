@@ -31,10 +31,7 @@ import org.tobi29.scapes.engine.opengl.Container;
 import org.tobi29.scapes.engine.opengl.GraphicsCheckException;
 import org.tobi29.scapes.engine.opengl.OpenGL;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -70,52 +67,52 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
         vSync = engine.getConfig().getVSync();
     }
 
-    private static String checkContext(GLContext context) {
+    private static Optional<String> checkContext(GLContext context) {
         LOGGER.info("OpenGL: {} (Vendor: {}, Renderer: {})",
                 GL11.glGetString(GL11.GL_VERSION),
                 GL11.glGetString(GL11.GL_VENDOR),
                 GL11.glGetString(GL11.GL_RENDERER));
         if (!context.getCapabilities().OpenGL11) {
-            return "Your graphics card has no OpenGL 1.1 support!";
+            return Optional.of("Your graphics card has no OpenGL 1.1 support!");
         }
         if (!context.getCapabilities().OpenGL12) {
-            return "Your graphics card has no OpenGL 1.2 support!";
+            return Optional.of("Your graphics card has no OpenGL 1.2 support!");
         }
         if (!context.getCapabilities().OpenGL13) {
-            return "Your graphics card has no OpenGL 1.3 support!";
+            return Optional.of("Your graphics card has no OpenGL 1.3 support!");
         }
         if (!context.getCapabilities().OpenGL14) {
-            return "Your graphics card has no OpenGL 1.4 support!";
+            return Optional.of("Your graphics card has no OpenGL 1.4 support!");
         }
         if (!context.getCapabilities().OpenGL15) {
-            return "Your graphics card has no OpenGL 1.5 support!";
+            return Optional.of("Your graphics card has no OpenGL 1.5 support!");
         }
         if (!context.getCapabilities().OpenGL20) {
-            return "Your graphics card has no OpenGL 2.0 support!";
+            return Optional.of("Your graphics card has no OpenGL 2.0 support!");
         }
         if (!context.getCapabilities().OpenGL21) {
-            return "Your graphics card has no OpenGL 2.1 support!";
+            return Optional.of("Your graphics card has no OpenGL 2.1 support!");
         }
         if (!context.getCapabilities().OpenGL30) {
-            return "Your graphics card has no OpenGL 3.0 support!";
+            return Optional.of("Your graphics card has no OpenGL 3.0 support!");
         }
         if (!context.getCapabilities().OpenGL31) {
-            return "Your graphics card has no OpenGL 3.1 support!";
+            return Optional.of("Your graphics card has no OpenGL 3.1 support!");
         }
         if (!context.getCapabilities().OpenGL32) {
-            return "Your graphics card has no OpenGL 3.2 support!";
+            return Optional.of("Your graphics card has no OpenGL 3.2 support!");
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override
     public void init() {
         createWindow(fullscreen, engine.getGame().getName());
         context = GLContext.createFromCurrent();
-        String check = checkContext(context);
-        if (check != null) {
+        Optional<String> check = checkContext(context);
+        if (check.isPresent()) {
             throw new GraphicsCheckException(
-                    "Insufficient OpenGL version: " + check);
+                    "Insufficient OpenGL version: " + check.get());
         }
     }
 

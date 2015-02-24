@@ -21,7 +21,6 @@ import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.connection.ConnectionCloseException;
-import org.tobi29.scapes.entity.skin.ServerSkin;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.DataInputStream;
@@ -79,9 +78,8 @@ public class PacketSkin extends Packet implements PacketServer, PacketClient {
 
     @Override
     public void runServer(PlayerConnection player, WorldServer world) {
-        ServerSkin skin = player.getServer().getSkin(checksum);
-        if (skin != null) {
-            player.send(new PacketSkin(skin.getImage(), skin.getChecksum()));
-        }
+        player.getServer().getSkin(checksum).ifPresent(skin -> player
+                        .send(new PacketSkin(skin.getImage(),
+                                skin.getChecksum())));
     }
 }

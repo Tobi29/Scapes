@@ -31,6 +31,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Optional;
 
 public class PacketInventoryInteraction extends Packet implements PacketServer {
     public static final byte LEFT = 0, RIGHT = 1;
@@ -90,42 +91,40 @@ public class PacketInventoryInteraction extends Packet implements PacketServer {
                         playerE.getInventory();
                 switch (type) {
                     case LEFT:
-                        if (playerI.getHold() == null) {
-                            playerI.setHold(chestI.getItem(slot)
-                                    .take(chestI.getItem(slot)));
-                        } else {
-                            int amount = chestI.getItem(slot)
-                                    .canStack(playerI.getHold());
+                        Optional<ItemStack> hold = playerI.getHold();
+                        if (hold.isPresent()) {
+                            ItemStack item = hold.get();
+                            int amount = chestI.getItem(slot).canStack(item);
                             if (amount == 0) {
-                                ItemStack swap = playerI.getHold();
                                 playerI.setHold(chestI.getItem(slot));
-                                chestI.setItem(slot, swap);
+                                chestI.setItem(slot, item);
                             } else {
-                                chestI.getItem(slot).stack(playerI.getHold());
-                                playerI.getHold().setAmount(
-                                        playerI.getHold().getAmount() - amount);
-                                if (playerI.getHold().getAmount() <= 0) {
-                                    playerI.setHold(null);
+                                chestI.getItem(slot).stack(item);
+                                item.setAmount(item.getAmount() - amount);
+                                if (item.getAmount() <= 0) {
+                                    playerI.setHold(Optional.empty());
                                 }
                             }
+                        } else {
+                            playerI.setHold(chestI.getItem(slot)
+                                    .take(chestI.getItem(slot)));
                         }
                         updateInventory(playerE, chestE);
                         break;
                     case RIGHT:
-                        if (playerI.getHold() == null) {
+                        hold = playerI.getHold();
+                        if (hold.isPresent()) {
+                            ItemStack item = hold.get();
+                            item.setAmount(item.getAmount() -
+                                    chestI.getItem(slot).stack(item, 1));
+                            if (item.getAmount() <= 0) {
+                                playerI.setHold(Optional.empty());
+                            }
+                        } else {
                             playerI.setHold(chestI.getItem(slot)
                                     .take(chestI.getItem(slot), (int) FastMath
                                             .ceil(chestI.getItem(slot)
                                                     .getAmount() / 2.0d)));
-                        } else {
-                            playerI.getHold().setAmount(
-                                    playerI.getHold().getAmount() -
-                                            chestI.getItem(slot)
-                                                    .stack(playerI.getHold(),
-                                                            1));
-                            if (playerI.getHold().getAmount() <= 0) {
-                                playerI.setHold(null);
-                            }
                         }
                         updateInventory(playerE, chestE);
                         break;

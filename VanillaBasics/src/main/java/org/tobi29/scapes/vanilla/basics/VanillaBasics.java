@@ -91,17 +91,17 @@ public class VanillaBasics implements WorldType {
         return biomeDecorator;
     }
 
-    public FurnaceFuel getFuel(ItemStack fuel) {
+    public Optional<FurnaceFuel> getFuel(ItemStack fuel) {
         if (!locked) {
             throw new IllegalStateException("Initializing still running");
         }
         for (FurnaceFuel fuelType : furnaceFuels) {
             if (fuel.canTake(fuelType.getFuel()) ==
                     fuelType.getFuel().getAmount()) {
-                return fuelType;
+                return Optional.of(fuelType);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     public Stream<ResearchRecipe> getResearchRecipes() {

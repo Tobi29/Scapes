@@ -147,7 +147,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
     }
 
     @Override
-    public TerrainInfiniteChunkServer getChunkNoLoad(int x, int y) {
+    public Optional<TerrainInfiniteChunkServer> getChunkNoLoad(int x, int y) {
         return chunkManager.get(x, y);
     }
 
@@ -160,35 +160,37 @@ public class TerrainInfiniteServer extends TerrainInfinite
     }
 
     @Override
-    public TerrainInfiniteChunkServer getChunk(int x, int y) {
-        TerrainInfiniteChunkServer chunk = chunkManager.get(x, y);
-        if (chunk == null) {
-            return addChunk(x, y);
+    public Optional<TerrainInfiniteChunkServer> getChunk(int x, int y) {
+        Optional<TerrainInfiniteChunkServer> chunk = chunkManager.get(x, y);
+        if (chunk.isPresent()) {
+            return chunk;
         }
-        return chunk;
+        return addChunk(x, y);
     }
 
     @Override
-    public TerrainInfiniteChunkServer addChunk(int x, int y) {
+    public Optional<TerrainInfiniteChunkServer> addChunk(int x, int y) {
         if (x < cxMin || x > cxMax || y < cyMin || y > cyMax) {
-            return null;
+            return Optional.empty();
         }
-        TerrainInfiniteChunkServer chunk;
+        Optional<TerrainInfiniteChunkServer> chunk;
         synchronized (chunkManager) {
             chunk = chunkManager.get(x, y);
-            if (chunk == null) {
+            if (!chunk.isPresent()) {
                 TagStructure tagStructure = null;
                 try {
                     tagStructure = format.getChunkTag(x, y);
                 } catch (IOException e) {
                     LOGGER.error("Failed to load chunk:", e);
                 }
-                chunk = new TerrainInfiniteChunkServer(new Vector2i(x, y), this,
-                        zSize, tagStructure);
-                chunkManager.add(chunk);
+                TerrainInfiniteChunkServer chunk2 =
+                        new TerrainInfiniteChunkServer(new Vector2i(x, y), this,
+                                zSize, tagStructure);
+                chunkManager.add(chunk2);
+                updateAdjacent(chunk2.getX(), chunk2.getY());
+                chunk = chunk2.getOptional();
             }
         }
-        updateAdjacent(chunk.getX(), chunk.getY());
         return chunk;
     }
 
@@ -258,20 +260,19 @@ public class TerrainInfiniteServer extends TerrainInfinite
 
     @Override
     public void addDelayedUpdate(Update update) {
-        TerrainInfiniteChunkServer chunk =
+        Optional<TerrainInfiniteChunkServer> chunk =
                 getChunk(FastMath.floor(update.getX() / 16.0),
                         FastMath.floor(update.getY() / 16.0));
-        if (chunk == null) {
-            return;
+        if (chunk.isPresent()) {
+            chunk.get().addDelayedUpdate(update);
         }
-        chunk.addDelayedUpdate(update);
     }
 
     @Override
     public boolean hasDelayedUpdate(int x, int y, int z) {
-        TerrainInfiniteChunkServer chunk =
+        Optional<TerrainInfiniteChunkServer> chunk =
                 getChunk(FastMath.floor(x / 16.0d), FastMath.floor(y / 16.0d));
-        return chunk != null && chunk.hasDelayedUpdate(x, y, z);
+        return chunk.isPresent() && chunk.get().hasDelayedUpdate(x, y, z);
     }
 
     @Override
@@ -285,11 +286,12 @@ public class TerrainInfiniteServer extends TerrainInfinite
         y = FastMath.floor(y / 16.0d);
         int x2 = FastMath.floor(player.getX() / 16.0d);
         int y2 = FastMath.floor(player.getY() / 16.0d);
-        TerrainInfiniteChunkServer chunk = getChunkNoLoad(x, y);
+        Optional<TerrainInfiniteChunkServer> chunk = getChunkNoLoad(x, y);
         int dis = FastMath.abs(x - x2);
         dis = FastMath.max(dis, FastMath.abs(y - y2));
-        if (chunk != null) {
-            if (dis > loadingRadius || !chunk.isSendable() && chunkContent) {
+        if (chunk.isPresent()) {
+            if (dis > loadingRadius ||
+                    !chunk.get().isSendable() && chunkContent) {
                 return false;
             }
         } else {
@@ -302,39 +304,42 @@ public class TerrainInfiniteServer extends TerrainInfinite
 
     @Override
     public void setBlockType(int x, int y, int z, BlockType type) {
-        TerrainInfiniteChunkServer chunk =
+        Optional<TerrainInfiniteChunkServer> chunk =
                 getChunk(FastMath.floor((double) x / 16),
                         FastMath.floor((double) y / 16));
-        if (chunk == null) {
+        if (!chunk.isPresent()) {
             return;
         }
-        chunk.setBlockType(x - (chunk.getX() << 4), y - (chunk.getY() << 4), z,
-                type);
+        TerrainInfiniteChunk chunk2 = chunk.get();
+        chunk2.setBlockType(x - (chunk2.getX() << 4), y - (chunk2.getY() << 4),
+                z, type);
     }
 
     @Override
     public void setBlockData(int x, int y, int z, int data) {
-        TerrainInfiniteChunkServer chunk =
+        Optional<TerrainInfiniteChunkServer> chunk =
                 getChunk(FastMath.floor((double) x / 16),
                         FastMath.floor((double) y / 16));
-        if (chunk == null) {
+        if (!chunk.isPresent()) {
             return;
         }
-        chunk.setBlockData(x - (chunk.getX() << 4), y - (chunk.getY() << 4), z,
-                data);
+        TerrainInfiniteChunk chunk2 = chunk.get();
+        chunk2.setBlockData(x - (chunk2.getX() << 4), y - (chunk2.getY() << 4),
+                z, data);
     }
 
     @Override
     public void setBlockTypeAndData(int x, int y, int z, BlockType block,
             int data) {
-        TerrainInfiniteChunkServer chunk =
+        Optional<TerrainInfiniteChunkServer> chunk =
                 getChunk(FastMath.floor((double) x / 16),
                         FastMath.floor((double) y / 16));
-        if (chunk == null) {
+        if (!chunk.isPresent()) {
             return;
         }
-        chunk.setBlockIdAndData(x - (chunk.getX() << 4),
-                y - (chunk.getY() << 4), z, block, data);
+        TerrainInfiniteChunk chunk2 = chunk.get();
+        chunk2.setBlockIdAndData(x - (chunk2.getX() << 4),
+                y - (chunk2.getY() << 4), z, block, data);
     }
 
     public void updateAdjacent(int x, int y) {
@@ -342,11 +347,8 @@ public class TerrainInfiniteServer extends TerrainInfinite
             int xxx = xx + x;
             for (int yy = -1; yy <= 1; yy++) {
                 if (xx != 0 || yy != 0) {
-                    TerrainInfiniteChunkServer chunk =
-                            chunkManager.get(xxx, yy + y);
-                    if (chunk != null) {
-                        chunk.updateAdjacent();
-                    }
+                    chunkManager.get(xxx, yy + y).ifPresent(
+                            TerrainInfiniteChunkServer::updateAdjacent);
                 }
             }
         }
@@ -358,7 +360,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
             for (int y = -radius; y <= radius; y++) {
                 int yy = chunk.getY() + y;
                 if (xx >= cxMin && xx <= cxMax && yy >= cyMin && yy <= cyMax) {
-                    if (getChunkNoLoad(xx, yy) == null) {
+                    if (!getChunkNoLoad(xx, yy).isPresent()) {
                         return false;
                     }
                 }
@@ -373,11 +375,9 @@ public class TerrainInfiniteServer extends TerrainInfinite
             for (int y = -radius; y <= radius; y++) {
                 int yy = chunk.getY() + y;
                 if (xx >= cxMin && xx <= cxMax && yy >= cyMin && yy <= cyMax) {
-                    TerrainInfiniteChunkServer check = getChunkNoLoad(xx, yy);
-                    if (check == null) {
-                        return false;
-                    }
-                    if (!check.isLoaded()) {
+                    Optional<TerrainInfiniteChunkServer> check =
+                            getChunkNoLoad(xx, yy);
+                    if (!check.isPresent() || !check.get().isLoaded()) {
                         return false;
                     }
                 }

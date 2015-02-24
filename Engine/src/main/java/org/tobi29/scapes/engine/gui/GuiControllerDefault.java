@@ -69,16 +69,10 @@ public class GuiControllerDefault implements GuiController {
                         data.selectAll();
                         break;
                     case KEY_C:
-                        String copy = data.copy();
-                        if (copy != null) {
-                            controller.clipboardCopy(copy);
-                        }
+                        data.copy().ifPresent(controller::clipboardCopy);
                         break;
                     case KEY_X:
-                        String cut = data.cut();
-                        if (cut != null) {
-                            controller.clipboardCopy(cut);
-                        }
+                        data.cut().ifPresent(controller::clipboardCopy);
                         break;
                     case KEY_V:
                         String paste = controller.clipboardPaste();

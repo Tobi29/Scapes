@@ -19,6 +19,7 @@ package org.tobi29.scapes.chunk.data;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 public class ChunkArraySection2x4 implements ChunkArraySection {
     private final int xSizeBits, ySizeBits, size;
@@ -120,18 +121,18 @@ public class ChunkArraySection2x4 implements ChunkArraySection {
     }
 
     @Override
-    public synchronized TagStructure save() {
+    public synchronized Optional<TagStructure> save() {
         TagStructure tag = new TagStructure();
         if (data == null) {
             if (defaultValue == 0xF) {
-                return null;
+                return Optional.empty();
             } else {
                 tag.setByte("Default", defaultValue);
             }
         } else {
             tag.setByteArray("Array", data);
         }
-        return tag;
+        return Optional.of(tag);
     }
 
     @Override

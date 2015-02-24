@@ -35,13 +35,11 @@ import java.io.IOException;
 public class GuiCredits extends Gui {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GuiCredits.class);
-    private final GameState state;
     private final FontRenderer.Text vaoText;
     private double y = -512;
 
     public GuiCredits(GameState state, Gui prev) {
         super(GuiAlignment.RIGHT);
-        this.state = state;
         GuiComponentVisiblePane pane =
                 new GuiComponentVisiblePane(704, 0, 96, 512);
         GuiComponentTextButton back =

@@ -18,8 +18,12 @@ package org.tobi29.scapes.vanilla.basics.material.item;
 
 import org.tobi29.scapes.block.ItemStack;
 
+import java.util.Optional;
+
 public interface ItemResearch {
-    String getInfoText(ItemStack item);
+    default Optional<String> getInfoText(ItemStack item) {
+        return Optional.empty();
+    }
 
     String[] getIdentifiers(ItemStack item);
 }

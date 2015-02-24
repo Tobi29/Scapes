@@ -33,10 +33,7 @@ import org.tobi29.scapes.server.connection.ServerConnection;
 import org.tobi29.scapes.server.format.WorldFormat;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -74,19 +71,19 @@ public class ScapesServer {
         logJoiner = taskExecutor.runTask(joiner -> {
             try (SystemOutReader logReader = new SystemOutReader()) {
                 while (!joiner.marked()) {
-                    String line = logReader.readLine();
-                    if (line == null) {
+                    Optional<String> line = logReader.readLine();
+                    if (line.isPresent()) {
+                        for (ControlPanel controlPanel : controlPanels
+                                .values()) {
+                            controlPanel.appendLog(line.get());
+                        }
+                    } else {
                         List<ControlPanel> closedControlPanels =
                                 controlPanels.values().stream()
                                         .filter(ControlPanel::isClosed)
                                         .collect(Collectors.toList());
                         closedControlPanels.forEach(this::removeControlPanel);
                         SleepUtil.sleep(10);
-                    } else {
-                        for (ControlPanel controlPanel : controlPanels
-                                .values()) {
-                            controlPanel.appendLog(line);
-                        }
                     }
                 }
             } catch (IOException e) {

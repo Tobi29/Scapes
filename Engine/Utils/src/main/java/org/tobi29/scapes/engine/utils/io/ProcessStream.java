@@ -145,6 +145,7 @@ public final class ProcessStream {
     public interface StreamProcessor<E> {
         void process(byte[] buffer, int offset, int length) throws IOException;
 
+        @SuppressWarnings("ReturnOfNull")
         default E result() {
             return null;
         }

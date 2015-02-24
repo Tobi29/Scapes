@@ -149,7 +149,7 @@ public class GLFWKeyMap {
 
     public static ControllerKey getKey(int id) {
         if (id < 0 || id >= KEYS.length) {
-            return null;
+            return ControllerKey.UNKNOWN;
         }
         return KEYS[id];
     }

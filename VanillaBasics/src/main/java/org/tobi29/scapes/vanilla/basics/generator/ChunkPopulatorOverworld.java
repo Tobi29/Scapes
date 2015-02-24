@@ -21,7 +21,6 @@ import org.tobi29.scapes.chunk.World;
 import org.tobi29.scapes.chunk.generator.ChunkPopulator;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfinite;
-import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteChunk;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.noise.layer.*;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
@@ -141,11 +140,10 @@ public class ChunkPopulatorOverworld implements ChunkPopulator {
     public void load(TerrainServer.TerrainMutable terrain, int x, int y, int dx,
             int dy) {
         if (terrain instanceof TerrainInfinite) {
-            TerrainInfiniteChunk chunk = ((TerrainInfinite) terrain)
-                    .getChunk(FastMath.floor(x / 16.0d),
-                            FastMath.floor(y / 16.0d));
-            ((WorldEnvironmentOverworld) terrain.getWorld().getEnvironment())
-                    .simulateSeason(chunk);
+            ((TerrainInfinite) terrain).getChunk(FastMath.floor(x / 16.0d),
+                    FastMath.floor(y / 16.0d)).ifPresent(
+                    ((WorldEnvironmentOverworld) terrain.getWorld()
+                            .getEnvironment())::simulateSeason);
         }
     }
 

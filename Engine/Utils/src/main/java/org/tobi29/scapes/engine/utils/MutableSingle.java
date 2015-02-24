@@ -59,6 +59,6 @@ public class MutableSingle<A> {
     @Override
     public String toString() {
         A a = this.a;
-        return a == null ? null : a.toString();
+        return a == null ? "null" : a.toString();
     }
 }

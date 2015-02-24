@@ -33,6 +33,7 @@ import org.tobi29.scapes.packets.PacketUpdateInventory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public abstract class BlockType extends Material {
     public static final Collision STANDARD_COLLISION = new Collision();
@@ -160,7 +161,7 @@ public abstract class BlockType extends Material {
         return 1.0f;
     }
 
-    public abstract TerrainTexture getParticleTexture(Face face,
+    public abstract Optional<TerrainTexture> getParticleTexture(Face face,
             TerrainClient terrain, int x, int y, int z);
 
     public boolean isLiquid() {

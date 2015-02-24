@@ -25,6 +25,8 @@ import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.model.EntityModel;
 import org.tobi29.scapes.vanilla.basics.entity.model.EntityModelBellows;
 
+import java.util.Optional;
+
 public class EntityBellowsClient extends EntityClient {
     private float scale;
     private Face face;
@@ -52,8 +54,8 @@ public class EntityBellowsClient extends EntityClient {
     }
 
     @Override
-    public EntityModel createModel() {
-        return new EntityModelBellows(this);
+    public Optional<EntityModel> createModel() {
+        return Optional.of(new EntityModelBellows(this));
     }
 
     public float getScale() {

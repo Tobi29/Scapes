@@ -34,6 +34,8 @@ import org.tobi29.scapes.vanilla.basics.entity.server.EntityForgeServer;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer;
 
+import java.util.Optional;
+
 public class BlockForge extends VanillaBlockContainer {
     private TerrainTexture textureOn, textureOff;
     private BlockModel modelOn, modelOff;
@@ -68,9 +70,10 @@ public class BlockForge extends VanillaBlockContainer {
     }
 
     @Override
-    public TerrainTexture getParticleTexture(Face face, TerrainClient terrain,
-            int x, int y, int z) {
-        return terrain.getBlockData(x, y, z) > 0 ? textureOn : textureOff;
+    public Optional<TerrainTexture> getParticleTexture(Face face,
+            TerrainClient terrain, int x, int y, int z) {
+        return Optional
+                .of(terrain.getBlockData(x, y, z) > 0 ? textureOn : textureOff);
     }
 
     @Override

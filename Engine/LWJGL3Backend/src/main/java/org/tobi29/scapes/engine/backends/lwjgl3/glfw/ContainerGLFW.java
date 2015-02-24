@@ -37,6 +37,7 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ContainerGLFW extends ContainerLWJGL3 {
@@ -108,7 +109,7 @@ public class ContainerGLFW extends ContainerLWJGL3 {
         mouseButtonFun =
                 GLFW.GLFWMouseButtonCallback((window, button, action, mods) -> {
                     ControllerKey virtualKey = ControllerKey.getButton(button);
-                    if (virtualKey != null) {
+                    if (virtualKey != ControllerKey.UNKNOWN) {
                         switch (action) {
                             case GLFW.GLFW_PRESS:
                                 addPressEvent(virtualKey, PressState.PRESS);
@@ -253,10 +254,12 @@ public class ContainerGLFW extends ContainerLWJGL3 {
                         boolean value = buttons.get() == 1;
                         if (states[i] != value) {
                             states[i] = value;
-                            virtualJoystick
-                                    .addPressEvent(ControllerKey.getButton(i),
-                                            value ? PressState.PRESS :
-                                                    PressState.RELEASE);
+                            ControllerKey button = ControllerKey.getButton(i);
+                            if (button != ControllerKey.UNKNOWN) {
+                                virtualJoystick.addPressEvent(button,
+                                        value ? PressState.PRESS :
+                                                PressState.RELEASE);
+                            }
                         }
                     }
                 } else if (virtualJoysticks.containsKey(joystick)) {
@@ -376,14 +379,14 @@ public class ContainerGLFW extends ContainerLWJGL3 {
     }
 
     @Override
-    public File saveFileDialog(PlatformDialogs.Extension[] extensions,
+    public Optional<File> saveFileDialog(PlatformDialogs.Extension[] extensions,
             String title) {
         Thread thread = Thread.currentThread();
         if (thread == mainThread) {
             return dialogs.saveFileDialog(extensions, title);
         }
         Joiner.Joinable joinable = new Joiner.Joinable();
-        MutableSingle<File> file = new MutableSingle<>(null);
+        MutableSingle<Optional<File>> file = new MutableSingle<>(null);
         tasks.add(() -> {
             file.a = dialogs.saveFileDialog(extensions, title);
             joinable.join();

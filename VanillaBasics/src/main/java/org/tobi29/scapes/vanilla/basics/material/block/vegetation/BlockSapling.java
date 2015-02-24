@@ -37,10 +37,7 @@ import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock;
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateSaplingGrowth;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class BlockSapling extends VanillaBlock {
@@ -111,9 +108,9 @@ public class BlockSapling extends VanillaBlock {
     }
 
     @Override
-    public TerrainTexture getParticleTexture(Face face, TerrainClient terrain,
-            int x, int y, int z) {
-        return textures[terrain.getBlockData(x, y, z)];
+    public Optional<TerrainTexture> getParticleTexture(Face face,
+            TerrainClient terrain, int x, int y, int z) {
+        return Optional.of(textures[terrain.getBlockData(x, y, z)]);
     }
 
     @Override

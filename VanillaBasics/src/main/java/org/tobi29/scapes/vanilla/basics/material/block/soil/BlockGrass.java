@@ -36,10 +36,7 @@ import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock;
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateGrassGrowth;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class BlockGrass extends VanillaBlock {
@@ -176,12 +173,12 @@ public class BlockGrass extends VanillaBlock {
     }
 
     @Override
-    public TerrainTexture getParticleTexture(Face face, TerrainClient terrain,
-            int x, int y, int z) {
+    public Optional<TerrainTexture> getParticleTexture(Face face,
+            TerrainClient terrain, int x, int y, int z) {
         if (face == Face.DOWN) {
-            return textureBottomDirt;
+            return Optional.of(textureBottomDirt);
         }
-        return textureTop;
+        return Optional.of(textureTop);
     }
 
     @Override

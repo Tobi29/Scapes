@@ -29,6 +29,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.zip.ZipFile;
 
 public class JavaNIOFile implements File {
@@ -71,12 +72,12 @@ public class JavaNIOFile implements File {
     @Override
     public boolean exportToUser(PlatformDialogs.Extension[] extensions,
             String title, PlatformDialogs dialogs) throws IOException {
-        java.io.File file = dialogs.saveFileDialog(extensions, title);
-        if (file == null) {
-            return false;
+        Optional<java.io.File> file = dialogs.saveFileDialog(extensions, title);
+        if (file.isPresent()) {
+            Files.copy(path, file.get().toPath());
+            return true;
         }
-        Files.copy(path, file.toPath());
-        return true;
+        return false;
     }
 
     @Override

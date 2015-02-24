@@ -56,6 +56,6 @@ public class Single<A> {
 
     @Override
     public String toString() {
-        return a == null ? null : a.toString();
+        return a == null ? "null" : a.toString();
     }
 }

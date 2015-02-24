@@ -24,7 +24,6 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.packets.PacketEntityChange;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
-import org.tobi29.scapes.vanilla.basics.material.FurnaceFuel;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.item.ItemHeatable;
 
@@ -95,21 +94,24 @@ public abstract class EntityAbstractFurnaceServer
                         temperature += fuelTemperature[i];
                         fuel[i]--;
                     } else {
-                        FurnaceFuel fuelType =
-                                plugin.getFuel(inventory.getItem(i));
-                        if (fuelType != null) {
-                            if (inventory.getItem(i)
-                                    .canTake(fuelType.getFuel()) ==
-                                    fuelType.getFuel().getAmount() &&
-                                    fuelType.getTier() >= fuelTier) {
-                                fuel[i] = fuelType.getTime() * fuelHeat;
-                                fuelTemperature[i] =
-                                        fuelType.getTemperature() * fuelHeat;
-                                inventory.getItem(i).take(fuelType.getFuel());
-                                world.getConnection()
-                                        .send(new PacketEntityChange(this));
-                            }
-                        }
+                        int j = i;
+                        plugin.getFuel(inventory.getItem(j))
+                                .ifPresent(fuelType -> {
+                                    if (inventory.getItem(j)
+                                            .canTake(fuelType.getFuel()) ==
+                                            fuelType.getFuel().getAmount() &&
+                                            fuelType.getTier() >= fuelTier) {
+                                        fuel[j] = fuelType.getTime() * fuelHeat;
+                                        fuelTemperature[j] =
+                                                fuelType.getTemperature() *
+                                                        fuelHeat;
+                                        inventory.getItem(j)
+                                                .take(fuelType.getFuel());
+                                        world.getConnection()
+                                                .send(new PacketEntityChange(
+                                                        this));
+                                    }
+                                });
                     }
                 }
                 int max = items + fuel.length + 1;
@@ -122,10 +124,13 @@ public abstract class EntityAbstractFurnaceServer
                         }
                     } else if (inventory.getItem(i).isEmpty() &&
                             !inventory.getItem(fuel.length).isEmpty()) {
-                        inventory.getItem(i)
-                                .stack(inventory.getItem(fuel.length).take(1));
-                        world.getConnection()
-                                .send(new PacketEntityChange(this));
+                        int j = i;
+                        inventory.getItem(fuel.length).take(1)
+                                .ifPresent(item -> {
+                                    inventory.getItem(j).stack(item);
+                                    world.getConnection()
+                                            .send(new PacketEntityChange(this));
+                                });
                     }
                 }
             }

@@ -69,7 +69,7 @@ public class WorldClient extends World {
         environment =
                 ((Dimension) plugins.getPlugin(name)).createEnvironment(this);
         scene = new SceneScapesVoxelWorld(this, cam);
-        playerModel = player.createModel();
+        playerModel = player.createModel().get();
         terrain = terrainSupplier.get(this);
     }
 
@@ -86,10 +86,8 @@ public class WorldClient extends World {
     public void addEntity(EntityClient add, int id) {
         if (id != player.getEntityID()) {
             if (add != player) {
-                EntityModel model = add.createModel();
-                if (model != null) {
-                    entityModels.put(id, model);
-                }
+                add.createModel()
+                        .ifPresent(model -> entityModels.put(id, model));
             }
             add.setEntityID(id);
             entities.put(id, add);

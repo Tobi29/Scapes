@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,12 +42,11 @@ public abstract class AudioInputStream extends InputStream {
     public static AudioInputStream create(Resource resource)
             throws IOException {
         String mime = resource.getAttributes().getMIMEType();
-        AudioInputStreamProvider codec = get(mime);
-        if (codec == null) {
-            throw new IOException(
-                    "No compatible decoder found for type: " + mime);
+        Optional<AudioInputStreamProvider> codec = get(mime);
+        if (codec.isPresent()) {
+            return codec.get().get(resource.read());
         }
-        return codec.get(resource.read());
+        throw new IOException("No compatible decoder found for type: " + mime);
     }
 
     public static boolean playable(Resource resource) throws IOException {
@@ -57,31 +57,32 @@ public abstract class AudioInputStream extends InputStream {
         return get(mime) != null;
     }
 
-    private static AudioInputStreamProvider get(String mime) {
-        AudioInputStreamProvider codec = CODECS.get(mime);
-        if (codec == null) {
+    private static Optional<AudioInputStreamProvider> get(String mime) {
+        Optional<AudioInputStreamProvider> codec =
+                Optional.ofNullable(CODECS.get(mime));
+        if (!codec.isPresent()) {
             codec = loadService(mime);
-            if (codec != null) {
-                CODECS.put(mime, codec);
+            if (codec.isPresent()) {
+                CODECS.put(mime, codec.get());
             }
         }
         return codec;
     }
 
-    private static AudioInputStreamProvider loadService(String mime) {
+    private static Optional<AudioInputStreamProvider> loadService(String mime) {
         for (AudioInputStreamProvider codec : ServiceLoader
                 .load(AudioInputStreamProvider.class)) {
             try {
                 if (codec.accepts(mime)) {
                     LOGGER.debug("Loaded audio codec ({}): {}", mime,
                             codec.getClass().getName());
-                    return codec;
+                    return Optional.of(codec);
                 }
             } catch (ServiceConfigurationError e) {
                 LOGGER.warn("Unable to load codec provider: {}", e.toString());
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     public abstract int getChannels();

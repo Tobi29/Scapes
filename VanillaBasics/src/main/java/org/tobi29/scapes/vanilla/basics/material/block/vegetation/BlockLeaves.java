@@ -44,6 +44,7 @@ import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 public class BlockLeaves extends VanillaBlock {
@@ -174,9 +175,9 @@ public class BlockLeaves extends VanillaBlock {
     }
 
     @Override
-    public TerrainTexture getParticleTexture(Face face, TerrainClient terrain,
-            int x, int y, int z) {
-        return texturesFancy[terrain.getBlockData(x, y, z)];
+    public Optional<TerrainTexture> getParticleTexture(Face face,
+            TerrainClient terrain, int x, int y, int z) {
+        return Optional.of(texturesFancy[terrain.getBlockData(x, y, z)]);
     }
 
     @Override

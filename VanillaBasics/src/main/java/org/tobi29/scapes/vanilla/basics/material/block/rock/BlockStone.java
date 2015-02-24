@@ -26,6 +26,8 @@ import org.tobi29.scapes.vanilla.basics.material.StoneType;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.block.BlockSimpleData;
 
+import java.util.Optional;
+
 public abstract class BlockStone extends BlockSimpleData {
     protected final GameRegistry.Registry<StoneType> stoneRegistry;
 
@@ -41,9 +43,9 @@ public abstract class BlockStone extends BlockSimpleData {
     }
 
     @Override
-    public TerrainTexture getParticleTexture(Face face, TerrainClient terrain,
-            int x, int y, int z) {
-        return textures[terrain.getBlockData(x, y, z)];
+    public Optional<TerrainTexture> getParticleTexture(Face face,
+            TerrainClient terrain, int x, int y, int z) {
+        return Optional.of(textures[terrain.getBlockData(x, y, z)]);
     }
 
     @Override

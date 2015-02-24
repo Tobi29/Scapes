@@ -36,6 +36,7 @@ import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class BlockBloomery extends VanillaBlockContainer {
     private TerrainTexture textureSide, textureInside;
@@ -73,9 +74,9 @@ public class BlockBloomery extends VanillaBlockContainer {
     }
 
     @Override
-    public TerrainTexture getParticleTexture(Face face, TerrainClient terrain,
-            int x, int y, int z) {
-        return textureSide;
+    public Optional<TerrainTexture> getParticleTexture(Face face,
+            TerrainClient terrain, int x, int y, int z) {
+        return Optional.of(textureSide);
     }
 
     @Override

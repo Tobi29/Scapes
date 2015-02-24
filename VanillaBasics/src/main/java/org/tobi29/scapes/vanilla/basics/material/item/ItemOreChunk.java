@@ -245,13 +245,9 @@ public class ItemOreChunk extends VanillaItem
             case 10:
                 return "Bismuth";
             default:
-                return null;
+                throw new IllegalArgumentException(
+                        "Unknown data: {}" + item.getData());
         }
-    }
-
-    @Override
-    public String getInfoText(ItemStack item) {
-        return null;
     }
 
     @Override

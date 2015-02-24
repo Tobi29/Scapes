@@ -28,11 +28,14 @@ import org.tobi29.scapes.packets.PacketBlockChangeAir;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
+    private final Optional<TerrainInfiniteChunkServer> optional =
+            Optional.of(this);
     private final TerrainInfiniteServer terrain;
     private final List<Update> delayedUpdates = new ArrayList<>();
 
@@ -49,6 +52,10 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
         } else {
             load(tagStructure);
         }
+    }
+
+    public Optional<TerrainInfiniteChunkServer> getOptional() {
+        return optional;
     }
 
     public void updateServer(double delta) {

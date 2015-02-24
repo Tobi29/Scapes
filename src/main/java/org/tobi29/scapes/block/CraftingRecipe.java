@@ -16,10 +16,7 @@
 
 package org.tobi29.scapes.block;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class CraftingRecipe {
     private final List<Ingredient> ingredients, requirements;
@@ -48,23 +45,23 @@ public class CraftingRecipe {
         return requirements;
     }
 
-    public List<ItemStack> getTakes(Inventory inventory) {
+    public Optional<List<ItemStack>> getTakes(Inventory inventory) {
         List<ItemStack> takes = new ArrayList<>();
         for (Ingredient ingredient : ingredients) {
-            ItemStack take = ingredient.match(inventory);
-            if (take == null) {
-                return null;
+            Optional<ItemStack> take = ingredient.match(inventory);
+            if (take.isPresent()) {
+                takes.add(take.get());
             } else {
-                takes.add(take);
+                return Optional.empty();
             }
         }
         for (Ingredient requirement : requirements) {
-            ItemStack take = requirement.match(inventory);
-            if (take == null) {
-                return null;
+            Optional<ItemStack> take = requirement.match(inventory);
+            if (!take.isPresent()) {
+                return Optional.empty();
             }
         }
-        return takes;
+        return Optional.of(takes);
     }
 
     public ItemStack getResult() {
@@ -72,7 +69,7 @@ public class CraftingRecipe {
     }
 
     public interface Ingredient {
-        ItemStack match(Inventory inventory);
+        Optional<ItemStack> match(Inventory inventory);
 
         ItemStack example(int i);
     }
@@ -89,13 +86,13 @@ public class CraftingRecipe {
         }
 
         @Override
-        public ItemStack match(Inventory inventory) {
+        public Optional<ItemStack> match(Inventory inventory) {
             for (ItemStack variant : variations) {
                 if (inventory.canTake(variant)) {
-                    return variant;
+                    return Optional.of(variant);
                 }
             }
-            return null;
+            return Optional.empty();
         }
 
         @Override

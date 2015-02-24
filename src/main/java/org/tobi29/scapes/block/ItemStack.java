@@ -19,6 +19,8 @@ package org.tobi29.scapes.block;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
+import java.util.Optional;
+
 public class ItemStack {
     private final GameRegistry registry;
     private int amount;
@@ -164,15 +166,15 @@ public class ItemStack {
         return amount;
     }
 
-    public ItemStack take(ItemStack take) {
+    public Optional<ItemStack> take(ItemStack take) {
         return take(take, take.amount);
     }
 
-    public ItemStack take(ItemStack take, int amount) {
+    public Optional<ItemStack> take(ItemStack take, int amount) {
         if (take.material != material ||
                 take.data != data || material == registry.getAir() ||
                 this.amount <= 0) {
-            return null;
+            return Optional.empty();
         }
         ItemStack give = new ItemStack(this);
         give.setAmount(FastMath.min(this.amount, amount));
@@ -182,12 +184,12 @@ public class ItemStack {
             this.amount = 0;
             material = registry.getAir();
         }
-        return give;
+        return Optional.of(give);
     }
 
-    public ItemStack take(int amount) {
+    public Optional<ItemStack> take(int amount) {
         if (material == registry.getAir() || this.amount <= 0) {
-            return null;
+            return Optional.empty();
         }
         ItemStack give = new ItemStack(this);
         give.setAmount(amount);
@@ -197,7 +199,7 @@ public class ItemStack {
             this.amount = 0;
             material = registry.getAir();
         }
-        return give;
+        return Optional.of(give);
     }
 
     public boolean isEmpty() {

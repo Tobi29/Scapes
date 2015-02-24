@@ -110,7 +110,8 @@ class VanillaBasicsRegisters {
             options.add("s", "saturation", true, "Saturation value (0-1)");
             options.add("t", "thirst", true, "Thirst value (0-1)");
         }, (args, executor, commands) -> {
-            String playerName = args.getOption('p', executor.getPlayerName());
+            String playerName =
+                    args.getOption('p', executor.getPlayerName().orElse(null));
             Command.require(playerName, 'p');
             if (args.hasOption('s')) {
                 double saturation = Command.getDouble(args.getOption('s'));
@@ -150,7 +151,8 @@ class VanillaBasicsRegisters {
             options.add("a", "amount", true, "Amount of item in stack");
             options.add("t", "temperature", true, "Temperature of metal");
         }, (args, executor, commands) -> {
-            String playerName = args.getOption('p', executor.getPlayerName());
+            String playerName =
+                    args.getOption('p', executor.getPlayerName().orElse(null));
             Command.require(playerName, 'p');
             String metal = args.getOption('m');
             Command.require(metal, 'm');
@@ -177,7 +179,8 @@ class VanillaBasicsRegisters {
             options.add("t", "temperature", true, "Temperature of metal");
             options.add("k", "kind", true, "Kind of tool");
         }, (args, executor, commands) -> {
-            String playerName = args.getOption('p', executor.getPlayerName());
+            String playerName =
+                    args.getOption('p', executor.getPlayerName().orElse(null));
             Command.require(playerName, 'p');
             String metal = args.getOption('m');
             Command.require(metal, 'm');

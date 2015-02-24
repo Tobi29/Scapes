@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
 
 import java.io.File;
+import java.util.Optional;
 
 public class PlatformDialogsSWT implements PlatformDialogs {
     private static final File[] EMPTY_FILE = new File[0];
@@ -70,7 +71,7 @@ public class PlatformDialogsSWT implements PlatformDialogs {
     }
 
     @Override
-    public File saveFileDialog(Extension[] extensions, String title) {
+    public Optional<File> saveFileDialog(Extension[] extensions, String title) {
         String[] filterExtensions = new String[extensions.length];
         String[] filterNames = new String[extensions.length];
         for (int i = 0; i < extensions.length; i++) {
@@ -84,10 +85,10 @@ public class PlatformDialogsSWT implements PlatformDialogs {
         fileDialog.setFilterNames(filterNames);
         boolean successful = fileDialog.open() != null;
         if (!successful) {
-            return null;
+            return Optional.empty();
         }
         String fileName = fileDialog.getFileName();
-        return new File(fileDialog.getFilterPath(), fileName);
+        return Optional.of(new File(fileDialog.getFilterPath(), fileName));
     }
 
     @Override
@@ -119,7 +120,8 @@ public class PlatformDialogsSWT implements PlatformDialogs {
 
     @Override
     public boolean renderTick(boolean force) {
-        return !IS_COCOA && shell.getDisplay().readAndDispatch(); // Avoid jvm crash on osx
+        return !IS_COCOA &&
+                shell.getDisplay().readAndDispatch(); // Avoid jvm crash on osx
     }
 
     @Override

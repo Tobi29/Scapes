@@ -34,6 +34,8 @@ import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator;
 import org.tobi29.scapes.vanilla.basics.generator.WorldEnvironmentOverworld;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
+import java.util.Optional;
+
 public class BlockDirt extends BlockSoil {
     private TerrainTexture textureDirt, textureSand;
     private BlockModel modelDirt, modelSand;
@@ -97,16 +99,16 @@ public class BlockDirt extends BlockSoil {
     }
 
     @Override
-    public TerrainTexture getParticleTexture(Face face, TerrainClient terrain,
-            int x, int y, int z) {
+    public Optional<TerrainTexture> getParticleTexture(Face face,
+            TerrainClient terrain, int x, int y, int z) {
         WorldEnvironmentOverworld environment =
                 (WorldEnvironmentOverworld) terrain.getWorld().getEnvironment();
         ClimateGenerator climateGenerator = environment.getClimateGenerator();
         double humidity = climateGenerator.getHumidity(x, y, z);
         if (humidity < 0.3) {
-            return textureSand;
+            return Optional.of(textureSand);
         } else {
-            return textureDirt;
+            return Optional.of(textureDirt);
         }
     }
 

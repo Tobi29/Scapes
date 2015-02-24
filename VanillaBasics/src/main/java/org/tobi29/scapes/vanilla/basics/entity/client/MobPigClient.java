@@ -24,7 +24,10 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.CreatureType;
 import org.tobi29.scapes.entity.client.MobLivingClient;
+import org.tobi29.scapes.entity.model.MobModel;
 import org.tobi29.scapes.vanilla.basics.entity.model.MobLivingModelPig;
+
+import java.util.Optional;
 
 public class MobPigClient extends MobLivingClient {
     public MobPigClient(WorldClient world) {
@@ -51,10 +54,10 @@ public class MobPigClient extends MobLivingClient {
     }
 
     @Override
-    public MobLivingModelPig createModel() {
+    public Optional<MobModel> createModel() {
         Texture texture =
                 world.getGame().getEngine().getGraphics().getTextureManager()
                         .getTexture("VanillaBasics:image/entity/mob/Pig");
-        return new MobLivingModelPig(this, texture);
+        return Optional.of(new MobLivingModelPig(this, texture));
     }
 }

@@ -46,6 +46,7 @@ import org.tobi29.scapes.packets.PacketInteraction;
 import org.tobi29.scapes.packets.PacketItemUse;
 
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -488,10 +489,11 @@ public class MobPlayerClientMain extends MobPlayerClient {
         PointerPane pane = getSelectedBlock();
         if (pane != null) {
             BlockType type = terrain.getBlockType(pane.x, pane.y, pane.z);
-            TerrainTexture tex =
+            Optional<TerrainTexture> tex =
                     type.getParticleTexture(pane.face, terrain, pane.x, pane.y,
                             pane.z);
-            if (tex != null) {
+            if (tex.isPresent()) {
+                TerrainTexture texture = tex.get();
                 Vector3 blockPos = new Vector3d(pane.x, pane.y, pane.z);
                 ParticleManager particleManager = world.getParticleManager();
                 Random random = ThreadLocalRandom.current();
@@ -501,7 +503,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
                                     random.nextDouble(), random.nextDouble())),
                             new Vector3d(-1.0 + random.nextDouble() * 2.0,
                                     -1.0 + random.nextDouble() * 2.0,
-                                    random.nextDouble() * 2.0 + 1.0), tex,
+                                    random.nextDouble() * 2.0 + 1.0), texture,
                             random.nextFloat() * 360,
                             type.getParticleColorR(pane.face, terrain, pane.x,
                                     pane.y, pane.z),

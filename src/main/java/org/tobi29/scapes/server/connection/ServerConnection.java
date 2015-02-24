@@ -35,10 +35,7 @@ import java.nio.channels.SocketChannel;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
@@ -82,13 +79,13 @@ public class ServerConnection implements PlayConnection {
         return playerByName.get(name);
     }
 
-    public ServerSkin getSkin(String checksum) {
+    public Optional<ServerSkin> getSkin(String checksum) {
         for (PlayerConnection player : playerByName.values()) {
             if (player.getSkin().getChecksum().equals(checksum)) {
-                return player.getSkin();
+                return Optional.of(player.getSkin());
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     public ScapesServer getServer() {
@@ -190,23 +187,23 @@ public class ServerConnection implements PlayConnection {
                 updatePlayers(array));
     }
 
-    protected String addPlayer(PlayerConnection connection) {
+    protected Optional<String> addPlayer(PlayerConnection connection) {
         synchronized (players) {
             if (players.size() >= mayPlayers) {
-                return "Server full";
+                return Optional.of("Server full");
             }
             if (players.containsKey(connection.getID())) {
-                return "User already online";
+                return Optional.of("User already online");
             }
             if (playerByName.containsKey(connection.getNickname())) {
-                return "User with same name online";
+                return Optional.of("User with same name online");
             }
             players.put(connection.getID(), connection);
             playerByName.put(connection.getNickname(), connection);
         }
         LOGGER.info("Added player: {}", connection.getNickname());
         updateControlPanelPlayers();
-        return null;
+        return Optional.empty();
     }
 
     protected void removePlayer(PlayerConnection connection) {

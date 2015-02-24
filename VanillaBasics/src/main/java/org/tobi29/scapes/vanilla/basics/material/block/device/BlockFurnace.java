@@ -35,6 +35,8 @@ import org.tobi29.scapes.vanilla.basics.entity.server.EntityFurnaceServer;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer;
 
+import java.util.Optional;
+
 public class BlockFurnace extends VanillaBlockContainer {
     private TerrainTexture textureTop, textureFront1, textureFront2,
             textureSide;
@@ -77,9 +79,9 @@ public class BlockFurnace extends VanillaBlockContainer {
     }
 
     @Override
-    public TerrainTexture getParticleTexture(Face face, TerrainClient terrain,
-            int x, int y, int z) {
-        return textureSide;
+    public Optional<TerrainTexture> getParticleTexture(Face face,
+            TerrainClient terrain, int x, int y, int z) {
+        return Optional.of(textureSide);
     }
 
     @Override

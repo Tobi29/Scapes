@@ -27,7 +27,6 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.List;
 
 public class PacketCrafting extends Packet implements PacketServer {
     private int type, id;
@@ -68,15 +67,16 @@ public class PacketCrafting extends Packet implements PacketServer {
                 world.getPlugins().getRegistry().getCraftingRecipes(table)
                         .get(type).getRecipes().get(id);
         ItemStack result = recipe.getResult();
-        List<ItemStack> takes = recipe.getTakes(inventory);
-        if (takes != null && inventory.canAdd(result) >= result.getAmount()) {
-            takes.forEach(inventory::take);
-            inventory.add(result);
-            for (int i = 0; i < recipe.getResult().getAmount(); i++) {
-                player.getStatistics()
-                        .blockCraft(result.getMaterial(), result.getData());
-            }
-            player.send(new PacketUpdateInventory(player.getMob()));
+        if (inventory.canAdd(result) >= result.getAmount()) {
+            recipe.getTakes(inventory).ifPresent(takes -> {
+                takes.forEach(inventory::take);
+                inventory.add(result);
+                for (int i = 0; i < recipe.getResult().getAmount(); i++) {
+                    player.getStatistics()
+                            .blockCraft(result.getMaterial(), result.getData());
+                }
+                player.send(new PacketUpdateInventory(player.getMob()));
+            });
         }
     }
 }

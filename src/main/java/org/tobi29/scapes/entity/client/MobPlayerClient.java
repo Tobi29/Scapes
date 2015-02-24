@@ -30,6 +30,9 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.CreatureType;
 import org.tobi29.scapes.entity.model.MobLivingModelHuman;
+import org.tobi29.scapes.entity.model.MobModel;
+
+import java.util.Optional;
 
 public class MobPlayerClient extends MobLivingEquippedClient
         implements EntityContainerClient {
@@ -150,8 +153,8 @@ public class MobPlayerClient extends MobLivingEquippedClient
     }
 
     @Override
-    public MobLivingModelHuman createModel() {
+    public Optional<MobModel> createModel() {
         Texture texture = world.getScene().getSkinStorage().getSkin(skin);
-        return new MobLivingModelHuman(this, texture);
+        return Optional.of(new MobLivingModelHuman(this, texture));
     }
 }

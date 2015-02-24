@@ -32,6 +32,8 @@ import org.tobi29.scapes.packets.PacketOpenCrafting;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock;
 
+import java.util.Optional;
+
 public class BlockCraftingTable extends VanillaBlock {
     private TerrainTexture textureTop, textureSide1, textureSide2,
             textureBottom;
@@ -64,9 +66,9 @@ public class BlockCraftingTable extends VanillaBlock {
     }
 
     @Override
-    public TerrainTexture getParticleTexture(Face face, TerrainClient terrain,
-            int x, int y, int z) {
-        return textureSide1;
+    public Optional<TerrainTexture> getParticleTexture(Face face,
+            TerrainClient terrain, int x, int y, int z) {
+        return Optional.of(textureSide1);
     }
 
     @Override

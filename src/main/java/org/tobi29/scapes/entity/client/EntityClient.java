@@ -25,6 +25,8 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.model.EntityModel;
 import org.tobi29.scapes.packets.PacketEntityMetaData;
 
+import java.util.Optional;
+
 public class EntityClient implements MultiTag.Readable {
     protected final WorldClient world;
     protected final GameRegistry registry;
@@ -84,8 +86,8 @@ public class EntityClient implements MultiTag.Readable {
     public void update(double delta) {
     }
 
-    public EntityModel createModel() {
-        return null;
+    public Optional<? extends EntityModel> createModel() {
+        return Optional.empty();
     }
 
     public void processPacket(PacketEntityMetaData packet) {

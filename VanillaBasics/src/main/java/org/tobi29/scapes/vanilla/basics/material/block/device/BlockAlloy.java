@@ -41,6 +41,7 @@ import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class BlockAlloy extends VanillaBlockContainer {
     private static final AABB SELECTION =
@@ -101,9 +102,9 @@ public class BlockAlloy extends VanillaBlockContainer {
     }
 
     @Override
-    public TerrainTexture getParticleTexture(Face face, TerrainClient terrain,
-            int x, int y, int z) {
-        return texture;
+    public Optional<TerrainTexture> getParticleTexture(Face face,
+            TerrainClient terrain, int x, int y, int z) {
+        return Optional.of(texture);
     }
 
     @Override

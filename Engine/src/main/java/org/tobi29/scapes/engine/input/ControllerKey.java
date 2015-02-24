@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public enum ControllerKey {
+    UNKNOWN("Unknown"),
     KEY_SPACE("Space"),
     KEY_APOSTROPHE("Apostrophe"),
     KEY_COMMA("Comma"),
@@ -247,7 +248,7 @@ public enum ControllerKey {
 
     public static ControllerKey getButton(int i) {
         if (i < 0 || i >= BUTTONS.size()) {
-            return null;
+            return UNKNOWN;
         }
         return BUTTONS.get(i);
     }

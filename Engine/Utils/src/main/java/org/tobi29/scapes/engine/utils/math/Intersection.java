@@ -19,6 +19,8 @@ package org.tobi29.scapes.engine.utils.math;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 
+import java.util.Optional;
+
 public class Intersection {
     private final Vector3 intersection;
 
@@ -26,8 +28,8 @@ public class Intersection {
         this.intersection = intersection;
     }
 
-    public static Intersection intersectPointerPane(Vector3 lp1, Vector3 lp2,
-            PointerPane pane) {
+    public static Optional<Intersection> intersectPointerPane(Vector3 lp1,
+            Vector3 lp2, PointerPane pane) {
         double minX, minY, minZ, maxX, maxY, maxZ;
         switch (pane.face) {
             case UP:
@@ -87,50 +89,51 @@ public class Intersection {
                 maxZ = 0.0d;
                 break;
         }
-        Intersection inter =
+        Optional<Intersection> inter =
                 intersectPlane(lp1, lp2, new Vector3d(maxX, minY, minZ),
                         new Vector3d(minX, maxY, minZ),
                         new Vector3d(minX, minY, maxZ));
-        if (inter == null) {
-            return null;
+        if (!inter.isPresent()) {
+            return Optional.empty();
         }
-        if (maxX < inter.intersection.doubleX() ||
-                minX > inter.intersection.doubleX()) {
-            return null;
+        Intersection intersection = inter.get();
+        if (maxX < intersection.intersection.doubleX() ||
+                minX > intersection.intersection.doubleX()) {
+            return Optional.empty();
         }
-        if (maxY < inter.intersection.doubleY() ||
-                minY > inter.intersection.doubleY()) {
-            return null;
+        if (maxY < intersection.intersection.doubleY() ||
+                minY > intersection.intersection.doubleY()) {
+            return Optional.empty();
         }
-        if (maxZ < inter.intersection.doubleZ() ||
-                minZ > inter.intersection.doubleZ()) {
-            return null;
+        if (maxZ < intersection.intersection.doubleZ() ||
+                minZ > intersection.intersection.doubleZ()) {
+            return Optional.empty();
         }
-        return inter;
+        return Optional.of(intersection);
     }
 
-    public static Intersection intersectPlane(Vector3 lp1, Vector3 lp2,
-            Vector3 p1, Vector3 p2, Vector3 p3) {
+    public static Optional<Intersection> intersectPlane(Vector3 lp1,
+            Vector3 lp2, Vector3 p1, Vector3 p2, Vector3 p3) {
         Vector3 e1 = p2.minus(p1);
         Vector3 e2 = p3.minus(p1);
         Vector3 normal = FastMath.cross(e1, e2);
         return intersectPlane(lp1, lp2, p1, normal);
     }
 
-    public static Intersection intersectPlane(Vector3 lp1, Vector3 lp2,
-            Vector3 p1, Vector3 normal) {
+    public static Optional<Intersection> intersectPlane(Vector3 lp1,
+            Vector3 lp2, Vector3 p1, Vector3 normal) {
         Vector3 ldir = lp2.minus(lp1);
         double numerator = FastMath.dot(normal, ldir);
         if (FastMath.abs(numerator) > 0.0001) {
             Vector3 p1tolp1 = p1.minus(lp1);
             double t = FastMath.dot(normal, p1tolp1) / numerator;
             if (t <= 0 || t >= 1) {
-                return null;
+                return Optional.empty();
             }
             Vector3 pos = lp1.plus(ldir.multiply(t));
-            return new Intersection(pos);
+            return Optional.of(new Intersection(pos));
         }
-        return null;
+        return Optional.empty();
     }
 
     public Vector3 getPos() {

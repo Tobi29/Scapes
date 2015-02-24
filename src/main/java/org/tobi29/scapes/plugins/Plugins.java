@@ -117,7 +117,16 @@ public class Plugins {
                 return plugin;
             }
         }
-        return null;
+        throw new IllegalArgumentException("Unknown plugin");
+    }
+
+    public boolean checkPlugin(String name) {
+        for (Plugin plugin : plugins) {
+            if (plugin.getID().equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void addFileSystems(FileSystemContainer files) {

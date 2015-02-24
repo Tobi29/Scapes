@@ -26,7 +26,6 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -211,7 +210,7 @@ public class PacketBundleChannel {
         return false;
     }
 
-    public InputStream fetch() throws IOException {
+    public Optional<DataInputStream> fetch() throws IOException {
         if (!hasInput) {
             int read = channel.read(header);
             if (!header.hasRemaining()) {
@@ -259,7 +258,8 @@ public class PacketBundleChannel {
                     ByteBuffer bundle = byteBufferStreamOut.getBuffer();
                     byteBufferStreamOut.reset();
                     hasInput = false;
-                    return new ByteBufferInputStream(bundle);
+                    return Optional.of(new DataInputStream(
+                            new ByteBufferInputStream(bundle)));
                 } else {
                     DataInputStream streamIn = new DataInputStream(
                             new ByteBufferInputStream(buffer));
@@ -269,7 +269,7 @@ public class PacketBundleChannel {
                         checked = true;
                         hasInput = false;
                         connectListener.connect();
-                        return null;
+                        return Optional.empty();
                     } else {
                         throw new IOException("Invalid header: " +
                                 new String(header, StandardCharsets.UTF_8));
@@ -280,7 +280,7 @@ public class PacketBundleChannel {
             }
             inRate.getAndAdd(read);
         }
-        return null;
+        return Optional.empty();
     }
 
     public void setKey(byte[] encryptKey, byte[] decryptKey) {

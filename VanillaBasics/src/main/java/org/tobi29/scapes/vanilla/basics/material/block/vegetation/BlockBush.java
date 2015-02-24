@@ -39,6 +39,7 @@ import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class BlockBush extends VanillaBlock {
     private static final AABB SELECTION =
@@ -104,9 +105,9 @@ public class BlockBush extends VanillaBlock {
     }
 
     @Override
-    public TerrainTexture getParticleTexture(Face face, TerrainClient terrain,
-            int x, int y, int z) {
-        return texturesOutside[terrain.getBlockData(x, y, z)];
+    public Optional<TerrainTexture> getParticleTexture(Face face,
+            TerrainClient terrain, int x, int y, int z) {
+        return Optional.of(texturesOutside[terrain.getBlockData(x, y, z)]);
     }
 
     @Override

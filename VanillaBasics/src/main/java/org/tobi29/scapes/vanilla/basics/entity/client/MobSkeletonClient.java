@@ -26,7 +26,10 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.CreatureType;
 import org.tobi29.scapes.entity.client.MobLivingEquippedClient;
 import org.tobi29.scapes.entity.model.MobLivingModelHuman;
+import org.tobi29.scapes.entity.model.MobModel;
 import org.tobi29.scapes.entity.particle.ParticleManager;
+
+import java.util.Optional;
 
 public class MobSkeletonClient extends MobLivingEquippedClient {
     public MobSkeletonClient(WorldClient world) {
@@ -64,11 +67,11 @@ public class MobSkeletonClient extends MobLivingEquippedClient {
     }
 
     @Override
-    public MobLivingModelHuman createModel() {
+    public Optional<MobModel> createModel() {
         Texture texture =
                 world.getGame().getEngine().getGraphics().getTextureManager()
                         .getTexture("VanillaBasics:image/entity/mob/Skeleton");
-        return new MobLivingModelHuman(this, texture, true, false);
+        return Optional.of(new MobLivingModelHuman(this, texture, true, false));
     }
 
     @Override

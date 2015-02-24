@@ -17,6 +17,7 @@
 package org.tobi29.scapes.engine.utils.io;
 
 import java.io.*;
+import java.util.Optional;
 
 /**
  * Utility class for reading log from {@code System.out} and {@code System.err}
@@ -52,11 +53,11 @@ public class SystemOutReader implements Closeable {
      * line was available yet
      * @throws IOException If an I/O error occurred
      */
-    public String readLine() throws IOException {
+    public Optional<String> readLine() throws IOException {
         if (logReader.ready()) {
-            return logReader.readLine();
+            return Optional.of(logReader.readLine());
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override

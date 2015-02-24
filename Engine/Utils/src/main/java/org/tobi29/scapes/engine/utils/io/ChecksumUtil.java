@@ -16,8 +16,6 @@
 
 package org.tobi29.scapes.engine.utils.io;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.utils.ArrayUtil;
 import org.tobi29.scapes.engine.utils.io.filesystem.Resource;
 
@@ -31,9 +29,6 @@ import java.security.NoSuchAlgorithmException;
  * Utility class for creating checksums
  */
 public final class ChecksumUtil {
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(ChecksumUtil.class);
-
     private ChecksumUtil() {
     }
 
@@ -180,9 +175,8 @@ public final class ChecksumUtil {
             ProcessStream.process(streamIn, digest::update);
             return digest.digest();
         } catch (NoSuchAlgorithmException e) {
-            LOGGER.error("Unsupported algorithm: {}", e.toString());
+            throw new IllegalStateException(e);
         }
-        return null;
     }
 
     /**
@@ -210,9 +204,8 @@ public final class ChecksumUtil {
             complete.update(array);
             return complete.digest();
         } catch (NoSuchAlgorithmException e) {
-            LOGGER.error("Unsupported algorithm: {}", e.toString());
+            throw new IllegalStateException(e);
         }
-        return null;
     }
 
     /**

@@ -25,6 +25,7 @@ import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.Pair;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -107,10 +108,7 @@ public abstract class GuiComponent
         for (GuiComponentEventListener event1 : events) {
             event1.click(event);
         }
-        Gui gui = getGui();
-        if (gui != null) {
-            gui.setLastClicked(this);
-        }
+        getGui().ifPresent(gui -> gui.setLastClicked(this));
     }
 
     @Override
@@ -118,10 +116,7 @@ public abstract class GuiComponent
         for (GuiComponentEventListener rightEvent : rightEvents) {
             rightEvent.click(event);
         }
-        Gui gui = getGui();
-        if (gui != null) {
-            gui.setLastClicked(this);
-        }
+        getGui().ifPresent(gui -> gui.setLastClicked(this));
     }
 
     @Override
@@ -156,7 +151,7 @@ public abstract class GuiComponent
         this.y = y;
     }
 
-    public Gui getGui() {
+    public Optional<Gui> getGui() {
         GuiComponent other = this;
         while (true) {
             if (other.parent != null) {
@@ -164,9 +159,9 @@ public abstract class GuiComponent
                 continue;
             }
             if (other instanceof Gui) {
-                return (Gui) other;
+                return Optional.of((Gui) other);
             }
-            return null;
+            return Optional.empty();
         }
     }
 

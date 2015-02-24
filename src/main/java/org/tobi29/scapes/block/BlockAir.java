@@ -31,6 +31,7 @@ import org.tobi29.scapes.entity.server.MobServer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class BlockAir extends BlockType {
     protected BlockAir(GameRegistry registry) {
@@ -89,9 +90,9 @@ public class BlockAir extends BlockType {
     }
 
     @Override
-    public TerrainTexture getParticleTexture(Face face, TerrainClient terrain,
-            int x, int y, int z) {
-        return null;
+    public Optional<TerrainTexture> getParticleTexture(Face face,
+            TerrainClient terrain, int x, int y, int z) {
+        return Optional.empty();
     }
 
     @Override

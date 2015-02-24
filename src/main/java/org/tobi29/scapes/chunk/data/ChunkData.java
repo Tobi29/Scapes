@@ -21,6 +21,8 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class ChunkData {
     private final int xSectionBits, ySectionBits, xSizeBits, ySizeBits,
@@ -52,7 +54,8 @@ public class ChunkData {
 
     public ChunkArraySection getSection(int offset) {
         if (offset < 0 || offset >= data.length) {
-            return null;
+            throw new IllegalArgumentException(
+                    "Offset out of range: " + offset);
         }
         return data[offset];
     }
@@ -78,22 +81,21 @@ public class ChunkData {
     }
 
     public List<TagStructure> save() {
-        List<TagStructure> tags = new ArrayList<>(data.length);
-        for (ChunkArraySection section : data) {
-            tags.add(section.save());
-        }
+        List<Optional<TagStructure>> tags =
+                Arrays.stream(data).map(ChunkArraySection::save)
+                        .collect(Collectors.toList());
+        List<TagStructure> tagStructures = new ArrayList<>(data.length);
         boolean empty = true;
         for (int i = tags.size() - 1; i >= 0; i--) {
-            if (tags.get(i) != null) {
+            Optional<TagStructure> tag = tags.get(i);
+            if (tag.isPresent()) {
                 empty = false;
+                tagStructures.add(0, tag.get());
             } else if (!empty) {
-                tags.set(i, new TagStructure());
-            }
-            if (empty) {
-                tags.remove(i);
+                tagStructures.add(0, new TagStructure());
             }
         }
-        return tags;
+        return tagStructures;
     }
 
     public void load(List<TagStructure> tags) {

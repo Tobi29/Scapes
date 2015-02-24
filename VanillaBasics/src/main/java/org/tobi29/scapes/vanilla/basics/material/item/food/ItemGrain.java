@@ -85,11 +85,6 @@ public class ItemGrain extends VanillaItem implements ItemResearch {
     }
 
     @Override
-    public String getInfoText(ItemStack item) {
-        return null;
-    }
-
-    @Override
     public String[] getIdentifiers(ItemStack item) {
         return new String[]{"vanilla.basics.item.Grain",
                 "vanilla.basics.item.Grain." + materials.crop.getName(item)};

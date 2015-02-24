@@ -29,6 +29,7 @@ import org.tobi29.scapes.entity.server.MobLivingServer;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -100,10 +101,8 @@ public class MobPigServer extends MobLivingServer {
             walkWait -= delta;
             if (walkWait <= 0.0) {
                 walkWait = 0.2;
-                Vector3 dest = findWalkPosition();
-                if (dest != null) {
-                    ai.setPositionTarget(dest, 160.0);
-                }
+                findWalkPosition()
+                        .ifPresent(dest -> ai.setPositionTarget(dest, 160.0));
             }
         }
         lookWait -= delta;
@@ -133,14 +132,14 @@ public class MobPigServer extends MobLivingServer {
         }
     }
 
-    private Vector3 findWalkPosition() {
+    private Optional<Vector3> findWalkPosition() {
         Random random = ThreadLocalRandom.current();
         Vector3 vector3d = pos.now().plus(new Vector3d(random.nextInt(17) - 8,
                 random.nextInt(17) - 8, random.nextInt(7) - 3));
         if (canMoveHere(world.getTerrain(), vector3d.intX(), vector3d.intY(),
                 vector3d.intZ())) {
-            return vector3d;
+            return Optional.of(vector3d);
         }
-        return null;
+        return Optional.empty();
     }
 }

@@ -30,6 +30,8 @@ import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock;
 
+import java.util.Optional;
+
 public class BlockGlass extends VanillaBlock {
     private TerrainTexture textureFrame, textureTransparent;
     private BlockModel modelFrame, modelTransparent;
@@ -54,9 +56,9 @@ public class BlockGlass extends VanillaBlock {
     }
 
     @Override
-    public TerrainTexture getParticleTexture(Face face, TerrainClient terrain,
-            int x, int y, int z) {
-        return textureFrame;
+    public Optional<TerrainTexture> getParticleTexture(Face face,
+            TerrainClient terrain, int x, int y, int z) {
+        return Optional.of(textureFrame);
     }
 
     @Override

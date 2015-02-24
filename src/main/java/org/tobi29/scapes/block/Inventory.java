@@ -20,11 +20,12 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class Inventory {
     protected final GameRegistry registry;
     protected final ItemStack[] items;
-    protected ItemStack hold;
+    protected Optional<ItemStack> hold = Optional.empty();
 
     public Inventory(GameRegistry registry, int size) {
         this.registry = registry;
@@ -81,11 +82,15 @@ public class Inventory {
         return amount >= take.getAmount();
     }
 
-    public ItemStack getHold() {
+    public Optional<ItemStack> getHold() {
         return hold;
     }
 
     public void setHold(ItemStack hold) {
+        this.hold = Optional.of(hold);
+    }
+
+    public void setHold(Optional<ItemStack> hold) {
         this.hold = hold;
     }
 
@@ -104,10 +109,11 @@ public class Inventory {
         }
         TagStructure holdTag = tag.getStructure("Hold");
         if (holdTag != null) {
-            hold = new ItemStack(registry);
-            hold.load(holdTag);
+            ItemStack item = new ItemStack(registry);
+            item.load(holdTag);
+            hold = Optional.of(item);
         } else {
-            hold = null;
+            hold = Optional.empty();
         }
     }
 
@@ -118,9 +124,7 @@ public class Inventory {
             list.add(i, items[i].save());
         }
         tag.setList("Items", list);
-        if (hold != null) {
-            tag.setStructure("Hold", hold.save());
-        }
+        hold.ifPresent(item -> tag.setStructure("Hold", item.save()));
         return tag;
     }
 
@@ -138,13 +142,14 @@ public class Inventory {
         ItemStack give = null;
         int amount = take.getAmount();
         for (int i = 0; i < items.length && amount > 0; i++) {
-            ItemStack give2 = items[i].take(take, amount);
-            if (give2 != null) {
-                amount -= give2.getAmount();
+            Optional<ItemStack> give2 = items[i].take(take, amount);
+            if (give2.isPresent()) {
+                ItemStack item = give2.get();
+                amount -= item.getAmount();
                 if (give == null) {
-                    give = give2;
+                    give = item;
                 } else {
-                    give.stack(give2);
+                    give.stack(item);
                 }
             }
         }

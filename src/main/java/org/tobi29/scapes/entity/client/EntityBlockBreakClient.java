@@ -22,7 +22,10 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.PointerPane;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
+import org.tobi29.scapes.entity.model.EntityModel;
 import org.tobi29.scapes.entity.model.EntityModelBlockBreak;
+
+import java.util.Optional;
 
 public class EntityBlockBreakClient extends EntityClient {
     private final Pool<PointerPane> pointerPanes = new Pool<>(PointerPane::new);
@@ -55,8 +58,8 @@ public class EntityBlockBreakClient extends EntityClient {
     }
 
     @Override
-    public EntityModelBlockBreak createModel() {
-        return new EntityModelBlockBreak(this);
+    public Optional<EntityModel> createModel() {
+        return Optional.of(new EntityModelBlockBreak(this));
     }
 
     public double getProgress() {

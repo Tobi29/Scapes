@@ -26,12 +26,12 @@ import javax.crypto.spec.PBEKeySpec;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.channels.SocketChannel;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -91,13 +91,13 @@ public class ControlPanelProtocol {
     @SuppressWarnings("CallToSystemGC")
     public boolean process() throws IOException {
         boolean processing = false;
-        InputStream streamIn = channel.fetch();
-        if (streamIn != null) {
-            DataInputStream dataStreamIn = new DataInputStream(streamIn);
-            int length = dataStreamIn.readInt();
+        Optional<DataInputStream> bundle = channel.fetch();
+        if (bundle.isPresent()) {
+            DataInputStream streamIn = bundle.get();
+            int length = streamIn.readInt();
             String[] command = new String[length];
             for (int i = 0; i < length; i++) {
-                command[i] = dataStreamIn.readUTF();
+                command[i] = streamIn.readUTF();
             }
             if ("connection".equals(command[0])) {
                 if (command.length > 1) {

@@ -29,6 +29,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Optional;
 
 public class PacketRequestChunk extends Packet
         implements PacketServer, PacketClient {
@@ -64,10 +65,10 @@ public class PacketRequestChunk extends Packet
         player.send(new PacketRequestChunk(x, y));
         Terrain terrain = world.getTerrain();
         if (terrain instanceof TerrainInfiniteServer) {
-            TerrainInfiniteChunkServer chunk =
+            Optional<TerrainInfiniteChunkServer> chunk =
                     ((TerrainInfiniteServer) terrain).getChunkNoLoad(x, y);
-            if (chunk != null) {
-                player.send(new PacketSendChunk(chunk));
+            if (chunk.isPresent()) {
+                player.send(new PacketSendChunk(chunk.get()));
             }
         }
     }

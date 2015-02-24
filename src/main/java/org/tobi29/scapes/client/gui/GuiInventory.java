@@ -94,8 +94,9 @@ public class GuiInventory extends Gui {
             vaoText.render(graphics, shader);
             matrixStack.pop();
         }
-        GuiUtils.renderItem((float) cursorX, (float) cursorY, 30.0f, 30.0f,
-                player.getInventory().getHold(), graphics, shader, font);
+        player.getInventory().getHold().ifPresent(hold -> GuiUtils
+                .renderItem((float) cursorX, (float) cursorY, 30.0f, 30.0f,
+                        hold, graphics, shader, font));
     }
 
     @Override
