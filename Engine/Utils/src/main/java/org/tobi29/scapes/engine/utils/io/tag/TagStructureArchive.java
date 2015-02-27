@@ -105,17 +105,17 @@ public class TagStructureArchive {
         tagStructures.put(key, array);
     }
 
-    public synchronized TagStructure getTagStructure(String key)
+    public synchronized Optional<TagStructure> getTagStructure(String key)
             throws IOException {
         byte[] array = tagStructures.get(key);
         if (array == null) {
-            return null;
+            return Optional.empty();
         }
         TagStructure tagStructure = new TagStructure();
         try (ByteArrayInputStream streamIn = new ByteArrayInputStream(array)) {
             TagStructureBinary.read(tagStructure, streamIn);
         }
-        return tagStructure;
+        return Optional.of(tagStructure);
     }
 
     public synchronized void removeTagStructure(String key) {

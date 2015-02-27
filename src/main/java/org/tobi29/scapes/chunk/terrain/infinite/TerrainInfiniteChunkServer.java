@@ -41,16 +41,16 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
 
     public TerrainInfiniteChunkServer(Vector2i pos,
             TerrainInfiniteServer terrain, int zSize,
-            TagStructure tagStructure) {
+            Optional<TagStructure> tagStructure) {
         super(pos, terrain, terrain.getWorld(), zSize);
         this.terrain = terrain;
-        if (tagStructure == null) {
+        if (tagStructure.isPresent()) {
+            load(tagStructure.get());
+        } else {
             terrain.getWorld().getGenerator()
                     .makeLand(pos.intX(), pos.intY(), this, bID, bData);
             initSunLight();
             initHeightMap();
-        } else {
-            load(tagStructure);
         }
     }
 

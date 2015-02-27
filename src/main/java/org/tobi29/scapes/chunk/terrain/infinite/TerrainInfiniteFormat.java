@@ -28,6 +28,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector2i;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -55,7 +56,7 @@ public class TerrainInfiniteFormat {
                 Integer.toString(y, 36).toUpperCase();
     }
 
-    public synchronized TagStructure getChunkTag(int x, int y)
+    public synchronized Optional<TagStructure> getChunkTag(int x, int y)
             throws IOException {
         Vector2i location = new Vector2i(FastMath.floor((double) x / 16),
                 FastMath.floor((double) y / 16));

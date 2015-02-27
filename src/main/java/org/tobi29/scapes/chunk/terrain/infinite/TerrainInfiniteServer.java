@@ -177,7 +177,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
         synchronized (chunkManager) {
             chunk = chunkManager.get(x, y);
             if (!chunk.isPresent()) {
-                TagStructure tagStructure = null;
+                Optional<TagStructure> tagStructure = Optional.empty();
                 try {
                     tagStructure = format.getChunkTag(x, y);
                 } catch (IOException e) {
