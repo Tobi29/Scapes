@@ -340,4 +340,33 @@ public class MutableVector2d extends MutableVector2 {
         x = tagStructure.getDouble("X");
         y = tagStructure.getDouble("Y");
     }
+
+    @Override
+    public int hashCode() {
+        long temp;
+        temp = Double.doubleToLongBits(x);
+        int result = (int) (temp ^ temp >>> 32);
+        temp = Double.doubleToLongBits(y);
+        result = 31 * result + (int) (temp ^ temp >>> 32);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof MutableVector2) {
+            MutableVector2 other = (MutableVector2) obj;
+            return x == other.doubleX() && y == other.doubleY();
+        }
+        if (!(obj instanceof Vector2)) {
+            return false;
+        }
+        Vector2 other = (Vector2) obj;
+        return x == other.doubleX() && y == other.doubleY();
+    }
 }

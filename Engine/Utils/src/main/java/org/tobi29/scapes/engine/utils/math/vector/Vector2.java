@@ -120,4 +120,10 @@ public abstract class Vector2 extends Number {
     public short shortValue() {
         return shortX();
     }
+
+    @Override
+    public abstract int hashCode();
+
+    @Override
+    public abstract boolean equals(Object obj);
 }

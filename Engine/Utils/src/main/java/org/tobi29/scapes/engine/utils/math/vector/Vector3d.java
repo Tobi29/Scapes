@@ -216,4 +216,37 @@ public class Vector3d extends Vector3 {
     public boolean hasNaN() {
         return Double.isNaN(x) || Double.isNaN(y) || Double.isNaN(z);
     }
+
+    @Override
+    public int hashCode() {
+        long temp;
+        temp = Double.doubleToLongBits(x);
+        int result = (int) (temp ^ temp >>> 32);
+        temp = Double.doubleToLongBits(y);
+        result = 31 * result + (int) (temp ^ temp >>> 32);
+        temp = Double.doubleToLongBits(z);
+        result = 31 * result + (int) (temp ^ temp >>> 32);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof MutableVector3) {
+            MutableVector3 other = (MutableVector3) obj;
+            return x == other.doubleX() && y == other.doubleY() &&
+                    z == other.doubleZ();
+        }
+        if (!(obj instanceof Vector3)) {
+            return false;
+        }
+        Vector3 other = (Vector3) obj;
+        return x == other.doubleX() && y == other.doubleY() &&
+                z == other.doubleZ();
+    }
 }

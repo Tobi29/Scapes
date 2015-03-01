@@ -225,4 +225,31 @@ public class Vector3i extends Vector3 {
     public boolean hasNaN() {
         return false;
     }
+
+    @Override
+    public int hashCode() {
+        int result = x;
+        result = 31 * result + y;
+        result = 31 * result + z;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof MutableVector3) {
+            MutableVector3 other = (MutableVector3) obj;
+            return x == other.intX() && y == other.intY() && z == other.intZ();
+        }
+        if (!(obj instanceof Vector3)) {
+            return false;
+        }
+        Vector3 other = (Vector3) obj;
+        return x == other.intX() && y == other.intY() && z == other.intZ();
+    }
 }

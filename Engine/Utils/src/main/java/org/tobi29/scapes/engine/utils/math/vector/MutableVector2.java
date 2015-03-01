@@ -150,4 +150,10 @@ public abstract class MutableVector2 implements MultiTag.ReadAndWrite {
     }
 
     public abstract Vector2 now();
+
+    @Override
+    public abstract int hashCode();
+
+    @Override
+    public abstract boolean equals(Object obj);
 }

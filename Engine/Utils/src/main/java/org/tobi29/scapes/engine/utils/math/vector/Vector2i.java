@@ -174,21 +174,27 @@ public class Vector2i extends Vector2 {
 
     @Override
     public int hashCode() {
-        int hash = 17;
-        hash = 31 * hash + x;
-        hash = 31 * hash + y;
-        return hash;
+        int result = x;
+        result = 31 * result + y;
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof Vector2i)) {
-            return false;
-        }
-        if (obj == this) {
+        if (this == obj) {
             return true;
         }
-        Vector2i comp = (Vector2i) obj;
-        return comp.x == x && comp.y == y;
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof MutableVector2) {
+            MutableVector2 other = (MutableVector2) obj;
+            return x == other.intX() && y == other.intY();
+        }
+        if (!(obj instanceof Vector2)) {
+            return false;
+        }
+        Vector2 other = (Vector2) obj;
+        return x == other.intX() && y == other.intY();
     }
 }

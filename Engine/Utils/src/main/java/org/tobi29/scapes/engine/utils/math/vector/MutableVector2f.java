@@ -340,4 +340,30 @@ public class MutableVector2f extends MutableVector2 {
         x = tagStructure.getFloat("X");
         y = tagStructure.getFloat("Y");
     }
+
+    @Override
+    public int hashCode() {
+        int result = x == 0.0f ? 0 : Float.floatToIntBits(x);
+        result = 31 * result + (y == 0.0f ? 0 : Float.floatToIntBits(y));
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof MutableVector2) {
+            MutableVector2 other = (MutableVector2) obj;
+            return x == other.floatX() && y == other.floatY();
+        }
+        if (!(obj instanceof Vector2)) {
+            return false;
+        }
+        Vector2 other = (Vector2) obj;
+        return x == other.floatX() && y == other.floatY();
+    }
 }

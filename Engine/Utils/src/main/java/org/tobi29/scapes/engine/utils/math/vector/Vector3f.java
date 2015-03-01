@@ -216,4 +216,31 @@ public class Vector3f extends Vector3 {
     public boolean hasNaN() {
         return Float.isNaN(x) || Float.isNaN(y) || Float.isNaN(z);
     }
+
+    @Override
+    public int hashCode() {
+        int result = x == 0.0f ? 0 : Float.floatToIntBits(x);
+        result = 31 * result + (y == 0.0f ? 0 : Float.floatToIntBits(y));
+        result = 31 * result + (z == 0.0f ? 0 : Float.floatToIntBits(z));
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof MutableVector3) {
+            MutableVector3 other = (MutableVector3) obj;
+            return x == other.floatX() && y == other.floatY() && z == other.floatZ();
+        }
+        if (!(obj instanceof Vector3)) {
+            return false;
+        }
+        Vector3 other = (Vector3) obj;
+        return x == other.floatX() && y == other.floatY() && z == other.floatZ();
+    }
 }
