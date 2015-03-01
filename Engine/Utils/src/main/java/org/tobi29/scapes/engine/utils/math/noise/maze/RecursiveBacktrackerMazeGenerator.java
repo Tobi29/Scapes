@@ -18,17 +18,20 @@ package org.tobi29.scapes.engine.utils.math.noise.maze;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tobi29.scapes.engine.utils.Pool;
+import org.tobi29.scapes.engine.utils.math.Face;
+import org.tobi29.scapes.engine.utils.math.vector.MutableVector2;
+import org.tobi29.scapes.engine.utils.math.vector.MutableVector2i;
 
-import java.util.Arrays;
 import java.util.Random;
-import java.util.Stack;
 
 public class RecursiveBacktrackerMazeGenerator implements MazeGenerator {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(RecursiveBacktrackerMazeGenerator.class);
+    private static final byte MASK_NORTH = 0x1, MASK_WEST = 0x2, MASK_VISITED =
+            0x4;
     private final int width, height, startX, startY;
-    private boolean[][] north;
-    private boolean[][] west;
+    private byte[][] data;
 
     public RecursiveBacktrackerMazeGenerator(int width, int height,
             Random random) {
@@ -46,60 +49,50 @@ public class RecursiveBacktrackerMazeGenerator implements MazeGenerator {
     @Override
     public void generate(Random random) {
         long time = System.currentTimeMillis();
-        north = new boolean[width][height];
-        west = new boolean[width][height];
-        boolean[][] visited = new boolean[width][height];
-        for (boolean[] array : north) {
-            Arrays.fill(array, true);
-        }
-        for (boolean[] array : west) {
-            Arrays.fill(array, true);
-        }
+        data = new byte[width][height];
         int maxX = width - 1;
         int maxY = height - 1;
-        Cell current = new Cell(startX, startY);
-        Stack<Cell> path = new Stack<>();
-        path.add(current);
-        Direction[] directions = new Direction[4];
+        Pool<MutableVector2> path = new Pool<>(MutableVector2i::new);
+        MutableVector2 current = path.push().set(startX, startY);
+        Face[] directions = new Face[4];
         while (current != null) {
-            visited[current.x][current.y] = true;
+            int x = current.intX();
+            int y = current.intY();
+            data[x][y] |= MASK_VISITED;
             int validDirections = 0;
-            if (current.x < maxX) {
-                if (!visited[current.x + 1][current.y]) {
-                    directions[validDirections++] = Direction.EAST;
+            if (x < maxX) {
+                if ((data[x + 1][y] & MASK_VISITED) == 0) {
+                    directions[validDirections++] = Face.EAST;
                 }
             }
-            if (current.y < maxY) {
-                if (!visited[current.x][current.y + 1]) {
-                    directions[validDirections++] = Direction.SOUTH;
+            if (y < maxY) {
+                if ((data[x][y + 1] & MASK_VISITED) == 0) {
+                    directions[validDirections++] = Face.SOUTH;
                 }
             }
-            if (current.x > 0) {
-                if (!visited[current.x - 1][current.y]) {
-                    directions[validDirections++] = Direction.WEST;
+            if (x > 0) {
+                if ((data[x - 1][y] & MASK_VISITED) == 0) {
+                    directions[validDirections++] = Face.WEST;
                 }
             }
-            if (current.y > 0) {
-                if (!visited[current.x][current.y - 1]) {
-                    directions[validDirections++] = Direction.NORTH;
+            if (y > 0) {
+                if ((data[x][y - 1] & MASK_VISITED) == 0) {
+                    directions[validDirections++] = Face.NORTH;
                 }
             }
             if (validDirections > 0) {
-                Direction direction =
-                        directions[random.nextInt(validDirections)];
-                if (direction == Direction.WEST) {
-                    west[current.x][current.y] = false;
-                } else if (direction == Direction.NORTH) {
-                    north[current.x][current.y] = false;
+                Face direction = directions[random.nextInt(validDirections)];
+                if (direction == Face.NORTH) {
+                    data[x][y] |= MASK_NORTH;
+                } else if (direction == Face.EAST) {
+                    data[x + 1][y] |= MASK_WEST;
+                } else if (direction == Face.SOUTH) {
+                    data[x][y + 1] |= MASK_NORTH;
+                } else if (direction == Face.WEST) {
+                    data[x][y] |= MASK_WEST;
                 }
-                current = new Cell(current.x + direction.x,
-                        current.y + direction.y);
-                path.add(current);
-                if (direction == Direction.EAST) {
-                    west[current.x][current.y] = false;
-                } else if (direction == Direction.SOUTH) {
-                    north[current.x][current.y] = false;
-                }
+                current = path.push()
+                        .set(x + direction.getX(), y + direction.getY());
             } else {
                 if (!path.isEmpty()) {
                     current = path.pop();
@@ -108,7 +101,7 @@ public class RecursiveBacktrackerMazeGenerator implements MazeGenerator {
                 }
             }
         }
-        LOGGER.info("Generated recursive-backtracker-maze in {} ms.",
+        LOGGER.debug("Generated recursive-backtracker-maze in {} ms.",
                 System.currentTimeMillis() - time);
     }
 
@@ -122,13 +115,13 @@ public class RecursiveBacktrackerMazeGenerator implements MazeGenerator {
             int yy = y * cellSizeY;
             for (int x = 0; x < width; x++) {
                 int xx = x * cellSizeX;
-                if (north[x][y]) {
+                if ((data[x][y] & MASK_NORTH) == 0) {
                     for (int wall = 0; wall <= cellSizeX; wall++) {
                         blocks[xx + wall][yy] = true;
                     }
                 }
-                if (west[x][y]) {
-                    for (int wall = 0; wall <= cellSizeX; wall++) {
+                if ((data[x][y] & MASK_WEST) == 0) {
+                    for (int wall = 0; wall <= cellSizeY; wall++) {
                         blocks[xx][yy + wall] = true;
                     }
                 }
@@ -143,27 +136,5 @@ public class RecursiveBacktrackerMazeGenerator implements MazeGenerator {
             blocks[x][i] = true;
         }
         return blocks;
-    }
-
-    private enum Direction {
-        EAST(1, 0),
-        SOUTH(0, 1),
-        WEST(-1, 0),
-        NORTH(0, -1);
-        public final int x, y;
-
-        Direction(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-    }
-
-    private static class Cell {
-        private final int x, y;
-
-        public Cell(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
     }
 }
