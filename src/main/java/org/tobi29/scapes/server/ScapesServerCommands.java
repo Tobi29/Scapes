@@ -26,6 +26,7 @@ import org.tobi29.scapes.packets.PacketDisconnect;
 import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.command.CommandRegistry;
 import org.tobi29.scapes.server.connection.PlayerConnection;
+import org.tobi29.scapes.server.format.PlayerBans;
 
 final class ScapesServerCommands {
     private ScapesServerCommands() {
@@ -176,7 +177,7 @@ final class ScapesServerCommands {
                     if (messageArray.length == 0) {
                         message = "Kick by an Admin!";
                     } else {
-                        message = ArrayUtil.join(args.getArgs(), " ");
+                        message = ArrayUtil.join(messageArray, " ");
                     }
                     commands.add(() -> {
                         PlayerConnection player = server.getConnection()
@@ -185,6 +186,53 @@ final class ScapesServerCommands {
                         player.send(new PacketDisconnect(message));
                     });
                 });
+
+        registry.register("ban", 9, options -> {
+            options.add("p", "player", true, "Player to be banned");
+            options.add("i", "id", true, "ID of ban");
+            options.add("k", "key", false, "Add key to ban entry");
+            options.add("a", "address", false, "Add address to ban entry");
+            options.add("n", "nickname", false, "Add nickname to ban entry");
+        }, (args, executor, commands) -> {
+            String playerName = args.getOption('p');
+            Command.require(playerName, 'p');
+            boolean key = args.hasOption('k');
+            boolean address = args.hasOption('a');
+            boolean banNickname = args.hasOption('n');
+            boolean banKey, banAddress;
+            if (!key && !address && !banNickname) {
+                banKey = true;
+                banAddress = true;
+            } else {
+                banKey = key;
+                banAddress = address;
+            }
+            String id = args.getOption('i', playerName);
+            String reason = ArrayUtil.join(args.getArgs(), " ");
+            commands.add(() -> {
+                PlayerConnection player =
+                        server.getConnection().getPlayerByName(playerName);
+                Command.require(player, playerName);
+                server.getWorldFormat().getPlayerBans()
+                        .ban(player, id, reason, banKey, banAddress,
+                                banNickname);
+            });
+        });
+
+        registry.register("unban", 9,
+                options -> options.add("i", "id", true, "ID of ban"),
+                (args, executor, commands) -> {
+                    String id = args.getOption('i');
+                    Command.require(id, 'i');
+                    commands.add(() -> server.getWorldFormat().getPlayerBans()
+                            .unban(id));
+                });
+
+        registry.register("banlist", 9, options -> {
+        }, (args, executor, commands) -> commands
+                .add(() -> server.getWorldFormat().getPlayerBans().getEntries()
+                        .map(PlayerBans.Entry::toString)
+                        .forEach(executor::tell)));
 
         registry.register("op", 10, options -> {
             options.add("p", "player", true,

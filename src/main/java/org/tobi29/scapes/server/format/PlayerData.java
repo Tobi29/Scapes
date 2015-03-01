@@ -77,18 +77,4 @@ public class PlayerData {
         }
         return false;
     }
-
-    public boolean checkKey(String id, String key) {
-        try {
-            File file = directory.getResource(id + ".stag");
-            if (file.exists()) {
-                TagStructure tagStructure =
-                        file.readAndReturn(TagStructureBinary::read);
-                return tagStructure.getString("Key").equals(key);
-            }
-        } catch (IOException e) {
-            LOGGER.error("Error checking player data: {}", e.toString());
-        }
-        return false;
-    }
 }

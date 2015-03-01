@@ -28,6 +28,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
 import org.tobi29.scapes.engine.utils.io.filesystem.File;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
+import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
 import org.tobi29.scapes.plugins.Dimension;
 import org.tobi29.scapes.plugins.PluginFile;
 import org.tobi29.scapes.plugins.Plugins;
@@ -49,6 +50,7 @@ public class WorldFormat {
     private final Directory directory;
     private final Plugins plugins;
     private final PlayerData playerData;
+    private final PlayerBans playerBans;
     private final TagStructure worldsTagStructure;
     private final Map<String, WorldServer> worlds = new ConcurrentHashMap<>();
     private final long seed;
@@ -58,6 +60,13 @@ public class WorldFormat {
         this.server = server;
         this.directory = directory;
         playerData = new PlayerData(server, directory.get("players"));
+        File bansFile = directory.getResource("Bans.json");
+        if (bansFile.exists()) {
+            playerBans = new PlayerBans(
+                    bansFile.readAndReturn(TagStructureJSON::read));
+        } else {
+            playerBans = new PlayerBans();
+        }
         TagStructure tagStructure = directory.getResource("Data.stag")
                 .readAndReturn(TagStructureBinary::read);
         idStorage.load(tagStructure.getStructure("IDs"));
@@ -81,6 +90,10 @@ public class WorldFormat {
 
     public PlayerData getPlayerData() {
         return playerData;
+    }
+
+    public PlayerBans getPlayerBans() {
+        return playerBans;
     }
 
     public long getSeed() {
@@ -107,12 +120,13 @@ public class WorldFormat {
                 controlPanel -> controlPanel.updateWorlds(worldsArray));
     }
 
-    public synchronized WorldServer registerWorld(Dimension dimension) throws IOException {
+    public synchronized WorldServer registerWorld(Dimension dimension)
+            throws IOException {
         return registerWorld(dimension, dimension.getID());
     }
 
-    public synchronized WorldServer registerWorld(Dimension dimension, String name)
-            throws IOException {
+    public synchronized WorldServer registerWorld(Dimension dimension,
+            String name) throws IOException {
         Directory worldDirectory =
                 directory.get("region/" + name.toLowerCase());
         WorldServer world = new WorldServer(this, name, dimension.getID(),
@@ -151,6 +165,8 @@ public class WorldFormat {
         tagStructure.setStructure("Worlds", worldsTagStructure);
         directory.getResource("Data.stag").write(streamOut -> TagStructureBinary
                 .write(tagStructure, streamOut));
+        directory.getResource("Bans.json").write(streamOut -> TagStructureJSON
+                .write(playerBans.write(), streamOut));
         plugins.dispose();
     }
 

@@ -201,7 +201,6 @@ public class ServerConnection implements PlayConnection {
             players.put(connection.getID(), connection);
             playerByName.put(connection.getNickname(), connection);
         }
-        LOGGER.info("Added player: {}", connection.getNickname());
         updateControlPanelPlayers();
         return Optional.empty();
     }
@@ -209,7 +208,6 @@ public class ServerConnection implements PlayConnection {
     protected void removePlayer(PlayerConnection connection) {
         players.remove(connection.getID());
         playerByName.remove(connection.getNickname());
-        LOGGER.info("Removed player: {}", connection.getNickname());
         updateControlPanelPlayers();
     }
 

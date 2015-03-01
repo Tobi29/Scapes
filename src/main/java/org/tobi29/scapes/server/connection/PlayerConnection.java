@@ -47,6 +47,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
@@ -65,11 +68,11 @@ public class PlayerConnection
     private final GameRegistry registry;
     private final Queue<Packet> sendQueue = new ConcurrentLinkedQueue<>();
     private final AtomicInteger sendQueueSize = new AtomicInteger();
-    private final byte[] key = new byte[550];
     private State state = State.LOGIN_STEP_1;
     private byte[] challenge;
     private MobPlayerServer entity;
     private ServerSkin skin;
+    private PublicKey key;
     private String id, nickname = "_Error_";
     private int loadingRadius, permissionLevel;
     private PlayerStatistics statistics;
@@ -102,8 +105,24 @@ public class PlayerConnection
         return skin;
     }
 
+    public PublicKey getKey() {
+        return key;
+    }
+
     public String getID() {
         return id;
+    }
+
+    public Optional<InetAddress> getAddress() {
+        Optional<SocketAddress> address = channel.getRemoteAddress();
+        if (address.isPresent()) {
+            SocketAddress socketAddress = address.get();
+            if (socketAddress instanceof InetSocketAddress) {
+                return Optional
+                        .of(((InetSocketAddress) socketAddress).getAddress());
+            }
+        }
+        return Optional.empty();
     }
 
     public String getNickname() {
@@ -149,16 +168,17 @@ public class PlayerConnection
     }
 
     private void loginStep3(DataInputStream streamIn) throws IOException {
-        streamIn.readFully(key);
-        id = ChecksumUtil.getChecksum(key);
+        byte[] array = new byte[550];
+        streamIn.readFully(array);
+        id = ChecksumUtil.getChecksum(array);
         challenge = new byte[501];
         new SecureRandom().nextBytes(challenge);
         DataOutputStream streamOut = channel.getOutputStream();
         try {
-            PublicKey rsaKey = KeyFactory.getInstance("RSA")
-                    .generatePublic(new X509EncodedKeySpec(key));
+            key = KeyFactory.getInstance("RSA")
+                    .generatePublic(new X509EncodedKeySpec(array));
             Cipher cipher = Cipher.getInstance("RSA");
-            cipher.init(Cipher.ENCRYPT_MODE, rsaKey);
+            cipher.init(Cipher.ENCRYPT_MODE, key);
             streamOut.write(cipher.doFinal(challenge));
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidKeySpecException e) {
             throw new IOException(e);
@@ -207,7 +227,8 @@ public class PlayerConnection
                 sendPlugin(plugins.get(request).getFile(), streamOut);
             }
             channel.queueBundle();
-            LOGGER.info("Client accepted: {}", channel.toString());
+            LOGGER.info("Client accepted: {} ({}) on {}", id, nickname,
+                    channel.toString());
         }
     }
 
@@ -256,8 +277,14 @@ public class PlayerConnection
             }
         }
         Optional<String> nicknameCheck = Account.isNameValid(nickname);
-        if (nicknameCheck != null) {
+        if (nicknameCheck.isPresent()) {
             return nicknameCheck;
+        }
+        Optional<String> banCheck =
+                server.getServer().getWorldFormat().getPlayerBans()
+                        .matches(this);
+        if (banCheck.isPresent()) {
+            return banCheck;
         }
         return Optional.empty();
     }
@@ -424,6 +451,7 @@ public class PlayerConnection
                         .save(tagStructure, id);
             }
         }
+        LOGGER.info("Client disconnected: {} ({})", id, nickname);
     }
 
     @Override

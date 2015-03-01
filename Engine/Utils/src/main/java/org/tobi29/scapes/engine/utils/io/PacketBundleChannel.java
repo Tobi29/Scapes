@@ -27,6 +27,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
@@ -311,6 +312,14 @@ public class PacketBundleChannel {
 
     public int getInputRate() {
         return inRate.getAndSet(0);
+    }
+
+    public Optional<SocketAddress> getRemoteAddress() {
+        try {
+            return Optional.of(channel.getRemoteAddress());
+        } catch (IOException e) {
+            return Optional.empty();
+        }
     }
 
     @SuppressWarnings("ObjectToString")
