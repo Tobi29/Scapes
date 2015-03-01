@@ -55,7 +55,7 @@ public final class PNG {
             byte[] scanline = line.getScanline();
             if (alpha) {
                 for (int y = height - 1; y >= 0; y--) {
-                    buffer.position(y * height << 2);
+                    buffer.position(y * width << 2);
                     int x = 0;
                     while (x < scanline.length) {
                         scanline[x++] = buffer.get();
