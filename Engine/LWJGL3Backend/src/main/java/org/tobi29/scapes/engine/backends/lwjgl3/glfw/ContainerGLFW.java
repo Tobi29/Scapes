@@ -270,9 +270,10 @@ public class ContainerGLFW extends ContainerLWJGL3 {
             }
         }
         GLFW.glfwPollEvents();
+        active |= containerResized;
+        engine.getGraphics().render(active);
+        containerResized = false;
         if (active) {
-            engine.getGraphics().render();
-            containerResized = false;
             GLFW.glfwSwapBuffers(window);
         }
         if (!visible) {
