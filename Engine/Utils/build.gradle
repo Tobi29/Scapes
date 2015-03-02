@@ -16,6 +16,8 @@
 
 
 
+
+
 apply from: "$rootDir/resources/scapesenginemodule.gradle"
 
 version = "0.0.0_1"
@@ -23,7 +25,6 @@ version = "0.0.0_1"
 dependencies {
     compile "org.slf4j:slf4j-api:1.7.10"
     compile "org.glassfish:javax.json:1.0.4"
-    compile "org.l33tlabs.twl:pngdecoder:1.0"
     compile "ar.com.hjg:pngj:2.1.0"
     compile "org.apache.tika:tika-core:1.7"
 

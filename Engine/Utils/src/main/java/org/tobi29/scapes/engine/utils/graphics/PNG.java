@@ -16,11 +16,7 @@
 
 package org.tobi29.scapes.engine.utils.graphics;
 
-import ar.com.hjg.pngj.ImageInfo;
-import ar.com.hjg.pngj.ImageLineByte;
-import ar.com.hjg.pngj.PngWriter;
-import ar.com.hjg.pngj.PngjException;
-import de.matthiasmann.twl.utils.PNGDecoder;
+import ar.com.hjg.pngj.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,11 +29,29 @@ public final class PNG {
 
     public static Image decode(InputStream streamIn, BufferSupplier supplier)
             throws IOException {
-        PNGDecoder decoder = new PNGDecoder(streamIn);
-        int width = decoder.getWidth();
-        int height = decoder.getHeight();
+        PngReaderByte reader = new PngReaderByte(streamIn);
+        int width = reader.imgInfo.cols;
+        int height = reader.imgInfo.rows;
+        boolean fillAlpha = !reader.imgInfo.alpha;
         ByteBuffer buffer = supplier.bytes(width * height << 2);
-        decoder.decode(buffer, width << 2, PNGDecoder.Format.RGBA);
+        if (fillAlpha) {
+            for (int i = 0; i < height; i++) {
+                ImageLineByte line = reader.readRowByte();
+                byte[] array = line.getScanlineByte();
+                int j = 0;
+                while (j < array.length) {
+                    buffer.put(array[j++]);
+                    buffer.put(array[j++]);
+                    buffer.put(array[j++]);
+                    buffer.put((byte) 0xFF);
+                }
+            }
+        } else {
+            for (int i = 0; i < height; i++) {
+                ImageLineByte line = reader.readRowByte();
+                buffer.put(line.getScanlineByte());
+            }
+        }
         buffer.rewind();
         return new Image(width, height, buffer);
     }
