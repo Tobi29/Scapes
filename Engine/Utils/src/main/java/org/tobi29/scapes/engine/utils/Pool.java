@@ -76,6 +76,24 @@ public class Pool<E> implements Iterable<E> {
         return value;
     }
 
+    public E get(int i) {
+        if (i >= size) {
+            throw new IndexOutOfBoundsException(
+                    "Index: " + i + " Size: " + size);
+        }
+        return list.get(i);
+    }
+
+    public E pop() {
+        size--;
+        return list.get(size);
+    }
+
+    public boolean remove(E element) {
+        size--;
+        return list.remove(element);
+    }
+
     /**
      * Returns an {@code Iterator} to iterate through all objects previously
      * retrieved by {@linkplain #push()}
@@ -125,8 +143,20 @@ public class Pool<E> implements Iterable<E> {
     }
 
     public boolean contains(E element) {
-        int index = list.indexOf(element);
-        return index >= 0 && index < size;
+        if (element == null) {
+            for (int i = 0; i < size; i++) {
+                if (list.get(i) == null) {
+                    return true;
+                }
+            }
+        } else {
+            for (int i = 0; i < size; i++) {
+                if (element.equals(list.get(i))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public boolean isEmpty() {
