@@ -35,8 +35,8 @@ public class SWTGlyphRenderer implements GlyphRenderer {
             glyphSize, imageSize, renderX, renderY;
     private final float tileSize;
     private final int[] color;
-    private Font font;
     private Image image;
+    private Font font;
 
     public SWTGlyphRenderer(String fontName, int size) {
         this.fontName = fontName;
@@ -61,20 +61,23 @@ public class SWTGlyphRenderer implements GlyphRenderer {
         MutableSingle<ImageData> output = new MutableSingle<>(null);
         Display display = Display.getDefault();
         display.syncExec(() -> {
-            if (font == null) {
-                double fontSize;
-                if ("gtk".equals(SWT.getPlatform())) {
-                    fontSize = size * 0.7; // Note to self: SWT is NOT platform independent by any means
-                } else {
-                    fontSize = size;
-                }
-                font = new Font(display, fontName, FastMath.round(fontSize),
-                        SWT.NONE);
-            }
             if (image == null) {
                 ImageData imageData =
                         new ImageData(imageSize, imageSize, 24, PALETTE_DATA);
                 image = new Image(display, imageData);
+            }
+            if (font == null) {
+                font = new Font(display, fontName, size, SWT.NONE);
+                GC gc = new GC(image);
+                gc.setFont(font);
+                int height = FastMath.round(gc.stringExtent("").y * 0.85);
+                if (height != size) {
+                    double scale = (double) size / height;
+                    font.dispose();
+                    font = new Font(display, fontName,
+                            FastMath.round(size * scale), SWT.NONE);
+                }
+                gc.dispose();
             }
             GC gc = new GC(image);
             gc.setFont(font);
@@ -121,11 +124,11 @@ public class SWTGlyphRenderer implements GlyphRenderer {
 
     @Override
     public void dispose() {
-        if (font != null) {
-            font.dispose();
-        }
         if (image != null) {
             image.dispose();
+        }
+        if (font != null) {
+            font.dispose();
         }
     }
 }
