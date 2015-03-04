@@ -29,31 +29,36 @@ public final class PNG {
 
     public static Image decode(InputStream streamIn, BufferSupplier supplier)
             throws IOException {
-        PngReaderByte reader = new PngReaderByte(streamIn);
-        int width = reader.imgInfo.cols;
-        int height = reader.imgInfo.rows;
-        boolean fillAlpha = !reader.imgInfo.alpha;
-        ByteBuffer buffer = supplier.bytes(width * height << 2);
-        if (fillAlpha) {
-            for (int i = 0; i < height; i++) {
-                ImageLineByte line = reader.readRowByte();
-                byte[] array = line.getScanlineByte();
-                int j = 0;
-                while (j < array.length) {
-                    buffer.put(array[j++]);
-                    buffer.put(array[j++]);
-                    buffer.put(array[j++]);
-                    buffer.put((byte) 0xFF);
+        try {
+            PngReaderByte reader = new PngReaderByte(streamIn);
+            int width = reader.imgInfo.cols;
+            int height = reader.imgInfo.rows;
+            boolean fillAlpha = !reader.imgInfo.alpha;
+            ByteBuffer buffer = supplier.bytes(width * height << 2);
+            if (fillAlpha) {
+                for (int i = 0; i < height; i++) {
+                    ImageLineByte line = reader.readRowByte();
+                    byte[] array = line.getScanlineByte();
+                    int j = 0;
+                    while (j < array.length) {
+                        buffer.put(array[j++]);
+                        buffer.put(array[j++]);
+                        buffer.put(array[j++]);
+                        buffer.put((byte) 0xFF);
+                    }
+                }
+            } else {
+                for (int i = 0; i < height; i++) {
+                    ImageLineByte line = reader.readRowByte();
+                    buffer.put(line.getScanlineByte());
                 }
             }
-        } else {
-            for (int i = 0; i < height; i++) {
-                ImageLineByte line = reader.readRowByte();
-                buffer.put(line.getScanlineByte());
-            }
+            reader.end();
+            buffer.rewind();
+            return new Image(width, height, buffer);
+        } catch (PngjException e) {
+            throw new IOException(e);
         }
-        buffer.rewind();
-        return new Image(width, height, buffer);
     }
 
     public static void encode(Image image, OutputStream streamOut, int level,
