@@ -16,13 +16,15 @@
 
 
 
+
+
 apply from: "$rootDir/resources/scapesenginemodule.gradle"
 
 version = "0.0.0_1"
 
 File lwjglJar = file("build/tmp/LWJGL/lwjgl.zip")
 if (!lwjglJar.exists()) {
-    URL url = new URL("http://build.lwjgl.org/nightly/lwjgl.zip");
+    URL url = new URL("http://build.lwjgl.org/stable/lwjgl.zip");
     lwjglJar.parentFile.mkdirs()
     InputStream streamIn = url.openStream()
     try {
