@@ -82,13 +82,13 @@ public class EntityModelBellows implements EntityModel {
         matrix = matrixStack.push();
         matrix.scale(1.0f, 1.0f, scale);
         graphics.getTextureManager()
-                .bind("VanillaBasics:image/terrain/tree/planks/Birch",
+                .bind("VanillaBasics:image/terrain/tree/birch/Planks",
                         graphics);
         MIDDLE.render(1.0f, 1.0f, 1.0f, 1.0f, graphics, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
         graphics.getTextureManager()
-                .bind("VanillaBasics:image/terrain/tree/planks/Oak", graphics);
+                .bind("VanillaBasics:image/terrain/tree/oak/Planks", graphics);
         matrix.translate(0.0f, 0.0f, scale * 0.5f);
         SIDE.render(1.0f, 1.0f, 1.0f, 1.0f, graphics, shader);
         matrixStack.pop();
