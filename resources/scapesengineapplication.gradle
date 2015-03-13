@@ -16,9 +16,6 @@
 
 
 
-
-
-
 apply from: "$rootDir/resources/scapesenginemodule.gradle"
 
 apply plugin: ScapesEngineApplication
