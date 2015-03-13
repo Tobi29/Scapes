@@ -16,10 +16,8 @@
 
 package org.tobi29.scapes.engine.backends.lwjgl3;
 
-import org.lwjgl.openal.AL;
-import org.lwjgl.openal.AL10;
-import org.lwjgl.openal.AL11;
-import org.lwjgl.openal.ALContext;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.openal.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.openal.AudioFormat;
@@ -52,7 +50,18 @@ public class LWJGL3OpenAL implements OpenAL {
 
     @Override
     public void create() {
-        context = ALContext.create();
+        ALDevice device = ALDevice.create(null);
+        long devicePointer = device.getPointer();
+        IntBuffer attributes = BufferUtils.createIntBuffer(5 << 2);
+        int frequency = ALC10.alcGetInteger(devicePointer, ALC10.ALC_FREQUENCY);
+        attributes.put(ALC10.ALC_FREQUENCY);
+        attributes.put(frequency);
+        attributes.put(ALC10.ALC_SYNC);
+        attributes.put(ALC10.ALC_FALSE);
+        attributes.put(0);
+        attributes.flip();
+        long contextHandle = ALC10.alcCreateContext(devicePointer, attributes);
+        context = new ALContext(device, contextHandle);
         LOGGER.info("OpenAL: {} (Vendor: {}, Renderer: {})",
                 AL10.alGetString(AL10.AL_VERSION),
                 AL10.alGetString(AL10.AL_VENDOR),

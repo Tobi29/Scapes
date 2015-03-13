@@ -59,7 +59,7 @@ public class ContainerGLFW extends ContainerLWJGL3 {
     private final Map<Integer, boolean[]> virtualJoystickStates =
             new ConcurrentHashMap<>();
     private long window;
-    private boolean skipMouseCallback, recreateContext, visible;
+    private boolean skipMouseCallback, recreateContext, visible, mouseGrabbed;
 
     public ContainerGLFW(ScapesEngine engine) {
         super(engine);
@@ -162,28 +162,6 @@ public class ContainerGLFW extends ContainerLWJGL3 {
 
     @Override
     public void setMouseGrabbed(boolean value) {
-        if (mouseGrabbed != value) {
-            if (value) {
-                mouseGrabbed = true;
-                GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR,
-                        GLFW.GLFW_CURSOR_DISABLED);
-                GLFW.glfwSetCursorPos(window, 0.0d, 0.0d);
-                mouseX = 0.0d;
-                mouseY = 0.0d;
-                skipMouseCallback = true;
-            } else {
-                mouseGrabbed = false;
-                mouseX = containerWidth * 0.5;
-                mouseY = containerHeight * 0.5;
-                GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR,
-                        GLFW.GLFW_CURSOR_NORMAL);
-                GLFW.glfwSetCursorPos(window, mouseX, mouseY);
-            }
-        }
-    }
-
-    @Override
-    protected void updateMouseGrabbed(boolean value) {
         if (value) {
             mouseGrabbed = true;
             GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR,
@@ -203,13 +181,29 @@ public class ContainerGLFW extends ContainerLWJGL3 {
     }
 
     @Override
-    public void updateVSync(boolean value) {
+    public void setVSync(boolean value) {
         GLFW.glfwSwapInterval(value ? 1 : 0);
     }
 
     @Override
-    protected void updateFullscreen(boolean value) {
+    public void setFullscreen(boolean value) {
         recreateContext = true;
+    }
+
+    @Override
+    public void dispose() {
+        dialogs.dispose();
+        GLFW.glfwDestroyWindow(window);
+        GLFW.glfwTerminate();
+        windowSizeFun.release();
+        windowCloseFun.release();
+        windowFocusFun.release();
+        frameBufferSizeFun.release();
+        keyFun.release();
+        charFun.release();
+        mouseButtonFun.release();
+        cursorPosFun.release();
+        scrollFun.release();
     }
 
     @SuppressWarnings("ForLoopThatDoesntUseLoopVariable")
@@ -292,7 +286,8 @@ public class ContainerGLFW extends ContainerLWJGL3 {
     }
 
     @Override
-    protected void createWindow(boolean fullscreen, String title) {
+    protected void createWindow(boolean fullscreen, boolean vSync,
+            String title) {
         LOGGER.info("Creating GLFW window...");
         long monitor = GLFW.glfwGetPrimaryMonitor();
         ByteBuffer videoMode = GLFW.glfwGetVideoMode(monitor);
@@ -344,22 +339,7 @@ public class ContainerGLFW extends ContainerLWJGL3 {
         GLFW.glfwSetCursorPosCallback(window, cursorPosFun);
         GLFW.glfwSetScrollCallback(window, scrollFun);
         GLFW.glfwMakeContextCurrent(window);
-    }
-
-    @Override
-    public void dispose() {
-        dialogs.dispose();
-        GLFW.glfwDestroyWindow(window);
-        GLFW.glfwTerminate();
-        windowSizeFun.release();
-        windowCloseFun.release();
-        windowFocusFun.release();
-        frameBufferSizeFun.release();
-        keyFun.release();
-        charFun.release();
-        mouseButtonFun.release();
-        cursorPosFun.release();
-        scrollFun.release();
+        GLFW.glfwSwapInterval(vSync ? 1 : 0);
     }
 
     @Override

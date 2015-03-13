@@ -48,8 +48,7 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
     protected final OpenAL openAL;
     protected final boolean superModifier;
     protected GLContext context;
-    protected boolean focus = true, vSync, containerResized = true,
-            mouseGrabbed, fullscreen;
+    protected boolean focus = true, containerResized = true;
     protected int containerWidth, containerHeight, contentWidth, contentHeight;
     protected double mouseX, mouseY;
     protected volatile boolean joysticksChanged;
@@ -63,8 +62,6 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
         openGL = new LWJGL3OpenGL(engine);
         openAL = new LWJGL3OpenAL();
         superModifier = LWJGLUtil.getPlatform() == LWJGLUtil.Platform.MACOSX;
-        fullscreen = engine.getConfig().isFullscreen();
-        vSync = engine.getConfig().getVSync();
     }
 
     private static Optional<String> checkContext(GLContext context) {
@@ -107,7 +104,9 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
 
     @Override
     public void init() {
-        createWindow(fullscreen, engine.getGame().getName());
+        boolean fullscreen = engine.getConfig().isFullscreen();
+        boolean vSync = engine.getConfig().getVSync();
+        createWindow(fullscreen, vSync, engine.getGame().getName());
         context = GLContext.createFromCurrent();
         Optional<String> check = checkContext(context);
         if (check.isPresent()) {
@@ -139,30 +138,6 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
     @Override
     public boolean getContainerResized() {
         return containerResized;
-    }
-
-    @Override
-    public void setMouseGrabbed(boolean value) {
-        if (mouseGrabbed != value) {
-            updateMouseGrabbed(value);
-            mouseGrabbed = value;
-        }
-    }
-
-    @Override
-    public void setVSync(boolean value) {
-        if (vSync != value) {
-            updateVSync(value);
-            vSync = value;
-        }
-    }
-
-    @Override
-    public void setFullscreen(boolean value) {
-        if (fullscreen != value) {
-            updateFullscreen(value);
-            fullscreen = value;
-        }
     }
 
     @Override
@@ -204,15 +179,10 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
         return joysticksChanged;
     }
 
-    protected abstract void updateMouseGrabbed(boolean value);
-
-    protected abstract void updateVSync(boolean value);
-
-    protected abstract void updateFullscreen(boolean value);
-
     protected abstract void render(boolean active);
 
-    protected abstract void createWindow(boolean fullscreen, String title);
+    protected abstract void createWindow(boolean fullscreen, boolean vSync,
+            String title);
 
     @Override
     public boolean isModifierDown() {

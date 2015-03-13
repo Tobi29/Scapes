@@ -70,7 +70,7 @@ public class ScapesEngine implements Crashable {
     private SoundSystem sounds;
     private ControllerDefault controller;
     private GuiController guiController;
-    private boolean running = true;
+    private boolean running = true, mouseGrabbed;
     private GameState currentState, newState;
     private StateThread stateThread;
 
@@ -347,8 +347,12 @@ public class ScapesEngine implements Crashable {
 
     private void update(double delta, GameState state) {
         taskExecutor.tick();
-        graphics.getContainer().setMouseGrabbed(currentState.isMouseGrabbed() ||
-                guiController.isSoftwareMouse());
+        boolean mouseGrabbed = currentState.isMouseGrabbed() ||
+                guiController.isSoftwareMouse();
+        if (this.mouseGrabbed != mouseGrabbed) {
+            this.mouseGrabbed = mouseGrabbed;
+            graphics.getContainer().setMouseGrabbed(mouseGrabbed);
+        }
         controller.poll();
         usedMemoryDebug.setValue(
                 (runtime.totalMemory() - runtime.freeMemory()) / 1048576);
