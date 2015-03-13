@@ -48,9 +48,9 @@ public class ProfilerGraph extends Composite {
         canvas.setLayoutData(
                 new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
         canvas.addListener(SWT.Resize, event -> {
-            i = 0;
             Point size = canvas.getSize();
             if (data.length != size.x) {
+                i = 0;
                 data = new double[size.x];
             }
         });
