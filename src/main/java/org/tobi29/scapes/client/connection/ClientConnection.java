@@ -356,12 +356,12 @@ public class ClientConnection
 
     public void changeWorld(WorldClient world, int playerID,
             TagStructure tagStructure) {
-        LOGGER.info("Received player entity: {} with id: {}", entity, playerID);
         this.world = world;
         entity = world.getPlayer();
         entity.read(tagStructure);
         world.addEntity(entity, playerID);
         game.setScene(world.getScene());
+        LOGGER.info("Received player entity: {} with id: {}", entity, playerID);
     }
 
     public void updatePing(long ping) {
