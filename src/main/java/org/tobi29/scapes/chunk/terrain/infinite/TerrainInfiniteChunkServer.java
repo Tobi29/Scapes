@@ -81,7 +81,7 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
                 }
             }
             Random random = ThreadLocalRandom.current();
-            for (int i = 0; i < zSize / 128; i++) {
+            if (random.nextInt(16) == 0) {
                 int x = random.nextInt(16);
                 int y = random.nextInt(16);
                 int z = random.nextInt(zSize);
@@ -253,8 +253,6 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
                     .populate(handle, posBlock.intX(), posBlock.intY(), 16,
                             16));
             updateSunLight();
-            terrain.getLighting()
-                    .initLight(posBlock.intX(), posBlock.intY(), 16, 16);
             bID.compress();
             bData.compress();
             bLight.compress();

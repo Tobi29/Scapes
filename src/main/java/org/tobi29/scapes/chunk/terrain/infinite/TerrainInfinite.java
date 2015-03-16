@@ -188,13 +188,8 @@ public abstract class TerrainInfinite implements Terrain {
 
     @Override
     public boolean isBlockAvailable(int x, int y, int z) {
-        if (z < 0 || z >= zSize) {
-            return false;
-        }
-        Optional<? extends TerrainInfiniteChunk> chunk =
-                getChunkNoLoad(FastMath.floor(x / 16.0d),
-                        FastMath.floor(y / 16.0d));
-        return chunk.isPresent();
+        return z >= 0 && z < zSize &&
+                hasChunk(FastMath.floor(x / 16.0d), FastMath.floor(y / 16.0d));
     }
 
     @Override
@@ -285,13 +280,8 @@ public abstract class TerrainInfinite implements Terrain {
         return chunkManager.has(x, y);
     }
 
-    public Optional<? extends TerrainInfiniteChunk> getChunk(int x, int y) {
-        Optional<? extends TerrainInfiniteChunk> chunk = chunkManager.get(x, y);
-        if (chunk.isPresent()) {
-            return chunk;
-        }
-        return addChunk(x, y);
-    }
+    public abstract Optional<? extends TerrainInfiniteChunk> getChunk(int x,
+            int y);
 
     public abstract Optional<? extends TerrainInfiniteChunk> addChunk(int x,
             int y);

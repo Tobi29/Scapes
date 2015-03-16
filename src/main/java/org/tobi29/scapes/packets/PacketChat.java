@@ -73,12 +73,11 @@ public class PacketChat extends Packet implements PacketServer, PacketClient {
         }
         if (text.charAt(0) == '/') {
             player.getServer().getServer().getCommandRegistry()
-                    .get(text.substring(1), player).execute().forEach(
-                    output -> player.send(new PacketChat(output.toString())));
+                    .get(text.substring(1), player).execute()
+                    .forEach(output -> player.tell(output.toString()));
         } else {
-            player.getServer().send(new PacketChat(
-                    '<' + player.getMob().getNickname() + "> " +
-                            text));
+            player.getServer().chat('<' + player.getMob().getNickname() + "> " +
+                    text);
         }
     }
 }

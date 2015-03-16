@@ -17,22 +17,14 @@
 package org.tobi29.scapes.plugins;
 
 import org.tobi29.scapes.block.GameRegistry;
+import org.tobi29.scapes.chunk.WorldClient;
+import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.server.ScapesServer;
 
 /**
  * Basic interface for generic plugins
  */
 public interface Plugin {
-    /**
-     * Called when the game is shutting down (Textures, sounds and VAOs are
-     * disposed automatically! (Textures that are not loaded through the {@code
-     * TextureManager} are not disposed automatically! So you have to dispose
-     * these yourself!))
-     *
-     * @param registry Used to register blocks, entities etc.
-     */
-    void dispose(GameRegistry registry);
-
     /**
      * Called when the game is starting (Do your registering and loading here)
      *
@@ -53,6 +45,32 @@ public interface Plugin {
      * @param server Server that this plugin is running on
      */
     void initServer(ScapesServer server);
+
+    /**
+     * Called when a world initializes
+     *
+     * @param world The {@code World} that is initializing
+     */
+    void worldInit(WorldServer world);
+
+    void worldInit(WorldClient world);
+
+    /**
+     * Called when a world ticks
+     *
+     * @param world The {@code World} that is ticking
+     */
+    void worldTick(WorldServer world);
+
+    /**
+     * Called when the game is shutting down (Textures, sounds and VAOs are
+     * disposed automatically! (Textures that are not loaded through the {@code
+     * TextureManager} are not disposed automatically! So you have to dispose
+     * these yourself!))
+     *
+     * @param registry Used to register blocks, entities etc.
+     */
+    void dispose(GameRegistry registry);
 
     /**
      * Name of the plugin

@@ -20,14 +20,10 @@ import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.block.Update;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
-import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator;
 import org.tobi29.scapes.vanilla.basics.generator.WorldEnvironmentOverworld;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
-
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class UpdateGrassGrowth extends Update {
     public UpdateGrassGrowth(GameRegistry registry) {
@@ -51,17 +47,6 @@ public class UpdateGrassGrowth extends Update {
             double humidity = climateGenerator.getHumidity(x, y, z);
             if (humidity < 0.2) {
                 terrain.setBlockType(x, y, z, materials.dirt);
-            } else {
-                Random random = ThreadLocalRandom.current();
-                if (random.nextInt(32) == 0) {
-                    int data = terrain.getBlockData(x, y, z);
-                    if (random.nextInt(data < 4 ? 3 : 2) == 0) {
-                        data = FastMath.max(data - 1, 0);
-                    } else {
-                        data = FastMath.min(data + 1, 8);
-                    }
-                    terrain.setBlockData(x, y, z, data);
-                }
             }
         } else if (type == materials.dirt) {
             WorldEnvironmentOverworld environment =
@@ -70,14 +55,12 @@ public class UpdateGrassGrowth extends Update {
             ClimateGenerator climateGenerator =
                     environment.getClimateGenerator();
             double humidity = climateGenerator.getHumidity(x, y, z);
-            if (humidity > 0.2) {
-                if ((terrain.getBlockLight(x, y, z + 1) > 8 ||
-                        terrain.getSunLight(x, y, z + 1) > 8) &&
-                        terrain.getBlockType(x, y, z + 1)
-                                .isTransparent(terrain, x, y, z + 1)) {
-                    terrain.setBlockTypeAndData(x, y, z, materials.grass,
-                            (short) 0);
-                }
+            if (humidity > 0.2 && (terrain.getBlockLight(x, y, z + 1) > 8 ||
+                    terrain.getSunLight(x, y, z + 1) > 8) &&
+                    terrain.getBlockType(x, y, z + 1)
+                            .isTransparent(terrain, x, y, z + 1)) {
+                terrain.setBlockTypeAndData(x, y, z, materials.grass,
+                        (short) 0);
             }
         }
     }

@@ -35,10 +35,7 @@ import org.tobi29.scapes.plugins.Plugins;
 import org.tobi29.scapes.server.ScapesServer;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class WorldFormat {
@@ -75,8 +72,9 @@ public class WorldFormat {
         plugins.initServer(server);
         seed = tagStructure.getLong("Seed");
         worldsTagStructure = tagStructure.getStructure("Worlds");
-        for (Dimension dimension : plugins.getDimensions()) {
-            registerWorld(dimension);
+        Iterator<Dimension> iterator = plugins.getDimensions().iterator();
+        while (iterator.hasNext()) {
+            registerWorld(iterator.next());
         }
     }
 

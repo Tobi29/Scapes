@@ -16,23 +16,8 @@
 
 package org.tobi29.scapes.plugins;
 
-import org.tobi29.scapes.chunk.WorldServer;
-
 /**
  * Basic interface for addons
  */
 public interface Addon extends Plugin {
-    /**
-     * Called when a world initializes
-     *
-     * @param world The {@code World} that is initializing
-     */
-    void worldInit(WorldServer world);
-
-    /**
-     * Called when a world ticks
-     *
-     * @param world The {@code World} that is ticking
-     */
-    void worldTick(WorldServer world);
 }

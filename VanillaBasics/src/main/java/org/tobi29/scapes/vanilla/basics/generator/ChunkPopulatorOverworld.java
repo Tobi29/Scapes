@@ -77,8 +77,8 @@ public class ChunkPopulatorOverworld implements ChunkPopulator {
                                         yy + random.nextInt(200) - 100,
                                         zz - random.nextInt(100)), random);
             }
-            int xx = random.nextInt(dx) + x;
-            int yy = random.nextInt(dy) + y;
+            int xx = x + (dx >> 1);
+            int yy = y + (dy >> 1);
             int zz = random.nextInt(terrain.getHighestTerrainBlockZAt(xx, yy));
             int data = terrain.getBlockData(xx, yy, zz);
             if (gen.getStoneType(xx + random.nextInt(21) - 10,

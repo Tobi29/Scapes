@@ -21,11 +21,17 @@ import org.tobi29.scapes.chunk.World;
 import org.tobi29.scapes.chunk.data.ChunkArraySection1x16;
 import org.tobi29.scapes.chunk.data.ChunkArraySection2x4;
 import org.tobi29.scapes.chunk.data.ChunkData;
+import org.tobi29.scapes.engine.utils.Pair;
+import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i;
 
 public abstract class TerrainInfiniteChunk {
+    private static final ThreadLocal<Pair<Pool<LightSpread>, Pool<LightSpread>>>
+            SPREAD_POOLS = ThreadLocal.withInitial(
+            () -> new Pair<>(new Pool<>(LightSpread::new),
+                    new Pool<>(LightSpread::new)));
     protected final ChunkData bID;
     protected final ChunkData bData;
     protected final ChunkData bLight;
@@ -56,33 +62,76 @@ public abstract class TerrainInfiniteChunk {
     public abstract void update(int x, int y, int z, boolean updateTile);
 
     public void updateSunLight() {
+        Pair<Pool<LightSpread>, Pool<LightSpread>> spreadPools =
+                SPREAD_POOLS.get();
+        Pool<LightSpread> spreads = spreadPools.a;
+        Pool<LightSpread> newSpreads = spreadPools.b;
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 16; y++) {
-                boolean flag = true;
                 byte sunLight = 15;
-                for (int z = heightMap[y << 4 | x]; z >= 0 && flag; z--) {
-                    int id = bID.getData(x, y, z, 0);
-                    if (id != 0) {
-                        BlockType type = blocks[id];
-                        if (type.isSolid(terrain, x + posBlock.intX(),
-                                y + posBlock.intX(), z) ||
-                                !type.isTransparent(terrain,
-                                        x + posBlock.intX(),
-                                        y + posBlock.intX(), z)) {
-                            sunLight = FastMath.clamp((byte) (sunLight +
-                                            type.lightTrough(terrain,
-                                                    x + posBlock.intX(),
-                                                    y + posBlock.intX(), z)),
-                                    (byte) 0, (byte) 15);
+                int spread;
+                if (x > 0 && x < 15 && y > 0 && y < 15) {
+                    spread = heightMap[y << 4 | x - 1];
+                    spread = FastMath.max(heightMap[y << 4 | x + 1], spread);
+                    spread = FastMath.max(heightMap[y - 1 << 4 | x], spread);
+                    spread = FastMath.max(heightMap[y + 1 << 4 | x], spread);
+                    spread--;
+                } else {
+                    spread = -1;
+                }
+                int light = heightMap[y << 4 | x];
+                for (int z = FastMath.max(light, spread); z >= 0; z--) {
+                    if (z < light) {
+                        int id = bID.getData(x, y, z, 0);
+                        if (id != 0) {
+                            BlockType type = blocks[id];
+                            if (type.isSolid(terrain, x + posBlock.intX(),
+                                    y + posBlock.intX(), z) ||
+                                    !type.isTransparent(terrain,
+                                            x + posBlock.intX(),
+                                            y + posBlock.intX(), z)) {
+                                sunLight = FastMath.clamp((byte) (sunLight +
+                                                type.lightTrough(terrain,
+                                                        x + posBlock.intX(),
+                                                        y + posBlock.intX(),
+                                                        z)), (byte) 0,
+                                        (byte) 15);
+                            }
                         }
-                    }
-                    if (bLight.getData(x, y, z, 0) == sunLight) {
-                        flag = false;
-                    } else {
                         bLight.setData(x, y, z, 0, sunLight);
+                    }
+                    if (z < spread && sunLight > 0) {
+                        spreads.push().set(x - 1, y, z, sunLight);
+                        spreads.push().set(x + 1, y, z, sunLight);
+                        spreads.push().set(x, y - 1, z, sunLight);
+                        spreads.push().set(x, y + 1, z, sunLight);
                     }
                 }
             }
+        }
+        while (!spreads.isEmpty()) {
+            for (LightSpread s : spreads) {
+                if (s.x >= 0 && s.x < 16 && s.y >= 0 && s.y < 16 && s.z >= 0 &&
+                        s.z < zSize) {
+                    s.l += blocks[bID.getData(s.x, s.y, s.z, 0)]
+                            .lightTrough(terrain, s.x + posBlock.intX(),
+                                    s.y + posBlock.intY(), s.z);
+                    s.l = FastMath.clamp(s.l, (byte) 0, (byte) 15);
+                    if (s.l > bLight.getData(s.x, s.y, s.z, 0)) {
+                        bLight.setData(s.x, s.y, s.z, 0, s.l);
+                        newSpreads.push().set(s.x - 1, s.y, s.z, s.l);
+                        newSpreads.push().set(s.x + 1, s.y, s.z, s.l);
+                        newSpreads.push().set(s.x, s.y - 1, s.z, s.l);
+                        newSpreads.push().set(s.x, s.y + 1, s.z, s.l);
+                        newSpreads.push().set(s.x, s.y, s.z - 1, s.l);
+                        newSpreads.push().set(s.x, s.y, s.z + 1, s.l);
+                    }
+                }
+            }
+            Pool<LightSpread> swapUpdates = spreads;
+            swapUpdates.reset();
+            spreads = newSpreads;
+            newSpreads = swapUpdates;
         }
     }
 
@@ -287,9 +336,7 @@ public abstract class TerrainInfiniteChunk {
     public void setSunLight(int x, int y, int z, int light) {
         if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 &&
                 z < zSize) {
-            if (bLight.getData(x, y, z, 0) != light) {
-                bLight.setData(x, y, z, 0, light);
-            }
+            bLight.setData(x, y, z, 0, light);
         } else {
             throw new ChunkMissException(
                     "Tried to access block " + x + ' ' + y + ' ' + z +
@@ -301,9 +348,7 @@ public abstract class TerrainInfiniteChunk {
     public void setBlockLight(int x, int y, int z, int light) {
         if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 &&
                 z < zSize) {
-            if (bLight.getData(x, y, z, 1) != light) {
-                bLight.setData(x, y, z, 1, light);
-            }
+            bLight.setData(x, y, z, 1, light);
         } else {
             throw new ChunkMissException(
                     "Tried to access block " + x + ' ' + y + ' ' + z +
@@ -359,6 +404,17 @@ public abstract class TerrainInfiniteChunk {
 
         {
             this.id = (byte) id;
+        }
+    }
+
+    private static class LightSpread {
+        private int x, y, z, l;
+
+        private void set(int x, int y, int z, int l) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.l = l;
         }
     }
 }

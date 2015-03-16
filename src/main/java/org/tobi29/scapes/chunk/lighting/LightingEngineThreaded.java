@@ -48,56 +48,6 @@ public class LightingEngineThreaded
     }
 
     @Override
-    public void initLight(int x, int y, int dx, int dy) {
-        int maxx = x + dx;
-        int maxy = y + dy;
-        Pool<LightSpread> spreads = new Pool<>(LightSpread::new);
-        Pool<LightSpread> newSpreads = new Pool<>(LightSpread::new);
-        for (int xx = x; xx < maxx; xx++) {
-            for (int yy = y; yy < maxy; yy++) {
-                int spread = terrain.getHighestBlockZAt(xx - 1, yy);
-                spread = FastMath.max(terrain.getHighestBlockZAt(xx + 1, yy),
-                        spread);
-                spread = FastMath.max(terrain.getHighestBlockZAt(xx, yy - 1),
-                        spread);
-                spread = FastMath.max(terrain.getHighestBlockZAt(xx, yy + 1),
-                        spread);
-                for (int zz = spread; zz >= 0; zz--) {
-                    int light = terrain.getSunLight(xx, yy, zz);
-                    if (light > 0) {
-                        spreads.push().set(xx - 1, yy, zz, light);
-                        spreads.push().set(xx + 1, yy, zz, light);
-                        spreads.push().set(xx, yy - 1, zz, light);
-                        spreads.push().set(xx, yy + 1, zz, light);
-                    }
-                }
-            }
-        }
-        while (!spreads.isEmpty()) {
-            for (LightSpread s : spreads) {
-                if (terrain.isBlockAvailable(s.x, s.y, s.z)) {
-                    s.l += terrain.getBlockType(s.x, s.y, s.z)
-                            .lightTrough(terrain, s.x, s.y, s.z);
-                    s.l = FastMath.clamp(s.l, (byte) 0, (byte) 15);
-                    if (s.l > terrain.getSunLight(s.x, s.y, s.z)) {
-                        terrain.setSunLight(s.x, s.y, s.z, s.l);
-                        newSpreads.push().set(s.x - 1, s.y, s.z, s.l);
-                        newSpreads.push().set(s.x + 1, s.y, s.z, s.l);
-                        newSpreads.push().set(s.x, s.y - 1, s.z, s.l);
-                        newSpreads.push().set(s.x, s.y + 1, s.z, s.l);
-                        newSpreads.push().set(s.x, s.y, s.z - 1, s.l);
-                        newSpreads.push().set(s.x, s.y, s.z + 1, s.l);
-                    }
-                }
-            }
-            Pool<LightSpread> swapUpdates = spreads;
-            swapUpdates.reset();
-            spreads = newSpreads;
-            newSpreads = swapUpdates;
-        }
-    }
-
-    @Override
     public void dispose() {
         joiner.join();
     }
@@ -252,17 +202,6 @@ public class LightingEngineThreaded
                 }
             }
             SleepUtil.sleep(10);
-        }
-    }
-
-    private static class LightSpread {
-        private int x, y, z, l;
-
-        private void set(int x, int y, int z, int l) {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-            this.l = l;
         }
     }
 }

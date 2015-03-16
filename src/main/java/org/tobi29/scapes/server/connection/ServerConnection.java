@@ -26,6 +26,7 @@ import org.tobi29.scapes.engine.utils.task.Joiner;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 import org.tobi29.scapes.entity.skin.ServerSkin;
 import org.tobi29.scapes.packets.Packet;
+import org.tobi29.scapes.packets.PacketChat;
 import org.tobi29.scapes.server.ScapesServer;
 
 import java.io.IOException;
@@ -209,6 +210,11 @@ public class ServerConnection implements PlayConnection {
         players.remove(connection.getID());
         playerByName.remove(connection.getNickname());
         updateControlPanelPlayers();
+    }
+
+    public void chat(String message) {
+        LOGGER.info("Chat (*): {}", message);
+        send(new PacketChat(message));
     }
 
     public static class NetWorkerThread implements TaskExecutor.ASyncTask {

@@ -28,12 +28,12 @@ import org.tobi29.scapes.server.ScapesServer;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class Plugins {
     private static final Logger LOGGER = LoggerFactory.getLogger(Plugins.class);
     private final List<PluginFile> files;
     private final List<Plugin> plugins = new ArrayList<>();
-    private final List<Addon> addons = new ArrayList<>();
     private final List<Dimension> dimensions = new ArrayList<>();
     private final GameRegistry registry;
     private WorldType worldType;
@@ -52,9 +52,6 @@ public class Plugins {
         for (PluginFile file : files) {
             Plugin plugin = file.getPlugin(classLoader);
             plugins.add(plugin);
-            if (plugin instanceof Addon) {
-                addons.add((Addon) plugin);
-            }
             if (plugin instanceof Dimension) {
                 dimensions.add((Dimension) plugin);
             }
@@ -75,7 +72,6 @@ public class Plugins {
             plugin.dispose(registry);
         }
         plugins.clear();
-        addons.clear();
         dimensions.clear();
         worldType = null;
         try {
@@ -91,20 +87,24 @@ public class Plugins {
         return registry;
     }
 
-    public List<PluginFile> getFiles() {
-        return files;
+    public int getFileCount() {
+        return files.size();
     }
 
-    public List<Plugin> getPlugins() {
-        return plugins;
+    public Stream<PluginFile> getFiles() {
+        return files.stream();
     }
 
-    public List<Addon> getAddons() {
-        return addons;
+    public PluginFile getFile(int i) {
+        return files.get(i);
     }
 
-    public List<Dimension> getDimensions() {
-        return dimensions;
+    public Stream<Plugin> getPlugins() {
+        return plugins.stream();
+    }
+
+    public Stream<Dimension> getDimensions() {
+        return dimensions.stream();
     }
 
     public WorldType getWorldType() {

@@ -23,14 +23,15 @@ import org.tobi29.scapes.engine.utils.math.noise.value.ValueNoise;
 import java.util.Random;
 
 public class TerrainGenerator {
-    private final ValueNoise terrainNoise, mountainNoise, mountainHeightNoise,
-            volcanoNoise, volcanoHeightNoise, riverNoise, canyonNoise,
-            canyonDepthNoise, caveRiverNoise, caveNoise, caveHeightNoise,
-            magmaNoise;
+    private final ValueNoise terrainNoise, mountainNoise, mountainCarveNoise,
+            mountainHeightNoise, volcanoNoise, volcanoHeightNoise, riverNoise,
+            canyonNoise, canyonDepthNoise, caveRiverNoise, caveNoise,
+            caveHeightNoise, magmaNoise;
 
     public TerrainGenerator(Random random) {
         terrainNoise = new SimplexNoise(random.nextLong());
         mountainNoise = new SimplexNoise(random.nextLong());
+        mountainCarveNoise = new SimplexNoise(random.nextLong());
         mountainHeightNoise = new SimplexNoise(random.nextLong());
         volcanoNoise = new SimplexNoise(random.nextLong());
         volcanoHeightNoise = new SimplexNoise(random.nextLong());
@@ -43,112 +44,136 @@ public class TerrainGenerator {
         magmaNoise = new SimplexNoise(random.nextLong());
     }
 
-    public void generate(double x, double y, TerrainGeneratorOutput output) {
+    public void generate(double x, double y, TerrainGeneratorLayer output) {
         double terrainFactor = generateTerrainFactorLayer(x, y);
-        double terrainHeight = terrainFactor * 64.0d + 224.0d;
+        double terrainHeight = terrainFactor * 64.0 + 224.0;
         double mountainFactor = generateMountainFactorLayer(x, y);
-        double mountain, mountainHeight;
-        if (mountainFactor > 0.0d) {
-            mountain = 1.0d - FastMath.abs(mountainNoise
-                    .noiseOctave(x / 512.0d, y / 512.0d, 4, 4.0d, 0.2));
-            mountainHeight = mountain * mountainFactor * 192.0d;
+        double mountain, mountainCarve, mountainHeight;
+        if (mountainFactor > 0.0) {
+            mountain = 1.0 - FastMath.abs(mountainNoise
+                    .noiseOctave(x / 512.0, y / 512.0, 2, 4.0, 0.2));
+            double mountainCarveFactor = 1.0 - FastMath.sqr(1.0 - mountain);
+            mountainCarve = FastMath.abs(mountainCarveNoise
+                    .noiseOctave(x / 96.0, y / 96.0, 4, 4.0, 0.2)) *
+                    mountainCarveFactor;
+            mountainHeight =
+                    (mountain - mountainCarve * 0.17) * mountainFactor * 256.0;
         } else {
-            mountain = 0.0d;
-            mountainHeight = 0.0d;
+            mountain = 0.0;
+            mountainCarve = 0.0;
+            mountainHeight = 0.0;
         }
         double volcanoFactor = generateVolcanoFactorLayer(x, y);
         double volcano, volcanoHeight;
-        if (volcanoFactor > 0.0d) {
+        if (volcanoFactor > 0.0) {
             volcano = FastMath.sqr(FastMath.clamp(volcanoNoise
-                    .noiseOctave(x / 512.0d, y / 512.0d, 4, 8.0d, 0.08) * 2.0d -
-                    1.0d, 0.0d, 1.0d));
+                    .noiseOctave(x / 512.0, y / 512.0, 4, 8.0, 0.08) * 2.0 -
+                    1.0, 0.0, 1.0));
             volcano *= volcano;
             if (volcano > 0.5) {
-                volcanoHeight = (1.0d - volcano) * volcanoFactor * 192.0d;
+                volcanoHeight = (1.0 - volcano) * volcanoFactor * 192.0;
             } else {
-                volcanoHeight = volcano * volcanoFactor * 192.0d;
+                volcanoHeight = volcano * volcanoFactor * 192.0;
             }
         } else {
-            volcano = 0.0d;
-            volcanoHeight = 0.0d;
+            volcano = 0.0;
+            volcanoHeight = 0.0;
         }
-        double river = generateRiverLayer(x, y, mountainFactor, 32.0d);
+        double river = generateRiverLayer(x, y, mountainFactor, 32.0);
         double canyon;
         double canyonFactor = FastMath.sqr(FastMath.clamp(
-                canyonDepthNoise.noise(x / 4096.0d, y / 4096.0d) * 5.0d - 3.0d,
-                0.0d, 1.0d));
-        if (canyonFactor > 0.0d) {
-            canyon = FastMath.clamp(FastMath.sqr(1.0d - FastMath.abs(canyonNoise
-                    .noiseOctave(x / 1024.0d, y / 1024.0d, 2, 8.0d, 0.1))) *
-                    4.0d * canyonFactor - 3.0d, 0.0d, 1.0d);
+                canyonDepthNoise.noise(x / 4096.0, y / 4096.0) * 5.0 - 3.0, 0.0,
+                1.0));
+        if (canyonFactor > 0.0) {
+            canyon = FastMath.clamp(FastMath.sqr(1.0 - FastMath.abs(canyonNoise
+                    .noiseOctave(x / 1024.0, y / 1024.0, 2, 8.0, 0.1))) *
+                    4.0 * canyonFactor - 3.0, 0.0, 1.0);
         } else {
-            canyon = 0.0d;
+            canyon = 0.0;
         }
         double groundHeight = terrainHeight + mountainHeight + volcanoHeight;
-        if (groundHeight > 244.0d) {
-            groundHeight -= 244.0d;
+        if (groundHeight > 244.0) {
+            groundHeight -= 244.0;
             groundHeight *= river;
-            groundHeight += 244.0d;
+            groundHeight += 244.0;
         }
-        groundHeight -= canyon * 40.0d;
-        double cave = FastMath.clamp(FastMath.sqr(1.0d - FastMath.abs(
-                caveNoise.noiseOctave(x / 128.0d, y / 128.0d, 2, 8.0d, 0.1))) *
-                8.0d - 6.0d, 0.0d, 1.0d);
-        double caveHeight =
-                128.0d + caveHeightNoise.noise(x / 512.0d, y / 512.0d) * 96.0d;
-        double caveRiver = FastMath.clamp(FastMath.sqr(1.0d - FastMath.abs(
-                caveRiverNoise
-                        .noiseOctave(x / 512.0d, y / 512.0d, 2, 8.0d, 0.1))) *
-                8.0d - 7.0d, 0.0d, 1.0d);
-        double magmaHeight =
-                7.0d + magmaNoise.noise(x / 512.0d, y / 512.0d) * 5.0d;
+        groundHeight -= canyon * 40.0;
         output.height = groundHeight;
+        output.mountain = mountain;
+        output.mountainCarve = mountainCarve;
         output.mountainFactor = mountainFactor;
+        output.volcano = volcano;
+        output.volcanoHeight = volcanoHeight;
         output.volcanoFactor = volcanoFactor;
-        output.waterHeight = 256.0d;
+        output.river = river;
+    }
+
+    public void generate(double x, double y, TerrainGeneratorOutput output) {
+        TerrainGeneratorLayer layer = new TerrainGeneratorLayer();
+        generate(x, y, layer);
+        double cave = FastMath.clamp(FastMath.sqr(1.0 - FastMath.abs(
+                caveNoise.noiseOctave(x / 128.0, y / 128.0, 2, 8.0, 0.1))) *
+                8.0 - 6.0, 0.0, 1.0);
+        double caveHeight =
+                128.0 + caveHeightNoise.noise(x / 512.0, y / 512.0) * 96.0;
+        double caveRiver = FastMath.clamp(FastMath.sqr(1.0 - FastMath.abs(
+                caveRiverNoise
+                        .noiseOctave(x / 512.0, y / 512.0, 2, 8.0, 0.1))) *
+                8.0 - 7.0, 0.0, 1.0);
+        double magmaHeight = 7.0 + magmaNoise.noise(x / 512.0, y / 512.0) * 5.0;
+        output.height = layer.height;
+        output.mountainFactor = layer.mountainFactor;
+        output.volcanoFactor = layer.volcanoFactor;
+        output.waterHeight = 256.0;
         output.cave = cave;
         output.caveHeight = caveHeight;
         output.caveRiver = caveRiver;
-        output.caveRiverHeight = 128.0d;
+        output.caveRiverHeight = 128.0;
         output.magmaHeight = magmaHeight;
-        output.river = river;
-        output.soiled = mountain < 1.3 - mountainFactor && volcanoHeight < 18;
-        output.beach = groundHeight > 250.0d && groundHeight <= 259.0d;
-        output.lavaChance = volcano > 0.5 ? 10000 : volcano > 0.2 ? 10000 : 0;
+        output.river = layer.river;
+        output.soiled = layer.mountain - layer.mountainCarve * 0.4 <
+                1.3 - layer.mountainFactor && layer.volcanoHeight < 18;
+        output.beach = layer.height > 250.0 && layer.height <= 259.0;
+        output.lavaChance =
+                layer.volcano > 0.5 ? 10000 : layer.volcano > 0.2 ? 10000 : 0;
     }
 
     public double generateTerrainFactorLayer(double x, double y) {
-        return terrainNoise
-                .noiseOctave(x / 4096.0d, y / 4096.0d, 4, 8.0d, 0.1d);
+        return terrainNoise.noiseOctave(x / 4096.0, y / 4096.0, 4, 8.0, 0.1d);
     }
 
     public double generateMountainFactorLayer(double x, double y) {
-        return FastMath.sqr((1.0d - FastMath.clamp(FastMath.abs(
-                mountainHeightNoise.noise(x / 8192.0d, y / 8192.0d)) * 3.0d -
-                0.25, 0.0d, 1.0d)) *
-                (mountainHeightNoise.noise(x / 4096.0d, y / 4096.0d) * 0.5 +
+        return FastMath.sqr((1.0 - FastMath.clamp(FastMath.abs(
+                mountainHeightNoise.noise(x / 8192.0, y / 8192.0)) * 3.0 - 0.25,
+                0.0, 1.0)) *
+                (mountainHeightNoise.noise(x / 4096.0, y / 4096.0) * 0.5 +
                         0.5));
     }
 
     public double generateVolcanoFactorLayer(double x, double y) {
-        return FastMath.sqr(1.0d - FastMath.clamp(FastMath.abs(
-                volcanoHeightNoise.noise(x / 16384.0d, y / 16384.0d)) * 3.0d -
-                0.25, 0.0d, 1.0d));
+        return FastMath.sqr(1.0 - FastMath.clamp(FastMath.abs(
+                volcanoHeightNoise.noise(x / 16384.0, y / 16384.0)) * 3.0 -
+                0.25, 0.0, 1.0));
     }
 
     public double generateRiverLayer(double x, double y, double mountainFactor,
             double limit) {
         double riverFactor =
-                FastMath.clamp(3.0d - mountainFactor * 10.0d, 0.0d, 1.0d);
-        if (riverFactor > 0.0d) {
-            double riverN = riverNoise
-                    .noiseOctave(x / 4096.0d, y / 4096.0d, 4, 4.0d, 0.2);
+                FastMath.clamp(3.0 - mountainFactor * 10.0, 0.0, 1.0);
+        if (riverFactor > 0.0) {
+            double riverN =
+                    riverNoise.noiseOctave(x / 4096.0, y / 4096.0, 4, 4.0, 0.2);
             return FastMath.clamp(limit -
-                    FastMath.sqr(1.0d - FastMath.abs(riverN)) * limit *
-                            riverFactor, 0.0d, 1.0d);
+                    FastMath.sqr(1.0 - FastMath.abs(riverN)) * limit *
+                            riverFactor, 0.0, 1.0);
         } else {
-            return 1.0d;
+            return 1.0;
         }
+    }
+
+    public static class TerrainGeneratorLayer {
+        public double height, mountain, mountainCarve, mountainFactor, volcano,
+                volcanoHeight, volcanoFactor, river;
     }
 
     public static class TerrainGeneratorOutput {

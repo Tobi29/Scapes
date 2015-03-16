@@ -17,6 +17,7 @@
 package org.tobi29.scapes.chunk;
 
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
+import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.client.states.scenes.SceneScapesVoxelWorld;
@@ -41,12 +42,15 @@ import org.tobi29.scapes.plugins.Dimension;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class WorldClient extends World {
     private final Map<Integer, EntityClient> entities =
             new ConcurrentHashMap<>();
+    private final Map<String, Supplier<TerrainRenderInfo.InfoLayer>>
+            infoLayers = new ConcurrentHashMap<>();
     private final SceneScapesVoxelWorld scene;
     private final MobPlayerClientMain player;
     private final MobModel playerModel;
@@ -70,6 +74,8 @@ public class WorldClient extends World {
                 ((Dimension) plugins.getPlugin(name)).createEnvironment(this);
         scene = new SceneScapesVoxelWorld(this, cam);
         playerModel = player.createModel().get();
+        connection.getPlugins().getPlugins()
+                .forEach(plugin -> plugin.worldInit(this));
         terrain = terrainSupplier.get(this);
     }
 
@@ -278,6 +284,15 @@ public class WorldClient extends World {
 
     public ParticleManager getParticleManager() {
         return particleManager;
+    }
+
+    public void renderInfoLayer(String name,
+            Supplier<TerrainRenderInfo.InfoLayer> layer) {
+        infoLayers.put(name, layer);
+    }
+
+    public Stream<Map.Entry<String, Supplier<TerrainRenderInfo.InfoLayer>>> getInfoLayers() {
+        return infoLayers.entrySet().stream();
     }
 
     public void dispose() {

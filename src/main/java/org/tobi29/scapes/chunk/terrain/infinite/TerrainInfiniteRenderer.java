@@ -17,7 +17,9 @@
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import org.tobi29.scapes.block.BlockType;
+import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.data.ChunkMesh;
+import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderer;
 import org.tobi29.scapes.engine.opengl.GraphicsSystem;
 import org.tobi29.scapes.engine.opengl.VAO;
@@ -34,7 +36,9 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TerrainInfiniteRenderer implements TerrainRenderer {
     private final List<Vector2i> sortedLocations;
@@ -54,15 +58,18 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     public TerrainInfiniteRenderer(TerrainInfiniteClient terrain,
             MobPlayerClientMain player, double chunkDistance) {
         this.terrain = terrain;
+        WorldClient world = terrain.getWorld();
         chunkDistanceMax = FastMath.sqr(chunkDistance);
         Queue<TerrainInfiniteRendererChunk> loadQueue =
                 new ConcurrentLinkedQueue<>();
         Queue<TerrainInfiniteRendererChunk> updateQueue =
                 new ConcurrentLinkedQueue<>();
         updateThread =
-                new TerrainInfiniteRendererThread(updateQueue, loadQueue, true);
-        loadThread = new TerrainInfiniteRendererThread(loadQueue, updateQueue,
-                false);
+                new TerrainInfiniteRendererThread(updateQueue, loadQueue, true,
+                        world.getInfoLayers());
+        loadThread =
+                new TerrainInfiniteRendererThread(loadQueue, updateQueue, false,
+                        world.getInfoLayers());
         keepInvisibleChunkVbos = player.getGame().getEngine().getTagStructure()
                 .getStructure("Scapes").getBoolean("KeepInvisibleChunkVbos");
         int size = (int) FastMath.ceil(chunkDistance / 16.0);
@@ -395,17 +402,20 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
             implements TaskExecutor.ASyncTask {
         private final Queue<TerrainInfiniteRendererChunk> queue, idleQueue;
         private final ChunkMesh.VertexArrays arrays, arraysAlpha;
+        private final TerrainRenderInfo info;
         private final boolean visibleUpdater;
 
         public TerrainInfiniteRendererThread(
                 Queue<TerrainInfiniteRendererChunk> queue,
                 Queue<TerrainInfiniteRendererChunk> idleQueue,
-                boolean visibleUpdater) {
+                boolean visibleUpdater,
+                Stream<Map.Entry<String, Supplier<TerrainRenderInfo.InfoLayer>>> infoLayers) {
             this.queue = queue;
             this.idleQueue = idleQueue;
             this.visibleUpdater = visibleUpdater;
             arrays = new ChunkMesh.VertexArrays();
             arraysAlpha = new ChunkMesh.VertexArrays();
+            info = new TerrainRenderInfo(infoLayers);
         }
 
         @Override
@@ -497,6 +507,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                 if (!empty && chunk.isVisible(i)) {
                     ChunkMesh mesh = new ChunkMesh(arrays);
                     ChunkMesh meshAlpha = new ChunkMesh(arraysAlpha);
+                    info.init(bx, by, bz, 16, 16, 16);
                     boolean lod = chunk.getLod(i);
                     boolean needsLod = false;
                     for (int xxx = 0; xxx < 16; xxx++) {
@@ -510,8 +521,8 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                                 int data = terrainChunk
                                         .getBlockData(xxx, yyy, bzz);
                                 type.addToChunkMesh(mesh, meshAlpha, data,
-                                        terrain, bxx, byy, bzz, xxx, yyy, zzz,
-                                        lod);
+                                        terrain, info, bxx, byy, bzz, xxx, yyy,
+                                        zzz, lod);
                                 if (!needsLod &&
                                         type.needsLodUpdate(data, terrain, bxx,
                                                 byy, bzz)) {

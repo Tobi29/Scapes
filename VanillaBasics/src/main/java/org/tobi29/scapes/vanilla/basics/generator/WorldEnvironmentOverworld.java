@@ -32,7 +32,6 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i;
 import org.tobi29.scapes.entity.CreatureType;
 import org.tobi29.scapes.entity.server.*;
-import org.tobi29.scapes.packets.PacketChat;
 import org.tobi29.scapes.packets.PacketEntityMetaData;
 import org.tobi29.scapes.packets.PacketUpdateInventory;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
@@ -273,9 +272,9 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                             }
                         });
                 player.listener("VanillaBasics:DeathMessage",
-                        (MobLivingServer.DeathListener) () -> world
-                                .getConnection().send(new PacketChat(
-                                        player.getNickname() + " died!")));
+                        (MobLivingServer.DeathListener) () -> worldServer
+                                .getConnection()
+                                .chat(player.getNickname() + " died!"));
             });
         }
     }
@@ -475,7 +474,7 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                 for (TerrainInfiniteChunk chunk : ((TerrainInfinite) worldServer
                         .getTerrain()).getLoadedChunks()) {
                     Random random = ThreadLocalRandom.current();
-                    if (chunk.isLoaded() && random.nextInt(16) == 0) {
+                    if (chunk.isLoaded()) {
                         simulateSeason(chunk);
                     }
                     int x = random.nextInt(16);
@@ -540,13 +539,12 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
         if (chunkSimulationCount <= 0) {
             count = 1;
         } else {
-            if (simulationCount - chunkSimulationCount != 0) {
-                count = FastMath.max(
-                        10240 / (int) (simulationCount - chunkSimulationCount),
-                        1);
-            } else {
+            long delta = simulationCount - chunkSimulationCount;
+            Random random = ThreadLocalRandom.current();
+            if (delta < 180 + random.nextInt(40)) {
                 return;
             }
+            count = FastMath.max(10240 / (int) delta, 1);
         }
         chunk.getMetaData("Vanilla")
                 .setLong("SimulationCount", simulationCount);
@@ -585,14 +583,8 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                     BlockType groundType = chunk.getBlockType(x, y, z - 1);
                     if (humidity > 0.2) {
                         if (groundType == materials.dirt) {
-                            if (random.nextInt(chance) == 0) {
-                                chunk.setBlockIdAndData(x, y, z - 1,
-                                        materials.grass,
-                                        (short) random.nextInt(9));
-                            } else {
-                                chunk.setBlockIdAndData(x, y, z - 1,
-                                        materials.grass, (short) 0);
-                            }
+                            chunk.setBlockIdAndData(x, y, z - 1,
+                                    materials.grass, (short) random.nextInt(9));
                         } else if (groundType == materials.grass) {
                             chunk.setBlockData(x, y, z - 1,
                                     (short) random.nextInt(9));

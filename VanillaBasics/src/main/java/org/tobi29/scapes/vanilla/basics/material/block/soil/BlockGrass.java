@@ -22,6 +22,7 @@ import org.tobi29.scapes.block.models.BlockModelComplex;
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock;
 import org.tobi29.scapes.chunk.data.ChunkMesh;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
+import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.opengl.GraphicsSystem;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -30,6 +31,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityFarmlandServer;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator;
+import org.tobi29.scapes.vanilla.basics.generator.ClimateInfoLayer;
 import org.tobi29.scapes.vanilla.basics.generator.WorldEnvironmentOverworld;
 import org.tobi29.scapes.vanilla.basics.material.CropType;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
@@ -183,13 +185,14 @@ public class BlockGrass extends VanillaBlock {
 
     @Override
     public void addToChunkMesh(ChunkMesh mesh, ChunkMesh meshAlpha, int data,
-            TerrainClient terrain, int x, int y, int z, float xx, float yy,
-            float zz, boolean lod) {
+            TerrainClient terrain, TerrainRenderInfo info, int x, int y, int z,
+            float xx, float yy, float zz, boolean lod) {
         WorldEnvironmentOverworld environment =
                 (WorldEnvironmentOverworld) terrain.getWorld().getEnvironment();
         ClimateGenerator climateGenerator = environment.getClimateGenerator();
-        double temperature = climateGenerator.getTemperature(x, y, z);
-        double humidity = climateGenerator.getHumidity(x, y, z);
+        ClimateInfoLayer climateLayer = info.get("VanillaBasics:Climate");
+        double temperature = climateLayer.getTemperature(x, y, z);
+        double humidity = climateLayer.getHumidity(x, y);
         double grassR = climateGenerator.getGrassColorR(temperature, humidity);
         double grassG = climateGenerator.getGrassColorG(temperature, humidity);
         double grassB = climateGenerator.getGrassColorB(temperature, humidity);
@@ -245,7 +248,8 @@ public class BlockGrass extends VanillaBlock {
                         .isTransparent(terrain, x, y, z + 1)) {
             terrain.setBlockTypeAndData(x, y, z, materials.dirt, (short) 0);
         }
-        if (!terrain.hasDelayedUpdate(x, y, z)) {
+        if (terrain.getHighestTerrainBlockZAt(x, y) > z + 1 &&
+                !terrain.hasDelayedUpdate(x, y, z)) {
             Random random = ThreadLocalRandom.current();
             terrain.addDelayedUpdate(new UpdateGrassGrowth()
                     .set(x, y, z, random.nextDouble() * 400.0 + 1600.0));

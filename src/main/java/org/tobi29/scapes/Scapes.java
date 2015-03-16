@@ -24,7 +24,6 @@ import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.scenes.SceneImage;
 import org.tobi29.scapes.engine.swt.SWTLoader;
 import org.tobi29.scapes.engine.utils.VersionUtil;
-import org.tobi29.scapes.engine.utils.platform.Platform;
 import org.tobi29.scapes.plugins.PluginClassLoader;
 import org.tobi29.scapes.server.shell.ScapesServerHeadless;
 import org.tobi29.scapes.server.shell.ScapesServerShell;
@@ -107,9 +106,8 @@ public class Scapes {
                 if (cmdArgs.length > 0) {
                     directory = cmdArgs[0];
                 } else {
-                    directory = Platform.getPlatform().getAppData("Scapes");
+                    directory = System.getProperty("user.dir");
                 }
-                System.setProperty("scapes.home", directory);
                 ScapesEngine engine =
                         new ScapesEngine(new ScapesClient(), directory, debug);
                 if (skipIntro) {
@@ -130,7 +128,6 @@ public class Scapes {
                 } else {
                     directory = System.getProperty("user.dir");
                 }
-                System.setProperty("scapes.home", directory);
                 if (gui) {
                     SWTLoader.loadSWT();
                     ScapesServerShell server = new ScapesServerShell();

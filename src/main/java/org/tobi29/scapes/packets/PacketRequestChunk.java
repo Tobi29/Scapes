@@ -20,6 +20,7 @@ import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.terrain.Terrain;
+import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteChunkClient;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteChunkServer;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteClient;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteServer;
@@ -76,18 +77,26 @@ public class PacketRequestChunk extends Packet
     @Override
     public void sendClient(PlayerConnection player, DataOutputStream streamOut)
             throws IOException {
+        streamOut.writeInt(x);
+        streamOut.writeInt(y);
     }
 
     @Override
     public void parseClient(ClientConnection client, DataInputStream streamIn)
             throws IOException {
+        x = streamIn.readInt();
+        y = streamIn.readInt();
     }
 
     @Override
     public void runClient(ClientConnection client, WorldClient world) {
         Terrain terrain = client.getWorld().getTerrain();
         if (terrain instanceof TerrainInfiniteClient) {
-            ((TerrainInfiniteClient) terrain).changeRequestedChunks(-1);
+            TerrainInfiniteClient terrainInfinite =
+                    (TerrainInfiniteClient) terrain;
+            terrainInfinite.changeRequestedChunks(-1);
+            terrainInfinite.getChunkNoLoad(x, y)
+                    .ifPresent(TerrainInfiniteChunkClient::resetRequest);
         }
     }
 }

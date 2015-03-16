@@ -29,6 +29,7 @@ public final class FastMath {
     public static final double DEG_2_RAD = PI / 180.0d;
     public static final double TWO_PI = 6.28318530717958647692;
     private static final double[] SIN = new double[1000000];
+    private static final double[] ASIN = new double[1000000];
 
     private FastMath() {
     }
@@ -51,8 +52,11 @@ public final class FastMath {
                 highestValue = value;
             }
         }
-        SIN[lowest] = -1.0d;
-        SIN[highest] = 1.0d;
+        SIN[lowest] = -1.0;
+        SIN[highest] = 1.0;
+        for (int i = 0; i < ASIN.length; i++) {
+            ASIN[i] = asin(i * 2.0 / ASIN.length - 1.0);
+        }
     }
 
     public static double abs(double a) {
@@ -181,6 +185,14 @@ public final class FastMath {
 
     public static double asin(double a) {
         return StrictMath.asin(a);
+    }
+
+    public static double asinTable(double a) {
+        int i = round((a * 0.5 + 0.5) * ASIN.length);
+        if (i < 0 || i >= ASIN.length) {
+            return Double.NaN;
+        }
+        return ASIN[i];
     }
 
     public static double acos(double a) {

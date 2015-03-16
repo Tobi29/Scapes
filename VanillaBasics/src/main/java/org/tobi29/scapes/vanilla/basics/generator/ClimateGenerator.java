@@ -76,7 +76,7 @@ public class ClimateGenerator {
         double axialTilt = -23.44 * FastMath.DEG_2_RAD;
         sunDeclination = FastMath.asin(FastMath.sin(axialTilt) *
                 FastMath.sin(getSeason() * FastMath.TWO_PI));
-        sunHourAngleCos = FastMath.sinTable(dayTime * FastMath.TWO_PI);
+        sunHourAngleCos = FastMath.sin(dayTime * FastMath.TWO_PI);
     }
 
     public ClimateGenerator at(long day, double dayTime) {
@@ -111,8 +111,8 @@ public class ClimateGenerator {
 
     public double getSunElevationD(double hourAngleCos, double declination,
             double latitude) {
-        return FastMath.asin(FastMath.sinTable(latitude) *
-                        FastMath.sinTable(declination) +
+        return FastMath.asinTable(
+                FastMath.sinTable(latitude) * FastMath.sinTable(declination) +
                         FastMath.cosTable(latitude) *
                                 FastMath.cosTable(declination) *
                                 hourAngleCos);
@@ -210,7 +210,9 @@ public class ClimateGenerator {
 
     public double getTemperature2D(double x, double y, double humidity3,
             double sunIntensity) {
-        double temperature = FastMath.sqr(sunIntensity) * 70.0;
+        double temperature =
+                FastMath.mix(sunIntensity, sunIntensity * sunIntensity, 0.5) *
+                        80.0 - 10.0;
         double noiseGlobal = temperatureNoise
                 .noise(x / 100000.0, y / 100000.0, (day + dayTime) / 100.0);
         double noiseLocal = temperatureNoise
@@ -270,8 +272,8 @@ public class ClimateGenerator {
     }
 
     public double getRiverHumidity(double x, double y) {
-        return 1.0 - terrainGenerator.generateRiverLayer(x, y,
-                terrainGenerator.generateMountainFactorLayer(x, y), 4.0);
+        return (1.0 - terrainGenerator.generateRiverLayer(x, y,
+                terrainGenerator.generateMountainFactorLayer(x, y), 4.0)) * 0.5;
     }
 
     public double getSunLightReduction(double x, double y) {

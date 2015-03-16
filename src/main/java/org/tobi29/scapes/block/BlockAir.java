@@ -19,6 +19,7 @@ package org.tobi29.scapes.block;
 import org.tobi29.scapes.chunk.data.ChunkMesh;
 import org.tobi29.scapes.chunk.terrain.Terrain;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
+import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.opengl.GraphicsSystem;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -117,8 +118,8 @@ public class BlockAir extends BlockType {
 
     @Override
     public void addToChunkMesh(ChunkMesh mesh, ChunkMesh meshAlpha, int data,
-            TerrainClient terrain, int x, int y, int z, float xx, float yy,
-            float zz, boolean lod) {
+            TerrainClient terrain, TerrainRenderInfo info, int x, int y, int z,
+            float xx, float yy, float zz, boolean lod) {
     }
 
     @Override

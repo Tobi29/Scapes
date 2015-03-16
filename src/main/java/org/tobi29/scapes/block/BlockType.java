@@ -19,6 +19,7 @@ package org.tobi29.scapes.block;
 import org.tobi29.scapes.chunk.data.ChunkMesh;
 import org.tobi29.scapes.chunk.terrain.Terrain;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
+import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.math.AABB;
@@ -189,8 +190,8 @@ public abstract class BlockType extends Material {
     }
 
     public abstract void addToChunkMesh(ChunkMesh mesh, ChunkMesh meshAlpha,
-            int data, TerrainClient terrain, int x, int y, int z, float xx,
-            float yy, float zz, boolean lod);
+            int data, TerrainClient terrain, TerrainRenderInfo info, int x,
+            int y, int z, float xx, float yy, float zz, boolean lod);
 
     public boolean needsLodUpdate(int data, TerrainClient terrain, int x, int y,
             int z) {

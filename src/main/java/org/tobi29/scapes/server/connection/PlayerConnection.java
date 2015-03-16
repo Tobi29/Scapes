@@ -35,6 +35,7 @@ import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.entity.skin.ServerSkin;
 import org.tobi29.scapes.packets.*;
 import org.tobi29.scapes.plugins.PluginFile;
+import org.tobi29.scapes.plugins.Plugins;
 import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.format.PlayerStatistics;
 import org.tobi29.scapes.server.format.WorldFormat;
@@ -183,10 +184,10 @@ public class PlayerConnection
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidKeySpecException e) {
             throw new IOException(e);
         }
-        List<PluginFile> plugins =
-                server.getServer().getWorldFormat().getPlugins().getFiles();
-        streamOut.writeInt(plugins.size());
-        plugins.forEach(plugin -> sendPluginChecksum(plugin, streamOut));
+        Plugins plugins = server.getServer().getWorldFormat().getPlugins();
+        streamOut.writeInt(plugins.getFileCount());
+        plugins.getFiles()
+                .forEach(plugin -> sendPluginChecksum(plugin, streamOut));
         TagStructureBinary
                 .write(server.getServer().getWorldFormat().getIDStorage()
                         .save(), streamOut);
@@ -195,8 +196,7 @@ public class PlayerConnection
 
     private void loginStep4(DataInputStream streamIn)
             throws IOException, ConnectionCloseException {
-        List<PluginFile> plugins =
-                server.getServer().getWorldFormat().getPlugins().getFiles();
+        Plugins plugins = server.getServer().getWorldFormat().getPlugins();
         byte[] challenge = new byte[this.challenge.length];
         streamIn.readFully(challenge);
         nickname = streamIn.readUTF();
@@ -224,7 +224,7 @@ public class PlayerConnection
         } else {
             streamOut.writeBoolean(false);
             for (int request : requests) {
-                sendPlugin(plugins.get(request).getFile(), streamOut);
+                sendPlugin(plugins.getFile(request).getFile(), streamOut);
             }
             channel.queueBundle();
             LOGGER.info("Client accepted: {} ({}) on {}", id, nickname,
@@ -466,6 +466,7 @@ public class PlayerConnection
 
     @Override
     public void tell(String message) {
+        LOGGER.info("Chat ({}): {}", nickname, message);
         send(new PacketChat(message));
     }
 

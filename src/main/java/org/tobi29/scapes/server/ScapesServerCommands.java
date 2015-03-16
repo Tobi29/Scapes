@@ -21,7 +21,6 @@ import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.Material;
 import org.tobi29.scapes.engine.utils.ArrayUtil;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
-import org.tobi29.scapes.packets.PacketChat;
 import org.tobi29.scapes.packets.PacketDisconnect;
 import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.command.CommandRegistry;
@@ -132,8 +131,7 @@ final class ScapesServerCommands {
                 message =
                         '<' + name + "> " + ArrayUtil.join(args.getArgs(), " ");
             }
-            commands.add(
-                    () -> server.getConnection().send(new PacketChat(message)));
+            commands.add(() -> server.getConnection().chat(message));
         });
 
         registry.register("tell", 0, options -> {

@@ -705,8 +705,8 @@ class VanillaBasicsRegisters {
 
     static void registerOres(VanillaBasics plugin) {
         VanillaMaterial materials = plugin.getMaterials();
-        plugin.c.ore(materials.oreCoal, 8, 32.0d, 3, 20, StoneType.DIRT_STONE);
-        plugin.c.ore(materials.oreCoal, 5, 24.0d, 3, 20, StoneType.CHALK,
+        plugin.c.ore(materials.oreCoal, 8, 16.0d, 3, 20, StoneType.DIRT_STONE);
+        plugin.c.ore(materials.oreCoal, 5, 12.0d, 3, 20, StoneType.CHALK,
                 StoneType.CHERT, StoneType.CLAYSTONE, StoneType.CONGLOMERATE,
                 StoneType.MARBLE, StoneType.ANDESITE, StoneType.BASALT,
                 StoneType.DACITE, StoneType.RHYOLITE, StoneType.DIORITE,

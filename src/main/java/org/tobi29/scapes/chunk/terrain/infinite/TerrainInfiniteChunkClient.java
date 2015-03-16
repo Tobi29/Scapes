@@ -28,6 +28,7 @@ public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
             Optional.of(this);
     private final TerrainInfiniteClient terrain;
     private final TerrainInfiniteRendererChunk rendererChunk;
+    private boolean requested;
 
     public TerrainInfiniteChunkClient(Vector2i pos,
             TerrainInfiniteClient terrain, int zSize,
@@ -44,7 +45,8 @@ public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
     public void updateClient() {
         if (state.id < State.LOADED.id) {
             TerrainInfiniteClient terrainClient = terrain;
-            if (terrainClient.getRequestedChunks() < 2) {
+            if (!requested && terrainClient.getRequestedChunks() < 2) {
+                requested = true;
                 terrainClient.changeRequestedChunks(1);
                 terrain.getWorld().getConnection()
                         .send(new PacketRequestChunk(pos.intX(), pos.intY()));
@@ -90,6 +92,10 @@ public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
 
     public TerrainInfiniteRendererChunk getRendererChunk() {
         return rendererChunk;
+    }
+
+    public void resetRequest() {
+        requested = false;
     }
 
     public void load(TagStructure tagStructure) {

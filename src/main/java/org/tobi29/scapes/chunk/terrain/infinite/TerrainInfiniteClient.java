@@ -144,11 +144,7 @@ public class TerrainInfiniteClient extends TerrainInfinite
 
     @Override
     public Optional<TerrainInfiniteChunkClient> getChunk(int x, int y) {
-        Optional<TerrainInfiniteChunkClient> chunk = chunkManager.get(x, y);
-        if (chunk.isPresent()) {
-            return chunk;
-        }
-        return addChunk(x, y);
+        return chunkManager.get(x, y);
     }
 
     @Override

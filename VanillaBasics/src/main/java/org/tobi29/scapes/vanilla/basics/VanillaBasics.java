@@ -20,11 +20,13 @@ import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.World;
+import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldEnvironment;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.plugins.WorldType;
 import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator;
+import org.tobi29.scapes.vanilla.basics.generator.ClimateInfoLayer;
 import org.tobi29.scapes.vanilla.basics.generator.WorldEnvironmentOverworld;
 import org.tobi29.scapes.vanilla.basics.generator.decorator.BiomeDecorator;
 import org.tobi29.scapes.vanilla.basics.material.*;
@@ -141,10 +143,6 @@ public class VanillaBasics implements WorldType {
     }
 
     @Override
-    public void dispose(GameRegistry registry) {
-    }
-
-    @Override
     public void init(GameRegistry registry) {
         GameRegistry.Registry<TreeType> treeRegistry =
                 VanillaBasicsRegisters.registerTreeTypes(registry);
@@ -177,6 +175,26 @@ public class VanillaBasics implements WorldType {
     }
 
     @Override
+    public void worldInit(WorldServer world) {
+    }
+
+    @Override
+    public void worldInit(WorldClient world) {
+        WorldEnvironmentOverworld environment =
+                (WorldEnvironmentOverworld) world.getEnvironment();
+        world.renderInfoLayer("VanillaBasics:Climate",
+                () -> new ClimateInfoLayer(environment.getClimateGenerator()));
+    }
+
+    @Override
+    public void worldTick(WorldServer world) {
+    }
+
+    @Override
+    public void dispose(GameRegistry registry) {
+    }
+
+    @Override
     public String getName() {
         return "Vanilla Basics";
     }
@@ -199,14 +217,6 @@ public class VanillaBasics implements WorldType {
     @Override
     public WorldEnvironment createEnvironment(World world) {
         return new WorldEnvironmentOverworld(world, this);
-    }
-
-    @Override
-    public void worldInit(WorldServer world) {
-    }
-
-    @Override
-    public void worldTick(WorldServer world) {
     }
 
     public VanillaMaterial getMaterials() {

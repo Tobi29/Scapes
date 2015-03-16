@@ -16,6 +16,8 @@
 
 
 
+
+
 apply from: "$rootDir/resources/scapesenginemodule.gradle"
 
 apply plugin: ScapesEngineApplication
@@ -157,8 +159,6 @@ class ScapesEngineApplication implements Plugin<Project> {
         programTask.jar = target.files(target.jar)
         programTask.exeMemoryMin = 1024
         programTask.exeMemoryMax = 2048
-        programTask.exeClasspath = "lib/*"
-        programTask.exeJRE = "jre"
         programTask.manifest =
                 new File(target.rootDir, "resources/Util/Program.manifest")
         programTask.output = new File(programTask.temporaryDir,
@@ -304,7 +304,7 @@ class AppBundlerTask extends DefaultTask {
 class Launch4jTask extends DefaultTask {
     def File output
     @Input
-    def exeMemoryMin, exeMemoryMax, exeJRE, exeClasspath, fullName, version, company, copyright, mainClass
+    def exeMemoryMin, exeMemoryMax, fullName, version, company, copyright, mainClass
     @InputFile
     def File launch4j, icon, manifest
     @InputFiles
@@ -326,14 +326,15 @@ class Launch4jTask extends DefaultTask {
                 jar: jar.singleFile.absolutePath,
                 icon: icon.absolutePath,
                 manifest: manifest.absolutePath]
-        Map<String, String> jreMap = [initialheapsize: exeMemoryMin,
-                maxheapsize: exeMemoryMax]
-        jreMap.put("path", exeJRE)
         def winVersion = version.replaceAll("_", ".")
         ant.launch4j {
             config(configMap) {
-                classPath(mainClass: mainClass, cp: exeClasspath)
-                jre(jreMap)
+                classPath(mainClass: mainClass, cp: "%EXEDIR%\\lib\\*")
+                jre(initialheapsize: exeMemoryMin,
+                        maxheapsize: exeMemoryMax,
+                        path: "%EXEDIR%\\jre") {
+                    opt("-Duser.dir=\"%APPDATA%\\${fullName}\"")
+                }
                 versioninfo(fileversion: winVersion,
                         txtfileversion: version,
                         filedescription: fullName,

@@ -37,7 +37,6 @@ import org.tobi29.scapes.entity.server.*;
 import org.tobi29.scapes.packets.PacketEntityAdd;
 import org.tobi29.scapes.packets.PacketEntityDespawn;
 import org.tobi29.scapes.packets.PacketSoundEffect;
-import org.tobi29.scapes.plugins.Addon;
 import org.tobi29.scapes.server.connection.ServerConnection;
 import org.tobi29.scapes.server.format.WorldFormat;
 
@@ -79,6 +78,11 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
     }
 
     @Override
+    public ServerConnection getConnection() {
+        return connection;
+    }
+
+    @Override
     public void read(TagStructure tagStructure) {
         tick = tagStructure.getLong("Tick");
         environment.load(tagStructure.getStructure("Environment"));
@@ -96,9 +100,8 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
         this.environment = environment;
         gen = environment.getGenerator();
         pop.add(environment.getPopulator());
-        for (Addon addon : worldFormat.getPlugins().getAddons()) {
-            addon.worldInit(this);
-        }
+        worldFormat.getPlugins().getPlugins()
+                .forEach(plugin -> plugin.worldInit(this));
     }
 
     public void calculateSpawn() {
@@ -222,9 +225,8 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                 }
             }
         });
-        for (Addon addon : worldFormat.getPlugins().getAddons()) {
-            addon.worldTick(this);
-        }
+        worldFormat.getPlugins().getPlugins()
+                .forEach(plugin -> plugin.worldTick(this));
         environment.tick(delta);
         taskExecutor.tick();
         tick++;
@@ -260,7 +262,8 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
         dropItem(item, new Vector3d(x + 0.5, y + 0.5, z + 0.5), 600.0);
     }
 
-    public void dropItem(ItemStack item, int x, int y, int z, double despawntime) {
+    public void dropItem(ItemStack item, int x, int y, int z,
+            double despawntime) {
         dropItem(item, new Vector3d(x + 0.5, y + 0.5, z + 0.5), despawntime);
     }
 

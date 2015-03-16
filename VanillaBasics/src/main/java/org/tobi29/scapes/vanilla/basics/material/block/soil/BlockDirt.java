@@ -23,6 +23,7 @@ import org.tobi29.scapes.block.models.BlockModel;
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock;
 import org.tobi29.scapes.chunk.data.ChunkMesh;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
+import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.opengl.GraphicsSystem;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -31,6 +32,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityFarmlandServer;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator;
+import org.tobi29.scapes.vanilla.basics.generator.ClimateInfoLayer;
 import org.tobi29.scapes.vanilla.basics.generator.WorldEnvironmentOverworld;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
@@ -114,12 +116,10 @@ public class BlockDirt extends BlockSoil {
 
     @Override
     public void addToChunkMesh(ChunkMesh mesh, ChunkMesh meshAlpha, int data,
-            TerrainClient terrain, int x, int y, int z, float xx, float yy,
-            float zz, boolean lod) {
-        WorldEnvironmentOverworld environment =
-                (WorldEnvironmentOverworld) terrain.getWorld().getEnvironment();
-        ClimateGenerator climateGenerator = environment.getClimateGenerator();
-        double humidity = climateGenerator.getHumidity(x, y, z);
+            TerrainClient terrain, TerrainRenderInfo info, int x, int y, int z,
+            float xx, float yy, float zz, boolean lod) {
+        ClimateInfoLayer climateLayer = info.get("VanillaBasics:Climate");
+        double humidity = climateLayer.getHumidity(x, y);
         if (humidity < 0.3) {
             modelSand.addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz, 1.0f,
                     1.0f, 1.0f, 1.0f);

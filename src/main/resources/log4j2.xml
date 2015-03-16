@@ -21,8 +21,8 @@
                     pattern="%d{HH:mm:ss} [%level] [%t: %logger{1}]: %msg%n"/>
         </Console>
         <RollingRandomAccessFile name="Log"
-                                 fileName="${sys:scapes.home}/logs/Scapes.log"
-                                 filePattern="${sys:scapes.home}/logs/Scapes-%d{MM-dd-yyyy}-%i.log.gz">
+                                 fileName="${sys:user.dir}/logs/Scapes.log"
+                                 filePattern="${sys:user.dir}/logs/Scapes-%d{MM-dd-yyyy}-%i.log.gz">
             <PatternLayout
                     pattern="%d{HH:mm:ss.SSS} [%level] [%t: %logger{36}]: %msg%n"/>
             <Policies>

@@ -23,6 +23,7 @@ import org.tobi29.scapes.block.models.BlockModelSimpleBlock;
 import org.tobi29.scapes.chunk.data.ChunkMesh;
 import org.tobi29.scapes.chunk.terrain.Terrain;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
+import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.opengl.GraphicsSystem;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -36,6 +37,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator;
+import org.tobi29.scapes.vanilla.basics.generator.ClimateInfoLayer;
 import org.tobi29.scapes.vanilla.basics.generator.WorldEnvironmentOverworld;
 import org.tobi29.scapes.vanilla.basics.material.TreeType;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
@@ -197,32 +199,43 @@ public class BlockLeaves extends VanillaBlock {
 
     @Override
     public void addToChunkMesh(ChunkMesh mesh, ChunkMesh meshAlpha, int data,
-            TerrainClient terrain, int x, int y, int z, float xx, float yy,
-            float zz, boolean lod) {
-        TreeType type = treeRegistry.get(data);
-        WorldEnvironmentOverworld environment =
-                (WorldEnvironmentOverworld) terrain.getWorld().getEnvironment();
-        ClimateGenerator climateGenerator = environment.getClimateGenerator();
-        double temperature = climateGenerator.getTemperature(x, y, z);
-        double mix = FastMath.clamp((temperature + 20.0f) / 50.0f, 0.0f, 1.0f);
-        Vector3 colorCold = type.getColorCold();
-        Vector3 colorWarm = type.getColorWarm();
-        double r = FastMath.mix(colorCold.floatX(), colorWarm.floatX(), mix);
-        double g = FastMath.mix(colorCold.floatY(), colorWarm.floatY(), mix);
-        double b = FastMath.mix(colorCold.floatZ(), colorWarm.floatZ(), mix);
-        if (!type.isEvergreen()) {
-            double autumn = climateGenerator.getAutumnLeaves(y);
-            Vector3 colorAutumn = type.getColorAutumn();
-            r = FastMath.mix(r, colorAutumn.floatX(), autumn);
-            g = FastMath.mix(g, colorAutumn.floatY(), autumn);
-            b = FastMath.mix(b, colorAutumn.floatZ(), autumn);
-        }
-        if (lod && !isCovered(terrain, x, y, z)) {
-            modelsFancy[data].addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz,
-                    (float) r, (float) g, (float) b, 1.0f);
-        } else {
-            modelsFast[data].addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz,
-                    (float) r, (float) g, (float) b, 1.0f);
+            TerrainClient terrain, TerrainRenderInfo info, int x, int y, int z,
+            float xx, float yy, float zz, boolean lod) {
+        if (!isCovered(terrain, x, y, z)) {
+            TreeType type = treeRegistry.get(data);
+            ClimateInfoLayer climateLayer = info.get("VanillaBasics:Climate");
+            double temperature = climateLayer.getTemperature(x, y, z);
+            double mix =
+                    FastMath.clamp((temperature + 20.0f) / 50.0f, 0.0f, 1.0f);
+            Vector3 colorCold = type.getColorCold();
+            Vector3 colorWarm = type.getColorWarm();
+            double r =
+                    FastMath.mix(colorCold.floatX(), colorWarm.floatX(), mix);
+            double g =
+                    FastMath.mix(colorCold.floatY(), colorWarm.floatY(), mix);
+            double b =
+                    FastMath.mix(colorCold.floatZ(), colorWarm.floatZ(), mix);
+            if (!type.isEvergreen()) {
+                WorldEnvironmentOverworld environment =
+                        (WorldEnvironmentOverworld) terrain.getWorld()
+                                .getEnvironment();
+                ClimateGenerator climateGenerator =
+                        environment.getClimateGenerator();
+                double autumn = climateGenerator.getAutumnLeaves(y);
+                Vector3 colorAutumn = type.getColorAutumn();
+                r = FastMath.mix(r, colorAutumn.floatX(), autumn);
+                g = FastMath.mix(g, colorAutumn.floatY(), autumn);
+                b = FastMath.mix(b, colorAutumn.floatZ(), autumn);
+            }
+            if (lod) {
+                modelsFancy[data]
+                        .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz,
+                                (float) r, (float) g, (float) b, 1.0f);
+            } else {
+                modelsFast[data]
+                        .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz,
+                                (float) r, (float) g, (float) b, 1.0f);
+            }
         }
     }
 
