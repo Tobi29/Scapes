@@ -17,7 +17,6 @@
 package org.tobi29.scapes.engine;
 
 import org.tobi29.scapes.engine.utils.VersionUtil;
-import org.tobi29.scapes.engine.utils.graphics.Image;
 
 public abstract class Game {
     protected ScapesEngine engine;
@@ -27,8 +26,6 @@ public abstract class Game {
     public abstract String getID();
 
     public abstract VersionUtil.Version getVersion();
-
-    public abstract Image getIcon();
 
     public abstract void init();
 
