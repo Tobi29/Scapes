@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.client.input.keyboard;
 
+import org.tobi29.scapes.client.ScapesClient;
 import org.tobi29.scapes.client.gui.GuiControlsDefault;
 import org.tobi29.scapes.client.input.InputMode;
 import org.tobi29.scapes.engine.GameState;
@@ -113,7 +114,9 @@ public class InputModeKeyboard implements InputMode {
 
     @Override
     public Gui createControlsGui(GameState state, Gui prev) {
-        return new GuiControlsDefault(state, prev, tagStructure, controller);
+        return new GuiControlsDefault(state, prev,
+                (ScapesClient) state.getEngine().getGame(), tagStructure,
+                controller);
     }
 
     @Override
@@ -203,7 +206,7 @@ public class InputModeKeyboard implements InputMode {
         }
 
         @Override
-        public Vector2 getCamera() {
+        public Vector2 getCamera(double delta) {
             Vector2 camera = new Vector2d(controller.getDeltaX(),
                     controller.getDeltaY());
             return camera.multiply(cameraSensitivity);

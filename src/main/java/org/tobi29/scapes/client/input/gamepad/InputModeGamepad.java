@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.client.input.gamepad;
 
+import org.tobi29.scapes.client.ScapesClient;
 import org.tobi29.scapes.client.gui.GuiControlsGamepad;
 import org.tobi29.scapes.client.input.InputMode;
 import org.tobi29.scapes.engine.GameState;
@@ -25,6 +26,7 @@ import org.tobi29.scapes.engine.gui.GuiController;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
+import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
@@ -134,7 +136,9 @@ public class InputModeGamepad implements InputMode {
 
     @Override
     public Gui createControlsGui(GameState state, Gui prev) {
-        return new GuiControlsGamepad(state, prev, tagStructure, controller);
+        return new GuiControlsGamepad(state, prev,
+                (ScapesClient) state.getEngine().getGame(), tagStructure,
+                controller);
     }
 
     @Override
@@ -162,7 +166,7 @@ public class InputModeGamepad implements InputMode {
             TagStructure cameraTag = tagStructure.getStructure("Camera");
             axisCameraX = cameraTag.getInteger("X");
             axisCameraY = cameraTag.getInteger("Y");
-            cameraSensitivity = cameraTag.getDouble("Sensitivity") * 10.0;
+            cameraSensitivity = cameraTag.getDouble("Sensitivity") * 400.0;
 
             TagStructure menuTag = tagStructure.getStructure("Menu");
             inventory = ControllerKey.valueOf(menuTag.getString("Inventory"));
@@ -187,10 +191,14 @@ public class InputModeGamepad implements InputMode {
         }
 
         @Override
-        public Vector2 getCamera() {
-            return new Vector2d(controller.getAxis(axisCameraX),
-                    controller.getAxis(axisCameraY))
-                    .multiply(cameraSensitivity);
+        public Vector2 getCamera(double delta) {
+            double x = controller.getAxis(axisCameraX);
+            double y = controller.getAxis(axisCameraY);
+            double cx = FastMath.sqrNoAbs(x);
+            double cy = FastMath.sqrNoAbs(y);
+            x = FastMath.mix(x, cx, 0.5);
+            y = FastMath.mix(y, cy, 0.5);
+            return new Vector2d(x, y).multiply(cameraSensitivity * delta);
         }
 
         @Override

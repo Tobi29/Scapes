@@ -224,10 +224,29 @@ public enum ControllerKey {
     SCROLL_DOWN("Scroll Down"),
     SCROLL_UP("Scroll Up"),
     SCROLL_LEFT("Scroll Left"),
-    SCROLL_RIGHT("Scroll Right");
+    SCROLL_RIGHT("Scroll Right"),
+    AXIS_0("Axis 0"),
+    AXIS_1("Axis 1"),
+    AXIS_2("Axis 2"),
+    AXIS_3("Axis 3"),
+    AXIS_4("Axis 4"),
+    AXIS_5("Axis 5"),
+    AXIS_6("Axis 6"),
+    AXIS_7("Axis 7"),
+    AXIS_8("Axis 8"),
+    AXIS_9("Axis 9"),
+    AXIS_10("Axis 10"),
+    AXIS_11("Axis 11"),
+    AXIS_12("Axis 12"),
+    AXIS_13("Axis 13"),
+    AXIS_14("Axis 14"),
+    AXIS_15("Axis 15");
     public static final ControllerKey BUTTON_LEFT = BUTTON_0;
     public static final ControllerKey BUTTON_RIGHT = BUTTON_1;
-    private static final List<ControllerKey> BUTTONS = new ArrayList<>();
+    private static final List<ControllerKey> BUTTONS = new ArrayList<>(), AXES =
+            new ArrayList<>();
+    private final String name;
+    private int id;
 
     static {
         int id = 0;
@@ -237,10 +256,10 @@ public enum ControllerKey {
         for (int i = 0; i < 80; i++) {
             BUTTONS.add(valueOf("BUTTON_" + i));
         }
+        for (int i = 0; i < 16; i++) {
+            AXES.add(valueOf("AXIS_" + i));
+        }
     }
-
-    private final String name;
-    private int id;
 
     ControllerKey(String name) {
         this.name = name;
@@ -251,6 +270,13 @@ public enum ControllerKey {
             return UNKNOWN;
         }
         return BUTTONS.get(i);
+    }
+
+    public static ControllerKey getAxis(int i) {
+        if (i < 0 || i >= AXES.size()) {
+            return UNKNOWN;
+        }
+        return AXES.get(i);
     }
 
     public String getName() {

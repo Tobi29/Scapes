@@ -120,7 +120,14 @@ public class ControllerJoystick implements Controller {
         return axes[axis];
     }
 
-    public void setAxis(int axis, double value) {
+    public synchronized void setAxis(int axis, double value) {
+        if (axes[axis] < 0.5 && value >= 0.5) {
+            System.out.println(ControllerKey.getAxis(axis));
+            addPressEvent(ControllerKey.getAxis(axis), PressState.PRESS);
+        } else if (axes[axis] >= 0.5 && value < 0.5) {
+            System.err.println(ControllerKey.getAxis(axis));
+            addPressEvent(ControllerKey.getAxis(axis), PressState.RELEASE);
+        }
         axes[axis] = value;
     }
 

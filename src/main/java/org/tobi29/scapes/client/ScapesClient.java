@@ -32,10 +32,7 @@ import org.tobi29.scapes.engine.gui.GuiMessage;
 import org.tobi29.scapes.engine.input.Controller;
 import org.tobi29.scapes.engine.input.ControllerDefault;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
-import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.VersionUtil;
-import org.tobi29.scapes.engine.utils.graphics.Image;
-import org.tobi29.scapes.engine.utils.graphics.PNG;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPathRoot;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -48,18 +45,8 @@ public class ScapesClient extends Game {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ScapesClient.class);
     private final List<InputMode> inputModes = new ArrayList<>();
-    private Image icon;
     private InputMode inputMode;
-
-    public ScapesClient() {
-        try {
-            icon = PNG.decode(getClass().getClassLoader().getResourceAsStream(
-                            "assets/scapes/tobi29/image/Icon.png"),
-                    BufferCreator::byteBuffer);
-        } catch (IOException e) {
-            engine.crash(e);
-        }
-    }
+    private boolean freezeInputMode;
 
     private static Optional<InputMode> loadService(ScapesEngine engine,
             Controller controller, TagStructure tagStructure) {
@@ -108,11 +95,6 @@ public class ScapesClient extends Game {
     }
 
     @Override
-    public Image getIcon() {
-        return icon;
-    }
-
-    @Override
     public void init() {
         try {
             FileSystemContainer files = engine.getFiles();
@@ -157,7 +139,8 @@ public class ScapesClient extends Game {
                 newInputMode = inputMode;
             }
         }
-        if (newInputMode != null && inputMode != newInputMode) {
+        if (newInputMode != null && inputMode != newInputMode &&
+                !freezeInputMode) {
             LOGGER.info("Setting input mode to {}", newInputMode);
             inputMode = newInputMode;
             engine.setGuiController(inputMode.getGuiController());
@@ -195,6 +178,10 @@ public class ScapesClient extends Game {
         }
         inputMode = inputModes.get(0);
         engine.setGuiController(inputMode.getGuiController());
+    }
+
+    public void setFreezeInputMode(boolean freezeInputMode) {
+        this.freezeInputMode = freezeInputMode;
     }
 
     public Stream<InputMode> getInputModes() {

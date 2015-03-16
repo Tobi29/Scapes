@@ -23,9 +23,10 @@ import org.tobi29.scapes.engine.input.ControllerDefault;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
 public class GuiControlsDefault extends Gui {
-    public GuiControlsDefault(GameState state, Gui prev,
+    public GuiControlsDefault(GameState state, Gui prev, ScapesClient game,
             TagStructure tagStructure, ControllerDefault controller) {
         super(GuiAlignment.CENTER);
+        game.setFreezeInputMode(true);
         GuiComponentVisiblePane pane =
                 new GuiComponentVisiblePane(200, 0, 400, 512);
         GuiComponentScrollPaneList scrollPane =
@@ -80,7 +81,8 @@ public class GuiControlsDefault extends Gui {
         GuiComponentTextButton back =
                 new GuiComponentTextButton(112, 466, 176, 30, 18, "Save");
         back.addLeftClick(event -> {
-            ((ScapesClient) state.getEngine().getGame()).reloadInput();
+            game.setFreezeInputMode(false);
+            game.reloadInput();
             state.remove(this);
             state.add(prev);
         });

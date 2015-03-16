@@ -21,7 +21,6 @@ import org.tobi29.scapes.engine.gui.GuiComponentEvent;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
-import org.tobi29.scapes.engine.utils.math.FastMath;
 
 public class GuiComponentControlsAxis extends GuiComponentTextButton {
     private final String name, id;
@@ -63,7 +62,7 @@ public class GuiComponentControlsAxis extends GuiComponentTextButton {
         if (editing > 1) {
             int axes = controller.getAxes();
             for (int i = 0; i < axes; i++) {
-                if (FastMath.abs(controller.getAxis(i)) > 0.4) {
+                if (controller.getAxis(i) > 0.5) {
                     axis = i;
                     tagStructure.setInteger(id, axis);
                     editing = 0;

@@ -283,7 +283,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
                     ground = false;
                 }
             }
-            Vector2 camera = controller.getCamera();
+            Vector2 camera = controller.getCamera(delta);
             rot.setZ((rot.doubleZ() - camera.doubleX()) % 360);
             rot.setX(FastMath.min(89,
                     FastMath.max(-89, rot.doubleX() - camera.doubleY())));
@@ -548,7 +548,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
     public interface Controller {
         Vector2 getWalk();
 
-        Vector2 getCamera();
+        Vector2 getCamera(double delta);
 
         boolean getLeft();
 
