@@ -48,9 +48,11 @@ public class ScapesServerHeadless extends ScapesStandaloneServer {
                 while (!server.hasStopped()) {
                     if (reader.ready()) {
                         String line = reader.readLine();
-                        server.getCommandRegistry().get(line, this).execute()
-                                .forEach(output -> System.out
-                                        .println(output.toString()));
+                        if (line != null) {
+                            server.getCommandRegistry().get(line, this)
+                                    .execute().forEach(output -> System.out
+                                    .println(output.toString()));
+                        }
                     } else {
                         SleepUtil.sleep(100);
                     }
