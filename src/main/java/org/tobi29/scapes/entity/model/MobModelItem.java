@@ -60,8 +60,8 @@ public class MobModelItem implements MobModel {
     @Override
     public void renderUpdate(GraphicsSystem graphics, WorldClient world,
             double delta) {
-        double div = 1.0 + 256.0 * delta;
-        pos.plus(entity.getPos().minus(pos.now()).div(div));
+        double factor = FastMath.min(1.0, delta * 10.0);
+        pos.plus(entity.getPos().minus(pos.now()).multiply(factor));
         dir += 45.0 * delta;
         dir %= 360.0f;
     }

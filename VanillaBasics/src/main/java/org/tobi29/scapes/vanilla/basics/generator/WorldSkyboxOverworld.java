@@ -289,13 +289,13 @@ public class WorldSkyboxOverworld implements WorldSkybox {
     public void renderUpdate(GraphicsSystem graphics, Cam cam, double delta) {
         MobPlayerClient player = world.getPlayer();
         SceneScapesVoxelWorld scene = world.getScene();
-        double div = 1.0 + 256.0 * delta;
+        double factor = FastMath.min(1.0, delta * 10.0);
         if (world.getTerrain().getSunLight(scene.getCam().position.intX(),
                 scene.getCam().position.intY(),
                 scene.getCam().position.intZ()) > 0) {
-            fogBrightness += (1.0f - fogBrightness) / div;
+            fogBrightness += (1.0f - fogBrightness) * factor;
         } else {
-            fogBrightness -= fogBrightness / div;
+            fogBrightness -= fogBrightness * factor;
         }
         float skyLight = (float) (15.0 - climateGenerator
                 .getSunLightReduction(scene.getCam().position.intX(),
@@ -327,7 +327,7 @@ public class WorldSkyboxOverworld implements WorldSkybox {
                 .getStructure("Condition");
         double temperature = conditionTag.getDouble("BodyTemperature");
         double heatstroke = FastMath.max((temperature - 37.1) * 7.5, 0.0) + 1.0;
-        exposure += (heatstroke * 0.3 - exposure) / div;
+        exposure += (heatstroke * 0.3 - exposure) * factor;
     }
 
     @Override

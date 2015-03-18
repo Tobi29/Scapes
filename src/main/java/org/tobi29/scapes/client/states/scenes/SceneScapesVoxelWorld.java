@@ -178,7 +178,8 @@ public class SceneScapesVoxelWorld extends Scene {
     }
 
     @Override
-    public void renderGui(GraphicsSystem graphics, Shader shader, double delta) {
+    public void renderGui(GraphicsSystem graphics, Shader shader,
+            double delta) {
         if (!guiHide) {
             super.renderGui(graphics, shader, delta);
         }
@@ -265,8 +266,8 @@ public class SceneScapesVoxelWorld extends Scene {
         if (renderDistance > newRenderDistance) {
             renderDistance = newRenderDistance;
         } else {
-            double div = 1.0 + 4096.0 * delta;
-            renderDistance += (newRenderDistance - renderDistance) / div;
+            double factor = FastMath.min(1.0, delta);
+            renderDistance += (newRenderDistance - renderDistance) * factor;
         }
         if (!Float.isFinite(renderDistance)) {
             renderDistance = 0.0f;
@@ -275,8 +276,8 @@ public class SceneScapesVoxelWorld extends Scene {
                         .sqrt(FastMath.sqr(player.getXSpeed()) +
                                 FastMath.sqr(player.getYSpeed())) * 2.0f +
                         90.0f, 120.0f);
-        double div = 1.0 + 256.0 * delta;
-        fov += (newFov - fov) / div;
+        double factor = FastMath.min(1.0, delta * 10.0);
+        fov += (newFov - fov) * factor;
         if (!Float.isFinite(fov)) {
             fov = 90.0f;
         }

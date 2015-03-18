@@ -56,11 +56,12 @@ public class EntityModelBellows implements EntityModel {
     @Override
     public void renderUpdate(GraphicsSystem graphics, WorldClient world,
             double delta) {
-        double div = 1.0 + 256.0 * delta;
-        pos.plus(entity.getPos().minus(pos.now()).div(div));
+        double factor = FastMath.min(1.0, delta * 10.0);
+        pos.plus(entity.getPos().minus(pos.now()).multiply(factor));
         float value = entity.getScale();
         scale += FastMath.diff(scale,
-                (value > 1.0f ? 2.0f - value : value) * 0.4f + 0.4f, 2) / div;
+                (value > 1.0f ? 2.0f - value : value) * 0.4f + 0.4f, 2) *
+                factor;
         scale %= 2;
     }
 

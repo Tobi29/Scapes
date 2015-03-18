@@ -66,18 +66,20 @@ public class MobLivingModelPig implements MobModel {
     @Override
     public void renderUpdate(GraphicsSystem graphics, WorldClient world,
             double delta) {
-        double divPos = 1.0 + 256.0 * delta;
-        double divRot = 1.0 + 64.0 * delta;
-        double divSpeed = 1.0 + 1024.0 * delta;
+        double factorPos = FastMath.min(1.0, delta * 10.0);
+        double factorRot = FastMath.min(1.0, delta * 20.0);
+        double factorSpeed = FastMath.min(1.0, delta * 5.0);
         double moveSpeed = FastMath.min(
                 FastMath.sqrt(FastMath.length((Vector2) entity.getSpeed())),
                 2.0);
-        xRotRender -= FastMath.angleDiff(entity.getXRot(), xRotRender) / divRot;
-        zRotRender -= FastMath.angleDiff(entity.getZRot(), zRotRender) / divRot;
-        pos.plus(entity.getPos().minus(pos.now()).div(divPos));
+        xRotRender -=
+                FastMath.angleDiff(entity.getXRot(), xRotRender) * factorRot;
+        zRotRender -=
+                FastMath.angleDiff(entity.getZRot(), zRotRender) * factorRot;
+        pos.plus(entity.getPos().minus(pos.now()).multiply(factorPos));
         swing += moveSpeed * 2.0 * delta;
         swing %= FastMath.TWO_PI;
-        moveSpeedRender += (moveSpeed - moveSpeedRender) / divSpeed;
+        moveSpeedRender += (moveSpeed - moveSpeedRender) * factorSpeed;
     }
 
     @Override
