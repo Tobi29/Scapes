@@ -186,7 +186,7 @@ public class LWJGL3OpenGL implements OpenGL {
     }
 
     @Override
-    public void drawbuffersFbo(int attachments) {
+    public void drawbuffersFBO(int attachments) {
         if (attachments < 0 || attachments > 15) {
             throw new IllegalArgumentException(
                     "Attachments must be 0-15, was " + attachments);
@@ -229,6 +229,19 @@ public class LWJGL3OpenGL implements OpenGL {
     public void attachDepth(int texture) {
         GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER,
                 GL30.GL_DEPTH_ATTACHMENT, GL11.GL_TEXTURE_2D, texture, 0);
+    }
+
+    @Override
+    public FBOStatus checkFBO() {
+        int status = GL30.glCheckFramebufferStatus(GL30.GL_FRAMEBUFFER);
+        switch (status) {
+            case GL30.GL_FRAMEBUFFER_COMPLETE:
+                return FBOStatus.COMPLETE;
+            case GL30.GL_FRAMEBUFFER_UNSUPPORTED:
+                return FBOStatus.UNSUPPORTED;
+            default:
+                return FBOStatus.UNKNOWN;
+        }
     }
 
     @Override

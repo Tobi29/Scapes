@@ -101,7 +101,7 @@ public interface OpenGL {
     void viewport(int x, int y, int width, int height);
 
     @OpenGLFunction
-    void drawbuffersFbo(int attachments);
+    void drawbuffersFBO(int attachments);
 
     @OpenGLFunction
     int createFBO();
@@ -117,6 +117,9 @@ public interface OpenGL {
 
     @OpenGLFunction
     void attachDepth(int texture);
+
+    @OpenGLFunction
+    FBOStatus checkFBO();
 
     @OpenGLFunction
     void screenShot(File file, GraphicsSystem graphics);

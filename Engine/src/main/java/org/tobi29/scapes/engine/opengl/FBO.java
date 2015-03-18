@@ -56,6 +56,28 @@ public class FBO {
 
     @OpenGLFunction
     private void init(GraphicsSystem graphics) {
+        init(graphics, alpha, hdr);
+        OpenGL openGL = graphics.getOpenGL();
+        framebufferID = openGL.createFBO();
+        activate(graphics);
+        attach(graphics);
+        if (openGL.checkFBO() != FBOStatus.COMPLETE) {
+            for (TextureFBOColor textureColor : texturesColor) {
+                textureColor.dispose(graphics);
+            }
+            if (depth) {
+                textureDepth.dispose(graphics);
+            }
+            init(graphics, alpha, false);
+            attach(graphics);
+        }
+        openGL.clear(0.0f, 0.0f, 0.0f, 0.0f);
+        deactivate(graphics);
+        FBOS.add(this);
+    }
+
+    @OpenGLFunction
+    private void init(GraphicsSystem graphics, boolean alpha, boolean hdr) {
         for (int i = 0; i < texturesColor.length; i++) {
             texturesColor[i] =
                     new TextureFBOColor(width, height, TextureFilter.LINEAR,
@@ -70,18 +92,17 @@ public class FBO {
                             TextureWrap.CLAMP);
             textureDepth.bind(graphics);
         }
+    }
+
+    @OpenGLFunction
+    private void attach(GraphicsSystem graphics) {
         OpenGL openGL = graphics.getOpenGL();
-        framebufferID = openGL.createFBO();
-        activate(graphics);
         if (depth) {
             openGL.attachDepth(textureDepth.getTextureID());
         }
         for (int i = 0; i < texturesColor.length; i++) {
             openGL.attachColor(texturesColor[i].getTextureID(), i);
         }
-        openGL.clear(0.0f, 0.0f, 0.0f, 0.0f);
-        deactivate(graphics);
-        FBOS.add(this);
     }
 
     @OpenGLFunction
@@ -101,7 +122,7 @@ public class FBO {
         currentBO = framebufferID;
         OpenGL openGL = graphics.getOpenGL();
         openGL.bindFBO(framebufferID);
-        openGL.drawbuffersFbo(texturesColor.length);
+        openGL.drawbuffersFBO(texturesColor.length);
     }
 
     @OpenGLFunction
