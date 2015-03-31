@@ -19,8 +19,11 @@ package org.tobi29.scapes.client.gui;
 import org.tobi29.scapes.client.states.GameStateMenu;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
+import org.tobi29.scapes.engine.utils.math.FastMath;
 
 public class GuiDisconnected extends Gui {
+    private final GuiComponentText reconnectTimer;
+
     public GuiDisconnected(GameState state, String message) {
         super(GuiAlignment.CENTER);
         GuiComponentVisiblePane pane =
@@ -32,8 +35,14 @@ public class GuiDisconnected extends Gui {
         pane.add(new GuiComponentText(16, 16, 32, "Error"));
         pane.add(new GuiComponentSeparator(24, 64, 352, 2));
         pane.add(new GuiComponentText(16, 80, 12, message));
+        reconnectTimer = new GuiComponentText(16, 400, 32, "");
+        pane.add(reconnectTimer);
         pane.add(new GuiComponentSeparator(24, 448, 352, 2));
         pane.add(back);
         add(pane);
+    }
+
+    public void setReconnectTimer(double time) {
+        reconnectTimer.setText("Reconnecting in: " + FastMath.floor(time));
     }
 }

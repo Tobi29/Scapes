@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -35,7 +34,7 @@ public class PacketUpdateInventory extends Packet implements PacketClient {
     private int entityID;
     private TagStructure tag;
 
-    public PacketUpdateInventory(GameRegistry registry) {
+    public PacketUpdateInventory() {
     }
 
     public PacketUpdateInventory(EntityContainerServer entity) {

@@ -41,6 +41,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPathRoot;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
 import org.tobi29.scapes.engine.utils.platform.Platform;
+import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 
@@ -252,11 +253,15 @@ public class ScapesEngine implements Crashable {
 
     public int run() {
         try {
-            Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
             try {
                 graphics.init();
             } catch (GraphicsCheckException e) {
                 LOGGER.error("Failed to initialize graphics:", e);
+                graphics.getContainer()
+                        .message(PlatformDialogs.MessageType.ERROR,
+                                game.getName(),
+                                "Unable to initialize graphics:\n" +
+                                        e.getMessage());
                 return 1;
             }
             sounds = new SoundSystem(this, graphics.getContainer().getOpenAL());
@@ -281,6 +286,9 @@ public class ScapesEngine implements Crashable {
             taskExecutor.shutdown();
         } catch (Throwable e) {
             taskExecutor.shutdown();
+            graphics.getContainer()
+                    .message(PlatformDialogs.MessageType.ERROR, game.getName(),
+                            game.getName() + " crashed\n:" + toString());
             crash(e);
             return 1;
         }
@@ -333,8 +341,7 @@ public class ScapesEngine implements Crashable {
         if (currentState.isThreaded()) {
             if (stateThread == null) {
                 stateThread = new StateThread(currentState);
-                stateThread.joiner = taskExecutor
-                        .runTask(stateThread, Thread.NORM_PRIORITY, "State");
+                stateThread.joiner = taskExecutor.runTask(stateThread, "State");
             }
         } else if (stateThread != null) {
             stateThread.joiner.join();

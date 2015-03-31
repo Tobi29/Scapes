@@ -17,7 +17,6 @@
 package org.tobi29.scapes.vanilla.basics.material.update;
 
 import org.tobi29.scapes.block.BlockType;
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.block.Update;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
@@ -26,12 +25,6 @@ import org.tobi29.scapes.vanilla.basics.generator.WorldEnvironmentOverworld;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
 public class UpdateGrassGrowth extends Update {
-    public UpdateGrassGrowth(GameRegistry registry) {
-    }
-
-    public UpdateGrassGrowth() {
-    }
-
     @Override
     public void run(TerrainServer.TerrainMutable terrain) {
         VanillaBasics plugin = (VanillaBasics) terrain.getWorld().getPlugins()

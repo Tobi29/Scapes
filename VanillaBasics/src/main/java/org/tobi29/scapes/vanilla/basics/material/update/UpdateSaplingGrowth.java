@@ -27,12 +27,6 @@ import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import java.util.Random;
 
 public class UpdateSaplingGrowth extends Update {
-    public UpdateSaplingGrowth(GameRegistry registry) {
-    }
-
-    public UpdateSaplingGrowth() {
-    }
-
     @Override
     public void run(TerrainServer.TerrainMutable terrain) {
         VanillaBasics plugin = (VanillaBasics) terrain.getWorld().getPlugins()

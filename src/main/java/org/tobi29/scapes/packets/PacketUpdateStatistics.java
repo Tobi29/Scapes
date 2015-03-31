@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.client.gui.GuiStatistics;
@@ -33,7 +32,7 @@ import java.util.List;
 public class PacketUpdateStatistics extends Packet implements PacketClient {
     private List<PlayerStatistics.StatisticMaterial> statisticMaterials;
 
-    public PacketUpdateStatistics(GameRegistry registry) {
+    public PacketUpdateStatistics() {
     }
 
     public PacketUpdateStatistics(MobPlayerServer player) {

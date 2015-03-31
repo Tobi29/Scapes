@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.vanilla.basics.packet;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.client.gui.GuiInGameMessage;
@@ -31,7 +30,7 @@ import java.io.IOException;
 public class PacketNotification extends Packet implements PacketClient {
     private String title, text;
 
-    public PacketNotification(GameRegistry registry) {
+    public PacketNotification() {
     }
 
     public PacketNotification(String title, String text) {
@@ -55,7 +54,7 @@ public class PacketNotification extends Packet implements PacketClient {
 
     @Override
     public void runClient(ClientConnection client, WorldClient world) {
-        client.getEntity().openGui(
-                new GuiInGameMessage(client.getGame(), title, text));
+        client.getEntity()
+                .openGui(new GuiInGameMessage(client.getGame(), title, text));
     }
 }

@@ -72,21 +72,7 @@ public interface Plugin {
      */
     void dispose(GameRegistry registry);
 
-    /**
-     * Name of the plugin
-     *
-     * @return Name of the plugin, excluding version
-     */
-    String getName();
-
     String getID();
 
     String getAssetRoot();
-
-    /**
-     * Version of the plugin
-     *
-     * @return Version of the plugin (Format: x.x.x)
-     */
-    String getVersion();
 }

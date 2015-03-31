@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.client.gui.GuiCrafting;
@@ -27,9 +26,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class PacketOpenCrafting extends Packet implements PacketClient {
-    public PacketOpenCrafting(GameRegistry registry) {
-    }
-
     @Override
     public void sendClient(PlayerConnection player, DataOutputStream streamOut)
             throws IOException {
@@ -42,7 +38,6 @@ public class PacketOpenCrafting extends Packet implements PacketClient {
 
     @Override
     public void runClient(ClientConnection client, WorldClient world) {
-        client.getEntity()
-                .openGui(new GuiCrafting(true, client.getEntity()));
+        client.getEntity().openGui(new GuiCrafting(true, client.getEntity()));
     }
 }

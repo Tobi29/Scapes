@@ -19,13 +19,6 @@ package org.tobi29.scapes.block;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 
 public class UpdateBlockUpdateUpdateTile extends UpdateBlockUpdate {
-    public UpdateBlockUpdateUpdateTile(GameRegistry registry) {
-        super(registry);
-    }
-
-    public UpdateBlockUpdateUpdateTile() {
-    }
-
     @Override
     public void run(TerrainServer.TerrainMutable terrain) {
         updateBlock(terrain, x, y, z, true);

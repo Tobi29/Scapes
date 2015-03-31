@@ -22,7 +22,7 @@ import org.tobi29.scapes.chunk.WorldEnvironment;
 /**
  * Basic interface dor dimension addons
  */
-public interface Dimension extends Addon {
+public interface Dimension extends Plugin {
     /**
      * Called to create a {@code WorldEnvironment}
      *

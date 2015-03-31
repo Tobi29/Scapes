@@ -19,6 +19,7 @@ package org.tobi29.scapes.engine.utils.io;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.utils.ArrayUtil;
+import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
 import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
 import org.tobi29.scapes.engine.utils.io.filesystem.File;
 
@@ -90,7 +91,7 @@ public class FileCache {
             write.move(getFile(type, name));
             return new Location(type, array);
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(e);
+            throw new UnsupportedJVMException(e);
         }
     }
 

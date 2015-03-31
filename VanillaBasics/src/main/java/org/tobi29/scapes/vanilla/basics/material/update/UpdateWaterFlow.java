@@ -26,12 +26,6 @@ import org.tobi29.scapes.vanilla.basics.material.StoneType;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
 public class UpdateWaterFlow extends Update {
-    public UpdateWaterFlow(GameRegistry registry) {
-    }
-
-    public UpdateWaterFlow() {
-    }
-
     private static boolean flow(TerrainServer.TerrainMutable terrain, int x,
             int y, int z, VanillaMaterial materials,
             GameRegistry.Registry<StoneType> stoneRegistry) {

@@ -27,6 +27,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class GameRegistry {
     private final Map<Pair<String, String>, Registry<?>> registries =
@@ -58,7 +60,7 @@ public class GameRegistry {
                 add("Core", "Entity", 1, Integer.MAX_VALUE);
         Registry<EntityClient.Supplier> entityClientRegistry =
                 add("Core", "EntityClient", 1, Integer.MAX_VALUE);
-        int id = entityServerRegistry.register(null, "core.mob.Player");
+        int id = entityServerRegistry.reg(null, "core.mob.Player");
         entityClientRegistry.register(MobPlayerClient::new, id);
         entityIDs.put(MobPlayerServer.class, id);
         registerEntity(EntityBlockBreakServer::new, EntityBlockBreakClient::new,
@@ -69,64 +71,44 @@ public class GameRegistry {
                 MobFlyingBlockServer.class, "core.mob.FlyingBlock");
         registerEntity(MobBombServer::new, MobBombClient::new,
                 MobBombServer.class, "core.mob.Bomb");
-        SupplierRegistry<Packet> packetRegistry =
+        SupplierRegistry<Packet> pr =
                 addSupplier("Core", "Packet", 1, Short.MAX_VALUE);
-        packetRegistry
-                .register(PacketRequestChunk::new, "core.packet.RequestChunk");
-        packetRegistry.register(PacketRequestEntity::new,
-                "core.packet.RequestEntity");
-        packetRegistry.register(PacketSendChunk::new, "core.packet.SendChunk");
-        packetRegistry
-                .register(PacketBlockChange::new, "core.packet.BlockChange");
-        packetRegistry.register(PacketBlockChangeAir::new,
-                "core.packet.BlockChangeAir");
-        packetRegistry.register(PacketEntityAdd::new, "core.packet.EntityAdd");
-        packetRegistry
-                .register(PacketEntityChange::new, "core.packet.EntityChange");
-        packetRegistry.register(PacketEntityMetaData::new,
-                "core.packet.EntityMetaData");
-        packetRegistry.register(PacketMobMoveRelative::new,
-                "core.packet.MobMoveRelative");
-        packetRegistry.register(PacketMobMoveAbsolute::new,
-                "core.packet.MobMoveAbsolute");
-        packetRegistry
-                .register(PacketMobChangeRot::new, "core.packet.MobChangeRot");
-        packetRegistry.register(PacketMobChangeSpeed::new,
-                "core.packet.MobChangeSpeed");
-        packetRegistry.register(PacketMobChangeState::new,
-                "core.packet.MobChangeState");
-        packetRegistry.register(PacketMobDamage::new, "core.packet.MobDamage");
-        packetRegistry.register(PacketEntityDespawn::new,
-                "core.packet.EntityDespawn");
-        packetRegistry
-                .register(PacketSoundEffect::new, "core.packet.SoundEffect");
-        packetRegistry
-                .register(PacketInteraction::new, "core.packet.Interaction");
-        packetRegistry.register(PacketInventoryInteraction::new,
+        pr.regS(PacketRequestChunk::new, "core.packet.RequestChunk");
+        pr.regS(PacketRequestEntity::new, "core.packet.RequestEntity");
+        pr.regS(PacketSendChunk::new, "core.packet.SendChunk");
+        pr.regS(PacketBlockChange::new, "core.packet.BlockChange");
+        pr.regS(PacketBlockChangeAir::new, "core.packet.BlockChangeAir");
+        pr.regS(PacketEntityAdd::new, "core.packet.EntityAdd");
+        pr.regS(PacketEntityChange::new, "core.packet.EntityChange");
+        pr.regS(PacketEntityMetaData::new, "core.packet.EntityMetaData");
+        pr.regS(PacketMobMoveRelative::new, "core.packet.MobMoveRelative");
+        pr.regS(PacketMobMoveAbsolute::new, "core.packet.MobMoveAbsolute");
+        pr.regS(PacketMobChangeRot::new, "core.packet.MobChangeRot");
+        pr.regS(PacketMobChangeSpeed::new, "core.packet.MobChangeSpeed");
+        pr.regS(PacketMobChangeState::new, "core.packet.MobChangeState");
+        pr.regS(PacketMobDamage::new, "core.packet.MobDamage");
+        pr.regS(PacketEntityDespawn::new, "core.packet.EntityDespawn");
+        pr.regS(PacketSoundEffect::new, "core.packet.SoundEffect");
+        pr.regS(PacketInteraction::new, "core.packet.Interaction");
+        pr.regS(PacketInventoryInteraction::new,
                 "core.packet.InventoryInteraction");
-        packetRegistry
-                .register(PacketOpenCrafting::new, "core.packet.OpenCrafting");
-        packetRegistry.register(PacketOpenGui::new, "core.packet.OpenGui");
-        packetRegistry.register(PacketCloseGui::new, "core.packet.CloseGui");
-        packetRegistry.register(PacketUpdateInventory::new,
-                "core.packet.UpdateInventory");
-        packetRegistry.register(PacketUpdateStatistics::new,
-                "core.packet.UpdateStatistics");
-        packetRegistry.register(PacketChat::new, "core.packet.Chat");
-        packetRegistry
-                .register(PacketPlayerHunger::new, "core.packet.PlayerHunger");
-        packetRegistry.register(PacketItemUse::new, "core.packet.ItemUse");
-        packetRegistry.register(PacketCrafting::new, "core.packet.Crafting");
-        packetRegistry
-                .register(PacketDisconnect::new, "core.packet.Disconnect");
-        packetRegistry.register(PacketSetWorld::new, "core.packet.SetWorld");
-        packetRegistry.register(PacketPing::new, "core.packet.Ping");
-        packetRegistry.register(PacketSkin::new, "core.packet.Skin");
-        SupplierRegistry<Update> updateRegistry =
+        pr.regS(PacketOpenCrafting::new, "core.packet.OpenCrafting");
+        pr.regS(PacketOpenGui::new, "core.packet.OpenGui");
+        pr.regS(PacketCloseGui::new, "core.packet.CloseGui");
+        pr.regS(PacketUpdateInventory::new, "core.packet.UpdateInventory");
+        pr.regS(PacketUpdateStatistics::new, "core.packet.UpdateStatistics");
+        pr.regS(PacketChat::new, "core.packet.Chat");
+        pr.regS(PacketPlayerHunger::new, "core.packet.PlayerHunger");
+        pr.regS(PacketItemUse::new, "core.packet.ItemUse");
+        pr.regS(PacketCrafting::new, "core.packet.Crafting");
+        pr.regS(PacketDisconnect::new, "core.packet.Disconnect");
+        pr.regS(PacketSetWorld::new, "core.packet.SetWorld");
+        pr.regS(PacketPing::new, "core.packet.Ping");
+        pr.regS(PacketSkin::new, "core.packet.Skin");
+        SupplierRegistry<Update> ur =
                 addSupplier("Core", "Update", 1, Short.MAX_VALUE);
-        updateRegistry
-                .register(UpdateBlockUpdate::new, "core.update.BlockUpdate");
-        updateRegistry.register(UpdateBlockUpdateUpdateTile::new,
+        ur.regS(UpdateBlockUpdate::new, "core.update.BlockUpdate");
+        ur.regS(UpdateBlockUpdateUpdateTile::new,
                 "core.update.BlockUpdateUpdateTile");
     }
 
@@ -241,7 +223,7 @@ public class GameRegistry {
                 get("Core", "Entity");
         Registry<EntityClient.Supplier> entityClientRegistry =
                 get("Core", "EntityClient");
-        int id = entityServerRegistry.register(serverSupplier, name);
+        int id = entityServerRegistry.reg(serverSupplier, name);
         entityClientRegistry.register(clientSupplier, id);
         entityIDs.put(entityClass, id);
     }
@@ -265,11 +247,6 @@ public class GameRegistry {
         }
     }
 
-    @FunctionalInterface
-    public interface Supplier<E> {
-        E get(GameRegistry registry);
-    }
-
     public class Registry<E> {
         protected final String module, type;
         protected final int min, max;
@@ -284,7 +261,7 @@ public class GameRegistry {
             this.max = max;
         }
 
-        public int register(E element, String name) {
+        public int reg(E element, String name) {
             if (locked) {
                 throw new IllegalStateException("Initializing already ended");
             }
@@ -321,7 +298,8 @@ public class GameRegistry {
         }
     }
 
-    public class SupplierRegistry<E> extends Registry<Supplier<? extends E>> {
+    public class SupplierRegistry<E>
+            extends Registry<Function<GameRegistry, ? extends E>> {
         private final Map<Class<?>, Integer> suppliers =
                 new ConcurrentHashMap<>();
 
@@ -329,13 +307,18 @@ public class GameRegistry {
             super(module, type, min, max);
         }
 
+        public int regS(Supplier<? extends E> element, String name) {
+            return reg(registry -> element.get(), name);
+        }
+
         @Override
-        public int register(Supplier<? extends E> element, String name) {
+        public int reg(Function<GameRegistry, ? extends E> element,
+                String name) {
             if (locked) {
                 throw new IllegalStateException("Initializing already ended");
             }
-            int id = super.register(element, name);
-            suppliers.put(element.get(GameRegistry.this).getClass(), id);
+            int id = super.reg(element, name);
+            suppliers.put(element.apply(GameRegistry.this).getClass(), id);
             return id;
         }
 

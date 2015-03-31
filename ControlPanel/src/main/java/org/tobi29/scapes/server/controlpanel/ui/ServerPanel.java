@@ -17,13 +17,12 @@
 package org.tobi29.scapes.server.controlpanel.ui;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
+import org.tobi29.scapes.engine.swt.util.ANSILineStyler;
 import org.tobi29.scapes.engine.swt.util.Fonts;
 
 import java.util.Map;
@@ -38,16 +37,11 @@ public class ServerPanel extends Composite {
     private final StyledText console;
     private final Font font;
     private final Group profilerGroup;
-    private final Color error, warn, debug, trace;
 
     public ServerPanel(Composite parent) {
         super(parent, SWT.NONE);
         setLayout(new GridLayout(3, false));
         Display display = getDisplay();
-        error = display.getSystemColor(SWT.COLOR_RED);
-        warn = display.getSystemColor(SWT.COLOR_DARK_YELLOW);
-        debug = display.getSystemColor(SWT.COLOR_DARK_GRAY);
-        trace = display.getSystemColor(SWT.COLOR_GRAY);
         Group playersGroup = new Group(this, SWT.NONE);
         playersGroup.setLayout(new GridLayout(1, false));
         GridData playersGrid =
@@ -71,6 +65,9 @@ public class ServerPanel extends Composite {
         console.setFont(font);
         console.setLayoutData(
                 new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+        ANSILineStyler consoleStyler = new ANSILineStyler(console);
+        console.addLineStyleListener(consoleStyler);
+        console.addVerifyListener(consoleStyler);
         input = new Text(consoleGroup, SWT.BORDER);
         input.setLayoutData(
                 new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
@@ -147,29 +144,7 @@ public class ServerPanel extends Composite {
         if (isDisposed()) {
             return;
         }
-        StyleRange style = null;
-        if (line.contains("[ERROR]")) {
-            style = new StyleRange();
-            style.fontStyle = SWT.BOLD;
-            style.foreground = error;
-        } else if (line.contains("[WARN]")) {
-            style = new StyleRange();
-            style.foreground = warn;
-        } else if (line.contains("[DEBUG]")) {
-            style = new StyleRange();
-            style.foreground = debug;
-        } else if (line.contains("[TRACE]")) {
-            style = new StyleRange();
-            style.foreground = trace;
-        }
-        if (style != null) {
-            style.start = console.getText().length();
-            style.length = line.length();
-        }
         console.append(line + '\n');
-        if (style != null) {
-            console.setStyleRange(style);
-        }
         console.setTopIndex(console.getLineCount() - 1);
     }
 

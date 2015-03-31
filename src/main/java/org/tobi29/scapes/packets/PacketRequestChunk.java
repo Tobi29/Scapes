@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.terrain.Terrain;
@@ -36,7 +35,7 @@ public class PacketRequestChunk extends Packet
         implements PacketServer, PacketClient {
     private int x, y;
 
-    public PacketRequestChunk(GameRegistry registry) {
+    public PacketRequestChunk() {
     }
 
     public PacketRequestChunk(int x, int y) {

@@ -97,10 +97,6 @@ public class EntityServer implements MultiTag.ReadAndWrite {
         return metaData.getStructure(category);
     }
 
-    public void setMetaData(String category, TagStructure metaData) {
-        this.metaData.setStructure(category, metaData);
-    }
-
     public void update(double delta) {
     }
 

@@ -23,17 +23,18 @@ import org.tobi29.scapes.client.gui.GuiLoading;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.connection.Account;
 import org.tobi29.scapes.connection.ConnectionCloseException;
-import org.tobi29.scapes.connection.ServerInfo;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.server.ScapesServer;
+import org.tobi29.scapes.server.controlpanel.ServerInfo;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
+import java.util.Optional;
 
 public class GameStateLoadSP extends GameState {
     private static final Logger LOGGER =
@@ -149,8 +150,8 @@ public class GameStateLoadSP extends GameState {
                         "Failed to stop internal server after login error:",
                         e1);
             }
-            engine.setState(
-                    new GameStateServerDisconnect(e.getMessage(), engine));
+            engine.setState(new GameStateServerDisconnect(e.getMessage(),
+                    Optional.empty(), engine));
             step = -1;
             return;
         }

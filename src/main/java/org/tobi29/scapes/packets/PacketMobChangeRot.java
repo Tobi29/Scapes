@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
@@ -34,7 +33,7 @@ public class PacketMobChangeRot extends Packet
     private int entityID;
     private float x, y, z;
 
-    public PacketMobChangeRot(GameRegistry registry) {
+    public PacketMobChangeRot() {
     }
 
     public PacketMobChangeRot(int entityID, Vector3 pos, float x, float y,

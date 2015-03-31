@@ -103,15 +103,14 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
     }
 
     @Override
-    public void init() {
+    public void init() throws GraphicsCheckException {
         boolean fullscreen = engine.getConfig().isFullscreen();
         boolean vSync = engine.getConfig().getVSync();
         createWindow(fullscreen, vSync, engine.getGame().getName());
         context = GLContext.createFromCurrent();
         Optional<String> check = checkContext(context);
         if (check.isPresent()) {
-            throw new GraphicsCheckException(
-                    "Insufficient OpenGL version: " + check.get());
+            throw new GraphicsCheckException(check.get());
         }
     }
 

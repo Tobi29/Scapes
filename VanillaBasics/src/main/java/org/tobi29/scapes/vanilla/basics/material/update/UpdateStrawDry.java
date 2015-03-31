@@ -17,19 +17,12 @@
 package org.tobi29.scapes.vanilla.basics.material.update;
 
 import org.tobi29.scapes.block.BlockType;
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.block.Update;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
 public class UpdateStrawDry extends Update {
-    public UpdateStrawDry(GameRegistry registry) {
-    }
-
-    public UpdateStrawDry() {
-    }
-
     @Override
     public void run(TerrainServer.TerrainMutable terrain) {
         if (terrain.getBlockData(x, y, z) == 0) {

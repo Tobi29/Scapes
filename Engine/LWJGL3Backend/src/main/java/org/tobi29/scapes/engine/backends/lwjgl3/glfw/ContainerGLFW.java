@@ -24,6 +24,7 @@ import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.backends.lwjgl3.ContainerLWJGL3;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.input.ControllerKey;
+import org.tobi29.scapes.engine.opengl.GraphicsCheckException;
 import org.tobi29.scapes.engine.opengl.GraphicsException;
 import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
 import org.tobi29.scapes.engine.utils.MutableSingle;
@@ -279,7 +280,12 @@ public class ContainerGLFW extends ContainerLWJGL3 {
             engine.getGraphics().reset();
             clearStates();
             GLFW.glfwDestroyWindow(window);
-            init();
+            try {
+                init();
+            } catch (GraphicsCheckException e) {
+                message(MessageType.ERROR, engine.getGame().getName(),
+                        "Unable to initialize graphics:\n" + e.getMessage());
+            }
             containerResized = true;
             visible = false;
         }

@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.engine.utils.platform;
 
+import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
 import org.tobi29.scapes.engine.utils.io.ReadSource;
 import org.tobi29.scapes.engine.utils.platform.spi.PlatformProvider;
 import org.tobi29.scapes.engine.utils.ui.font.GlyphRenderer;
@@ -36,7 +37,7 @@ public abstract class Platform {
                 return platform;
             }
         }
-        throw new IllegalStateException("Platform not supported!");
+        throw new UnsupportedJVMException("Platform not supported!");
     }
 
     public static Platform getPlatform() {

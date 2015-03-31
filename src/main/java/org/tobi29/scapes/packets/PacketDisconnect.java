@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.connection.ConnectionCloseException;
@@ -29,7 +28,7 @@ import java.io.IOException;
 public class PacketDisconnect extends Packet implements PacketClient {
     private String reason;
 
-    public PacketDisconnect(GameRegistry registry) {
+    public PacketDisconnect() {
     }
 
     public PacketDisconnect(String reason) {

@@ -50,7 +50,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.SocketException;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
@@ -115,13 +114,9 @@ public class PlayerConnection
     }
 
     public Optional<InetAddress> getAddress() {
-        Optional<SocketAddress> address = channel.getRemoteAddress();
+        Optional<InetSocketAddress> address = channel.getRemoteAddress();
         if (address.isPresent()) {
-            SocketAddress socketAddress = address.get();
-            if (socketAddress instanceof InetSocketAddress) {
-                return Optional
-                        .of(((InetSocketAddress) socketAddress).getAddress());
-            }
+            return Optional.of(address.get().getAddress());
         }
         return Optional.empty();
     }

@@ -55,7 +55,7 @@ public class GameStateLoadMP extends GameState {
     public void init() {
         progress = new GuiLoading();
         add(progress);
-        progress.setLabel("Creating server...");
+        progress.setLabel("Connecting to server...");
     }
 
     @Override
@@ -88,8 +88,8 @@ public class GameStateLoadMP extends GameState {
                 case 1:
                     if (channel.finishConnect()) {
                         step++;
+                        progress.setLabel("Logging in...");
                     }
-                    progress.setLabel("Logging in...");
                     break;
                 case 2:
                     int loadingRadius = (int) FastMath.ceil((10 +
@@ -118,7 +118,8 @@ public class GameStateLoadMP extends GameState {
         } catch (IOException | ConnectionCloseException e) {
             LOGGER.error("Failed to connect to server:", e);
             engine.setState(
-                    new GameStateServerDisconnect(e.getMessage(), engine));
+                    new GameStateServerDisconnect(e.getMessage(), address,
+                            engine));
             step = -1;
             return;
         }

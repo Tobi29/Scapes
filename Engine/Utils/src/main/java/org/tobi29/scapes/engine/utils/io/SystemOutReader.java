@@ -18,6 +18,8 @@ package org.tobi29.scapes.engine.utils.io;
 
 import java.io.*;
 import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Utility class for reading log from {@code System.out} and {@code System.err}
@@ -29,7 +31,10 @@ import java.util.Optional;
 public class SystemOutReader implements Closeable {
     private final CopyOutputStream copyOut, copyErr;
     private final PipedOutputStream consoleStream;
-    private final BufferedReader logReader;
+    private final InputStream logReader;
+    private final Queue<String> lineQueue = new ConcurrentLinkedQueue<>();
+    private byte[] buffer = new byte[1024];
+    private int i;
 
     /**
      * Constructs a new reader
@@ -40,8 +45,7 @@ public class SystemOutReader implements Closeable {
         consoleStream = new PipedOutputStream();
         copyOut = new CopyOutputStream(System.out, consoleStream);
         copyErr = new CopyOutputStream(System.err, consoleStream);
-        logReader = new BufferedReader(
-                new InputStreamReader(new PipedInputStream(consoleStream)));
+        logReader = new PipedInputStream(consoleStream);
         System.setOut(new PrintStream(copyOut));
         System.setErr(new PrintStream(copyErr));
     }
@@ -54,10 +58,32 @@ public class SystemOutReader implements Closeable {
      * @throws IOException If an I/O error occurred
      */
     public Optional<String> readLine() throws IOException {
-        if (logReader.ready()) {
-            return Optional.of(logReader.readLine());
+        if (lineQueue.isEmpty() && logReader.available() > 0) {
+            if (i >= buffer.length) {
+                byte[] newBuffer = new byte[buffer.length + 1024];
+                System.arraycopy(buffer, 0, newBuffer, 0, i);
+                buffer = newBuffer;
+            }
+            int length = logReader.read(buffer, i, buffer.length - i);
+            if (length > 0) {
+                int j = 0;
+                while (j < length) {
+                    int ij = i + j;
+                    char c = (char) buffer[ij];
+                    if (c == '\n') {
+                        lineQueue.add(new String(buffer, 0, ij));
+                        System.arraycopy(buffer, ij + 1, buffer, 0, length - j);
+                        length -= j + 1;
+                        i = 0;
+                        j = 0;
+                    } else {
+                        j++;
+                    }
+                }
+                i += length;
+            }
         }
-        return Optional.empty();
+        return Optional.ofNullable(lineQueue.poll());
     }
 
     @Override

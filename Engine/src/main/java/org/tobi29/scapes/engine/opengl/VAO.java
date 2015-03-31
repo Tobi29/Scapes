@@ -317,10 +317,6 @@ public class VAO {
         used = true;
     }
 
-    public void markAsUsed() {
-        used = true;
-    }
-
     private void store(GraphicsSystem graphics) {
         buffer.rewind();
         index.rewind();

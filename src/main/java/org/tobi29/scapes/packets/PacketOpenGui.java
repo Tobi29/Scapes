@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.entity.client.EntityContainerClient;
@@ -31,7 +30,7 @@ import java.io.IOException;
 public class PacketOpenGui extends Packet implements PacketClient {
     private int entityId;
 
-    public PacketOpenGui(GameRegistry registry) {
+    public PacketOpenGui() {
     }
 
     public PacketOpenGui(EntityContainerServer entity) {

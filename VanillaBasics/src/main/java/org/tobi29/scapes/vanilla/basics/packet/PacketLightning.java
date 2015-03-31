@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.vanilla.basics.packet;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
@@ -40,7 +39,7 @@ public class PacketLightning extends Packet implements PacketClient {
                     "VanillaBasics:sound/entity/particle/thunder/Close3.ogg"};
     private double x, y, z;
 
-    public PacketLightning(GameRegistry registry) {
+    public PacketLightning() {
     }
 
     public PacketLightning(double x, double y, double z) {

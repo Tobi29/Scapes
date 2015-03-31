@@ -20,10 +20,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.CompressionUtil;
+import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
 import org.tobi29.scapes.engine.utils.graphics.Image;
+import org.tobi29.scapes.engine.utils.graphics.PNG;
+import org.tobi29.scapes.engine.utils.io.filesystem.File;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
@@ -33,6 +37,44 @@ public class ServerInfo {
     private final String name;
     private final Image image;
     private final ByteBuffer buffer;
+
+    public ServerInfo(String name, File icon) {
+        this.name = name;
+        Image image;
+        if (icon.exists()) {
+            try (InputStream streamIn = icon.read()) {
+                image = PNG.decode(streamIn, BufferCreator::byteBuffer);
+                int width = image.getWidth();
+                if (width != image.getHeight()) {
+                    throw new IOException("The icon has to be square sized.");
+                } else if (width > 256) {
+                    throw new IOException(
+                            "The icon may not be larger than 256x256.");
+                }
+            } catch (IOException e) {
+                LOGGER.warn("Unable to load server icon: {}", e.toString());
+                image = new Image(1, 1, BufferCreator.byteBuffer(4));
+            }
+        } else {
+            image = new Image(1, 1, BufferCreator.byteBuffer(4));
+        }
+        this.image = image;
+        ByteBuffer buffer;
+        try {
+            buffer = CompressionUtil.compress(image.getBuffer());
+        } catch (IOException e) {
+            throw new UnsupportedJVMException("Failed to compress server icon",
+                    e);
+        }
+        byte[] array = name.getBytes(StandardCharsets.UTF_8);
+        int size = 1 + array.length + buffer.remaining();
+        this.buffer = BufferCreator.byteBuffer(4 + size);
+        this.buffer.putInt(size);
+        this.buffer.put((byte) array.length);
+        this.buffer.put(array);
+        this.buffer.put(buffer);
+        this.buffer.rewind();
+    }
 
     public ServerInfo(ByteBuffer buffer) {
         this.buffer = buffer;

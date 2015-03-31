@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -33,7 +32,7 @@ public class PacketEntityChange extends Packet implements PacketClient {
     private int entityID;
     private TagStructure tag;
 
-    public PacketEntityChange(GameRegistry registry) {
+    public PacketEntityChange() {
     }
 
     public PacketEntityChange(EntityServer entity) {

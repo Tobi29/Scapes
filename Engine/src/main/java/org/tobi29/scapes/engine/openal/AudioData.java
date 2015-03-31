@@ -17,6 +17,8 @@
 package org.tobi29.scapes.engine.openal;
 
 import org.tobi29.scapes.engine.openal.codec.AudioInputStream;
+import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
+import org.tobi29.scapes.engine.utils.io.ProcessStream;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -26,8 +28,10 @@ public class AudioData {
 
     public AudioData(AudioInputStream streamIn, OpenAL openAL)
             throws IOException {
-        this(streamIn.readNow(), streamIn.getRate(), streamIn.getChannels(),
-                openAL);
+        this(ProcessStream.process(streamIn, ProcessStream.asBuffer(
+                        length -> BufferCreatorDirect
+                                .byteBuffer(length + 40960))),
+                streamIn.getRate(), streamIn.getChannels(), openAL);
     }
 
     public AudioData(ByteBuffer data, int rate, int channels, OpenAL openAL) {

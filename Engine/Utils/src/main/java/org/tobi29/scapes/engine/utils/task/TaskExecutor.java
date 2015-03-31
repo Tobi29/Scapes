@@ -95,12 +95,7 @@ public class TaskExecutor {
     }
 
     public Joiner runTask(ASyncTask task, String name) {
-        return runTask(task, Thread.MIN_PRIORITY, name);
-    }
-
-    public Joiner runTask(ASyncTask task, int priority, String name) {
-        ThreadWrapper thread =
-                new ThreadWrapper(task, priority, this.name + name);
+        ThreadWrapper thread = new ThreadWrapper(task, this.name + name);
         threadPool.execute(thread);
         return thread.joinable.getJoiner();
     }
@@ -115,6 +110,10 @@ public class TaskExecutor {
     public void shutdown() {
         if (root) {
             threadPool.shutdown();
+            try {
+                threadPool.awaitTermination(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+            }
         }
     }
 
@@ -145,13 +144,11 @@ public class TaskExecutor {
 
     private class ThreadWrapper implements Runnable {
         private final ASyncTask task;
-        private final int priority;
         private final String name;
         private final Joiner.Joinable joinable;
 
-        private ThreadWrapper(ASyncTask task, int priority, String name) {
+        private ThreadWrapper(ASyncTask task, String name) {
             this.task = task;
-            this.priority = priority;
             this.name = name;
             joinable = new Joiner.Joinable();
         }
@@ -161,7 +158,6 @@ public class TaskExecutor {
         public void run() {
             try {
                 Thread thread = Thread.currentThread();
-                thread.setPriority(priority);
                 thread.setName(name);
                 task.run(joinable.getJoiner());
             } catch (Throwable e) { // Yes this catches ThreadDeath, so don't use it

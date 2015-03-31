@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.vanilla.basics.packet;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.Material;
 import org.tobi29.scapes.chunk.WorldServer;
@@ -42,7 +41,7 @@ import java.io.IOException;
 public class PacketAnvil extends Packet implements PacketServer {
     private int entityID, id;
 
-    public PacketAnvil(GameRegistry registry) {
+    public PacketAnvil() {
     }
 
     public PacketAnvil(EntityAnvilClient anvil, int id) {

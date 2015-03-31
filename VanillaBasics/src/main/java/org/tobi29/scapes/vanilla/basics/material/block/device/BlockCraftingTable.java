@@ -47,7 +47,7 @@ public class BlockCraftingTable extends VanillaBlock {
     @Override
     public boolean click(TerrainServer terrain, int x, int y, int z, Face face,
             MobPlayerServer player) {
-        player.getConnection().send(new PacketOpenCrafting(registry));
+        player.getConnection().send(new PacketOpenCrafting());
         return true;
     }
 

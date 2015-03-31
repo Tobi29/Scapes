@@ -251,13 +251,11 @@ final class ScapesServerCommands {
         });
 
         registry.register("stop", 10, options -> {
-        }, (args, executor, commands) -> server.getTaskExecutor().runTask(
-                joiner -> server.stop(ScapesServer.ShutdownReason.STOP),
-                "Server-Stop"));
+        }, (args, executor, commands) -> server
+                .scheduleStop(ScapesServer.ShutdownReason.STOP));
 
         registry.register("reload", 10, options -> {
-        }, (args, executor, commands) -> server.getTaskExecutor().runTask(
-                joiner -> server.stop(ScapesServer.ShutdownReason.RELOAD),
-                "Server-Reload"));
+        }, (args, executor, commands) -> server
+                .scheduleStop(ScapesServer.ShutdownReason.RELOAD));
     }
 }

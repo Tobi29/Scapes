@@ -19,7 +19,6 @@ package org.tobi29.scapes.server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.chunk.WorldServer;
-import org.tobi29.scapes.connection.ServerInfo;
 import org.tobi29.scapes.engine.utils.Crashable;
 import org.tobi29.scapes.engine.utils.SleepUtil;
 import org.tobi29.scapes.engine.utils.Sync;
@@ -30,6 +29,7 @@ import org.tobi29.scapes.engine.utils.task.Joiner;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 import org.tobi29.scapes.server.command.CommandRegistry;
 import org.tobi29.scapes.server.connection.ServerConnection;
+import org.tobi29.scapes.server.controlpanel.ServerInfo;
 import org.tobi29.scapes.server.format.WorldFormat;
 
 import java.io.IOException;
@@ -83,7 +83,7 @@ public class ScapesServer {
                                         .filter(ControlPanel::isClosed)
                                         .collect(Collectors.toList());
                         closedControlPanels.forEach(this::removeControlPanel);
-                        SleepUtil.sleep(10);
+                        SleepUtil.sleep(100);
                     }
                 }
             } catch (IOException e) {
@@ -178,14 +178,21 @@ public class ScapesServer {
         return commandRegistry;
     }
 
+    public void scheduleStop(ShutdownReason shutdownReason) {
+        Thread thread = new Thread(() -> stop(shutdownReason));
+        thread.setName("Server-Shutdown");
+        thread.start();
+    }
+
     public void stop(ShutdownReason shutdownReason) {
+        this.shutdownReason = shutdownReason;
         worldFormat.getWorldNames().forEach(worldFormat::removeWorld);
         profilerJoiner.join();
         serverConnection.stop();
         logJoiner.join();
         stopped = true;
         taskExecutor.shutdown();
-        this.shutdownReason = shutdownReason;
+        LOGGER.info("Stopped server");
     }
 
     public boolean hasStopped() {

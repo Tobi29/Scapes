@@ -19,14 +19,10 @@ package org.tobi29.scapes.engine.openal.codec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.openal.codec.spi.AudioInputStreamProvider;
-import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
-import org.tobi29.scapes.engine.utils.io.ProcessStream;
 import org.tobi29.scapes.engine.utils.io.filesystem.Resource;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceConfigurationError;
@@ -88,17 +84,6 @@ public abstract class AudioInputStream extends InputStream {
     public abstract int getChannels();
 
     public abstract int getRate();
-
-    public ByteBuffer readNow() throws IOException {
-        ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
-        ProcessStream.process(this, streamOut::write);
-        byte[] bytes = streamOut.toByteArray();
-        streamOut.close();
-        ByteBuffer buffer = BufferCreatorDirect.byteBuffer(bytes.length);
-        buffer.put(bytes);
-        buffer.rewind();
-        return buffer;
-    }
 
     @Override
     public int read(byte[] b) throws IOException {

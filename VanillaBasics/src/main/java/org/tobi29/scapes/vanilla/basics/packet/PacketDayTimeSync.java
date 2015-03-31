@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.vanilla.basics.packet;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.packets.Packet;
@@ -33,7 +32,7 @@ public class PacketDayTimeSync extends Packet implements PacketClient {
     private long day;
     private double dayTime;
 
-    public PacketDayTimeSync(GameRegistry registry) {
+    public PacketDayTimeSync() {
     }
 
     public PacketDayTimeSync(double dayTime, long day) {

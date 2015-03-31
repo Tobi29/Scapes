@@ -139,7 +139,7 @@ public class GraphicsSystem {
         return modelViewProjectionMatrix;
     }
 
-    public void init() {
+    public void init() throws GraphicsCheckException {
         container.init();
         sync.init();
     }

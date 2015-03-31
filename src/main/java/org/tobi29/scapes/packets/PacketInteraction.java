@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
@@ -37,7 +36,7 @@ public class PacketInteraction extends Packet
     private int entityID;
     private byte type, data;
 
-    public PacketInteraction(GameRegistry registry) {
+    public PacketInteraction() {
     }
 
     public PacketInteraction(byte type) {

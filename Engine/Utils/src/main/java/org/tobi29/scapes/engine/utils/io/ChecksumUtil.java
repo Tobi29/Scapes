@@ -17,6 +17,7 @@
 package org.tobi29.scapes.engine.utils.io;
 
 import org.tobi29.scapes.engine.utils.ArrayUtil;
+import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
 import org.tobi29.scapes.engine.utils.io.filesystem.Resource;
 
 import java.io.IOException;
@@ -175,7 +176,7 @@ public final class ChecksumUtil {
             ProcessStream.process(streamIn, digest::update);
             return digest.digest();
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(e);
+            throw new UnsupportedJVMException(e);
         }
     }
 
@@ -204,7 +205,7 @@ public final class ChecksumUtil {
             complete.update(array);
             return complete.digest();
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(e);
+            throw new UnsupportedJVMException(e);
         }
     }
 

@@ -18,9 +18,8 @@ package org.tobi29.scapes.server.shell;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.Scapes;
 import org.tobi29.scapes.engine.utils.SleepUtil;
-import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileSystem;
 import org.tobi29.scapes.server.ScapesServer;
 
 import java.io.BufferedReader;
@@ -32,8 +31,8 @@ public class ScapesServerHeadless extends ScapesStandaloneServer {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ScapesServerHeadless.class);
 
-    public ScapesServerHeadless() throws IOException {
-        super(FileSystemContainer.newFileSystem(Scapes.directory, ""));
+    public ScapesServerHeadless(FileSystem files) throws IOException {
+        super(files);
     }
 
     public void run() throws IOException {

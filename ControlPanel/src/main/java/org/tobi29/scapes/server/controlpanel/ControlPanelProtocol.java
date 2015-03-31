@@ -18,6 +18,7 @@ package org.tobi29.scapes.server.controlpanel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
 import org.tobi29.scapes.engine.utils.io.PacketBundleChannel;
 
 import javax.crypto.SecretKey;
@@ -60,7 +61,7 @@ public class ControlPanelProtocol {
                     new PBEKeySpec(password.toCharArray(), salt, 65536, 256);
             key = factory.generateSecret(spec);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new IllegalStateException(e);
+            throw new UnsupportedJVMException(e);
         }
         byte[] array = key.getEncoded();
         this.channel =

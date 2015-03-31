@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.vanilla.basics.packet;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldServer;
@@ -39,7 +38,7 @@ import java.io.IOException;
 public class PacketQuern extends Packet implements PacketServer {
     private int entityID;
 
-    public PacketQuern(GameRegistry registry) {
+    public PacketQuern() {
     }
 
     public PacketQuern(EntityQuernClient quern) {

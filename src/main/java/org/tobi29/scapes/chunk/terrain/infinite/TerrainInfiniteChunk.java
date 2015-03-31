@@ -53,8 +53,8 @@ public abstract class TerrainInfiniteChunk {
         this.world = world;
         this.zSize = zSize;
         blocks = world.getRegistry().getBlocks();
-        bData = new ChunkData(1, 1, 6, 3, 3, 3, ChunkArraySection1x16::new);
-        bID = new ChunkData(1, 1, 6, 3, 3, 3, ChunkArraySection1x16::new);
+        bData = new ChunkData(0, 0, 5, 4, 4, 4, ChunkArraySection1x16::new);
+        bID = new ChunkData(0, 0, 5, 4, 4, 4, ChunkArraySection1x16::new);
         bLight = new ChunkData(0, 0, 5, 4, 4, 4, ChunkArraySection2x4::new);
         heightMap = new int[256];
     }
@@ -355,10 +355,6 @@ public abstract class TerrainInfiniteChunk {
                             " in chunk " + pos.intX() +
                             ' ' + pos.intY());
         }
-    }
-
-    public void setMetaData(String category, TagStructure metaData) {
-        this.metaData.setStructure(category, metaData);
     }
 
     protected void initHeightMap() {

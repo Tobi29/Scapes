@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.entity.server.EntityServer;
@@ -29,7 +28,7 @@ import java.io.IOException;
 public class PacketRequestEntity extends Packet implements PacketServer {
     private int entityId;
 
-    public PacketRequestEntity(GameRegistry registry) {
+    public PacketRequestEntity() {
     }
 
     public PacketRequestEntity(int entityId) {
@@ -56,8 +55,8 @@ public class PacketRequestEntity extends Packet implements PacketServer {
         EntityServer entity = world.getEntity(entityId);
         if (entity != null) {
             player.send(new PacketEntityAdd(entity,
-                    player.getServer().getServer().getWorldFormat()
-                            .getPlugins().getRegistry()));
+                    player.getServer().getServer().getWorldFormat().getPlugins()
+                            .getRegistry()));
         }
     }
 }

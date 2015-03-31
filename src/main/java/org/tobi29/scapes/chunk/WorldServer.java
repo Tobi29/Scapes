@@ -501,7 +501,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                 update(0.05);
                 sync.capTPS();
             }
-        }, Thread.NORM_PRIORITY, "Tick-" + id);
+        }, "Tick-" + id);
     }
 
     @FunctionalInterface

@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -34,7 +33,7 @@ public class PacketEntityMetaData extends Packet implements PacketClient {
     private String category;
     private TagStructure tag;
 
-    public PacketEntityMetaData(GameRegistry registry) {
+    public PacketEntityMetaData() {
     }
 
     public PacketEntityMetaData(EntityServer entity, String category) {

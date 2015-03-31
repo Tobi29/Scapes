@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
@@ -32,7 +31,7 @@ public class PacketSoundEffect extends Packet implements PacketClient {
     private Vector3 position, velocity;
     private float pitch, gain, range;
 
-    public PacketSoundEffect(GameRegistry registry) {
+    public PacketSoundEffect() {
     }
 
     public PacketSoundEffect(String audio, Vector3 position, Vector3 velocity,

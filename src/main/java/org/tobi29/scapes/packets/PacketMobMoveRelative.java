@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
@@ -34,7 +33,7 @@ public class PacketMobMoveRelative extends Packet
     private int entityID;
     private byte x, y, z;
 
-    public PacketMobMoveRelative(GameRegistry registry) {
+    public PacketMobMoveRelative() {
     }
 
     public PacketMobMoveRelative(int entityID, Vector3 pos, byte x, byte y,

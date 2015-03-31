@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
@@ -29,7 +28,7 @@ import java.io.IOException;
 public class PacketBlockChange extends Packet implements PacketClient {
     protected int x, y, z, id, data;
 
-    public PacketBlockChange(GameRegistry registry) {
+    public PacketBlockChange() {
     }
 
     public PacketBlockChange(int x, int y, int z, int id, int data) {

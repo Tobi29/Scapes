@@ -19,7 +19,6 @@ package org.tobi29.scapes.server.shell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.*;
-import org.tobi29.scapes.Scapes;
 import org.tobi29.scapes.engine.swt.util.Dialogs;
 import org.tobi29.scapes.engine.swt.util.InputDialog;
 import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
@@ -39,8 +38,8 @@ public class ScapesServerShell extends ScapesStandaloneServer
     public final Display display;
     private final ServerPanel serverPanel;
 
-    public ScapesServerShell() throws IOException {
-        super(FileSystemContainer.newFileSystem(Scapes.directory, ""));
+    public ScapesServerShell(FileSystem files) throws IOException {
+        super(files);
         display = Display.getDefault();
         shell = new Shell(display);
         shell.setText("Scapes Server");

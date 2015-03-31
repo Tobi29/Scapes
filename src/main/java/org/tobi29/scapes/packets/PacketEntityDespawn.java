@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.entity.client.EntityClient;
@@ -33,7 +32,7 @@ public class PacketEntityDespawn extends Packet implements PacketClient {
     private int entityID;
     private boolean dead;
 
-    public PacketEntityDespawn(GameRegistry registry) {
+    public PacketEntityDespawn() {
     }
 
     public PacketEntityDespawn(EntityServer entity) {

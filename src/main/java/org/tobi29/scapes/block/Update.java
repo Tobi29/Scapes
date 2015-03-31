@@ -27,7 +27,7 @@ public abstract class Update {
             double delay, short id) {
         try {
             return registry.<Update>getSupplier("Core", "Update").get(id)
-                    .get(registry).set(x, y, z, delay);
+                    .apply(registry).set(x, y, z, delay);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(
                     "Failed to make update over reflection! (id: " +

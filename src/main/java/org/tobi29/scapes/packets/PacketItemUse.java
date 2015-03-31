@@ -17,7 +17,6 @@
 package org.tobi29.scapes.packets;
 
 import org.tobi29.scapes.block.BlockType;
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
@@ -40,7 +39,7 @@ public class PacketItemUse extends Packet implements PacketServer {
     private double strength;
     private boolean side;
 
-    public PacketItemUse(GameRegistry registry) {
+    public PacketItemUse() {
     }
 
     public PacketItemUse(boolean side, double strength) {

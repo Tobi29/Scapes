@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.terrain.Terrain;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteChunkClient;
@@ -37,7 +36,7 @@ public class PacketSendChunk extends Packet implements PacketClient {
     private int x, y;
     private TagStructure tag;
 
-    public PacketSendChunk(GameRegistry registry) {
+    public PacketSendChunk() {
     }
 
     public PacketSendChunk(TerrainInfiniteChunkServer chunk) {

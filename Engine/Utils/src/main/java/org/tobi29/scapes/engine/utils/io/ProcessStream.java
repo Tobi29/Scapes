@@ -16,8 +16,13 @@
 
 package org.tobi29.scapes.engine.utils.io;
 
+import org.tobi29.scapes.engine.utils.BufferCreator;
+import org.tobi29.scapes.engine.utils.ByteBufferOutputStream;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -107,6 +112,45 @@ public final class ProcessStream {
         return processor.result();
     }
 
+    public static StreamProcessor<byte[]> asArray() {
+        return new StreamProcessor<byte[]>() {
+            private final ByteArrayOutputStream streamOut =
+                    new ByteArrayOutputStream();
+
+            @Override
+            public void process(byte[] buffer, int offset, int length) {
+                streamOut.write(buffer, offset, length);
+            }
+
+            @Override
+            public byte[] result() {
+                return streamOut.toByteArray();
+            }
+        };
+    }
+
+    public static StreamProcessor<ByteBuffer> asBuffer() {
+        return asBuffer(length -> BufferCreator.byteBuffer(length + 1024));
+    }
+
+    public static StreamProcessor<ByteBuffer> asBuffer(
+            ByteBufferOutputStream.BufferSupplier supplier) {
+        return new StreamProcessor<ByteBuffer>() {
+            private final ByteBufferOutputStream streamOut =
+                    new ByteBufferOutputStream(supplier);
+
+            @Override
+            public void process(byte[] buffer, int offset, int length) {
+                streamOut.write(buffer, offset, length);
+            }
+
+            @Override
+            public ByteBuffer result() {
+                return streamOut.getBuffer();
+            }
+        };
+    }
+
     /**
      * A default {@code StreamProcessor} that encoded the input into a {@code String}
      *
@@ -124,16 +168,17 @@ public final class ProcessStream {
      */
     public static StreamProcessor<String> asString(Charset charset) {
         return new StreamProcessor<String>() {
-            private final StringBuilder collector = new StringBuilder(16);
+            private final ByteArrayOutputStream streamOut =
+                    new ByteArrayOutputStream();
 
             @Override
             public void process(byte[] buffer, int offset, int length) {
-                collector.append(new String(buffer, offset, length, charset));
+                streamOut.write(buffer, offset, length);
             }
 
             @Override
             public String result() {
-                return collector.toString();
+                return new String(streamOut.toByteArray(), charset);
             }
         };
     }

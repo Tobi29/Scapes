@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldServer;
@@ -38,7 +37,7 @@ public class PacketInventoryInteraction extends Packet implements PacketServer {
     private int entityID, slot;
     private byte type;
 
-    public PacketInventoryInteraction(GameRegistry registry) {
+    public PacketInventoryInteraction() {
     }
 
     public PacketInventoryInteraction(EntityContainerClient chest, byte type,

@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.entity.client.EntityClient;
@@ -32,7 +31,7 @@ public class PacketPlayerHunger extends Packet implements PacketClient {
     private int entityId;
     private double hunger, thirst, stamina;
 
-    public PacketPlayerHunger(GameRegistry registry) {
+    public PacketPlayerHunger() {
     }
 
     public PacketPlayerHunger(MobPlayerServer entity) {

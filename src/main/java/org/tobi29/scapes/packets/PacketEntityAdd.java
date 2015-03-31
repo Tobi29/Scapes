@@ -33,7 +33,7 @@ public class PacketEntityAdd extends Packet implements PacketClient {
     private int entityID, id;
     private TagStructure tag;
 
-    public PacketEntityAdd(GameRegistry registry) {
+    public PacketEntityAdd() {
     }
 
     public PacketEntityAdd(EntityServer entity, GameRegistry registry) {

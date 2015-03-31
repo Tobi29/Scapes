@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
@@ -31,7 +30,7 @@ public class PacketSkin extends Packet implements PacketServer, PacketClient {
     private byte[] array;
     private String checksum;
 
-    public PacketSkin(GameRegistry registry) {
+    public PacketSkin() {
     }
 
     public PacketSkin(String checksum) {

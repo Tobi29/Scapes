@@ -27,13 +27,13 @@ import org.tobi29.scapes.engine.utils.io.filesystem.Resource;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayDeque;
 import java.util.Properties;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Shader {
     private static final Logger LOGGER = LoggerFactory.getLogger(Shader.class);
-    private final Queue<Uniform> uniforms = new ConcurrentLinkedQueue<>();
+    private final Queue<Uniform> uniforms = new ArrayDeque<>();
     private final int[] uniformLocations;
     private final int vertexShader, fragmentShader, program;
 

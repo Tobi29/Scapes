@@ -27,6 +27,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -95,7 +96,7 @@ public class PacketBundleChannel {
             encryptCipher = Cipher.getInstance("AES/CBC/NoPadding");
             decryptCipher = Cipher.getInstance("AES/CBC/NoPadding");
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new IllegalStateException(e);
+            throw new UnsupportedJVMException(e);
         }
         setKey(encryptKey, decryptKey);
         queueStreamOut = new ByteBufferOutputStream(
@@ -111,7 +112,7 @@ public class PacketBundleChannel {
             try {
                 size = encryptCipher.update(buffer, bundle);
             } catch (ShortBufferException e) {
-                throw new IllegalStateException(e);
+                throw new UnsupportedJVMException(e);
             }
         } else {
             size = buffer.remaining();
@@ -294,7 +295,7 @@ public class PacketBundleChannel {
                 encryptCipher.init(Cipher.ENCRYPT_MODE, encryptKeySpec, IV);
                 decryptCipher.init(Cipher.DECRYPT_MODE, decryptKeySpec, IV);
             } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
-                throw new IllegalStateException(e);
+                throw new UnsupportedJVMException(e);
             }
             encrypt = true;
         }
@@ -314,12 +315,15 @@ public class PacketBundleChannel {
         return inRate.getAndSet(0);
     }
 
-    public Optional<SocketAddress> getRemoteAddress() {
+    public Optional<InetSocketAddress> getRemoteAddress() {
         try {
-            return Optional.of(channel.getRemoteAddress());
+            SocketAddress address = channel.getRemoteAddress();
+            if (address instanceof InetSocketAddress) {
+                return Optional.of((InetSocketAddress) address);
+            }
         } catch (IOException e) {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     @SuppressWarnings("ObjectToString")

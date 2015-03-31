@@ -17,7 +17,6 @@
 package org.tobi29.scapes.vanilla.basics.material.update;
 
 import org.tobi29.scapes.block.BlockType;
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.block.Update;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
@@ -29,12 +28,6 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class UpdateFlowerGrowth extends Update {
-    public UpdateFlowerGrowth(GameRegistry registry) {
-    }
-
-    public UpdateFlowerGrowth() {
-    }
-
     @Override
     public void run(TerrainServer.TerrainMutable terrain) {
         VanillaBasics plugin = (VanillaBasics) terrain.getWorld().getPlugins()

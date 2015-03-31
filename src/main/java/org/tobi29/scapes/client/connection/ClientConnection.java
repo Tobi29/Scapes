@@ -294,8 +294,8 @@ public class ClientConnection
             }
         } catch (ConnectionCloseException | IOException e) {
             LOGGER.info("Lost connection: {}", e.toString());
-            engine.setState(
-                    new GameStateServerDisconnect(e.getMessage(), engine));
+            engine.setState(new GameStateServerDisconnect(e.getMessage(),
+                    channel.getRemoteAddress(), engine));
         }
         try {
             close();

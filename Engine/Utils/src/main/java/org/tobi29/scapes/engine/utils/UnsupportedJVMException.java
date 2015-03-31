@@ -14,10 +14,18 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.plugins;
+package org.tobi29.scapes.engine.utils;
 
-/**
- * Basic interface for addons
- */
-public interface Addon extends Plugin {
+public class UnsupportedJVMException extends RuntimeException {
+    public UnsupportedJVMException(String message) {
+        super(message);
+    }
+
+    public UnsupportedJVMException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public UnsupportedJVMException(Throwable cause) {
+        super(cause);
+    }
 }

@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteClient;
@@ -37,7 +36,7 @@ public class PacketSetWorld extends Packet implements PacketClient {
     private String name;
     private int entityID;
 
-    public PacketSetWorld(GameRegistry registry) {
+    public PacketSetWorld() {
     }
 
     public PacketSetWorld(WorldServer world, MobPlayerServer player) {

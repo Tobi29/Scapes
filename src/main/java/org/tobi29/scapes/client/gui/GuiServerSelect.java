@@ -22,7 +22,6 @@ import org.tobi29.scapes.client.states.GameStateLoadMP;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.connection.ConnectionInfo;
 import org.tobi29.scapes.connection.ConnectionType;
-import org.tobi29.scapes.connection.ServerInfo;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.*;
@@ -34,6 +33,7 @@ import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
+import org.tobi29.scapes.server.controlpanel.ServerInfo;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

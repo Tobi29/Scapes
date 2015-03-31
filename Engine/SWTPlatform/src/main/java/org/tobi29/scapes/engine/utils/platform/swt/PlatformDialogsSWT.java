@@ -49,7 +49,7 @@ public class PlatformDialogsSWT implements PlatformDialogs {
             filterExtensions[i] = extension.pattern;
             filterNames[i] = extension.name;
         }
-        int style = SWT.OPEN;
+        int style = SWT.OPEN | SWT.APPLICATION_MODAL;
         if (multiple) {
             style |= SWT.MULTI;
         }
@@ -79,7 +79,8 @@ public class PlatformDialogsSWT implements PlatformDialogs {
             filterExtensions[i] = extension.pattern;
             filterNames[i] = extension.name;
         }
-        FileDialog fileDialog = new FileDialog(shell, SWT.SAVE);
+        FileDialog fileDialog =
+                new FileDialog(shell, SWT.SAVE | SWT.APPLICATION_MODAL);
         fileDialog.setText(title);
         fileDialog.setFilterExtensions(filterExtensions);
         fileDialog.setFilterNames(filterNames);
@@ -93,23 +94,24 @@ public class PlatformDialogsSWT implements PlatformDialogs {
 
     @Override
     public void message(MessageType messageType, String title, String message) {
-        int style = SWT.OK;
+        int style = SWT.APPLICATION_MODAL;
         switch (messageType) {
             case ERROR:
-                style = SWT.ICON_ERROR;
+                style |= SWT.ICON_ERROR;
                 break;
             case INFORMATION:
-                style = SWT.ICON_INFORMATION;
+                style |= SWT.ICON_INFORMATION;
                 break;
             case WARNING:
-                style = SWT.ICON_WARNING;
+                style |= SWT.ICON_WARNING;
                 break;
             case QUESTION:
-                style = SWT.ICON_QUESTION;
+                style |= SWT.ICON_QUESTION;
                 break;
         }
         MessageBox messageBox = new MessageBox(shell, style);
         messageBox.setText(title);
+        messageBox.setMessage(message);
         messageBox.open();
     }
 

@@ -24,6 +24,8 @@ import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.scenes.SceneImage;
 import org.tobi29.scapes.engine.swt.SWTLoader;
 import org.tobi29.scapes.engine.utils.VersionUtil;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileSystem;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
 import org.tobi29.scapes.plugins.PluginClassLoader;
 import org.tobi29.scapes.server.shell.ScapesServerHeadless;
 import org.tobi29.scapes.server.shell.ScapesServerShell;
@@ -35,10 +37,7 @@ import java.util.Enumeration;
 public class Scapes {
     public static final VersionUtil.Version VERSION =
             new VersionUtil.Version(0, 0, 0, 1);
-    public static String directory;
     public static boolean debug;
-    public static boolean gui;
-    public static boolean skipIntro;
 
     @SuppressWarnings("CallToSystemExit")
     public static void main(String[] args) throws IOException {
@@ -96,21 +95,20 @@ public class Scapes {
             }
         });
         System.setSecurityManager(new SecurityManager());
-        gui = !commandLine.hasOption('c');
         debug = commandLine.hasOption('d');
-        skipIntro = commandLine.hasOption('s');
         String[] cmdArgs = commandLine.getArgs();
         String mode = commandLine.getOptionValue('m', "client");
+        String directory;
+        if (cmdArgs.length > 0) {
+            directory = cmdArgs[0];
+        } else {
+            directory = ".";
+        }
         switch (mode) {
             case "client":
-                if (cmdArgs.length > 0) {
-                    directory = cmdArgs[0];
-                } else {
-                    directory = System.getProperty("user.dir");
-                }
                 ScapesEngine engine =
                         new ScapesEngine(new ScapesClient(), directory, debug);
-                if (skipIntro) {
+                if (commandLine.hasOption('s')) {
                     engine.setState(new GameStateMenu(engine));
                 } else {
                     engine.setState(
@@ -123,17 +121,15 @@ public class Scapes {
                 System.exit(engine.run());
                 break;
             case "server":
-                if (cmdArgs.length > 0) {
-                    directory = cmdArgs[0];
-                } else {
-                    directory = System.getProperty("user.dir");
-                }
-                if (gui) {
+                FileSystem files =
+                        FileSystemContainer.newFileSystem(directory, "");
+                if (!commandLine.hasOption('c')) {
                     SWTLoader.loadSWT();
-                    ScapesServerShell server = new ScapesServerShell();
+                    ScapesServerShell server = new ScapesServerShell(files);
                     server.run();
                 } else {
-                    ScapesServerHeadless server = new ScapesServerHeadless();
+                    ScapesServerHeadless server =
+                            new ScapesServerHeadless(files);
                     server.run();
                 }
                 break;

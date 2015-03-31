@@ -34,7 +34,7 @@ public final class RSAUtil {
         try {
             FACTORY = KeyFactory.getInstance("RSA");
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("RSA-keys not supported");
+            throw new UnsupportedJVMException("RSA-keys not supported");
         }
     }
 

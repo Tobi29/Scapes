@@ -46,10 +46,6 @@ public class ControllerJoystick implements Controller {
         return id;
     }
 
-    public int getButtons() {
-        return states.length;
-    }
-
     public int getAxes() {
         return axes.length;
     }
@@ -122,17 +118,10 @@ public class ControllerJoystick implements Controller {
 
     public synchronized void setAxis(int axis, double value) {
         if (axes[axis] < 0.5 && value >= 0.5) {
-            System.out.println(ControllerKey.getAxis(axis));
             addPressEvent(ControllerKey.getAxis(axis), PressState.PRESS);
         } else if (axes[axis] >= 0.5 && value < 0.5) {
-            System.err.println(ControllerKey.getAxis(axis));
             addPressEvent(ControllerKey.getAxis(axis), PressState.RELEASE);
         }
         axes[axis] = value;
-    }
-
-    public synchronized void clearStates() {
-        Arrays.fill(states, (byte) 0);
-        Arrays.fill(axes, 0.0d);
     }
 }

@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.server.connection.PlayerConnection;
@@ -26,12 +25,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class PacketCloseGui extends Packet implements PacketClient {
-    public PacketCloseGui(GameRegistry registry) {
-    }
-
-    public PacketCloseGui() {
-    }
-
     @Override
     public void sendClient(PlayerConnection player, DataOutputStream streamOut)
             throws IOException {

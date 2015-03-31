@@ -24,7 +24,7 @@ import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
 import java.util.Collection;
 
 public interface Container extends PlatformDialogs {
-    void init();
+    void init() throws GraphicsCheckException;
 
     int getContainerWidth();
 

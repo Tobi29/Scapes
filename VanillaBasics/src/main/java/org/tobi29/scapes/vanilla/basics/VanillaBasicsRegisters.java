@@ -240,37 +240,26 @@ class VanillaBasicsRegisters {
     }
 
     static void registerUpdates(GameRegistry registry) {
-        GameRegistry.SupplierRegistry<Update> updateRegistry =
+        GameRegistry.SupplierRegistry<Update> ur =
                 registry.getSupplier("Core", "Update");
-        updateRegistry.register(UpdateWaterFlow::new,
-                "vanilla.basics.update.WaterFlow");
-        updateRegistry.register(UpdateLavaFlow::new,
-                "vanilla.basics.update.LavaFlow");
-        updateRegistry.register(UpdateGrassGrowth::new,
-                "vanilla.basics.update.GrassGrowth");
-        updateRegistry.register(UpdateFlowerGrowth::new,
-                "vanilla.basics.update.FlowerGrowth");
-        updateRegistry.register(UpdateSaplingGrowth::new,
+        ur.regS(UpdateWaterFlow::new, "vanilla.basics.update.WaterFlow");
+        ur.regS(UpdateLavaFlow::new, "vanilla.basics.update.LavaFlow");
+        ur.regS(UpdateGrassGrowth::new, "vanilla.basics.update.GrassGrowth");
+        ur.regS(UpdateFlowerGrowth::new, "vanilla.basics.update.FlowerGrowth");
+        ur.regS(UpdateSaplingGrowth::new,
                 "vanilla.basics.update.SaplingGrowth");
-        updateRegistry.register(UpdateStrawDry::new,
-                "vanilla.basics.update.StrawDry");
+        ur.regS(UpdateStrawDry::new, "vanilla.basics.update.StrawDry");
     }
 
     static void registerPackets(GameRegistry registry) {
-        GameRegistry.SupplierRegistry<Packet> packetRegistry =
+        GameRegistry.SupplierRegistry<Packet> pr =
                 registry.getSupplier("Core", "Packet");
-        packetRegistry.register(PacketDayTimeSync::new,
-                "vanilla.basics.packet.DayTimeSync");
-        packetRegistry
-                .register(PacketAnvil::new, "vanilla.basics.packet.Anvil");
-        packetRegistry.register(PacketLightning::new,
-                "vanilla.basics.packet.Lightning");
-        packetRegistry.register(PacketNotification::new,
-                "vanilla.basics.packet.Notification");
-        packetRegistry.register(PacketResearch::new,
-                "vanilla.basics.packet.Research");
-        packetRegistry
-                .register(PacketQuern::new, "vanilla.basics.packet.Quern");
+        pr.regS(PacketDayTimeSync::new, "vanilla.basics.packet.DayTimeSync");
+        pr.regS(PacketAnvil::new, "vanilla.basics.packet.Anvil");
+        pr.regS(PacketLightning::new, "vanilla.basics.packet.Lightning");
+        pr.regS(PacketNotification::new, "vanilla.basics.packet.Notification");
+        pr.regS(PacketResearch::new, "vanilla.basics.packet.Research");
+        pr.regS(PacketQuern::new, "vanilla.basics.packet.Quern");
     }
 
     static void registerRecipes(GameRegistry registry,
@@ -392,25 +381,25 @@ class VanillaBasicsRegisters {
         recipeType.getRecipes().add(new CraftingRecipe(ingotItem, rocks));
         ItemStack hoeItem = new ItemStack(ingotItem);
         ToolUtil.createTool(materials.plugin, hoeItem, "Hoe");
-        ItemStack hoeHeadItem = new ItemStack(hoeItem);
+        ItemStack hoeHeadItem = new ItemStack(hoeItem).setData(0);
         ItemStack hammerItem = new ItemStack(ingotItem);
         ToolUtil.createTool(materials.plugin, hammerItem, "Hammer");
-        ItemStack hammerHeadItem = new ItemStack(hammerItem);
+        ItemStack hammerHeadItem = new ItemStack(hammerItem).setData(0);
         ItemStack sawItem = new ItemStack(ingotItem);
         ToolUtil.createTool(materials.plugin, sawItem, "Saw");
-        ItemStack sawHeadItem = new ItemStack(sawItem);
+        ItemStack sawHeadItem = new ItemStack(sawItem).setData(0);
         ItemStack axeItem = new ItemStack(ingotItem);
         ToolUtil.createTool(materials.plugin, axeItem, "Axe");
-        ItemStack axeHeadItem = new ItemStack(axeItem);
+        ItemStack axeHeadItem = new ItemStack(axeItem).setData(0);
         ItemStack shovelItem = new ItemStack(ingotItem);
         ToolUtil.createTool(materials.plugin, shovelItem, "Shovel");
-        ItemStack shovelHeadItem = new ItemStack(shovelItem);
+        ItemStack shovelHeadItem = new ItemStack(shovelItem).setData(0);
         ItemStack pickaxeItem = new ItemStack(ingotItem);
         ToolUtil.createTool(materials.plugin, pickaxeItem, "Pickaxe");
-        ItemStack pickaxeHeadItem = new ItemStack(pickaxeItem);
+        ItemStack pickaxeHeadItem = new ItemStack(pickaxeItem).setData(0);
         ItemStack swordItem = new ItemStack(ingotItem);
         ToolUtil.createTool(materials.plugin, swordItem, "Sword");
-        ItemStack swordHeadItem = new ItemStack(swordItem);
+        ItemStack swordHeadItem = new ItemStack(swordItem).setData(0);
 
         recipeType.getRecipes().add(new CraftingRecipe(hoeHeadItem, ingot));
         recipeType.getRecipes().add(new CraftingRecipe(hammerHeadItem, ingot));
@@ -658,13 +647,13 @@ class VanillaBasicsRegisters {
             GameRegistry registry) {
         GameRegistry.Registry<TreeType> treeRegistry =
                 registry.add("VanillaBasics", "TreeType", 0, Short.MAX_VALUE);
-        treeRegistry.register(TreeType.OAK, "vanilla.basics.tree.Oak");
-        treeRegistry.register(TreeType.BIRCH, "vanilla.basics.tree.Birch");
-        treeRegistry.register(TreeType.SPRUCE, "vanilla.basics.tree.Spruce");
-        treeRegistry.register(TreeType.PALM, "vanilla.basics.tree.Palm");
-        treeRegistry.register(TreeType.MAPLE, "vanilla.basics.tree.Maple");
-        treeRegistry.register(TreeType.SEQUOIA, "vanilla.basics.tree.Sequoia");
-        treeRegistry.register(TreeType.WILLOW, "vanilla.basics.tree.Willow");
+        treeRegistry.reg(TreeType.OAK, "vanilla.basics.tree.Oak");
+        treeRegistry.reg(TreeType.BIRCH, "vanilla.basics.tree.Birch");
+        treeRegistry.reg(TreeType.SPRUCE, "vanilla.basics.tree.Spruce");
+        treeRegistry.reg(TreeType.PALM, "vanilla.basics.tree.Palm");
+        treeRegistry.reg(TreeType.MAPLE, "vanilla.basics.tree.Maple");
+        treeRegistry.reg(TreeType.SEQUOIA, "vanilla.basics.tree.Sequoia");
+        treeRegistry.reg(TreeType.WILLOW, "vanilla.basics.tree.Willow");
         return treeRegistry;
     }
 
@@ -672,7 +661,7 @@ class VanillaBasicsRegisters {
             GameRegistry registry) {
         GameRegistry.Registry<CropType> cropRegistry =
                 registry.add("VanillaBasics", "CropType", 0, Short.MAX_VALUE);
-        cropRegistry.register(CropType.WHEAT, "vanilla.basics.crop.Wheat");
+        cropRegistry.reg(CropType.WHEAT, "vanilla.basics.crop.Wheat");
         return cropRegistry;
     }
 
@@ -680,26 +669,22 @@ class VanillaBasicsRegisters {
             GameRegistry registry) {
         GameRegistry.Registry<StoneType> stoneRegistry =
                 registry.add("VanillaBasics", "StoneType", 0, Short.MAX_VALUE);
-        stoneRegistry.register(StoneType.DIRT_STONE,
-                "vanilla.basics.stone.DirtStone");
-        stoneRegistry.register(StoneType.CHALK, "vanilla.basics.stone.Chalk");
-        stoneRegistry.register(StoneType.CHERT, "vanilla.basics.stone.Chert");
-        stoneRegistry.register(StoneType.CLAYSTONE,
-                "vanilla.basics.stone.Claystone");
-        stoneRegistry.register(StoneType.CONGLOMERATE,
+        stoneRegistry
+                .reg(StoneType.DIRT_STONE, "vanilla.basics.stone.DirtStone");
+        stoneRegistry.reg(StoneType.CHALK, "vanilla.basics.stone.Chalk");
+        stoneRegistry.reg(StoneType.CHERT, "vanilla.basics.stone.Chert");
+        stoneRegistry
+                .reg(StoneType.CLAYSTONE, "vanilla.basics.stone.Claystone");
+        stoneRegistry.reg(StoneType.CONGLOMERATE,
                 "vanilla.basics.stone.Conglomerate");
-        stoneRegistry.register(StoneType.MARBLE, "vanilla.basics.stone.Marble");
-        stoneRegistry
-                .register(StoneType.ANDESITE, "vanilla.basics.stone.Andesite");
-        stoneRegistry.register(StoneType.BASALT, "vanilla.basics.stone.Basalt");
-        stoneRegistry.register(StoneType.DACITE, "vanilla.basics.stone.Dacite");
-        stoneRegistry
-                .register(StoneType.RHYOLITE, "vanilla.basics.stone.Rhyolite");
-        stoneRegistry
-                .register(StoneType.DIORITE, "vanilla.basics.stone.Diorite");
-        stoneRegistry.register(StoneType.GABBRO, "vanilla.basics.stone.Gabbro");
-        stoneRegistry
-                .register(StoneType.GRANITE, "vanilla.basics.stone.Granite");
+        stoneRegistry.reg(StoneType.MARBLE, "vanilla.basics.stone.Marble");
+        stoneRegistry.reg(StoneType.ANDESITE, "vanilla.basics.stone.Andesite");
+        stoneRegistry.reg(StoneType.BASALT, "vanilla.basics.stone.Basalt");
+        stoneRegistry.reg(StoneType.DACITE, "vanilla.basics.stone.Dacite");
+        stoneRegistry.reg(StoneType.RHYOLITE, "vanilla.basics.stone.Rhyolite");
+        stoneRegistry.reg(StoneType.DIORITE, "vanilla.basics.stone.Diorite");
+        stoneRegistry.reg(StoneType.GABBRO, "vanilla.basics.stone.Gabbro");
+        stoneRegistry.reg(StoneType.GRANITE, "vanilla.basics.stone.Granite");
         return stoneRegistry;
     }
 

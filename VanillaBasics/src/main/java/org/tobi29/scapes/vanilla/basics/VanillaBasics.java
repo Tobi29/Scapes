@@ -195,11 +195,6 @@ public class VanillaBasics implements WorldType {
     }
 
     @Override
-    public String getName() {
-        return "Vanilla Basics";
-    }
-
-    @Override
     public String getID() {
         return "VanillaBasics";
     }
@@ -207,11 +202,6 @@ public class VanillaBasics implements WorldType {
     @Override
     public String getAssetRoot() {
         return "assets/scapes/tobi29/vanilla/basics/";
-    }
-
-    @Override
-    public String getVersion() {
-        return "0.0.0_1";
     }
 
     @Override

@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.connection.Connection;
 import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.utils.SleepUtil;
+import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
@@ -68,7 +69,7 @@ public class ServerConnection implements PlayConnection {
             keyPairGenerator.initialize(tagStructure.getInteger("RSASize"));
             keyPair = keyPairGenerator.genKeyPair();
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(e);
+            throw new UnsupportedJVMException(e);
         }
     }
 
@@ -100,7 +101,7 @@ public class ServerConnection implements PlayConnection {
 
     @Override
     public int getLoadingRadius() {
-        throw new IllegalStateException(
+        throw new UnsupportedOperationException(
                 "Cannot check loading radius from server.");
     }
 

@@ -100,10 +100,6 @@ public class MobPlayerServer extends MobLivingEquippedServer
         return inventory.getItem(inventorySelectRight);
     }
 
-    public int getInventorySelectLeft() {
-        return inventorySelectLeft;
-    }
-
     public void setInventorySelectLeft(int select) {
         int c = 1;
         if (select < inventorySelectLeft) {
@@ -121,10 +117,6 @@ public class MobPlayerServer extends MobLivingEquippedServer
             select += 10;
         }
         inventorySelectLeft = select;
-    }
-
-    public int getInventorySelectRight() {
-        return inventorySelectRight;
     }
 
     public void setInventorySelectRight(int select) {

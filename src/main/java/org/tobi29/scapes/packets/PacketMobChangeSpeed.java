@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
@@ -35,7 +34,7 @@ public class PacketMobChangeSpeed extends Packet
     private int entityID;
     private short x, y, z;
 
-    public PacketMobChangeSpeed(GameRegistry registry) {
+    public PacketMobChangeSpeed() {
     }
 
     public PacketMobChangeSpeed(int entityID, Vector3 pos, double x, double y,

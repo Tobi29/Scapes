@@ -22,7 +22,7 @@ package org.tobi29.scapes.engine.opengl;
  *
  * @author Tobi29
  */
-public class GraphicsCheckException extends RuntimeException {
+public class GraphicsCheckException extends Exception {
     public GraphicsCheckException(String message) {
         super(message);
     }

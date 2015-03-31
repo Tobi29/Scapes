@@ -18,7 +18,6 @@ package org.tobi29.scapes.server.shell;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.connection.ServerInfo;
 import org.tobi29.scapes.engine.utils.Crashable;
 import org.tobi29.scapes.engine.utils.io.CrashReportFile;
 import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
@@ -30,6 +29,7 @@ import org.tobi29.scapes.server.ControlPanel;
 import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.connection.ServerConnection;
+import org.tobi29.scapes.server.controlpanel.ServerInfo;
 
 import java.io.IOException;
 import java.util.Collection;

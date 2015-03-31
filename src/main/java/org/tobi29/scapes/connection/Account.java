@@ -19,6 +19,7 @@ package org.tobi29.scapes.connection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.utils.RSAUtil;
+import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
 import org.tobi29.scapes.engine.utils.io.filesystem.File;
 
 import java.io.IOException;
@@ -74,7 +75,7 @@ public class Account {
             keyPairGenerator.initialize(4096);
             return keyPairGenerator.genKeyPair();
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(e);
+            throw new UnsupportedJVMException(e);
         }
     }
 

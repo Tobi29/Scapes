@@ -20,11 +20,6 @@ import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.entity.server.EntityServer;
 
 public class UpdateBlockUpdate extends Update {
-    public UpdateBlockUpdate(GameRegistry registry) {
-    }
-
-    public UpdateBlockUpdate() {
-    }
 
     @Override
     public void run(TerrainServer.TerrainMutable terrain) {

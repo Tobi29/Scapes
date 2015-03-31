@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
@@ -29,7 +28,7 @@ import java.io.IOException;
 public class PacketPing extends Packet implements PacketServer, PacketClient {
     private long timestamp;
 
-    public PacketPing(GameRegistry registry) {
+    public PacketPing() {
     }
 
     public PacketPing(long timestamp) {

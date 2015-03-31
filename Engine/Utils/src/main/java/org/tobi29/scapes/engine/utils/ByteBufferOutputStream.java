@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.engine.utils;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
@@ -30,7 +29,7 @@ public class ByteBufferOutputStream extends OutputStream {
     }
 
     @Override
-    public void write(int b) throws IOException {
+    public void write(int b) {
         if (!buffer.hasRemaining()) {
             ByteBuffer newBuffer = supplier.bytes(buffer.position() + 1);
             buffer.flip();
@@ -41,7 +40,7 @@ public class ByteBufferOutputStream extends OutputStream {
     }
 
     @Override
-    public void write(byte[] b, int off, int len) throws IOException {
+    public void write(byte[] b, int off, int len) {
         if (buffer.remaining() < len) {
             ByteBuffer newBuffer = supplier.bytes(buffer.position() + len);
             buffer.flip();

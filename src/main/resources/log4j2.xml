@@ -18,7 +18,7 @@
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT" follow="true">
             <PatternLayout
-                    pattern="%d{HH:mm:ss} [%level] [%t: %logger{1}]: %msg%n"/>
+                    pattern="%d{HH:mm:ss} %highlight{[%level] [%t: %logger{1}]: %msg%n}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=normal, DEBUG=green bold, TRACE=blue}"/>
         </Console>
         <RollingRandomAccessFile name="Log"
                                  fileName="${sys:user.dir}/logs/Scapes.log"

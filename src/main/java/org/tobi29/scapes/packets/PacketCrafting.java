@@ -17,7 +17,6 @@
 package org.tobi29.scapes.packets;
 
 import org.tobi29.scapes.block.CraftingRecipe;
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldServer;
@@ -32,7 +31,7 @@ public class PacketCrafting extends Packet implements PacketServer {
     private int type, id;
     private boolean table;
 
-    public PacketCrafting(GameRegistry registry) {
+    public PacketCrafting() {
     }
 
     public PacketCrafting(int type, int id, boolean table) {

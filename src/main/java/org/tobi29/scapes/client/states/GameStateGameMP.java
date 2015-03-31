@@ -62,7 +62,12 @@ public class GameStateGameMP extends GameState {
     @Override
     public void dispose() {
         client.stop();
-        resetAPI();
+        engine.getSounds().stopMusic();
+        ParticleBlock.clear();
+        if (client.getPlugins() != null) {
+            client.getPlugins().dispose();
+            client.getPlugins().removeFileSystems(engine.getFiles());
+        }
         LOGGER.info("Stopped game!");
     }
 
@@ -113,18 +118,6 @@ public class GameStateGameMP extends GameState {
         }
         sync.capTPS();
         tickDebug.setValue(sync.getTPS());
-    }
-
-    protected void resetAPI() {
-        LOGGER.info("Reset api!");
-        engine.getSounds().stopMusic();
-        ParticleBlock.clear();
-        if (client != null) {
-            if (client.getPlugins() != null) {
-                client.getPlugins().dispose();
-                client.getPlugins().removeFileSystems(engine.getFiles());
-            }
-        }
     }
 
     public Playlist getPlaylist() {
