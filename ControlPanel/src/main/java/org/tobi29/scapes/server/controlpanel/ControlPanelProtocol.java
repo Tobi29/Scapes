@@ -27,6 +27,7 @@ import javax.crypto.spec.PBEKeySpec;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -157,6 +158,10 @@ public class ControlPanelProtocol {
 
     public void addCommand(String command, PacketListener packetListener) {
         commands.put(command, packetListener);
+    }
+
+    public void register(Selector selector, int opt) throws IOException {
+        channel.register(selector, opt);
     }
 
     public void close() throws IOException {

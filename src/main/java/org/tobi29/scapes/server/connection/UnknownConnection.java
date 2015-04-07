@@ -26,6 +26,7 @@ import org.tobi29.scapes.engine.utils.io.PacketBundleChannel;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.Random;
@@ -54,6 +55,11 @@ public class UnknownConnection implements Connection {
     }
 
     @Override
+    public void register(Selector selector, int opt) throws IOException {
+        channel.register(selector, opt);
+    }
+
+    @Override
     public boolean tick(ServerConnection.NetWorkerThread worker) {
         if (!done) {
             try {
@@ -72,8 +78,11 @@ public class UnknownConnection implements Connection {
                                 channel = null;
                                 break;
                             case PLAY:
-                                worker.addConnection(new PlayerConnection(
-                                        new PacketBundleChannel(channel), connection));
+                                PacketBundleChannel bundleChannel =
+                                        new PacketBundleChannel(channel);
+                                worker.addConnection(
+                                        new PlayerConnection(bundleChannel,
+                                                connection));
                                 channel = null;
                                 break;
                             case CONTROL_PANEL:

@@ -30,6 +30,7 @@ import java.lang.ref.WeakReference;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
@@ -61,6 +62,7 @@ public class PacketBundleChannel {
     private final Cipher encryptCipher, decryptCipher;
     private final AtomicInteger inRate = new AtomicInteger(), outRate =
             new AtomicInteger();
+    private Optional<Selector> selector = Optional.empty();
     private boolean checked, encrypt, hasInput;
     private ByteBuffer output, input = BufferCreator.byteBuffer(1024),
             inputDecrypt = BufferCreator.byteBuffer(1024);
@@ -192,6 +194,7 @@ public class PacketBundleChannel {
         bundle.putInt(size);
         bundle.rewind();
         queue.add(bundle);
+        selector.ifPresent(Selector::wakeup);
     }
 
     public boolean process() throws IOException {
@@ -299,6 +302,10 @@ public class PacketBundleChannel {
             }
             encrypt = true;
         }
+    }
+
+    public void register(Selector selector, int opt) throws IOException {
+        channel.register(selector, opt);
     }
 
     public void close() throws IOException {

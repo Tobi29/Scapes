@@ -24,6 +24,7 @@ import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.controlpanel.ControlPanelProtocol;
 
 import java.io.IOException;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -51,6 +52,11 @@ public class ControlPanelConnection implements Connection, ControlPanel {
                         .execute()
                         .forEach(output -> appendLog(output.toString())));
         id = channel.getRemoteAddress().toString();
+    }
+
+    @Override
+    public void register(Selector selector, int opt) throws IOException {
+        protocol.register(selector, opt);
     }
 
     @Override

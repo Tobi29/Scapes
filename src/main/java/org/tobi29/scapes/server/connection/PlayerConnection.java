@@ -51,6 +51,7 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.nio.channels.Selector;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
@@ -354,6 +355,11 @@ public class PlayerConnection
                 LOGGER.error("Error in connection: {}", e.toString());
             }
         }
+    }
+
+    @Override
+    public void register(Selector selector, int opt) throws IOException {
+        channel.register(selector, opt);
     }
 
     @Override

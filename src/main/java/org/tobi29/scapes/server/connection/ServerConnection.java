@@ -32,6 +32,8 @@ import org.tobi29.scapes.server.ScapesServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.security.KeyPair;
@@ -222,9 +224,16 @@ public class ServerConnection implements PlayConnection {
         private final Queue<Connection> connectionQueue =
                 new ConcurrentLinkedQueue<>();
         private final List<Connection> connections = new ArrayList<>();
+        private final Selector selector;
 
-        public void addConnection(Connection connection) {
+        public NetWorkerThread() throws IOException {
+            selector = Selector.open();
+        }
+
+        public void addConnection(Connection connection) throws IOException {
             connectionQueue.add(connection);
+            connection.register(selector, SelectionKey.OP_READ);
+            selector.wakeup();
         }
 
         @Override
@@ -253,8 +262,14 @@ public class ServerConnection implements PlayConnection {
                         }
                         connections.remove(connection);
                     }
-                    if (!processing) {
-                        SleepUtil.sleep(10);
+                    if (!processing && !joiner.marked()) {
+                        try {
+                            selector.select(10);
+                            selector.selectedKeys().clear();
+                        } catch (IOException e) {
+                            LOGGER.warn("Error when waiting for events: {}",
+                                    e.toString());
+                        }
                     }
                 }
             } finally {
@@ -265,6 +280,11 @@ public class ServerConnection implements PlayConnection {
                         LOGGER.warn("Failed to close connection: {}",
                                 e.toString());
                     }
+                }
+                try {
+                    selector.close();
+                } catch (IOException e) {
+                    LOGGER.warn("Failed to close selector: {}", e.toString());
                 }
             }
         }

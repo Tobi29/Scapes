@@ -57,6 +57,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
@@ -71,6 +73,7 @@ public class ClientConnection
     private static final int AES_KEY_LENGTH;
     private final ScapesEngine engine;
     private final PacketBundleChannel channel;
+    private final Selector selector;
     private final IDStorage idStorage = new IDStorage();
     private final int loadingDistance;
     private final FileCache cache;
@@ -96,10 +99,12 @@ public class ClientConnection
     }
 
     public ClientConnection(ScapesEngine engine, SocketChannel channel,
-            Account.Client account, int loadingDistance) {
+            Account.Client account, int loadingDistance) throws IOException {
         this.engine = engine;
         this.loadingDistance = loadingDistance;
         this.channel = new PacketBundleChannel(channel);
+        selector = Selector.open();
+        this.channel.register(selector, SelectionKey.OP_READ);
         GuiWidgetDebugValues debugValues = engine.getDebugValues();
         pingDebug = debugValues.get("Connection-Ping");
         downloadDebug = debugValues.get("Connection-Down");
@@ -286,9 +291,13 @@ public class ClientConnection
                         packet.parseClient(this, streamIn);
                         packet.runClient(this, world);
                     }
-                } else {
-                    if (!channel.process()) {
-                        SleepUtil.sleep(10);
+                } else if (!channel.process() && !joiner.marked()) {
+                    try {
+                        selector.select(100);
+                        selector.selectedKeys().clear();
+                    } catch (IOException e) {
+                        LOGGER.warn("Error when waiting for events: {}",
+                                e.toString());
                     }
                 }
             }
@@ -307,6 +316,7 @@ public class ClientConnection
 
     private void close() throws IOException {
         channel.close();
+        selector.close();
     }
 
     @Override

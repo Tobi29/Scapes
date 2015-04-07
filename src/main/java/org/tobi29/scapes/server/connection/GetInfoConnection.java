@@ -23,6 +23,7 @@ import org.tobi29.scapes.server.controlpanel.ServerInfo;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
 public class GetInfoConnection implements Connection {
@@ -35,6 +36,11 @@ public class GetInfoConnection implements Connection {
     public GetInfoConnection(SocketChannel channel, ServerInfo serverInfo) {
         this.channel = channel;
         buffer = serverInfo.getBuffer();
+    }
+
+    @Override
+    public void register(Selector selector, int opt) throws IOException {
+        channel.register(selector, opt);
     }
 
     @Override

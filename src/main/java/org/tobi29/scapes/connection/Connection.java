@@ -19,8 +19,11 @@ package org.tobi29.scapes.connection;
 import org.tobi29.scapes.server.connection.ServerConnection;
 
 import java.io.IOException;
+import java.nio.channels.Selector;
 
 public interface Connection {
+    void register(Selector selector, int opt) throws IOException;
+
     boolean tick(ServerConnection.NetWorkerThread worker);
 
     boolean isClosed();
