@@ -23,52 +23,73 @@ public class VAOUtility {
     public static VAO createVI(float[] vertex, int[] index,
             RenderType renderType) {
         List<VAO.VAOAttribute> vaoAttributes = new ArrayList<>();
-        vaoAttributes.add(new VAO.VAOAttribute(0, 3, vertex, false,
-                VertexType.HALF_FLOAT));
+        vaoAttributes
+                .add(new VAO.VAOAttribute(OpenGL.VERTEX_ATTRIBUTE, 3, vertex,
+                        false, VertexType.HALF_FLOAT));
         return new VAO(vaoAttributes, vertex.length / 3, index, renderType);
     }
 
     public static VAO createVNI(float[] vertex, float[] normal, int[] index,
             RenderType renderType) {
         List<VAO.VAOAttribute> vaoAttributes = new ArrayList<>();
-        vaoAttributes.add(new VAO.VAOAttribute(0, 3, vertex, false,
-                VertexType.HALF_FLOAT));
         vaoAttributes
-                .add(new VAO.VAOAttribute(3, 3, normal, true, VertexType.BYTE));
+                .add(new VAO.VAOAttribute(OpenGL.VERTEX_ATTRIBUTE, 3, vertex,
+                        false, VertexType.HALF_FLOAT));
+        vaoAttributes
+                .add(new VAO.VAOAttribute(OpenGL.NORMAL_ATTRIBUTE, 3, normal,
+                        true, VertexType.BYTE));
+        return new VAO(vaoAttributes, vertex.length / 3, index, renderType);
+    }
+
+    public static VAO createVCI(float[] vertex, float[] color, int[] index,
+            RenderType renderType) {
+        List<VAO.VAOAttribute> vaoAttributes = new ArrayList<>();
+        vaoAttributes
+                .add(new VAO.VAOAttribute(OpenGL.VERTEX_ATTRIBUTE, 3, vertex,
+                        false, VertexType.HALF_FLOAT));
+        vaoAttributes.add(new VAO.VAOAttribute(OpenGL.COLOR_ATTRIBUTE, 4, color,
+                false, VertexType.UNSIGNED_BYTE));
         return new VAO(vaoAttributes, vertex.length / 3, index, renderType);
     }
 
     public static VAO createVTI(float[] vertex, float[] texture, int[] index,
             RenderType renderType) {
         List<VAO.VAOAttribute> vaoAttributes = new ArrayList<>();
-        vaoAttributes.add(new VAO.VAOAttribute(0, 3, vertex, false,
-                VertexType.HALF_FLOAT));
-        vaoAttributes.add(new VAO.VAOAttribute(2, 2, texture, false,
-                VertexType.FLOAT));
+        vaoAttributes
+                .add(new VAO.VAOAttribute(OpenGL.VERTEX_ATTRIBUTE, 3, vertex,
+                        false, VertexType.HALF_FLOAT));
+        vaoAttributes
+                .add(new VAO.VAOAttribute(OpenGL.TEXTURE_ATTRIBUTE, 2, texture,
+                        false, VertexType.FLOAT));
         return new VAO(vaoAttributes, vertex.length / 3, index, renderType);
     }
 
     public static VAO createVTNI(float[] vertex, float[] texture,
             float[] normal, int[] index, RenderType renderType) {
         List<VAO.VAOAttribute> vaoAttributes = new ArrayList<>();
-        vaoAttributes.add(new VAO.VAOAttribute(0, 3, vertex, false,
-                VertexType.HALF_FLOAT));
-        vaoAttributes.add(new VAO.VAOAttribute(2, 2, texture, false,
-                VertexType.FLOAT));
         vaoAttributes
-                .add(new VAO.VAOAttribute(3, 3, normal, true, VertexType.BYTE));
+                .add(new VAO.VAOAttribute(OpenGL.VERTEX_ATTRIBUTE, 3, vertex,
+                        false, VertexType.HALF_FLOAT));
+        vaoAttributes
+                .add(new VAO.VAOAttribute(OpenGL.TEXTURE_ATTRIBUTE, 2, texture,
+                        false, VertexType.FLOAT));
+        vaoAttributes
+                .add(new VAO.VAOAttribute(OpenGL.NORMAL_ATTRIBUTE, 3, normal,
+                        true, VertexType.BYTE));
         return new VAO(vaoAttributes, vertex.length / 3, index, renderType);
     }
 
     public static VAO createVCTI(float[] vertex, float[] color, float[] texture,
             int[] index, RenderType renderType) {
         List<VAO.VAOAttribute> vaoAttributes = new ArrayList<>();
-        vaoAttributes.add(new VAO.VAOAttribute(0, 3, vertex, false,
-                VertexType.HALF_FLOAT));
-        vaoAttributes.add(new VAO.VAOAttribute(1, 4, color, true,
-                VertexType.UNSIGNED_BYTE));
-        vaoAttributes.add(new VAO.VAOAttribute(2, 2, texture, false,
-                VertexType.FLOAT));
+        vaoAttributes
+                .add(new VAO.VAOAttribute(OpenGL.VERTEX_ATTRIBUTE, 3, vertex,
+                        false, VertexType.HALF_FLOAT));
+        vaoAttributes.add(new VAO.VAOAttribute(OpenGL.COLOR_ATTRIBUTE, 4, color,
+                true, VertexType.UNSIGNED_BYTE));
+        vaoAttributes
+                .add(new VAO.VAOAttribute(OpenGL.TEXTURE_ATTRIBUTE, 2, texture,
+                        false, VertexType.FLOAT));
         return new VAO(vaoAttributes, vertex.length / 3, index, renderType);
     }
 
@@ -76,14 +97,17 @@ public class VAOUtility {
             float[] texture, float[] normal, int[] index,
             RenderType renderType) {
         List<VAO.VAOAttribute> vaoAttributes = new ArrayList<>();
-        vaoAttributes.add(new VAO.VAOAttribute(0, 3, vertex, false,
-                VertexType.HALF_FLOAT));
-        vaoAttributes.add(new VAO.VAOAttribute(1, 4, color, true,
-                VertexType.UNSIGNED_BYTE));
-        vaoAttributes.add(new VAO.VAOAttribute(2, 2, texture, false,
-                VertexType.FLOAT));
         vaoAttributes
-                .add(new VAO.VAOAttribute(3, 3, normal, true, VertexType.BYTE));
+                .add(new VAO.VAOAttribute(OpenGL.VERTEX_ATTRIBUTE, 3, vertex,
+                        false, VertexType.HALF_FLOAT));
+        vaoAttributes.add(new VAO.VAOAttribute(OpenGL.COLOR_ATTRIBUTE, 4, color,
+                true, VertexType.UNSIGNED_BYTE));
+        vaoAttributes
+                .add(new VAO.VAOAttribute(OpenGL.TEXTURE_ATTRIBUTE, 2, texture,
+                        false, VertexType.FLOAT));
+        vaoAttributes
+                .add(new VAO.VAOAttribute(OpenGL.NORMAL_ATTRIBUTE, 3, normal,
+                        true, VertexType.BYTE));
         return new VAO(vaoAttributes, vertex.length / 3, index, renderType);
     }
 }

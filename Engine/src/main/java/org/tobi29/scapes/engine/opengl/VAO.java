@@ -45,9 +45,9 @@ public class VAO {
 
     public VAO(List<VAOAttribute> attributes, int vertices, int[] index,
             int length, RenderType renderType) {
-        if (renderType == RenderType.TRIANGLES && length % 3 != 0) {
+        if (renderType == RenderType.TRIANGLES && index.length % 3 != 0) {
             throw new IllegalArgumentException("Length not multiply of 3");
-        } else if (renderType == RenderType.LINES && length % 2 != 0) {
+        } else if (renderType == RenderType.LINES && index.length % 2 != 0) {
             throw new IllegalArgumentException("Length not multiply of 2");
         }
         this.renderType = renderType;
@@ -67,10 +67,10 @@ public class VAO {
         buffer = BufferCreatorDirect.byteBuffer(vertices * stride)
                 .order(ByteOrder.nativeOrder());
         attributes.forEach(attribute -> addToBuffer(attribute, vertices));
-        this.index = BufferCreatorDirect.byteBuffer(length << 1)
+        this.index = BufferCreatorDirect.byteBuffer(index.length << 1)
                 .order(ByteOrder.nativeOrder());
-        for (int i = 0; i < length; i++) {
-            this.index.putShort((short) index[i]);
+        for (int i : index) {
+            this.index.putShort((short) i);
         }
     }
 

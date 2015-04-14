@@ -26,7 +26,8 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 public interface OpenGL {
-    int VERTEX_ATTRIBUTE = 0, COLOR_ATTRIBUTE = 1, TEXTURE_ATTRIBUTE = 2;
+    int VERTEX_ATTRIBUTE = 0, COLOR_ATTRIBUTE = 1, TEXTURE_ATTRIBUTE = 2,
+            NORMAL_ATTRIBUTE = 3;
 
     @OpenGLFunction
     void checkError(String message);
