@@ -435,60 +435,60 @@ public class LWJGL3OpenGL implements OpenGL {
 
     @Override
     public void setUniform1(int uniform, FloatBuffer values) {
-        GL20.glUniform1(uniform, values);
+        GL20.glUniform1fv(uniform, values);
     }
 
     @Override
     public void setUniform2(int uniform, FloatBuffer values) {
-        GL20.glUniform2(uniform, values);
+        GL20.glUniform2fv(uniform, values);
     }
 
     @Override
     public void setUniform3(int uniform, FloatBuffer values) {
-        GL20.glUniform3(uniform, values);
+        GL20.glUniform3fv(uniform, values);
     }
 
     @Override
     public void setUniform4(int uniform, FloatBuffer values) {
-        GL20.glUniform4(uniform, values);
+        GL20.glUniform4fv(uniform, values);
     }
 
     @Override
     public void setUniform1(int uniform, IntBuffer values) {
-        GL20.glUniform1(uniform, values);
+        GL20.glUniform1iv(uniform, values);
     }
 
     @Override
     public void setUniform2(int uniform, IntBuffer values) {
-        GL20.glUniform2(uniform, values);
+        GL20.glUniform2iv(uniform, values);
     }
 
     @Override
     public void setUniform3(int uniform, IntBuffer values) {
-        GL20.glUniform3(uniform, values);
+        GL20.glUniform3iv(uniform, values);
     }
 
     @Override
     public void setUniform4(int uniform, IntBuffer values) {
-        GL20.glUniform4(uniform, values);
+        GL20.glUniform4iv(uniform, values);
     }
 
     @Override
     public void setUniformMatrix2(int uniform, boolean transpose,
             FloatBuffer matrices) {
-        GL20.glUniformMatrix2(uniform, transpose, matrices);
+        GL20.glUniformMatrix2fv(uniform, transpose, matrices);
     }
 
     @Override
     public void setUniformMatrix3(int uniform, boolean transpose,
             FloatBuffer matrices) {
-        GL20.glUniformMatrix3(uniform, transpose, matrices);
+        GL20.glUniformMatrix3fv(uniform, transpose, matrices);
     }
 
     @Override
     public void setUniformMatrix4(int uniform, boolean transpose,
             FloatBuffer matrices) {
-        GL20.glUniformMatrix4(uniform, transpose, matrices);
+        GL20.glUniformMatrix4fv(uniform, transpose, matrices);
     }
 
     @Override

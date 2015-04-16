@@ -71,7 +71,7 @@ public class LWJGL3OpenAL implements OpenAL {
         listenerOrientation
                 .put(new float[]{0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f});
         listenerOrientation.rewind();
-        AL10.alListener(AL10.AL_ORIENTATION, listenerOrientation);
+        AL10.alListenerfv(AL10.AL_ORIENTATION, listenerOrientation);
         AL10.alListener3f(AL10.AL_POSITION, 0.0f, 0.0f, 0.0f);
         AL10.alListener3f(AL10.AL_VELOCITY, 0.0f, 0.0f, 0.0f);
     }
@@ -101,7 +101,7 @@ public class LWJGL3OpenAL implements OpenAL {
         listenerOrientation.put(0);
         listenerOrientation.put(1);
         listenerOrientation.rewind();
-        AL10.alListener(AL10.AL_ORIENTATION, listenerOrientation);
+        AL10.alListenerfv(AL10.AL_ORIENTATION, listenerOrientation);
         AL10.alListener3f(AL10.AL_POSITION, position.floatX(),
                 position.floatY(), position.floatZ());
         AL10.alListener3f(AL10.AL_VELOCITY, velocity.floatX(),
