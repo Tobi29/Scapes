@@ -23,6 +23,7 @@ import org.tobi29.scapes.block.TerrainTextureRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldSkybox;
 import org.tobi29.scapes.client.gui.GuiComponentChat;
+import org.tobi29.scapes.client.gui.GuiComponentGraph;
 import org.tobi29.scapes.client.gui.GuiHud;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.engine.gui.GuiWidget;
@@ -62,6 +63,7 @@ public class SceneScapesVoxelWorld extends Scene {
             blockLightDebug, sunLightDebug;
     private final ClientSkinStorage skinStorage;
     private final GuiWidgetDebugClient debugWidget;
+    private final GuiWidgetPerformanceClient performanceWidget;
     private final GuiComponentChat chat = new GuiComponentChat(8, 416, 0, 0);
     private float brightness;
     private float renderDistance, fov;
@@ -98,6 +100,9 @@ public class SceneScapesVoxelWorld extends Scene {
         debugWidget = new GuiWidgetDebugClient();
         addGui(debugWidget);
         debugWidget.setVisible(false);
+        performanceWidget = new GuiWidgetPerformanceClient();
+        addGui(performanceWidget);
+        performanceWidget.setVisible(false);
         skinStorage = new ClientSkinStorage(
                 world.getGame().getEngine().getGraphics().getTextureManager()
                         .getTexture("Scapes:image/entity/mob/Player"));
@@ -296,6 +301,7 @@ public class SceneScapesVoxelWorld extends Scene {
         lightDebug.setValue(world.getTerrain().getLight(xx, yy, zz));
         blockLightDebug.setValue(world.getTerrain().getBlockLight(xx, yy, zz));
         sunLightDebug.setValue(world.getTerrain().getSunLight(xx, yy, zz));
+        performanceWidget.graphRender.addStamp(delta);
         terrainTextureRegistry.render(graphics);
         renderWorld(graphics, cam);
         world.updateRender(graphics, cam, delta);
@@ -444,12 +450,21 @@ public class SceneScapesVoxelWorld extends Scene {
         }
     }
 
+    public void update(double delta) {
+        world.update(delta);
+        performanceWidget.graphUpdate.addStamp(delta);
+    }
+
     public void setHudVisible(boolean visible) {
         hud.setVisible(visible);
     }
 
     public void toggleDebug() {
         debugWidget.setVisible(!debugWidget.isVisible());
+    }
+
+    public void togglePerformance() {
+        performanceWidget.setVisible(!performanceWidget.isVisible());
     }
 
     public TerrainTextureRegistry getTerrainTextureRegistry() {
@@ -493,6 +508,22 @@ public class SceneScapesVoxelWorld extends Scene {
             reloadGeometryButton
                     .addLeftClick(event -> world.getTerrain().reloadGeometry());
             add(reloadGeometryButton);
+        }
+    }
+
+    private class GuiWidgetPerformanceClient extends GuiWidget {
+        private final GuiComponentGraph graphRender, graphUpdate;
+
+        private GuiWidgetPerformanceClient() {
+            super(32, 32, 240, 80, "Performance Graph");
+            graphRender =
+                    new GuiComponentGraph(0, 0, width, height, 0.0f, 1.0f, 0.0f,
+                            1.0f);
+            add(graphRender);
+            graphUpdate =
+                    new GuiComponentGraph(0, 0, width, height, 0.0f, 0.0f, 1.0f,
+                            1.0f, 1.0f, 0.0f, 0.0f, 1.0f);
+            add(graphUpdate);
         }
     }
 }

@@ -108,9 +108,13 @@ public class GameStateGameMP extends GameState {
                 engine.getController().isPressed(ControllerKey.KEY_F6)) {
             scene.toggleDebug();
         }
+        if (Scapes.debug &&
+                engine.getController().isPressed(ControllerKey.KEY_F7)) {
+            scene.togglePerformance();
+        }
         MobPlayerClientMain player = scene.getPlayer();
         playlist.update(player, delta);
-        scene.getWorld().update(delta);
+        scene.update(delta);
         pingWait -= delta;
         while (pingWait <= 0.0) {
             pingWait += 1.0;
