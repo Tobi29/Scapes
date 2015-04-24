@@ -28,7 +28,7 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 public class GuiComponentScrollPane extends GuiComponentVisiblePane {
     protected final int scrollStep;
     protected final GuiComponentSliderVert slider;
-    protected int maxY;
+    private int maxY;
     private double scroll;
 
     public GuiComponentScrollPane(int x, int y, int width, int height,
@@ -51,7 +51,7 @@ public class GuiComponentScrollPane extends GuiComponentVisiblePane {
         if (visible) {
             MatrixStack matrixStack = graphics.getMatrixStack();
             Matrix matrix = matrixStack.push();
-            matrix.translate(x, y, 0.0f);
+            transform(matrix);
             renderComponent(graphics, shader, font, delta);
             matrix = matrixStack.push();
             matrix.translate(0.0f, (float) -scroll, 0.0f);
@@ -69,7 +69,8 @@ public class GuiComponentScrollPane extends GuiComponentVisiblePane {
             components.stream().filter(component ->
                     component.getY() - scroll > -scrollStep &&
                             component.getY() - scroll < height).forEach(
-                    component -> component.render(graphics, shader, font, delta));
+                    component -> component
+                            .render(graphics, shader, font, delta));
             openGL.disableScissor();
             matrixStack.pop();
             renderOverlay(graphics, shader, font);
@@ -111,5 +112,12 @@ public class GuiComponentScrollPane extends GuiComponentVisiblePane {
 
     public void setMaxY(int maxY) {
         this.maxY = maxY;
+        maxY += scrollStep;
+        if (maxY <= 0) {
+            slider.setSliderHeight(height);
+        } else {
+            slider.setSliderHeight(
+                    FastMath.min(height * height / maxY, height));
+        }
     }
 }

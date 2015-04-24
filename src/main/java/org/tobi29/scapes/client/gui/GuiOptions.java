@@ -17,13 +17,13 @@
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.*;
+import org.tobi29.scapes.engine.gui.Gui;
+import org.tobi29.scapes.engine.gui.GuiComponentSlider;
+import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 
-public class GuiOptions extends Gui {
-    public GuiOptions(GameState state, Gui prev) {
-        super(GuiAlignment.CENTER);
-        GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(200, 0, 400, 512);
+public class GuiOptions extends GuiMenu {
+    public GuiOptions(GameState state, Gui previous) {
+        super(state, "Options", previous);
         GuiComponentSlider musicVolume =
                 new GuiComponentSlider(16, 80, 368, 30, 18, "Music",
                         state.getEngine().getConfig().getMusicVolume());
@@ -53,21 +53,10 @@ public class GuiOptions extends Gui {
             state.remove(this);
             state.add(new GuiAccount(state, this));
         });
-        GuiComponentTextButton back =
-                new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");
-        back.addLeftClick(event -> {
-            state.remove(this);
-            state.add(prev);
-        });
-        pane.add(new GuiComponentText(16, 16, 32, "Options"));
-        pane.add(new GuiComponentSeparator(24, 64, 352, 2));
         pane.add(musicVolume);
         pane.add(soundVolume);
         pane.add(controls);
         pane.add(graphics);
         pane.add(account);
-        pane.add(new GuiComponentSeparator(24, 448, 352, 2));
-        pane.add(back);
-        add(pane);
     }
 }

@@ -30,26 +30,24 @@ import org.tobi29.scapes.plugins.PluginFile;
 import java.io.IOException;
 import java.util.zip.ZipFile;
 
-public class GuiPlugins extends Gui {
+public class GuiPlugins extends GuiMenu {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GuiPlugins.class);
     private final Directory directory;
     private final GuiComponentScrollPaneList scrollPane;
 
-    public GuiPlugins(GameState state, Gui prev) {
-        super(GuiAlignment.CENTER);
+    public GuiPlugins(GameState state, Gui previous) {
+        super(state, "Plugins", previous);
         try {
             directory =
                     state.getEngine().getFiles().getDirectory("File:plugins");
         } catch (IOException e) {
             throw new ScapesEngineException("Failed to load plugins", e);
         }
-        GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(200, 0, 400, 512);
         scrollPane = new GuiComponentScrollPaneList(16, 80, 368, 250, 70);
-        GuiComponentTextButton create =
+        GuiComponentTextButton add =
                 new GuiComponentTextButton(112, 370, 176, 30, 18, "Add");
-        create.addLeftClick(event -> {
+        add.addLeftClick(event -> {
             try {
                 directory.importFromUser(new PlatformDialogs.Extension[]{
                                 new PlatformDialogs.Extension("*.jar",
@@ -60,19 +58,8 @@ public class GuiPlugins extends Gui {
                 LOGGER.warn("Failed to import plugin: {}", e.toString());
             }
         });
-        GuiComponentTextButton back =
-                new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");
-        back.addLeftClick(event -> {
-            state.remove(this);
-            state.add(prev);
-        });
-        pane.add(new GuiComponentText(16, 16, 32, "Plugins"));
-        pane.add(new GuiComponentSeparator(24, 64, 352, 2));
         pane.add(scrollPane);
-        pane.add(create);
-        pane.add(new GuiComponentSeparator(24, 448, 352, 2));
-        pane.add(back);
-        add(pane);
+        pane.add(add);
         updatePlugins();
     }
 

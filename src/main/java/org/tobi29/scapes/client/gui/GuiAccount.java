@@ -30,15 +30,15 @@ import java.security.KeyPair;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-public class GuiAccount extends Gui {
+public class GuiAccount extends GuiMenu {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GuiAccount.class);
     private static final Pattern REPLACE = Pattern.compile("[^A-Za-z0-9+/= ]");
     private KeyPair keyPair;
     private String nickname = "";
 
-    public GuiAccount(GameState state, Gui prev) {
-        super(GuiAlignment.CENTER);
+    public GuiAccount(GameState state, Gui previous) {
+        super(state, "Account", "Save", previous);
         try {
             Account.Client account = Account.read(state.getEngine().getFiles()
                     .getFile("File:Account.properties"));
@@ -47,12 +47,12 @@ public class GuiAccount extends Gui {
         } catch (IOException e) {
             LOGGER.error("Failed to read account file: {}", e.toString());
         }
-        GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(200, 0, 400, 512);
         GuiComponentText hash = new GuiComponentText(16, 140, 12, "Hash: " +
-                ChecksumUtil.getChecksum(keyPair.getPrivate().getEncoded()));
+                ChecksumUtil.getChecksum(keyPair.getPrivate().getEncoded(),
+                        ChecksumUtil.ChecksumAlgorithm.SHA1));
         GuiComponentText id = new GuiComponentText(16, 160, 12, "ID: " +
-                ChecksumUtil.getChecksum(keyPair.getPublic().getEncoded()));
+                ChecksumUtil.getChecksum(keyPair.getPublic().getEncoded(),
+                        ChecksumUtil.ChecksumAlgorithm.SHA1));
         GuiComponentText error = new GuiComponentText(16, 320, 18, "");
         GuiComponentButton keyCopy =
                 new GuiComponentTextButton(16, 100, 174, 30, 18, "Copy");
@@ -91,9 +91,7 @@ public class GuiAccount extends Gui {
                 LOGGER.warn("Failed to import skin: {}", e.toString());
             }
         });
-        GuiComponentTextButton save =
-                new GuiComponentTextButton(112, 466, 176, 30, 18, "Save");
-        save.addLeftClick(event -> {
+        back.addLeftClick(event -> {
             this.nickname = nickname.getText();
             if (!Account.valid(this.nickname)) {
                 error.setText("Invalid Nickname!");
@@ -106,11 +104,7 @@ public class GuiAccount extends Gui {
             } catch (IOException e) {
                 LOGGER.error("Failed to write account file: {}", e.toString());
             }
-            state.remove(this);
-            state.add(prev);
         });
-        pane.add(new GuiComponentText(16, 16, 32, "Account"));
-        pane.add(new GuiComponentSeparator(24, 64, 352, 2));
         pane.add(new GuiComponentText(16, 80, 18, "Key:"));
         pane.add(keyCopy);
         pane.add(keyPaste);
@@ -120,8 +114,5 @@ public class GuiAccount extends Gui {
         pane.add(nickname);
         pane.add(skin);
         pane.add(error);
-        pane.add(new GuiComponentSeparator(24, 448, 352, 2));
-        pane.add(save);
-        add(pane);
     }
 }

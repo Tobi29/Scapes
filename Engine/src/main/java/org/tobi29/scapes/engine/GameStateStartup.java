@@ -18,6 +18,7 @@ package org.tobi29.scapes.engine;
 
 import org.tobi29.scapes.engine.gui.GuiComponentIcon;
 import org.tobi29.scapes.engine.opengl.scenes.SceneImage;
+import org.tobi29.scapes.engine.utils.Sync;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 public class GameStateStartup extends GameState {
@@ -57,7 +58,7 @@ public class GameStateStartup extends GameState {
     }
 
     @Override
-    public void stepComponent(double delta) {
+    public void stepComponent(Sync sync) {
         GuiComponentIcon image = scene.getImage();
         if (image != null) {
             if (warmUp > 20) {

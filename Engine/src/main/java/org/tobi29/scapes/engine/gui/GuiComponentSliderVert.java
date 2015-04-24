@@ -26,14 +26,19 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 public class GuiComponentSliderVert extends GuiComponent {
     private final VAO vaoShadow;
     public double value;
+    private int sliderHeight;
     private boolean hover, dragging;
     private VAO vaoSlider;
 
     public GuiComponentSliderVert(int x, int y, int width, int height,
             double value) {
+        this(x, y, width, height, 16, value);
+    }
+
+    public GuiComponentSliderVert(int x, int y, int width, int height,
+            int sliderHeight, double value) {
         super(x, y, width, height);
-        this.width = width;
-        this.height = height;
+        this.sliderHeight = sliderHeight;
         this.value = value;
         Mesh mesh = new Mesh(true);
         GuiUtils.renderShadow(mesh, 0.0f, 0.0f, width, height, 0.2f);
@@ -56,7 +61,8 @@ public class GuiComponentSliderVert extends GuiComponent {
     @Override
     public void renderComponent(GraphicsSystem graphics, Shader shader,
             FontRenderer font, double delta) {
-        float slider = (float) value * (height - 16) + y + 8;
+        float slider = (float) value * (height - sliderHeight) + y +
+                sliderHeight * 0.5f;
         graphics.getTextureManager().unbind(graphics);
         MatrixStack matrixStack = graphics.getMatrixStack();
         vaoShadow.render(graphics, shader);
@@ -80,8 +86,8 @@ public class GuiComponentSliderVert extends GuiComponent {
         super.update(mouseX, mouseY, mouseInside, engine);
         if (dragging) {
             if (engine.getGuiController().getLeftDrag()) {
-                value = FastMath.clamp((mouseY - y - 8) / (height - 16.0d), 0,
-                        1);
+                value = FastMath.clamp((mouseY - y - sliderHeight * 0.5) /
+                        (height - sliderHeight), 0, 1);
                 hover(new GuiComponentEvent(mouseX, mouseY));
             } else {
                 dragging = false;
@@ -95,6 +101,11 @@ public class GuiComponentSliderVert extends GuiComponent {
         }
     }
 
+    public void setSliderHeight(int value) {
+        sliderHeight = value;
+        updateMesh();
+    }
+
     private void updateMesh() {
         float a;
         if (hover) {
@@ -102,9 +113,10 @@ public class GuiComponentSliderVert extends GuiComponent {
         } else {
             a = 0.6f;
         }
+        float sliderHalf = sliderHeight * 0.5f;
         vaoSlider = VAOUtility.createVCTI(
-                new float[]{0.0f, 8.0f, 0.0f, width, 8.0f, 0.0f, 0.0f, -8.0f,
-                        0.0f, width, -8.0f, 0.0f},
+                new float[]{0.0f, sliderHalf, 0.0f, width, sliderHalf, 0.0f,
+                        0.0f, -sliderHalf, 0.0f, width, -sliderHalf, 0.0f},
                 new float[]{0.0f, 0.0f, 0.0f, a, 0.0f, 0.0f, 0.0f, a, 0.0f,
                         0.0f, 0.0f, a, 0.0f, 0.0f, 0.0f, a},
                 new float[]{0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f},

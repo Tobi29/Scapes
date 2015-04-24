@@ -51,7 +51,7 @@ public class GraphicsSystem {
     private final Matrix4f projectionMatrix, modelViewProjectionMatrix;
     private final OpenGL openGL;
     private boolean triggerScreenshot;
-    private float resolutionMultiplier = 1.0f;
+    private double resolutionMultiplier = 1.0;
     private int containerWidth = 1, containerHeight = 1, contentWidth = 1,
             contentHeight = 1;
 
@@ -176,11 +176,11 @@ public class GraphicsSystem {
         if (state == null) {
             state = engine.getState();
         }
-        container.renderTick(state.forceRender());
+        container.renderTick();
         sync.capTPS();
     }
 
-    public void render(boolean active) {
+    public void render() {
         try {
             boolean fboSizeDirty;
             if (container.getContainerResized() || resolutionMultiplier !=
@@ -197,40 +197,35 @@ public class GraphicsSystem {
             } else {
                 fboSizeDirty = false;
             }
-            if (active) {
-                double delta = sync.getSpeedFactor();
-                engine.step();
-                GameState state = engine.getState();
-                state.render(this, fboSizeDirty);
-                Shader shader =
-                        shaderManager.getShader("Engine:shader/Gui", this);
-                engine.getGlobalGui().render(this, shader, defaultFont, delta);
-                GuiController guiController = engine.getGuiController();
-                if (guiController.isSoftwareMouse() &&
-                        !state.isMouseGrabbed()) {
-                    setProjectionOrthogonal(0.0f, 0.0f, contentWidth,
-                            contentHeight);
-                    textureManager.bind("Engine:image/Cursor", this);
-                    Matrix matrix = matrixStack.push();
-                    matrix.translate((float) guiController.getCursorX(),
-                            (float) guiController.getCursorY(), 0.0f);
-                    CURSOR.render(this, shader);
-                    matrixStack.pop();
-                }
-                fpsDebug.setValue(sync.getTPS());
-                textureDebug.setValue(Texture.getTextureCount());
-                vaoDebug.setValue(VAO.getVAOCount());
-                if (triggerScreenshot) {
-                    triggerScreenshot = false;
-                    try {
-                        openGL.screenShot(
-                                engine.getFiles().getFile("File:screenshots/" +
-                                        System.currentTimeMillis() +
-                                        ".png"), this);
-                    } catch (IOException e) {
-                        LOGGER.warn("Failed to save screenshot: {}",
-                                e.toString());
-                    }
+            double delta = sync.getSpeedFactor();
+            engine.step();
+            GameState state = engine.getState();
+            state.render(this, fboSizeDirty);
+            Shader shader = shaderManager.getShader("Engine:shader/Gui", this);
+            engine.getGlobalGui().render(this, shader, defaultFont, delta);
+            GuiController guiController = engine.getGuiController();
+            if (guiController.isSoftwareMouse() && !state.isMouseGrabbed()) {
+                setProjectionOrthogonal(0.0f, 0.0f, contentWidth,
+                        contentHeight);
+                textureManager.bind("Engine:image/Cursor", this);
+                Matrix matrix = matrixStack.push();
+                matrix.translate((float) guiController.getCursorX(),
+                        (float) guiController.getCursorY(), 0.0f);
+                CURSOR.render(this, shader);
+                matrixStack.pop();
+            }
+            fpsDebug.setValue(sync.getTPS());
+            textureDebug.setValue(Texture.getTextureCount());
+            vaoDebug.setValue(VAO.getVAOCount());
+            if (triggerScreenshot) {
+                triggerScreenshot = false;
+                try {
+                    openGL.screenShot(
+                            engine.getFiles().getFile("File:screenshots/" +
+                                    System.currentTimeMillis() +
+                                    ".png"), this);
+                } catch (IOException e) {
+                    LOGGER.warn("Failed to save screenshot: {}", e.toString());
                 }
             }
             VAO.disposeUnused(this);
@@ -245,11 +240,11 @@ public class GraphicsSystem {
     }
 
     public int getSceneWidth() {
-        return (int) (contentWidth / resolutionMultiplier);
+        return (int) (contentWidth * resolutionMultiplier);
     }
 
     public int getSceneHeight() {
-        return (int) (contentHeight / resolutionMultiplier);
+        return (int) (contentHeight * resolutionMultiplier);
     }
 
     public int getContentWidth() {

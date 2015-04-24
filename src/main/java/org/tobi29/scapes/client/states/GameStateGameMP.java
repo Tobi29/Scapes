@@ -37,8 +37,6 @@ public class GameStateGameMP extends GameState {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GameStateGameMP.class);
     protected final ClientConnection client;
-    protected final Sync sync =
-            new Sync(60, 5000000000L, true, "Client-Update");
     protected final Playlist playlist;
     protected final int loadingRadius;
     private final GuiWidgetDebugValues.Element tickDebug;
@@ -95,9 +93,8 @@ public class GameStateGameMP extends GameState {
     }
 
     @Override
-    public void stepComponent(double delta) {
+    public void stepComponent(Sync sync) {
         if (!(scene instanceof SceneScapesVoxelWorld)) {
-            sync.init();
             return;
         }
         SceneScapesVoxelWorld scene = (SceneScapesVoxelWorld) this.scene;
@@ -108,10 +105,7 @@ public class GameStateGameMP extends GameState {
                 engine.getController().isPressed(ControllerKey.KEY_F6)) {
             scene.toggleDebug();
         }
-        if (Scapes.debug &&
-                engine.getController().isPressed(ControllerKey.KEY_F7)) {
-            scene.togglePerformance();
-        }
+        double delta = sync.getSpeedFactor();
         MobPlayerClientMain player = scene.getPlayer();
         playlist.update(player, delta);
         scene.update(delta);
@@ -120,7 +114,6 @@ public class GameStateGameMP extends GameState {
             pingWait += 1.0;
             client.send(new PacketPing(System.currentTimeMillis()));
         }
-        sync.capTPS();
         tickDebug.setValue(sync.getTPS());
     }
 

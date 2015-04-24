@@ -25,6 +25,7 @@ import org.tobi29.scapes.connection.Account;
 import org.tobi29.scapes.connection.ConnectionCloseException;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.utils.Sync;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import java.io.IOException;
@@ -74,7 +75,7 @@ public class GameStateLoadMP extends GameState {
     }
 
     @Override
-    public void stepComponent(double delta) {
+    public void stepComponent(Sync sync) {
         try {
             switch (step) {
                 case 0:

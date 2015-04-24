@@ -247,14 +247,12 @@ public class SoundSystem {
                     .poll(this, openAL, listenerPosition, delta, lagSilence))
                     .collect(Collectors.toList()));
             openAL.checkError("Sound-Effects");
-            if (engine.getConfig().getMusicVolume() != musicVolume) {
-                if (music != null) {
-                    openAL.setGain(musicSource,
-                            music.gain * engine.getConfig().getMusicVolume());
-                }
-                musicVolume = engine.getConfig().getMusicVolume();
+            float musicVolume = (float) engine.getConfig().getMusicVolume();
+            if (music != null && musicVolume != this.musicVolume) {
+                openAL.setGain(musicSource, music.gain * musicVolume);
+                this.musicVolume = musicVolume;
             }
-            soundVolume = engine.getConfig().getSoundVolume();
+            soundVolume = (float) engine.getConfig().getSoundVolume();
             openAL.setListener(listenerPosition.minus(origin),
                     listenerOrientation, listenerVelocity);
             if (!isSoundPlaying()) {

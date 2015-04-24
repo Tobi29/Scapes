@@ -25,6 +25,7 @@ import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.connection.Account;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.utils.Sync;
 import org.tobi29.scapes.engine.utils.io.filesystem.File;
 
 import java.io.IOException;
@@ -76,6 +77,6 @@ public class GameStateMenu extends GameState {
     }
 
     @Override
-    public void stepComponent(double delta) {
+    public void stepComponent(Sync sync) {
     }
 }

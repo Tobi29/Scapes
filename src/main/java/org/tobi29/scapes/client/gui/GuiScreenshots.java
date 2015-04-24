@@ -19,77 +19,60 @@ package org.tobi29.scapes.client.gui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
+import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
 import org.tobi29.scapes.engine.opengl.texture.TextureFile;
 import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
 import org.tobi29.scapes.engine.utils.io.filesystem.File;
 import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
+import org.tobi29.scapes.engine.utils.task.Joiner;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
-public class GuiScreenshots extends Gui {
+public class GuiScreenshots extends GuiMenu {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GuiScreenshots.class);
     private final GameState state;
     private final GuiComponentScrollPaneList scrollPane;
-    private List<File> files;
-    private int i;
+    private final Joiner joiner;
 
-    public GuiScreenshots(GameState state, Gui prev) {
-        super(GuiAlignment.CENTER);
+    public GuiScreenshots(GameState state, Gui previous) {
+        super(state, "Screenshots", previous);
         this.state = state;
-        GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(200, 0, 400, 512);
         scrollPane = new GuiComponentScrollPaneList(16, 80, 368, 350, 70);
-        GuiComponentTextButton back =
-                new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");
-        back.addLeftClick(event -> {
-            state.remove(this);
-            state.add(prev);
-        });
-        pane.add(new GuiComponentText(16, 16, 32, "Screenshots"));
-        pane.add(new GuiComponentSeparator(24, 64, 352, 2));
         pane.add(scrollPane);
-        pane.add(new GuiComponentSeparator(24, 448, 352, 2));
-        pane.add(back);
-        add(pane);
-        try {
-            Directory directory = state.getEngine().getFiles()
-                    .getDirectory("File:screenshots");
-            files = directory
-                    .listFiles(file -> file.getName().endsWith(".png"));
-        } catch (IOException e) {
-            LOGGER.warn("Failed to read screenshots: {}", e.toString());
-        }
-    }
-
-    @Override
-    public void update(double mouseX, double mouseY, boolean mouseInside,
-            ScapesEngine engine) {
-        super.update(mouseX, mouseY, mouseInside, engine);
-        if (files != null) {
-            if (i == files.size()) {
-                files = null;
-            } else {
-                File file = files.get(i++);
-                try {
-                    Element element =
-                            new Element(file, new TextureFile(file.read(), 0),
-                                    this);
-                    scrollPane.add(element);
-                } catch (IOException e) {
-                    LOGGER.warn("Failed to load screenshot: {}", e.toString());
+        joiner = state.getEngine().getTaskExecutor().runTask(joiner -> {
+            try {
+                Directory directory = state.getEngine().getFiles()
+                        .getDirectory("File:screenshots");
+                List<File> files = directory
+                        .listFiles(file -> file.getName().endsWith(".png"));
+                Collections.sort(files, Comparator.comparing(File::getName));
+                for (int i = 0; i < files.size() && !joiner.marked(); i++) {
+                    scrollPane.add(new Element(files.get(i), this));
                 }
+            } catch (IOException e) {
+                LOGGER.warn("Failed to read screenshots: {}", e.toString());
             }
-        }
+        }, "Load-Screenshots");
+        back.addLeftClick(event -> joiner.join());
     }
 
     private class Element extends GuiComponentPane {
-        public Element(File file, Texture texture, GuiScreenshots gui) {
+        public Element(File file, GuiScreenshots gui) {
             super(0, 0, 378, 70);
+            Texture textureLoad = null;
+            try {
+                textureLoad = new TextureFile(file.read(), 0);
+            } catch (IOException e) {
+                LOGGER.warn("Failed to load screenshot: {}", e.toString());
+                textureLoad = new TextureCustom(1, 1);
+            }
+            Texture texture = textureLoad;
             GuiComponentIcon icon =
                     new GuiComponentIcon(15, 20, 40, 30, texture);
             icon.addLeftClick(event -> {

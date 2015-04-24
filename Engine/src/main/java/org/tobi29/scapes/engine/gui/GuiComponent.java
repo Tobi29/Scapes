@@ -257,7 +257,7 @@ public abstract class GuiComponent
     }
 
     protected void transform(Matrix matrix) {
-        matrix.translate(x, y, 0);
+        matrix.translate(x, y, 0.0f);
     }
 
     @Override

@@ -17,16 +17,16 @@
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.*;
+import org.tobi29.scapes.engine.gui.Gui;
+import org.tobi29.scapes.engine.gui.GuiComponentSlider;
+import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
-public class GuiShaderSettings extends Gui {
+public class GuiShaderSettings extends GuiMenu {
     public GuiShaderSettings(GameState state, Gui previous) {
-        super(GuiAlignment.CENTER);
+        super(state, "Shader Settings", previous);
         TagStructure scapesTag =
                 state.getEngine().getTagStructure().getStructure("Scapes");
-        GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(200, 0, 400, 512);
         GuiComponentSlider animationDistance =
                 new GuiComponentSlider(16, 80, 368, 30, 18,
                         "Animation Distance",
@@ -67,19 +67,8 @@ public class GuiShaderSettings extends Gui {
                 scapesTag.setBoolean("FXAA", false);
             }
         });
-        GuiComponentTextButton back =
-                new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");
-        back.addLeftClick(event -> {
-            state.remove(this);
-            state.add(previous);
-        });
-        pane.add(new GuiComponentText(16, 16, 32, "Shader settings"));
-        pane.add(new GuiComponentSeparator(24, 64, 352, 2));
         pane.add(animationDistance);
         pane.add(bloom);
         pane.add(fxaa);
-        pane.add(new GuiComponentSeparator(24, 448, 352, 2));
-        pane.add(back);
-        add(pane);
     }
 }

@@ -43,6 +43,6 @@ public class GuiComponentScrollPaneList extends GuiComponentScrollPane {
             component.setY(i);
             i += scrollStep;
         }
-        maxY = i - scrollStep;
+        setMaxY(i - scrollStep);
     }
 }

@@ -67,7 +67,7 @@ public class Playlist {
 
     private void playMusic(Music music, MobPlayerClientMain player) {
         currentMusic = music;
-        if (sounds.getMusicVolume() <= 0.0f) {
+        if (sounds.getMusicVolume() <= 0.0) {
             return;
         }
         try {

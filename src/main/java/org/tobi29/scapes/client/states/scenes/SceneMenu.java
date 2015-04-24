@@ -37,6 +37,7 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -68,7 +69,7 @@ public class SceneMenu extends Scene {
     }
 
     public void changeBackground(Directory file) throws IOException {
-        if (!background.equals(file)) {
+        if (!Objects.equals(background, file)) {
             background = file;
             for (int i = 0; i < 6; i++) {
                 textures[i].dispose(state.getEngine().getGraphics());

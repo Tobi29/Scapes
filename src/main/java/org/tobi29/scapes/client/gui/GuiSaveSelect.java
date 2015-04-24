@@ -32,19 +32,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GuiSaveSelect extends Gui {
+public class GuiSaveSelect extends GuiMenu {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GuiSaveSelect.class);
     private static final String NO_WORLD_TYPE =
             "No plugin found that that can\n" + "be used to create a save.";
     private final GuiComponentScrollPaneList scrollPane;
-    private final GameState state;
 
-    public GuiSaveSelect(GameState state, Gui prev) {
-        super(GuiAlignment.CENTER);
-        this.state = state;
-        GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(200, 0, 400, 512);
+    public GuiSaveSelect(GameState state, Gui previous) {
+        super(state, "Singleplayer", previous);
         scrollPane = new GuiComponentScrollPaneList(16, 80, 368, 290, 70);
         GuiComponentTextButton create =
                 new GuiComponentTextButton(112, 410, 176, 30, 18, "Create");
@@ -74,23 +70,12 @@ public class GuiSaveSelect extends Gui {
                 LOGGER.warn("Failed to read plugins: {}", e.toString());
             }
         });
-        GuiComponentTextButton back =
-                new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");
-        back.addLeftClick(event -> {
-            state.remove(this);
-            state.add(prev);
-        });
-        pane.add(new GuiComponentText(16, 16, 32, "Singleplayer"));
-        pane.add(new GuiComponentSeparator(24, 64, 352, 2));
         pane.add(scrollPane);
         pane.add(create);
-        pane.add(new GuiComponentSeparator(24, 448, 352, 2));
-        pane.add(back);
-        add(pane);
         updateSaves();
     }
 
-    private void updateSaves() {
+    public void updateSaves() {
         try {
             Directory directory =
                     state.getEngine().getFiles().getDirectory("File:saves");

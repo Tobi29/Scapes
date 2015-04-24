@@ -17,21 +17,18 @@
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.*;
+import org.tobi29.scapes.engine.gui.GuiComponentText;
+import org.tobi29.scapes.engine.gui.GuiComponentTextField;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
-public class GuiAddServer extends Gui {
-    public GuiAddServer(GameState state, GuiServerSelect prev) {
-        super(GuiAlignment.CENTER);
-        GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(200, 0, 400, 512);
+public class GuiAddServer extends GuiMenuDouble {
+    public GuiAddServer(GameState state, GuiServerSelect previous) {
+        super(state, "Add Server", previous);
         GuiComponentTextField ip =
                 new GuiComponentTextField(16, 110, 368, 30, 18, "");
         GuiComponentTextField port =
                 new GuiComponentTextField(16, 180, 368, 30, 18, "12345");
-        GuiComponentTextButton create =
-                new GuiComponentTextButton(112, 466, 176, 30, 18, "Create");
-        create.addLeftClick(event -> {
+        save.addLeftClick(event -> {
             TagStructure tagStructure = new TagStructure();
             tagStructure.setString("Address", ip.getText());
             try {
@@ -40,19 +37,14 @@ public class GuiAddServer extends Gui {
             } catch (NumberFormatException e) {
                 tagStructure.setInteger("Port", 12345);
             }
-            prev.addServer(tagStructure);
+            previous.addServer(tagStructure);
             state.remove(this);
-            prev.updateServers();
-            state.add(prev);
+            previous.updateServers();
+            state.add(previous);
         });
-        pane.add(new GuiComponentText(16, 16, 32, "Add Server"));
-        pane.add(new GuiComponentSeparator(24, 64, 352, 2));
         pane.add(new GuiComponentText(16, 80, 18, "IP:"));
         pane.add(ip);
         pane.add(new GuiComponentText(16, 150, 18, "Port:"));
         pane.add(port);
-        pane.add(new GuiComponentSeparator(24, 448, 352, 2));
-        pane.add(create);
-        add(pane);
     }
 }

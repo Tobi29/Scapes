@@ -19,19 +19,18 @@ package org.tobi29.scapes.client.gui;
 import org.tobi29.scapes.client.ScapesClient;
 import org.tobi29.scapes.client.input.InputMode;
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.*;
+import org.tobi29.scapes.engine.gui.Gui;
+import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class GuiControlsList extends Gui {
-    public GuiControlsList(GameState state, Gui prev) {
-        super(GuiAlignment.CENTER);
+public class GuiControlsList extends GuiMenu {
+    public GuiControlsList(GameState state, Gui previous) {
+        super(state, "Controls", previous);
         Map<String, InputMode> inputModes = new ConcurrentHashMap<>();
         ((ScapesClient) state.getEngine().getGame()).getInputModes().forEach(
                 inputMode -> inputModes.put(inputMode.toString(), inputMode));
-        GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(200, 0, 400, 512);
         int y = 80;
         for (InputMode inputMode : inputModes.values()) {
             GuiComponentTextButton controls =
@@ -44,16 +43,5 @@ public class GuiControlsList extends Gui {
             pane.add(controls);
             y += 40;
         }
-        GuiComponentTextButton back =
-                new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");
-        back.addLeftClick(event -> {
-            state.remove(this);
-            state.add(prev);
-        });
-        pane.add(new GuiComponentText(16, 16, 32, "Controls"));
-        pane.add(new GuiComponentSeparator(24, 64, 352, 2));
-        pane.add(new GuiComponentSeparator(24, 448, 352, 2));
-        pane.add(back);
-        add(pane);
     }
 }

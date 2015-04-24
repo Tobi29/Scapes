@@ -17,17 +17,17 @@
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.*;
+import org.tobi29.scapes.engine.gui.Gui;
+import org.tobi29.scapes.engine.gui.GuiComponentSlider;
+import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
-public class GuiVideoSettings extends Gui {
-    public GuiVideoSettings(GameState state, Gui prev) {
-        super(GuiAlignment.CENTER);
+public class GuiVideoSettings extends GuiMenu {
+    public GuiVideoSettings(GameState state, Gui previous) {
+        super(state, "Video Settings", previous);
         TagStructure scapesTag =
                 state.getEngine().getTagStructure().getStructure("Scapes");
-        GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(200, 0, 400, 512);
         GuiComponentSlider viewDistance =
                 new GuiComponentSlider(16, 80, 368, 30, 18, "View distance",
                         scapesTag.getFloat("RenderDistance"),
@@ -82,29 +82,26 @@ public class GuiVideoSettings extends Gui {
         });
         GuiComponentSlider resolutionMultiplier =
                 new GuiComponentSlider(16, 240, 368, 30, 18, "Resolution",
-                        1.0f / state.getEngine().getConfig()
-                                .getResolutionMultiplier());
-        resolutionMultiplier.addHover(event -> {
-            state.getEngine().getConfig().setResolutionMultiplier((int) (1.0f /
-                    FastMath.clamp(resolutionMultiplier.value, 0.1, 1)));
-            resolutionMultiplier.value = 1.0f /
-                    state.getEngine().getConfig().getResolutionMultiplier();
-        });
-        GuiComponentTextButton back =
-                new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");
-        back.addLeftClick(event -> {
-            state.remove(this);
-            state.add(prev);
-        });
-        pane.add(new GuiComponentText(16, 16, 32, "Video settings"));
-        pane.add(new GuiComponentSeparator(24, 64, 352, 2));
+                        reverseResolution(state.getEngine().getConfig()
+                                .getResolutionMultiplier()),
+                        (text, value) -> text + ": " +
+                                FastMath.round(resolution(value) * 100.0) +
+                                '%');
+        resolutionMultiplier.addHover(event -> state.getEngine().getConfig()
+                .setResolutionMultiplier(
+                        (float) resolution(resolutionMultiplier.value)));
         pane.add(viewDistance);
         pane.add(shader);
         pane.add(fullscreen);
         pane.add(keepInvisibleVbos);
         pane.add(resolutionMultiplier);
-        pane.add(new GuiComponentSeparator(24, 448, 352, 2));
-        pane.add(back);
-        add(pane);
+    }
+
+    private static double resolution(double value) {
+        return 1.0 / FastMath.round(11.0 - value * 10.0);
+    }
+
+    private static double reverseResolution(double value) {
+        return 1.1 - 0.1 / value;
     }
 }

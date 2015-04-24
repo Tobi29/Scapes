@@ -18,8 +18,6 @@ package org.tobi29.scapes.client.gui;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.client.states.GameStateLoadSP;
-import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.opengl.texture.*;
@@ -37,7 +35,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.zip.ZipFile;
 
-public class GuiCreateWorld extends Gui {
+public class GuiCreateWorld extends GuiMenuDouble {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GuiCreateWorld.class);
     private static final String SAVE_EXISTS =
@@ -45,11 +43,9 @@ public class GuiCreateWorld extends Gui {
     public final List<PluginFile> addons = new ArrayList<>();
     private int environmentID;
 
-    public GuiCreateWorld(GameState state, Gui prev,
+    public GuiCreateWorld(GameState state, GuiSaveSelect previous,
             List<PluginFile> worldTypes, List<PluginFile> plugins) {
-        super(GuiAlignment.CENTER);
-        GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(200, 0, 400, 512);
+        super(state, "New World", previous);
         GuiComponentTextField name =
                 new GuiComponentTextField(16, 100, 368, 30, 18, "New World");
         GuiComponentTextField seed =
@@ -73,9 +69,7 @@ public class GuiCreateWorld extends Gui {
             state.add(new GuiAddons(state, this,
                     worldTypes.get(environmentID).getName(), plugins));
         });
-        GuiComponentTextButton create =
-                new GuiComponentTextButton(112, 410, 176, 30, 18, "Create");
-        create.addLeftClick(event -> {
+        save.addLeftClick(event -> {
             if (name.getText().isEmpty()) {
                 name.setText("New World");
             }
@@ -114,31 +108,19 @@ public class GuiCreateWorld extends Gui {
                     addon.getFile().copy(pluginsDir
                             .getResource(addon.getFile().getName()));
                 }
-                state.getEngine().setState(
-                        new GameStateLoadSP(file, state.getEngine(),
-                                (SceneMenu) state.getScene()));
+                state.remove(this);
+                previous.updateSaves();
+                state.add(previous);
             } catch (IOException e) {
                 LOGGER.error("Failed to create world: {}", e.toString());
             }
         });
-        GuiComponentTextButton back =
-                new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");
-        back.addLeftClick(event -> {
-            state.remove(this);
-            state.add(prev);
-        });
-        pane.add(new GuiComponentText(16, 16, 32, "Single Player"));
-        pane.add(new GuiComponentSeparator(24, 64, 352, 2));
-        pane.add(name);
         pane.add(new GuiComponentText(16, 80, 18, "Name:"));
-        pane.add(seed);
+        pane.add(name);
         pane.add(new GuiComponentText(16, 140, 18, "Seed:"));
+        pane.add(seed);
         pane.add(environment);
         pane.add(addonsButton);
-        pane.add(create);
-        pane.add(new GuiComponentSeparator(24, 448, 352, 2));
-        pane.add(back);
-        add(pane);
     }
 
     private class GuiAddons extends Gui {

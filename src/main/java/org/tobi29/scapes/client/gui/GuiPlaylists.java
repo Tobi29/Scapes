@@ -19,7 +19,10 @@ package org.tobi29.scapes.client.gui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.*;
+import org.tobi29.scapes.engine.gui.Gui;
+import org.tobi29.scapes.engine.gui.GuiComponentPane;
+import org.tobi29.scapes.engine.gui.GuiComponentScrollPaneList;
+import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.engine.openal.codec.AudioInputStream;
 import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
 import org.tobi29.scapes.engine.utils.io.filesystem.File;
@@ -30,7 +33,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class GuiPlaylists extends Gui {
+public class GuiPlaylists extends GuiMenu {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GuiPlaylists.class);
     private final List<Element> elements = new ArrayList<>();
@@ -38,11 +41,9 @@ public class GuiPlaylists extends Gui {
     private final GameState state;
     private String playlist;
 
-    public GuiPlaylists(GameState state, Gui prev) {
-        super(GuiAlignment.CENTER);
+    public GuiPlaylists(GameState state, Gui previous) {
+        super(state, "Playlists", previous);
         this.state = state;
-        GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(200, 0, 400, 512);
         GuiComponentTextButton day =
                 new GuiComponentTextButton(16, 80, 80, 30, 18, "Day");
         day.addLeftClick(event -> updateTitles("day"));
@@ -53,9 +54,9 @@ public class GuiPlaylists extends Gui {
                 new GuiComponentTextButton(196, 80, 80, 30, 18, "Battle");
         battle.addLeftClick(event -> updateTitles("battle"));
         scrollPane = new GuiComponentScrollPaneList(16, 120, 368, 210, 20);
-        GuiComponentTextButton create =
+        GuiComponentTextButton add =
                 new GuiComponentTextButton(112, 370, 176, 30, 18, "Add");
-        create.addLeftClick(event -> {
+        add.addLeftClick(event -> {
             try {
                 Directory directory = state.getEngine().getFiles()
                         .getDirectory("File:playlists/" + playlist);
@@ -74,22 +75,11 @@ public class GuiPlaylists extends Gui {
                 LOGGER.warn("Failed to import music: {}", e.toString());
             }
         });
-        GuiComponentTextButton back =
-                new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");
-        back.addLeftClick(event -> {
-            state.remove(this);
-            state.add(prev);
-        });
-        pane.add(new GuiComponentText(16, 16, 32, "Playlists"));
-        pane.add(new GuiComponentSeparator(24, 64, 352, 2));
         pane.add(day);
         pane.add(night);
         pane.add(battle);
         pane.add(scrollPane);
-        pane.add(create);
-        pane.add(new GuiComponentSeparator(24, 448, 352, 2));
-        pane.add(back);
-        add(pane);
+        pane.add(add);
         updateTitles("day");
     }
 

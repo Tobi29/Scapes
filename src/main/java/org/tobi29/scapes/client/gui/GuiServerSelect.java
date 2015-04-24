@@ -42,46 +42,31 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GuiServerSelect extends Gui {
+public class GuiServerSelect extends GuiMenu {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GuiServerSelect.class);
     private static final byte[] CONNECTION_HEADER = ConnectionInfo.getHeader();
     private final List<TagStructure> servers = new ArrayList<>();
     private final List<Element> elements = new ArrayList<>();
     private final GuiComponentScrollPaneList scrollPane;
-    private final GameState state;
 
-    public GuiServerSelect(GameState state, Gui prev) {
-        super(GuiAlignment.CENTER);
-        this.state = state;
+    public GuiServerSelect(GameState state, Gui previous) {
+        super(state, "Multiplayer", previous);
         TagStructure scapesTag =
                 state.getEngine().getTagStructure().getStructure("Scapes");
         if (scapesTag.has("Servers")) {
             servers.addAll(scapesTag.getList("Servers"));
         }
-        GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(200, 0, 400, 512);
         scrollPane = new GuiComponentScrollPaneList(16, 80, 368, 250, 70);
-        GuiComponentTextButton create =
+        GuiComponentTextButton add =
                 new GuiComponentTextButton(112, 370, 176, 30, 18, "Add");
-        create.addLeftClick(event -> {
+        add.addLeftClick(event -> {
             state.remove(this);
             state.add(new GuiAddServer(state, this));
         });
-        GuiComponentTextButton back =
-                new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");
-        back.addLeftClick(event -> {
-            disposeServers();
-            state.remove(this);
-            state.add(prev);
-        });
-        pane.add(new GuiComponentText(16, 16, 32, "Multiplayer"));
-        pane.add(new GuiComponentSeparator(24, 64, 352, 2));
+        back.addLeftClick(event -> disposeServers());
         pane.add(scrollPane);
-        pane.add(create);
-        pane.add(new GuiComponentSeparator(24, 448, 352, 2));
-        pane.add(back);
-        add(pane);
+        pane.add(add);
         updateServers();
     }
 
@@ -133,7 +118,6 @@ public class GuiServerSelect extends Gui {
         private final GuiComponentTextButton label;
         private final ByteBuffer outBuffer, headerBuffer =
                 BufferCreator.byteBuffer(4);
-        private Texture texture;
         private SocketChannel channel;
         private int readState;
         private ByteBuffer buffer;
@@ -219,11 +203,13 @@ public class GuiServerSelect extends Gui {
                                     .byteBuffer(imageBuffer.remaining());
                             buffer.put(imageBuffer);
                             buffer.rewind();
-                            texture = new TextureCustom(image.getWidth(),
-                                    image.getHeight(), buffer, 0,
-                                    TextureFilter.NEAREST,
-                                    TextureFilter.NEAREST, TextureWrap.CLAMP,
-                                    TextureWrap.CLAMP);
+                            Texture texture =
+                                    new TextureCustom(image.getWidth(),
+                                            image.getHeight(), buffer, 0,
+                                            TextureFilter.NEAREST,
+                                            TextureFilter.NEAREST,
+                                            TextureWrap.CLAMP,
+                                            TextureWrap.CLAMP);
                             add(new GuiComponentIcon(15, 15, 40, 40, texture));
                             readState = -1;
                         } else if (read == -1) {

@@ -463,10 +463,6 @@ public class SceneScapesVoxelWorld extends Scene {
         debugWidget.setVisible(!debugWidget.isVisible());
     }
 
-    public void togglePerformance() {
-        performanceWidget.setVisible(!performanceWidget.isVisible());
-    }
-
     public TerrainTextureRegistry getTerrainTextureRegistry() {
         return terrainTextureRegistry;
     }
@@ -485,7 +481,7 @@ public class SceneScapesVoxelWorld extends Scene {
 
     private class GuiWidgetDebugClient extends GuiWidget {
         private GuiWidgetDebugClient() {
-            super(32, 32, 160, 100, "Debug Values");
+            super(32, 32, 160, 120, "Debug Values");
             GuiComponentTextButton geometryButton =
                     new GuiComponentTextButton(10, 10, 140, 15, 12, "Geometry");
             geometryButton.addLeftClick(
@@ -508,10 +504,16 @@ public class SceneScapesVoxelWorld extends Scene {
             reloadGeometryButton
                     .addLeftClick(event -> world.getTerrain().reloadGeometry());
             add(reloadGeometryButton);
+            GuiComponentTextButton performanceButton =
+                    new GuiComponentTextButton(10, 90, 140, 15, 12,
+                            "Performance");
+            performanceButton.addLeftClick(event -> performanceWidget
+                    .setVisible(!performanceWidget.isVisible()));
+            add(performanceButton);
         }
     }
 
-    private class GuiWidgetPerformanceClient extends GuiWidget {
+    private static class GuiWidgetPerformanceClient extends GuiWidget {
         private final GuiComponentGraph graphRender, graphUpdate;
 
         private GuiWidgetPerformanceClient() {
@@ -522,7 +524,7 @@ public class SceneScapesVoxelWorld extends Scene {
             add(graphRender);
             graphUpdate =
                     new GuiComponentGraph(0, 0, width, height, 0.0f, 0.0f, 1.0f,
-                            1.0f, 1.0f, 0.0f, 0.0f, 1.0f);
+                            1.0f);
             add(graphUpdate);
         }
     }

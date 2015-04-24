@@ -139,10 +139,10 @@ public class ScapesEngine implements Crashable {
         } else {
             TagStructure engineTag = tagStructure.getStructure("Engine");
             engineTag.setBoolean("VSync", true);
-            engineTag.setInteger("Framerate", 60);
-            engineTag.setFloat("ResolutionMultiplier", 1.0f);
-            engineTag.setFloat("MusicVolume", 1.0f);
-            engineTag.setFloat("SoundVolume", 1.0f);
+            engineTag.setDouble("Framerate", 60.0);
+            engineTag.setDouble("ResolutionMultiplier", 1.0);
+            engineTag.setDouble("MusicVolume", 1.0);
+            engineTag.setDouble("SoundVolume", 1.0);
             engineTag.setBoolean("Fullscreen", false);
             config = new ScapesEngineConfig(engineTag);
         }
@@ -348,11 +348,11 @@ public class ScapesEngine implements Crashable {
             stateThread = null;
         }
         if (stateThread == null) {
-            update(graphics.getSync().getSpeedFactor(), currentState);
+            update(graphics.getSync(), currentState);
         }
     }
 
-    private void update(double delta, GameState state) {
+    private void update(Sync sync, GameState state) {
         taskExecutor.tick();
         boolean mouseGrabbed = currentState.isMouseGrabbed() ||
                 guiController.isSoftwareMouse();
@@ -370,10 +370,10 @@ public class ScapesEngine implements Crashable {
         if (debug && controller.isPressed(ControllerKey.KEY_F3)) {
             debugGui.toggleDebugValues();
         }
-        state.step(delta);
+        state.step(sync);
         globalGui.update(this);
         game.step();
-        guiController.update(delta);
+        guiController.update(sync.getSpeedFactor());
     }
 
     private class StateThread implements TaskExecutor.ASyncTask {
@@ -387,11 +387,12 @@ public class ScapesEngine implements Crashable {
         @Override
         public void run(Joiner joiner) {
             try {
-                Sync sync = new Sync(1.0, 0, false, null);
+                Sync sync = new Sync(config.getFPS(), 5000000000L, true,
+                        "Engine-Update");
                 sync.init();
                 while (!joiner.marked()) {
-                    update(sync.getSpeedFactor(), state);
-                    sync.calculateTPS();
+                    update(sync, state);
+                    sync.capTPS();
                 }
             } catch (Throwable e) {
                 crash(e);

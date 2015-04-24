@@ -21,6 +21,7 @@ import org.tobi29.scapes.engine.opengl.*;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.opengl.texture.TextureFBOColor;
+import org.tobi29.scapes.engine.utils.Sync;
 
 public abstract class GameState {
     protected final VAO vao;
@@ -100,14 +101,14 @@ public abstract class GameState {
         newScene = scene;
     }
 
-    public void step(double delta) {
+    public void step(Sync sync) {
         if (scene != null) {
             scene.stepGui(engine);
         }
-        stepComponent(delta);
+        stepComponent(sync);
     }
 
-    public abstract void stepComponent(double delta);
+    public abstract void stepComponent(Sync sync);
 
     public void render(GraphicsSystem graphics, boolean updateSize) {
         if (newScene != null) {

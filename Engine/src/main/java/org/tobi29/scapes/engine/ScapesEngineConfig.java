@@ -20,17 +20,16 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
 public class ScapesEngineConfig {
     private final TagStructure tagStructure;
-    private int fps;
-    private float musicVolume, soundVolume, resolutionMultiplier;
+    private double fps, musicVolume, soundVolume, resolutionMultiplier;
     private boolean vSync, fullscreen;
 
     ScapesEngineConfig(TagStructure tagStructure) {
         this.tagStructure = tagStructure;
         vSync = tagStructure.getBoolean("VSync");
-        fps = tagStructure.getInteger("Framerate");
-        resolutionMultiplier = tagStructure.getFloat("ResolutionMultiplier");
-        musicVolume = tagStructure.getFloat("MusicVolume");
-        soundVolume = tagStructure.getFloat("SoundVolume");
+        fps = tagStructure.getDouble("Framerate");
+        resolutionMultiplier = tagStructure.getDouble("ResolutionMultiplier");
+        musicVolume = tagStructure.getDouble("MusicVolume");
+        soundVolume = tagStructure.getDouble("SoundVolume");
         fullscreen = tagStructure.getBoolean("Fullscreen");
     }
 
@@ -43,40 +42,40 @@ public class ScapesEngineConfig {
         tagStructure.setBoolean("VSync", true);
     }
 
-    public int getFPS() {
+    public double getFPS() {
         return fps;
     }
 
-    public void setFPS(int fps) {
+    public void setFPS(double fps) {
         this.fps = fps;
-        tagStructure.setInteger("Framerate", fps);
+        tagStructure.setDouble("Framerate", fps);
     }
 
-    public float getResolutionMultiplier() {
+    public double getResolutionMultiplier() {
         return resolutionMultiplier;
     }
 
-    public void setResolutionMultiplier(float resolutionMultiplier) {
+    public void setResolutionMultiplier(double resolutionMultiplier) {
         this.resolutionMultiplier = resolutionMultiplier;
-        tagStructure.setFloat("ResolutionMultiplier", resolutionMultiplier);
+        tagStructure.setDouble("ResolutionMultiplier", resolutionMultiplier);
     }
 
-    public float getMusicVolume() {
+    public double getMusicVolume() {
         return musicVolume;
     }
 
-    public void setMusicVolume(float musicVolume) {
+    public void setMusicVolume(double musicVolume) {
         this.musicVolume = musicVolume;
-        tagStructure.setFloat("MusicVolume", musicVolume);
+        tagStructure.setDouble("MusicVolume", musicVolume);
     }
 
-    public float getSoundVolume() {
+    public double getSoundVolume() {
         return soundVolume;
     }
 
-    public void setSoundVolume(float soundVolume) {
+    public void setSoundVolume(double soundVolume) {
         this.soundVolume = soundVolume;
-        tagStructure.setFloat("SoundVolume", soundVolume);
+        tagStructure.setDouble("SoundVolume", soundVolume);
     }
 
     public boolean isFullscreen() {

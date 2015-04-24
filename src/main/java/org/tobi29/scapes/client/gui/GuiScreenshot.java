@@ -17,31 +17,16 @@
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.*;
+import org.tobi29.scapes.engine.gui.Gui;
+import org.tobi29.scapes.engine.gui.GuiComponentIcon;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 
-public class GuiScreenshot extends Gui {
-    private final Gui own;
-
-    public GuiScreenshot(GameState state, Gui prev, Texture texture) {
-        super(GuiAlignment.CENTER);
-        GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(200, 0, 400, 512);
-        own = this;
+public class GuiScreenshot extends GuiMenu {
+    public GuiScreenshot(GameState state, Gui previous, Texture texture) {
+        super(state, "Screenshots", previous);
         GuiComponentIcon image = new GuiComponentIcon(16, 80, 368,
                 (int) ((double) texture.getHeight() / texture.getWidth() * 368),
                 texture);
-        GuiComponentTextButton back =
-                new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");
-        back.addLeftClick(event -> {
-            state.remove(own);
-            state.add(prev);
-        });
-        pane.add(new GuiComponentText(16, 16, 32, "Screenshots"));
-        pane.add(new GuiComponentSeparator(24, 64, 352, 2));
         pane.add(image);
-        pane.add(new GuiComponentSeparator(24, 448, 352, 2));
-        pane.add(back);
-        add(pane);
     }
 }
