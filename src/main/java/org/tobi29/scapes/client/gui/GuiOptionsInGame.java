@@ -34,6 +34,27 @@ public class GuiOptionsInGame extends Gui {
                         state.getEngine().getConfig().getSoundVolume());
         soundVolume.addHover(event -> state.getEngine().getConfig()
                 .setSoundVolume((float) soundVolume.value));
+        GuiComponentTextButton fullscreen;
+        if (state.getEngine().getConfig().isFullscreen()) {
+            fullscreen = new GuiComponentTextButton(16, 160, 368, 30, 18,
+                    "Fullscreen: ON");
+        } else {
+            fullscreen = new GuiComponentTextButton(16, 160, 368, 30, 18,
+                    "Fullscreen: OFF");
+        }
+        fullscreen.addLeftClick(event -> {
+            if (!state.getEngine().getConfig().isFullscreen()) {
+                fullscreen.setText("Fullscreen: ON");
+                state.getEngine().getConfig().setFullscreen(true);
+                state.getEngine().getGraphics().getContainer()
+                        .setFullscreen(true);
+            } else {
+                fullscreen.setText("Fullscreen: OFF");
+                state.getEngine().getConfig().setFullscreen(false);
+                state.getEngine().getGraphics().getContainer()
+                        .setFullscreen(false);
+            }
+        });
         GuiComponentTextButton back =
                 new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");
         back.addLeftClick(
@@ -42,6 +63,7 @@ public class GuiOptionsInGame extends Gui {
         pane.add(new GuiComponentSeparator(24, 64, 352, 2));
         pane.add(musicVolume);
         pane.add(soundVolume);
+        pane.add(fullscreen);
         pane.add(new GuiComponentSeparator(24, 448, 352, 2));
         pane.add(back);
         add(pane);
