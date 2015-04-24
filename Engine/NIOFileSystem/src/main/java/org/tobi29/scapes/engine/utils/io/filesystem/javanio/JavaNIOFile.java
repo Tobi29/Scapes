@@ -29,6 +29,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.zip.ZipFile;
 
@@ -137,6 +138,6 @@ public class JavaNIOFile implements File {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof File && ((File) obj).getID().equals(id);
+        return obj instanceof File && Objects.equals(((File) obj).getID(), id);
     }
 }

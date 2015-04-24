@@ -72,7 +72,8 @@ public class SystemOutReader implements Closeable {
                     char c = (char) buffer[ij];
                     if (c == '\n') {
                         lineQueue.add(new String(buffer, 0, ij));
-                        System.arraycopy(buffer, ij + 1, buffer, 0, length - j);
+                        System.arraycopy(buffer, ij + 1, buffer, 0,
+                                length - j - 1);
                         length -= j + 1;
                         i = 0;
                         j = 0;

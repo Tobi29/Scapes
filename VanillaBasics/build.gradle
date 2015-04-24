@@ -15,7 +15,6 @@
  */
 
 
-
 apply plugin: "java"
 
 version = "0.0.0_1"
