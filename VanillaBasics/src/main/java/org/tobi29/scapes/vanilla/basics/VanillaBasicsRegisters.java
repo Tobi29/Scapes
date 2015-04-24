@@ -794,6 +794,12 @@ class VanillaBasicsRegisters {
         // Steppe
         plugin.c.biomeDecorator(STEPPE, "Waste", 10, d -> {
         });
+        plugin.c.biomeDecorator(STEPPE, "Birch", 5, d -> {
+            d.addLayer(new LayerTree(TreeBirch.INSTANCE, 1024));
+            d.addLayer(new LayerPatch(materials.bush, 0, 16, 64, 1 << 16,
+                    (terrain, x, y, z) -> terrain.getBlockType(x, y, z - 1) ==
+                            materials.grass));
+        });
         plugin.c.biomeDecorator(STEPPE, "Spruce", 10, d -> {
             d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 512));
             d.addLayer(new LayerPatch(materials.bush, 0, 16, 64, 1 << 17,
@@ -804,6 +810,7 @@ class VanillaBasicsRegisters {
         // Forest
         plugin.c.biomeDecorator(FOREST, "Deciduous", 10, d -> {
             d.addLayer(new LayerTree(TreeOak.INSTANCE, 64));
+            d.addLayer(new LayerTree(TreeBirch.INSTANCE, 128));
             d.addLayer(new LayerTree(TreeMaple.INSTANCE, 32));
             for (int i = 0; i < 20; i++) {
                 d.addLayer(new LayerPatch(materials.flower, i, 16, 24, 1 << 14,
@@ -812,6 +819,18 @@ class VanillaBasicsRegisters {
                                         materials.grass));
             }
             d.addLayer(new LayerPatch(materials.bush, 0, 6, 8, 2048,
+                    (terrain, x, y, z) -> terrain.getBlockType(x, y, z - 1) ==
+                            materials.grass));
+        });
+        plugin.c.biomeDecorator(FOREST, "Birch", 10, d -> {
+            d.addLayer(new LayerTree(TreeBirch.INSTANCE, 64));
+            for (int i = 0; i < 20; i++) {
+                d.addLayer(new LayerPatch(materials.flower, i, 16, 24, 1 << 15,
+                        (terrain, x, y, z) ->
+                                terrain.getBlockType(x, y, z - 1) ==
+                                        materials.grass));
+            }
+            d.addLayer(new LayerPatch(materials.bush, 0, 16, 64, 1 << 13,
                     (terrain, x, y, z) -> terrain.getBlockType(x, y, z - 1) ==
                             materials.grass));
         });
@@ -856,6 +875,8 @@ class VanillaBasicsRegisters {
         // Rainforest
         plugin.c.biomeDecorator(RAINFOREST, "Deciduous", 10, d -> {
             d.addLayer(new LayerTree(TreeOak.INSTANCE, 64));
+            d.addLayer(new LayerTree(TreeBirch.INSTANCE, 96));
+            d.addLayer(new LayerTree(TreePalm.INSTANCE, 256));
             d.addLayer(new LayerTree(TreeMaple.INSTANCE, 32));
             for (int i = 0; i < 20; i++) {
                 d.addLayer(new LayerPatch(materials.flower, i, 16, 24, 1 << 13,
@@ -878,15 +899,6 @@ class VanillaBasicsRegisters {
             d.addLayer(new LayerPatch(materials.bush, 0, 4, 8, 1024,
                     (terrain, x, y, z) -> terrain.getBlockType(x, y, z - 1) ==
                             materials.grass));
-        });
-        plugin.c.biomeDecorator(RAINFOREST, "Palm", 3, d -> {
-            d.addLayer(new LayerTree(TreePalm.INSTANCE, 96));
-            for (int i = 0; i < 20; i++) {
-                d.addLayer(new LayerPatch(materials.flower, i, 16, 24, 1 << 13,
-                        (terrain, x, y, z) ->
-                                terrain.getBlockType(x, y, z - 1) ==
-                                        materials.grass));
-            }
         });
     }
 }
