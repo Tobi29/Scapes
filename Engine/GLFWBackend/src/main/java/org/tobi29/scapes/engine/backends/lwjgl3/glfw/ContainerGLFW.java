@@ -16,6 +16,8 @@
 
 package org.tobi29.scapes.engine.backends.lwjgl3.glfw;
 
+import org.lwjgl.glfw.*;
+import org.lwjgl.opengl.GL11;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.ScapesEngine;

@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.engine.backends.lwjgl3.glfw;
 
+import org.lwjgl.glfw.GLFW;
 import org.tobi29.scapes.engine.input.ControllerKey;
 
 public class GLFWKeyMap {
