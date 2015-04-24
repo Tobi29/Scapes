@@ -32,22 +32,24 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 
 public class PacketBundleChannel {
     private static final IvParameterSpec IV;
-    private static final byte[] HEADER;
+    private static final ChecksumUtil.ChecksumAlgorithm HASH_ALGORITHM =
+            ChecksumUtil.ChecksumAlgorithm.SHA256;
+    private static final int HASH_SIZE, BUNDLE_HEADER_SIZE = 4;
     private final SocketChannel channel;
-    private final ConnectListener connectListener;
     private final ByteBufferOutputStream queueStreamOut;
     private final DataOutputStream dataStreamOut;
     private final ByteBufferOutputStream byteBufferStreamOut =
@@ -57,13 +59,15 @@ public class PacketBundleChannel {
     private final Queue<ByteBuffer> queue = new ConcurrentLinkedQueue<>();
     private final List<WeakReference<ByteBuffer>> bufferCache =
             new ArrayList<>();
+    private final byte[] hashEncrypted;
     private final Deflater deflater;
     private final Inflater inflater;
     private final Cipher encryptCipher, decryptCipher;
+    private final MessageDigest digest;
     private final AtomicInteger inRate = new AtomicInteger(), outRate =
             new AtomicInteger();
     private Optional<Selector> selector = Optional.empty();
-    private boolean checked, encrypt, hasInput;
+    private boolean encrypt, hasInput;
     private ByteBuffer output, input = BufferCreator.byteBuffer(1024),
             inputDecrypt = BufferCreator.byteBuffer(1024);
 
@@ -73,9 +77,12 @@ public class PacketBundleChannel {
         byte[] array = new byte[16];
         random.nextBytes(array);
         IV = new IvParameterSpec(array);
-        byte[] header = "Encryption worked".getBytes(StandardCharsets.UTF_8);
-        HEADER = new byte[header.length + 15 & ~15];
-        System.arraycopy(header, 0, HEADER, 0, header.length);
+        try {
+            HASH_SIZE = MessageDigest.getInstance(HASH_ALGORITHM.getName())
+                    .getDigestLength();
+        } catch (NoSuchAlgorithmException e) {
+            throw new UnsupportedJVMException(e);
+        }
     }
 
     public PacketBundleChannel(SocketChannel channel) {
@@ -84,19 +91,13 @@ public class PacketBundleChannel {
 
     public PacketBundleChannel(SocketChannel channel, byte[] encryptKey,
             byte[] decryptKey) {
-        this(channel, encryptKey, decryptKey, () -> {
-        });
-    }
-
-    public PacketBundleChannel(SocketChannel channel, byte[] encryptKey,
-            byte[] decryptKey, ConnectListener connectListener) {
         this.channel = channel;
-        this.connectListener = connectListener;
         deflater = new Deflater();
         inflater = new Inflater();
         try {
             encryptCipher = Cipher.getInstance("AES/CBC/NoPadding");
             decryptCipher = Cipher.getInstance("AES/CBC/NoPadding");
+            digest = MessageDigest.getInstance(HASH_ALGORITHM.getName());
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new UnsupportedJVMException(e);
         }
@@ -104,28 +105,7 @@ public class PacketBundleChannel {
         queueStreamOut = new ByteBufferOutputStream(
                 length -> BufferCreator.byteBuffer(length + 102400));
         dataStreamOut = new DataOutputStream(queueStreamOut);
-        ByteBuffer buffer = ByteBuffer.wrap(HEADER);
-        ByteBuffer bundle;
-        int size;
-        if (encrypt) {
-            bundle = BufferCreator
-                    .byteBuffer(encryptCipher.getOutputSize(HEADER.length) + 4);
-            bundle.position(4);
-            try {
-                size = encryptCipher.update(buffer, bundle);
-            } catch (ShortBufferException e) {
-                throw new UnsupportedJVMException(e);
-            }
-        } else {
-            size = buffer.remaining();
-            bundle = BufferCreator.byteBuffer(size + 4);
-            bundle.position(4);
-            bundle.put(buffer);
-        }
-        bundle.flip();
-        bundle.putInt(size);
-        bundle.rewind();
-        queue.add(bundle);
+        hashEncrypted = new byte[HASH_SIZE];
     }
 
     public DataOutputStream getOutputStream() {
@@ -140,9 +120,17 @@ public class PacketBundleChannel {
         if (queueStreamOut.size() == 0) {
             return;
         }
-        CompressionUtil
-                .compress(queueStreamOut.getBuffer(), byteBufferStreamOut,
-                        deflater);
+        try (DeflaterOutputStream deflaterStreamOut = new DeflaterOutputStream(
+                byteBufferStreamOut, deflater)) {
+            ProcessStream.process(
+                    new ByteBufferInputStream(queueStreamOut.getBuffer()),
+                    (byte[] buffer, int offset, int length) -> {
+                        deflaterStreamOut.write(buffer, offset, length);
+                        digest.update(buffer, offset, length);
+                    });
+            deflaterStreamOut.finish();
+        }
+        byte[] hash = digest.digest();
         deflater.reset();
         int padding = 16 - (byteBufferStreamOut.size() & 15);
         if (padding > 0) {
@@ -154,11 +142,13 @@ public class PacketBundleChannel {
         ByteBuffer buffer = byteBufferStreamOut.getBuffer();
         byteBufferStreamOut.reset();
         queueStreamOut.reset();
+        int bundleSize = HASH_SIZE + buffer.remaining();
         int capacity;
         if (encrypt) {
-            capacity = encryptCipher.getOutputSize(buffer.remaining()) + 4;
+            capacity = BUNDLE_HEADER_SIZE +
+                    encryptCipher.getOutputSize(bundleSize);
         } else {
-            capacity = buffer.remaining() + 4;
+            capacity = BUNDLE_HEADER_SIZE + bundleSize;
         }
         ByteBuffer bundle = null;
         int i = 0;
@@ -178,16 +168,19 @@ public class PacketBundleChannel {
         if (bundle == null) {
             bundle = BufferCreator.byteBuffer(capacity);
         }
-        bundle.position(4);
+        bundle.position(BUNDLE_HEADER_SIZE);
         int size;
         if (encrypt) {
             try {
-                size = encryptCipher.update(buffer, bundle);
+                size = encryptCipher.update(hash, 0, HASH_SIZE, hashEncrypted);
+                bundle.put(hashEncrypted);
+                size += encryptCipher.update(buffer, bundle);
             } catch (ShortBufferException e) {
                 throw new IOException(e);
             }
         } else {
-            size = buffer.remaining();
+            size = bundleSize;
+            bundle.put(hash);
             bundle.put(buffer);
         }
         bundle.flip();
@@ -256,30 +249,25 @@ public class PacketBundleChannel {
                 } else {
                     buffer = input;
                 }
-                if (checked) {
-                    CompressionUtil
-                            .decompress(buffer, byteBufferStreamOut, inflater);
-                    inflater.reset();
-                    ByteBuffer bundle = byteBufferStreamOut.getBuffer();
-                    byteBufferStreamOut.reset();
-                    hasInput = false;
-                    return Optional.of(new DataInputStream(
-                            new ByteBufferInputStream(bundle)));
-                } else {
-                    DataInputStream streamIn = new DataInputStream(
-                            new ByteBufferInputStream(buffer));
-                    byte[] header = new byte[HEADER.length];
-                    streamIn.readFully(header);
-                    if (Arrays.equals(HEADER, header)) {
-                        checked = true;
-                        hasInput = false;
-                        connectListener.connect();
-                        return Optional.empty();
-                    } else {
-                        throw new IOException("Invalid header: " +
-                                new String(header, StandardCharsets.UTF_8));
+                buffer.position(HASH_SIZE);
+                CompressionUtil
+                        .decompress(buffer, byteBufferStreamOut, inflater);
+                inflater.reset();
+                ByteBuffer bundle = byteBufferStreamOut.getBuffer();
+                byteBufferStreamOut.reset();
+                ProcessStream.process(new ByteBufferInputStream(bundle),
+                        digest::update);
+                bundle.flip();
+                byte[] hash = digest.digest();
+                buffer.position(0);
+                for (byte i : hash) {
+                    if (i != buffer.get()) {
+                        throw new IOException("Integrity check failed");
                     }
                 }
+                hasInput = false;
+                return Optional.of(new DataInputStream(
+                        new ByteBufferInputStream(bundle)));
             } else if (read == -1) {
                 throw new IOException("Connection closed");
             }
@@ -341,10 +329,5 @@ public class PacketBundleChannel {
         } catch (IOException e) {
         }
         return super.toString();
-    }
-
-    @FunctionalInterface
-    public interface ConnectListener {
-        void connect();
     }
 }

@@ -32,15 +32,13 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RemoteControlPanel implements Runnable {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(RemoteControlPanel.class);
-    private static final byte[] SALT =
-            "Scapes-Control-Panel".getBytes(StandardCharsets.UTF_8);
     private final String address, name, tip;
     private final int port;
     private final TabItem tabItem;
@@ -73,7 +71,8 @@ public class RemoteControlPanel implements Runnable {
                 throw new IOException("Connection closed");
             }
         }
-        connection = new ControlPanelProtocol(channel, password, SALT);
+        connection =
+                new ControlPanelProtocol(channel, password, Optional.empty());
         connection.addCommand("updateplayers", serverPanel::updatePlayers);
         connection.addCommand("updateworlds", serverPanel::updateWorlds);
         connection.addCommand("appendlog", serverPanel::appendLine);

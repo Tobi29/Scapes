@@ -80,8 +80,8 @@ public class FileCache {
         parent.make();
         File write = temp.getResource(UUID.randomUUID().toString());
         try (OutputStream streamOut = write.write()) {
-            MessageDigest digest = MessageDigest
-                    .getInstance(ChecksumUtil.ChecksumAlgorithm.SHA1.getName());
+            MessageDigest digest = MessageDigest.getInstance(
+                    ChecksumUtil.ChecksumAlgorithm.SHA256.getName());
             ProcessStream.process(streamIn, (buffer, offset, length) -> {
                 digest.update(buffer, offset, length);
                 streamOut.write(buffer, offset, length);
@@ -101,7 +101,8 @@ public class FileCache {
      * @param location The location that will be looked up
      * @return A {@code File} pointing at the file in cache or null if the cache doesn't contain a matching file
      */
-    public synchronized Optional<File> retrieve(Location location) throws IOException {
+    public synchronized Optional<File> retrieve(Location location)
+            throws IOException {
         String name = ArrayUtil.toHexadecimal(location.array);
         File file = getFile(location.type, name);
         if (file.exists()) {

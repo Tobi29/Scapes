@@ -26,14 +26,12 @@ import org.tobi29.scapes.server.controlpanel.ControlPanelProtocol;
 import java.io.IOException;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Optional;
 
 public class ControlPanelConnection implements Connection, ControlPanel {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ControlPanelConnection.class);
-    private static final byte[] SALT =
-            "Scapes-Control-Panel".getBytes(StandardCharsets.UTF_8);
     private final ControlPanelProtocol protocol;
     private final String id;
     private boolean done;
@@ -45,13 +43,14 @@ public class ControlPanelConnection implements Connection, ControlPanel {
         if (password.isEmpty()) {
             throw new IOException("No control panel password set");
         }
-        protocol = new ControlPanelProtocol(channel, password, SALT,
-                () -> server.addControlPanel(this));
+        protocol = new ControlPanelProtocol(channel, password,
+                Optional.of(server.getConnection().getKeyPair()));
         protocol.addCommand("scapescmd",
                 command -> server.getCommandRegistry().get(command[0], this)
                         .execute()
                         .forEach(output -> appendLog(output.toString())));
         id = channel.getRemoteAddress().toString();
+        server.addControlPanel(this);
     }
 
     @Override

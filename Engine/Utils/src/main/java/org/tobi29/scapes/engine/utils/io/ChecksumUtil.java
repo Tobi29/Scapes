@@ -42,7 +42,7 @@ public final class ChecksumUtil {
      * @throws IOException If an I/O error occurred
      */
     public static String getChecksum(Resource file) throws IOException {
-        return getChecksum(file, ChecksumAlgorithm.SHA1);
+        return getChecksum(file, ChecksumAlgorithm.SHA256);
     }
 
     /**
@@ -60,7 +60,7 @@ public final class ChecksumUtil {
     }
 
     public static String getChecksum(InputStream streamIn) throws IOException {
-        return getChecksum(streamIn, ChecksumAlgorithm.SHA1);
+        return getChecksum(streamIn, ChecksumAlgorithm.SHA256);
     }
 
     public static String getChecksum(InputStream streamIn,
@@ -76,7 +76,7 @@ public final class ChecksumUtil {
      * checksum
      */
     public static String getChecksum(String value) {
-        return getChecksum(value, ChecksumAlgorithm.SHA1);
+        return getChecksum(value, ChecksumAlgorithm.SHA256);
     }
 
     /**
@@ -100,7 +100,7 @@ public final class ChecksumUtil {
      * checksum
      */
     public static String getChecksum(byte... array) {
-        return getChecksum(array, ChecksumAlgorithm.SHA1);
+        return getChecksum(array, ChecksumAlgorithm.SHA256);
     }
 
     /**
@@ -123,7 +123,7 @@ public final class ChecksumUtil {
      * @return A {@code byte[]} containing the checksum
      */
     public static byte[] createChecksum(String value) {
-        return createChecksum(value, ChecksumAlgorithm.SHA1);
+        return createChecksum(value, ChecksumAlgorithm.SHA256);
     }
 
     /**
@@ -147,7 +147,7 @@ public final class ChecksumUtil {
      * @throws IOException If an I/O error occurred
      */
     public static byte[] createChecksum(Resource file) throws IOException {
-        return createChecksum(file, ChecksumAlgorithm.SHA1);
+        return createChecksum(file, ChecksumAlgorithm.SHA256);
     }
 
     /**
@@ -165,7 +165,7 @@ public final class ChecksumUtil {
 
     public static byte[] createChecksum(InputStream streamIn)
             throws IOException {
-        return createChecksum(streamIn, ChecksumAlgorithm.SHA1);
+        return createChecksum(streamIn, ChecksumAlgorithm.SHA256);
     }
 
     public static byte[] createChecksum(InputStream streamIn,
@@ -187,7 +187,7 @@ public final class ChecksumUtil {
      * @return A {@code byte[]} containing the checksum
      */
     public static byte[] createChecksum(byte... array) {
-        return createChecksum(array, ChecksumAlgorithm.SHA1);
+        return createChecksum(array, ChecksumAlgorithm.SHA256);
     }
 
     /**
@@ -229,7 +229,9 @@ public final class ChecksumUtil {
      * Enum containing available checksum algorithms
      */
     public enum ChecksumAlgorithm {
+        SHA256("SHA-256"),
         SHA1("SHA1"),
+        @Deprecated
         MD5("MD5");
         private final String name;
 
