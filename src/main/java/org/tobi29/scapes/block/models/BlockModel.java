@@ -22,5 +22,5 @@ import org.tobi29.scapes.chunk.terrain.TerrainClient;
 public interface BlockModel extends ItemModel {
     void addToChunkMesh(ChunkMesh mesh, TerrainClient terrain, int x, int y,
             int z, float xx, float yy, float zz, float r, float g, float b,
-            float a);
+            float a, boolean lod);
 }

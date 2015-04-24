@@ -54,10 +54,10 @@ public class BlockModelComplex implements BlockModel {
     @Override
     public void addToChunkMesh(ChunkMesh mesh, TerrainClient terrain, int x,
             int y, int z, float xx, float yy, float zz, float r, float g,
-            float b, float a) {
+            float b, float a, boolean lod) {
         shapes.forEach(shape -> shape
-                .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz, r, g, b,
-                        a));
+                .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz, r, g, b, a,
+                        lod));
     }
 
     @Override
@@ -214,10 +214,9 @@ public class BlockModelComplex implements BlockModel {
         }
 
         public abstract void addToChunkMesh(ChunkMesh mesh,
-                TerrainClient terrain,
-
-                double x, double y, double z, float xx, float yy, float zz,
-                float r, float g, float b, float a);
+                TerrainClient terrain, double x, double y, double z, float xx,
+                float yy, float zz, float r, float g, float b, float a,
+                boolean lod);
 
         public abstract void addToMesh(Mesh mesh, boolean inventory);
     }
@@ -260,7 +259,7 @@ public class BlockModelComplex implements BlockModel {
         @Override
         public void addToChunkMesh(ChunkMesh mesh, TerrainClient terrain,
                 double x, double y, double z, float xx, float yy, float zz,
-                float r, float g, float b, float a) {
+                float r, float g, float b, float a, boolean lod) {
             r *= this.r;
             g *= this.g;
             b *= this.b;
@@ -276,22 +275,22 @@ public class BlockModelComplex implements BlockModel {
                         y + tllh.floatY(), z + tllh.floatZ(),
                         xx + tllh.floatX(), yy + tllh.floatY(),
                         zz + tllh.floatZ(), texTop.getX() + texMinX,
-                        texTop.getY() + texMinY, r, g, b, a, anim);
+                        texTop.getY() + texMinY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.UP, x + thlh.floatX(),
                         y + thlh.floatY(), z + thlh.floatZ(),
                         xx + thlh.floatX(), yy + thlh.floatY(),
                         zz + thlh.floatZ(), texTop.getX() + texMaxX,
-                        texTop.getY() + texMinY, r, g, b, a, anim);
+                        texTop.getY() + texMinY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.UP, x + thhh.floatX(),
                         y + thhh.floatY(), z + thhh.floatZ(),
                         xx + thhh.floatX(), yy + thhh.floatY(),
                         zz + thhh.floatZ(), texTop.getX() + texMaxX,
-                        texTop.getY() + texMaxY, r, g, b, a, anim);
+                        texTop.getY() + texMaxY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.UP, x + tlhh.floatX(),
                         y + tlhh.floatY(), z + tlhh.floatZ(),
                         xx + tlhh.floatX(), yy + tlhh.floatY(),
                         zz + tlhh.floatZ(), texTop.getX() + texMinX,
-                        texTop.getY() + texMaxY, r, g, b, a, anim);
+                        texTop.getY() + texMaxY, r, g, b, a, lod, anim);
             }
             if (texBottom != null) {
                 float terrainTile = texBottom.getSize();
@@ -304,22 +303,22 @@ public class BlockModelComplex implements BlockModel {
                         y + tlhl.floatY(), z + tlhl.floatZ(),
                         xx + tlhl.floatX(), yy + tlhl.floatY(),
                         zz + tlhl.floatZ(), texBottom.getX() + texMinX,
-                        texBottom.getY() + texMaxY, r, g, b, a, anim);
+                        texBottom.getY() + texMaxY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.DOWN, x + thhl.floatX(),
                         y + thhl.floatY(), z + thhl.floatZ(),
                         xx + thhl.floatX(), yy + thhl.floatY(),
                         zz + thhl.floatZ(), texBottom.getX() + texMaxX,
-                        texBottom.getY() + texMaxY, r, g, b, a, anim);
+                        texBottom.getY() + texMaxY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.DOWN, x + thll.floatX(),
                         y + thll.floatY(), z + thll.floatZ(),
                         xx + thll.floatX(), yy + thll.floatY(),
                         zz + thll.floatZ(), texBottom.getX() + texMaxX,
-                        texBottom.getY() + texMinY, r, g, b, a, anim);
+                        texBottom.getY() + texMinY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.DOWN, x + tlll.floatX(),
                         y + tlll.floatY(), z + tlll.floatZ(),
                         xx + tlll.floatX(), yy + tlll.floatY(),
                         zz + tlll.floatZ(), texBottom.getX() + texMinX,
-                        texBottom.getY() + texMinY, r, g, b, a, anim);
+                        texBottom.getY() + texMinY, r, g, b, a, lod, anim);
             }
             if (texSide1 != null) {
                 float terrainTile = texSide1.getSize();
@@ -332,22 +331,22 @@ public class BlockModelComplex implements BlockModel {
                         y + thlh.floatY(), z + thlh.floatZ(),
                         xx + thlh.floatX(), yy + thlh.floatY(),
                         zz + thlh.floatZ(), texSide1.getX() + texMaxX,
-                        texSide1.getY() + texMinY, r, g, b, a, anim);
+                        texSide1.getY() + texMinY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.NORTH, x + tllh.floatX(),
                         y + tllh.floatY(), z + tllh.floatZ(),
                         xx + tllh.floatX(), yy + tllh.floatY(),
                         zz + tllh.floatZ(), texSide1.getX() + texMinX,
-                        texSide1.getY() + texMinY, r, g, b, a, anim);
+                        texSide1.getY() + texMinY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.NORTH, x + tlll.floatX(),
                         y + tlll.floatY(), z + tlll.floatZ(),
                         xx + tlll.floatX(), yy + tlll.floatY(),
                         zz + tlll.floatZ(), texSide1.getX() + texMinX,
-                        texSide1.getY() + texMaxY, r, g, b, a, anim);
+                        texSide1.getY() + texMaxY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.NORTH, x + thll.floatX(),
                         y + thll.floatY(), z + thll.floatZ(),
                         xx + thll.floatX(), yy + thll.floatY(),
                         zz + thll.floatZ(), texSide1.getX() + texMaxX,
-                        texSide1.getY() + texMaxY, r, g, b, a, anim);
+                        texSide1.getY() + texMaxY, r, g, b, a, lod, anim);
             }
             if (texSide2 != null) {
                 float terrainTile = texSide2.getSize();
@@ -360,22 +359,22 @@ public class BlockModelComplex implements BlockModel {
                         y + thhh.floatY(), z + thhh.floatZ(),
                         xx + thhh.floatX(), yy + thhh.floatY(),
                         zz + thhh.floatZ(), texSide2.getX() + texMaxX,
-                        texSide2.getY() + texMinY, r, g, b, a, anim);
+                        texSide2.getY() + texMinY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.EAST, x + thlh.floatX(),
                         y + thlh.floatY(), z + thlh.floatZ(),
                         xx + thlh.floatX(), yy + thlh.floatY(),
                         zz + thlh.floatZ(), texSide2.getX() + texMinX,
-                        texSide2.getY() + texMinY, r, g, b, a, anim);
+                        texSide2.getY() + texMinY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.EAST, x + thll.floatX(),
                         y + thll.floatY(), z + thll.floatZ(),
                         xx + thll.floatX(), yy + thll.floatY(),
                         zz + thll.floatZ(), texSide2.getX() + texMinX,
-                        texSide2.getY() + texMaxY, r, g, b, a, anim);
+                        texSide2.getY() + texMaxY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.EAST, x + thhl.floatX(),
                         y + thhl.floatY(), z + thhl.floatZ(),
                         xx + thhl.floatX(), yy + thhl.floatY(),
                         zz + thhl.floatZ(), texSide2.getX() + texMaxX,
-                        texSide2.getY() + texMaxY, r, g, b, a, anim);
+                        texSide2.getY() + texMaxY, r, g, b, a, lod, anim);
             }
             if (texSide3 != null) {
                 float terrainTile = texSide3.getSize();
@@ -388,22 +387,22 @@ public class BlockModelComplex implements BlockModel {
                         y + thhl.floatY(), z + thhl.floatZ(),
                         xx + thhl.floatX(), yy + thhl.floatY(),
                         zz + thhl.floatZ(), texSide3.getX() + texMinX,
-                        texSide3.getY() + texMaxZ, r, g, b, a, anim);
+                        texSide3.getY() + texMaxZ, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.SOUTH, x + tlhl.floatX(),
                         y + tlhl.floatY(), z + tlhl.floatZ(),
                         xx + tlhl.floatX(), yy + tlhl.floatY(),
                         zz + tlhl.floatZ(), texSide3.getX() + texMaxX,
-                        texSide3.getY() + texMaxZ, r, g, b, a, anim);
+                        texSide3.getY() + texMaxZ, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.SOUTH, x + tlhh.floatX(),
                         y + tlhh.floatY(), z + tlhh.floatZ(),
                         xx + tlhh.floatX(), yy + tlhh.floatY(),
                         zz + tlhh.floatZ(), texSide3.getX() + texMaxX,
-                        texSide3.getY() + texMinZ, r, g, b, a, anim);
+                        texSide3.getY() + texMinZ, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.SOUTH, x + thhh.floatX(),
                         y + thhh.floatY(), z + thhh.floatZ(),
                         xx + thhh.floatX(), yy + thhh.floatY(),
                         zz + thhh.floatZ(), texSide3.getX() + texMinX,
-                        texSide3.getY() + texMinZ, r, g, b, a, anim);
+                        texSide3.getY() + texMinZ, r, g, b, a, lod, anim);
             }
             if (texSide4 != null) {
                 float terrainTile = texSide4.getSize();
@@ -416,22 +415,22 @@ public class BlockModelComplex implements BlockModel {
                         y + tlhl.floatY(), z + tlhl.floatZ(),
                         xx + tlhl.floatX(), yy + tlhl.floatY(),
                         zz + tlhl.floatZ(), texSide4.getX() + texMinX,
-                        texSide4.getY() + texMaxZ, r, g, b, a, anim);
+                        texSide4.getY() + texMaxZ, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.WEST, x + tlll.floatX(),
                         y + tlll.floatY(), z + tlll.floatZ(),
                         xx + tlll.floatX(), yy + tlll.floatY(),
                         zz + tlll.floatZ(), texSide4.getX() + texMaxX,
-                        texSide4.getY() + texMaxZ, r, g, b, a, anim);
+                        texSide4.getY() + texMaxZ, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.WEST, x + tllh.floatX(),
                         y + tllh.floatY(), z + tllh.floatZ(),
                         xx + tllh.floatX(), yy + tllh.floatY(),
                         zz + tllh.floatZ(), texSide4.getX() + texMaxX,
-                        texSide4.getY() + texMinZ, r, g, b, a, anim);
+                        texSide4.getY() + texMinZ, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.WEST, x + tlhh.floatX(),
                         y + tlhh.floatY(), z + tlhh.floatZ(),
                         xx + tlhh.floatX(), yy + tlhh.floatY(),
                         zz + tlhh.floatZ(), texSide4.getX() + texMinX,
-                        texSide4.getY() + texMinZ, r, g, b, a, anim);
+                        texSide4.getY() + texMinZ, r, g, b, a, lod, anim);
             }
         }
 
@@ -608,7 +607,7 @@ public class BlockModelComplex implements BlockModel {
         @Override
         public void addToChunkMesh(ChunkMesh mesh, TerrainClient terrain,
                 double x, double y, double z, float xx, float yy, float zz,
-                float r, float g, float b, float a) {
+                float r, float g, float b, float a, boolean lod) {
             r *= this.r;
             g *= this.g;
             b *= this.b;
@@ -632,97 +631,97 @@ public class BlockModelComplex implements BlockModel {
                         xx + tlll.floatX(), yy + tlll.floatY(),
                         zz + tlll.floatZ(), nx, ny, nz,
                         texture.getX() + texMinX, texture.getY() + texMaxY, r,
-                        g, b, a, animTop);
+                        g, b, a, lod, animTop);
                 mesh.addVertex(terrain, Face.NONE, x + tlhl.floatX(),
                         y + tlhl.floatY(), z + tlhl.floatZ(),
                         xx + tlhl.floatX(), yy + tlhl.floatY(),
                         zz + tlhl.floatZ(), nx, ny, nz,
                         texture.getX() + texMaxX, texture.getY() + texMaxY, r,
-                        g, b, a, animTop);
+                        g, b, a, lod, animTop);
                 mesh.addVertex(terrain, Face.NONE, x + tlhh.floatX(),
                         y + tlhh.floatY(), z + tlhh.floatZ(),
                         xx + tlhh.floatX(), yy + tlhh.floatY(),
                         zz + tlhh.floatZ(), nx, ny, nz,
                         texture.getX() + texMaxX, texture.getY() + texMinY, r,
-                        g, b, a, animBottom);
+                        g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + tllh.floatX(),
                         y + tllh.floatY(), z + tllh.floatZ(),
                         xx + tllh.floatX(), yy + tllh.floatY(),
                         zz + tllh.floatZ(), nx, ny, nz,
                         texture.getX() + texMinX, texture.getY() + texMinY, r,
-                        g, b, a, animBottom);
+                        g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + tllh.floatX(),
                         y + tllh.floatY(), z + tllh.floatZ(),
                         xx + tllh.floatX(), yy + tllh.floatY(),
                         zz + tllh.floatZ(), nx, ny, nz,
                         texture.getX() + texMaxX, texture.getY() + texMinY, r,
-                        g, b, a, animBottom);
+                        g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + tlhh.floatX(),
                         y + tlhh.floatY(), z + tlhh.floatZ(),
                         xx + tlhh.floatX(), yy + tlhh.floatY(),
                         zz + tlhh.floatZ(), nx, ny, nz,
                         texture.getX() + texMinX, texture.getY() + texMinY, r,
-                        g, b, a, animBottom);
+                        g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + tlhl.floatX(),
                         y + tlhl.floatY(), z + tlhl.floatZ(),
                         xx + tlhl.floatX(), yy + tlhl.floatY(),
                         zz + tlhl.floatZ(), nx, ny, nz,
                         texture.getX() + texMinX, texture.getY() + texMaxY, r,
-                        g, b, a, animTop);
+                        g, b, a, lod, animTop);
                 mesh.addVertex(terrain, Face.NONE, x + tlll.floatX(),
                         y + tlll.floatY(), z + tlll.floatZ(),
                         xx + tlll.floatX(), yy + tlll.floatY(),
                         zz + tlll.floatZ(), nx, ny, nz,
                         texture.getX() + texMaxX, texture.getY() + texMaxY, r,
-                        g, b, a, animTop);
+                        g, b, a, lod, animTop);
                 mesh.addVertex(terrain, Face.NONE, x + thll.floatX(),
                         y + thll.floatY(), z + thll.floatZ(),
                         xx + thll.floatX(), yy + thll.floatY(),
                         zz + thll.floatZ(), nx, ny, nz,
                         texture.getX() + texMinX, texture.getY() + texMaxY, r,
-                        g, b, a, animTop);
+                        g, b, a, lod, animTop);
                 mesh.addVertex(terrain, Face.NONE, x + thhl.floatX(),
                         y + thhl.floatY(), z + thhl.floatZ(),
                         xx + thhl.floatX(), yy + thhl.floatY(),
                         zz + thhl.floatZ(), nx, ny, nz,
                         texture.getX() + texMaxX, texture.getY() + texMaxY, r,
-                        g, b, a, animTop);
+                        g, b, a, lod, animTop);
                 mesh.addVertex(terrain, Face.NONE, x + thhh.floatX(),
                         y + thhh.floatY(), z + thhh.floatZ(),
                         xx + thhh.floatX(), yy + thhh.floatY(),
                         zz + thhh.floatZ(), nx, ny, nz,
                         texture.getX() + texMaxX, texture.getY() + texMinY, r,
-                        g, b, a, animBottom);
+                        g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + thlh.floatX(),
                         y + thlh.floatY(), z + thlh.floatZ(),
                         xx + thlh.floatX(), yy + thlh.floatY(),
                         zz + thlh.floatZ(), nx, ny, nz,
                         texture.getX() + texMinX, texture.getY() + texMinY, r,
-                        g, b, a, animBottom);
+                        g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + thlh.floatX(),
                         y + thlh.floatY(), z + thlh.floatZ(),
                         xx + thlh.floatX(), yy + thlh.floatY(),
                         zz + thlh.floatZ(), nx, ny, nz,
                         texture.getX() + texMaxX, texture.getY() + texMinY, r,
-                        g, b, a, animBottom);
+                        g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + thhh.floatX(),
                         y + thhh.floatY(), z + thhh.floatZ(),
                         xx + thhh.floatX(), yy + thhh.floatY(),
                         zz + thhh.floatZ(), nx, ny, nz,
                         texture.getX() + texMinX, texture.getY() + texMinY, r,
-                        g, b, a, animBottom);
+                        g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + thhl.floatX(),
                         y + thhl.floatY(), z + thhl.floatZ(),
                         xx + thhl.floatX(), yy + thhl.floatY(),
                         zz + thhl.floatZ(), nx, ny, nz,
                         texture.getX() + texMinX, texture.getY() + texMaxY, r,
-                        g, b, a, animTop);
+                        g, b, a, lod, animTop);
                 mesh.addVertex(terrain, Face.NONE, x + thll.floatX(),
                         y + thll.floatY(), z + thll.floatZ(),
                         xx + thll.floatX(), yy + thll.floatY(),
                         zz + thll.floatZ(), nx, ny, nz,
                         texture.getX() + texMaxX, texture.getY() + texMaxY, r,
-                        g, b, a, animTop);
+                        g, b, a, lod, animTop);
             }
         }
 

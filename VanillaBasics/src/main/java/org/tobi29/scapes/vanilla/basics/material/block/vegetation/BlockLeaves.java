@@ -230,19 +230,13 @@ public class BlockLeaves extends VanillaBlock {
             if (lod) {
                 modelsFancy[data]
                         .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz,
-                                (float) r, (float) g, (float) b, 1.0f);
+                                (float) r, (float) g, (float) b, 1.0f, lod);
             } else {
                 modelsFast[data]
                         .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz,
-                                (float) r, (float) g, (float) b, 1.0f);
+                                (float) r, (float) g, (float) b, 1.0f, lod);
             }
         }
-    }
-
-    @Override
-    public boolean needsLodUpdate(int data, TerrainClient terrain, int x, int y,
-            int z) {
-        return true;
     }
 
     @Override

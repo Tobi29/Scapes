@@ -65,9 +65,9 @@ public class BlockModelSimpleBlock implements BlockModel {
     @Override
     public void addToChunkMesh(ChunkMesh mesh, TerrainClient terrain, int x,
             int y, int z, float xx, float yy, float zz, float r, float g,
-            float b, float a) {
+            float b, float a, boolean lod) {
         addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz, texTop, texBottom,
-                texSide1, texSide2, texSide3, texSide4, r, g, b, a);
+                texSide1, texSide2, texSide3, texSide4, r, g, b, a, lod);
     }
 
     @Override
@@ -92,7 +92,8 @@ public class BlockModelSimpleBlock implements BlockModel {
             int y, int z, float xx, float yy, float zz, TerrainTexture texTop,
             TerrainTexture texBottom, TerrainTexture texSide1,
             TerrainTexture texSide2, TerrainTexture texSide3,
-            TerrainTexture texSide4, float r, float g, float b, float a) {
+            TerrainTexture texSide4, float r, float g, float b, float a,
+            boolean lod) {
         r *= this.r;
         g *= this.g;
         b *= this.b;
@@ -113,15 +114,15 @@ public class BlockModelSimpleBlock implements BlockModel {
             float terrainTile = texTop.getSize();
             byte anim = texTop.getShaderAnimation().getID();
             mesh.addVertex(terrain, Face.UP, x, y, z1, xx, yy, zz1,
-                    texTop.getX(), texTop.getY(), r, g, b, a, anim);
+                    texTop.getX(), texTop.getY(), r, g, b, a, lod, anim);
             mesh.addVertex(terrain, Face.UP, x1, y, z1, xx1, yy, zz1,
-                    texTop.getX() + terrainTile, texTop.getY(), r, g, b, a,
+                    texTop.getX() + terrainTile, texTop.getY(), r, g, b, a, lod,
                     anim);
             mesh.addVertex(terrain, Face.UP, x1, y1, z1, xx1, yy1, zz1,
                     texTop.getX() + terrainTile, texTop.getY() + terrainTile, r,
-                    g, b, a, anim);
+                    g, b, a, lod, anim);
             mesh.addVertex(terrain, Face.UP, x, y1, z1, xx, yy1, zz1,
-                    texTop.getX(), texTop.getY() + terrainTile, r, g, b, a,
+                    texTop.getX(), texTop.getY() + terrainTile, r, g, b, a, lod,
                     anim);
         }
         if (texBottom != null &&
@@ -133,15 +134,15 @@ public class BlockModelSimpleBlock implements BlockModel {
             byte anim = texBottom.getShaderAnimation().getID();
             mesh.addVertex(terrain, Face.DOWN, x, y1, z, xx, yy1, zz,
                     texBottom.getX(), texBottom.getY() + terrainTile, r, g, b,
-                    a, anim);
+                    a, lod, anim);
             mesh.addVertex(terrain, Face.DOWN, x1, y1, z, xx1, yy1, zz,
                     texBottom.getX() + terrainTile,
-                    texBottom.getY() + terrainTile, r, g, b, a, anim);
+                    texBottom.getY() + terrainTile, r, g, b, a, lod, anim);
             mesh.addVertex(terrain, Face.DOWN, x1, y, z, xx1, yy, zz,
                     texBottom.getX() + terrainTile, texBottom.getY(), r, g, b,
-                    a, anim);
+                    a, lod, anim);
             mesh.addVertex(terrain, Face.DOWN, x, y, z, xx, yy, zz,
-                    texBottom.getX(), texBottom.getY(), r, g, b, a, anim);
+                    texBottom.getX(), texBottom.getY(), r, g, b, a, lod, anim);
         }
         if (texSide1 != null &&
                 terrain.getBlockType(x, y0, z).connectStage(terrain, x, y0, z) <
@@ -152,15 +153,15 @@ public class BlockModelSimpleBlock implements BlockModel {
             byte anim = texSide1.getShaderAnimation().getID();
             mesh.addVertex(terrain, Face.NORTH, x1, y, z1, xx1, yy, zz1,
                     texSide1.getX() + terrainTile, texSide1.getY(), r, g, b, a,
-                    anim);
+                    lod, anim);
             mesh.addVertex(terrain, Face.NORTH, x, y, z1, xx, yy, zz1,
-                    texSide1.getX(), texSide1.getY(), r, g, b, a, anim);
+                    texSide1.getX(), texSide1.getY(), r, g, b, a, lod, anim);
             mesh.addVertex(terrain, Face.NORTH, x, y, z, xx, yy, zz,
                     texSide1.getX(), texSide1.getY() + terrainTile, r, g, b, a,
-                    anim);
+                    lod, anim);
             mesh.addVertex(terrain, Face.NORTH, x1, y, z, xx1, yy, zz,
                     texSide1.getX() + terrainTile,
-                    texSide1.getY() + terrainTile, r, g, b, a, anim);
+                    texSide1.getY() + terrainTile, r, g, b, a, lod, anim);
         }
         if (texSide2 != null &&
                 terrain.getBlockType(x1, y, z).connectStage(terrain, x1, y, z) <
@@ -172,15 +173,15 @@ public class BlockModelSimpleBlock implements BlockModel {
             byte anim = texSide2.getShaderAnimation().getID();
             mesh.addVertex(terrain, Face.EAST, x1, y1, z1, xx1, yy1, zz1,
                     texSide2.getX() + terrainTile, texSide2.getY(), r, g, b, a,
-                    anim);
+                    lod, anim);
             mesh.addVertex(terrain, Face.EAST, x1, y, z1, xx1, yy, zz1,
-                    texSide2.getX(), texSide2.getY(), r, g, b, a, anim);
+                    texSide2.getX(), texSide2.getY(), r, g, b, a, lod, anim);
             mesh.addVertex(terrain, Face.EAST, x1, y, z, xx1, yy, zz,
                     texSide2.getX(), texSide2.getY() + terrainTile, r, g, b, a,
-                    anim);
+                    lod, anim);
             mesh.addVertex(terrain, Face.EAST, x1, y1, z, xx1, yy1, zz,
                     texSide2.getX() + terrainTile,
-                    texSide2.getY() + terrainTile, r, g, b, a, anim);
+                    texSide2.getY() + terrainTile, r, g, b, a, lod, anim);
         }
         if (texSide3 != null &&
                 terrain.getBlockType(x, y1, z).connectStage(terrain, x, y1, z) <
@@ -192,15 +193,15 @@ public class BlockModelSimpleBlock implements BlockModel {
             byte anim = texSide3.getShaderAnimation().getID();
             mesh.addVertex(terrain, Face.SOUTH, x1, y1, z, xx1, yy1, zz,
                     texSide3.getX(), texSide3.getY() + terrainTile, r, g, b, a,
-                    anim);
+                    lod, anim);
             mesh.addVertex(terrain, Face.SOUTH, x, y1, z, xx, yy1, zz,
                     texSide3.getX() + terrainTile,
-                    texSide3.getY() + terrainTile, r, g, b, a, anim);
+                    texSide3.getY() + terrainTile, r, g, b, a, lod, anim);
             mesh.addVertex(terrain, Face.SOUTH, x, y1, z1, xx, yy1, zz1,
                     texSide3.getX() + terrainTile, texSide3.getY(), r, g, b, a,
-                    anim);
+                    lod, anim);
             mesh.addVertex(terrain, Face.SOUTH, x1, y1, z1, xx1, yy1, zz1,
-                    texSide3.getX(), texSide3.getY(), r, g, b, a, anim);
+                    texSide3.getX(), texSide3.getY(), r, g, b, a, lod, anim);
         }
         if (texSide4 != null &&
                 terrain.getBlockType(x0, y, z).connectStage(terrain, x0, y, z) <
@@ -211,15 +212,15 @@ public class BlockModelSimpleBlock implements BlockModel {
             byte anim = texSide4.getShaderAnimation().getID();
             mesh.addVertex(terrain, Face.WEST, x, y1, z, xx, yy1, zz,
                     texSide4.getX(), texSide4.getY() + terrainTile, r, g, b, a,
-                    anim);
+                    lod, anim);
             mesh.addVertex(terrain, Face.WEST, x, y, z, xx, yy, zz,
                     texSide4.getX() + terrainTile,
-                    texSide4.getY() + terrainTile, r, g, b, a, anim);
+                    texSide4.getY() + terrainTile, r, g, b, a, lod, anim);
             mesh.addVertex(terrain, Face.WEST, x, y, z1, xx, yy, zz1,
                     texSide4.getX() + terrainTile, texSide4.getY(), r, g, b, a,
-                    anim);
+                    lod, anim);
             mesh.addVertex(terrain, Face.WEST, x, y1, z1, xx, yy1, zz1,
-                    texSide4.getX(), texSide4.getY(), r, g, b, a, anim);
+                    texSide4.getX(), texSide4.getY(), r, g, b, a, lod, anim);
         }
     }
 

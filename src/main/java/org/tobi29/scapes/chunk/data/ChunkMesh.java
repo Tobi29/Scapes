@@ -31,7 +31,7 @@ import java.util.List;
 public class ChunkMesh {
     private static final float[] EMPTY_FLOAT = new float[0];
     private static final byte[] EMPTY_BYTE = new byte[0];
-    private static final int BATCH_SIZE = 1200;
+    private static final int BATCH_SIZE = 6 * 6000;
     private final SmoothLight.FloatTriple triple =
             new SmoothLight.FloatTriple();
     private final AABB aabb =
@@ -46,39 +46,39 @@ public class ChunkMesh {
     }
 
     public void addVertex(TerrainClient terrain, Face side, double x, double y,
-            double z, float xx, float yy, float zz, float texX, float texY,
-            float r, float g, float b, float a, byte anim) {
-        SmoothLight.calcLight(triple, side, x, y, z, terrain);
-        r *= triple.c;
-        g *= triple.c;
-        b *= triple.c;
-        addVertex(xx, yy, zz, Float.NaN, Float.NaN, Float.NaN, r, g, b, a, texX,
-                texY, triple.a, triple.b, anim);
+            double z, float xx, float yy, float zz, float tx, float ty, float r,
+            float g, float b, float a, boolean lod, byte anim) {
+        addVertex(terrain, side, x, y, z, xx, yy, zz, Float.NaN, Float.NaN,
+                Float.NaN, tx, ty, r, g, b, a, lod, anim);
     }
 
     public void addVertex(TerrainClient terrain, Face side, double x, double y,
             double z, float xx, float yy, float zz, float nx, float ny,
-            float nz, float texX, float texY, float r, float g, float b,
-            float a, byte anim) {
-        SmoothLight.calcLight(triple, side, x, y, z, terrain);
-        r *= triple.c;
-        g *= triple.c;
-        b *= triple.c;
-        addVertex(xx, yy, zz, nx, ny, nz, r, g, b, a, texX, texY, triple.a,
-                triple.b, anim);
-    }
-
-    public void addVertex(float x, float y, float z, float nx, float ny,
-            float nz, float r, float g, float b, float a, float tx, float ty,
-            float bl, float sl, byte anim) {
+            float nz, float tx, float ty, float r, float g, float b, float a,
+            boolean lod, byte anim) {
+        float light, sunLight;
+        if (lod) {
+            SmoothLight.calcLight(triple, side, x, y, z, terrain);
+            light = triple.a;
+            sunLight = triple.b;
+            r *= triple.c;
+            g *= triple.c;
+            b *= triple.c;
+        } else {
+            int xxx = FastMath.floor(x + side.getX());
+            int yyy = FastMath.floor(y + side.getY());
+            int zzz = FastMath.floor(z + side.getZ());
+            light = terrain.getBlockLight(xxx, yyy, zzz) / 15.0f;
+            sunLight = terrain.getSunLight(xxx, yyy, zzz) / 15.0f;
+        }
         if (remaining <= 0) {
             changeArraySize(pos + BATCH_SIZE);
             remaining += BATCH_SIZE;
         }
         int i = pos * 3;
-        arrays.vertexArray[i++] = x;
-        arrays.vertexArray[i++] = y;
-        arrays.vertexArray[i] = z;
+        arrays.vertexArray[i++] = xx;
+        arrays.vertexArray[i++] = yy;
+        arrays.vertexArray[i] = zz;
         i = pos * 3;
         arrays.normalArray[i++] = nx;
         arrays.normalArray[i++] = ny;
@@ -92,15 +92,15 @@ public class ChunkMesh {
         arrays.textureArray[i++] = tx;
         arrays.textureArray[i] = ty;
         i = pos << 1;
-        arrays.lightArray[i++] = bl;
-        arrays.lightArray[i] = sl;
+        arrays.lightArray[i++] = light;
+        arrays.lightArray[i] = sunLight;
         arrays.animationArray[pos++] = anim;
-        aabb.minX = FastMath.min(aabb.minX, x);
-        aabb.minY = FastMath.min(aabb.minY, y);
-        aabb.minZ = FastMath.min(aabb.minZ, z);
-        aabb.maxX = FastMath.max(aabb.maxX, x);
-        aabb.maxY = FastMath.max(aabb.maxY, y);
-        aabb.maxZ = FastMath.max(aabb.maxZ, z);
+        aabb.minX = FastMath.min(aabb.minX, xx);
+        aabb.minY = FastMath.min(aabb.minY, yy);
+        aabb.minZ = FastMath.min(aabb.minZ, zz);
+        aabb.maxX = FastMath.max(aabb.maxX, xx);
+        aabb.maxY = FastMath.max(aabb.maxY, yy);
+        aabb.maxZ = FastMath.max(aabb.maxZ, zz);
         remaining--;
     }
 

@@ -193,11 +193,6 @@ public abstract class BlockType extends Material {
             int data, TerrainClient terrain, TerrainRenderInfo info, int x,
             int y, int z, float xx, float yy, float zz, boolean lod);
 
-    public boolean needsLodUpdate(int data, TerrainClient terrain, int x, int y,
-            int z) {
-        return false;
-    }
-
     public void update(TerrainServer.TerrainMutable terrain, int x, int y,
             int z) {
     }

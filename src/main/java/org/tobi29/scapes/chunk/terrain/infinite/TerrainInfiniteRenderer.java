@@ -466,6 +466,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
         }
 
         private void process(TerrainInfiniteRendererChunk chunk, int i) {
+            BlockType air = terrain.getWorld().getAir();
             VAO vao = null, vaoAlpha = null;
             AABB aabb = null, aabbAlpha = null;
             if (chunk.getChunk().isEmpty(i)) {
@@ -484,7 +485,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                             int bzz = bz + zzz;
                             BlockType type =
                                     terrainChunk.getBlockType(xxx, yyy, bzz);
-                            if (type == terrain.getWorld().getAir()) {
+                            if (type == air) {
                                 solid = false;
                             } else {
                                 empty = false;
@@ -523,9 +524,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                                 type.addToChunkMesh(mesh, meshAlpha, data,
                                         terrain, info, bxx, byy, bzz, xxx, yyy,
                                         zzz, lod);
-                                if (!needsLod &&
-                                        type.needsLodUpdate(data, terrain, bxx,
-                                                byy, bzz)) {
+                                if (type != air) {
                                     needsLod = true;
                                 }
                             }

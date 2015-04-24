@@ -84,17 +84,11 @@ public class BlockGlass extends VanillaBlock {
         if (lod) {
             modelTransparent
                     .addToChunkMesh(meshAlpha, terrain, x, y, z, xx, yy, zz,
-                            1.0f, 1.0f, 1.0f, 1.0f);
+                            1.0f, 1.0f, 1.0f, 1.0f, lod);
         }
         modelFrame
                 .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz, 1.0f, 1.0f,
-                        1.0f, 1.0f);
-    }
-
-    @Override
-    public boolean needsLodUpdate(int data, TerrainClient terrain, int x, int y,
-            int z) {
-        return true;
+                        1.0f, 1.0f, lod);
     }
 
     @Override

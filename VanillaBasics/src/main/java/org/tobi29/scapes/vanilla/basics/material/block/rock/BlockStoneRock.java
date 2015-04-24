@@ -156,7 +156,7 @@ public class BlockStoneRock extends VanillaBlock {
         int i = PERM[x & 255 + PERM[y & 255 + PERM[z & 255]]] % 8;
         models[data][i]
                 .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz, 1.0f, 1.0f,
-                        1.0f, 1.0f);
+                        1.0f, 1.0f, lod);
     }
 
     @Override

@@ -22,169 +22,58 @@ import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 public class SmoothLight {
+    private static final byte[] SIDES =
+            {0b000, 0b100, 0b010, 0b110, 0b001, 0b101, 0b011, 0b111, 0b010,
+                    0b110, 0b011, 0b111, 0b000, 0b010, 0b001, 0b011, 0b000,
+                    0b100, 0b001, 0b101, 0b100, 0b110, 0b101, 0b111, 0b000,
+                    0b100, 0b010, 0b110, 0b001, 0b101, 0b011, 0b111};
+
     public static void calcLight(FloatTriple triple, Face side, int x, int y,
             int z, Terrain terrain) {
-        float light = 0.0f;
+        int light = 0;
         int lights = 0;
-        float sunLight = 0.0f;
+        int sunLight = 0;
         int sunLights = 0;
         int ssaoLights = 0;
-        BlockType type = terrain.getBlockType(x, y, z);
-        if (side != Face.DOWN) {
-            if (side != Face.WEST) {
-                if (side != Face.NORTH) {
-                    if (!type.isSolid(terrain, x, y, z)) {
-                        float tempLight = terrain.getBlockLight(x, y, z);
-                        if (tempLight > 0) {
-                            light += tempLight;
-                            lights++;
-                        }
-                        tempLight = terrain.getSunLight(x, y, z);
-                        if (tempLight > 0) {
-                            sunLight += tempLight;
-                            sunLights++;
-                        }
-                        ssaoLights++;
-                    }
-                }
-                if (side != Face.SOUTH) {
-                    type = terrain.getBlockType(x, y - 1, z);
-                    if (!type.isSolid(terrain, x, y, z)) {
-                        float tempLight = terrain.getBlockLight(x, y - 1, z);
-                        if (tempLight > 0) {
-                            light += tempLight;
-                            lights++;
-                        }
-                        tempLight = terrain.getSunLight(x, y - 1, z);
-                        if (tempLight > 0) {
-                            sunLight += tempLight;
-                            sunLights++;
-                        }
-                        ssaoLights++;
-                    }
-                }
-            }
-            if (side != Face.EAST) {
-                if (side != Face.NORTH) {
-                    type = terrain.getBlockType(x - 1, y, z);
-                    if (!type.isSolid(terrain, x, y, z)) {
-                        float tempLight = terrain.getBlockLight(x - 1, y, z);
-                        if (tempLight > 0) {
-                            light += tempLight;
-                            lights++;
-                        }
-                        tempLight = terrain.getSunLight(x - 1, y, z);
-                        if (tempLight > 0) {
-                            sunLight += tempLight;
-                            sunLights++;
-                        }
-                        ssaoLights++;
-                    }
-                }
-                if (side != Face.SOUTH) {
-                    type = terrain.getBlockType(x - 1, y - 1, z);
-                    if (!type.isSolid(terrain, x, y, z)) {
-                        float tempLight =
-                                terrain.getBlockLight(x - 1, y - 1, z);
-                        if (tempLight > 0) {
-                            light += tempLight;
-                            lights++;
-                        }
-                        tempLight = terrain.getSunLight(x - 1, y - 1, z);
-                        if (tempLight > 0) {
-                            sunLight += tempLight;
-                            sunLights++;
-                        }
-                        ssaoLights++;
-                    }
-                }
-            }
+        int i, limit;
+        if (side == Face.NONE) {
+            i = 24;
+            limit = 30;
+        } else {
+            i = side.getData() << 2;
+            limit = i + 4;
         }
-        if (side != Face.UP) {
-            if (side != Face.WEST) {
-                if (side != Face.NORTH) {
-                    type = terrain.getBlockType(x, y, z - 1);
-                    if (!type.isSolid(terrain, x, y, z)) {
-                        float tempLight = terrain.getBlockLight(x, y, z - 1);
-                        if (tempLight > 0) {
-                            light += tempLight;
-                            lights++;
-                        }
-                        tempLight = terrain.getSunLight(x, y, z - 1);
-                        if (tempLight > 0) {
-                            sunLight += tempLight;
-                            sunLights++;
-                        }
-                        ssaoLights++;
-                    }
+        while (i < limit) {
+            byte offset = SIDES[i];
+            int xx = x - (offset >> 2 & 1);
+            int yy = y - (offset >> 1 & 1);
+            int zz = z - (offset & 1);
+            BlockType type = terrain.getBlockType(xx, yy, zz);
+            if (!type.isSolid(terrain, xx, yy, zz)) {
+                float tempLight = terrain.getBlockLight(xx, yy, zz);
+                if (tempLight > 0) {
+                    light += tempLight;
+                    lights++;
                 }
-                if (side != Face.SOUTH) {
-                    type = terrain.getBlockType(x, y - 1, z - 1);
-                    if (!type.isSolid(terrain, x, y, z)) {
-                        float tempLight =
-                                terrain.getBlockLight(x, y - 1, z - 1);
-                        if (tempLight > 0) {
-                            light += tempLight;
-                            lights++;
-                        }
-                        tempLight = terrain.getSunLight(x, y - 1, z - 1);
-                        if (tempLight > 0) {
-                            sunLight += tempLight;
-                            sunLights++;
-                        }
-                        ssaoLights++;
-                    }
+                tempLight = terrain.getSunLight(xx, yy, zz);
+                if (tempLight > 0) {
+                    sunLight += tempLight;
+                    sunLights++;
                 }
+                ssaoLights++;
             }
-            if (side != Face.EAST) {
-                if (side != Face.NORTH) {
-                    type = terrain.getBlockType(x - 1, y, z - 1);
-                    if (!type.isSolid(terrain, x, y, z)) {
-                        float tempLight =
-                                terrain.getBlockLight(x - 1, y, z - 1);
-                        if (tempLight > 0) {
-                            light += tempLight;
-                            lights++;
-                        }
-                        tempLight = terrain.getSunLight(x - 1, y, z - 1);
-                        if (tempLight > 0) {
-                            sunLight += tempLight;
-                            sunLights++;
-                        }
-                        ssaoLights++;
-                    }
-                }
-                if (side != Face.SOUTH) {
-                    type = terrain.getBlockType(x - 1, y - 1, z - 1);
-                    if (!type.isSolid(terrain, x, y, z)) {
-                        float tempLight =
-                                terrain.getBlockLight(x - 1, y - 1, z - 1);
-                        if (tempLight > 0) {
-                            light += tempLight;
-                            lights++;
-                        }
-                        tempLight = terrain.getSunLight(x - 1, y - 1, z - 1);
-                        if (tempLight > 0) {
-                            sunLight += tempLight;
-                            sunLights++;
-                        }
-                        ssaoLights++;
-                    }
-                }
-            }
+            i++;
         }
         if (lights == 0) {
-            light = 0.0f;
+            triple.a = 0.0f;
         } else {
-            light /= lights;
+            triple.a = light / lights / 15.0f;
         }
         if (sunLights == 0) {
-            sunLight = 0.0f;
+            triple.a = 0.0f;
         } else {
-            sunLight /= sunLights;
+            triple.b = sunLight / sunLights / 15.0f;
         }
-        triple.a = light / 15.0f;
-        triple.b = sunLight / 15.0f;
         triple.c = FastMath.clamp(0.3f * ssaoLights - 0.2f, 0.0f, 1.0f);
     }
 

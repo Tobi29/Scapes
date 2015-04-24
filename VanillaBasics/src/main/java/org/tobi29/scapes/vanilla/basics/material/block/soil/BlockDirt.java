@@ -122,10 +122,10 @@ public class BlockDirt extends BlockSoil {
         double humidity = climateLayer.getHumidity(x, y);
         if (humidity < 0.3) {
             modelSand.addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz, 1.0f,
-                    1.0f, 1.0f, 1.0f);
+                    1.0f, 1.0f, 1.0f, lod);
         } else {
             modelDirt.addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz, 1.0f,
-                    1.0f, 1.0f, 1.0f);
+                    1.0f, 1.0f, 1.0f, lod);
         }
     }
 }

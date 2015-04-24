@@ -77,7 +77,7 @@ public class BlockCraftingTable extends VanillaBlock {
             TerrainClient terrain, TerrainRenderInfo info, int x, int y, int z,
             float xx, float yy, float zz, boolean lod) {
         model.addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz, 1.0f, 1.0f,
-                1.0f, 1.0f);
+                1.0f, 1.0f, lod);
     }
 
     @Override

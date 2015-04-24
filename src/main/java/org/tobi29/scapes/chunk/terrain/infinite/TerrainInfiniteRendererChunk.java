@@ -96,12 +96,11 @@ public class TerrainInfiniteRendererChunk {
         double relativeY = (chunk.getY() << 4) - cam.position.doubleY();
         MatrixStack matrixStack = graphics.getMatrixStack();
         for (int i = 0; i < vao.length; i++) {
+            double relativeZ = (i << 4) - cam.position.doubleZ();
             boolean oldLod = (lod[i] & 1) == 1;
-            boolean newLod = FastMath.sqr(
-                    cam.position.doubleX() - (chunk.getX() << 4) - 8) +
-                    FastMath.sqr(cam.position.doubleY() - (chunk.getY() << 4) -
-                            8) +
-                    FastMath.sqr(cam.position.doubleZ() - (i << 4) - 8) < 4096;
+            boolean newLod = FastMath.sqr(relativeX + 8) +
+                    FastMath.sqr(relativeY + 8) +
+                    FastMath.sqr(relativeZ + 8) < 9216;
             if (newLod != oldLod) {
                 if (newLod) {
                     lod[i] |= 1;
@@ -113,15 +112,13 @@ public class TerrainInfiniteRendererChunk {
                     renderer.addToLoadQueue(this);
                 }
             }
-        }
-        for (int i = 0; i < vao.length; i++) {
             VAO vao = this.vao[i];
             AABB aabb = this.aabb[i];
             if (vao != null && aabb != null) {
                 if (cam.frustum.inView(aabb) != 0) {
                     Matrix matrix = matrixStack.push();
                     matrix.translate((float) relativeX, (float) relativeY,
-                            (float) ((i << 4) - cam.position.doubleZ()));
+                            (float) relativeZ);
                     vao.render(graphics, shader);
                     matrixStack.pop();
                 } else if (ensureStored) {

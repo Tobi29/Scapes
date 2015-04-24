@@ -154,7 +154,7 @@ public class BlockTorch extends VanillaBlock {
             float xx, float yy, float zz, boolean lod) {
         models[data]
                 .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz, 1.0f, 1.0f,
-                        1.0f, 1.0f);
+                        1.0f, 1.0f, lod);
     }
 
     @Override

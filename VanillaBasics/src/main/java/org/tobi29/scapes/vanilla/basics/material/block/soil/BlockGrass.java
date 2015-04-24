@@ -198,45 +198,39 @@ public class BlockGrass extends VanillaBlock {
         double grassB = climateGenerator.getGrassColorB(temperature, humidity);
         if (lod) {
             modelBlockGrass.addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz,
-                    (float) grassR, (float) grassG, (float) grassB, 1.0f);
+                    (float) grassR, (float) grassG, (float) grassB, 1.0f, lod);
             if (humidity < 0.3) {
                 modelBlockSand
                         .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz,
-                                1.0f, 1.0f, 1.0f, 1.0f);
+                                1.0f, 1.0f, 1.0f, 1.0f, lod);
             } else {
                 modelBlockDirt
                         .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz,
-                                1.0f, 1.0f, 1.0f, 1.0f);
+                                1.0f, 1.0f, 1.0f, 1.0f, lod);
             }
             if (data > 0) {
                 if (terrain.getBlockType(x, y, z + 1) == materials.air) {
                     modelsTallGrass[data]
                             .addToChunkMesh(mesh, terrain, x, y, z + 1, xx, yy,
                                     zz + 1, (float) grassR, (float) grassG,
-                                    (float) grassB, 1.0f);
+                                    (float) grassB, 1.0f, lod);
                 }
             }
         } else {
             modelBlockFastGrass
                     .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz,
                             (float) grassR, (float) grassG, (float) grassB,
-                            1.0f);
+                            1.0f, lod);
             if (humidity < 0.3) {
                 modelBlockFastSand
                         .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz,
-                                1.0f, 1.0f, 1.0f, 1.0f);
+                                1.0f, 1.0f, 1.0f, 1.0f, lod);
             } else {
                 modelBlockFastDirt
                         .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz,
-                                1.0f, 1.0f, 1.0f, 1.0f);
+                                1.0f, 1.0f, 1.0f, 1.0f, lod);
             }
         }
-    }
-
-    @Override
-    public boolean needsLodUpdate(int data, TerrainClient terrain, int x, int y,
-            int z) {
-        return true;
     }
 
     @Override

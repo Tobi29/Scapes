@@ -88,10 +88,10 @@ public class BlockForge extends VanillaBlockContainer {
             float xx, float yy, float zz, boolean lod) {
         if (data == 1) {
             modelOff.addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz, 1.0f,
-                    1.0f, 1.0f, 1.0f);
+                    1.0f, 1.0f, 1.0f, lod);
         } else {
             modelOn.addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz, 1.0f,
-                    1.0f, 1.0f, 1.0f);
+                    1.0f, 1.0f, 1.0f, lod);
         }
     }
 

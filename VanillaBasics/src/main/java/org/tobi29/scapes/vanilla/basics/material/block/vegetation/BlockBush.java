@@ -132,13 +132,7 @@ public class BlockBush extends VanillaBlock {
             float xx, float yy, float zz, boolean lod) {
         models[data]
                 .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz, 1.0f, 1.0f,
-                        1.0f, 1.0f);
-    }
-
-    @Override
-    public boolean needsLodUpdate(int data, TerrainClient terrain, int x, int y,
-            int z) {
-        return true;
+                        1.0f, 1.0f, lod);
     }
 
     @Override
