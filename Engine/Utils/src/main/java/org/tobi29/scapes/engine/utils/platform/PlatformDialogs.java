@@ -29,7 +29,7 @@ public interface PlatformDialogs {
 
     void openFile(File file);
 
-    boolean renderTick(boolean force);
+    void renderTick();
 
     void dispose();
 

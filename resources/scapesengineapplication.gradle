@@ -15,9 +15,6 @@
  */
 
 
-
-
-
 apply from: "$rootDir/resources/scapesenginemodule.gradle"
 
 apply plugin: ScapesEngineApplication
@@ -74,13 +71,13 @@ class ScapesEngineApplication implements Plugin<Project> {
         // Main task
         Tar task = target.tasks.create("deployUniversal", Tar)
         task.description =
-                "Archive containing necessary files to run the game on any supported platform"
+                "Contains platform-independent files useful for creating packages"
         task.group = "Deployment"
         task.dependsOn target.jar
-        task.baseName = "${target.project.name}-Universal"
+        task.baseName = "${-> target.project.name}-Universal"
         task.compression = Compression.GZIP
-        task.from(target.configurations.runtime) { into "lib" }
-        task.from(target.jar) { rename { "${target.project.name}.jar" } }
+        task.from(target.configurations.runtime)
+        task.from(target.jar)
         return task
     }
 
@@ -90,6 +87,7 @@ class ScapesEngineApplication implements Plugin<Project> {
             target.logger.warn "No JRE for Mac OS X found!"
             return
         }
+        pruneJREMacOSX(jre)
         // Bundle task
         AppBundlerTask bundleTask = target.tasks.
                 create("bundleMacOSX", AppBundlerTask)
@@ -100,14 +98,13 @@ class ScapesEngineApplication implements Plugin<Project> {
         bundleTask.copyright = "${-> target.application.copyright}"
         bundleTask.mainClass = "${-> target.application.mainClass}"
         bundleTask.appbundler =
-                new File(target.rootDir, "resources/Util/appbundler-1.0ea.jar")
+                target.rootProject.file("resources/appbundler-1.0ea.jar")
         bundleTask.jre = jre
-        bundleTask.icon =
-                new File(target.rootDir, "resources/Project/Icon.icns")
-        bundleTask.classpath =
-                target.configurations.runtime + target.files(target.jar)
+        bundleTask.icon = target.file("project/Icon.icns")
+        bundleTask.classpath = target.configurations.runtime +
+                target.configurations.runtimeMacOSX + target.files(target.jar)
         bundleTask.output =
-                "${bundleTask.temporaryDir}/${target.project.name}.app"
+                "${-> bundleTask.temporaryDir}/${-> target.project.name}.app"
 
         // Main task
         Tar task = target.tasks.create("deployMacOSX", Tar)
@@ -130,6 +127,7 @@ class ScapesEngineApplication implements Plugin<Project> {
                 target.logger.warn "No 32-Bit JRE for Windows found!"
                 return
             }
+            pruneJREWindows(extracted)
             extracted.renameTo(jre32)
         }
         File jre64 = new File(target.buildDir,
@@ -140,45 +138,83 @@ class ScapesEngineApplication implements Plugin<Project> {
                 target.logger.warn "No 64-Bit JRE for Windows found!"
                 return
             }
+            pruneJREWindows(extracted)
             extracted.renameTo(jre64)
         }
 
-        // Bootstrap task
+        // Program task
         Launch4jTask programTask = target.tasks.
                 create("programWindows", Launch4jTask)
-        programTask.dependsOn target.jar
         programTask.fullName = "${-> target.application.fullName}"
         programTask.version = "${-> target.application.version}"
         programTask.company = "${-> target.application.company}"
         programTask.copyright = "${-> target.application.copyright}"
         programTask.mainClass = "${-> target.application.mainClass}"
         programTask.launch4j =
-                new File(target.rootDir, "resources/Util/Launch4j/launch4j.jar")
-        programTask.icon =
-                new File(target.rootDir, "resources/Project/Icon.ico")
-        programTask.jar = target.files(target.jar)
+                target.rootProject.file("resources/Launch4j/launch4j.jar")
+        programTask.icon = target.file("project/Icon.ico")
         programTask.exeMemoryMin = 1024
         programTask.exeMemoryMax = 2048
+        programTask.exeType = "gui"
+        programTask.runInAppData = true
         programTask.manifest =
-                new File(target.rootDir, "resources/Util/Program.manifest")
+                target.rootProject.file("resources/Program.manifest")
         programTask.output = new File(programTask.temporaryDir,
                 target.project.name + ".exe")
 
+        // Command task
+        Launch4jTask programCmdTask = target.tasks.
+                create("programCmdWindows", Launch4jTask)
+        programCmdTask.fullName = "${-> target.application.fullName}"
+        programCmdTask.version = "${-> target.application.version}"
+        programCmdTask.company = "${-> target.application.company}"
+        programCmdTask.copyright = "${-> target.application.copyright}"
+        programCmdTask.mainClass = "${-> target.application.mainClass}"
+        programCmdTask.launch4j =
+                target.rootProject.file("resources/Launch4j/launch4j.jar")
+        programCmdTask.icon = target.file("project/Icon.ico")
+        programCmdTask.exeMemoryMin = 1024
+        programCmdTask.exeMemoryMax = 2048
+        programCmdTask.exeType = "console"
+        programCmdTask.runInAppData = false
+        programCmdTask.manifest =
+                target.rootProject.file("resources/Program.manifest")
+        programCmdTask.output = new File(programCmdTask.temporaryDir,
+                target.project.name + "Cmd.exe")
+
+        // InnoSetup Config Task
+        InnoSetupConfigTask isconfigTask = target.tasks.
+                create("isconfigWindows", InnoSetupConfigTask)
+        isconfigTask.config = target.rootProject.file("resources/Setup.iss")
+        isconfigTask.output = new File(isconfigTask.temporaryDir, "Setup.iss")
+
         // Prepare Task
         Copy prepareTask = target.tasks.create("prepareWindows", Copy)
-        prepareTask.dependsOn programTask
         prepareTask.dependsOn target.jar
-        prepareTask.from new File(target.rootDir, "resources/Project/installer")
+        prepareTask.dependsOn programTask
+        prepareTask.dependsOn programCmdTask
+        prepareTask.dependsOn isconfigTask
+        prepareTask.from isconfigTask.output
+        prepareTask.from target.file("project/installer")
         prepareTask.from(programTask.output, { into "install/common" })
+        prepareTask.from(programCmdTask.output, { into "install/common" })
+        prepareTask.from(target.files(target.jar),
+                { into "install/common/lib" })
         prepareTask.from(target.configurations.runtime,
                 { into "install/common/lib" })
+        prepareTask.from(target.configurations.runtimeWindows32,
+                { into "install/32/lib" })
+        prepareTask.from(target.configurations.runtimeWindows64,
+                { into "install/64/lib" })
+        prepareTask.from(target.rootProject.
+                file("resources/Install/Windows"), { into "install" })
         prepareTask.into prepareTask.temporaryDir
 
         // Pack task
         Exec packTask = target.tasks.create("packWindows", Exec)
         packTask.dependsOn prepareTask
-        String innoEXE = new File(target.rootDir,
-                "resources/Util/Inno Setup 5/ISCC.exe").absolutePath
+        String innoEXE = target.rootProject.
+                file("resources/Inno Setup 5/ISCC.exe").absolutePath
         String innoISS = new File(prepareTask.temporaryDir,
                 "Setup.iss").absolutePath
         if (System.properties["os.name"].toLowerCase().contains("win")) {
@@ -208,10 +244,10 @@ class ScapesEngineApplication implements Plugin<Project> {
 
     private
     static File getJRE(Project target, String platform, File file) {
-        File[] jres = new File(target.rootDir,
-                "resources/Util/JRE/" + platform).listFiles((FileFilter) {
-            !it.isDirectory() && !it.isHidden()
-        })
+        File[] jres = target.rootProject.file("resources/JRE/" + platform).
+                listFiles((FileFilter) {
+                    !it.isDirectory() && !it.isHidden()
+                })
         if (jres == null || jres.length == 0) {
             return null
         }
@@ -232,25 +268,158 @@ class ScapesEngineApplication implements Plugin<Project> {
         }
         return jre[0]
     }
+    private static
+    final List<String> jreExtensions = ["dnsns.jar", "sunjce_provider.jar",
+            "sunec.jar", "sunpkcs11.jar", "sunmscapi.jar"]
+
+    private static void pruneJREMacOSX(File jre) {
+        File jreHome = new File(jre, "Contents/Home")
+        pruneJRE(jreHome)
+        File lib = new File(jreHome, "lib")
+        deleteLibrary(lib, "libdecora_sse")
+        deleteLibrary(lib, "libfxplugins")
+        deleteLibrary(lib, "libglass")
+        deleteLibrary(lib, "libglib-lite")
+        deleteLibrary(lib, "libgstreamer-lite")
+        deleteLibrary(lib, "libjavafx_font")
+        deleteLibrary(lib, "libjavafx_font_t2k")
+        deleteLibrary(lib, "libjavafx_iio")
+        deleteLibrary(lib, "libjfxmedia")
+        deleteLibrary(lib, "libjfxwebkit")
+        deleteLibrary(lib, "libprism_common")
+        deleteLibrary(lib, "libprism_es2")
+        deleteLibrary(lib, "libprism_sw")
+    }
+
+    private static void pruneJREWindows(File jre) {
+        pruneJRE(jre)
+        File lib = new File(jre, "lib")
+        File bin = new File(jre, "bin")
+        delete(bin, "dtplugin")
+        delete(bin, "plugin2")
+        deleteBinary(bin, "javacpl")
+        deleteBinary(bin, "jucheck")
+        deleteBinary(bin, "jabswitch")
+        deleteBinary(bin, "kinit")
+        deleteBinary(bin, "klist")
+        deleteBinary(bin, "ktab")
+        deleteLibrary(bin, "java_crw_demo")
+        deleteLibrary(bin, "JavaAccessBridge-32")
+        deleteLibrary(bin, "JavaAccessBridge")
+        deleteLibrary(bin, "JAWTAccessBridge-32")
+        deleteLibrary(bin, "JAWTAccessBridge")
+        deleteLibrary(bin, "WindowsAccessBridge-32")
+        deleteLibrary(bin, "WindowsAccessBridge")
+        deleteLibrary(bin, "wsdetect")
+        deleteLibrary(bin, "deploy")
+        deleteLibrary(bin, "jfr")
+        deleteLibrary(bin, "decora_sse")
+        deleteLibrary(bin, "fxplugins")
+        deleteLibrary(bin, "glass")
+        deleteLibrary(bin, "glib-lite")
+        deleteLibrary(bin, "gstreamer-lite")
+        deleteLibrary(bin, "javafx_font")
+        deleteLibrary(bin, "javafx_font_t2k")
+        deleteLibrary(bin, "javafx_iio")
+        deleteLibrary(bin, "jfxmedia")
+        deleteLibrary(bin, "jfxwebkit")
+        deleteLibrary(bin, "prism_common")
+        deleteLibrary(bin, "prism_d3d")
+        deleteLibrary(bin, "prism_es2")
+        deleteLibrary(bin, "prism_sw")
+
+        delete(lib, "deploy.jar")
+        delete(lib, "plugin.jar")
+        delete(lib, "deploy")
+    }
+
+    private static void pruneJRE(File jre) {
+        File lib = new File(jre, "lib")
+        File bin = new File(jre, "bin")
+        File ext = new File(lib, "ext")
+        File[] unusedExtensions = ext.listFiles((FileFilter) {
+            !jreExtensions.contains(it.name)
+        })
+        if (unusedExtensions != null) {
+            for (File file : unusedExtensions) {
+                file.delete()
+            }
+        }
+        delete(jre, "THIRDPARTYLICENSEREADME-JAVAFX.txt")
+        delete(jre, "plugin")
+
+        delete(bin, "javacpl.cpl")
+        deleteBinary(bin, "rmid")
+        deleteBinary(bin, "rmiregistry")
+        deleteBinary(bin, "tnameserv")
+        deleteBinary(bin, "keytool")
+        deleteBinary(bin, "policytool")
+        deleteBinary(bin, "orbd")
+        deleteBinary(bin, "servertool")
+        deleteBinary(bin, "javaws")
+
+        delete(lib, "javaws.jar")
+        delete(lib, "jfr")
+        delete(lib, "jfr.jar")
+        delete(lib, "oblique-fonts")
+        delete(lib, "desktop")
+        delete(lib, "ant-javafx.jar")
+        delete(lib, "javafx.properties")
+        delete(lib, "jfxswt.jar")
+    }
+
+    private static void delete(File dir, String name) {
+        File file = new File(dir, name)
+        if (file.isDirectory()) {
+            file.deleteDir()
+        } else {
+            file.delete()
+        }
+    }
+
+    private static void deleteBinary(File dir, String name) {
+        File file = new File(dir, name)
+        file.delete()
+        new File(file.parentFile, file.name + ".exe").delete()
+    }
+
+    private static void deleteLibrary(File dir, String name) {
+        File file = new File(dir, name)
+        file.delete()
+        new File(file.parentFile, file.name + ".dll").delete()
+        new File(file.parentFile, file.name + ".so").delete()
+        new File(file.parentFile, file.name + ".dylib").delete()
+    }
 }
 
 class ScapesEngineApplicationExtension {
     def String fullName
     def String version
     def String company
+    def String url
     def String copyright
+    def String uuid
     def String mainClass
 }
 
-class BootstrapPropertiesTask extends DefaultTask {
+class InnoSetupConfigTask extends DefaultTask {
+    @InputFile
+    def File config
     @OutputFile
     def File output
 
     @TaskAction
     void run() {
-        Properties properties = new Properties()
-        properties.put("MainClass", project.application.mainClass)
-        properties.store(output.newWriter(), "")
+        BufferedWriter writer = output.newWriter()
+        writer.write "#define ApplicationFullName \"${project.application.fullName}\"\n"
+        writer.write "#define ApplicationVersion \"${project.application.version}\"\n"
+        writer.write "#define ApplicationCompany \"${project.application.company}\"\n"
+        writer.write "#define ApplicationCopyright \"${project.application.copyright}\"\n"
+        writer.write "#define ApplicationURL \"${project.application.url}\"\n"
+        writer.write "#define ApplicationUUID \"${project.application.uuid}\"\n"
+        writer.write "#define ApplicationName \"${project.name}.exe\"\n"
+        writer << config.newReader()
+        writer.close()
     }
 }
 
@@ -304,11 +473,11 @@ class AppBundlerTask extends DefaultTask {
 class Launch4jTask extends DefaultTask {
     def File output
     @Input
-    def exeMemoryMin, exeMemoryMax, fullName, version, company, copyright, mainClass
+    def exeMemoryMin, exeMemoryMax, exeType, fullName, version, company, copyright, mainClass
+    @Input
+    boolean runInAppData
     @InputFile
     def File launch4j, icon, manifest
-    @InputFiles
-    def FileCollection jar
 
     @OutputFile
     File getOutput() {
@@ -320,31 +489,44 @@ class Launch4jTask extends DefaultTask {
         ant.taskdef(name: "launch4j",
                 classpath: launch4j.absolutePath,
                 classname: "net.sf.launch4j.ant.Launch4jTask")
-        Map<String, String> configMap = [headerType: "gui",
+        def winVersion = version.replaceAll("_", ".")
+        Map<String, String> configMap = [headerType: exeType,
                 outfile: getOutput().absolutePath,
-                dontWrapJar: "false",
-                jar: jar.singleFile.absolutePath,
+                dontWrapJar: "true",
                 icon: icon.absolutePath,
                 manifest: manifest.absolutePath]
-        def winVersion = version.replaceAll("_", ".")
-        ant.launch4j {
-            config(configMap) {
-                classPath(mainClass: mainClass, cp: "%EXEDIR%\\lib\\*")
-                jre(initialheapsize: exeMemoryMin,
-                        maxheapsize: exeMemoryMax,
-                        path: "%EXEDIR%\\jre") {
-                    opt("-Duser.dir=\"%APPDATA%\\${fullName}\"")
+        Map<String, String> versionMap = [fileversion: winVersion,
+                txtfileversion: version,
+                filedescription: fullName,
+                copyright: copyright,
+                productversion: winVersion,
+                productname: fullName,
+                txtproductversion: version,
+                companyname: company,
+                internalname: fullName,
+                originalfilename: output.name]
+        Map<String, String> classPathMap = [mainClass: mainClass,
+                cp: "%EXEDIR%\\lib\\*"];
+        Map<String, String> jreMap = [initialheapsize: exeMemoryMin,
+                maxheapsize: exeMemoryMax,
+                path: "%EXEDIR%\\jre"]
+        if (runInAppData) {
+            ant.launch4j {
+                config(configMap) {
+                    classPath(classPathMap)
+                    jre(jreMap) {
+                        opt("-Duser.dir=\"%APPDATA%\\${fullName}\"")
+                    }
+                    versioninfo(versionMap)
                 }
-                versioninfo(fileversion: winVersion,
-                        txtfileversion: version,
-                        filedescription: fullName,
-                        copyright: copyright,
-                        productversion: winVersion,
-                        productname: fullName,
-                        txtproductversion: version,
-                        companyname: company,
-                        internalname: fullName,
-                        originalfilename: output.name)
+            }
+        } else {
+            ant.launch4j {
+                config(configMap) {
+                    classPath(classPathMap)
+                    jre(jreMap)
+                    versioninfo(versionMap)
+                }
             }
         }
     }

@@ -22,7 +22,6 @@ import org.tobi29.scapes.client.states.GameStateMenu;
 import org.tobi29.scapes.engine.GameStateStartup;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.scenes.SceneImage;
-import org.tobi29.scapes.engine.swt.SWTLoader;
 import org.tobi29.scapes.engine.utils.VersionUtil;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileSystem;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
@@ -124,7 +123,6 @@ public class Scapes {
                 FileSystem files =
                         FileSystemContainer.newFileSystem(directory, "");
                 if (!commandLine.hasOption('c')) {
-                    SWTLoader.loadSWT();
                     ScapesServerShell server = new ScapesServerShell(files);
                     server.run();
                 } else {

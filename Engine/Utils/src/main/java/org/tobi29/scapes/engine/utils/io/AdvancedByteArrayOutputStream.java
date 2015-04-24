@@ -22,7 +22,7 @@ import java.io.ByteArrayOutputStream;
  * Utility class that gives more efficient usage possibilities to {@code
  * ByteArrayOutputStream}
  *
- * @see java.io.ByteArrayOutputStream
+ * @see ByteArrayOutputStream
  */
 public class AdvancedByteArrayOutputStream extends ByteArrayOutputStream {
     public AdvancedByteArrayOutputStream() {

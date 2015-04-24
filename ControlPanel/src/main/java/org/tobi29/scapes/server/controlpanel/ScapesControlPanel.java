@@ -16,11 +16,8 @@
 
 package org.tobi29.scapes.server.controlpanel;
 
-import org.tobi29.scapes.engine.swt.SWTLoader;
-
 public class ScapesControlPanel {
     public static void main(String... args) {
-        SWTLoader.loadSWT();
         new ScapesControlPanelContainer().run();
     }
 }

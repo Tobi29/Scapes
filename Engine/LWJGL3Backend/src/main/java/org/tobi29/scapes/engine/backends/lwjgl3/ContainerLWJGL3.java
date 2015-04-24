@@ -16,10 +16,6 @@
 
 package org.tobi29.scapes.engine.backends.lwjgl3;
 
-import org.lwjgl.LWJGLUtil;
-import org.lwjgl.Sys;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.ScapesEngine;
@@ -30,7 +26,11 @@ import org.tobi29.scapes.engine.openal.OpenAL;
 import org.tobi29.scapes.engine.opengl.Container;
 import org.tobi29.scapes.engine.opengl.GraphicsCheckException;
 import org.tobi29.scapes.engine.opengl.OpenGL;
+import org.tobi29.scapes.engine.utils.MutableSingle;
+import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
+import org.tobi29.scapes.engine.utils.task.Joiner;
 
+import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -43,18 +43,20 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
             new ConcurrentHashMap<>();
     protected final Queue<Runnable> tasks = new ConcurrentLinkedQueue<>();
     protected final ScapesEngine engine;
+    protected final PlatformDialogs dialogs;
     protected final Thread mainThread;
     protected final OpenGL openGL;
     protected final OpenAL openAL;
     protected final boolean superModifier;
     protected GLContext context;
-    protected boolean focus = true, containerResized = true;
+    protected boolean focus = true, valid, visible, containerResized = true;
     protected int containerWidth, containerHeight, contentWidth, contentHeight;
     protected double mouseX, mouseY;
     protected volatile boolean joysticksChanged;
 
-    protected ContainerLWJGL3(ScapesEngine engine) {
+    protected ContainerLWJGL3(ScapesEngine engine, PlatformDialogs dialogs) {
         this.engine = engine;
+        this.dialogs = dialogs;
         mainThread = Thread.currentThread();
         String natives = LWJGLNatives.extract(engine.getFiles());
         System.setProperty("org.lwjgl.librarypath", natives);
@@ -104,14 +106,20 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
 
     @Override
     public void init() throws GraphicsCheckException {
-        boolean fullscreen = engine.getConfig().isFullscreen();
-        boolean vSync = engine.getConfig().getVSync();
-        createWindow(fullscreen, vSync, engine.getGame().getName());
-        context = GLContext.createFromCurrent();
-        Optional<String> check = checkContext(context);
+        /*Optional<String> check = checkContext(context);
         if (check.isPresent()) {
             throw new GraphicsCheckException(check.get());
-        }
+        }*/
+    }
+
+    @Override
+    public void setVSync(boolean value) {
+        valid = false;
+    }
+
+    @Override
+    public void setFullscreen(boolean value) {
+        valid = false;
     }
 
     @Override
@@ -140,13 +148,91 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
     }
 
     @Override
-    public boolean renderTick(boolean force) {
-        boolean active = focus || force;
+    public File[] openFileDialog(PlatformDialogs.Extension[] extensions,
+            String title, boolean multiple) {
+        Thread thread = Thread.currentThread();
+        if (thread == mainThread) {
+            return dialogs.openFileDialog(extensions, title, multiple);
+        }
+        Joiner.Joinable joinable = new Joiner.Joinable();
+        MutableSingle<File[]> file = new MutableSingle<>(null);
+        tasks.add(() -> {
+            file.a = dialogs.openFileDialog(extensions, title, multiple);
+            joinable.join();
+        });
+        joinable.getJoiner().join();
+        return file.a;
+    }
+
+    @Override
+    public Optional<File> saveFileDialog(PlatformDialogs.Extension[] extensions,
+            String title) {
+        Thread thread = Thread.currentThread();
+        if (thread == mainThread) {
+            return dialogs.saveFileDialog(extensions, title);
+        }
+        Joiner.Joinable joinable = new Joiner.Joinable();
+        MutableSingle<Optional<File>> file = new MutableSingle<>(null);
+        tasks.add(() -> {
+            file.a = dialogs.saveFileDialog(extensions, title);
+            joinable.join();
+        });
+        joinable.getJoiner().join();
+        return file.a;
+    }
+
+    @Override
+    public void message(PlatformDialogs.MessageType messageType, String title,
+            String message) {
+        Thread thread = Thread.currentThread();
+        if (thread == mainThread) {
+            dialogs.message(messageType, title, message);
+            return;
+        }
+        Joiner.Joinable joinable = new Joiner.Joinable();
+        tasks.add(() -> {
+            dialogs.message(messageType, title, message);
+            joinable.join();
+        });
+        joinable.getJoiner().join();
+    }
+
+    @Override
+    public void openFile(File file) {
+        Thread thread = Thread.currentThread();
+        if (thread == mainThread) {
+            dialogs.openFile(file);
+            return;
+        }
+        Joiner.Joinable joinable = new Joiner.Joinable();
+        tasks.add(() -> {
+            dialogs.openFile(file);
+            joinable.join();
+        });
+        joinable.getJoiner().join();
+    }
+
+    @Override
+    public void renderTick() {
         while (!tasks.isEmpty()) {
             tasks.poll().run();
         }
-        render(active);
-        return active;
+        if (!valid) {
+            if (context != null) {
+                engine.getGraphics().reset();
+                cleanWindow();
+            }
+            initWindow(engine.getConfig().isFullscreen(),
+                    engine.getConfig().getVSync());
+            context = GLContext.createFromCurrent();
+            valid = true;
+            containerResized = true;
+        }
+        render();
+        containerResized = false;
+        if (!visible) {
+            showWindow();
+        }
     }
 
     @Override
@@ -178,10 +264,13 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
         return joysticksChanged;
     }
 
-    protected abstract void render(boolean active);
+    protected abstract void render();
 
-    protected abstract void createWindow(boolean fullscreen, boolean vSync,
-            String title);
+    protected abstract void initWindow(boolean fullscreen, boolean vSync);
+
+    protected abstract void showWindow();
+
+    protected abstract void cleanWindow();
 
     @Override
     public boolean isModifierDown() {

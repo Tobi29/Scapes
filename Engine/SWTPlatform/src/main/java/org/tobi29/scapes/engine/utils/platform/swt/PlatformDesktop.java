@@ -19,7 +19,6 @@ package org.tobi29.scapes.engine.utils.platform.swt;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.engine.swt.SWTLoader;
 import org.tobi29.scapes.engine.utils.io.ProcessStream;
 import org.tobi29.scapes.engine.utils.io.ReadSource;
 import org.tobi29.scapes.engine.utils.platform.Platform;
@@ -66,7 +65,6 @@ public abstract class PlatformDesktop extends Platform {
 
     @Override
     public PlatformDialogs createDialogHandler() {
-        SWTLoader.loadSWT();
         return new PlatformDialogsSWT();
     }
 
@@ -78,7 +76,6 @@ public abstract class PlatformDesktop extends Platform {
     @Override
     public boolean loadFont(ReadSource font) {
         Logger logger = LoggerFactory.getLogger(PlatformDesktop.class);
-        SWTLoader.loadSWT();
         String fontPath = null;
         try {
             Path fontFile = Files.createTempFile("Scapes", ".ttf");

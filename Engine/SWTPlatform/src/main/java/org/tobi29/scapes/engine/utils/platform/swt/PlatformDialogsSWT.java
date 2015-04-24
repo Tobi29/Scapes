@@ -121,9 +121,10 @@ public class PlatformDialogsSWT implements PlatformDialogs {
     }
 
     @Override
-    public boolean renderTick(boolean force) {
-        return !IS_COCOA &&
-                shell.getDisplay().readAndDispatch(); // Avoid jvm crash on osx
+    public void renderTick() {
+        if (!IS_COCOA) { // Avoid jvm crash on osx
+            shell.getDisplay().readAndDispatch();
+        }
     }
 
     @Override

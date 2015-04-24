@@ -29,16 +29,16 @@ public final class MipMapGenerator {
     }
 
     /**
-     * Creates an array of {@link java.nio.ByteBuffer} containing mipmap
+     * Creates an array of {@link ByteBuffer} containing mipmap
      * textures from the given source texture
      *
-     * @param buffer  {@link java.nio.ByteBuffer} containing texture data in RGBA
+     * @param buffer  {@link ByteBuffer} containing texture data in RGBA
      *                format
      * @param width   Width of source texture in pixels
      * @param height  Height of source texture in pixels
      * @param mipmaps Amount of mipmap levels, resulting array will be n + 1 in size
      * @param alpha   Whether or not to allow transparent borders or harsh ones
-     * @return An array of {@link java.nio.ByteBuffer} containing the mipmap
+     * @return An array of {@link ByteBuffer} containing the mipmap
      * textures
      */
     public static ByteBuffer[] generateMipMaps(ByteBuffer buffer, int width,
@@ -57,13 +57,13 @@ public final class MipMapGenerator {
     /**
      * Creates a mipmap of given level from the given texture
      *
-     * @param buffer    {@link java.nio.ByteBuffer} containing texture data in RGBA
+     * @param buffer    {@link ByteBuffer} containing texture data in RGBA
      *                  format
      * @param width     Width of source texture in pixels
      * @param height    Height of source texture in pixels
      * @param scaleBits Scale for the mipmap texture given as bit-shift value
      * @param alpha     Whether or not to allow transparent borders or harsh ones
-     * @return A {@link java.nio.ByteBuffer} containing the mipmap texture
+     * @return A {@link ByteBuffer} containing the mipmap texture
      */
     public static ByteBuffer generateMipMap(ByteBuffer buffer, int width,
             int height, int scaleBits, boolean alpha) {
@@ -73,17 +73,17 @@ public final class MipMapGenerator {
     /**
      * Creates a mipmap of given level from the given texture
      *
-     * @param buffer         {@link java.nio.ByteBuffer} containing texture data in RGBA
+     * @param buffer         {@link ByteBuffer} containing texture data in RGBA
      *                       format
      * @param width          Width of source texture in pixels
      * @param height         Height of source texture in pixels
      * @param scaleBits      Scale for the mipmap texture given as bit-shift value
-     * @param lower          Optional {@link java.nio.ByteBuffer} to fetch data from when the
+     * @param lower          Optional {@link ByteBuffer} to fetch data from when the
      *                       source has invisible pixels
      * @param lowerScaleBits Scale of the lower texture in comparison to the mipmap texture as
      *                       bit-shift value
      * @param alpha          Whether or not to allow transparent borders or harsh ones
-     * @return A {@link java.nio.ByteBuffer} containing the mipmap texture
+     * @return A {@link ByteBuffer} containing the mipmap texture
      */
     public static ByteBuffer generateMipMap(ByteBuffer buffer, int width,
             int height, int scaleBits, ByteBuffer lower, int lowerScaleBits,

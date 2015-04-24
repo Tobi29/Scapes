@@ -43,7 +43,7 @@ public interface Container extends PlatformDialogs {
     void setFullscreen(boolean value);
 
     @Override
-    boolean renderTick(boolean force);
+    void renderTick();
 
     @Override
     void dispose();
