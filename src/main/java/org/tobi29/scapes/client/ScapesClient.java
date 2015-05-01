@@ -116,11 +116,12 @@ public class ScapesClient extends Game {
             scapesTag.setFloat("AnimationDistance", 0.15f);
             scapesTag.setBoolean("FXAA", true);
             scapesTag.setBoolean("Bloom", true);
-            scapesTag.setFloat("RenderDistance", 0.5f);
+            scapesTag.setDouble("RenderDistance", 128.0);
             scapesTag.setBoolean("KeepInvisibleChunkVbos", true);
             TagStructure integratedServerTag =
                     scapesTag.getStructure("IntegratedServer");
             TagStructure serverTag = integratedServerTag.getStructure("Server");
+            serverTag.setInteger("MaxLoadingRadius", 256);
             TagStructure socketTag = serverTag.getStructure("Socket");
             socketTag.setInteger("MaxPlayers", 5);
             socketTag.setInteger("WorkerCount", 1);

@@ -48,6 +48,7 @@ public class ScapesServer {
     private final WorldFormat worldFormat;
     private final CommandRegistry commandRegistry;
     private final String controlPanelPassword;
+    private final int maxLoadingRadius;
     private final Joiner logJoiner, profilerJoiner;
     private final Map<String, ControlPanel> controlPanels =
             new ConcurrentHashMap<>();
@@ -92,6 +93,7 @@ public class ScapesServer {
             }
         }, "Log");
         TagStructure serverTag = tagStructure.getStructure("Server");
+        maxLoadingRadius = serverTag.getInteger("MaxLoadingRadius");
         controlPanelPassword = serverTag.getString("ControlPanelPassword");
         this.serverInfo = serverInfo;
         serverConnection = new ServerConnection(this, taskExecutor,
@@ -152,6 +154,10 @@ public class ScapesServer {
 
     public ServerInfo getServerInfo() {
         return serverInfo;
+    }
+
+    public int getMaxLoadingRadius() {
+        return maxLoadingRadius;
     }
 
     public String getControlPanelPassword() {

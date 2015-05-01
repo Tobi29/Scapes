@@ -72,14 +72,15 @@ public class ClientConnection
             LoggerFactory.getLogger(ClientConnection.class);
     private static final int AES_KEY_LENGTH;
     private final ScapesEngine engine;
+    private final int loadingDistanceRequest;
     private final PacketBundleChannel channel;
     private final Selector selector;
     private final IDStorage idStorage = new IDStorage();
-    private final int loadingDistance;
     private final FileCache cache;
     private final GuiWidgetDebugValues.Element pingDebug, downloadDebug,
             uploadDebug;
     private final Queue<Packet> sendQueue = new ConcurrentLinkedQueue<>();
+    private int loadingDistance = -1;
     private LoginData loginData;
     private GameStateGameMP game;
     private MobPlayerClientMain entity;
@@ -101,7 +102,7 @@ public class ClientConnection
     public ClientConnection(ScapesEngine engine, SocketChannel channel,
             Account.Client account, int loadingDistance) throws IOException {
         this.engine = engine;
-        this.loadingDistance = loadingDistance;
+        loadingDistanceRequest = loadingDistance;
         this.channel = new PacketBundleChannel(channel);
         selector = Selector.open();
         this.channel.register(selector, SelectionKey.OP_READ);
@@ -185,7 +186,7 @@ public class ClientConnection
                     DataOutputStream streamOut = channel.getOutputStream();
                     streamOut.write(challenge);
                     streamOut.writeUTF(loginData.account.getNickname());
-                    streamOut.writeInt(loadingDistance);
+                    streamOut.writeInt(loadingDistanceRequest);
                     sendSkin(streamOut);
                     streamOut.writeInt(loginData.pluginRequests.size());
                     for (Integer request : loginData.pluginRequests) {
@@ -205,6 +206,7 @@ public class ClientConnection
                     if (streamIn.readBoolean()) {
                         throw new ConnectionCloseException(streamIn.readUTF());
                     }
+                    loadingDistance = streamIn.readInt();
                     for (Integer request : loginData.pluginRequests) {
                         Optional<File> file = cache.retrieve(cache.store(
                                 new LimitedInputStream(streamIn,
@@ -330,6 +332,9 @@ public class ClientConnection
 
     @Override
     public int getLoadingRadius() {
+        if (loadingDistance == -1) {
+            throw new IllegalStateException("Client not logged in");
+        }
         return loadingDistance;
     }
 

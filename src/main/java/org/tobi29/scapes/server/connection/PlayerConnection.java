@@ -197,7 +197,8 @@ public class PlayerConnection
         byte[] challenge = new byte[this.challenge.length];
         streamIn.readFully(challenge);
         nickname = streamIn.readUTF();
-        loadingRadius = streamIn.readInt();
+        loadingRadius = FastMath.clamp(streamIn.readInt(), 10,
+                server.getServer().getMaxLoadingRadius());
         byte[] array = new byte[64 * 64 * 4];
         streamIn.readFully(array);
         skin = new ServerSkin(array);
@@ -220,6 +221,7 @@ public class PlayerConnection
             throw new ConnectionCloseException(response.get());
         } else {
             streamOut.writeBoolean(false);
+            streamOut.writeInt(loadingRadius);
             for (int request : requests) {
                 sendPlugin(plugins.getFile(request).getFile(), streamOut);
             }

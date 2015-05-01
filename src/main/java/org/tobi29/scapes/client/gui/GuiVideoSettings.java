@@ -30,12 +30,12 @@ public class GuiVideoSettings extends GuiMenu {
                 state.getEngine().getTagStructure().getStructure("Scapes");
         GuiComponentSlider viewDistance =
                 new GuiComponentSlider(16, 80, 368, 30, 18, "View distance",
-                        scapesTag.getFloat("RenderDistance"),
+                        (scapesTag.getDouble("RenderDistance") - 10.0) / 246.0,
                         (text, value) -> text + ": " +
-                                (int) (10 + value * 246) +
+                                FastMath.round(10.0 + value * 246.0) +
                                 'm');
-        viewDistance.addHover(event -> scapesTag
-                .setFloat("RenderDistance", (float) viewDistance.value));
+        viewDistance.addHover(event -> scapesTag.setDouble("RenderDistance",
+                10.0 + viewDistance.value * 246.0));
         GuiComponentTextButton shader =
                 new GuiComponentTextButton(16, 120, 368, 30, 18, "Shaders");
         shader.addLeftClick(event -> {

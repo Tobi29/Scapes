@@ -119,14 +119,13 @@ public class GameStateLoadSP extends GameState {
                     progress.setLabel("Logging in...");
                     break;
                 case 4:
-                    int loadingRadius = (int) FastMath.ceil((10 +
+                    int loadingRadius = FastMath.round(
                             engine.getTagStructure().getStructure("Scapes")
-                                    .getFloat("RenderDistance") * 246) /
-                            16.0f) << 4;
+                                    .getDouble("RenderDistance"));
                     Account.Client account = Account.read(engine.getFiles()
                             .getFile("File:Account.properties"));
                     client = new ClientConnection(engine, channel, account,
-                            loadingRadius + 16);
+                            loadingRadius);
                     step++;
                     break;
                 case 5:

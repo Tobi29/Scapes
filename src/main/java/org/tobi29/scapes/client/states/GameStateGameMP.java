@@ -28,7 +28,6 @@ import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
 import org.tobi29.scapes.engine.utils.Sync;
-import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.particle.ParticleBlock;
 import org.tobi29.scapes.packets.PacketPing;
@@ -38,16 +37,12 @@ public class GameStateGameMP extends GameState {
             LoggerFactory.getLogger(GameStateGameMP.class);
     protected final ClientConnection client;
     protected final Playlist playlist;
-    protected final int loadingRadius;
     private final GuiWidgetDebugValues.Element tickDebug;
     protected double pingWait;
 
     protected GameStateGameMP(ClientConnection client, Scene scene,
             ScapesEngine engine) {
         super(engine, scene);
-        loadingRadius = (int) FastMath.ceil((10 +
-                engine.getTagStructure().getStructure("Scapes")
-                        .getFloat("RenderDistance") * 246) / 16.0f) << 4;
         playlist = new Playlist(engine.getSounds());
         this.client = client;
         tickDebug = engine.getDebugValues().get("Client-TPS");

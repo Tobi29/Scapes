@@ -105,6 +105,7 @@ public abstract class ScapesStandaloneServer
         TagStructure serverTag = tagStructure.getStructure("Server");
         serverTag.setString("ServerName", "My Superb Server");
         serverTag.setString("ServerIcon", "ServerIcon.png");
+        serverTag.setInteger("MaxLoadingRadius", 256);
         serverTag.setString("ControlPanelPassword", "");
         TagStructure socketTag = serverTag.getStructure("Socket");
         socketTag.setInteger("MaxPlayers", 20);
