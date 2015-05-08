@@ -16,8 +16,6 @@
 
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
@@ -25,13 +23,14 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class PacketPing extends Packet implements PacketServer, PacketClient {
-    private long timestamp;
+public abstract class PacketPing extends Packet
+        implements PacketServer, PacketClient {
+    protected long timestamp;
 
-    public PacketPing() {
+    protected PacketPing() {
     }
 
-    public PacketPing(long timestamp) {
+    protected PacketPing(long timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -48,11 +47,6 @@ public class PacketPing extends Packet implements PacketServer, PacketClient {
     }
 
     @Override
-    public void runServer(PlayerConnection player, WorldServer world) {
-        player.send(new PacketPing(timestamp));
-    }
-
-    @Override
     public void sendClient(PlayerConnection player, DataOutputStream streamOut)
             throws IOException {
         streamOut.writeLong(timestamp);
@@ -62,10 +56,5 @@ public class PacketPing extends Packet implements PacketServer, PacketClient {
     public void parseClient(ClientConnection client, DataInputStream streamIn)
             throws IOException {
         timestamp = streamIn.readLong();
-    }
-
-    @Override
-    public void runClient(ClientConnection client, WorldClient world) {
-        client.updatePing(System.currentTimeMillis() - timestamp);
     }
 }

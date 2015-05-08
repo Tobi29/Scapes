@@ -103,7 +103,8 @@ public class GameRegistry {
         pr.regS(PacketCrafting::new, "core.packet.Crafting");
         pr.regS(PacketDisconnect::new, "core.packet.Disconnect");
         pr.regS(PacketSetWorld::new, "core.packet.SetWorld");
-        pr.regS(PacketPing::new, "core.packet.Ping");
+        pr.regS(PacketPingClient::new, "core.packet.PingClient");
+        pr.regS(PacketPingServer::new, "core.packet.PingServer");
         pr.regS(PacketSkin::new, "core.packet.Skin");
         SupplierRegistry<Update> ur =
                 addSupplier("Core", "Update", 1, Short.MAX_VALUE);

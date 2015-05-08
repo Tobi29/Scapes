@@ -44,6 +44,7 @@ import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketClient;
+import org.tobi29.scapes.packets.PacketPingClient;
 import org.tobi29.scapes.packets.PacketServer;
 import org.tobi29.scapes.plugins.PluginFile;
 import org.tobi29.scapes.plugins.Plugins;
@@ -342,6 +343,7 @@ public class ClientConnection
         this.game = game;
         joiner = engine.getTaskExecutor().runTask(this, "Client-Connection");
         engine.getTaskExecutor().addTask(() -> {
+            send(new PacketPingClient(System.currentTimeMillis()));
             downloadDebug.setValue(channel.getInputRate() / 128.0);
             uploadDebug.setValue(channel.getOutputRate() / 128.0);
             return state == State.CLOSED ? -1 : 1000;
@@ -380,7 +382,7 @@ public class ClientConnection
     }
 
     public void updatePing(long ping) {
-        pingDebug.setValue(ping);
+        pingDebug.setValue(System.currentTimeMillis() - ping);
     }
 
     enum State {

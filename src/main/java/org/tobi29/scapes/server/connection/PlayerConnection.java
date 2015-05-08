@@ -77,6 +77,7 @@ public class PlayerConnection
     private String id, nickname = "_Error_";
     private int loadingRadius, permissionLevel;
     private PlayerStatistics statistics;
+    private long ping, pingTimeout, pingWait;
 
     static {
         int length = 16;
@@ -132,6 +133,10 @@ public class PlayerConnection
 
     public PlayerStatistics getStatistics() {
         return statistics;
+    }
+
+    public long getPing() {
+        return ping;
     }
 
     private void loginStep1() throws IOException {
@@ -226,6 +231,9 @@ public class PlayerConnection
                 sendPlugin(plugins.getFile(request).getFile(), streamOut);
             }
             channel.queueBundle();
+            long currentTime = System.currentTimeMillis();
+            pingWait = currentTime + 1000;
+            pingTimeout = currentTime + 10000;
             LOGGER.info("Client accepted: {} ({}) on {}", id, nickname,
                     channel.toString());
         }
@@ -233,26 +241,26 @@ public class PlayerConnection
 
     private Optional<String> start() {
         WorldFormat worldFormat = server.getServer().getWorldFormat();
-        TagStructure tagStructure = worldFormat.getPlayerData().load(id);
-        WorldServer world =
-                worldFormat.getWorld(tagStructure.getString("World"));
-        if (tagStructure.has("Entity")) {
+        Optional<TagStructure> tag = worldFormat.getPlayerData().load(id);
+        WorldServer world;
+        statistics = new PlayerStatistics();
+        if (tag.isPresent()) {
+            TagStructure tagStructure = tag.get();
+            world = worldFormat.getWorld(tagStructure.getString("World"));
             entity = new MobPlayerServer(world, Vector3d.ZERO, Vector3d.ZERO,
                     0.0d, 0.0d, nickname, skin.getChecksum(), this);
             entity.read(tagStructure.getStructure("Entity"));
+            statistics.load(world.getRegistry(),
+                    tagStructure.getList("Statistics"));
+            permissionLevel = tagStructure.getInteger("Permissions");
         } else {
+            world = worldFormat.getDefaultWorld();
             entity = new MobPlayerServer(world,
                     new Vector3d(0.5, 0.5, 1.0d).plus(world.getSpawn()),
                     Vector3d.ZERO, 0.0d, 0.0d, nickname, skin.getChecksum(),
                     this);
             entity.onSpawn();
         }
-        statistics = new PlayerStatistics();
-        if (tagStructure.has("Statistics")) {
-            statistics.load(world.getRegistry(),
-                    tagStructure.getList("Statistics"));
-        }
-        permissionLevel = tagStructure.getInteger("Permissions");
         world.addEntity(entity);
         world.addPlayer(entity);
         sendQueueSize.incrementAndGet();
@@ -393,6 +401,15 @@ public class PlayerConnection
                     return channel.process();
                 }
                 case OPEN:
+                    long currentTime = System.currentTimeMillis();
+                    if (pingTimeout < currentTime) {
+                        throw new ConnectionCloseException(
+                                "Connection timeout");
+                    }
+                    if (pingWait < currentTime) {
+                        pingWait = System.currentTimeMillis() + 1000;
+                        sendPacket(new PacketPingServer(currentTime));
+                    }
                     while (!sendQueue.isEmpty()) {
                         Packet packet = sendQueue.poll();
                         sendPacket(packet);
@@ -429,6 +446,11 @@ public class PlayerConnection
             state = State.CLOSED;
         }
         return false;
+    }
+
+    public void updatePing(long ping) {
+        this.ping = System.currentTimeMillis() - ping;
+        pingTimeout = ping + 10000;
     }
 
     @Override

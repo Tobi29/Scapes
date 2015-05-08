@@ -50,6 +50,7 @@ public class WorldFormat {
     private final PlayerBans playerBans;
     private final TagStructure worldsTagStructure;
     private final Map<String, WorldServer> worlds = new ConcurrentHashMap<>();
+    private final WorldServer defaultWorld;
     private final long seed;
 
     public WorldFormat(ScapesServer server, Directory directory)
@@ -76,6 +77,7 @@ public class WorldFormat {
         while (iterator.hasNext()) {
             registerWorld(iterator.next());
         }
+        defaultWorld = worlds.get(plugins.getWorldType().getID());
     }
 
     public static String getFilenameExtension() {
@@ -104,6 +106,10 @@ public class WorldFormat {
 
     public WorldServer getWorld(String name) {
         return worlds.get(name);
+    }
+
+    public WorldServer getDefaultWorld() {
+        return defaultWorld;
     }
 
     public Collection<String> getWorldNames() {

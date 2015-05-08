@@ -25,6 +25,7 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
 import org.tobi29.scapes.server.ScapesServer;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class PlayerData {
     private static final Logger LOGGER =
@@ -39,24 +40,18 @@ public class PlayerData {
         directory.make();
     }
 
-    public TagStructure load(String id) {
-        TagStructure tagStructure = null;
+    public Optional<TagStructure> load(String id) {
         try {
             File file = directory.getResource(id + ".stag");
             if (file.exists()) {
-                tagStructure = file.readAndReturn(TagStructureBinary::read);
+                TagStructure tagStructure =
+                        file.readAndReturn(TagStructureBinary::read);
+                return Optional.of(tagStructure);
             }
         } catch (IOException e) {
             LOGGER.error("Error reading player data: {}", e.toString());
         }
-        if (tagStructure == null) {
-            tagStructure = new TagStructure();
-            String world =
-                    server.getWorldFormat().getPlugins().getWorldType()
-                            .getID();
-            tagStructure.setString("World", world);
-        }
-        return tagStructure;
+        return Optional.empty();
     }
 
     public void save(TagStructure tagStructure, String id) {

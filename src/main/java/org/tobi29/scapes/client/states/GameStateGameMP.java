@@ -30,7 +30,7 @@ import org.tobi29.scapes.engine.opengl.scenes.Scene;
 import org.tobi29.scapes.engine.utils.Sync;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.particle.ParticleBlock;
-import org.tobi29.scapes.packets.PacketPing;
+import org.tobi29.scapes.packets.PacketPingClient;
 
 public class GameStateGameMP extends GameState {
     private static final Logger LOGGER =
@@ -107,7 +107,7 @@ public class GameStateGameMP extends GameState {
         pingWait -= delta;
         while (pingWait <= 0.0) {
             pingWait += 1.0;
-            client.send(new PacketPing(System.currentTimeMillis()));
+            client.send(new PacketPingClient(System.currentTimeMillis()));
         }
         tickDebug.setValue(sync.getTPS());
     }
