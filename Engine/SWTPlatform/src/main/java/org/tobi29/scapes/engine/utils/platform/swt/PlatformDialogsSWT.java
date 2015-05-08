@@ -18,6 +18,7 @@ package org.tobi29.scapes.engine.utils.platform.swt;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.program.Program;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
@@ -32,12 +33,13 @@ public class PlatformDialogsSWT implements PlatformDialogs {
     private static final boolean IS_COCOA = "cocoa".equals(SWT.getPlatform());
     private final Shell shell;
 
-    public PlatformDialogsSWT() {
-        this(new Shell());
+    public PlatformDialogsSWT(String id) {
+        this(id, new Shell());
     }
 
-    public PlatformDialogsSWT(Shell shell) {
+    public PlatformDialogsSWT(String id, Shell shell) {
         this.shell = shell;
+        Display.setAppName(id);
     }
 
     @Override

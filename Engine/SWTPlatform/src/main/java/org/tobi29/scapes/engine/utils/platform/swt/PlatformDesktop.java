@@ -64,8 +64,8 @@ public abstract class PlatformDesktop extends Platform {
     }
 
     @Override
-    public PlatformDialogs createDialogHandler() {
-        return new PlatformDialogsSWT();
+    public PlatformDialogs createDialogHandler(String id) {
+        return new PlatformDialogsSWT(id);
     }
 
     @Override

@@ -56,7 +56,7 @@ public abstract class Platform {
 
     public abstract boolean is64Bit();
 
-    public abstract PlatformDialogs createDialogHandler();
+    public abstract PlatformDialogs createDialogHandler(String id);
 
     public abstract GlyphRenderer getGlyphRenderer(String font, int size);
 

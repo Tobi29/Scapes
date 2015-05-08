@@ -52,7 +52,8 @@ public class ContainerGLFW extends ContainerLWJGL3 {
     private boolean skipMouseCallback, mouseGrabbed;
 
     public ContainerGLFW(ScapesEngine engine) {
-        super(engine, Platform.getPlatform().createDialogHandler());
+        super(engine, Platform.getPlatform()
+                .createDialogHandler(engine.getGame().getID()));
         errorFun = Callbacks.errorCallbackPrint();
         GLFW.glfwSetErrorCallback(errorFun);
         if (GLFW.glfwInit() != GL11.GL_TRUE) {
