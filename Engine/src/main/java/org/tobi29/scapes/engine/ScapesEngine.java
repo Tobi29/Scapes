@@ -68,8 +68,8 @@ public class ScapesEngine implements Crashable {
     private final Gui globalGui;
     private final GuiDebugLayer debugGui;
     private final FileSystemContainer files;
-    private SoundSystem sounds;
-    private ControllerDefault controller;
+    private final SoundSystem sounds;
+    private final ControllerDefault controller;
     private GuiController guiController;
     private boolean running = true, mouseGrabbed;
     private GameState currentState, newState;
@@ -89,6 +89,7 @@ public class ScapesEngine implements Crashable {
         this.debug = debug;
         this.game = game;
         runtime = Runtime.getRuntime();
+        game.engine = this;
         Thread.currentThread().setName("Engine-Rendering-Thread");
         LOGGER.info("Starting Scapes-Engine: {} (Game: {})", this, game);
         try {
@@ -121,7 +122,6 @@ public class ScapesEngine implements Crashable {
                     "Failed to create virtual file system: " + e.toString());
         }
         checkSystem();
-        game.engine = this;
         taskExecutor = new TaskExecutor(this, "Engine");
         tagStructure = new TagStructure();
         try {
@@ -152,7 +152,11 @@ public class ScapesEngine implements Crashable {
         GuiWidgetDebugValues debugValues = debugGui.getDebugValues();
         usedMemoryDebug = debugValues.get("Runtime-Memory-Used");
         maxMemoryDebug = debugValues.get("Runtime-Memory-Max");
+        game.init();
         graphics = new GraphicsSystem(this, backend.createContainer(this));
+        sounds = new SoundSystem(this, graphics.getContainer().getOpenAL());
+        controller = graphics.getContainer().getController();
+        guiController = new GuiControllerDefault(this, controller);
     }
 
     private static ScapesEngineBackendProvider loadBackend() {
@@ -251,22 +255,9 @@ public class ScapesEngine implements Crashable {
         newState = state;
     }
 
+    @SuppressWarnings("OverlyBroadCatchBlock")
     public int run() {
         try {
-            try {
-                graphics.init();
-            } catch (GraphicsCheckException e) {
-                LOGGER.error("Failed to initialize graphics:", e);
-                graphics.getContainer()
-                        .message(PlatformDialogs.MessageType.ERROR,
-                                game.getName(),
-                                "Unable to initialize graphics:\n" +
-                                        e.getMessage());
-                return 1;
-            }
-            sounds = new SoundSystem(this, graphics.getContainer().getOpenAL());
-            controller = graphics.getContainer().getController();
-            guiController = new GuiControllerDefault(this, controller);
             while (running) {
                 sounds.poll(graphics.getSync().getSpeedFactor());
                 graphics.step();
@@ -284,6 +275,13 @@ public class ScapesEngine implements Crashable {
                 LOGGER.warn("Failed to save config file!");
             }
             taskExecutor.shutdown();
+        } catch (GraphicsCheckException e) {
+            LOGGER.error("Failed to initialize graphics:", e);
+            graphics.getContainer()
+                    .message(PlatformDialogs.MessageType.ERROR, game.getName(),
+                            "Unable to initialize graphics:\n" +
+                                    e.getMessage());
+            return 1;
         } catch (Throwable e) {
             taskExecutor.shutdown();
             graphics.getContainer()
@@ -329,7 +327,7 @@ public class ScapesEngine implements Crashable {
             }
             if (currentState == null) {
                 currentState = newState;
-                game.init();
+                game.initLate();
             } else {
                 currentState.getScene().dispose(graphics);
                 currentState.disposeState();

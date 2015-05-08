@@ -16,13 +16,15 @@
 
 package org.tobi29.scapes.engine.opengl;
 
+import org.tobi29.scapes.engine.utils.DesktopException;
+
 /**
  * Gets thrown when the computer doesn't fulfill the requirements to run the
  * game.
  *
  * @author Tobi29
  */
-public class GraphicsCheckException extends Exception {
+public class GraphicsCheckException extends DesktopException {
     public GraphicsCheckException(String message) {
         super(message);
     }

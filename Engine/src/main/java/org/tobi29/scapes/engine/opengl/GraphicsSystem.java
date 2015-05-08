@@ -28,6 +28,7 @@ import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.opengl.shader.ShaderManager;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.opengl.texture.TextureManager;
+import org.tobi29.scapes.engine.utils.DesktopException;
 import org.tobi29.scapes.engine.utils.Sync;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f;
@@ -92,6 +93,7 @@ public class GraphicsSystem {
         vaoDebug = debugValues.get("Graphics-VAOs");
         sync = new Sync(engine.getConfig().getFPS(), 5000000000L, false,
                 "Rendering");
+        sync.init();
     }
 
     public FontRenderer getDefaultFont() {
@@ -139,11 +141,6 @@ public class GraphicsSystem {
         return modelViewProjectionMatrix;
     }
 
-    public void init() throws GraphicsCheckException {
-        container.init();
-        sync.init();
-    }
-
     public void setProjectionPerspective(float width, float height, Cam cam) {
         projectionMatrix.identity();
         projectionMatrix
@@ -171,7 +168,7 @@ public class GraphicsSystem {
         openGL.setBlending(BlendingMode.NORMAL);
     }
 
-    public void step() {
+    public void step() throws DesktopException {
         GameState state = engine.getNewState();
         if (state == null) {
             state = engine.getState();

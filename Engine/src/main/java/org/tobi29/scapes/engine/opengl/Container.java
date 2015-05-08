@@ -19,13 +19,12 @@ package org.tobi29.scapes.engine.opengl;
 import org.tobi29.scapes.engine.input.ControllerDefault;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.openal.OpenAL;
+import org.tobi29.scapes.engine.utils.DesktopException;
 import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
 
 import java.util.Collection;
 
 public interface Container extends PlatformDialogs {
-    void init() throws GraphicsCheckException;
-
     int getContainerWidth();
 
     int getContainerHeight();
@@ -43,7 +42,7 @@ public interface Container extends PlatformDialogs {
     void setFullscreen(boolean value);
 
     @Override
-    void renderTick();
+    void renderTick() throws DesktopException;
 
     @Override
     void dispose();

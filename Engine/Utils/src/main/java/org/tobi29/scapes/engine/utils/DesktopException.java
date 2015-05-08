@@ -14,27 +14,10 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine;
+package org.tobi29.scapes.engine.utils;
 
-import org.tobi29.scapes.engine.utils.VersionUtil;
-import org.tobi29.scapes.engine.utils.graphics.Image;
-
-public abstract class Game {
-    protected ScapesEngine engine;
-
-    public abstract String getName();
-
-    public abstract String getID();
-
-    public abstract VersionUtil.Version getVersion();
-
-    public abstract Image getIcon();
-
-    public abstract void init();
-
-    public abstract void initLate();
-
-    public abstract void step();
-
-    public abstract void dispose();
+public class DesktopException extends Exception {
+    public DesktopException(String message) {
+        super(message);
+    }
 }

@@ -33,7 +33,10 @@ import org.tobi29.scapes.engine.input.Controller;
 import org.tobi29.scapes.engine.input.ControllerDefault;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.input.InputException;
+import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
 import org.tobi29.scapes.engine.utils.VersionUtil;
+import org.tobi29.scapes.engine.utils.graphics.Image;
+import org.tobi29.scapes.engine.utils.graphics.PNG;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPathRoot;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -45,6 +48,7 @@ import java.util.stream.Stream;
 public class ScapesClient extends Game {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ScapesClient.class);
+    private Image icon;
     private final List<InputMode> inputModes = new ArrayList<>();
     private InputMode inputMode;
     private boolean freezeInputMode;
@@ -96,6 +100,11 @@ public class ScapesClient extends Game {
     }
 
     @Override
+    public Image getIcon() {
+        return icon;
+    }
+
+    @Override
     public void init() {
         try {
             FileSystemContainer files = engine.getFiles();
@@ -107,6 +116,9 @@ public class ScapesClient extends Game {
             files.getDirectory("File:plugins").make();
             files.getDirectory("File:screenshots").make();
             files.getDirectory("File:saves").make();
+            icon = files.getResource("Scapes:image/Icon.png").readAndReturn(
+                    streamIn -> PNG
+                            .decode(streamIn, BufferCreatorDirect::byteBuffer));
         } catch (IOException e) {
             engine.crash(e);
         }
@@ -127,6 +139,10 @@ public class ScapesClient extends Game {
             socketTag.setInteger("WorkerCount", 1);
             socketTag.setInteger("RSASize", 1024);
         }
+    }
+
+    @Override
+    public void initLate() {
         reloadInput();
     }
 

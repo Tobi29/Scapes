@@ -30,6 +30,7 @@ import org.tobi29.scapes.engine.openal.OpenAL;
 import org.tobi29.scapes.engine.opengl.Container;
 import org.tobi29.scapes.engine.opengl.GraphicsCheckException;
 import org.tobi29.scapes.engine.opengl.OpenGL;
+import org.tobi29.scapes.engine.utils.DesktopException;
 import org.tobi29.scapes.engine.utils.MutableSingle;
 import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
 import org.tobi29.scapes.engine.utils.task.Joiner;
@@ -106,14 +107,6 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
             return Optional.of("Your graphics card has no OpenGL 3.2 support!");
         }
         return Optional.empty();
-    }
-
-    @Override
-    public void init() throws GraphicsCheckException {
-        /*Optional<String> check = checkContext(context);
-        if (check.isPresent()) {
-            throw new GraphicsCheckException(check.get());
-        }*/
     }
 
     @Override
@@ -217,7 +210,7 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
     }
 
     @Override
-    public void renderTick() {
+    public void renderTick() throws DesktopException {
         while (!tasks.isEmpty()) {
             tasks.poll().run();
         }
@@ -229,9 +222,14 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
             initWindow(engine.getConfig().isFullscreen(),
                     engine.getConfig().getVSync());
             context = GLContext.createFromCurrent();
+            Optional<String> check = checkContext(context);
+            if (check.isPresent()) {
+                throw new GraphicsCheckException(check.get());
+            }
             valid = true;
             containerResized = true;
         }
+        dialogs.renderTick();
         render();
         containerResized = false;
         if (!visible) {

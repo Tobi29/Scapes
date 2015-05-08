@@ -53,10 +53,10 @@ public class ServerInfo {
                 }
             } catch (IOException e) {
                 LOGGER.warn("Unable to load server icon: {}", e.toString());
-                image = new Image(1, 1, BufferCreator.byteBuffer(4));
+                image = new Image();
             }
         } else {
-            image = new Image(1, 1, BufferCreator.byteBuffer(4));
+            image = new Image();
         }
         this.image = image;
         ByteBuffer buffer;
@@ -91,11 +91,11 @@ public class ServerInfo {
             } catch (IOException e) {
                 LOGGER.warn("Failed to decompress server icon: {}",
                         e.toString());
-                image = new Image(1, 1, BufferCreator.byteBuffer(4));
+                image = new Image();
             }
         } else {
             name = "Invalid server info";
-            image = new Image(1, 1, BufferCreator.byteBuffer(4));
+            image = new Image();
         }
         this.image = image;
     }

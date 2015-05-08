@@ -16,11 +16,21 @@
 
 package org.tobi29.scapes.engine.utils.graphics;
 
+import org.tobi29.scapes.engine.utils.BufferCreator;
+
 import java.nio.ByteBuffer;
 
 public class Image {
     private final int width, height;
     private final ByteBuffer buffer;
+
+    public Image() {
+        this(1, 1);
+    }
+
+    public Image(int width, int height) {
+        this(width, height, BufferCreator.byteBuffer(width * height << 2));
+    }
 
     public Image(int width, int height, ByteBuffer buffer) {
         this.width = width;
@@ -37,6 +47,6 @@ public class Image {
     }
 
     public ByteBuffer getBuffer() {
-        return buffer;
+        return buffer.asReadOnlyBuffer();
     }
 }

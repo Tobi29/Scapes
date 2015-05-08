@@ -16,6 +16,8 @@
 
 package org.tobi29.scapes.engine.utils.platform;
 
+import org.tobi29.scapes.engine.utils.DesktopException;
+
 import java.io.File;
 import java.util.Optional;
 
@@ -29,7 +31,7 @@ public interface PlatformDialogs {
 
     void openFile(File file);
 
-    void renderTick();
+    void renderTick() throws DesktopException;
 
     void dispose();
 

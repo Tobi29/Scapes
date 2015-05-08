@@ -21,6 +21,7 @@ import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+import org.tobi29.scapes.engine.utils.DesktopException;
 import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
 
 import java.io.File;
@@ -121,7 +122,7 @@ public class PlatformDialogsSWT implements PlatformDialogs {
     }
 
     @Override
-    public void renderTick() {
+    public void renderTick() throws DesktopException {
         if (!IS_COCOA) { // Avoid jvm crash on osx
             shell.getDisplay().readAndDispatch();
         }

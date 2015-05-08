@@ -22,7 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.backends.lwjgl3.ContainerLWJGL3;
-import org.tobi29.scapes.engine.input.ControllerJoystick;
+import org.tobi29.scapes.engine.backends.lwjgl3.GLFWControllers;
+import org.tobi29.scapes.engine.backends.lwjgl3.GLFWKeyMap;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.opengl.GraphicsException;
 import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
@@ -30,15 +31,12 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.platform.Platform;
 
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ContainerGLFW extends ContainerLWJGL3 {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ContainerGLFW.class);
-    private static final double DEADZONES = 0.05, DEADZONES_SCALE = 0.95;
+    private final GLFWControllers controllers;
     @SuppressWarnings("FieldCanBeLocal")
     private final GLFWErrorCallback errorFun;
     private final GLFWWindowSizeCallback windowSizeFun;
@@ -50,8 +48,6 @@ public class ContainerGLFW extends ContainerLWJGL3 {
     private final GLFWMouseButtonCallback mouseButtonFun;
     private final GLFWCursorPosCallback cursorPosFun;
     private final GLFWScrollCallback scrollFun;
-    private final Map<Integer, boolean[]> virtualJoystickStates =
-            new ConcurrentHashMap<>();
     private long window;
     private boolean skipMouseCallback, mouseGrabbed;
 
@@ -63,6 +59,7 @@ public class ContainerGLFW extends ContainerLWJGL3 {
             throw new GraphicsException("Unable to initialize GLFW");
         }
         LOGGER.info("GLFW version: {}", GLFW.glfwGetVersionString());
+        controllers = new GLFWControllers(virtualJoysticks);
         windowSizeFun = GLFW.GLFWWindowSizeCallback((window, width, height) -> {
             containerWidth = width;
             containerHeight = height;
@@ -144,15 +141,6 @@ public class ContainerGLFW extends ContainerLWJGL3 {
         });
     }
 
-    private static double deadzones(double value) {
-        if (value > DEADZONES) {
-            return (value - DEADZONES) / DEADZONES_SCALE;
-        } else if (value < -DEADZONES) {
-            return (value + DEADZONES) / DEADZONES_SCALE;
-        }
-        return 0.0f;
-    }
-
     @Override
     public void setMouseGrabbed(boolean value) {
         if (value) {
@@ -189,62 +177,10 @@ public class ContainerGLFW extends ContainerLWJGL3 {
         scrollFun.release();
     }
 
-    @SuppressWarnings("ForLoopThatDoesntUseLoopVariable")
     @Override
     public void render() {
-        dialogs.renderTick();
-        for (int joystick = GLFW.GLFW_JOYSTICK_1;
-                joystick <= GLFW.GLFW_JOYSTICK_LAST; joystick++) {
-            if (GLFW.glfwJoystickPresent(joystick) == GL11.GL_TRUE) {
-                String name = GLFW.glfwGetJoystickName(joystick);
-                FloatBuffer axes = GLFW.glfwGetJoystickAxes(joystick);
-                ByteBuffer buttons = GLFW.glfwGetJoystickButtons(joystick);
-                ControllerJoystick virtualJoystick =
-                        virtualJoysticks.get(joystick);
-                boolean[] states = virtualJoystickStates.get(joystick);
-                if (virtualJoystick == null) {
-                    assert states == null;
-                    virtualJoystick =
-                            new ControllerJoystick(name, axes.capacity());
-                    states = new boolean[buttons.remaining()];
-                    virtualJoysticks.put(joystick, virtualJoystick);
-                    virtualJoystickStates.put(joystick, states);
-                    joysticksChanged = true;
-                } else {
-                    assert states != null;
-                    if (!name.equals(virtualJoystick.getName()) ||
-                            buttons.remaining() != states.length ||
-                            axes.remaining() != virtualJoystick.getAxes()) {
-                        virtualJoystick =
-                                new ControllerJoystick(name, axes.capacity());
-                        states = new boolean[buttons.remaining()];
-                        virtualJoysticks.put(joystick, virtualJoystick);
-                        virtualJoystickStates.put(joystick, states);
-                        joysticksChanged = true;
-                    }
-                }
-                for (int i = 0; axes.hasRemaining(); i++) {
-                    virtualJoystick.setAxis(i, deadzones(axes.get()));
-                }
-                for (int i = 0; buttons.hasRemaining(); i++) {
-                    boolean value = buttons.get() == 1;
-                    if (states[i] != value) {
-                        states[i] = value;
-                        ControllerKey button = ControllerKey.getButton(i);
-                        if (button != ControllerKey.UNKNOWN) {
-                            virtualJoystick.addPressEvent(button,
-                                    value ? PressState.PRESS :
-                                            PressState.RELEASE);
-                        }
-                    }
-                }
-            } else if (virtualJoysticks.containsKey(joystick)) {
-                virtualJoysticks.remove(joystick);
-                virtualJoystickStates.remove(joystick);
-                joysticksChanged = true;
-            }
-        }
         GLFW.glfwPollEvents();
+        controllers.poll();
         engine.getGraphics().render();
         GLFW.glfwSwapBuffers(window);
     }

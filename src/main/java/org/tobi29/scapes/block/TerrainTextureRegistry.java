@@ -102,11 +102,12 @@ public class TerrainTextureRegistry {
                         }
                         int bufferR, bufferG, bufferB, bufferA, layerR, layerG,
                                 layerB, layerA;
-                        while (layer.getBuffer().hasRemaining()) {
-                            layerR = layer.getBuffer().get() & 0xFF;
-                            layerG = layer.getBuffer().get() & 0xFF;
-                            layerB = layer.getBuffer().get() & 0xFF;
-                            layerA = layer.getBuffer().get() & 0xFF;
+                        ByteBuffer layerBuffer = layer.getBuffer();
+                        while (layerBuffer.hasRemaining()) {
+                            layerR = layerBuffer.get() & 0xFF;
+                            layerG = layerBuffer.get() & 0xFF;
+                            layerB = layerBuffer.get() & 0xFF;
+                            layerA = layerBuffer.get() & 0xFF;
                             if (layerA == 255) {
                                 buffer.put((byte) layerR);
                                 buffer.put((byte) layerG);
@@ -134,7 +135,6 @@ public class TerrainTextureRegistry {
                             }
                         }
                         buffer.rewind();
-                        layer.getBuffer().rewind();
                     }
                 } else {
                     buffer = source.getBuffer();
