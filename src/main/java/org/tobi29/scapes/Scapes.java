@@ -28,6 +28,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
 import org.tobi29.scapes.plugins.PluginClassLoader;
 import org.tobi29.scapes.server.shell.ScapesServerHeadless;
 import org.tobi29.scapes.server.shell.ScapesServerShell;
+import org.tobi29.scapes.server.shell.ScapesStandaloneServer;
 
 import java.io.IOException;
 import java.security.*;
@@ -37,34 +38,13 @@ public class Scapes {
     public static final VersionUtil.Version VERSION =
             new VersionUtil.Version(0, 0, 0, 1);
     public static boolean debug;
+    private static boolean sandboxed;
 
-    @SuppressWarnings("CallToSystemExit")
-    public static void main(String[] args) throws IOException {
-        Options options = new Options();
-        options.addOption("h", "help", false, "Print this text and exit");
-        options.addOption("v", "version", false, "Print version and exit");
-        options.addOption("m", "mode", true, "Specify which mode to run");
-        options.addOption("d", "debug", false, "Run in debug mode");
-        options.addOption("c", "console", false, "Run server without gui");
-        options.addOption("s", "skipintro", false, "Skip client intro");
-        Parser parser = new PosixParser();
-        CommandLine commandLine;
-        try {
-            commandLine = parser.parse(options, args);
-        } catch (ParseException e) {
-            System.err.println(e.getMessage());
-            System.exit(255);
+    public static void sandbox() {
+        if (sandboxed) {
             return;
         }
-        if (commandLine.hasOption('h')) {
-            HelpFormatter helpFormatter = new HelpFormatter();
-            helpFormatter.printHelp("scapes", options);
-            System.exit(0);
-        }
-        if (commandLine.hasOption('v')) {
-            System.out.println("Scapes " + VERSION);
-            System.exit(0);
-        }
+        sandboxed = true;
         Policy.setPolicy(new Policy() {
             @Override
             public Permissions getPermissions(CodeSource codesource) {
@@ -94,6 +74,38 @@ public class Scapes {
             }
         });
         System.setSecurityManager(new SecurityManager());
+    }
+
+    @SuppressWarnings("CallToSystemExit")
+    public static void main(String[] args) {
+        Options options = new Options();
+        options.addOption("h", "help", false, "Print this text and exit");
+        options.addOption("v", "version", false, "Print version and exit");
+        options.addOption("m", "mode", true, "Specify which mode to run");
+        options.addOption("d", "debug", false, "Run in debug mode");
+        options.addOption("c", "console", false, "Run server without gui");
+        options.addOption("s", "skipintro", false, "Skip client intro");
+        Parser parser = new PosixParser();
+        CommandLine commandLine;
+        try {
+            commandLine = parser.parse(options, args);
+        } catch (ParseException e) {
+            System.err.println(e.getMessage());
+            System.exit(255);
+            return;
+        }
+        if (commandLine.hasOption('h')) {
+            HelpFormatter helpFormatter = new HelpFormatter();
+            helpFormatter.printHelp("scapes", options);
+            System.exit(0);
+            return;
+        }
+        if (commandLine.hasOption('v')) {
+            System.out.println("Scapes " + VERSION);
+            System.exit(0);
+            return;
+        }
+        sandbox();
         debug = commandLine.hasOption('d');
         String[] cmdArgs = commandLine.getArgs();
         String mode = commandLine.getOptionValue('m', "client");
@@ -120,15 +132,20 @@ public class Scapes {
                 System.exit(engine.run());
                 break;
             case "server":
-                FileSystem files =
-                        FileSystemContainer.newFileSystem(directory, "");
-                if (!commandLine.hasOption('c')) {
-                    ScapesServerShell server = new ScapesServerShell(files);
-                    server.run();
-                } else {
-                    ScapesServerHeadless server =
-                            new ScapesServerHeadless(files);
-                    server.run();
+                try {
+                    FileSystem files =
+                            FileSystemContainer.newFileSystem(directory, "");
+                    ScapesStandaloneServer server;
+                    if (!commandLine.hasOption('c')) {
+                        server = new ScapesServerShell(files);
+                    } else {
+                        server = new ScapesServerHeadless(files);
+                    }
+                    System.exit(server.run());
+                } catch (IOException e) {
+                    System.err.println(e.getMessage());
+                    System.exit(200);
+                    return;
                 }
                 break;
             default:

@@ -35,7 +35,8 @@ public class ScapesServerHeadless extends ScapesStandaloneServer {
         super(files);
     }
 
-    public void run() throws IOException {
+    @Override
+    public int run() throws IOException {
         if (!directory.exists()) {
             throw new IOException("No save found");
         }
@@ -64,6 +65,7 @@ public class ScapesServerHeadless extends ScapesStandaloneServer {
                 break;
             }
         }
+        return 0;
     }
 
     @Override

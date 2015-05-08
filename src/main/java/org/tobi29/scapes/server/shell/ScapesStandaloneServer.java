@@ -58,6 +58,8 @@ public abstract class ScapesStandaloneServer
         directory = files.get("data");
     }
 
+    public abstract int run() throws IOException;
+
     protected void start() throws IOException {
         start(Collections.emptyList());
     }

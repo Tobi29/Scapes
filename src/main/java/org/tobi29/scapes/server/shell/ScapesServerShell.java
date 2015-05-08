@@ -109,7 +109,8 @@ public class ScapesServerShell extends ScapesStandaloneServer
         });
     }
 
-    public void run() throws IOException {
+    @Override
+    public int run() throws IOException {
         Directory directory = files.get("data");
         if (!directory.exists()) {
             DirectoryDialog dialog = new DirectoryDialog(shell, SWT.OPEN);
@@ -134,6 +135,7 @@ public class ScapesServerShell extends ScapesStandaloneServer
                 break;
             }
         }
+        return 0;
     }
 
     @Override
