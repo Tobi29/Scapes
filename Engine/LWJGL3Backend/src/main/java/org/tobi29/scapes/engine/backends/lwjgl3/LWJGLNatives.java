@@ -34,33 +34,31 @@ public final class LWJGLNatives {
             Directory directory = files.getDirectory("Temp:natives");
             directory.make();
             Platform platform = Platform.getPlatform();
+            Path path = files.get("Class:native");
             switch (platform.getID()) {
                 case "Linux": {
-                    Path path;
                     if (platform.is64Bit()) {
-                        path = files.get("Class:native/linux/x64");
+                        extract("liblwjgl.so", path, directory);
+                        extract("libopenal.so", path, directory);
                     } else {
-                        path = files.get("Class:native/linux/x86");
+                        extract("liblwjgl32.so", path, directory);
+                        extract("libopenal32.so", path, directory);
                     }
-                    extract("liblwjgl.so", path, directory);
-                    extract("libopenal.so", path, directory);
                     break;
                 }
                 case "MacOSX": {
-                    Path path = files.get("Class:native/macosx/x64");
                     extract("liblwjgl.dylib", path, directory);
                     extract("libopenal.dylib", path, directory);
                     break;
                 }
                 case "Windows":
-                    Path path;
                     if (platform.is64Bit()) {
-                        path = files.get("Class:native/windows/x64");
+                        extract("lwjgl.dll", path, directory);
+                        extract("OpenAL.dll", path, directory);
                     } else {
-                        path = files.get("Class:native/windows/x86");
+                        extract("lwjgl32.dll", path, directory);
+                        extract("OpenAL32.dll", path, directory);
                     }
-                    extract("lwjgl.dll", path, directory);
-                    extract("OpenAL32.dll", path, directory);
                     break;
                 default:
                     throw new ScapesEngineException(
