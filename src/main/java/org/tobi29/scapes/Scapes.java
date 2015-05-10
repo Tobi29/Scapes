@@ -113,7 +113,7 @@ public class Scapes {
         if (cmdArgs.length > 0) {
             directory = cmdArgs[0];
         } else {
-            directory = ".";
+            directory = System.getProperty("user.dir");
         }
         switch (mode) {
             case "client":
