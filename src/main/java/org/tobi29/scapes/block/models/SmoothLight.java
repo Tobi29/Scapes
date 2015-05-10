@@ -70,7 +70,7 @@ public class SmoothLight {
             triple.a = light / lights / 15.0f;
         }
         if (sunLights == 0) {
-            triple.a = 0.0f;
+            triple.b = 0.0f;
         } else {
             triple.b = sunLight / sunLights / 15.0f;
         }
