@@ -32,6 +32,7 @@ void main(void)  {
     float lightSunLevel = max(attribute_Light.y - uniform_Sunlight, 0.0);
     vec3 lightSun = vec3(lightSunLevel);
     vec3 lightBlock = vec3(attribute_Light.x);
+    lightBlock *= 0.5;
     lightBlock.gb *= lightBlock.gb;
     lightBlock.b *= lightBlock.b;
     if (varying_Depth < 32.0 * uniform_CamLight) {

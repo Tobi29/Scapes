@@ -6,8 +6,10 @@ in vec4 attribute_Position;
 in vec2 attribute_Texture;
 
 uniform mat4 uniform_ModelViewProjectionMatrix;
+uniform sampler2D uniform_AutoExposure;
 
 out vec2 varying_Texture;
+out float varying_AutoExposure;
 
 #ifdef ENABLE_BLOOM
     #define BLUR_OFFSET _SCAPES_ENGINE_EXTERNAL
@@ -25,5 +27,6 @@ void main(void)  {
             varying_TextureOffset[i] = vec2(attribute_Texture.x, attribute_Texture.y + blurOffset[i]);
         }
     #endif
+    varying_AutoExposure = texture(uniform_AutoExposure, vec2(0.0)).r;
     gl_Position = uniform_ModelViewProjectionMatrix * attribute_Position;
 }

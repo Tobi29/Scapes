@@ -2,12 +2,15 @@
 
 #define ENABLE_BLOOM _SCAPES_ENGINE_DEFINE
 
+const vec3 lumcoeff = vec3(0.299, 0.587, 0.114);
+
+in vec2 varying_Texture;
+in float varying_AutoExposure;
+
 uniform sampler2D uniform_Texture;
 uniform sampler2D uniform_Luminance;
 uniform float uniform_Brightness;
 uniform float uniform_Exposure;
-
-in vec2 varying_Texture;
 
 #ifdef ENABLE_BLOOM
     #define BLUR_WEIGHT _SCAPES_ENGINE_EXTERNAL
@@ -19,8 +22,6 @@ in vec2 varying_Texture;
 #endif
 
 out vec4 out_Color;
-
-const vec3 lumcoeff = vec3(0.299, 0.587, 0.114);
 
 vec3 toneMap(vec3 color, float exposure) {
     color *= vec3(exposure);
@@ -36,7 +37,7 @@ vec3 colorBoost(vec3 color, float amount, float luminance) {
 
 void main(void) {
     vec3 color = texture(uniform_Texture, varying_Texture).rgb;
-    color = toneMap(color, uniform_Exposure);
+    color = toneMap(color, uniform_Exposure + varying_AutoExposure);
     float luminance = dot(color, lumcoeff);
     #ifdef ENABLE_BLOOM
         vec3 bloom = vec3(0.0);

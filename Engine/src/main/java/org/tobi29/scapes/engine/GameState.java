@@ -17,18 +17,32 @@
 package org.tobi29.scapes.engine;
 
 import org.tobi29.scapes.engine.gui.Gui;
+import org.tobi29.scapes.engine.gui.GuiController;
 import org.tobi29.scapes.engine.opengl.*;
+import org.tobi29.scapes.engine.opengl.matrix.Matrix;
+import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.opengl.texture.TextureFBOColor;
 import org.tobi29.scapes.engine.utils.Sync;
 
 public abstract class GameState {
+    protected static final VAO CURSOR;
     protected final VAO vao;
     protected final ScapesEngine engine;
     protected final FontRenderer font;
     protected Scene scene, newScene;
     protected FBO fboScene, fboFront, fboBack;
+
+    static {
+        CURSOR = VAOUtility.createVCTI(
+                new float[]{-16.0f, -16.0f, 0.0f, 16.0f, -16.0f, 0.0f, -16.0f,
+                        16.0f, 0.0f, 16.0f, 16.0f, 0.0f},
+                new float[]{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+                        1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+                new float[]{0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f},
+                new int[]{0, 1, 2, 1, 2, 3}, RenderType.TRIANGLES);
+    }
 
     protected GameState(ScapesEngine engine, Scene scene) {
         this(engine, scene, engine.getGraphics().getDefaultFont());
@@ -159,7 +173,7 @@ public abstract class GameState {
         fboScene.activate(graphics);
         openGL.viewport(0, 0, sceneWidth, sceneHeight);
         openGL.clearDepth();
-        scene.renderScene(graphics, delta);
+        scene.renderScene(graphics);
         fboScene.deactivate(graphics);
         openGL.checkError("Scene-Rendering");
         graphics.setProjectionOrthogonal(0.0f, 0.0f, 800.0f, 512.0f);
@@ -213,7 +227,23 @@ public abstract class GameState {
         Shader shader = graphics.getShaderManager()
                 .getShader("Engine:shader/Gui", graphics);
         scene.renderGui(graphics, shader, delta);
+        engine.getGlobalGui()
+                .render(graphics, shader, graphics.getDefaultFont(), delta);
+        GuiController guiController = engine.getGuiController();
+        if (guiController.isSoftwareMouse() && !isMouseGrabbed()) {
+            graphics.setProjectionOrthogonal(0.0f, 0.0f,
+                    graphics.getContentWidth(), graphics.getContainerHeight());
+            graphics.getTextureManager().bind("Engine:image/Cursor", graphics);
+            MatrixStack matrixStack = graphics.getMatrixStack();
+            Matrix matrix = matrixStack.push();
+            matrix.translate((float) guiController.getCursorX(),
+                    (float) guiController.getCursorY(), 0.0f);
+            CURSOR.render(graphics, shader);
+            matrixStack.pop();
+        }
         openGL.checkError("Gui-Rendering");
+        scene.postRender(graphics, delta);
+        openGL.checkError("Post-Render");
     }
 
     public void renderPostProcess(GraphicsSystem graphics, FBO fbo,
@@ -230,6 +260,10 @@ public abstract class GameState {
         openGL.activeTexture(0);
         texturesColor[0].bind(graphics);
         vao.render(graphics, scene.postProcessing(graphics, i));
+    }
+
+    public FBO getFBOScene() {
+        return fboScene;
     }
 
     public FontRenderer getFont() {

@@ -20,11 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.gui.GuiController;
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.opengl.shader.ShaderManager;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.opengl.texture.TextureManager;
@@ -39,7 +37,6 @@ import java.io.IOException;
 public class GraphicsSystem {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GraphicsSystem.class);
-    private static final VAO CURSOR;
     private final ScapesEngine engine;
     private final FontRenderer defaultFont;
     private final Container container;
@@ -55,16 +52,6 @@ public class GraphicsSystem {
     private double resolutionMultiplier = 1.0;
     private int containerWidth = 1, containerHeight = 1, contentWidth = 1,
             contentHeight = 1;
-
-    static {
-        CURSOR = VAOUtility.createVCTI(
-                new float[]{-16.0f, -16.0f, 0.0f, 16.0f, -16.0f, 0.0f, -16.0f,
-                        16.0f, 0.0f, 16.0f, 16.0f, 0.0f},
-                new float[]{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-                        1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
-                new float[]{0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f},
-                new int[]{0, 1, 2, 1, 2, 3}, RenderType.TRIANGLES);
-    }
 
     public GraphicsSystem(ScapesEngine engine, Container container) {
         this.engine = engine;
@@ -194,23 +181,9 @@ public class GraphicsSystem {
             } else {
                 fboSizeDirty = false;
             }
-            double delta = sync.getSpeedFactor();
             engine.step();
             GameState state = engine.getState();
             state.render(this, fboSizeDirty);
-            Shader shader = shaderManager.getShader("Engine:shader/Gui", this);
-            engine.getGlobalGui().render(this, shader, defaultFont, delta);
-            GuiController guiController = engine.getGuiController();
-            if (guiController.isSoftwareMouse() && !state.isMouseGrabbed()) {
-                setProjectionOrthogonal(0.0f, 0.0f, contentWidth,
-                        contentHeight);
-                textureManager.bind("Engine:image/Cursor", this);
-                Matrix matrix = matrixStack.push();
-                matrix.translate((float) guiController.getCursorX(),
-                        (float) guiController.getCursorY(), 0.0f);
-                CURSOR.render(this, shader);
-                matrixStack.pop();
-            }
             fpsDebug.setValue(sync.getTPS());
             textureDebug.setValue(Texture.getTextureCount());
             vaoDebug.setValue(VAO.getVAOCount());

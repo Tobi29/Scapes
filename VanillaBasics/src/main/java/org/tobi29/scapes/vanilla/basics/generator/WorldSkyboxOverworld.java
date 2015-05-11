@@ -338,8 +338,8 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         MatrixStack matrixStack = graphics.getMatrixStack();
         float skyLight = (float) (15.0 - climateGenerator
                 .getSunLightReduction(scene.getCam().position.intX(),
-                        scene.getCam().position.intY())) / 15.0f *
-                fogBrightness;
+                        scene.getCam().position.intY())) / 15.0f;
+        float skyboxLight = skyLight * fogBrightness;
         float weather = (float) climateGenerator
                 .getWeather(FastMath.floor(player.getX()),
                         FastMath.floor(player.getY()));
@@ -358,7 +358,8 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         shader.setUniform3f(4, scene.getFogR(), scene.getFogG(),
                 scene.getFogB());
         shader.setUniform1f(5, scene.getFogDistance());
-        shader.setUniform4f(6, skyLight * skyLight, skyLight, skyLight, 1.0f);
+        shader.setUniform4f(6, skyboxLight * skyboxLight, skyboxLight,
+                skyboxLight, 1.0f);
         skyboxMesh.render(graphics, shader);
         // Stars
         if (skyLight < 1.0f) {
@@ -384,9 +385,10 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         matrix.rotate(-sunElevation, 1.0f, 0.0f, 0.0f);
         matrix.scale(1.0f, 1.0f, 1.0f);
         shader = shaderManager.getShader("VanillaBasics:shader/Glow", graphics);
-        shader.setUniform4f(4, fogR * 0.8f, fogG * 0.9f, fogB * 0.9f, 1.0f);
+        shader.setUniform4f(4, fogR * 1.0f, fogG * 1.1f, fogB * 1.1f, 1.0f);
         billboardMesh.render(graphics, shader);
         matrix.scale(0.2f, 1.0f, 0.2f);
+        shader.setUniform4f(4, fogR * 1.6f, fogG * 1.6f, fogB * 1.3f, 1.0f);
         billboardMesh.render(graphics, shader);
         matrixStack.pop();
         // Moon
@@ -401,7 +403,6 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         openGL.setBlending(BlendingMode.NORMAL);
         shader = shaderManager
                 .getShader("VanillaBasics:shader/Skybox", graphics);
-        shader.setUniform4f(6, skyLight, skyLight, skyLight, 1.0f);
         // Clouds
         graphics.getTextureManager().bind(fbo.getTexturesColor()[0], graphics);
         cloudMesh.render(graphics, shader);

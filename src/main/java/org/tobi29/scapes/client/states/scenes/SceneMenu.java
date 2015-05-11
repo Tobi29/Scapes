@@ -105,9 +105,7 @@ public class SceneMenu extends Scene {
     }
 
     @Override
-    public void renderScene(GraphicsSystem graphics, double delta) {
-        yaw -= speed * delta;
-        yaw %= 360;
+    public void renderScene(GraphicsSystem graphics) {
         cam.setPerspective(
                 (float) graphics.getSceneWidth() / graphics.getSceneHeight(),
                 90.0f);
@@ -137,6 +135,12 @@ public class SceneMenu extends Scene {
             vao.render(graphics, shader);
             matrixStack.pop();
         }
+    }
+
+    @Override
+    public void postRender(GraphicsSystem graphics, double delta) {
+        yaw -= speed * delta;
+        yaw %= 360;
     }
 
     @Override

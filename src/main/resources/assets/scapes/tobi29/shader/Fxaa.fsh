@@ -1,6 +1,7 @@
 #version 150
 
 uniform sampler2D uniform_Texture;
+uniform sampler2D uniform_Noise;
 uniform vec2 uniform_ScreenSize;
 
 in vec2 varying_Texture;
@@ -12,7 +13,7 @@ out vec4 out_Color;
 #define FxaaFloat2 vec2
 #define FxaaTexLod0(t, p) texture(t, p)
 
-vec3 FxaaPixelShader(vec4 posPos, sampler2D tex, vec2 rcpFrame) {
+vec3 fxaa(vec4 posPos, sampler2D tex, vec2 rcpFrame) {
     #define FXAA_REDUCE_MIN   (1.0/128.0)
     #define FXAA_REDUCE_MUL   (1.0/8.0)
     #define FXAA_SPAN_MAX     8.0
@@ -55,13 +56,18 @@ vec3 FxaaPixelShader(vec4 posPos, sampler2D tex, vec2 rcpFrame) {
     if((lumaB < lumaMin) || (lumaB > lumaMax)) return rgbA;
     return rgbB;
 }
+
+vec3 dither(vec3 color, vec2 pixel) {
+    vec3 noise = texture(uniform_Noise, pixel).rgb / 512.0 + 0.001953125;
+    return color + noise;
+}
     
-void main() 
-{ 
+void main() {
   vec2 uv = varying_Texture;
   vec4 color = vec4(0.0);
   vec2 rcpFrame = vec2(1.0 / uniform_ScreenSize.x, 1.0 / uniform_ScreenSize.y);
-  color.rgb = FxaaPixelShader(vec4(varying_Texture,varying_PosPos), uniform_Texture, rcpFrame);
+  color.rgb = fxaa(vec4(varying_Texture, varying_PosPos), uniform_Texture, rcpFrame);
+  color.rgb = dither(color.rgb, varying_Texture * uniform_ScreenSize / vec2(512.0));
   color.a = 1.0;
   out_Color = color;
 }

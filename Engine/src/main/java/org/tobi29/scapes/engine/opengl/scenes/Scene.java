@@ -63,7 +63,8 @@ public abstract class Scene {
         guis.forEach(gui -> gui.update(engine));
     }
 
-    public void renderGui(GraphicsSystem graphics, Shader shader, double delta) {
+    public void renderGui(GraphicsSystem graphics, Shader shader,
+            double delta) {
         for (GuiComponent gui : guis) {
             gui.render(graphics, shader, state.getFont(), delta);
         }
@@ -79,7 +80,10 @@ public abstract class Scene {
 
     public abstract void init(GraphicsSystem graphics);
 
-    public abstract void renderScene(GraphicsSystem graphics, double delta);
+    public abstract void renderScene(GraphicsSystem graphics);
+
+    public void postRender(GraphicsSystem graphics, double delta) {
+    }
 
     public Shader postProcessing(GraphicsSystem graphics, int pass) {
         return graphics.getShaderManager()
