@@ -64,6 +64,7 @@ configurations {
 
 afterEvaluate {
     sourceSets.main.compileClasspath += configurations.provided
+    sourceSets.main.runtimeClasspath += configurations.runtimePlatform
 
     idea {
         module {

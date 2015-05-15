@@ -33,7 +33,9 @@ class ScapesEngineApplication implements Plugin<Project> {
         runTask.description = "Runs this project as a JVM application"
         runTask.group = "Run"
         runTask.conventionMapping.main = { target.application.mainClass }
-        runTask.classpath = target.sourceSets.main.runtimeClasspath
+        target.afterEvaluate {
+            runTask.classpath = target.sourceSets.main.runtimeClasspath
+        }
         runTask.jvmArgs "-Xms1024M", "-Xmx2048M", "-XX:+UseG1GC",
                 "-XX:MaxGCPauseMillis=1"
         if (target.hasProperty("runArgs")) {
