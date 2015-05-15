@@ -22,13 +22,14 @@ import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
 import org.tobi29.scapes.engine.utils.io.filesystem.File;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Optional;
 
 public interface PlatformDialogs {
-    java.io.File[] openFileDialog(Pair<String, String>[] extensions,
+    URI[] openFileDialog(Pair<String, String>[] extensions,
             String title, boolean multiple);
 
-    Optional<java.io.File> saveFileDialog(Pair<String, String>[] extensions,
+    Optional<URI> saveFileDialog(Pair<String, String>[] extensions,
             String title);
 
     boolean exportToUser(File file, Pair<String, String>[] extensions,
@@ -43,7 +44,7 @@ public interface PlatformDialogs {
 
     void message(MessageType messageType, String title, String message);
 
-    void openFile(java.io.File file);
+    void openFile(URI file);
 
     void renderTick() throws DesktopException;
 

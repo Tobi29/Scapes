@@ -39,6 +39,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.File;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -149,14 +150,14 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
     }
 
     @Override
-    public java.io.File[] openFileDialog(Pair<String, String>[] extensions,
-            String title, boolean multiple) {
+    public URI[] openFileDialog(Pair<String, String>[] extensions, String title,
+            boolean multiple) {
         return exec(() -> dialogs.openFileDialog(extensions, title, multiple));
     }
 
     @Override
-    public Optional<java.io.File> saveFileDialog(
-            Pair<String, String>[] extensions, String title) {
+    public Optional<URI> saveFileDialog(Pair<String, String>[] extensions,
+            String title) {
         return exec(() -> dialogs.saveFileDialog(extensions, title));
     }
 
@@ -187,7 +188,7 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
     }
 
     @Override
-    public void openFile(java.io.File file) {
+    public void openFile(URI file) {
         exec(() -> dialogs.openFile(file));
     }
 

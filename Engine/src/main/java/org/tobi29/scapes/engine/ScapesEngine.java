@@ -303,8 +303,7 @@ public class ScapesEngine implements Crashable {
                     CrashReportFile.getFile(files.getDirectory("File:"));
             CrashReportFile.writeCrashReport(e, crashReportFile, "ScapesEngine",
                     debugValues);
-            graphics.getContainer()
-                    .openFile(new java.io.File(crashReportFile.getURI()));
+            graphics.getContainer().openFile(crashReportFile.getURI());
         } catch (IOException e1) {
             LOGGER.error("Failed to write crash report: {}", e.toString());
         }
