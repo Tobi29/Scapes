@@ -14,22 +14,36 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.platform;
+package org.tobi29.scapes.engine;
 
 import org.tobi29.scapes.engine.utils.DesktopException;
+import org.tobi29.scapes.engine.utils.Pair;
+import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
+import org.tobi29.scapes.engine.utils.io.filesystem.File;
 
-import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 
 public interface PlatformDialogs {
-    File[] openFileDialog(Extension[] extensions, String title,
-            boolean multiple);
+    java.io.File[] openFileDialog(Pair<String, String>[] extensions,
+            String title, boolean multiple);
 
-    Optional<File> saveFileDialog(Extension[] extensions, String title);
+    Optional<java.io.File> saveFileDialog(Pair<String, String>[] extensions,
+            String title);
+
+    boolean exportToUser(File file, Pair<String, String>[] extensions,
+            String title) throws IOException;
+
+    boolean importFromUser(File file, Pair<String, String>[] extensions,
+            String title) throws IOException;
+
+    boolean importFromUser(Directory directory,
+            Pair<String, String>[] extensions, String title, boolean multiple)
+            throws IOException;
 
     void message(MessageType messageType, String title, String message);
 
-    void openFile(File file);
+    void openFile(java.io.File file);
 
     void renderTick() throws DesktopException;
 
@@ -41,14 +55,5 @@ public interface PlatformDialogs {
         WARNING,
         QUESTION,
         PLAIN
-    }
-
-    class Extension {
-        public final String pattern, name;
-
-        public Extension(String pattern, String name) {
-            this.pattern = pattern;
-            this.name = name;
-        }
     }
 }

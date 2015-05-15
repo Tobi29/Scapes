@@ -19,7 +19,6 @@ package org.tobi29.scapes.engine.utils.io.filesystem.javanio;
 import org.tobi29.scapes.engine.utils.io.filesystem.File;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileAttributes;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileContents;
-import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +29,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.zip.ZipFile;
 
 public class JavaNIOFile implements File {
@@ -68,27 +66,6 @@ public class JavaNIOFile implements File {
     @Override
     public FileAttributes getAttributes() {
         return new JavaNIOAttributes(path);
-    }
-
-    @Override
-    public boolean exportToUser(PlatformDialogs.Extension[] extensions,
-            String title, PlatformDialogs dialogs) throws IOException {
-        Optional<java.io.File> file = dialogs.saveFileDialog(extensions, title);
-        if (file.isPresent()) {
-            Files.copy(path, file.get().toPath());
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean importFromUser(PlatformDialogs.Extension[] extensions,
-            String title, PlatformDialogs dialogs) throws IOException {
-        java.io.File[] files = dialogs.openFileDialog(extensions, title, false);
-        for (java.io.File file : files) {
-            Files.copy(file.toPath(), path);
-        }
-        return files.length > 0;
     }
 
     @Override

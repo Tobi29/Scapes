@@ -16,11 +16,13 @@
 
 package org.tobi29.scapes.engine.opengl;
 
+import org.tobi29.scapes.engine.PlatformDialogs;
 import org.tobi29.scapes.engine.input.ControllerDefault;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.openal.OpenAL;
 import org.tobi29.scapes.engine.utils.DesktopException;
-import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
+import org.tobi29.scapes.engine.utils.io.ReadSource;
+import org.tobi29.scapes.engine.utils.ui.font.GlyphRenderer;
 
 import java.util.Collection;
 
@@ -46,6 +48,10 @@ public interface Container extends PlatformDialogs {
 
     @Override
     void dispose();
+
+    boolean loadFont(ReadSource font);
+
+    GlyphRenderer createGlyphRenderer(String fontName, int size);
 
     OpenGL getOpenGL();
 

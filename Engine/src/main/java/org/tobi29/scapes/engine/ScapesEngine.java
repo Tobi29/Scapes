@@ -41,12 +41,10 @@ import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPathRoot;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
 import org.tobi29.scapes.engine.utils.platform.Platform;
-import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Map;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
@@ -94,12 +92,10 @@ public class ScapesEngine implements Crashable {
         LOGGER.info("Starting Scapes-Engine: {} (Game: {})", this, game);
         try {
             files = new FileSystemContainer();
-            files.registerFileSystem("File",
-                    FileSystemContainer.newFileSystem(home));
-            String temp = Files.createTempDirectory("Scapes").toAbsolutePath()
-                    .toString();
+            files.registerFileSystem("File", home,
+                    Platform.getPlatform()::getFileFileSystem);
             files.registerFileSystem("Temp",
-                    FileSystemContainer.newFileSystem(temp));
+                    Platform.getPlatform()::getTempFileFileSystem);
             Directory tempDirectory = files.getDirectory("Temp:");
             runtime.addShutdownHook(new Thread(() -> {
                 try {
@@ -109,7 +105,7 @@ public class ScapesEngine implements Crashable {
                             e.toString());
                 }
             }));
-            files.registerFileSystem("Class",
+            files.registerFileSystem("Class", "",
                     ClasspathPathRoot.make(getClass().getClassLoader()));
             files.registerFileSystem("Engine", "assets/scapes/tobi29/engine/",
                     ClasspathPathRoot.make(getClass().getClassLoader()));

@@ -17,7 +17,6 @@
 package org.tobi29.scapes.engine.utils.io.filesystem;
 
 import org.tobi29.scapes.engine.utils.io.WriteDestination;
-import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
 
 import java.io.IOException;
 import java.net.URI;
@@ -34,12 +33,6 @@ public interface File extends Resource, WriteDestination {
 
     @Override
     FileAttributes getAttributes();
-
-    boolean exportToUser(PlatformDialogs.Extension[] extensions, String title,
-            PlatformDialogs dialogs) throws IOException;
-
-    boolean importFromUser(PlatformDialogs.Extension[] extensions, String title,
-            PlatformDialogs dialogs) throws IOException;
 
     FileContents contents() throws IOException;
 

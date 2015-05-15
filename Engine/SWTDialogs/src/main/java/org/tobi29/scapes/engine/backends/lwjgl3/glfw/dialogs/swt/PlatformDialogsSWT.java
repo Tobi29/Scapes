@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.platform.swt;
+package org.tobi29.scapes.engine.backends.lwjgl3.glfw.dialogs.swt;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.program.Program;
@@ -22,10 +22,15 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+import org.tobi29.scapes.engine.PlatformDialogs;
 import org.tobi29.scapes.engine.utils.DesktopException;
-import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
+import org.tobi29.scapes.engine.utils.Pair;
+import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 public class PlatformDialogsSWT implements PlatformDialogs {
@@ -43,14 +48,14 @@ public class PlatformDialogsSWT implements PlatformDialogs {
     }
 
     @Override
-    public File[] openFileDialog(Extension[] extensions, String title,
-            boolean multiple) {
+    public File[] openFileDialog(Pair<String, String>[] extensions,
+            String title, boolean multiple) {
         String[] filterExtensions = new String[extensions.length];
         String[] filterNames = new String[extensions.length];
         for (int i = 0; i < extensions.length; i++) {
-            Extension extension = extensions[i];
-            filterExtensions[i] = extension.pattern;
-            filterNames[i] = extension.name;
+            Pair<String, String> extension = extensions[i];
+            filterExtensions[i] = extension.a;
+            filterNames[i] = extension.b;
         }
         int style = SWT.OPEN | SWT.APPLICATION_MODAL;
         if (multiple) {
@@ -74,13 +79,14 @@ public class PlatformDialogsSWT implements PlatformDialogs {
     }
 
     @Override
-    public Optional<File> saveFileDialog(Extension[] extensions, String title) {
+    public Optional<File> saveFileDialog(Pair<String, String>[] extensions,
+            String title) {
         String[] filterExtensions = new String[extensions.length];
         String[] filterNames = new String[extensions.length];
         for (int i = 0; i < extensions.length; i++) {
-            Extension extension = extensions[i];
-            filterExtensions[i] = extension.pattern;
-            filterNames[i] = extension.name;
+            Pair<String, String> extension = extensions[i];
+            filterExtensions[i] = extension.a;
+            filterNames[i] = extension.b;
         }
         FileDialog fileDialog =
                 new FileDialog(shell, SWT.SAVE | SWT.APPLICATION_MODAL);
@@ -93,6 +99,43 @@ public class PlatformDialogsSWT implements PlatformDialogs {
         }
         String fileName = fileDialog.getFileName();
         return Optional.of(new File(fileDialog.getFilterPath(), fileName));
+    }
+
+    @Override
+    public boolean exportToUser(
+            org.tobi29.scapes.engine.utils.io.filesystem.File file,
+            Pair<String, String>[] extensions, String title)
+            throws IOException {
+        Optional<File> export = saveFileDialog(extensions, title);
+        if (export.isPresent()) {
+            Files.copy(Paths.get(file.getURI()), export.get().toPath());
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean importFromUser(
+            org.tobi29.scapes.engine.utils.io.filesystem.File file,
+            Pair<String, String>[] extensions, String title)
+            throws IOException {
+        File[] exports = openFileDialog(extensions, title, false);
+        for (File export : exports) {
+            Files.copy(export.toPath(), Paths.get(file.getURI()));
+        }
+        return exports.length > 0;
+    }
+
+    @Override
+    public boolean importFromUser(Directory directory,
+            Pair<String, String>[] extensions, String title, boolean multiple)
+            throws IOException {
+        File[] exports = openFileDialog(extensions, title, multiple);
+        for (File export : exports) {
+            Files.copy(export.toPath(),
+                    Paths.get(directory.getURI()).resolve(export.getName()));
+        }
+        return exports.length > 0;
     }
 
     @Override

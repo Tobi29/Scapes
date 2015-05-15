@@ -29,4 +29,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-org.tobi29.scapes.engine.backends.lwjgl3.glfw.GLFWBackendProvider
+org.tobi29.scapes.engine.utils.platform.nio.PlatformLinuxProvider
+org.tobi29.scapes.engine.utils.platform.nio.PlatformMacOSXProvider
+org.tobi29.scapes.engine.utils.platform.nio.PlatformWindowsProvider

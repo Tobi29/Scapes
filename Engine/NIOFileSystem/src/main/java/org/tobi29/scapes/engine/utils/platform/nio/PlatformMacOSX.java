@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.server.controlpanel;
+package org.tobi29.scapes.engine.utils.platform.nio;
 
-public class ScapesControlPanel {
-    public static void main(String... args) {
-        new ScapesControlPanelContainer().run();
+public class PlatformMacOSX extends PlatformDesktop {
+    @Override
+    public String getID() {
+        return "MacOSX";
     }
 }

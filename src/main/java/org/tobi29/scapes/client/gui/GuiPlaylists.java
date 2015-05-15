@@ -24,9 +24,9 @@ import org.tobi29.scapes.engine.gui.GuiComponentPane;
 import org.tobi29.scapes.engine.gui.GuiComponentScrollPaneList;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.engine.openal.codec.AudioInputStream;
+import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
 import org.tobi29.scapes.engine.utils.io.filesystem.File;
-import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,6 +41,7 @@ public class GuiPlaylists extends GuiMenu {
     private final GameState state;
     private String playlist;
 
+    @SuppressWarnings("unchecked")
     public GuiPlaylists(GameState state, Gui previous) {
         super(state, "Playlists", previous);
         this.state = state;
@@ -60,16 +61,13 @@ public class GuiPlaylists extends GuiMenu {
             try {
                 Directory directory = state.getEngine().getFiles()
                         .getDirectory("File:playlists/" + playlist);
-                directory.importFromUser(new PlatformDialogs.Extension[]{
-                                new PlatformDialogs.Extension("*.*",
-                                        "All Files"),
-                                new PlatformDialogs.Extension("*.ogg",
-                                        "ogg-Vorbis File"),
-                                new PlatformDialogs.Extension("*.mp3",
-                                        "MP3 File"),
-                                new PlatformDialogs.Extension("*.wav",
-                                        "Wave File")}, "Import music", true,
-                        state.getEngine().getGraphics().getContainer());
+                state.getEngine().getGraphics().getContainer()
+                        .importFromUser(directory,
+                                new Pair[]{new Pair<>("*.*", "All Files"),
+                                        new Pair<>("*.ogg", "ogg-Vorbis File"),
+                                        new Pair<>("*.mp3", "MP3 File"),
+                                        new Pair<>("*.wav", "Wave File")},
+                                "Import music", true);
                 updateTitles(playlist);
             } catch (IOException e) {
                 LOGGER.warn("Failed to import music: {}", e.toString());

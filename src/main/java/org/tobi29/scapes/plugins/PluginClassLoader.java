@@ -24,6 +24,7 @@ import java.io.FilePermission;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Paths;
 import java.security.CodeSource;
 import java.security.PermissionCollection;
 import java.security.Permissions;
@@ -42,8 +43,8 @@ public class PluginClassLoader extends URLClassLoader {
         }
         if (directory != null) {
             permissions.add(new FilePermission(
-                    directory.getFile().getAbsolutePath() + "/-",
-                    "read,write,delete"));
+                    Paths.get(directory.getURI()).toAbsolutePath().toString() +
+                            "/-", "read,write,delete"));
         }
         permissions.add(new RuntimePermission("getClassLoader"));
         permissions.setReadOnly();

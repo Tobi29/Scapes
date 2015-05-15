@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.io.filesystem.spi;
+package org.tobi29.scapes.engine.backends.lwjgl3.glfw.spi;
 
-import org.tobi29.scapes.engine.utils.io.filesystem.FileSystem;
+import org.tobi29.scapes.engine.PlatformDialogs;
+import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.utils.io.ReadSource;
+import org.tobi29.scapes.engine.utils.ui.font.GlyphRenderer;
 
-import java.io.IOException;
+public interface GLFWDialogsProvider {
+    boolean available();
 
-public interface FileSystemProvider {
-    FileSystem getFileFileSystem(String root, String id) throws IOException;
+    PlatformDialogs createDialogs(ScapesEngine engine);
+
+    boolean loadFont(ReadSource font);
+
+    GlyphRenderer createGlyphRenderer(String fontName, int size);
 }

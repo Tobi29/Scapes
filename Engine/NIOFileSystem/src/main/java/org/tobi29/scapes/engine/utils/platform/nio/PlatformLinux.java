@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.io.filesystem.classpath;
+package org.tobi29.scapes.engine.utils.platform.nio;
 
-import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
-import org.tobi29.scapes.engine.utils.io.filesystem.PathRoot;
-
-public class ClasspathPathRoot extends ClasspathPath implements PathRoot {
-    public ClasspathPathRoot(ClassLoader classLoader, String id, String path) {
-        super(classLoader, id, path);
-    }
-
-    public static FileSystemContainer.PathRootCreatorWithPath make(
-            ClassLoader classLoader) {
-        return (id, path) -> new ClasspathPathRoot(classLoader, id, path);
+public class PlatformLinux extends PlatformDesktop {
+    @Override
+    public String getID() {
+        return "Linux";
     }
 }

@@ -21,9 +21,9 @@ import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.connection.Account;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
+import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.io.ChecksumUtil;
 import org.tobi29.scapes.engine.utils.io.filesystem.File;
-import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
 
 import java.io.IOException;
 import java.security.KeyPair;
@@ -37,6 +37,7 @@ public class GuiAccount extends GuiMenu {
     private KeyPair keyPair;
     private String nickname = "";
 
+    @SuppressWarnings("unchecked")
     public GuiAccount(GameState state, Gui previous) {
         super(state, "Account", "Save", previous);
         try {
@@ -83,10 +84,10 @@ public class GuiAccount extends GuiMenu {
             try {
                 File file =
                         state.getEngine().getFiles().getFile("File:Skin.png");
-                file.importFromUser(new PlatformDialogs.Extension[]{
-                                new PlatformDialogs.Extension("*.png",
-                                        "PNG Picture")}, "Import skin",
-                        state.getEngine().getGraphics().getContainer());
+                state.getEngine().getGraphics().getContainer()
+                        .importFromUser(file,
+                                new Pair[]{new Pair<>("*.png", "PNG Picture")},
+                                "Import skin");
             } catch (IOException e) {
                 LOGGER.warn("Failed to import skin: {}", e.toString());
             }

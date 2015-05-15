@@ -30,7 +30,6 @@ import org.tobi29.scapes.engine.utils.DesktopException;
 import org.tobi29.scapes.engine.utils.Sync;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f;
-import org.tobi29.scapes.engine.utils.platform.Platform;
 
 import java.io.IOException;
 
@@ -63,15 +62,14 @@ public class GraphicsSystem {
         textureManager = new TextureManager(engine);
         shaderManager = new ShaderManager(engine);
         resolutionMultiplier = engine.getConfig().getResolutionMultiplier();
-        Platform platform = Platform.getPlatform();
         try {
-            platform.loadFont(engine.getFiles()
+            container.loadFont(engine.getFiles()
                     .getResource("Engine:font/QuicksandPro-Regular.otf"));
         } catch (IOException e) {
             LOGGER.warn("Failed to load default font", e);
         }
         defaultFont = new FontRenderer(
-                platform.getGlyphRenderer("Quicksand Pro", 64));
+                container.createGlyphRenderer("Quicksand Pro", 64));
         GuiWidgetDebugValues debugValues = engine.getDebugValues();
         fpsDebug = debugValues.get("Graphics-Fps");
         widthDebug = debugValues.get("Graphics-Width");

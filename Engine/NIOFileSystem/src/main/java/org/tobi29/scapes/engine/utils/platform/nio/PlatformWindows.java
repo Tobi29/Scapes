@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.platform.swt;
+package org.tobi29.scapes.engine.utils.platform.nio;
 
-import org.tobi29.scapes.engine.utils.platform.Platform;
-import org.tobi29.scapes.engine.utils.platform.spi.PlatformProvider;
-
-public class PlatformWindowsProvider implements PlatformProvider {
+public class PlatformWindows extends PlatformDesktop {
     @Override
-    public boolean available() {
-        return System.getProperty("os.name").toUpperCase().contains("WIN");
-    }
-
-    @Override
-    public Platform getPlatform() {
-        return new PlatformWindows();
+    public String getID() {
+        return "Windows";
     }
 }
 

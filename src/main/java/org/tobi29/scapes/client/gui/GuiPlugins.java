@@ -22,9 +22,9 @@ import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngineException;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.opengl.texture.*;
+import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
 import org.tobi29.scapes.engine.utils.io.filesystem.File;
-import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
 import org.tobi29.scapes.plugins.PluginFile;
 
 import java.io.IOException;
@@ -36,6 +36,7 @@ public class GuiPlugins extends GuiMenu {
     private final Directory directory;
     private final GuiComponentScrollPaneList scrollPane;
 
+    @SuppressWarnings("unchecked")
     public GuiPlugins(GameState state, Gui previous) {
         super(state, "Plugins", previous);
         try {
@@ -49,10 +50,10 @@ public class GuiPlugins extends GuiMenu {
                 new GuiComponentTextButton(112, 370, 176, 30, 18, "Add");
         add.addLeftClick(event -> {
             try {
-                directory.importFromUser(new PlatformDialogs.Extension[]{
-                                new PlatformDialogs.Extension("*.jar",
-                                        "Jar Archive")}, "Import plugin", true,
-                        state.getEngine().getGraphics().getContainer());
+                state.getEngine().getGraphics().getContainer()
+                        .importFromUser(directory,
+                                new Pair[]{new Pair<>("*.jar", "Jar Archive")},
+                                "Import plugin", true);
                 updatePlugins();
             } catch (IOException e) {
                 LOGGER.warn("Failed to import plugin: {}", e.toString());

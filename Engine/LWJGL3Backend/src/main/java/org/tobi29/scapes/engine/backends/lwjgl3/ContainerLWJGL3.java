@@ -22,6 +22,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tobi29.scapes.engine.PlatformDialogs;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.input.ControllerDefault;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
@@ -32,13 +33,16 @@ import org.tobi29.scapes.engine.opengl.GraphicsCheckException;
 import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.utils.DesktopException;
 import org.tobi29.scapes.engine.utils.MutableSingle;
-import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
+import org.tobi29.scapes.engine.utils.Pair;
+import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
+import org.tobi29.scapes.engine.utils.io.filesystem.File;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 
-import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Supplier;
 
 public abstract class ContainerLWJGL3 extends ControllerDefault
         implements Container {
@@ -145,68 +149,46 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
     }
 
     @Override
-    public File[] openFileDialog(PlatformDialogs.Extension[] extensions,
+    public java.io.File[] openFileDialog(Pair<String, String>[] extensions,
             String title, boolean multiple) {
-        Thread thread = Thread.currentThread();
-        if (thread == mainThread) {
-            return dialogs.openFileDialog(extensions, title, multiple);
-        }
-        Joiner.Joinable joinable = new Joiner.Joinable();
-        MutableSingle<File[]> file = new MutableSingle<>(null);
-        tasks.add(() -> {
-            file.a = dialogs.openFileDialog(extensions, title, multiple);
-            joinable.join();
-        });
-        joinable.getJoiner().join();
-        return file.a;
+        return exec(() -> dialogs.openFileDialog(extensions, title, multiple));
     }
 
     @Override
-    public Optional<File> saveFileDialog(PlatformDialogs.Extension[] extensions,
-            String title) {
-        Thread thread = Thread.currentThread();
-        if (thread == mainThread) {
-            return dialogs.saveFileDialog(extensions, title);
-        }
-        Joiner.Joinable joinable = new Joiner.Joinable();
-        MutableSingle<Optional<File>> file = new MutableSingle<>(null);
-        tasks.add(() -> {
-            file.a = dialogs.saveFileDialog(extensions, title);
-            joinable.join();
-        });
-        joinable.getJoiner().join();
-        return file.a;
+    public Optional<java.io.File> saveFileDialog(
+            Pair<String, String>[] extensions, String title) {
+        return exec(() -> dialogs.saveFileDialog(extensions, title));
+    }
+
+    @Override
+    public boolean exportToUser(File file, Pair<String, String>[] extensions,
+            String title) throws IOException {
+        return execIO(() -> dialogs.exportToUser(file, extensions, title));
+    }
+
+    @Override
+    public boolean importFromUser(File file, Pair<String, String>[] extensions,
+            String title) throws IOException {
+        return execIO(() -> dialogs.importFromUser(file, extensions, title));
+    }
+
+    @Override
+    public boolean importFromUser(Directory directory,
+            Pair<String, String>[] extensions, String title, boolean multiple)
+            throws IOException {
+        return execIO(() -> dialogs
+                .importFromUser(directory, extensions, title, multiple));
     }
 
     @Override
     public void message(PlatformDialogs.MessageType messageType, String title,
             String message) {
-        Thread thread = Thread.currentThread();
-        if (thread == mainThread) {
-            dialogs.message(messageType, title, message);
-            return;
-        }
-        Joiner.Joinable joinable = new Joiner.Joinable();
-        tasks.add(() -> {
-            dialogs.message(messageType, title, message);
-            joinable.join();
-        });
-        joinable.getJoiner().join();
+        exec(() -> dialogs.message(messageType, title, message));
     }
 
     @Override
-    public void openFile(File file) {
-        Thread thread = Thread.currentThread();
-        if (thread == mainThread) {
-            dialogs.openFile(file);
-            return;
-        }
-        Joiner.Joinable joinable = new Joiner.Joinable();
-        tasks.add(() -> {
-            dialogs.openFile(file);
-            joinable.join();
-        });
-        joinable.getJoiner().join();
+    public void openFile(java.io.File file) {
+        exec(() -> dialogs.openFile(file));
     }
 
     @Override
@@ -283,5 +265,62 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
             return isDown(ControllerKey.KEY_LEFT_CONTROL) ||
                     isDown(ControllerKey.KEY_RIGHT_CONTROL);
         }
+    }
+
+    private void exec(Runnable runnable) {
+        Thread thread = Thread.currentThread();
+        if (thread == mainThread) {
+            runnable.run();
+            return;
+        }
+        Joiner.Joinable joinable = new Joiner.Joinable();
+        tasks.add(() -> {
+            runnable.run();
+            joinable.join();
+        });
+        joinable.getJoiner().join();
+    }
+
+    private <R> R exec(Supplier<R> runnable) {
+        Thread thread = Thread.currentThread();
+        if (thread == mainThread) {
+            return runnable.get();
+        }
+        Joiner.Joinable joinable = new Joiner.Joinable();
+        MutableSingle<R> output = new MutableSingle<>(null);
+        tasks.add(() -> {
+            output.a = runnable.get();
+            joinable.join();
+        });
+        joinable.getJoiner().join();
+        return output.a;
+    }
+
+    private <R> R execIO(IOSupplier<R> runnable) throws IOException {
+        Thread thread = Thread.currentThread();
+        if (thread == mainThread) {
+            return runnable.get();
+        }
+        Joiner.Joinable joinable = new Joiner.Joinable();
+        MutableSingle<R> output = new MutableSingle<>(null);
+        MutableSingle<IOException> exception = new MutableSingle<>(null);
+        tasks.add(() -> {
+            try {
+                output.a = runnable.get();
+            } catch (IOException e) {
+                exception.a = e;
+            }
+            joinable.join();
+        });
+        joinable.getJoiner().join();
+        if (exception.a != null) {
+            throw new IOException(exception.a);
+        }
+        return output.a;
+    }
+
+    @FunctionalInterface
+    private interface IOSupplier<R> {
+        R get() throws IOException;
     }
 }

@@ -23,9 +23,9 @@ import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
 import org.tobi29.scapes.engine.opengl.texture.TextureFile;
+import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
 import org.tobi29.scapes.engine.utils.io.filesystem.File;
-import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 
 import java.io.IOException;
@@ -63,6 +63,7 @@ public class GuiScreenshots extends GuiMenu {
     }
 
     private class Element extends GuiComponentPane {
+        @SuppressWarnings("unchecked")
         public Element(File file, GuiScreenshots gui) {
             super(0, 0, 378, 70);
             Texture textureLoad = null;
@@ -83,11 +84,10 @@ public class GuiScreenshots extends GuiMenu {
                     new GuiComponentTextButton(70, 20, 100, 30, 18, "Save");
             label.addLeftClick(event -> {
                 try {
-                    file.exportToUser(new PlatformDialogs.Extension[]{
-                                    new PlatformDialogs.Extension("*.png",
-                                            "PNG Picture")},
-                            "Export screenshot",
-                            state.getEngine().getGraphics().getContainer());
+                    state.getEngine().getGraphics().getContainer()
+                            .exportToUser(file, new Pair[]{
+                                            new Pair<>("*.png", "PNG Picture")},
+                                    "Export screenshot");
                 } catch (IOException e) {
                     LOGGER.warn("Failed to export screenshot: {}",
                             e.toString());

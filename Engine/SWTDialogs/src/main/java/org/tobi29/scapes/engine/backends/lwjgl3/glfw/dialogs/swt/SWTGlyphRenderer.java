@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.platform.swt;
+package org.tobi29.scapes.engine.backends.lwjgl3.glfw.dialogs.swt;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.*;

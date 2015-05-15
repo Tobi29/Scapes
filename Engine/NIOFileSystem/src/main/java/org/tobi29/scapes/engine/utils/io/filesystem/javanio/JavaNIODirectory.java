@@ -19,13 +19,10 @@ package org.tobi29.scapes.engine.utils.io.filesystem.javanio;
 import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
 import org.tobi29.scapes.engine.utils.io.filesystem.File;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileAttributes;
-import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
 
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
+import java.net.URI;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,12 +57,12 @@ public class JavaNIODirectory implements Directory {
 
     @Override
     public void move(Directory directory) throws IOException {
-        Files.move(path, directory.getFile().toPath());
+        Files.move(path, Paths.get(directory.getURI()));
     }
 
     @Override
     public void copy(Directory directory) throws IOException {
-        Path dest = directory.getFile().toPath();
+        Path dest = Paths.get(directory.getURI());
         Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir,
@@ -162,19 +159,8 @@ public class JavaNIODirectory implements Directory {
     }
 
     @Override
-    public boolean importFromUser(PlatformDialogs.Extension[] extensions,
-            String title, boolean multiple, PlatformDialogs dialogs)
-            throws IOException {
-        java.io.File[] files = dialogs.openFileDialog(extensions, title, true);
-        for (java.io.File file : files) {
-            Files.copy(file.toPath(), path.resolve(file.getName()));
-        }
-        return files.length > 0;
-    }
-
-    @Override
-    public java.io.File getFile() {
-        return path.toFile();
+    public URI getURI() {
+        return path.toUri();
     }
 
     @Override

@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.platform.swt;
+package org.tobi29.scapes.engine.backends.lwjgl3.glfw.dialogs.swt;
 
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tobi29.scapes.engine.PlatformDialogs;
+import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.backends.lwjgl3.glfw.spi.GLFWDialogsProvider;
 import org.tobi29.scapes.engine.utils.io.ProcessStream;
 import org.tobi29.scapes.engine.utils.io.ReadSource;
-import org.tobi29.scapes.engine.utils.platform.Platform;
-import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
 import org.tobi29.scapes.engine.utils.ui.font.GlyphRenderer;
 
 import java.io.IOException;
@@ -30,52 +31,22 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public abstract class PlatformDesktop extends Platform {
-    protected final boolean is64Bit;
-    private final String name;
-    private final String version;
-    private final String arch;
+public class SWTDialogsProvider implements GLFWDialogsProvider {
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(SWTDialogsProvider.class);
 
-    protected PlatformDesktop() {
-        name = System.getProperty("os.name");
-        version = System.getProperty("os.version");
-        arch = System.getProperty("os.arch");
-        is64Bit = arch.contains("64");
+    @Override
+    public boolean available() {
+        return true;
     }
 
     @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getVersion() {
-        return version;
-    }
-
-    @Override
-    public String getArch() {
-        return arch;
-    }
-
-    @Override
-    public boolean is64Bit() {
-        return is64Bit;
-    }
-
-    @Override
-    public PlatformDialogs createDialogHandler(String id) {
-        return new PlatformDialogsSWT(id);
-    }
-
-    @Override
-    public GlyphRenderer getGlyphRenderer(String font, int size) {
-        return new SWTGlyphRenderer(font, size);
+    public PlatformDialogs createDialogs(ScapesEngine engine) {
+        return new PlatformDialogsSWT(engine.getGame().getID());
     }
 
     @Override
     public boolean loadFont(ReadSource font) {
-        Logger logger = LoggerFactory.getLogger(PlatformDesktop.class);
         String fontPath = null;
         try {
             Path fontFile = Files.createTempFile("Scapes", ".ttf");
@@ -83,7 +54,7 @@ public abstract class PlatformDesktop extends Platform {
                 try {
                     Files.delete(fontFile);
                 } catch (IOException e) {
-                    logger.warn("Failed to delete temporary font file: {}",
+                    LOGGER.warn("Failed to delete temporary font file: {}",
                             e.toString());
                 }
             }));
@@ -92,13 +63,18 @@ public abstract class PlatformDesktop extends Platform {
             }
             fontPath = fontFile.toAbsolutePath().toString();
         } catch (IOException e) {
-            logger.warn("Failed to store font file: {}", e.toString());
+            LOGGER.warn("Failed to store font file: {}", e.toString());
             return false;
         }
         if (Display.getDefault().loadFont(fontPath)) {
             return true;
         }
-        logger.warn("Failed to load font: {}", font);
+        LOGGER.warn("Failed to load font: {}", font);
         return false;
+    }
+
+    @Override
+    public GlyphRenderer createGlyphRenderer(String fontName, int size) {
+        return new SWTGlyphRenderer(fontName, size);
     }
 }

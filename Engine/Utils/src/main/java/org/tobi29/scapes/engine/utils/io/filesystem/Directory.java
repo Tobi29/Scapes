@@ -16,9 +16,8 @@
 
 package org.tobi29.scapes.engine.utils.io.filesystem;
 
-import org.tobi29.scapes.engine.utils.platform.PlatformDialogs;
-
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 
 public interface Directory extends Path {
@@ -72,10 +71,7 @@ public interface Directory extends Path {
         return listFilesRecursive(file -> true);
     }
 
-    boolean importFromUser(PlatformDialogs.Extension[] extensions, String title,
-            boolean multiple, PlatformDialogs dialogs) throws IOException;
-
-    java.io.File getFile();
+    URI getURI();
 
     @FunctionalInterface
     interface FileFilter {

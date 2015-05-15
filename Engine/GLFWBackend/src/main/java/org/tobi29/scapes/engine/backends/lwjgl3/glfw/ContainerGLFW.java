@@ -21,21 +21,27 @@ import org.lwjgl.opengl.GL11;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.ScapesEngineException;
 import org.tobi29.scapes.engine.backends.lwjgl3.ContainerLWJGL3;
 import org.tobi29.scapes.engine.backends.lwjgl3.GLFWControllers;
 import org.tobi29.scapes.engine.backends.lwjgl3.GLFWKeyMap;
+import org.tobi29.scapes.engine.backends.lwjgl3.glfw.spi.GLFWDialogsProvider;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.opengl.GraphicsException;
 import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
+import org.tobi29.scapes.engine.utils.io.ReadSource;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
-import org.tobi29.scapes.engine.utils.platform.Platform;
+import org.tobi29.scapes.engine.utils.ui.font.GlyphRenderer;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.ServiceConfigurationError;
+import java.util.ServiceLoader;
 
 public class ContainerGLFW extends ContainerLWJGL3 {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ContainerGLFW.class);
+    private final GLFWDialogsProvider dialogs;
     private final GLFWControllers controllers;
     @SuppressWarnings("FieldCanBeLocal")
     private final GLFWErrorCallback errorFun;
@@ -51,9 +57,30 @@ public class ContainerGLFW extends ContainerLWJGL3 {
     private long window;
     private boolean skipMouseCallback, mouseGrabbed;
 
+    private static GLFWDialogsProvider loadDialogs() {
+        for (GLFWDialogsProvider dialogs : ServiceLoader
+                .load(GLFWDialogsProvider.class)) {
+            try {
+                if (dialogs.available()) {
+                    LOGGER.debug("Loaded dialogs: {}",
+                            dialogs.getClass().getName());
+                    return dialogs;
+                }
+            } catch (ServiceConfigurationError e) {
+                LOGGER.warn("Unable to load dialogs provider: {}",
+                        e.toString());
+            }
+        }
+        throw new ScapesEngineException("No dialogs found!");
+    }
+
     public ContainerGLFW(ScapesEngine engine) {
-        super(engine, Platform.getPlatform()
-                .createDialogHandler(engine.getGame().getID()));
+        this(engine, loadDialogs());
+    }
+
+    public ContainerGLFW(ScapesEngine engine, GLFWDialogsProvider dialogs) {
+        super(engine, dialogs.createDialogs(engine));
+        this.dialogs = dialogs;
         errorFun = Callbacks.errorCallbackPrint();
         GLFW.glfwSetErrorCallback(errorFun);
         if (GLFW.glfwInit() != GL11.GL_TRUE) {
@@ -164,7 +191,7 @@ public class ContainerGLFW extends ContainerLWJGL3 {
 
     @Override
     public void dispose() {
-        dialogs.dispose();
+        super.dialogs.dispose();
         GLFW.glfwDestroyWindow(window);
         GLFW.glfwTerminate();
         windowSizeFun.release();
@@ -176,6 +203,16 @@ public class ContainerGLFW extends ContainerLWJGL3 {
         mouseButtonFun.release();
         cursorPosFun.release();
         scrollFun.release();
+    }
+
+    @Override
+    public boolean loadFont(ReadSource font) {
+        return dialogs.loadFont(font);
+    }
+
+    @Override
+    public GlyphRenderer createGlyphRenderer(String fontName, int size) {
+        return dialogs.createGlyphRenderer(fontName, size);
     }
 
     @Override

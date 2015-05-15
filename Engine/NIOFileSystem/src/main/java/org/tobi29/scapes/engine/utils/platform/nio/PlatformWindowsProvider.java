@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.platform.swt;
+package org.tobi29.scapes.engine.utils.platform.nio;
 
 import org.tobi29.scapes.engine.utils.platform.Platform;
 import org.tobi29.scapes.engine.utils.platform.spi.PlatformProvider;
 
-public class PlatformLinuxProvider implements PlatformProvider {
+public class PlatformWindowsProvider implements PlatformProvider {
     @Override
     public boolean available() {
-        return System.getProperty("os.name").toUpperCase().contains("NUX");
+        return System.getProperty("os.name").toUpperCase().contains("WIN");
     }
 
     @Override
     public Platform getPlatform() {
-        return new PlatformLinux();
+        return new PlatformWindows();
     }
 }
+

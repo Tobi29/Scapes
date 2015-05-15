@@ -24,6 +24,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.*;
 import org.tobi29.scapes.engine.utils.platform.Platform;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 
 public final class LWJGLNatives {
     private static final Logger LOGGER =
@@ -64,7 +65,7 @@ public final class LWJGLNatives {
                     throw new ScapesEngineException(
                             "Unsupported platform:" + platform.getID());
             }
-            return directory.getFile().getAbsolutePath();
+            return Paths.get(directory.getURI()).toAbsolutePath().toString();
         } catch (IOException e) {
             LOGGER.error("Failed to create temporary directory:", e);
         }

@@ -24,10 +24,9 @@ import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.scenes.SceneImage;
 import org.tobi29.scapes.engine.utils.VersionUtil;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileSystem;
-import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
+import org.tobi29.scapes.engine.utils.platform.Platform;
 import org.tobi29.scapes.plugins.PluginClassLoader;
 import org.tobi29.scapes.server.shell.ScapesServerHeadless;
-import org.tobi29.scapes.server.shell.ScapesServerShell;
 import org.tobi29.scapes.server.shell.ScapesStandaloneServer;
 
 import java.io.IOException;
@@ -83,7 +82,6 @@ public class Scapes {
         options.addOption("v", "version", false, "Print version and exit");
         options.addOption("m", "mode", true, "Specify which mode to run");
         options.addOption("d", "debug", false, "Run in debug mode");
-        options.addOption("c", "console", false, "Run server without gui");
         options.addOption("s", "skipintro", false, "Skip client intro");
         Parser parser = new PosixParser();
         CommandLine commandLine;
@@ -133,14 +131,10 @@ public class Scapes {
                 break;
             case "server":
                 try {
-                    FileSystem files =
-                            FileSystemContainer.newFileSystem(directory, "");
+                    FileSystem files = Platform.getPlatform()
+                            .getFileFileSystem(directory, "");
                     ScapesStandaloneServer server;
-                    if (!commandLine.hasOption('c')) {
-                        server = new ScapesServerShell(files);
-                    } else {
-                        server = new ScapesServerHeadless(files);
-                    }
+                    server = new ScapesServerHeadless(files);
                     System.exit(server.run());
                 } catch (IOException e) {
                     System.err.println(e.getMessage());

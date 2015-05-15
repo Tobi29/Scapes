@@ -17,10 +17,10 @@
 package org.tobi29.scapes.engine.utils.platform;
 
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
-import org.tobi29.scapes.engine.utils.io.ReadSource;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileSystem;
 import org.tobi29.scapes.engine.utils.platform.spi.PlatformProvider;
-import org.tobi29.scapes.engine.utils.ui.font.GlyphRenderer;
 
+import java.io.IOException;
 import java.util.ServiceLoader;
 
 public abstract class Platform {
@@ -44,8 +44,6 @@ public abstract class Platform {
         return PLATFORM;
     }
 
-    public abstract String getAppData(String name);
-
     public abstract String getID();
 
     public abstract String getName();
@@ -56,9 +54,9 @@ public abstract class Platform {
 
     public abstract boolean is64Bit();
 
-    public abstract PlatformDialogs createDialogHandler(String id);
+    public abstract FileSystem getFileFileSystem(String id, String root)
+            throws IOException;
 
-    public abstract GlyphRenderer getGlyphRenderer(String font, int size);
-
-    public abstract boolean loadFont(ReadSource font);
+    public abstract FileSystem getTempFileFileSystem(String id)
+            throws IOException;
 }

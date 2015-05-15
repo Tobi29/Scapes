@@ -29,4 +29,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-org.tobi29.scapes.engine.backends.lwjgl3.glfw.GLFWBackendProvider
+org.tobi29.scapes.engine.backends.lwjgl3.glfw.dialogs.swt.SWTDialogsProvider

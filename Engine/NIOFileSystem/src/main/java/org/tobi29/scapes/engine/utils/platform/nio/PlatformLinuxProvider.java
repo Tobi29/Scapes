@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.platform.swt;
+package org.tobi29.scapes.engine.utils.platform.nio;
 
 import org.tobi29.scapes.engine.utils.platform.Platform;
 import org.tobi29.scapes.engine.utils.platform.spi.PlatformProvider;
 
-public class PlatformMacOSXProvider implements PlatformProvider {
+public class PlatformLinuxProvider implements PlatformProvider {
     @Override
     public boolean available() {
-        return System.getProperty("os.name").toUpperCase().contains("MAC");
+        return System.getProperty("os.name").toUpperCase().contains("NUX");
     }
 
     @Override
     public Platform getPlatform() {
-        return new PlatformMacOSX();
+        return new PlatformLinux();
     }
 }

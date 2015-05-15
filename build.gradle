@@ -32,29 +32,20 @@ application {
 dependencies {
     compile project(":Engine")
     compile project(":Engine:Utils")
-    compile project(":Engine:SWTUtils")
     compile project(":ControlPanel")
     compile "org.slf4j:slf4j-api:1.7.10"
     compile "commons-cli:commons-cli:1.2"
 
-    provided "org.eclipse.swt:org.eclipse.swt.win32.win32.x86:4.4"
-
     testCompile "junit:junit:4.12"
 
-    runtime project(":Engine:GLFWBackend")
-    runtime project(":Engine:SWTPlatform")
+    runtime project(":Engine:SWTDialogs")
+    runtime project(":Engine:NIOFileSystem")
     runtime project(":Engine:CodecOGG")
     runtime project(":Engine:CodecMP3")
     runtime project(":Engine:CodecWAV")
     runtime "org.apache.logging.log4j:log4j-api:2.1"
     runtime "org.apache.logging.log4j:log4j-core:2.1"
     runtime "org.apache.logging.log4j:log4j-slf4j-impl:2.1"
-
-    runtimeLinux32 "org.eclipse.swt:org.eclipse.swt.gtk.linux.x86:4.4"
-    runtimeLinux64 "org.eclipse.swt:org.eclipse.swt.gtk.linux.x86_64:4.4"
-    runtimeMacOSX "org.eclipse.swt:org.eclipse.swt.cocoa.macosx.x86_64:4.4"
-    runtimeWindows32 "org.eclipse.swt:org.eclipse.swt.win32.win32.x86:4.4"
-    runtimeWindows64 "org.eclipse.swt:org.eclipse.swt.win32.win32.x86_64:4.4"
 }
 
 task wrapper(type: Wrapper) {
