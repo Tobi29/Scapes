@@ -22,7 +22,6 @@ import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
 import org.tobi29.scapes.engine.utils.io.filesystem.File;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
-import org.tobi29.scapes.server.ScapesServer;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -30,12 +29,9 @@ import java.util.Optional;
 public class PlayerData {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(PlayerData.class);
-    private final ScapesServer server;
     private final Directory directory;
 
-    public PlayerData(ScapesServer server, Directory directory)
-            throws IOException {
-        this.server = server;
+    public PlayerData(Directory directory) throws IOException {
         this.directory = directory;
         directory.make();
     }

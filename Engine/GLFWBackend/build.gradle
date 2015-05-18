@@ -24,9 +24,9 @@ evaluationDependsOn(':Engine:LWJGL3Backend')
 dependencies {
     compile project(":Engine")
     compile project(":Engine:Utils")
-    compile "org.slf4j:slf4j-api:1.7.10"
     compile project(":Engine:LWJGL3Backend")
     compile project(":Engine:LWJGL3Backend").ext.lwjgl
+    compile "org.slf4j:slf4j-api:1.7.10"
 
     testCompile "junit:junit:4.12"
 }

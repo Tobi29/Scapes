@@ -57,7 +57,7 @@ public class WorldFormat {
             throws IOException {
         this.server = server;
         this.directory = directory;
-        playerData = new PlayerData(server, directory.get("players"));
+        playerData = new PlayerData(directory.get("players"));
         File bansFile = directory.getResource("Bans.json");
         if (bansFile.exists()) {
             playerBans = new PlayerBans(
