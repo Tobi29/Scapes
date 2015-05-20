@@ -38,7 +38,10 @@ public class Scapes {
             new VersionUtil.Version(0, 0, 0, 1);
     public static boolean debug;
     private static boolean sandboxed;
+    private static final String[] PACKAGE_WHITELIST =
+            {"java", "org.tobi29.scapes", "org.slf4j"};
 
+    @SuppressWarnings("CustomSecurityManager")
     public static void sandbox() {
         if (sandboxed) {
             return;
@@ -54,12 +57,11 @@ public class Scapes {
 
             @Override
             public Permissions getPermissions(ProtectionDomain domain) {
-                Permissions permissions;
                 if (domain.getClassLoader() instanceof PluginClassLoader) {
-                    permissions = new Permissions();
-                } else {
-                    permissions = getPermissions(domain.getCodeSource());
+                    return new Permissions();
                 }
+                Permissions permissions =
+                        getPermissions(domain.getCodeSource());
                 PermissionCollection domainPermissions =
                         domain.getPermissions();
                 synchronized (domainPermissions) {
@@ -72,7 +74,23 @@ public class Scapes {
                 return permissions;
             }
         });
-        System.setSecurityManager(new SecurityManager());
+        System.setSecurityManager(new SecurityManager() {
+            @Override
+            public void checkPackageAccess(String pkg) {
+                super.checkPackageAccess(pkg);
+                boolean whitelisted = false;
+                for (String whitelist : PACKAGE_WHITELIST) {
+                    if (pkg.startsWith(whitelist)) {
+                        whitelisted = true;
+                        break;
+                    }
+                }
+                if (!whitelisted) {
+                    checkPermission(
+                            new RuntimePermission("scapes.restrictedPkg"));
+                }
+            }
+        });
     }
 
     @SuppressWarnings("CallToSystemExit")
