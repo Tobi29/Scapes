@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine;
+package org.tobi29.scapes.engine.backends.lwjgl3.glfw;
 
-import org.tobi29.scapes.engine.utils.DesktopException;
+import org.tobi29.scapes.engine.opengl.Container;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
 import org.tobi29.scapes.engine.utils.io.filesystem.File;
@@ -42,19 +42,12 @@ public interface PlatformDialogs {
             Pair<String, String>[] extensions, String title, boolean multiple)
             throws IOException;
 
-    void message(MessageType messageType, String title, String message);
+    void message(Container.MessageType messageType, String title,
+            String message);
 
     void openFile(URI file);
 
-    void renderTick() throws DesktopException;
+    void renderTick();
 
     void dispose();
-
-    enum MessageType {
-        ERROR,
-        INFORMATION,
-        WARNING,
-        QUESTION,
-        PLAIN
-    }
 }

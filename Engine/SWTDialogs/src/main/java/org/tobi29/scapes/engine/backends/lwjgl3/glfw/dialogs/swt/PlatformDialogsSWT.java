@@ -22,10 +22,11 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
-import org.tobi29.scapes.engine.PlatformDialogs;
-import org.tobi29.scapes.engine.utils.DesktopException;
+import org.tobi29.scapes.engine.backends.lwjgl3.glfw.PlatformDialogs;
+import org.tobi29.scapes.engine.opengl.Container;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
+import org.tobi29.scapes.engine.utils.io.filesystem.File;
 
 import java.io.IOException;
 import java.net.URI;
@@ -105,10 +106,8 @@ public class PlatformDialogsSWT implements PlatformDialogs {
     }
 
     @Override
-    public boolean exportToUser(
-            org.tobi29.scapes.engine.utils.io.filesystem.File file,
-            Pair<String, String>[] extensions, String title)
-            throws IOException {
+    public boolean exportToUser(File file, Pair<String, String>[] extensions,
+            String title) throws IOException {
         Optional<URI> export = saveFileDialog(extensions, title);
         if (export.isPresent()) {
             Files.copy(Paths.get(file.getURI()), Paths.get(export.get()));
@@ -118,10 +117,8 @@ public class PlatformDialogsSWT implements PlatformDialogs {
     }
 
     @Override
-    public boolean importFromUser(
-            org.tobi29.scapes.engine.utils.io.filesystem.File file,
-            Pair<String, String>[] extensions, String title)
-            throws IOException {
+    public boolean importFromUser(File file, Pair<String, String>[] extensions,
+            String title) throws IOException {
         URI[] exports = openFileDialog(extensions, title, false);
         for (URI export : exports) {
             Files.copy(Paths.get(export), Paths.get(file.getURI()));
@@ -143,7 +140,8 @@ public class PlatformDialogsSWT implements PlatformDialogs {
     }
 
     @Override
-    public void message(MessageType messageType, String title, String message) {
+    public void message(Container.MessageType messageType, String title,
+            String message) {
         int style = SWT.APPLICATION_MODAL;
         switch (messageType) {
             case ERROR:
@@ -171,7 +169,7 @@ public class PlatformDialogsSWT implements PlatformDialogs {
     }
 
     @Override
-    public void renderTick() throws DesktopException {
+    public void renderTick() {
         if (!IS_COCOA) { // Avoid jvm crash on osx
             shell.getDisplay().readAndDispatch();
         }

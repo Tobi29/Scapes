@@ -27,6 +27,7 @@ import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
 import org.tobi29.scapes.engine.input.ControllerDefault;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.openal.SoundSystem;
+import org.tobi29.scapes.engine.opengl.Container;
 import org.tobi29.scapes.engine.opengl.GraphicsCheckException;
 import org.tobi29.scapes.engine.opengl.GraphicsSystem;
 import org.tobi29.scapes.engine.spi.ScapesEngineBackendProvider;
@@ -274,14 +275,14 @@ public class ScapesEngine implements Crashable {
         } catch (GraphicsCheckException e) {
             LOGGER.error("Failed to initialize graphics:", e);
             graphics.getContainer()
-                    .message(PlatformDialogs.MessageType.ERROR, game.getName(),
+                    .message(Container.MessageType.ERROR, game.getName(),
                             "Unable to initialize graphics:\n" +
                                     e.getMessage());
             return 1;
         } catch (Throwable e) {
             taskExecutor.shutdown();
             graphics.getContainer()
-                    .message(PlatformDialogs.MessageType.ERROR, game.getName(),
+                    .message(Container.MessageType.ERROR, game.getName(),
                             game.getName() + " crashed\n:" + toString());
             crash(e);
             return 1;

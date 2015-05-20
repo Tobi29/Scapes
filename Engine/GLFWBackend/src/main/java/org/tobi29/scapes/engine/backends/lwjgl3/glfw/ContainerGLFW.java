@@ -29,19 +29,26 @@ import org.tobi29.scapes.engine.backends.lwjgl3.glfw.spi.GLFWDialogsProvider;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.opengl.GraphicsException;
 import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
+import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.io.ReadSource;
+import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
+import org.tobi29.scapes.engine.utils.io.filesystem.File;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.ui.font.GlyphRenderer;
 
+import java.io.IOException;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.Optional;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 
 public class ContainerGLFW extends ContainerLWJGL3 {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ContainerGLFW.class);
-    private final GLFWDialogsProvider dialogs;
+    private final GLFWDialogsProvider dialogsProvider;
+    private final PlatformDialogs dialogs;
     private final GLFWControllers controllers;
     @SuppressWarnings("FieldCanBeLocal")
     private final GLFWErrorCallback errorFun;
@@ -78,9 +85,11 @@ public class ContainerGLFW extends ContainerLWJGL3 {
         this(engine, loadDialogs());
     }
 
-    public ContainerGLFW(ScapesEngine engine, GLFWDialogsProvider dialogs) {
-        super(engine, dialogs.createDialogs(engine));
-        this.dialogs = dialogs;
+    public ContainerGLFW(ScapesEngine engine,
+            GLFWDialogsProvider dialogsProvider) {
+        super(engine);
+        this.dialogsProvider = dialogsProvider;
+        dialogs = dialogsProvider.createDialogs(engine);
         errorFun = Callbacks.errorCallbackPrint();
         GLFW.glfwSetErrorCallback(errorFun);
         if (GLFW.glfwInit() != GL11.GL_TRUE) {
@@ -191,7 +200,7 @@ public class ContainerGLFW extends ContainerLWJGL3 {
 
     @Override
     public void dispose() {
-        super.dialogs.dispose();
+        dialogs.dispose();
         GLFW.glfwDestroyWindow(window);
         GLFW.glfwTerminate();
         windowSizeFun.release();
@@ -206,13 +215,55 @@ public class ContainerGLFW extends ContainerLWJGL3 {
     }
 
     @Override
+    public URI[] openFileDialog(Pair<String, String>[] extensions, String title,
+            boolean multiple) {
+        return exec(() -> dialogs.openFileDialog(extensions, title, multiple));
+    }
+
+    @Override
+    public Optional<URI> saveFileDialog(Pair<String, String>[] extensions,
+            String title) {
+        return exec(() -> dialogs.saveFileDialog(extensions, title));
+    }
+
+    @Override
+    public boolean exportToUser(File file, Pair<String, String>[] extensions,
+            String title) throws IOException {
+        return execIO(() -> dialogs.exportToUser(file, extensions, title));
+    }
+
+    @Override
+    public boolean importFromUser(File file, Pair<String, String>[] extensions,
+            String title) throws IOException {
+        return execIO(() -> dialogs.importFromUser(file, extensions, title));
+    }
+
+    @Override
+    public boolean importFromUser(Directory directory,
+            Pair<String, String>[] extensions, String title, boolean multiple)
+            throws IOException {
+        return execIO(() -> dialogs
+                .importFromUser(directory, extensions, title, multiple));
+    }
+
+    @Override
+    public void message(MessageType messageType, String title, String message) {
+        exec(() -> dialogs.message(messageType, title, message));
+    }
+
+    @Override
+    public void openFile(URI file) {
+        exec(() -> dialogs.openFile(file));
+    }
+
+    @Override
     public boolean loadFont(ReadSource font) {
-        return dialogs.loadFont(font);
+        return dialogsProvider.loadFont(font);
     }
 
     @Override
     public GlyphRenderer createGlyphRenderer(String fontName, int size) {
-        return dialogs.createGlyphRenderer(fontName, size);
+        return dialogsProvider.createGlyphRenderer(fontName, size);
     }
 
     @Override
@@ -220,6 +271,7 @@ public class ContainerGLFW extends ContainerLWJGL3 {
         GLFW.glfwPollEvents();
         controllers.poll();
         engine.getGraphics().render();
+        dialogs.renderTick();
         GLFW.glfwSwapBuffers(window);
     }
 

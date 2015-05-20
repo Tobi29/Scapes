@@ -22,7 +22,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.engine.PlatformDialogs;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.input.ControllerDefault;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
@@ -33,13 +32,9 @@ import org.tobi29.scapes.engine.opengl.GraphicsCheckException;
 import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.utils.DesktopException;
 import org.tobi29.scapes.engine.utils.MutableSingle;
-import org.tobi29.scapes.engine.utils.Pair;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -53,7 +48,6 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
             new ConcurrentHashMap<>();
     protected final Queue<Runnable> tasks = new ConcurrentLinkedQueue<>();
     protected final ScapesEngine engine;
-    protected final PlatformDialogs dialogs;
     protected final Thread mainThread;
     protected final OpenGL openGL;
     protected final OpenAL openAL;
@@ -64,9 +58,8 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
     protected double mouseX, mouseY;
     protected volatile boolean joysticksChanged;
 
-    protected ContainerLWJGL3(ScapesEngine engine, PlatformDialogs dialogs) {
+    protected ContainerLWJGL3(ScapesEngine engine) {
         this.engine = engine;
-        this.dialogs = dialogs;
         mainThread = Thread.currentThread();
         String natives = LWJGLNatives.extract(engine.getFiles());
         System.setProperty("org.lwjgl.librarypath", natives);
@@ -150,49 +143,6 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
     }
 
     @Override
-    public URI[] openFileDialog(Pair<String, String>[] extensions, String title,
-            boolean multiple) {
-        return exec(() -> dialogs.openFileDialog(extensions, title, multiple));
-    }
-
-    @Override
-    public Optional<URI> saveFileDialog(Pair<String, String>[] extensions,
-            String title) {
-        return exec(() -> dialogs.saveFileDialog(extensions, title));
-    }
-
-    @Override
-    public boolean exportToUser(File file, Pair<String, String>[] extensions,
-            String title) throws IOException {
-        return execIO(() -> dialogs.exportToUser(file, extensions, title));
-    }
-
-    @Override
-    public boolean importFromUser(File file, Pair<String, String>[] extensions,
-            String title) throws IOException {
-        return execIO(() -> dialogs.importFromUser(file, extensions, title));
-    }
-
-    @Override
-    public boolean importFromUser(Directory directory,
-            Pair<String, String>[] extensions, String title, boolean multiple)
-            throws IOException {
-        return execIO(() -> dialogs
-                .importFromUser(directory, extensions, title, multiple));
-    }
-
-    @Override
-    public void message(PlatformDialogs.MessageType messageType, String title,
-            String message) {
-        exec(() -> dialogs.message(messageType, title, message));
-    }
-
-    @Override
-    public void openFile(URI file) {
-        exec(() -> dialogs.openFile(file));
-    }
-
-    @Override
     public void renderTick() throws DesktopException {
         while (!tasks.isEmpty()) {
             tasks.poll().run();
@@ -212,7 +162,6 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
             valid = true;
             containerResized = true;
         }
-        dialogs.renderTick();
         render();
         containerResized = false;
         if (!visible) {
@@ -268,7 +217,7 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
         }
     }
 
-    private void exec(Runnable runnable) {
+    protected void exec(Runnable runnable) {
         Thread thread = Thread.currentThread();
         if (thread == mainThread) {
             runnable.run();
@@ -282,7 +231,7 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
         joinable.getJoiner().join();
     }
 
-    private <R> R exec(Supplier<R> runnable) {
+    protected <R> R exec(Supplier<R> runnable) {
         Thread thread = Thread.currentThread();
         if (thread == mainThread) {
             return runnable.get();
@@ -297,7 +246,7 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
         return output.a;
     }
 
-    private <R> R execIO(IOSupplier<R> runnable) throws IOException {
+    protected <R> R execIO(IOSupplier<R> runnable) throws IOException {
         Thread thread = Thread.currentThread();
         if (thread == mainThread) {
             return runnable.get();
@@ -321,7 +270,7 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
     }
 
     @FunctionalInterface
-    private interface IOSupplier<R> {
+    protected interface IOSupplier<R> {
         R get() throws IOException;
     }
 }
