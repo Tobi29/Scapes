@@ -15,21 +15,16 @@
  */
 
 
-apply plugin: "java"
-
-version = "0.0.0_1"
-
-sourceCompatibility = 1.8
-
-repositories {
-    mavenCentral()
-}
+apply from: "$rootDir/resources/scapesenginemodule.gradle"
 
 dependencies {
     compile rootProject
     compile project(":Engine")
     compile project(":Engine:Utils")
     compile "org.slf4j:slf4j-api:1.7.10"
+
+    provided(files(
+            "$rootDir/resources/QtJambi/qtjambi-win32-msvc2012-4.8.6.jar"))
 
     testCompile "junit:junit:4.12"
 }
