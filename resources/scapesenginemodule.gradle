@@ -36,39 +36,13 @@ jar {
 
 configurations {
     provided
-    runtimeLinux32
-    runtimeLinux64
-    runtimeMacOSX
-    runtimeWindows32
-    runtimeWindows64
-    runtimePlatform
-
-    String os = System.properties["os.name"].toLowerCase()
-    String arch = System.properties["os.arch"]
-    if (os.contains("linux")) {
-        if (arch.contains("64")) {
-            runtimePlatform.extendsFrom runtimeLinux64
-        } else {
-            runtimePlatform.extendsFrom runtimeLinux32
-        }
-    } else if (os.contains("mac")) {
-        runtimePlatform.extendsFrom runtimeMacOSX
-    } else if (os.contains("windows")) {
-        if (arch.contains("64")) {
-            runtimePlatform.extendsFrom runtimeWindows64
-        } else {
-            runtimePlatform.extendsFrom runtimeWindows32
-        }
-    }
 }
 
 afterEvaluate {
     sourceSets.main.compileClasspath += configurations.provided
-    sourceSets.main.runtimeClasspath += configurations.runtimePlatform
 
     idea {
         module {
-            scopes.RUNTIME.plus += [configurations.runtimePlatform]
             scopes.PROVIDED.plus += [configurations.provided]
         }
     }
