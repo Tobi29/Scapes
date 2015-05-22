@@ -58,7 +58,7 @@ public class SWTGlyphRenderer implements GlyphRenderer {
     @Override
     public synchronized GlyphPage getPage(int id) {
         float[] width = new float[pageTiles];
-        MutableSingle<ImageData> output = new MutableSingle<>(null);
+        MutableSingle<ByteBuffer> output = new MutableSingle<>(null);
         Display display = Display.getDefault();
         display.syncExec(() -> {
             if (image == null) {
@@ -97,19 +97,20 @@ public class SWTGlyphRenderer implements GlyphRenderer {
                 }
             }
             gc.dispose();
-            output.a = image.getImageData();
+            image.getImageData()
+                    .getPixels(0, 0, imageSize * imageSize, color, 0);
+            ByteBuffer buffer =
+                    BufferCreatorDirect.byteBuffer(imageSize * imageSize << 2);
+            i = 0;
+            while (buffer.hasRemaining()) {
+                buffer.put(WHITE);
+                buffer.put((byte) (color[i] & 0xFF));
+                i++;
+            }
+            buffer.rewind();
+            output.a = buffer;
         });
-        output.a.getPixels(0, 0, imageSize * imageSize, color, 0);
-        ByteBuffer buffer =
-                BufferCreatorDirect.byteBuffer(imageSize * imageSize << 2);
-        int i = 0;
-        while (buffer.hasRemaining()) {
-            buffer.put(WHITE);
-            buffer.put((byte) (color[i] & 0xFF));
-            i++;
-        }
-        buffer.rewind();
-        return new GlyphPage(buffer, width, imageSize, tiles, tileSize);
+        return new GlyphPage(output.a, width, imageSize, tiles, tileSize);
     }
 
     @Override
