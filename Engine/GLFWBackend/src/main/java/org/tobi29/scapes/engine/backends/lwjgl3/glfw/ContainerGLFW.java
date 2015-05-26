@@ -27,8 +27,10 @@ import org.tobi29.scapes.engine.backends.lwjgl3.GLFWControllers;
 import org.tobi29.scapes.engine.backends.lwjgl3.GLFWKeyMap;
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.spi.GLFWDialogsProvider;
 import org.tobi29.scapes.engine.input.ControllerKey;
+import org.tobi29.scapes.engine.opengl.GraphicsCheckException;
 import org.tobi29.scapes.engine.opengl.GraphicsException;
 import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
+import org.tobi29.scapes.engine.utils.DesktopException;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.io.ReadSource;
 import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
@@ -267,15 +269,35 @@ public class ContainerGLFW extends ContainerLWJGL3 {
     }
 
     @Override
-    public void render() {
+    public void renderTick() throws DesktopException {
+        while (!tasks.isEmpty()) {
+            tasks.poll().run();
+        }
+        if (!valid) {
+            if (context != null) {
+                engine.getGraphics().reset();
+                cleanWindow();
+            }
+            initWindow(engine.getConfig().isFullscreen(),
+                    engine.getConfig().getVSync());
+            Optional<String> check = initContext();
+            if (check.isPresent()) {
+                throw new GraphicsCheckException(check.get());
+            }
+            valid = true;
+            containerResized = true;
+        }
         GLFW.glfwPollEvents();
-        controllers.poll();
+        joysticksChanged = controllers.poll();
         engine.getGraphics().render();
+        containerResized = false;
         dialogs.renderTick();
         GLFW.glfwSwapBuffers(window);
+        if (!visible) {
+            GLFW.glfwShowWindow(window);
+        }
     }
 
-    @Override
     protected void initWindow(boolean fullscreen, boolean vSync) {
         LOGGER.info("Creating GLFW window...");
         String title = engine.getGame().getName();
@@ -332,12 +354,6 @@ public class ContainerGLFW extends ContainerLWJGL3 {
         GLFW.glfwSwapInterval(vSync ? 1 : 0);
     }
 
-    @Override
-    protected void showWindow() {
-        GLFW.glfwShowWindow(window);
-    }
-
-    @Override
     protected void cleanWindow() {
         clearStates();
         GLFW.glfwDestroyWindow(window);

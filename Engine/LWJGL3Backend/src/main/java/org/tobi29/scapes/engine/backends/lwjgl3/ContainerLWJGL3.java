@@ -28,9 +28,7 @@ import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.openal.OpenAL;
 import org.tobi29.scapes.engine.opengl.Container;
-import org.tobi29.scapes.engine.opengl.GraphicsCheckException;
 import org.tobi29.scapes.engine.opengl.OpenGL;
-import org.tobi29.scapes.engine.utils.DesktopException;
 import org.tobi29.scapes.engine.utils.MutableSingle;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 
@@ -53,10 +51,10 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
     protected final OpenAL openAL;
     protected final boolean superModifier;
     protected GLContext context;
-    protected boolean focus = true, valid, visible, containerResized = true;
+    protected boolean focus = true, valid, visible, containerResized = true,
+            joysticksChanged;
     protected int containerWidth, containerHeight, contentWidth, contentHeight;
     protected double mouseX, mouseY;
-    protected volatile boolean joysticksChanged;
 
     protected ContainerLWJGL3(ScapesEngine engine) {
         this.engine = engine;
@@ -138,35 +136,13 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
     }
 
     @Override
-    public boolean getContainerResized() {
+    public boolean contentResized() {
         return containerResized;
     }
 
-    @Override
-    public void renderTick() throws DesktopException {
-        while (!tasks.isEmpty()) {
-            tasks.poll().run();
-        }
-        if (!valid) {
-            if (context != null) {
-                engine.getGraphics().reset();
-                cleanWindow();
-            }
-            initWindow(engine.getConfig().isFullscreen(),
-                    engine.getConfig().getVSync());
-            context = GLContext.createFromCurrent();
-            Optional<String> check = checkContext(context);
-            if (check.isPresent()) {
-                throw new GraphicsCheckException(check.get());
-            }
-            valid = true;
-            containerResized = true;
-        }
-        render();
-        containerResized = false;
-        if (!visible) {
-            showWindow();
-        }
+    protected Optional<String> initContext() {
+        context = GLContext.createFromCurrent();
+        return checkContext(context);
     }
 
     @Override
@@ -197,14 +173,6 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
     public boolean joysticksChanged() {
         return joysticksChanged;
     }
-
-    protected abstract void render();
-
-    protected abstract void initWindow(boolean fullscreen, boolean vSync);
-
-    protected abstract void showWindow();
-
-    protected abstract void cleanWindow();
 
     @Override
     public boolean isModifierDown() {

@@ -40,7 +40,7 @@ public interface Container {
 
     int getContentHeight();
 
-    boolean getContainerResized();
+    boolean contentResized();
 
     void setMouseGrabbed(boolean value);
 

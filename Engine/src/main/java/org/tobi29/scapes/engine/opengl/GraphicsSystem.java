@@ -164,18 +164,19 @@ public class GraphicsSystem {
 
     public void render() {
         try {
+            openGL.checkError("Pre-Render");
+            containerWidth = container.getContainerWidth();
+            containerHeight = container.getContainerHeight();
             boolean fboSizeDirty;
-            if (container.getContainerResized() || resolutionMultiplier !=
+            if (container.contentResized() || resolutionMultiplier !=
                     engine.getConfig().getResolutionMultiplier()) {
                 resolutionMultiplier =
                         engine.getConfig().getResolutionMultiplier();
-                containerWidth = container.getContainerWidth();
-                containerHeight = container.getContainerHeight();
                 contentWidth = container.getContentWidth();
                 contentHeight = container.getContentHeight();
                 fboSizeDirty = true;
-                widthDebug.setValue(containerWidth);
-                heightDebug.setValue(containerHeight);
+                widthDebug.setValue(contentWidth);
+                heightDebug.setValue(contentHeight);
             } else {
                 fboSizeDirty = false;
             }
