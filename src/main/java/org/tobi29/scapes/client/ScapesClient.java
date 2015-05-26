@@ -143,13 +143,13 @@ public class ScapesClient extends Game {
 
     @Override
     public void initLate() {
-        reloadInput();
+        loadInput();
     }
 
     @Override
     public void step() {
         if (engine.getGraphics().getContainer().joysticksChanged()) {
-            reloadInput();
+            loadInput();
         }
         InputMode newInputMode = null;
         for (InputMode inputMode : inputModes) {
@@ -177,7 +177,7 @@ public class ScapesClient extends Game {
     public void dispose() {
     }
 
-    public void reloadInput() {
+    public void loadInput() {
         LOGGER.info("Loading input");
         TagStructure tagStructure =
                 engine.getTagStructure().getStructure("Scapes")

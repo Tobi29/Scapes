@@ -35,7 +35,7 @@ public abstract class GuiControls extends GuiMenu {
         game.setFreezeInputMode(true);
         back.addLeftClick(event -> {
             game.setFreezeInputMode(false);
-            game.reloadInput();
+            game.loadInput();
         });
         scrollPane = new GuiComponentScrollPaneList(16, 80, 368, 350, 40);
         pane.add(scrollPane);
