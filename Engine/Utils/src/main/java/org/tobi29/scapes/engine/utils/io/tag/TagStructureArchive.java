@@ -40,8 +40,8 @@ public class TagStructureArchive {
         this.byteStreamOut = byteStreamOut;
     }
 
-    public static Optional<TagStructure> extract(String name, InputStream streamIn)
-            throws IOException {
+    public static Optional<TagStructure> extract(String name,
+            InputStream streamIn) throws IOException {
         List<Entry> entries = readHeader(streamIn);
         int offset = 0;
         for (Entry entry : entries) {
@@ -120,6 +120,13 @@ public class TagStructureArchive {
 
     public synchronized void removeTagStructure(String key) {
         tagStructures.remove(key);
+    }
+
+    public synchronized void moveTagStructure(String from, String to) {
+        byte[] tag = tagStructures.remove(from);
+        if (tag != null) {
+            tagStructures.put(to, tag);
+        }
     }
 
     public boolean hasTagStructure(String key) {
