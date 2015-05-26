@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.openal.AudioFormat;
 import org.tobi29.scapes.engine.openal.OpenAL;
 import org.tobi29.scapes.engine.openal.SoundException;
-import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
@@ -52,7 +51,7 @@ public class LWJGL3OpenAL implements OpenAL {
     public void create() {
         ALDevice device = ALDevice.create(null);
         long devicePointer = device.getPointer();
-        IntBuffer attributes = BufferCreator.intBuffer(5);
+        IntBuffer attributes = BufferCreatorDirect.intBuffer(5);
         int frequency = ALC10.alcGetInteger(devicePointer, ALC10.ALC_FREQUENCY);
         attributes.put(ALC10.ALC_FREQUENCY);
         attributes.put(frequency);
