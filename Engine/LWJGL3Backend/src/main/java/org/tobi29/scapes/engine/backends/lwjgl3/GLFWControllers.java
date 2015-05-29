@@ -46,6 +46,7 @@ public class GLFWControllers {
         return 0.0f;
     }
 
+    @SuppressWarnings("ForLoopThatDoesntUseLoopVariable")
     public boolean poll() {
         boolean joysticksChanged = false;
         for (int joystick = GLFW.GLFW_JOYSTICK_1;
