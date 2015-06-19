@@ -20,7 +20,15 @@ public class MutablePair<A, B> {
     public A a;
     public B b;
 
+    public MutablePair() {
+    }
+
     public MutablePair(A a, B b) {
+        this.a = a;
+        this.b = b;
+    }
+
+    public void set(A a, B b) {
         this.a = a;
         this.b = b;
     }

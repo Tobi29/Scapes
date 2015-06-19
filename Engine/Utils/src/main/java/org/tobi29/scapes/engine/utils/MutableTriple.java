@@ -21,7 +21,16 @@ public class MutableTriple<A, B, C> {
     public B b;
     public C c;
 
+    public MutableTriple() {
+    }
+
     public MutableTriple(A a, B b, C c) {
+        this.a = a;
+        this.b = b;
+        this.c = c;
+    }
+
+    public void set(A a, B b, C c) {
         this.a = a;
         this.b = b;
         this.c = c;

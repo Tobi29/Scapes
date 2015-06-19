@@ -19,7 +19,14 @@ package org.tobi29.scapes.engine.utils;
 public class MutableSingle<A> {
     public A a;
 
+    public MutableSingle() {
+    }
+
     public MutableSingle(A a) {
+        this.a = a;
+    }
+
+    public void set(A a) {
         this.a = a;
     }
 
