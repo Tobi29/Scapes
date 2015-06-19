@@ -16,6 +16,7 @@
 
 
 apply from: "$rootDir/resources/scapesengineapplication.gradle"
+apply from: "$rootDir/backends/qtjambi.gradle"
 
 version = "0.0.0_1"
 
@@ -45,12 +46,6 @@ dependencies {
     runtime "org.apache.logging.log4j:log4j-api:2.1"
     runtime "org.apache.logging.log4j:log4j-core:2.1"
     runtime "org.apache.logging.log4j:log4j-slf4j-impl:2.1"
-    runtime project(":Engine:SWTDialogs")
-    runtimeLinux32 "org.eclipse.swt:org.eclipse.swt.gtk.linux.x86:4.4"
-    runtimeLinux64 "org.eclipse.swt:org.eclipse.swt.gtk.linux.x86_64:4.4"
-    runtimeMacOSX "org.eclipse.swt:org.eclipse.swt.cocoa.macosx.x86_64:4.4"
-    runtimeWindows32 "org.eclipse.swt:org.eclipse.swt.win32.win32.x86:4.4"
-    runtimeWindows64 "org.eclipse.swt:org.eclipse.swt.win32.win32.x86_64:4.4"
 }
 
 task wrapper(type: Wrapper) {
