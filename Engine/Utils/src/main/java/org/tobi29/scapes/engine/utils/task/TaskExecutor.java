@@ -18,41 +18,36 @@ package org.tobi29.scapes.engine.utils.task;
 
 import org.tobi29.scapes.engine.utils.Crashable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class TaskExecutor {
     private final List<TaskWorker> tasks = new ArrayList<>();
-    private final ThreadPoolExecutor threadPool;
+    private final Map<Priority, ThreadPoolExecutor> threadPools;
     private final Crashable crashHandler;
     private final String name;
     private final boolean root;
 
     public TaskExecutor(TaskExecutor parent, String name) {
-        this(parent, name, new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60L,
-                TimeUnit.SECONDS, new SynchronousQueue<>()));
-    }
-
-    public TaskExecutor(TaskExecutor parent, String name,
-            ThreadPoolExecutor threadPool) {
-        this(parent.crashHandler, parent.name + name, threadPool, false);
+        crashHandler = parent.crashHandler;
+        this.name = parent.name + name + '-';
+        root = false;
+        threadPools = parent.threadPools;
     }
 
     public TaskExecutor(Crashable crashHandler, String name) {
-        this(crashHandler, name,
-                new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60L,
-                        TimeUnit.SECONDS, new SynchronousQueue<>()), true);
-    }
-
-    private TaskExecutor(Crashable crashHandler, String name,
-            ThreadPoolExecutor threadPool, boolean root) {
         this.crashHandler = crashHandler;
         this.name = name + '-';
-        this.threadPool = threadPool;
-        this.root = root;
+        root = true;
+        threadPools = new EnumMap<>(Priority.class);
+        Arrays.stream(Priority.values()).forEach(priority -> threadPools
+                .put(priority, new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60L,
+                        TimeUnit.SECONDS, new SynchronousQueue<>(),
+                        new PriorityThreadFactory(priority.priority))));
     }
 
     public void tick() {
@@ -95,8 +90,12 @@ public class TaskExecutor {
     }
 
     public Joiner runTask(ASyncTask task, String name) {
+        return runTask(task, name, Priority.LOW);
+    }
+
+    public Joiner runTask(ASyncTask task, String name, Priority priority) {
         ThreadWrapper thread = new ThreadWrapper(task, this.name + name);
-        threadPool.execute(thread);
+        threadPools.get(priority).execute(thread);
         return thread.joinable.getJoiner();
     }
 
@@ -109,11 +108,13 @@ public class TaskExecutor {
 
     public void shutdown() {
         if (root) {
-            threadPool.shutdown();
-            try {
-                threadPool.awaitTermination(10, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-            }
+            threadPools.values().forEach(ThreadPoolExecutor::shutdown);
+            threadPools.values().forEach(threadPool -> {
+                try {
+                    threadPool.awaitTermination(10, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                }
+            });
         }
     }
 
@@ -165,6 +166,39 @@ public class TaskExecutor {
             } finally {
                 joinable.join();
             }
+        }
+    }
+
+    private class PriorityThreadFactory implements ThreadFactory {
+        private final AtomicInteger id = new AtomicInteger(1);
+        private final int priority;
+        private final ThreadGroup group;
+
+        private PriorityThreadFactory(int priority) {
+            this.priority = priority;
+            group = Thread.currentThread().getThreadGroup();
+        }
+
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread thread =
+                    new Thread(group, r, name + id.getAndIncrement(), 0);
+            if (thread.isDaemon()) {
+                thread.setDaemon(false);
+            }
+            thread.setPriority(priority);
+            return thread;
+        }
+    }
+
+    public enum Priority {
+        HIGH(Thread.MAX_PRIORITY),
+        MEDIUM(Thread.NORM_PRIORITY),
+        LOW(Thread.MIN_PRIORITY);
+        private final int priority;
+
+        Priority(int priority) {
+            this.priority = priority;
         }
     }
 }

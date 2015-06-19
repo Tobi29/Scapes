@@ -44,6 +44,8 @@ public class Joiner {
     public void join() {
         for (Joinable thread : joinables) {
             thread.joiner.marked = true;
+        }
+        for (Joinable thread : joinables) {
             synchronized (thread) {
                 while (!thread.joining) {
                     try {

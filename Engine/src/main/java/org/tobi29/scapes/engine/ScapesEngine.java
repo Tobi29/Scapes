@@ -335,7 +335,8 @@ public class ScapesEngine implements Crashable {
         if (currentState.isThreaded()) {
             if (stateThread == null) {
                 stateThread = new StateThread(currentState);
-                stateThread.joiner = taskExecutor.runTask(stateThread, "State");
+                stateThread.joiner = taskExecutor.runTask(stateThread, "State",
+                        TaskExecutor.Priority.MEDIUM);
             }
         } else if (stateThread != null) {
             stateThread.joiner.join();
