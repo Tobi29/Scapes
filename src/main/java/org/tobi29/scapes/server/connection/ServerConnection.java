@@ -42,7 +42,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Collectors;
 
 public class ServerConnection implements PlayConnection {
     private static final Logger LOGGER =
@@ -250,17 +249,18 @@ public class ServerConnection implements PlayConnection {
                             processing = true;
                         }
                     }
-                    List<Connection> closedSessions =
-                            connections.stream().filter(Connection::isClosed)
-                                    .collect(Collectors.toList());
-                    for (Connection connection : closedSessions) {
-                        try {
-                            connection.close();
-                        } catch (IOException e) {
-                            LOGGER.warn("Failed to close connection: {}",
-                                    e.toString());
+                    Iterator<Connection> iterator = connections.iterator();
+                    while (iterator.hasNext()) {
+                        Connection connection = iterator.next();
+                        if (connection.isClosed()) {
+                            try {
+                                connection.close();
+                            } catch (IOException e) {
+                                LOGGER.warn("Failed to close connection: {}",
+                                        e.toString());
+                            }
+                            iterator.remove();
                         }
-                        connections.remove(connection);
                     }
                     if (!processing && !joiner.marked()) {
                         try {
