@@ -294,6 +294,7 @@ public class PacketBundleChannel {
 
     public void register(Selector selector, int opt) throws IOException {
         channel.register(selector, opt);
+        this.selector = Optional.of(selector);
     }
 
     public void close() throws IOException {
