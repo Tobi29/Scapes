@@ -106,12 +106,7 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
     }
 
     @Override
-    public void setVSync(boolean value) {
-        valid = false;
-    }
-
-    @Override
-    public void setFullscreen(boolean value) {
+    public void updateContainer() {
         valid = false;
     }
 

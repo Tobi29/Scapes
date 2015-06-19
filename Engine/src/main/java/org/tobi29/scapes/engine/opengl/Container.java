@@ -44,9 +44,7 @@ public interface Container {
 
     void setMouseGrabbed(boolean value);
 
-    void setVSync(boolean value);
-
-    void setFullscreen(boolean value);
+    void updateContainer();
 
     URI[] openFileDialog(Pair<String, String>[] extensions, String title,
             boolean multiple);

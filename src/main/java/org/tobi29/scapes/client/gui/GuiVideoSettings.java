@@ -54,14 +54,11 @@ public class GuiVideoSettings extends GuiMenu {
             if (!state.getEngine().getConfig().isFullscreen()) {
                 fullscreen.setText("Fullscreen: ON");
                 state.getEngine().getConfig().setFullscreen(true);
-                state.getEngine().getGraphics().getContainer()
-                        .setFullscreen(true);
             } else {
                 fullscreen.setText("Fullscreen: OFF");
                 state.getEngine().getConfig().setFullscreen(false);
-                state.getEngine().getGraphics().getContainer()
-                        .setFullscreen(false);
             }
+            state.getEngine().getGraphics().getContainer().updateContainer();
         });
         GuiComponentTextButton keepInvisibleVbos;
         if (scapesTag.getBoolean("KeepInvisibleChunkVbos")) {
