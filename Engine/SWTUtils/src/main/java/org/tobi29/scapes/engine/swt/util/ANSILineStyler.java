@@ -57,6 +57,7 @@ public class ANSILineStyler implements LineStyleListener, VerifyListener {
         colorTable[17] = display.getSystemColor(SWT.COLOR_WHITE);
     }
 
+    @SuppressWarnings("AssignmentToForLoopParameter")
     @Override
     public void lineGetStyle(LineStyleEvent event) {
         int start = event.lineOffset;
