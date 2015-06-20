@@ -16,7 +16,7 @@
 
 
 apply from: "$rootDir/resources/scapesengineapplication.gradle"
-apply from: "$rootDir/backends/qtjambi.gradle"
+apply from: "$rootDir/backends/glfw.gradle"
 
 version = "0.0.0_1"
 
