@@ -42,7 +42,7 @@ public class SWTDialogsProvider implements GLFWDialogsProvider {
 
     @Override
     public PlatformDialogs createDialogs(ScapesEngine engine) {
-        return new PlatformDialogsSWT(engine.getGame().getID());
+        return new PlatformDialogsSWT(engine.getGame().getName());
     }
 
     @Override

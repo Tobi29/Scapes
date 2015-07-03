@@ -34,16 +34,17 @@ import java.util.Optional;
 
 public class PlatformDialogsSWT implements PlatformDialogs {
     private static final Path[] EMPTY_PATH = {};
-    private static final boolean IS_COCOA = "cocoa".equals(SWT.getPlatform());
-    private final Shell shell;
+    private final Display display;
+    private final String name;
 
-    public PlatformDialogsSWT(String id) {
-        this(id, new Shell());
+    public PlatformDialogsSWT(String name) {
+        this(Display.getDefault(), name);
+        Display.setAppName(name);
     }
 
-    public PlatformDialogsSWT(String id, Shell shell) {
-        this.shell = shell;
-        Display.setAppName(id);
+    public PlatformDialogsSWT(Display display, String name) {
+        this.display = display;
+        this.name = name;
     }
 
     @Override
@@ -60,11 +61,13 @@ public class PlatformDialogsSWT implements PlatformDialogs {
         if (multiple) {
             style |= SWT.MULTI;
         }
+        Shell shell = createShell();
         FileDialog fileDialog = new FileDialog(shell, style);
         fileDialog.setText(title);
         fileDialog.setFilterExtensions(filterExtensions);
         fileDialog.setFilterNames(filterNames);
         boolean successful = fileDialog.open() != null;
+        shell.dispose();
         if (!successful) {
             return EMPTY_PATH;
         }
@@ -87,12 +90,14 @@ public class PlatformDialogsSWT implements PlatformDialogs {
             filterExtensions[i] = extension.a;
             filterNames[i] = extension.b;
         }
+        Shell shell = createShell();
         FileDialog fileDialog =
                 new FileDialog(shell, SWT.SAVE | SWT.APPLICATION_MODAL);
         fileDialog.setText(title);
         fileDialog.setFilterExtensions(filterExtensions);
         fileDialog.setFilterNames(filterNames);
         boolean successful = fileDialog.open() != null;
+        shell.dispose();
         if (!successful) {
             return Optional.empty();
         }
@@ -150,10 +155,12 @@ public class PlatformDialogsSWT implements PlatformDialogs {
                 style |= SWT.ICON_QUESTION;
                 break;
         }
+        Shell shell = createShell();
         MessageBox messageBox = new MessageBox(shell, style);
         messageBox.setText(title);
         messageBox.setMessage(message);
         messageBox.open();
+        shell.dispose();
     }
 
     @Override
@@ -163,13 +170,15 @@ public class PlatformDialogsSWT implements PlatformDialogs {
 
     @Override
     public void renderTick() {
-        if (!IS_COCOA) { // Avoid jvm crash on osx
-            shell.getDisplay().readAndDispatch();
-        }
     }
 
     @Override
     public void dispose() {
-        shell.dispose();
+    }
+
+    private Shell createShell() {
+        Shell shell = new Shell(display);
+        shell.setText(name);
+        return shell;
     }
 }
