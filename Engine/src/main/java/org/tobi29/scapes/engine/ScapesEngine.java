@@ -46,7 +46,6 @@ import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
@@ -76,12 +75,12 @@ public class ScapesEngine implements Crashable {
     private GameState currentState, newState;
     private StateThread stateThread;
 
-    public ScapesEngine(Game game, String home, boolean debug) {
+    public ScapesEngine(Game game, Path home, boolean debug) {
         this(game, loadBackend(), home, debug);
     }
 
     public ScapesEngine(Game game, ScapesEngineBackendProvider backend,
-            String home, boolean debug) {
+            Path home, boolean debug) {
         if (instance != null) {
             throw new ScapesEngineException(
                     "You can only have one engine running at a time!");
@@ -89,12 +88,12 @@ public class ScapesEngine implements Crashable {
         instance = this;
         this.debug = debug;
         this.game = game;
+        this.home = home;
         runtime = Runtime.getRuntime();
         game.engine = this;
         Thread.currentThread().setName("Engine-Rendering-Thread");
         LOGGER.info("Starting Scapes-Engine: {} (Game: {})", this, game);
         try {
-            this.home = Paths.get(home);
             files = new FileSystemContainer();
             temp = Files.createTempDirectory("ScapesEngine");
             runtime.addShutdownHook(new Thread(() -> {

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import java.util.stream.Collectors
 
 apply from: "$rootDir/resources/scapesenginemodule.gradle"
 
@@ -24,22 +25,33 @@ configurations {
     runtimeWindows32
     runtimeWindows64
     runtimePlatform
+    nativesLinux32
+    nativesLinux64
+    nativesMacOSX
+    nativesWindows32
+    nativesWindows64
+    nativesPlatform
 
     String os = System.properties["os.name"].toLowerCase()
     String arch = System.properties["os.arch"]
     if (os.contains("linux")) {
         if (arch.contains("64")) {
             runtimePlatform.extendsFrom runtimeLinux64
+            nativesPlatform.extendsFrom nativesLinux64
         } else {
             runtimePlatform.extendsFrom runtimeLinux32
+            nativesPlatform.extendsFrom nativesLinux32
         }
     } else if (os.contains("mac")) {
         runtimePlatform.extendsFrom runtimeMacOSX
+        nativesPlatform.extendsFrom nativesMacOSX
     } else if (os.contains("windows")) {
         if (arch.contains("64")) {
             runtimePlatform.extendsFrom runtimeWindows64
+            nativesPlatform.extendsFrom nativesWindows64
         } else {
             runtimePlatform.extendsFrom runtimeWindows32
+            nativesPlatform.extendsFrom nativesWindows32
         }
     }
 }
@@ -64,6 +76,17 @@ class ScapesEngineApplication implements Plugin<Project> {
         // Application properties
         target.extensions.
                 create("application", ScapesEngineApplicationExtension)
+
+        // Natives task
+        Copy nativesTask = target.tasks.create("natives", Copy)
+        nativesTask.description = "Extract natives for runtime"
+        nativesTask.group = "run"
+        nativesTask.from { ->
+            target.configurations.nativesPlatform.files.stream().
+                    map({ target.zipTree(it) }).
+                    collect(Collectors.toList())
+        }
+        nativesTask.into new File(target.buildDir, "natives")
 
         // Run task
         Task runTask = target.tasks.create("run", JavaExec)
@@ -145,12 +168,21 @@ class ScapesEngineApplication implements Plugin<Project> {
         bundleTask.output =
                 "${-> bundleTask.temporaryDir}/${-> target.project.name}.app"
 
+        // Natives task
+        Copy nativesTask = target.tasks.create("nativesMacOSX", Copy)
+        nativesTask.dependsOn bundleTask
+        nativesTask.from({ ->
+            target.configurations.nativesMacOSX.files.stream().
+                    map({ target.zipTree(it) }).collect(Collectors.toList())
+        })
+        nativesTask.into "${-> bundleTask.output}/Contents/MacOS"
+
         // Main task
         Tar task = target.tasks.create("deployMacOSX", Tar)
         task.description =
                 "Mac OS X Application containing necessary files to run the game"
         task.group = "Deployment"
-        task.dependsOn bundleTask
+        task.dependsOn nativesTask
         task.baseName = "${target.project.name}-MacOSX"
         task.compression = Compression.GZIP
         task.from bundleTask.output.parentFile
@@ -241,6 +273,14 @@ class ScapesEngineApplication implements Plugin<Project> {
                 { into "install/common/lib" })
         prepareTask.from(target.configurations.runtime,
                 { into "install/common/lib" })
+        prepareTask.from({ ->
+            target.configurations.nativesWindows32.files.stream().
+                    map({ target.zipTree(it) }).collect(Collectors.toList())
+        }, { into "install/32" })
+        prepareTask.from({ ->
+            target.configurations.nativesWindows64.files.stream().
+                    map({ target.zipTree(it) }).collect(Collectors.toList())
+        }, { into "install/64" })
         prepareTask.from(target.configurations.runtimeWindows32,
                 { into "install/32/lib" })
         prepareTask.from(target.configurations.runtimeWindows64,
@@ -504,7 +544,7 @@ class AppBundlerTask extends DefaultTask {
             option(value: "-XX:+UseG1GC")
             option(value: "-XX:MaxGCPauseMillis=1")
             option(value: "-Xdock:icon=Contents/resources/Icon.icns")
-            option(value: "-Duser.dir=\$APP_ROOT/Contents/Resources")
+            argument(value: "\$HOME/Library/Application Support/$fullName")
         }
     }
 }
@@ -555,6 +595,7 @@ class Launch4jTask extends DefaultTask {
                     classPath(classPathMap)
                     jre(jreMap) {
                         opt("-Duser.dir=\"%APPDATA%\\${fullName}\"")
+                        opt("-Djava.library.path=\"%EXEDIR%\"")
                     }
                     versioninfo(versionMap)
                 }

@@ -34,8 +34,6 @@ import org.tobi29.scapes.engine.utils.io.IOSupplier;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -62,15 +60,6 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
     protected ContainerLWJGL3(ScapesEngine engine) {
         this.engine = engine;
         mainThread = Thread.currentThread();
-        try {
-            Path natives = engine.getTemp().resolve("natives");
-            Files.createDirectories(natives);
-            LWJGLNatives.extract(engine.getFiles(), natives);
-            System.setProperty("org.lwjgl.librarypath",
-                    natives.toAbsolutePath().toString());
-        } catch (IOException e) {
-            LOGGER.error("Failed to extract natives", e);
-        }
         LOGGER.info("LWJGL version: {}", Sys.getVersion());
         openGL = new LWJGL3OpenGL(engine);
         openAL = new LWJGL3OpenAL();

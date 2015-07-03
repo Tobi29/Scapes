@@ -28,9 +28,11 @@ import org.tobi29.scapes.server.shell.ScapesServerHeadless;
 import org.tobi29.scapes.server.shell.ScapesStandaloneServer;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.*;
 import java.util.Enumeration;
+import java.util.regex.Pattern;
 
 public class Scapes {
     public static final VersionUtil.Version VERSION =
@@ -39,6 +41,7 @@ public class Scapes {
     private static boolean sandboxed;
     private static final String[] PACKAGE_WHITELIST =
             {"java", "org.tobi29.scapes", "org.slf4j"};
+    private static final Pattern HOME_PATH = Pattern.compile("\\$HOME");
 
     @SuppressWarnings("CustomSecurityManager")
     public static void sandbox() {
@@ -124,16 +127,17 @@ public class Scapes {
         debug = commandLine.hasOption('d');
         String[] cmdArgs = commandLine.getArgs();
         String mode = commandLine.getOptionValue('m', "client");
-        String directory;
+        Path home;
         if (cmdArgs.length > 0) {
-            directory = cmdArgs[0];
+            home = Paths.get(HOME_PATH.matcher(cmdArgs[0])
+                    .replaceAll(System.getProperty("user.home")));
         } else {
-            directory = System.getProperty("user.dir");
+            home = Paths.get(System.getProperty("user.dir"));
         }
         switch (mode) {
             case "client":
                 ScapesEngine engine =
-                        new ScapesEngine(new ScapesClient(), directory, debug);
+                        new ScapesEngine(new ScapesClient(), home, debug);
                 if (commandLine.hasOption('s')) {
                     engine.setState(new GameStateMenu(engine));
                 } else {
@@ -149,7 +153,7 @@ public class Scapes {
             case "server":
                 try {
                     ScapesStandaloneServer server;
-                    server = new ScapesServerHeadless(Paths.get(directory));
+                    server = new ScapesServerHeadless(home);
                     System.exit(server.run());
                 } catch (IOException e) {
                     System.err.println(e.getMessage());
