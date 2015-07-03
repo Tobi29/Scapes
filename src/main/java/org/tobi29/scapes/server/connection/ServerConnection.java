@@ -82,9 +82,9 @@ public class ServerConnection implements PlayConnection {
         return playerByName.get(name);
     }
 
-    public Optional<ServerSkin> getSkin(String checksum) {
+    public Optional<ServerSkin> getSkin(byte[] checksum) {
         for (PlayerConnection player : playerByName.values()) {
-            if (player.getSkin().getChecksum().equals(checksum)) {
+            if (Arrays.equals(player.getSkin().checksum(), checksum)) {
                 return Optional.of(player.getSkin());
             }
         }

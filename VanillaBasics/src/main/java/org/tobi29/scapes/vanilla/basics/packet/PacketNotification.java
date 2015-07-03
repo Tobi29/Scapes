@@ -19,12 +19,12 @@ package org.tobi29.scapes.vanilla.basics.packet;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.client.gui.GuiInGameMessage;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketClient;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class PacketNotification extends Packet implements PacketClient {
@@ -39,17 +39,17 @@ public class PacketNotification extends Packet implements PacketClient {
     }
 
     @Override
-    public void sendClient(PlayerConnection player, DataOutputStream streamOut)
+    public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        streamOut.writeUTF(title);
-        streamOut.writeUTF(text);
+        stream.putString(title);
+        stream.putString(text);
     }
 
     @Override
-    public void parseClient(ClientConnection client, DataInputStream streamIn)
+    public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        title = streamIn.readUTF();
-        text = streamIn.readUTF();
+        title = stream.getString();
+        text = stream.getString();
     }
 
     @Override

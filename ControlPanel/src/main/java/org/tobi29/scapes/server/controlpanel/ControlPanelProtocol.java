@@ -19,14 +19,14 @@ package org.tobi29.scapes.server.controlpanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.utils.io.PacketBundleChannel;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -70,11 +70,11 @@ public class ControlPanelProtocol {
         this.keyPair = keyPair;
         if (keyPair.isPresent()) {
             state = State.SERVER_LOGIN_STEP_1;
-            DataOutputStream streamOut = this.channel.getOutputStream();
+            WritableByteStream output = this.channel.getOutputStream();
             byte[] array = keyPair.get().getPublic().getEncoded();
-            streamOut.writeInt(array.length);
-            streamOut.write(array);
-            streamOut.writeInt(AES_KEY_LENGTH);
+            output.putInt(array.length);
+            output.put(array);
+            output.putInt(AES_KEY_LENGTH);
             this.channel.queueBundle();
         } else {
             state = State.CLIENT_LOGIN_STEP_1;
@@ -101,32 +101,33 @@ public class ControlPanelProtocol {
 
     public boolean process() throws IOException {
         boolean processing = false;
-        Optional<DataInputStream> bundle = channel.fetch();
+        Optional<ReadableByteStream> bundle = channel.fetch();
         if (bundle.isPresent()) {
-            DataInputStream streamIn = bundle.get();
+            ReadableByteStream streamIn = bundle.get();
             switch (state) {
                 case CLIENT_LOGIN_STEP_1:
                     try {
-                        byte[] array = new byte[streamIn.readInt()];
-                        streamIn.readFully(array);
-                        int keyLength = streamIn.readInt();
+                        byte[] array = new byte[streamIn.getInt()];
+                        streamIn.get(array);
+                        int keyLength = streamIn.getInt();
                         keyLength = FastMath.min(keyLength, AES_KEY_LENGTH);
                         byte[] keyServer = new byte[keyLength];
                         byte[] keyClient = new byte[keyLength];
                         Random random = new SecureRandom();
                         random.nextBytes(keyServer);
                         random.nextBytes(keyClient);
-                        DataOutputStream streamOut = channel.getOutputStream();
-                        streamOut.writeInt(keyLength);
+                        WritableByteStream output = channel.getOutputStream();
+                        output.putInt(keyLength);
                         PublicKey rsaKey = KeyFactory.getInstance("RSA")
                                 .generatePublic(new X509EncodedKeySpec(array));
                         Cipher cipher = Cipher.getInstance("RSA");
                         cipher.init(Cipher.ENCRYPT_MODE, rsaKey);
-                        streamOut.write(cipher.update(keyServer));
-                        streamOut.write(cipher.doFinal(keyClient));
+                        output.put(cipher.update(keyServer));
+                        output.put(cipher.doFinal(keyClient));
                         channel.queueBundle();
                         channel.setKey(keyClient, keyServer);
-                        streamOut.writeUTF(password);
+                        // TODO: Replace with challenge auth
+                        output.putString(password);
                         channel.queueBundle();
                     } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidKeySpecException e) {
                         throw new IOException(e);
@@ -134,7 +135,7 @@ public class ControlPanelProtocol {
                     state = State.OPEN;
                     break;
                 case SERVER_LOGIN_STEP_1:
-                    int keyLength = streamIn.readInt();
+                    int keyLength = streamIn.getInt();
                     keyLength = FastMath.min(keyLength, AES_KEY_LENGTH);
                     byte[] keyServer = new byte[keyLength];
                     byte[] keyClient = new byte[keyLength];
@@ -145,7 +146,7 @@ public class ControlPanelProtocol {
                                 keyPair.get().getPrivate());
                         byte[] array =
                                 new byte[cipher.getOutputSize(keyLength << 1)];
-                        streamIn.readFully(array);
+                        streamIn.get(array);
                         array = cipher.doFinal(array);
                         System.arraycopy(array, 0, keyServer, 0, keyLength);
                         System.arraycopy(array, keyLength, keyClient, 0,
@@ -157,17 +158,17 @@ public class ControlPanelProtocol {
                     state = State.SERVER_LOGIN_STEP_2;
                     break;
                 case SERVER_LOGIN_STEP_2:
-                    String password = streamIn.readUTF();
+                    String password = streamIn.getString();
                     if (!this.password.equals(password)) {
                         throw new IOException("Failed password authentication");
                     }
                     state = State.OPEN;
                     break;
                 case OPEN:
-                    int length = streamIn.readInt();
+                    int length = streamIn.getInt();
                     String[] command = new String[length];
                     for (int i = 0; i < length; i++) {
-                        command[i] = streamIn.readUTF();
+                        command[i] = streamIn.getString();
                     }
                     processCommand(command);
                     processing = true;
@@ -178,10 +179,10 @@ public class ControlPanelProtocol {
             case OPEN:
                 while (!queue.isEmpty()) {
                     String[] command = queue.poll();
-                    DataOutputStream streamOut = channel.getOutputStream();
-                    streamOut.writeInt(command.length);
+                    WritableByteStream output = channel.getOutputStream();
+                    output.putInt(command.length);
                     for (String str : command) {
-                        streamOut.writeUTF(str);
+                        output.putString(str);
                     }
                     channel.queueBundle();
                     processing = true;

@@ -48,11 +48,10 @@ public class EntityBlockBreakClient extends EntityClient {
     @Override
     public void update(double delta) {
         pointerPanes.reset();
-        world.getTerrain().getBlockType(pos.intX(), pos.intY(), pos
-                .intZ())
+        world.getTerrain().type(pos.intX(), pos.intY(), pos.intZ())
                 .addPointerCollision(world.getTerrain()
-                                .getBlockData(pos.intX(), pos.intY(),
-                                        pos.intZ()), pointerPanes, pos
+                                .data(pos.intX(), pos.intY(), pos.intZ()),
+                        pointerPanes, pos
                                 .intX(),
                         pos.intY(), pos.intZ());
     }

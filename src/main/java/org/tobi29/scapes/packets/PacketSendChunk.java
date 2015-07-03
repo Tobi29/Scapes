@@ -22,13 +22,13 @@ import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteChunkClient;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteChunkServer;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -40,27 +40,27 @@ public class PacketSendChunk extends Packet implements PacketClient {
     }
 
     public PacketSendChunk(TerrainInfiniteChunkServer chunk) {
-        super(new Vector3d(chunk.getX() << 4, chunk.getY() << 4, 0), true);
+        super(new Vector3d(chunk.getBlockX(), chunk.getBlockY(), 0), true);
         x = chunk.getX();
         y = chunk.getY();
         tag = chunk.save(true);
     }
 
     @Override
-    public void sendClient(PlayerConnection player, DataOutputStream streamOut)
+    public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        streamOut.writeInt(x);
-        streamOut.writeInt(y);
-        TagStructureBinary.write(tag, streamOut);
+        stream.putInt(x);
+        stream.putInt(y);
+        TagStructureBinary.write(tag, stream);
     }
 
     @Override
-    public void parseClient(ClientConnection client, DataInputStream streamIn)
+    public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        x = streamIn.readInt();
-        y = streamIn.readInt();
+        x = stream.getInt();
+        y = stream.getInt();
         tag = new TagStructure();
-        TagStructureBinary.read(tag, streamIn);
+        TagStructureBinary.read(tag, stream);
     }
 
     @Override

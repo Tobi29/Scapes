@@ -21,10 +21,6 @@ public class UnsupportedJVMException extends RuntimeException {
         super(message);
     }
 
-    public UnsupportedJVMException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
     public UnsupportedJVMException(Throwable cause) {
         super(cause);
     }

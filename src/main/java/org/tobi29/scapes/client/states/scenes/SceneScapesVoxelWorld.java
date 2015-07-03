@@ -304,8 +304,7 @@ public class SceneScapesVoxelWorld extends Scene {
         vao.render(graphics, shader);
         exposureFBO.deactivate(graphics);
         MobPlayerClientMain player = world.getPlayer();
-        float newRenderDistance =
-                (float) world.getTerrain().getTerrainRenderer()
+        float newRenderDistance = (float) world.getTerrain().renderer()
                         .getActualRenderDistance();
         if (renderDistance > newRenderDistance) {
             renderDistance = newRenderDistance;
@@ -331,11 +330,11 @@ public class SceneScapesVoxelWorld extends Scene {
         int xx = FastMath.floor(cam.position.doubleX());
         int yy = FastMath.floor(cam.position.doubleY());
         int zz = FastMath.floor(cam.position.doubleZ());
-        lightDebug.setValue(world.getTerrain().getLight(xx, yy, zz));
-        blockLightDebug.setValue(world.getTerrain().getBlockLight(xx, yy, zz));
-        sunLightDebug.setValue(world.getTerrain().getSunLight(xx, yy, zz));
+        lightDebug.setValue(world.getTerrain().light(xx, yy, zz));
+        blockLightDebug.setValue(world.getTerrain().blockLight(xx, yy, zz));
+        sunLightDebug.setValue(world.getTerrain().sunLight(xx, yy, zz));
         performanceWidget.graphRender.addStamp(delta);
-        world.updateRender(graphics, cam, delta);
+        world.updateRender(cam, delta);
         skybox.renderUpdate(graphics, cam, delta);
         skinStorage.update(graphics, player.getGame().getClient());
     }
@@ -412,6 +411,7 @@ public class SceneScapesVoxelWorld extends Scene {
         skybox.dispose(graphics, cam);
         fbo.dispose(graphics);
         skyboxFBO.dispose(graphics);
+        exposureFBO.dispose(graphics);
         world.dispose();
         terrainTextureRegistry.dispose(graphics);
         skinStorage.dispose(graphics);

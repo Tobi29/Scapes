@@ -109,6 +109,10 @@ public interface Command {
         }
     }
 
+    static void error(String msg) throws CommandException {
+        throw new CommandException(253, msg);
+    }
+
     static void requirePermission(Executor executor, int level)
             throws CommandException {
         if (executor.getPermissionLevel() < level) {

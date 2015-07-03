@@ -49,10 +49,10 @@ public class BlockChest extends VanillaBlockContainer {
     @Override
     protected EntityContainerServer placeEntity(TerrainServer terrain, int x,
             int y, int z) {
-        EntityChestServer entity = new EntityChestServer(terrain.getWorld(),
+        EntityChestServer entity = new EntityChestServer(terrain.world(),
                 new Vector3d(x + 0.5, y + 0.5, z + 0.5));
         entity.onSpawn();
-        terrain.getWorld().addEntity(entity);
+        terrain.world().addEntity(entity);
         return entity;
     }
 
@@ -62,7 +62,7 @@ public class BlockChest extends VanillaBlockContainer {
         if (face == Face.UP || face == Face.DOWN) {
             return false;
         }
-        terrain.setBlockData(x, y, z, face.getData());
+        terrain.data(x, y, z, face.getData());
         return true;
     }
 

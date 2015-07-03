@@ -18,22 +18,31 @@ package org.tobi29.scapes.engine.utils.tests;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.tobi29.scapes.engine.utils.CompressionUtil;
+import org.tobi29.scapes.engine.utils.io.ByteBufferStream;
+import org.tobi29.scapes.engine.utils.io.CompressionUtil;
 import org.tobi29.scapes.engine.utils.tests.util.RandomInput;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 public class CompressionUtilTest {
     @Test
     public void testCompressArray() throws IOException {
         for (byte[] array : RandomInput.createRandomArrays(32, 8)) {
-            byte[] compressed = CompressionUtil.compress(array);
-            byte[] decompressed = CompressionUtil.decompress(compressed);
+            ByteBufferStream compressed = new ByteBufferStream();
+            CompressionUtil
+                    .compress(new ByteBufferStream(ByteBuffer.wrap(array)),
+                            compressed);
+            compressed.buffer().flip();
+            ByteBufferStream decompressed = new ByteBufferStream();
+            CompressionUtil
+                    .decompress(new ByteBufferStream(compressed.buffer()),
+                            decompressed);
+            decompressed.buffer().flip();
+            byte[] check = new byte[decompressed.buffer().remaining()];
+            decompressed.buffer().get(check);
             Assert.assertArrayEquals("Data not equal after decompression",
-                    array, decompressed);
-            byte[] recompressed = CompressionUtil.compress(decompressed);
-            Assert.assertArrayEquals("Data not equal after recompression",
-                    compressed, recompressed);
+                    array, check);
         }
     }
 }

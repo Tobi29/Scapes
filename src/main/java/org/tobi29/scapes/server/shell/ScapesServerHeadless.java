@@ -19,25 +19,26 @@ package org.tobi29.scapes.server.shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.utils.SleepUtil;
-import org.tobi29.scapes.engine.utils.io.filesystem.FileSystem;
 import org.tobi29.scapes.server.ScapesServer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Optional;
 
 public class ScapesServerHeadless extends ScapesStandaloneServer {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ScapesServerHeadless.class);
 
-    public ScapesServerHeadless(FileSystem files) throws IOException {
-        super(files);
+    public ScapesServerHeadless(Path path) {
+        super(path);
     }
 
     @Override
     public int run() throws IOException {
-        if (!directory.exists()) {
+        if (!Files.exists(path)) {
             throw new IOException("No save found");
         }
         while (true) {

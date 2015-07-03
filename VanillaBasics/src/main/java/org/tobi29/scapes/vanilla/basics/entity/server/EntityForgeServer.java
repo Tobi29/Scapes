@@ -70,19 +70,19 @@ public class EntityForgeServer extends EntityAbstractFurnaceServer {
         int yy = pos.intY();
         int zz = pos.intZ();
         if (temperature > 10.0) {
-            if (world.getTerrain().getBlockData(xx, yy, zz) == 0) {
-                world.getTerrain().queueBlockChanges(handle -> {
-                    if (handle.getBlockType(xx, yy, zz) == materials.forge &&
-                            handle.getBlockData(xx, yy, zz) == 0) {
-                        handle.setBlockData(xx, yy, zz, (short) 0);
+            if (world.getTerrain().data(xx, yy, zz) == 0) {
+                world.getTerrain().queue(handle -> {
+                    if (handle.type(xx, yy, zz) == materials.forge &&
+                            handle.data(xx, yy, zz) == 0) {
+                        handle.data(xx, yy, zz, (short) 0);
                     }
                 });
             }
-        } else if (world.getTerrain().getBlockData(xx, yy, zz) == 1) {
-            world.getTerrain().queueBlockChanges(handle -> {
-                if (handle.getBlockType(xx, yy, zz) == materials.forge &&
-                        handle.getBlockData(xx, yy, zz) == 1) {
-                    handle.setBlockData(xx, yy, zz, (short) 1);
+        } else if (world.getTerrain().data(xx, yy, zz) == 1) {
+            world.getTerrain().queue(handle -> {
+                if (handle.type(xx, yy, zz) == materials.forge &&
+                        handle.data(xx, yy, zz) == 1) {
+                    handle.data(xx, yy, zz, (short) 1);
                 }
             });
         }
@@ -90,9 +90,9 @@ public class EntityForgeServer extends EntityAbstractFurnaceServer {
 
     @Override
     protected boolean isValidOn(TerrainServer terrain, int x, int y, int z) {
-        VanillaBasics plugin = (VanillaBasics) terrain.getWorld().getPlugins()
+        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
                 .getPlugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
-        return terrain.getBlockType(x, y, z) == materials.forge;
+        return terrain.type(x, y, z) == materials.forge;
     }
 }

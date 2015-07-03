@@ -46,7 +46,7 @@ public class GuiCredits extends Gui {
                 new GuiComponentTextButton(13, 64, 70, 30, 18, "Back");
         StringBuilder credits = new StringBuilder(200);
         try (BufferedReader reader = state.getEngine().getFiles()
-                .getResource("Scapes:Readme.txt").reader()) {
+                .get("Scapes:Readme.txt").reader()) {
             String line = reader.readLine();
             while (line != null) {
                 credits.append(line).append('\n');

@@ -27,7 +27,7 @@ public final class StructureSmallRuin {
     public static void placeRandomRuin(TerrainServer.TerrainMutable terrain,
             int x, int y, int z, VanillaMaterial materials, short stoneType,
             Random random) {
-        if (terrain.getBlockType(x, y, z) != materials.air &&
+        if (terrain.type(x, y, z) != materials.air &&
                 random.nextInt(10) != 0) {
             return;
         }
@@ -72,7 +72,7 @@ public final class StructureSmallRuin {
     public static void placePillar(TerrainServer.TerrainMutable terrain, int x,
             int y, int z, BlockType[] type, short... data) {
         for (int i = 0; i < type.length; i++) {
-            terrain.setBlockTypeAndData(x, y, z + i, type[i], data[i]);
+            terrain.typeData(x, y, z + i, type[i], data[i]);
         }
     }
 
@@ -97,8 +97,7 @@ public final class StructureSmallRuin {
                             walls[random.nextInt(walls.length)], stoneType,
                             random.nextInt(9) + 1);
                 } else {
-                    terrain.setBlockTypeAndData(xxx, yyy, z - 1, floor,
-                            woodType);
+                    terrain.typeData(xxx, yyy, z - 1, floor, woodType);
                     fillGround(terrain, xxx, yyy, z - 2,
                             walls[random.nextInt(walls.length)], stoneType,
                             random.nextInt(9));
@@ -110,16 +109,16 @@ public final class StructureSmallRuin {
     public static void placePillar(TerrainServer.TerrainMutable terrain, int x,
             int y, int z, BlockType type, short data, int height) {
         for (int i = 0; i < height; i++) {
-            terrain.setBlockTypeAndData(x, y, z + i, type, data);
+            terrain.typeData(x, y, z + i, type, data);
         }
     }
 
     public static void fillGround(TerrainServer.TerrainMutable terrain, int x,
             int y, int z, BlockType type, short data, int maxDepth) {
         for (int i = 0; i < maxDepth; i++) {
-            if (terrain.getBlockType(x, y, z - i)
+            if (terrain.type(x, y, z - i)
                     .isReplaceable(terrain, x, y, z - i)) {
-                terrain.setBlockTypeAndData(x, y, z - i, type, data);
+                terrain.typeData(x, y, z - i, type, data);
             } else {
                 return;
             }

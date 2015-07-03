@@ -24,10 +24,11 @@ import java.util.Random;
 
 public class LayerGround implements BiomeDecorator.Layer {
     private final BlockType material;
-    private final int data, chance;
+    private final int chance;
     private final GroundCheck check;
+    private final DataProducer data;
 
-    public LayerGround(BlockType material, int data, int chance,
+    public LayerGround(BlockType material, DataProducer data, int chance,
             GroundCheck check) {
         this.material = material;
         this.data = data;
@@ -41,7 +42,8 @@ public class LayerGround implements BiomeDecorator.Layer {
         if (random.nextInt(chance) == 0) {
             int z = terrain.getHighestTerrainBlockZAt(x, y);
             if (check.canPlace(terrain, x, y, z)) {
-                terrain.setBlockTypeAndData(x, y, z, material, data);
+                terrain.typeData(x, y, z, material,
+                        data.data(terrain, x, y, z, random));
             }
         }
     }
@@ -50,5 +52,11 @@ public class LayerGround implements BiomeDecorator.Layer {
     public interface GroundCheck {
         boolean canPlace(TerrainServer.TerrainMutable terrain, int x, int y,
                 int z);
+    }
+
+    @FunctionalInterface
+    public interface DataProducer {
+        int data(TerrainServer.TerrainMutable terrain, int x, int y, int z,
+                Random random);
     }
 }

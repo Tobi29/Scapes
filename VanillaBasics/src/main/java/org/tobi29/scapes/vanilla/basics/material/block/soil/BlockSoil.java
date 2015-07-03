@@ -46,21 +46,21 @@ public abstract class BlockSoil extends VanillaBlock {
             int z) {
         int sides = 0, xx = 0, yy = 0;
         boolean flag = false;
-        if (terrain.getBlockType(x, y, z - 1).isSolid(terrain, x, y, z - 1)) {
+        if (terrain.type(x, y, z - 1).isSolid(terrain, x, y, z - 1)) {
             Random random = ThreadLocalRandom.current();
-            if (!terrain.getBlockType(x - 1, y, z)
+            if (!terrain.type(x - 1, y, z)
                     .isSolid(terrain, x - 1, y, z)) {
                 sides++;
-                if (!terrain.getBlockType(x - 1, y, z - 1)
+                if (!terrain.type(x - 1, y, z - 1)
                         .isSolid(terrain, x - 1, y, z - 1)) {
                     xx = -1;
                     flag = true;
                 }
             }
-            if (!terrain.getBlockType(x + 1, y, z)
+            if (!terrain.type(x + 1, y, z)
                     .isSolid(terrain, x + 1, y, z)) {
                 sides++;
-                if (!terrain.getBlockType(x + 1, y, z - 1)
+                if (!terrain.type(x + 1, y, z - 1)
                         .isSolid(terrain, x + 1, y, z - 1)) {
                     if (xx == 0 || random.nextBoolean()) {
                         xx = 1;
@@ -68,10 +68,10 @@ public abstract class BlockSoil extends VanillaBlock {
                     flag = true;
                 }
             }
-            if (!terrain.getBlockType(x, y - 1, z)
+            if (!terrain.type(x, y - 1, z)
                     .isSolid(terrain, x, y - 1, z)) {
                 sides++;
-                if (!terrain.getBlockType(x, y - 1, z - 1)
+                if (!terrain.type(x, y - 1, z - 1)
                         .isSolid(terrain, x, y - 1, z - 1)) {
                     if (xx == 0 || random.nextBoolean()) {
                         xx = 0;
@@ -80,10 +80,10 @@ public abstract class BlockSoil extends VanillaBlock {
                     flag = true;
                 }
             }
-            if (!terrain.getBlockType(x, y + 1, z)
+            if (!terrain.type(x, y + 1, z)
                     .isSolid(terrain, x, y + 1, z)) {
                 sides++;
-                if (!terrain.getBlockType(x, y + 1, z - 1)
+                if (!terrain.type(x, y + 1, z - 1)
                         .isSolid(terrain, x, y + 1, z - 1)) {
                     if (xx == 0 && yy == 0 || random.nextBoolean()) {
                         xx = 0;
@@ -97,13 +97,11 @@ public abstract class BlockSoil extends VanillaBlock {
             flag = true;
         }
         if (sides > 2 && flag) {
-            terrain.getWorld().addEntity(
-                    new MobFlyingBlockServer(terrain.getWorld(),
+            terrain.world().addEntity(new MobFlyingBlockServer(terrain.world(),
                             new Vector3d(x + xx + 0.5, y + yy + 0.5, z + 0.5),
                             new Vector3d(0, 0, -1.0d), this,
-                            terrain.getBlockData(x, y, z)));
-            terrain.setBlockTypeAndData(x, y, z, terrain.getWorld().getAir(),
-                    (short) 0);
+                            terrain.data(x, y, z)));
+            terrain.typeData(x, y, z, terrain.world().getAir(), (short) 0);
         }
     }
 

@@ -19,13 +19,13 @@ package org.tobi29.scapes.packets;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.MobileEntity;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class PacketMobChangeState extends Packet
@@ -47,19 +47,19 @@ public class PacketMobChangeState extends Packet
     }
 
     @Override
-    public void sendClient(PlayerConnection player, DataOutputStream streamOut)
+    public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        streamOut.writeInt(entityID);
-        streamOut.writeByte(
-                (ground ? 1 : 0) | (slidingWall ? 2 : 0) | (inWater ? 4 : 0) |
-                        (swimming ? 8 : 0));
+        stream.putInt(entityID);
+        int b = (ground ? 1 : 0) | (slidingWall ? 2 : 0) | (inWater ? 4 : 0) |
+                (swimming ? 8 : 0);
+        stream.put(b);
     }
 
     @Override
-    public void parseClient(ClientConnection client, DataInputStream streamIn)
+    public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        entityID = streamIn.readInt();
-        byte value = streamIn.readByte();
+        entityID = stream.getInt();
+        byte value = stream.get();
         ground = (value & 1) == 1;
         slidingWall = (value & 2) == 2;
         inWater = (value & 4) == 4;
@@ -79,17 +79,17 @@ public class PacketMobChangeState extends Packet
     }
 
     @Override
-    public void sendServer(ClientConnection client, DataOutputStream streamOut)
+    public void sendServer(ClientConnection client, WritableByteStream stream)
             throws IOException {
-        streamOut.writeByte(
-                (ground ? 1 : 0) | (slidingWall ? 2 : 0) | (inWater ? 4 : 0) |
-                        (swimming ? 8 : 0));
+        int b = (ground ? 1 : 0) | (slidingWall ? 2 : 0) | (inWater ? 4 : 0) |
+                (swimming ? 8 : 0);
+        stream.put(b);
     }
 
     @Override
-    public void parseServer(PlayerConnection player, DataInputStream streamIn)
+    public void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException {
-        byte value = streamIn.readByte();
+        byte value = stream.get();
         ground = (value & 1) == 1;
         slidingWall = (value & 2) == 2;
         inWater = (value & 4) == 4;

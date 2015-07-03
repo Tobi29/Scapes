@@ -16,11 +16,10 @@
 
 package org.tobi29.scapes.engine.utils.io;
 
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
-
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -45,23 +44,22 @@ public final class CrashReportFile {
     /**
      * Suggests how to name the file
      *
-     * @param directory Parent directory to put the file into
+     * @param path Parent directory to put the file into
      * @return A file inside of the given directory with appropriate name
      */
-    public static File getFile(Directory directory) throws IOException {
-        return getFile(directory, DEFAULT_CLOCK);
+    public static Path getFile(Path path) {
+        return getFile(path, DEFAULT_CLOCK);
     }
 
     /**
      * Suggests how to name the file
      *
-     * @param directory Parent directory to put the file into
-     * @param clock     The clock used to name the file
+     * @param path  Parent directory to put the file into
+     * @param clock The clock used to name the file
      * @return A file inside of the given directory with appropriate name
      */
-    public static File getFile(Directory directory, Clock clock)
-            throws IOException {
-        return directory.getResource("CrashReport-" +
+    public static Path getFile(Path path, Clock clock) {
+        return path.resolve("CrashReport-" +
                 OffsetDateTime.now(clock).format(FILE_FORMATTER) +
                 ".txt");
     }
@@ -70,27 +68,28 @@ public final class CrashReportFile {
      * Writes a crash report
      *
      * @param e           The {@code Throwable} that supplies te stacktrace
-     * @param file        The {@code File} that the report is written to
+     * @param path        The {@code File} that the report is written to
      * @param name        Name of the program used in the report
      * @param debugValues A {@code Map} that supplies extra information
      */
-    public static void writeCrashReport(Throwable e, File file, String name,
+    public static void writeCrashReport(Throwable e, Path path, String name,
             Map<String, String> debugValues) throws IOException {
-        writeCrashReport(e, file, name, debugValues, DEFAULT_CLOCK);
+        writeCrashReport(e, path, name, debugValues, DEFAULT_CLOCK);
     }
 
     /**
      * Writes a crash report
      *
      * @param e           The {@code Throwable} that supplies te stacktrace
-     * @param file        The {@code File} that the report is written to
+     * @param path        The {@code File} that the report is written to
      * @param name        Name of the program used in the report
      * @param debugValues A {@code Map} that supplies extra information
      * @param clock       The clock used to determine time in the report
      */
-    public static void writeCrashReport(Throwable e, File file, String name,
+    public static void writeCrashReport(Throwable e, Path path, String name,
             Map<String, String> debugValues, Clock clock) throws IOException {
-        try (PrintWriter writer = new PrintWriter(file.writer())) {
+        try (PrintWriter writer = new PrintWriter(
+                Files.newBufferedWriter(path))) {
             writer.println(name + " has crashed: " + e);
             writer.println();
             writer.println(

@@ -36,7 +36,7 @@ import java.nio.IntBuffer;
 public class LWJGL3OpenAL implements OpenAL {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(LWJGL3OpenAL.class);
-    private final IntBuffer intBuffer = BufferCreatorDirect.intBuffer(1);
+    private final IntBuffer buffer = BufferCreatorDirect.intBuffer(1);
     private final FloatBuffer listenerOrientation =
             BufferCreatorDirect.floatBuffer(6);
     private ALContext context;
@@ -209,8 +209,8 @@ public class LWJGL3OpenAL implements OpenAL {
 
     @Override
     public int unqueue() {
-        AL10.alSourceUnqueueBuffers(1, intBuffer);
-        return intBuffer.get(0);
+        AL10.alSourceUnqueueBuffers(1, buffer);
+        return buffer.get(0);
     }
 
     @Override

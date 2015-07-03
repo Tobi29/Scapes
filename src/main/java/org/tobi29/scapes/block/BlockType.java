@@ -67,8 +67,8 @@ public abstract class BlockType extends Material {
     public double click(MobPlayerServer entity, ItemStack item,
             TerrainServer terrain, int x, int y, int z, Face face) {
         Vector3 place = face.getDelta().plus(new Vector3i(x, y, z));
-        terrain.queueBlockChanges(handler -> {
-            if (handler.getBlockType(place.intX(), place.intY(), place.intZ())
+        terrain.queue(handler -> {
+            if (handler.type(place.intX(), place.intY(), place.intZ())
                     .isReplaceable(handler, place.intX(), place.intY(),
                             place.intZ())) {
                 List<AABBElement> aabbs =
@@ -83,14 +83,14 @@ public abstract class BlockType extends Material {
                     }
                 }
                 if (flag) {
-                    handler.setBlockData(place.intX(), place.intY(),
-                            place.intZ(), item.getData());
+                    handler.data(place.intX(), place.intY(), place.intZ(),
+                            item.getData());
                     if (place(handler, place.intX(), place.intY(), place.intZ(),
                             face, entity)) {
-                        handler.setBlockType(place.intX(), place.intY(),
-                                place.intZ(), this);
+                        handler.type(place.intX(), place.intY(), place.intZ(),
+                                this);
                         item.setAmount(item.getAmount() - 1);
-                        handler.getWorld().getConnection()
+                        handler.world().getConnection()
                                 .send(new PacketUpdateInventory(entity));
                         entity.getConnection().getStatistics()
                                 .blockPlace(this, item.getData());

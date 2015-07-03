@@ -23,13 +23,12 @@ import org.tobi29.scapes.engine.GameStateStartup;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.scenes.SceneImage;
 import org.tobi29.scapes.engine.utils.VersionUtil;
-import org.tobi29.scapes.engine.utils.io.filesystem.FileSystem;
-import org.tobi29.scapes.engine.utils.platform.Platform;
 import org.tobi29.scapes.plugins.PluginClassLoader;
 import org.tobi29.scapes.server.shell.ScapesServerHeadless;
 import org.tobi29.scapes.server.shell.ScapesStandaloneServer;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.security.*;
 import java.util.Enumeration;
 
@@ -149,10 +148,8 @@ public class Scapes {
                 break;
             case "server":
                 try {
-                    FileSystem files = Platform.getPlatform()
-                            .getFileFileSystem(directory, "");
                     ScapesStandaloneServer server;
-                    server = new ScapesServerHeadless(files);
+                    server = new ScapesServerHeadless(Paths.get(directory));
                     System.exit(server.run());
                 } catch (IOException e) {
                     System.err.println(e.getMessage());

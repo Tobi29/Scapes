@@ -16,7 +16,9 @@
 
 package org.tobi29.scapes.connection;
 
-public class ConnectionCloseException extends Exception {
+import java.io.IOException;
+
+public class ConnectionCloseException extends IOException {
     public ConnectionCloseException(String message) {
         super(message);
     }

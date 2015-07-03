@@ -290,7 +290,7 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         MobPlayerClient player = world.getPlayer();
         SceneScapesVoxelWorld scene = world.getScene();
         double factor = FastMath.min(1.0, delta * 10.0);
-        if (world.getTerrain().getSunLight(scene.getCam().position.intX(),
+        if (world.getTerrain().sunLight(scene.getCam().position.intX(),
                 scene.getCam().position.intY(),
                 scene.getCam().position.intZ()) > 0) {
             fogBrightness += (1.0f - fogBrightness) * factor;
@@ -302,7 +302,7 @@ public class WorldSkyboxOverworld implements WorldSkybox {
                         scene.getCam().position.intY())) / 15.0f;
         if (player.isHeadInWater()) {
             float light = FastMath.clamp(world.getTerrain()
-                    .getLight(FastMath.floor(player.getX()),
+                    .light(FastMath.floor(player.getX()),
                             FastMath.floor(player.getY()),
                             FastMath.floor(player.getZ() + 0.7)) * 0.09333f +
                     0.2f, 0.0f, 1.0f);

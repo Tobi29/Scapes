@@ -38,20 +38,20 @@ public class MobPlayerClient extends MobLivingEquippedClient
         implements EntityContainerClient {
     protected final Inventory inventory;
     protected int inventorySelectLeft, inventorySelectRight = 9, healWait;
-    protected String nickname, skin;
+    protected String nickname;
+    private byte[] skin;
 
     public MobPlayerClient(WorldClient world) {
-        this(world, Vector3d.ZERO, Vector3d.ZERO, 0.0d, 0.0d, "", "");
+        this(world, Vector3d.ZERO, Vector3d.ZERO, 0.0d, 0.0d, "");
     }
 
     public MobPlayerClient(WorldClient world, Vector3 pos, Vector3 speed,
-            double xRot, double zRot, String nickname, String skin) {
+            double xRot, double zRot, String nickname) {
         super(world, pos, speed, new AABB(-0.4, -0.4, -1, 0.4, 0.4, 0.9), 100,
                 100, new Frustum(90, 1, 0.1, 24), new Frustum(50, 1, 0.1, 2));
         rot.setX(xRot);
         rot.setZ(zRot);
         this.nickname = nickname;
-        this.skin = skin;
         inventory = new Inventory(registry, 44);
     }
 
@@ -133,7 +133,7 @@ public class MobPlayerClient extends MobLivingEquippedClient
             nickname = tagStructure.getString("Nickname");
         }
         if (tagStructure.has("SkinChecksum")) {
-            skin = tagStructure.getString("SkinChecksum");
+            skin = tagStructure.getByteArray("SkinChecksum");
         }
     }
 

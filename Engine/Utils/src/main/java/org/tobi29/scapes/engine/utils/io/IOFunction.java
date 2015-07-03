@@ -16,23 +16,26 @@
 
 package org.tobi29.scapes.engine.utils.io;
 
-import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Objects;
 
-/**
- * Utility class that gives more efficient usage possibilities to {@code
- * ByteArrayOutputStream}
- *
- * @see ByteArrayOutputStream
- */
-public class AdvancedByteArrayOutputStream extends ByteArrayOutputStream {
-    public AdvancedByteArrayOutputStream() {
+@FunctionalInterface
+public interface IOFunction<T, R> {
+    R apply(T t) throws IOException;
+
+    default <V> IOFunction<V, R> compose(
+            IOFunction<? super V, ? extends T> before) {
+        Objects.requireNonNull(before);
+        return (V v) -> apply(before.apply(v));
     }
 
-    public AdvancedByteArrayOutputStream(int size) {
-        super(size);
+    default <V> IOFunction<T, V> andThen(
+            IOFunction<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
+        return (T t) -> after.apply(apply(t));
     }
 
-    public byte[] getBuffer() {
-        return buf;
+    static <T> IOFunction<T, T> identity() {
+        return t -> t;
     }
 }

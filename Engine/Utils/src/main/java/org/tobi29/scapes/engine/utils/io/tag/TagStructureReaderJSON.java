@@ -17,6 +17,8 @@
 package org.tobi29.scapes.engine.utils.io.tag;
 
 import org.tobi29.scapes.engine.utils.Pair;
+import org.tobi29.scapes.engine.utils.io.ByteStreamInputStream;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 
 import javax.json.Json;
 import javax.json.JsonException;
@@ -30,6 +32,10 @@ public class TagStructureReaderJSON extends TagStructureJSON
     private final JsonParser reader;
     private String key;
     private JsonParser.Event event;
+
+    public TagStructureReaderJSON(ReadableByteStream stream) {
+        this(new ByteStreamInputStream(stream));
+    }
 
     public TagStructureReaderJSON(InputStream streamIn) {
         reader = Json.createParser(streamIn);

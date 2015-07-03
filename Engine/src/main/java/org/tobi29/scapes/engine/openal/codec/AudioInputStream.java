@@ -19,7 +19,7 @@ package org.tobi29.scapes.engine.openal.codec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.openal.codec.spi.AudioInputStreamProvider;
-import org.tobi29.scapes.engine.utils.io.filesystem.Resource;
+import org.tobi29.scapes.engine.utils.io.ReadSource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,18 +35,18 @@ public abstract class AudioInputStream extends InputStream {
     private static final Map<String, AudioInputStreamProvider> CODECS =
             new ConcurrentHashMap<>();
 
-    public static AudioInputStream create(Resource resource)
+    public static AudioInputStream create(ReadSource resource)
             throws IOException {
-        String mime = resource.getAttributes().getMIMEType();
+        String mime = resource.getMIMEType();
         Optional<AudioInputStreamProvider> codec = get(mime);
         if (codec.isPresent()) {
-            return codec.get().get(resource.read());
+            return codec.get().get(resource.readIO());
         }
         throw new IOException("No compatible decoder found for type: " + mime);
     }
 
-    public static boolean playable(Resource resource) throws IOException {
-        return playable(resource.getAttributes().getMIMEType());
+    public static boolean playable(ReadSource resource) throws IOException {
+        return playable(resource.getMIMEType());
     }
 
     public static boolean playable(String mime) {

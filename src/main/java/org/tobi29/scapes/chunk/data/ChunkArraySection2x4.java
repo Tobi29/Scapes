@@ -34,12 +34,12 @@ public class ChunkArraySection2x4 implements ChunkArraySection {
     }
 
     @Override
-    public int getData(int x, int y, int z, int offset) {
-        return getData((((z << ySizeBits | y) << xSizeBits | x) << 1) + offset);
+    public int data(int x, int y, int z, int offset) {
+        return data((((z << ySizeBits | y) << xSizeBits | x) << 1) + offset);
     }
 
     @Override
-    public int getData(int offset) {
+    public int data(int offset) {
         byte[] data = this.data;
         if ((offset & 1) == 0) {
             if (data == null) {
@@ -55,12 +55,12 @@ public class ChunkArraySection2x4 implements ChunkArraySection {
     }
 
     @Override
-    public void setData(int x, int y, int z, int offset, int value) {
-        setData((((z << ySizeBits | y) << xSizeBits | x) << 1) + offset, value);
+    public void data(int x, int y, int z, int offset, int value) {
+        data((((z << ySizeBits | y) << xSizeBits | x) << 1) + offset, value);
     }
 
     @Override
-    public synchronized void setData(int offset, int value) {
+    public synchronized void data(int offset, int value) {
         byte[] data = this.data;
         if ((offset & 1) == 0) {
             offset >>= 1;
@@ -72,6 +72,7 @@ public class ChunkArraySection2x4 implements ChunkArraySection {
                 Arrays.fill(data, defaultValue);
                 data[offset] = (byte) (data[offset] & 0xF0 | value);
                 this.data = data;
+                changed = true;
             } else {
                 data[offset] = (byte) (data[offset] & 0xF0 | value);
                 changed = true;
@@ -87,6 +88,7 @@ public class ChunkArraySection2x4 implements ChunkArraySection {
                 Arrays.fill(data, defaultValue);
                 data[offset] = (byte) (data[offset] & 0xF | value);
                 this.data = data;
+                changed = true;
             } else {
                 data[offset] = (byte) (data[offset] & 0xF | value);
                 changed = true;
@@ -105,9 +107,10 @@ public class ChunkArraySection2x4 implements ChunkArraySection {
             return data == null;
         }
         boolean flag = true;
-        for (int i = 1; i < data.length && flag; i++) {
+        for (int i = 1; i < data.length; i++) {
             if (data[i] != data[0]) {
                 flag = false;
+                break;
             }
         }
         if (flag) {

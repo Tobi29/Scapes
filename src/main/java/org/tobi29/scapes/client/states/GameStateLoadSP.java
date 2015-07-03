@@ -22,11 +22,9 @@ import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.client.gui.GuiLoading;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.connection.Account;
-import org.tobi29.scapes.connection.ConnectionCloseException;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.utils.Sync;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.server.ScapesServer;
@@ -35,23 +33,23 @@ import org.tobi29.scapes.server.controlpanel.ServerInfo;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
+import java.nio.file.Path;
 import java.util.Optional;
 
 public class GameStateLoadSP extends GameState {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GameStateLoadSP.class);
-    private final Directory directory;
+    private final Path path;
     private int step;
     private ScapesServer server;
     private SocketChannel channel;
     private ClientConnection client;
     private GuiLoading progress;
 
-    public GameStateLoadSP(Directory directory, ScapesEngine engine,
-            SceneMenu scene) {
+    public GameStateLoadSP(Path path, ScapesEngine engine, SceneMenu scene) {
         super(engine, scene);
+        this.path = path;
         scene.setSpeed(0.0f);
-        this.directory = directory;
     }
 
     @Override
@@ -76,24 +74,19 @@ public class GameStateLoadSP extends GameState {
     }
 
     @Override
-    public boolean forceRender() {
-        return true;
-    }
-
-    @Override
     public void stepComponent(Sync sync) {
         try {
             switch (step) {
                 case 0:
-                    String filename = directory.getName();
+                    String filename = path.getFileName().toString();
                     filename = filename.substring(0, filename.lastIndexOf('.'));
                     TagStructure tagStructure =
                             engine.getTagStructure().getStructure("Scapes")
                                     .getStructure("IntegratedServer");
                     ServerInfo serverInfo = new ServerInfo(filename,
-                            directory.getResource("Panorama0.png"));
-                    server = new ScapesServer(directory, tagStructure,
-                            serverInfo, engine);
+                            path.resolve("Panorama0.png"));
+                    server = new ScapesServer(path, tagStructure, serverInfo,
+                            engine);
                     progress.setLabel("Starting server...");
                     step++;
                     break;
@@ -122,8 +115,8 @@ public class GameStateLoadSP extends GameState {
                     int loadingRadius = FastMath.round(
                             engine.getTagStructure().getStructure("Scapes")
                                     .getDouble("RenderDistance"));
-                    Account.Client account = Account.read(engine.getFiles()
-                            .getFile("File:Account.properties"));
+                    Account.Client account = Account.read(
+                            engine.getHome().resolve("Account.properties"));
                     client = new ClientConnection(engine, channel, account,
                             loadingRadius);
                     step++;
@@ -141,7 +134,7 @@ public class GameStateLoadSP extends GameState {
                     engine.setState(game);
                     break;
             }
-        } catch (IOException | ConnectionCloseException e) {
+        } catch (IOException e) {
             LOGGER.error("Failed to start internal server:", e);
             try {
                 server.stop(ScapesServer.ShutdownReason.ERROR);

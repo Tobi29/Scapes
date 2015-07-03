@@ -75,8 +75,7 @@ public class TagStructureWriterXML extends TagStructureXML
             Transformer transformer = TRANSFORMER_FACTORY.newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.transform(source, result);
-        } catch (@SuppressWarnings("OverlyBroadCatchBlock")
-        XMLStreamException | TransformerException e) {
+        } catch (XMLStreamException | TransformerException e) {
             throw new IOException(e);
         }
     }

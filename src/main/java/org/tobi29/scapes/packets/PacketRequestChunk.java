@@ -24,10 +24,10 @@ import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteChunkServer;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteClient;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -44,17 +44,17 @@ public class PacketRequestChunk extends Packet
     }
 
     @Override
-    public void sendServer(ClientConnection client, DataOutputStream streamOut)
+    public void sendServer(ClientConnection client, WritableByteStream stream)
             throws IOException {
-        streamOut.writeInt(x);
-        streamOut.writeInt(y);
+        stream.putInt(x);
+        stream.putInt(y);
     }
 
     @Override
-    public void parseServer(PlayerConnection player, DataInputStream streamIn)
+    public void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException {
-        x = streamIn.readInt();
-        y = streamIn.readInt();
+        x = stream.getInt();
+        y = stream.getInt();
     }
 
     @Override
@@ -74,17 +74,17 @@ public class PacketRequestChunk extends Packet
     }
 
     @Override
-    public void sendClient(PlayerConnection player, DataOutputStream streamOut)
+    public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        streamOut.writeInt(x);
-        streamOut.writeInt(y);
+        stream.putInt(x);
+        stream.putInt(y);
     }
 
     @Override
-    public void parseClient(ClientConnection client, DataInputStream streamIn)
+    public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        x = streamIn.readInt();
-        y = streamIn.readInt();
+        x = stream.getInt();
+        y = stream.getInt();
     }
 
     @Override

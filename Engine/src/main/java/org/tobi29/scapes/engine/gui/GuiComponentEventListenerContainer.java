@@ -35,5 +35,5 @@ public interface GuiComponentEventListenerContainer {
 
     void clickRight(GuiComponentEvent event, ScapesEngine engine);
 
-    void hover(GuiComponentEvent event);
+    void hover(GuiComponentHoverEvent event);
 }

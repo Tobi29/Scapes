@@ -20,12 +20,12 @@ import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.connection.InvalidPacketDataException;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.MobPlayerClient;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -55,19 +55,19 @@ public class PacketInteraction extends Packet
     }
 
     @Override
-    public void sendClient(PlayerConnection player, DataOutputStream streamOut)
+    public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        streamOut.writeInt(entityID);
-        streamOut.writeByte(type);
-        streamOut.writeByte(data);
+        stream.putInt(entityID);
+        stream.put(type);
+        stream.put(data);
     }
 
     @Override
-    public void parseClient(ClientConnection client, DataInputStream streamIn)
+    public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        entityID = streamIn.readInt();
-        type = streamIn.readByte();
-        data = streamIn.readByte();
+        entityID = stream.getInt();
+        type = stream.get();
+        data = stream.get();
     }
 
     @Override
@@ -91,17 +91,17 @@ public class PacketInteraction extends Packet
     }
 
     @Override
-    public void sendServer(ClientConnection client, DataOutputStream streamOut)
+    public void sendServer(ClientConnection client, WritableByteStream stream)
             throws IOException {
-        streamOut.writeByte(type);
-        streamOut.writeByte(data);
+        stream.put(type);
+        stream.put(data);
     }
 
     @Override
-    public void parseServer(PlayerConnection player, DataInputStream streamIn)
+    public void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException {
-        type = streamIn.readByte();
-        data = streamIn.readByte();
+        type = stream.get();
+        data = stream.get();
     }
 
     @Override

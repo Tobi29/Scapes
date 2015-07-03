@@ -25,6 +25,7 @@ import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
+import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.*;
 import org.tobi29.scapes.entity.client.MobLivingEquippedClient;
@@ -183,8 +184,17 @@ public class MobLivingModelHuman implements MobModel {
     }
 
     @Override
-    public void renderUpdate(GraphicsSystem graphics, WorldClient world,
-            double delta) {
+    public void shapeAABB(AABB aabb) {
+        aabb.minX = pos.doubleX() - 1.0;
+        aabb.minY = pos.doubleY() - 1.0;
+        aabb.minZ = pos.doubleZ() - 1.0;
+        aabb.maxX = pos.doubleX() + 1.0;
+        aabb.maxY = pos.doubleY() + 1.0;
+        aabb.maxZ = pos.doubleZ() + 1.2;
+    }
+
+    @Override
+    public void renderUpdate(double delta) {
         double factorPos = FastMath.min(1.0, delta * 10.0);
         double factorRot = FastMath.min(1.0, delta * 20.0);
         double factorSpeed = FastMath.min(1.0, delta * 5.0);
@@ -276,10 +286,10 @@ public class MobLivingModelHuman implements MobModel {
                 (moveSpeedRender * 0.2 + 0.2);
         OpenGL openGL = graphics.getOpenGL();
         openGL.setAttribute2f(4, world.getTerrain()
-                        .getBlockLight(FastMath.floor(entity.getX()),
+                        .blockLight(FastMath.floor(entity.getX()),
                                 FastMath.floor(entity.getY()),
                                 FastMath.floor(entity.getZ())) / 15.0f,
-                world.getTerrain().getSunLight(FastMath.floor(entity.getX()),
+                world.getTerrain().sunLight(FastMath.floor(entity.getX()),
                         FastMath.floor(entity.getY()),
                         FastMath.floor(entity.getZ())) / 15.0f);
         texture.bind(graphics);

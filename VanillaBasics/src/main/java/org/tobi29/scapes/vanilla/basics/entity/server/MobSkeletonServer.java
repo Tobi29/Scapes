@@ -59,17 +59,17 @@ public class MobSkeletonServer extends MobLivingEquippedServer {
 
     @Override
     public boolean canMoveHere(TerrainServer terrain, int x, int y, int z) {
-        if (terrain.getLight(x, y, z) < 7) {
-            if (!terrain.getBlockType(x, y, z).isSolid(terrain, x, y, z) &&
-                    terrain.getBlockType(x, y, z)
+        if (terrain.light(x, y, z) < 7) {
+            if (!terrain.type(x, y, z).isSolid(terrain, x, y, z) &&
+                    terrain.type(x, y, z)
                             .isTransparent(terrain, x, y, z) &&
-                    !terrain.getBlockType(x, y, z + 1)
+                    !terrain.type(x, y, z + 1)
                             .isSolid(terrain, x, y, z + 1) &&
-                    terrain.getBlockType(x, y, z + 1)
+                    terrain.type(x, y, z + 1)
                             .isTransparent(terrain, x, y, z + 1) &&
-                    terrain.getBlockType(x, y, z - 1)
+                    terrain.type(x, y, z - 1)
                             .isSolid(terrain, x, y, z - 1) &&
-                    !terrain.getBlockType(x, y, z - 1)
+                    !terrain.type(x, y, z - 1)
                             .isTransparent(terrain, x, y, z - 1)) {
                 return true;
             }
@@ -129,7 +129,7 @@ public class MobSkeletonServer extends MobLivingEquippedServer {
                 walkSpeed);
         speed.plusY(FastMath.sinTable(rot.doubleZ() * FastMath.DEG_2_RAD) *
                 walkSpeed);
-        if (world.getTerrain().getLight(pos.intX(), pos.intY(),
+        if (world.getTerrain().light(pos.intX(), pos.intY(),
                 FastMath.floor(pos.doubleZ() + 0.7)) > 8) {
             damage(1.0);
         }

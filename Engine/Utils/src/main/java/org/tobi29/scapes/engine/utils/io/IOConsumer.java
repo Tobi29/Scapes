@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.io.filesystem;
+package org.tobi29.scapes.engine.utils.io;
 
 import java.io.IOException;
-import java.time.Instant;
+import java.util.Objects;
 
-public interface FileAttributes extends ResourceAttributes {
-    Instant getCreationTime() throws IOException;
+@FunctionalInterface
+public interface IOConsumer<T> {
+    void accept(T t) throws IOException;
 
-    Instant getLastModifiedTime() throws IOException;
-
-    void setLastModifiedTime(Instant time)throws IOException;
+    default IOConsumer<T> andThen(IOConsumer<? super T> after) {
+        Objects.requireNonNull(after);
+        return (T t) -> {
+            accept(t);
+            after.accept(t);
+        };
+    }
 }

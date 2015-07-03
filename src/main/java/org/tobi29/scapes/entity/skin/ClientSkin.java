@@ -23,10 +23,10 @@ import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
 import java.nio.ByteBuffer;
 
 public class ClientSkin extends TextureCustom {
-    private final String checksum;
+    private final byte[] checksum;
     private int unusedTicks;
 
-    public ClientSkin(ByteBuffer buffer, String checksum) {
+    public ClientSkin(ByteBuffer buffer, byte[] checksum) {
         super(64, 64, buffer);
         this.checksum = checksum;
     }
@@ -43,7 +43,7 @@ public class ClientSkin extends TextureCustom {
         super.bind(graphics);
     }
 
-    public String getChecksum() {
+    public byte[] checksum() {
         return checksum;
     }
 

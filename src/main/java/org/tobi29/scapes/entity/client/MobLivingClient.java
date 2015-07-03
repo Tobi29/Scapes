@@ -139,13 +139,12 @@ public abstract class MobLivingClient extends MobClient {
             if (FastMath.max(FastMath.abs((Vector2) speed.now())) > 0.1) {
                 int x = pos.intX(), y = pos.intY(), z =
                         FastMath.floor(pos.doubleZ() - 0.1);
-                String footSteepSound = world.getTerrain().getBlockType(x, y, z)
-                        .getFootStep(world.getTerrain().getBlockData(x, y, z));
+                String footSteepSound = world.getTerrain().type(x, y, z)
+                        .getFootStep(world.getTerrain().data(x, y, z));
                 if (footSteepSound.isEmpty() && ground) {
                     z = FastMath.floor(pos.doubleZ() - 1.4);
-                    footSteepSound = world.getTerrain().getBlockType(x, y, z)
-                            .getFootStep(
-                                    world.getTerrain().getBlockData(x, y, z));
+                    footSteepSound = world.getTerrain().type(x, y, z)
+                            .getFootStep(world.getTerrain().data(x, y, z));
                 }
                 if (!footSteepSound.isEmpty()) {
                     Random random = ThreadLocalRandom.current();

@@ -22,25 +22,23 @@ import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.math.PointerPane;
 
 public interface Terrain {
-    void setSunLight(int x, int y, int z, int light);
+    void sunLight(int x, int y, int z, int light);
 
-    void setBlockLight(int x, int y, int z, int light);
+    void blockLight(int x, int y, int z, int light);
 
-    BlockType getBlockType(int x, int y, int z);
+    BlockType type(int x, int y, int z);
 
-    int getBlockData(int x, int y, int z);
+    int data(int x, int y, int z);
 
-    int getLight(int x, int y, int z);
+    int light(int x, int y, int z);
 
-    int getSunLight(int x, int y, int z);
+    int sunLight(int x, int y, int z);
 
-    int getBlockLight(int x, int y, int z);
+    int blockLight(int x, int y, int z);
 
     int getHighestBlockZAt(int x, int y);
 
     int getHighestTerrainBlockZAt(int x, int y);
-
-    boolean isBlockAvailable(int x, int y, int z);
 
     boolean isBlockLoaded(int x, int y, int z);
 

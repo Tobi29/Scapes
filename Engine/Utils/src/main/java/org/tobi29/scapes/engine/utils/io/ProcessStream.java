@@ -17,14 +17,13 @@
 package org.tobi29.scapes.engine.utils.io;
 
 import org.tobi29.scapes.engine.utils.BufferCreator;
-import org.tobi29.scapes.engine.utils.ByteBufferOutputStream;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.function.IntFunction;
 
 /**
  * Utility class to read an entire stream and process it as a byte array.
@@ -37,40 +36,13 @@ public final class ProcessStream {
      * Processes the entire stream and invokes the processor with the read data.
      * The stream will be closed after the stream ended.
      *
-     * @param source      {@code ReadSource} to read from
-     * @param destination {@code WriteDestination} to process the stream data
-     * @throws IOException Thrown when an I/O error occurs
-     */
-    public static <E> E processSourceAndDestination(ReadSource source,
-            WriteDestination destination) throws IOException {
-        return processDestination(source.read(), destination);
-    }
-
-    /**
-     * Processes the entire stream and invokes the processor with the read data.
-     * The stream will be closed after the stream ended.
-     *
-     * @param streamIn    {@code InputStream} to read from
-     * @param destination {@code WriteDestination} to process the stream data
-     * @throws IOException Thrown when an I/O error occurs
-     */
-    public static <E> E processDestination(InputStream streamIn,
-            WriteDestination destination) throws IOException {
-        return destination.writeAndReturn(
-                streamOut -> process(streamIn, streamOut::write, 1024));
-    }
-
-    /**
-     * Processes the entire stream and invokes the processor with the read data.
-     * The stream will be closed after the stream ended.
-     *
      * @param source    {@code ReadSource} to read from
      * @param processor {@code StreamProcessor} to process the stream data
      * @throws IOException Thrown when an I/O error occurs
      */
     public static <E> E processSource(ReadSource source,
             StreamProcessor<E> processor) throws IOException {
-        return process(source.read(), processor, 1024);
+        return source.readReturn(stream -> process(stream, processor, 1024));
     }
 
     /**
@@ -82,7 +54,7 @@ public final class ProcessStream {
      * @throws IOException Thrown when an I/O error occurs
      */
     public static <E> E process(InputStream streamIn,
-            StreamProcessor<E> processor) throws IOException {
+            StreamProcessorIO<E> processor) throws IOException {
         return process(streamIn, processor, 1024);
     }
 
@@ -96,7 +68,7 @@ public final class ProcessStream {
      * @throws IOException Thrown when an I/O error occurs
      */
     public static <E> E process(InputStream streamIn,
-            StreamProcessor<E> processor, int bufferSize) throws IOException {
+            StreamProcessorIO<E> processor, int bufferSize) throws IOException {
         try {
             byte[] buffer = new byte[bufferSize];
             int read = streamIn.read(buffer);
@@ -112,41 +84,61 @@ public final class ProcessStream {
         return processor.result();
     }
 
+    public static <E> E process(ReadableByteStream input,
+            StreamProcessor<E> processor) throws IOException {
+        return process(input, processor, 1024);
+    }
+
+    public static <E> E process(ReadableByteStream input,
+            StreamProcessor<E> processor, int bufferSize) throws IOException {
+        ByteBuffer buffer = BufferCreator.byteBuffer(bufferSize);
+        boolean available = true;
+        while (available) {
+            available = input.getSome(buffer);
+            buffer.flip();
+            processor.process(buffer);
+            buffer.clear();
+        }
+        return processor.result();
+    }
+
     public static StreamProcessor<byte[]> asArray() {
         return new StreamProcessor<byte[]>() {
-            private final ByteArrayOutputStream streamOut =
-                    new ByteArrayOutputStream();
+            private final ByteBufferStream stream = new ByteBufferStream();
 
             @Override
-            public void process(byte[] buffer, int offset, int length) {
-                streamOut.write(buffer, offset, length);
+            public void process(ByteBuffer buffer) throws IOException {
+                stream.put(buffer);
             }
 
             @Override
             public byte[] result() {
-                return streamOut.toByteArray();
+                stream.buffer().flip();
+                byte[] array = new byte[stream.buffer().remaining()];
+                stream.buffer().get(array);
+                return array;
             }
         };
     }
 
     public static StreamProcessor<ByteBuffer> asBuffer() {
-        return asBuffer(length -> BufferCreator.byteBuffer(length + 1024));
+        return asBuffer(capacity -> BufferCreator.byteBuffer(capacity + 8192));
     }
 
     public static StreamProcessor<ByteBuffer> asBuffer(
-            ByteBufferOutputStream.BufferSupplier supplier) {
+            IntFunction<ByteBuffer> supplier) {
         return new StreamProcessor<ByteBuffer>() {
-            private final ByteBufferOutputStream streamOut =
-                    new ByteBufferOutputStream(supplier);
+            private final ByteBufferStream stream =
+                    new ByteBufferStream(supplier);
 
             @Override
-            public void process(byte[] buffer, int offset, int length) {
-                streamOut.write(buffer, offset, length);
+            public void process(ByteBuffer buffer) throws IOException {
+                stream.put(buffer);
             }
 
             @Override
             public ByteBuffer result() {
-                return streamOut.getBuffer();
+                return stream.buffer();
             }
         };
     }
@@ -168,17 +160,18 @@ public final class ProcessStream {
      */
     public static StreamProcessor<String> asString(Charset charset) {
         return new StreamProcessor<String>() {
-            private final ByteArrayOutputStream streamOut =
-                    new ByteArrayOutputStream();
+            private final ByteBufferStream stream = new ByteBufferStream(
+                    capacity -> ByteBuffer.wrap(new byte[capacity + 1024]));
 
             @Override
-            public void process(byte[] buffer, int offset, int length) {
-                streamOut.write(buffer, offset, length);
+            public void process(ByteBuffer buffer) throws IOException {
+                stream.put(buffer);
             }
 
             @Override
             public String result() {
-                return new String(streamOut.toByteArray(), charset);
+                return new String(stream.buffer().array(), 0,
+                        stream.buffer().position(), charset);
             }
         };
     }
@@ -187,8 +180,18 @@ public final class ProcessStream {
      * Functional interface to process data
      */
     @FunctionalInterface
-    public interface StreamProcessor<E> {
+    public interface StreamProcessorIO<E> {
         void process(byte[] buffer, int offset, int length) throws IOException;
+
+        @SuppressWarnings("ReturnOfNull")
+        default E result() {
+            return null;
+        }
+    }
+
+    @FunctionalInterface
+    public interface StreamProcessor<E> {
+        void process(ByteBuffer buffer) throws IOException;
 
         @SuppressWarnings("ReturnOfNull")
         default E result() {

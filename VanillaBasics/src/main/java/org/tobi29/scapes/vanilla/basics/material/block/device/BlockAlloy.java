@@ -134,10 +134,10 @@ public class BlockAlloy extends VanillaBlockContainer {
     @Override
     protected EntityContainerServer placeEntity(TerrainServer terrain, int x,
             int y, int z) {
-        EntityAlloyServer entity = new EntityAlloyServer(terrain.getWorld(),
+        EntityAlloyServer entity = new EntityAlloyServer(terrain.world(),
                 new Vector3d(x + 0.5, y + 0.5, z + 0.5));
         entity.onSpawn();
-        terrain.getWorld().addEntity(entity);
+        terrain.world().addEntity(entity);
         return entity;
     }
 

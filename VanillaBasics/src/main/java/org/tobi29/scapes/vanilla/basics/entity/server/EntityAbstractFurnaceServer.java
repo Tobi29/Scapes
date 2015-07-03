@@ -135,8 +135,8 @@ public abstract class EntityAbstractFurnaceServer
                 }
             }
             if (temperature > maximumTemperature) {
-                world.getTerrain().queueBlockChanges(handler -> handler
-                        .setBlockTypeAndData(pos.intX(), pos.intY(), pos.intZ(),
+                world.getTerrain().queue(handler -> handler
+                        .typeData(pos.intX(), pos.intY(), pos.intZ(),
                                 materials.air, (short) 0));
             }
         }

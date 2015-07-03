@@ -42,7 +42,7 @@ public class ItemFertilizer extends VanillaItem {
     @Override
     public double click(MobPlayerServer entity, ItemStack item,
             TerrainServer terrain, int x, int y, int z, Face face) {
-        BlockType type = terrain.getBlockType(x, y, z);
+        BlockType type = terrain.type(x, y, z);
         if (type == materials.sapling) {
             terrain.addDelayedUpdate(
                     new UpdateSaplingGrowth().set(x, y, z, 3.0));

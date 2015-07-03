@@ -16,71 +16,60 @@
 
 package org.tobi29.scapes.engine.utils.io.tag;
 
-import org.tobi29.scapes.engine.utils.io.MarkedDeflaterOutputStream;
+import org.tobi29.scapes.engine.utils.io.ByteBufferStream;
+import org.tobi29.scapes.engine.utils.io.CompressionUtil;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.zip.Deflater;
-import java.util.zip.DeflaterOutputStream;
 
 public class TagStructureWriterBinary extends TagStructureBinary
         implements TagStructureWriter {
-    private final OutputStream streamOut;
+    private final WritableByteStream stream;
+    private final ByteBufferStream compressionStream;
     private final byte compression;
     private final boolean useDictionary;
     private KeyDictionary dictionary;
-    private DataOutputStream structureStreamOut;
-    private Deflater deflater;
-    private DeflaterOutputStream deflaterStreamOut;
+    private ByteBufferStream byteStream;
+    private WritableByteStream structureStream;
 
-    public TagStructureWriterBinary(OutputStream streamOut, byte compression) {
-        this(streamOut, compression, true);
-    }
-
-    public TagStructureWriterBinary(OutputStream streamOut, byte compression,
-            boolean useDictionary) {
-        this.streamOut = streamOut;
+    public TagStructureWriterBinary(WritableByteStream stream, byte compression,
+            boolean useDictionary, ByteBufferStream compressionStream) {
+        this.stream = stream;
         this.compression = compression;
         this.useDictionary = useDictionary;
+        this.compressionStream = compressionStream;
     }
 
     @Override
     public void begin(TagStructure root) throws IOException {
-        DataOutputStream dataStreamOut = new DataOutputStream(streamOut);
-        dataStreamOut.write(HEADER_MAGIC);
-        dataStreamOut.writeByte(HEADER_VERSION);
-        dataStreamOut.writeByte(compression);
+        stream.put(HEADER_MAGIC);
+        stream.put(HEADER_VERSION);
+        stream.put(compression);
         if (compression >= 0) {
-            deflater = new Deflater(compression);
-            deflaterStreamOut =
-                    new MarkedDeflaterOutputStream(streamOut, deflater, 1024);
-            structureStreamOut = new DataOutputStream(
-                    new BufferedOutputStream(deflaterStreamOut, 1024));
+            byteStream = new ByteBufferStream();
+            structureStream = byteStream;
         } else {
-            structureStreamOut = dataStreamOut;
+            structureStream = stream;
         }
         if (useDictionary) {
             dictionary = new KeyDictionary(root);
         } else {
             dictionary = new KeyDictionary();
         }
-        dictionary.write(structureStreamOut);
+        dictionary.write(structureStream);
     }
 
     @Override
     public void end() throws IOException {
+        structureStream.put(ID_STRUCTURE_TERMINATE);
         if (compression >= 0) {
-            structureStreamOut.flush();
-            deflaterStreamOut.flush();
-            deflaterStreamOut.write(ID_STRUCTURE_TERMINATE);
-            deflaterStreamOut.finish();
-            deflaterStreamOut.flush();
-            deflater.end();
-        } else {
-            structureStreamOut.writeByte(ID_STRUCTURE_TERMINATE);
-            structureStreamOut.flush();
+            byteStream.buffer().flip();
+            CompressionUtil.compress(new ByteBufferStream(byteStream.buffer()),
+                    compressionStream);
+            compressionStream.buffer().flip();
+            stream.putInt(compressionStream.buffer().remaining());
+            stream.put(compressionStream.buffer());
+            compressionStream.buffer().clear();
         }
     }
 
@@ -90,86 +79,86 @@ public class TagStructureWriterBinary extends TagStructureBinary
 
     @Override
     public void beginStructure(String key) throws IOException {
-        structureStreamOut.writeByte(ID_STRUCTURE_BEGIN);
-        writeKey(key, structureStreamOut, dictionary);
+        structureStream.put(ID_STRUCTURE_BEGIN);
+        writeKey(key, structureStream, dictionary);
     }
 
     @Override
     public void endStructure() throws IOException {
-        structureStreamOut.writeByte(ID_STRUCTURE_TERMINATE);
+        structureStream.put(ID_STRUCTURE_TERMINATE);
     }
 
     @Override
     public void structureEmpty() throws IOException {
-        structureStreamOut.writeByte(ID_STRUCTURE_TERMINATE);
+        structureStream.put(ID_STRUCTURE_TERMINATE);
     }
 
     @Override
     public void structureEmpty(String key) throws IOException {
-        structureStreamOut.writeByte(ID_STRUCTURE_EMPTY);
-        writeKey(key, structureStreamOut, dictionary);
+        structureStream.put(ID_STRUCTURE_EMPTY);
+        writeKey(key, structureStream, dictionary);
     }
 
     @Override
     public void beginList(String key) throws IOException {
-        structureStreamOut.writeByte(ID_LIST_BEGIN);
-        writeKey(key, structureStreamOut, dictionary);
+        structureStream.put(ID_LIST_BEGIN);
+        writeKey(key, structureStream, dictionary);
     }
 
     @Override
     public void endListWidthTerminate() throws IOException {
-        structureStreamOut.writeByte(ID_LIST_TERMINATE);
+        structureStream.put(ID_LIST_TERMINATE);
     }
 
     @Override
     public void endListWithEmpty() throws IOException {
-        structureStreamOut.writeByte(ID_LIST_TERMINATE);
+        structureStream.put(ID_LIST_TERMINATE);
     }
 
     @Override
     public void listEmpty(String key) throws IOException {
-        structureStreamOut.writeByte(ID_LIST_EMPTY);
-        writeKey(key, structureStreamOut, dictionary);
+        structureStream.put(ID_LIST_EMPTY);
+        writeKey(key, structureStream, dictionary);
     }
 
     @Override
     public void writeTag(String key, Object tag) throws IOException {
         if (tag instanceof Boolean) {
-            structureStreamOut.writeByte(ID_TAG_BOOLEAN);
-            writeKey(key, structureStreamOut, dictionary);
-            structureStreamOut.writeBoolean((boolean) tag);
+            structureStream.put(ID_TAG_BOOLEAN);
+            writeKey(key, structureStream, dictionary);
+            structureStream.put((boolean) tag ? 1 : 0);
         } else if (tag instanceof Byte) {
-            structureStreamOut.writeByte(ID_TAG_BYTE);
-            writeKey(key, structureStreamOut, dictionary);
-            structureStreamOut.writeByte((byte) tag);
+            structureStream.put(ID_TAG_BYTE);
+            writeKey(key, structureStream, dictionary);
+            structureStream.put((byte) tag);
         } else if (tag instanceof byte[]) {
-            structureStreamOut.writeByte(ID_TAG_BYTE_ARRAY);
-            writeKey(key, structureStreamOut, dictionary);
-            writeArray((byte[]) tag, structureStreamOut);
+            structureStream.put(ID_TAG_BYTE_ARRAY);
+            writeKey(key, structureStream, dictionary);
+            structureStream.putByteArrayLong((byte[]) tag);
         } else if (tag instanceof Short) {
-            structureStreamOut.writeByte(ID_TAG_INT_16);
-            writeKey(key, structureStreamOut, dictionary);
-            structureStreamOut.writeShort((short) tag);
+            structureStream.put(ID_TAG_INT_16);
+            writeKey(key, structureStream, dictionary);
+            structureStream.putShort((short) tag);
         } else if (tag instanceof Integer) {
-            structureStreamOut.writeByte(ID_TAG_INT_32);
-            writeKey(key, structureStreamOut, dictionary);
-            structureStreamOut.writeInt((int) tag);
+            structureStream.put(ID_TAG_INT_32);
+            writeKey(key, structureStream, dictionary);
+            structureStream.putInt((int) tag);
         } else if (tag instanceof Long) {
-            structureStreamOut.writeByte(ID_TAG_INT_64);
-            writeKey(key, structureStreamOut, dictionary);
-            structureStreamOut.writeLong((long) tag);
+            structureStream.put(ID_TAG_INT_64);
+            writeKey(key, structureStream, dictionary);
+            structureStream.putLong((long) tag);
         } else if (tag instanceof Float) {
-            structureStreamOut.writeByte(ID_TAG_FLOAT_32);
-            writeKey(key, structureStreamOut, dictionary);
-            structureStreamOut.writeFloat((float) tag);
+            structureStream.put(ID_TAG_FLOAT_32);
+            writeKey(key, structureStream, dictionary);
+            structureStream.putFloat((float) tag);
         } else if (tag instanceof Double) {
-            structureStreamOut.writeByte(ID_TAG_FLOAT_64);
-            writeKey(key, structureStreamOut, dictionary);
-            structureStreamOut.writeDouble((double) tag);
+            structureStream.put(ID_TAG_FLOAT_64);
+            writeKey(key, structureStream, dictionary);
+            structureStream.putDouble((double) tag);
         } else if (tag instanceof String) {
-            structureStreamOut.writeByte(ID_TAG_STRING);
-            writeKey(key, structureStreamOut, dictionary);
-            writeString((String) tag, structureStreamOut);
+            structureStream.put(ID_TAG_STRING);
+            writeKey(key, structureStream, dictionary);
+            structureStream.putString((String) tag);
         } else {
             throw new IOException("Invalid type: " + tag.getClass());
         }

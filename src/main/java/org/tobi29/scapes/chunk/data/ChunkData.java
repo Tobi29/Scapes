@@ -67,7 +67,7 @@ public class ChunkData {
 
     private int getData(int xOffset, int yOffset, int zOffset, int x, int y,
             int z, int offset) {
-        return getSection(xOffset, yOffset, zOffset).getData(x, y, z, offset);
+        return getSection(xOffset, yOffset, zOffset).data(x, y, z, offset);
     }
 
     public void setData(int x, int y, int z, int offset, int value) {
@@ -77,7 +77,7 @@ public class ChunkData {
 
     private void setData(int xOffset, int yOffset, int zOffset, int x, int y,
             int z, int offset, int value) {
-        getSection(xOffset, yOffset, zOffset).setData(x, y, z, offset, value);
+        getSection(xOffset, yOffset, zOffset).data(x, y, z, offset, value);
     }
 
     public List<TagStructure> save() {

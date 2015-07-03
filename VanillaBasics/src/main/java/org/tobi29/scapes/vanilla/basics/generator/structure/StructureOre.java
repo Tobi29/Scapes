@@ -37,8 +37,8 @@ public final class StructureOre {
                             FastMath.sqr((double) zz / sizeZ) <
                             random.nextDouble() * 0.1 + 0.9) {
                         if (random.nextInt(chance) == 0) {
-                            if (terrain.getBlockType(xxx, yyy, zzz) == stone) {
-                                terrain.setBlockType(xxx, yyy, zzz, ore);
+                            if (terrain.type(xxx, yyy, zzz) == stone) {
+                                terrain.type(xxx, yyy, zzz, ore);
                             }
                         }
                     }

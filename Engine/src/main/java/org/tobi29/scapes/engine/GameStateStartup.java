@@ -53,11 +53,6 @@ public class GameStateStartup extends GameState {
     }
 
     @Override
-    public boolean forceRender() {
-        return true;
-    }
-
-    @Override
     public void stepComponent(Sync sync) {
         GuiComponentIcon image = scene.getImage();
         if (image != null) {

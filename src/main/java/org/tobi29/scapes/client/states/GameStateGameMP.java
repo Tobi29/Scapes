@@ -83,11 +83,6 @@ public class GameStateGameMP extends GameState {
     }
 
     @Override
-    public boolean forceRender() {
-        return !(scene instanceof SceneScapesVoxelWorld);
-    }
-
-    @Override
     public void stepComponent(Sync sync) {
         if (!(scene instanceof SceneScapesVoxelWorld)) {
             return;

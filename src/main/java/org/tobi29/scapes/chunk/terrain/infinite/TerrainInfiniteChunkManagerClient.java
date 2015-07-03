@@ -18,15 +18,16 @@ package org.tobi29.scapes.chunk.terrain.infinite;
 
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 public class TerrainInfiniteChunkManagerClient
         implements TerrainInfiniteChunkManager {
     private final int radius, size;
-    private final List<TerrainInfiniteChunkClient> dumpedChunks =
-            new ArrayList<>();
     private final TerrainInfiniteChunkClient[] array;
     private final AtomicLong lock = new AtomicLong();
     private int x, y;
@@ -106,10 +107,6 @@ public class TerrainInfiniteChunkManagerClient
                 .collect(Collectors.toList());
     }
 
-    protected List<TerrainInfiniteChunkClient> getDumpedChunks() {
-        return dumpedChunks;
-    }
-
     protected void setCenter(int x, int y) {
         x -= radius;
         y -= radius;
@@ -155,55 +152,35 @@ public class TerrainInfiniteChunkManagerClient
 
     private void clear() {
         for (int i = 0; i < array.length; i++) {
-            TerrainInfiniteChunkClient chunk = array[i];
-            if (chunk != null) {
-                array[i] = null;
-                dumpedChunks.add(chunk);
-            }
+            array[i] = null;
         }
     }
 
     private void shiftXPositive() {
         System.arraycopy(array, 0, array, 1, array.length - 1);
         for (int i = 0; i < array.length; i += size) {
-            TerrainInfiniteChunkClient chunk = array[i];
-            if (chunk != null) {
-                dumpedChunks.add(chunk);
-                array[i] = null;
-            }
+            array[i] = null;
         }
     }
 
     private void shiftXNegative() {
         System.arraycopy(array, 1, array, 0, array.length - 1);
         for (int i = size - 1; i < array.length; i += size) {
-            TerrainInfiniteChunkClient chunk = array[i];
-            if (chunk != null) {
-                dumpedChunks.add(chunk);
-                array[i] = null;
-            }
+            array[i] = null;
         }
     }
 
     private void shiftYPositive() {
         System.arraycopy(array, 0, array, size, array.length - size);
         for (int i = 0; i < size; i++) {
-            TerrainInfiniteChunkClient chunk = array[i];
-            if (chunk != null) {
-                dumpedChunks.add(chunk);
-                array[i] = null;
-            }
+            array[i] = null;
         }
     }
 
     private void shiftYNegative() {
         System.arraycopy(array, size, array, 0, array.length - size);
         for (int i = array.length - size; i < array.length; i++) {
-            TerrainInfiniteChunkClient chunk = array[i];
-            if (chunk != null) {
-                dumpedChunks.add(chunk);
-                array[i] = null;
-            }
+            array[i] = null;
         }
     }
 }

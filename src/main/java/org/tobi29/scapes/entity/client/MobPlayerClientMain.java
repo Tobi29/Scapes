@@ -63,8 +63,8 @@ public class MobPlayerClientMain extends MobPlayerClient {
     private float chargeLeft, chargeRight;
 
     public MobPlayerClientMain(WorldClient world, Vector3 pos, Vector3 speed,
-            double xRot, double zRot, String nickname, String skin) {
-        super(world, pos, speed, xRot, zRot, nickname, skin);
+            double xRot, double zRot, String nickname) {
+        super(world, pos, speed, xRot, zRot, nickname);
         game = world.getGame();
     }
 
@@ -416,9 +416,8 @@ public class MobPlayerClientMain extends MobPlayerClient {
             if (ground) {
                 speed.setZ(speed.doubleZ() / (1.0 + 4.0 * delta));
             }
-            headInWater = world.getTerrain()
-                    .getBlockType(pos.intX(), pos.intY(),
-                            FastMath.floor(pos.doubleZ() + 0.7)).isLiquid();
+            headInWater = world.getTerrain().type(pos.intX(), pos.intY(),
+                    FastMath.floor(pos.doubleZ() + 0.7)).isLiquid();
             collide(aabb, aabbs);
             aabbs.reset();
         }
@@ -452,13 +451,12 @@ public class MobPlayerClientMain extends MobPlayerClient {
             if (FastMath.max(FastMath.abs((Vector2) speed.now())) > 0.1) {
                 int x = pos.intX(), y = pos.intY(), z =
                         FastMath.floor(pos.doubleZ() - 0.1);
-                String footSteepSound = world.getTerrain().getBlockType(x, y, z)
-                        .getFootStep(world.getTerrain().getBlockData(x, y, z));
+                String footSteepSound = world.getTerrain().type(x, y, z)
+                        .getFootStep(world.getTerrain().data(x, y, z));
                 if (footSteepSound.isEmpty() && ground) {
                     z = FastMath.floor(pos.doubleZ() - 1.4);
-                    footSteepSound = world.getTerrain().getBlockType(x, y, z)
-                            .getFootStep(
-                                    world.getTerrain().getBlockData(x, y, z));
+                    footSteepSound = world.getTerrain().type(x, y, z)
+                            .getFootStep(world.getTerrain().data(x, y, z));
                 }
                 if (!footSteepSound.isEmpty()) {
                     Random random = ThreadLocalRandom.current();
@@ -488,7 +486,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
     private void breakParticles(TerrainClient terrain, int amount) {
         PointerPane pane = getSelectedBlock();
         if (pane != null) {
-            BlockType type = terrain.getBlockType(pane.x, pane.y, pane.z);
+            BlockType type = terrain.type(pane.x, pane.y, pane.z);
             Optional<TerrainTexture> tex =
                     type.getParticleTexture(pane.face, terrain, pane.x, pane.y,
                             pane.z);

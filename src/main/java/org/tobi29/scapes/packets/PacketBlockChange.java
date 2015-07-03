@@ -18,11 +18,11 @@ package org.tobi29.scapes.packets;
 
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class PacketBlockChange extends Packet implements PacketClient {
@@ -41,23 +41,23 @@ public class PacketBlockChange extends Packet implements PacketClient {
     }
 
     @Override
-    public void sendClient(PlayerConnection player, DataOutputStream streamOut)
+    public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        streamOut.writeInt(x);
-        streamOut.writeInt(y);
-        streamOut.writeInt(z);
-        streamOut.writeShort(id);
-        streamOut.writeShort(data);
+        stream.putInt(x);
+        stream.putInt(y);
+        stream.putInt(z);
+        stream.putShort(id);
+        stream.putShort(data);
     }
 
     @Override
-    public void parseClient(ClientConnection client, DataInputStream streamIn)
+    public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        x = streamIn.readInt();
-        y = streamIn.readInt();
-        z = streamIn.readInt();
-        id = streamIn.readShort();
-        data = streamIn.readShort();
+        x = stream.getInt();
+        y = stream.getInt();
+        z = stream.getInt();
+        id = stream.getShort();
+        data = stream.getShort();
     }
 
     @Override
@@ -65,7 +65,7 @@ public class PacketBlockChange extends Packet implements PacketClient {
         if (world == null) {
             return;
         }
-        world.getTerrain().processPacket(this);
+        world.getTerrain().process(this);
     }
 
     public int getX() {

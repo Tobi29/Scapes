@@ -39,9 +39,9 @@ public class UpdateBlockUpdate extends Update {
 
     protected void updateBlock(TerrainServer.TerrainMutable terrain, int x,
             int y, int z, boolean updateTile) {
-        BlockType type = terrain.getBlockType(x, y, z);
+        BlockType type = terrain.type(x, y, z);
         if (updateTile || type.causesTileUpdate()) {
-            for (EntityServer entity : terrain.getWorld()
+            for (EntityServer entity : terrain.world()
                     .getEntities(x, y, z)) {
                 entity.updateTile(terrain, x, y, z);
             }

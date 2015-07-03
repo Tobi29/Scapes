@@ -44,9 +44,9 @@ public final class StructurePlantPatch implements Tree {
             int xx = x + random.nextInt(sizeDiameter) - size;
             int yy = y + random.nextInt(sizeDiameter) - size;
             int zz = terrain.getHighestTerrainBlockZAt(xx, yy);
-            if (terrain.getBlockType(xx, yy, zz) == materials.air &&
-                    terrain.getBlockType(xx, yy, zz - 1) == materials.grass) {
-                terrain.setBlockTypeAndData(xx, yy, zz, type, data);
+            if (terrain.type(xx, yy, zz) == materials.air &&
+                    terrain.type(xx, yy, zz - 1) == materials.grass) {
+                terrain.typeData(xx, yy, zz, type, data);
             }
         }
     }

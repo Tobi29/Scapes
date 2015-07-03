@@ -155,13 +155,13 @@ public abstract class Particle {
         WorldClient world = particleManager.getWorld();
         posRender.set(pos.now());
         int x = posRender.intX(), y = posRender.intY(), z = posRender.intZ();
-        BlockType type = world.getTerrain().getBlockType(x, y, z);
+        BlockType type = world.getTerrain().type(x, y, z);
         if (!type.isSolid(world.getTerrain(), x, y, z) ||
                 type.isTransparent(world.getTerrain(), x, y, z)) {
             OpenGL openGL = graphics.getOpenGL();
             openGL.setAttribute2f(4,
-                    world.getTerrain().getBlockLight(x, y, z) / 15.0f,
-                    world.getTerrain().getSunLight(x, y, z) / 15.0f);
+                    world.getTerrain().blockLight(x, y, z) / 15.0f,
+                    world.getTerrain().sunLight(x, y, z) / 15.0f);
             float posRenderX =
                     (float) (posRender.doubleX() - cam.position.doubleX());
             float posRenderY =

@@ -22,12 +22,10 @@ import org.tobi29.scapes.engine.openal.OpenAL;
 import org.tobi29.scapes.engine.utils.DesktopException;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.io.ReadSource;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
 import org.tobi29.scapes.engine.utils.ui.font.GlyphRenderer;
 
 import java.io.IOException;
-import java.net.URI;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -46,34 +44,6 @@ public interface Container {
 
     void updateContainer();
 
-    URI[] openFileDialog(Pair<String, String>[] extensions, String title,
-            boolean multiple);
-
-    Optional<URI> saveFileDialog(Pair<String, String>[] extensions,
-            String title);
-
-    boolean exportToUser(File file, Pair<String, String>[] extensions,
-            String title) throws IOException;
-
-    boolean importFromUser(File file, Pair<String, String>[] extensions,
-            String title) throws IOException;
-
-    boolean importFromUser(Directory directory,
-            Pair<String, String>[] extensions, String title, boolean multiple)
-            throws IOException;
-
-    void message(MessageType messageType, String title, String message);
-
-    void openFile(URI file);
-
-    void renderTick() throws DesktopException;
-
-    void dispose();
-
-    boolean loadFont(ReadSource font);
-
-    GlyphRenderer createGlyphRenderer(String fontName, int size);
-
     OpenGL getOpenGL();
 
     OpenAL getOpenAL();
@@ -83,6 +53,33 @@ public interface Container {
     Collection<ControllerJoystick> getJoysticks();
 
     boolean joysticksChanged();
+
+    boolean loadFont(ReadSource font);
+
+    GlyphRenderer createGlyphRenderer(String fontName, int size);
+
+    void run() throws DesktopException;
+
+    void stop();
+
+    Path[] openFileDialog(Pair<String, String>[] extensions, String title,
+            boolean multiple);
+
+    Optional<Path> saveFileDialog(Pair<String, String>[] extensions,
+            String title);
+
+    boolean exportToUser(Path path, Pair<String, String>[] extensions,
+            String title) throws IOException;
+
+    boolean importFromUser(Path path, Pair<String, String>[] extensions,
+            String title) throws IOException;
+
+    boolean importFromUser(Path path, Pair<String, String>[] extensions,
+            String title, boolean multiple) throws IOException;
+
+    void message(MessageType messageType, String title, String message);
+
+    void openFile(Path path);
 
     enum MessageType {
         ERROR,

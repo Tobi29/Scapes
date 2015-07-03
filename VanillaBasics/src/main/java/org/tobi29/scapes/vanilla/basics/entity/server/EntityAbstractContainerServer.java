@@ -78,7 +78,7 @@ public abstract class EntityAbstractContainerServer extends EntityServer
 
     @Override
     public void updateTile(TerrainServer terrain, int x, int y, int z) {
-        WorldServer world = terrain.getWorld();
+        WorldServer world = terrain.world();
         if (!isValidOn(terrain, x, y, z)) {
             synchronized (this) {
                 for (int i = 0; i < inventory.getSize(); i++) {

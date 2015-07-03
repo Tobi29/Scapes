@@ -16,7 +16,11 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.block.*;
+import org.tobi29.scapes.chunk.generator.ChunkGenerator;
+import org.tobi29.scapes.chunk.generator.GeneratorOutput;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i;
@@ -34,6 +38,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(TerrainInfiniteChunkServer.class);
     private final Optional<TerrainInfiniteChunkServer> optional =
             Optional.of(this);
     private final TerrainInfiniteServer terrain;
@@ -41,16 +47,38 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
 
     public TerrainInfiniteChunkServer(Vector2i pos,
             TerrainInfiniteServer terrain, int zSize,
-            Optional<TagStructure> tagStructure) {
-        super(pos, terrain, terrain.getWorld(), zSize);
+            Optional<TagStructure> tagStructure, ChunkGenerator generator,
+            GeneratorOutput output) {
+        super(pos, terrain, terrain.world(), zSize);
         this.terrain = terrain;
         if (tagStructure.isPresent()) {
             load(tagStructure.get());
         } else {
-            terrain.getWorld().getGenerator()
-                    .makeLand(pos.intX(), pos.intY(), this, bID, bData);
+            long time = System.currentTimeMillis();
+            generator.seed(pos.intX(), pos.intY());
+            for (int y = 0; y < 16; y++) {
+                int yy = posBlock.intY() + y;
+                for (int x = 0; x < 16; x++) {
+                    int xx = posBlock.intX() + x;
+                    generator.makeLand(xx, yy, 0, zSize, output);
+                    for (int z = 0; z < zSize; z++) {
+                        int type = output.type[z];
+                        if (type != 0) {
+                            bID.setData(x, y, z, 0, type);
+                            int data = output.data[z];
+                            if (data != 0) {
+                                bData.setData(x, y, z, 0, data);
+                            }
+                        }
+                    }
+                    output.updates.forEach(this::addDelayedUpdate);
+                    output.updates.clear();
+                }
+            }
             initSunLight();
             initHeightMap();
+            LOGGER.trace("Generated chunk in {} ms.",
+                    System.currentTimeMillis() - time);
         }
     }
 
@@ -67,10 +95,9 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
                     if (update.isValid()) {
                         if (update.delay(delta) <= 0) {
                             delayedUpdates.remove(i--);
-                            if (update.isValidOn(getBlockType(
-                                    update.getX() - posBlock.intX(),
-                                    update.getY() - posBlock.intY(),
-                                    update.getZ()), terrain)) {
+                            if (update.isValidOn(
+                                    typeG(update.getX(), update.getY(),
+                                            update.getZ()), terrain)) {
                                 update.run(terrain);
                             }
                         }
@@ -85,20 +112,19 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
                 int x = random.nextInt(16);
                 int y = random.nextInt(16);
                 int z = random.nextInt(zSize);
-                getBlockType(x, y, z).update(terrain, x + posBlock.intX(),
+                typeL(x, y, z).update(terrain, x + posBlock.intX(),
                         y + posBlock.intY(), z);
             }
         }
     }
 
-    public void disposeServer() throws IOException {
+    public void dispose() throws IOException {
         List<EntityServer> entities = getEntities();
         for (EntityServer entity : entities) {
-            terrain.getWorld().deleteEntity(entity);
+            terrain.world().deleteEntity(entity);
         }
         terrain.getTerrainFormat()
                 .putChunkTag(pos.intX(), pos.intY(), save(false, entities));
-        disposed = true;
     }
 
     public void addDelayedUpdate(Update update) {
@@ -113,9 +139,8 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
                 if (update.getX() == x && update.getY() == y &&
                         update.getZ() == z) {
                     if (update.isValidOn(
-                            getBlockType(update.getX() - posBlock.intX(),
-                                    update.getY() - posBlock.intY(),
-                                    update.getZ()), terrain)) {
+                            typeG(update.getX(), update.getY(), update.getZ()),
+                            terrain)) {
                         return true;
                     } else {
                         update.markAsInvalid();
@@ -136,22 +161,26 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
                     .set(x + posBlock.intX(), y + posBlock.intY(), z, 0.0));
         }
         if (state.id >= State.SENDABLE.id) {
-            BlockType type = getBlockType(x, y, z);
-            if (type == terrain.getWorld().getAir()) {
-                terrain.getWorld().getConnection()
+            BlockType type = typeL(x, y, z);
+            if (type == terrain.world().getAir()) {
+                terrain.world().getConnection()
                         .send(new PacketBlockChangeAir(x + posBlock.intX(),
                                 y + posBlock.intY(), z));
             } else {
-                terrain.getWorld().getConnection()
+                terrain.world().getConnection()
                         .send(new PacketBlockChange(x + posBlock.intX(),
                                 y + posBlock.intY(), z, type.getID(),
-                                getBlockData(x, y, z)));
+                                dataL(x, y, z)));
             }
         }
         if (state.id >= State.LOADED.id) {
             terrain.getLighting()
                     .updateLight(x + posBlock.intX(), y + posBlock.intY(), z);
         }
+    }
+
+    @Override
+    public void updateLight(int x, int y, int z) {
     }
 
     public void load(TagStructure tagStructure) {
@@ -161,11 +190,11 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
         initHeightMap();
         for (TagStructure tag : tagStructure.getList("Entities")) {
             EntityServer entity =
-                    EntityServer.make(tag.getInteger("ID"), terrain.getWorld());
+                    EntityServer.make(tag.getInteger("ID"), terrain.world());
             entity.read(tag.getStructure("Data"));
-            terrain.getWorld().addEntity(entity);
+            terrain.world().addEntity(entity);
             long oldTick = tag.getLong("Tick");
-            long newTick = terrain.getWorld().getTick();
+            long newTick = terrain.world().getTick();
             if (newTick > oldTick) {
                 entity.tickSkip(oldTick, newTick);
             }
@@ -176,7 +205,7 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
                 xy += 256;
             }
             addDelayedUpdate(
-                    Update.make(terrain.getWorld().getPlugins().getRegistry(),
+                    Update.make(terrain.world().getPlugins().getRegistry(),
                             (xy & 0xF) + posBlock.intX(),
                             (xy >> 4) + posBlock.intY(), tag.getInteger("PosZ"),
                             tag.getDouble("Delay"), tag.getShort("ID")));
@@ -196,13 +225,13 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
         bID.compress();
         bData.compress();
         bLight.compress();
-        long tick = terrain.getWorld().getTick();
+        long tick = terrain.world().getTick();
         TagStructure tagStructure = new TagStructure();
         tagStructure.setList("BlockID", bID.save());
         tagStructure.setList("BlockData", bData.save());
         tagStructure.setList("BlockLight", bLight.save());
         List<TagStructure> entitiesTag = new ArrayList<>();
-        GameRegistry registry = terrain.getWorld().getRegistry();
+        GameRegistry registry = terrain.world().getRegistry();
         entities.stream()
                 .filter(entity -> !(entity instanceof MobPlayerServer) ||
                         packet).forEach(entity -> {
@@ -222,8 +251,7 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
             List<TagStructure> updatesTag = new ArrayList<>();
             synchronized (delayedUpdates) {
                 delayedUpdates.stream().filter(update -> update.isValidOn(
-                        getBlockType(update.getX() - posBlock.intX(),
-                                update.getY() - posBlock.intY(), update.getZ()),
+                        typeG(update.getX(), update.getY(), update.getZ()),
                         terrain)).forEach(update -> {
                     TagStructure updateTag = new TagStructure();
                     updateTag.setShort("ID", update.getID(registry));
@@ -248,8 +276,8 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
 
     public void populate() {
         state = State.POPULATING;
-        terrain.queueBlockChanges(handle -> {
-            terrain.getWorld().getPopulators().forEach(pop -> pop
+        terrain.queue(handle -> {
+            terrain.world().getPopulators().forEach(pop -> pop
                     .populate(handle, posBlock.intX(), posBlock.intY(), 16,
                             16));
             updateSunLight();
@@ -261,8 +289,8 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
     }
 
     public void finish() {
-        terrain.queueBlockChanges(handle -> {
-            terrain.getWorld().getPopulators().forEach(pop -> pop
+        terrain.queue(handle -> {
+            terrain.world().getPopulators().forEach(pop -> pop
                     .load(handle, posBlock.intX(), posBlock.intY(), 16, 16));
             state = State.BORDER;
             terrain.updateAdjacent(pos.intX(), pos.intY());
@@ -309,7 +337,7 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
     }
 
     private List<EntityServer> getEntities() {
-        return terrain.getWorld().getEntities().filter(entity ->
+        return terrain.world().getEntities().filter(entity ->
                 FastMath.floor(entity.getX() / 16.0) == pos.intX() &&
                         FastMath.floor(entity.getY() / 16.0) == pos.intY())
                 .collect(Collectors.toList());

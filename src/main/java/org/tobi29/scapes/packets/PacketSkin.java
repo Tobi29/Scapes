@@ -20,65 +20,69 @@ import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.connection.ConnectionCloseException;
+import org.tobi29.scapes.engine.utils.BufferCreator;
+import org.tobi29.scapes.engine.utils.graphics.Image;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 public class PacketSkin extends Packet implements PacketServer, PacketClient {
-    private byte[] array;
-    private String checksum;
+    private Image image;
+    private byte[] checksum;
 
     public PacketSkin() {
     }
 
-    public PacketSkin(String checksum) {
+    public PacketSkin(byte[] checksum) {
         this.checksum = checksum;
     }
 
-    public PacketSkin(byte[] array, String checksum) {
-        this.array = array;
+    public PacketSkin(Image image, byte[] checksum) {
+        this.image = image;
         this.checksum = checksum;
     }
 
     @Override
-    public void sendClient(PlayerConnection player, DataOutputStream streamOut)
+    public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        streamOut.write(array);
-        streamOut.writeUTF(checksum);
+        stream.put(image.getBuffer());
+        stream.putByteArray(checksum);
     }
 
     @Override
-    public void parseClient(ClientConnection client, DataInputStream streamIn)
+    public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        array = new byte[64 * 64 * 4];
-        streamIn.readFully(array);
-        checksum = streamIn.readUTF();
+        ByteBuffer buffer = BufferCreator.byteBuffer(64 * 64 * 4);
+        stream.get(buffer);
+        buffer.flip();
+        image = new Image(64, 64, buffer);
+        checksum = stream.getByteArray();
     }
 
     @Override
     public void runClient(ClientConnection client, WorldClient world)
             throws ConnectionCloseException {
-        client.getWorld().getScene().getSkinStorage().addSkin(checksum, array);
+        client.getWorld().getScene().getSkinStorage().addSkin(checksum, image);
     }
 
     @Override
-    public void sendServer(ClientConnection client, DataOutputStream streamOut)
+    public void sendServer(ClientConnection client, WritableByteStream stream)
             throws IOException {
-        streamOut.writeUTF(checksum);
+        stream.putByteArray(checksum);
     }
 
     @Override
-    public void parseServer(PlayerConnection player, DataInputStream streamIn)
+    public void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException {
-        checksum = streamIn.readUTF();
+        checksum = stream.getByteArray();
     }
 
     @Override
     public void runServer(PlayerConnection player, WorldServer world) {
-        player.getServer().getSkin(checksum).ifPresent(skin -> player
-                        .send(new PacketSkin(skin.getImage(),
-                                skin.getChecksum())));
+        player.getServer().getSkin(checksum).ifPresent(
+                skin -> player.send(new PacketSkin(skin.image(), checksum)));
     }
 }

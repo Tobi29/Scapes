@@ -21,34 +21,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-@FunctionalInterface
 public interface ReadSource {
-    InputStream read() throws IOException;
+    boolean exists();
 
-    default void read(StreamReaderConsumer reader) throws IOException {
-        try (InputStream streamIn = read()) {
-            reader.read(streamIn);
-        }
-    }
+    InputStream readIO() throws IOException;
 
-    default <T> T readAndReturn(StreamReaderFunction<T> reader)
-            throws IOException {
-        try (InputStream streamIn = read()) {
-            return reader.read(streamIn);
-        }
-    }
+    void read(IOConsumer<ReadableByteStream> reader) throws IOException;
+
+    <R> R readReturn(IOFunction<ReadableByteStream, R> reader)
+            throws IOException;
 
     default BufferedReader reader() throws IOException {
-        return new BufferedReader(new InputStreamReader(read()));
+        return new BufferedReader(new InputStreamReader(readIO()));
     }
 
-    @FunctionalInterface
-    interface StreamReaderConsumer {
-        void read(InputStream streamIn) throws IOException;
-    }
-
-    @FunctionalInterface
-    interface StreamReaderFunction<T> {
-        T read(InputStream streamIn) throws IOException;
-    }
+    String getMIMEType() throws IOException;
 }

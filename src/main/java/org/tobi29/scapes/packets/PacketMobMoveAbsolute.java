@@ -19,14 +19,14 @@ package org.tobi29.scapes.packets;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.MobileEntity;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class PacketMobMoveAbsolute extends Packet
@@ -47,21 +47,21 @@ public class PacketMobMoveAbsolute extends Packet
     }
 
     @Override
-    public void sendClient(PlayerConnection player, DataOutputStream streamOut)
+    public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        streamOut.writeInt(entityID);
-        streamOut.writeDouble(x);
-        streamOut.writeDouble(y);
-        streamOut.writeDouble(z);
+        stream.putInt(entityID);
+        stream.putDouble(x);
+        stream.putDouble(y);
+        stream.putDouble(z);
     }
 
     @Override
-    public void parseClient(ClientConnection client, DataInputStream streamIn)
+    public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        entityID = streamIn.readInt();
-        x = streamIn.readDouble();
-        y = streamIn.readDouble();
-        z = streamIn.readDouble();
+        entityID = stream.getInt();
+        x = stream.getDouble();
+        y = stream.getDouble();
+        z = stream.getDouble();
     }
 
     @Override
@@ -81,19 +81,19 @@ public class PacketMobMoveAbsolute extends Packet
     }
 
     @Override
-    public void sendServer(ClientConnection client, DataOutputStream streamOut)
+    public void sendServer(ClientConnection client, WritableByteStream stream)
             throws IOException {
-        streamOut.writeDouble(x);
-        streamOut.writeDouble(y);
-        streamOut.writeDouble(z);
+        stream.putDouble(x);
+        stream.putDouble(y);
+        stream.putDouble(z);
     }
 
     @Override
-    public void parseServer(PlayerConnection player, DataInputStream streamIn)
+    public void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException {
-        x = streamIn.readDouble();
-        y = streamIn.readDouble();
-        z = streamIn.readDouble();
+        x = stream.getDouble();
+        y = stream.getDouble();
+        z = stream.getDouble();
     }
 
     @Override

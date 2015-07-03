@@ -18,11 +18,9 @@ package org.tobi29.scapes.engine.utils.io;
 
 import org.tobi29.scapes.engine.utils.ArrayUtil;
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
-import org.tobi29.scapes.engine.utils.io.filesystem.Resource;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -31,65 +29,6 @@ import java.security.NoSuchAlgorithmException;
  */
 public final class ChecksumUtil {
     private ChecksumUtil() {
-    }
-
-    /**
-     * Creates a SHA1 checksum from the given {@code File}
-     *
-     * @param file File that will be read to create the checksum
-     * @return A {@code String} that represents a hexadecimal encoding of the
-     * checksum
-     * @throws IOException If an I/O error occurred
-     */
-    public static String getChecksum(Resource file) throws IOException {
-        return getChecksum(file, ChecksumAlgorithm.SHA256);
-    }
-
-    /**
-     * Creates a checksum from the given file
-     *
-     * @param file      File that will be read to create the checksum
-     * @param algorithm The algorithm that will be used to create the checksum
-     * @return A {@code String} that represents a hexadecimal encoding of the
-     * checksum
-     * @throws IOException If an I/O error occurred
-     */
-    public static String getChecksum(Resource file, ChecksumAlgorithm algorithm)
-            throws IOException {
-        return ArrayUtil.toHexadecimal(createChecksum(file, algorithm));
-    }
-
-    public static String getChecksum(InputStream streamIn) throws IOException {
-        return getChecksum(streamIn, ChecksumAlgorithm.SHA256);
-    }
-
-    public static String getChecksum(InputStream streamIn,
-            ChecksumAlgorithm algorithm) throws IOException {
-        return ArrayUtil.toHexadecimal(createChecksum(streamIn, algorithm));
-    }
-
-    /**
-     * Creates a SHA1 checksum from the given {@code String}
-     *
-     * @param value String that will be used to create the checksum
-     * @return A {@code String} that represents a hexadecimal encoding of the
-     * checksum
-     */
-    public static String getChecksum(String value) {
-        return getChecksum(value, ChecksumAlgorithm.SHA256);
-    }
-
-    /**
-     * Creates a checksum from the given {@code String}
-     *
-     * @param value     String that will be used to create the checksum
-     * @param algorithm The algorithm that will be used to create the checksum
-     * @return A {@code String} that represents a hexadecimal encoding of the
-     * checksum
-     */
-    public static String getChecksum(String value,
-            ChecksumAlgorithm algorithm) {
-        return ArrayUtil.toHexadecimal(createChecksum(value, algorithm));
     }
 
     /**
@@ -117,76 +56,12 @@ public final class ChecksumUtil {
     }
 
     /**
-     * Creates a SHA1 checksum from the given {@code String}
-     *
-     * @param value String that will be used to create the checksum
-     * @return A {@code byte[]} containing the checksum
-     */
-    public static byte[] createChecksum(String value) {
-        return createChecksum(value, ChecksumAlgorithm.SHA256);
-    }
-
-    /**
-     * Creates a checksum from the given {@code String}
-     *
-     * @param value     String that will be used to create the checksum
-     * @param algorithm The algorithm that will be used to create the checksum
-     * @return A {@code byte[]} containing the checksum
-     */
-    public static byte[] createChecksum(String value,
-            ChecksumAlgorithm algorithm) {
-        return createChecksum(value.getBytes(StandardCharsets.UTF_8),
-                algorithm);
-    }
-
-    /**
-     * Creates a SHA1 checksum from the given {@code File}
-     *
-     * @param file File that will be read to create the checksum
-     * @return A {@code byte[]} containing the checksum
-     * @throws IOException If an I/O error occurred
-     */
-    public static byte[] createChecksum(Resource file) throws IOException {
-        return createChecksum(file, ChecksumAlgorithm.SHA256);
-    }
-
-    /**
-     * Creates a checksum from the given {@code File}
-     *
-     * @param file      File that will be read to create the checksum
-     * @param algorithm The algorithm that will be used to create the checksum
-     * @return A {@code byte[]} containing the checksum
-     * @throws IOException If an I/O error occurred
-     */
-    public static byte[] createChecksum(Resource file,
-            ChecksumAlgorithm algorithm) throws IOException {
-        return createChecksum(file.read(), algorithm);
-    }
-
-    public static byte[] createChecksum(InputStream streamIn)
-            throws IOException {
-        return createChecksum(streamIn, ChecksumAlgorithm.SHA256);
-    }
-
-    public static byte[] createChecksum(InputStream streamIn,
-            ChecksumAlgorithm algorithm) throws IOException {
-        try {
-            MessageDigest digest =
-                    MessageDigest.getInstance(algorithm.getName());
-            ProcessStream.process(streamIn, digest::update);
-            return digest.digest();
-        } catch (NoSuchAlgorithmException e) {
-            throw new UnsupportedJVMException(e);
-        }
-    }
-
-    /**
-     * Creates a SHA1 checksum from the given {@code byte[]}
+     * Creates a checksum from the given {@code byte[]}
      *
      * @param array Byte array that will be used to create the checksum
      * @return A {@code byte[]} containing the checksum
      */
-    public static byte[] createChecksum(byte... array) {
+    public static byte[] createChecksum(byte[] array) {
         return createChecksum(array, ChecksumAlgorithm.SHA256);
     }
 
@@ -209,20 +84,37 @@ public final class ChecksumUtil {
         }
     }
 
-    /**
-     * Encodes the given checksum into hexadecimal
-     *
-     * @param array The checksum that will be encoded
-     * @return A {@code String} that represents a hexadecimal encoding of the
-     * checksum
-     */
-    public static String encodeChecksum(byte... array) {
-        StringBuilder result = new StringBuilder(array.length);
-        for (byte aB : array) {
-            result.append(
-                    Integer.toString((aB & 0xff) + 0x100, 16).substring(1));
+    public static byte[] createChecksum(ByteBuffer buffer) {
+        return createChecksum(buffer, ChecksumAlgorithm.SHA256);
+    }
+
+    public static byte[] createChecksum(ByteBuffer buffer,
+            ChecksumAlgorithm algorithm) {
+        try {
+            MessageDigest digest =
+                    MessageDigest.getInstance(algorithm.getName());
+            digest.update(buffer);
+            return digest.digest();
+        } catch (NoSuchAlgorithmException e) {
+            throw new UnsupportedJVMException(e);
         }
-        return result.toString();
+    }
+
+    public static byte[] createChecksum(ReadableByteStream input)
+            throws IOException {
+        return createChecksum(input, ChecksumAlgorithm.SHA256);
+    }
+
+    public static byte[] createChecksum(ReadableByteStream input,
+            ChecksumAlgorithm algorithm) throws IOException {
+        try {
+            MessageDigest digest =
+                    MessageDigest.getInstance(algorithm.getName());
+            ProcessStream.process(input, digest::update);
+            return digest.digest();
+        } catch (NoSuchAlgorithmException e) {
+            throw new UnsupportedJVMException(e);
+        }
     }
 
     /**
@@ -231,8 +123,7 @@ public final class ChecksumUtil {
     public enum ChecksumAlgorithm {
         SHA256("SHA-256"),
         SHA1("SHA1"),
-        @Deprecated
-        MD5("MD5");
+        @Deprecated MD5("MD5");
         private final String name;
 
         ChecksumAlgorithm(String name) {

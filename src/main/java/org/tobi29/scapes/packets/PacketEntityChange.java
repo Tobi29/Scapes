@@ -18,14 +18,14 @@ package org.tobi29.scapes.packets;
 
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class PacketEntityChange extends Packet implements PacketClient {
@@ -42,18 +42,18 @@ public class PacketEntityChange extends Packet implements PacketClient {
     }
 
     @Override
-    public void sendClient(PlayerConnection player, DataOutputStream streamOut)
+    public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        streamOut.writeInt(entityID);
-        TagStructureBinary.write(tag, streamOut);
+        stream.putInt(entityID);
+        TagStructureBinary.write(tag, stream);
     }
 
     @Override
-    public void parseClient(ClientConnection client, DataInputStream streamIn)
+    public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        entityID = streamIn.readInt();
+        entityID = stream.getInt();
         tag = new TagStructure();
-        TagStructureBinary.read(tag, streamIn);
+        TagStructureBinary.read(tag, stream);
     }
 
     @Override

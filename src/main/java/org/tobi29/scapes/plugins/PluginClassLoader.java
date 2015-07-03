@@ -18,13 +18,12 @@ package org.tobi29.scapes.plugins;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
 
 import java.io.FilePermission;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.security.CodeSource;
 import java.security.PermissionCollection;
 import java.security.Permissions;
@@ -35,16 +34,16 @@ public class PluginClassLoader extends URLClassLoader {
             LoggerFactory.getLogger(PluginClassLoader.class);
     private final Permissions permissions = new Permissions();
 
-    public PluginClassLoader(List<PluginFile> files, Directory directory)
+    public PluginClassLoader(List<PluginFile> files, Path path)
             throws IOException {
         super(getURLs(files));
         if (System.getSecurityManager() == null) {
             LOGGER.warn("No security manager installed!");
         }
-        if (directory != null) {
+        if (path != null) {
             permissions.add(new FilePermission(
-                    Paths.get(directory.getURI()).toAbsolutePath().toString() +
-                            "/-", "read,write,delete"));
+                    path.toAbsolutePath().toString() + "/-",
+                    "read,write,delete"));
         }
         permissions.add(new RuntimePermission("getClassLoader"));
         permissions.setReadOnly();
@@ -54,7 +53,7 @@ public class PluginClassLoader extends URLClassLoader {
         URL[] urls = new URL[files.size()];
         int i = 0;
         for (PluginFile file : files) {
-            urls[i] = file.getFile().getURL();
+            urls[i] = file.getFile().toUri().toURL();
             i++;
         }
         return urls;

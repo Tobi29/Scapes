@@ -106,7 +106,7 @@ public class BlockModelSimpleBlock implements BlockModel {
         int y1 = y + 1;
         int z1 = z + 1;
         if (texTop != null &&
-                terrain.getBlockType(x, y, z1).connectStage(terrain, x, y, z1) <
+                terrain.type(x, y, z1).connectStage(terrain, x, y, z1) <
                         connectStage) {
             float xx1 = xx + 1.0f;
             float yy1 = yy + 1.0f;
@@ -126,7 +126,7 @@ public class BlockModelSimpleBlock implements BlockModel {
                     anim);
         }
         if (texBottom != null &&
-                terrain.getBlockType(x, y, z0).connectStage(terrain, x, y, z0) <
+                terrain.type(x, y, z0).connectStage(terrain, x, y, z0) <
                         connectStage) {
             float xx1 = xx + 1.0f;
             float yy1 = yy + 1.0f;
@@ -145,7 +145,7 @@ public class BlockModelSimpleBlock implements BlockModel {
                     texBottom.getX(), texBottom.getY(), r, g, b, a, lod, anim);
         }
         if (texSide1 != null &&
-                terrain.getBlockType(x, y0, z).connectStage(terrain, x, y0, z) <
+                terrain.type(x, y0, z).connectStage(terrain, x, y0, z) <
                         connectStage) {
             float xx1 = xx + 1.0f;
             float zz1 = zz + 1.0f;
@@ -164,7 +164,7 @@ public class BlockModelSimpleBlock implements BlockModel {
                     texSide1.getY() + terrainTile, r, g, b, a, lod, anim);
         }
         if (texSide2 != null &&
-                terrain.getBlockType(x1, y, z).connectStage(terrain, x1, y, z) <
+                terrain.type(x1, y, z).connectStage(terrain, x1, y, z) <
                         connectStage) {
             float xx1 = xx + 1.0f;
             float yy1 = yy + 1.0f;
@@ -184,7 +184,7 @@ public class BlockModelSimpleBlock implements BlockModel {
                     texSide2.getY() + terrainTile, r, g, b, a, lod, anim);
         }
         if (texSide3 != null &&
-                terrain.getBlockType(x, y1, z).connectStage(terrain, x, y1, z) <
+                terrain.type(x, y1, z).connectStage(terrain, x, y1, z) <
                         connectStage) {
             float xx1 = xx + 1.0f;
             float yy1 = yy + 1.0f;
@@ -204,7 +204,7 @@ public class BlockModelSimpleBlock implements BlockModel {
                     texSide3.getX(), texSide3.getY(), r, g, b, a, lod, anim);
         }
         if (texSide4 != null &&
-                terrain.getBlockType(x0, y, z).connectStage(terrain, x0, y, z) <
+                terrain.type(x0, y, z).connectStage(terrain, x0, y, z) <
                         connectStage) {
             float yy1 = yy + 1.0f;
             float zz1 = zz + 1.0f;

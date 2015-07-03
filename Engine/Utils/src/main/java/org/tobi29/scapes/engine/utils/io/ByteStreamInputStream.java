@@ -14,52 +14,37 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils;
-
-import org.tobi29.scapes.engine.utils.math.FastMath;
+package org.tobi29.scapes.engine.utils.io;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 
-public class ByteBufferInputStream extends InputStream {
-    private final ByteBuffer buffer;
+public class ByteStreamInputStream extends InputStream {
+    private final ReadableByteStream stream;
 
-    public ByteBufferInputStream(ByteBuffer buffer) {
-        this.buffer = buffer;
+    public ByteStreamInputStream(ReadableByteStream stream) {
+        this.stream = stream;
     }
 
     @Override
     public int read() throws IOException {
-        if (!buffer.hasRemaining()) {
-            return -1;
-        }
-        int value = buffer.get();
-        if (value < 0) {
-            value += 256;
-        }
-        return value;
+        return stream.getUByte();
     }
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        len = FastMath.min(len, buffer.remaining());
-        if (len == 0) {
-            return -1;
-        }
-        buffer.get(b, off, len);
-        return len;
+        return stream.getSome(b, off, len);
     }
 
     @Override
     public long skip(long n) throws IOException {
-        int skip = (int) FastMath.min(n, buffer.remaining());
-        buffer.position(buffer.position() + skip);
-        return skip;
+        int len = (int) n;
+        stream.skip(len);
+        return len;
     }
 
     @Override
     public int available() throws IOException {
-        return buffer.remaining();
+        return stream.remaining();
     }
 }

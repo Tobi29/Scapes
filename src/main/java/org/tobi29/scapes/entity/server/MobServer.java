@@ -377,7 +377,7 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
         if (ground) {
             speed.setZ(speed.doubleZ() / (1.0 + 4.0 * delta));
         }
-        headInWater = world.getTerrain().getBlockType(pos.intX(), pos.intY(),
+        headInWater = world.getTerrain().type(pos.intX(), pos.intY(),
                 FastMath.floor(pos.doubleZ() + 0.7)).isLiquid();
         collide(aabb, aabbs, delta);
         aabbs.reset();

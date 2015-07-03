@@ -22,12 +22,12 @@ import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.PlatformDialogs;
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.spi.GLFWDialogsProvider;
+import org.tobi29.scapes.engine.utils.io.FileUtil;
 import org.tobi29.scapes.engine.utils.io.ProcessStream;
 import org.tobi29.scapes.engine.utils.io.ReadSource;
 import org.tobi29.scapes.engine.utils.ui.font.GlyphRenderer;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -58,9 +58,8 @@ public class SWTDialogsProvider implements GLFWDialogsProvider {
                             e.toString());
                 }
             }));
-            try (OutputStream streamOut = Files.newOutputStream(fontFile)) {
-                ProcessStream.processSource(font, streamOut::write);
-            }
+            FileUtil.write(fontFile,
+                    stream -> ProcessStream.processSource(font, stream::put));
             fontPath = fontFile.toAbsolutePath().toString();
         } catch (IOException e) {
             LOGGER.warn("Failed to store font file: {}", e.toString());

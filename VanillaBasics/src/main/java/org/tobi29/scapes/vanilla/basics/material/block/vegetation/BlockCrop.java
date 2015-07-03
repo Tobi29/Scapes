@@ -110,7 +110,7 @@ public class BlockCrop extends VanillaBlock {
     @Override
     public Optional<TerrainTexture> getParticleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
-        return Optional.of(textures[terrain.getBlockData(x, y, z)]);
+        return Optional.of(textures[terrain.data(x, y, z)]);
     }
 
     @Override
@@ -142,9 +142,8 @@ public class BlockCrop extends VanillaBlock {
     @Override
     public void update(TerrainServer.TerrainMutable terrain, int x, int y,
             int z) {
-        if (terrain.getBlockType(x, y, z - 1) != materials.farmland) {
-            terrain.setBlockTypeAndData(x, y, z, terrain.getWorld().getAir(),
-                    (short) 0);
+        if (terrain.type(x, y, z - 1) != materials.farmland) {
+            terrain.typeData(x, y, z, terrain.world().getAir(), (short) 0);
         }
     }
 

@@ -129,11 +129,10 @@ public class BlockSnow extends VanillaBlock {
     @Override
     public void update(TerrainServer.TerrainMutable terrain, int x, int y,
             int z) {
-        BlockType type = terrain.getBlockType(x, y, z - 1);
+        BlockType type = terrain.type(x, y, z - 1);
         if (type == materials.air || type == materials.snow ||
                 type.isLiquid()) {
-            terrain.setBlockTypeAndData(x, y, z, terrain.getWorld().getAir(),
-                    (short) 0);
+            terrain.typeData(x, y, z, terrain.world().getAir(), (short) 0);
         }
     }
 

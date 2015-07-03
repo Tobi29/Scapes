@@ -20,9 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.utils.Crashable;
 import org.tobi29.scapes.engine.utils.io.CrashReportFile;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
-import org.tobi29.scapes.engine.utils.io.filesystem.FileSystem;
+import org.tobi29.scapes.engine.utils.io.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
 import org.tobi29.scapes.server.ControlPanel;
@@ -32,6 +30,8 @@ import org.tobi29.scapes.server.connection.ServerConnection;
 import org.tobi29.scapes.server.controlpanel.ServerInfo;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -42,8 +42,7 @@ public abstract class ScapesStandaloneServer
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ScapesStandaloneServer.class);
     private static final Runtime RUNTIME = Runtime.getRuntime();
-    protected final FileSystem files;
-    protected final Directory directory;
+    protected final Path path;
     private final Thread shutdownHook = new Thread(() -> {
         try {
             stopServer();
@@ -53,9 +52,8 @@ public abstract class ScapesStandaloneServer
     });
     protected ScapesServer server;
 
-    protected ScapesStandaloneServer(FileSystem files) throws IOException {
-        this.files = files;
-        directory = files.get("data");
+    protected ScapesStandaloneServer(Path path) {
+        this.path = path;
     }
 
     public abstract int run() throws IOException;
@@ -68,13 +66,14 @@ public abstract class ScapesStandaloneServer
             throws IOException {
         RUNTIME.addShutdownHook(shutdownHook);
         TagStructure tagStructure;
-        tagStructure = loadConfig(files.getResource("Server.json"));
+        tagStructure = loadConfig(path.resolve("Server.json"));
         TagStructure serverTag = tagStructure.getStructure("Server");
         ServerInfo serverInfo =
                 new ServerInfo(serverTag.getString("ServerName"),
-                        files.getResource(serverTag.getString("ServerIcon")));
-        server = new ScapesServer(directory, tagStructure, serverInfo, this,
-                initialControlPanels);
+                        path.resolve(serverTag.getString("ServerIcon")));
+        server =
+                new ScapesServer(path.resolve("data"), tagStructure, serverInfo,
+                        this, initialControlPanels);
         ServerConnection connection = server.getConnection();
         connection.setAllowsCreation(
                 tagStructure.getBoolean("AllowAccountCreation"));
@@ -97,9 +96,9 @@ public abstract class ScapesStandaloneServer
         return shutdownReason;
     }
 
-    protected TagStructure loadConfig(File file) throws IOException {
-        if (file.exists()) {
-            return file.readAndReturn(TagStructureJSON::read);
+    protected TagStructure loadConfig(Path path) throws IOException {
+        if (Files.exists(path)) {
+            return FileUtil.readReturn(path, TagStructureJSON::read);
         }
         TagStructure tagStructure = new TagStructure();
         tagStructure.setInteger("ServerPort", 12345);
@@ -113,7 +112,7 @@ public abstract class ScapesStandaloneServer
         socketTag.setInteger("MaxPlayers", 20);
         socketTag.setInteger("WorkerCount", 2);
         socketTag.setInteger("RSASize", 2048);
-        file.write(
+        FileUtil.write(path,
                 streamOut -> TagStructureJSON.write(tagStructure, streamOut));
         return tagStructure;
     }
@@ -124,7 +123,7 @@ public abstract class ScapesStandaloneServer
         LOGGER.error("Stopping due to a crash", e);
         Map<String, String> debugValues = new ConcurrentHashMap<>();
         try {
-            CrashReportFile.writeCrashReport(e, CrashReportFile.getFile(files),
+            CrashReportFile.writeCrashReport(e, CrashReportFile.getFile(path),
                     "ScapesServer", debugValues);
         } catch (IOException e1) {
             LOGGER.warn("Failed to write crash report: {}", e1.toString());

@@ -26,13 +26,14 @@ import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
 import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.graphics.PNG;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
+import org.tobi29.scapes.engine.utils.io.FileUtil;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.file.Path;
 
 public class LWJGL3OpenGL implements OpenGL {
     private static final Logger LOGGER =
@@ -245,7 +246,7 @@ public class LWJGL3OpenGL implements OpenGL {
     }
 
     @Override
-    public void screenShot(File file, GraphicsSystem graphics) {
+    public void screenShot(Path path, GraphicsSystem graphics) {
         int width = graphics.getSceneWidth(), height =
                 graphics.getSceneHeight();
         GL11.glReadBuffer(GL11.GL_FRONT);
@@ -255,7 +256,8 @@ public class LWJGL3OpenGL implements OpenGL {
         graphics.getEngine().getTaskExecutor().runTask(joiner -> {
             Image image = new Image(width, height, buffer);
             try {
-                file.write(streamOut -> PNG.encode(image, streamOut, 9, false));
+                FileUtil.write(path,
+                        stream -> PNG.encode(image, stream, 9, false));
             } catch (IOException e) {
                 LOGGER.error("Error saving screenshot: {}", e.toString());
             }

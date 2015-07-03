@@ -26,12 +26,9 @@ import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.ShaderManager;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.opengl.texture.TextureManager;
-import org.tobi29.scapes.engine.utils.DesktopException;
 import org.tobi29.scapes.engine.utils.Sync;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f;
-
-import java.io.IOException;
 
 public class GraphicsSystem {
     private static final Logger LOGGER =
@@ -62,12 +59,8 @@ public class GraphicsSystem {
         textureManager = new TextureManager(engine);
         shaderManager = new ShaderManager(engine);
         resolutionMultiplier = engine.getConfig().getResolutionMultiplier();
-        try {
-            container.loadFont(engine.getFiles()
-                    .getResource("Engine:font/QuicksandPro-Regular.otf"));
-        } catch (IOException e) {
-            LOGGER.warn("Failed to load default font", e);
-        }
+        container.loadFont(
+                engine.getFiles().get("Engine:font/QuicksandPro-Regular.otf"));
         defaultFont = new FontRenderer(
                 container.createGlyphRenderer("Quicksand Pro", 64));
         GuiWidgetDebugValues debugValues = engine.getDebugValues();
@@ -89,7 +82,6 @@ public class GraphicsSystem {
         textureManager.clearCache(this);
         defaultFont.dispose(this);
         VAO.disposeAll(this);
-        container.dispose();
     }
 
     public Container getContainer() {
@@ -153,12 +145,11 @@ public class GraphicsSystem {
         openGL.setBlending(BlendingMode.NORMAL);
     }
 
-    public void step() throws DesktopException {
+    public void step() {
         GameState state = engine.getNewState();
         if (state == null) {
             state = engine.getState();
         }
-        container.renderTick();
         sync.capTPS();
     }
 
@@ -188,14 +179,9 @@ public class GraphicsSystem {
             vaoDebug.setValue(VAO.getVAOCount());
             if (triggerScreenshot) {
                 triggerScreenshot = false;
-                try {
-                    openGL.screenShot(
-                            engine.getFiles().getFile("File:screenshots/" +
-                                    System.currentTimeMillis() +
-                                    ".png"), this);
-                } catch (IOException e) {
-                    LOGGER.warn("Failed to save screenshot: {}", e.toString());
-                }
+                openGL.screenShot(engine.getHome().resolve("screenshots/" +
+                        System.currentTimeMillis() +
+                        ".png"), this);
             }
             VAO.disposeUnused(this);
             Texture.disposeUnused(this);

@@ -24,12 +24,17 @@ import org.tobi29.scapes.engine.gui.GuiComponentIcon;
 import org.tobi29.scapes.engine.gui.GuiComponentText;
 import org.tobi29.scapes.engine.gui.GuiMessage;
 import org.tobi29.scapes.engine.openal.SoundSystem;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
+import org.tobi29.scapes.engine.utils.io.FileUtil;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -71,26 +76,33 @@ public class Playlist {
             return;
         }
         try {
-            Directory directory = player.getGame().getEngine().getFiles()
-                    .getDirectory("File:playlists/" + music.getName());
-            List<File> titles = directory.listFilesRecursive();
-            if (titles != null) {
-                if (!titles.isEmpty()) {
-                    Random random = ThreadLocalRandom.current();
-                    File title = titles.get(random.nextInt(titles.size()));
-                    ScapesEngine engine = player.getGame().getEngine();
-                    GuiMessage message =
-                            new GuiMessage(500, 0, 290, 60, GuiAlignment.RIGHT,
-                                    3.0);
-                    message.add(new GuiComponentIcon(10, 10, 40, 40,
-                            engine.getGraphics().getTextureManager()
-                                    .getTexture("Scapes:image/gui/Playlist")));
-                    String name = title.getName();
-                    name = name.substring(0, name.lastIndexOf('.'));
-                    message.add(new GuiComponentText(60, 23, 420, 16, name));
-                    engine.getGlobalGui().add(message);
-                    sounds.playMusic(title.getID(), 1.0f, 1.0f);
+            Path path =
+                    player.getGame().getEngine().getHome().resolve("playlists")
+                            .resolve(music.getName());
+            List<Path> titles = new ArrayList<>();
+            Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file,
+                        BasicFileAttributes attrs) {
+                    titles.add(file);
+                    return FileVisitResult.CONTINUE;
                 }
+            });
+            if (!titles.isEmpty()) {
+                Random random = ThreadLocalRandom.current();
+                Path title = titles.get(random.nextInt(titles.size()));
+                ScapesEngine engine = player.getGame().getEngine();
+                GuiMessage message =
+                        new GuiMessage(500, 0, 290, 60, GuiAlignment.RIGHT,
+                                3.0);
+                message.add(new GuiComponentIcon(10, 10, 40, 40,
+                        engine.getGraphics().getTextureManager()
+                                .getTexture("Scapes:image/gui/Playlist")));
+                String name = title.getFileName().toString();
+                name = name.substring(0, name.lastIndexOf('.'));
+                message.add(new GuiComponentText(60, 23, 420, 16, name));
+                engine.getGlobalGui().add(message);
+                sounds.playMusic(FileUtil.read(title), 1.0f, 1.0f);
             }
         } catch (IOException e) {
             LOGGER.warn("Failed to play music: {}", e.toString());

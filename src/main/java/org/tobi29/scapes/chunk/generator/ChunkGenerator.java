@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.io.filesystem;
+package org.tobi29.scapes.chunk.generator;
 
-import java.io.IOException;
+public interface ChunkGenerator {
+    void seed(int x, int y);
 
-public interface ResourceAttributes {
-    String getMIMEType() throws IOException;
-
-    long getSize() throws IOException;
+    void makeLand(int x, int y, int z, int dz, GeneratorOutput output);
 }

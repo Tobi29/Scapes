@@ -50,7 +50,7 @@ public class BlockResearchTable extends VanillaBlock {
     @Override
     public boolean click(TerrainServer terrain, int x, int y, int z, Face face,
             MobPlayerServer player) {
-        terrain.getWorld().getEntities(x, y, z).stream()
+        terrain.world().getEntities(x, y, z).stream()
                 .filter(entity -> entity instanceof EntityResearchTableServer)
                 .forEach(entity -> player
                         .openGui((EntityContainerServer) entity));
@@ -60,10 +60,10 @@ public class BlockResearchTable extends VanillaBlock {
     @Override
     public boolean place(TerrainServer.TerrainMutable terrain, int x, int y,
             int z, Face face, MobPlayerServer player) {
-        EntityServer entity = new EntityResearchTableServer(terrain.getWorld(),
+        EntityServer entity = new EntityResearchTableServer(terrain.world(),
                 new Vector3d(x + 0.5, y + 0.5, z + 0.5));
         entity.onSpawn();
-        terrain.getWorld().addEntity(entity);
+        terrain.world().addEntity(entity);
         return true;
     }
 

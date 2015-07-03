@@ -18,34 +18,31 @@ package org.tobi29.scapes.engine.backends.lwjgl3.glfw;
 
 import org.tobi29.scapes.engine.opengl.Container;
 import org.tobi29.scapes.engine.utils.Pair;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
 
 import java.io.IOException;
-import java.net.URI;
+import java.nio.file.Path;
 import java.util.Optional;
 
 public interface PlatformDialogs {
-    URI[] openFileDialog(Pair<String, String>[] extensions,
-            String title, boolean multiple);
+    Path[] openFileDialog(Pair<String, String>[] extensions, String title,
+            boolean multiple);
 
-    Optional<URI> saveFileDialog(Pair<String, String>[] extensions,
+    Optional<Path> saveFileDialog(Pair<String, String>[] extensions,
             String title);
 
-    boolean exportToUser(File file, Pair<String, String>[] extensions,
+    boolean exportToUser(Path path, Pair<String, String>[] extensions,
             String title) throws IOException;
 
-    boolean importFromUser(File file, Pair<String, String>[] extensions,
+    boolean importFromUser(Path path, Pair<String, String>[] extensions,
             String title) throws IOException;
 
-    boolean importFromUser(Directory directory,
-            Pair<String, String>[] extensions, String title, boolean multiple)
-            throws IOException;
+    boolean importFromUser(Path path, Pair<String, String>[] extensions,
+            String title, boolean multiple) throws IOException;
 
     void message(Container.MessageType messageType, String title,
             String message);
 
-    void openFile(URI file);
+    void openFile(Path path);
 
     void renderTick();
 

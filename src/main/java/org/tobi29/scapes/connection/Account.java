@@ -20,10 +20,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.utils.RSAUtil;
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -36,15 +38,15 @@ import java.util.Properties;
 public class Account {
     private static final Logger LOGGER = LoggerFactory.getLogger(Account.class);
 
-    public static Client read(File file) throws IOException {
+    public static Client read(Path path) throws IOException {
         String key = null, nickname = "";
-        if (file.exists()) {
+        if (Files.exists(path)) {
             Properties properties = new Properties();
-            try (InputStream streamIn = file.read()) {
+            try (InputStream streamIn = Files.newInputStream(path)) {
                 properties.load(streamIn);
-                key = properties.getProperty("Key");
-                nickname = properties.getProperty("Nickname", "");
             }
+            key = properties.getProperty("Key");
+            nickname = properties.getProperty("Nickname", "");
         }
         Optional<KeyPair> keyPair = key(key);
         if (keyPair.isPresent()) {
@@ -121,11 +123,13 @@ public class Account {
             this.nickname = nickname;
         }
 
-        public void write(File file) throws IOException {
+        public void write(Path path) throws IOException {
             Properties properties = new Properties();
             properties.setProperty("Key", key(keyPair));
             properties.setProperty("Nickname", nickname);
-            file.write(streamOut -> properties.store(streamOut, ""));
+            try (OutputStream streamOut = Files.newOutputStream(path)) {
+                properties.store(streamOut, "");
+            }
         }
 
         public KeyPair getKeyPair() {

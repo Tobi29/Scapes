@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.platform.spi;
+package org.tobi29.scapes.engine.utils.io;
 
-import org.tobi29.scapes.engine.utils.platform.Platform;
+import java.io.IOException;
 
-public interface PlatformProvider {
-    boolean available();
-
-    Platform getPlatform();
+@FunctionalInterface
+public interface IOSupplier<T> {
+    T get() throws IOException;
 }

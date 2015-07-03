@@ -16,6 +16,9 @@
 
 package org.tobi29.scapes.engine.utils.io.tag;
 
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -33,6 +36,22 @@ public class TagStructureJSON {
     public static TagStructure read(TagStructure tagStructure,
             InputStream streamIn) throws IOException {
         tagStructure.read(new TagStructureReaderJSON(streamIn));
+        return tagStructure;
+    }
+
+    public static void write(TagStructure tagStructure,
+            WritableByteStream stream) throws IOException {
+        tagStructure.write(new TagStructureWriterJSON(stream));
+    }
+
+    public static TagStructure read(ReadableByteStream stream)
+            throws IOException {
+        return read(new TagStructure(), stream);
+    }
+
+    public static TagStructure read(TagStructure tagStructure,
+            ReadableByteStream stream) throws IOException {
+        tagStructure.read(new TagStructureReaderJSON(stream));
         return tagStructure;
     }
 }

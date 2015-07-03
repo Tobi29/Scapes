@@ -22,6 +22,7 @@ import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
+import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.PointerPane;
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3;
@@ -55,8 +56,17 @@ public class EntityModelBlockBreak implements EntityModel {
     }
 
     @Override
-    public void renderUpdate(GraphicsSystem graphics, WorldClient world,
-            double delta) {
+    public void shapeAABB(AABB aabb) {
+        aabb.minX = pos.doubleX() - 0.5;
+        aabb.minY = pos.doubleY() - 0.5;
+        aabb.minZ = pos.doubleZ() - 0.5;
+        aabb.maxX = pos.doubleX() + 0.5;
+        aabb.maxY = pos.doubleY() + 0.5;
+        aabb.maxZ = pos.doubleZ() + 0.5;
+    }
+
+    @Override
+    public void renderUpdate(double delta) {
         double factor = FastMath.min(1.0, delta * 5.0);
         pos.plus(entity.getPos().minus(pos.now()).multiply(factor));
     }
@@ -73,9 +83,9 @@ public class EntityModelBlockBreak implements EntityModel {
         }
         OpenGL openGL = graphics.getOpenGL();
         openGL.setAttribute2f(4, world.getTerrain()
-                        .getBlockLight(pos.intX(), pos.intY(), pos.intZ()) /
-                        15.0f, world.getTerrain()
-                        .getSunLight(pos.intX(), pos.intY(), pos.intZ()) /
+                        .blockLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f,
+                world.getTerrain()
+                        .sunLight(pos.intX(), pos.intY(), pos.intZ()) /
                         15.0f);
         graphics.getTextureManager()
                 .bind("Scapes:image/entity/Break" + i, graphics);

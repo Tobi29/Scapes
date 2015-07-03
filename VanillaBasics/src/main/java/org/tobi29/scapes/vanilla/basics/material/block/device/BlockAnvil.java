@@ -123,24 +123,23 @@ public class BlockAnvil extends VanillaBlockContainer {
     @Override
     public void update(TerrainServer.TerrainMutable terrain, int x, int y,
             int z) {
-        if (!terrain.getBlockType(x, y, z - 1).isSolid(terrain, x, y, z - 1)) {
-            EntityServer entity = new MobFlyingBlockServer(terrain.getWorld(),
+        if (!terrain.type(x, y, z - 1).isSolid(terrain, x, y, z - 1)) {
+            EntityServer entity = new MobFlyingBlockServer(terrain.world(),
                     new Vector3d(x + 0.5, y + 0.5, z + 0.5), Vector3d.ZERO,
-                    this, terrain.getBlockData(x, y, z));
+                    this, terrain.data(x, y, z));
             entity.onSpawn();
-            terrain.getWorld().addEntity(entity);
-            terrain.setBlockTypeAndData(x, y, z, terrain.getWorld().getAir(),
-                    (short) 0);
+            terrain.world().addEntity(entity);
+            terrain.typeData(x, y, z, terrain.world().getAir(), (short) 0);
         }
     }
 
     @Override
     protected EntityContainerServer placeEntity(TerrainServer terrain, int x,
             int y, int z) {
-        EntityAnvilServer entity = new EntityAnvilServer(terrain.getWorld(),
+        EntityAnvilServer entity = new EntityAnvilServer(terrain.world(),
                 new Vector3d(x + 0.5, y + 0.5, z + 0.5));
         entity.onSpawn();
-        terrain.getWorld().addEntity(entity);
+        terrain.world().addEntity(entity);
         return entity;
     }
 

@@ -20,10 +20,10 @@ import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.connection.InvalidPacketDataException;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class PacketChat extends Packet implements PacketServer, PacketClient {
@@ -37,15 +37,15 @@ public class PacketChat extends Packet implements PacketServer, PacketClient {
     }
 
     @Override
-    public void sendClient(PlayerConnection player, DataOutputStream streamOut)
+    public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        streamOut.writeUTF(text);
+        stream.putString(text);
     }
 
     @Override
-    public void parseClient(ClientConnection client, DataInputStream streamIn)
+    public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        text = streamIn.readUTF();
+        text = stream.getString();
     }
 
     @Override
@@ -54,15 +54,15 @@ public class PacketChat extends Packet implements PacketServer, PacketClient {
     }
 
     @Override
-    public void sendServer(ClientConnection client, DataOutputStream streamOut)
+    public void sendServer(ClientConnection client, WritableByteStream stream)
             throws IOException {
-        streamOut.writeUTF(text);
+        stream.putString(text);
     }
 
     @Override
-    public void parseServer(PlayerConnection player, DataInputStream streamIn)
+    public void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException {
-        text = streamIn.readUTF();
+        text = stream.getString();
     }
 
     @Override

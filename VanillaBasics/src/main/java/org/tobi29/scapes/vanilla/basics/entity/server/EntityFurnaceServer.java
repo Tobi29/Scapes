@@ -41,9 +41,9 @@ public class EntityFurnaceServer extends EntityAbstractFurnaceServer {
 
     @Override
     public boolean isValidOn(TerrainServer terrain, int x, int y, int z) {
-        VanillaBasics plugin = (VanillaBasics) terrain.getWorld().getPlugins()
+        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
                 .getPlugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
-        return terrain.getBlockType(x, y, z) == materials.furnace;
+        return terrain.type(x, y, z) == materials.furnace;
     }
 }

@@ -85,9 +85,8 @@ public class BlockDirt extends BlockSoil {
     public boolean destroy(TerrainServer.TerrainMutable terrain, int x, int y,
             int z, Face face, MobPlayerServer player, ItemStack item) {
         if ("Hoe".equals(item.getMaterial().getToolType(item))) {
-            terrain.setBlockType(x, y, z, materials.farmland);
-            terrain.getWorld().addEntity(
-                    new EntityFarmlandServer(terrain.getWorld(),
+            terrain.type(x, y, z, materials.farmland);
+            terrain.world().addEntity(new EntityFarmlandServer(terrain.world(),
                             new Vector3d(x + 0.5, y + 0.5, z + 0.5), 0.1f, 0.1f,
                             0.1f));
             return false;
@@ -104,7 +103,7 @@ public class BlockDirt extends BlockSoil {
     public Optional<TerrainTexture> getParticleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
         WorldEnvironmentOverworld environment =
-                (WorldEnvironmentOverworld) terrain.getWorld().getEnvironment();
+                (WorldEnvironmentOverworld) terrain.world().getEnvironment();
         ClimateGenerator climateGenerator = environment.getClimateGenerator();
         double humidity = climateGenerator.getHumidity(x, y, z);
         if (humidity < 0.3) {

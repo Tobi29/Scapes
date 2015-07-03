@@ -19,7 +19,7 @@ package org.tobi29.scapes.chunk;
 import org.tobi29.scapes.block.BlockExplosive;
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.ItemStack;
-import org.tobi29.scapes.chunk.generator.ChunkGeneratorInfinite;
+import org.tobi29.scapes.chunk.generator.ChunkGenerator;
 import org.tobi29.scapes.chunk.generator.ChunkPopulator;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.utils.Sync;
@@ -62,7 +62,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
     private final Map<String, MobPlayerServer> players =
             new ConcurrentHashMap<>();
     private Joiner joiner;
-    private ChunkGeneratorInfinite gen;
+    private ChunkGenerator gen;
 
     public WorldServer(WorldFormat worldFormat, String name, String id,
             ServerConnection connection, TaskExecutor taskExecutor,
@@ -288,8 +288,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
             int x = FastMath.floor(x1 + dx * i);
             int y = FastMath.floor(y1 + dy * i);
             int z = FastMath.floor(z1 + dz * i);
-            if (!terrain.getBlockType(x, y, z)
-                    .isTransparent(terrain, x, y, z)) {
+            if (!terrain.type(x, y, z).isTransparent(terrain, x, y, z)) {
                 return true;
             }
         }
@@ -319,7 +318,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
 
     public void explosionBlockPush(double x, double y, double z, double size,
             double dropChance, double blockChance, double push, double damage) {
-        terrain.queueBlockChanges(handler -> {
+        terrain.queue(handler -> {
             Random random = ThreadLocalRandom.current();
             double step = 360.0d / FastMath.TWO_PI / size;
             for (double pitch = 90.0d; pitch >= -90.0d; pitch -= step) {
@@ -337,7 +336,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                         int xxx = FastMath.floor(x + deltaX * distance);
                         int yyy = FastMath.floor(y + deltaY * distance);
                         int zzz = FastMath.floor(z + deltaZ * distance);
-                        BlockType type = terrain.getBlockType(xxx, yyy, zzz);
+                        BlockType type = terrain.type(xxx, yyy, zzz);
                         if (type != air) {
                             if (type instanceof BlockExplosive) {
                                 ((BlockExplosive) type)
@@ -347,17 +346,16 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                                 if (random.nextDouble() < dropChance) {
                                     dropItems(type.getDrops(
                                                     new ItemStack(registry),
-                                                    terrain.getBlockData(xxx,
-                                                            yyy, zzz)), xxx,
-                                            yyy, zzz);
+                                                    terrain.data(xxx, yyy,
+                                                            zzz)), xxx, yyy,
+                                            zzz);
                                 } else if (
                                         type.isSolid(terrain, xxx, yyy, zzz) &&
                                                 !type.isTransparent(terrain,
                                                         xxx, yyy, zzz) &&
                                                 random.nextDouble() <
                                                         blockChance) {
-                                    int data =
-                                            terrain.getBlockData(xxx, yyy, zzz);
+                                    int data = terrain.data(xxx, yyy, zzz);
                                     EntityServer entity =
                                             new MobFlyingBlockServer(this,
                                                     new Vector3d(xxx + 0.5,
@@ -375,7 +373,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                                     addEntity(entity);
                                 }
                             }
-                            handler.setBlockTypeAndData(xxx, yyy, zzz, air, 0);
+                            handler.typeData(xxx, yyy, zzz, air, 0);
                         }
                     }
                 }
@@ -428,7 +426,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
         this.pop.add(pop);
     }
 
-    public ChunkGeneratorInfinite getGenerator() {
+    public ChunkGenerator getGenerator() {
         return gen;
     }
 
@@ -501,7 +499,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                 update(0.05);
                 sync.capTPS();
             }
-        }, "Tick-" + id);
+        }, "Tick-" + id, TaskExecutor.Priority.MEDIUM);
     }
 
     @FunctionalInterface

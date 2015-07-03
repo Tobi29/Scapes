@@ -79,7 +79,7 @@ public class BlockSapling extends VanillaBlock {
     @Override
     public boolean place(TerrainServer.TerrainMutable terrain, int x, int y,
             int z, Face face, MobPlayerServer player) {
-        if (terrain.getBlockType(x, y, z - 1).isSolid(terrain, x, y, z - 1)) {
+        if (terrain.type(x, y, z - 1).isSolid(terrain, x, y, z - 1)) {
             Random random = ThreadLocalRandom.current();
             terrain.addDelayedUpdate(new UpdateSaplingGrowth()
                     .set(x, y, z, random.nextDouble() * 3600.0 + 3600.0));
@@ -111,7 +111,7 @@ public class BlockSapling extends VanillaBlock {
     @Override
     public Optional<TerrainTexture> getParticleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
-        return Optional.of(textures[terrain.getBlockData(x, y, z)]);
+        return Optional.of(textures[terrain.data(x, y, z)]);
     }
 
     @Override
@@ -146,12 +146,11 @@ public class BlockSapling extends VanillaBlock {
     @Override
     public void update(TerrainServer.TerrainMutable terrain, int x, int y,
             int z) {
-        if (!terrain.getBlockType(x, y, z - 1).isSolid(terrain, x, y, z - 1)) {
-            terrain.getWorld().dropItems(
+        if (!terrain.type(x, y, z - 1).isSolid(terrain, x, y, z - 1)) {
+            terrain.world().dropItems(
                     getDrops(new ItemStack(materials.air, (short) 0),
-                            terrain.getBlockData(x, y, z)), x, y, z);
-            terrain.setBlockTypeAndData(x, y, z, terrain.getWorld().getAir(),
-                    (short) 0);
+                            terrain.data(x, y, z)), x, y, z);
+            terrain.typeData(x, y, z, terrain.world().getAir(), (short) 0);
         }
     }
 

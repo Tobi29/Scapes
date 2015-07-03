@@ -16,6 +16,9 @@
 
 package org.tobi29.scapes.engine.utils.io.tag;
 
+import org.tobi29.scapes.engine.utils.io.ByteStreamOutputStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
+
 import javax.json.Json;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonGeneratorFactory;
@@ -34,6 +37,10 @@ public class TagStructureWriterJSON extends TagStructureJSON
         Map<String, Object> map = new ConcurrentHashMap<>();
         map.put(JsonGenerator.PRETTY_PRINTING, Boolean.TRUE);
         FACTORY = Json.createGeneratorFactory(map);
+    }
+
+    public TagStructureWriterJSON(WritableByteStream stream) {
+        this(new ByteStreamOutputStream(stream));
     }
 
     public TagStructureWriterJSON(OutputStream streamOut) {

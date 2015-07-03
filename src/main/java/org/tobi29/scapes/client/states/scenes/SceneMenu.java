@@ -32,12 +32,16 @@ import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
 import org.tobi29.scapes.engine.utils.ArrayUtil;
 import org.tobi29.scapes.engine.utils.graphics.BlurOffset;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
+import org.tobi29.scapes.engine.utils.io.FileUtil;
 import org.tobi29.scapes.engine.utils.math.FastMath;
+import org.tobi29.scapes.server.format.WorldFormat;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -47,11 +51,6 @@ public class SceneMenu extends Scene {
     private static final String BLUR_OFFSET;
     private static final String BLUR_WEIGHT;
     private static final int BLUR_LENGTH;
-    private final Cam cam;
-    private float speed = 0.6f, yaw;
-    private Directory background;
-    private Texture[] textures;
-    private VAO vao;
 
     static {
         float[] blurOffset = BlurOffset.gaussianBlurOffset(15, 0.04f);
@@ -62,22 +61,21 @@ public class SceneMenu extends Scene {
         BLUR_WEIGHT = ArrayUtil.join(blurWeight);
     }
 
+    private final Texture[] textures = new Texture[6];
+    private final Cam cam;
+    private float speed = 0.6f, yaw;
+    private VAO vao;
+
     public SceneMenu() {
         cam = new Cam(0.4f, 2.0f);
         Random random = ThreadLocalRandom.current();
         yaw = random.nextFloat() * 360.0f;
     }
 
-    public void changeBackground(Directory file) throws IOException {
-        if (!Objects.equals(background, file)) {
-            background = file;
-            for (int i = 0; i < 6; i++) {
-                textures[i].dispose(state.getEngine().getGraphics());
-                textures[i] = new TextureFile(
-                        background.getResource("Panorama" + i + ".png").read(),
-                        0, TextureFilter.LINEAR, TextureFilter.LINEAR,
-                        TextureWrap.CLAMP, TextureWrap.CLAMP);
-            }
+    public void changeBackground(Path path) throws IOException {
+        Optional<Path[]> save = saveBackground(path);
+        if (save.isPresent()) {
+            changeBackground(save.get());
         }
     }
 
@@ -99,9 +97,7 @@ public class SceneMenu extends Scene {
                         -1.0f, 1.0f, -1.0f, -1.0f},
                 new float[]{1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f},
                 new int[]{0, 1, 2, 2, 1, 3}, RenderType.TRIANGLES);
-        if (textures == null) {
-            textures = loadTextures(graphics);
-        }
+        loadTextures();
     }
 
     @Override
@@ -117,23 +113,26 @@ public class SceneMenu extends Scene {
         OpenGL openGL = graphics.getOpenGL();
         MatrixStack matrixStack = graphics.getMatrixStack();
         for (int i = 0; i < 6; i++) {
-            Matrix matrix = matrixStack.push();
-            if (i == 1) {
-                matrix.rotate(90.0f, 0.0f, 0.0f, 1.0f);
-            } else if (i == 2) {
-                matrix.rotate(180.0f, 0.0f, 0.0f, 1.0f);
-            } else if (i == 3) {
-                matrix.rotate(270.0f, 0.0f, 0.0f, 1.0f);
-            } else if (i == 4) {
-                matrix.rotate(90.0f, 1.0f, 0.0f, 0.0f);
-            } else if (i == 5) {
-                matrix.rotate(-90.0f, 1.0f, 0.0f, 0.0f);
+            Texture texture = textures[i];
+            if (texture != null) {
+                Matrix matrix = matrixStack.push();
+                if (i == 1) {
+                    matrix.rotate(90.0f, 0.0f, 0.0f, 1.0f);
+                } else if (i == 2) {
+                    matrix.rotate(180.0f, 0.0f, 0.0f, 1.0f);
+                } else if (i == 3) {
+                    matrix.rotate(270.0f, 0.0f, 0.0f, 1.0f);
+                } else if (i == 4) {
+                    matrix.rotate(90.0f, 1.0f, 0.0f, 0.0f);
+                } else if (i == 5) {
+                    matrix.rotate(-90.0f, 1.0f, 0.0f, 0.0f);
+                }
+                texture.bind(graphics);
+                openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
+                        1.0f);
+                vao.render(graphics, shader);
+                matrixStack.pop();
             }
-            textures[i].bind(graphics);
-            openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
-                    1.0f);
-            vao.render(graphics, shader);
-            matrixStack.pop();
         }
     }
 
@@ -157,7 +156,10 @@ public class SceneMenu extends Scene {
     @Override
     public void dispose(GraphicsSystem graphics) {
         for (int i = 0; i < 6; i++) {
-            textures[i].dispose(graphics);
+            Texture texture = textures[i];
+            if (texture != null) {
+                texture.dispose(graphics);
+            }
         }
     }
 
@@ -165,40 +167,67 @@ public class SceneMenu extends Scene {
         this.speed = speed;
     }
 
-    protected Texture[] loadTextures(GraphicsSystem graphics) {
-        Texture[] textures = new Texture[6];
-        Random random = ThreadLocalRandom.current();
-        int r = random.nextInt(2);
-        for (int i = 0; i < 6; i++) {
-            textures[i] = graphics.getTextureManager()
-                    .getTexture("Scapes:image/gui/panorama/" +
-                            r + "/Panorama" + i);
-        }
-        Directory world = null;
+    protected void loadTextures() {
+        List<Path[]> saves = new ArrayList<>();
         try {
-            Directory directory =
-                    state.getEngine().getFiles().getDirectory("File:saves");
-            List<Directory> saves = directory
-                    .listDirectories(dir -> dir.getName().endsWith(".spkg"));
-            if (!saves.isEmpty()) {
-                world = saves.get(random.nextInt(saves.size()));
+            Path path = state.getEngine().getHome().resolve("saves");
+            for (Path directory : Files.newDirectoryStream(path)) {
+                if (Files.isDirectory(directory) &&
+                        !Files.isHidden(directory) &&
+                        directory.getFileName().toString()
+                                .endsWith(WorldFormat.getFilenameExtension())) {
+                    saveBackground(directory).ifPresent(saves::add);
+                }
             }
         } catch (IOException e) {
             LOGGER.warn("Failed to read saves: {}", e.toString());
         }
-        if (world != null) {
-            background = world;
+        GraphicsSystem graphics = state.getEngine().getGraphics();
+        Random random = ThreadLocalRandom.current();
+        if (saves.isEmpty()) {
+            int r = random.nextInt(2);
             for (int i = 0; i < 6; i++) {
-                try {
-                    textures[i] = new TextureFile(
-                            background.getResource("Panorama" + i + ".png")
-                                    .read(), 0, TextureFilter.LINEAR,
-                            TextureFilter.LINEAR, TextureWrap.CLAMP,
-                            TextureWrap.CLAMP);
-                } catch (IOException e) {
-                }
+                setBackground(graphics.getTextureManager()
+                        .getTexture("Scapes:image/gui/panorama/" +
+                                r + "/Panorama" + i), i);
+            }
+        } else {
+            try {
+                changeBackground(saves.get(random.nextInt(saves.size())));
+            } catch (IOException e) {
+                LOGGER.warn("Failed to load save background: {}", e.toString());
             }
         }
-        return textures;
+    }
+
+    protected void setBackground(Texture replace, int i) {
+        GraphicsSystem graphics = state.getEngine().getGraphics();
+        Texture texture = textures[i];
+        if (texture != null) {
+            texture.dispose(graphics);
+        }
+        textures[i] = replace;
+    }
+
+    private Optional<Path[]> saveBackground(Path path) {
+        Path[] save = new Path[6];
+        for (int i = 0; i < 6; i++) {
+            Path background = path.resolve("Panorama" + i + ".png");
+            if (Files.exists(background)) {
+                save[i] = background;
+            } else {
+                return Optional.empty();
+            }
+        }
+        return Optional.of(save);
+    }
+
+    private void changeBackground(Path[] save) throws IOException {
+        for (int i = 0; i < 6; i++) {
+            setBackground(FileUtil.readReturn(save[i],
+                    input -> new TextureFile(input, 0, TextureFilter.LINEAR,
+                            TextureFilter.LINEAR, TextureWrap.CLAMP,
+                            TextureWrap.CLAMP)), i);
+        }
     }
 }

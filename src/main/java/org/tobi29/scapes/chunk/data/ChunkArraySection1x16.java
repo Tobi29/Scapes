@@ -35,12 +35,12 @@ public class ChunkArraySection1x16 implements ChunkArraySection {
     }
 
     @Override
-    public int getData(int x, int y, int z, int offset) {
-        return getData(((z << ySizeBits | y) << xSizeBits | x) + offset);
+    public int data(int x, int y, int z, int offset) {
+        return data(((z << ySizeBits | y) << xSizeBits | x) + offset);
     }
 
     @Override
-    public int getData(int offset) {
+    public int data(int offset) {
         byte[] data = this.data;
         if (data == null) {
             return defaultValue;
@@ -58,12 +58,12 @@ public class ChunkArraySection1x16 implements ChunkArraySection {
     }
 
     @Override
-    public void setData(int x, int y, int z, int offset, int value) {
-        setData(((z << ySizeBits | y) << xSizeBits | x) + offset, value);
+    public void data(int x, int y, int z, int offset, int value) {
+        data(((z << ySizeBits | y) << xSizeBits | x) + offset, value);
     }
 
     @Override
-    public synchronized void setData(int offset, int value) {
+    public synchronized void data(int offset, int value) {
         offset <<= 1;
         byte[] data = this.data;
         if (data == null) {
@@ -81,6 +81,7 @@ public class ChunkArraySection1x16 implements ChunkArraySection {
             data[offset] = (byte) (value >> 8);
             data[offset + 1] = (byte) value;
             this.data = data;
+            changed = true;
         } else {
             lock.incrementAndGet();
             data[offset] = (byte) (value >> 8);
@@ -102,10 +103,7 @@ public class ChunkArraySection1x16 implements ChunkArraySection {
         }
         boolean flag = true;
         for (int i = 2; i < size; i += 2) {
-            if (data[i] != data[0]) {
-                flag = false;
-                break;
-            } else if (data[i + 1] != data[1]) {
+            if (data[i] != data[0] || data[i + 1] != data[1]) {
                 flag = false;
                 break;
             }

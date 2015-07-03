@@ -82,7 +82,8 @@ public class Shader {
     }
 
     private static String readSource(Resource resource) throws IOException {
-        return ProcessStream.process(resource.read(), ProcessStream.asString());
+        return resource.readReturn(stream -> ProcessStream
+                .process(stream, ProcessStream.asString()));
     }
 
     private static int createShader(String source, int shader,

@@ -35,17 +35,18 @@ import org.tobi29.scapes.engine.utils.Crashable;
 import org.tobi29.scapes.engine.utils.Sync;
 import org.tobi29.scapes.engine.utils.io.CrashReportFile;
 import org.tobi29.scapes.engine.utils.io.FileCache;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
+import org.tobi29.scapes.engine.utils.io.FileUtil;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
-import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPathRoot;
+import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
-import org.tobi29.scapes.engine.utils.platform.Platform;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
@@ -61,6 +62,7 @@ public class ScapesEngine implements Crashable {
     private final Game game;
     private final TagStructure tagStructure;
     private final ScapesEngineConfig config;
+    private final Path home, temp;
     private final FileCache fileCache;
     private final GuiWidgetDebugValues.Element usedMemoryDebug, maxMemoryDebug;
     private final boolean debug;
@@ -70,7 +72,7 @@ public class ScapesEngine implements Crashable {
     private final SoundSystem sounds;
     private final ControllerDefault controller;
     private GuiController guiController;
-    private boolean running = true, mouseGrabbed;
+    private boolean mouseGrabbed;
     private GameState currentState, newState;
     private StateThread stateThread;
 
@@ -92,28 +94,26 @@ public class ScapesEngine implements Crashable {
         Thread.currentThread().setName("Engine-Rendering-Thread");
         LOGGER.info("Starting Scapes-Engine: {} (Game: {})", this, game);
         try {
+            this.home = Paths.get(home);
             files = new FileSystemContainer();
-            files.registerFileSystem("File", home,
-                    Platform.getPlatform()::getFileFileSystem);
-            files.registerFileSystem("Temp",
-                    Platform.getPlatform()::getTempFileFileSystem);
-            Directory tempDirectory = files.getDirectory("Temp:");
+            temp = Files.createTempDirectory("ScapesEngine");
             runtime.addShutdownHook(new Thread(() -> {
                 try {
-                    tempDirectory.delete();
+                    FileUtil.deleteDir(temp);
                 } catch (IOException e) {
                     LOGGER.warn("Failed to delete temporary directory: {}",
                             e.toString());
                 }
             }));
-            files.registerFileSystem("Class", "",
-                    ClasspathPathRoot.make(getClass().getClassLoader()));
-            files.registerFileSystem("Engine", "assets/scapes/tobi29/engine/",
-                    ClasspathPathRoot.make(getClass().getClassLoader()));
-            fileCache = new FileCache(files.getDirectory("File:cache"),
-                    files.getDirectory("Temp:cache"));
+            files.registerFileSystem("Class",
+                    new ClasspathPath(getClass().getClassLoader(), ""));
+            files.registerFileSystem("Engine",
+                    new ClasspathPath(getClass().getClassLoader(),
+                            "assets/scapes/tobi29/engine/"));
+            fileCache = new FileCache(this.home.resolve("cache"),
+                    temp.resolve("cache"));
             fileCache.check();
-            files.getDirectory("File:screenshots").make();
+            Files.createDirectories(this.home.resolve("screenshots"));
         } catch (IOException e) {
             throw new ScapesEngineException(
                     "Failed to create virtual file system: " + e.toString());
@@ -122,10 +122,10 @@ public class ScapesEngine implements Crashable {
         taskExecutor = new TaskExecutor(this, "Engine");
         tagStructure = new TagStructure();
         try {
-            File file = files.getFile("File:ScapesEngine.json");
-            if (file.exists()) {
-                file.read(streamIn -> TagStructureJSON
-                        .read(tagStructure, streamIn));
+            Path configPath = this.home.resolve("ScapesEngine.json");
+            if (Files.exists(configPath)) {
+                FileUtil.read(configPath,
+                        stream -> TagStructureJSON.read(tagStructure, stream));
             }
         } catch (IOException e) {
             LOGGER.warn("Failed to load config file: {}", e.toString());
@@ -174,18 +174,12 @@ public class ScapesEngine implements Crashable {
     }
 
     private void checkSystem() {
-        LOGGER.info("Operating system: {} {} (Impl: {}, Arch: {}, 64Bit: {})",
-                Platform.getPlatform().getName(),
-                Platform.getPlatform().getVersion(),
-                Platform.getPlatform().getID(),
-                Platform.getPlatform().getArch(),
-                Platform.getPlatform().is64Bit());
+        LOGGER.info("Operating system: {} {} {}", System.getProperty("os.name"),
+                System.getProperty("os.version"),
+                System.getProperty("os.arch"));
         LOGGER.info("Java: {} (MaxMemory: {}, Processors: {})",
                 System.getProperty("java.version"),
                 runtime.maxMemory() / 1048576, runtime.availableProcessors());
-        if (!Platform.getPlatform().is64Bit()) {
-            LOGGER.warn("64Bit System is recommended!");
-        }
     }
 
     public GraphicsSystem getGraphics() {
@@ -210,6 +204,14 @@ public class ScapesEngine implements Crashable {
 
     public FileSystemContainer getFiles() {
         return files;
+    }
+
+    public Path getHome() {
+        return home;
+    }
+
+    public Path getTemp() {
+        return temp;
     }
 
     public FileCache getFileCache() {
@@ -255,23 +257,7 @@ public class ScapesEngine implements Crashable {
     @SuppressWarnings("OverlyBroadCatchBlock")
     public int run() {
         try {
-            while (running) {
-                sounds.poll(graphics.getSync().getSpeedFactor());
-                graphics.step();
-            }
-            currentState.getScene().dispose(graphics);
-            currentState.disposeState();
-            game.dispose();
-            sounds.dispose();
-            graphics.dispose();
-            try {
-                files.getFile("File:ScapesEngine.json")
-                        .write(streamOut -> TagStructureJSON
-                                .write(tagStructure, streamOut));
-            } catch (IOException e) {
-                LOGGER.warn("Failed to save config file!");
-            }
-            taskExecutor.shutdown();
+            graphics.getContainer().run();
         } catch (GraphicsCheckException e) {
             LOGGER.error("Failed to initialize graphics:", e);
             graphics.getContainer()
@@ -280,14 +266,43 @@ public class ScapesEngine implements Crashable {
                                     e.getMessage());
             return 1;
         } catch (Throwable e) {
-            taskExecutor.shutdown();
-            graphics.getContainer()
-                    .message(Container.MessageType.ERROR, game.getName(),
-                            game.getName() + " crashed\n:" + toString());
+            try {
+                graphics.getContainer()
+                        .message(Container.MessageType.ERROR, game.getName(),
+                                game.getName() + " crashed\n:" + toString());
+            } catch (Exception e2) {
+                LOGGER.error("Failed to show crash message", e2);
+            }
             crash(e);
             return 1;
         }
         return 0;
+    }
+
+    public void render() {
+        graphics.step();
+        sounds.poll(graphics.getSync().getSpeedFactor());
+        graphics.render();
+    }
+
+    public void dispose() {
+        if (stateThread != null) {
+            stateThread.joiner.join();
+            stateThread = null;
+        }
+        currentState.getScene().dispose(graphics);
+        currentState.disposeState();
+        game.dispose();
+        sounds.dispose();
+        graphics.dispose();
+        try {
+            FileUtil.write(home.resolve("ScapesEngine.json"),
+                    streamOut -> TagStructureJSON
+                            .write(tagStructure, streamOut));
+        } catch (IOException e) {
+            LOGGER.warn("Failed to save config file!");
+        }
+        taskExecutor.shutdown();
     }
 
     @Override
@@ -300,11 +315,10 @@ public class ScapesEngine implements Crashable {
             debugValues.put(entry.getKey(), entry.getValue().toString());
         }
         try {
-            File crashReportFile =
-                    CrashReportFile.getFile(files.getDirectory("File:"));
+            Path crashReportFile = CrashReportFile.getFile(home);
             CrashReportFile.writeCrashReport(e, crashReportFile, "ScapesEngine",
                     debugValues);
-            graphics.getContainer().openFile(crashReportFile.getURI());
+            graphics.getContainer().openFile(crashReportFile);
         } catch (IOException e1) {
             LOGGER.error("Failed to write crash report: {}", e.toString());
         }
@@ -312,7 +326,7 @@ public class ScapesEngine implements Crashable {
     }
 
     public void stop() {
-        running = false;
+        graphics.getContainer().stop();
     }
 
     public void step() {

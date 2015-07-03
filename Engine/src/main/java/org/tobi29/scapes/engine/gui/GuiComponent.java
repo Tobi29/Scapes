@@ -50,7 +50,7 @@ public abstract class GuiComponent
             Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final long uid = UID_COUNTER.getAndIncrement();
     protected GuiComponent parent;
-    protected boolean visible = true;
+    protected boolean visible = true, hovering;
     protected int x, y, width, height;
 
     protected GuiComponent(int x, int y, int width, int height) {
@@ -120,7 +120,7 @@ public abstract class GuiComponent
     }
 
     @Override
-    public void hover(GuiComponentEvent event) {
+    public void hover(GuiComponentHoverEvent event) {
         for (GuiComponentHoverListener hover : hovers) {
             hover.hover(event);
         }
@@ -218,7 +218,14 @@ public abstract class GuiComponent
                     clickRight(new GuiComponentEvent(mouseX, mouseY), engine);
                 }
                 setHover(true, engine);
-                hover(new GuiComponentEvent(mouseX, mouseY));
+                if (hovering) {
+                    hover(new GuiComponentHoverEvent(mouseX, mouseY,
+                            GuiComponentHoverEvent.State.HOVER));
+                } else {
+                    hover(new GuiComponentHoverEvent(mouseX, mouseY,
+                            GuiComponentHoverEvent.State.ENTER));
+                    hovering = true;
+                }
             } else {
                 resetHover(engine);
             }
@@ -242,6 +249,7 @@ public abstract class GuiComponent
     }
 
     protected void resetHover(ScapesEngine engine) {
+        hovering = false;
         setHover(false, engine);
         for (GuiComponent component : components) {
             component.resetHover(engine);

@@ -23,12 +23,13 @@ import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.opengl.texture.*;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
+import org.tobi29.scapes.engine.utils.io.FileUtil;
 import org.tobi29.scapes.plugins.PluginFile;
 import org.tobi29.scapes.server.format.WorldFormat;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,13 +47,16 @@ public class GuiSaveSelect extends GuiMenu {
                 new GuiComponentTextButton(112, 410, 176, 30, 18, "Create");
         create.addLeftClick(event -> {
             try {
-                Directory directory = state.getEngine().getFiles()
-                        .getDirectory("File:plugins");
-                List<File> files = directory.listFilesRecursive(
-                        file -> file.getName().endsWith(".jar"));
+                Path path = state.getEngine().getHome().resolve("plugins");
+                List<Path> files = new ArrayList<>();
+                for (Path file : Files.newDirectoryStream(path)) {
+                    if (Files.isRegularFile(file) && !Files.isHidden(file)) {
+                        files.add(file);
+                    }
+                }
                 List<PluginFile> worldTypes = new ArrayList<>();
                 List<PluginFile> plugins = new ArrayList<>();
-                for (File file : files) {
+                for (Path file : files) {
                     PluginFile plugin = new PluginFile(file);
                     if ("WorldType".equals(plugin.getParent())) {
                         worldTypes.add(plugin);
@@ -63,8 +67,10 @@ public class GuiSaveSelect extends GuiMenu {
                     state.add(new GuiMessage(state, this, "Error",
                             NO_WORLD_TYPE));
                 } else {
-                    state.add(new GuiCreateWorld(state, this, worldTypes,
-                            plugins));
+                    state.add(
+                            new GuiCreateWorld(state, this, worldTypes, plugins,
+                                    state.getEngine().getHome()
+                                            .resolve("saves")));
                 }
             } catch (IOException e) {
                 LOGGER.warn("Failed to read plugins: {}", e.toString());
@@ -77,17 +83,21 @@ public class GuiSaveSelect extends GuiMenu {
 
     public void updateSaves() {
         try {
-            Directory directory =
-                    state.getEngine().getFiles().getDirectory("File:saves");
+            Path path = state.getEngine().getHome().resolve("saves");
             scrollPane.removeAll();
-            for (Directory save : directory.listDirectories(dir -> dir.getName()
-                    .endsWith(WorldFormat.getFilenameExtension()))) {
-                Element element = null;
-                try {
-                    element = new Element(save);
-                    scrollPane.add(element);
-                } catch (IOException e) {
-                    LOGGER.error("Error reading save info: {}", e.toString());
+            for (Path directory : Files.newDirectoryStream(path)) {
+                if (Files.isDirectory(directory) &&
+                        !Files.isHidden(directory) &&
+                        directory.getFileName().toString()
+                                .endsWith(WorldFormat.getFilenameExtension())) {
+                    Element element = null;
+                    try {
+                        element = new Element(directory);
+                        scrollPane.add(element);
+                    } catch (IOException e) {
+                        LOGGER.error("Error reading save info: {}",
+                                e.toString());
+                    }
                 }
             }
         } catch (IOException e) {
@@ -98,36 +108,39 @@ public class GuiSaveSelect extends GuiMenu {
     private class Element extends GuiComponentPane {
         private final Texture texture;
 
-        public Element(Directory directory) throws IOException {
+        public Element(Path path) throws IOException {
             super(0, 0, 378, 70);
-            String filename = directory.getName();
+            String filename = path.getFileName().toString();
             GuiComponentTextButton label =
                     new GuiComponentTextButton(70, 20, 200, 30, 18,
                             filename.substring(0, filename.lastIndexOf('.')));
             label.addLeftClick(event -> state.getEngine().setState(
-                    new GameStateLoadSP(directory, state.getEngine(),
+                    new GameStateLoadSP(path, state.getEngine(),
                             (SceneMenu) state.getScene())));
             label.addHover(event -> {
-                try {
-                    ((SceneMenu) state.getScene()).changeBackground(directory);
-                } catch (IOException e) {
+                if (event.getState() == GuiComponentHoverEvent.State.ENTER) {
+                    try {
+                        ((SceneMenu) state.getScene()).changeBackground(path);
+                    } catch (IOException e) {
+                    }
                 }
             });
             GuiComponentTextButton delete =
                     new GuiComponentTextButton(280, 20, 60, 30, 18, "Delete");
             delete.addLeftClick(event -> {
                 try {
-                    directory.delete();
+                    FileUtil.deleteDir(path);
                     scrollPane.remove(this);
                 } catch (IOException e) {
                     LOGGER.warn("Failed to delete save: {}", e.toString());
                 }
             });
-            File thumbnailFile = directory.getResource("Panorama0.png");
-            if (thumbnailFile.exists()) {
-                texture = new TextureFile(thumbnailFile.read(), 0,
-                        TextureFilter.LINEAR, TextureFilter.LINEAR,
-                        TextureWrap.CLAMP, TextureWrap.CLAMP);
+            Path thumbnailPath = path.resolve("Panorama0.png");
+            if (Files.exists(thumbnailPath)) {
+                texture = FileUtil.readReturn(thumbnailPath,
+                        input -> new TextureFile(input, 0, TextureFilter.LINEAR,
+                                TextureFilter.LINEAR, TextureWrap.CLAMP,
+                                TextureWrap.CLAMP));
             } else {
                 texture = new TextureCustom(1, 1);
             }

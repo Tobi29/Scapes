@@ -33,7 +33,7 @@ public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
     public TerrainInfiniteChunkClient(Vector2i pos,
             TerrainInfiniteClient terrain, int zSize,
             TerrainInfiniteRenderer renderer) {
-        super(pos, terrain, terrain.getWorld(), zSize);
+        super(pos, terrain, terrain.world(), zSize);
         this.terrain = terrain;
         rendererChunk = new TerrainInfiniteRendererChunk(this, renderer);
     }
@@ -45,21 +45,13 @@ public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
     public void updateClient() {
         if (state.id < State.LOADED.id) {
             TerrainInfiniteClient terrainClient = terrain;
-            if (!requested && terrainClient.getRequestedChunks() < 2) {
+            if (!requested && terrainClient.getRequestedChunks() < 10) {
                 requested = true;
                 terrainClient.changeRequestedChunks(1);
-                terrain.getWorld().getConnection()
+                terrain.world().getConnection()
                         .send(new PacketRequestChunk(pos.intX(), pos.intY()));
             }
         }
-    }
-
-    public void disposeClient() {
-        disposed = true;
-    }
-
-    public boolean isDisposed() {
-        return disposed;
     }
 
     public void setLoaded() {
@@ -68,7 +60,7 @@ public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
 
     @Override
     public void update(int x, int y, int z, boolean updateTile) {
-        terrain.getTerrainRenderer()
+        terrain.renderer()
                 .blockChange(x + posBlock.intX(), y + posBlock.intY(), z);
         if (state.id >= State.LOADED.id) {
             terrain.getLighting()
@@ -77,16 +69,8 @@ public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
     }
 
     @Override
-    public void setSunLight(int x, int y, int z, int light) {
-        super.setSunLight(x, y, z, light);
-        terrain.getTerrainRenderer()
-                .blockChange(x + posBlock.intX(), y + posBlock.intY(), z);
-    }
-
-    @Override
-    public void setBlockLight(int x, int y, int z, int light) {
-        super.setBlockLight(x, y, z, light);
-        terrain.getTerrainRenderer()
+    public void updateLight(int x, int y, int z) {
+        terrain.renderer()
                 .blockChange(x + posBlock.intX(), y + posBlock.intY(), z);
     }
 
@@ -105,9 +89,9 @@ public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
         initHeightMap();
         for (TagStructure tag : tagStructure.getList("Entities")) {
             EntityClient entity =
-                    EntityClient.make(tag.getInteger("ID"), terrain.getWorld());
+                    EntityClient.make(tag.getInteger("ID"), terrain.world());
             entity.read(tag.getStructure("Data"));
-            terrain.getWorld().addEntity(entity, tag.getInteger("EntityID"));
+            terrain.world().addEntity(entity, tag.getInteger("EntityID"));
         }
         metaData = tagStructure.getStructure("MetaData");
         initHeightMap();

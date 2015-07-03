@@ -20,11 +20,11 @@ import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.Material;
 import org.tobi29.scapes.chunk.*;
-import org.tobi29.scapes.chunk.generator.ChunkGeneratorInfinite;
+import org.tobi29.scapes.chunk.generator.ChunkGenerator;
 import org.tobi29.scapes.chunk.generator.ChunkPopulator;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
-import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfinite;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteChunk;
+import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteServer;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
@@ -91,18 +91,18 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                 @Override
                 public boolean canSpawn(TerrainServer terrain, int x, int y,
                         int z) {
-                    if (terrain.getLight(x, y, z) < 7) {
-                        if (!terrain.getBlockType(x, y, z)
+                    if (terrain.light(x, y, z) < 7) {
+                        if (!terrain.type(x, y, z)
                                 .isSolid(terrain, x, y, z) &&
-                                terrain.getBlockType(x, y, z)
+                                terrain.type(x, y, z)
                                         .isTransparent(terrain, x, y, z) &&
-                                !terrain.getBlockType(x, y, z + 1)
+                                !terrain.type(x, y, z + 1)
                                         .isSolid(terrain, x, y, z + 1) &&
-                                terrain.getBlockType(x, y, z + 1)
+                                terrain.type(x, y, z + 1)
                                         .isTransparent(terrain, x, y, z + 1) &&
-                                terrain.getBlockType(x, y, z - 1)
+                                terrain.type(x, y, z - 1)
                                         .isSolid(terrain, x, y, z - 1) &&
-                                !terrain.getBlockType(x, y, z - 1)
+                                !terrain.type(x, y, z - 1)
                                         .isTransparent(terrain, x, y, z - 1)) {
                             return true;
                         }
@@ -114,7 +114,7 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                 public MobServer spawn(TerrainServer terrain, int x, int y,
                         int z) {
                     Random random = ThreadLocalRandom.current();
-                    return new MobZombieServer(terrain.getWorld(),
+                    return new MobZombieServer(terrain.world(),
                             new Vector3d(x + 0.5d, y + 0.5d, z + 1.0d),
                             Vector3d.ZERO, 0.0d, random.nextDouble() * 360.0d);
                 }
@@ -143,18 +143,18 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                 @Override
                 public boolean canSpawn(TerrainServer terrain, int x, int y,
                         int z) {
-                    if (terrain.getLight(x, y, z) < 7) {
-                        if (!terrain.getBlockType(x, y, z)
+                    if (terrain.light(x, y, z) < 7) {
+                        if (!terrain.type(x, y, z)
                                 .isSolid(terrain, x, y, z) &&
-                                terrain.getBlockType(x, y, z)
+                                terrain.type(x, y, z)
                                         .isTransparent(terrain, x, y, z) &&
-                                !terrain.getBlockType(x, y, z + 1)
+                                !terrain.type(x, y, z + 1)
                                         .isSolid(terrain, x, y, z + 1) &&
-                                terrain.getBlockType(x, y, z + 1)
+                                terrain.type(x, y, z + 1)
                                         .isTransparent(terrain, x, y, z + 1) &&
-                                terrain.getBlockType(x, y, z - 1)
+                                terrain.type(x, y, z - 1)
                                         .isSolid(terrain, x, y, z - 1) &&
-                                !terrain.getBlockType(x, y, z - 1)
+                                !terrain.type(x, y, z - 1)
                                         .isTransparent(terrain, x, y, z - 1)) {
                             return true;
                         }
@@ -166,7 +166,7 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                 public MobServer spawn(TerrainServer terrain, int x, int y,
                         int z) {
                     Random random = ThreadLocalRandom.current();
-                    return new MobSkeletonServer(terrain.getWorld(),
+                    return new MobSkeletonServer(terrain.world(),
                             new Vector3d(x + 0.5d, y + 0.5d, z + 1.0d),
                             Vector3d.ZERO, 0, random.nextDouble() * 360.0d);
                 }
@@ -195,12 +195,12 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                 @Override
                 public boolean canSpawn(TerrainServer terrain, int x, int y,
                         int z) {
-                    if (terrain.getLight(x, y, z) >= 7) {
-                        if (!terrain.getBlockType(x, y, z)
+                    if (terrain.light(x, y, z) >= 7) {
+                        if (!terrain.type(x, y, z)
                                 .isSolid(terrain, x, y, z) &&
-                                terrain.getBlockType(x, y, z)
+                                terrain.type(x, y, z)
                                         .isTransparent(terrain, x, y, z) &&
-                                terrain.getBlockType(x, y, z - 1) ==
+                                terrain.type(x, y, z - 1) ==
                                         materials.grass) {
                             return true;
                         }
@@ -212,7 +212,7 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                 public MobServer spawn(TerrainServer terrain, int x, int y,
                         int z) {
                     Random random = ThreadLocalRandom.current();
-                    return new MobPigServer(terrain.getWorld(),
+                    return new MobPigServer(terrain.world(),
                             new Vector3d(x + 0.5, y + 0.5, z + 0.6875),
                             Vector3d.ZERO, 0, random.nextDouble() * 360.0d);
                 }
@@ -284,7 +284,7 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
     }
 
     @Override
-    public ChunkGeneratorInfinite getGenerator() {
+    public ChunkGenerator getGenerator() {
         return gen;
     }
 
@@ -471,32 +471,35 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                 if (simulationCount >= Long.MAX_VALUE - 10) {
                     simulationCount = 0;
                 }
-                for (TerrainInfiniteChunk chunk : ((TerrainInfinite) worldServer
-                        .getTerrain()).getLoadedChunks()) {
+                TerrainInfiniteServer terrain =
+                        (TerrainInfiniteServer) worldServer.getTerrain();
+                for (TerrainInfiniteChunk chunk : terrain.getLoadedChunks()) {
                     Random random = ThreadLocalRandom.current();
                     if (chunk.isLoaded()) {
-                        simulateSeason(chunk);
+                        simulateSeason(terrain, chunk.getBlockX(),
+                                chunk.getBlockY(), 16, 16,
+                                chunk.getMetaData("Vanilla"));
                     }
                     int x = random.nextInt(16);
                     int y = random.nextInt(16);
                     double weather = climateGenerator
-                            .getWeather(x + (chunk.getX() << 4),
-                                    y + (chunk.getY() << 4));
+                            .getWeather(x + chunk.getBlockX(),
+                                    y + chunk.getBlockY());
                     if (random.nextInt((int) (513 - weather * 512)) == 0 &&
                             random.nextInt(1000) == 0 &&
                             weather > 0.7f) {
-                        world.getConnection().send(new PacketLightning(
-                                (chunk.getX() << 4) + x,
-                                (chunk.getY() << 4) + y,
-                                chunk.getHighestTerrainBlockZAt(x, y)));
+                        world.getConnection()
+                                .send(new PacketLightning(chunk.getBlockX() + x,
+                                        chunk.getBlockY() + y,
+                                        chunk.getHighestTerrainBlockZAt(x, y)));
                     } else if (
                             random.nextInt((int) (513 - weather * 512)) == 0 &&
                                     random.nextInt(10000) == 0 &&
                                     weather > 0.85f) {
                         EntityServer entity =
                                 new EntityTornadoServer(worldServer,
-                                        new Vector3d((chunk.getX() << 4) + x,
-                                                (chunk.getY() << 4) + y,
+                                        new Vector3d(chunk.getBlockX() + x,
+                                                chunk.getBlockY() + y,
                                                 chunk.getHighestTerrainBlockZAt(
                                                         x, y)));
                         entity.onSpawn();
@@ -532,9 +535,9 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                 world);
     }
 
-    public void simulateSeason(TerrainInfiniteChunk chunk) {
-        long chunkSimulationCount =
-                chunk.getMetaData("Vanilla").getLong("SimulationCount");
+    public void simulateSeason(TerrainServer.TerrainMutable terrain, int x,
+            int y, int dx, int dy, TagStructure tagStructure) {
+        long chunkSimulationCount = tagStructure.getLong("SimulationCount");
         int count;
         if (chunkSimulationCount <= 0) {
             count = 1;
@@ -546,82 +549,77 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
             }
             count = FastMath.max(10240 / (int) delta, 1);
         }
-        chunk.getMetaData("Vanilla")
-                .setLong("SimulationCount", simulationCount);
-        simulateSeason(chunk, count);
+        tagStructure.setLong("SimulationCount", simulationCount);
+        simulateSeason(terrain, x, y, dx, dy, count);
     }
 
-    private void simulateSeason(TerrainInfiniteChunk chunk, int chance) {
+    private void simulateSeason(TerrainServer.TerrainMutable chunk, int x,
+            int y, int dx, int dy, int chance) {
         Random random = ThreadLocalRandom.current();
-        int sx = chunk.getX() << 4;
-        int sy = chunk.getY() << 4;
-        double humidity00 = climateGenerator.getHumidity(sx, sy);
-        double temperature00 = climateGenerator.getTemperature(sx, sy);
-        double humidity10 = climateGenerator.getHumidity(sx + 15, sy);
-        double temperature10 = climateGenerator.getTemperature(sx + 15, sy);
-        double humidity01 = climateGenerator.getHumidity(sx, sy + 15);
-        double temperature01 = climateGenerator.getTemperature(sx, sy + 15);
-        double humidity11 = climateGenerator.getHumidity(sx + 15, sy + 15);
-        double temperature11 =
-                climateGenerator.getTemperature(sx + 15, sy + 15);
-        for (int y = 0; y < 16; y++) {
-            double mixY = y / 15.0;
+        double humidity00 = climateGenerator.getHumidity(x, y);
+        double temperature00 = climateGenerator.getTemperature(x, y);
+        double humidity10 = climateGenerator.getHumidity(x + 15, y);
+        double temperature10 = climateGenerator.getTemperature(x + 15, y);
+        double humidity01 = climateGenerator.getHumidity(x, y + 15);
+        double temperature01 = climateGenerator.getTemperature(x, y + 15);
+        double humidity11 = climateGenerator.getHumidity(x + 15, y + 15);
+        double temperature11 = climateGenerator.getTemperature(x + 15, y + 15);
+        for (int yy = 0; yy < dx; yy++) {
+            int yyy = yy + y;
+            double mixY = yy / 15.0;
             double humidity0 = FastMath.mix(humidity00, humidity01, mixY);
             double humidity1 = FastMath.mix(humidity10, humidity11, mixY);
             double temperature0 =
                     FastMath.mix(temperature00, temperature01, mixY);
             double temperature1 =
                     FastMath.mix(temperature10, temperature11, mixY);
-            for (int x = 0; x < 16; x++) {
+            for (int xx = 0; xx < dy; xx++) {
                 if (random.nextInt(chance) == 0) {
-                    int z = chunk.getHighestTerrainBlockZAt(x, y);
-                    double mixX = x / 15.0;
+                    int xxx = xx + x;
+                    int z = chunk.getHighestTerrainBlockZAt(xxx, yyy);
+                    double mixX = xx / 15.0;
                     double humidity = FastMath.mix(humidity0, humidity1, mixX);
                     double temperature = climateGenerator.getTemperatureD(
                             FastMath.mix(temperature0, temperature1, mixX), z);
-                    BlockType spaceType = chunk.getBlockType(x, y, z);
-                    BlockType groundType = chunk.getBlockType(x, y, z - 1);
+                    BlockType spaceType = chunk.type(xxx, yyy, z);
+                    BlockType groundType = chunk.type(xxx, yyy, z - 1);
                     if (humidity > 0.2) {
                         if (groundType == materials.dirt) {
-                            chunk.setBlockIdAndData(x, y, z - 1,
-                                    materials.grass, (short) random.nextInt(9));
+                            chunk.typeData(xxx, yyy, z - 1, materials.grass,
+                                    (short) random.nextInt(9));
                         } else if (groundType == materials.grass) {
-                            chunk.setBlockData(x, y, z - 1,
+                            chunk.data(xxx, yyy, z - 1,
                                     (short) random.nextInt(9));
                         }
                     } else {
                         if (groundType == materials.grass) {
-                            chunk.setBlockIdAndData(x, y, z - 1, materials.dirt,
+                            chunk.typeData(xxx, yyy, z - 1, materials.dirt,
                                     (short) 0);
                         }
                     }
                     if (temperature > 1.0) {
                         if (spaceType == materials.snow) {
-                            if (chunk.getBlockData(x, y, z) < 8) {
-                                chunk.setBlockData(x, y, z,
-                                        (short) (chunk.getBlockData(x, y, z) +
-                                                1));
+                            if (chunk.data(xxx, yyy, z) < 8) {
+                                chunk.data(xxx, yyy, z,
+                                        (short) (chunk.data(xxx, yyy, z) + 1));
                             } else {
-                                chunk.setBlockIdAndData(x, y, z, materials.air,
+                                chunk.typeData(xxx, yyy, z, materials.air,
                                         (short) 0);
                             }
                         }
                     } else {
-                        double weather = climateGenerator
-                                .getWeather(x + (chunk.getX() << 4),
-                                        y + (chunk.getY() << 4));
+                        double weather = climateGenerator.getWeather(xxx, yyy);
                         if (temperature < 0.0 &&
                                 (weather > 0.5 || chance == 1)) {
                             if (spaceType == materials.air ||
                                     spaceType == materials.flower ||
                                     spaceType == materials.stoneRock) {
-                                chunk.setBlockIdAndData(x, y, z, materials.snow,
+                                chunk.typeData(xxx, yyy, z, materials.snow,
                                         (short) 8);
                             } else if (spaceType == materials.snow &&
-                                    chunk.getBlockData(x, y, z) > 0) {
-                                chunk.setBlockData(x, y, z,
-                                        (short) (chunk.getBlockData(x, y, z) -
-                                                1));
+                                    chunk.data(xxx, yyy, z) > 0) {
+                                chunk.data(xxx, yyy, z,
+                                        (short) (chunk.data(xxx, yyy, z) - 1));
                             }
                         }
                     }

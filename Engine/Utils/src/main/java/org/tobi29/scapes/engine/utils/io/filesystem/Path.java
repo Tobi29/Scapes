@@ -16,12 +16,6 @@
 
 package org.tobi29.scapes.engine.utils.io.filesystem;
 
-import java.io.IOException;
-
 public interface Path {
-    String getID();
-
-    Path get(String path) throws IOException;
-
-    Resource getResource(String path) throws IOException;
+    Resource get(String path);
 }

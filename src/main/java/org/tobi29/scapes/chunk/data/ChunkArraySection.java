@@ -21,13 +21,13 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import java.util.Optional;
 
 public interface ChunkArraySection {
-    int getData(int x, int y, int z, int offset);
+    int data(int x, int y, int z, int offset);
 
-    int getData(int offset);
+    int data(int offset);
 
-    void setData(int x, int y, int z, int offset, int value);
+    void data(int x, int y, int z, int offset, int value);
 
-    void setData(int offset, int value);
+    void data(int offset, int value);
 
     boolean isEmpty();
 

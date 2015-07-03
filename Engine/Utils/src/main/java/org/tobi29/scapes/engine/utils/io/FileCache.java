@@ -20,12 +20,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.utils.ArrayUtil;
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
@@ -39,7 +38,7 @@ import java.util.UUID;
 public class FileCache {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(FileCache.class);
-    private final Directory root, temp;
+    private final Path root, temp;
     private final Duration time;
 
     /**
@@ -47,7 +46,7 @@ public class FileCache {
      *
      * @param root The root directory that the cache will be saved into, will be created if it doesn't exist
      */
-    public FileCache(Directory root, Directory temp) throws IOException {
+    public FileCache(Path root, Path temp) throws IOException {
         this(root, temp, Duration.ofDays(16));
     }
 
@@ -57,10 +56,9 @@ public class FileCache {
      * @param root The root directory that the cache will be saved into, will be created if it doesn't exist
      * @param time Time until a file will be treated as old and is deleted on {@linkplain #check()}
      */
-    public FileCache(Directory root, Directory temp, Duration time)
-            throws IOException {
-        root.make();
-        temp.make();
+    public FileCache(Path root, Path temp, Duration time) throws IOException {
+        Files.createDirectories(root);
+        Files.createDirectories(temp);
         this.root = root;
         this.temp = temp;
         this.time = time;
@@ -69,30 +67,37 @@ public class FileCache {
     /**
      * Reads the given {@code InputStream} and write its data into a file in the cache
      *
-     * @param streamIn {@code InputStream} that will be read until it ends and will be closed
-     * @param type     The type of data that will be stored, to organize the cache
+     * @param input {@code InputStream} that will be read until it ends and will be closed
+     * @param type  The type of data that will be stored, to organize the cache
      * @return A {@code FileCacheLocation} to later access the stored data, containing the checksum of the written file
      * @throws IOException If an I/O error occurred
      */
-    public synchronized Location store(InputStream streamIn, String type)
+    public synchronized Location store(ReadableByteStream input, String type)
             throws IOException {
-        Directory parent = root.get(type);
-        parent.make();
-        File write = temp.getResource(UUID.randomUUID().toString());
-        try (OutputStream streamOut = write.write()) {
-            MessageDigest digest = MessageDigest.getInstance(
-                    ChecksumUtil.ChecksumAlgorithm.SHA256.getName());
-            ProcessStream.process(streamIn, (buffer, offset, length) -> {
-                digest.update(buffer, offset, length);
-                streamOut.write(buffer, offset, length);
-            });
-            byte[] array = digest.digest();
-            String name = ArrayUtil.toHexadecimal(array);
-            write.move(getFile(type, name));
-            return new Location(type, array);
-        } catch (NoSuchAlgorithmException e) {
-            throw new UnsupportedJVMException(e);
+        Path parent = root.resolve(type);
+        Files.createDirectories(parent);
+        Path write = temp.resolve(UUID.randomUUID().toString());
+        byte[] checksum = FileUtil.writeReturn(write, output -> {
+            try {
+                MessageDigest digest = MessageDigest.getInstance(
+                        ChecksumUtil.ChecksumAlgorithm.SHA256.getName());
+                ProcessStream.process(input, buffer -> {
+                    digest.update(buffer);
+                    buffer.rewind();
+                    output.put(buffer);
+                });
+                return digest.digest();
+            } catch (NoSuchAlgorithmException e) {
+                throw new UnsupportedJVMException(e);
+            }
+        });
+        String name = ArrayUtil.toHexadecimal(checksum);
+        try {
+            Files.move(write, parent.resolve(name));
+        } catch (IOException e) {
+            LOGGER.warn("Failed to move output file into cache directory");
         }
+        return new Location(type, checksum);
     }
 
     /**
@@ -101,12 +106,12 @@ public class FileCache {
      * @param location The location that will be looked up
      * @return A {@code File} pointing at the file in cache or null if the cache doesn't contain a matching file
      */
-    public synchronized Optional<File> retrieve(Location location)
+    public synchronized Optional<Path> retrieve(Location location)
             throws IOException {
         String name = ArrayUtil.toHexadecimal(location.array);
-        File file = getFile(location.type, name);
-        if (file.exists()) {
-            file.getAttributes().setLastModifiedTime(Instant.now());
+        Path file = getFile(location.type, name);
+        if (Files.exists(file)) {
+            Files.setLastModifiedTime(file, FileTime.from(Instant.now()));
             return Optional.of(file);
         }
         return Optional.empty();
@@ -119,10 +124,8 @@ public class FileCache {
      */
     public synchronized void delete(Location location) throws IOException {
         String name = ArrayUtil.toHexadecimal(location.array);
-        File file = getFile(location.type, name);
-        if (file != null) {
-            file.delete();
-        }
+        Path file = getFile(location.type, name);
+        Files.deleteIfExists(file);
     }
 
     /**
@@ -131,7 +134,7 @@ public class FileCache {
      * @param type The name of the type that will be removed
      */
     public synchronized void delete(String type) throws IOException {
-        root.get(type).delete();
+        FileUtil.deleteDir(root.resolve(type));
     }
 
     /**
@@ -139,19 +142,22 @@ public class FileCache {
      */
     public synchronized void check() throws IOException {
         Instant currentTime = Instant.now().minus(time);
-        for (Directory type : root.listDirectories()) {
-            for (File file : type.listFiles()) {
-                if (file.getAttributes().getLastModifiedTime()
-                        .isBefore(currentTime)) {
-                    file.delete();
-                    LOGGER.debug("Deleted old cache entry: {}", file);
+        for (Path directory : Files.newDirectoryStream(root)) {
+            if (Files.isDirectory(directory) && !Files.isHidden(directory)) {
+                for (Path file : Files.newDirectoryStream(directory)) {
+                    if (Files.isRegularFile(file) && !Files.isHidden(file) &&
+                            Files.getLastModifiedTime(file).toInstant()
+                                    .isBefore(currentTime)) {
+                        Files.delete(file);
+                        LOGGER.debug("Deleted old cache entry: {}", file);
+                    }
                 }
             }
         }
     }
 
-    private File getFile(String type, String name) throws IOException {
-        return root.getResource(type + '/' + name);
+    private Path getFile(String type, String name) {
+        return root.resolve(type + '/' + name);
     }
 
     /**

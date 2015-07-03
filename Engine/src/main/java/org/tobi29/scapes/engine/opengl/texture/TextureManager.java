@@ -16,8 +16,6 @@
 
 package org.tobi29.scapes.engine.opengl.texture;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.GraphicsSystem;
 import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
@@ -31,8 +29,6 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TextureManager {
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(TextureManager.class);
     private final ScapesEngine engine;
     private final Map<String, TextureAsset> cache = new ConcurrentHashMap<>();
     private final Texture empty;
@@ -77,14 +73,13 @@ public class TextureManager {
         try {
             Properties properties = new Properties();
             FileSystemContainer files = engine.getFiles();
-            Resource imageResource = files.getResource(asset + ".png");
-            Resource propertiesResource =
-                    files.getResource(asset + ".properties");
+            Resource imageResource = files.get(asset + ".png");
+            Resource propertiesResource = files.get(asset + ".properties");
             if (propertiesResource.exists()) {
-                properties.load(propertiesResource.read());
+                properties.load(propertiesResource.readIO());
             }
             TextureAsset texture =
-                    new TextureAsset(imageResource.read(), properties);
+                    new TextureAsset(imageResource.readIO(), properties);
             cache.put(asset, texture);
         } catch (IOException e) {
             engine.crash(e);

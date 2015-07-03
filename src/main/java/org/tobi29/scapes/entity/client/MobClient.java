@@ -129,7 +129,7 @@ public abstract class MobClient extends EntityClient implements MobileEntity {
     }
 
     public void move(double delta) {
-        headInWater = world.getTerrain().getBlockType(pos.intX(), pos.intY(),
+        headInWater = world.getTerrain().type(pos.intX(), pos.intY(),
                 FastMath.floor(pos.doubleZ() + 0.7)).isLiquid();
     }
 }

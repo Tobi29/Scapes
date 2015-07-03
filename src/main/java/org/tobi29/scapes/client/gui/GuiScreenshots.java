@@ -24,11 +24,13 @@ import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
 import org.tobi29.scapes.engine.opengl.texture.TextureFile;
 import org.tobi29.scapes.engine.utils.Pair;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
+import org.tobi29.scapes.engine.utils.io.FileUtil;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -47,11 +49,15 @@ public class GuiScreenshots extends GuiMenu {
         pane.add(scrollPane);
         joiner = state.getEngine().getTaskExecutor().runTask(joiner -> {
             try {
-                Directory directory = state.getEngine().getFiles()
-                        .getDirectory("File:screenshots");
-                List<File> files = directory
-                        .listFiles(file -> file.getName().endsWith(".png"));
-                Collections.sort(files, Comparator.comparing(File::getName));
+                Path path = state.getEngine().getHome().resolve("screenshots");
+                List<Path> files = new ArrayList<>();
+                for (Path file : Files.newDirectoryStream(path)) {
+                    if (Files.isRegularFile(file) && !Files.isHidden(file)) {
+                        files.add(file);
+                    }
+                }
+                Collections
+                        .sort(files, Comparator.comparing(Path::getFileName));
                 for (int i = 0; i < files.size() && !joiner.marked(); i++) {
                     scrollPane.add(new Element(files.get(i), this));
                 }
@@ -64,11 +70,12 @@ public class GuiScreenshots extends GuiMenu {
 
     private class Element extends GuiComponentPane {
         @SuppressWarnings("unchecked")
-        public Element(File file, GuiScreenshots gui) {
+        public Element(Path path, GuiScreenshots gui) {
             super(0, 0, 378, 70);
             Texture textureLoad = null;
             try {
-                textureLoad = new TextureFile(file.read(), 0);
+                textureLoad = FileUtil.readReturn(path,
+                        stream -> new TextureFile(stream, 0));
             } catch (IOException e) {
                 LOGGER.warn("Failed to load screenshot: {}", e.toString());
                 textureLoad = new TextureCustom(1, 1);
@@ -85,7 +92,7 @@ public class GuiScreenshots extends GuiMenu {
             label.addLeftClick(event -> {
                 try {
                     state.getEngine().getGraphics().getContainer()
-                            .exportToUser(file, new Pair[]{
+                            .exportToUser(path, new Pair[]{
                                             new Pair<>("*.png", "PNG Picture")},
                                     "Export screenshot");
                 } catch (IOException e) {
@@ -97,7 +104,7 @@ public class GuiScreenshots extends GuiMenu {
                     new GuiComponentTextButton(180, 20, 100, 30, 18, "Delete");
             edit.addLeftClick(event -> {
                 try {
-                    file.delete();
+                    Files.delete(path);
                     scrollPane.remove(this);
                 } catch (IOException e) {
                     LOGGER.warn("Failed to delete screenshot: {}",

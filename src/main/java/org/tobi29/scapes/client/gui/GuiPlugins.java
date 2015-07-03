@@ -19,39 +19,33 @@ package org.tobi29.scapes.client.gui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.ScapesEngineException;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.opengl.texture.*;
 import org.tobi29.scapes.engine.utils.Pair;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
 import org.tobi29.scapes.plugins.PluginFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.zip.ZipFile;
 
 public class GuiPlugins extends GuiMenu {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GuiPlugins.class);
-    private final Directory directory;
+    private final Path path;
     private final GuiComponentScrollPaneList scrollPane;
 
     @SuppressWarnings("unchecked")
     public GuiPlugins(GameState state, Gui previous) {
         super(state, "Plugins", previous);
-        try {
-            directory =
-                    state.getEngine().getFiles().getDirectory("File:plugins");
-        } catch (IOException e) {
-            throw new ScapesEngineException("Failed to load plugins", e);
-        }
+        path = state.getEngine().getHome().resolve("plugins");
         scrollPane = new GuiComponentScrollPaneList(16, 80, 368, 250, 70);
         GuiComponentTextButton add =
                 new GuiComponentTextButton(112, 370, 176, 30, 18, "Add");
         add.addLeftClick(event -> {
             try {
                 state.getEngine().getGraphics().getContainer()
-                        .importFromUser(directory,
+                        .importFromUser(path,
                                 new Pair[]{new Pair<>("*.jar", "Jar Archive")},
                                 "Import plugin", true);
                 updatePlugins();
@@ -67,9 +61,10 @@ public class GuiPlugins extends GuiMenu {
     private void updatePlugins() {
         try {
             scrollPane.removeAll();
-            for (File plugin : directory.listFilesRecursive(
-                    file -> file.getName().endsWith(".jar"))) {
-                scrollPane.add(new Element(plugin));
+            for (Path file : Files.newDirectoryStream(path)) {
+                if (Files.isRegularFile(file) && !Files.isHidden(file)) {
+                    scrollPane.add(new Element(file));
+                }
             }
         } catch (IOException e) {
             LOGGER.warn("Failed to read plugins: {}", e.toString());
@@ -79,10 +74,10 @@ public class GuiPlugins extends GuiMenu {
     private class Element extends GuiComponentPane {
         private Texture texture;
 
-        public Element(File file) throws IOException {
+        public Element(Path path) throws IOException {
             super(0, 0, 378, 70);
-            PluginFile plugin = new PluginFile(file);
-            try (ZipFile zip = file.readZIP()) {
+            PluginFile plugin = new PluginFile(path);
+            try (ZipFile zip = new ZipFile(path.toFile())) {
                 texture = new TextureFile(
                         zip.getInputStream(zip.getEntry("Icon.png")), 0,
                         TextureFilter.LINEAR, TextureFilter.LINEAR,
@@ -97,7 +92,7 @@ public class GuiPlugins extends GuiMenu {
                     new GuiComponentTextButton(250, 20, 100, 30, 18, "Delete");
             delete.addLeftClick(event -> {
                 try {
-                    file.delete();
+                    Files.delete(path);
                     scrollPane.remove(this);
                 } catch (IOException e) {
                     LOGGER.warn("Failed to delete plugin: {}", e.toString());

@@ -50,17 +50,17 @@ public class BlockFurnace extends VanillaBlockContainer {
     @Override
     protected EntityContainerServer placeEntity(TerrainServer terrain, int x,
             int y, int z) {
-        EntityFurnaceServer entity = new EntityFurnaceServer(terrain.getWorld(),
+        EntityFurnaceServer entity = new EntityFurnaceServer(terrain.world(),
                 new Vector3d(x + 0.5, y + 0.5, z + 0.5));
         entity.onSpawn();
-        terrain.getWorld().addEntity(entity);
+        terrain.world().addEntity(entity);
         return entity;
     }
 
     @Override
     public boolean place(TerrainServer.TerrainMutable terrain, int x, int y,
             int z, Face face, MobPlayerServer player) {
-        terrain.setBlockData(x, y, z, face.getData());
+        terrain.data(x, y, z, face.getData());
         return true;
     }
 
@@ -87,7 +87,7 @@ public class BlockFurnace extends VanillaBlockContainer {
 
     @Override
     public byte lightEmit(Terrain terrain, int x, int y, int z) {
-        return terrain.getBlockData(x, y, z) > 0 ? (byte) 15 : 0;
+        return terrain.data(x, y, z) > 0 ? (byte) 15 : 0;
     }
 
     @Override

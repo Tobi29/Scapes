@@ -50,11 +50,10 @@ public class BlockBloomery extends VanillaBlockContainer {
     @Override
     protected EntityContainerServer placeEntity(TerrainServer terrain, int x,
             int y, int z) {
-        EntityBloomeryServer entity =
-                new EntityBloomeryServer(terrain.getWorld(),
+        EntityBloomeryServer entity = new EntityBloomeryServer(terrain.world(),
                         new Vector3d(x + 0.5, y + 0.5, z + 0.5));
         entity.onSpawn();
-        terrain.getWorld().addEntity(entity);
+        terrain.world().addEntity(entity);
         entity.updateBellows(terrain);
         return entity;
     }
@@ -101,7 +100,7 @@ public class BlockBloomery extends VanillaBlockContainer {
     @Override
     public void update(TerrainServer.TerrainMutable terrain, int x, int y,
             int z) {
-        terrain.getWorld().getEntities(x, y, z).stream()
+        terrain.world().getEntities(x, y, z).stream()
                 .filter(entity -> entity instanceof EntityBloomeryServer)
                 .forEach(entity -> ((EntityBloomeryServer) entity)
                         .updateBellows(terrain));

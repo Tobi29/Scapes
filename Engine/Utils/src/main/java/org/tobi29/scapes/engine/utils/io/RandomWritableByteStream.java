@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.io.filesystem.classpath;
+package org.tobi29.scapes.engine.utils.io;
 
-import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
-import org.tobi29.scapes.engine.utils.io.filesystem.PathRoot;
+public interface RandomWritableByteStream extends WritableByteStream {
+    int position();
 
-public class ClasspathPathRoot extends ClasspathPath implements PathRoot {
-    public ClasspathPathRoot(ClassLoader classLoader, String id, String path) {
-        super(classLoader, id, path);
-    }
-
-    public static FileSystemContainer.PathRootCreatorWithPath make(
-            ClassLoader classLoader) {
-        return (id, path) -> new ClasspathPathRoot(classLoader, id, path);
-    }
+    WritableByteStream position(int pos);
 }

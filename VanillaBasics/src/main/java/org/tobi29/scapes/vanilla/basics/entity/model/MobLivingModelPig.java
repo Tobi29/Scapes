@@ -24,6 +24,7 @@ import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
+import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3;
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d;
@@ -64,8 +65,17 @@ public class MobLivingModelPig implements MobModel {
     }
 
     @Override
-    public void renderUpdate(GraphicsSystem graphics, WorldClient world,
-            double delta) {
+    public void shapeAABB(AABB aabb) {
+        aabb.minX = pos.doubleX() - 0.75;
+        aabb.minY = pos.doubleY() - 0.75;
+        aabb.minZ = pos.doubleZ() - 0.45;
+        aabb.maxX = pos.doubleX() + 0.75;
+        aabb.maxY = pos.doubleY() + 0.75;
+        aabb.maxZ = pos.doubleZ() + 0.7;
+    }
+
+    @Override
+    public void renderUpdate(double delta) {
         double factorPos = FastMath.min(1.0, delta * 10.0);
         double factorRot = FastMath.min(1.0, delta * 20.0);
         double factorSpeed = FastMath.min(1.0, delta * 5.0);
@@ -93,9 +103,9 @@ public class MobLivingModelPig implements MobModel {
         double swingDir = FastMath.cosTable(swing) * moveSpeedRender * 0.5;
         OpenGL openGL = graphics.getOpenGL();
         openGL.setAttribute2f(4, world.getTerrain()
-                        .getBlockLight(pos.intX(), pos.intY(), pos.intZ()) /
-                        15.0f, world.getTerrain()
-                        .getSunLight(pos.intX(), pos.intY(), pos.intZ()) /
+                        .blockLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f,
+                world.getTerrain()
+                        .sunLight(pos.intX(), pos.intY(), pos.intZ()) /
                         15.0f);
         texture.bind(graphics);
         MatrixStack matrixStack = graphics.getMatrixStack();

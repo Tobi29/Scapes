@@ -59,36 +59,35 @@ public class LightingEngineThreaded
             for (MutableVector3 update : updates) {
                 if (terrain.isBlockLoaded(update.intX(), update.intY(),
                         update.intZ())) {
-                    BlockType type =
-                            terrain.getBlockType(update.intX(), update.intY(),
+                    BlockType type = terrain.type(update.intX(), update.intY(),
                                     update.intZ());
                     byte lightTrough = type.lightTrough(terrain, update.intX(),
                             update.intY(), update.intZ());
                     byte light = type.lightEmit(terrain, update.intX(),
                             update.intY(), update.intZ());
                     light = (byte) FastMath.max(terrain
-                            .getBlockLight(update.intX() - 1, update.intY(),
+                            .blockLight(update.intX() - 1, update.intY(),
                                     update.intZ()) + lightTrough, light);
                     light = (byte) FastMath.max(terrain
-                            .getBlockLight(update.intX() + 1, update.intY(),
+                            .blockLight(update.intX() + 1, update.intY(),
                                     update.intZ()) + lightTrough, light);
                     light = (byte) FastMath.max(terrain
-                            .getBlockLight(update.intX(), update.intY() - 1,
+                            .blockLight(update.intX(), update.intY() - 1,
                                     update.intZ()) + lightTrough, light);
                     light = (byte) FastMath.max(terrain
-                            .getBlockLight(update.intX(), update.intY() + 1,
+                            .blockLight(update.intX(), update.intY() + 1,
                                     update.intZ()) + lightTrough, light);
                     light = (byte) FastMath.max(terrain
-                            .getBlockLight(update.intX(), update.intY(),
+                            .blockLight(update.intX(), update.intY(),
                                     update.intZ() - 1) + lightTrough, light);
                     light = (byte) FastMath.max(terrain
-                            .getBlockLight(update.intX(), update.intY(),
+                            .blockLight(update.intX(), update.intY(),
                                     update.intZ() + 1) + lightTrough, light);
                     light = FastMath.clamp(light, (byte) 0, (byte) 15);
                     if (light !=
-                            terrain.getBlockLight(update.intX(), update.intY(),
+                            terrain.blockLight(update.intX(), update.intY(),
                                     update.intZ())) {
-                        terrain.setBlockLight(update.intX(), update.intY(),
+                        terrain.blockLight(update.intX(), update.intY(),
                                 update.intZ(), light);
                         newUpdates.push().set(update.intX() - 1, update.intY(),
                                 update.intZ());
@@ -119,36 +118,34 @@ public class LightingEngineThreaded
             for (MutableVector3 update : updates) {
                 if (terrain.isBlockLoaded(update.intX(), update.intY(),
                         update.intZ())) {
-                    BlockType type =
-                            terrain.getBlockType(update.intX(), update.intY(),
+                    BlockType type = terrain.type(update.intX(), update.intY(),
                                     update.intZ());
                     byte lightTrough = type.lightTrough(terrain, update.intX(),
                             update.intY(), update.intZ());
                     byte light = calcSunLightAt(update.intX(), update.intY(),
                             update.intZ());
                     light = (byte) FastMath.max(terrain
-                            .getSunLight(update.intX() - 1, update.intY(),
+                            .sunLight(update.intX() - 1, update.intY(),
                                     update.intZ()) + lightTrough, light);
                     light = (byte) FastMath.max(terrain
-                            .getSunLight(update.intX() + 1, update.intY(),
+                            .sunLight(update.intX() + 1, update.intY(),
                                     update.intZ()) + lightTrough, light);
                     light = (byte) FastMath.max(terrain
-                            .getSunLight(update.intX(), update.intY() - 1,
+                            .sunLight(update.intX(), update.intY() - 1,
                                     update.intZ()) + lightTrough, light);
                     light = (byte) FastMath.max(terrain
-                            .getSunLight(update.intX(), update.intY() + 1,
+                            .sunLight(update.intX(), update.intY() + 1,
                                     update.intZ()) + lightTrough, light);
                     light = (byte) FastMath.max(terrain
-                            .getSunLight(update.intX(), update.intY(),
+                            .sunLight(update.intX(), update.intY(),
                                     update.intZ() - 1) + lightTrough, light);
                     light = (byte) FastMath.max(terrain
-                            .getSunLight(update.intX(), update.intY(),
+                            .sunLight(update.intX(), update.intY(),
                                     update.intZ() + 1) + lightTrough, light);
                     light = FastMath.clamp(light, (byte) 0, (byte) 15);
-                    if (light !=
-                            terrain.getSunLight(update.intX(), update.intY(),
+                    if (light != terrain.sunLight(update.intX(), update.intY(),
                                     update.intZ())) {
-                        terrain.setSunLight(update.intX(), update.intY(),
+                        terrain.sunLight(update.intX(), update.intY(),
                                 update.intZ(), light);
                         newUpdates.push().set(update.intX() - 1, update.intY(),
                                 update.intZ());
@@ -176,7 +173,7 @@ public class LightingEngineThreaded
         byte sunLight = 15;
         for (int zz = terrain.getHighestBlockZAt(x, y); zz >= z && zz >= 0;
                 zz--) {
-            BlockType type = terrain.getBlockType(x, y, zz);
+            BlockType type = terrain.type(x, y, zz);
             if (type.isSolid(terrain, x, y, zz) ||
                     !type.isTransparent(terrain, x, y, zz)) {
                 sunLight = FastMath.clamp(

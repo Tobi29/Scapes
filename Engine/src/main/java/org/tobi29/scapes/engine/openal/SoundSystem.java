@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.openal.codec.AudioInputStream;
 import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
+import org.tobi29.scapes.engine.utils.io.ReadSource;
 import org.tobi29.scapes.engine.utils.io.filesystem.Resource;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
@@ -111,11 +112,21 @@ public class SoundSystem {
     }
 
     public void playMusic(String asset, float pitch, float gain) {
+        playMusic(engine.getFiles().get(asset), pitch, gain);
+    }
+
+    public void playMusic(String asset, float pitch, float gain,
+            Vector3 position, Vector3 velocity) {
+        playMusic(engine.getFiles().get(asset), pitch, gain, position,
+                velocity);
+    }
+
+    public void playMusic(ReadSource asset, float pitch, float gain) {
         music = new Music(asset, Vector3d.ZERO, Vector3d.ZERO, pitch, gain,
                 false);
     }
 
-    public void playMusic(String asset, float pitch, float gain,
+    public void playMusic(ReadSource asset, float pitch, float gain,
             Vector3 position, Vector3 velocity) {
         music = new Music(asset, position, velocity, pitch, gain, true);
     }
@@ -181,9 +192,8 @@ public class SoundSystem {
                         this.music = null;
                     } else {
                         try {
-                            Resource resource =
-                                    engine.getFiles().getResource(music.asset);
-                            streamIn = AudioInputStream.create(resource);
+                            ReadSource asset = music.asset;
+                            streamIn = AudioInputStream.create(asset);
                             try {
                                 for (int queue : queuedBuffers) {
                                     stream(queue);
@@ -303,10 +313,10 @@ public class SoundSystem {
         openAL.play(source);
     }
 
-    protected AudioData getAudio(String asset) {
+    protected Optional<AudioData> getAudio(String asset) {
         if (!cache.containsKey(asset)) {
             try {
-                Resource resource = engine.getFiles().getResource(asset);
+                Resource resource = engine.getFiles().get(asset);
                 if (resource.exists()) {
                     cache.put(asset,
                             new AudioData(AudioInputStream.create(resource),
@@ -316,7 +326,7 @@ public class SoundSystem {
                 LOGGER.warn("Failed to get audio data", e);
             }
         }
-        return cache.get(asset);
+        return Optional.ofNullable(cache.get(asset));
     }
 
     protected void removeBufferFromSources(int buffer) {
@@ -367,14 +377,14 @@ public class SoundSystem {
     }
 
     private static class Music {
-        private final String asset;
+        private final ReadSource asset;
         private final Vector3 pos, velocity;
         private final float pitch, gain;
         private final boolean hasPosition;
         private boolean playing;
 
-        private Music(String asset, Vector3 pos, Vector3 velocity, float pitch,
-                float gain, boolean hasPosition) {
+        private Music(ReadSource asset, Vector3 pos, Vector3 velocity,
+                float pitch, float gain, boolean hasPosition) {
             this.asset = asset;
             this.pos = pos;
             this.velocity = velocity;

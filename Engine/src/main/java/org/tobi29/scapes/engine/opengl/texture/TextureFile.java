@@ -19,6 +19,7 @@ package org.tobi29.scapes.engine.opengl.texture;
 import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.graphics.PNG;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +40,23 @@ public class TextureFile extends Texture {
         this(PNG.decode(streamIn, BufferCreatorDirect::byteBuffer), mipmaps,
                 minFilter, magFilter, wrapS, wrapT);
         streamIn.close();
+    }
+
+    public TextureFile(ReadableByteStream input) throws IOException {
+        this(input, 4);
+    }
+
+    public TextureFile(ReadableByteStream input, int mipmaps)
+            throws IOException {
+        this(input, mipmaps, TextureFilter.NEAREST, TextureFilter.NEAREST,
+                TextureWrap.REPEAT, TextureWrap.REPEAT);
+    }
+
+    public TextureFile(ReadableByteStream input, int mipmaps,
+            TextureFilter minFilter, TextureFilter magFilter, TextureWrap wrapS,
+            TextureWrap wrapT) throws IOException {
+        this(PNG.decode(input, BufferCreatorDirect::byteBuffer), mipmaps,
+                minFilter, magFilter, wrapS, wrapT);
     }
 
     public TextureFile(Image image, int mipmaps, TextureFilter minFilter,

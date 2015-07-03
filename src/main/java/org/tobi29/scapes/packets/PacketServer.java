@@ -19,17 +19,17 @@ package org.tobi29.scapes.packets;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.connection.ConnectionCloseException;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 public interface PacketServer {
-    void sendServer(ClientConnection client, DataOutputStream streamOut)
+    void sendServer(ClientConnection client, WritableByteStream stream)
             throws IOException;
 
-    void parseServer(PlayerConnection player, DataInputStream streamIn)
+    void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException;
 
     void runServer(PlayerConnection player, WorldServer world)

@@ -21,7 +21,7 @@ import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 
 public interface TerrainRenderer {
-    void renderUpdate(GraphicsSystem graphics, Cam cam);
+    void renderUpdate(Cam cam);
 
     void render(GraphicsSystem graphics, Shader shader, Cam cam, boolean debug);
 

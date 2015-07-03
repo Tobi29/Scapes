@@ -14,11 +14,28 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.platform.nio;
+package org.tobi29.scapes.chunk.generator;
 
-public class PlatformMacOSX extends PlatformDesktop {
-    @Override
-    public String getID() {
-        return "MacOSX";
+import org.tobi29.scapes.block.BlockType;
+import org.tobi29.scapes.block.Update;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class GeneratorOutput {
+    public final int[] type, data;
+    public final List<Update> updates = new ArrayList<>();
+
+    public GeneratorOutput(int height) {
+        type = new int[height];
+        data = new int[height];
+    }
+
+    public void type(int z, BlockType type) {
+        this.type[z] = type.getID();
+    }
+
+    public void data(int z, int data) {
+        this.data[z] = data;
     }
 }

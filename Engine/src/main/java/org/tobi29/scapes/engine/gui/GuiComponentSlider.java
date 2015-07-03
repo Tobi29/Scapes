@@ -107,7 +107,14 @@ public class GuiComponentSlider extends GuiComponent {
                 value = FastMath.clamp((mouseX - x - 8) / (width - 16.0d), 0,
                         1);
                 updateText();
-                hover(new GuiComponentEvent(mouseX, mouseY));
+                if (hovering) {
+                    hover(new GuiComponentHoverEvent(mouseX, mouseY,
+                            GuiComponentHoverEvent.State.HOVER));
+                } else {
+                    hover(new GuiComponentHoverEvent(mouseX, mouseY,
+                            GuiComponentHoverEvent.State.ENTER));
+                    hovering = true;
+                }
             } else {
                 dragging = false;
             }

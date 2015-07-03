@@ -92,8 +92,8 @@ public class TerrainInfiniteRendererChunk {
 
     public void render(GraphicsSystem graphics, Shader shader,
             boolean ensureStored, Cam cam) {
-        double relativeX = (chunk.getX() << 4) - cam.position.doubleX();
-        double relativeY = (chunk.getY() << 4) - cam.position.doubleY();
+        double relativeX = chunk.getBlockX() - cam.position.doubleX();
+        double relativeY = chunk.getBlockY() - cam.position.doubleY();
         MatrixStack matrixStack = graphics.getMatrixStack();
         for (int i = 0; i < vao.length; i++) {
             double relativeZ = (i << 4) - cam.position.doubleZ();
@@ -130,8 +130,8 @@ public class TerrainInfiniteRendererChunk {
 
     public void renderAlpha(GraphicsSystem graphics, Shader shader,
             boolean ensureStored, Cam cam) {
-        double relativeX = (chunk.getX() << 4) - cam.position.doubleX();
-        double relativeY = (chunk.getY() << 4) - cam.position.doubleY();
+        double relativeX = chunk.getBlockX() - cam.position.doubleX();
+        double relativeY = chunk.getBlockY() - cam.position.doubleY();
         MatrixStack matrixStack = graphics.getMatrixStack();
         for (int i = 0; i < vao.length; i++) {
             VAO vao = vaoAlpha[i];
@@ -190,10 +190,10 @@ public class TerrainInfiniteRendererChunk {
             vao[i] = render;
             vaoAlpha[i] = renderAlpha;
             if (aabb != null) {
-                aabb.add(chunk.getX() << 4, chunk.getY() << 4, i << 4);
+                aabb.add(chunk.getBlockX(), chunk.getBlockY(), i << 4);
             }
             if (aabbAlpha != null) {
-                aabbAlpha.add(chunk.getX() << 4, chunk.getY() << 4, i << 4);
+                aabbAlpha.add(chunk.getBlockX(), chunk.getBlockY(), i << 4);
             }
             this.aabb[i] = aabb;
             this.aabbAlpha[i] = aabbAlpha;

@@ -21,13 +21,13 @@ import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class PacketSetWorld extends Packet implements PacketClient {
@@ -47,22 +47,22 @@ public class PacketSetWorld extends Packet implements PacketClient {
     }
 
     @Override
-    public void sendClient(PlayerConnection player, DataOutputStream streamOut)
+    public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        TagStructureBinary.write(tag, streamOut);
-        streamOut.writeLong(seed);
-        streamOut.writeUTF(name);
-        streamOut.writeInt(entityID);
+        TagStructureBinary.write(tag, stream);
+        stream.putLong(seed);
+        stream.putString(name);
+        stream.putInt(entityID);
     }
 
     @Override
-    public void parseClient(ClientConnection client, DataInputStream streamIn)
+    public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
         tag = new TagStructure();
-        TagStructureBinary.read(tag, streamIn);
-        seed = streamIn.readLong();
-        name = streamIn.readUTF();
-        entityID = streamIn.readInt();
+        TagStructureBinary.read(tag, stream);
+        seed = stream.getLong();
+        name = stream.getString();
+        entityID = stream.getInt();
     }
 
     @Override
@@ -71,7 +71,7 @@ public class PacketSetWorld extends Packet implements PacketClient {
                 new Cam(0.01f, client.getLoadingRadius()), seed, name,
                 newWorld -> new TerrainInfiniteClient(newWorld,
                         client.getLoadingRadius() >> 4, 512,
-                        client.getGame().getEngine().getTaskExecutor())),
-                entityID, tag);
+                        client.getGame().getEngine().getTaskExecutor()), tag,
+                entityID));
     }
 }

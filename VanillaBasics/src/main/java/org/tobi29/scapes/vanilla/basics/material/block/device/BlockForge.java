@@ -48,10 +48,10 @@ public class BlockForge extends VanillaBlockContainer {
     @Override
     protected EntityContainerServer placeEntity(TerrainServer terrain, int x,
             int y, int z) {
-        EntityForgeServer entity = new EntityForgeServer(terrain.getWorld(),
+        EntityForgeServer entity = new EntityForgeServer(terrain.world(),
                 new Vector3d(x + 0.5, y + 0.5, z + 0.5));
         entity.onSpawn();
-        terrain.getWorld().addEntity(entity);
+        terrain.world().addEntity(entity);
         return entity;
     }
 
@@ -73,13 +73,12 @@ public class BlockForge extends VanillaBlockContainer {
     @Override
     public Optional<TerrainTexture> getParticleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
-        return Optional
-                .of(terrain.getBlockData(x, y, z) > 0 ? textureOn : textureOff);
+        return Optional.of(terrain.data(x, y, z) > 0 ? textureOn : textureOff);
     }
 
     @Override
     public byte lightEmit(Terrain terrain, int x, int y, int z) {
-        return terrain.getBlockData(x, y, z) > 0 ? (byte) 15 : 0;
+        return terrain.data(x, y, z) > 0 ? (byte) 15 : 0;
     }
 
     @Override

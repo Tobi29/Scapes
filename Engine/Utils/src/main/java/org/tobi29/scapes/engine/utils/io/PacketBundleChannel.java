@@ -16,15 +16,16 @@
 
 package org.tobi29.scapes.engine.utils.io;
 
-import org.tobi29.scapes.engine.utils.*;
+import org.tobi29.scapes.engine.utils.BufferCreator;
+import org.tobi29.scapes.engine.utils.StringLongHash;
+import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
+import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.InetSocketAddress;
@@ -34,42 +35,32 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.zip.Deflater;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.Inflater;
 
 public class PacketBundleChannel {
     private static final IvParameterSpec IV;
-    private static final ChecksumUtil.ChecksumAlgorithm HASH_ALGORITHM =
-            ChecksumUtil.ChecksumAlgorithm.SHA256;
-    private static final int HASH_SIZE, BUNDLE_HEADER_SIZE = 4;
+    private static final int BUNDLE_HEADER_SIZE = 4;
     private final SocketChannel channel;
-    private final ByteBufferOutputStream queueStreamOut;
-    private final DataOutputStream dataStreamOut;
-    private final ByteBufferOutputStream byteBufferStreamOut =
-            new ByteBufferOutputStream(
-                    length -> BufferCreator.byteBuffer(length + 1024));
-    private final ByteBuffer header = BufferCreator.byteBuffer(4);
+    private final ByteBufferStream dataStreamOut = new ByteBufferStream(
+            length -> BufferCreator.byteBuffer(length + 102400)),
+            byteBufferStreamOut = new ByteBufferStream(
+                    length -> BufferCreator.byteBuffer(length + 102400));
+    private final ByteBuffer header =
+            BufferCreator.byteBuffer(BUNDLE_HEADER_SIZE);
     private final Queue<ByteBuffer> queue = new ConcurrentLinkedQueue<>();
     private final List<WeakReference<ByteBuffer>> bufferCache =
             new ArrayList<>();
-    private final byte[] hashEncrypted;
-    private final Deflater deflater;
-    private final Inflater inflater;
+    private final CompressionUtil.Filter deflater, inflater, decipherInflater;
     private final Cipher encryptCipher, decryptCipher;
-    private final MessageDigest digest;
     private final AtomicInteger inRate = new AtomicInteger(), outRate =
             new AtomicInteger();
     private Optional<Selector> selector = Optional.empty();
     private boolean encrypt, hasInput;
-    private ByteBuffer output, input = BufferCreator.byteBuffer(1024),
-            inputDecrypt = BufferCreator.byteBuffer(1024);
+    private ByteBuffer output, input = BufferCreator.byteBuffer(1024);
 
     static {
         Random random = new Random(
@@ -77,12 +68,6 @@ public class PacketBundleChannel {
         byte[] array = new byte[16];
         random.nextBytes(array);
         IV = new IvParameterSpec(array);
-        try {
-            HASH_SIZE = MessageDigest.getInstance(HASH_ALGORITHM.getName())
-                    .getDigestLength();
-        } catch (NoSuchAlgorithmException e) {
-            throw new UnsupportedJVMException(e);
-        }
     }
 
     public PacketBundleChannel(SocketChannel channel) {
@@ -92,64 +77,49 @@ public class PacketBundleChannel {
     public PacketBundleChannel(SocketChannel channel, byte[] encryptKey,
             byte[] decryptKey) {
         this.channel = channel;
-        deflater = new Deflater();
-        inflater = new Inflater();
+        deflater = new CompressionUtil.ZDeflater(1);
+        inflater = new CompressionUtil.ZInflater();
+        decipherInflater = new DecipherZInflater();
         try {
             encryptCipher = Cipher.getInstance("AES/CBC/NoPadding");
             decryptCipher = Cipher.getInstance("AES/CBC/NoPadding");
-            digest = MessageDigest.getInstance(HASH_ALGORITHM.getName());
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new UnsupportedJVMException(e);
         }
         setKey(encryptKey, decryptKey);
-        queueStreamOut = new ByteBufferOutputStream(
-                length -> BufferCreator.byteBuffer(length + 102400));
-        dataStreamOut = new DataOutputStream(queueStreamOut);
-        hashEncrypted = new byte[HASH_SIZE];
     }
 
-    public DataOutputStream getOutputStream() {
+    public WritableByteStream getOutputStream() {
         return dataStreamOut;
     }
 
     public int bundleSize() {
-        return queueStreamOut.size();
+        return dataStreamOut.buffer().position();
     }
 
     public void queueBundle() throws IOException {
-        if (queueStreamOut.size() == 0) {
+        dataStreamOut.buffer().flip();
+        if (!dataStreamOut.buffer().hasRemaining()) {
+            dataStreamOut.buffer().clear();
             return;
         }
-        try (DeflaterOutputStream deflaterStreamOut = new DeflaterOutputStream(
-                byteBufferStreamOut, deflater)) {
-            ProcessStream.process(
-                    new ByteBufferInputStream(queueStreamOut.getBuffer()),
-                    (byte[] buffer, int offset, int length) -> {
-                        deflaterStreamOut.write(buffer, offset, length);
-                        digest.update(buffer, offset, length);
-                    });
-            deflaterStreamOut.finish();
-        }
-        byte[] hash = digest.digest();
-        deflater.reset();
-        int padding = 16 - (byteBufferStreamOut.size() & 15);
-        if (padding > 0) {
-            Random random = ThreadLocalRandom.current();
-            do {
-                byteBufferStreamOut.write(random.nextInt(256));
-            } while (--padding > 0);
-        }
-        ByteBuffer buffer = byteBufferStreamOut.getBuffer();
-        byteBufferStreamOut.reset();
-        queueStreamOut.reset();
-        int bundleSize = HASH_SIZE + buffer.remaining();
+        byteBufferStreamOut.buffer().clear();
+        CompressionUtil.filter(new ByteBufferStream(dataStreamOut.buffer()),
+                byteBufferStreamOut, deflater);
         int capacity;
         if (encrypt) {
-            capacity = BUNDLE_HEADER_SIZE +
-                    encryptCipher.getOutputSize(bundleSize);
+            int padding = 16 - (byteBufferStreamOut.buffer().position() & 15);
+            Random random = ThreadLocalRandom.current();
+            do {
+                byteBufferStreamOut.put(random.nextInt(256));
+            } while (--padding > 0);
+            capacity = BUNDLE_HEADER_SIZE + encryptCipher
+                    .getOutputSize(byteBufferStreamOut.buffer().position());
         } else {
-            capacity = BUNDLE_HEADER_SIZE + bundleSize;
+            capacity = BUNDLE_HEADER_SIZE +
+                    byteBufferStreamOut.buffer().position();
         }
+        byteBufferStreamOut.buffer().flip();
         ByteBuffer bundle = null;
         int i = 0;
         while (i < bufferCache.size()) {
@@ -172,21 +142,20 @@ public class PacketBundleChannel {
         int size;
         if (encrypt) {
             try {
-                size = encryptCipher.update(hash, 0, HASH_SIZE, hashEncrypted);
-                bundle.put(hashEncrypted);
-                size += encryptCipher.update(buffer, bundle);
+                size = encryptCipher
+                        .update(byteBufferStreamOut.buffer(), bundle);
             } catch (ShortBufferException e) {
                 throw new IOException(e);
             }
         } else {
-            size = bundleSize;
-            bundle.put(hash);
-            bundle.put(buffer);
+            size = byteBufferStreamOut.buffer().remaining();
+            bundle.put(byteBufferStreamOut.buffer());
         }
         bundle.flip();
         bundle.putInt(size);
         bundle.rewind();
         queue.add(bundle);
+        dataStreamOut.buffer().clear();
         selector.ifPresent(Selector::wakeup);
     }
 
@@ -208,19 +177,19 @@ public class PacketBundleChannel {
         return false;
     }
 
-    public Optional<DataInputStream> fetch() throws IOException {
+    public Optional<ReadableByteStream> fetch() throws IOException {
         if (!hasInput) {
             int read = channel.read(header);
             if (!header.hasRemaining()) {
-                int limit = header.getInt(0);
+                header.flip();
+                int limit = header.getInt();
                 if (limit > input.capacity()) {
                     input = BufferCreator.byteBuffer(limit);
                 } else {
-                    input.limit(limit);
-                    input.rewind();
+                    input.clear().limit(limit);
                 }
                 hasInput = true;
-                header.rewind();
+                header.clear();
             } else if (read == -1) {
                 throw new IOException("Connection closed");
             }
@@ -231,43 +200,18 @@ public class PacketBundleChannel {
             if (!input.hasRemaining()) {
                 inRate.getAndAdd(read);
                 input.flip();
-                ByteBuffer buffer;
+                byteBufferStreamOut.buffer().clear();
                 if (encrypt) {
-                    inputDecrypt.clear();
-                    int capacity =
-                            decryptCipher.getOutputSize(input.remaining());
-                    if (capacity > inputDecrypt.remaining()) {
-                        inputDecrypt = BufferCreator.byteBuffer(capacity);
-                    }
-                    try {
-                        decryptCipher.update(input, inputDecrypt);
-                    } catch (ShortBufferException e) {
-                        throw new IOException(e);
-                    }
-                    inputDecrypt.flip();
-                    buffer = inputDecrypt;
+                    CompressionUtil.filter(new ByteBufferStream(input),
+                            byteBufferStreamOut, decipherInflater);
                 } else {
-                    buffer = input;
+                    CompressionUtil.filter(new ByteBufferStream(input),
+                            byteBufferStreamOut, inflater);
                 }
-                buffer.position(HASH_SIZE);
-                CompressionUtil
-                        .decompress(buffer, byteBufferStreamOut, inflater);
-                inflater.reset();
-                ByteBuffer bundle = byteBufferStreamOut.getBuffer();
-                byteBufferStreamOut.reset();
-                ProcessStream.process(new ByteBufferInputStream(bundle),
-                        digest::update);
+                ByteBuffer bundle = byteBufferStreamOut.buffer();
                 bundle.flip();
-                byte[] hash = digest.digest();
-                buffer.position(0);
-                for (byte i : hash) {
-                    if (i != buffer.get()) {
-                        throw new IOException("Integrity check failed");
-                    }
-                }
                 hasInput = false;
-                return Optional.of(new DataInputStream(
-                        new ByteBufferInputStream(bundle)));
+                return Optional.of(new ByteBufferStream(bundle));
             } else if (read == -1) {
                 throw new IOException("Connection closed");
             }
@@ -299,8 +243,8 @@ public class PacketBundleChannel {
 
     public void close() throws IOException {
         channel.close();
-        deflater.end();
-        inflater.end();
+        deflater.close();
+        inflater.close();
     }
 
     public int getOutputRate() {
@@ -330,5 +274,32 @@ public class PacketBundleChannel {
         } catch (IOException e) {
         }
         return super.toString();
+    }
+
+    @SuppressWarnings("AmbiguousFieldAccess")
+    public class DecipherZInflater extends CompressionUtil.ZInflater {
+        public DecipherZInflater() {
+            this(8192);
+        }
+
+        public DecipherZInflater(int buffer) {
+            super(buffer);
+        }
+
+        @Override
+        public void input(ReadableByteStream buffer) throws IOException {
+            int len = FastMath.min(buffer.remaining(), this.buffer);
+            if (input.length < len) {
+                input = new byte[len];
+                output = new byte[len];
+            }
+            buffer.get(output, 0, len);
+            try {
+                decryptCipher.update(output, 0, len, input, 0);
+            } catch (ShortBufferException e) {
+                throw new IOException(e);
+            }
+            inflater.setInput(input, 0, len);
+        }
     }
 }

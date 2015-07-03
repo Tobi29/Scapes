@@ -66,19 +66,19 @@ public class EntityBloomeryServer extends EntityAbstractFurnaceServer {
         int yy = pos.intY();
         int zz = pos.intZ();
         if (temperature > 10) {
-            if (world.getTerrain().getBlockData(xx, yy, zz) == 0) {
-                world.getTerrain().queueBlockChanges(handle -> {
-                    if (handle.getBlockType(xx, yy, zz) == materials.bloomery &&
-                            handle.getBlockData(xx, yy, zz) == 0) {
-                        handle.setBlockData(xx, yy, zz, (short) 1);
+            if (world.getTerrain().data(xx, yy, zz) == 0) {
+                world.getTerrain().queue(handle -> {
+                    if (handle.type(xx, yy, zz) == materials.bloomery &&
+                            handle.data(xx, yy, zz) == 0) {
+                        handle.data(xx, yy, zz, (short) 1);
                     }
                 });
             }
-        } else if (world.getTerrain().getBlockData(xx, yy, zz) == 1) {
-            world.getTerrain().queueBlockChanges(handle -> {
-                if (handle.getBlockType(xx, yy, zz) == materials.bloomery &&
-                        handle.getBlockData(xx, yy, zz) == 1) {
-                    handle.setBlockData(xx, yy, zz, (short) 0);
+        } else if (world.getTerrain().data(xx, yy, zz) == 1) {
+            world.getTerrain().queue(handle -> {
+                if (handle.type(xx, yy, zz) == materials.bloomery &&
+                        handle.data(xx, yy, zz) == 1) {
+                    handle.data(xx, yy, zz, (short) 0);
                 }
             });
         }
@@ -86,14 +86,14 @@ public class EntityBloomeryServer extends EntityAbstractFurnaceServer {
 
     @Override
     protected boolean isValidOn(TerrainServer terrain, int x, int y, int z) {
-        VanillaBasics plugin = (VanillaBasics) terrain.getWorld().getPlugins()
+        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
                 .getPlugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
-        return terrain.getBlockType(x, y, z) == materials.bloomery;
+        return terrain.type(x, y, z) == materials.bloomery;
     }
 
     public void updateBellows(TerrainServer terrain) {
-        WorldServer world = terrain.getWorld();
+        WorldServer world = terrain.world();
         VanillaBasics plugin =
                 (VanillaBasics) world.getPlugins().getPlugin("VanillaBasics");
         GameRegistry registry = world.getRegistry();
@@ -102,20 +102,20 @@ public class EntityBloomeryServer extends EntityAbstractFurnaceServer {
         int xx = pos.intX();
         int yy = pos.intY();
         int zz = pos.intZ();
-        if (terrain.getBlockType(xx - 1, yy, zz) == materials.bellows &&
-                terrain.getBlockData(xx - 1, yy, zz) == 5) {
+        if (terrain.type(xx - 1, yy, zz) == materials.bellows &&
+                terrain.data(xx - 1, yy, zz) == 5) {
             hasBellows = true;
         }
-        if (terrain.getBlockType(xx + 1, yy, zz) == materials.bellows &&
-                terrain.getBlockData(xx + 1, yy, zz) == 3) {
+        if (terrain.type(xx + 1, yy, zz) == materials.bellows &&
+                terrain.data(xx + 1, yy, zz) == 3) {
             hasBellows = true;
         }
-        if (terrain.getBlockType(xx, yy - 1, zz) == materials.bellows &&
-                terrain.getBlockData(xx, yy - 1, zz) == 2) {
+        if (terrain.type(xx, yy - 1, zz) == materials.bellows &&
+                terrain.data(xx, yy - 1, zz) == 2) {
             hasBellows = true;
         }
-        if (terrain.getBlockType(xx, yy + 1, zz) == materials.bellows &&
-                terrain.getBlockData(xx, yy + 1, zz) == 4) {
+        if (terrain.type(xx, yy + 1, zz) == materials.bellows &&
+                terrain.data(xx, yy + 1, zz) == 4) {
             hasBellows = true;
         }
         this.hasBellows = hasBellows;

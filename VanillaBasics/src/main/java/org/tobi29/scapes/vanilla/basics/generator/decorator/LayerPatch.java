@@ -46,7 +46,7 @@ public class LayerPatch implements BiomeDecorator.Layer {
                 int yy = y + random.nextInt(size) - random.nextInt(size);
                 int z = terrain.getHighestTerrainBlockZAt(xx, yy);
                 if (check.canPlace(terrain, xx, yy, z)) {
-                    terrain.setBlockTypeAndData(xx, yy, z, material, data);
+                    terrain.typeData(xx, yy, z, material, data);
                 }
             }
         }

@@ -22,10 +22,8 @@ import org.tobi29.scapes.Scapes;
 import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.connection.*;
-import org.tobi29.scapes.engine.utils.io.ChecksumUtil;
-import org.tobi29.scapes.engine.utils.io.PacketBundleChannel;
-import org.tobi29.scapes.engine.utils.io.ProcessStream;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
+import org.tobi29.scapes.engine.utils.graphics.Image;
+import org.tobi29.scapes.engine.utils.io.*;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -44,14 +42,14 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.nio.ByteBuffer;
 import java.nio.channels.Selector;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
@@ -140,17 +138,17 @@ public class PlayerConnection
     }
 
     private void loginStep1() throws IOException {
-        DataOutputStream streamOut = channel.getOutputStream();
+        WritableByteStream output = channel.getOutputStream();
         KeyPair keyPair = server.getKeyPair();
         byte[] array = keyPair.getPublic().getEncoded();
-        streamOut.writeInt(array.length);
-        streamOut.write(array);
-        streamOut.writeInt(AES_KEY_LENGTH);
+        output.putInt(array.length);
+        output.put(array);
+        output.putInt(AES_KEY_LENGTH);
         channel.queueBundle();
     }
 
-    private void loginStep2(DataInputStream streamIn) throws IOException {
-        int keyLength = streamIn.readInt();
+    private void loginStep2(ReadableByteStream input) throws IOException {
+        int keyLength = input.getInt();
         keyLength = FastMath.min(keyLength, AES_KEY_LENGTH);
         byte[] keyServer = new byte[keyLength];
         byte[] keyClient = new byte[keyLength];
@@ -159,7 +157,7 @@ public class PlayerConnection
             Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
             byte[] array = new byte[cipher.getOutputSize(keyLength << 1)];
-            streamIn.readFully(array);
+            input.get(array);
             array = cipher.doFinal(array);
             System.arraycopy(array, 0, keyServer, 0, keyLength);
             System.arraycopy(array, keyLength, keyClient, 0, keyLength);
@@ -169,66 +167,67 @@ public class PlayerConnection
         channel.setKey(keyServer, keyClient);
     }
 
-    private void loginStep3(DataInputStream streamIn) throws IOException {
+    private void loginStep3(ReadableByteStream input) throws IOException {
         byte[] array = new byte[550];
-        streamIn.readFully(array);
+        input.get(array);
         id = ChecksumUtil
                 .getChecksum(array, ChecksumUtil.ChecksumAlgorithm.SHA1);
         challenge = new byte[501];
         new SecureRandom().nextBytes(challenge);
-        DataOutputStream streamOut = channel.getOutputStream();
+        WritableByteStream output = channel.getOutputStream();
         try {
             key = KeyFactory.getInstance("RSA")
                     .generatePublic(new X509EncodedKeySpec(array));
             Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.ENCRYPT_MODE, key);
-            streamOut.write(cipher.doFinal(challenge));
+            output.put(cipher.doFinal(challenge));
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidKeySpecException e) {
             throw new IOException(e);
         }
         Plugins plugins = server.getServer().getWorldFormat().getPlugins();
-        streamOut.writeInt(plugins.getFileCount());
-        plugins.getFiles()
-                .forEach(plugin -> sendPluginChecksum(plugin, streamOut));
+        output.putInt(plugins.getFileCount());
+        Iterator<PluginFile> pluginIterator = plugins.getFiles().iterator();
+        while (pluginIterator.hasNext()) {
+            sendPluginChecksum(pluginIterator.next(), output);
+        }
         TagStructureBinary
                 .write(server.getServer().getWorldFormat().getIDStorage()
-                        .save(), streamOut);
+                        .save(), output);
         channel.queueBundle();
     }
 
-    private void loginStep4(DataInputStream streamIn)
-            throws IOException, ConnectionCloseException {
+    private void loginStep4(ReadableByteStream input) throws IOException {
         Plugins plugins = server.getServer().getWorldFormat().getPlugins();
         byte[] challenge = new byte[this.challenge.length];
-        streamIn.readFully(challenge);
-        nickname = streamIn.readUTF();
-        loadingRadius = FastMath.clamp(streamIn.readInt(), 10,
+        input.get(challenge);
+        nickname = input.getString();
+        loadingRadius = FastMath.clamp(input.getInt(), 10,
                 server.getServer().getMaxLoadingRadius());
-        byte[] array = new byte[64 * 64 * 4];
-        streamIn.readFully(array);
-        skin = new ServerSkin(array);
-        int length = streamIn.readInt();
+        ByteBuffer buffer = ByteBuffer.allocate(64 * 64 * 4);
+        input.get(buffer);
+        buffer.flip();
+        skin = new ServerSkin(new Image(64, 64, buffer));
+        int length = input.getInt();
         List<Integer> requests = new ArrayList<>(length);
         while (length-- > 0) {
-            requests.add(streamIn.readInt());
+            requests.add(input.getInt());
         }
-        DataOutputStream streamOut = channel.getOutputStream();
+        WritableByteStream output = channel.getOutputStream();
         Optional<String> response =
                 generateResponse(Arrays.equals(challenge, this.challenge));
         if (!response.isPresent()) {
             response = start();
         }
         if (response.isPresent()) {
-            streamOut.writeBoolean(true);
-            streamOut.writeUTF(response.get());
-            streamOut.flush();
+            output.putBoolean(true);
+            output.putString(response.get());
             channel.queueBundle();
             throw new ConnectionCloseException(response.get());
         } else {
-            streamOut.writeBoolean(false);
-            streamOut.writeInt(loadingRadius);
+            output.putBoolean(false);
+            output.putInt(loadingRadius);
             for (int request : requests) {
-                sendPlugin(plugins.getFile(request).getFile(), streamOut);
+                sendPlugin(plugins.getFile(request).getFile(), output);
             }
             channel.queueBundle();
             long currentTime = System.currentTimeMillis();
@@ -248,7 +247,7 @@ public class PlayerConnection
             TagStructure tagStructure = tag.get();
             world = worldFormat.getWorld(tagStructure.getString("World"));
             entity = new MobPlayerServer(world, Vector3d.ZERO, Vector3d.ZERO,
-                    0.0d, 0.0d, nickname, skin.getChecksum(), this);
+                    0.0, 0.0, nickname, skin.checksum(), this);
             entity.read(tagStructure.getStructure("Entity"));
             statistics.load(world.getRegistry(),
                     tagStructure.getList("Statistics"));
@@ -256,9 +255,8 @@ public class PlayerConnection
         } else {
             world = worldFormat.getDefaultWorld();
             entity = new MobPlayerServer(world,
-                    new Vector3d(0.5, 0.5, 1.0d).plus(world.getSpawn()),
-                    Vector3d.ZERO, 0.0d, 0.0d, nickname, skin.getChecksum(),
-                    this);
+                    new Vector3d(0.5, 0.5, 1.0).plus(world.getSpawn()),
+                    Vector3d.ZERO, 0.0, 0.0, nickname, skin.checksum(), this);
             entity.onSpawn();
         }
         world.addEntity(entity);
@@ -313,22 +311,17 @@ public class PlayerConnection
     }
 
     private void sendPluginChecksum(PluginFile plugin,
-            DataOutputStream streamOut) {
-        try {
-            byte[] checksum = plugin.getChecksum();
-            streamOut.writeInt(checksum.length);
-            streamOut.write(checksum);
-        } catch (IOException e) {
-            LOGGER.error("Failed to update plugin:", e);
-        }
+            WritableByteStream output) throws IOException {
+        byte[] checksum = plugin.getChecksum();
+        output.putInt(checksum.length);
+        output.put(checksum);
     }
 
-    private void sendPlugin(File file, DataOutputStream streamOut)
+    private void sendPlugin(Path path, WritableByteStream output)
             throws IOException {
-        try (InputStream streamIn = file.read()) {
-            streamOut.writeInt(streamIn.available());
-            ProcessStream.process(streamIn, streamOut::write);
-        }
+        output.putInt((int) Files.size(path));
+        FileUtil.read(path,
+                stream -> ProcessStream.process(stream, output::put));
     }
 
     private void sendPacket(Packet packet) {
@@ -356,11 +349,11 @@ public class PlayerConnection
         }
         if (flag) {
             try {
-                DataOutputStream streamOut = channel.getOutputStream();
-                streamOut.writeShort(packet.getID(
+                WritableByteStream output = channel.getOutputStream();
+                output.putShort(packet.getID(
                         server.getServer().getWorldFormat().getPlugins()
                                 .getRegistry()));
-                ((PacketClient) packet).sendClient(this, streamOut);
+                ((PacketClient) packet).sendClient(this, output);
             } catch (SocketException e) {
             } catch (IOException e) {
                 LOGGER.error("Error in connection: {}", e.toString());
@@ -378,7 +371,7 @@ public class PlayerConnection
         try {
             switch (state) {
                 case LOGIN_STEP_1: {
-                    Optional<DataInputStream> bundle = channel.fetch();
+                    Optional<ReadableByteStream> bundle = channel.fetch();
                     if (bundle.isPresent()) {
                         loginStep2(bundle.get());
                         state = State.LOGIN_STEP_2;
@@ -386,7 +379,7 @@ public class PlayerConnection
                     return channel.process();
                 }
                 case LOGIN_STEP_2: {
-                    Optional<DataInputStream> bundle = channel.fetch();
+                    Optional<ReadableByteStream> bundle = channel.fetch();
                     if (bundle.isPresent()) {
                         loginStep3(bundle.get());
                         state = State.LOGIN_STEP_3;
@@ -394,7 +387,7 @@ public class PlayerConnection
                     return channel.process();
                 }
                 case LOGIN_STEP_3: {
-                    Optional<DataInputStream> bundle = channel.fetch();
+                    Optional<ReadableByteStream> bundle = channel.fetch();
                     if (bundle.isPresent()) {
                         loginStep4(bundle.get());
                     }
@@ -419,13 +412,13 @@ public class PlayerConnection
                         }
                     }
                     channel.queueBundle();
-                    Optional<DataInputStream> bundle = channel.fetch();
+                    Optional<ReadableByteStream> bundle = channel.fetch();
                     if (bundle.isPresent()) {
-                        DataInputStream streamIn = bundle.get();
-                        while (streamIn.available() > 0) {
+                        ReadableByteStream stream = bundle.get();
+                        while (stream.hasRemaining()) {
                             PacketServer packet = (PacketServer) Packet
-                                    .makePacket(registry, streamIn.readShort());
-                            packet.parseServer(this, streamIn);
+                                    .makePacket(registry, stream.getShort());
+                            packet.parseServer(this, stream);
                             packet.runServer(this, entity.getWorld());
                         }
                     }

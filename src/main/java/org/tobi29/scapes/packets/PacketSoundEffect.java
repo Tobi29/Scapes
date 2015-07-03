@@ -18,12 +18,12 @@ package org.tobi29.scapes.packets;
 
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class PacketSoundEffect extends Packet implements PacketClient {
@@ -46,31 +46,31 @@ public class PacketSoundEffect extends Packet implements PacketClient {
     }
 
     @Override
-    public void sendClient(PlayerConnection player, DataOutputStream streamOut)
+    public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        streamOut.writeUTF(audio);
-        streamOut.writeDouble(position.doubleX());
-        streamOut.writeDouble(position.doubleY());
-        streamOut.writeDouble(position.doubleZ());
-        streamOut.writeDouble(velocity.doubleX());
-        streamOut.writeDouble(velocity.doubleY());
-        streamOut.writeDouble(velocity.doubleZ());
-        streamOut.writeFloat(pitch);
-        streamOut.writeFloat(gain);
-        streamOut.writeFloat(range);
+        stream.putString(audio);
+        stream.putDouble(position.doubleX());
+        stream.putDouble(position.doubleY());
+        stream.putDouble(position.doubleZ());
+        stream.putDouble(velocity.doubleX());
+        stream.putDouble(velocity.doubleY());
+        stream.putDouble(velocity.doubleZ());
+        stream.putFloat(pitch);
+        stream.putFloat(gain);
+        stream.putFloat(range);
     }
 
     @Override
-    public void parseClient(ClientConnection client, DataInputStream streamIn)
+    public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        audio = streamIn.readUTF();
-        position = new Vector3d(streamIn.readDouble(), streamIn.readDouble(),
-                streamIn.readDouble());
-        velocity = new Vector3d(streamIn.readDouble(), streamIn.readDouble(),
-                streamIn.readDouble());
-        pitch = streamIn.readFloat();
-        gain = streamIn.readFloat();
-        range = streamIn.readFloat();
+        audio = stream.getString();
+        position = new Vector3d(stream.getDouble(), stream.getDouble(),
+                stream.getDouble());
+        velocity = new Vector3d(stream.getDouble(), stream.getDouble(),
+                stream.getDouble());
+        pitch = stream.getFloat();
+        gain = stream.getFloat();
+        range = stream.getFloat();
     }
 
     @Override

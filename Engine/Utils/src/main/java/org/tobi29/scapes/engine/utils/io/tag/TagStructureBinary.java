@@ -16,9 +16,11 @@
 
 package org.tobi29.scapes.engine.utils.io.tag;
 
-import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import org.tobi29.scapes.engine.utils.io.ByteBufferStream;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -52,102 +54,68 @@ public class TagStructureBinary {
     protected static final byte ID_TAG_FLOAT_64 = 0x61;
     //   String
     protected static final byte ID_TAG_STRING = 0x71;
-    // UTF-8
-    protected static final Charset CHARSET = StandardCharsets.UTF_8;
 
-    protected static String readKey(DataInputStream streamIn,
+    protected static String readKey(ReadableByteStream stream,
             KeyDictionary dictionary) throws IOException {
-        byte alias = streamIn.readByte();
+        byte alias = stream.get();
         if (alias == -1) {
-            return readString(streamIn);
+            return stream.getString();
         } else {
             return dictionary.getKey(alias);
         }
     }
 
-    protected static String readString(DataInputStream streamIn)
-            throws IOException {
-        int length = streamIn.readUnsignedByte();
-        if (length == 0xFF) {
-            length = streamIn.readInt();
-        }
-        byte[] array = new byte[length];
-        streamIn.readFully(array);
-        return new String(array, CHARSET);
-    }
-
-    protected static byte[] readArray(DataInputStream streamIn)
-            throws IOException {
-        int length = streamIn.readUnsignedShort();
-        if (length == 0xFFFF) {
-            length = streamIn.readInt();
-        }
-        byte[] array = new byte[length];
-        streamIn.readFully(array);
-        return array;
-    }
-
-    protected static void writeKey(String key, DataOutputStream streamOut,
+    protected static void writeKey(String key, WritableByteStream stream,
             KeyDictionary dictionary) throws IOException {
         Byte alias = dictionary.getAlias(key);
         if (alias == null) {
-            streamOut.writeByte(0xFF);
-            writeString(key, streamOut);
+            stream.put(0xFF);
+            stream.putString(key);
         } else {
-            streamOut.writeByte(alias);
+            stream.put(alias);
         }
     }
 
-    protected static void writeString(String value, DataOutputStream streamOut)
-            throws IOException {
-        byte[] array = value.getBytes(CHARSET);
-        if (array.length >= 0xFF) {
-            streamOut.writeByte(0xFF);
-            streamOut.writeInt(array.length);
-        } else {
-            streamOut.writeByte(array.length);
-        }
-        streamOut.write(array);
-    }
-
-    protected static void writeArray(byte[] array, DataOutputStream streamOut)
-            throws IOException {
-        if (array.length >= 0xFFFF) {
-            streamOut.writeShort(0xFFFF);
-            streamOut.writeInt(array.length);
-        } else {
-            streamOut.writeShort(array.length);
-        }
-        streamOut.write(array);
+    public static TagStructure write(TagStructure tagStructure,
+            WritableByteStream stream) throws IOException {
+        return write(tagStructure, stream, (byte) -1);
     }
 
     public static TagStructure write(TagStructure tagStructure,
-            OutputStream streamOut) throws IOException {
-        write(tagStructure, streamOut, (byte) -1);
-        return tagStructure;
+            WritableByteStream stream, byte compression) throws IOException {
+        return write(tagStructure, stream, compression, true);
     }
 
     public static TagStructure write(TagStructure tagStructure,
-            OutputStream streamOut, byte compression) throws IOException {
-        write(tagStructure, streamOut, compression, true);
-        return tagStructure;
-    }
-
-    public static TagStructure write(TagStructure tagStructure,
-            OutputStream streamOut, byte compression, boolean useDictionary)
+            WritableByteStream stream, byte compression, boolean useDictionary)
             throws IOException {
-        tagStructure.write(new TagStructureWriterBinary(streamOut, compression,
-                useDictionary));
+        return write(tagStructure, stream, compression, useDictionary,
+                new ByteBufferStream());
+    }
+
+    public static TagStructure write(TagStructure tagStructure,
+            WritableByteStream stream, byte compression, boolean useDictionary,
+            ByteBufferStream compressionStream) throws IOException {
+        tagStructure.write(new TagStructureWriterBinary(stream, compression,
+                useDictionary, compressionStream));
         return tagStructure;
     }
 
-    public static TagStructure read(InputStream streamIn) throws IOException {
-        return read(new TagStructure(), streamIn);
+    public static TagStructure read(ReadableByteStream stream)
+            throws IOException {
+        return read(new TagStructure(), stream);
     }
 
     public static TagStructure read(TagStructure tagStructure,
-            InputStream streamIn) throws IOException {
-        tagStructure.read(new TagStructureReaderBinary(streamIn));
+            ReadableByteStream stream) throws IOException {
+        return read(tagStructure, stream, new ByteBufferStream());
+    }
+
+    public static TagStructure read(TagStructure tagStructure,
+            ReadableByteStream stream, ByteBufferStream compressionStream)
+            throws IOException {
+        tagStructure
+                .read(new TagStructureReaderBinary(stream, compressionStream));
         return tagStructure;
     }
 
@@ -162,13 +130,14 @@ public class TagStructureBinary {
         protected KeyDictionary() {
         }
 
-        protected KeyDictionary(DataInputStream streamIn) throws IOException {
-            int length = streamIn.readByte();
+        protected KeyDictionary(ReadableByteStream streamIn)
+                throws IOException {
+            int length = streamIn.get();
             if (length < 0) {
                 length += 256;
             }
             while (length-- > 0) {
-                addKeyAlias(readString(streamIn));
+                addKeyAlias(streamIn.getString());
             }
         }
 
@@ -224,10 +193,10 @@ public class TagStructureBinary {
             return keyAliasMap.get(key);
         }
 
-        protected void write(DataOutputStream streamOut) throws IOException {
-            streamOut.writeByte(keyAliases.size());
-            for (String key : keyAliases) {
-                writeString(key, streamOut);
+        protected void write(WritableByteStream output) throws IOException {
+            output.put(keyAliases.size());
+            for (String keyAlias : keyAliases) {
+                output.putString(keyAlias);
             }
         }
 

@@ -18,24 +18,25 @@ package org.tobi29.scapes.plugins;
 
 import org.tobi29.scapes.engine.utils.VersionUtil;
 import org.tobi29.scapes.engine.utils.io.ChecksumUtil;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
+import org.tobi29.scapes.engine.utils.io.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
 import java.util.zip.ZipFile;
 
 public class PluginFile {
-    private final File file;
+    private final Path path;
     private final byte[] checksum;
     private final String name, parent, mainClass;
     private final VersionUtil.Version version, scapesVersion;
 
-    public PluginFile(File file) throws IOException {
-        this.file = file;
-        checksum = ChecksumUtil.createChecksum(file.read());
-        try (ZipFile zip = file.readZIP()) {
+    public PluginFile(Path path) throws IOException {
+        this.path = path;
+        checksum = FileUtil.readReturn(path, ChecksumUtil::createChecksum);
+        try (ZipFile zip = new ZipFile(path.toFile())) {
             TagStructure tagStructure = TagStructureJSON
                     .read(zip.getInputStream(zip.getEntry("Plugin.json")));
             name = tagStructure.getString("Name");
@@ -57,8 +58,8 @@ public class PluginFile {
         return scapesVersion;
     }
 
-    public File getFile() {
-        return file;
+    public Path getFile() {
+        return path;
     }
 
     public String getName() {

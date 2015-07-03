@@ -63,7 +63,7 @@ public class MobFlyingBlockServer extends MobServer {
         if (ground) {
             int x = pos.intX(), y = pos.intY(),
                     z = pos.intZ();
-            if (!world.getTerrain().getBlockType(x, y, z)
+            if (!world.getTerrain().type(x, y, z)
                     .isReplaceable(world.getTerrain(), x, y, z)) {
                 double xx = pos.intX() + 0.5, yy = pos.intY() + 0.5;
                 if (pos.doubleX() == xx && pos.doubleY() == yy) {
@@ -79,9 +79,8 @@ public class MobFlyingBlockServer extends MobServer {
                 }
             } else if (FastMath.abs(speed.doubleX()) < 0.1 &&
                     FastMath.abs(speed.doubleY()) < 0.1) {
-                world.getTerrain().queueBlockChanges(handler -> handler
-                        .setBlockTypeAndData(x, y, z,
-                                (BlockType) item.getMaterial(),
+                world.getTerrain().queue(handler -> handler
+                        .typeData(x, y, z, (BlockType) item.getMaterial(),
                                 item.getData()));
                 world.deleteEntity(this);
             }

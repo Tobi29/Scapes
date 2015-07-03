@@ -20,6 +20,8 @@ import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.EntityContainerClient;
@@ -27,8 +29,6 @@ import org.tobi29.scapes.entity.server.EntityContainerServer;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -59,19 +59,19 @@ public class PacketInventoryInteraction extends Packet implements PacketServer {
     }
 
     @Override
-    public void sendServer(ClientConnection client, DataOutputStream streamOut)
+    public void sendServer(ClientConnection client, WritableByteStream stream)
             throws IOException {
-        streamOut.writeInt(entityID);
-        streamOut.writeInt(slot);
-        streamOut.writeByte(type);
+        stream.putInt(entityID);
+        stream.putInt(slot);
+        stream.put(type);
     }
 
     @Override
-    public void parseServer(PlayerConnection player, DataInputStream streamIn)
+    public void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException {
-        entityID = streamIn.readInt();
-        slot = streamIn.readInt();
-        type = streamIn.readByte();
+        entityID = stream.getInt();
+        slot = stream.getInt();
+        type = stream.get();
     }
 
     @Override

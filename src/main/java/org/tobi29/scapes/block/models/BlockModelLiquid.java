@@ -69,34 +69,30 @@ public class BlockModelLiquid implements BlockModel {
 
     protected static float calcHeight(int x, int y, int z, Terrain terrain,
             BlockType block) {
-        if (terrain.getBlockType(x, y, z + 1) == block ||
-                terrain.getBlockType(x - 1, y, z + 1) == block ||
-                terrain.getBlockType(x - 1, y - 1, z + 1) == block ||
-                terrain.getBlockType(x, y - 1, z + 1) == block) {
+        if (terrain.type(x, y, z + 1) == block ||
+                terrain.type(x - 1, y, z + 1) == block ||
+                terrain.type(x - 1, y - 1, z + 1) == block ||
+                terrain.type(x, y - 1, z + 1) == block) {
             return 1.0f;
         }
         float height = 0;
         int heights = 0;
-        if (terrain.getBlockType(x, y, z) == block) {
-            height += 1 -
-                    FastMath.max(0, terrain.getBlockData(x, y, z) - 1) / 7.0f;
+        if (terrain.type(x, y, z) == block) {
+            height += 1 - FastMath.max(0, terrain.data(x, y, z) - 1) / 7.0f;
             heights++;
         }
-        if (terrain.getBlockType(x - 1, y, z) == block) {
-            height += 1 -
-                    FastMath.max(0, terrain.getBlockData(x - 1, y, z) - 1) /
+        if (terrain.type(x - 1, y, z) == block) {
+            height += 1 - FastMath.max(0, terrain.data(x - 1, y, z) - 1) /
                             7.0f;
             heights++;
         }
-        if (terrain.getBlockType(x - 1, y - 1, z) == block) {
-            height += 1 -
-                    FastMath.max(0, terrain.getBlockData(x - 1, y - 1, z) - 1) /
+        if (terrain.type(x - 1, y - 1, z) == block) {
+            height += 1 - FastMath.max(0, terrain.data(x - 1, y - 1, z) - 1) /
                             7.0f;
             heights++;
         }
-        if (terrain.getBlockType(x, y - 1, z) == block) {
-            height += 1 -
-                    FastMath.max(0, terrain.getBlockData(x, y - 1, z) - 1) /
+        if (terrain.type(x, y - 1, z) == block) {
+            height += 1 - FastMath.max(0, terrain.data(x, y - 1, z) - 1) /
                             7.0f;
             heights++;
         }
@@ -115,7 +111,7 @@ public class BlockModelLiquid implements BlockModel {
         b *= this.b;
         a *= this.a;
         int connectStage = block.connectStage(terrain, x, y, z);
-        BlockType top = terrain.getBlockType(x, y, z + 1);
+        BlockType top = terrain.type(x, y, z + 1);
         float height00, height01, height11, height10;
         boolean flag = top != block;
         if (flag) {
@@ -154,7 +150,7 @@ public class BlockModelLiquid implements BlockModel {
             height01 = height00;
         }
         BlockType other;
-        other = terrain.getBlockType(x, y, z - 1);
+        other = terrain.type(x, y, z - 1);
         if (other != block &&
                 other.connectStage(terrain, x, y, z - 1) <= connectStage) {
             if (texBottom != null) {
@@ -174,7 +170,7 @@ public class BlockModelLiquid implements BlockModel {
                         anim);
             }
         }
-        other = terrain.getBlockType(x, y - 1, z);
+        other = terrain.type(x, y - 1, z);
         if (other != block &&
                 other.connectStage(terrain, x, y - 1, z) <= connectStage) {
             if (texSide1 != null) {
@@ -201,7 +197,7 @@ public class BlockModelLiquid implements BlockModel {
                         texSide1.getY() + terrainTile, r, g, b, a, lod, anim);
             }
         }
-        other = terrain.getBlockType(x + 1, y, z);
+        other = terrain.type(x + 1, y, z);
         if (other != block &&
                 other.connectStage(terrain, x + 1, y, z) <= connectStage) {
             if (texSide2 != null) {
@@ -228,7 +224,7 @@ public class BlockModelLiquid implements BlockModel {
                         texSide2.getY() + terrainTile, r, g, b, a, lod, anim);
             }
         }
-        other = terrain.getBlockType(x, y + 1, z);
+        other = terrain.type(x, y + 1, z);
         if (other != block &&
                 other.connectStage(terrain, x, y + 1, z) <= connectStage) {
             if (texSide3 != null) {
@@ -254,7 +250,7 @@ public class BlockModelLiquid implements BlockModel {
                         anim);
             }
         }
-        other = terrain.getBlockType(x - 1, y, z);
+        other = terrain.type(x - 1, y, z);
         if (other != block &&
                 other.connectStage(terrain, x - 1, y, z) <= connectStage) {
             if (texSide4 != null) {

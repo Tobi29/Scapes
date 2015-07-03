@@ -24,6 +24,7 @@ import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
+import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3;
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d;
@@ -58,8 +59,17 @@ public class MobModelItem implements MobModel {
     }
 
     @Override
-    public void renderUpdate(GraphicsSystem graphics, WorldClient world,
-            double delta) {
+    public void shapeAABB(AABB aabb) {
+        aabb.minX = pos.doubleX() - 0.1;
+        aabb.minY = pos.doubleY() - 0.1;
+        aabb.minZ = pos.doubleZ() - 0.1;
+        aabb.maxX = pos.doubleX() + 0.1;
+        aabb.maxY = pos.doubleY() + 0.1;
+        aabb.maxZ = pos.doubleZ() + 0.1;
+    }
+
+    @Override
+    public void renderUpdate(double delta) {
         double factor = FastMath.min(1.0, delta * 10.0);
         pos.plus(entity.getPos().minus(pos.now()).multiply(factor));
         dir += 45.0 * delta;
@@ -74,10 +84,10 @@ public class MobModelItem implements MobModel {
         float posRenderZ = (float) (pos.doubleZ() - cam.position.doubleZ());
         OpenGL openGL = graphics.getOpenGL();
         openGL.setAttribute2f(4, world.getTerrain()
-                        .getBlockLight(FastMath.floor(entity.getX()),
+                        .blockLight(FastMath.floor(entity.getX()),
                                 FastMath.floor(entity.getY()),
                                 FastMath.floor(entity.getZ())) / 15.0f,
-                world.getTerrain().getSunLight(FastMath.floor(entity.getX()),
+                world.getTerrain().sunLight(FastMath.floor(entity.getX()),
                         FastMath.floor(entity.getY()),
                         FastMath.floor(entity.getZ())) / 15.0f);
         MatrixStack matrixStack = graphics.getMatrixStack();

@@ -25,11 +25,11 @@ import org.tobi29.scapes.entity.server.MobPlayerServer;
 import java.util.Collection;
 
 public interface TerrainServer extends Terrain {
-    WorldServer getWorld();
-
-    void queueBlockChanges(BlockChanges blockChanges);
+    WorldServer world();
 
     void update(double delta, Collection<MobSpawner> spawners);
+
+    void queue(BlockChanges blockChanges);
 
     void addDelayedUpdate(Update update);
 
@@ -44,11 +44,10 @@ public interface TerrainServer extends Terrain {
     }
 
     interface TerrainMutable extends TerrainServer {
-        void setBlockType(int x, int y, int z, BlockType type);
+        void type(int x, int y, int z, BlockType type);
 
-        void setBlockData(int x, int y, int z, int data);
+        void data(int x, int y, int z, int data);
 
-        void setBlockTypeAndData(int x, int y, int z, BlockType block,
-                int data);
+        void typeData(int x, int y, int z, BlockType block, int data);
     }
 }

@@ -18,13 +18,13 @@ package org.tobi29.scapes.packets;
 
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.MobLivingClient;
 import org.tobi29.scapes.entity.server.MobLivingServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class PacketMobDamage extends Packet implements PacketClient {
@@ -50,19 +50,19 @@ public class PacketMobDamage extends Packet implements PacketClient {
     }
 
     @Override
-    public void sendClient(PlayerConnection player, DataOutputStream streamOut)
+    public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        streamOut.writeInt(entityId);
-        streamOut.writeDouble(lives);
-        streamOut.writeDouble(maxLives);
+        stream.putInt(entityId);
+        stream.putDouble(lives);
+        stream.putDouble(maxLives);
     }
 
     @Override
-    public void parseClient(ClientConnection client, DataInputStream streamIn)
+    public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        entityId = streamIn.readInt();
-        lives = streamIn.readDouble();
-        maxLives = streamIn.readDouble();
+        entityId = stream.getInt();
+        lives = stream.getDouble();
+        maxLives = stream.getDouble();
     }
 
     @Override

@@ -108,9 +108,8 @@ public class TerrainGenerator {
         output.river = river;
     }
 
-    public void generate(double x, double y, TerrainGeneratorOutput output) {
-        TerrainGeneratorLayer layer = new TerrainGeneratorLayer();
-        generate(x, y, layer);
+    public void generate(double x, double y, TerrainGeneratorLayer layer,
+            TerrainGeneratorOutput output) {
         double cave = FastMath.clamp(FastMath.sqr(1.0 - FastMath.abs(
                 caveNoise.noiseOctave(x / 128.0, y / 128.0, 2, 8.0, 0.1))) *
                 8.0 - 6.0, 0.0, 1.0);

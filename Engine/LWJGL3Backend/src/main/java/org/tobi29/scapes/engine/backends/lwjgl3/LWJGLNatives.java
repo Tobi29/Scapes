@@ -16,68 +16,64 @@
 
 package org.tobi29.scapes.engine.backends.lwjgl3;
 
+import org.lwjgl.LWJGLUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.ScapesEngineException;
+import org.tobi29.scapes.engine.utils.io.FileUtil;
 import org.tobi29.scapes.engine.utils.io.ProcessStream;
-import org.tobi29.scapes.engine.utils.io.filesystem.*;
-import org.tobi29.scapes.engine.utils.platform.Platform;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
+import org.tobi29.scapes.engine.utils.io.filesystem.Resource;
 
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 
 public final class LWJGLNatives {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(LWJGLNatives.class);
 
-    public static String extract(FileSystemContainer files) {
-        try {
-            Directory directory = files.getDirectory("Temp:natives");
-            directory.make();
-            Platform platform = Platform.getPlatform();
-            Path path = files.get("Class:native");
-            switch (platform.getID()) {
-                case "Linux": {
-                    if (platform.is64Bit()) {
-                        extract("liblwjgl.so", path, directory);
-                        extract("libopenal.so", path, directory);
-                    } else {
-                        extract("liblwjgl32.so", path, directory);
-                        extract("libopenal32.so", path, directory);
-                    }
-                    break;
+    public static void extract(FileSystemContainer files, Path path)
+            throws IOException {
+        String classpath = "Class:";
+        boolean is32Bit = !System.getProperty("os.arch").contains("64");
+        switch (LWJGLUtil.getPlatform()) {
+            case LINUX: {
+                if (is32Bit) {
+                    extract(files, "liblwjgl32.so", classpath, path);
+                    extract(files, "libopenal32.so", classpath, path);
+                } else {
+                    extract(files, "liblwjgl.so", classpath, path);
+                    extract(files, "libopenal.so", classpath, path);
                 }
-                case "MacOSX": {
-                    extract("liblwjgl.dylib", path, directory);
-                    extract("libopenal.dylib", path, directory);
-                    break;
-                }
-                case "Windows":
-                    if (platform.is64Bit()) {
-                        extract("lwjgl.dll", path, directory);
-                        extract("OpenAL.dll", path, directory);
-                    } else {
-                        extract("lwjgl32.dll", path, directory);
-                        extract("OpenAL32.dll", path, directory);
-                    }
-                    break;
-                default:
-                    throw new ScapesEngineException(
-                            "Unsupported platform:" + platform.getID());
+                break;
             }
-            return Paths.get(directory.getURI()).toAbsolutePath().toString();
-        } catch (IOException e) {
-            LOGGER.error("Failed to create temporary directory:", e);
+            case MACOSX: {
+                extract(files, "liblwjgl.dylib", classpath, path);
+                extract(files, "libopenal.dylib", classpath, path);
+                break;
+            }
+            case WINDOWS:
+                if (is32Bit) {
+                    extract(files, "lwjgl32.dll", classpath, path);
+                    extract(files, "OpenAL32.dll", classpath, path);
+                } else {
+                    extract(files, "lwjgl.dll", classpath, path);
+                    extract(files, "OpenAL.dll", classpath, path);
+                }
+                break;
+            default:
+                throw new ScapesEngineException(
+                        "Unsupported platform:" + LWJGLUtil.getPlatform());
         }
-        return System.getProperty("user.dir");
     }
 
-    private static void extract(String name, Path path, Directory directory)
-            throws IOException {
-        Resource resource = path.getResource(name);
+    private static void extract(FileSystemContainer files, String name,
+            String classpath, Path path) throws IOException {
+        Resource resource = files.get(classpath + name);
         if (resource.exists()) {
-            File file = directory.getResource(name);
-            ProcessStream.processSourceAndDestination(resource, file);
+            Path file = path.resolve(name);
+            FileUtil.write(file, stream -> ProcessStream
+                    .processSource(resource, stream::put));
         } else {
             LOGGER.warn("Native library not found in classpath: {}", name);
         }

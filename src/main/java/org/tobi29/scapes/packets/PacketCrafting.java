@@ -21,10 +21,10 @@ import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class PacketCrafting extends Packet implements PacketServer {
@@ -41,19 +41,19 @@ public class PacketCrafting extends Packet implements PacketServer {
     }
 
     @Override
-    public void sendServer(ClientConnection client, DataOutputStream streamOut)
+    public void sendServer(ClientConnection client, WritableByteStream stream)
             throws IOException {
-        streamOut.writeInt(type);
-        streamOut.writeInt(id);
-        streamOut.writeBoolean(table);
+        stream.putInt(type);
+        stream.putInt(id);
+        stream.putBoolean(table);
     }
 
     @Override
-    public void parseServer(PlayerConnection player, DataInputStream streamIn)
+    public void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException {
-        type = streamIn.readInt();
-        id = streamIn.readInt();
-        table = streamIn.readBoolean();
+        type = stream.getInt();
+        id = stream.getInt();
+        table = stream.getBoolean();
     }
 
     @Override

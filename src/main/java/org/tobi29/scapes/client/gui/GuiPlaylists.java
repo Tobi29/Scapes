@@ -23,14 +23,16 @@ import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiComponentPane;
 import org.tobi29.scapes.engine.gui.GuiComponentScrollPaneList;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
-import org.tobi29.scapes.engine.openal.codec.AudioInputStream;
 import org.tobi29.scapes.engine.utils.Pair;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
+import org.tobi29.scapes.engine.utils.io.FileUtil;
 
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class GuiPlaylists extends GuiMenu {
@@ -59,8 +61,9 @@ public class GuiPlaylists extends GuiMenu {
                 new GuiComponentTextButton(112, 370, 176, 30, 18, "Add");
         add.addLeftClick(event -> {
             try {
-                Directory directory = state.getEngine().getFiles()
-                        .getDirectory("File:playlists/" + playlist);
+                Path directory =
+                        state.getEngine().getHome().resolve("playlists")
+                                .resolve(playlist);
                 state.getEngine().getGraphics().getContainer()
                         .importFromUser(directory,
                                 new Pair[]{new Pair<>("*.*", "All Files"),
@@ -86,36 +89,44 @@ public class GuiPlaylists extends GuiMenu {
         elements.clear();
         this.playlist = playlist;
         try {
-            Directory directory = state.getEngine().getFiles()
-                    .getDirectory("File:playlists/" + playlist);
-            directory.listFilesRecursive(AudioInputStream::playable).stream()
-                    .sorted(Comparator.comparing(File::getName))
-                    .forEach(file -> {
-                        Element element = new Element(file.getName()
-                                .substring(0, file.getName().lastIndexOf('.')),
-                                file);
-                        elements.add(element);
-                        scrollPane.add(element);
-                    });
+            Path path = state.getEngine().getHome().resolve("playlists")
+                    .resolve(playlist);
+            List<Path> titles = new ArrayList<>();
+            Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file,
+                        BasicFileAttributes attrs) {
+                    titles.add(file);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+            for (Path title : titles) {
+                String fileName = title.getFileName().toString();
+                Element element = new Element(
+                        fileName.substring(0, fileName.lastIndexOf('.')),
+                        title);
+                elements.add(element);
+                scrollPane.add(element);
+            }
         } catch (IOException e) {
             LOGGER.warn("Failed to load playlist: {}", e.toString());
         }
     }
 
     private class Element extends GuiComponentPane {
-        public Element(String title, File file) {
+        public Element(String title, Path path) {
             super(0, 0, 378, 20);
             GuiComponentTextButton play =
                     new GuiComponentTextButton(20, 2, 30, 15, 12, "Play");
             play.addLeftClick(event -> state.getEngine().getSounds()
-                    .playMusic(file.getID(), 1.0f, 1.0f));
+                    .playMusic(FileUtil.read(path), 1.0f, 1.0f));
             GuiComponentTextButton label =
                     new GuiComponentTextButton(60, 2, 220, 15, 12, title);
             GuiComponentTextButton delete =
                     new GuiComponentTextButton(290, 2, 60, 15, 12, "Delete");
             delete.addLeftClick(event -> {
                 try {
-                    file.delete();
+                    Files.delete(path);
                     scrollPane.remove(this);
                 } catch (IOException e) {
                     LOGGER.warn("Failed to delete music: {}", e.toString());

@@ -46,7 +46,7 @@ public abstract class BlockSimpleData extends VanillaBlock {
     @Override
     public Optional<TerrainTexture> getParticleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
-        return Optional.of(textures[terrain.getBlockData(x, y, z)]);
+        return Optional.of(textures[terrain.data(x, y, z)]);
     }
 
     @Override

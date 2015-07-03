@@ -18,7 +18,6 @@ package org.tobi29.scapes.engine.utils.io.filesystem;
 
 import org.tobi29.scapes.engine.utils.Pair;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
@@ -27,77 +26,33 @@ public class FileSystemContainer implements Path {
     private static final Pattern SPLIT = Pattern.compile(":");
     private final Map<String, Path> fileSystems = new ConcurrentHashMap<>();
 
-    public void registerFileSystem(String id, PathRootCreator fileSystem)
-            throws IOException {
-        fileSystems.put(id, fileSystem.get(id + ':'));
-    }
-
-    public void registerFileSystem(String id, String root,
-            PathRootCreatorWithPath fileSystem) throws IOException {
-        fileSystems.put(id, fileSystem.get(id + ':', root));
+    public void registerFileSystem(String id, Path path) {
+        fileSystems.put(id, path);
     }
 
     public void removeFileSystem(String id) {
         fileSystems.remove(id);
     }
 
-    public Path getFileSystem(String id) throws IOException {
+    public Path getFileSystem(String id) {
         Path fileSystem = fileSystems.get(id);
         if (fileSystem == null) {
-            throw new IOException("Unknown file system: " + id);
+            throw new IllegalArgumentException("Unknown file system: " + id);
         }
         return fileSystem;
     }
 
     @Override
-    public String getID() {
-        throw new UnsupportedOperationException(
-                "Cannot get ID of root container");
-    }
-
-    @Override
-    public Path get(String path) throws IOException {
+    public Resource get(String path) {
         Pair<String, String> location = splitPath(path);
         return getFileSystem(location.a).get(location.b);
     }
 
-    @Override
-    public Resource getResource(String path) throws IOException {
-        Pair<String, String> location = splitPath(path);
-        return getFileSystem(location.a).getResource(location.b);
-    }
-
-    public Directory getDirectory(String path) throws IOException {
-        Path directory = get(path);
-        if (directory instanceof Directory) {
-            return (Directory) directory;
-        }
-        throw new IOException("Not a directory-based filesystem: " + path);
-    }
-
-    public File getFile(String path) throws IOException {
-        Resource file = getResource(path);
-        if (file instanceof File) {
-            return (File) file;
-        }
-        throw new IOException("Not a file-based filesystem: " + path);
-    }
-
-    private Pair<String, String> splitPath(String path) throws IOException {
+    private Pair<String, String> splitPath(String path) {
         String[] array = SPLIT.split(path, 2);
         if (array.length != 2) {
-            throw new IOException("Invalid path: " + path);
+            throw new IllegalArgumentException("Invalid path: " + path);
         }
         return new Pair<>(array[0], array[1]);
-    }
-
-    @FunctionalInterface
-    public interface PathRootCreator {
-        PathRoot get(String id) throws IOException;
-    }
-
-    @FunctionalInterface
-    public interface PathRootCreatorWithPath {
-        PathRoot get(String id, String path) throws IOException;
     }
 }

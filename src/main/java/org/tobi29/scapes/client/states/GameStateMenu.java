@@ -26,9 +26,9 @@ import org.tobi29.scapes.connection.Account;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.utils.Sync;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 public class GameStateMenu extends GameState {
     private static final Logger LOGGER =
@@ -46,7 +46,7 @@ public class GameStateMenu extends GameState {
     @Override
     public void init() {
         try {
-            File file = engine.getFiles().getFile("File:Account.properties");
+            Path file = engine.getHome().resolve("Account.properties");
             Account.Client account = Account.read(file);
             if (account.valid()) {
                 add(new GuiMainMenu(this));
@@ -68,11 +68,6 @@ public class GameStateMenu extends GameState {
 
     @Override
     public boolean isThreaded() {
-        return false;
-    }
-
-    @Override
-    public boolean forceRender() {
         return false;
     }
 

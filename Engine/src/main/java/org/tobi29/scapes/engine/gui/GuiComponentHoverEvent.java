@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.chunk.generator;
+package org.tobi29.scapes.engine.gui;
 
-import org.tobi29.scapes.chunk.data.ChunkData;
-import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteChunkServer;
+public class GuiComponentHoverEvent extends GuiComponentEvent {
+    private final State state;
 
-public interface ChunkGeneratorInfinite {
-    void makeLand(int x, int y, TerrainInfiniteChunkServer chunk, ChunkData bId,
-            ChunkData bData);
+    public GuiComponentHoverEvent(double x, double y, State state) {
+        super(x, y);
+        this.state = state;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public enum State {
+        ENTER,
+        HOVER
+    }
 }

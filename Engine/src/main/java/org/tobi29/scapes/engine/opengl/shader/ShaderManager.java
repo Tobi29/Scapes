@@ -51,12 +51,11 @@ public class ShaderManager {
         try {
             Properties properties = new Properties();
             FileSystemContainer files = engine.getFiles();
-            Resource vertexResource = files.getResource(asset + ".vsh");
-            Resource fragmentResource = files.getResource(asset + ".fsh");
-            Resource propertiesResource =
-                    files.getResource(asset + ".properties");
+            Resource vertexResource = files.get(asset + ".vsh");
+            Resource fragmentResource = files.get(asset + ".fsh");
+            Resource propertiesResource = files.get(asset + ".properties");
             if (propertiesResource.exists()) {
-                properties.load(propertiesResource.read());
+                properties.load(propertiesResource.readIO());
             }
             Shader shader =
                     new Shader(vertexResource, fragmentResource, properties,

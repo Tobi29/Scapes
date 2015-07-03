@@ -20,12 +20,15 @@ import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.engine.opengl.GraphicsSystem;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
+import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 
 public interface EntityModel {
     Vector3 getPos();
 
-    void renderUpdate(GraphicsSystem graphics, WorldClient world, double delta);
+    void shapeAABB(AABB aabb);
+
+    void renderUpdate(double delta);
 
     void render(GraphicsSystem graphics, WorldClient world, Cam cam,
             Shader shader);

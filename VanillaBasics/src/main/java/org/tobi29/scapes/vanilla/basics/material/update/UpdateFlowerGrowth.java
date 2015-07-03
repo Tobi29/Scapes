@@ -30,40 +30,39 @@ import java.util.concurrent.ThreadLocalRandom;
 public class UpdateFlowerGrowth extends Update {
     @Override
     public void run(TerrainServer.TerrainMutable terrain) {
-        VanillaBasics plugin = (VanillaBasics) terrain.getWorld().getPlugins()
+        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
                 .getPlugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
-        BlockType type = terrain.getBlockType(x, y, z);
+        BlockType type = terrain.type(x, y, z);
         if (type == materials.air) {
-            if (terrain.getSunLight(x, y, z) >= 12 &&
-                    terrain.getBlockType(x, y, z - 1) == materials.grass) {
+            if (terrain.sunLight(x, y, z) >= 12 &&
+                    terrain.type(x, y, z - 1) == materials.grass) {
                 int flowers = 0;
                 List<Integer> datas = new ArrayList<>();
                 for (int xx = -4; xx < 5; xx++) {
                     for (int yy = -4; yy < 5; yy++) {
                         for (int zz = -4; zz < 5; zz++) {
-                            if (terrain.getBlockType(x + xx, y + yy, z + zz) ==
+                            if (terrain.type(x + xx, y + yy, z + zz) ==
                                     materials.flower) {
                                 if (flowers++ > 1) {
                                     return;
                                 }
-                                datas.add(terrain.getBlockData(x + xx, y + yy,
-                                        z + zz));
+                                datas.add(terrain.data(x + xx, y + yy, z + zz));
                             }
                         }
                     }
                 }
                 if (datas.isEmpty()) {
-                    terrain.setBlockTypeAndData(x, y, z, materials.flower,
+                    terrain.typeData(x, y, z, materials.flower,
                             (short) new Random().nextInt(20));
                 } else {
-                    terrain.setBlockTypeAndData(x, y, z, materials.flower,
+                    terrain.typeData(x, y, z, materials.flower,
                             datas.get(new Random().nextInt(datas.size())));
                 }
             }
         } else if (type == materials.snow) {
-            if (terrain.getSunLight(x, y, z) >= 12 &&
-                    terrain.getBlockType(x, y, z - 1) == materials.grass) {
+            if (terrain.sunLight(x, y, z) >= 12 &&
+                    terrain.type(x, y, z - 1) == materials.grass) {
                 Random random = ThreadLocalRandom.current();
                 terrain.addDelayedUpdate(new UpdateFlowerGrowth()
                         .set(x, y, z, random.nextDouble() * 3600.0 + 3600.0));

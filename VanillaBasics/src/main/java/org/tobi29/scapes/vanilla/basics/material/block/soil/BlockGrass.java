@@ -68,31 +68,30 @@ public class BlockGrass extends VanillaBlock {
     public boolean destroy(TerrainServer.TerrainMutable terrain, int x, int y,
             int z, Face face, MobPlayerServer player, ItemStack item) {
         if ("Hoe".equals(item.getMaterial().getToolType(item))) {
-            if (terrain.getBlockData(x, y, z) > 0) {
+            if (terrain.data(x, y, z) > 0) {
                 if (item.getMaterial().getToolLevel(item) >= 10) {
-                    terrain.getWorld().dropItem(
+                    terrain.world().dropItem(
                             new ItemStack(materials.grassBundle, (short) 0,
-                                    terrain.getBlockData(x, y, z)), x, y,
+                                    terrain.data(x, y, z)), x, y,
                             z + 1);
-                    terrain.setBlockData(x, y, z, (short) 0);
+                    terrain.data(x, y, z, (short) 0);
                 } else {
-                    terrain.getWorld().dropItem(
+                    terrain.world().dropItem(
                             new ItemStack(materials.grassBundle, (short) 0), x,
                             y, z + 1);
-                    terrain.setBlockData(x, y, z,
-                            (short) (terrain.getBlockData(x, y, z) - 1));
+                    terrain.data(x, y, z, (short) (terrain.data(x, y, z) - 1));
                 }
                 Random random = ThreadLocalRandom.current();
                 if (random.nextInt(40) == 0) {
-                    terrain.getWorld().dropItem(new ItemStack(materials.seed,
+                    terrain.world().dropItem(new ItemStack(materials.seed,
                                     (short) random.nextInt(
                                             cropRegistry.values().size())), x,
                             y, z + 1);
                 }
             } else {
-                terrain.setBlockType(x, y, z, materials.farmland);
-                terrain.getWorld().addEntity(
-                        new EntityFarmlandServer(terrain.getWorld(),
+                terrain.type(x, y, z, materials.farmland);
+                terrain.world()
+                        .addEntity(new EntityFarmlandServer(terrain.world(),
                                 new Vector3d(x + 0.5, y + 0.5, z + 0.5), 0.5f,
                                 0.5f, 0.5f));
             }
@@ -130,7 +129,7 @@ public class BlockGrass extends VanillaBlock {
             return 1.0f;
         } else {
             WorldEnvironmentOverworld environment =
-                    (WorldEnvironmentOverworld) terrain.getWorld()
+                    (WorldEnvironmentOverworld) terrain.world()
                             .getEnvironment();
             ClimateGenerator climateGenerator =
                     environment.getClimateGenerator();
@@ -147,7 +146,7 @@ public class BlockGrass extends VanillaBlock {
             return 1.0f;
         } else {
             WorldEnvironmentOverworld environment =
-                    (WorldEnvironmentOverworld) terrain.getWorld()
+                    (WorldEnvironmentOverworld) terrain.world()
                             .getEnvironment();
             ClimateGenerator climateGenerator =
                     environment.getClimateGenerator();
@@ -164,7 +163,7 @@ public class BlockGrass extends VanillaBlock {
             return 1.0f;
         } else {
             WorldEnvironmentOverworld environment =
-                    (WorldEnvironmentOverworld) terrain.getWorld()
+                    (WorldEnvironmentOverworld) terrain.world()
                             .getEnvironment();
             ClimateGenerator climateGenerator =
                     environment.getClimateGenerator();
@@ -188,7 +187,7 @@ public class BlockGrass extends VanillaBlock {
             TerrainClient terrain, TerrainRenderInfo info, int x, int y, int z,
             float xx, float yy, float zz, boolean lod) {
         WorldEnvironmentOverworld environment =
-                (WorldEnvironmentOverworld) terrain.getWorld().getEnvironment();
+                (WorldEnvironmentOverworld) terrain.world().getEnvironment();
         ClimateGenerator climateGenerator = environment.getClimateGenerator();
         ClimateInfoLayer climateLayer = info.get("VanillaBasics:Climate");
         double temperature = climateLayer.getTemperature(x, y, z);
@@ -209,7 +208,7 @@ public class BlockGrass extends VanillaBlock {
                                 1.0f, 1.0f, 1.0f, 1.0f, lod);
             }
             if (data > 0) {
-                if (terrain.getBlockType(x, y, z + 1) == materials.air) {
+                if (terrain.type(x, y, z + 1) == materials.air) {
                     modelsTallGrass[data]
                             .addToChunkMesh(mesh, terrain, x, y, z + 1, xx, yy,
                                     zz + 1, (float) grassR, (float) grassG,
@@ -236,11 +235,10 @@ public class BlockGrass extends VanillaBlock {
     @Override
     public void update(TerrainServer.TerrainMutable terrain, int x, int y,
             int z) {
-        if (terrain.getBlockLight(x, y, z + 1) <= 0 &&
-                terrain.getSunLight(x, y, z + 1) <= 0 ||
-                !terrain.getBlockType(x, y, z + 1)
+        if (terrain.blockLight(x, y, z + 1) <= 0 &&
+                terrain.sunLight(x, y, z + 1) <= 0 || !terrain.type(x, y, z + 1)
                         .isTransparent(terrain, x, y, z + 1)) {
-            terrain.setBlockTypeAndData(x, y, z, materials.dirt, (short) 0);
+            terrain.typeData(x, y, z, materials.dirt, (short) 0);
         }
         if (terrain.getHighestTerrainBlockZAt(x, y) > z + 1 &&
                 !terrain.hasDelayedUpdate(x, y, z)) {

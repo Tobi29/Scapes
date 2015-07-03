@@ -29,12 +29,12 @@ public class UpdateWaterFlow extends Update {
     private static boolean flow(TerrainServer.TerrainMutable terrain, int x,
             int y, int z, VanillaMaterial materials,
             GameRegistry.Registry<StoneType> stoneRegistry) {
-        BlockType type = terrain.getBlockType(x, y, z);
+        BlockType type = terrain.type(x, y, z);
         if (type.isReplaceable(terrain, x, y, z)) {
-            int dataHas = terrain.getBlockData(x, y, z);
+            int dataHas = terrain.data(x, y, z);
             if (dataHas > 0 || type != materials.water) {
                 short dataNeed = 6;
-                if (terrain.getBlockType(x, y, z + 1) == materials.water) {
+                if (terrain.type(x, y, z + 1) == materials.water) {
                     dataNeed = 1;
                 } else {
                     dataNeed =
@@ -49,18 +49,16 @@ public class UpdateWaterFlow extends Update {
                 dataNeed++;
                 if (dataNeed <= 6) {
                     if (dataNeed != dataHas || type != materials.water) {
-                        if (terrain.getBlockType(x, y, z) == materials.lava) {
-                            terrain.setBlockTypeAndData(x, y, z,
-                                    materials.cobblestone,
+                        if (terrain.type(x, y, z) == materials.lava) {
+                            terrain.typeData(x, y, z, materials.cobblestone,
                                     stoneRegistry.get(StoneType.BASALT));
                         } else {
-                            terrain.setBlockTypeAndData(x, y, z,
-                                    materials.water, dataNeed);
+                            terrain.typeData(x, y, z, materials.water,
+                                    dataNeed);
                         }
                     }
                 } else if (type == materials.water) {
-                    terrain.setBlockTypeAndData(x, y, z, materials.air,
-                            (short) 0);
+                    terrain.typeData(x, y, z, materials.air, (short) 0);
                 }
             }
             return false;
@@ -70,9 +68,9 @@ public class UpdateWaterFlow extends Update {
 
     private static short getData(TerrainServer terrain, int x, int y, int z,
             short oldData, VanillaMaterial materials) {
-        if (terrain.getBlockType(x, y, z) == materials.water) {
-            short data = (short) (
-                    FastMath.max(0, terrain.getBlockData(x, y, z) - 1) + 1);
+        if (terrain.type(x, y, z) == materials.water) {
+            short data = (short) (FastMath.max(0, terrain.data(x, y, z) - 1) +
+                    1);
             if (data < oldData) {
                 return data;
             }
@@ -82,10 +80,10 @@ public class UpdateWaterFlow extends Update {
 
     @Override
     public void run(TerrainServer.TerrainMutable terrain) {
-        VanillaBasics plugin = (VanillaBasics) terrain.getWorld().getPlugins()
+        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
                 .getPlugin("VanillaBasics");
         GameRegistry.Registry<StoneType> stoneRegistry =
-                terrain.getWorld().getRegistry()
+                terrain.world().getRegistry()
                         .get("VanillaBasics", "StoneType");
         VanillaMaterial materials = plugin.getMaterials();
         flow(terrain, x, y, z, materials, stoneRegistry);
@@ -99,7 +97,7 @@ public class UpdateWaterFlow extends Update {
 
     @Override
     public boolean isValidOn(BlockType type, TerrainServer terrain) {
-        VanillaBasics plugin = (VanillaBasics) terrain.getWorld().getPlugins()
+        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
                 .getPlugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         return type == materials.water;

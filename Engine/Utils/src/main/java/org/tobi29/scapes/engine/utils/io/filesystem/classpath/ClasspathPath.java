@@ -19,44 +19,36 @@ package org.tobi29.scapes.engine.utils.io.filesystem.classpath;
 import org.tobi29.scapes.engine.utils.io.filesystem.Path;
 import org.tobi29.scapes.engine.utils.io.filesystem.Resource;
 
-import java.io.IOException;
-
 public class ClasspathPath implements Path {
-    final ClassLoader classLoader;
-    final String id, path;
+    private final ClassLoader classLoader;
+    private final String path;
 
-    public ClasspathPath(ClassLoader classLoader, String id, String path) {
+    public ClasspathPath(ClassLoader classLoader, String path) {
         this.classLoader = classLoader;
-        this.id = id;
         this.path = path;
     }
 
     @Override
-    public String getID() {
-        return id;
-    }
-
-    @Override
-    public Path get(String path) throws IOException {
-        if (path.isEmpty()) {
-            return this;
-        }
-        return new ClasspathPath(classLoader, id + path + '/',
-                this.path + path + '/');
-    }
-
-    @Override
-    public Resource getResource(String path) throws IOException {
-        return new ClasspathResource(classLoader, this.path + path, id + path);
+    public Resource get(String path) {
+        return new ClasspathResource(classLoader, this.path + path);
     }
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        int prime = 31;
+        int result = 1;
+        result = prime * result + path.hashCode();
+        result = prime * result + classLoader.hashCode();
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof Path && ((Path) obj).getID().equals(id);
+        if (!(obj instanceof ClasspathPath)) {
+            return false;
+        }
+        ClasspathPath resource = (ClasspathPath) obj;
+        return path.equals(resource.path) &&
+                classLoader.equals(resource.classLoader);
     }
 }

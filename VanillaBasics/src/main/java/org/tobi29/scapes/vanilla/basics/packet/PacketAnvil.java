@@ -20,6 +20,8 @@ import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.Material;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.packets.Packet;
@@ -34,8 +36,6 @@ import org.tobi29.scapes.vanilla.basics.material.item.ItemIngot;
 import org.tobi29.scapes.vanilla.basics.material.item.ItemOreChunk;
 import org.tobi29.scapes.vanilla.basics.util.ToolUtil;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class PacketAnvil extends Packet implements PacketServer {
@@ -50,17 +50,17 @@ public class PacketAnvil extends Packet implements PacketServer {
     }
 
     @Override
-    public void sendServer(ClientConnection client, DataOutputStream streamOut)
+    public void sendServer(ClientConnection client, WritableByteStream stream)
             throws IOException {
-        streamOut.writeInt(entityID);
-        streamOut.writeInt(id);
+        stream.putInt(entityID);
+        stream.putInt(id);
     }
 
     @Override
-    public void parseServer(PlayerConnection player, DataInputStream streamIn)
+    public void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException {
-        entityID = streamIn.readInt();
-        id = streamIn.readInt();
+        entityID = stream.getInt();
+        id = stream.getInt();
     }
 
     @Override

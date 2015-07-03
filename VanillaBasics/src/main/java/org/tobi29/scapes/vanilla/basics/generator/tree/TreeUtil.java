@@ -40,9 +40,9 @@ public final class TreeUtil {
 
     public static void changeBlock(TerrainServer.TerrainMutable terrain, int x,
             int y, int z, BlockType type, short data) {
-        if (terrain.getBlockType(x, y, z).isReplaceable(terrain, x, y, z) ||
-                terrain.getBlockType(x, y, z).isTransparent(terrain, x, y, z)) {
-            terrain.setBlockTypeAndData(x, y, z, type, data);
+        if (terrain.type(x, y, z).isReplaceable(terrain, x, y, z) ||
+                terrain.type(x, y, z).isTransparent(terrain, x, y, z)) {
+            terrain.typeData(x, y, z, type, data);
         }
     }
 
@@ -146,9 +146,9 @@ public final class TreeUtil {
     public static void fillGround(TerrainServer.TerrainMutable terrain, int x,
             int y, int z, BlockType type, short data, int maxDepth) {
         for (int i = 0; i < maxDepth; i++) {
-            if (terrain.getBlockType(x, y, z - i)
+            if (terrain.type(x, y, z - i)
                     .isReplaceable(terrain, x, y, z - i)) {
-                terrain.setBlockTypeAndData(x, y, z - i, type, data);
+                terrain.typeData(x, y, z - i, type, data);
             } else {
                 return;
             }

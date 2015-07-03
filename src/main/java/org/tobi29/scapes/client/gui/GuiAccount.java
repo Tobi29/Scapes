@@ -23,9 +23,9 @@ import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.io.ChecksumUtil;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.security.KeyPair;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -41,8 +41,8 @@ public class GuiAccount extends GuiMenu {
     public GuiAccount(GameState state, Gui previous) {
         super(state, "Account", "Save", previous);
         try {
-            Account.Client account = Account.read(state.getEngine().getFiles()
-                    .getFile("File:Account.properties"));
+            Account.Client account = Account.read(
+                    state.getEngine().getHome().resolve("Account.properties"));
             keyPair = account.getKeyPair();
             nickname = account.getNickname();
         } catch (IOException e) {
@@ -82,10 +82,9 @@ public class GuiAccount extends GuiMenu {
                 new GuiComponentTextButton(112, 260, 176, 30, 18, "Skin");
         skin.addLeftClick(event -> {
             try {
-                File file =
-                        state.getEngine().getFiles().getFile("File:Skin.png");
+                Path path = state.getEngine().getHome().resolve("Skin.png");
                 state.getEngine().getGraphics().getContainer()
-                        .importFromUser(file,
+                        .importFromUser(path,
                                 new Pair[]{new Pair<>("*.png", "PNG Picture")},
                                 "Import skin");
             } catch (IOException e) {
@@ -100,8 +99,8 @@ public class GuiAccount extends GuiMenu {
             }
             try {
                 new Account.Client(keyPair, this.nickname)
-                        .write(state.getEngine().getFiles()
-                                .getFile("File:Account.properties"));
+                        .write(state.getEngine().getHome()
+                                .resolve("Account.properties"));
             } catch (IOException e) {
                 LOGGER.error("Failed to write account file: {}", e.toString());
             }

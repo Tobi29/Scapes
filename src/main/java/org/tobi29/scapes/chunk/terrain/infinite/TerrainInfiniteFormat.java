@@ -18,15 +18,15 @@ package org.tobi29.scapes.chunk.terrain.infinite;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
+import org.tobi29.scapes.engine.utils.io.ByteBufferStream;
+import org.tobi29.scapes.engine.utils.io.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureArchive;
-import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,20 +35,15 @@ import java.util.stream.Collectors;
 public class TerrainInfiniteFormat {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(TerrainInfiniteFormat.class);
-    private final Directory directory;
+    private final Path path;
     private final Map<Vector2i, RegionFile> regions = new ConcurrentHashMap<>();
     private final TerrainInfinite terrain;
-    private final ByteArrayOutputStream byteStreamOut =
-            new ByteArrayOutputStream(0x2000);
+    private final ByteBufferStream byteStream = new ByteBufferStream(),
+            compressionStream = new ByteBufferStream();
 
-    public TerrainInfiniteFormat(Directory directory, TerrainInfinite terrain) {
-        this.directory = directory;
+    public TerrainInfiniteFormat(Path path, TerrainInfinite terrain) {
+        this.path = path;
         this.terrain = terrain;
-        try {
-            directory.make();
-        } catch (IOException e) {
-            LOGGER.warn("Failed to create directory: {}", e.toString());
-        }
     }
 
     private static String getFilename(int x, int y) {
@@ -58,8 +53,7 @@ public class TerrainInfiniteFormat {
 
     public synchronized Optional<TagStructure> getChunkTag(int x, int y)
             throws IOException {
-        Vector2i location = new Vector2i(FastMath.floor((double) x / 16),
-                FastMath.floor((double) y / 16));
+        Vector2i location = new Vector2i(x >> 4, y >> 4);
         RegionFile region = regions.get(location);
         if (region == null) {
             region = createRegion(location);
@@ -71,8 +65,7 @@ public class TerrainInfiniteFormat {
 
     public synchronized void putChunkTag(int x, int y, TagStructure tag)
             throws IOException {
-        Vector2i location = new Vector2i(FastMath.floor((double) x / 16),
-                FastMath.floor((double) y / 16));
+        Vector2i location = new Vector2i(x >> 4, y >> 4);
         RegionFile region = regions.get(location);
         if (region == null) {
             region = createRegion(location);
@@ -86,9 +79,8 @@ public class TerrainInfiniteFormat {
     }
 
     private RegionFile createRegion(Vector2i location) throws IOException {
-        RegionFile region = new RegionFile(directory.getResource(
-                getFilename(location.intX(), location.intY()) + ".star"),
-                byteStreamOut);
+        RegionFile region = new RegionFile(path.resolve(
+                getFilename(location.intX(), location.intY()) + ".star"));
         regions.keySet().stream().filter(this::checkRegionUnused)
                 .collect(Collectors.toList()).forEach(this::removeRegion);
         regions.put(location, region);
@@ -116,21 +108,20 @@ public class TerrainInfiniteFormat {
         }
     }
 
-    private static class RegionFile {
-        private final File file;
+    private class RegionFile {
+        private final Path path;
         private final TagStructureArchive tag;
 
-        public RegionFile(File file, ByteArrayOutputStream byteStreamOut)
-                throws IOException {
-            this.file = file;
-            tag = new TagStructureArchive(byteStreamOut);
-            if (file.exists()) {
-                file.read(tag::read);
+        private RegionFile(Path path) throws IOException {
+            this.path = path;
+            tag = new TagStructureArchive(byteStream, compressionStream);
+            if (Files.exists(path)) {
+                FileUtil.read(path, tag::read);
             }
         }
 
         private void write() throws IOException {
-            file.write(tag::write);
+            FileUtil.write(path, tag::write);
         }
     }
 }

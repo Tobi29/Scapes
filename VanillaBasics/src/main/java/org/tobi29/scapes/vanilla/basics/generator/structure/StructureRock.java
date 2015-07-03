@@ -38,8 +38,7 @@ public final class StructureRock {
                         } else {
                             type = stone;
                         }
-                        terrain.setBlockTypeAndData(x + xx, y + yy, z + zz,
-                                type, data);
+                        terrain.typeData(x + xx, y + yy, z + zz, type, data);
                     }
                 }
             }

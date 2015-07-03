@@ -81,7 +81,7 @@ public class BlockLeaves extends VanillaBlock {
     @Override
     public boolean destroy(TerrainServer.TerrainMutable terrain, int x, int y,
             int z, Face face, MobPlayerServer player, ItemStack item) {
-        destroy(terrain, new Vector3i(x, y, z), terrain.getBlockData(x, y, z),
+        destroy(terrain, new Vector3i(x, y, z), terrain.data(x, y, z),
                 256);
         return true;
     }
@@ -119,9 +119,9 @@ public class BlockLeaves extends VanillaBlock {
     @Override
     public float getParticleColorR(Face face, TerrainClient terrain, int x,
             int y, int z) {
-        TreeType type = treeRegistry.get(terrain.getBlockData(x, y, z));
+        TreeType type = treeRegistry.get(terrain.data(x, y, z));
         WorldEnvironmentOverworld environment =
-                (WorldEnvironmentOverworld) terrain.getWorld().getEnvironment();
+                (WorldEnvironmentOverworld) terrain.world().getEnvironment();
         ClimateGenerator climateGenerator = environment.getClimateGenerator();
         double temperature = climateGenerator.getTemperature(x, y, z);
         double mix = FastMath.clamp(temperature / 30.0f, 0.0f, 1.0f);
@@ -139,9 +139,9 @@ public class BlockLeaves extends VanillaBlock {
     @Override
     public float getParticleColorG(Face face, TerrainClient terrain, int x,
             int y, int z) {
-        TreeType type = treeRegistry.get(terrain.getBlockData(x, y, z));
+        TreeType type = treeRegistry.get(terrain.data(x, y, z));
         WorldEnvironmentOverworld environment =
-                (WorldEnvironmentOverworld) terrain.getWorld().getEnvironment();
+                (WorldEnvironmentOverworld) terrain.world().getEnvironment();
         ClimateGenerator climateGenerator = environment.getClimateGenerator();
         double temperature = climateGenerator.getTemperature(x, y, z);
         double mix = FastMath.clamp(temperature / 30.0f, 0.0f, 1.0f);
@@ -159,9 +159,9 @@ public class BlockLeaves extends VanillaBlock {
     @Override
     public float getParticleColorB(Face face, TerrainClient terrain, int x,
             int y, int z) {
-        TreeType type = treeRegistry.get(terrain.getBlockData(x, y, z));
+        TreeType type = treeRegistry.get(terrain.data(x, y, z));
         WorldEnvironmentOverworld environment =
-                (WorldEnvironmentOverworld) terrain.getWorld().getEnvironment();
+                (WorldEnvironmentOverworld) terrain.world().getEnvironment();
         ClimateGenerator climateGenerator = environment.getClimateGenerator();
         double temperature = climateGenerator.getTemperature(x, y, z);
         double mix = FastMath.clamp(temperature / 30.0f, 0.0f, 1.0f);
@@ -179,7 +179,7 @@ public class BlockLeaves extends VanillaBlock {
     @Override
     public Optional<TerrainTexture> getParticleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
-        return Optional.of(texturesFancy[terrain.getBlockData(x, y, z)]);
+        return Optional.of(texturesFancy[terrain.data(x, y, z)]);
     }
 
     @Override
@@ -217,7 +217,7 @@ public class BlockLeaves extends VanillaBlock {
                     FastMath.mix(colorCold.floatZ(), colorWarm.floatZ(), mix);
             if (!type.isEvergreen()) {
                 WorldEnvironmentOverworld environment =
-                        (WorldEnvironmentOverworld) terrain.getWorld()
+                        (WorldEnvironmentOverworld) terrain.world()
                                 .getEnvironment();
                 ClimateGenerator climateGenerator =
                         environment.getClimateGenerator();
@@ -318,8 +318,8 @@ public class BlockLeaves extends VanillaBlock {
 
     private void destroy(TerrainServer.TerrainMutable terrain, Vector3 pos,
             int data, int length) {
-        if (terrain.getBlockType(pos.intX(), pos.intY(), pos.intZ()) != this ||
-                terrain.getBlockData(pos.intX(), pos.intY(), pos.intZ()) !=
+        if (terrain.type(pos.intX(), pos.intY(), pos.intZ()) != this ||
+                terrain.data(pos.intX(), pos.intY(), pos.intZ()) !=
                         data) {
             return;
         }
@@ -329,14 +329,14 @@ public class BlockLeaves extends VanillaBlock {
         checks.push().set(pos);
         for (int i = 0; i < 5 && !checks.isEmpty(); i++) {
             for (MutableVector3 check : checks) {
-                if (terrain.getBlockData(check.intX(), check.intY(),
-                        check.intZ()) == data) {
-                    if (terrain.getBlockType(check.intX(), check.intY(),
-                            check.intZ()) == materials.log) {
+                if (terrain.data(check.intX(), check.intY(), check.intZ()) ==
+                        data) {
+                    if (terrain
+                            .type(check.intX(), check.intY(), check.intZ()) ==
+                            materials.log) {
                         return;
                     }
-                    if (i < 10 &&
-                            terrain.getBlockType(check.intX(), check.intY(),
+                    if (i < 10 && terrain.type(check.intX(), check.intY(),
                                     check.intZ()) == this) {
                         checks2.push().set(check.intX(), check.intY(),
                                 check.intZ() + 1);
@@ -358,13 +358,13 @@ public class BlockLeaves extends VanillaBlock {
             checks = checks2;
             checks2 = checksSwap;
         }
-        terrain.getWorld().dropItems(
+        terrain.world().dropItems(
                 getDrops(new ItemStack(materials.air, (short) 0),
-                        terrain.getBlockData(pos.intX(), pos.intY(),
-                                pos.intZ())), pos.intX(), pos.intY(),
+                        terrain.data(pos.intX(), pos.intY(), pos.intZ())),
+                pos.intX(), pos.intY(),
                 pos.intZ());
-        terrain.setBlockTypeAndData(pos.intX(), pos.intY(), pos.intZ(),
-                materials.air, (short) 0);
+        terrain.typeData(pos.intX(), pos.intY(), pos.intZ(), materials.air,
+                (short) 0);
         if (length-- > 0) {
             destroy(terrain, pos.plus(new Vector3i(-1, -1, -1)), data, length);
             destroy(terrain, pos.plus(new Vector3i(0, -1, -1)), data, length);
@@ -401,7 +401,7 @@ public class BlockLeaves extends VanillaBlock {
             int xx = x + face.getX();
             int yy = y + face.getY();
             int zz = z + face.getZ();
-            if (terrain.getBlockType(xx, yy, zz)
+            if (terrain.type(xx, yy, zz)
                     .isReplaceable(terrain, xx, yy, zz)) {
                 return false;
             }

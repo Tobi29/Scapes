@@ -71,8 +71,8 @@ public class TerrainTextureRegistry {
             try {
                 Image source = sources.get(paths[0]);
                 if (source == null) {
-                    source = engine.getFiles().getResource(paths[0])
-                            .readAndReturn(streamIn -> PNG.decode(streamIn,
+                    source = engine.getFiles().get(paths[0])
+                            .readReturn(streamIn -> PNG.decode(streamIn,
                                     BufferCreator::byteBuffer));
                     sources.put(paths[0], source);
                 }
@@ -87,10 +87,9 @@ public class TerrainTextureRegistry {
                     for (int i = 1; i < paths.length; i++) {
                         Image layer = sources.get(paths[i]);
                         if (layer == null) {
-                            layer = engine.getFiles().getResource(paths[i])
-                                    .readAndReturn(streamIn -> PNG
-                                            .decode(streamIn,
-                                                    BufferCreator::byteBuffer));
+                            layer = engine.getFiles().get(paths[i]).readReturn(
+                                    streamIn -> PNG.decode(streamIn,
+                                            BufferCreator::byteBuffer));
                             sources.put(paths[i], layer);
                         }
                         if (layer.getWidth() != source.getWidth() ||

@@ -75,10 +75,10 @@ public class EntityAlloyServer extends EntityAbstractContainerServer {
 
     @Override
     public boolean isValidOn(TerrainServer terrain, int x, int y, int z) {
-        VanillaBasics plugin = (VanillaBasics) terrain.getWorld().getPlugins()
+        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
                 .getPlugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
-        return terrain.getBlockType(x, y, z) == materials.alloy;
+        return terrain.type(x, y, z) == materials.alloy;
     }
 
     @Override

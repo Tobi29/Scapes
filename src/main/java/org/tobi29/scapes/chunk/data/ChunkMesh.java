@@ -68,8 +68,8 @@ public class ChunkMesh {
             int xxx = FastMath.floor(x + side.getX());
             int yyy = FastMath.floor(y + side.getY());
             int zzz = FastMath.floor(z + side.getZ());
-            light = terrain.getBlockLight(xxx, yyy, zzz) / 15.0f;
-            sunLight = terrain.getSunLight(xxx, yyy, zzz) / 15.0f;
+            light = terrain.blockLight(xxx, yyy, zzz) / 15.0f;
+            sunLight = terrain.sunLight(xxx, yyy, zzz) / 15.0f;
         }
         if (remaining <= 0) {
             changeArraySize(pos + BATCH_SIZE);

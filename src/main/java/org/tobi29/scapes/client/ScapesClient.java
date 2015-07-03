@@ -38,10 +38,12 @@ import org.tobi29.scapes.engine.utils.VersionUtil;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.graphics.PNG;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
-import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPathRoot;
+import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -107,17 +109,18 @@ public class ScapesClient extends Game {
     @Override
     public void init() {
         try {
+            Path path = engine.getHome();
+            Path playlistsPath = path.resolve("playlists");
+            Files.createDirectories(playlistsPath.resolve("day"));
+            Files.createDirectories(playlistsPath.resolve("night"));
+            Files.createDirectories(playlistsPath.resolve("battle"));
+            Files.createDirectories(path.resolve("plugins"));
+            Files.createDirectories(path.resolve("saves"));
             FileSystemContainer files = engine.getFiles();
-            files.registerFileSystem("Scapes", "assets/scapes/tobi29/",
-                    ClasspathPathRoot.make(getClass().getClassLoader()));
-            files.getDirectory("File:playlists/day").make();
-            files.getDirectory("File:playlists/night").make();
-            files.getDirectory("File:playlists/battle").make();
-            files.getDirectory("File:plugins").make();
-            files.getDirectory("File:screenshots").make();
-            files.getDirectory("File:saves").make();
-            icon = files.getResource("Scapes:image/Icon.png").readAndReturn(
-                    streamIn -> PNG
+            files.registerFileSystem("Scapes",
+                    new ClasspathPath(getClass().getClassLoader(),
+                            "assets/scapes/tobi29/"));
+            icon = files.get("Scapes:image/Icon.png").readReturn(streamIn -> PNG
                             .decode(streamIn, BufferCreatorDirect::byteBuffer));
         } catch (IOException e) {
             engine.crash(e);

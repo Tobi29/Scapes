@@ -18,30 +18,31 @@ package org.tobi29.scapes.server.format;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
+import org.tobi29.scapes.engine.utils.io.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Optional;
 
 public class PlayerData {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(PlayerData.class);
-    private final Directory directory;
+    private final Path path;
 
-    public PlayerData(Directory directory) throws IOException {
-        this.directory = directory;
-        directory.make();
+    public PlayerData(Path path) throws IOException {
+        this.path = path;
+        Files.createDirectories(path);
     }
 
     public Optional<TagStructure> load(String id) {
         try {
-            File file = directory.getResource(id + ".stag");
-            if (file.exists()) {
+            Path file = path.resolve(id + ".stag");
+            if (Files.exists(file)) {
                 TagStructure tagStructure =
-                        file.readAndReturn(TagStructureBinary::read);
+                        FileUtil.readReturn(file, TagStructureBinary::read);
                 return Optional.of(tagStructure);
             }
         } catch (IOException e) {
@@ -52,20 +53,15 @@ public class PlayerData {
 
     public void save(TagStructure tagStructure, String id) {
         try {
-            File file = directory.getResource(id + ".stag");
-            file.write(streamOut -> TagStructureBinary
-                    .write(tagStructure, streamOut));
+            Path file = path.resolve(id + ".stag");
+            FileUtil.write(file,
+                    stream -> TagStructureBinary.write(tagStructure, stream));
         } catch (IOException e) {
             LOGGER.error("Error writing player data: {}", e.toString());
         }
     }
 
     public boolean playerExists(String id) {
-        try {
-            return directory.getResource(id + ".stag").exists();
-        } catch (IOException e) {
-            LOGGER.error("Error checking player data: {}", e.toString());
-        }
-        return false;
+        return Files.exists(path.resolve(id + ".stag"));
     }
 }

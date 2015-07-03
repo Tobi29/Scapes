@@ -48,14 +48,14 @@ public class SmoothLight {
             int xx = x - (offset >> 2 & 1);
             int yy = y - (offset >> 1 & 1);
             int zz = z - (offset & 1);
-            BlockType type = terrain.getBlockType(xx, yy, zz);
+            BlockType type = terrain.type(xx, yy, zz);
             if (!type.isSolid(terrain, xx, yy, zz)) {
-                float tempLight = terrain.getBlockLight(xx, yy, zz);
+                float tempLight = terrain.blockLight(xx, yy, zz);
                 if (tempLight > 0) {
                     light += tempLight;
                     lights++;
                 }
-                tempLight = terrain.getSunLight(xx, yy, zz);
+                tempLight = terrain.sunLight(xx, yy, zz);
                 if (tempLight > 0) {
                     sunLight += tempLight;
                     sunLights++;

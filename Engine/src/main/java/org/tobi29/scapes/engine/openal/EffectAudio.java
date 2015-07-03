@@ -19,6 +19,8 @@ package org.tobi29.scapes.engine.openal;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 
+import java.util.Optional;
+
 public class EffectAudio implements Audio {
     private final String asset;
     private final Vector3 pos, velocity;
@@ -50,10 +52,10 @@ public class EffectAudio implements Audio {
         }
         if (flag) {
             if (!lagSilence) {
-                AudioData audio = sounds.getAudio(asset);
-                if (audio != null) {
-                    sounds.playSound(audio.getBuffer(), pitch, gain, range, pos,
-                            velocity, false, hasPosition);
+                Optional<AudioData> audio = sounds.getAudio(asset);
+                if (audio.isPresent()) {
+                    sounds.playSound(audio.get().getBuffer(), pitch, gain,
+                            range, pos, velocity, false, hasPosition);
                 }
             }
             return true;

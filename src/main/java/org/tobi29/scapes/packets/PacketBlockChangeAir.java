@@ -18,10 +18,10 @@ package org.tobi29.scapes.packets;
 
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class PacketBlockChangeAir extends PacketBlockChange {
@@ -33,19 +33,19 @@ public class PacketBlockChangeAir extends PacketBlockChange {
     }
 
     @Override
-    public void sendClient(PlayerConnection player, DataOutputStream streamOut)
+    public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        streamOut.writeInt(x);
-        streamOut.writeInt(y);
-        streamOut.writeInt(z);
+        stream.putInt(x);
+        stream.putInt(y);
+        stream.putInt(z);
     }
 
     @Override
-    public void parseClient(ClientConnection client, DataInputStream streamIn)
+    public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        x = streamIn.readInt();
-        y = streamIn.readInt();
-        z = streamIn.readInt();
+        x = stream.getInt();
+        y = stream.getInt();
+        z = stream.getInt();
     }
 
     @Override
@@ -53,6 +53,6 @@ public class PacketBlockChangeAir extends PacketBlockChange {
         if (world == null) {
             return;
         }
-        world.getTerrain().processPacket(this);
+        world.getTerrain().process(this);
     }
 }

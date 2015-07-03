@@ -23,7 +23,6 @@ import org.tobi29.scapes.engine.utils.Crashable;
 import org.tobi29.scapes.engine.utils.SleepUtil;
 import org.tobi29.scapes.engine.utils.Sync;
 import org.tobi29.scapes.engine.utils.io.SystemOutReader;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
@@ -33,6 +32,7 @@ import org.tobi29.scapes.server.controlpanel.ServerInfo;
 import org.tobi29.scapes.server.format.WorldFormat;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -41,7 +41,6 @@ import java.util.stream.Stream;
 public class ScapesServer {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ScapesServer.class);
-    private final Directory directory;
     private final TaskExecutor taskExecutor;
     private final ServerInfo serverInfo;
     private final ServerConnection serverConnection;
@@ -55,17 +54,16 @@ public class ScapesServer {
     private boolean stopped;
     private ShutdownReason shutdownReason = ShutdownReason.ERROR;
 
-    public ScapesServer(Directory directory, TagStructure tagStructure,
+    public ScapesServer(Path path, TagStructure tagStructure,
             ServerInfo serverInfo, Crashable crashHandler) throws IOException {
-        this(directory, tagStructure, serverInfo, crashHandler,
+        this(path, tagStructure, serverInfo, crashHandler,
                 Collections.emptyList());
     }
 
-    public ScapesServer(Directory directory, TagStructure tagStructure,
+    public ScapesServer(Path path, TagStructure tagStructure,
             ServerInfo serverInfo, Crashable crashHandler,
             Collection<ControlPanel> initalControlPanels) throws IOException {
         taskExecutor = new TaskExecutor(crashHandler, "Server");
-        this.directory = directory;
         commandRegistry = new CommandRegistry();
         initalControlPanels.forEach(controlPanel -> controlPanels
                 .put(controlPanel.getID(), controlPanel));
@@ -98,7 +96,7 @@ public class ScapesServer {
         this.serverInfo = serverInfo;
         serverConnection = new ServerConnection(this, taskExecutor,
                 serverTag.getStructure("Socket"));
-        worldFormat = new WorldFormat(this, directory);
+        worldFormat = new WorldFormat(this, path);
         ScapesServerCommands.register(commandRegistry, this);
         profilerJoiner = taskExecutor.runTask(joiner -> {
             Runtime runtime = Runtime.getRuntime();
@@ -170,10 +168,6 @@ public class ScapesServer {
         } catch (IOException e) {
             LOGGER.error("Error starting server: {}", e.toString());
         }
-    }
-
-    public Directory getDirectory() {
-        return directory;
     }
 
     public TaskExecutor getTaskExecutor() {

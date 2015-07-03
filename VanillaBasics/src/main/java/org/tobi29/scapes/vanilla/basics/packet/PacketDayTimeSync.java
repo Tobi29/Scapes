@@ -18,14 +18,14 @@ package org.tobi29.scapes.vanilla.basics.packet;
 
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketClient;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator;
 import org.tobi29.scapes.vanilla.basics.generator.WorldEnvironmentOverworld;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class PacketDayTimeSync extends Packet implements PacketClient {
@@ -41,17 +41,17 @@ public class PacketDayTimeSync extends Packet implements PacketClient {
     }
 
     @Override
-    public void sendClient(PlayerConnection player, DataOutputStream streamOut)
+    public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        streamOut.writeFloat((float) dayTime);
-        streamOut.writeLong(day);
+        stream.putFloat((float) dayTime);
+        stream.putLong(day);
     }
 
     @Override
-    public void parseClient(ClientConnection client, DataInputStream streamIn)
+    public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        dayTime = streamIn.readFloat();
-        day = streamIn.readLong();
+        dayTime = stream.getFloat();
+        day = stream.getLong();
     }
 
     @Override

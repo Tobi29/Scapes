@@ -23,7 +23,7 @@ public final class RandomInput {
     }
 
     public static byte[][] createRandomArrays(int amount, int sizeBits) {
-        Random random = new Random();
+        Random random = new Random(0);
         byte[][] arrays = new byte[amount][];
         for (int i = 0; i < arrays.length; i++) {
             arrays[i] = new byte[i << sizeBits];

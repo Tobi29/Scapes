@@ -16,6 +16,8 @@
 
 package org.tobi29.scapes.chunk;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.client.connection.ClientConnection;
@@ -27,6 +29,8 @@ import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.opengl.shader.ShaderManager;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
+import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
+import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.Frustum;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
@@ -47,6 +51,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class WorldClient extends World {
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(WorldClient.class);
     private final Map<Integer, EntityClient> entities =
             new ConcurrentHashMap<>();
     private final Map<String, Supplier<TerrainRenderInfo.InfoLayer>>
@@ -61,19 +67,23 @@ public class WorldClient extends World {
     private final ParticleManager particleManager = new ParticleManager(this);
 
     public WorldClient(ClientConnection connection, Cam cam, long seed,
-            String name, TerrainSupplier terrainSupplier) {
+            String name, TerrainSupplier terrainSupplier,
+            TagStructure playerTag, int playerID) {
         super(connection, connection.getPlugins(),
                 connection.getGame().getEngine().getTaskExecutor(),
                 connection.getPlugins().getRegistry());
         game = connection.getGame();
         player =
                 new MobPlayerClientMain(this, Vector3d.ZERO, Vector3d.ZERO, 0.0,
-                        0.0, "", "");
+                        0.0, "");
+        player.read(playerTag);
         this.seed = seed;
         environment =
                 ((Dimension) plugins.getPlugin(name)).createEnvironment(this);
         scene = new SceneScapesVoxelWorld(this, cam);
         playerModel = player.createModel().get();
+        addEntity(player, playerID);
+        LOGGER.info("Received player entity: {} with id: {}", player, playerID);
         connection.getPlugins().getPlugins()
                 .forEach(plugin -> plugin.worldInit(this));
         terrain = terrainSupplier.get(this);
@@ -140,17 +150,15 @@ public class WorldClient extends World {
         spawn = player.getPos();
     }
 
-    public void updateRender(GraphicsSystem graphics, Cam cam, double delta) {
-        playerModel.renderUpdate(graphics, this, delta);
-        entityModels.values()
-                .forEach(model -> model.renderUpdate(graphics, this, delta));
-        terrain.getTerrainRenderer().renderUpdate(graphics, cam);
+    public void updateRender(Cam cam, double delta) {
+        playerModel.renderUpdate(delta);
+        entityModels.values().forEach(model -> model.renderUpdate(delta));
+        terrain.renderer().renderUpdate(cam);
     }
 
     public void render(GraphicsSystem graphics, Cam cam,
             float animationDistance, boolean debug) {
         float time = (System.currentTimeMillis() % 10000000) / 1000.0f;
-        OpenGL openGL = graphics.getOpenGL();
         float sunLightReduction = environment
                 .getSunLightReduction(cam.position.doubleX(),
                         cam.position.doubleY()) / 15.0f;
@@ -177,11 +185,6 @@ public class WorldClient extends World {
                 player.getRightWeapon().getMaterial()
                         .getPlayerLight(player.getRightWeapon())));
         shaderTerrain.setUniform1f(12, animationDistance * cam.far);
-        openGL.setBlending(BlendingMode.NONE);
-        scene.getTerrainTextureRegistry().getTexture().bind(graphics);
-        terrain.getTerrainRenderer()
-                .render(graphics, shaderTerrain, cam, debug);
-        openGL.setBlending(BlendingMode.NORMAL);
         Shader shaderEntity =
                 shaderManager.getShader("Scapes:shader/Entity", graphics);
         shaderEntity.setUniform3f(4, scene.getFogR(), scene.getFogG(),
@@ -200,14 +203,22 @@ public class WorldClient extends World {
                         .getPlayerLight(player.getLeftWeapon()),
                 player.getRightWeapon().getMaterial()
                         .getPlayerLight(player.getRightWeapon())));
+        OpenGL openGL = graphics.getOpenGL();
+        openGL.setBlending(BlendingMode.NONE);
+        scene.getTerrainTextureRegistry().getTexture().bind(graphics);
+        terrain.renderer().render(graphics, shaderTerrain, cam, debug);
+        openGL.setBlending(BlendingMode.NORMAL);
         if (!scene.isGuiHidden()) {
             playerModel.render(graphics, this, cam, shaderEntity);
         }
-        entityModels.values().forEach(
-                model -> model.render(graphics, this, cam, shaderEntity));
+        AABB aabb = new AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        entityModels.values().stream().filter(model -> {
+            model.shapeAABB(aabb);
+            return cam.frustum.inView(aabb) != 0;
+        }).forEach(model -> model.render(graphics, this, cam, shaderEntity));
         particleManager.render(graphics, cam);
         scene.getTerrainTextureRegistry().getTexture().bind(graphics);
-        terrain.getTerrainRenderer().renderAlpha(graphics, shaderTerrain, cam);
+        terrain.renderer().renderAlpha(graphics, shaderTerrain, cam);
     }
 
     public TerrainClient getTerrain() {
@@ -224,8 +235,7 @@ public class WorldClient extends World {
             int x = FastMath.floor(x1 + dx * i);
             int y = FastMath.floor(y1 + dy * i);
             int z = FastMath.floor(z1 + dz * i);
-            if (!terrain.getBlockType(x, y, z)
-                    .isTransparent(terrain, x, y, z)) {
+            if (!terrain.type(x, y, z).isTransparent(terrain, x, y, z)) {
                 return true;
             }
         }

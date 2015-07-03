@@ -25,13 +25,13 @@ import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.packets.PacketBlockChange;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class TerrainInfiniteClient extends TerrainInfinite
         implements TerrainClient {
     protected final TerrainInfiniteRenderer renderer;
+    private final List<Vector2i> sortedLocations;
     private final WorldClient world;
     private final MobPlayerClientMain player;
     private final TerrainInfiniteChunkManagerClient chunkManager;
@@ -46,9 +46,26 @@ public class TerrainInfiniteClient extends TerrainInfinite
         this.loadingRadius = loadingRadius;
         loadingRadiusSqr = loadingRadius * loadingRadius;
         player = world.getPlayer();
-        renderer = new TerrainInfiniteRenderer(this, player,
-                loadingRadius - 1 << 4);
         chunkManager = (TerrainInfiniteChunkManagerClient) super.chunkManager;
+        List<Vector2i> locations = new ArrayList<>();
+        int loadingRadiusSqr = FastMath.sqr(loadingRadius);
+        for (int yy = -loadingRadius; yy <= loadingRadius; yy++) {
+            for (int xx = -loadingRadius; xx <= loadingRadius; xx++) {
+                if (xx * xx + yy * yy <= loadingRadiusSqr) {
+                    locations.add(new Vector2i(xx, yy));
+                }
+            }
+        }
+        Collections.sort(locations, (vector1, vector2) -> {
+            double distance1 =
+                    FastMath.pointDistanceSqr(vector1, Vector2i.ZERO),
+                    distance2 =
+                            FastMath.pointDistanceSqr(vector2, Vector2i.ZERO);
+            return distance1 == distance2 ? 0 : distance1 > distance2 ? 1 : -1;
+        });
+        sortedLocations = locations.stream().collect(Collectors.toList());
+        renderer = new TerrainInfiniteRenderer(this, player, loadingRadius,
+                sortedLocations);
     }
 
     public int getRequestedChunks() {
@@ -60,35 +77,27 @@ public class TerrainInfiniteClient extends TerrainInfinite
     }
 
     @Override
-    public WorldClient getWorld() {
+    public WorldClient world() {
         return world;
     }
 
     @Override
-    public TerrainRenderer getTerrainRenderer() {
+    public TerrainRenderer renderer() {
         return renderer;
     }
 
     @Override
     public void update(double delta) {
-        Vector2i playerPos = new Vector2i(FastMath.floor(player.getX() / 16.0d),
-                FastMath.floor(player.getY() / 16.0d));
-        chunkManager.getIterator().stream().filter(chunk ->
-                FastMath.pointDistanceSqr(playerPos, chunk.getPos()) <
-                        loadingRadiusSqr).sorted((chunk1, chunk2) -> {
-            double distance1 =
-                    FastMath.pointDistanceSqr(chunk1.getPos(), playerPos),
-                    distance2 = FastMath.pointDistanceSqr(chunk2.getPos(),
-                            playerPos);
-            return distance1 == distance2 ? 0 : distance1 > distance2 ? 1 : -1;
-        }).forEach(TerrainInfiniteChunkClient::updateClient);
         int xx = FastMath.floor(player.getX() / 16.0d);
         int yy = FastMath.floor(player.getY() / 16.0d);
+        for (Vector2i pos : sortedLocations) {
+            Optional<TerrainInfiniteChunkClient> chunk =
+                    chunkManager.get(pos.intX() + xx, pos.intY() + yy);
+            if (chunk.isPresent()) {
+                chunk.get().updateClient();
+            }
+        }
         chunkManager.setCenter(xx, yy);
-        List<TerrainInfiniteChunkClient> dumpedChunks =
-                chunkManager.getDumpedChunks();
-        dumpedChunks.forEach(this::removeChunk);
-        dumpedChunks.clear();
         for (int x = -loadingRadius; x <= loadingRadius; x++) {
             int xxx = x + xx;
             for (int y = -loadingRadius; y <= loadingRadius; y++) {
@@ -118,17 +127,13 @@ public class TerrainInfiniteClient extends TerrainInfinite
     }
 
     @Override
-    public void processPacket(PacketBlockChange packet) {
+    public void process(PacketBlockChange packet) {
         int x = packet.getX();
         int y = packet.getY();
         int z = packet.getZ();
-        getChunk(FastMath.floor((double) x / 16),
-                FastMath.floor((double) y / 16)).ifPresent(chunk -> chunk
-                .setBlockIdAndData(x - (chunk.getX() << 4),
-                        y - (chunk.getY() << 4), z,
-                        world.getPlugins().getRegistry()
-                                .getBlock(packet.getBlockId()),
-                        packet.getBlockData()));
+        getChunk(x >> 4, y >> 4).ifPresent(chunk -> chunk.typeDataG(x, y, z,
+                world.getPlugins().getRegistry().getBlock(packet.getBlockId()),
+                packet.getBlockData()));
     }
 
     @Override
@@ -147,7 +152,6 @@ public class TerrainInfiniteClient extends TerrainInfinite
         return chunkManager.get(x, y);
     }
 
-    @Override
     public Optional<TerrainInfiniteChunkClient> addChunk(int x, int y) {
         if (x < cxMin || x > cxMax || y < cyMin || y > cyMax) {
             return Optional.empty();
@@ -175,6 +179,5 @@ public class TerrainInfiniteClient extends TerrainInfinite
         int x = chunk.getX();
         int y = chunk.getY();
         chunkManager.remove(x, y);
-        chunk.disposeClient();
     }
 }

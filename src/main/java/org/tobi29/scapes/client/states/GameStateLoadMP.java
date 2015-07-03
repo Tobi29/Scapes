@@ -22,7 +22,6 @@ import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.client.gui.GuiLoading;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.connection.Account;
-import org.tobi29.scapes.connection.ConnectionCloseException;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.utils.Sync;
@@ -70,11 +69,6 @@ public class GameStateLoadMP extends GameState {
     }
 
     @Override
-    public boolean forceRender() {
-        return true;
-    }
-
-    @Override
     public void stepComponent(Sync sync) {
         try {
             switch (step) {
@@ -96,8 +90,8 @@ public class GameStateLoadMP extends GameState {
                     int loadingRadius = FastMath.round(
                             engine.getTagStructure().getStructure("Scapes")
                                     .getDouble("RenderDistance"));
-                    Account.Client account = Account.read(engine.getFiles()
-                            .getFile("File:Account.properties"));
+                    Account.Client account = Account.read(
+                            engine.getHome().resolve("Account.properties"));
                     client = new ClientConnection(engine, channel, account,
                             loadingRadius);
                     step++;
@@ -115,7 +109,7 @@ public class GameStateLoadMP extends GameState {
                     engine.setState(game);
                     break;
             }
-        } catch (IOException | ConnectionCloseException e) {
+        } catch (IOException e) {
             LOGGER.error("Failed to connect to server:", e);
             engine.setState(
                     new GameStateServerDisconnect(e.getMessage(), address,

@@ -88,7 +88,14 @@ public class GuiComponentSliderVert extends GuiComponent {
             if (engine.getGuiController().getLeftDrag()) {
                 value = FastMath.clamp((mouseY - y - sliderHeight * 0.5) /
                         (height - sliderHeight), 0, 1);
-                hover(new GuiComponentEvent(mouseX, mouseY));
+                if (hovering) {
+                    hover(new GuiComponentHoverEvent(mouseX, mouseY,
+                            GuiComponentHoverEvent.State.HOVER));
+                } else {
+                    hover(new GuiComponentHoverEvent(mouseX, mouseY,
+                            GuiComponentHoverEvent.State.ENTER));
+                    hovering = true;
+                }
             } else {
                 dragging = false;
             }

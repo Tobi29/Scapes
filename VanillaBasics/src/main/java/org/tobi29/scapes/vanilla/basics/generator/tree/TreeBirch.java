@@ -27,10 +27,10 @@ public final class TreeBirch implements Tree {
     @Override
     public void gen(TerrainServer.TerrainMutable terrain, int x, int y, int z,
             VanillaMaterial materials, Random random) {
-        if (terrain.getBlockType(x, y, z - 1) != materials.grass) {
+        if (terrain.type(x, y, z - 1) != materials.grass) {
             return;
         }
-        if (terrain.getBlockType(x, y, z) != materials.air) {
+        if (terrain.type(x, y, z) != materials.air) {
             return;
         }
         int size = random.nextInt(4) + 14;

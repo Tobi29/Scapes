@@ -25,14 +25,14 @@ import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 public class UpdateStrawDry extends Update {
     @Override
     public void run(TerrainServer.TerrainMutable terrain) {
-        if (terrain.getBlockData(x, y, z) == 0) {
-            terrain.setBlockData(x, y, z, (short) 1);
+        if (terrain.data(x, y, z) == 0) {
+            terrain.data(x, y, z, (short) 1);
         }
     }
 
     @Override
     public boolean isValidOn(BlockType type, TerrainServer terrain) {
-        VanillaBasics plugin = (VanillaBasics) terrain.getWorld().getPlugins()
+        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
                 .getPlugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         return type == materials.straw;

@@ -20,6 +20,8 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 
+import java.util.Optional;
+
 public class StaticAudio implements Audio {
     private final String asset;
     private int buffer = -1, source = -1;
@@ -48,9 +50,9 @@ public class StaticAudio implements Audio {
     public boolean poll(SoundSystem sounds, OpenAL openAL,
             Vector3 listenerPosition, double speedFactor, boolean lagSilence) {
         if (buffer == -1) {
-            AudioData audio = sounds.getAudio(asset);
-            if (audio != null) {
-                buffer = audio.getBuffer();
+            Optional<AudioData> audio = sounds.getAudio(asset);
+            if (audio.isPresent()) {
+                buffer = audio.get().getBuffer();
             }
         }
         if (source == -1) {

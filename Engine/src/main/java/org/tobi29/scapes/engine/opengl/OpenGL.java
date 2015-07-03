@@ -19,11 +19,11 @@ package org.tobi29.scapes.engine.opengl;
 import org.tobi29.scapes.engine.opengl.texture.TextureFilter;
 import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
 import org.tobi29.scapes.engine.utils.graphics.Image;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.file.Path;
 
 public interface OpenGL {
     int VERTEX_ATTRIBUTE = 0, COLOR_ATTRIBUTE = 1, TEXTURE_ATTRIBUTE = 2,
@@ -123,7 +123,7 @@ public interface OpenGL {
     FBOStatus checkFBO();
 
     @OpenGLFunction
-    void screenShot(File file, GraphicsSystem graphics);
+    void screenShot(Path path, GraphicsSystem graphics);
 
     @OpenGLFunction
     Image screenShot(int width, int height);

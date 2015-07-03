@@ -19,45 +19,11 @@ apply from: "$rootDir/resources/scapesenginemodule.gradle"
 
 version = "0.0.0_1"
 
-File lwjglJar = file("build/tmp/LWJGL/lwjgl.zip")
-FileTree lwjglJars = files({
-    zipTree(lwjglJar)
-}).asFileTree.matching { include "jar/" }
-
-ext.lwjgl = lwjglJars
-
-if (!lwjglJar.exists()) {
-    URL url = new URL("http://build.lwjgl.org/stable/lwjgl.zip");
-    lwjglJar.parentFile.mkdirs()
-    InputStream streamIn = url.openStream()
-    try {
-        OutputStream streamOut = lwjglJar.newOutputStream()
-        try {
-            streamOut << streamIn
-        } finally {
-            streamOut.close()
-        }
-    } finally {
-        streamIn.close()
-    }
-}
-
-task lwjgl3Platform(type: Jar) {
-    from(zipTree(lwjglJar)) {
-        include "native/"
-    }
-    archiveName = "lwjgl-platform.jar"
-}
-
-compileJava.dependsOn tasks.lwjgl3Platform
-
 dependencies {
     compile project(":Engine")
     compile project(":Engine:Utils")
     compile "org.slf4j:slf4j-api:1.7.10"
-    compile lwjglJars
-
-    runtime tasks.lwjgl3Platform.outputs.files
+    compile "org.lwjgl:lwjgl:3.0.0a"
 
     testCompile "junit:junit:4.12"
 }

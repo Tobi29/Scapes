@@ -22,14 +22,15 @@ import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.opengl.texture.*;
 import org.tobi29.scapes.engine.utils.StringLongHash;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
+import org.tobi29.scapes.engine.utils.io.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
 import org.tobi29.scapes.plugins.PluginFile;
 import org.tobi29.scapes.server.format.WorldFormat;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -44,7 +45,7 @@ public class GuiCreateWorld extends GuiMenuDouble {
     private int environmentID;
 
     public GuiCreateWorld(GameState state, GuiSaveSelect previous,
-            List<PluginFile> worldTypes, List<PluginFile> plugins) {
+            List<PluginFile> worldTypes, List<PluginFile> plugins, Path path) {
         super(state, "New World", previous);
         GuiComponentTextField name =
                 new GuiComponentTextField(16, 100, 368, 30, 18, "New World");
@@ -74,17 +75,16 @@ public class GuiCreateWorld extends GuiMenuDouble {
                 name.setText("New World");
             }
             try {
-                Directory file = state.getEngine().getFiles()
-                        .getDirectory("File:saves/" + name.getText() +
-                                WorldFormat.getFilenameExtension());
-                if (file.exists()) {
+                Path save = path.resolve(
+                        name.getText() + WorldFormat.getFilenameExtension());
+                if (Files.exists(save)) {
                     state.remove(this);
                     state.add(
                             new GuiMessage(state, this, "Error", SAVE_EXISTS));
                     return;
                 }
-                file.make();
-                File save = file.getResource("Data.stag");
+                Files.createDirectories(save);
+                Path data = save.resolve("Data.stag");
                 TagStructure tagStructure = new TagStructure();
                 long randomSeed;
                 if (seed.getText().isEmpty()) {
@@ -97,16 +97,16 @@ public class GuiCreateWorld extends GuiMenuDouble {
                     }
                 }
                 tagStructure.setLong("Seed", randomSeed);
-                save.write(streamOut -> TagStructureBinary
-                        .write(tagStructure, streamOut));
-                Directory pluginsDir = file.get("plugins");
-                pluginsDir.make();
+                FileUtil.write(data, stream -> TagStructureBinary
+                        .write(tagStructure, stream));
+                Path pluginsDir = save.resolve("plugins");
+                Files.createDirectories(pluginsDir);
                 PluginFile worldType = worldTypes.get(environmentID);
-                worldType.getFile().copy(pluginsDir
-                        .getResource(worldType.getFile().getName()));
+                Files.copy(worldType.getFile(),
+                        pluginsDir.resolve(worldType.getFile().getFileName()));
                 for (PluginFile addon : addons) {
-                    addon.getFile().copy(pluginsDir
-                            .getResource(addon.getFile().getName()));
+                    Files.copy(addon.getFile(),
+                            pluginsDir.resolve(addon.getFile().getFileName()));
                 }
                 state.remove(this);
                 previous.updateSaves();
@@ -157,7 +157,7 @@ public class GuiCreateWorld extends GuiMenuDouble {
 
             public Element(PluginFile addon) {
                 super(0, 0, 378, 70);
-                try (ZipFile zip = addon.getFile().readZIP()) {
+                try (ZipFile zip = new ZipFile(addon.getFile().toFile())) {
                     texture = new TextureFile(
                             zip.getInputStream(zip.getEntry("Icon.png")), 0,
                             TextureFilter.LINEAR, TextureFilter.LINEAR,

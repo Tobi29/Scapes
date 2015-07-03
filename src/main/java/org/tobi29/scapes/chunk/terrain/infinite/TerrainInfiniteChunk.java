@@ -41,7 +41,6 @@ public abstract class TerrainInfiniteChunk {
     protected final int zSize;
     protected final BlockType[] blocks;
     protected final int[] heightMap;
-    protected boolean disposed;
     protected State state = State.NEW;
     protected TagStructure metaData = new TagStructure();
 
@@ -60,6 +59,8 @@ public abstract class TerrainInfiniteChunk {
     }
 
     public abstract void update(int x, int y, int z, boolean updateTile);
+
+    public abstract void updateLight(int x, int y, int z);
 
     public void updateSunLight() {
         Pair<Pool<LightSpread>, Pool<LightSpread>> spreadPools =
@@ -177,6 +178,14 @@ public abstract class TerrainInfiniteChunk {
         return pos.intY();
     }
 
+    public int getBlockX() {
+        return posBlock.intX();
+    }
+
+    public int getBlockY() {
+        return posBlock.intY();
+    }
+
     public int getZSize() {
         return zSize;
     }
@@ -217,13 +226,20 @@ public abstract class TerrainInfiniteChunk {
                     }
                 }
             }
+            return 0;
         }
         throw new ChunkMissException("Tried to access block " + x + ' ' + y +
                 " in chunk " + pos.intX() +
                 ' ' + pos.intY());
     }
 
-    public BlockType getBlockType(int x, int y, int z) {
+    public BlockType typeG(int x, int y, int z) {
+        x -= posBlock.intX();
+        y -= posBlock.intY();
+        return typeL(x, y, z);
+    }
+
+    public BlockType typeL(int x, int y, int z) {
         if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 &&
                 z < zSize) {
             return blocks[bID.getData(x, y, z, 0)];
@@ -234,7 +250,13 @@ public abstract class TerrainInfiniteChunk {
                         ' ' + pos.intY());
     }
 
-    public int getBlockData(int x, int y, int z) {
+    public int dataG(int x, int y, int z) {
+        x -= posBlock.intX();
+        y -= posBlock.intY();
+        return dataL(x, y, z);
+    }
+
+    public int dataL(int x, int y, int z) {
         if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 &&
                 z < zSize) {
             return bData.getData(x, y, z, 0);
@@ -245,7 +267,13 @@ public abstract class TerrainInfiniteChunk {
                         ' ' + pos.intY());
     }
 
-    public int getLight(int x, int y, int z) {
+    public int lightG(int x, int y, int z) {
+        x -= posBlock.intX();
+        y -= posBlock.intY();
+        return lightL(x, y, z);
+    }
+
+    public int lightL(int x, int y, int z) {
         if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 &&
                 z < zSize) {
             return (int) FastMath.max(bLight.getData(x, y, z, 1),
@@ -259,7 +287,13 @@ public abstract class TerrainInfiniteChunk {
                         ' ' + pos.intY());
     }
 
-    public int getSunLight(int x, int y, int z) {
+    public int sunLightG(int x, int y, int z) {
+        x -= posBlock.intX();
+        y -= posBlock.intY();
+        return sunLightL(x, y, z);
+    }
+
+    public int sunLightL(int x, int y, int z) {
         if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 &&
                 z < zSize) {
             return bLight.getData(x, y, z, 0);
@@ -270,7 +304,13 @@ public abstract class TerrainInfiniteChunk {
                         ' ' + pos.intY());
     }
 
-    public int getBlockLight(int x, int y, int z) {
+    public int blockLightG(int x, int y, int z) {
+        x -= posBlock.intX();
+        y -= posBlock.intY();
+        return blockLightL(x, y, z);
+    }
+
+    public int blockLightL(int x, int y, int z) {
         if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 &&
                 z < zSize) {
             return bLight.getData(x, y, z, 1);
@@ -281,7 +321,13 @@ public abstract class TerrainInfiniteChunk {
                         ' ' + pos.intY());
     }
 
-    public void setBlockType(int x, int y, int z, BlockType type) {
+    public void blockTypeG(int x, int y, int z, BlockType type) {
+        x -= posBlock.intX();
+        y -= posBlock.intY();
+        blockTypeL(x, y, z, type);
+    }
+
+    public void blockTypeL(int x, int y, int z, BlockType type) {
         if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 &&
                 z < zSize) {
             BlockType oldType = blocks[bID.getData(x, y, z, 0)];
@@ -298,8 +344,13 @@ public abstract class TerrainInfiniteChunk {
         }
     }
 
-    public void setBlockIdAndData(int x, int y, int z, BlockType type,
-            int data) {
+    public void typeDataG(int x, int y, int z, BlockType type, int data) {
+        x -= posBlock.intX();
+        y -= posBlock.intY();
+        typeDataL(x, y, z, type, data);
+    }
+
+    public void typeDataL(int x, int y, int z, BlockType type, int data) {
         if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 &&
                 z < zSize) {
             BlockType oldType = blocks[bID.getData(x, y, z, 0)];
@@ -317,7 +368,13 @@ public abstract class TerrainInfiniteChunk {
         }
     }
 
-    public void setBlockData(int x, int y, int z, int data) {
+    public void dataG(int x, int y, int z, int data) {
+        x -= posBlock.intX();
+        y -= posBlock.intY();
+        dataL(x, y, z, data);
+    }
+
+    public void dataL(int x, int y, int z, int data) {
         if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 &&
                 z < zSize) {
             if (bData.getData(x, y, z, 0) != data) {
@@ -333,10 +390,17 @@ public abstract class TerrainInfiniteChunk {
         }
     }
 
-    public void setSunLight(int x, int y, int z, int light) {
+    public void sunLightG(int x, int y, int z, int light) {
+        x -= posBlock.intX();
+        y -= posBlock.intY();
+        sunLightL(x, y, z, light);
+    }
+
+    public void sunLightL(int x, int y, int z, int light) {
         if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 &&
                 z < zSize) {
             bLight.setData(x, y, z, 0, light);
+            updateLight(x, y, z);
         } else {
             throw new ChunkMissException(
                     "Tried to access block " + x + ' ' + y + ' ' + z +
@@ -345,10 +409,17 @@ public abstract class TerrainInfiniteChunk {
         }
     }
 
-    public void setBlockLight(int x, int y, int z, int light) {
+    public void blockLightG(int x, int y, int z, int light) {
+        x -= posBlock.intX();
+        y -= posBlock.intY();
+        blockLightL(x, y, z, light);
+    }
+
+    public void blockLightL(int x, int y, int z, int light) {
         if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 &&
                 z < zSize) {
             bLight.setData(x, y, z, 1, light);
+            updateLight(x, y, z);
         } else {
             throw new ChunkMissException(
                     "Tried to access block " + x + ' ' + y + ' ' + z +

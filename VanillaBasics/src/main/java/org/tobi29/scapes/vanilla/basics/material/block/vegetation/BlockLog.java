@@ -53,8 +53,8 @@ public class BlockLog extends VanillaBlock {
     public boolean destroy(TerrainServer.TerrainMutable terrain, int x, int y,
             int z, Face face, MobPlayerServer player, ItemStack item) {
         if ("Axe".equals(item.getMaterial().getToolType(item))) {
-            destroy(terrain, new Vector3i(x, y, z),
-                    terrain.getBlockData(x, y, z), 512, player, z);
+            destroy(terrain, new Vector3i(x, y, z), terrain.data(x, y, z), 512,
+                    player, z);
         }
         return true;
     }
@@ -90,9 +90,9 @@ public class BlockLog extends VanillaBlock {
     public Optional<TerrainTexture> getParticleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
         if (face == Face.UP || face == Face.DOWN) {
-            return Optional.of(texturesTop[terrain.getBlockData(x, y, z)]);
+            return Optional.of(texturesTop[terrain.data(x, y, z)]);
         }
-        return Optional.of(texturesSide[terrain.getBlockData(x, y, z)]);
+        return Optional.of(texturesSide[terrain.data(x, y, z)]);
     }
 
     @Override
@@ -154,9 +154,8 @@ public class BlockLog extends VanillaBlock {
 
     private void destroy(TerrainServer.TerrainMutable terrain, Vector3 pos,
             int data, int length, MobPlayerServer player, int minZ) {
-        BlockType type =
-                terrain.getBlockType(pos.intX(), pos.intY(), pos.intZ());
-        int d = terrain.getBlockData(pos.intX(), pos.intY(), pos.intZ());
+        BlockType type = terrain.type(pos.intX(), pos.intY(), pos.intZ());
+        int d = terrain.data(pos.intX(), pos.intY(), pos.intZ());
         if (type == materials.leaves && d == data) {
             type.destroy(terrain, pos.intX(), pos.intY(), pos.intZ(), Face.NONE,
                     player, new ItemStack(materials.air, (short) 0));
@@ -164,11 +163,11 @@ public class BlockLog extends VanillaBlock {
         if (type != this || d != data) {
             return;
         }
-        terrain.getWorld()
+        terrain.world()
                 .dropItem(new ItemStack(this, data), pos.intX(), pos.intY(),
                         pos.intZ());
-        terrain.setBlockTypeAndData(pos.intX(), pos.intY(), pos.intZ(),
-                materials.air, (short) 0);
+        terrain.typeData(pos.intX(), pos.intY(), pos.intZ(), materials.air,
+                (short) 0);
         if (length-- > 0) {
             if (pos.intZ() > minZ) {
                 destroy(terrain, pos.plus(new Vector3i(-1, -1, -1)), data,

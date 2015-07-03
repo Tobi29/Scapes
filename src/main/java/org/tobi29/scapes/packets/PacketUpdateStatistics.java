@@ -19,12 +19,12 @@ package org.tobi29.scapes.packets;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.client.gui.GuiStatistics;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 import org.tobi29.scapes.server.format.PlayerStatistics;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,29 +41,28 @@ public class PacketUpdateStatistics extends Packet implements PacketClient {
     }
 
     @Override
-    public void sendClient(PlayerConnection player, DataOutputStream streamOut)
+    public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        streamOut.writeInt(statisticMaterials.size());
+        stream.putInt(statisticMaterials.size());
         for (PlayerStatistics.StatisticMaterial statisticMaterial : statisticMaterials) {
-            streamOut.writeInt(statisticMaterial.getType().getItemID());
-            streamOut.writeShort(statisticMaterial.getData());
-            streamOut.writeInt(statisticMaterial.getBreakAmount());
-            streamOut.writeInt(statisticMaterial.getPlaceAmount());
-            streamOut.writeInt(statisticMaterial.getCraftAmount());
+            stream.putInt(statisticMaterial.getType().getItemID());
+            stream.putShort(statisticMaterial.getData());
+            stream.putInt(statisticMaterial.getBreakAmount());
+            stream.putInt(statisticMaterial.getPlaceAmount());
+            stream.putInt(statisticMaterial.getCraftAmount());
         }
     }
 
     @Override
-    public void parseClient(ClientConnection client, DataInputStream streamIn)
+    public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        int length = streamIn.readInt();
+        int length = stream.getInt();
         statisticMaterials = new ArrayList<>();
         for (int i = 0; i < length; i++) {
             statisticMaterials.add(new PlayerStatistics.StatisticMaterial(
                     client.getPlugins().getRegistry()
-                            .getMaterial(streamIn.readInt()),
-                    streamIn.readShort(), streamIn.readInt(),
-                    streamIn.readInt(), streamIn.readInt()));
+                            .getMaterial(stream.getInt()), stream.getShort(),
+                    stream.getInt(), stream.getInt(), stream.getInt()));
         }
     }
 

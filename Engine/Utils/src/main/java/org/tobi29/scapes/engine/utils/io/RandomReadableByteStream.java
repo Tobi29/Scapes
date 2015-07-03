@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.io.filesystem;
+package org.tobi29.scapes.engine.utils.io;
 
-public interface PathRoot extends Path {
+public interface RandomReadableByteStream extends ReadableByteStream {
+    int position();
+
+    ReadableByteStream position(int pos);
+
+    int limit();
+
+    ReadableByteStream limit(int limit);
 }

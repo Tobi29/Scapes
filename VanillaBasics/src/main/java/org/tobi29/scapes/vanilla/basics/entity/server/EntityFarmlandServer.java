@@ -81,15 +81,15 @@ public class EntityFarmlandServer extends EntityServer {
 
     @Override
     public void updateTile(TerrainServer terrain, int x, int y, int z) {
-        WorldServer world = terrain.getWorld();
+        WorldServer world = terrain.world();
         VanillaBasics plugin =
                 (VanillaBasics) world.getPlugins().getPlugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
-        if (terrain.getBlockType(pos.intX(), pos.intY(), pos.intZ()) !=
+        if (terrain.type(pos.intX(), pos.intY(), pos.intZ()) !=
                 materials.farmland) {
             world.deleteEntity(this);
         } else if (stage > 0 &&
-                terrain.getBlockType(pos.intX(), pos.intY(), pos.intZ() + 1) !=
+                terrain.type(pos.intX(), pos.intY(), pos.intZ() + 1) !=
                         materials.crop) {
             cropType = null;
         }
@@ -109,8 +109,8 @@ public class EntityFarmlandServer extends EntityServer {
             GameRegistry.Registry<CropType> cropRegistry = world.getRegistry()
                     .<CropType>get("VanillaBasics", "CropType");
             VanillaMaterial materials = plugin.getMaterials();
-            world.getTerrain().queueBlockChanges(handler -> handler
-                    .setBlockTypeAndData(pos.intX(), pos.intY(), pos.intZ() + 1,
+            world.getTerrain().queue(handler -> handler
+                    .typeData(pos.intX(), pos.intY(), pos.intZ() + 1,
                             materials.crop,
                             (short) (stage + (cropRegistry.get(cropType) << 3) -
                                     1)));

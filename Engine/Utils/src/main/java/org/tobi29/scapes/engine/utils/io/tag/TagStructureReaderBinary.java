@@ -17,73 +17,71 @@
 package org.tobi29.scapes.engine.utils.io.tag;
 
 import org.tobi29.scapes.engine.utils.Pair;
-import org.tobi29.scapes.engine.utils.io.MarkedInflaterInputStream;
+import org.tobi29.scapes.engine.utils.io.ByteBufferStream;
+import org.tobi29.scapes.engine.utils.io.CompressionUtil;
+import org.tobi29.scapes.engine.utils.io.LimitedBufferStream;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
-import java.util.zip.Inflater;
-import java.util.zip.InflaterInputStream;
 
 public class TagStructureReaderBinary extends TagStructureBinary
         implements TagStructureReader {
-    private final InputStream streamIn;
-    private byte compression;
+    private final ReadableByteStream stream;
+    private final ByteBufferStream compressionStream;
     private KeyDictionary dictionary;
-    private DataInputStream structureStreamIn;
-    private Inflater inflater;
+    private ReadableByteStream structureBuffer;
 
-    public TagStructureReaderBinary(InputStream streamIn) {
-        this.streamIn = streamIn;
+    public TagStructureReaderBinary(ReadableByteStream stream,
+            ByteBufferStream compressionStream) {
+        this.stream = stream;
+        this.compressionStream = compressionStream;
     }
 
     @Override
     public void begin() throws IOException {
-        DataInputStream dataStreamIn = new DataInputStream(streamIn);
         byte[] magic = new byte[HEADER_MAGIC.length];
-        dataStreamIn.readFully(magic);
+        stream.get(magic);
         if (!Arrays.equals(magic, magic)) {
             throw new IOException("Not in tag format! (Magic-Header: " +
                     Arrays.toString(magic) +
                     ')');
         }
-        byte version = dataStreamIn.readByte();
+        byte version = stream.get();
         if (version > HEADER_VERSION) {
             throw new IOException(
                     "Unsupported version or not in tag format! (Version: " +
                             version + ')');
         }
-        compression = dataStreamIn.readByte();
+        byte compression = stream.get();
         if (compression >= 0) {
-            inflater = new Inflater();
-            InflaterInputStream inflaterStreamIn =
-                    new MarkedInflaterInputStream(streamIn, inflater, 1024);
-            structureStreamIn = new DataInputStream(inflaterStreamIn);
+            int len = stream.getInt();
+            CompressionUtil.decompress(new LimitedBufferStream(stream, len),
+                    compressionStream);
+            compressionStream.buffer().flip();
+            structureBuffer = new ByteBufferStream(compressionStream.buffer());
         } else {
-            structureStreamIn = dataStreamIn;
+            structureBuffer = stream;
         }
-        dictionary = new KeyDictionary(structureStreamIn);
+        dictionary = new KeyDictionary(structureBuffer);
     }
 
     @Override
     public void end() throws IOException {
-        if (compression >= 0) {
-            inflater.end();
-        }
+        compressionStream.buffer().clear();
     }
 
     @Override
     public Pair<String, Object> next() throws IOException {
-        byte componentId = structureStreamIn.readByte();
-        if (componentId == ID_STRUCTURE_TERMINATE) {
+        byte componentID = structureBuffer.get();
+        if (componentID == ID_STRUCTURE_TERMINATE) {
             return new Pair<>(null, SpecialNext.STRUCTURE_TERMINATE);
-        } else if (componentId == ID_LIST_TERMINATE) {
+        } else if (componentID == ID_LIST_TERMINATE) {
             return new Pair<>(null, SpecialNext.LIST_TERMINATE);
         }
-        String key = readKey(structureStreamIn, dictionary);
+        String key = readKey(structureBuffer, dictionary);
         Object tag;
-        switch (componentId) {
+        switch (componentID) {
             case ID_STRUCTURE_BEGIN:
                 tag = SpecialNext.STRUCTURE;
                 break;
@@ -97,36 +95,36 @@ public class TagStructureReaderBinary extends TagStructureBinary
                 tag = SpecialNext.LIST_EMPTY;
                 break;
             case ID_TAG_BOOLEAN:
-                tag = structureStreamIn.readBoolean();
+                tag = structureBuffer.get() != 0;
                 break;
             case ID_TAG_BYTE:
-                tag = structureStreamIn.readByte();
+                tag = structureBuffer.get();
                 break;
             case ID_TAG_BYTE_ARRAY:
-                tag = readArray(structureStreamIn);
+                tag = structureBuffer.getByteArrayLong();
                 break;
             case ID_TAG_INT_16:
-                tag = structureStreamIn.readShort();
+                tag = structureBuffer.getShort();
                 break;
             case ID_TAG_INT_32:
-                tag = structureStreamIn.readInt();
+                tag = structureBuffer.getInt();
                 break;
             case ID_TAG_INT_64:
-                tag = structureStreamIn.readLong();
+                tag = structureBuffer.getLong();
                 break;
             case ID_TAG_FLOAT_32:
-                tag = structureStreamIn.readFloat();
+                tag = structureBuffer.getFloat();
                 break;
             case ID_TAG_FLOAT_64:
-                tag = structureStreamIn.readDouble();
+                tag = structureBuffer.getDouble();
                 break;
             case ID_TAG_STRING:
-                tag = readString(structureStreamIn);
+                tag = structureBuffer.getString();
                 break;
             default:
                 throw new IOException(
                         "Not in tag format! (Invalid component-id: " +
-                                componentId + ')');
+                                componentID + ')');
         }
         return new Pair<>(key, tag);
     }

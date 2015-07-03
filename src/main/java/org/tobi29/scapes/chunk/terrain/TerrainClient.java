@@ -20,9 +20,9 @@ import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.packets.PacketBlockChange;
 
 public interface TerrainClient extends Terrain {
-    WorldClient getWorld();
+    WorldClient world();
 
-    TerrainRenderer getTerrainRenderer();
+    TerrainRenderer renderer();
 
     void update(double delta);
 
@@ -30,5 +30,5 @@ public interface TerrainClient extends Terrain {
 
     void reloadGeometry();
 
-    void processPacket(PacketBlockChange packet);
+    void process(PacketBlockChange packet);
 }

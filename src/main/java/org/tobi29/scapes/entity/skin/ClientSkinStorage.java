@@ -20,9 +20,11 @@ import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.opengl.GraphicsSystem;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
+import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.packets.PacketSkin;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -31,8 +33,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
 public class ClientSkinStorage {
-    private final Map<String, ClientSkin> skins = new ConcurrentHashMap<>();
-    private final Queue<String> skinRequests = new ConcurrentLinkedQueue<>();
+    private final Map<Checksum, ClientSkin> skins = new ConcurrentHashMap<>();
+    private final Queue<byte[]> skinRequests = new ConcurrentLinkedQueue<>();
     private final ByteBuffer defaultSkin;
 
     public ClientSkinStorage(Texture defaultTexture) {
@@ -44,7 +46,7 @@ public class ClientSkinStorage {
                 .filter(skin -> skin.increaseTicks() > 1200)
                 .collect(Collectors.toList());
         oldSkins.forEach(skin -> {
-            skins.remove(skin.getChecksum());
+            skins.remove(new Checksum(skin.checksum()));
             skin.dispose(graphics);
         });
         while (!skinRequests.isEmpty()) {
@@ -56,23 +58,44 @@ public class ClientSkinStorage {
         skins.values().forEach(skin -> skin.dispose(graphics));
     }
 
-    public void addSkin(String checksum, byte... image) {
-        ByteBuffer buffer = BufferCreatorDirect.byteBuffer(image.length);
-        buffer.put(image);
+    public void addSkin(byte[] checksum, Image image) {
+        ByteBuffer imageBuffer = image.getBuffer();
+        ByteBuffer buffer =
+                BufferCreatorDirect.byteBuffer(imageBuffer.remaining());
+        buffer.put(imageBuffer);
         buffer.rewind();
-        ClientSkin skin = skins.get(checksum);
+        ClientSkin skin = skins.get(new Checksum(checksum));
         if (skin != null) {
             skin.setImage(buffer);
         }
     }
 
-    public Texture getSkin(String checksum) {
+    public Texture getSkin(byte[] checksum) {
         ClientSkin skin = skins.get(checksum);
         if (skin == null) {
             skin = new ClientSkin(defaultSkin, checksum);
-            skins.put(checksum, skin);
+            skins.put(new Checksum(checksum), skin);
             skinRequests.add(checksum);
         }
         return skin;
+    }
+
+    private static class Checksum {
+        protected final byte[] array;
+
+        private Checksum(byte[] array) {
+            this.array = array;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof Checksum &&
+                    Arrays.equals(array, ((Checksum) obj).array);
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(array);
+        }
     }
 }

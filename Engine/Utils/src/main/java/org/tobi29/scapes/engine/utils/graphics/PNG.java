@@ -17,24 +17,34 @@
 package org.tobi29.scapes.engine.utils.graphics;
 
 import ar.com.hjg.pngj.*;
+import org.tobi29.scapes.engine.utils.io.ByteStreamInputStream;
+import org.tobi29.scapes.engine.utils.io.ByteStreamOutputStream;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.function.IntFunction;
 
 public final class PNG {
     private PNG() {
     }
 
-    public static Image decode(InputStream streamIn, BufferSupplier supplier)
-            throws IOException {
+    public static Image decode(ReadableByteStream stream,
+            IntFunction<ByteBuffer> supplier) throws IOException {
+        return decode(new ByteStreamInputStream(stream), supplier);
+    }
+
+    public static Image decode(InputStream streamIn,
+            IntFunction<ByteBuffer> supplier) throws IOException {
         try {
             PngReaderByte reader = new PngReaderByte(streamIn);
             int width = reader.imgInfo.cols;
             int height = reader.imgInfo.rows;
             boolean fillAlpha = !reader.imgInfo.alpha;
-            ByteBuffer buffer = supplier.bytes(width * height << 2);
+            ByteBuffer buffer = supplier.apply(width * height << 2);
             if (fillAlpha) {
                 for (int i = 0; i < height; i++) {
                     ImageLineByte line = reader.readRowByte();
@@ -59,6 +69,11 @@ public final class PNG {
         } catch (PngjException e) {
             throw new IOException(e);
         }
+    }
+
+    public static void encode(Image image, WritableByteStream stream, int level,
+            boolean alpha) throws IOException {
+        encode(image, new ByteStreamOutputStream(stream), level, alpha);
     }
 
     public static void encode(Image image, OutputStream streamOut, int level,
@@ -101,10 +116,5 @@ public final class PNG {
         } catch (PngjException e) {
             throw new IOException(e);
         }
-    }
-
-    @FunctionalInterface
-    public interface BufferSupplier {
-        ByteBuffer bytes(int size);
     }
 }

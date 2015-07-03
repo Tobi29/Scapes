@@ -54,7 +54,7 @@ public class ItemSeed extends VanillaItem {
             item.setAmount(item.getAmount() - 1);
             Random random = ThreadLocalRandom.current();
             if (random.nextInt(1) == 0) {
-                terrain.getWorld().getEntities(x, y, z).stream()
+                terrain.world().getEntities(x, y, z).stream()
                         .filter(farmland -> farmland instanceof EntityFarmlandServer)
                         .forEach(farmland -> ((EntityFarmlandServer) farmland)
                                 .seed(CropType.WHEAT));

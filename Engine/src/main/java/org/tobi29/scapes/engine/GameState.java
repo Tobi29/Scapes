@@ -90,8 +90,6 @@ public abstract class GameState {
 
     public abstract boolean isThreaded();
 
-    public abstract boolean forceRender();
-
     public void add(Gui gui) {
         if (gui != null) {
             scene.addGui(gui);

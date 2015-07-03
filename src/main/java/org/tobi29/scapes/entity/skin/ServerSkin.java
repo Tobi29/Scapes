@@ -16,22 +16,23 @@
 
 package org.tobi29.scapes.entity.skin;
 
+import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.ChecksumUtil;
 
 public class ServerSkin {
-    private final byte[] array;
-    private final String checksum;
+    private final Image image;
+    private final byte[] checksum;
 
-    public ServerSkin(byte... array) {
-        this.array = array;
-        checksum = ChecksumUtil.getChecksum(array);
+    public ServerSkin(Image image) {
+        this.image = image;
+        checksum = ChecksumUtil.createChecksum(image.getBuffer());
     }
 
-    public byte[] getImage() {
-        return array;
+    public Image image() {
+        return image;
     }
 
-    public String getChecksum() {
+    public byte[] checksum() {
         return checksum;
     }
 }

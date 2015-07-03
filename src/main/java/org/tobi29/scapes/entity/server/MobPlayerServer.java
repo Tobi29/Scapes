@@ -49,7 +49,8 @@ public class MobPlayerServer extends MobLivingEquippedServer
     protected final PlayerConnection connection;
     protected final ServerConnection serverConnection;
     protected final List<MobPlayerServer> viewers = new ArrayList<>();
-    protected final String nickname, skin;
+    protected final String nickname;
+    private final byte[] skin;
     protected final Inventory inventory;
     private final Map<String, PunchListener> punchListeners =
             new ConcurrentHashMap<>();
@@ -57,7 +58,7 @@ public class MobPlayerServer extends MobLivingEquippedServer
     private EntityContainerServer currentContainer;
 
     public MobPlayerServer(WorldServer world, Vector3 pos, Vector3 speed,
-            double xRot, double zRot, String nickname, String skin,
+            double xRot, double zRot, String nickname, byte[] skin,
             PlayerConnection connection) {
         super(world, pos, speed, new AABB(-0.4, -0.4, -1, 0.4, 0.4, 0.9), 100,
                 100, new Frustum(90, 1, 0.1, 24), new Frustum(50, 1, 0.1, 2));
@@ -152,7 +153,7 @@ public class MobPlayerServer extends MobLivingEquippedServer
         tagStructure.setStructure("Inventory", inventory.save());
         if (packet) {
             tagStructure.setString("Nickname", nickname);
-            tagStructure.setString("SkinChecksum", skin);
+            tagStructure.setByteArray("SkinChecksum", skin);
         }
         return tagStructure;
     }
@@ -377,7 +378,8 @@ public class MobPlayerServer extends MobLivingEquippedServer
         return attack(false, strength);
     }
 
-    protected synchronized List<MobServer> attack(boolean side, double strength) {
+    protected synchronized List<MobServer> attack(boolean side,
+            double strength) {
         double lookX = FastMath.cosTable(rot.doubleZ() * FastMath.PI / 180) *
                 FastMath.cosTable(rot.doubleX() * FastMath.PI / 180) * 6;
         double lookY = FastMath.sinTable(rot.doubleZ() * FastMath.PI / 180) *
@@ -474,7 +476,7 @@ public class MobPlayerServer extends MobLivingEquippedServer
         sendPositionHandler
                 .submitUpdate(entityID, pos.now(), speed.now(), rot.now(),
                         ground, slidingWall, inWater, swimming);
-        headInWater = world.getTerrain().getBlockType(pos.intX(), pos.intY(),
+        headInWater = world.getTerrain().type(pos.intX(), pos.intY(),
                 FastMath.floor(pos.doubleZ() + 0.7)).isLiquid();
         if (invincibleTicks > 0.0) {
             invincibleTicks = FastMath.max(invincibleTicks - delta, 0.0);

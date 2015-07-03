@@ -16,14 +16,14 @@
 
 package org.tobi29.scapes.chunk;
 
-import org.tobi29.scapes.chunk.generator.ChunkGeneratorInfinite;
+import org.tobi29.scapes.chunk.generator.ChunkGenerator;
 import org.tobi29.scapes.chunk.generator.ChunkPopulator;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 
 public interface WorldEnvironment {
-    ChunkGeneratorInfinite getGenerator();
+    ChunkGenerator getGenerator();
 
     ChunkPopulator getPopulator();
 

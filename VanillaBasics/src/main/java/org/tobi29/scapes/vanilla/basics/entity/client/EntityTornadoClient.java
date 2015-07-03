@@ -83,19 +83,19 @@ public class EntityTornadoClient extends EntityClient implements MobileEntity {
                     .add(new ParticleTornadoBlock(particleManager, pos.now(),
                             Vector3d.ZERO, random.nextFloat() * 360, 12.0, spin,
                             baseSpin, random.nextDouble() * 10 + 6,
-                            world.getTerrain().getBlockType(x, y, z),
-                            world.getTerrain().getBlockData(x, y, z)));
+                            world.getTerrain().type(x, y, z),
+                            world.getTerrain().data(x, y, z)));
         }
         int x = pos.intX() + random.nextInt(9) - 4;
         int y = pos.intY() + random.nextInt(9) - 4;
         int z = pos.intZ() + random.nextInt(7) - 3;
-        if (world.getTerrain().getBlockType(x, y, z) != world.getAir()) {
+        if (world.getTerrain().type(x, y, z) != world.getAir()) {
             particleManager
                     .add(new ParticleTornadoBlock(particleManager, pos.now(),
                             Vector3d.ZERO, random.nextFloat() * 360, 1.0, spin,
                             baseSpin, random.nextDouble() * 20 + 20,
-                            world.getTerrain().getBlockType(x, y, z),
-                            world.getTerrain().getBlockData(x, y, z)));
+                            world.getTerrain().type(x, y, z),
+                            world.getTerrain().data(x, y, z)));
         }
         particleManager.add(new ParticleTornado(particleManager, pos.now(),
                 Vector3d.ZERO, random.nextFloat() * 360, 1.0, spin, baseSpin,

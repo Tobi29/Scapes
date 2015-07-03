@@ -29,11 +29,11 @@ public final class TreePalm implements Tree {
     @Override
     public void gen(TerrainServer.TerrainMutable terrain, int x, int y, int z,
             VanillaMaterial materials, Random random) {
-        BlockType groundType = terrain.getBlockType(x, y, z - 1);
+        BlockType groundType = terrain.type(x, y, z - 1);
         if (groundType != materials.grass && groundType != materials.sand) {
             return;
         }
-        if (terrain.getBlockType(x, y, z) != materials.air) {
+        if (terrain.type(x, y, z) != materials.air) {
             return;
         }
         int size = random.nextInt(4) + 9;

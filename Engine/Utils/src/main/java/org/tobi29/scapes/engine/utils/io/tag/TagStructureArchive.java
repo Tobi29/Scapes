@@ -16,57 +16,60 @@
 
 package org.tobi29.scapes.engine.utils.io.tag;
 
-import org.tobi29.scapes.engine.utils.Pair;
+import org.tobi29.scapes.engine.utils.BufferCreator;
+import org.tobi29.scapes.engine.utils.io.ByteBufferStream;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 
-import java.io.*;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class TagStructureArchive {
     private static final byte HEADER_VERSION = 1;
     private static final byte[] HEADER_MAGIC = {'S', 'T', 'A', 'R'};
     private static final Charset CHARSET = StandardCharsets.UTF_8;
-    private final Map<String, byte[]> tagStructures = new ConcurrentHashMap<>();
-    private final ByteArrayOutputStream byteStreamOut;
+    private final Map<String, ByteBuffer> tagStructures =
+            new ConcurrentHashMap<>();
+    private final ByteBufferStream byteStream, compressionStream;
 
     public TagStructureArchive() {
-        this(new ByteArrayOutputStream());
+        this(new ByteBufferStream(), new ByteBufferStream());
     }
 
-    public TagStructureArchive(ByteArrayOutputStream byteStreamOut) {
-        this.byteStreamOut = byteStreamOut;
+    public TagStructureArchive(ByteBufferStream byteStream,
+            ByteBufferStream compressionStream) {
+        this.byteStream = byteStream;
+        this.compressionStream = compressionStream;
     }
 
     public static Optional<TagStructure> extract(String name,
-            InputStream streamIn) throws IOException {
-        List<Entry> entries = readHeader(streamIn);
+            ReadableByteStream stream) throws IOException {
+        List<Entry> entries = readHeader(stream);
         int offset = 0;
         for (Entry entry : entries) {
             if (entry.name.equals(name)) {
-                new DataInputStream(streamIn).skipBytes(offset);
-                TagStructure tagStructure = new TagStructure();
-                tagStructure.read(new TagStructureReaderBinary(streamIn));
-                return Optional.of(tagStructure);
+                stream.skip(offset);
+                return Optional.of(TagStructureBinary.read(stream));
             }
             offset += entry.length;
         }
         return Optional.empty();
     }
 
-    public static List<Entry> readHeader(InputStream streamIn)
+    public static List<Entry> readHeader(ReadableByteStream stream)
             throws IOException {
-        DataInputStream dataStreamIn = new DataInputStream(streamIn);
         byte[] magic = new byte[HEADER_MAGIC.length];
-        dataStreamIn.readFully(magic);
+        stream.get(magic);
         if (!Arrays.equals(magic, magic)) {
             throw new IOException("Not in tag-archive format! (Magic-Header: " +
                     Arrays.toString(magic) +
                     ')');
         }
-        byte version = dataStreamIn.readByte();
+        byte version = stream.get();
         if (version > HEADER_VERSION) {
             throw new IOException(
                     "Unsupported version or not in tag-container format! (Version: " +
@@ -74,19 +77,16 @@ public class TagStructureArchive {
         }
         List<Entry> entries = new ArrayList<>();
         while (true) {
-            int length = dataStreamIn.readByte();
-            if (length < 0) {
-                length += 256;
-            }
+            int length = stream.getUByte();
             if (length == 255) {
                 break;
             } else if (length == 254) {
-                length = dataStreamIn.readInt();
+                length = stream.getInt();
             }
             byte[] array = new byte[length];
-            dataStreamIn.readFully(array);
+            stream.get(array);
             String name = new String(array, CHARSET);
-            length = dataStreamIn.readInt();
+            length = stream.getInt();
             entries.add(new Entry(name, length));
         }
         return entries;
@@ -99,22 +99,28 @@ public class TagStructureArchive {
 
     public synchronized void setTagStructure(String key,
             TagStructure tagStructure, byte compression) throws IOException {
-        TagStructureBinary.write(tagStructure, byteStreamOut, compression);
-        byte[] array = byteStreamOut.toByteArray();
-        byteStreamOut.reset();
-        tagStructures.put(key, array);
+        byteStream.buffer().clear();
+        TagStructureBinary.write(tagStructure, byteStream, compression, true,
+                compressionStream);
+        byteStream.put(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12});
+        byteStream.buffer().flip();
+        ByteBuffer buffer =
+                BufferCreator.byteBuffer(byteStream.buffer().remaining());
+        buffer.put(byteStream.buffer());
+        buffer.flip();
+        tagStructures.put(key, buffer);
     }
 
     public synchronized Optional<TagStructure> getTagStructure(String key)
             throws IOException {
-        byte[] array = tagStructures.get(key);
-        if (array == null) {
+        ByteBuffer buffer = tagStructures.get(key);
+        if (buffer == null) {
             return Optional.empty();
         }
         TagStructure tagStructure = new TagStructure();
-        try (ByteArrayInputStream streamIn = new ByteArrayInputStream(array)) {
-            TagStructureBinary.read(tagStructure, streamIn);
-        }
+        TagStructureBinary
+                .read(tagStructure, new ByteBufferStream(buffer.duplicate()),
+                        compressionStream);
         return Optional.of(tagStructure);
     }
 
@@ -123,7 +129,7 @@ public class TagStructureArchive {
     }
 
     public synchronized void moveTagStructure(String from, String to) {
-        byte[] tag = tagStructures.remove(from);
+        ByteBuffer tag = tagStructures.remove(from);
         if (tag != null) {
             tagStructures.put(to, tag);
         }
@@ -138,36 +144,37 @@ public class TagStructureArchive {
     }
 
     @SuppressWarnings("AccessToStaticFieldLockedOnInstance")
-    public synchronized void write(OutputStream streamOut) throws IOException {
-        List<Pair<String, byte[]>> entries = tagStructures.entrySet().stream()
-                .map(entry -> new Pair<>(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList());
-        DataOutputStream dataStreamOut = new DataOutputStream(streamOut);
-        dataStreamOut.write(HEADER_MAGIC);
-        dataStreamOut.writeByte(HEADER_VERSION);
-        for (Pair<String, byte[]> entry : entries) {
-            byte[] array = entry.a.getBytes(CHARSET);
+    public synchronized void write(WritableByteStream stream)
+            throws IOException {
+        stream.put(HEADER_MAGIC);
+        stream.put(HEADER_VERSION);
+        List<ByteBuffer> buffers = new ArrayList<>();
+        for (Map.Entry<String, ByteBuffer> entry : tagStructures.entrySet()) {
+            byte[] array = entry.getKey().getBytes(CHARSET);
             if (array.length >= 254) {
-                dataStreamOut.writeByte(-2);
-                dataStreamOut.writeInt(array.length);
+                stream.put(254);
+                stream.putInt(array.length);
             } else {
-                dataStreamOut.writeByte((byte) array.length);
+                stream.put(array.length);
             }
-            dataStreamOut.write(array);
-            dataStreamOut.writeInt(entry.b.length);
+            stream.put(array);
+            ByteBuffer buffer = entry.getValue().duplicate();
+            stream.putInt(buffer.remaining());
+            buffers.add(buffer);
         }
-        dataStreamOut.writeByte(-1);
-        for (Pair<String, byte[]> entry : entries) {
-            dataStreamOut.write(entry.b);
+        stream.put(255);
+        for (ByteBuffer buffer : buffers) {
+            stream.put(buffer);
         }
     }
 
-    public synchronized void read(InputStream streamIn) throws IOException {
-        List<Entry> entries = readHeader(streamIn);
-        DataInputStream dataStreamIn = new DataInputStream(streamIn);
+    public synchronized void read(ReadableByteStream stream)
+            throws IOException {
+        List<Entry> entries = readHeader(stream);
         for (Entry entry : entries) {
-            byte[] array = new byte[entry.length];
-            dataStreamIn.readFully(array);
+            ByteBuffer array = BufferCreator.byteBuffer(entry.length);
+            stream.get(array);
+            array.flip();
             tagStructures.put(entry.name, array);
         }
     }

@@ -51,11 +51,11 @@ public class BlockBellows extends VanillaBlock {
     @Override
     public boolean place(TerrainServer.TerrainMutable terrain, int x, int y,
             int z, Face face, MobPlayerServer player) {
-        terrain.setBlockData(x, y, z, face.getData());
-        EntityServer entity = new EntityBellowsServer(terrain.getWorld(),
+        terrain.data(x, y, z, face.getData());
+        EntityServer entity = new EntityBellowsServer(terrain.world(),
                 new Vector3d(x + 0.5, y + 0.5, z + 0.5), face);
         entity.onSpawn();
-        terrain.getWorld().addEntity(entity);
+        terrain.world().addEntity(entity);
         return true;
     }
 

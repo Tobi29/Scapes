@@ -37,7 +37,6 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TerrainInfiniteRenderer implements TerrainRenderer {
@@ -56,10 +55,12 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
             cullingPool2 = new Pool<>(VisibleUpdate::new);
 
     public TerrainInfiniteRenderer(TerrainInfiniteClient terrain,
-            MobPlayerClientMain player, double chunkDistance) {
+            MobPlayerClientMain player, double chunkDistance,
+            List<Vector2i> sortedLocations) {
         this.terrain = terrain;
-        WorldClient world = terrain.getWorld();
-        chunkDistanceMax = FastMath.sqr(chunkDistance);
+        this.sortedLocations = sortedLocations;
+        WorldClient world = terrain.world();
+        chunkDistanceMax = FastMath.sqr(chunkDistance - 1.0);
         Queue<TerrainInfiniteRendererChunk> loadQueue =
                 new ConcurrentLinkedQueue<>();
         Queue<TerrainInfiniteRendererChunk> updateQueue =
@@ -72,23 +73,6 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                         world.getInfoLayers());
         keepInvisibleChunkVbos = player.getGame().getEngine().getTagStructure()
                 .getStructure("Scapes").getBoolean("KeepInvisibleChunkVbos");
-        int size = (int) FastMath.ceil(chunkDistance / 16.0);
-        List<Vector2i> locations = new ArrayList<>();
-        for (int yy = -size; yy <= size; yy++) {
-            for (int xx = -size; xx <= size; xx++) {
-                if (xx * xx + yy * yy <= chunkDistanceMax) {
-                    locations.add(new Vector2i(xx, yy));
-                }
-            }
-        }
-        Collections.sort(locations, (vector1, vector2) -> {
-            double distance1 =
-                    FastMath.pointDistanceSqr(vector1, Vector2i.ZERO),
-                    distance2 =
-                            FastMath.pointDistanceSqr(vector2, Vector2i.ZERO);
-            return distance1 == distance2 ? 0 : distance1 > distance2 ? 1 : -1;
-        });
-        sortedLocations = locations.stream().collect(Collectors.toList());
         Joiner updateJoiner = player.getGame().getEngine().getTaskExecutor()
                 .runTask(updateThread, "TerrainInfiniteChunk-Geometry-Update");
         Joiner loadJoiner = player.getGame().getEngine().getTaskExecutor()
@@ -111,8 +95,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     }
 
     public void addToUpdateQueue(TerrainInfiniteRendererChunk chunk) {
-        if (chunk == null ||
-                chunk.getChunk().isDisposed() || !chunk.getChunk().isLoaded() ||
+        if (chunk == null || !chunk.getChunk().isLoaded() ||
                 disposed) {
             return;
         }
@@ -120,8 +103,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     }
 
     public void addToLoadQueue(TerrainInfiniteRendererChunk chunk) {
-        if (chunk == null ||
-                chunk.getChunk().isDisposed() || !chunk.getChunk().isLoaded() ||
+        if (chunk == null || !chunk.getChunk().isLoaded() ||
                 disposed) {
             return;
         }
@@ -129,7 +111,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     }
 
     @Override
-    public void renderUpdate(GraphicsSystem graphics, Cam cam) {
+    public void renderUpdate(Cam cam) {
         if (disposed) {
             return;
         }
@@ -147,20 +129,14 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                         chunk.get().getRendererChunk();
                 if (rendererChunk.isLoaded()) {
                     chunks.add(rendererChunk);
-                } else {
-                    newChunkDistance = FastMath.min(newChunkDistance,
-                            FastMath.sqr(
-                                    (rendererChunk.getChunk().getX() << 4) + 8 -
-                                            cam.position.doubleX()) +
-                                    FastMath.sqr(
-                                            (rendererChunk.getChunk().getY() <<
-                                                    4) + 8 -
-                                                    cam.position.doubleY()) -
-                                    256.0d);
+                    continue;
                 }
             }
+            newChunkDistance = FastMath.min(newChunkDistance,
+                    FastMath.sqr(pos.intX()) + FastMath.sqr(pos.intY()) - 1.0);
+            break;
         }
-        chunkDistance = FastMath.sqrt(newChunkDistance);
+        chunkDistance = FastMath.sqrt(newChunkDistance) * 16.0;
     }
 
     @Override
@@ -192,13 +168,13 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
 
     @Override
     public void blockChange(int x, int y, int z) {
-        int xx = FastMath.floor(x / 16.0d);
-        int yy = FastMath.floor(y / 16.0d);
+        int xx = x >> 4;
+        int yy = y >> 4;
         Optional<TerrainInfiniteChunkClient> chunk = terrain.getChunk(xx, yy);
         if (chunk.isPresent()) {
             TerrainInfiniteRendererChunk rendererChunk =
                     chunk.get().getRendererChunk();
-            int zz = FastMath.floor(z / 16.0d);
+            int zz = z >> 4;
             int xxx = x - (xx << 4);
             int yyy = y - (yy << 4);
             int zzz = z - (zz << 4);
@@ -244,7 +220,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     @Override
     public double getActualRenderDistance() {
         if (staticRenderDistance) {
-            return chunkDistanceMax;
+            return 4096.0;
         }
         return chunkDistance;
     }
@@ -403,6 +379,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
         private final Queue<TerrainInfiniteRendererChunk> queue, idleQueue;
         private final ChunkMesh.VertexArrays arrays, arraysAlpha;
         private final TerrainRenderInfo info;
+        private final TerrainInfiniteSection section;
         private final boolean visibleUpdater;
 
         public TerrainInfiniteRendererThread(
@@ -416,6 +393,8 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
             arrays = new ChunkMesh.VertexArrays();
             arraysAlpha = new ChunkMesh.VertexArrays();
             info = new TerrainRenderInfo(infoLayers);
+            section = new TerrainInfiniteSection(terrain, terrain.zSize,
+                    terrain.world().getAir());
         }
 
         @Override
@@ -455,7 +434,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
         }
 
         private void process(TerrainInfiniteRendererChunk chunk) {
-            if (chunk != null && !chunk.getChunk().isDisposed()) {
+            if (chunk != null) {
                 for (int i = 0; i < chunk.getZSections(); i++) {
                     if (chunk.isGeometryDirty(i)) {
                         chunk.unsetGeometryDirty(i);
@@ -466,15 +445,16 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
         }
 
         private void process(TerrainInfiniteRendererChunk chunk, int i) {
-            BlockType air = terrain.getWorld().getAir();
             VAO vao = null, vaoAlpha = null;
             AABB aabb = null, aabbAlpha = null;
-            if (chunk.getChunk().isEmpty(i)) {
+            TerrainInfiniteChunk terrainChunk = chunk.getChunk();
+            if (terrainChunk.isEmpty(i)) {
                 chunk.setSolid(i, false);
             } else {
-                TerrainInfiniteChunk terrainChunk = chunk.getChunk();
-                int bx = terrainChunk.getX() << 4;
-                int by = terrainChunk.getY() << 4;
+                BlockType air = terrain.world().getAir();
+                section.init(terrainChunk.getPos());
+                int bx = terrainChunk.getBlockX();
+                int by = terrainChunk.getBlockY();
                 int bz = i << 4;
                 boolean solid = true, empty = true;
                 for (int xxx = 0; xxx < 16; xxx++) {
@@ -483,14 +463,13 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                         int byy = by + yyy;
                         for (int zzz = 0; zzz < 16; zzz++) {
                             int bzz = bz + zzz;
-                            BlockType type =
-                                    terrainChunk.getBlockType(xxx, yyy, bzz);
+                            BlockType type = terrainChunk.typeL(xxx, yyy, bzz);
                             if (type == air) {
                                 solid = false;
                             } else {
                                 empty = false;
                                 if (solid &&
-                                        type.connectStage(terrain, bxx, byy,
+                                        type.connectStage(section, bxx, byy,
                                                 bzz) < 4) {
                                     solid = false;
                                 }
@@ -517,12 +496,11 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                             int byy = by + yyy;
                             for (int zzz = 0; zzz < 16; zzz++) {
                                 int bzz = bz + zzz;
-                                BlockType type = terrainChunk
-                                        .getBlockType(xxx, yyy, bzz);
-                                int data = terrainChunk
-                                        .getBlockData(xxx, yyy, bzz);
+                                BlockType type =
+                                        terrainChunk.typeL(xxx, yyy, bzz);
+                                int data = terrainChunk.dataL(xxx, yyy, bzz);
                                 type.addToChunkMesh(mesh, meshAlpha, data,
-                                        terrain, info, bxx, byy, bzz, xxx, yyy,
+                                        section, info, bxx, byy, bzz, xxx, yyy,
                                         zzz, lod);
                                 if (type != air) {
                                     needsLod = true;

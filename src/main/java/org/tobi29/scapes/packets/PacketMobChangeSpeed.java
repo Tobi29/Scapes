@@ -19,14 +19,14 @@ package org.tobi29.scapes.packets;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.MobileEntity;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class PacketMobChangeSpeed extends Packet
@@ -50,21 +50,21 @@ public class PacketMobChangeSpeed extends Packet
     }
 
     @Override
-    public void sendClient(PlayerConnection player, DataOutputStream streamOut)
+    public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        streamOut.writeInt(entityID);
-        streamOut.writeShort(x);
-        streamOut.writeShort(y);
-        streamOut.writeShort(z);
+        stream.putInt(entityID);
+        stream.putShort(x);
+        stream.putShort(y);
+        stream.putShort(z);
     }
 
     @Override
-    public void parseClient(ClientConnection client, DataInputStream streamIn)
+    public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        entityID = streamIn.readInt();
-        x = streamIn.readShort();
-        y = streamIn.readShort();
-        z = streamIn.readShort();
+        entityID = stream.getInt();
+        x = stream.getShort();
+        y = stream.getShort();
+        z = stream.getShort();
     }
 
     @Override
@@ -80,19 +80,19 @@ public class PacketMobChangeSpeed extends Packet
     }
 
     @Override
-    public void sendServer(ClientConnection client, DataOutputStream streamOut)
+    public void sendServer(ClientConnection client, WritableByteStream stream)
             throws IOException {
-        streamOut.writeShort(x);
-        streamOut.writeShort(y);
-        streamOut.writeShort(z);
+        stream.putShort(x);
+        stream.putShort(y);
+        stream.putShort(z);
     }
 
     @Override
-    public void parseServer(PlayerConnection player, DataInputStream streamIn)
+    public void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException {
-        x = streamIn.readShort();
-        y = streamIn.readShort();
-        z = streamIn.readShort();
+        x = stream.getShort();
+        y = stream.getShort();
+        z = stream.getShort();
     }
 
     @Override

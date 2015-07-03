@@ -18,10 +18,10 @@ package org.tobi29.scapes.vanilla.basics.generator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.GameRegistry;
-import org.tobi29.scapes.chunk.data.ChunkData;
-import org.tobi29.scapes.chunk.generator.ChunkGeneratorInfinite;
-import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteChunkServer;
+import org.tobi29.scapes.chunk.generator.ChunkGenerator;
+import org.tobi29.scapes.chunk.generator.GeneratorOutput;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.noise.layer.*;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
@@ -33,14 +33,19 @@ import org.tobi29.scapes.vanilla.basics.material.update.UpdateLavaFlow;
 import java.util.Iterator;
 import java.util.Random;
 
-public class ChunkGeneratorOverworld implements ChunkGeneratorInfinite {
+public class ChunkGeneratorOverworld implements ChunkGenerator {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ChunkGeneratorOverworld.class);
+    private final Random random = new Random();
     private final VanillaMaterial materials;
     private final RandomNoiseLayer sandLayer;
     private final RandomNoiseLayer sandstoneLayer;
     private final RandomNoiseLayer[] stoneLayers;
     private final TerrainGenerator terrainGenerator;
+    private final TerrainGenerator.TerrainGeneratorLayer layer =
+            new TerrainGenerator.TerrainGeneratorLayer();
+    private final TerrainGenerator.TerrainGeneratorOutput generator =
+            new TerrainGenerator.TerrainGeneratorOutput();
     private final short[] sandstoneLayers;
     private final long seedInt;
 
@@ -109,187 +114,13 @@ public class ChunkGeneratorOverworld implements ChunkGeneratorInfinite {
                 new RandomNoiseNoiseLayer(sandstoneNoise, random.nextLong(), 3);
     }
 
-    @Override
-    public void makeLand(int x, int y, TerrainInfiniteChunkServer chunk,
-            ChunkData bId, ChunkData bData) {
-        long time = System.currentTimeMillis();
-        int hash = 17;
-        hash = 31 * hash + x;
-        hash = 31 * hash + y;
-        Random random = new Random(hash + seedInt);
-        TerrainGenerator.TerrainGeneratorOutput output =
-                new TerrainGenerator.TerrainGeneratorOutput();
-        for (int xx = 0; xx < 16; xx++) {
-            int xxx = (x << 4) + xx;
-            for (int yy = 0; yy < 16; yy++) {
-                int yyy = (y << 4) + yy;
-                terrainGenerator.generate(xxx, yyy, output);
-                short stoneType;
-                short sandType =
-                        output.beach ? (short) sandLayer.getInt(xxx, yyy) : 4;
-                boolean sandstone = sandstoneLayer.getInt(xxx, yyy) == 0;
-                int stoneTypeZShift =
-                        random.nextInt(6) - (int) (output.mountainFactor * 300);
-                int lastFree = FastMath.clamp((int) output.height,
-                        (int) output.waterHeight, chunk.getZSize() - 1);
-                int zzzShifted = lastFree + stoneTypeZShift;
-                if (zzzShifted <= 96) {
-                    stoneType = (short) stoneLayers[0].getInt(xxx, yyy);
-                } else if (zzzShifted <= 240) {
-                    stoneType = (short) stoneLayers[1].getInt(xxx, yyy);
-                } else if (output.volcanoFactor > 0.4f) {
-                    stoneType = (short) stoneLayers[2].getInt(xxx, yyy);
-                } else {
-                    stoneType = (short) stoneLayers[3].getInt(xxx, yyy);
-                }
-                for (int zzz = lastFree; zzz >= 0; zzz--) {
-                    zzzShifted = zzz + stoneTypeZShift;
-                    if (zzzShifted == 240) {
-                        stoneType = (short) stoneLayers[1].getInt(xxx, yyy);
-                    } else if (zzzShifted == 96) {
-                        stoneType = (short) stoneLayers[0].getInt(xxx, yyy);
-                    }
-                    short blockID;
-                    short blockData = 0;
-                    if (zzz < output.height) {
-                        if (zzz == 0) {
-                            blockID = materials.bedrock.getID();
-                        } else if (zzz < output.magmaHeight) {
-                            blockID = materials.lava.getID();
-                        } else {
-                            if (sandType < 3) {
-                                if (lastFree - zzz < 9) {
-                                    if (lastFree - zzz <
-                                            5 + random.nextInt(3)) {
-                                        blockID = materials.sand.getID();
-                                        blockData = sandType;
-                                        if (blockData == 1) {
-                                            if (random.nextInt(4) == 0 && zzz <
-                                                    chunk.getZSize() - 1) {
-                                                if (bId.getData(xx, yy, zzz + 1,
-                                                        0) == 0) {
-                                                    bId.setData(xx, yy, zzz + 1,
-                                                            0,
-                                                            materials.stoneRock
-                                                                    .getID());
-                                                    if (random.nextInt(8) ==
-                                                            0) {
-                                                        bData.setData(xx, yy,
-                                                                zzz + 1, 0,
-                                                                stoneType);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    } else {
-                                        blockID = materials.stoneRaw.getID();
-                                    }
-                                } else {
-                                    blockID = materials.stoneRaw.getID();
-                                }
-                            } else if (lastFree > 254) {
-                                if (zzz == lastFree) {
-                                    if (output.soiled) {
-                                        blockID = materials.grass.getID();
-                                    } else {
-                                        if (output.lavaChance > 0 &&
-                                                random.nextInt(
-                                                        output.lavaChance) ==
-                                                        0) {
-                                            blockID = materials.lava.getID();
-                                            chunk.addDelayedUpdate(
-                                                    new UpdateLavaFlow()
-                                                            .set(xxx, yyy, zzz,
-                                                                    0.0));
-                                        } else {
-                                            blockID =
-                                                    materials.stoneRaw.getID();
-                                        }
-                                    }
-                                    if (random.nextInt(128) == 0 &&
-                                            zzz < chunk.getZSize() - 1) {
-                                        bId.setData(xx, yy, zzz + 1, 0,
-                                                materials.stoneRock.getID());
-                                        bData.setData(xx, yy, zzz + 1, 0,
-                                                stoneType);
-                                    }
-                                } else if (lastFree - zzz < 9) {
-                                    if (lastFree - zzz <
-                                            5 + random.nextInt(5)) {
-                                        if (output.soiled) {
-                                            blockID = materials.dirt.getID();
-                                        } else {
-                                            blockID =
-                                                    materials.stoneRaw.getID();
-                                        }
-                                    } else {
-                                        blockID = materials.stoneRaw.getID();
-                                    }
-                                } else {
-                                    blockID = materials.stoneRaw.getID();
-                                }
-                            } else {
-                                blockID = materials.stoneRaw.getID();
-                            }
-                        }
-                        if (blockID == materials.stoneRaw.getID()) {
-                            if (output.caveRiver >
-                                    FastMath.abs(zzz - output.caveRiverHeight) /
-                                            16.0d) {
-                                if (zzz < 128) {
-                                    blockID = materials.water.getID();
-                                } else {
-                                    blockID = materials.air.getID();
-                                }
-                            } else if (output.cave >
-                                    FastMath.abs(zzz - output.caveHeight) /
-                                            8.0d) {
-                                blockID = materials.air.getID();
-                            } else {
-                                if (sandstone && zzz > 240) {
-                                    blockID = materials.sandstone.getID();
-                                    blockData = sandstoneLayers[zzz];
-                                } else {
-                                    blockData = stoneType;
-                                    if (zzz == lastFree) {
-                                        if (zzz < chunk.getZSize() - 1 &&
-                                                lastFree >= 255 &&
-                                                random.nextInt(10) == 0) {
-                                            bId.setData(xx, yy, zzz + 1, 0,
-                                                    materials.stoneRock
-                                                            .getID());
-                                            bData.setData(xx, yy, zzz + 1, 0,
-                                                    blockData);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        if (zzz < output.waterHeight) {
-                            blockID = materials.water.getID();
-                        } else {
-                            blockID = materials.air.getID();
-                        }
-                        lastFree = zzz - 1;
-                    }
-                    if (blockID != materials.air.getID()) {
-                        bId.setData(xx, yy, zzz, 0, blockID);
-                        if (blockData != 0) {
-                            bData.setData(xx, yy, zzz, 0, blockData);
-                        }
-                    }
-                }
-            }
-        }
-        LOGGER.trace("Generated chunk in {} ms.",
-                System.currentTimeMillis() - time);
-    }
-
     public boolean isValidSpawn(int x, int y) {
+        TerrainGenerator.TerrainGeneratorLayer layer =
+                new TerrainGenerator.TerrainGeneratorLayer();
+        terrainGenerator.generate(x, y, layer);
         TerrainGenerator.TerrainGeneratorOutput output =
                 new TerrainGenerator.TerrainGeneratorOutput();
-        terrainGenerator.generate(x, y, output);
+        terrainGenerator.generate(x, y, layer, output);
         return output.height > output.waterHeight;
     }
 
@@ -330,6 +161,131 @@ public class ChunkGeneratorOverworld implements ChunkGeneratorInfinite {
             return (short) stoneLayers[2].getInt(xxx, yyy);
         } else {
             return (short) stoneLayers[3].getInt(xxx, yyy);
+        }
+    }
+
+    @Override
+    public void seed(int x, int y) {
+        int hash = 17;
+        hash = 31 * hash + x;
+        hash = 31 * hash + y;
+        random.setSeed(hash + seedInt);
+    }
+
+    @Override
+    public void makeLand(int x, int y, int z, int dz, GeneratorOutput output) {
+        terrainGenerator.generate(x, y, layer);
+        terrainGenerator.generate(x, y, layer, generator);
+        int stoneType;
+        int sandType = generator.beach ? sandLayer.getInt(x, y) : 4;
+        boolean sandstone = sandstoneLayer.getInt(x, y) == 0;
+        int stoneTypeZShift =
+                random.nextInt(6) - (int) (generator.mountainFactor * 300);
+        int lastFree = FastMath.clamp((int) generator.height,
+                (int) generator.waterHeight, dz - 1);
+        int zzzShifted = lastFree + stoneTypeZShift;
+        if (zzzShifted <= 96) {
+            stoneType = stoneLayers[0].getInt(x, y);
+        } else if (zzzShifted <= 240) {
+            stoneType = stoneLayers[1].getInt(x, y);
+        } else if (generator.volcanoFactor > 0.4f) {
+            stoneType = stoneLayers[2].getInt(x, y);
+        } else {
+            stoneType = stoneLayers[3].getInt(x, y);
+        }
+        for (int zz = dz - 1; zz > lastFree; zz--) {
+            output.type(zz, materials.air);
+            output.data(zz, 0);
+        }
+        for (int zz = lastFree; zz >= 0; zz--) {
+            zzzShifted = zz + stoneTypeZShift;
+            if (zzzShifted == 240) {
+                stoneType = (short) stoneLayers[1].getInt(x, y);
+            } else if (zzzShifted == 96) {
+                stoneType = (short) stoneLayers[0].getInt(x, y);
+            }
+            BlockType type;
+            int data = 0;
+            if (zz < generator.height) {
+                if (zz == 0) {
+                    type = materials.bedrock;
+                } else if (zz < generator.magmaHeight) {
+                    type = materials.lava;
+                } else {
+                    if (sandType < 3) {
+                        if (lastFree - zz < 9) {
+                            if (lastFree - zz < 5 + random.nextInt(3)) {
+                                type = materials.sand;
+                                data = sandType;
+                            } else {
+                                type = materials.stoneRaw;
+                            }
+                        } else {
+                            type = materials.stoneRaw;
+                        }
+                    } else if (lastFree > 254) {
+                        if (zz == lastFree) {
+                            if (generator.soiled) {
+                                type = materials.grass;
+                            } else {
+                                if (generator.lavaChance > 0 &&
+                                        random.nextInt(generator.lavaChance) ==
+                                                0) {
+                                    type = materials.lava;
+                                    output.updates.add(new UpdateLavaFlow()
+                                            .set(x, y, zz, 0.0));
+                                } else {
+                                    type = materials.stoneRaw;
+                                }
+                            }
+                        } else if (lastFree - zz < 9) {
+                            if (lastFree - zz < 5 + random.nextInt(5)) {
+                                if (generator.soiled) {
+                                    type = materials.dirt;
+                                } else {
+                                    type = materials.stoneRaw;
+                                }
+                            } else {
+                                type = materials.stoneRaw;
+                            }
+                        } else {
+                            type = materials.stoneRaw;
+                        }
+                    } else {
+                        type = materials.stoneRaw;
+                    }
+                }
+                if (type == materials.stoneRaw) {
+                    if (generator.caveRiver >
+                            FastMath.abs(zz - generator.caveRiverHeight) /
+                                    16.0d) {
+                        if (zz < 128) {
+                            type = materials.water;
+                        } else {
+                            type = materials.air;
+                        }
+                    } else if (generator.cave >
+                            FastMath.abs(zz - generator.caveHeight) / 8.0d) {
+                        type = materials.air;
+                    } else {
+                        if (sandstone && zz > 240) {
+                            type = materials.sandstone;
+                            data = sandstoneLayers[zz];
+                        } else {
+                            data = stoneType;
+                        }
+                    }
+                }
+            } else {
+                if (zz < generator.waterHeight) {
+                    type = materials.water;
+                } else {
+                    type = materials.air;
+                }
+                lastFree = zz - 1;
+            }
+            output.type(zz, type);
+            output.data(zz, data);
         }
     }
 }

@@ -18,15 +18,5 @@ package org.tobi29.scapes.engine.utils.io.filesystem;
 
 import org.tobi29.scapes.engine.utils.io.ReadSource;
 
-import java.io.IOException;
-import java.net.URL;
-
 public interface Resource extends ReadSource {
-    String getID();
-
-    boolean exists();
-
-    ResourceAttributes getAttributes();
-
-    URL getURL() throws IOException;
 }

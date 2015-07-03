@@ -84,15 +84,14 @@ public class BlockTorch extends VanillaBlock {
             int z, Face face, MobPlayerServer player) {
         Vector3 ground =
                 face.getOpposite().getDelta().plus(new Vector3i(x, y, z));
-        boolean flag = terrain.getBlockType(ground.intX(), ground.intY(),
-                ground.intZ()).isSolid(terrain, ground.intX(), ground.intY(),
+        boolean flag = terrain.type(ground.intX(), ground.intY(), ground.intZ())
+                .isSolid(terrain, ground.intX(), ground.intY(),
                 ground.intZ()) &&
-                !terrain.getBlockType(ground.intX(), ground.intY(),
-                        ground.intZ())
+                !terrain.type(ground.intX(), ground.intY(), ground.intZ())
                         .isTransparent(terrain, ground.intX(), ground.intY(),
                                 ground.intZ());
         if (flag) {
-            terrain.setBlockData(x, y, z, face.getData());
+            terrain.data(x, y, z, face.getData());
         }
         return flag;
     }
@@ -161,20 +160,18 @@ public class BlockTorch extends VanillaBlock {
     public void update(TerrainServer.TerrainMutable terrain, int x, int y,
             int z) {
         Vector3 ground =
-                Face.get(terrain.getBlockData(x, y, z)).getOpposite().getDelta()
+                Face.get(terrain.data(x, y, z)).getOpposite().getDelta()
                         .plus(new Vector3i(x, y, z));
-        if (!terrain.getBlockType(ground.intX(), ground.intY(), ground.intZ())
+        if (!terrain.type(ground.intX(), ground.intY(), ground.intZ())
                 .isSolid(terrain, ground.intX(), ground.intY(),
                         ground.intZ()) ||
-                terrain.getBlockType(ground.intX(), ground.intY(),
-                        ground.intZ())
+                terrain.type(ground.intX(), ground.intY(), ground.intZ())
                         .isTransparent(terrain, ground.intX(), ground.intY(),
                                 ground.intZ())) {
-            terrain.getWorld().dropItems(
+            terrain.world().dropItems(
                     getDrops(new ItemStack(materials.air, (short) 0),
-                            terrain.getBlockData(x, y, z)), x, y, z);
-            terrain.setBlockTypeAndData(x, y, z, terrain.getWorld().getAir(),
-                    (short) 0);
+                            terrain.data(x, y, z)), x, y, z);
+            terrain.typeData(x, y, z, terrain.world().getAir(), (short) 0);
         }
     }
 

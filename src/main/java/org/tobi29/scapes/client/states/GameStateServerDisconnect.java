@@ -62,11 +62,6 @@ public class GameStateServerDisconnect extends GameState {
     }
 
     @Override
-    public boolean forceRender() {
-        return false;
-    }
-
-    @Override
     public void stepComponent(Sync sync) {
         address.ifPresent(address -> {
             reconnectTimer -= sync.getSpeedFactor();

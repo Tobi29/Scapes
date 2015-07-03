@@ -40,11 +40,11 @@ public class BlockOreMagnetite extends BlockOre {
             int z, Face face, MobPlayerServer player, ItemStack item) {
         if ("Pickaxe".equals(item.getMaterial().getToolType(item)) &&
                 !canBeBroken(item.getMaterial().getToolLevel(item),
-                        terrain.getBlockData(x, y, z))) {
-            terrain.getWorld()
+                        terrain.data(x, y, z))) {
+            terrain.world()
                     .dropItem(new ItemStack(materials.oreChunk, (short) 5),
                             x + face.getX(), y + face.getY(), z + face.getZ());
-            terrain.setBlockType(x, y, z, materials.stoneRaw);
+            terrain.type(x, y, z, materials.stoneRaw);
             return false;
         }
         return true;

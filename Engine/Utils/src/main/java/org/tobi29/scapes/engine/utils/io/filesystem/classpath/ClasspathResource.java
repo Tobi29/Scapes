@@ -16,60 +16,77 @@
 
 package org.tobi29.scapes.engine.utils.io.filesystem.classpath;
 
+import org.apache.tika.Tika;
+import org.tobi29.scapes.engine.utils.io.BufferedReadChannelStream;
+import org.tobi29.scapes.engine.utils.io.IOConsumer;
+import org.tobi29.scapes.engine.utils.io.IOFunction;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.filesystem.Resource;
-import org.tobi29.scapes.engine.utils.io.filesystem.ResourceAttributes;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.channels.Channels;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 public class ClasspathResource implements Resource {
-    final ClassLoader classLoader;
-    final String path, id;
+    private final ClassLoader classLoader;
+    private final String path;
 
-    public ClasspathResource(ClassLoader classLoader, String path, String id) {
+    public ClasspathResource(ClassLoader classLoader, String path) {
         this.classLoader = classLoader;
         this.path = path;
-        this.id = id;
-    }
-
-    @Override
-    public String getID() {
-        return id;
     }
 
     @Override
     public boolean exists() {
-        return getURL() != null;
-    }
-
-    @Override
-    public ResourceAttributes getAttributes() {
-        return new ClasspathAttributes(this);
-    }
-
-    @Override
-    public URL getURL() {
         return AccessController.doPrivileged(
-                (PrivilegedAction<URL>) () -> classLoader.getResource(path));
+                (PrivilegedAction<URL>) () -> classLoader.getResource(path)) !=
+                null;
     }
 
     @Override
-    public InputStream read() throws IOException {
+    public String getMIMEType() throws IOException {
+        return new Tika().detect(readIO(), path);
+    }
+
+    @Override
+    public InputStream readIO() throws IOException {
         return AccessController.doPrivileged(
                 (PrivilegedAction<InputStream>) () -> classLoader
                         .getResourceAsStream(path));
     }
 
     @Override
+    public void read(IOConsumer<ReadableByteStream> reader) throws IOException {
+        reader.accept(
+                new BufferedReadChannelStream(Channels.newChannel(readIO())));
+    }
+
+    @Override
+    public <R> R readReturn(IOFunction<ReadableByteStream, R> reader)
+            throws IOException {
+        return reader.apply(new BufferedReadChannelStream(
+                Channels.newChannel(readIO())));
+    }
+
+    @Override
     public int hashCode() {
-        return id.hashCode();
+        int prime = 31;
+        int result = 1;
+        result = prime * result + path.hashCode();
+        result = prime * result + classLoader.hashCode();
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof Resource && ((Resource) obj).getID().equals(id);
+        if (!(obj instanceof ClasspathResource)) {
+            return false;
+        }
+        ClasspathResource resource = (ClasspathResource) obj;
+        return path.equals(resource.path) &&
+                classLoader.equals(resource.classLoader);
     }
 }

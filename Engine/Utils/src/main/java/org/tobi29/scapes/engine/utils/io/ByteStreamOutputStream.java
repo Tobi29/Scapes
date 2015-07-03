@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.platform.nio;
+package org.tobi29.scapes.engine.utils.io;
 
-import org.tobi29.scapes.engine.utils.platform.Platform;
-import org.tobi29.scapes.engine.utils.platform.spi.PlatformProvider;
+import java.io.IOException;
+import java.io.OutputStream;
 
-public class PlatformLinuxProvider implements PlatformProvider {
-    @Override
-    public boolean available() {
-        return System.getProperty("os.name").toUpperCase().contains("NUX");
+public class ByteStreamOutputStream extends OutputStream {
+    private final WritableByteStream stream;
+
+    public ByteStreamOutputStream(WritableByteStream stream) {
+        this.stream = stream;
     }
 
     @Override
-    public Platform getPlatform() {
-        return new PlatformLinux();
+    public void write(int b) throws IOException {
+        stream.put(b);
+    }
+
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+        stream.put(b, off, len);
     }
 }

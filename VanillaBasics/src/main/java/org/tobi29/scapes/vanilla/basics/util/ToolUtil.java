@@ -22,33 +22,33 @@ import org.tobi29.scapes.vanilla.basics.material.MetalType;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
 public class ToolUtil {
-    public static void createTool(VanillaBasics plugin, ItemStack item,
+    public static boolean createTool(VanillaBasics plugin, ItemStack item,
             String type) {
         switch (type) {
             case "Pickaxe":
                 createTool(plugin, item, 1);
-                break;
+                return true;
             case "Axe":
                 createTool(plugin, item, 2);
-                break;
+                return true;
             case "Shovel":
                 createTool(plugin, item, 3);
-                break;
+                return true;
             case "Hammer":
                 createTool(plugin, item, 4);
-                break;
+                return true;
             case "Saw":
                 createTool(plugin, item, 5);
-                break;
+                return true;
             case "Hoe":
                 createTool(plugin, item, 6);
-                break;
+                return true;
             case "Sword":
                 createTool(plugin, item, 7);
-                break;
+                return true;
             default:
-                throw new IllegalArgumentException("Unknown tool type!");
         }
+        return false;
     }
 
     public static void createTool(VanillaBasics plugin, ItemStack item,

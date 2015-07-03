@@ -18,6 +18,7 @@ package org.tobi29.scapes.engine.utils.tests;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.tobi29.scapes.engine.utils.io.ByteBufferStream;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
@@ -33,12 +34,11 @@ public class TagStructureTest {
     @Test
     public void testUncompressedBinaryFile() throws IOException {
         TagStructure tagStructure = TagStructureTemplate.createTagStructure();
-        ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
-        TagStructureBinary.write(tagStructure, streamOut);
+        ByteBufferStream channel = new ByteBufferStream();
+        TagStructureBinary.write(tagStructure, channel, (byte) -1);
+        channel.buffer().flip();
         TagStructure read = new TagStructure();
-        InputStream streamIn =
-                new ByteArrayInputStream(streamOut.toByteArray());
-        TagStructureBinary.read(read, streamIn);
+        TagStructureBinary.read(read, new ByteBufferStream(channel.buffer()));
         Assert.assertEquals("Read structure doesn't match written one",
                 tagStructure, read);
     }
@@ -46,12 +46,11 @@ public class TagStructureTest {
     @Test
     public void testCompressedBinaryFile() throws IOException {
         TagStructure tagStructure = TagStructureTemplate.createTagStructure();
-        ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
-        TagStructureBinary.write(tagStructure, streamOut, (byte) 1);
+        ByteBufferStream channel = new ByteBufferStream();
+        TagStructureBinary.write(tagStructure, channel, (byte) 1);
+        channel.buffer().flip();
         TagStructure read = new TagStructure();
-        InputStream streamIn =
-                new ByteArrayInputStream(streamOut.toByteArray());
-        TagStructureBinary.read(read, streamIn);
+        TagStructureBinary.read(read, new ByteBufferStream(channel.buffer()));
         Assert.assertEquals("Read structure doesn't match written one",
                 tagStructure, read);
     }

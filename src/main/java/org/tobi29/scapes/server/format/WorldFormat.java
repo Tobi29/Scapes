@@ -24,8 +24,7 @@ import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteServer;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.graphics.PNG;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
+import org.tobi29.scapes.engine.utils.io.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
@@ -35,6 +34,8 @@ import org.tobi29.scapes.plugins.Plugins;
 import org.tobi29.scapes.server.ScapesServer;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,7 +45,7 @@ public class WorldFormat {
     private static final String FILENAME_EXTENSION = ".spkg";
     private final ScapesServer server;
     private final IDStorage idStorage = new IDStorage();
-    private final Directory directory;
+    private final Path path, regionPath;
     private final Plugins plugins;
     private final PlayerData playerData;
     private final PlayerBans playerBans;
@@ -53,22 +54,23 @@ public class WorldFormat {
     private final WorldServer defaultWorld;
     private final long seed;
 
-    public WorldFormat(ScapesServer server, Directory directory)
-            throws IOException {
+    public WorldFormat(ScapesServer server, Path path) throws IOException {
         this.server = server;
-        this.directory = directory;
-        playerData = new PlayerData(directory.get("players"));
-        File bansFile = directory.getResource("Bans.json");
-        if (bansFile.exists()) {
+        this.path = path;
+        regionPath = path.resolve("region");
+        playerData = new PlayerData(path.resolve("players"));
+        Path bansFile = path.resolve("Bans.json");
+        if (Files.exists(bansFile)) {
             playerBans = new PlayerBans(
-                    bansFile.readAndReturn(TagStructureJSON::read));
+                    FileUtil.readReturn(bansFile, TagStructureJSON::read));
         } else {
             playerBans = new PlayerBans();
         }
-        TagStructure tagStructure = directory.getResource("Data.stag")
-                .readAndReturn(TagStructureBinary::read);
+        TagStructure tagStructure =
+                FileUtil.readReturn(path.resolve("Data.stag"),
+                        TagStructureBinary::read);
         idStorage.load(tagStructure.getStructure("IDs"));
-        plugins = new Plugins(pluginFiles(), idStorage, directory);
+        plugins = new Plugins(pluginFiles(), idStorage, path);
         plugins.init();
         plugins.initServer(server);
         seed = tagStructure.getLong("Seed");
@@ -131,8 +133,8 @@ public class WorldFormat {
 
     public synchronized WorldServer registerWorld(Dimension dimension,
             String name) throws IOException {
-        Directory worldDirectory =
-                directory.get("region/" + name.toLowerCase());
+        Path worldDirectory = regionPath.resolve(name.toLowerCase());
+        Files.createDirectories(worldDirectory);
         WorldServer world = new WorldServer(this, name, dimension.getID(),
                 server.getConnection(), server.getTaskExecutor(),
                 newWorld -> new TerrainInfiniteServer(newWorld, 512,
@@ -167,9 +169,9 @@ public class WorldFormat {
         tagStructure.setLong("Seed", seed);
         tagStructure.setStructure("IDs", idStorage.save());
         tagStructure.setStructure("Worlds", worldsTagStructure);
-        directory.getResource("Data.stag").write(streamOut -> TagStructureBinary
-                .write(tagStructure, streamOut));
-        directory.getResource("Bans.json").write(streamOut -> TagStructureJSON
+        FileUtil.write(path.resolve("Data.stag"),
+                streamOut -> TagStructureBinary.write(tagStructure, streamOut));
+        FileUtil.write(path.resolve("Bans.json"), streamOut -> TagStructureJSON
                 .write(playerBans.write(), streamOut));
         plugins.dispose();
     }
@@ -180,9 +182,8 @@ public class WorldFormat {
         }
         for (int i = 0; i < 6; i++) {
             int j = i;
-            directory.getResource("Panorama" + i + ".png")
-                    .write(streamOut -> PNG
-                            .encode(images[j], streamOut, 9, false));
+            FileUtil.write(path.resolve("Panorama" + i + ".png"),
+                    streamOut -> PNG.encode(images[j], streamOut, 9, false));
         }
     }
 
@@ -192,9 +193,10 @@ public class WorldFormat {
 
     private List<PluginFile> pluginFiles() throws IOException {
         List<PluginFile> plugins = new ArrayList<>();
-        for (File plugin : directory.get("plugins")
-                .listFiles(file -> file.getName().endsWith(".jar"))) {
-            plugins.add(new PluginFile(plugin));
+        for (Path file : Files.newDirectoryStream(path.resolve("plugins"))) {
+            if (Files.isRegularFile(file) && !Files.isHidden(file)) {
+                plugins.add(new PluginFile(file));
+            }
         }
         return plugins;
     }

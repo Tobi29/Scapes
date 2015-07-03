@@ -27,40 +27,39 @@ import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 public class UpdateGrassGrowth extends Update {
     @Override
     public void run(TerrainServer.TerrainMutable terrain) {
-        VanillaBasics plugin = (VanillaBasics) terrain.getWorld().getPlugins()
+        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
                 .getPlugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
-        BlockType type = terrain.getBlockType(x, y, z);
+        BlockType type = terrain.type(x, y, z);
         if (type == materials.grass) {
             WorldEnvironmentOverworld environment =
-                    (WorldEnvironmentOverworld) terrain.getWorld()
+                    (WorldEnvironmentOverworld) terrain.world()
                             .getEnvironment();
             ClimateGenerator climateGenerator =
                     environment.getClimateGenerator();
             double humidity = climateGenerator.getHumidity(x, y, z);
             if (humidity < 0.2) {
-                terrain.setBlockType(x, y, z, materials.dirt);
+                terrain.type(x, y, z, materials.dirt);
             }
         } else if (type == materials.dirt) {
             WorldEnvironmentOverworld environment =
-                    (WorldEnvironmentOverworld) terrain.getWorld()
+                    (WorldEnvironmentOverworld) terrain.world()
                             .getEnvironment();
             ClimateGenerator climateGenerator =
                     environment.getClimateGenerator();
             double humidity = climateGenerator.getHumidity(x, y, z);
-            if (humidity > 0.2 && (terrain.getBlockLight(x, y, z + 1) > 8 ||
-                    terrain.getSunLight(x, y, z + 1) > 8) &&
-                    terrain.getBlockType(x, y, z + 1)
+            if (humidity > 0.2 && (terrain.blockLight(x, y, z + 1) > 8 ||
+                    terrain.sunLight(x, y, z + 1) > 8) &&
+                    terrain.type(x, y, z + 1)
                             .isTransparent(terrain, x, y, z + 1)) {
-                terrain.setBlockTypeAndData(x, y, z, materials.grass,
-                        (short) 0);
+                terrain.typeData(x, y, z, materials.grass, (short) 0);
             }
         }
     }
 
     @Override
     public boolean isValidOn(BlockType type, TerrainServer terrain) {
-        VanillaBasics plugin = (VanillaBasics) terrain.getWorld().getPlugins()
+        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
                 .getPlugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         return type == materials.grass || type == materials.dirt;

@@ -20,12 +20,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.IDStorage;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
-import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPathRoot;
+import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath;
 import org.tobi29.scapes.server.ScapesServer;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -44,11 +44,11 @@ public class Plugins {
         this(files, idStorage, null);
     }
 
-    public Plugins(List<PluginFile> files, IDStorage idStorage,
-            Directory directory) throws IOException {
+    public Plugins(List<PluginFile> files, IDStorage idStorage, Path path)
+            throws IOException {
         this.files = files;
         registry = new GameRegistry(idStorage);
-        classLoader = new PluginClassLoader(files, directory);
+        classLoader = new PluginClassLoader(files, path);
         for (PluginFile file : files) {
             Plugin plugin = file.getPlugin(classLoader);
             plugins.add(plugin);
@@ -120,24 +120,10 @@ public class Plugins {
         throw new IllegalArgumentException("Unknown plugin");
     }
 
-    public boolean checkPlugin(String name) {
-        for (Plugin plugin : plugins) {
-            if (plugin.getID().equals(name)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public void addFileSystems(FileSystemContainer files) {
-        try {
-            for (Plugin plugin : plugins) {
-                files.registerFileSystem(plugin.getID(), plugin.getAssetRoot(),
-                        ClasspathPathRoot.make(classLoader));
-            }
-        } catch (IOException e) {
-            LOGGER.error("Failed to add virtual filesystems for plugins: {}",
-                    e.toString());
+        for (Plugin plugin : plugins) {
+            files.registerFileSystem(plugin.getID(),
+                    new ClasspathPath(classLoader, plugin.getAssetRoot()));
         }
     }
 

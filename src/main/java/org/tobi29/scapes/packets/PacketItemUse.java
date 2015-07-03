@@ -21,6 +21,8 @@ import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.connection.InvalidPacketDataException;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.engine.utils.math.PointerPane;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
@@ -30,8 +32,6 @@ import org.tobi29.scapes.entity.server.EntityBlockBreakServer;
 import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -48,17 +48,17 @@ public class PacketItemUse extends Packet implements PacketServer {
     }
 
     @Override
-    public void sendServer(ClientConnection client, DataOutputStream streamOut)
+    public void sendServer(ClientConnection client, WritableByteStream stream)
             throws IOException {
-        streamOut.writeDouble(strength);
-        streamOut.writeBoolean(side);
+        stream.putDouble(strength);
+        stream.putBoolean(side);
     }
 
     @Override
-    public void parseServer(PlayerConnection player, DataInputStream streamIn)
+    public void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException {
-        strength = streamIn.readDouble();
-        side = streamIn.readBoolean();
+        strength = stream.getDouble();
+        side = stream.getBoolean();
     }
 
     @Override
@@ -89,18 +89,19 @@ public class PacketItemUse extends Packet implements PacketServer {
             boolean flag = false;
             if (strength < 0.6) {
                 flag = world.getTerrain()
-                        .getBlockType(block.intX(), block.intY(), block.intZ())
+                        .type(block.intX(), block.intY(), block.intZ())
                         .click(world.getTerrain(), block.intX(), block.intY(),
                                 block.intZ(), face, player.getMob());
             }
             if (!flag && br > 0.0d && strength > 0.0d) {
                 world.getTaskExecutor().addTask(() -> {
-                            world.getTerrain().queueBlockChanges(handler -> {
+                            world.getTerrain().queue(handler -> {
                                 BlockType type =
-                                        handler.getBlockType(block.intX(),
-                                                block.intY(), block.intZ());
-                                int data = handler.getBlockData(block.intX(),
-                                        block.intY(), block.intZ());
+                                        handler.type(block.intX(), block.intY(),
+                                                block.intZ());
+                                int data =
+                                        handler.data(block.intX(), block.intY(),
+                                                block.intZ());
                                 double punch =
                                         br / type.getResistance(item, data) *
                                                 strength * strength;
@@ -145,10 +146,9 @@ public class PacketItemUse extends Packet implements PacketServer {
                                                                 drops.get(0)
                                                                         .getData());
                                             }
-                                            handler.setBlockTypeAndData(
-                                                    block.intX(), block.intY(),
-                                                    block.intZ(),
-                                                    handler.getWorld().getAir(),
+                                            handler.typeData(block.intX(),
+                                                    block.intY(), block.intZ(),
+                                                    handler.world().getAir(),
                                                     (short) 0);
                                         }
                                     }

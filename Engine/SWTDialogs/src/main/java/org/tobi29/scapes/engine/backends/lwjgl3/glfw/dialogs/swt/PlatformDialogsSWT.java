@@ -25,18 +25,15 @@ import org.eclipse.swt.widgets.Shell;
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.PlatformDialogs;
 import org.tobi29.scapes.engine.opengl.Container;
 import org.tobi29.scapes.engine.utils.Pair;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
 public class PlatformDialogsSWT implements PlatformDialogs {
-    private static final URI[] EMPTY_URI = new URI[0];
+    private static final Path[] EMPTY_PATH = {};
     private static final boolean IS_COCOA = "cocoa".equals(SWT.getPlatform());
     private final Shell shell;
 
@@ -50,8 +47,8 @@ public class PlatformDialogsSWT implements PlatformDialogs {
     }
 
     @Override
-    public URI[] openFileDialog(Pair<String, String>[] extensions, String title,
-            boolean multiple) {
+    public Path[] openFileDialog(Pair<String, String>[] extensions,
+            String title, boolean multiple) {
         String[] filterExtensions = new String[extensions.length];
         String[] filterNames = new String[extensions.length];
         for (int i = 0; i < extensions.length; i++) {
@@ -69,20 +66,19 @@ public class PlatformDialogsSWT implements PlatformDialogs {
         fileDialog.setFilterNames(filterNames);
         boolean successful = fileDialog.open() != null;
         if (!successful) {
-            return EMPTY_URI;
+            return EMPTY_PATH;
         }
         String filterPath = fileDialog.getFilterPath();
         String[] fileNames = fileDialog.getFileNames();
-        URI[] files = new URI[fileNames.length];
+        Path[] files = new Path[fileNames.length];
         for (int i = 0; i < fileNames.length; i++) {
-            files[i] = Paths.get(filterPath, fileNames[i]).toAbsolutePath()
-                    .toUri();
+            files[i] = Paths.get(filterPath, fileNames[i]).toAbsolutePath();
         }
         return files;
     }
 
     @Override
-    public Optional<URI> saveFileDialog(Pair<String, String>[] extensions,
+    public Optional<Path> saveFileDialog(Pair<String, String>[] extensions,
             String title) {
         String[] filterExtensions = new String[extensions.length];
         String[] filterNames = new String[extensions.length];
@@ -102,39 +98,36 @@ public class PlatformDialogsSWT implements PlatformDialogs {
         }
         String fileName = fileDialog.getFileName();
         return Optional.of(Paths.get(fileDialog.getFilterPath(), fileName)
-                .toAbsolutePath().toUri());
+                .toAbsolutePath());
     }
 
     @Override
-    public boolean exportToUser(File file, Pair<String, String>[] extensions,
+    public boolean exportToUser(Path path, Pair<String, String>[] extensions,
             String title) throws IOException {
-        Optional<URI> export = saveFileDialog(extensions, title);
+        Optional<Path> export = saveFileDialog(extensions, title);
         if (export.isPresent()) {
-            Files.copy(Paths.get(file.getURI()), Paths.get(export.get()));
+            Files.copy(path, export.get());
             return true;
         }
         return false;
     }
 
     @Override
-    public boolean importFromUser(File file, Pair<String, String>[] extensions,
+    public boolean importFromUser(Path path, Pair<String, String>[] extensions,
             String title) throws IOException {
-        URI[] exports = openFileDialog(extensions, title, false);
-        for (URI export : exports) {
-            Files.copy(Paths.get(export), Paths.get(file.getURI()));
+        Path[] exports = openFileDialog(extensions, title, false);
+        for (Path export : exports) {
+            Files.copy(export, path);
         }
         return exports.length > 0;
     }
 
     @Override
-    public boolean importFromUser(Directory directory,
-            Pair<String, String>[] extensions, String title, boolean multiple)
-            throws IOException {
-        URI[] exports = openFileDialog(extensions, title, multiple);
-        for (URI export : exports) {
-            Path path = Paths.get(export);
-            Files.copy(path,
-                    Paths.get(directory.getURI()).resolve(path.getFileName()));
+    public boolean importFromUser(Path path, Pair<String, String>[] extensions,
+            String title, boolean multiple) throws IOException {
+        Path[] exports = openFileDialog(extensions, title, multiple);
+        for (Path export : exports) {
+            Files.copy(export, path.resolve(export.getFileName()));
         }
         return exports.length > 0;
     }
@@ -164,8 +157,8 @@ public class PlatformDialogsSWT implements PlatformDialogs {
     }
 
     @Override
-    public void openFile(URI file) {
-        Program.launch(file.toString());
+    public void openFile(Path path) {
+        Program.launch(path.toString());
     }
 
     @Override

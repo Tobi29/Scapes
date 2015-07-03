@@ -45,7 +45,7 @@ public class BlockHyperBomb extends BlockSimple implements BlockExplosive {
 
     @Override
     public void explode(TerrainServer terrain, int x, int y, int z) {
-        terrain.getWorld()
+        terrain.world()
                 .explosionBlockPush(x + 0.5, y + 0.5, z + 0.5, 8.0, 0.2, 0.1,
                         64.0, 48.0);
     }
@@ -75,21 +75,21 @@ public class BlockHyperBomb extends BlockSimple implements BlockExplosive {
     @Override
     public void igniteByExplosion(TerrainServer terrain, int x, int y, int z) {
         Random random = ThreadLocalRandom.current();
-        EntityServer entity = new MobBombServer(terrain.getWorld(),
+        EntityServer entity = new MobBombServer(terrain.world(),
                 new Vector3d(x + 0.5, y + 0.5, z + 0.5),
                 new Vector3d(random.nextDouble() * 0.1 - 0.05,
                         random.nextDouble() * 0.1 - 0.05,
                         random.nextDouble() * 0.2 + 0.2), this, (short) 0,
                 random.nextDouble() * 2.0);
         entity.onSpawn();
-        terrain.getWorld().addEntity(entity);
+        terrain.world().addEntity(entity);
     }
 
     @Override
     public boolean destroy(TerrainServer.TerrainMutable terrain, int x, int y,
             int z, Face face, MobPlayerServer player, ItemStack item) {
         Random random = ThreadLocalRandom.current();
-        terrain.getWorld().addEntity(new MobBombServer(terrain.getWorld(),
+        terrain.world().addEntity(new MobBombServer(terrain.world(),
                 new Vector3d(x + 0.5, y + 0.5, z + 0.5),
                 new Vector3d(random.nextDouble() * 0.1 - 0.05,
                         random.nextDouble() * 0.1 - 0.05,

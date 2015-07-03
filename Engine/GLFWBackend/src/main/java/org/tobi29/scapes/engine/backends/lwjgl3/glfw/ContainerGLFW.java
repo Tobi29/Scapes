@@ -33,15 +33,13 @@ import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
 import org.tobi29.scapes.engine.utils.DesktopException;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.io.ReadSource;
-import org.tobi29.scapes.engine.utils.io.filesystem.Directory;
-import org.tobi29.scapes.engine.utils.io.filesystem.File;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.ui.font.GlyphRenderer;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
@@ -64,7 +62,7 @@ public class ContainerGLFW extends ContainerLWJGL3 {
     private final GLFWCursorPosCallback cursorPosFun;
     private final GLFWScrollCallback scrollFun;
     private long window;
-    private boolean skipMouseCallback, mouseGrabbed;
+    private boolean running = true, skipMouseCallback, mouseGrabbed;
 
     private static GLFWDialogsProvider loadDialogs() {
         for (GLFWDialogsProvider dialogs : ServiceLoader
@@ -201,7 +199,88 @@ public class ContainerGLFW extends ContainerLWJGL3 {
     }
 
     @Override
-    public void dispose() {
+    public Path[] openFileDialog(Pair<String, String>[] extensions,
+            String title, boolean multiple) {
+        return exec(() -> dialogs.openFileDialog(extensions, title, multiple));
+    }
+
+    @Override
+    public Optional<Path> saveFileDialog(Pair<String, String>[] extensions,
+            String title) {
+        return exec(() -> dialogs.saveFileDialog(extensions, title));
+    }
+
+    @Override
+    public boolean exportToUser(Path path, Pair<String, String>[] extensions,
+            String title) throws IOException {
+        return execIO(() -> dialogs.exportToUser(path, extensions, title));
+    }
+
+    @Override
+    public boolean importFromUser(Path path, Pair<String, String>[] extensions,
+            String title) throws IOException {
+        return execIO(() -> dialogs.importFromUser(path, extensions, title));
+    }
+
+    @Override
+    public boolean importFromUser(Path path, Pair<String, String>[] extensions,
+            String title, boolean multiple) throws IOException {
+        return execIO(() -> dialogs
+                .importFromUser(path, extensions, title, multiple));
+    }
+
+    @Override
+    public void message(MessageType messageType, String title, String message) {
+        exec(() -> dialogs.message(messageType, title, message));
+    }
+
+    @Override
+    public void openFile(Path path) {
+        exec(() -> dialogs.openFile(path));
+    }
+
+    @Override
+    public boolean loadFont(ReadSource font) {
+        return dialogsProvider.loadFont(font);
+    }
+
+    @Override
+    public GlyphRenderer createGlyphRenderer(String fontName, int size) {
+        return dialogsProvider.createGlyphRenderer(fontName, size);
+    }
+
+    @Override
+    public void run() throws DesktopException {
+        while (running) {
+            while (!tasks.isEmpty()) {
+                tasks.poll().run();
+            }
+            if (!valid) {
+                if (context != null) {
+                    engine.getGraphics().reset();
+                    cleanWindow();
+                }
+                initWindow(engine.getConfig().isFullscreen(),
+                        engine.getConfig().getVSync());
+                Optional<String> check = initContext();
+                if (check.isPresent()) {
+                    throw new GraphicsCheckException(check.get());
+                }
+                valid = true;
+                containerResized = true;
+            }
+            GLFW.glfwPollEvents();
+            joysticksChanged = controllers.poll();
+            engine.render();
+            containerResized = false;
+            dialogs.renderTick();
+            GLFW.glfwSwapBuffers(window);
+            if (!visible) {
+                GLFW.glfwShowWindow(window);
+                visible = true;
+            }
+        }
+        engine.dispose();
         dialogs.dispose();
         GLFW.glfwDestroyWindow(window);
         GLFW.glfwTerminate();
@@ -217,85 +296,8 @@ public class ContainerGLFW extends ContainerLWJGL3 {
     }
 
     @Override
-    public URI[] openFileDialog(Pair<String, String>[] extensions, String title,
-            boolean multiple) {
-        return exec(() -> dialogs.openFileDialog(extensions, title, multiple));
-    }
-
-    @Override
-    public Optional<URI> saveFileDialog(Pair<String, String>[] extensions,
-            String title) {
-        return exec(() -> dialogs.saveFileDialog(extensions, title));
-    }
-
-    @Override
-    public boolean exportToUser(File file, Pair<String, String>[] extensions,
-            String title) throws IOException {
-        return execIO(() -> dialogs.exportToUser(file, extensions, title));
-    }
-
-    @Override
-    public boolean importFromUser(File file, Pair<String, String>[] extensions,
-            String title) throws IOException {
-        return execIO(() -> dialogs.importFromUser(file, extensions, title));
-    }
-
-    @Override
-    public boolean importFromUser(Directory directory,
-            Pair<String, String>[] extensions, String title, boolean multiple)
-            throws IOException {
-        return execIO(() -> dialogs
-                .importFromUser(directory, extensions, title, multiple));
-    }
-
-    @Override
-    public void message(MessageType messageType, String title, String message) {
-        exec(() -> dialogs.message(messageType, title, message));
-    }
-
-    @Override
-    public void openFile(URI file) {
-        exec(() -> dialogs.openFile(file));
-    }
-
-    @Override
-    public boolean loadFont(ReadSource font) {
-        return dialogsProvider.loadFont(font);
-    }
-
-    @Override
-    public GlyphRenderer createGlyphRenderer(String fontName, int size) {
-        return dialogsProvider.createGlyphRenderer(fontName, size);
-    }
-
-    @Override
-    public void renderTick() throws DesktopException {
-        while (!tasks.isEmpty()) {
-            tasks.poll().run();
-        }
-        if (!valid) {
-            if (context != null) {
-                engine.getGraphics().reset();
-                cleanWindow();
-            }
-            initWindow(engine.getConfig().isFullscreen(),
-                    engine.getConfig().getVSync());
-            Optional<String> check = initContext();
-            if (check.isPresent()) {
-                throw new GraphicsCheckException(check.get());
-            }
-            valid = true;
-            containerResized = true;
-        }
-        GLFW.glfwPollEvents();
-        joysticksChanged = controllers.poll();
-        engine.getGraphics().render();
-        containerResized = false;
-        dialogs.renderTick();
-        GLFW.glfwSwapBuffers(window);
-        if (!visible) {
-            GLFW.glfwShowWindow(window);
-        }
+    public void stop() {
+        running = false;
     }
 
     protected void initWindow(boolean fullscreen, boolean vSync) {
@@ -362,6 +364,7 @@ public class ContainerGLFW extends ContainerLWJGL3 {
     protected void cleanWindow() {
         clearStates();
         GLFW.glfwDestroyWindow(window);
+        visible = false;
     }
 
     @Override

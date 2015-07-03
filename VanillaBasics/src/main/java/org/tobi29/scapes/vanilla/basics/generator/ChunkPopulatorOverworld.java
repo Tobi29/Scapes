@@ -63,7 +63,7 @@ public class ChunkPopulatorOverworld implements ChunkPopulator {
         hash = 31 * hash + y;
         Random random = new Random(hash + seedInt);
         ChunkGeneratorOverworld gen =
-                (ChunkGeneratorOverworld) terrain.getWorld().getGenerator();
+                (ChunkGeneratorOverworld) terrain.world().getGenerator();
         VanillaMaterial materials = plugin.getMaterials();
         int passes = dx * dy / 256;
         for (int i = 0; i < passes; i++) {
@@ -80,7 +80,7 @@ public class ChunkPopulatorOverworld implements ChunkPopulator {
             int xx = x + (dx >> 1);
             int yy = y + (dy >> 1);
             int zz = random.nextInt(terrain.getHighestTerrainBlockZAt(xx, yy));
-            int data = terrain.getBlockData(xx, yy, zz);
+            int data = terrain.data(xx, yy, zz);
             if (gen.getStoneType(xx + random.nextInt(21) - 10,
                     yy + random.nextInt(21) - 10, zz + random.nextInt(9) - 4) !=
                     data) {
@@ -100,8 +100,7 @@ public class ChunkPopulatorOverworld implements ChunkPopulator {
                         int yyy = yy + random.nextInt(21) - 10;
                         int zzz = terrain.getHighestTerrainBlockZAt(xxx, yyy) -
                                 random.nextInt(4);
-                        BlockType blockType =
-                                terrain.getBlockType(xxx, yyy, zzz);
+                        BlockType blockType = terrain.type(xxx, yyy, zzz);
                         if (blockType == materials.grass ||
                                 blockType == materials.dirt ||
                                 blockType == materials.sand ||
@@ -140,10 +139,11 @@ public class ChunkPopulatorOverworld implements ChunkPopulator {
     public void load(TerrainServer.TerrainMutable terrain, int x, int y, int dx,
             int dy) {
         if (terrain instanceof TerrainInfinite) {
-            ((TerrainInfinite) terrain).getChunk(FastMath.floor(x / 16.0d),
-                    FastMath.floor(y / 16.0d)).ifPresent(
-                    ((WorldEnvironmentOverworld) terrain.getWorld()
-                            .getEnvironment())::simulateSeason);
+            ((TerrainInfinite) terrain).getChunk(x >> 4, y >> 4).ifPresent(
+                    chunk -> ((WorldEnvironmentOverworld) terrain.world()
+                            .getEnvironment())
+                            .simulateSeason(terrain, x, y, dx, dy,
+                                    chunk.getMetaData("Vanilla")));
         }
     }
 
