@@ -39,7 +39,6 @@ dependencies {
 
     testCompile "junit:junit:4.12"
 
-    runtime project(":Engine:NIOFileSystem")
     runtime project(":Engine:CodecOGG")
     runtime project(":Engine:CodecMP3")
     runtime project(":Engine:CodecWAV")
