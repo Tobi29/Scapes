@@ -67,7 +67,7 @@ public class PlatformDialogsSWT implements PlatformDialogs {
         fileDialog.setFilterExtensions(filterExtensions);
         fileDialog.setFilterNames(filterNames);
         boolean successful = fileDialog.open() != null;
-        shell.dispose();
+        disposeShell(shell);
         if (!successful) {
             return EMPTY_PATH;
         }
@@ -97,7 +97,7 @@ public class PlatformDialogsSWT implements PlatformDialogs {
         fileDialog.setFilterExtensions(filterExtensions);
         fileDialog.setFilterNames(filterNames);
         boolean successful = fileDialog.open() != null;
-        shell.dispose();
+        disposeShell(shell);
         if (!successful) {
             return Optional.empty();
         }
@@ -160,7 +160,7 @@ public class PlatformDialogsSWT implements PlatformDialogs {
         messageBox.setText(title);
         messageBox.setMessage(message);
         messageBox.open();
-        shell.dispose();
+        disposeShell(shell);
     }
 
     @Override
@@ -180,5 +180,11 @@ public class PlatformDialogsSWT implements PlatformDialogs {
         Shell shell = new Shell(display);
         shell.setText(name);
         return shell;
+    }
+
+    private void disposeShell(Shell shell) {
+        shell.dispose();
+        while (display.readAndDispatch()) {
+        }
     }
 }
