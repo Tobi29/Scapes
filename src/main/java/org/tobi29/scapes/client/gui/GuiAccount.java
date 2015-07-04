@@ -39,7 +39,7 @@ public class GuiAccount extends GuiMenu {
 
     @SuppressWarnings("unchecked")
     public GuiAccount(GameState state, Gui previous) {
-        super(state, "Account", "Save", previous);
+        super(state, "Account", "Save");
         try {
             Account.Client account = Account.read(
                     state.getEngine().getHome().resolve("Account.properties"));
@@ -104,6 +104,8 @@ public class GuiAccount extends GuiMenu {
             } catch (IOException e) {
                 LOGGER.error("Failed to write account file: {}", e.toString());
             }
+            state.remove(this);
+            state.add(previous);
         });
         pane.add(new GuiComponentText(16, 80, 18, "Key:"));
         pane.add(keyCopy);

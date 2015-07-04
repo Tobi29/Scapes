@@ -28,8 +28,20 @@ public class GuiMenu extends Gui {
         this(state, title, "Back", previous);
     }
 
+    protected GuiMenu(GameState state, String title) {
+        this(state, title, "Back");
+    }
+
     protected GuiMenu(GameState state, String title, String back,
             Gui previous) {
+        this(state, title, back);
+        this.back.addLeftClick(event -> {
+            state.remove(this);
+            state.add(previous);
+        });
+    }
+
+    protected GuiMenu(GameState state, String title, String back) {
         super(GuiAlignment.CENTER);
         this.state = state;
         pane = new GuiComponentVisiblePane(200, 0, 400, 512);
@@ -37,10 +49,6 @@ public class GuiMenu extends Gui {
         pane.add(new GuiComponentSeparator(24, 64, 352, 2));
         pane.add(new GuiComponentSeparator(24, 448, 352, 2));
         this.back = new GuiComponentTextButton(112, 466, 176, 30, 18, back);
-        this.back.addLeftClick(event -> {
-            state.remove(this);
-            state.add(previous);
-        });
         pane.add(this.back);
         add(pane);
     }
