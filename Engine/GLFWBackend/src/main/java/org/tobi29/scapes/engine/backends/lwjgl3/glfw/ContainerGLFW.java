@@ -314,6 +314,8 @@ public class ContainerGLFW extends ContainerLWJGL3 {
         int monitorHeight = GLFWvidmode.height(videoMode);
         GLFW.glfwDefaultWindowHints();
         GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GL11.GL_FALSE);
+        // >:V Seriously, stop with this crap!
+        GLFW.glfwWindowHint(GLFW.GLFW_AUTO_ICONIFY, GL11.GL_FALSE);
         TagStructure tagStructure = engine.getTagStructure();
         if (!tagStructure.has("Compatibility") ||
                 !engine.getTagStructure().getStructure("Compatibility")
