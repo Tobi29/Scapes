@@ -81,12 +81,13 @@ class ScapesEngineApplication implements Plugin<Project> {
         Copy nativesTask = target.tasks.create("natives", Copy)
         nativesTask.description = "Extract natives for runtime"
         nativesTask.group = "run"
+        File natives = new File(target.buildDir, "natives")
         nativesTask.from { ->
             target.configurations.nativesPlatform.files.stream().
                     map({ target.zipTree(it) }).
                     collect(Collectors.toList())
         }
-        nativesTask.into new File(target.buildDir, "natives")
+        nativesTask.into natives
 
         // Run task
         Task runTask = target.tasks.create("run", JavaExec)
@@ -107,8 +108,15 @@ class ScapesEngineApplication implements Plugin<Project> {
         if (System.properties["os.name"].toLowerCase().contains("mac")) {
             runTask.jvmArgs "-XstartOnFirstThread"
         }
+        if (target.hasProperty("runtime")) {
+            runTask.jvmArgs "-Duser.dir=$target.runtime"
+        } else {
+            runTask.jvmArgs "-Duser.dir=${target.file('runtime')}"
+        }
+        runTask.jvmArgs "-Djava.library.path=$natives.absolutePath"
         runTask.standardInput = System.in
         runTask.dependsOn target.classes
+        runTask.dependsOn nativesTask
 
         // Platform deploy tasks
         Task deployUniversalTask = addDeployUniversalTask(target)
