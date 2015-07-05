@@ -82,10 +82,19 @@ class ScapesEngineApplication implements Plugin<Project> {
         nativesTask.description = "Extract natives for runtime"
         nativesTask.group = "run"
         File natives = new File(target.buildDir, "natives")
-        nativesTask.from { ->
+        nativesTask.from({ ->
             target.configurations.nativesPlatform.files.stream().
-                    map({ target.zipTree(it) }).
-                    collect(Collectors.toList())
+                    map({
+                        target.zipTree(it).files.stream().filter({
+                            it.isFile() && it.name.matches(
+                                    "(.+)\\.(dll|so(.[0-9]+)?|jnilib|dylib)")
+                        }).collect(Collectors.toList())
+                    }).collect(Collectors.toList())
+        }) {
+            eachFile { FileCopyDetails fcp ->
+                String[] segments = [fcp.getName()]
+                fcp.relativePath = new RelativePath(true, segments)
+            }
         }
         nativesTask.into natives
 
@@ -181,8 +190,18 @@ class ScapesEngineApplication implements Plugin<Project> {
         nativesTask.dependsOn bundleTask
         nativesTask.from({ ->
             target.configurations.nativesMacOSX.files.stream().
-                    map({ target.zipTree(it) }).collect(Collectors.toList())
-        })
+                    map({
+                        target.zipTree(it).files.stream().filter({
+                            it.isFile() &&
+                                    it.name.matches("(.+)\\.(jnilib|dylib)")
+                        }).collect(Collectors.toList())
+                    }).collect(Collectors.toList())
+        }) {
+            eachFile { FileCopyDetails fcp ->
+                String[] segments = [fcp.getName()]
+                fcp.relativePath = new RelativePath(true, segments)
+            }
+        }
         nativesTask.into "${-> bundleTask.output}/Contents/MacOS"
 
         // Main task
@@ -283,12 +302,30 @@ class ScapesEngineApplication implements Plugin<Project> {
                 { into "install/common/lib" })
         prepareTask.from({ ->
             target.configurations.nativesWindows32.files.stream().
-                    map({ target.zipTree(it) }).collect(Collectors.toList())
-        }, { into "install/32" })
+                    map({
+                        target.zipTree(it).files.stream().filter({
+                            it.isFile() && it.name.matches("(.+)\\.dll")
+                        }).collect(Collectors.toList())
+                    }).collect(Collectors.toList())
+        }) {
+            eachFile { FileCopyDetails fcp ->
+                String[] segments = ["install", "32", "lib", fcp.getName()]
+                fcp.relativePath = new RelativePath(true, segments)
+            }
+        }
         prepareTask.from({ ->
             target.configurations.nativesWindows64.files.stream().
-                    map({ target.zipTree(it) }).collect(Collectors.toList())
-        }, { into "install/64" })
+                    map({
+                        target.zipTree(it).files.stream().filter({
+                            it.isFile() && it.name.matches("(.+)\\.dll")
+                        }).collect(Collectors.toList())
+                    }).collect(Collectors.toList())
+        }) {
+            eachFile { FileCopyDetails fcp ->
+                String[] segments = ["install", "64", "lib", fcp.getName()]
+                fcp.relativePath = new RelativePath(true, segments)
+            }
+        }
         prepareTask.from(target.configurations.runtimeWindows32,
                 { into "install/32/lib" })
         prepareTask.from(target.configurations.runtimeWindows64,
@@ -603,7 +640,7 @@ class Launch4jTask extends DefaultTask {
                     classPath(classPathMap)
                     jre(jreMap) {
                         opt("-Duser.dir=\"%APPDATA%\\${fullName}\"")
-                        opt("-Djava.library.path=\"%EXEDIR%\"")
+                        opt("-Djava.library.path=\"%EXEDIR%\"\\lib")
                     }
                     versioninfo(versionMap)
                 }
