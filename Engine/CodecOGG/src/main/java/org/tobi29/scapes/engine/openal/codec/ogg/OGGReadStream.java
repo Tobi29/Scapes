@@ -24,18 +24,17 @@ import com.jcraft.jorbis.Block;
 import com.jcraft.jorbis.Comment;
 import com.jcraft.jorbis.DspState;
 import com.jcraft.jorbis.Info;
-import org.tobi29.scapes.engine.openal.codec.AudioInputStream;
+import org.tobi29.scapes.engine.openal.codec.ReadableAudioStream;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteOrder;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.nio.channels.ReadableByteChannel;
 
-public class OGGInputStream extends AudioInputStream {
-    private static final boolean BIG_ENDIAN =
-            ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
+public class OGGReadStream implements ReadableAudioStream {
     private static final int BUFFER_SIZE = 4096;
-    private final InputStream streamIn;
+    private final ReadableByteChannel channel;
     private final Packet packet = new Packet();
     private final Page page = new Page();
     private final StreamState streamState = new StreamState();
@@ -45,21 +44,17 @@ public class OGGInputStream extends AudioInputStream {
     private final Comment comment = new Comment();
     private final Info info = new Info();
     private final int channels, rate;
-    private final byte[] buffer;
     private final int[] index;
     private final float[][][] pcm = new float[1][][];
-    private boolean eos;
-    private int position, limit;
 
-    public OGGInputStream(InputStream streamIn) throws IOException {
-        this.streamIn = streamIn;
+    public OGGReadStream(ReadableByteChannel channel) throws IOException {
+        this.channel = channel;
         syncState.init();
         info.init();
         comment.init();
         readHeader();
         channels = info.channels;
         rate = info.rate;
-        buffer = new byte[BUFFER_SIZE * channels << 1];
         index = new int[channels];
     }
 
@@ -74,33 +69,23 @@ public class OGGInputStream extends AudioInputStream {
     }
 
     @Override
-    public int read() throws IOException {
-        checkFrame();
-        return buffer[position++];
+    public boolean getSome(FloatBuffer buffer, int len) throws IOException {
+        int limit = buffer.limit();
+        buffer.limit(buffer.position() + len);
+        boolean valid = true;
+        while (buffer.hasRemaining() && valid) {
+            valid = decodePacket(buffer);
+        }
+        buffer.limit(limit);
+        return valid;
     }
 
     @Override
-    public int read(byte[] b, int off, int len) throws IOException {
-        if (eos) {
-            return -1;
+    public void close() {
+        try {
+            channel.close();
+        } catch (IOException e) {
         }
-        int read = 0;
-        while (read < len) {
-            if (eos) {
-                return read;
-            }
-            checkFrame();
-            int size = FastMath.min(limit - position, len - read);
-            System.arraycopy(buffer, position, b, read, size);
-            position += size;
-            read += size;
-        }
-        return read;
-    }
-
-    @Override
-    public int available() {
-        return eos ? 0 : 1;
     }
 
     private void readHeader() throws IOException {
@@ -123,85 +108,71 @@ public class OGGInputStream extends AudioInputStream {
         block.init(dspState);
     }
 
-    private void checkFrame() throws IOException {
-        if (position >= limit) {
-            readPacket();
-            position = 0;
-            limit = decodePacket();
-        }
-    }
-
-    private void readPacket() throws IOException {
-        while (!eos) {
+    private boolean readPacket() throws IOException {
+        while (true) {
             switch (streamState.packetout(packet)) {
                 case -1:
                     throw new IOException("Hole in packet");
                 case 1:
-                    return;
+                    return true;
             }
-            readPage();
+            if (!readPage()) {
+                return false;
+            }
             streamState.pagein(page);
         }
     }
 
-    private int decodePacket() {
+    private boolean decodePacket(FloatBuffer buffer) throws IOException {
+        if (!readPacket()) {
+            return false;
+        }
         if (block.synthesis(packet) == 0) {
             dspState.synthesis_blockin(block);
-            int offset = 0;
             int samples = dspState.synthesis_pcmout(pcm, index);
-            while (samples > 0) {
+            if (samples > 0) {
                 float[][] pcmSamples = pcm[0];
-                int length = FastMath.min(samples, BUFFER_SIZE);
+                int length =
+                        FastMath.min(samples, buffer.remaining() / channels);
+                int offset = buffer.position();
                 for (int i = 0; i < channels; i++) {
                     float[] channel = pcmSamples[i];
-                    int position = (i << 1) + offset;
                     int location = index[i];
+                    int position = offset + i;
                     for (int j = 0; j < length; j++) {
-                        int sample =
-                                (int) (channel[location + j] * Short.MAX_VALUE);
-                        short value = (short) FastMath
-                                .clamp(sample, Short.MIN_VALUE,
-                                        Short.MAX_VALUE);
-                        if (BIG_ENDIAN) {
-                            buffer[position] = (byte) (value >>> 8 & 0xFF);
-                            buffer[position + 1] = (byte) (value & 0xFF);
-                        } else {
-                            buffer[position] = (byte) (value & 0xFF);
-                            buffer[position + 1] = (byte) (value >>> 8 & 0xFF);
-                        }
-                        position += channels << 1;
+                        buffer.put(position, channel[location + j]);
+                        position += channels;
                     }
                 }
+                buffer.position(offset + length * channels);
                 dspState.synthesis_read(length);
-                offset += length * channels << 1;
-                samples = dspState.synthesis_pcmout(pcm, index);
             }
-            return offset;
-        } else {
-            eos = true;
         }
-        return 0;
+        return true;
     }
 
-    private void readPage() throws IOException {
-        while (!eos) {
+    private boolean readPage() throws IOException {
+        while (true) {
             switch (syncState.pageout(page)) {
                 case -1:
                     throw new IOException("Hole in page");
                 case 1:
-                    return;
+                    return true;
             }
-            fillBuffer();
+            if (!fillBuffer()) {
+                return false;
+            }
         }
     }
 
-    private void fillBuffer() throws IOException {
+    private boolean fillBuffer() throws IOException {
         int offset = syncState.buffer(BUFFER_SIZE);
-        int read = streamIn.read(syncState.data, offset, BUFFER_SIZE);
+        int read = channel.read(
+                ByteBuffer.wrap(syncState.data, offset, BUFFER_SIZE));
         if (read == -1) {
-            eos = true;
-            return;
+            return false;
         }
         syncState.wrote(read);
+        return true;
     }
 }

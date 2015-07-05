@@ -17,34 +17,34 @@
 package org.tobi29.scapes.engine.openal.codec.mp3;
 
 import javazoom.jl.decoder.*;
-import org.tobi29.scapes.engine.openal.codec.AudioInputStream;
+import org.tobi29.scapes.engine.openal.codec.ReadableAudioStream;
+import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 
-public class MP3InputStream extends AudioInputStream {
-    private static final boolean BIG_ENDIAN =
-            ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
+public class MP3ReadStream implements ReadableAudioStream {
+    private final ReadableByteChannel channel;
     private final Decoder decoder;
     private final Bitstream bitstream;
-    private final OutputBuffer outputBuffer;
+    private final OutputBuffer output;
     private final int channels, rate;
-    private boolean eos;
-    private int position;
 
-    public MP3InputStream(InputStream streamIn) throws IOException {
-        bitstream = new Bitstream(streamIn);
+    public MP3ReadStream(ReadableByteChannel channel) throws IOException {
+        this.channel = channel;
+        bitstream = new Bitstream(Channels.newInputStream(channel));
         decoder = new Decoder();
         Header header = readFrame();
-        if (eos) {
+        if (header == null) {
             throw new IOException("Unable to read first frame");
         } else {
             channels = header.mode() == Header.SINGLE_CHANNEL ? 1 : 2;
             rate = getSampleRate(header.sample_frequency(), header.version());
-            outputBuffer = new OutputBuffer(channels);
-            decoder.setOutputBuffer(outputBuffer);
+            output = new OutputBuffer();
+            decoder.setOutputBuffer(output);
             decodeFrame(header);
         }
     }
@@ -87,53 +87,51 @@ public class MP3InputStream extends AudioInputStream {
     }
 
     @Override
-    public int read() throws IOException {
-        checkFrame();
-        return outputBuffer.buffer[position++];
+    public void close() {
+        try {
+            channel.close();
+        } catch (IOException e) {
+        }
     }
 
     @Override
-    public int read(byte[] b, int off, int len) throws IOException {
-        if (eos) {
-            return -1;
+    public boolean getSome(FloatBuffer buffer, int len) throws IOException {
+        int limit = buffer.limit();
+        buffer.limit(buffer.position() + len);
+        boolean valid = true;
+        while (buffer.hasRemaining() && valid) {
+            valid = decodeFrame(buffer);
         }
-        int read = 0;
-        while (read < len) {
-            if (eos) {
-                return read;
-            }
-            checkFrame();
-            byte[] buffer = outputBuffer.buffer;
-            int size = FastMath.min(buffer.length - position, len - read);
-            System.arraycopy(buffer, position, b, read, size);
-            position += size;
-            read += size;
-        }
-        return read;
+        buffer.limit(limit);
+        return valid;
     }
 
-    @Override
-    public int available() {
-        return eos ? 0 : 1;
+    private boolean decodeFrame(FloatBuffer buffer) throws IOException {
+        if (!checkFrame()) {
+            return false;
+        }
+        int len = FastMath.min(buffer.remaining(), output.buffer.remaining());
+        int limit = output.buffer.limit();
+        output.buffer.limit(output.buffer.position() + len);
+        buffer.put(output.buffer);
+        output.buffer.limit(limit);
+        return true;
     }
 
-    private void checkFrame() throws IOException {
-        if (position >= outputBuffer.buffer.length) {
-            position = 0;
+    private boolean checkFrame() throws IOException {
+        if (!output.buffer.hasRemaining()) {
             Header header = readFrame();
-            if (!eos) {
-                decodeFrame(header);
+            if (header == null) {
+                return false;
             }
+            decodeFrame(header);
         }
+        return true;
     }
 
     private Header readFrame() throws IOException {
         try {
-            Header header = bitstream.readFrame();
-            if (header == null) {
-                eos = true;
-            }
-            return header;
+            return bitstream.readFrame();
         } catch (BitstreamException e) {
             throw new IOException(e);
         }
@@ -141,7 +139,9 @@ public class MP3InputStream extends AudioInputStream {
 
     private void decodeFrame(Header header) throws IOException {
         try {
+            output.buffer.clear();
             decoder.decodeFrame(header, bitstream);
+            output.buffer.limit(output.index[0]);
             bitstream.closeFrame();
         } catch (DecoderException e) {
             throw new IOException(e);
@@ -149,36 +149,26 @@ public class MP3InputStream extends AudioInputStream {
     }
 
     private static class OutputBuffer extends Obuffer {
-        private final byte[] buffer;
+        private final FloatBuffer buffer;
         private final int[] index;
-        private final int channels;
 
-        public OutputBuffer(int channels) {
-            buffer = new byte[OBUFFERSIZE * channels];
+        public OutputBuffer() {
+            buffer = BufferCreator.floatBuffer(OBUFFERSIZE * MAXCHANNELS);
             index = new int[MAXCHANNELS];
-            this.channels = channels;
-            for (int i = 0; i < channels; i++) {
-                index[i] = i;
-            }
+            clear_buffer();
         }
 
         @Override
         public void append(int channel, short value) {
-            if (BIG_ENDIAN) {
-                buffer[index[channel] << 1] = (byte) (value >>> 8 & 0xFF);
-                buffer[(index[channel] << 1) + 1] = (byte) (value & 0xFF);
-            } else {
-                buffer[index[channel] << 1] = (byte) (value & 0xFF);
-                buffer[(index[channel] << 1) + 1] = (byte) (value >>> 8 & 0xFF);
-            }
-            index[channel] += channels;
+            buffer.put(index[channel], (float) value / Short.MAX_VALUE);
+            index[channel] += index.length;
         }
 
         @Override
         public void appendSamples(int channel, float[] f) {
-            for (int j = 0; j < 32; j++) {
-                append(channel, (short) (f[j] > 32767.0f ? 32767.0f :
-                        f[j] < -32767.0f ? -32767.0f : f[j]));
+            for (float sample : f) {
+                buffer.put(index[channel], sample / Short.MAX_VALUE);
+                index[channel] += index.length;
             }
         }
 
@@ -192,7 +182,7 @@ public class MP3InputStream extends AudioInputStream {
 
         @Override
         public void clear_buffer() {
-            for (int i = 0; i < channels; i++) {
+            for (int i = 0; i < index.length; i++) {
                 index[i] = i;
             }
         }

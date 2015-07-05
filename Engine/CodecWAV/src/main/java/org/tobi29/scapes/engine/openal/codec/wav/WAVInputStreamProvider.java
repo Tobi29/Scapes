@@ -16,15 +16,15 @@
 
 package org.tobi29.scapes.engine.openal.codec.wav;
 
-import org.tobi29.scapes.engine.openal.codec.AudioInputStream;
-import org.tobi29.scapes.engine.openal.codec.spi.AudioInputStreamProvider;
+import org.tobi29.scapes.engine.openal.codec.ReadableAudioStream;
+import org.tobi29.scapes.engine.openal.codec.spi.ReadableAudioStreamProvider;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.channels.ReadableByteChannel;
 import java.util.Collections;
 import java.util.List;
 
-public class WAVInputStreamProvider implements AudioInputStreamProvider {
+public class WAVInputStreamProvider implements ReadableAudioStreamProvider {
     private final List<String> mimeTypes =
             Collections.singletonList("audio/x-wav");
 
@@ -34,7 +34,8 @@ public class WAVInputStreamProvider implements AudioInputStreamProvider {
     }
 
     @Override
-    public AudioInputStream get(InputStream streamIn) throws IOException {
-        return new WAVInputStream(streamIn);
+    public ReadableAudioStream get(ReadableByteChannel channel)
+            throws IOException {
+        return new WAVReadStream(channel);
     }
 }

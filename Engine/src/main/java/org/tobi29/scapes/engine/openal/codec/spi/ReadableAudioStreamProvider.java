@@ -16,13 +16,13 @@
 
 package org.tobi29.scapes.engine.openal.codec.spi;
 
-import org.tobi29.scapes.engine.openal.codec.AudioInputStream;
+import org.tobi29.scapes.engine.openal.codec.ReadableAudioStream;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.channels.ReadableByteChannel;
 
-public interface AudioInputStreamProvider {
+public interface ReadableAudioStreamProvider {
     boolean accepts(String mime);
 
-    AudioInputStream get(InputStream streamIn) throws IOException;
+    ReadableAudioStream get(ReadableByteChannel channel) throws IOException;
 }

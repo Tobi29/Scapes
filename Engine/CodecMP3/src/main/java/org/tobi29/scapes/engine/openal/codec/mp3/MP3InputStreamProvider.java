@@ -16,24 +16,26 @@
 
 package org.tobi29.scapes.engine.openal.codec.mp3;
 
-import org.tobi29.scapes.engine.openal.codec.AudioInputStream;
-import org.tobi29.scapes.engine.openal.codec.spi.AudioInputStreamProvider;
+import org.tobi29.scapes.engine.openal.codec.ReadableAudioStream;
+import org.tobi29.scapes.engine.openal.codec.spi.ReadableAudioStreamProvider;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.channels.ReadableByteChannel;
 import java.util.Collections;
 import java.util.List;
 
-public class MP3InputStreamProvider implements AudioInputStreamProvider {
-    private final List<String>mimeTypes=
+public class MP3InputStreamProvider implements ReadableAudioStreamProvider {
+    private final List<String> mimeTypes =
             Collections.singletonList("audio/mpeg");
+
     @Override
     public boolean accepts(String mime) {
         return mimeTypes.contains(mime);
     }
 
     @Override
-    public AudioInputStream get(InputStream streamIn) throws IOException {
-        return new MP3InputStream(streamIn);
+    public ReadableAudioStream get(ReadableByteChannel channel)
+            throws IOException {
+        return new MP3ReadStream(channel);
     }
 }

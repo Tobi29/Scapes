@@ -19,7 +19,9 @@ package org.tobi29.scapes.engine.openal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.openal.codec.AudioInputStream;
+import org.tobi29.scapes.engine.openal.codec.AudioStream;
+import org.tobi29.scapes.engine.openal.codec.ReadableAudioStream;
+import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
 import org.tobi29.scapes.engine.utils.io.ReadSource;
 import org.tobi29.scapes.engine.utils.io.filesystem.Resource;
@@ -29,6 +31,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -45,12 +48,12 @@ public class SoundSystem {
     private final int[] queuedBuffers = new int[3];
     private final int[] sources;
     private final ByteBuffer streamBuffer;
+    private final FloatBuffer streamReadBuffer;
     private final ScapesEngine engine;
-    private final byte[] streamReadBuffer;
     private final OpenAL openAL;
     private Music music;
     private float musicVolume = 1, soundVolume = 1;
-    private AudioInputStream streamIn;
+    private ReadableAudioStream stream;
     private Vector3 origin = Vector3d.ZERO, listenerPosition = Vector3d.ZERO,
             listenerOrientation = Vector3d.ZERO, listenerVelocity =
             Vector3d.ZERO;
@@ -60,8 +63,9 @@ public class SoundSystem {
         this.openAL = openAL;
         openAL.create();
         musicSource = openAL.createSource();
-        streamReadBuffer = new byte[4096 * 5];
-        streamBuffer = BufferCreatorDirect.byteBuffer(streamReadBuffer.length);
+        streamReadBuffer = BufferCreator.floatBuffer(4096 << 2);
+        streamBuffer = BufferCreatorDirect
+                .byteBuffer(streamReadBuffer.capacity() << 1);
         for (int i = 0; i < queuedBuffers.length; i++) {
             queuedBuffers[i] = openAL.createBuffer();
         }
@@ -175,13 +179,9 @@ public class SoundSystem {
             Music music = this.music;
             if (music != null) {
                 if (!music.playing) {
-                    if (streamIn != null) {
-                        try {
-                            streamIn.close();
-                        } catch (IOException e) {
-                            LOGGER.warn("Failed to stop music: {}",
-                                    e.toString());
-                        }
+                    if (stream != null) {
+                        stream.close();
+                        stream = null;
                     }
                     openAL.stop(musicSource);
                     int queued = openAL.getBuffersQueued(musicSource);
@@ -193,7 +193,7 @@ public class SoundSystem {
                     } else {
                         try {
                             ReadSource asset = music.asset;
-                            streamIn = AudioInputStream.create(asset);
+                            stream = AudioStream.create(asset);
                             try {
                                 for (int queue : queuedBuffers) {
                                     stream(queue);
@@ -223,7 +223,7 @@ public class SoundSystem {
                         music.playing = true;
                     }
                 }
-                if (streamIn != null) {
+                if (stream != null) {
                     try {
                         int finished = openAL.getBuffersPrecessed(musicSource);
                         while (finished-- > 0) {
@@ -232,16 +232,12 @@ public class SoundSystem {
                                 openAL.queue(musicSource, unqueued);
                             }
                         }
-                        if (streamIn.available() == 0) {
-                            streamIn = null;
-                        } else {
-                            if (!openAL.isPlaying(musicSource)) {
-                                openAL.play(musicSource);
-                            }
+                        if (!openAL.isPlaying(musicSource)) {
+                            openAL.play(musicSource);
                         }
                     } catch (IOException e) {
                         LOGGER.warn("Error during stream: {}", e.toString());
-                        streamIn = null;
+                        stream = null;
                     }
                 } else {
                     this.music = null;
@@ -315,16 +311,15 @@ public class SoundSystem {
 
     protected Optional<AudioData> getAudio(String asset) {
         if (!cache.containsKey(asset)) {
-            try {
                 Resource resource = engine.getFiles().get(asset);
                 if (resource.exists()) {
-                    cache.put(asset,
-                            new AudioData(AudioInputStream.create(resource),
-                                    openAL));
+                    try (ReadableAudioStream stream = AudioStream
+                            .create(resource)) {
+                        cache.put(asset, new AudioData(stream, openAL));
+                    } catch (IOException e) {
+                        LOGGER.warn("Failed to get audio data", e);
+                    }
                 }
-            } catch (IOException e) {
-                LOGGER.warn("Failed to get audio data", e);
-            }
         }
         return Optional.ofNullable(cache.get(asset));
     }
@@ -360,20 +355,24 @@ public class SoundSystem {
     }
 
     private boolean stream(int buffer) throws IOException {
+        if (stream == null) {
+            return true;
+        }
+        boolean valid = true;
+        while (streamReadBuffer.hasRemaining() && valid) {
+            valid = stream.getSome(streamReadBuffer);
+        }
+        streamReadBuffer.flip();
         streamBuffer.clear();
-        if (streamIn == null) {
-            return true;
+        while (streamReadBuffer.hasRemaining()) {
+            streamBuffer.putShort(PCMUtil.toInt32(streamReadBuffer.get()));
         }
-        int read = streamIn.read(streamReadBuffer);
-        if (read > 0) {
-            streamBuffer.put(streamReadBuffer, 0, read);
-            streamBuffer.rewind();
-            openAL.storeBuffer(buffer,
-                    streamIn.getChannels() > 1 ? AudioFormat.STEREO :
-                            AudioFormat.MONO, streamBuffer, streamIn.getRate());
-            return true;
-        }
-        return false;
+        streamReadBuffer.clear();
+        streamBuffer.flip();
+        openAL.storeBuffer(buffer,
+                stream.getChannels() > 1 ? AudioFormat.STEREO :
+                        AudioFormat.MONO, streamBuffer, stream.getRate());
+        return valid;
     }
 
     private static class Music {

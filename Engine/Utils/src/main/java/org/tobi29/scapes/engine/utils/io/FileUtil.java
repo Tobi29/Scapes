@@ -21,6 +21,7 @@ import org.apache.tika.Tika;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 
@@ -44,6 +45,11 @@ public class FileUtil {
             public void read(IOConsumer<ReadableByteStream> reader)
                     throws IOException {
                 FileUtil.read(path, reader::accept);
+            }
+
+            @Override
+            public ReadableByteChannel channel() throws IOException {
+                return Files.newByteChannel(path, StandardOpenOption.READ);
             }
 
             @Override

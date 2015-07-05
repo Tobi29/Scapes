@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.io.filesystem.javanio;
+package org.tobi29.scapes.engine.openal;
 
-import org.tobi29.scapes.engine.utils.io.filesystem.FileSystem;
+import org.tobi29.scapes.engine.utils.math.FastMath;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-public class JavaNIOFileSystem extends JavaNIODirectory implements FileSystem {
-    public JavaNIOFileSystem(Path path, String id) throws IOException {
-        super(path, id);
-        Files.createDirectories(path);
+public class PCMUtil {
+    public static short toInt32(float sample) {
+        int pcm = (int) (sample * Short.MAX_VALUE);
+        return (short) FastMath.clamp(pcm, Short.MIN_VALUE, Short.MAX_VALUE);
     }
 }

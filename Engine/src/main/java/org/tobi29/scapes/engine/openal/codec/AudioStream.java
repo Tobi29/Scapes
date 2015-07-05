@@ -18,29 +18,31 @@ package org.tobi29.scapes.engine.openal.codec;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.engine.openal.codec.spi.AudioInputStreamProvider;
+import org.tobi29.scapes.engine.openal.codec.spi.ReadableAudioStreamProvider;
 import org.tobi29.scapes.engine.utils.io.ReadSource;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class AudioInputStream extends InputStream {
+public class AudioStream {
     private static final Logger LOGGER =
-            LoggerFactory.getLogger(AudioInputStream.class);
-    private static final Map<String, AudioInputStreamProvider> CODECS =
+            LoggerFactory.getLogger(AudioStream.class);
+    private static final Map<String, ReadableAudioStreamProvider> CODECS =
             new ConcurrentHashMap<>();
 
-    public static AudioInputStream create(ReadSource resource)
+    private AudioStream() {
+    }
+
+    public static ReadableAudioStream create(ReadSource resource)
             throws IOException {
         String mime = resource.getMIMEType();
-        Optional<AudioInputStreamProvider> codec = get(mime);
+        Optional<ReadableAudioStreamProvider> codec = get(mime);
         if (codec.isPresent()) {
-            return codec.get().get(resource.readIO());
+            return codec.get().get(resource.channel());
         }
         throw new IOException("No compatible decoder found for type: " + mime);
     }
@@ -53,8 +55,8 @@ public abstract class AudioInputStream extends InputStream {
         return get(mime) != null;
     }
 
-    private static Optional<AudioInputStreamProvider> get(String mime) {
-        Optional<AudioInputStreamProvider> codec =
+    private static Optional<ReadableAudioStreamProvider> get(String mime) {
+        Optional<ReadableAudioStreamProvider> codec =
                 Optional.ofNullable(CODECS.get(mime));
         if (!codec.isPresent()) {
             codec = loadService(mime);
@@ -65,9 +67,10 @@ public abstract class AudioInputStream extends InputStream {
         return codec;
     }
 
-    private static Optional<AudioInputStreamProvider> loadService(String mime) {
-        for (AudioInputStreamProvider codec : ServiceLoader
-                .load(AudioInputStreamProvider.class)) {
+    private static Optional<ReadableAudioStreamProvider> loadService(
+            String mime) {
+        for (ReadableAudioStreamProvider codec : ServiceLoader
+                .load(ReadableAudioStreamProvider.class)) {
             try {
                 if (codec.accepts(mime)) {
                     LOGGER.debug("Loaded audio codec ({}): {}", mime,
@@ -79,14 +82,5 @@ public abstract class AudioInputStream extends InputStream {
             }
         }
         return Optional.empty();
-    }
-
-    public abstract int getChannels();
-
-    public abstract int getRate();
-
-    @Override
-    public int read(byte[] b) throws IOException {
-        return read(b, 0, b.length);
     }
 }

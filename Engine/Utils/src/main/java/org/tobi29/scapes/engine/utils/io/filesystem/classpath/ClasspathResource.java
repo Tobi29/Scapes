@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
@@ -62,6 +63,11 @@ public class ClasspathResource implements Resource {
     public void read(IOConsumer<ReadableByteStream> reader) throws IOException {
         reader.accept(
                 new BufferedReadChannelStream(Channels.newChannel(readIO())));
+    }
+
+    @Override
+    public ReadableByteChannel channel() throws IOException {
+        return Channels.newChannel(readIO());
     }
 
     @Override

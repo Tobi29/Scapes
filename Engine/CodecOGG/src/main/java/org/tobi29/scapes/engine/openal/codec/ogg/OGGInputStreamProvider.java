@@ -16,15 +16,15 @@
 
 package org.tobi29.scapes.engine.openal.codec.ogg;
 
-import org.tobi29.scapes.engine.openal.codec.AudioInputStream;
-import org.tobi29.scapes.engine.openal.codec.spi.AudioInputStreamProvider;
+import org.tobi29.scapes.engine.openal.codec.ReadableAudioStream;
+import org.tobi29.scapes.engine.openal.codec.spi.ReadableAudioStreamProvider;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 import java.util.List;
 
-public class OGGInputStreamProvider implements AudioInputStreamProvider {
+public class OGGInputStreamProvider implements ReadableAudioStreamProvider {
     private final List<String> mimeTypes =
             Arrays.asList("audio/vorbis", "audio/x-vorbis+ogg");
 
@@ -34,7 +34,8 @@ public class OGGInputStreamProvider implements AudioInputStreamProvider {
     }
 
     @Override
-    public AudioInputStream get(InputStream streamIn) throws IOException {
-        return new OGGInputStream(streamIn);
+    public ReadableAudioStream get(ReadableByteChannel channel)
+            throws IOException {
+        return new OGGReadStream(channel);
     }
 }

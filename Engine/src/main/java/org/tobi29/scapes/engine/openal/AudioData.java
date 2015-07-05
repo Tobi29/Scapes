@@ -16,22 +16,21 @@
 
 package org.tobi29.scapes.engine.openal;
 
-import org.tobi29.scapes.engine.openal.codec.AudioInputStream;
+import org.tobi29.scapes.engine.openal.codec.ReadableAudioStream;
+import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream;
-import org.tobi29.scapes.engine.utils.io.ProcessStream;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 
 public class AudioData {
     private final int buffer;
 
-    public AudioData(AudioInputStream streamIn, OpenAL openAL)
+    public AudioData(ReadableAudioStream stream, OpenAL openAL)
             throws IOException {
-        this(read(streamIn), streamIn.getRate(), streamIn.getChannels(),
-                openAL);
+        this(read(stream), stream.getRate(), stream.getChannels(), openAL);
     }
 
     public AudioData(ByteBuffer data, int rate, int channels, OpenAL openAL) {
@@ -50,10 +49,20 @@ public class AudioData {
         return buffer;
     }
 
-    private static ByteBuffer read(InputStream input) throws IOException {
+    private static ByteBuffer read(ReadableAudioStream input)
+            throws IOException {
         ByteBufferStream output = new ByteBufferStream(
                 capacity -> BufferCreatorDirect.byteBuffer(capacity + 40960));
-        ProcessStream.process(input, output::put);
+        FloatBuffer buffer = BufferCreator.floatBuffer(40960);
+        boolean valid = true;
+        while (valid) {
+            valid = input.getSome(buffer);
+            buffer.flip();
+            while (buffer.hasRemaining()) {
+                output.putShort(PCMUtil.toInt32(buffer.get()));
+            }
+            buffer.clear();
+        }
         output.buffer().flip();
         return output.buffer();
     }

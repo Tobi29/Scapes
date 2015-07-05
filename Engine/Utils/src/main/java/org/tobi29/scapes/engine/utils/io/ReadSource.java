@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.channels.ReadableByteChannel;
 
 public interface ReadSource {
     boolean exists();
@@ -27,6 +28,8 @@ public interface ReadSource {
     InputStream readIO() throws IOException;
 
     void read(IOConsumer<ReadableByteStream> reader) throws IOException;
+
+    ReadableByteChannel channel() throws IOException;
 
     <R> R readReturn(IOFunction<ReadableByteStream, R> reader)
             throws IOException;
