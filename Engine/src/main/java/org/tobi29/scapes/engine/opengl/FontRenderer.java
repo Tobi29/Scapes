@@ -51,7 +51,7 @@ public class FontRenderer {
         GlyphRenderer.GlyphPage page = glyphRenderer.getPage(id);
         int imageSize = page.getSize();
         Texture texture =
-                new TextureCustom(imageSize, imageSize, page.getBuffer(), 1,
+                new TextureCustom(imageSize, imageSize, page.getBuffer(), 2,
                         TextureFilter.LINEAR, TextureFilter.LINEAR,
                         TextureWrap.CLAMP, TextureWrap.CLAMP);
         timestamp = System.currentTimeMillis() - timestamp;

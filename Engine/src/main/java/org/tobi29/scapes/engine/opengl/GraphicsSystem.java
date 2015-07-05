@@ -62,7 +62,7 @@ public class GraphicsSystem {
         container.loadFont(
                 engine.getFiles().get("Engine:font/QuicksandPro-Regular.otf"));
         defaultFont = new FontRenderer(
-                container.createGlyphRenderer("Quicksand Pro", 64));
+                container.createGlyphRenderer("Quicksand Pro", 128));
         GuiWidgetDebugValues debugValues = engine.getDebugValues();
         fpsDebug = debugValues.get("Graphics-Fps");
         widthDebug = debugValues.get("Graphics-Width");
