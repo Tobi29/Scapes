@@ -17,6 +17,8 @@
 package org.tobi29.scapes.engine.utils.io.tag;
 
 import org.tobi29.scapes.engine.utils.ArrayUtil;
+import org.tobi29.scapes.engine.utils.io.ByteStreamOutputStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -24,7 +26,10 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.*;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 
 public class TagStructureWriterXML extends TagStructureXML
@@ -33,7 +38,7 @@ public class TagStructureWriterXML extends TagStructureXML
             XMLOutputFactory.newInstance();
     private static final TransformerFactory TRANSFORMER_FACTORY =
             TransformerFactory.newInstance();
-    private final OutputStream streamOut;
+    private final WritableByteStream stream;
     private final XMLStreamWriter writer;
     private final StringWriter stringWriter;
 
@@ -41,9 +46,9 @@ public class TagStructureWriterXML extends TagStructureXML
         TRANSFORMER_FACTORY.setAttribute("indent-number", 4);
     }
 
-    public TagStructureWriterXML(OutputStream streamOut) throws IOException {
+    public TagStructureWriterXML(WritableByteStream stream) throws IOException {
         try {
-            this.streamOut = streamOut;
+            this.stream = stream;
             stringWriter = new StringWriter();
             writer = FACTORY.createXMLStreamWriter(stringWriter);
         } catch (XMLStreamException e) {
@@ -71,7 +76,8 @@ public class TagStructureWriterXML extends TagStructureXML
             Source source =
                     new StreamSource(new StringReader(stringWriter.toString()));
             StreamResult result = new StreamResult(
-                    new OutputStreamWriter(streamOut, StandardCharsets.UTF_8));
+                    new OutputStreamWriter(new ByteStreamOutputStream(stream),
+                            StandardCharsets.UTF_8));
             Transformer transformer = TRANSFORMER_FACTORY.newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.transform(source, result);

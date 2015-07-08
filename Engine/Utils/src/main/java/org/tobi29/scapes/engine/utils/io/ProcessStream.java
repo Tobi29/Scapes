@@ -19,7 +19,6 @@ package org.tobi29.scapes.engine.utils.io;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -43,45 +42,6 @@ public final class ProcessStream {
     public static <E> E processSource(ReadSource source,
             StreamProcessor<E> processor) throws IOException {
         return source.readReturn(stream -> process(stream, processor, 1024));
-    }
-
-    /**
-     * Processes the entire stream and invokes the processor with the read data.
-     * The stream will be closed after the stream ended.
-     *
-     * @param streamIn  {@code InputStream} to read from
-     * @param processor {@code StreamProcessor} to process the stream data
-     * @throws IOException Thrown when an I/O error occurs
-     */
-    public static <E> E process(InputStream streamIn,
-            StreamProcessorIO<E> processor) throws IOException {
-        return process(streamIn, processor, 1024);
-    }
-
-    /**
-     * Processes the entire stream and invokes the processor with the read data.
-     * The stream will be closed after the stream ended.
-     *
-     * @param streamIn   {@code InputStream} to read from
-     * @param processor  {@code StreamProcessor} tp process the stream data
-     * @param bufferSize Size of the buffer to store the data in
-     * @throws IOException Thrown when an I/O error occurs
-     */
-    public static <E> E process(InputStream streamIn,
-            StreamProcessorIO<E> processor, int bufferSize) throws IOException {
-        try {
-            byte[] buffer = new byte[bufferSize];
-            int read = streamIn.read(buffer);
-            while (read != -1) {
-                if (read > 0) {
-                    processor.process(buffer, 0, read);
-                }
-                read = streamIn.read(buffer);
-            }
-        } finally {
-            streamIn.close();
-        }
-        return processor.result();
     }
 
     public static <E> E process(ReadableByteStream input,
@@ -174,19 +134,6 @@ public final class ProcessStream {
                         stream.buffer().position(), charset);
             }
         };
-    }
-
-    /**
-     * Functional interface to process data
-     */
-    @FunctionalInterface
-    public interface StreamProcessorIO<E> {
-        void process(byte[] buffer, int offset, int length) throws IOException;
-
-        @SuppressWarnings("ReturnOfNull")
-        default E result() {
-            return null;
-        }
     }
 
     @FunctionalInterface

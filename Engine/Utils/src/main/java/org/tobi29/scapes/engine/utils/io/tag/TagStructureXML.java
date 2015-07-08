@@ -16,9 +16,10 @@
 
 package org.tobi29.scapes.engine.utils.io.tag;
 
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 public class TagStructureXML {
     protected static final String VERSION = "1.0.0";
@@ -38,18 +39,19 @@ public class TagStructureXML {
     protected static final String ATTRIBUTE_VALUE = "value";
     protected static final String ATTRIBUTE_VERSION = "version";
 
-    public static void write(TagStructure tagStructure, OutputStream streamOut)
-            throws IOException {
-        tagStructure.write(new TagStructureWriterXML(streamOut));
+    public static void write(TagStructure tagStructure,
+            WritableByteStream stream) throws IOException {
+        tagStructure.write(new TagStructureWriterXML(stream));
     }
 
-    public static TagStructure read(InputStream streamIn) throws IOException {
-        return read(new TagStructure(), streamIn);
+    public static TagStructure read(ReadableByteStream stream)
+            throws IOException {
+        return read(new TagStructure(), stream);
     }
 
     public static TagStructure read(TagStructure tagStructure,
-            InputStream streamIn) throws IOException {
-        tagStructure.read(new TagStructureReaderXML(streamIn));
+            ReadableByteStream stream) throws IOException {
+        tagStructure.read(new TagStructureReaderXML(stream));
         return tagStructure;
     }
 }

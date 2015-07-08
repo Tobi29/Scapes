@@ -17,6 +17,7 @@
 package org.tobi29.scapes.plugins;
 
 import org.tobi29.scapes.engine.utils.VersionUtil;
+import org.tobi29.scapes.engine.utils.io.BufferedReadChannelStream;
 import org.tobi29.scapes.engine.utils.io.ChecksumUtil;
 import org.tobi29.scapes.engine.utils.io.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -24,6 +25,7 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.channels.Channels;
 import java.nio.file.Path;
 import java.util.zip.ZipFile;
 
@@ -38,7 +40,8 @@ public class PluginFile {
         checksum = FileUtil.readReturn(path, ChecksumUtil::createChecksum);
         try (ZipFile zip = new ZipFile(path.toFile())) {
             TagStructure tagStructure = TagStructureJSON
-                    .read(zip.getInputStream(zip.getEntry("Plugin.json")));
+                    .read(new BufferedReadChannelStream(Channels.newChannel(
+                            zip.getInputStream(zip.getEntry("Plugin.json")))));
             name = tagStructure.getString("Name");
             parent = tagStructure.getString("Parent");
             version = VersionUtil.get(tagStructure.getString("Version"));

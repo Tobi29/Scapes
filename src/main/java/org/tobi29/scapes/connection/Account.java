@@ -20,10 +20,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.utils.RSAUtil;
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
+import org.tobi29.scapes.engine.utils.io.ByteStreamInputStream;
+import org.tobi29.scapes.engine.utils.io.ByteStreamOutputStream;
+import org.tobi29.scapes.engine.utils.io.FileUtil;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyPair;
@@ -42,9 +43,8 @@ public class Account {
         String key = null, nickname = "";
         if (Files.exists(path)) {
             Properties properties = new Properties();
-            try (InputStream streamIn = Files.newInputStream(path)) {
-                properties.load(streamIn);
-            }
+            FileUtil.read(path, stream -> properties
+                    .load(new ByteStreamInputStream(stream)));
             key = properties.getProperty("Key");
             nickname = properties.getProperty("Nickname", "");
         }
@@ -127,9 +127,8 @@ public class Account {
             Properties properties = new Properties();
             properties.setProperty("Key", key(keyPair));
             properties.setProperty("Nickname", nickname);
-            try (OutputStream streamOut = Files.newOutputStream(path)) {
-                properties.store(streamOut, "");
-            }
+            FileUtil.write(path, stream -> properties
+                    .store(new ByteStreamOutputStream(stream), ""));
         }
 
         public KeyPair getKeyPair() {

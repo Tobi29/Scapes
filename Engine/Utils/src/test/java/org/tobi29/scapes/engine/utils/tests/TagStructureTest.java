@@ -25,10 +25,7 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureXML;
 import org.tobi29.scapes.engine.utils.tests.util.TagStructureTemplate;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 public class TagStructureTest {
     @Test
@@ -58,30 +55,28 @@ public class TagStructureTest {
     @Test
     public void testXMLFile() throws IOException {
         TagStructure tagStructure = TagStructureTemplate.createTagStructure();
-        ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
-        TagStructureXML.write(tagStructure, streamOut);
+        ByteBufferStream channel = new ByteBufferStream();
+        TagStructureXML.write(tagStructure, channel);
+        channel.buffer().flip();
         TagStructure read = new TagStructure();
-        InputStream streamIn =
-                new ByteArrayInputStream(streamOut.toByteArray());
-        TagStructureXML.read(read, streamIn);
+        TagStructureXML.read(read, new ByteBufferStream(channel.buffer()));
         Assert.assertEquals("Read structure doesn't match written one",
                 tagStructure, read);
     }
 
     @Test
     public void testJSONFile() throws IOException {
-
         TagStructure tagStructure = TagStructureTemplate.createTagStructure();
-        ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
-        TagStructureJSON.write(tagStructure, streamOut);
+        ByteBufferStream channel = new ByteBufferStream();
+        TagStructureJSON.write(tagStructure, channel);
+        channel.buffer().flip();
         TagStructure read = new TagStructure();
-        InputStream streamIn =
-                new ByteArrayInputStream(streamOut.toByteArray());
-        streamOut.reset();
-        TagStructureJSON.write(read, streamOut);
+        TagStructureJSON.read(read, new ByteBufferStream(channel.buffer()));
+        channel.buffer().clear();
+        TagStructureJSON.write(read, channel);
+        channel.buffer().flip();
         TagStructure reread = new TagStructure();
-        streamIn = new ByteArrayInputStream(streamOut.toByteArray());
-        TagStructureJSON.read(read, streamIn);
+        TagStructureJSON.read(reread, new ByteBufferStream(channel.buffer()));
         Assert.assertEquals("Read structure doesn't match written one", read,
                 reread);
     }

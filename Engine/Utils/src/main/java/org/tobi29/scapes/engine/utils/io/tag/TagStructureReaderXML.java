@@ -18,13 +18,14 @@ package org.tobi29.scapes.engine.utils.io.tag;
 
 import org.tobi29.scapes.engine.utils.ArrayUtil;
 import org.tobi29.scapes.engine.utils.Pair;
+import org.tobi29.scapes.engine.utils.io.ByteStreamInputStream;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
-import java.io.InputStream;
 
 public class TagStructureReaderXML extends TagStructureXML
         implements TagStructureReader {
@@ -32,9 +33,10 @@ public class TagStructureReaderXML extends TagStructureXML
             XMLInputFactory.newInstance();
     private final XMLStreamReader reader;
 
-    public TagStructureReaderXML(InputStream streamIn) throws IOException {
+    public TagStructureReaderXML(ReadableByteStream stream) throws IOException {
         try {
-            reader = FACTORY.createXMLStreamReader(streamIn);
+            reader = FACTORY.createXMLStreamReader(
+                    new ByteStreamInputStream(stream));
         } catch (XMLStreamException e) {
             throw new IOException(e);
         }
