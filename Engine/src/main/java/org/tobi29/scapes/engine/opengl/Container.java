@@ -16,13 +16,13 @@
 
 package org.tobi29.scapes.engine.opengl;
 
+import org.tobi29.scapes.engine.gui.GlyphRenderer;
 import org.tobi29.scapes.engine.input.ControllerDefault;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.openal.OpenAL;
 import org.tobi29.scapes.engine.utils.DesktopException;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.io.ReadSource;
-import org.tobi29.scapes.engine.utils.ui.font.GlyphRenderer;
 
 import java.io.IOException;
 import java.nio.file.Path;

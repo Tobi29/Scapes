@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.ui.font;
+package org.tobi29.scapes.engine.gui;
 
 import java.nio.ByteBuffer;
 

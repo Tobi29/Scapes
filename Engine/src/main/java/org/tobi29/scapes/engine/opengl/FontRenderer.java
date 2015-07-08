@@ -18,13 +18,13 @@ package org.tobi29.scapes.engine.opengl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tobi29.scapes.engine.gui.GlyphRenderer;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
 import org.tobi29.scapes.engine.opengl.texture.TextureFilter;
 import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
 import org.tobi29.scapes.engine.utils.math.FastMath;
-import org.tobi29.scapes.engine.utils.ui.font.GlyphRenderer;
 
 import java.util.Arrays;
 import java.util.Map;

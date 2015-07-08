@@ -19,10 +19,10 @@ package org.tobi29.scapes.engine.backends.lwjgl3.glfw.dialogs.swt;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.widgets.Display;
+import org.tobi29.scapes.engine.gui.GlyphRenderer;
 import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
 import org.tobi29.scapes.engine.utils.MutableSingle;
 import org.tobi29.scapes.engine.utils.math.FastMath;
-import org.tobi29.scapes.engine.utils.ui.font.GlyphRenderer;
 
 import java.nio.ByteBuffer;
 

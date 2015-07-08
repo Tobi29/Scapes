@@ -26,6 +26,7 @@ import org.tobi29.scapes.engine.backends.lwjgl3.ContainerLWJGL3;
 import org.tobi29.scapes.engine.backends.lwjgl3.GLFWControllers;
 import org.tobi29.scapes.engine.backends.lwjgl3.GLFWKeyMap;
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.spi.GLFWDialogsProvider;
+import org.tobi29.scapes.engine.gui.GlyphRenderer;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.opengl.GraphicsCheckException;
 import org.tobi29.scapes.engine.opengl.GraphicsException;
@@ -34,7 +35,6 @@ import org.tobi29.scapes.engine.utils.DesktopException;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.io.ReadSource;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
-import org.tobi29.scapes.engine.utils.ui.font.GlyphRenderer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
