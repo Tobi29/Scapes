@@ -166,16 +166,20 @@ public class ClimateGenerator {
     }
 
     public double getWeather(double x, double y) {
-        return getWeatherD(x, y, getHumidity3(x, y));
+        double humidity3 = getHumidity3(x, y);
+        double temperature2 = getTemperature2D(x, y, humidity3);
+        return getWeatherD(x, y, humidity3);
     }
 
     public double getWeatherD(double x, double y, double humidity3) {
-        double weather = weatherNoise
-                .noise((day + dayTime) / 2.0, x / 8000.0, y / 8000.0) * 0.5 +
-                0.5;
-        double a = humidity3 + weather * (1 - humidity3);
-        a *= a;
-        return weather * a * a;
+        double weather =
+                weatherNoise.noise(day + dayTime, x / 16000.0, y / 16000.0) *
+                        0.5 + 0.5;
+        double rainfall = 4.0 - humidity3 * 3.2;
+        rainfall *= 1.0 - FastMath.sinTable(dayTime * FastMath.PI) * 0.5;
+        rainfall = FastMath.max(rainfall, 0.1);
+        weather = FastMath.pow(weather, rainfall);
+        return weather;
     }
 
     public double getTemperature(int x, int y, int z) {
@@ -234,8 +238,8 @@ public class ClimateGenerator {
 
     public double getHumidity(double x, double y) {
         double humidity3 = getHumidity3(x, y);
-        double weather = getWeatherD(x, y, humidity3);
         double temperature2 = getTemperature2D(x, y, humidity3);
+        double weather = getWeatherD(x, y, humidity3);
         double humidity2 = getHumidity2D(temperature2, humidity3);
         return getHumidityD(humidity2, getRiverHumidity(x, y), weather);
     }
