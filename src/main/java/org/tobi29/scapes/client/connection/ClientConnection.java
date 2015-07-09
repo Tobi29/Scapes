@@ -69,6 +69,17 @@ public class ClientConnection
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ClientConnection.class);
     private static final int AES_KEY_LENGTH;
+
+    static {
+        int length = 16;
+        try {
+            length = Cipher.getMaxAllowedKeyLength("AES") >> 3;
+        } catch (NoSuchAlgorithmException e) {
+            LOGGER.warn("Failed to detect maximum key length", e);
+        }
+        AES_KEY_LENGTH = length;
+    }
+
     private final ScapesEngine engine;
     private final int loadingDistanceRequest;
     private final PacketBundleChannel channel;
@@ -86,16 +97,6 @@ public class ClientConnection
     private State state = State.LOGIN_STEP_1;
     private WorldClient world;
     private Plugins plugins;
-
-    static {
-        int length = 16;
-        try {
-            length = Cipher.getMaxAllowedKeyLength("AES") >> 3;
-        } catch (NoSuchAlgorithmException e) {
-            LOGGER.warn("Failed to detect maximum key length", e);
-        }
-        AES_KEY_LENGTH = length;
-    }
 
     public ClientConnection(ScapesEngine engine, SocketChannel channel,
             Account.Client account, int loadingDistance) throws IOException {

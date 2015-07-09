@@ -34,15 +34,16 @@ import org.tobi29.scapes.vanilla.basics.entity.client.EntityBellowsClient;
 
 public class EntityModelBellows implements EntityModel {
     private static final Box SIDE, MIDDLE, PIPE;
-    private final MutableVector3 pos;
-    private final EntityBellowsClient entity;
-    private float scale;
 
     static {
         SIDE = new Box(0.0625f, -7, -7, -1, 7, 7, 1, 0, 0);
         MIDDLE = new Box(0.0625f, -6, -6, -7, 6, 6, 7, 0, 0);
         PIPE = new Box(0.0625f, -2, -2, -16, 2, 2, 0, 0, 0);
     }
+
+    private final MutableVector3 pos;
+    private final EntityBellowsClient entity;
+    private float scale;
 
     public EntityModelBellows(EntityBellowsClient entity) {
         this.entity = entity;
@@ -83,10 +84,9 @@ public class EntityModelBellows implements EntityModel {
         float posRenderZ = (float) (pos.doubleZ() - cam.position.doubleZ());
         OpenGL openGL = graphics.getOpenGL();
         openGL.setAttribute2f(4, world.getTerrain()
-                .blockLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f,
+                        .blockLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f,
                 world.getTerrain()
-                        .sunLight(pos.intX(), pos.intY(), pos.intZ()) /
-                        15.0f);
+                        .sunLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f);
         MatrixStack matrixStack = graphics.getMatrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(posRenderX, posRenderY, posRenderZ);

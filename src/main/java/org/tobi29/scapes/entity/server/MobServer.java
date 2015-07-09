@@ -84,53 +84,53 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
         boolean walking = true;
         while (walking) {
             walking = false;
-            if (goX != 0.0d) {
+            if (goX != 0.0) {
                 double lastGoX = aabb.moveOutX(getCollisions(aabbs), goX);
-                if (lastGoX != 0.0d) {
+                if (lastGoX != 0.0) {
                     pos.plusX(lastGoX);
-                    aabb.add(lastGoX, 0.0d, 0.0d);
+                    aabb.add(lastGoX, 0.0, 0.0);
                     goX -= lastGoX;
                     walking = true;
                 }
             }
-            if (goY != 0.0d) {
+            if (goY != 0.0) {
                 double lastGoY = aabb.moveOutY(getCollisions(aabbs), goY);
-                if (lastGoY != 0.0d) {
+                if (lastGoY != 0.0) {
                     pos.plusY(lastGoY);
-                    aabb.add(0.0d, lastGoY, 0.0d);
+                    aabb.add(0.0, lastGoY, 0.0);
                     goY -= lastGoY;
                     walking = true;
                 }
             }
         }
         // Check collision
-        boolean slidingX = goX != 0.0d;
-        boolean slidingY = goY != 0.0d;
+        boolean slidingX = goX != 0.0;
+        boolean slidingY = goY != 0.0;
         if (slidingX || slidingY) {
-            if (stepHeight > 0.0d && (this.ground || inWater)) {
+            if (stepHeight > 0.0 && (this.ground || inWater)) {
                 // Step
                 // Calculate step height
-                AABB aabbStep = new AABB(aabb).add(goX, 0.0d, 0.0d);
+                AABB aabbStep = new AABB(aabb).add(goX, 0.0, 0.0);
                 double stepX =
                         aabbStep.moveOutZ(getCollisions(aabbs), stepHeight);
-                aabbStep = new AABB(aabb).add(0.0d, goY, 0.0d);
+                aabbStep = new AABB(aabb).add(0.0, goY, 0.0);
                 double stepY =
                         aabbStep.moveOutZ(getCollisions(aabbs), stepHeight);
                 double step = FastMath.max(stepX, stepY);
                 aabbStep = new AABB(aabb).add(goX, goY, step);
                 step += aabbStep.moveOutZ(getCollisions(aabbs), -step);
                 // Check step height
-                aabbStep.copy(aabb).add(0.0d, 0.0d, step);
+                aabbStep.copy(aabb).add(0.0, 0.0, step);
                 step = aabb.moveOutZ(getCollisions(aabbs), step);
                 // Attempt walk at new height
                 double lastGoX = aabbStep.moveOutX(getCollisions(aabbs), goX);
-                aabbStep.add(lastGoX, 0.0d, 0.0d);
+                aabbStep.add(lastGoX, 0.0, 0.0);
                 double lastGoY = aabbStep.moveOutY(getCollisions(aabbs), goY);
                 // Check if walk was successful
-                if (lastGoX != 0.0d || lastGoY != 0.0d) {
+                if (lastGoX != 0.0 || lastGoY != 0.0) {
                     pos.plusX(lastGoX);
                     pos.plusY(lastGoY);
-                    aabb.copy(aabbStep).add(0.0d, lastGoY, 0.0d);
+                    aabb.copy(aabbStep).add(0.0, lastGoY, 0.0);
                     pos.plusZ(step);
                 } else {
                     // Collide

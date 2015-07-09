@@ -94,13 +94,13 @@ public abstract class ControllerDefault implements Controller {
         pressEvents = newPressEvents;
         typeEvents = newTypeEvents;
         deltaX = deltaXSet;
-        deltaXSet = 0.0d;
+        deltaXSet = 0.0;
         deltaY = deltaYSet;
-        deltaYSet = 0.0d;
+        deltaYSet = 0.0;
         scrollX = scrollXSet;
-        scrollXSet = 0.0d;
+        scrollXSet = 0.0;
         scrollY = scrollYSet;
-        scrollYSet = 0.0d;
+        scrollYSet = 0.0;
     }
 
     @Override

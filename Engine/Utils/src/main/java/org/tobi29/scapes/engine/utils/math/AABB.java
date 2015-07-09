@@ -206,7 +206,7 @@ public class AABB {
     }
 
     public double moveOutX(AABB check, double base) {
-        return moveOutX(check, base, 0.00001d);
+        return moveOutX(check, base, 0.00001);
     }
 
     public double moveOutX(AABB check, double base, double error) {
@@ -216,7 +216,7 @@ public class AABB {
     }
 
     public double moveOutY(AABB check, double base) {
-        return moveOutY(check, base, 0.00001d);
+        return moveOutY(check, base, 0.00001);
     }
 
     public double moveOutY(AABB check, double base, double error) {
@@ -226,7 +226,7 @@ public class AABB {
     }
 
     public double moveOutZ(AABB check, double base) {
-        return moveOutZ(check, base, 0.00001d);
+        return moveOutZ(check, base, 0.00001);
     }
 
     public double moveOutZ(AABB check, double base, double error) {

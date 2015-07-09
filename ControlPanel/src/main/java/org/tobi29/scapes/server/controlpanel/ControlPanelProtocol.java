@@ -44,13 +44,6 @@ public class ControlPanelProtocol {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ControlPanelProtocol.class);
     private static final int AES_KEY_LENGTH;
-    private final PacketBundleChannel channel;
-    private final Queue<String[]> queue = new ConcurrentLinkedQueue<>();
-    private final Map<String, PacketListener> commands =
-            new ConcurrentHashMap<>();
-    private final String password;
-    private final Optional<KeyPair> keyPair;
-    private State state;
 
     static {
         int length = 16;
@@ -62,6 +55,14 @@ public class ControlPanelProtocol {
         length = FastMath.min(length, 32);
         AES_KEY_LENGTH = length;
     }
+
+    private final PacketBundleChannel channel;
+    private final Queue<String[]> queue = new ConcurrentLinkedQueue<>();
+    private final Map<String, PacketListener> commands =
+            new ConcurrentHashMap<>();
+    private final String password;
+    private final Optional<KeyPair> keyPair;
+    private State state;
 
     public ControlPanelProtocol(SocketChannel channel, String password,
             Optional<KeyPair> keyPair) throws IOException {
@@ -244,16 +245,16 @@ public class ControlPanelProtocol {
         channel.close();
     }
 
-    @FunctionalInterface
-    public interface PacketListener {
-        void receive(String... command);
-    }
-
     enum State {
         CLIENT_LOGIN_STEP_1,
         SERVER_LOGIN_STEP_1,
         SERVER_LOGIN_STEP_2,
         OPEN,
         CLOSED
+    }
+
+    @FunctionalInterface
+    public interface PacketListener {
+        void receive(String... command);
     }
 }

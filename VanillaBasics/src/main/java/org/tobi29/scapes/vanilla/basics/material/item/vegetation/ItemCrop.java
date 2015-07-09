@@ -48,8 +48,8 @@ public class ItemCrop extends VanillaItem implements ItemResearch {
         textures = new TerrainTexture[types.size()];
         int i = 0;
         for (CropType type : types) {
-            textures[i++] = registry.registerTexture(
-                    type.getTexture() + "/Drop.png");
+            textures[i++] =
+                    registry.registerTexture(type.getTexture() + "/Drop.png");
         }
     }
 

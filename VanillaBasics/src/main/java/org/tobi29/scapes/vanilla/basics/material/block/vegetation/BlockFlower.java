@@ -252,8 +252,7 @@ public class BlockFlower extends VanillaBlock {
     @Override
     public void renderInventory(ItemStack item, GraphicsSystem graphics,
             Shader shader, float r, float g, float b, float a) {
-        modelsItem[item.getData()]
-                .renderInventory(graphics, shader);
+        modelsItem[item.getData()].renderInventory(graphics, shader);
     }
 
     @Override

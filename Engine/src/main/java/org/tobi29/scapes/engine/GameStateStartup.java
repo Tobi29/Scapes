@@ -57,11 +57,11 @@ public class GameStateStartup extends GameState {
         GuiComponentIcon image = scene.getImage();
         if (image != null) {
             if (warmUp > 20) {
-                time += engine.getGraphics().getSync().getSpeedFactor() / 5.0d;
+                time += engine.getGraphics().getSync().getSpeedFactor() / 5.0;
                 float a = (float) FastMath.sinTable(time * FastMath.PI);
                 a = FastMath.min(a * 1.4f, 1.0f);
                 image.setColor(1.0f, 1.0f, 1.0f, a);
-                if (time > 1.0d) {
+                if (time > 1.0) {
                     engine.setState(nextState);
                 }
             } else {

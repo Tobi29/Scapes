@@ -48,8 +48,7 @@ public abstract class BlockSoil extends VanillaBlock {
         boolean flag = false;
         if (terrain.type(x, y, z - 1).isSolid(terrain, x, y, z - 1)) {
             Random random = ThreadLocalRandom.current();
-            if (!terrain.type(x - 1, y, z)
-                    .isSolid(terrain, x - 1, y, z)) {
+            if (!terrain.type(x - 1, y, z).isSolid(terrain, x - 1, y, z)) {
                 sides++;
                 if (!terrain.type(x - 1, y, z - 1)
                         .isSolid(terrain, x - 1, y, z - 1)) {
@@ -57,8 +56,7 @@ public abstract class BlockSoil extends VanillaBlock {
                     flag = true;
                 }
             }
-            if (!terrain.type(x + 1, y, z)
-                    .isSolid(terrain, x + 1, y, z)) {
+            if (!terrain.type(x + 1, y, z).isSolid(terrain, x + 1, y, z)) {
                 sides++;
                 if (!terrain.type(x + 1, y, z - 1)
                         .isSolid(terrain, x + 1, y, z - 1)) {
@@ -68,8 +66,7 @@ public abstract class BlockSoil extends VanillaBlock {
                     flag = true;
                 }
             }
-            if (!terrain.type(x, y - 1, z)
-                    .isSolid(terrain, x, y - 1, z)) {
+            if (!terrain.type(x, y - 1, z).isSolid(terrain, x, y - 1, z)) {
                 sides++;
                 if (!terrain.type(x, y - 1, z - 1)
                         .isSolid(terrain, x, y - 1, z - 1)) {
@@ -80,8 +77,7 @@ public abstract class BlockSoil extends VanillaBlock {
                     flag = true;
                 }
             }
-            if (!terrain.type(x, y + 1, z)
-                    .isSolid(terrain, x, y + 1, z)) {
+            if (!terrain.type(x, y + 1, z).isSolid(terrain, x, y + 1, z)) {
                 sides++;
                 if (!terrain.type(x, y + 1, z - 1)
                         .isSolid(terrain, x, y + 1, z - 1)) {
@@ -98,9 +94,8 @@ public abstract class BlockSoil extends VanillaBlock {
         }
         if (sides > 2 && flag) {
             terrain.world().addEntity(new MobFlyingBlockServer(terrain.world(),
-                            new Vector3d(x + xx + 0.5, y + yy + 0.5, z + 0.5),
-                            new Vector3d(0, 0, -1.0d), this,
-                            terrain.data(x, y, z)));
+                    new Vector3d(x + xx + 0.5, y + yy + 0.5, z + 0.5),
+                    new Vector3d(0, 0, -1.0), this, terrain.data(x, y, z)));
             terrain.typeData(x, y, z, terrain.world().getAir(), (short) 0);
         }
     }

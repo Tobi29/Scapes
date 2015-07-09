@@ -50,8 +50,8 @@ import java.util.stream.Stream;
 public class ScapesClient extends Game {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ScapesClient.class);
-    private Image icon;
     private final List<InputMode> inputModes = new ArrayList<>();
+    private Image icon;
     private InputMode inputMode;
     private boolean freezeInputMode;
 
@@ -121,7 +121,7 @@ public class ScapesClient extends Game {
                     new ClasspathPath(getClass().getClassLoader(),
                             "assets/scapes/tobi29/"));
             icon = files.get("Scapes:image/Icon.png").readReturn(streamIn -> PNG
-                            .decode(streamIn, BufferCreatorDirect::byteBuffer));
+                    .decode(streamIn, BufferCreatorDirect::byteBuffer));
         } catch (IOException e) {
             engine.crash(e);
         }

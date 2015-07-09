@@ -22,7 +22,6 @@ import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import java.util.Random;
 
 public interface Tree {
-
     void gen(TerrainServer.TerrainMutable terrain, int x, int y, int z,
             VanillaMaterial materials, Random random);
 }

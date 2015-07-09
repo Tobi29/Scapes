@@ -72,8 +72,7 @@ public class BlockGrass extends VanillaBlock {
                 if (item.getMaterial().getToolLevel(item) >= 10) {
                     terrain.world().dropItem(
                             new ItemStack(materials.grassBundle, (short) 0,
-                                    terrain.data(x, y, z)), x, y,
-                            z + 1);
+                                    terrain.data(x, y, z)), x, y, z + 1);
                     terrain.data(x, y, z, (short) 0);
                 } else {
                     terrain.world().dropItem(
@@ -237,7 +236,7 @@ public class BlockGrass extends VanillaBlock {
             int z) {
         if (terrain.blockLight(x, y, z + 1) <= 0 &&
                 terrain.sunLight(x, y, z + 1) <= 0 || !terrain.type(x, y, z + 1)
-                        .isTransparent(terrain, x, y, z + 1)) {
+                .isTransparent(terrain, x, y, z + 1)) {
             terrain.typeData(x, y, z, materials.dirt, (short) 0);
         }
         if (terrain.getHighestTerrainBlockZAt(x, y) > z + 1 &&

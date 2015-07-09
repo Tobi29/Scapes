@@ -26,8 +26,7 @@ import java.util.List;
 import java.util.Random;
 
 public final class TreeWillow implements Tree {
-    public static final TreeWillow INSTANCE =
-            new TreeWillow();
+    public static final TreeWillow INSTANCE = new TreeWillow();
 
     @Override
     public void gen(TerrainServer.TerrainMutable terrain, int x, int y, int z,
@@ -41,42 +40,33 @@ public final class TreeWillow implements Tree {
         int size = random.nextInt(2) + 4;
         TreeUtil.fillGround(terrain, x - 1, y - 1, z - 2, materials.log,
                 (short) 6, 2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x - 1, y, z - 1, materials.log, (short) 6,
-                        2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x - 1, y, z - 1, materials.log, (short) 6,
+                2 + random.nextInt(5));
         TreeUtil.fillGround(terrain, x - 1, y + 1, z - 2, materials.log,
                 (short) 6, 2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x, y - 1, z - 1, materials.log, (short) 6,
-                        2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x, y - 1, z - 1, materials.log, (short) 6,
+                2 + random.nextInt(5));
         TreeUtil.fillGround(terrain, x, y, z - 1, materials.log, (short) 6,
                 2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x, y + 1, z - 1, materials.log, (short) 6,
-                        2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x, y + 1, z - 1, materials.log, (short) 6,
+                2 + random.nextInt(5));
         TreeUtil.fillGround(terrain, x + 1, y - 1, z - 2, materials.log,
                 (short) 6, 2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x + 1, y, z - 1, materials.log, (short) 6,
-                        2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x + 1, y, z - 1, materials.log, (short) 6,
+                2 + random.nextInt(5));
         TreeUtil.fillGround(terrain, x + 1, y + 1, z - 2, materials.log,
                 (short) 6, 2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x - 2, y, z - 3, materials.log, (short) 6,
-                        2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x + 2, y, z - 3, materials.log, (short) 6,
-                        2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x, y - 2, z - 3, materials.log, (short) 6,
-                        2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x, y + 2, z - 3, materials.log, (short) 6,
-                        2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x - 2, y, z - 3, materials.log, (short) 6,
+                2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x + 2, y, z - 3, materials.log, (short) 6,
+                2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x, y - 2, z - 3, materials.log, (short) 6,
+                2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x, y + 2, z - 3, materials.log, (short) 6,
+                2 + random.nextInt(5));
         for (int zz = 0; zz < size + 2; zz++) {
-            TreeUtil
-                    .makeLayer(terrain, x, y, z + zz, materials.log, (short) 6,
-                            1);
+            TreeUtil.makeLayer(terrain, x, y, z + zz, materials.log, (short) 6,
+                    1);
         }
         List<Vector3> branches = new ArrayList<>();
         for (int i = 0; i < random.nextInt(4) + 4; i++) {
@@ -88,10 +78,9 @@ public final class TreeWillow implements Tree {
         for (Vector3 branch : branches) {
             TreeUtil.makeBranch(terrain, begin, branch, materials.log,
                     (short) 6);
-            TreeUtil
-                    .makeWillowLeaves(terrain, branch.intX(), branch.intY(),
-                            branch.intZ(), materials.leaves, (short) 6, 6, 3, 4,
-                            10, random);
+            TreeUtil.makeWillowLeaves(terrain, branch.intX(), branch.intY(),
+                    branch.intZ(), materials.leaves, (short) 6, 6, 3, 4, 10,
+                    random);
         }
     }
 }

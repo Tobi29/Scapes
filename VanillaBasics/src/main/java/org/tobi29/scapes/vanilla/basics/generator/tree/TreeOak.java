@@ -44,42 +44,33 @@ public final class TreeOak implements Tree {
         }
         TreeUtil.fillGround(terrain, x - 1, y - 1, z - 2, materials.log,
                 (short) 0, 2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x - 1, y, z - 1, materials.log, (short) 0,
-                        2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x - 1, y, z - 1, materials.log, (short) 0,
+                2 + random.nextInt(5));
         TreeUtil.fillGround(terrain, x - 1, y + 1, z - 2, materials.log,
                 (short) 0, 2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x, y - 1, z - 1, materials.log, (short) 0,
-                        2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x, y - 1, z - 1, materials.log, (short) 0,
+                2 + random.nextInt(5));
         TreeUtil.fillGround(terrain, x, y, z - 1, materials.log, (short) 0,
                 2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x, y + 1, z - 1, materials.log, (short) 0,
-                        2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x, y + 1, z - 1, materials.log, (short) 0,
+                2 + random.nextInt(5));
         TreeUtil.fillGround(terrain, x + 1, y - 1, z - 2, materials.log,
                 (short) 0, 2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x + 1, y, z - 1, materials.log, (short) 0,
-                        2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x + 1, y, z - 1, materials.log, (short) 0,
+                2 + random.nextInt(5));
         TreeUtil.fillGround(terrain, x + 1, y + 1, z - 2, materials.log,
                 (short) 0, 2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x - 2, y, z - 3, materials.log, (short) 0,
-                        2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x + 2, y, z - 3, materials.log, (short) 0,
-                        2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x, y - 2, z - 3, materials.log, (short) 0,
-                        2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x, y + 2, z - 3, materials.log, (short) 0,
-                        2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x - 2, y, z - 3, materials.log, (short) 0,
+                2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x + 2, y, z - 3, materials.log, (short) 0,
+                2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x, y - 2, z - 3, materials.log, (short) 0,
+                2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x, y + 2, z - 3, materials.log, (short) 0,
+                2 + random.nextInt(5));
         for (int zz = 0; zz < size + 2; zz++) {
-            TreeUtil
-                    .makeLayer(terrain, x, y, z + zz, materials.log, (short) 0,
-                            trunkSize - 1);
+            TreeUtil.makeLayer(terrain, x, y, z + zz, materials.log, (short) 0,
+                    trunkSize - 1);
         }
         List<Vector3> branches = new ArrayList<>();
         for (int i = 0; i < random.nextInt(4) + 4 * trunkSize; i++) {

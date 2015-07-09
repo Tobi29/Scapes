@@ -52,7 +52,7 @@ public class BlockAir extends BlockType {
 
     @Override
     public double click(MobPlayerServer entity, ItemStack item, MobServer hit) {
-        return 2.0d;
+        return 2.0;
     }
 
     @Override

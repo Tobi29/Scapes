@@ -74,8 +74,8 @@ public class TerrainInfiniteServer extends TerrainInfinite
                     SleepUtil.sleep(100);
                 } else {
                     for (MobPlayerServer player : players) {
-                        int xx = FastMath.floor(player.getX() / 16.0d);
-                        int yy = FastMath.floor(player.getY() / 16.0d);
+                        int xx = FastMath.floor(player.getX() / 16.0);
+                        int yy = FastMath.floor(player.getY() / 16.0);
                         int loadingRadius =
                                 (player.getConnection().getLoadingRadius() >>
                                         4) + 3;
@@ -97,8 +97,8 @@ public class TerrainInfiniteServer extends TerrainInfinite
                         }
                     }
                     for (MobPlayerServer player : players) {
-                        Vector2 loadArea = new Vector2d(player.getX() / 16.0d,
-                                player.getY() / 16.0d);
+                        Vector2 loadArea = new Vector2d(player.getX() / 16.0,
+                                player.getY() / 16.0);
                         requiredChunks.stream()
                                 .filter(pos -> !hasChunk(pos.intX(),
                                         pos.intY()))
@@ -202,11 +202,6 @@ public class TerrainInfiniteServer extends TerrainInfinite
     }
 
     @Override
-    public void queue(BlockChanges blockChanges) {
-        this.blockChanges.add(blockChanges);
-    }
-
-    @Override
     public void update(double delta, Collection<MobSpawner> spawners) {
         chunkManager.getIterator().forEach(chunk -> chunk.updateServer(delta));
         Random random = ThreadLocalRandom.current();
@@ -235,8 +230,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
                                                             yy) +
                                                     FastMath.sqr(
                                                             player.getZ() - z);
-                                    if (distance > 9216.0d ||
-                                            distance < 256.0d) {
+                                    if (distance > 9216.0 || distance < 256.0) {
                                         continue;
                                     }
                                 }
@@ -258,6 +252,11 @@ public class TerrainInfiniteServer extends TerrainInfinite
         while (!chunkUnloadQueue.isEmpty()) {
             removeChunk(chunkUnloadQueue.poll());
         }
+    }
+
+    @Override
+    public void queue(BlockChanges blockChanges) {
+        this.blockChanges.add(blockChanges);
     }
 
     @Override
@@ -284,8 +283,8 @@ public class TerrainInfiniteServer extends TerrainInfinite
         int loadingRadius = player.getConnection().getLoadingRadius() >> 4;
         x = x >> 4;
         y = y >> 4;
-        int x2 = FastMath.floor(player.getX() / 16.0d);
-        int y2 = FastMath.floor(player.getY() / 16.0d);
+        int x2 = FastMath.floor(player.getX() / 16.0);
+        int y2 = FastMath.floor(player.getY() / 16.0);
         Optional<TerrainInfiniteChunkServer> chunk = getChunkNoLoad(x, y);
         int dis = FastMath.abs(x - x2);
         dis = FastMath.max(dis, FastMath.abs(y - y2));

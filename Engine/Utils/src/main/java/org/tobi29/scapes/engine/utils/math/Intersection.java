@@ -81,12 +81,12 @@ public class Intersection {
                 maxZ = pane.z + pane.aabb.maxZ;
                 break;
             default:
-                minX = 0.0d;
-                minY = 0.0d;
-                minZ = 0.0d;
-                maxX = 0.0d;
-                maxY = 0.0d;
-                maxZ = 0.0d;
+                minX = 0.0;
+                minY = 0.0;
+                minZ = 0.0;
+                maxX = 0.0;
+                maxY = 0.0;
+                maxZ = 0.0;
                 break;
         }
         Optional<Intersection> inter =

@@ -48,11 +48,6 @@ public class ClasspathResource implements Resource {
     }
 
     @Override
-    public String getMIMEType() throws IOException {
-        return new Tika().detect(readIO(), path);
-    }
-
-    @Override
     public InputStream readIO() throws IOException {
         return AccessController.doPrivileged(
                 (PrivilegedAction<InputStream>) () -> classLoader
@@ -75,6 +70,11 @@ public class ClasspathResource implements Resource {
             throws IOException {
         return reader.apply(new BufferedReadChannelStream(
                 Channels.newChannel(readIO())));
+    }
+
+    @Override
+    public String getMIMEType() throws IOException {
+        return new Tika().detect(readIO(), path);
     }
 
     @Override

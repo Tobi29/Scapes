@@ -41,6 +41,21 @@ public abstract class GuiControls extends GuiMenu {
         pane.add(scrollPane);
     }
 
+    private static double sensitivity(double value) {
+        value = value * 2.0 - 1.0;
+        return value * value * value * 10.0;
+    }
+
+    private static double reverseSensitivity(double value) {
+        value *= 0.1;
+        if (value >= 0.0) {
+            value = FastMath.pow(value, 1.0 / 3.0);
+        } else {
+            value = -FastMath.pow(-value, 1.0 / 3.0);
+        }
+        return value * 0.5 + 0.5;
+    }
+
     protected void addText(String text) {
         scrollPane.add(new GuiComponentText(40, 0, 18, text));
     }
@@ -72,20 +87,5 @@ public abstract class GuiControls extends GuiMenu {
         slider.addHover(
                 event -> tagStructure.setDouble(id, sensitivity(slider.value)));
         scrollPane.add(slider);
-    }
-
-    private static double sensitivity(double value) {
-        value = value * 2.0 - 1.0;
-        return value * value * value * 10.0;
-    }
-
-    private static double reverseSensitivity(double value) {
-        value *= 0.1;
-        if (value >= 0.0) {
-            value = FastMath.pow(value, 1.0 / 3.0);
-        } else {
-            value = -FastMath.pow(-value, 1.0 / 3.0);
-        }
-        return value * 0.5 + 0.5;
     }
 }

@@ -22,7 +22,7 @@ public class PointerPane {
     public int x, y, z;
 
     public PointerPane() {
-        this(new AABB(0.0d, 0.0d, 0.0d, 0.0d, 0.0d, 0.0d), Face.NONE, 0, 0, 0);
+        this(new AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0), Face.NONE, 0, 0, 0);
     }
 
     public PointerPane(AABB aabb, Face face, int x, int y, int z) {

@@ -60,7 +60,7 @@ public class LightingEngineThreaded
                 if (terrain.isBlockLoaded(update.intX(), update.intY(),
                         update.intZ())) {
                     BlockType type = terrain.type(update.intX(), update.intY(),
-                                    update.intZ());
+                            update.intZ());
                     byte lightTrough = type.lightTrough(terrain, update.intX(),
                             update.intY(), update.intZ());
                     byte light = type.lightEmit(terrain, update.intX(),
@@ -119,7 +119,7 @@ public class LightingEngineThreaded
                 if (terrain.isBlockLoaded(update.intX(), update.intY(),
                         update.intZ())) {
                     BlockType type = terrain.type(update.intX(), update.intY(),
-                                    update.intZ());
+                            update.intZ());
                     byte lightTrough = type.lightTrough(terrain, update.intX(),
                             update.intY(), update.intZ());
                     byte light = calcSunLightAt(update.intX(), update.intY(),
@@ -144,7 +144,7 @@ public class LightingEngineThreaded
                                     update.intZ() + 1) + lightTrough, light);
                     light = FastMath.clamp(light, (byte) 0, (byte) 15);
                     if (light != terrain.sunLight(update.intX(), update.intY(),
-                                    update.intZ())) {
+                            update.intZ())) {
                         terrain.sunLight(update.intX(), update.intY(),
                                 update.intZ(), light);
                         newUpdates.push().set(update.intX() - 1, update.intY(),

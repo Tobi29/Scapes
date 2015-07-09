@@ -215,7 +215,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                                 getNearestPlayer(entity.getPos());
                         if (player != null) {
                             if (FastMath.pointDistanceSqr(entity.getPos(),
-                                    player.getPos()) > 16384.0d) {
+                                    player.getPos()) > 16384.0) {
                                 deleteEntity(entity);
                             }
                         } else {
@@ -251,9 +251,9 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
     public void dropItem(ItemStack item, Vector3 pos, double despawntime) {
         Random random = ThreadLocalRandom.current();
         EntityServer entity = new MobItemServer(this, pos,
-                new Vector3d(-2.0d + random.nextDouble() * 4.0d,
-                        -2.0d + random.nextDouble() * 4.0d,
-                        random.nextDouble() * 1.0d + 0.5), item, despawntime);
+                new Vector3d(-2.0 + random.nextDouble() * 4.0,
+                        -2.0 + random.nextDouble() * 4.0,
+                        random.nextDouble() * 1.0 + 0.5), item, despawntime);
         entity.onSpawn();
         addEntity(entity);
     }
@@ -320,12 +320,12 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
             double dropChance, double blockChance, double push, double damage) {
         terrain.queue(handler -> {
             Random random = ThreadLocalRandom.current();
-            double step = 360.0d / FastMath.TWO_PI / size;
-            for (double pitch = 90.0d; pitch >= -90.0d; pitch -= step) {
+            double step = 360.0 / FastMath.TWO_PI / size;
+            for (double pitch = 90.0; pitch >= -90.0; pitch -= step) {
                 double cosYaw = FastMath.cosTable(pitch * FastMath.DEG_2_RAD);
                 double stepYawForPitch = FastMath.abs(step / cosYaw);
                 double deltaZ = FastMath.sinTable(pitch * FastMath.DEG_2_RAD);
-                for (double yaw = 0.0d; yaw < 360.0d; yaw += stepYawForPitch) {
+                for (double yaw = 0.0; yaw < 360.0; yaw += stepYawForPitch) {
                     double deltaX =
                             FastMath.cosTable(yaw * FastMath.DEG_2_RAD) *
                                     cosYaw;

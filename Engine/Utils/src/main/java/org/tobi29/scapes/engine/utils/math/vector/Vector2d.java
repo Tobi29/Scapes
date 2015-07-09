@@ -192,7 +192,7 @@ public class Vector2d extends Vector2 {
         }
         if (obj instanceof MutableVector2) {
             MutableVector2 other = (MutableVector2) obj;
-            return x == other.doubleX() && y == other.doubleY() ;
+            return x == other.doubleX() && y == other.doubleY();
         }
         if (!(obj instanceof Vector2)) {
             return false;

@@ -92,13 +92,12 @@ public abstract class Particle {
         AABB aabb = new AABB(collision);
         aabb.add(pos.doubleX(), pos.doubleY(), pos.doubleZ());
         Pool<AABBElement> aabbs = world.getTerrain().getCollisions(
-                FastMath.floor(aabb.minX + FastMath.min(goX, 0.0d)),
-                FastMath.floor(aabb.minY + FastMath.min(goY, 0.0d)),
-                FastMath.floor(aabb.minZ + FastMath.min(goZ, 0.0d)),
-                FastMath.floor(aabb.maxX + FastMath.max(goX, 0.0d)),
-                FastMath.floor(aabb.maxY + FastMath.max(goY, 0.0d)),
-                FastMath.floor(aabb.maxZ +
-                        FastMath.max(goZ, 0.0d) + 1.0d));
+                FastMath.floor(aabb.minX + FastMath.min(goX, 0.0)),
+                FastMath.floor(aabb.minY + FastMath.min(goY, 0.0)),
+                FastMath.floor(aabb.minZ + FastMath.min(goZ, 0.0)),
+                FastMath.floor(aabb.maxX + FastMath.max(goX, 0.0)),
+                FastMath.floor(aabb.maxY + FastMath.max(goY, 0.0)),
+                FastMath.floor(aabb.maxZ + FastMath.max(goZ, 0.0)));
         double lastGoZ = aabb.moveOutZ(
                 aabbs.stream().filter(AABBElement::isSolid)
                         .map(AABBElement::getAABB).iterator(), goZ);

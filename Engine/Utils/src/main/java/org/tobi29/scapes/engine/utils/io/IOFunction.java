@@ -21,6 +21,10 @@ import java.util.Objects;
 
 @FunctionalInterface
 public interface IOFunction<T, R> {
+    static <T> IOFunction<T, T> identity() {
+        return t -> t;
+    }
+
     R apply(T t) throws IOException;
 
     default <V> IOFunction<V, R> compose(
@@ -33,9 +37,5 @@ public interface IOFunction<T, R> {
             IOFunction<? super R, ? extends V> after) {
         Objects.requireNonNull(after);
         return (T t) -> after.apply(apply(t));
-    }
-
-    static <T> IOFunction<T, T> identity() {
-        return t -> t;
     }
 }

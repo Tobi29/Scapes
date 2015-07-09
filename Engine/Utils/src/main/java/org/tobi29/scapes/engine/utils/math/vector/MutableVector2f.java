@@ -328,20 +328,6 @@ public class MutableVector2f extends MutableVector2 {
     }
 
     @Override
-    public TagStructure write() {
-        TagStructure tagStructure = new TagStructure();
-        tagStructure.setFloat("X", x);
-        tagStructure.setFloat("Y", y);
-        return tagStructure;
-    }
-
-    @Override
-    public void read(TagStructure tagStructure) {
-        x = tagStructure.getFloat("X");
-        y = tagStructure.getFloat("Y");
-    }
-
-    @Override
     public int hashCode() {
         int result = x == 0.0f ? 0 : Float.floatToIntBits(x);
         result = 31 * result + (y == 0.0f ? 0 : Float.floatToIntBits(y));
@@ -365,5 +351,19 @@ public class MutableVector2f extends MutableVector2 {
         }
         Vector2 other = (Vector2) obj;
         return x == other.floatX() && y == other.floatY();
+    }
+
+    @Override
+    public TagStructure write() {
+        TagStructure tagStructure = new TagStructure();
+        tagStructure.setFloat("X", x);
+        tagStructure.setFloat("Y", y);
+        return tagStructure;
+    }
+
+    @Override
+    public void read(TagStructure tagStructure) {
+        x = tagStructure.getFloat("X");
+        y = tagStructure.getFloat("Y");
     }
 }

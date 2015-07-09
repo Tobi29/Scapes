@@ -28,11 +28,6 @@ import org.tobi29.scapes.engine.utils.Sync;
 
 public abstract class GameState {
     protected static final VAO CURSOR;
-    protected final VAO vao;
-    protected final ScapesEngine engine;
-    protected final FontRenderer font;
-    protected Scene scene, newScene;
-    protected FBO fboScene, fboFront, fboBack;
 
     static {
         CURSOR = VAOUtility.createVCTI(
@@ -43,6 +38,12 @@ public abstract class GameState {
                 new float[]{0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f},
                 new int[]{0, 1, 2, 1, 2, 3}, RenderType.TRIANGLES);
     }
+
+    protected final VAO vao;
+    protected final ScapesEngine engine;
+    protected final FontRenderer font;
+    protected Scene scene, newScene;
+    protected FBO fboScene, fboFront, fboBack;
 
     protected GameState(ScapesEngine engine, Scene scene) {
         this(engine, scene, engine.getGraphics().getDefaultFont());

@@ -32,8 +32,7 @@ public class GuiStatistics extends Gui {
                 new GuiComponentScrollPaneList(16, 80, 368, 350, 70);
         GuiComponentTextButton back =
                 new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");
-        back.addLeftClick(
-                event -> state.getClient().getEntity().closeGui());
+        back.addLeftClick(event -> state.getClient().getEntity().closeGui());
         for (PlayerStatistics.StatisticMaterial statisticMaterial : statisticMaterials) {
             scrollPane.add(new Element(statisticMaterial));
         }

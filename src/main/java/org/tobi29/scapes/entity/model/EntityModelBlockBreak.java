@@ -32,8 +32,6 @@ import org.tobi29.scapes.entity.client.EntityBlockBreakClient;
 
 public class EntityModelBlockBreak implements EntityModel {
     private static final VAO VAO;
-    private final MutableVector3 pos;
-    private final EntityBlockBreakClient entity;
 
     static {
         VAO = VAOUtility.createVTNI(
@@ -44,6 +42,9 @@ public class EntityModelBlockBreak implements EntityModel {
                         1.0f, 0.0f, 0.0f, 1.0f}, new int[]{0, 1, 2, 0, 2, 3},
                 RenderType.TRIANGLES);
     }
+
+    private final MutableVector3 pos;
+    private final EntityBlockBreakClient entity;
 
     public EntityModelBlockBreak(EntityBlockBreakClient entity) {
         this.entity = entity;
@@ -85,8 +86,7 @@ public class EntityModelBlockBreak implements EntityModel {
         openGL.setAttribute2f(4, world.getTerrain()
                         .blockLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f,
                 world.getTerrain()
-                        .sunLight(pos.intX(), pos.intY(), pos.intZ()) /
-                        15.0f);
+                        .sunLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f);
         graphics.getTextureManager()
                 .bind("Scapes:image/entity/Break" + i, graphics);
         for (PointerPane pane : entity.getPointerPanes()) {

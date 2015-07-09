@@ -27,12 +27,6 @@ public enum Face {
     EAST(3, 1, 0, 0, (byte) 3),
     SOUTH(4, 0, 1, 0, (byte) 4),
     WEST(5, -1, 0, 0, (byte) 5);
-    private final int value;
-    private final int x, y, z;
-    private final Vector3 delta;
-    private final byte data;
-    private Face opposite;
-
     static {
         NONE.opposite = NONE;
         UP.opposite = DOWN;
@@ -42,6 +36,12 @@ public enum Face {
         SOUTH.opposite = NORTH;
         WEST.opposite = EAST;
     }
+
+    private final int value;
+    private final int x, y, z;
+    private final Vector3 delta;
+    private final byte data;
+    private Face opposite;
 
     Face(int value, int x, int y, int z, byte data) {
         this.value = value;

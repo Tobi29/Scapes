@@ -486,12 +486,14 @@ public class MutableVector3f extends MutableVector3 {
         }
         if (obj instanceof MutableVector3) {
             MutableVector3 other = (MutableVector3) obj;
-            return x == other.floatX() && y == other.floatY() && z == other.floatZ();
+            return x == other.floatX() && y == other.floatY() &&
+                    z == other.floatZ();
         }
         if (!(obj instanceof Vector3)) {
             return false;
         }
         Vector3 other = (Vector3) obj;
-        return x == other.floatX() && y == other.floatY() && z == other.floatZ();
+        return x == other.floatX() && y == other.floatY() &&
+                z == other.floatZ();
     }
 }

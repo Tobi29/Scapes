@@ -138,7 +138,7 @@ public class TerrainGenerator {
     }
 
     public double generateTerrainFactorLayer(double x, double y) {
-        return terrainNoise.noiseOctave(x / 4096.0, y / 4096.0, 4, 8.0, 0.1d);
+        return terrainNoise.noiseOctave(x / 4096.0, y / 4096.0, 4, 8.0, 0.1);
     }
 
     public double generateMountainFactorLayer(double x, double y) {

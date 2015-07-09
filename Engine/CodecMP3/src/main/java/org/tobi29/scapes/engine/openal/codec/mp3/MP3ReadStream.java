@@ -87,14 +87,6 @@ public class MP3ReadStream implements ReadableAudioStream {
     }
 
     @Override
-    public void close() {
-        try {
-            channel.close();
-        } catch (IOException e) {
-        }
-    }
-
-    @Override
     public boolean getSome(FloatBuffer buffer, int len) throws IOException {
         int limit = buffer.limit();
         buffer.limit(buffer.position() + len);
@@ -104,6 +96,14 @@ public class MP3ReadStream implements ReadableAudioStream {
         }
         buffer.limit(limit);
         return valid;
+    }
+
+    @Override
+    public void close() {
+        try {
+            channel.close();
+        } catch (IOException e) {
+        }
     }
 
     private boolean decodeFrame(FloatBuffer buffer) throws IOException {

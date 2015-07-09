@@ -64,23 +64,6 @@ public class ContainerGLFW extends ContainerLWJGL3 {
     private long window;
     private boolean running = true, skipMouseCallback, mouseGrabbed;
 
-    private static GLFWDialogsProvider loadDialogs() {
-        for (GLFWDialogsProvider dialogs : ServiceLoader
-                .load(GLFWDialogsProvider.class)) {
-            try {
-                if (dialogs.available()) {
-                    LOGGER.debug("Loaded dialogs: {}",
-                            dialogs.getClass().getName());
-                    return dialogs;
-                }
-            } catch (ServiceConfigurationError e) {
-                LOGGER.warn("Unable to load dialogs provider: {}",
-                        e.toString());
-            }
-        }
-        throw new ScapesEngineException("No dialogs found!");
-    }
-
     public ContainerGLFW(ScapesEngine engine) {
         this(engine, loadDialogs());
     }
@@ -151,31 +134,48 @@ public class ContainerGLFW extends ContainerLWJGL3 {
             if (skipMouseCallback) {
                 skipMouseCallback = false;
                 if (mouseGrabbed) {
-                    GLFW.glfwSetCursorPos(window, 0.0d, 0.0d);
+                    GLFW.glfwSetCursorPos(window, 0.0, 0.0);
                 }
             } else {
                 double dx, dy;
                 if (mouseGrabbed) {
                     dx = xpos;
                     dy = ypos;
-                    GLFW.glfwSetCursorPos(window, 0.0d, 0.0d);
+                    GLFW.glfwSetCursorPos(window, 0.0, 0.0);
                 } else {
                     dx = xpos - mouseX;
                     dy = ypos - mouseY;
                     mouseX = (int) xpos;
                     mouseY = (int) ypos;
                 }
-                if (dx != 0.0d || dy != 0.0d) {
+                if (dx != 0.0 || dy != 0.0) {
                     set(xpos, ypos);
                     addDelta(dx, dy);
                 }
             }
         });
         scrollFun = GLFW.GLFWScrollCallback((window, xoffset, yoffset) -> {
-            if (xoffset != 0.0d || yoffset != 0.0d) {
+            if (xoffset != 0.0 || yoffset != 0.0) {
                 addScroll(xoffset, yoffset);
             }
         });
+    }
+
+    private static GLFWDialogsProvider loadDialogs() {
+        for (GLFWDialogsProvider dialogs : ServiceLoader
+                .load(GLFWDialogsProvider.class)) {
+            try {
+                if (dialogs.available()) {
+                    LOGGER.debug("Loaded dialogs: {}",
+                            dialogs.getClass().getName());
+                    return dialogs;
+                }
+            } catch (ServiceConfigurationError e) {
+                LOGGER.warn("Unable to load dialogs provider: {}",
+                        e.toString());
+            }
+        }
+        throw new ScapesEngineException("No dialogs found!");
     }
 
     @Override
@@ -184,9 +184,9 @@ public class ContainerGLFW extends ContainerLWJGL3 {
             mouseGrabbed = true;
             GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR,
                     GLFW.GLFW_CURSOR_DISABLED);
-            GLFW.glfwSetCursorPos(window, 0.0d, 0.0d);
-            mouseX = 0.0d;
-            mouseY = 0.0d;
+            GLFW.glfwSetCursorPos(window, 0.0, 0.0);
+            mouseX = 0.0;
+            mouseY = 0.0;
             skipMouseCallback = true;
         } else {
             mouseGrabbed = false;
@@ -196,47 +196,6 @@ public class ContainerGLFW extends ContainerLWJGL3 {
                     GLFW.GLFW_CURSOR_NORMAL);
             GLFW.glfwSetCursorPos(window, mouseX, mouseY);
         }
-    }
-
-    @Override
-    public Path[] openFileDialog(Pair<String, String>[] extensions,
-            String title, boolean multiple) {
-        return exec(() -> dialogs.openFileDialog(extensions, title, multiple));
-    }
-
-    @Override
-    public Optional<Path> saveFileDialog(Pair<String, String>[] extensions,
-            String title) {
-        return exec(() -> dialogs.saveFileDialog(extensions, title));
-    }
-
-    @Override
-    public boolean exportToUser(Path path, Pair<String, String>[] extensions,
-            String title) throws IOException {
-        return execIO(() -> dialogs.exportToUser(path, extensions, title));
-    }
-
-    @Override
-    public boolean importFromUser(Path path, Pair<String, String>[] extensions,
-            String title) throws IOException {
-        return execIO(() -> dialogs.importFromUser(path, extensions, title));
-    }
-
-    @Override
-    public boolean importFromUser(Path path, Pair<String, String>[] extensions,
-            String title, boolean multiple) throws IOException {
-        return execIO(() -> dialogs
-                .importFromUser(path, extensions, title, multiple));
-    }
-
-    @Override
-    public void message(MessageType messageType, String title, String message) {
-        exec(() -> dialogs.message(messageType, title, message));
-    }
-
-    @Override
-    public void openFile(Path path) {
-        exec(() -> dialogs.openFile(path));
     }
 
     @Override
@@ -298,6 +257,47 @@ public class ContainerGLFW extends ContainerLWJGL3 {
     @Override
     public void stop() {
         running = false;
+    }
+
+    @Override
+    public Path[] openFileDialog(Pair<String, String>[] extensions,
+            String title, boolean multiple) {
+        return exec(() -> dialogs.openFileDialog(extensions, title, multiple));
+    }
+
+    @Override
+    public Optional<Path> saveFileDialog(Pair<String, String>[] extensions,
+            String title) {
+        return exec(() -> dialogs.saveFileDialog(extensions, title));
+    }
+
+    @Override
+    public boolean exportToUser(Path path, Pair<String, String>[] extensions,
+            String title) throws IOException {
+        return execIO(() -> dialogs.exportToUser(path, extensions, title));
+    }
+
+    @Override
+    public boolean importFromUser(Path path, Pair<String, String>[] extensions,
+            String title) throws IOException {
+        return execIO(() -> dialogs.importFromUser(path, extensions, title));
+    }
+
+    @Override
+    public boolean importFromUser(Path path, Pair<String, String>[] extensions,
+            String title, boolean multiple) throws IOException {
+        return execIO(() -> dialogs
+                .importFromUser(path, extensions, title, multiple));
+    }
+
+    @Override
+    public void message(MessageType messageType, String title, String message) {
+        exec(() -> dialogs.message(messageType, title, message));
+    }
+
+    @Override
+    public void openFile(Path path) {
+        exec(() -> dialogs.openFile(path));
     }
 
     protected void initWindow(boolean fullscreen, boolean vSync) {

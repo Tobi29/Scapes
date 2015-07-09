@@ -44,6 +44,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PacketBundleChannel {
     private static final IvParameterSpec IV;
     private static final int BUNDLE_HEADER_SIZE = 4;
+
+    static {
+        Random random = new Random(
+                StringLongHash.hash("Totally secure initialization vector :P"));
+        byte[] array = new byte[16];
+        random.nextBytes(array);
+        IV = new IvParameterSpec(array);
+    }
+
     private final SocketChannel channel;
     private final ByteBufferStream dataStreamOut = new ByteBufferStream(
             length -> BufferCreator.byteBuffer(length + 102400)),
@@ -61,14 +70,6 @@ public class PacketBundleChannel {
     private Optional<Selector> selector = Optional.empty();
     private boolean encrypt, hasInput;
     private ByteBuffer output, input = BufferCreator.byteBuffer(1024);
-
-    static {
-        Random random = new Random(
-                StringLongHash.hash("Totally secure initialization vector :P"));
-        byte[] array = new byte[16];
-        random.nextBytes(array);
-        IV = new IvParameterSpec(array);
-    }
 
     public PacketBundleChannel(SocketChannel channel) {
         this(channel, null, null);

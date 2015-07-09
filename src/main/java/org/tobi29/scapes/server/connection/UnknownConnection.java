@@ -36,17 +36,18 @@ public class UnknownConnection implements Connection {
             LoggerFactory.getLogger(UnknownConnection.class);
     private static final byte[] CONNECTION_KEY;
     private static final byte[] CONNECTION_HEADER = ConnectionInfo.getHeader();
-    private final ByteBuffer buffer =
-            BufferCreator.byteBuffer(CONNECTION_HEADER.length + 1);
-    private final ServerConnection connection;
-    private SocketChannel channel;
-    private boolean done;
 
     static {
         Random random = new Random(12345);
         CONNECTION_KEY = new byte[16];
         random.nextBytes(CONNECTION_KEY);
     }
+
+    private final ByteBuffer buffer =
+            BufferCreator.byteBuffer(CONNECTION_HEADER.length + 1);
+    private final ServerConnection connection;
+    private SocketChannel channel;
+    private boolean done;
 
     public UnknownConnection(SocketChannel channel,
             ServerConnection connection) {

@@ -20,7 +20,6 @@ import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.entity.server.EntityServer;
 
 public class UpdateBlockUpdate extends Update {
-
     @Override
     public void run(TerrainServer.TerrainMutable terrain) {
         updateBlock(terrain, x, y, z, false);
@@ -41,8 +40,7 @@ public class UpdateBlockUpdate extends Update {
             int y, int z, boolean updateTile) {
         BlockType type = terrain.type(x, y, z);
         if (updateTile || type.causesTileUpdate()) {
-            for (EntityServer entity : terrain.world()
-                    .getEntities(x, y, z)) {
+            for (EntityServer entity : terrain.world().getEntities(x, y, z)) {
                 entity.updateTile(terrain, x, y, z);
             }
         }

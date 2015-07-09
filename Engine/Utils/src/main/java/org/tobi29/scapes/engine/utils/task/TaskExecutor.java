@@ -118,6 +118,17 @@ public class TaskExecutor {
         }
     }
 
+    public enum Priority {
+        HIGH(Thread.MAX_PRIORITY),
+        MEDIUM(Thread.NORM_PRIORITY),
+        LOW(Thread.MIN_PRIORITY);
+        private final int priority;
+
+        Priority(int priority) {
+            this.priority = priority;
+        }
+    }
+
     @FunctionalInterface
     public interface Task {
         long run();
@@ -188,17 +199,6 @@ public class TaskExecutor {
             }
             thread.setPriority(priority);
             return thread;
-        }
-    }
-
-    public enum Priority {
-        HIGH(Thread.MAX_PRIORITY),
-        MEDIUM(Thread.NORM_PRIORITY),
-        LOW(Thread.MIN_PRIORITY);
-        private final int priority;
-
-        Priority(int priority) {
-            this.priority = priority;
         }
     }
 }

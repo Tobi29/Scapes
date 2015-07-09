@@ -104,8 +104,7 @@ public class GuiComponentSlider extends GuiComponent {
         super.update(mouseX, mouseY, mouseInside, engine);
         if (dragging) {
             if (engine.getGuiController().getLeftDrag()) {
-                value = FastMath.clamp((mouseX - x - 8) / (width - 16.0d), 0,
-                        1);
+                value = FastMath.clamp((mouseX - x - 8) / (width - 16.0), 0, 1);
                 updateText();
                 if (hovering) {
                     hover(new GuiComponentHoverEvent(mouseX, mouseY,

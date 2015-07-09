@@ -69,8 +69,8 @@ public class UpdateWaterFlow extends Update {
     private static short getData(TerrainServer terrain, int x, int y, int z,
             short oldData, VanillaMaterial materials) {
         if (terrain.type(x, y, z) == materials.water) {
-            short data = (short) (FastMath.max(0, terrain.data(x, y, z) - 1) +
-                    1);
+            short data =
+                    (short) (FastMath.max(0, terrain.data(x, y, z) - 1) + 1);
             if (data < oldData) {
                 return data;
             }
@@ -83,8 +83,7 @@ public class UpdateWaterFlow extends Update {
         VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
                 .getPlugin("VanillaBasics");
         GameRegistry.Registry<StoneType> stoneRegistry =
-                terrain.world().getRegistry()
-                        .get("VanillaBasics", "StoneType");
+                terrain.world().getRegistry().get("VanillaBasics", "StoneType");
         VanillaMaterial materials = plugin.getMaterials();
         flow(terrain, x, y, z, materials, stoneRegistry);
         if (flow(terrain, x, y, z - 1, materials, stoneRegistry)) {

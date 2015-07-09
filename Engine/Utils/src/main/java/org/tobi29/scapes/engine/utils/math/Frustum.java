@@ -42,8 +42,8 @@ public class Frustum {
             double farD) {
         this.nearD = nearD;
         this.farD = farD;
-        double ang2grad = 0.0174532925199433D;
-        double tang = FastMath.tan(ang2grad * angle * 0.5D);
+        double ang2grad = 0.0174532925199433;
+        double tang = FastMath.tan(ang2grad * angle * 0.5);
         nh = this.nearD * tang;
         nw = nh * ratio;
         fh = this.farD * tang;

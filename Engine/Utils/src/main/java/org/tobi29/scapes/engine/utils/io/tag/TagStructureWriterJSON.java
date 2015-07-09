@@ -31,13 +31,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TagStructureWriterJSON extends TagStructureJSON
         implements TagStructureWriter {
     private static final JsonGeneratorFactory FACTORY;
-    private final JsonGenerator writer;
 
     static {
         Map<String, Object> map = new ConcurrentHashMap<>();
         map.put(JsonGenerator.PRETTY_PRINTING, Boolean.TRUE);
         FACTORY = Json.createGeneratorFactory(map);
     }
+
+    private final JsonGenerator writer;
 
     public TagStructureWriterJSON(WritableByteStream stream) {
         this(new ByteStreamOutputStream(stream));

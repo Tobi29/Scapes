@@ -86,12 +86,12 @@ public class Inventory {
         return hold;
     }
 
-    public void setHold(ItemStack hold) {
-        this.hold = Optional.of(hold);
-    }
-
     public void setHold(Optional<ItemStack> hold) {
         this.hold = hold;
+    }
+
+    public void setHold(ItemStack hold) {
+        this.hold = Optional.of(hold);
     }
 
     public ItemStack getItem(int id) {

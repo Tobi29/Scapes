@@ -187,16 +187,16 @@ public class InputModeKeyboard implements InputMode {
         public Vector2 getWalk() {
             double x = 0.0, y = 0.0;
             if (controller.isDown(walkForward)) {
-                y += 1.0d;
+                y += 1.0;
             }
             if (controller.isDown(walkBackward)) {
-                y -= 1.0d;
+                y -= 1.0;
             }
             if (controller.isDown(walkLeft)) {
-                x -= 1.0d;
+                x -= 1.0;
             }
             if (controller.isDown(walkRight)) {
-                x += 1.0d;
+                x += 1.0;
             }
             if (!controller.isDown(walkSprint)) {
                 x *= 0.4;

@@ -51,9 +51,7 @@ public class EntityBlockBreakClient extends EntityClient {
         world.getTerrain().type(pos.intX(), pos.intY(), pos.intZ())
                 .addPointerCollision(world.getTerrain()
                                 .data(pos.intX(), pos.intY(), pos.intZ()),
-                        pointerPanes, pos
-                                .intX(),
-                        pos.intY(), pos.intZ());
+                        pointerPanes, pos.intX(), pos.intY(), pos.intZ());
     }
 
     @Override

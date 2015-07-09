@@ -81,10 +81,9 @@ public class MobModelBlock implements MobModel {
         float posRenderZ = (float) (pos.doubleZ() - cam.position.doubleZ());
         OpenGL openGL = graphics.getOpenGL();
         openGL.setAttribute2f(4, world.getTerrain()
-                .blockLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f,
+                        .blockLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f,
                 world.getTerrain()
-                        .sunLight(pos.intX(), pos.intY(), pos.intZ()) /
-                        15.0f);
+                        .sunLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f);
         MatrixStack matrixStack = graphics.getMatrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(posRenderX, posRenderY, posRenderZ);

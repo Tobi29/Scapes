@@ -79,7 +79,7 @@ public abstract class ItemTool extends VanillaItem
             item.getMetaData("Vanilla").setDouble("ToolDamage", damage +
                     item.getMetaData("Vanilla").getDouble("ToolDamageAdd"));
             return item.getMetaData("Vanilla").getDouble("ToolEfficiency") *
-                    (1.0d - FastMath.tanh(damage));
+                    (1.0 - FastMath.tanh(damage));
         } else {
             return 0;
         }
@@ -91,7 +91,7 @@ public abstract class ItemTool extends VanillaItem
             double damage = item.getMetaData("Vanilla").getDouble("ToolDamage");
             item.getMetaData("Vanilla").setDouble("ToolDamage", damage);
             return item.getMetaData("Vanilla").getDouble("ToolStrength") *
-                    (1.0d - FastMath.tanh(damage));
+                    (1.0 - FastMath.tanh(damage));
         } else {
             return 0;
         }

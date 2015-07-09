@@ -81,8 +81,7 @@ public class BlockLeaves extends VanillaBlock {
     @Override
     public boolean destroy(TerrainServer.TerrainMutable terrain, int x, int y,
             int z, Face face, MobPlayerServer player, ItemStack item) {
-        destroy(terrain, new Vector3i(x, y, z), terrain.data(x, y, z),
-                256);
+        destroy(terrain, new Vector3i(x, y, z), terrain.data(x, y, z), 256);
         return true;
     }
 
@@ -319,8 +318,7 @@ public class BlockLeaves extends VanillaBlock {
     private void destroy(TerrainServer.TerrainMutable terrain, Vector3 pos,
             int data, int length) {
         if (terrain.type(pos.intX(), pos.intY(), pos.intZ()) != this ||
-                terrain.data(pos.intX(), pos.intY(), pos.intZ()) !=
-                        data) {
+                terrain.data(pos.intX(), pos.intY(), pos.intZ()) != data) {
             return;
         }
         Pool<MutableVector3> checks = new Pool<>(MutableVector3i::new),
@@ -337,7 +335,7 @@ public class BlockLeaves extends VanillaBlock {
                         return;
                     }
                     if (i < 10 && terrain.type(check.intX(), check.intY(),
-                                    check.intZ()) == this) {
+                            check.intZ()) == this) {
                         checks2.push().set(check.intX(), check.intY(),
                                 check.intZ() + 1);
                         checks2.push().set(check.intX(), check.intY(),
@@ -361,8 +359,7 @@ public class BlockLeaves extends VanillaBlock {
         terrain.world().dropItems(
                 getDrops(new ItemStack(materials.air, (short) 0),
                         terrain.data(pos.intX(), pos.intY(), pos.intZ())),
-                pos.intX(), pos.intY(),
-                pos.intZ());
+                pos.intX(), pos.intY(), pos.intZ());
         terrain.typeData(pos.intX(), pos.intY(), pos.intZ(), materials.air,
                 (short) 0);
         if (length-- > 0) {
@@ -401,8 +398,7 @@ public class BlockLeaves extends VanillaBlock {
             int xx = x + face.getX();
             int yy = y + face.getY();
             int zz = z + face.getZ();
-            if (terrain.type(xx, yy, zz)
-                    .isReplaceable(terrain, xx, yy, zz)) {
+            if (terrain.type(xx, yy, zz).isReplaceable(terrain, xx, yy, zz)) {
                 return false;
             }
         }

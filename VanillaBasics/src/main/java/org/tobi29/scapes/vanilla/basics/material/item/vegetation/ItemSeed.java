@@ -60,7 +60,7 @@ public class ItemSeed extends VanillaItem {
                                 .seed(CropType.WHEAT));
             }
         }
-        return 0.0d;
+        return 0.0;
     }
 
     @Override
@@ -69,8 +69,8 @@ public class ItemSeed extends VanillaItem {
         textures = new TerrainTexture[types.size()];
         int i = 0;
         for (CropType type : types) {
-            textures[i++] = registry.registerTexture(
-                    type.getTexture() + "/Seed.png");
+            textures[i++] =
+                    registry.registerTexture(type.getTexture() + "/Seed.png");
         }
     }
 

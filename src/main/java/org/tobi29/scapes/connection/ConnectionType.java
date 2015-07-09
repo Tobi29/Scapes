@@ -23,6 +23,13 @@ public enum ConnectionType {
     PLAY((byte) 11),
     CONTROL_PANEL((byte) 101);
     private static final HashMap<Byte, ConnectionType> VALUES = new HashMap<>();
+
+    static {
+        for (ConnectionType type : values()) {
+            VALUES.put(type.data, type);
+        }
+    }
+
     private final byte data;
 
     ConnectionType(byte data) {
@@ -35,11 +42,5 @@ public enum ConnectionType {
 
     public byte getData() {
         return data;
-    }
-
-    static {
-        for (ConnectionType type : values()) {
-            VALUES.put(type.data, type);
-        }
     }
 }

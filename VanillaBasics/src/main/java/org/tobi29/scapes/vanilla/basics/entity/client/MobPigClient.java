@@ -31,7 +31,7 @@ import java.util.Optional;
 
 public class MobPigClient extends MobLivingClient {
     public MobPigClient(WorldClient world) {
-        this(world, Vector3d.ZERO, Vector3d.ZERO, 0.0d, 0.0d);
+        this(world, Vector3d.ZERO, Vector3d.ZERO, 0.0, 0.0);
     }
 
     public MobPigClient(WorldClient world, Vector3 pos, Vector3 speed,

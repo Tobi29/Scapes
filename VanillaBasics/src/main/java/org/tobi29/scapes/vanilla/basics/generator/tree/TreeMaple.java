@@ -38,20 +38,16 @@ public final class TreeMaple implements Tree {
             return;
         }
         int size = random.nextInt(4) + 3;
-        TreeUtil
-                .fillGround(terrain, x - 1, y, z - 1, materials.log, (short) 4,
-                        2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x, y - 1, z - 1, materials.log, (short) 4,
-                        2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x - 1, y, z - 1, materials.log, (short) 4,
+                2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x, y - 1, z - 1, materials.log, (short) 4,
+                2 + random.nextInt(5));
         TreeUtil.fillGround(terrain, x, y, z - 1, materials.log, (short) 4,
                 2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x, y + 1, z - 1, materials.log, (short) 4,
-                        2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x + 1, y, z - 1, materials.log, (short) 4,
-                        2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x, y + 1, z - 1, materials.log, (short) 4,
+                2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x + 1, y, z - 1, materials.log, (short) 4,
+                2 + random.nextInt(5));
         for (int zz = 0; zz < size + 2; zz++) {
             TreeUtil.changeBlock(terrain, x, y, z + zz, materials.log,
                     (short) 4);

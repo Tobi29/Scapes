@@ -42,11 +42,11 @@ public class PacketMobChangeSpeed extends Packet
         super(pos, 0.0, false, false);
         this.entityID = entityID;
         this.x = (short) FastMath
-                .clamp(x * 100.0d, Short.MIN_VALUE, Short.MAX_VALUE);
+                .clamp(x * 100.0, Short.MIN_VALUE, Short.MAX_VALUE);
         this.y = (short) FastMath
-                .clamp(y * 100.0d, Short.MIN_VALUE, Short.MAX_VALUE);
+                .clamp(y * 100.0, Short.MIN_VALUE, Short.MAX_VALUE);
         this.z = (short) FastMath
-                .clamp(z * 100.0d, Short.MIN_VALUE, Short.MAX_VALUE);
+                .clamp(z * 100.0, Short.MIN_VALUE, Short.MAX_VALUE);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class PacketMobChangeSpeed extends Packet
         EntityClient entity = world.getEntity(entityID);
         if (entity instanceof MobileEntity) {
             ((MobileEntity) entity).getPositionHandler()
-                    .receiveSpeed(x / 100.0d, y / 100.0d, z / 100.0d);
+                    .receiveSpeed(x / 100.0, y / 100.0, z / 100.0);
         }
     }
 
@@ -98,6 +98,6 @@ public class PacketMobChangeSpeed extends Packet
     @Override
     public void runServer(PlayerConnection player, WorldServer world) {
         player.getMob().getPositionHandler()
-                .receiveSpeed(x / 100.0d, y / 100.0d, z / 100.0d);
+                .receiveSpeed(x / 100.0, y / 100.0, z / 100.0);
     }
 }

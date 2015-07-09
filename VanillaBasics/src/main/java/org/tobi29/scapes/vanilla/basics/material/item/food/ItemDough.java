@@ -52,8 +52,8 @@ public class ItemDough extends VanillaItem
         textures = new TerrainTexture[types.size()];
         int i = 0;
         for (CropType type : types) {
-            textures[i++] = registry.registerTexture(
-                    type.getTexture() + "/Dough.png");
+            textures[i++] =
+                    registry.registerTexture(type.getTexture() + "/Dough.png");
         }
     }
 

@@ -50,8 +50,8 @@ public class MobPlayerServer extends MobLivingEquippedServer
     protected final ServerConnection serverConnection;
     protected final List<MobPlayerServer> viewers = new ArrayList<>();
     protected final String nickname;
-    private final byte[] skin;
     protected final Inventory inventory;
+    private final byte[] skin;
     private final Map<String, PunchListener> punchListeners =
             new ConcurrentHashMap<>();
     protected int inventorySelectLeft, inventorySelectRight = 9, healWait;

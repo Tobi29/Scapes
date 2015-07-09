@@ -55,7 +55,7 @@ public class GuiAnvilInventory extends GuiContainerInventory {
         GuiComponentItemButton item =
                 new GuiComponentItemButton(x, y, 30, 30, icon);
         item.addLeftClick(event -> player.getConnection()
-                        .send(new PacketAnvil(container, i)));
+                .send(new PacketAnvil(container, i)));
         pane.add(item);
     }
 }

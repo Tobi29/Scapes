@@ -156,8 +156,8 @@ public class Sync {
         long newSync = System.nanoTime();
         diff = newSync - lastSync;
         tickDiff = diff;
-        currentTPS = 1000000000.0d / tickDiff;
-        speedFactor = tickDiff / 1000000000.0d;
+        currentTPS = 1000000000.0 / tickDiff;
+        speedFactor = tickDiff / 1000000000.0;
         lastSync = newSync;
     }
 }

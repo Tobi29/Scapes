@@ -34,15 +34,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class ParticleLightning extends Particle {
     private static final VAO[] VAOS;
-    private final VAO vao;
-    private double time;
-
-    public ParticleLightning(ParticleManager particleManager, Vector3 pos,
-            Vector3 speed) {
-        super(particleManager, pos, speed, new AABB(-5, -5, -5, 5, 5, 5));
-        Random random = ThreadLocalRandom.current();
-        vao = VAOS[random.nextInt(VAOS.length)];
-    }
 
     static {
         VAOS = new VAO[16];
@@ -72,6 +63,16 @@ public class ParticleLightning extends Particle {
             VAOS[i] = VAOUtility
                     .createVNI(vertex, normal, index, RenderType.LINES);
         }
+    }
+
+    private final VAO vao;
+    private double time;
+
+    public ParticleLightning(ParticleManager particleManager, Vector3 pos,
+            Vector3 speed) {
+        super(particleManager, pos, speed, new AABB(-5, -5, -5, 5, 5, 5));
+        Random random = ThreadLocalRandom.current();
+        vao = VAOS[random.nextInt(VAOS.length)];
     }
 
     private static List<Line> createLighting() {

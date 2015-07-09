@@ -33,13 +33,13 @@ import java.util.Optional;
 
 public class MobZombieClient extends MobLivingEquippedClient {
     public MobZombieClient(WorldClient world) {
-        this(world, Vector3d.ZERO, Vector3d.ZERO, 0.0d, 0.0d);
+        this(world, Vector3d.ZERO, Vector3d.ZERO, 0.0, 0.0);
     }
 
     public MobZombieClient(WorldClient world, Vector3 pos, Vector3 speed,
             double xRot, double zRot) {
-        super(world, pos, speed, new AABB(-0.4, -0.4, -1, 0.4, 0.4, 0.9), 20.0d,
-                30.0d, new Frustum(90, 1, 0.1, 24),
+        super(world, pos, speed, new AABB(-0.4, -0.4, -1, 0.4, 0.4, 0.9), 20.0,
+                30.0, new Frustum(90, 1, 0.1, 24),
                 new Frustum(20, 0.5, 0.1, 0.2));
         rot.setX(xRot);
         rot.setZ(zRot);

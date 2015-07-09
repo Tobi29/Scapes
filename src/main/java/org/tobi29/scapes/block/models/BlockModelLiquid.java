@@ -82,18 +82,16 @@ public class BlockModelLiquid implements BlockModel {
             heights++;
         }
         if (terrain.type(x - 1, y, z) == block) {
-            height += 1 - FastMath.max(0, terrain.data(x - 1, y, z) - 1) /
-                            7.0f;
+            height += 1 - FastMath.max(0, terrain.data(x - 1, y, z) - 1) / 7.0f;
             heights++;
         }
         if (terrain.type(x - 1, y - 1, z) == block) {
-            height += 1 - FastMath.max(0, terrain.data(x - 1, y - 1, z) - 1) /
-                            7.0f;
+            height += 1 -
+                    FastMath.max(0, terrain.data(x - 1, y - 1, z) - 1) / 7.0f;
             heights++;
         }
         if (terrain.type(x, y - 1, z) == block) {
-            height += 1 - FastMath.max(0, terrain.data(x, y - 1, z) - 1) /
-                            7.0f;
+            height += 1 - FastMath.max(0, terrain.data(x, y - 1, z) - 1) / 7.0f;
             heights++;
         }
         if (heights == 0) {

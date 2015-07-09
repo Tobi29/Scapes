@@ -84,7 +84,7 @@ public class SoundSystem {
                 openAL.unqueue();
             }
             audios.forEach(audio -> audio
-                    .poll(this, openAL, listenerPosition, 1.0d, false));
+                    .poll(this, openAL, listenerPosition, 1.0, false));
             for (AudioData audioData : cache.values()) {
                 audioData.dispose(this, openAL);
             }
@@ -248,7 +248,7 @@ public class SoundSystem {
                 audios.add(queue.poll());
             }
             boolean lagSilence =
-                    delta > 1.0d; // Prevent accumulating sounds on lag spikes
+                    delta > 1.0; // Prevent accumulating sounds on lag spikes
             audios.removeAll(audios.stream().filter(audio -> audio
                     .poll(this, openAL, listenerPosition, delta, lagSilence))
                     .collect(Collectors.toList()));
@@ -311,15 +311,15 @@ public class SoundSystem {
 
     protected Optional<AudioData> getAudio(String asset) {
         if (!cache.containsKey(asset)) {
-                Resource resource = engine.getFiles().get(asset);
-                if (resource.exists()) {
-                    try (ReadableAudioStream stream = AudioStream
-                            .create(resource)) {
-                        cache.put(asset, new AudioData(stream, openAL));
-                    } catch (IOException e) {
-                        LOGGER.warn("Failed to get audio data", e);
-                    }
+            Resource resource = engine.getFiles().get(asset);
+            if (resource.exists()) {
+                try (ReadableAudioStream stream = AudioStream
+                        .create(resource)) {
+                    cache.put(asset, new AudioData(stream, openAL));
+                } catch (IOException e) {
+                    LOGGER.warn("Failed to get audio data", e);
                 }
+            }
         }
         return Optional.ofNullable(cache.get(asset));
     }

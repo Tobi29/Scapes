@@ -116,8 +116,8 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
             return;
         }
         this.cam = cam;
-        int camX = FastMath.floor(cam.position.doubleX() / 16.0d);
-        int camY = FastMath.floor(cam.position.doubleY() / 16.0d);
+        int camX = FastMath.floor(cam.position.doubleX() / 16.0);
+        int camY = FastMath.floor(cam.position.doubleY() / 16.0);
         double newChunkDistance = chunkDistanceMax;
         chunks.clear();
         for (Vector2i pos : sortedLocations) {

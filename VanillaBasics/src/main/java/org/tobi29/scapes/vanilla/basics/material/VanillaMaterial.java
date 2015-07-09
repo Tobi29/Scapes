@@ -110,8 +110,8 @@ public class VanillaMaterial {
     public final BlockType water;
     public final BlockType wood;
 
-    public VanillaMaterial(VanillaBasics plugin, 
-            GameRegistry registry, GameRegistry.Registry<TreeType> treeRegistry,
+    public VanillaMaterial(VanillaBasics plugin, GameRegistry registry,
+            GameRegistry.Registry<TreeType> treeRegistry,
             GameRegistry.Registry<CropType> cropRegistry,
             GameRegistry.Registry<StoneType> stoneRegistry) {
         this.plugin = plugin;

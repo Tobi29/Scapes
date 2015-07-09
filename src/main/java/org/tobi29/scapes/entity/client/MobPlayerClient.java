@@ -42,7 +42,7 @@ public class MobPlayerClient extends MobLivingEquippedClient
     private byte[] skin;
 
     public MobPlayerClient(WorldClient world) {
-        this(world, Vector3d.ZERO, Vector3d.ZERO, 0.0d, 0.0d, "");
+        this(world, Vector3d.ZERO, Vector3d.ZERO, 0.0, 0.0, "");
     }
 
     public MobPlayerClient(WorldClient world, Vector3 pos, Vector3 speed,

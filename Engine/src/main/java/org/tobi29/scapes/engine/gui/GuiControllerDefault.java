@@ -52,8 +52,8 @@ public class GuiControllerDefault implements GuiController {
         GraphicsSystem graphics = engine.getGraphics();
         double width = graphics.getContainerWidth();
         double height = graphics.getContainerHeight();
-        guiCursorX = cursorX / width * 800.0d;
-        guiCursorY = cursorY / height * 512.0d;
+        guiCursorX = cursorX / width * 800.0;
+        guiCursorY = cursorY / height * 512.0;
     }
 
     @Override

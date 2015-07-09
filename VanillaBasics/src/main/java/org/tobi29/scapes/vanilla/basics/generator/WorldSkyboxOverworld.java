@@ -419,8 +419,8 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         shader.setUniform1f(4, cloudTime);
         shader.setUniform1f(5, weather);
         shader.setUniform2f(6,
-                (float) (scene.getCam().position.doubleX() / 2048.0d % 1024),
-                (float) (scene.getCam().position.doubleY() / 2048.0d % 1024));
+                (float) (scene.getCam().position.doubleX() / 2048.0 % 1024.0),
+                (float) (scene.getCam().position.doubleY() / 2048.0 % 1024.0));
         cloudTextureMesh.render(graphics, shader);
         fbo.deactivate(graphics);
     }

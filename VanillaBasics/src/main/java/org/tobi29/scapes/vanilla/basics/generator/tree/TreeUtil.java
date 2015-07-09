@@ -146,8 +146,7 @@ public final class TreeUtil {
     public static void fillGround(TerrainServer.TerrainMutable terrain, int x,
             int y, int z, BlockType type, short data, int maxDepth) {
         for (int i = 0; i < maxDepth; i++) {
-            if (terrain.type(x, y, z - i)
-                    .isReplaceable(terrain, x, y, z - i)) {
+            if (terrain.type(x, y, z - i).isReplaceable(terrain, x, y, z - i)) {
                 terrain.typeData(x, y, z - i, type, data);
             } else {
                 return;

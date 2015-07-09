@@ -75,7 +75,7 @@ public class ToolUtil {
                 break;
             case 4:
                 item.setMaterial(materials.hammer);
-                efficiency = 0.0d;
+                efficiency = 0.0;
                 strength *= 0.4;
                 break;
             case 5:
@@ -88,7 +88,7 @@ public class ToolUtil {
                 break;
             case 7:
                 item.setMaterial(materials.sword);
-                efficiency = 0.0d;
+                efficiency = 0.0;
                 break;
         }
         item.getMetaData("Vanilla").setDouble("ToolEfficiency", efficiency);

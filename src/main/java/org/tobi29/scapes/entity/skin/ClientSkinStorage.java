@@ -88,14 +88,14 @@ public class ClientSkinStorage {
         }
 
         @Override
-        public boolean equals(Object obj) {
-            return obj instanceof Checksum &&
-                    Arrays.equals(array, ((Checksum) obj).array);
+        public int hashCode() {
+            return Arrays.hashCode(array);
         }
 
         @Override
-        public int hashCode() {
-            return Arrays.hashCode(array);
+        public boolean equals(Object obj) {
+            return obj instanceof Checksum &&
+                    Arrays.equals(array, ((Checksum) obj).array);
         }
     }
 }

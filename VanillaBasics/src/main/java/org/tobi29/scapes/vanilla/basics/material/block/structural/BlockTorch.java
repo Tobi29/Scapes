@@ -86,7 +86,7 @@ public class BlockTorch extends VanillaBlock {
                 face.getOpposite().getDelta().plus(new Vector3i(x, y, z));
         boolean flag = terrain.type(ground.intX(), ground.intY(), ground.intZ())
                 .isSolid(terrain, ground.intX(), ground.intY(),
-                ground.intZ()) &&
+                        ground.intZ()) &&
                 !terrain.type(ground.intX(), ground.intY(), ground.intZ())
                         .isTransparent(terrain, ground.intX(), ground.intY(),
                                 ground.intZ());

@@ -106,6 +106,23 @@ public final class CompressionUtil {
         filter.reset();
     }
 
+    public interface Filter extends AutoCloseable {
+        void input(ReadableByteStream buffer) throws IOException;
+
+        int output(WritableByteStream buffer) throws IOException;
+
+        void finish();
+
+        boolean needsInput();
+
+        boolean finished();
+
+        void reset();
+
+        @Override
+        void close();
+    }
+
     public static class ZDeflater implements Filter {
         protected final Deflater deflater;
         protected final int buffer;
@@ -222,22 +239,5 @@ public final class CompressionUtil {
         public void close() {
             inflater.end();
         }
-    }
-
-    public interface Filter extends AutoCloseable {
-        void input(ReadableByteStream buffer) throws IOException;
-
-        int output(WritableByteStream buffer) throws IOException;
-
-        void finish();
-
-        boolean needsInput();
-
-        boolean finished();
-
-        void reset();
-
-        @Override
-        void close();
     }
 }

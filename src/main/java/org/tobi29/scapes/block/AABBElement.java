@@ -23,7 +23,7 @@ public class AABBElement {
     public Collision collision;
 
     public AABBElement() {
-        this(new AABB(0.0d, 0.0d, 0.0d, 0.0d, 0.0d, 0.0d),
+        this(new AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
                 BlockType.STANDARD_COLLISION);
     }
 

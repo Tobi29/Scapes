@@ -53,6 +53,11 @@ public class MobBombClient extends MobClient {
     }
 
     @Override
+    public Optional<MobModel> createModel() {
+        return Optional.of(new MobModelBlock(this, item));
+    }
+
+    @Override
     public void update(double delta) {
         time -= delta;
         if (time < 0.05 && !exploded) { // TODO: Replace with proper packet
@@ -60,10 +65,5 @@ public class MobBombClient extends MobClient {
                     .explodeClient(world, pos.now(), speed.now());
             exploded = true;
         }
-    }
-
-    @Override
-    public Optional<MobModel> createModel() {
-        return Optional.of(new MobModelBlock(this, item));
     }
 }

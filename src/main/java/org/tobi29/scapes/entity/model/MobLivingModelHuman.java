@@ -39,14 +39,6 @@ public class MobLivingModelHuman implements MobModel {
     private static final Box BODY, HEAD, LEG_NORMAL_LEFT, LEG_NORMAL_RIGHT,
             ARM_NORMAL_LEFT, ARM_NORMAL_RIGHT, LEG_THIN_LEFT, LEG_THIN_RIGHT,
             ARM_THIN_LEFT, ARM_THIN_RIGHT;
-    private final MobLivingEquippedClient entity;
-    private final Texture texture;
-    private final boolean culling;
-    private final MutableVector3 pos;
-    private final Box legLeft, legRight, armLeft, armRight;
-    private double swing, lazyName, moveSpeedRender;
-    private float armDirLeft, armDirRight, armDirLeftRender, armDirRightRender,
-            armDirLeft2, armDirRight2, xRotRender, zRotRender;
 
     static {
         BODY = new Box(0.015625f, -4, -2, -6, 4, 2, 6, 0, 0);
@@ -60,6 +52,15 @@ public class MobLivingModelHuman implements MobModel {
         ARM_THIN_LEFT = new Box(0.015625f, -2, -1, -10, 0, 1, 2, 24, 16);
         ARM_THIN_RIGHT = new Box(0.015625f, 0, -1, -10, 2, 1, 2, 32, 16);
     }
+
+    private final MobLivingEquippedClient entity;
+    private final Texture texture;
+    private final boolean culling;
+    private final MutableVector3 pos;
+    private final Box legLeft, legRight, armLeft, armRight;
+    private double swing, lazyName, moveSpeedRender;
+    private float armDirLeft, armDirRight, armDirLeftRender, armDirRightRender,
+            armDirLeft2, armDirRight2, xRotRender, zRotRender;
 
     public MobLivingModelHuman(MobLivingEquippedClient entity,
             Texture texture) {

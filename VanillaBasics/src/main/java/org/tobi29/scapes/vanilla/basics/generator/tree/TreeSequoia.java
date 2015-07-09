@@ -28,8 +28,7 @@ import java.util.List;
 import java.util.Random;
 
 public final class TreeSequoia implements Tree {
-    public static final TreeSequoia INSTANCE =
-            new TreeSequoia();
+    public static final TreeSequoia INSTANCE = new TreeSequoia();
 
     @Override
     public void gen(TerrainServer.TerrainMutable terrain, int x, int y, int z,
@@ -46,44 +45,35 @@ public final class TreeSequoia implements Tree {
         }
         TreeUtil.fillGround(terrain, x - 1, y - 1, z - 1, materials.log,
                 (short) 5, 2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x - 1, y, z - 1, materials.log, (short) 5,
-                        2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x - 1, y, z - 1, materials.log, (short) 5,
+                2 + random.nextInt(5));
         TreeUtil.fillGround(terrain, x - 1, y + 1, z - 1, materials.log,
                 (short) 5, 2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x, y - 1, z - 1, materials.log, (short) 5,
-                        2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x, y - 1, z - 1, materials.log, (short) 5,
+                2 + random.nextInt(5));
         TreeUtil.fillGround(terrain, x, y, z - 1, materials.log, (short) 5,
                 2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x, y + 1, z - 1, materials.log, (short) 5,
-                        2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x, y + 1, z - 1, materials.log, (short) 5,
+                2 + random.nextInt(5));
         TreeUtil.fillGround(terrain, x + 1, y - 1, z - 1, materials.log,
                 (short) 5, 2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x + 1, y, z - 1, materials.log, (short) 5,
-                        2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x + 1, y, z - 1, materials.log, (short) 5,
+                2 + random.nextInt(5));
         TreeUtil.fillGround(terrain, x + 1, y + 1, z - 1, materials.log,
                 (short) 5, 2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x - 2, y, z - 1, materials.log, (short) 5,
-                        2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x + 2, y, z - 1, materials.log, (short) 5,
-                        2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x, y - 2, z - 1, materials.log, (short) 5,
-                        2 + random.nextInt(5));
-        TreeUtil
-                .fillGround(terrain, x, y + 2, z - 1, materials.log, (short) 5,
-                        2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x - 2, y, z - 1, materials.log, (short) 5,
+                2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x + 2, y, z - 1, materials.log, (short) 5,
+                2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x, y - 2, z - 1, materials.log, (short) 5,
+                2 + random.nextInt(5));
+        TreeUtil.fillGround(terrain, x, y + 2, z - 1, materials.log, (short) 5,
+                2 + random.nextInt(5));
         float leavesSize = 4.0f;
         List<Pair<Vector3, Vector3>> branches = new ArrayList<>();
         for (int zz = size - 1; zz >= 0; zz--) {
-            TreeUtil
-                    .makeLayer(terrain, x, y, z + zz, materials.log, (short) 5,
-                            1);
+            TreeUtil.makeLayer(terrain, x, y, z + zz, materials.log, (short) 5,
+                    1);
             if (zz > 10) {
                 leavesSize += 0.25f;
             } else {
@@ -94,7 +84,7 @@ public final class TreeSequoia implements Tree {
                 for (int i = -1; i < branchCount; i++) {
                     double dir = random.nextDouble() * FastMath.TWO_PI;
                     double distance =
-                            (1.0d - FastMath.sqr(1.0d - random.nextDouble())) *
+                            (1.0 - FastMath.sqr(1.0 - random.nextDouble())) *
                                     leavesSize;
                     int xx = FastMath.floor(FastMath.cosTable(dir) * distance);
                     int yy = FastMath.floor(FastMath.sinTable(dir) * distance);

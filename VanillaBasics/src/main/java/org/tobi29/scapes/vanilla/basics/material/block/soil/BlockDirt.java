@@ -87,8 +87,7 @@ public class BlockDirt extends BlockSoil {
         if ("Hoe".equals(item.getMaterial().getToolType(item))) {
             terrain.type(x, y, z, materials.farmland);
             terrain.world().addEntity(new EntityFarmlandServer(terrain.world(),
-                            new Vector3d(x + 0.5, y + 0.5, z + 0.5), 0.1f, 0.1f,
-                            0.1f));
+                    new Vector3d(x + 0.5, y + 0.5, z + 0.5), 0.1f, 0.1f, 0.1f));
             return false;
         }
         return true;

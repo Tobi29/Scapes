@@ -40,20 +40,20 @@ public final class TreePalm implements Tree {
         double dirX, dirY;
         switch (random.nextInt(4)) {
             case 1:
-                dirX = -1.0d;
-                dirY = 1.0d;
+                dirX = -1.0;
+                dirY = 1.0;
                 break;
             case 2:
-                dirX = 1.0d;
-                dirY = -1.0d;
+                dirX = 1.0;
+                dirY = -1.0;
                 break;
             case 3:
-                dirX = -1.0d;
-                dirY = -1.0d;
+                dirX = -1.0;
+                dirY = -1.0;
                 break;
             default:
-                dirX = 1.0d;
-                dirY = 1.0d;
+                dirX = 1.0;
+                dirY = 1.0;
                 break;
         }
         double xx = x, yy = y;
@@ -64,25 +64,21 @@ public final class TreePalm implements Tree {
             yyy = FastMath.floor(yy + 0.5);
             TreeUtil.changeBlock(terrain, xxx, yyy, z + i, materials.log,
                     (short) 3);
-            TreeUtil
-                    .changeBlock(terrain, xxx - 1, yyy, z + i, materials.log,
-                            (short) 3);
+            TreeUtil.changeBlock(terrain, xxx - 1, yyy, z + i, materials.log,
+                    (short) 3);
             TreeUtil.changeBlock(terrain, xxx - 1, yyy - 1, z + i,
                     materials.log, (short) 3);
-            TreeUtil
-                    .changeBlock(terrain, xxx, yyy - 1, z + i, materials.log,
-                            (short) 3);
+            TreeUtil.changeBlock(terrain, xxx, yyy - 1, z + i, materials.log,
+                    (short) 3);
             i++;
             TreeUtil.changeBlock(terrain, xxx, yyy, z + i, materials.log,
                     (short) 3);
-            TreeUtil
-                    .changeBlock(terrain, xxx - 1, yyy, z + i, materials.log,
-                            (short) 3);
+            TreeUtil.changeBlock(terrain, xxx - 1, yyy, z + i, materials.log,
+                    (short) 3);
             TreeUtil.changeBlock(terrain, xxx - 1, yyy - 1, z + i,
                     materials.log, (short) 3);
-            TreeUtil
-                    .changeBlock(terrain, xxx, yyy - 1, z + i, materials.log,
-                            (short) 3);
+            TreeUtil.changeBlock(terrain, xxx, yyy - 1, z + i, materials.log,
+                    (short) 3);
             xx += dirX * i / size;
             yy += dirY * i / size;
         }

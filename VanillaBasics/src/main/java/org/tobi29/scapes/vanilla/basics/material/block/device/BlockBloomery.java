@@ -51,7 +51,7 @@ public class BlockBloomery extends VanillaBlockContainer {
     protected EntityContainerServer placeEntity(TerrainServer terrain, int x,
             int y, int z) {
         EntityBloomeryServer entity = new EntityBloomeryServer(terrain.world(),
-                        new Vector3d(x + 0.5, y + 0.5, z + 0.5));
+                new Vector3d(x + 0.5, y + 0.5, z + 0.5));
         entity.onSpawn();
         terrain.world().addEntity(entity);
         entity.updateBellows(terrain);

@@ -54,8 +54,7 @@ public class GuiOptionsInGame extends Gui {
         });
         GuiComponentTextButton back =
                 new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");
-        back.addLeftClick(
-                event -> state.getClient().getEntity().closeGui());
+        back.addLeftClick(event -> state.getClient().getEntity().closeGui());
         pane.add(new GuiComponentText(16, 16, 32, "Options"));
         pane.add(new GuiComponentSeparator(24, 64, 352, 2));
         pane.add(musicVolume);

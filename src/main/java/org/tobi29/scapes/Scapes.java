@@ -37,11 +37,11 @@ import java.util.regex.Pattern;
 public class Scapes {
     public static final VersionUtil.Version VERSION =
             new VersionUtil.Version(0, 0, 0, 1);
-    public static boolean debug;
-    private static boolean sandboxed;
     private static final String[] PACKAGE_WHITELIST =
             {"java", "org.tobi29.scapes", "org.slf4j"};
     private static final Pattern HOME_PATH = Pattern.compile("\\$HOME");
+    public static boolean debug;
+    private static boolean sandboxed;
 
     @SuppressWarnings("CustomSecurityManager")
     public static void sandbox() {
@@ -146,7 +146,7 @@ public class Scapes {
                                     new SceneImage(engine.getGraphics()
                                             .getTextureManager()
                                             .getTexture("Engine:image/Logo"),
-                                            0.5d), engine));
+                                            0.5), engine));
                 }
                 System.exit(engine.run());
                 break;

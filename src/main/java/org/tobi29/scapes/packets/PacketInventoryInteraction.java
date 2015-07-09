@@ -123,7 +123,7 @@ public class PacketInventoryInteraction extends Packet implements PacketServer {
                             playerI.setHold(chestI.getItem(slot)
                                     .take(chestI.getItem(slot), (int) FastMath
                                             .ceil(chestI.getItem(slot)
-                                                    .getAmount() / 2.0d)));
+                                                    .getAmount() / 2.0)));
                         }
                         updateInventory(playerE, chestE);
                         break;

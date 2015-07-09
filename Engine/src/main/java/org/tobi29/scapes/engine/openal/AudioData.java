@@ -40,15 +40,6 @@ public class AudioData {
                 rate);
     }
 
-    public void dispose(SoundSystem soundSystem, OpenAL openAL) {
-        soundSystem.removeBufferFromSources(buffer);
-        openAL.deleteBuffer(buffer);
-    }
-
-    public int getBuffer() {
-        return buffer;
-    }
-
     private static ByteBuffer read(ReadableAudioStream input)
             throws IOException {
         ByteBufferStream output = new ByteBufferStream(
@@ -65,5 +56,14 @@ public class AudioData {
         }
         output.buffer().flip();
         return output.buffer();
+    }
+
+    public void dispose(SoundSystem soundSystem, OpenAL openAL) {
+        soundSystem.removeBufferFromSources(buffer);
+        openAL.deleteBuffer(buffer);
+    }
+
+    public int getBuffer() {
+        return buffer;
     }
 }

@@ -37,7 +37,7 @@ public class MobPigServer extends MobLivingServer {
     private double soundWait, lookWait, walkWait;
 
     public MobPigServer(WorldServer world) {
-        this(world, Vector3d.ZERO, Vector3d.ZERO, 0.0d, 0.0d);
+        this(world, Vector3d.ZERO, Vector3d.ZERO, 0.0, 0.0);
     }
 
     public MobPigServer(WorldServer world, Vector3 pos, Vector3 speed,
@@ -63,10 +63,8 @@ public class MobPigServer extends MobLivingServer {
     public boolean canMoveHere(TerrainServer terrain, int x, int y, int z) {
         if (terrain.light(x, y, z) >= 7) {
             if (!terrain.type(x, y, z).isSolid(terrain, x, y, z) &&
-                    terrain.type(x, y, z)
-                            .isTransparent(terrain, x, y, z) &&
-                    terrain.type(x, y, z - 1)
-                            .isSolid(terrain, x, y, z - 1) &&
+                    terrain.type(x, y, z).isTransparent(terrain, x, y, z) &&
+                    terrain.type(x, y, z - 1).isSolid(terrain, x, y, z - 1) &&
                     !terrain.type(x, y, z - 1)
                             .isTransparent(terrain, x, y, z - 1)) {
                 return true;

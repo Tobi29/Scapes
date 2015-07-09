@@ -107,9 +107,9 @@ public class ChunkPopulatorOverworld implements ChunkPopulator {
                                 blockType == materials.stoneRaw) {
                             double size;
                             if (random.nextInt(30) == 0) {
-                                size = random.nextDouble() * 4.0d + 3.0d;
+                                size = random.nextDouble() * 4.0 + 3.0;
                             } else {
-                                size = random.nextDouble() * 2.0d + 2.0d;
+                                size = random.nextDouble() * 2.0 + 2.0;
                             }
                             StructureRock.genOreRock(terrain, xxx, yyy, zzz,
                                     materials.stoneRaw, oreType.getBlockType(),

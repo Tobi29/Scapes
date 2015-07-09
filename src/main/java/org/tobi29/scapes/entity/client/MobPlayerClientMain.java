@@ -102,53 +102,53 @@ public class MobPlayerClientMain extends MobPlayerClient {
         boolean walking = true;
         while (walking) {
             walking = false;
-            if (goX != 0.0d) {
+            if (goX != 0.0) {
                 double lastGoX = aabb.moveOutX(getCollisions(aabbs), goX);
-                if (lastGoX != 0.0d) {
+                if (lastGoX != 0.0) {
                     pos.plusX(lastGoX);
-                    aabb.add(lastGoX, 0.0d, 0.0d);
+                    aabb.add(lastGoX, 0.0, 0.0);
                     goX -= lastGoX;
                     walking = true;
                 }
             }
-            if (goY != 0.0d) {
+            if (goY != 0.0) {
                 double lastGoY = aabb.moveOutY(getCollisions(aabbs), goY);
-                if (lastGoY != 0.0d) {
+                if (lastGoY != 0.0) {
                     pos.plusY(lastGoY);
-                    aabb.add(0.0d, lastGoY, 0.0d);
+                    aabb.add(0.0, lastGoY, 0.0);
                     goY -= lastGoY;
                     walking = true;
                 }
             }
         }
         // Check collision
-        boolean slidingX = goX != 0.0d;
-        boolean slidingY = goY != 0.0d;
+        boolean slidingX = goX != 0.0;
+        boolean slidingY = goY != 0.0;
         if (slidingX || slidingY) {
-            if (stepHeight > 0.0d && (this.ground || inWater)) {
+            if (stepHeight > 0.0 && (this.ground || inWater)) {
                 // Step
                 // Calculate step height
-                AABB aabbStep = new AABB(aabb).add(goX, 0.0d, 0.0d);
+                AABB aabbStep = new AABB(aabb).add(goX, 0.0, 0.0);
                 double stepX =
                         aabbStep.moveOutZ(getCollisions(aabbs), stepHeight);
-                aabbStep = new AABB(aabb).add(0.0d, goY, 0.0d);
+                aabbStep = new AABB(aabb).add(0.0, goY, 0.0);
                 double stepY =
                         aabbStep.moveOutZ(getCollisions(aabbs), stepHeight);
                 double step = FastMath.max(stepX, stepY);
                 aabbStep = new AABB(aabb).add(goX, goY, step);
                 step += aabbStep.moveOutZ(getCollisions(aabbs), -step);
                 // Check step height
-                aabbStep.copy(aabb).add(0.0d, 0.0d, step);
+                aabbStep.copy(aabb).add(0.0, 0.0, step);
                 step = aabb.moveOutZ(getCollisions(aabbs), step);
                 // Attempt walk at new height
                 double lastGoX = aabbStep.moveOutX(getCollisions(aabbs), goX);
-                aabbStep.add(lastGoX, 0.0d, 0.0d);
+                aabbStep.add(lastGoX, 0.0, 0.0);
                 double lastGoY = aabbStep.moveOutY(getCollisions(aabbs), goY);
                 // Check if walk was successful
-                if (lastGoX != 0.0d || lastGoY != 0.0d) {
+                if (lastGoX != 0.0 || lastGoY != 0.0) {
                     pos.plusX(lastGoX);
                     pos.plusY(lastGoY);
-                    aabb.copy(aabbStep).add(0.0d, lastGoY, 0.0d);
+                    aabb.copy(aabbStep).add(0.0, lastGoY, 0.0);
                     pos.plusZ(step);
                 } else {
                     // Collide
@@ -267,10 +267,10 @@ public class MobPlayerClientMain extends MobPlayerClient {
                 }
                 if (flying) {
                     if (controllerDefault.isDown(ControllerKey.KEY_Q)) {
-                        speed.plusZ(1.0d);
+                        speed.plusZ(1.0);
                     }
                     if (controllerDefault.isDown(ControllerKey.KEY_C)) {
-                        speed.plusZ(-1.0d);
+                        speed.plusZ(-1.0);
                     }
                 }
             }
@@ -290,7 +290,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
             Vector2 walk = controller.getWalk();
             double walkSpeed = FastMath.clamp(
                     FastMath.max(FastMath.abs(walk.doubleX()),
-                            FastMath.abs(walk.doubleY())), 0.0d, 1.0d) * 120.0;
+                            FastMath.abs(walk.doubleY())), 0.0, 1.0) * 120.0;
             if (!ground && !slidingWall && !inWater && !flying) {
                 walkSpeed *= 0.0006;
             } else if (!ground && !inWater && !flying) {
@@ -298,9 +298,9 @@ public class MobPlayerClientMain extends MobPlayerClient {
             } else if (inWater) {
                 walkSpeed *= 0.2;
             }
-            if (walkSpeed > 0.0d) {
+            if (walkSpeed > 0.0) {
                 double dir = (FastMath.pointDirection(Vector2d.ZERO, walk) +
-                        rot.doubleZ() - 90.0d) * FastMath.DEG_2_RAD;
+                        rot.doubleZ() - 90.0) * FastMath.DEG_2_RAD;
                 walkSpeed *= delta;
                 speed.plusX(FastMath.cosTable(dir) * walkSpeed);
                 speed.plusY(FastMath.sinTable(dir) * walkSpeed);
@@ -319,7 +319,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
                         (double) (System.currentTimeMillis() - punchLeft) /
                                 getLeftWeapon().getMaterial()
                                         .getHitWait(getLeftWeapon()), 0.5) *
-                        2.0d));
+                        2.0));
                 punchLeft = -1;
             }
             if (controller.getRight()) {
@@ -334,7 +334,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
                 world.getConnection().send(new PacketItemUse(false,
                         FastMath.min((double) (System.currentTimeMillis() -
                                 punchRight) / getRightWeapon().getMaterial()
-                                .getHitWait(getRightWeapon()), 0.5) * 2.0d));
+                                .getHitWait(getRightWeapon()), 0.5) * 2.0));
                 punchRight = -1;
             }
             if (blockWait > 0) {
@@ -406,11 +406,11 @@ public class MobPlayerClientMain extends MobPlayerClient {
         } else {
             AABB aabb = getAABB();
             Pool<AABBElement> aabbs = world.getTerrain().getCollisions(
-                    FastMath.floor(aabb.minX + FastMath.min(goX, 0.0d)),
-                    FastMath.floor(aabb.minY + FastMath.min(goY, 0.0d)),
-                    FastMath.floor(aabb.minZ + FastMath.min(goZ, 0.0d)),
-                    FastMath.floor(aabb.maxX + FastMath.max(goX, 0.0d)),
-                    FastMath.floor(aabb.maxY + FastMath.max(goY, 0.0d)),
+                    FastMath.floor(aabb.minX + FastMath.min(goX, 0.0)),
+                    FastMath.floor(aabb.minY + FastMath.min(goY, 0.0)),
+                    FastMath.floor(aabb.minZ + FastMath.min(goZ, 0.0)),
+                    FastMath.floor(aabb.maxX + FastMath.max(goX, 0.0)),
+                    FastMath.floor(aabb.maxY + FastMath.max(goY, 0.0)),
                     FastMath.floor(aabb.maxZ + FastMath.max(goZ, stepHeight)));
             move(aabb, aabbs, goX, goY, goZ);
             if (ground) {

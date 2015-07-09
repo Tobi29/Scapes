@@ -93,7 +93,7 @@ public class PacketItemUse extends Packet implements PacketServer {
                         .click(world.getTerrain(), block.intX(), block.intY(),
                                 block.intZ(), face, player.getMob());
             }
-            if (!flag && br > 0.0d && strength > 0.0d) {
+            if (!flag && br > 0.0 && strength > 0.0) {
                 world.getTaskExecutor().addTask(() -> {
                             world.getTerrain().queue(handler -> {
                                 BlockType type =

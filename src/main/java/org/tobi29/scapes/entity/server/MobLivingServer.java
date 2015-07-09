@@ -81,8 +81,8 @@ public abstract class MobLivingServer extends MobServer {
                 .forEach(mob -> {
                     ((MobLivingServer) mob).onNotice(this);
                     double rad = rot.doubleZ() * FastMath.DEG_2_RAD;
-                    mob.push(FastMath.cosTable(rad) * 10.0d,
-                            FastMath.sinTable(rad) * 10.0d, 2.0d);
+                    mob.push(FastMath.cosTable(rad) * 10.0,
+                            FastMath.sinTable(rad) * 10.0, 2.0);
                 });
         return mobs;
     }

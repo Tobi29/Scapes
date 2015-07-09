@@ -54,9 +54,11 @@ public class ParticleManager {
         synchronized (particles) {
             particles.stream().sorted((particle1, particle2) -> {
                 double distance1 =
-                        FastMath.pointDistanceSqr(particle1.getPosRender(), camPos);
+                        FastMath.pointDistanceSqr(particle1.getPosRender(),
+                                camPos);
                 double distance2 =
-                        FastMath.pointDistanceSqr(particle2.getPosRender(), camPos);
+                        FastMath.pointDistanceSqr(particle2.getPosRender(),
+                                camPos);
                 return distance1 == distance2 ? 0 :
                         distance1 < distance2 ? 1 : -1;
             }).forEach(particle -> particle.render(graphics, cam, shader));

@@ -47,12 +47,12 @@ public class MobItemClient extends MobClient {
         item.load(tagStructure.getStructure("Inventory"));
     }
 
-    public ItemStack getItem() {
-        return item;
-    }
-
     @Override
     public Optional<MobModel> createModel() {
         return Optional.of(new MobModelItem(this, item));
+    }
+
+    public ItemStack getItem() {
+        return item;
     }
 }

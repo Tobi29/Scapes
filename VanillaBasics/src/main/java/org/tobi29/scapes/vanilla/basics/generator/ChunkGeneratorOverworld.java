@@ -258,14 +258,14 @@ public class ChunkGeneratorOverworld implements ChunkGenerator {
                 if (type == materials.stoneRaw) {
                     if (generator.caveRiver >
                             FastMath.abs(zz - generator.caveRiverHeight) /
-                                    16.0d) {
+                                    16.0) {
                         if (zz < 128) {
                             type = materials.water;
                         } else {
                             type = materials.air;
                         }
                     } else if (generator.cave >
-                            FastMath.abs(zz - generator.caveHeight) / 8.0d) {
+                            FastMath.abs(zz - generator.caveHeight) / 8.0) {
                         type = materials.air;
                     } else {
                         if (sandstone && zz > 240) {

@@ -27,8 +27,7 @@ public final class StructureSmallRuin {
     public static void placeRandomRuin(TerrainServer.TerrainMutable terrain,
             int x, int y, int z, VanillaMaterial materials, short stoneType,
             Random random) {
-        if (terrain.type(x, y, z) != materials.air &&
-                random.nextInt(10) != 0) {
+        if (terrain.type(x, y, z) != materials.air && random.nextInt(10) != 0) {
             return;
         }
         int type = random.nextInt(2);
@@ -116,8 +115,7 @@ public final class StructureSmallRuin {
     public static void fillGround(TerrainServer.TerrainMutable terrain, int x,
             int y, int z, BlockType type, short data, int maxDepth) {
         for (int i = 0; i < maxDepth; i++) {
-            if (terrain.type(x, y, z - i)
-                    .isReplaceable(terrain, x, y, z - i)) {
+            if (terrain.type(x, y, z - i).isReplaceable(terrain, x, y, z - i)) {
                 terrain.typeData(x, y, z - i, type, data);
             } else {
                 return;

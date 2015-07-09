@@ -53,6 +53,26 @@ public class SceneScapesVoxelWorld extends Scene {
     private static final String BLUR_OFFSET, BLUR_WEIGHT, SAMPLE_OFFSET,
             SAMPLE_WEIGHT;
     private static final int BLUR_LENGTH, SAMPLE_LENGTH;
+
+    static {
+        float[] blurOffset = BlurOffset.gaussianBlurOffset(5, 0.01f);
+        float[] blurWeight = BlurOffset.gaussianBlurWeight(5, sample -> FastMath
+                .pow(FastMath.cos(sample * FastMath.PI), 0.1));
+        BLUR_LENGTH = blurOffset.length;
+        BLUR_OFFSET = ArrayUtil.join(blurOffset);
+        BLUR_WEIGHT = ArrayUtil.join(blurWeight);
+        float[] sampleOffset = BlurOffset.gaussianBlurOffset(11, 0.5f);
+        float[] sampleWeight = BlurOffset.gaussianBlurWeight(11,
+                sample -> FastMath
+                        .pow(FastMath.cos(sample * FastMath.PI), 0.1));
+        for (int i = 0; i < sampleOffset.length; i++) {
+            sampleOffset[i] = sampleOffset[i] + 0.5f;
+        }
+        SAMPLE_LENGTH = sampleOffset.length;
+        SAMPLE_OFFSET = ArrayUtil.join(sampleOffset);
+        SAMPLE_WEIGHT = ArrayUtil.join(sampleWeight);
+    }
+
     public final float animationDistance;
     public final boolean fxaa, bloom;
     private final VAO vao;
@@ -76,25 +96,6 @@ public class SceneScapesVoxelWorld extends Scene {
     private WorldSkybox skybox;
     private TerrainTextureRegistry terrainTextureRegistry;
     private boolean chunkGeometryDebug;
-
-    static {
-        float[] blurOffset = BlurOffset.gaussianBlurOffset(5, 0.01f);
-        float[] blurWeight = BlurOffset.gaussianBlurWeight(5, sample -> FastMath
-                .pow(FastMath.cos(sample * FastMath.PI), 0.1));
-        BLUR_LENGTH = blurOffset.length;
-        BLUR_OFFSET = ArrayUtil.join(blurOffset);
-        BLUR_WEIGHT = ArrayUtil.join(blurWeight);
-        float[] sampleOffset = BlurOffset.gaussianBlurOffset(11, 0.5f);
-        float[] sampleWeight = BlurOffset.gaussianBlurWeight(11,
-                sample -> FastMath
-                        .pow(FastMath.cos(sample * FastMath.PI), 0.1));
-        for (int i = 0; i < sampleOffset.length; i++) {
-            sampleOffset[i] = sampleOffset[i] + 0.5f;
-        }
-        SAMPLE_LENGTH = sampleOffset.length;
-        SAMPLE_OFFSET = ArrayUtil.join(sampleOffset);
-        SAMPLE_WEIGHT = ArrayUtil.join(sampleWeight);
-    }
 
     public SceneScapesVoxelWorld(WorldClient world, Cam cam) {
         this.world = world;
@@ -304,8 +305,8 @@ public class SceneScapesVoxelWorld extends Scene {
         vao.render(graphics, shader);
         exposureFBO.deactivate(graphics);
         MobPlayerClientMain player = world.getPlayer();
-        float newRenderDistance = (float) world.getTerrain().renderer()
-                        .getActualRenderDistance();
+        float newRenderDistance =
+                (float) world.getTerrain().renderer().getActualRenderDistance();
         if (renderDistance > newRenderDistance) {
             renderDistance = newRenderDistance;
         } else {
@@ -521,6 +522,22 @@ public class SceneScapesVoxelWorld extends Scene {
         return hud;
     }
 
+    private static class GuiWidgetPerformanceClient extends GuiWidget {
+        private final GuiComponentGraph graphRender, graphUpdate;
+
+        private GuiWidgetPerformanceClient() {
+            super(32, 32, 240, 80, "Performance Graph");
+            graphRender =
+                    new GuiComponentGraph(0, 0, width, height, 0.0f, 1.0f, 0.0f,
+                            1.0f);
+            add(graphRender);
+            graphUpdate =
+                    new GuiComponentGraph(0, 0, width, height, 0.0f, 0.0f, 1.0f,
+                            1.0f);
+            add(graphUpdate);
+        }
+    }
+
     private class GuiWidgetDebugClient extends GuiWidget {
         private GuiWidgetDebugClient() {
             super(32, 32, 160, 120, "Debug Values");
@@ -552,22 +569,6 @@ public class SceneScapesVoxelWorld extends Scene {
             performanceButton.addLeftClick(event -> performanceWidget
                     .setVisible(!performanceWidget.isVisible()));
             add(performanceButton);
-        }
-    }
-
-    private static class GuiWidgetPerformanceClient extends GuiWidget {
-        private final GuiComponentGraph graphRender, graphUpdate;
-
-        private GuiWidgetPerformanceClient() {
-            super(32, 32, 240, 80, "Performance Graph");
-            graphRender =
-                    new GuiComponentGraph(0, 0, width, height, 0.0f, 1.0f, 0.0f,
-                            1.0f);
-            add(graphRender);
-            graphUpdate =
-                    new GuiComponentGraph(0, 0, width, height, 0.0f, 0.0f, 1.0f,
-                            1.0f);
-            add(graphUpdate);
         }
     }
 }

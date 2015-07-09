@@ -62,6 +62,18 @@ public class PlayerConnection
     private static final Logger LOGGER =
             LoggerFactory.getLogger(PlayerConnection.class);
     private static final int AES_KEY_LENGTH;
+
+    static {
+        int length = 16;
+        try {
+            length = Cipher.getMaxAllowedKeyLength("AES") >> 3;
+        } catch (NoSuchAlgorithmException e) {
+            LOGGER.warn("Failed to detect maximum key length", e);
+        }
+        length = FastMath.min(length, 32);
+        AES_KEY_LENGTH = length;
+    }
+
     private final ServerConnection server;
     private final PacketBundleChannel channel;
     private final GameRegistry registry;
@@ -76,17 +88,6 @@ public class PlayerConnection
     private int loadingRadius, permissionLevel;
     private PlayerStatistics statistics;
     private long ping, pingTimeout, pingWait;
-
-    static {
-        int length = 16;
-        try {
-            length = Cipher.getMaxAllowedKeyLength("AES") >> 3;
-        } catch (NoSuchAlgorithmException e) {
-            LOGGER.warn("Failed to detect maximum key length", e);
-        }
-        length = FastMath.min(length, 32);
-        AES_KEY_LENGTH = length;
-    }
 
     public PlayerConnection(PacketBundleChannel channel,
             ServerConnection server) throws IOException {
@@ -339,7 +340,7 @@ public class PlayerConnection
             }
             if (flag) {
                 double range = packet.getRange();
-                if (range > 0.0d) {
+                if (range > 0.0) {
                     if (FastMath.pointDistanceSqr(pos3d, entity.getPos()) >
                             range * range) {
                         flag = false;
@@ -441,11 +442,6 @@ public class PlayerConnection
         return false;
     }
 
-    public void updatePing(long ping) {
-        this.ping = System.currentTimeMillis() - ping;
-        pingTimeout = ping + 10000;
-    }
-
     @Override
     public boolean isClosed() {
         return state == State.CLOSED;
@@ -471,6 +467,11 @@ public class PlayerConnection
             }
         }
         LOGGER.info("Client disconnected: {} ({})", id, nickname);
+    }
+
+    public void updatePing(long ping) {
+        this.ping = System.currentTimeMillis() - ping;
+        pingTimeout = ping + 10000;
     }
 
     @Override

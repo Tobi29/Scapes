@@ -43,6 +43,7 @@ public abstract class ScapesStandaloneServer
             LoggerFactory.getLogger(ScapesStandaloneServer.class);
     private static final Runtime RUNTIME = Runtime.getRuntime();
     protected final Path path;
+    protected ScapesServer server;
     private final Thread shutdownHook = new Thread(() -> {
         try {
             stopServer();
@@ -50,7 +51,6 @@ public abstract class ScapesStandaloneServer
             LOGGER.error("Failed to terminate server: {}", e.toString());
         }
     });
-    protected ScapesServer server;
 
     protected ScapesStandaloneServer(Path path) {
         this.path = path;

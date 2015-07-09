@@ -28,6 +28,18 @@ import java.util.Arrays;
 
 public class TerrainInfiniteRendererChunk {
     private static final VAO FRAME;
+
+    static {
+        float min = 0.001f;
+        float max = 0.999f;
+        FRAME = VAOUtility.createVI(
+                new float[]{min, min, min, max, min, min, max, max, min, min,
+                        max, min, min, min, max, max, min, max, max, max, max,
+                        min, max, max},
+                new int[]{0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4,
+                        1, 5, 2, 6, 3, 7}, RenderType.LINES);
+    }
+
     private final TerrainInfiniteChunkClient chunk;
     private final TerrainInfiniteRenderer renderer;
     private final VAO[] vao;
@@ -41,17 +53,6 @@ public class TerrainInfiniteRendererChunk {
     private final boolean[] prepareVisible;
     private final boolean[] culled;
     private final byte[] lod;
-
-    static {
-        float min = 0.001f;
-        float max = 0.999f;
-        FRAME = VAOUtility.createVI(
-                new float[]{min, min, min, max, min, min, max, max, min, min,
-                        max, min, min, min, max, max, min, max, max, max, max,
-                        min, max, max},
-                new int[]{0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4,
-                        1, 5, 2, 6, 3, 7}, RenderType.LINES);
-    }
 
     public TerrainInfiniteRendererChunk(TerrainInfiniteChunkClient chunk,
             TerrainInfiniteRenderer renderer) {

@@ -88,8 +88,8 @@ public class TerrainInfiniteClient extends TerrainInfinite
 
     @Override
     public void update(double delta) {
-        int xx = FastMath.floor(player.getX() / 16.0d);
-        int yy = FastMath.floor(player.getY() / 16.0d);
+        int xx = FastMath.floor(player.getX() / 16.0);
+        int yy = FastMath.floor(player.getY() / 16.0);
         for (Vector2i pos : sortedLocations) {
             Optional<TerrainInfiniteChunkClient> chunk =
                     chunkManager.get(pos.intX() + xx, pos.intY() + yy);
@@ -152,6 +152,11 @@ public class TerrainInfiniteClient extends TerrainInfinite
         return chunkManager.get(x, y);
     }
 
+    @Override
+    public Collection<TerrainInfiniteChunkClient> getLoadedChunks() {
+        return chunkManager.getIterator();
+    }
+
     public Optional<TerrainInfiniteChunkClient> addChunk(int x, int y) {
         if (x < cxMin || x > cxMax || y < cyMin || y > cyMax) {
             return Optional.empty();
@@ -168,11 +173,6 @@ public class TerrainInfiniteClient extends TerrainInfinite
             }
         }
         return chunk;
-    }
-
-    @Override
-    public Collection<TerrainInfiniteChunkClient> getLoadedChunks() {
-        return chunkManager.getIterator();
     }
 
     private void removeChunk(TerrainInfiniteChunkClient chunk) {

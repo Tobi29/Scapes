@@ -245,8 +245,6 @@ public enum ControllerKey {
     public static final ControllerKey BUTTON_RIGHT = BUTTON_1;
     private static final List<ControllerKey> BUTTONS = new ArrayList<>(), AXES =
             new ArrayList<>();
-    private final String name;
-    private int id;
 
     static {
         int id = 0;
@@ -260,6 +258,9 @@ public enum ControllerKey {
             AXES.add(valueOf("AXIS_" + i));
         }
     }
+
+    private final String name;
+    private int id;
 
     ControllerKey(String name) {
         this.name = name;

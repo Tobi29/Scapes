@@ -693,29 +693,29 @@ class VanillaBasicsRegisters {
 
     static void registerOres(VanillaBasics plugin) {
         VanillaMaterial materials = plugin.getMaterials();
-        plugin.c.ore(materials.oreCoal, 8, 16.0d, 3, 20, StoneType.DIRT_STONE);
-        plugin.c.ore(materials.oreCoal, 5, 12.0d, 3, 20, StoneType.CHALK,
+        plugin.c.ore(materials.oreCoal, 8, 16.0, 3, 20, StoneType.DIRT_STONE);
+        plugin.c.ore(materials.oreCoal, 5, 12.0, 3, 20, StoneType.CHALK,
                 StoneType.CHERT, StoneType.CLAYSTONE, StoneType.CONGLOMERATE,
                 StoneType.MARBLE, StoneType.ANDESITE, StoneType.BASALT,
                 StoneType.DACITE, StoneType.RHYOLITE, StoneType.DIORITE,
                 StoneType.GABBRO, StoneType.GRANITE);
-        plugin.c.ore(materials.oreCassiterite, 3, 6.0d, 4, 6,
-                StoneType.ANDESITE, StoneType.BASALT, StoneType.DACITE,
-                StoneType.RHYOLITE, StoneType.GRANITE);
-        plugin.c.ore(materials.oreSphalerite, 3, 6.0d, 3, 4, StoneType.MARBLE);
-        plugin.c.ore(materials.oreBismuthinite, 2, 3.0d, 8, 9, StoneType.CHALK,
+        plugin.c.ore(materials.oreCassiterite, 3, 6.0, 4, 6, StoneType.ANDESITE,
+                StoneType.BASALT, StoneType.DACITE, StoneType.RHYOLITE,
+                StoneType.GRANITE);
+        plugin.c.ore(materials.oreSphalerite, 3, 6.0, 3, 4, StoneType.MARBLE);
+        plugin.c.ore(materials.oreBismuthinite, 2, 3.0, 8, 9, StoneType.CHALK,
                 StoneType.CHERT, StoneType.CLAYSTONE, StoneType.CONGLOMERATE,
                 StoneType.MARBLE, StoneType.DIORITE, StoneType.GABBRO,
                 StoneType.GRANITE);
-        plugin.c.ore(materials.oreChalcocite, 6, 8.0d, 2, 1, StoneType.CHALK,
+        plugin.c.ore(materials.oreChalcocite, 6, 8.0, 2, 1, StoneType.CHALK,
                 StoneType.CHERT, StoneType.CLAYSTONE, StoneType.CONGLOMERATE);
-        plugin.c.ore(materials.oreMagnetite, 4, 5.0d, 9, 10, StoneType.CHALK,
+        plugin.c.ore(materials.oreMagnetite, 4, 5.0, 9, 10, StoneType.CHALK,
                 StoneType.CHERT, StoneType.CLAYSTONE, StoneType.CONGLOMERATE);
-        plugin.c.ore(materials.orePyrite, 3, 4.0d, 11, 13, StoneType.CHALK,
+        plugin.c.ore(materials.orePyrite, 3, 4.0, 11, 13, StoneType.CHALK,
                 StoneType.CHERT, StoneType.CLAYSTONE, StoneType.CONGLOMERATE,
                 StoneType.MARBLE);
-        plugin.c.ore(materials.oreSilver, 2, 3.0d, 4, 8, StoneType.GRANITE);
-        plugin.c.ore(materials.oreGold, 1, 2.0d, 4, 32, StoneType.ANDESITE,
+        plugin.c.ore(materials.oreSilver, 2, 3.0, 4, 8, StoneType.GRANITE);
+        plugin.c.ore(materials.oreGold, 1, 2.0, 4, 32, StoneType.ANDESITE,
                 StoneType.BASALT, StoneType.DACITE, StoneType.RHYOLITE,
                 StoneType.DIORITE, StoneType.GABBRO, StoneType.GRANITE);
     }
@@ -726,7 +726,7 @@ class VanillaBasicsRegisters {
                 1200.0f, 1.0, 4.0, 0.004, 10, i -> {
                     i.put("Stone", 1.0);
                 });
-        plugin.c.metal("Tin", "Tin", 1.0f, 1.0f, 1.0f, 231.0f, 0.1d, 2.0, 0.01,
+        plugin.c.metal("Tin", "Tin", 1.0f, 1.0f, 1.0f, 231.0f, 0.1, 2.0, 0.01,
                 0, i -> {
                     i.put("Tin", 1.0);
                 });
@@ -754,13 +754,13 @@ class VanillaBasicsRegisters {
                 0.01, 0, i -> {
                     i.put("Gold", 1.0);
                 });
-        plugin.c.metal("Bronze", "Bronze", 0.6f, 0.4f, 0.0f, 800.0f, 10.0d,
-                10.0, 0.0005, 30, i -> {
+        plugin.c.metal("Bronze", "Bronze", 0.6f, 0.4f, 0.0f, 800.0f, 10.0, 10.0,
+                0.0005, 30, i -> {
                     i.put("Tin", 0.25);
                     i.put("Copper", 0.75);
                 });
         plugin.c.metal("BismuthBronze", "Bismuth Bronze", 1.0f, 0.8f, 0.8f,
-                800.0f, 10.0d, 10.0, 0.0005, 30, i -> {
+                800.0f, 10.0, 10.0, 0.0005, 30, i -> {
                     i.put("Bismuth", 0.2);
                     i.put("Zinc", 0.2);
                     i.put("Copper", 0.6);

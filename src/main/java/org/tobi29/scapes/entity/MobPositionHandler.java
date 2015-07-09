@@ -91,16 +91,16 @@ public class MobPositionHandler {
                         POSITION_SEND_RELATIVE_OFFSET) {
                     byte x = (byte) (FastMath
                             .clamp(pos.doubleX() - sentPosRelative.doubleX(),
-                                    -1.0d, 1.0d) * 100.0d);
+                                    -1.0, 1.0) * 100.0);
                     byte y = (byte) (FastMath
                             .clamp(pos.doubleY() - sentPosRelative.doubleY(),
-                                    -1.0d, 1.0d) * 100.0d);
+                                    -1.0, 1.0) * 100.0);
                     byte z = (byte) (FastMath
                             .clamp(pos.doubleZ() - sentPosRelative.doubleZ(),
-                                    -1.0d, 1.0d) * 100.0d);
-                    sentPosRelative.plusX(x / 100.0d);
-                    sentPosRelative.plusY(y / 100.0d);
-                    sentPosRelative.plusZ(z / 100.0d);
+                                    -1.0, 1.0) * 100.0);
+                    sentPosRelative.plusX(x / 100.0);
+                    sentPosRelative.plusY(y / 100.0);
+                    sentPosRelative.plusZ(z / 100.0);
                     packetHandler.sendPacket(
                             new PacketMobMoveRelative(entityID, oldPos, x, y,
                                     z));
@@ -168,9 +168,9 @@ public class MobPositionHandler {
     }
 
     public void receiveMoveRelative(byte x, byte y, byte z) {
-        double xx = x / 100.0d;
-        double yy = y / 100.0d;
-        double zz = z / 100.0d;
+        double xx = x / 100.0;
+        double yy = y / 100.0;
+        double zz = z / 100.0;
         sentPosRelative.plusX(xx);
         sentPosRelative.plusY(yy);
         sentPosRelative.plusZ(zz);

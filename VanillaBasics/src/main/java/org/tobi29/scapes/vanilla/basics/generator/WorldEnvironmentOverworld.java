@@ -92,8 +92,7 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                 public boolean canSpawn(TerrainServer terrain, int x, int y,
                         int z) {
                     if (terrain.light(x, y, z) < 7) {
-                        if (!terrain.type(x, y, z)
-                                .isSolid(terrain, x, y, z) &&
+                        if (!terrain.type(x, y, z).isSolid(terrain, x, y, z) &&
                                 terrain.type(x, y, z)
                                         .isTransparent(terrain, x, y, z) &&
                                 !terrain.type(x, y, z + 1)
@@ -115,8 +114,8 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                         int z) {
                     Random random = ThreadLocalRandom.current();
                     return new MobZombieServer(terrain.world(),
-                            new Vector3d(x + 0.5d, y + 0.5d, z + 1.0d),
-                            Vector3d.ZERO, 0.0d, random.nextDouble() * 360.0d);
+                            new Vector3d(x + 0.5, y + 0.5, z + 1.0),
+                            Vector3d.ZERO, 0.0, random.nextDouble() * 360.0);
                 }
 
                 @Override
@@ -144,8 +143,7 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                 public boolean canSpawn(TerrainServer terrain, int x, int y,
                         int z) {
                     if (terrain.light(x, y, z) < 7) {
-                        if (!terrain.type(x, y, z)
-                                .isSolid(terrain, x, y, z) &&
+                        if (!terrain.type(x, y, z).isSolid(terrain, x, y, z) &&
                                 terrain.type(x, y, z)
                                         .isTransparent(terrain, x, y, z) &&
                                 !terrain.type(x, y, z + 1)
@@ -167,8 +165,8 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                         int z) {
                     Random random = ThreadLocalRandom.current();
                     return new MobSkeletonServer(terrain.world(),
-                            new Vector3d(x + 0.5d, y + 0.5d, z + 1.0d),
-                            Vector3d.ZERO, 0, random.nextDouble() * 360.0d);
+                            new Vector3d(x + 0.5, y + 0.5, z + 1.0),
+                            Vector3d.ZERO, 0, random.nextDouble() * 360.0);
                 }
 
                 @Override
@@ -196,12 +194,10 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                 public boolean canSpawn(TerrainServer terrain, int x, int y,
                         int z) {
                     if (terrain.light(x, y, z) >= 7) {
-                        if (!terrain.type(x, y, z)
-                                .isSolid(terrain, x, y, z) &&
+                        if (!terrain.type(x, y, z).isSolid(terrain, x, y, z) &&
                                 terrain.type(x, y, z)
                                         .isTransparent(terrain, x, y, z) &&
-                                terrain.type(x, y, z - 1) ==
-                                        materials.grass) {
+                                terrain.type(x, y, z - 1) == materials.grass) {
                             return true;
                         }
                     }
@@ -214,7 +210,7 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                     Random random = ThreadLocalRandom.current();
                     return new MobPigServer(terrain.world(),
                             new Vector3d(x + 0.5, y + 0.5, z + 0.6875),
-                            Vector3d.ZERO, 0, random.nextDouble() * 360.0d);
+                            Vector3d.ZERO, 0, random.nextDouble() * 360.0);
                 }
 
                 @Override

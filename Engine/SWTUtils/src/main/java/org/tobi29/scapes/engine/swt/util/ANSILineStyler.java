@@ -33,9 +33,9 @@ import java.util.regex.Pattern;
 public class ANSILineStyler implements LineStyleListener, VerifyListener {
     private final Pattern controlSequencePattern =
             Pattern.compile("((\u001B\\[)(\\d+;)*(\\d+)?[m])");
-    private StyleRange lastStyle;
     private final ArrayList<StyleRange> queuedStyles = new ArrayList<>();
     private final Color[] colorTable = new Color[20];
+    private StyleRange lastStyle;
 
     public ANSILineStyler(StyledText styledText) {
         Display display = styledText.getDisplay();

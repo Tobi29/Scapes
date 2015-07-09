@@ -63,7 +63,8 @@ public class GuiBloomeryInventory extends GuiContainerInventory {
         }
         String text = FastMath.floor(container.getTemperature()) + "°C";
         if (!text.equals(currentText) || vaoTemperatureText == null) {
-            currentText = text; vaoTemperatureText =
+            currentText = text;
+            vaoTemperatureText =
                     font.render(text, 220, 170, 24, 1.0f, 1.0f, 1.0f, 1.0f);
         }
         vaoTemperatureText.render(graphics, shader);

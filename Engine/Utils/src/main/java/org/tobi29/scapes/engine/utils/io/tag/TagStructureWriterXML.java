@@ -38,13 +38,14 @@ public class TagStructureWriterXML extends TagStructureXML
             XMLOutputFactory.newInstance();
     private static final TransformerFactory TRANSFORMER_FACTORY =
             TransformerFactory.newInstance();
-    private final WritableByteStream stream;
-    private final XMLStreamWriter writer;
-    private final StringWriter stringWriter;
 
     static {
         TRANSFORMER_FACTORY.setAttribute("indent-number", 4);
     }
+
+    private final WritableByteStream stream;
+    private final XMLStreamWriter writer;
+    private final StringWriter stringWriter;
 
     public TagStructureWriterXML(WritableByteStream stream) throws IOException {
         try {

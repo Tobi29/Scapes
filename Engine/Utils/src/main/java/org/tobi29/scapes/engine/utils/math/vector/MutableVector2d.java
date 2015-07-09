@@ -328,20 +328,6 @@ public class MutableVector2d extends MutableVector2 {
     }
 
     @Override
-    public TagStructure write() {
-        TagStructure tagStructure = new TagStructure();
-        tagStructure.setDouble("X", x);
-        tagStructure.setDouble("Y", y);
-        return tagStructure;
-    }
-
-    @Override
-    public void read(TagStructure tagStructure) {
-        x = tagStructure.getDouble("X");
-        y = tagStructure.getDouble("Y");
-    }
-
-    @Override
     public int hashCode() {
         long temp;
         temp = Double.doubleToLongBits(x);
@@ -368,5 +354,19 @@ public class MutableVector2d extends MutableVector2 {
         }
         Vector2 other = (Vector2) obj;
         return x == other.doubleX() && y == other.doubleY();
+    }
+
+    @Override
+    public TagStructure write() {
+        TagStructure tagStructure = new TagStructure();
+        tagStructure.setDouble("X", x);
+        tagStructure.setDouble("Y", y);
+        return tagStructure;
+    }
+
+    @Override
+    public void read(TagStructure tagStructure) {
+        x = tagStructure.getDouble("X");
+        y = tagStructure.getDouble("Y");
     }
 }

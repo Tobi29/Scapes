@@ -22,8 +22,7 @@ import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import java.util.Random;
 
 public final class TreeSpruce implements Tree {
-    public static final TreeSpruce INSTANCE =
-            new TreeSpruce();
+    public static final TreeSpruce INSTANCE = new TreeSpruce();
 
     @Override
     public void gen(TerrainServer.TerrainMutable terrain, int x, int y, int z,

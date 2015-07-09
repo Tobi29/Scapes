@@ -35,8 +35,7 @@ public class UpdateSaplingGrowth extends Update {
         int data = terrain.data(x, y, z);
         terrain.typeData(x, y, z, materials.air, (short) 0);
         GameRegistry.Registry<TreeType> treeRegistry =
-                terrain.world().getRegistry()
-                        .get("VanillaBasics", "TreeType");
+                terrain.world().getRegistry().get("VanillaBasics", "TreeType");
         treeRegistry.get(data).getGenerator()
                 .gen(terrain, x, y, z, materials, new Random());
     }

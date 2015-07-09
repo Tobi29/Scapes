@@ -105,11 +105,6 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
     }
 
     @Override
-    public void updateContainer() {
-        valid = false;
-    }
-
-    @Override
     public int getContainerWidth() {
         return containerWidth;
     }
@@ -134,9 +129,9 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
         return containerResized;
     }
 
-    protected Optional<String> initContext() {
-        context = GLContext.createFromCurrent();
-        return checkContext(context);
+    @Override
+    public void updateContainer() {
+        valid = false;
     }
 
     @Override
@@ -166,6 +161,11 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
     @Override
     public boolean joysticksChanged() {
         return joysticksChanged;
+    }
+
+    protected Optional<String> initContext() {
+        context = GLContext.createFromCurrent();
+        return checkContext(context);
     }
 
     @Override

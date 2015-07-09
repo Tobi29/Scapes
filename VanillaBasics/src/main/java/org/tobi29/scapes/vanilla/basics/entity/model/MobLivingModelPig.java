@@ -37,9 +37,6 @@ import org.tobi29.scapes.entity.model.MobModel;
 public class MobLivingModelPig implements MobModel {
     private static final Box BODY, HEAD, LEG_FRONT_LEFT, LEG_FRONT_RIGHT,
             LEG_BACK_LEFT, LEG_BACK_RIGHT;
-    private final MobLivingClient entity;
-    private final Texture texture;
-    private final MutableVector3 pos;
 
     static {
         BODY = new Box(0.015625f, -5, -6, -5, 5, 6, 5, 0, 0);
@@ -50,6 +47,9 @@ public class MobLivingModelPig implements MobModel {
         LEG_BACK_RIGHT = new Box(0.015625f, -2, -2, -6, 2, 2, 0, 44, 30);
     }
 
+    private final MobLivingClient entity;
+    private final Texture texture;
+    private final MutableVector3 pos;
     private double swing, moveSpeedRender;
     private float xRotRender, zRotRender;
 
@@ -105,8 +105,7 @@ public class MobLivingModelPig implements MobModel {
         openGL.setAttribute2f(4, world.getTerrain()
                         .blockLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f,
                 world.getTerrain()
-                        .sunLight(pos.intX(), pos.intY(), pos.intZ()) /
-                        15.0f);
+                        .sunLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f);
         texture.bind(graphics);
         MatrixStack matrixStack = graphics.getMatrixStack();
         Matrix matrix = matrixStack.push();

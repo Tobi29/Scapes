@@ -53,11 +53,6 @@ public class BlockStoneRock extends VanillaBlock {
                     new AABB(0.4375, 0.375, 0, 0.5625, 0.625, 0.125),
                     new AABB(0.4375, 0.25, 0, 0.5625, 0.75, 0.125)};
     private static final int[] PERM = new int[512];
-    private final GameRegistry.Registry<StoneType> stoneRegistry;
-    private TerrainTexture[] textures;
-    private TerrainTexture[] texturesItem;
-    private BlockModel[][] models;
-    private ItemModel[] modelsItem;
 
     static {
         Random random = new Random(0);
@@ -68,6 +63,12 @@ public class BlockStoneRock extends VanillaBlock {
             PERM[i + 256] = v;
         }
     }
+
+    private final GameRegistry.Registry<StoneType> stoneRegistry;
+    private TerrainTexture[] textures;
+    private TerrainTexture[] texturesItem;
+    private BlockModel[][] models;
+    private ItemModel[] modelsItem;
 
     public BlockStoneRock(VanillaMaterial materials,
             GameRegistry.Registry<StoneType> stoneRegistry) {
@@ -220,8 +221,7 @@ public class BlockStoneRock extends VanillaBlock {
     @Override
     public void renderInventory(ItemStack item, GraphicsSystem graphics,
             Shader shader, float r, float g, float b, float a) {
-        modelsItem[item.getData()]
-                .renderInventory(graphics, shader);
+        modelsItem[item.getData()].renderInventory(graphics, shader);
     }
 
     @Override

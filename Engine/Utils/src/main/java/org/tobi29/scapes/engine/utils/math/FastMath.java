@@ -25,14 +25,11 @@ public final class FastMath {
     public static final double E = 2.7182818284590452354;
     public static final double HALF_PI = 1.57079632679489661923;
     public static final double PI = 3.14159265358979323846;
-    public static final double RAD_2_DEG = 180.0d / PI;
-    public static final double DEG_2_RAD = PI / 180.0d;
+    public static final double RAD_2_DEG = 180.0 / PI;
+    public static final double DEG_2_RAD = PI / 180.0;
     public static final double TWO_PI = 6.28318530717958647692;
     private static final double[] SIN = new double[1000000];
     private static final double[] ASIN = new double[1000000];
-
-    private FastMath() {
-    }
 
     static {
         for (int i = 0; i < SIN.length; i++) {
@@ -40,8 +37,8 @@ public final class FastMath {
         }
         int lowest = 0;
         int highest = 0;
-        double lowestValue = 1.0d;
-        double highestValue = -1.0d;
+        double lowestValue = 1.0;
+        double highestValue = -1.0;
         for (int i = 0; i < SIN.length; i++) {
             double value = SIN[i];
             if (value < lowestValue) {
@@ -59,8 +56,11 @@ public final class FastMath {
         }
     }
 
+    private FastMath() {
+    }
+
     public static double abs(double a) {
-        return a < 0.0d ? -a : a;
+        return a < 0.0 ? -a : a;
     }
 
     public static float abs(float a) {
@@ -244,7 +244,7 @@ public final class FastMath {
     }
 
     public static double cosTable(double a) {
-        return sinTableLookup((int) ((a / TWO_PI + 0.25d) * SIN.length));
+        return sinTableLookup((int) ((a / TWO_PI + 0.25) * SIN.length));
     }
 
     public static float sqr(float a) {
@@ -334,7 +334,7 @@ public final class FastMath {
     }
 
     public static double angleDiff(double a1, double a2) {
-        return diff(a1, a2, 360.0d);
+        return diff(a1, a2, 360.0);
     }
 
     public static double diff(double a1, double a2, double m) {

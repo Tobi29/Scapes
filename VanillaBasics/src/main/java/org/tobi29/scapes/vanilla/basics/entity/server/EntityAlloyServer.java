@@ -111,8 +111,7 @@ public class EntityAlloyServer extends EntityAbstractContainerServer {
                     inventory.setItem(0,
                             new ItemStack(materials.mold, (short) 1));
                     updateResult(plugin);
-                    world.getConnection()
-                            .send(new PacketEntityChange(this));
+                    world.getConnection().send(new PacketEntityChange(this));
                 }
             }
         }
@@ -136,8 +135,7 @@ public class EntityAlloyServer extends EntityAbstractContainerServer {
                     }
                 }
                 updateResult(plugin);
-                world.getConnection()
-                        .send(new PacketEntityChange(this));
+                world.getConnection().send(new PacketEntityChange(this));
             }
         }
     }

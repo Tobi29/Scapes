@@ -328,20 +328,6 @@ public class MutableVector2i extends MutableVector2 {
     }
 
     @Override
-    public TagStructure write() {
-        TagStructure tagStructure = new TagStructure();
-        tagStructure.setInteger("X", x);
-        tagStructure.setInteger("Y", y);
-        return tagStructure;
-    }
-
-    @Override
-    public void read(TagStructure tagStructure) {
-        x = tagStructure.getInteger("X");
-        y = tagStructure.getInteger("Y");
-    }
-
-    @Override
     public int hashCode() {
         int result = x;
         result = 31 * result + y;
@@ -365,5 +351,19 @@ public class MutableVector2i extends MutableVector2 {
         }
         Vector2 other = (Vector2) obj;
         return x == other.intX() && y == other.intY();
+    }
+
+    @Override
+    public TagStructure write() {
+        TagStructure tagStructure = new TagStructure();
+        tagStructure.setInteger("X", x);
+        tagStructure.setInteger("Y", y);
+        return tagStructure;
+    }
+
+    @Override
+    public void read(TagStructure tagStructure) {
+        x = tagStructure.getInteger("X");
+        y = tagStructure.getInteger("Y");
     }
 }

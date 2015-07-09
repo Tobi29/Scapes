@@ -80,6 +80,23 @@ public class EntityFarmlandServer extends EntityServer {
     }
 
     @Override
+    public void update(double delta) {
+        growth(delta);
+        if (updateBlock) {
+            VanillaBasics plugin = (VanillaBasics) world.getPlugins()
+                    .getPlugin("VanillaBasics");
+            GameRegistry.Registry<CropType> cropRegistry = world.getRegistry()
+                    .<CropType>get("VanillaBasics", "CropType");
+            VanillaMaterial materials = plugin.getMaterials();
+            world.getTerrain().queue(handler -> handler
+                    .typeData(pos.intX(), pos.intY(), pos.intZ() + 1,
+                            materials.crop,
+                            (short) (stage + (cropRegistry.get(cropType) << 3) -
+                                    1)));
+        }
+    }
+
+    @Override
     public void updateTile(TerrainServer terrain, int x, int y, int z) {
         WorldServer world = terrain.world();
         VanillaBasics plugin =
@@ -98,23 +115,6 @@ public class EntityFarmlandServer extends EntityServer {
     @Override
     public void tickSkip(long oldTick, long newTick) {
         growth((newTick - oldTick) / 20.0f);
-    }
-
-    @Override
-    public void update(double delta) {
-        growth(delta);
-        if (updateBlock) {
-            VanillaBasics plugin = (VanillaBasics) world.getPlugins()
-                    .getPlugin("VanillaBasics");
-            GameRegistry.Registry<CropType> cropRegistry = world.getRegistry()
-                    .<CropType>get("VanillaBasics", "CropType");
-            VanillaMaterial materials = plugin.getMaterials();
-            world.getTerrain().queue(handler -> handler
-                    .typeData(pos.intX(), pos.intY(), pos.intZ() + 1,
-                            materials.crop,
-                            (short) (stage + (cropRegistry.get(cropType) << 3) -
-                                    1)));
-        }
     }
 
     public void seed(CropType cropType) {
