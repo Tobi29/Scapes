@@ -66,6 +66,12 @@ afterEvaluate {
     }
 }
 
+idea {
+    module {
+        excludeDirs += file("$rootDir/runtime")
+    }
+}
+
 apply plugin: ScapesEngineApplication
 
 class ScapesEngineApplication implements Plugin<Project> {
