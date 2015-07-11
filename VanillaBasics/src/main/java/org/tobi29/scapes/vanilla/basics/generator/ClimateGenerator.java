@@ -175,7 +175,7 @@ public class ClimateGenerator {
         double weather =
                 weatherNoise.noise(day + dayTime, x / 16000.0, y / 16000.0) *
                         0.5 + 0.5;
-        double rainfall = 4.0 - humidity3 * 3.2;
+        double rainfall = 4.0 - humidity3 * 3.4;
         rainfall *= 1.0 - FastMath.sinTable(dayTime * FastMath.PI) * 0.5;
         rainfall = FastMath.max(rainfall, 0.1);
         weather = FastMath.pow(weather, rainfall);
