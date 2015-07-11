@@ -19,7 +19,7 @@ package org.tobi29.scapes.engine.gui;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.BlendingMode;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -89,7 +89,7 @@ public class GuiComponentTextField extends GuiComponentTextButton {
         super.update(mouseX, mouseY, mouseInside, engine);
         getGui().ifPresent(gui -> {
             if (gui.getLastClicked() == this || major) {
-                if (engine.getGuiController().processTextField(data, false)) {
+                if (engine.guiController().processTextField(data, false)) {
                     if (data.text.length() > maxLength) {
                         data.text.delete(maxLength, data.text.length());
                         data.cursor = FastMath.min(data.cursor, maxLength);
@@ -104,16 +104,16 @@ public class GuiComponentTextField extends GuiComponentTextButton {
     }
 
     @Override
-    public void renderComponent(GraphicsSystem graphics, Shader shader,
+    public void renderComponent(GL gl, Shader shader,
             FontRenderer font, double delta) {
-        super.renderComponent(graphics, shader, font, delta);
+        super.renderComponent(gl, shader, font, delta);
         if (cursor) {
-            vaoCursor.render(graphics, shader);
+            vaoCursor.render(gl, shader);
         }
-        graphics.getTextureManager().unbind(graphics);
-        OpenGL openGL = graphics.getOpenGL();
+        gl.getTextureManager().unbind(gl);
+        OpenGL openGL = gl.getOpenGL();
         openGL.setBlending(BlendingMode.INVERT);
-        vaoSelection.render(graphics, shader, false);
+        vaoSelection.render(gl, shader, false);
         openGL.setBlending(BlendingMode.NORMAL);
         getGui().ifPresent(gui -> {
             if (gui.getLastClicked() == this || major) {

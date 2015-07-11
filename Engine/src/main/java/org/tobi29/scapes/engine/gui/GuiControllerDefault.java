@@ -20,7 +20,6 @@ import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.input.Controller;
 import org.tobi29.scapes.engine.input.ControllerDefault;
 import org.tobi29.scapes.engine.input.ControllerKey;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
 import org.tobi29.scapes.engine.utils.MutableSingle;
 
 import java.util.regex.Pattern;
@@ -49,9 +48,8 @@ public class GuiControllerDefault implements GuiController {
         cursorX = controller.getX();
         cursorY = controller.getY();
         scroll = controller.getScrollY() * scrollSensitivity;
-        GraphicsSystem graphics = engine.getGraphics();
-        double width = graphics.getContainerWidth();
-        double height = graphics.getContainerHeight();
+        double width = engine.container().getContainerWidth();
+        double height = engine.container().getContainerHeight();
         guiCursorX = cursorX / width * 800.0;
         guiCursorY = cursorY / height * 512.0;
     }

@@ -17,7 +17,7 @@
 package org.tobi29.scapes.entity.particle;
 
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -47,10 +47,10 @@ public class ParticleManager {
         }
     }
 
-    public void render(GraphicsSystem graphics, Cam cam) {
+    public void render(GL gl, Cam cam) {
         Vector3 camPos = cam.position.now();
-        Shader shader = graphics.getShaderManager()
-                .getShader("Scapes:shader/Entity", graphics);
+        Shader shader =
+                gl.getShaderManager().getShader("Scapes:shader/Entity", gl);
         synchronized (particles) {
             particles.stream().sorted((particle1, particle2) -> {
                 double distance1 =
@@ -61,7 +61,7 @@ public class ParticleManager {
                                 camPos);
                 return distance1 == distance2 ? 0 :
                         distance1 < distance2 ? 1 : -1;
-            }).forEach(particle -> particle.render(graphics, cam, shader));
+            }).forEach(particle -> particle.render(gl, cam, shader));
         }
     }
 

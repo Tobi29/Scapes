@@ -26,8 +26,8 @@ import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
 import org.tobi29.scapes.engine.input.ControllerKey;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
-import org.tobi29.scapes.engine.utils.Sync;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.particle.ParticleBlock;
 import org.tobi29.scapes.packets.PacketPingClient;
@@ -43,9 +43,9 @@ public class GameStateGameMP extends GameState {
     protected GameStateGameMP(ClientConnection client, Scene scene,
             ScapesEngine engine) {
         super(engine, scene);
-        playlist = new Playlist(engine.getSounds());
+        playlist = new Playlist(engine.sounds());
         this.client = client;
-        tickDebug = engine.getDebugValues().get("Client-TPS");
+        tickDebug = engine.debugValues().get("Client-TPS");
     }
 
     public ClientConnection getClient() {
@@ -53,20 +53,20 @@ public class GameStateGameMP extends GameState {
     }
 
     @Override
-    public void dispose() {
+    public void dispose(GL gl) {
         client.stop();
-        engine.getSounds().stopMusic();
+        engine.sounds().stopMusic();
         ParticleBlock.clear();
         if (client.getPlugins() != null) {
             client.getPlugins().dispose();
-            client.getPlugins().removeFileSystems(engine.getFiles());
+            client.getPlugins().removeFileSystems(engine.files());
         }
         LOGGER.info("Stopped game!");
     }
 
     @Override
-    public void init() {
-        client.getPlugins().addFileSystems(engine.getFiles());
+    public void init(GL gl) {
+        client.getPlugins().addFileSystems(engine.files());
         client.getPlugins().init();
         client.start(this);
     }
@@ -83,19 +83,18 @@ public class GameStateGameMP extends GameState {
     }
 
     @Override
-    public void stepComponent(Sync sync) {
+    public void stepComponent(double delta) {
         if (!(scene instanceof SceneScapesVoxelWorld)) {
             return;
         }
         SceneScapesVoxelWorld scene = (SceneScapesVoxelWorld) this.scene;
-        if (engine.getController().isPressed(ControllerKey.KEY_F1)) {
+        if (engine.controller().isPressed(ControllerKey.KEY_F1)) {
             scene.setGuiHide(!scene.isGuiHidden());
         }
         if (Scapes.debug &&
-                engine.getController().isPressed(ControllerKey.KEY_F6)) {
+                engine.controller().isPressed(ControllerKey.KEY_F6)) {
             scene.toggleDebug();
         }
-        double delta = sync.getSpeedFactor();
         MobPlayerClientMain player = scene.getPlayer();
         playlist.update(player, delta);
         scene.update(delta);
@@ -104,7 +103,7 @@ public class GameStateGameMP extends GameState {
             pingWait += 1.0;
             client.send(new PacketPingClient(System.currentTimeMillis()));
         }
-        tickDebug.setValue(sync.getTPS());
+        tickDebug.setValue(1.0 / delta);
     }
 
     public Playlist getPlaylist() {

@@ -17,7 +17,7 @@
 package org.tobi29.scapes.entity.model;
 
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.math.AABB;
@@ -30,6 +30,5 @@ public interface EntityModel {
 
     void renderUpdate(double delta);
 
-    void render(GraphicsSystem graphics, WorldClient world, Cam cam,
-            Shader shader);
+    void render(GL gl, WorldClient world, Cam cam, Shader shader);
 }

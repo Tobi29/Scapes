@@ -21,7 +21,7 @@ import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -81,22 +81,22 @@ public class GuiInventory extends Gui {
     }
 
     @Override
-    public void renderOverlay(GraphicsSystem graphics, Shader shader,
+    public void renderOverlay(GL gl, Shader shader,
             FontRenderer font) {
         if (renderHover != null) {
-            MatrixStack matrixStack = graphics.getMatrixStack();
+            MatrixStack matrixStack = gl.getMatrixStack();
             if (!renderHover.equals(currentName) || this.font != font) {
                 this.font = font;
                 updateText(renderHover);
             }
             Matrix matrix = matrixStack.push();
             matrix.translate((float) cursorX, (float) cursorY, 0.0f);
-            vaoText.render(graphics, shader);
+            vaoText.render(gl, shader);
             matrixStack.pop();
         }
         player.getInventory().getHold().ifPresent(hold -> GuiUtils
                 .renderItem((float) cursorX, (float) cursorY, 30.0f, 30.0f,
-                        hold, graphics, shader, font));
+                        hold, gl, shader, font));
     }
 
     @Override

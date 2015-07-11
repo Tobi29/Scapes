@@ -19,7 +19,7 @@ package org.tobi29.scapes.block;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
 import org.tobi29.scapes.engine.utils.BufferCreator;
@@ -71,7 +71,7 @@ public class TerrainTextureRegistry {
             try {
                 Image source = sources.get(paths[0]);
                 if (source == null) {
-                    source = engine.getFiles().get(paths[0])
+                    source = engine.files().get(paths[0])
                             .readReturn(streamIn -> PNG.decode(streamIn,
                                     BufferCreator::byteBuffer));
                     sources.put(paths[0], source);
@@ -87,7 +87,7 @@ public class TerrainTextureRegistry {
                     for (int i = 1; i < paths.length; i++) {
                         Image layer = sources.get(paths[i]);
                         if (layer == null) {
-                            layer = engine.getFiles().get(paths[i]).readReturn(
+                            layer = engine.files().get(paths[i]).readReturn(
                                     streamIn -> PNG.decode(streamIn,
                                             BufferCreator::byteBuffer));
                             sources.put(paths[i], layer);
@@ -270,16 +270,16 @@ public class TerrainTextureRegistry {
         return texture;
     }
 
-    public void render(GraphicsSystem graphics) {
+    public void render(GL gl) {
         for (TerrainTexture texture : textures.values()) {
-            texture.renderAnim(graphics);
+            texture.renderAnim(gl);
         }
     }
 
-    public void dispose(GraphicsSystem graphics) {
+    public void dispose(GL gl) {
         textures.clear();
         if (texture != null) {
-            texture.dispose(graphics);
+            texture.dispose(gl);
         }
     }
 

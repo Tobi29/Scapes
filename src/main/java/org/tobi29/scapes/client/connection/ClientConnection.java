@@ -105,11 +105,11 @@ public class ClientConnection
         this.channel = new PacketBundleChannel(channel);
         selector = Selector.open();
         this.channel.register(selector, SelectionKey.OP_READ);
-        GuiWidgetDebugValues debugValues = engine.getDebugValues();
+        GuiWidgetDebugValues debugValues = engine.debugValues();
         pingDebug = debugValues.get("Connection-Ping");
         downloadDebug = debugValues.get("Connection-Down");
         uploadDebug = debugValues.get("Connection-Up");
-        cache = engine.getFileCache();
+        cache = engine.fileCache();
         loginData = new LoginData(channel, account);
     }
 
@@ -248,7 +248,7 @@ public class ClientConnection
 
     private void sendSkin(WritableByteStream output) throws IOException {
         MutableSingle<Image> image = new MutableSingle<>();
-        Path path = engine.getHome().resolve("Skin.png");
+        Path path = engine.home().resolve("Skin.png");
         if (Files.exists(path)) {
             image.a = FileUtil.readReturn(path,
                     stream -> PNG.decode(stream, BufferCreator::byteBuffer));
@@ -256,7 +256,7 @@ public class ClientConnection
                 throw new ConnectionCloseException("Invalid skin!");
             }
         } else {
-            engine.getFiles().get("Scapes:image/entity/mob/Player.png")
+            engine.files().get("Scapes:image/entity/mob/Player.png")
                     .read(stream -> {
                         image.a = PNG.decode(stream, BufferCreator::byteBuffer);
                         if (image.a.getWidth() != 64 ||
@@ -339,8 +339,8 @@ public class ClientConnection
 
     public void start(GameStateGameMP game) {
         this.game = game;
-        joiner = engine.getTaskExecutor().runTask(this, "Client-Connection");
-        engine.getTaskExecutor().addTask(() -> {
+        joiner = engine.taskExecutor().runTask(this, "Client-Connection");
+        engine.taskExecutor().addTask(() -> {
             send(new PacketPingClient(System.currentTimeMillis()));
             downloadDebug.setValue(channel.getInputRate() / 128.0);
             uploadDebug.setValue(channel.getOutputRate() / 128.0);

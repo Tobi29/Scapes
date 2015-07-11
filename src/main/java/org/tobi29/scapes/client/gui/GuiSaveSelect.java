@@ -47,7 +47,7 @@ public class GuiSaveSelect extends GuiMenu {
                 new GuiComponentTextButton(112, 410, 176, 30, 18, "Create");
         create.addLeftClick(event -> {
             try {
-                Path path = state.getEngine().getHome().resolve("plugins");
+                Path path = state.getEngine().home().resolve("plugins");
                 List<Path> files = new ArrayList<>();
                 for (Path file : Files.newDirectoryStream(path)) {
                     if (Files.isRegularFile(file) && !Files.isHidden(file)) {
@@ -69,7 +69,7 @@ public class GuiSaveSelect extends GuiMenu {
                 } else {
                     state.add(
                             new GuiCreateWorld(state, this, worldTypes, plugins,
-                                    state.getEngine().getHome()
+                                    state.getEngine().home()
                                             .resolve("saves")));
                 }
             } catch (IOException e) {
@@ -83,7 +83,7 @@ public class GuiSaveSelect extends GuiMenu {
 
     public void updateSaves() {
         try {
-            Path path = state.getEngine().getHome().resolve("saves");
+            Path path = state.getEngine().home().resolve("saves");
             scrollPane.removeAll();
             for (Path directory : Files.newDirectoryStream(path)) {
                 if (Files.isDirectory(directory) &&
@@ -119,10 +119,7 @@ public class GuiSaveSelect extends GuiMenu {
                             (SceneMenu) state.getScene())));
             label.addHover(event -> {
                 if (event.getState() == GuiComponentHoverEvent.State.ENTER) {
-                    try {
-                        ((SceneMenu) state.getScene()).changeBackground(path);
-                    } catch (IOException e) {
-                    }
+                    ((SceneMenu) state.getScene()).changeBackground(path);
                 }
             });
             GuiComponentTextButton delete =

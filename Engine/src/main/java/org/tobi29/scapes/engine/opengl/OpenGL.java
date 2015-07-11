@@ -123,13 +123,13 @@ public interface OpenGL {
     FBOStatus checkFBO();
 
     @OpenGLFunction
-    void screenShot(Path path, GraphicsSystem graphics);
+    void screenShot(Path path, GL gl);
 
     @OpenGLFunction
     Image screenShot(int width, int height);
 
     @OpenGLFunction
-    Image screenShotFBO(GraphicsSystem graphics, FBO fbo, int colorAttachment);
+    Image screenShotFBO(GL gl, FBO fbo, int colorAttachment);
 
     @OpenGLFunction
     void activateShader(int id);

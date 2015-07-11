@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.block;
 
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 
 import java.nio.ByteBuffer;
 
@@ -73,7 +73,7 @@ public class TerrainTexture {
         return shaderAnimation;
     }
 
-    protected void renderAnim(GraphicsSystem graphics) {
+    protected void renderAnim(GL gl) {
     }
 
     protected void updateAnim(double delta) {

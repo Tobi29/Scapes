@@ -21,201 +21,91 @@ import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
-import org.tobi29.scapes.engine.opengl.matrix.Matrix;
-import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.ShaderManager;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.opengl.texture.TextureManager;
-import org.tobi29.scapes.engine.utils.Sync;
-import org.tobi29.scapes.engine.utils.graphics.Cam;
-import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f;
 
 public class GraphicsSystem {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GraphicsSystem.class);
     private final ScapesEngine engine;
-    private final FontRenderer defaultFont;
-    private final Container container;
-    private final TextureManager textureManager;
-    private final ShaderManager shaderManager;
-    private final Sync sync;
     private final GuiWidgetDebugValues.Element fpsDebug, widthDebug,
             heightDebug, textureDebug, vaoDebug;
-    private final MatrixStack matrixStack;
-    private final Matrix4f projectionMatrix, modelViewProjectionMatrix;
     private final OpenGL openGL;
+    private final GL gl;
     private boolean triggerScreenshot;
     private double resolutionMultiplier = 1.0;
-    private int containerWidth = 1, containerHeight = 1, contentWidth = 1,
-            contentHeight = 1;
 
-    public GraphicsSystem(ScapesEngine engine, Container container) {
+    public GraphicsSystem(ScapesEngine engine, OpenGL openGL) {
         this.engine = engine;
-        this.container = container;
-        openGL = container.getOpenGL();
-        matrixStack = new MatrixStack(64);
-        projectionMatrix = new Matrix4f();
-        modelViewProjectionMatrix = new Matrix4f();
-        textureManager = new TextureManager(engine);
-        shaderManager = new ShaderManager(engine);
-        resolutionMultiplier = engine.getConfig().getResolutionMultiplier();
-        container.loadFont(
-                engine.getFiles().get("Engine:font/QuicksandPro-Regular.otf"));
-        defaultFont = new FontRenderer(
-                container.createGlyphRenderer("Quicksand Pro", 128));
-        GuiWidgetDebugValues debugValues = engine.getDebugValues();
+        this.openGL = openGL;
+        resolutionMultiplier = engine.config().getResolutionMultiplier();
+        GuiWidgetDebugValues debugValues = engine.debugValues();
         fpsDebug = debugValues.get("Graphics-Fps");
         widthDebug = debugValues.get("Graphics-Width");
         heightDebug = debugValues.get("Graphics-Height");
         textureDebug = debugValues.get("Graphics-Textures");
         vaoDebug = debugValues.get("Graphics-VAOs");
-        sync = new Sync(engine.getConfig().getFPS(), 5000000000L, false,
-                "Rendering");
-        sync.init();
-    }
-
-    public FontRenderer getDefaultFont() {
-        return defaultFont;
+        gl = new GL(engine, openGL);
     }
 
     public void dispose() {
-        textureManager.clearCache(this);
-        defaultFont.dispose(this);
-        VAO.disposeAll(this);
-    }
-
-    public Container getContainer() {
-        return container;
-    }
-
-    public TextureManager getTextureManager() {
-        return textureManager;
-    }
-
-    public ShaderManager getShaderManager() {
-        return shaderManager;
+        GameState state = engine.state();
+        state.getScene().dispose(gl);
+        state.dispose(gl);
+        gl.dispose();
     }
 
     public ScapesEngine getEngine() {
         return engine;
     }
 
-    public OpenGL getOpenGL() {
-        return openGL;
+    public TextureManager getTextureManager() {
+        return gl.getTextureManager();
     }
 
-    public MatrixStack getMatrixStack() {
-        return matrixStack;
+    public ShaderManager getShaderManager() {
+        return gl.getShaderManager();
     }
 
-    public Matrix4f getProjectionMatrix() {
-        return projectionMatrix;
-    }
-
-    public Matrix4f getModelViewProjectionMatrix() {
-        projectionMatrix.multiply(matrixStack.current().getModelViewMatrix(),
-                modelViewProjectionMatrix);
-        return modelViewProjectionMatrix;
-    }
-
-    public void setProjectionPerspective(float width, float height, Cam cam) {
-        projectionMatrix.identity();
-        projectionMatrix
-                .perspective(cam.fov, width / height, cam.near, cam.far);
-        Matrix matrix = matrixStack.current();
-        matrix.identity();
-        Matrix4f viewMatrix = matrix.getModelViewMatrix();
-        viewMatrix.rotate(-cam.tilt, 0.0f, 0.0f, 1.0f);
-        viewMatrix.rotate(-cam.pitch - 90.0f, 1.0f, 0.0f, 0.0f);
-        viewMatrix.rotate(-cam.yaw + 90.0f, 0.0f, 0.0f, 1.0f);
-        openGL.enableCulling();
-        openGL.enableDepthTest();
-        openGL.setBlending(BlendingMode.NORMAL);
-    }
-
-    public void setProjectionOrthogonal(float x, float y, float width,
-            float height) {
-        projectionMatrix.identity();
-        projectionMatrix
-                .orthogonal(x, x + width, y + height, y, -1024.0f, 1024.0f);
-        Matrix matrix = matrixStack.current();
-        matrix.identity();
-        openGL.disableCulling();
-        openGL.disableDepthTest();
-        openGL.setBlending(BlendingMode.NORMAL);
-    }
-
-    public void step() {
-        GameState state = engine.getNewState();
-        if (state == null) {
-            state = engine.getState();
-        }
-        sync.capTPS();
-    }
-
-    public void render() {
+    public void render(double delta) {
         try {
             openGL.checkError("Pre-Render");
-            containerWidth = container.getContainerWidth();
-            containerHeight = container.getContainerHeight();
+            Container container = engine.container();
+            int containerWidth = container.getContainerWidth();
+            int containerHeight = container.getContainerHeight();
             boolean fboSizeDirty;
             if (container.contentResized() || resolutionMultiplier !=
-                    engine.getConfig().getResolutionMultiplier()) {
+                    engine.config().getResolutionMultiplier()) {
                 resolutionMultiplier =
-                        engine.getConfig().getResolutionMultiplier();
-                contentWidth = container.getContentWidth();
-                contentHeight = container.getContentHeight();
+                        engine.config().getResolutionMultiplier();
+                int contentWidth = container.getContentWidth();
+                int contentHeight = container.getContentHeight();
                 fboSizeDirty = true;
                 widthDebug.setValue(contentWidth);
                 heightDebug.setValue(contentHeight);
+                gl.reshape(contentWidth, contentHeight, containerWidth,
+                        containerHeight, resolutionMultiplier);
             } else {
                 fboSizeDirty = false;
             }
-            engine.step();
-            GameState state = engine.getState();
-            state.render(this, fboSizeDirty);
-            fpsDebug.setValue(sync.getTPS());
+            engine.step(gl, delta);
+            GameState state = engine.state();
+            state.render(gl, delta, fboSizeDirty);
+            fpsDebug.setValue(1.0 / delta);
             textureDebug.setValue(Texture.getTextureCount());
             vaoDebug.setValue(VAO.getVAOCount());
             if (triggerScreenshot) {
                 triggerScreenshot = false;
-                openGL.screenShot(engine.getHome().resolve("screenshots/" +
+                openGL.screenShot(engine.home().resolve("screenshots/" +
                         System.currentTimeMillis() +
-                        ".png"), this);
+                        ".png"), gl);
             }
-            VAO.disposeUnused(this);
-            Texture.disposeUnused(this);
+            VAO.disposeUnused(gl);
+            Texture.disposeUnused(gl);
         } catch (GraphicsException e) {
             LOGGER.warn("Graphics error during rendering: {}", e.toString());
         }
-    }
-
-    public Sync getSync() {
-        return sync;
-    }
-
-    public int getSceneWidth() {
-        return (int) (contentWidth * resolutionMultiplier);
-    }
-
-    public int getSceneHeight() {
-        return (int) (contentHeight * resolutionMultiplier);
-    }
-
-    public int getContentWidth() {
-        return contentWidth;
-    }
-
-    public int getContentHeight() {
-        return contentHeight;
-    }
-
-    public int getContainerWidth() {
-        return containerWidth;
-    }
-
-    public int getContainerHeight() {
-        return containerHeight;
     }
 
     public void triggerScreenshot() {
@@ -224,9 +114,6 @@ public class GraphicsSystem {
 
     @OpenGLFunction
     public void reset() {
-        Texture.disposeAll(this);
-        VAO.disposeAll(this);
-        FBO.disposeAll(this);
-        shaderManager.clearCache(this);
+        gl.reset();
     }
 }

@@ -24,7 +24,7 @@ import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.connection.Account;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.utils.Sync;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import java.io.IOException;
@@ -48,11 +48,11 @@ public class GameStateLoadMP extends GameState {
     }
 
     @Override
-    public void dispose() {
+    public void dispose(GL gl) {
     }
 
     @Override
-    public void init() {
+    public void init(GL gl) {
         progress = new GuiLoading();
         add(progress);
         progress.setLabel("Connecting to server...");
@@ -69,7 +69,7 @@ public class GameStateLoadMP extends GameState {
     }
 
     @Override
-    public void stepComponent(Sync sync) {
+    public void stepComponent(double delta) {
         try {
             switch (step) {
                 case 0:
@@ -88,10 +88,10 @@ public class GameStateLoadMP extends GameState {
                     break;
                 case 2:
                     int loadingRadius = FastMath.round(
-                            engine.getTagStructure().getStructure("Scapes")
+                            engine.tagStructure().getStructure("Scapes")
                                     .getDouble("RenderDistance"));
                     Account.Client account = Account.read(
-                            engine.getHome().resolve("Account.properties"));
+                            engine.home().resolve("Account.properties"));
                     client = new ClientConnection(engine, channel, account,
                             loadingRadius);
                     step++;

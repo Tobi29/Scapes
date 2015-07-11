@@ -22,7 +22,7 @@ import org.tobi29.scapes.block.TerrainTextureRegistry;
 import org.tobi29.scapes.block.models.ItemModel;
 import org.tobi29.scapes.block.models.ItemModelSimple;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -133,31 +133,31 @@ public abstract class ItemTool extends VanillaItem
     }
 
     @Override
-    public void render(ItemStack item, GraphicsSystem graphics, Shader shader,
+    public void render(ItemStack item, GL gl, Shader shader,
             float r, float g, float b, float a) {
         if (item.getData() > 0) {
-            modelHandle.render(graphics, shader);
+            modelHandle.render(gl, shader);
         }
         MetalType metal = plugin.getMetalType(
                 item.getMetaData("Vanilla").getString("MetalType"));
         if (metal == null) {
             metal = plugin.getMetalType("Iron");
         }
-        getModelHead(metal).render(graphics, shader);
+        getModelHead(metal).render(gl, shader);
     }
 
     @Override
-    public void renderInventory(ItemStack item, GraphicsSystem graphics,
+    public void renderInventory(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a) {
         if (item.getData() > 0) {
-            modelHandle.renderInventory(graphics, shader);
+            modelHandle.renderInventory(gl, shader);
         }
         MetalType metal = plugin.getMetalType(
                 item.getMetaData("Vanilla").getString("MetalType"));
         if (metal == null) {
             metal = plugin.getMetalType("Iron");
         }
-        getModelHead(metal).renderInventory(graphics, shader);
+        getModelHead(metal).renderInventory(gl, shader);
     }
 
     @Override

@@ -18,7 +18,7 @@ package org.tobi29.scapes.engine.opengl.shader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.OpenGLFunction;
 import org.tobi29.scapes.engine.utils.io.ProcessStream;
@@ -39,15 +39,15 @@ public class Shader {
 
     @OpenGLFunction
     public Shader(Resource vertexResource, Resource fragmentResource,
-            Properties properties, ShaderCompileInformation information,
-            GraphicsSystem graphics) throws IOException {
-        OpenGL openGL = graphics.getOpenGL();
+            Properties properties, ShaderCompileInformation information, GL gl)
+            throws IOException {
+        OpenGL openGL = gl.getOpenGL();
         vertexShader = createShader(
                 information.processVertexSource(readSource(vertexResource)),
-                openGL.createVertexObject(), graphics);
+                openGL.createVertexObject(), gl);
         fragmentShader = createShader(
                 information.processFragmentSource(readSource(fragmentResource)),
-                openGL.createFragmentObject(), graphics);
+                openGL.createFragmentObject(), gl);
         program = openGL.createProgram();
         openGL.attach(program, vertexShader);
         openGL.attach(program, fragmentShader);
@@ -86,9 +86,8 @@ public class Shader {
                 .process(stream, ProcessStream.asString()));
     }
 
-    private static int createShader(String source, int shader,
-            GraphicsSystem graphics) {
-        OpenGL openGL = graphics.getOpenGL();
+    private static int createShader(String source, int shader, GL gl) {
+        OpenGL openGL = gl.getOpenGL();
         openGL.source(shader, source);
         openGL.compile(shader);
         openGL.printLogShader(shader);
@@ -108,8 +107,8 @@ public class Shader {
     }
 
     @OpenGLFunction
-    public void dispose(GraphicsSystem graphics) {
-        OpenGL openGL = graphics.getOpenGL();
+    public void dispose(GL gl) {
+        OpenGL openGL = gl.getOpenGL();
         openGL.deleteProgram(program);
         openGL.deleteShader(fragmentShader);
         openGL.deleteShader(vertexShader);

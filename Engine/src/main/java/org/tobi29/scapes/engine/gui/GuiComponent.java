@@ -18,7 +18,7 @@ package org.tobi29.scapes.engine.gui;
 
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -165,25 +165,25 @@ public abstract class GuiComponent
         }
     }
 
-    public void render(GraphicsSystem graphics, Shader shader,
+    public void render(GL gl, Shader shader,
             FontRenderer font, double delta) {
         if (visible) {
-            MatrixStack matrixStack = graphics.getMatrixStack();
+            MatrixStack matrixStack = gl.getMatrixStack();
             Matrix matrix = matrixStack.push();
             transform(matrix);
-            renderComponent(graphics, shader, font, delta);
+            renderComponent(gl, shader, font, delta);
             components.stream().forEach(component -> component
-                    .render(graphics, shader, font, delta));
-            renderOverlay(graphics, shader, font);
+                    .render(gl, shader, font, delta));
+            renderOverlay(gl, shader, font);
             matrixStack.pop();
         }
     }
 
-    public void renderComponent(GraphicsSystem graphics, Shader shader,
+    public void renderComponent(GL gl, Shader shader,
             FontRenderer font, double delta) {
     }
 
-    public void renderOverlay(GraphicsSystem graphics, Shader shader,
+    public void renderOverlay(GL gl, Shader shader,
             FontRenderer font) {
     }
 
@@ -199,7 +199,7 @@ public abstract class GuiComponent
     }
 
     public void update(ScapesEngine engine) {
-        GuiController guiController = engine.getGuiController();
+        GuiController guiController = engine.guiController();
         update(guiController.getGuiCursorX(), guiController.getGuiCursorY(),
                 true, engine);
     }
@@ -210,7 +210,7 @@ public abstract class GuiComponent
             updateComponent();
             boolean inside = mouseInside && checkInside(mouseX, mouseY);
             if (inside) {
-                GuiController guiController = engine.getGuiController();
+                GuiController guiController = engine.guiController();
                 if (guiController.getLeftClick()) {
                     clickLeft(new GuiComponentEvent(mouseX, mouseY), engine);
                 }

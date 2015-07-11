@@ -42,13 +42,13 @@ public class GuiMessage extends Gui {
     }
 
     @Override
-    public void renderComponent(GraphicsSystem graphics, Shader shader,
+    public void renderComponent(GL gl, Shader shader,
             FontRenderer font, double delta) {
         progress += speed * delta;
-        graphics.getTextureManager().unbind(graphics);
-        OpenGL openGL = graphics.getOpenGL();
+        gl.getTextureManager().unbind(gl);
+        OpenGL openGL = gl.getOpenGL();
         openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
-        vao.render(graphics, shader);
+        vao.render(gl, shader);
         GuiComponent parent = this.parent;
         if (progress >= 1.0 && parent != null) {
             parent.remove(this);

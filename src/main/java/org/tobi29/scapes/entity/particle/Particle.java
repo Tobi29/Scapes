@@ -19,7 +19,7 @@ package org.tobi29.scapes.entity.particle;
 import org.tobi29.scapes.block.AABBElement;
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.Pool;
@@ -150,14 +150,14 @@ public abstract class Particle {
         }
     }
 
-    public void render(GraphicsSystem graphics, Cam cam, Shader shader) {
+    public void render(GL gl, Cam cam, Shader shader) {
         WorldClient world = particleManager.getWorld();
         posRender.set(pos.now());
         int x = posRender.intX(), y = posRender.intY(), z = posRender.intZ();
         BlockType type = world.getTerrain().type(x, y, z);
         if (!type.isSolid(world.getTerrain(), x, y, z) ||
                 type.isTransparent(world.getTerrain(), x, y, z)) {
-            OpenGL openGL = graphics.getOpenGL();
+            OpenGL openGL = gl.getOpenGL();
             openGL.setAttribute2f(4,
                     world.getTerrain().blockLight(x, y, z) / 15.0f,
                     world.getTerrain().sunLight(x, y, z) / 15.0f);
@@ -168,12 +168,12 @@ public abstract class Particle {
             float posRenderZ =
                     (float) (posRender.doubleZ() - cam.position.doubleZ());
             renderParticle(posRenderX, posRenderY, posRenderZ, 1.0f, 1.0f, 1.0f,
-                    1.0f, graphics, shader);
+                    1.0f, gl, shader);
         }
     }
 
     public abstract void renderParticle(float x, float y, float z, float r,
-            float g, float b, float a, GraphicsSystem graphics, Shader shader);
+            float g, float b, float a, GL gl, Shader shader);
 
     public abstract void update(double delta);
 }

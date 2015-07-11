@@ -71,7 +71,7 @@ public class PacketSetWorld extends Packet implements PacketClient {
                 new Cam(0.01f, client.getLoadingRadius()), seed, name,
                 newWorld -> new TerrainInfiniteClient(newWorld,
                         client.getLoadingRadius() >> 4, 512,
-                        client.getGame().getEngine().getTaskExecutor()), tag,
+                        client.getGame().getEngine().taskExecutor()), tag,
                 entityID));
     }
 }

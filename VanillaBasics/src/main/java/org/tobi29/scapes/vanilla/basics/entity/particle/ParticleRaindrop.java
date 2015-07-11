@@ -65,15 +65,15 @@ public class ParticleRaindrop extends Particle {
 
     @Override
     public void renderParticle(float x, float y, float z, float r, float g,
-            float b, float a, GraphicsSystem graphics, Shader shader) {
-        MatrixStack matrixStack = graphics.getMatrixStack();
+            float b, float a, GL gl, Shader shader) {
+        MatrixStack matrixStack = gl.getMatrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(x, y, z);
-        graphics.getTextureManager().unbind(graphics);
-        OpenGL openGL = graphics.getOpenGL();
+        gl.getTextureManager().unbind(gl);
+        OpenGL openGL = gl.getOpenGL();
         openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, g * 0.3f, b * 0.5f,
                 a * 0.3f);
-        VAO.render(graphics, shader);
+        VAO.render(gl, shader);
         matrixStack.pop();
     }
 

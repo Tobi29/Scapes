@@ -37,66 +37,66 @@ public class FBO {
     private TextureFBODepth textureDepth;
 
     public FBO(int width, int height, int colorAttachments, boolean depth,
-            boolean hdr, boolean alpha, GraphicsSystem graphics) {
+            boolean hdr, boolean alpha, GL gl) {
         this.width = FastMath.max(width, 1);
         this.height = FastMath.max(height, 1);
         texturesColor = new TextureFBOColor[colorAttachments];
         this.depth = depth;
         this.hdr = hdr;
         this.alpha = alpha;
-        init(graphics);
+        init(gl);
     }
 
     @OpenGLFunction
-    public static void disposeAll(GraphicsSystem graphics) {
+    public static void disposeAll(GL gl) {
         while (!FBOS.isEmpty()) {
-            FBOS.get(0).dispose(graphics);
+            FBOS.get(0).dispose(gl);
         }
     }
 
     @OpenGLFunction
-    private void init(GraphicsSystem graphics) {
-        init(graphics, alpha, hdr);
-        OpenGL openGL = graphics.getOpenGL();
+    private void init(GL gl) {
+        init(gl, alpha, hdr);
+        OpenGL openGL = gl.getOpenGL();
         framebufferID = openGL.createFBO();
-        activate(graphics);
-        attach(graphics);
+        activate(gl);
+        attach(gl);
         if (openGL.checkFBO() != FBOStatus.COMPLETE) {
             for (TextureFBOColor textureColor : texturesColor) {
-                textureColor.dispose(graphics);
+                textureColor.dispose(gl);
             }
             if (depth) {
-                textureDepth.dispose(graphics);
+                textureDepth.dispose(gl);
             }
-            init(graphics, alpha, false);
-            attach(graphics);
+            init(gl, alpha, false);
+            attach(gl);
         }
         openGL.clear(0.0f, 0.0f, 0.0f, 0.0f);
-        deactivate(graphics);
+        deactivate(gl);
         FBOS.add(this);
     }
 
     @OpenGLFunction
-    private void init(GraphicsSystem graphics, boolean alpha, boolean hdr) {
+    private void init(GL gl, boolean alpha, boolean hdr) {
         for (int i = 0; i < texturesColor.length; i++) {
             texturesColor[i] =
                     new TextureFBOColor(width, height, TextureFilter.LINEAR,
                             TextureFilter.LINEAR, TextureWrap.CLAMP,
                             TextureWrap.CLAMP, alpha, hdr);
-            texturesColor[i].bind(graphics);
+            texturesColor[i].bind(gl);
         }
         if (depth) {
             textureDepth =
                     new TextureFBODepth(width, height, TextureFilter.LINEAR,
                             TextureFilter.LINEAR, TextureWrap.CLAMP,
                             TextureWrap.CLAMP);
-            textureDepth.bind(graphics);
+            textureDepth.bind(gl);
         }
     }
 
     @OpenGLFunction
-    private void attach(GraphicsSystem graphics) {
-        OpenGL openGL = graphics.getOpenGL();
+    private void attach(GL gl) {
+        OpenGL openGL = gl.getOpenGL();
         if (depth) {
             openGL.attachDepth(textureDepth.getTextureID());
         }
@@ -106,43 +106,43 @@ public class FBO {
     }
 
     @OpenGLFunction
-    public void deactivate(GraphicsSystem graphics) {
-        OpenGL openGL = graphics.getOpenGL();
+    public void deactivate(GL gl) {
+        OpenGL openGL = gl.getOpenGL();
         openGL.bindFBO(lastFBO);
         currentBO = lastFBO;
         lastFBO = 0;
     }
 
     @OpenGLFunction
-    public void activate(GraphicsSystem graphics) {
+    public void activate(GL gl) {
         if (framebufferID == -1) {
-            init(graphics);
+            init(gl);
         }
         lastFBO = currentBO;
         currentBO = framebufferID;
-        OpenGL openGL = graphics.getOpenGL();
+        OpenGL openGL = gl.getOpenGL();
         openGL.bindFBO(framebufferID);
         openGL.drawbuffersFBO(texturesColor.length);
     }
 
     @OpenGLFunction
-    public void setSize(int width, int height, GraphicsSystem graphics) {
-        dispose(graphics);
+    public void setSize(int width, int height, GL gl) {
+        dispose(gl);
         this.width = FastMath.max(width, 1);
         this.height = FastMath.max(height, 1);
-        init(graphics);
+        init(gl);
     }
 
     @OpenGLFunction
-    public void dispose(GraphicsSystem graphics) {
+    public void dispose(GL gl) {
         if (framebufferID != -1) {
-            OpenGL openGL = graphics.getOpenGL();
+            OpenGL openGL = gl.getOpenGL();
             openGL.deleteFBO(framebufferID);
             for (TextureFBOColor textureColor : texturesColor) {
-                textureColor.dispose(graphics);
+                textureColor.dispose(gl);
             }
             if (depth) {
-                textureDepth.dispose(graphics);
+                textureDepth.dispose(gl);
             }
             framebufferID = -1;
         }

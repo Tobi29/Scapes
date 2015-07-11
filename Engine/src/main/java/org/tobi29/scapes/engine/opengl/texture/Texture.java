@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.engine.opengl.texture;
 
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.OpenGLFunction;
 import org.tobi29.scapes.engine.utils.graphics.MipMapGenerator;
@@ -54,16 +54,16 @@ public abstract class Texture {
     }
 
     @OpenGLFunction
-    public static void disposeUnused(GraphicsSystem graphics) {
+    public static void disposeUnused(GL gl) {
         while (!DISPOSE_TEXTURES.isEmpty()) {
-            DISPOSE_TEXTURES.poll().dispose(graphics);
+            DISPOSE_TEXTURES.poll().dispose(gl);
         }
     }
 
     @OpenGLFunction
-    public static void disposeAll(GraphicsSystem graphics) {
+    public static void disposeAll(GL gl) {
         while (!TEXTURES.isEmpty()) {
-            TEXTURES.get(0).dispose(graphics);
+            TEXTURES.get(0).dispose(gl);
         }
     }
 
@@ -72,11 +72,11 @@ public abstract class Texture {
     }
 
     @OpenGLFunction
-    public void bind(GraphicsSystem graphics) {
+    public void bind(GL gl) {
         if (textureID == -1) {
-            store(graphics);
+            store(gl);
         }
-        OpenGL openGL = graphics.getOpenGL();
+        OpenGL openGL = gl.getOpenGL();
         openGL.bindTexture(textureID);
         if (dirtyFilter) {
             openGL.minFilter(minFilter, mipmaps > 0);
@@ -87,8 +87,8 @@ public abstract class Texture {
         }
     }
 
-    protected void store(GraphicsSystem graphics) {
-        OpenGL openGL = graphics.getOpenGL();
+    protected void store(GL gl) {
+        OpenGL openGL = gl.getOpenGL();
         buffer.rewind();
         textureID = openGL.createTexture();
         openGL.bindTexture(textureID);
@@ -104,8 +104,8 @@ public abstract class Texture {
     }
 
     @OpenGLFunction
-    public void dispose(GraphicsSystem graphics) {
-        OpenGL openGL = graphics.getOpenGL();
+    public void dispose(GL gl) {
+        OpenGL openGL = gl.getOpenGL();
         if (textureID != -1) {
             openGL.deleteTexture(textureID);
             textureID = -1;

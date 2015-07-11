@@ -59,16 +59,16 @@ public class GuiComponentSliderVert extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GraphicsSystem graphics, Shader shader,
+    public void renderComponent(GL gl, Shader shader,
             FontRenderer font, double delta) {
         float slider = (float) value * (height - sliderHeight) + y +
                 sliderHeight * 0.5f;
-        graphics.getTextureManager().unbind(graphics);
-        MatrixStack matrixStack = graphics.getMatrixStack();
-        vaoShadow.render(graphics, shader);
+        gl.getTextureManager().unbind(gl);
+        MatrixStack matrixStack = gl.getMatrixStack();
+        vaoShadow.render(gl, shader);
         Matrix matrix = matrixStack.push();
         matrix.translate(0.0f, slider, 0.0f);
-        vaoSlider.render(graphics, shader);
+        vaoSlider.render(gl, shader);
         matrixStack.pop();
     }
 
@@ -85,7 +85,7 @@ public class GuiComponentSliderVert extends GuiComponent {
             ScapesEngine engine) {
         super.update(mouseX, mouseY, mouseInside, engine);
         if (dragging) {
-            if (engine.getGuiController().getLeftDrag()) {
+            if (engine.guiController().getLeftDrag()) {
                 value = FastMath.clamp((mouseY - y - sliderHeight * 0.5) /
                         (height - sliderHeight), 0, 1);
                 if (hovering) {
@@ -101,8 +101,8 @@ public class GuiComponentSliderVert extends GuiComponent {
             }
         }
         if (checkInside(mouseX, mouseY)) {
-            if (engine.getGuiController().getLeftClick()) {
-                engine.getSounds()
+            if (engine.guiController().getLeftClick()) {
+                engine.sounds()
                         .playSound("Engine:sound/Click.ogg", 1.0f, 1.0f);
             }
         }

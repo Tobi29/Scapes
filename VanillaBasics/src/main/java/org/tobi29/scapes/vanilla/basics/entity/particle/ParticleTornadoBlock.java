@@ -18,7 +18,7 @@ package org.tobi29.scapes.vanilla.basics.entity.particle;
 
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.ItemStack;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -56,13 +56,13 @@ public class ParticleTornadoBlock extends Particle {
 
     @Override
     public void renderParticle(float x, float y, float z, float r, float g,
-            float b, float a, GraphicsSystem graphics, Shader shader) {
-        MatrixStack matrixStack = graphics.getMatrixStack();
+            float b, float a, GL gl, Shader shader) {
+        MatrixStack matrixStack = gl.getMatrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(x, y, z);
         matrix.rotate((float) spin, 0, 0, 1);
         matrix.rotate(dir, 1, 0, 0);
-        item.getMaterial().render(item, graphics, shader, r, g, b, a);
+        item.getMaterial().render(item, gl, shader, r, g, b, a);
         matrixStack.pop();
     }
 

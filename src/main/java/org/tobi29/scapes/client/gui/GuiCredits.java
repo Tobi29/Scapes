@@ -24,7 +24,7 @@ import org.tobi29.scapes.engine.gui.GuiAlignment;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.engine.gui.GuiComponentVisiblePane;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -35,7 +35,8 @@ import java.io.IOException;
 public class GuiCredits extends Gui {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GuiCredits.class);
-    private final FontRenderer.Text vaoText;
+    private final String credits;
+    private FontRenderer.Text vaoText;
     private double y = -512;
 
     public GuiCredits(GameState state, Gui prev) {
@@ -45,7 +46,7 @@ public class GuiCredits extends Gui {
         GuiComponentTextButton back =
                 new GuiComponentTextButton(13, 64, 70, 30, 18, "Back");
         StringBuilder credits = new StringBuilder(200);
-        try (BufferedReader reader = state.getEngine().getFiles()
+        try (BufferedReader reader = state.getEngine().files()
                 .get("Scapes:Readme.txt").reader()) {
             String line = reader.readLine();
             while (line != null) {
@@ -61,27 +62,30 @@ public class GuiCredits extends Gui {
         } catch (IOException e) {
             LOGGER.error("Error reading Readme.txt: {}", e.toString());
         }
+        this.credits = credits.toString();
         back.addLeftClick(event -> {
-            state.getEngine().getSounds().stopMusic();
+            state.getEngine().sounds().stopMusic();
             state.remove(this);
             state.add(prev);
         });
         pane.add(back);
         add(pane);
-        state.getEngine().getSounds()
+        state.getEngine().sounds()
                 .playMusic("Scapes:sound/Credits.ogg", 1.0f, 1.0f);
-        vaoText = state.getFont()
-                .render(credits.toString(), 20, 0, 18, 1, 1, 1, 1);
     }
 
     @Override
-    public void renderComponent(GraphicsSystem graphics, Shader shader,
-            FontRenderer font, double delta) {
+    public void renderComponent(GL gl, Shader shader, FontRenderer font,
+            double delta) {
+        if (vaoText == null) {
+            vaoText =
+                    gl.getDefaultFont().render(credits, 20, 0, 18, 1, 1, 1, 1);
+        }
         y += 40.0 * delta;
-        MatrixStack matrixStack = graphics.getMatrixStack();
+        MatrixStack matrixStack = gl.getMatrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(0, (float) -y, 0);
-        vaoText.render(graphics, shader);
+        vaoText.render(gl, shader);
         matrixStack.pop();
     }
 }

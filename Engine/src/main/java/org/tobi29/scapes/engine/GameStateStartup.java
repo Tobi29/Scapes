@@ -17,8 +17,8 @@
 package org.tobi29.scapes.engine;
 
 import org.tobi29.scapes.engine.gui.GuiComponentIcon;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.scenes.SceneImage;
-import org.tobi29.scapes.engine.utils.Sync;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 public class GameStateStartup extends GameState {
@@ -35,11 +35,11 @@ public class GameStateStartup extends GameState {
     }
 
     @Override
-    public void dispose() {
+    public void dispose(GL gl) {
     }
 
     @Override
-    public void init() {
+    public void init(GL gl) {
     }
 
     @Override
@@ -53,11 +53,11 @@ public class GameStateStartup extends GameState {
     }
 
     @Override
-    public void stepComponent(Sync sync) {
+    public void stepComponent(double delta) {
         GuiComponentIcon image = scene.getImage();
         if (image != null) {
             if (warmUp > 20) {
-                time += engine.getGraphics().getSync().getSpeedFactor() / 5.0;
+                time += delta / 5.0;
                 float a = (float) FastMath.sinTable(time * FastMath.PI);
                 a = FastMath.min(a * 1.4f, 1.0f);
                 image.setColor(1.0f, 1.0f, 1.0f, a);

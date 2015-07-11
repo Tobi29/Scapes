@@ -56,7 +56,7 @@ public class MobPigClient extends MobLivingClient {
     @Override
     public Optional<MobModel> createModel() {
         Texture texture =
-                world.getGame().getEngine().getGraphics().getTextureManager()
+                world.getGame().getEngine().graphics().getTextureManager()
                         .getTexture("VanillaBasics:image/entity/mob/Pig");
         return Optional.of(new MobLivingModelPig(this, texture));
     }

@@ -84,25 +84,25 @@ public class GuiComponentLogo extends GuiComponent {
 
     @Override
     public void clickLeft(GuiComponentEvent event, ScapesEngine engine) {
-        engine.getSounds().playSound("Engine:sound/Click.ogg", 1.0f, 1.0f);
+        engine.sounds().playSound("Engine:sound/Click.ogg", 1.0f, 1.0f);
         super.clickLeft(event, engine);
         text = getSplash();
         updateText();
     }
 
     @Override
-    public void renderComponent(GraphicsSystem graphics, Shader shader,
+    public void renderComponent(GL gl, Shader shader,
             FontRenderer font, double delta) {
-        graphics.getTextureManager().bind("Scapes:image/Icon", graphics);
-        OpenGL openGL = graphics.getOpenGL();
+        gl.getTextureManager().bind("Scapes:image/Icon", gl);
+        OpenGL openGL = gl.getOpenGL();
         openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
-        vao.render(graphics, shader);
+        vao.render(gl, shader);
         if (this.font != font) {
             this.font = font;
             updateText();
         }
-        vaoScapes.render(graphics, shader);
-        vaoSplash.render(graphics, shader);
+        vaoScapes.render(gl, shader);
+        vaoSplash.render(gl, shader);
     }
 
     private void updateText() {

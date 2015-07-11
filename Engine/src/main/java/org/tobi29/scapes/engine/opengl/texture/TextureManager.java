@@ -16,8 +16,10 @@
 
 package org.tobi29.scapes.engine.opengl.texture;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
 import org.tobi29.scapes.engine.utils.io.filesystem.Resource;
@@ -29,6 +31,8 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TextureManager {
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(TextureManager.class);
     private final ScapesEngine engine;
     private final Map<String, TextureAsset> cache = new ConcurrentHashMap<>();
     private final Texture empty;
@@ -44,35 +48,36 @@ public class TextureManager {
         empty = new TextureCustom(1, 1, buffer, 0);
     }
 
-    public void bind(String asset, GraphicsSystem graphics) {
+    public void bind(String asset, GL gl) {
         if (asset == null) {
-            unbind(graphics);
+            unbind(gl);
         } else if (asset.isEmpty()) {
-            unbind(graphics);
+            unbind(gl);
         } else {
-            bind(getTexture(asset), graphics);
+            bind(getTexture(asset), gl);
         }
     }
 
-    public void bind(Texture texture, GraphicsSystem graphics) {
+    public void bind(Texture texture, GL gl) {
         if (texture == null) {
-            unbind(graphics);
+            unbind(gl);
         } else {
-            texture.bind(graphics);
+            texture.bind(gl);
         }
     }
 
     public Texture getTexture(String asset) {
-        if (!cache.containsKey(asset)) {
-            loadFromAsset(asset);
+        Texture texture = cache.get(asset);
+        if (texture == null) {
+            texture = loadFromAsset(asset);
         }
-        return cache.get(asset);
+        return texture;
     }
 
-    private void loadFromAsset(String asset) {
+    private Texture loadFromAsset(String asset) {
         try {
             Properties properties = new Properties();
-            FileSystemContainer files = engine.getFiles();
+            FileSystemContainer files = engine.files();
             Resource imageResource = files.get(asset + ".png");
             Resource propertiesResource = files.get(asset + ".properties");
             if (propertiesResource.exists()) {
@@ -81,18 +86,21 @@ public class TextureManager {
             TextureAsset texture =
                     new TextureAsset(imageResource.readIO(), properties);
             cache.put(asset, texture);
+            return texture;
         } catch (IOException e) {
-            engine.crash(e);
+            LOGGER.error("Failed to load texture from: {} ({})", asset,
+                    e.getMessage());
         }
+        return empty;
     }
 
-    public void unbind(GraphicsSystem graphics) {
-        empty.bind(graphics);
+    public void unbind(GL gl) {
+        empty.bind(gl);
     }
 
-    public void clearCache(GraphicsSystem graphics) {
+    public void clearCache(GL gl) {
         for (Texture texture : cache.values()) {
-            texture.dispose(graphics);
+            texture.dispose(gl);
         }
         cache.clear();
     }

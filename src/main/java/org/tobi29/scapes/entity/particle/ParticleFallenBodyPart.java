@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.entity.particle;
 
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
@@ -49,18 +49,18 @@ public class ParticleFallenBodyPart extends Particle {
 
     @Override
     public void renderParticle(float x, float y, float z, float r, float g,
-            float b, float a, GraphicsSystem graphics, Shader shader) {
-        graphics.getTextureManager().bind(texture, graphics);
-        OpenGL openGL = graphics.getOpenGL();
+            float b, float a, GL gl, Shader shader) {
+        gl.getTextureManager().bind(texture, gl);
+        OpenGL openGL = gl.getOpenGL();
         if (!culling) {
             openGL.disableCulling();
         }
-        MatrixStack matrixStack = graphics.getMatrixStack();
+        MatrixStack matrixStack = gl.getMatrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(x, y, z);
         matrix.rotate((float) zRot, 0, 0, 1);
         matrix.rotate((float) xRot, 1, 0, 0);
-        box.render(r, g, b, a, graphics, shader);
+        box.render(r, g, b, a, gl, shader);
         matrixStack.pop();
         if (!culling) {
             openGL.enableCulling();

@@ -17,7 +17,7 @@
 package org.tobi29.scapes.entity.particle;
 
 import org.tobi29.scapes.block.TerrainTexture;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.Mesh;
 import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.VAO;
@@ -68,7 +68,7 @@ public class ParticleBlock extends Particle {
 
     @Override
     public void renderParticle(float x, float y, float z, float r, float g,
-            float b, float a, GraphicsSystem graphics, Shader shader) {
+            float b, float a, GL gl, Shader shader) {
         if (!BLOCKS.containsKey(texPos.floatX() + "/" + texPos.floatY())) {
             Mesh mesh = new Mesh(false, false);
             mesh.normal(0.0f, -1.0f, 0.0f);
@@ -82,7 +82,7 @@ public class ParticleBlock extends Particle {
             mesh.vertex(-SIZE, 0.0f, SIZE);
             BLOCKS.put(texPos.floatX() + "/" + texPos.floatY(), mesh.finish());
         }
-        MatrixStack matrixStack = graphics.getMatrixStack();
+        MatrixStack matrixStack = gl.getMatrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(x, y, z - (float) FastMath.max(0.0, 1.0 - time));
         double camDir = FastMath.pointDirection(x, y, 0.0, 0.0);
@@ -90,12 +90,11 @@ public class ParticleBlock extends Particle {
         matrix.rotate((float) (FastMath.atan2(z, FastMath.length(x, y)) *
                 FastMath.RAD_2_DEG), 1, 0, 0);
         matrix.rotate((float) (camDir + dir), 0, 1, 0);
-        texture.bind(graphics);
-        OpenGL openGL = graphics.getOpenGL();
+        texture.bind(gl);
+        OpenGL openGL = gl.getOpenGL();
         openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, r * this.r, g * this.g,
                 b * this.b, a * this.a);
-        BLOCKS.get(texPos.floatX() + "/" + texPos.floatY())
-                .render(graphics, shader);
+        BLOCKS.get(texPos.floatX() + "/" + texPos.floatY()).render(gl, shader);
         matrixStack.pop();
     }
 

@@ -67,13 +67,12 @@ public class WorldSkyboxOverworld implements WorldSkybox {
     private float rainGain, fogR, fogG, fogB, fogDistance;
 
     public WorldSkyboxOverworld(ClimateGenerator climateGenerator,
-            BiomeGenerator biomeGenerator, WorldClient world) {
+            BiomeGenerator biomeGenerator, WorldClient world, GL gl) {
         this.climateGenerator = climateGenerator;
         this.biomeGenerator = biomeGenerator;
         this.world = world;
         long seed = world.getSeed();
-        fbo = new FBO(512, 512, 1, false, false, true,
-                world.getGame().getEngine().getGraphics());
+        fbo = new FBO(512, 512, 1, false, false, true, gl);
         billboardMesh = VAOUtility.createVTI(
                 new float[]{1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f,
                         -1.0f, 1.0f, 1.0f, -1.0f, 1.0f},
@@ -263,9 +262,9 @@ public class WorldSkyboxOverworld implements WorldSkybox {
     }
 
     @Override
-    public void init(GraphicsSystem graphics, Cam cam) {
+    public void init(GL gl, Cam cam) {
         ScapesEngine engine = world.getGame().getEngine();
-        GuiWidgetDebugValues debugValues = engine.getDebugValues();
+        GuiWidgetDebugValues debugValues = engine.debugValues();
         temperatureDebug = debugValues.get("Vanilla-Environment-Temperature");
         humidityDebug = debugValues.get("Vanilla-Environment-Humidity");
         weatherDebug = debugValues.get("Vanilla-Environment-Weather");
@@ -276,17 +275,17 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         bodyTemperatureDebug =
                 debugValues.get("Vanilla-Condition-Body-Temperature");
         exposureDebug = debugValues.get("Vanilla-Exposure");
-        rainAudio = engine.getSounds().playStaticAudio(
+        rainAudio = engine.sounds().playStaticAudio(
                 "VanillaBasics:sound/entity/particle/rain/Rain1.ogg", 1.0f,
                 0.0f);
-        windAudio = engine.getSounds().playStaticAudio(
+        windAudio = engine.sounds().playStaticAudio(
                 "VanillaBasics:sound/entity/particle/rain/Wind1.ogg", 1.0f,
                 0.0f);
         world.getScene().getHud().add(new GuiHudCondition(world.getPlayer()));
     }
 
     @Override
-    public void renderUpdate(GraphicsSystem graphics, Cam cam, double delta) {
+    public void renderUpdate(GL gl, Cam cam, double delta) {
         MobPlayerClient player = world.getPlayer();
         SceneScapesVoxelWorld scene = world.getScene();
         double factor = FastMath.min(1.0, delta * 10.0);
@@ -331,11 +330,11 @@ public class WorldSkyboxOverworld implements WorldSkybox {
     }
 
     @Override
-    public void render(GraphicsSystem graphics, Cam cam) {
+    public void render(GL gl, Cam cam) {
         MobPlayerClient player = world.getPlayer();
         SceneScapesVoxelWorld scene = world.getScene();
-        OpenGL openGL = graphics.getOpenGL();
-        MatrixStack matrixStack = graphics.getMatrixStack();
+        OpenGL openGL = gl.getOpenGL();
+        MatrixStack matrixStack = gl.getMatrixStack();
         float skyLight = (float) (15.0 - climateGenerator
                 .getSunLightReduction(scene.getCam().position.intX(),
                         scene.getCam().position.intY())) / 15.0f;
@@ -350,23 +349,22 @@ public class WorldSkyboxOverworld implements WorldSkybox {
                 .getSunAzimuth(cam.position.doubleX(), cam.position.doubleY()) *
                 FastMath.RAD_2_DEG);
         // Sky
-        graphics.getTextureManager().unbind(graphics);
+        gl.getTextureManager().unbind(gl);
         openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
-        ShaderManager shaderManager = graphics.getShaderManager();
-        Shader shader = shaderManager
-                .getShader("VanillaBasics:shader/Skybox", graphics);
+        ShaderManager shaderManager = gl.getShaderManager();
+        Shader shader =
+                shaderManager.getShader("VanillaBasics:shader/Skybox", gl);
         shader.setUniform3f(4, scene.getFogR(), scene.getFogG(),
                 scene.getFogB());
         shader.setUniform1f(5, scene.getFogDistance());
         shader.setUniform4f(6, skyboxLight * skyboxLight, skyboxLight,
                 skyboxLight, 1.0f);
-        skyboxMesh.render(graphics, shader);
+        skyboxMesh.render(gl, shader);
         // Stars
         if (skyLight < 1.0f) {
             Random random = ThreadLocalRandom.current();
             openGL.setBlending(BlendingMode.ADD);
-            shader = shaderManager
-                    .getShader("VanillaBasics:shader/Glow", graphics);
+            shader = shaderManager.getShader("VanillaBasics:shader/Glow", gl);
             float brightness =
                     FastMath.max(1.0f - skyLight - random.nextFloat() * 0.1f,
                             0.0f);
@@ -374,7 +372,7 @@ public class WorldSkyboxOverworld implements WorldSkybox {
             Matrix matrix = matrixStack.push();
             matrix.rotate(sunAzimuth + 180.0f, 0.0f, 0.0f, 1.0f);
             matrix.rotate(-sunElevation, 1.0f, 0.0f, 0.0f);
-            starMesh.render(graphics, shader);
+            starMesh.render(gl, shader);
             matrixStack.pop();
         } else {
             openGL.setBlending(BlendingMode.ADD);
@@ -384,50 +382,48 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         matrix.rotate(sunAzimuth + 180.0f, 0.0f, 0.0f, 1.0f);
         matrix.rotate(-sunElevation, 1.0f, 0.0f, 0.0f);
         matrix.scale(1.0f, 1.0f, 1.0f);
-        shader = shaderManager.getShader("VanillaBasics:shader/Glow", graphics);
+        shader = shaderManager.getShader("VanillaBasics:shader/Glow", gl);
         shader.setUniform4f(4, fogR * 1.0f, fogG * 1.1f, fogB * 1.1f, 1.0f);
-        billboardMesh.render(graphics, shader);
+        billboardMesh.render(gl, shader);
         matrix.scale(0.2f, 1.0f, 0.2f);
         shader.setUniform4f(4, fogR * 1.6f, fogG * 1.6f, fogB * 1.3f, 1.0f);
-        billboardMesh.render(graphics, shader);
+        billboardMesh.render(gl, shader);
         matrixStack.pop();
         // Moon
-        shader = shaderManager.getShader("Engine:shader/Textured", graphics);
-        graphics.getTextureManager().bind("VanillaBasics:image/Moon", graphics);
+        shader = shaderManager.getShader("Engine:shader/Textured", gl);
+        gl.getTextureManager().bind("VanillaBasics:image/Moon", gl);
         matrix = matrixStack.push();
         matrix.rotate(sunAzimuth, 0.0f, 0.0f, 1.0f);
         matrix.rotate(sunElevation, 1.0f, 0.0f, 0.0f);
         matrix.scale(0.1f, 1.0f, 0.1f);
-        billboardMesh.render(graphics, shader);
+        billboardMesh.render(gl, shader);
         matrixStack.pop();
         openGL.setBlending(BlendingMode.NORMAL);
-        shader = shaderManager
-                .getShader("VanillaBasics:shader/Skybox", graphics);
+        shader = shaderManager.getShader("VanillaBasics:shader/Skybox", gl);
         // Clouds
-        graphics.getTextureManager().bind(fbo.getTexturesColor()[0], graphics);
-        cloudMesh.render(graphics, shader);
-        graphics.getTextureManager().unbind(graphics);
+        gl.getTextureManager().bind(fbo.getTexturesColor()[0], gl);
+        cloudMesh.render(gl, shader);
+        gl.getTextureManager().unbind(gl);
         // Bottom
-        skyboxBottomMesh.render(graphics, shader);
+        skyboxBottomMesh.render(gl, shader);
         float cloudTime = (System.currentTimeMillis() % 1000000) / 1000000.0f;
-        fbo.activate(graphics);
+        fbo.activate(gl);
         openGL.viewport(0, 0, fbo.getWidth(), fbo.getHeight());
         openGL.clear(0.0f, 0.0f, 0.0f, 0.0f);
-        graphics.setProjectionOrthogonal(0, 0, 1, 1);
-        shader = shaderManager
-                .getShader("VanillaBasics:shader/Clouds", graphics);
+        gl.setProjectionOrthogonal(0, 0, 1, 1);
+        shader = shaderManager.getShader("VanillaBasics:shader/Clouds", gl);
         shader.setUniform1f(4, cloudTime);
         shader.setUniform1f(5, weather);
         shader.setUniform2f(6,
                 (float) (scene.getCam().position.doubleX() / 2048.0 % 1024.0),
                 (float) (scene.getCam().position.doubleY() / 2048.0 % 1024.0));
-        cloudTextureMesh.render(graphics, shader);
-        fbo.deactivate(graphics);
+        cloudTextureMesh.render(gl, shader);
+        fbo.deactivate(gl);
     }
 
     @Override
-    public void dispose(GraphicsSystem graphics, Cam cam) {
-        fbo.dispose(graphics);
+    public void dispose(GL gl, Cam cam) {
+        fbo.dispose(gl);
         rainAudio.dispose();
         windAudio.dispose();
     }

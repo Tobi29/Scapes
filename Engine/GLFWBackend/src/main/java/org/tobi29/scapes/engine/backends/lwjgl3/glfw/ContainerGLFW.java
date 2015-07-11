@@ -33,6 +33,7 @@ import org.tobi29.scapes.engine.opengl.GraphicsException;
 import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
 import org.tobi29.scapes.engine.utils.DesktopException;
 import org.tobi29.scapes.engine.utils.Pair;
+import org.tobi29.scapes.engine.utils.Sync;
 import org.tobi29.scapes.engine.utils.io.ReadSource;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
@@ -49,6 +50,7 @@ public class ContainerGLFW extends ContainerLWJGL3 {
             LoggerFactory.getLogger(ContainerGLFW.class);
     private final GLFWDialogsProvider dialogsProvider;
     private final PlatformDialogs dialogs;
+    private final Sync sync;
     private final GLFWControllers controllers;
     @SuppressWarnings("FieldCanBeLocal")
     private final GLFWErrorCallback errorFun;
@@ -79,6 +81,8 @@ public class ContainerGLFW extends ContainerLWJGL3 {
             throw new GraphicsException("Unable to initialize GLFW");
         }
         LOGGER.info("GLFW version: {}", GLFW.glfwGetVersionString());
+        sync = new Sync(engine.config().getFPS(), 5000000000L, false,
+                "Rendering");
         controllers = new GLFWControllers(virtualJoysticks);
         windowSizeFun = GLFW.GLFWWindowSizeCallback((window, width, height) -> {
             containerWidth = width;
@@ -210,17 +214,18 @@ public class ContainerGLFW extends ContainerLWJGL3 {
 
     @Override
     public void run() throws DesktopException {
+        sync.init();
         while (running) {
             while (!tasks.isEmpty()) {
                 tasks.poll().run();
             }
             if (!valid) {
                 if (context != null) {
-                    engine.getGraphics().reset();
+                    engine.graphics().reset();
                     cleanWindow();
                 }
-                initWindow(engine.getConfig().isFullscreen(),
-                        engine.getConfig().getVSync());
+                initWindow(engine.config().isFullscreen(),
+                        engine.config().getVSync());
                 Optional<String> check = initContext();
                 if (check.isPresent()) {
                     throw new GraphicsCheckException(check.get());
@@ -230,7 +235,7 @@ public class ContainerGLFW extends ContainerLWJGL3 {
             }
             GLFW.glfwPollEvents();
             joysticksChanged = controllers.poll();
-            engine.render();
+            engine.render(sync.getSpeedFactor());
             containerResized = false;
             dialogs.renderTick();
             GLFW.glfwSwapBuffers(window);
@@ -302,7 +307,7 @@ public class ContainerGLFW extends ContainerLWJGL3 {
 
     protected void initWindow(boolean fullscreen, boolean vSync) {
         LOGGER.info("Creating GLFW window...");
-        String title = engine.getGame().getName();
+        String title = engine.game().getName();
         long monitor = GLFW.glfwGetPrimaryMonitor();
         IntBuffer xBuffer = BufferCreatorDirect.intBuffer(1);
         IntBuffer yBuffer = BufferCreatorDirect.intBuffer(1);
@@ -316,9 +321,9 @@ public class ContainerGLFW extends ContainerLWJGL3 {
         GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GL11.GL_FALSE);
         // >:V Seriously, stop with this crap!
         GLFW.glfwWindowHint(GLFW.GLFW_AUTO_ICONIFY, GL11.GL_FALSE);
-        TagStructure tagStructure = engine.getTagStructure();
+        TagStructure tagStructure = engine.tagStructure();
         if (!tagStructure.has("Compatibility") ||
-                !engine.getTagStructure().getStructure("Compatibility")
+                !engine.tagStructure().getStructure("Compatibility")
                         .getBoolean("ForceLegacyGL")) {
             GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);
             GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 2);

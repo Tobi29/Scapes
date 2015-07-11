@@ -18,7 +18,7 @@ package org.tobi29.scapes.vanilla.basics.gui;
 
 import org.tobi29.scapes.client.gui.GuiContainerInventory;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
@@ -50,16 +50,16 @@ public class GuiBloomeryInventory extends GuiContainerInventory {
     }
 
     @Override
-    public void renderOverlay(GraphicsSystem graphics, Shader shader,
+    public void renderOverlay(GL gl, Shader shader,
             FontRenderer font) {
-        super.renderOverlay(graphics, shader, font);
+        super.renderOverlay(gl, shader, font);
         if (!container.hasBellows()) {
             if (vaoBellowsText == null) {
                 vaoBellowsText =
                         font.render("No bellows attached!", 300, 170, 24, 1.0f,
                                 1.0f, 1.0f, 1.0f);
             }
-            vaoBellowsText.render(graphics, shader);
+            vaoBellowsText.render(gl, shader);
         }
         String text = FastMath.floor(container.getTemperature()) + "°C";
         if (!text.equals(currentText) || vaoTemperatureText == null) {
@@ -67,6 +67,6 @@ public class GuiBloomeryInventory extends GuiContainerInventory {
             vaoTemperatureText =
                     font.render(text, 220, 170, 24, 1.0f, 1.0f, 1.0f, 1.0f);
         }
-        vaoTemperatureText.render(graphics, shader);
+        vaoTemperatureText.render(gl, shader);
     }
 }

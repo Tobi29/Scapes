@@ -47,9 +47,9 @@ public class GuiScreenshots extends GuiMenu {
         this.state = state;
         scrollPane = new GuiComponentScrollPaneList(16, 80, 368, 350, 70);
         pane.add(scrollPane);
-        joiner = state.getEngine().getTaskExecutor().runTask(joiner -> {
+        joiner = state.getEngine().taskExecutor().runTask(joiner -> {
             try {
-                Path path = state.getEngine().getHome().resolve("screenshots");
+                Path path = state.getEngine().home().resolve("screenshots");
                 List<Path> files = new ArrayList<>();
                 for (Path file : Files.newDirectoryStream(path)) {
                     if (Files.isRegularFile(file) && !Files.isHidden(file)) {
@@ -91,7 +91,7 @@ public class GuiScreenshots extends GuiMenu {
                     new GuiComponentTextButton(70, 20, 100, 30, 18, "Save");
             label.addLeftClick(event -> {
                 try {
-                    state.getEngine().getGraphics().getContainer()
+                    state.getEngine().container()
                             .exportToUser(path, new Pair[]{
                                             new Pair<>("*.png", "PNG Picture")},
                                     "Export screenshot");

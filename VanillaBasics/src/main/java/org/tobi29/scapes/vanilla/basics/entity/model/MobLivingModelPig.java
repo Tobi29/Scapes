@@ -17,7 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.entity.model;
 
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
@@ -93,7 +93,7 @@ public class MobLivingModelPig implements MobModel {
     }
 
     @Override
-    public void render(GraphicsSystem graphics, WorldClient world, Cam cam,
+    public void render(GL gl, WorldClient world, Cam cam,
             Shader shader) {
         float damageColor = (float) (1.0 - FastMath.min(1.0,
                 FastMath.max(0.0f, entity.getInvincibleTicks() / 0.8)));
@@ -101,45 +101,42 @@ public class MobLivingModelPig implements MobModel {
         float posRenderY = (float) (pos.doubleY() - cam.position.doubleY());
         float posRenderZ = (float) (pos.doubleZ() - cam.position.doubleZ());
         double swingDir = FastMath.cosTable(swing) * moveSpeedRender * 0.5;
-        OpenGL openGL = graphics.getOpenGL();
+        OpenGL openGL = gl.getOpenGL();
         openGL.setAttribute2f(4, world.getTerrain()
                         .blockLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f,
                 world.getTerrain()
                         .sunLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f);
-        texture.bind(graphics);
-        MatrixStack matrixStack = graphics.getMatrixStack();
+        texture.bind(gl);
+        MatrixStack matrixStack = gl.getMatrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(posRenderX, posRenderY, posRenderZ);
         matrix.rotate(zRotRender - 90, 0, 0, 1);
-        BODY.render(1.0f, damageColor, damageColor, 1.0f, graphics, shader);
+        BODY.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrix = matrixStack.push();
         matrix.translate(0, 0.3125f, 0.0625f);
         matrix.rotate(xRotRender, 1, 0, 0);
-        HEAD.render(1.0f, damageColor, damageColor, 1.0f, graphics, shader);
+        HEAD.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
         matrix.translate(-0.125f, 0.1875f, -0.3125f);
         matrix.rotate((float) swingDir * 30, 1, 0, 0);
-        LEG_FRONT_LEFT
-                .render(1.0f, damageColor, damageColor, 1.0f, graphics, shader);
+        LEG_FRONT_LEFT.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
         matrix.translate(0.125f, 0.1875f, -0.3125f);
         matrix.rotate((float) -swingDir * 30, 1, 0, 0);
         LEG_FRONT_RIGHT
-                .render(1.0f, damageColor, damageColor, 1.0f, graphics, shader);
+                .render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
         matrix.translate(-0.125f, -0.1875f, -0.3125f);
         matrix.rotate((float) -swingDir * 30, 1, 0, 0);
-        LEG_BACK_LEFT
-                .render(1.0f, damageColor, damageColor, 1.0f, graphics, shader);
+        LEG_BACK_LEFT.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
         matrix.translate(0.125f, -0.1875f, -0.3125f);
         matrix.rotate((float) swingDir * 30, 1, 0, 0);
-        LEG_BACK_RIGHT
-                .render(1.0f, damageColor, damageColor, 1.0f, graphics, shader);
+        LEG_BACK_RIGHT.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrixStack.pop();
         matrixStack.pop();
     }

@@ -17,7 +17,7 @@
 package org.tobi29.scapes.engine.gui;
 
 import org.tobi29.scapes.engine.opengl.FontRenderer;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 
 public class GuiComponentText extends GuiComponent {
@@ -49,13 +49,13 @@ public class GuiComponentText extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GraphicsSystem graphics, Shader shader,
+    public void renderComponent(GL gl, Shader shader,
             FontRenderer font, double delta) {
         if (this.font != font) {
             this.font = font;
             updateText();
         }
-        vaoText.render(graphics, shader);
+        vaoText.render(gl, shader);
     }
 
     private void updateText() {

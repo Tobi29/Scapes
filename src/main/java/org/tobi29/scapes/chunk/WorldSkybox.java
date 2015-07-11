@@ -16,19 +16,19 @@
 
 package org.tobi29.scapes.chunk;
 
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 
 public interface WorldSkybox {
     void update(double delta);
 
-    void init(GraphicsSystem graphics, Cam cam);
+    void init(GL gl, Cam cam);
 
-    void renderUpdate(GraphicsSystem graphics, Cam cam, double delta);
+    void renderUpdate(GL gl, Cam cam, double delta);
 
-    void render(GraphicsSystem graphics, Cam cam);
+    void render(GL gl, Cam cam);
 
-    void dispose(GraphicsSystem graphics, Cam cam);
+    void dispose(GL gl, Cam cam);
 
     float getExposure();
 

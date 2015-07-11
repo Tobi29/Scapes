@@ -24,7 +24,7 @@ import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.client.states.scenes.SceneScapesVoxelWorld;
 import org.tobi29.scapes.engine.opengl.BlendingMode;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.opengl.shader.ShaderManager;
@@ -70,7 +70,7 @@ public class WorldClient extends World {
             String name, TerrainSupplier terrainSupplier,
             TagStructure playerTag, int playerID) {
         super(connection, connection.getPlugins(),
-                connection.getGame().getEngine().getTaskExecutor(),
+                connection.getGame().getEngine().taskExecutor(),
                 connection.getPlugins().getRegistry());
         game = connection.getGame();
         player =
@@ -156,7 +156,7 @@ public class WorldClient extends World {
         terrain.renderer().renderUpdate(cam);
     }
 
-    public void render(GraphicsSystem graphics, Cam cam,
+    public void render(GL gl, Cam cam,
             float animationDistance, boolean debug) {
         float time = (System.currentTimeMillis() % 10000000) / 1000.0f;
         float sunLightReduction = environment
@@ -165,16 +165,15 @@ public class WorldClient extends World {
         Vector3 sunlightNormal = environment
                 .getSunLightNormal(cam.position.doubleX(),
                         cam.position.doubleY());
-        ShaderManager shaderManager = graphics.getShaderManager();
+        ShaderManager shaderManager = gl.getShaderManager();
         Shader shaderTerrain =
-                shaderManager.getShader("Scapes:shader/Terrain", graphics);
+                shaderManager.getShader("Scapes:shader/Terrain", gl);
         shaderTerrain.setUniform3f(4, scene.getFogR(), scene.getFogG(),
                 scene.getFogB());
         shaderTerrain.setUniform1f(5,
                 scene.getFogDistance() * scene.getRenderDistance());
         shaderTerrain.setUniform1i(6, 1);
-        shaderTerrain.setUniform2f(7, graphics.getSceneWidth(),
-                graphics.getSceneHeight());
+        shaderTerrain.setUniform2f(7, gl.getSceneWidth(), gl.getSceneHeight());
         shaderTerrain.setUniform1f(8, time);
         shaderTerrain.setUniform1f(9, sunLightReduction);
         shaderTerrain.setUniform3f(10, sunlightNormal.floatX(),
@@ -186,14 +185,13 @@ public class WorldClient extends World {
                         .getPlayerLight(player.getRightWeapon())));
         shaderTerrain.setUniform1f(12, animationDistance * cam.far);
         Shader shaderEntity =
-                shaderManager.getShader("Scapes:shader/Entity", graphics);
+                shaderManager.getShader("Scapes:shader/Entity", gl);
         shaderEntity.setUniform3f(4, scene.getFogR(), scene.getFogG(),
                 scene.getFogB());
         shaderEntity.setUniform1f(5,
                 scene.getFogDistance() * scene.getRenderDistance());
         shaderEntity.setUniform1i(6, 1);
-        shaderEntity.setUniform2f(7, graphics.getSceneWidth(),
-                graphics.getSceneHeight());
+        shaderEntity.setUniform2f(7, gl.getSceneWidth(), gl.getSceneHeight());
         shaderEntity.setUniform1f(8, time);
         shaderEntity.setUniform1f(9, sunLightReduction);
         shaderEntity.setUniform3f(10, sunlightNormal.floatX(),
@@ -203,22 +201,22 @@ public class WorldClient extends World {
                         .getPlayerLight(player.getLeftWeapon()),
                 player.getRightWeapon().getMaterial()
                         .getPlayerLight(player.getRightWeapon())));
-        OpenGL openGL = graphics.getOpenGL();
+        OpenGL openGL = gl.getOpenGL();
         openGL.setBlending(BlendingMode.NONE);
-        scene.getTerrainTextureRegistry().getTexture().bind(graphics);
-        terrain.renderer().render(graphics, shaderTerrain, cam, debug);
+        scene.getTerrainTextureRegistry().getTexture().bind(gl);
+        terrain.renderer().render(gl, shaderTerrain, cam, debug);
         openGL.setBlending(BlendingMode.NORMAL);
         if (!scene.isGuiHidden()) {
-            playerModel.render(graphics, this, cam, shaderEntity);
+            playerModel.render(gl, this, cam, shaderEntity);
         }
         AABB aabb = new AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
         entityModels.values().stream().filter(model -> {
             model.shapeAABB(aabb);
             return cam.frustum.inView(aabb) != 0;
-        }).forEach(model -> model.render(graphics, this, cam, shaderEntity));
-        particleManager.render(graphics, cam);
-        scene.getTerrainTextureRegistry().getTexture().bind(graphics);
-        terrain.renderer().renderAlpha(graphics, shaderTerrain, cam);
+        }).forEach(model -> model.render(gl, this, cam, shaderEntity));
+        particleManager.render(gl, cam);
+        scene.getTerrainTextureRegistry().getTexture().bind(gl);
+        terrain.renderer().renderAlpha(gl, shaderTerrain, cam);
     }
 
     public TerrainClient getTerrain() {
@@ -272,7 +270,7 @@ public class WorldClient extends World {
 
     public void playSound(String audio, Vector3 position, Vector3 velocity,
             float pitch, float gain, float range) {
-        game.getEngine().getSounds()
+        game.getEngine().sounds()
                 .playSound(audio, position, velocity, pitch, gain, range);
     }
 

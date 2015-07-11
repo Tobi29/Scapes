@@ -21,7 +21,7 @@ import org.tobi29.scapes.block.TerrainTexture;
 import org.tobi29.scapes.block.TerrainTextureRegistry;
 import org.tobi29.scapes.block.models.ItemModel;
 import org.tobi29.scapes.block.models.ItemModelSimple;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
@@ -45,15 +45,15 @@ public class ItemStick extends VanillaItem {
     }
 
     @Override
-    public void render(ItemStack item, GraphicsSystem graphics, Shader shader,
+    public void render(ItemStack item, GL gl, Shader shader,
             float r, float g, float b, float a) {
-        model.render(graphics, shader);
+        model.render(gl, shader);
     }
 
     @Override
-    public void renderInventory(ItemStack item, GraphicsSystem graphics,
+    public void renderInventory(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a) {
-        model.renderInventory(graphics, shader);
+        model.renderInventory(gl, shader);
     }
 
     @Override

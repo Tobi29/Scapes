@@ -18,7 +18,7 @@ package org.tobi29.scapes.engine.gui;
 
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -37,16 +37,15 @@ public class Gui extends GuiComponent {
     }
 
     @Override
-    public void render(GraphicsSystem graphics, Shader shader,
-            FontRenderer font, double delta) {
+    public void render(GL gl, Shader shader, FontRenderer font, double delta) {
         if (visible) {
             if (alignment == GuiAlignment.STRETCH) {
-                super.render(graphics, shader, font, delta);
+                super.render(gl, shader, font, delta);
             } else {
-                MatrixStack matrixStack = graphics.getMatrixStack();
+                MatrixStack matrixStack = gl.getMatrixStack();
                 Matrix matrix = matrixStack.push();
-                float ratio = (float) graphics.getSceneHeight() /
-                        graphics.getSceneWidth() * 1.5625f;
+                float ratio = (float) gl.getSceneHeight() / gl.getSceneWidth() *
+                        1.5625f;
                 matrix.scale(ratio, 1.0f, 1.0f);
                 switch (alignment) {
                     case CENTER:
@@ -56,7 +55,7 @@ public class Gui extends GuiComponent {
                         matrix.translate(-800.0f + 800.0f / ratio, 0.0f, 0.0f);
                         break;
                 }
-                super.render(graphics, shader, font, delta);
+                super.render(gl, shader, font, delta);
                 matrixStack.pop();
             }
         }
@@ -79,20 +78,20 @@ public class Gui extends GuiComponent {
     protected double getAlignedX(double x, ScapesEngine engine) {
         switch (alignment) {
             case LEFT:
-                x *= engine.getGraphics().getSceneWidth() * 512.0f /
-                        engine.getGraphics().getSceneHeight() /
+                x *= engine.container().getContainerWidth() * 512.0f /
+                        engine.container().getContainerHeight() /
                         800.0f;
                 return x;
             case CENTER: {
-                float width = engine.getGraphics().getSceneWidth() * 512.0f /
-                        engine.getGraphics().getSceneHeight();
+                float width = engine.container().getContainerWidth() * 512.0f /
+                        engine.container().getContainerHeight();
                 x *= width / 800.0f;
                 x += (800.0f - width) * 0.5f;
                 return x;
             }
             case RIGHT: {
-                float width = engine.getGraphics().getSceneWidth() * 512.0f /
-                        engine.getGraphics().getSceneHeight();
+                float width = engine.container().getContainerWidth() * 512.0f /
+                        engine.container().getContainerHeight();
                 x *= width / 800.0f;
                 x += 800.0f - width;
                 return x;

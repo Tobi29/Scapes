@@ -143,7 +143,7 @@ public class Scapes {
                 } else {
                     engine.setState(
                             new GameStateStartup(new GameStateMenu(engine),
-                                    new SceneImage(engine.getGraphics()
+                                    new SceneImage(engine.graphics()
                                             .getTextureManager()
                                             .getTexture("Engine:image/Logo"),
                                             0.5), engine));

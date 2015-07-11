@@ -75,8 +75,8 @@ public class VAO {
     }
 
     @OpenGLFunction
-    public static void disposeUnused(GraphicsSystem graphics) {
-        OpenGL openGL = graphics.getOpenGL();
+    public static void disposeUnused(GL gl) {
+        OpenGL openGL = gl.getOpenGL();
         for (int i = disposeOffset; i < VAO_LIST.size(); i += 16) {
             VAO vao = VAO_LIST.get(i);
             assert vao.stored;
@@ -94,10 +94,10 @@ public class VAO {
     }
 
     @OpenGLFunction
-    public static void disposeAll(GraphicsSystem graphics) {
+    public static void disposeAll(GL gl) {
         VAO_LIST.forEach(VAO::markAsDisposed);
         while (!VAO_LIST.isEmpty()) {
-            disposeUnused(graphics);
+            disposeUnused(gl);
         }
     }
 
@@ -105,9 +105,8 @@ public class VAO {
         return VAO_LIST.size();
     }
 
-    private void storeAttribute(GraphicsSystem graphics,
-            VAOAttributeData attribute) {
-        graphics.getOpenGL().setAttribute(attribute.id, attribute.size,
+    private void storeAttribute(GL gl, VAOAttributeData attribute) {
+        gl.getOpenGL().setAttribute(attribute.id, attribute.size,
                 attribute.vertexType, attribute.normalized, stride,
                 attribute.offset);
     }
@@ -274,10 +273,10 @@ public class VAO {
     }
 
     @OpenGLFunction
-    public void render(GraphicsSystem graphics, Shader shader) {
-        ensureStored(graphics);
-        Matrix matrix = graphics.getMatrixStack().current();
-        OpenGL openGL = graphics.getOpenGL();
+    public void render(GL gl, Shader shader) {
+        ensureStored(gl);
+        Matrix matrix = gl.getMatrixStack().current();
+        OpenGL openGL = gl.getOpenGL();
         openGL.bindVAO(arrayID);
         openGL.activateShader(shader.getProgramID());
         Queue<Shader.Uniform> uniforms = shader.getUniforms();
@@ -292,7 +291,7 @@ public class VAO {
         uniformLocation = shader.getUniformLocation(1);
         if (uniformLocation != -1) {
             openGL.setUniformMatrix4(uniformLocation, false,
-                    graphics.getModelViewProjectionMatrix().getBuffer());
+                    gl.getModelViewProjectionMatrix().getBuffer());
         }
         uniformLocation = shader.getUniformLocation(2);
         if (uniformLocation != -1) {
@@ -310,17 +309,17 @@ public class VAO {
     }
 
     @OpenGLFunction
-    public void ensureStored(GraphicsSystem graphics) {
+    public void ensureStored(GL gl) {
         if (!stored) {
-            store(graphics);
+            store(gl);
         }
         used = true;
     }
 
-    private void store(GraphicsSystem graphics) {
+    private void store(GL gl) {
         buffer.rewind();
         index.rewind();
-        OpenGL openGL = graphics.getOpenGL();
+        OpenGL openGL = gl.getOpenGL();
         arrayID = openGL.createVAO();
         openGL.bindVAO(arrayID);
         vertexID = openGL.createVBO();
@@ -329,8 +328,7 @@ public class VAO {
         openGL.bufferVBODataArray(buffer);
         openGL.bindVBOElement(indexID);
         openGL.bufferVBODataElement(index);
-        attributes.stream()
-                .forEach(attribute -> storeAttribute(graphics, attribute));
+        attributes.stream().forEach(attribute -> storeAttribute(gl, attribute));
         VAO_LIST.add(this);
         stored = true;
     }

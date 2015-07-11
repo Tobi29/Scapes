@@ -19,7 +19,7 @@ package org.tobi29.scapes.client.gui;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.engine.gui.GuiComponentButton;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 
 public class GuiComponentItemButton extends GuiComponentButton {
@@ -36,10 +36,10 @@ public class GuiComponentItemButton extends GuiComponentButton {
     }
 
     @Override
-    public void renderComponent(GraphicsSystem graphics, Shader shader,
+    public void renderComponent(GL gl, Shader shader,
             FontRenderer font, double delta) {
-        super.renderComponent(graphics, shader, font, delta);
-        GuiUtils.renderItem(0.0f, 0.0f, width, height, item, graphics, shader,
+        super.renderComponent(gl, shader, font, delta);
+        GuiUtils.renderItem(0.0f, 0.0f, width, height, item, gl, shader,
                 font);
     }
 }

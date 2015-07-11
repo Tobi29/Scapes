@@ -17,7 +17,7 @@
 package org.tobi29.scapes.entity.skin;
 
 import org.tobi29.scapes.client.connection.ClientConnection;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
 import org.tobi29.scapes.engine.utils.graphics.Image;
@@ -41,21 +41,21 @@ public class ClientSkinStorage {
         defaultSkin = defaultTexture.getBuffer();
     }
 
-    public void update(GraphicsSystem graphics, ClientConnection connection) {
+    public void update(GL gl, ClientConnection connection) {
         List<ClientSkin> oldSkins = skins.values().stream()
                 .filter(skin -> skin.increaseTicks() > 1200)
                 .collect(Collectors.toList());
         oldSkins.forEach(skin -> {
             skins.remove(new Checksum(skin.checksum()));
-            skin.dispose(graphics);
+            skin.dispose(gl);
         });
         while (!skinRequests.isEmpty()) {
             connection.send(new PacketSkin(skinRequests.poll()));
         }
     }
 
-    public void dispose(GraphicsSystem graphics) {
-        skins.values().forEach(skin -> skin.dispose(graphics));
+    public void dispose(GL gl) {
+        skins.values().forEach(skin -> skin.dispose(gl));
     }
 
     public void addSkin(byte[] checksum, Image image) {

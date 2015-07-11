@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.engine;
 
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.utils.VersionUtil;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 
@@ -32,7 +33,7 @@ public abstract class Game {
 
     public abstract void init();
 
-    public abstract void initLate();
+    public abstract void initLate(GL gl);
 
     public abstract void step();
 

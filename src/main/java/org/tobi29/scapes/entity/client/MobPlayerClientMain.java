@@ -214,7 +214,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
     @Override
     public void update(double delta) {
         Controller controller =
-                ((ScapesClient) game.getEngine().getGame()).getInputMode()
+                ((ScapesClient) game.getEngine().game()).getInputMode()
                         .getPlayerController();
         if (controller.getInventory()) {
             if (!(currentGui instanceof GuiChatWrite)) {
@@ -261,7 +261,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
             // Debug
             if (Scapes.debug) {
                 ControllerDefault controllerDefault =
-                        game.getEngine().getController();
+                        game.getEngine().controller();
                 if (controllerDefault.isPressed(ControllerKey.KEY_F5)) {
                     flying = !flying;
                 }
@@ -460,7 +460,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
                 }
                 if (!footSteepSound.isEmpty()) {
                     Random random = ThreadLocalRandom.current();
-                    game.getEngine().getSounds().playSound(footSteepSound,
+                    game.getEngine().sounds().playSound(footSteepSound,
                             0.9f + random.nextFloat() * 0.2f, 1.0f);
                     footStep = 1.0 /
                             FastMath.clamp(FastMath.length(speed.now()), 1.0,

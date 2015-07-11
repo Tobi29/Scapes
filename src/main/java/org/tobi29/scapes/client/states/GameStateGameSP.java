@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
 import org.tobi29.scapes.server.ControlPanel;
 import org.tobi29.scapes.server.ScapesServer;
@@ -41,8 +42,8 @@ public class GameStateGameSP extends GameStateGameMP {
     }
 
     @Override
-    public void dispose() {
-        super.dispose();
+    public void dispose(GL gl) {
+        super.dispose(gl);
         server.stop(ScapesServer.ShutdownReason.STOP);
         try {
             server.getWorldFormat().save();
@@ -74,7 +75,7 @@ public class GameStateGameSP extends GameStateGameMP {
 
         @Override
         public void sendProfilerResults(long ram, Map<String, Double> tps) {
-            GuiWidgetDebugValues debug = engine.getDebugValues();
+            GuiWidgetDebugValues debug = engine.debugValues();
             for (Map.Entry<String, Double> entry : tps.entrySet()) {
                 debug.get("Server-CPU-" + entry.getKey())
                         .setValue(entry.getValue());

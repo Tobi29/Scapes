@@ -20,7 +20,7 @@ import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.GuiController;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.input.ControllerKey;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.Container;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 public class GuiControllerGamepad implements GuiController {
@@ -50,9 +50,9 @@ public class GuiControllerGamepad implements GuiController {
 
     @Override
     public void update(double delta) {
-        GraphicsSystem graphics = engine.getGraphics();
-        double width = graphics.getContainerWidth();
-        double height = graphics.getContainerHeight();
+        Container container = engine.container();
+        double width = container.getContainerWidth();
+        double height = container.getContainerHeight();
         if (!cursorCentered) {
             cursorCentered = true;
             cursorX = width / 2.0;

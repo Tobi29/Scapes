@@ -17,7 +17,7 @@
 package org.tobi29.scapes.block;
 
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
@@ -89,11 +89,11 @@ public abstract class Material {
 
     public abstract void createModels(TerrainTextureRegistry registry);
 
-    public abstract void render(ItemStack item, GraphicsSystem graphics,
+    public abstract void render(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a);
 
-    public abstract void renderInventory(ItemStack item,
-            GraphicsSystem graphics, Shader shader, float r, float g, float b,
+    public abstract void renderInventory(ItemStack item, GL gl, Shader shader,
+            float r, float g, float b,
             float a);
 
     public float getPlayerLight(ItemStack item) {

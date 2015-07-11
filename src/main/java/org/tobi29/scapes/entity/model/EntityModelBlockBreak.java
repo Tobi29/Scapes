@@ -73,7 +73,7 @@ public class EntityModelBlockBreak implements EntityModel {
     }
 
     @Override
-    public void render(GraphicsSystem graphics, WorldClient world, Cam cam,
+    public void render(GL gl, WorldClient world, Cam cam,
             Shader shader) {
         float posRenderX = (float) (pos.doubleX() - cam.position.doubleX());
         float posRenderY = (float) (pos.doubleY() - cam.position.doubleY());
@@ -82,15 +82,14 @@ public class EntityModelBlockBreak implements EntityModel {
         if (i < 1 || i > 10) {
             return;
         }
-        OpenGL openGL = graphics.getOpenGL();
+        OpenGL openGL = gl.getOpenGL();
         openGL.setAttribute2f(4, world.getTerrain()
                         .blockLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f,
                 world.getTerrain()
                         .sunLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f);
-        graphics.getTextureManager()
-                .bind("Scapes:image/entity/Break" + i, graphics);
+        gl.getTextureManager().bind("Scapes:image/entity/Break" + i, gl);
         for (PointerPane pane : entity.getPointerPanes()) {
-            MatrixStack matrixStack = graphics.getMatrixStack();
+            MatrixStack matrixStack = gl.getMatrixStack();
             Matrix matrix = matrixStack.push();
             matrix.translate((float) (posRenderX - 0.5 +
                             (pane.aabb.minX + pane.aabb.maxX) / 2),
@@ -120,7 +119,7 @@ public class EntityModelBlockBreak implements EntityModel {
             }
             openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.3f, 0.3f, 0.3f,
                     0.4f);
-            VAO.render(graphics, shader);
+            VAO.render(gl, shader);
             matrixStack.pop();
         }
     }

@@ -21,7 +21,7 @@ import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.data.ChunkMesh;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderer;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.VAO;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.Pool;
@@ -71,11 +71,11 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
         loadThread =
                 new TerrainInfiniteRendererThread(loadQueue, updateQueue, false,
                         world.getInfoLayers());
-        keepInvisibleChunkVbos = player.getGame().getEngine().getTagStructure()
+        keepInvisibleChunkVbos = player.getGame().getEngine().tagStructure()
                 .getStructure("Scapes").getBoolean("KeepInvisibleChunkVbos");
-        Joiner updateJoiner = player.getGame().getEngine().getTaskExecutor()
+        Joiner updateJoiner = player.getGame().getEngine().taskExecutor()
                 .runTask(updateThread, "TerrainInfiniteChunk-Geometry-Update");
-        Joiner loadJoiner = player.getGame().getEngine().getTaskExecutor()
+        Joiner loadJoiner = player.getGame().getEngine().taskExecutor()
                 .runTask(loadThread, "TerrainInfiniteChunk-Geometry-Load");
         joiner = new Joiner(updateJoiner, loadJoiner);
     }
@@ -140,21 +140,21 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     }
 
     @Override
-    public void render(GraphicsSystem graphics, Shader shader, Cam cam,
+    public void render(GL gl, Shader shader, Cam cam,
             boolean debug) {
         if (disposed) {
             return;
         }
         chunks.forEach(chunk -> chunk
-                .render(graphics, shader, keepInvisibleChunkVbos, cam));
+                .render(gl, shader, keepInvisibleChunkVbos, cam));
         if (debug) {
-            graphics.getTextureManager().unbind(graphics);
-            chunks.forEach(chunk -> chunk.renderFrame(graphics, shader, cam));
+            gl.getTextureManager().unbind(gl);
+            chunks.forEach(chunk -> chunk.renderFrame(gl, shader, cam));
         }
     }
 
     @Override
-    public void renderAlpha(GraphicsSystem graphics, Shader shader, Cam cam) {
+    public void renderAlpha(GL gl, Shader shader, Cam cam) {
         if (disposed) {
             return;
         }
@@ -162,7 +162,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                 chunks.listIterator(chunks.size());
         while (iterator.hasPrevious()) {
             iterator.previous()
-                    .renderAlpha(graphics, shader, keepInvisibleChunkVbos, cam);
+                    .renderAlpha(gl, shader, keepInvisibleChunkVbos, cam);
         }
     }
 

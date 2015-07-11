@@ -37,7 +37,7 @@ public class GuiComponentGraph extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GraphicsSystem graphics, Shader shader,
+    public void renderComponent(GL gl, Shader shader,
             FontRenderer font, double delta) {
         if (data.length != width) {
             data = new float[width];
@@ -67,9 +67,9 @@ public class GuiComponentGraph extends GuiComponent {
             index[j++] = i;
             index[j] = i + 1;
         }
-        graphics.getTextureManager().unbind(graphics);
+        gl.getTextureManager().unbind(gl);
         VAO vao = VAOUtility.createVCI(vertex, color, index, RenderType.LINES);
-        vao.render(graphics, shader);
+        vao.render(gl, shader);
         vao.markAsDisposed();
     }
 

@@ -16,16 +16,16 @@
 
 package org.tobi29.scapes.chunk.terrain;
 
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 
 public interface TerrainRenderer {
     void renderUpdate(Cam cam);
 
-    void render(GraphicsSystem graphics, Shader shader, Cam cam, boolean debug);
+    void render(GL gl, Shader shader, Cam cam, boolean debug);
 
-    void renderAlpha(GraphicsSystem graphics, Shader shader, Cam cam);
+    void renderAlpha(GL gl, Shader shader, Cam cam);
 
     void blockChange(int x, int y, int z);
 

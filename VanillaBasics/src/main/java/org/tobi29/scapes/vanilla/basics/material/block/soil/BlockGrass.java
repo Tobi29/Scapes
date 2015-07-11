@@ -24,7 +24,7 @@ import org.tobi29.scapes.chunk.data.ChunkMesh;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
@@ -306,17 +306,17 @@ public class BlockGrass extends VanillaBlock {
     }
 
     @Override
-    public void render(ItemStack item, GraphicsSystem graphics, Shader shader,
+    public void render(ItemStack item, GL gl, Shader shader,
             float r, float g, float b, float a) {
-        modelBlockGrass.render(graphics, shader);
-        modelBlockDirt.render(graphics, shader);
+        modelBlockGrass.render(gl, shader);
+        modelBlockDirt.render(gl, shader);
     }
 
     @Override
-    public void renderInventory(ItemStack item, GraphicsSystem graphics,
+    public void renderInventory(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a) {
-        modelBlockGrass.renderInventory(graphics, shader);
-        modelBlockDirt.renderInventory(graphics, shader);
+        modelBlockGrass.renderInventory(gl, shader);
+        modelBlockDirt.renderInventory(gl, shader);
     }
 
     @Override

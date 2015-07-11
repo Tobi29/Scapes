@@ -1,0 +1,157 @@
+/*
+ * Copyright 2012-2015 Tobi29
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.tobi29.scapes.engine.opengl;
+
+import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.opengl.matrix.Matrix;
+import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
+import org.tobi29.scapes.engine.opengl.shader.ShaderManager;
+import org.tobi29.scapes.engine.opengl.texture.Texture;
+import org.tobi29.scapes.engine.opengl.texture.TextureManager;
+import org.tobi29.scapes.engine.utils.graphics.Cam;
+import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f;
+
+public class GL {
+    private final FontRenderer defaultFont;
+    private final TextureManager textureManager;
+    private final ShaderManager shaderManager;
+    private final MatrixStack matrixStack;
+    private final Matrix4f projectionMatrix, modelViewProjectionMatrix;
+    private final OpenGL openGL;
+    private double resolutionMultiplier = 1.0;
+    private int containerWidth = 1, containerHeight = 1, contentWidth = 1,
+            contentHeight = 1;
+
+    public GL(ScapesEngine engine, OpenGL openGL) {
+        this.openGL = openGL;
+        matrixStack = new MatrixStack(64);
+        projectionMatrix = new Matrix4f();
+        modelViewProjectionMatrix = new Matrix4f();
+        textureManager = new TextureManager(engine);
+        shaderManager = new ShaderManager(engine);
+        resolutionMultiplier = engine.config().getResolutionMultiplier();
+        Container container = engine.container();
+        container.loadFont(
+                engine.files().get("Engine:font/QuicksandPro-Regular.otf"));
+        defaultFont = new FontRenderer(
+                container.createGlyphRenderer("Quicksand Pro", 128));
+    }
+
+    public FontRenderer getDefaultFont() {
+        return defaultFont;
+    }
+
+    public void reshape(int contentWidth, int contentHeight, int containerWidth,
+            int containerHeight, double resolutionMultiplier) {
+        this.contentWidth = contentWidth;
+        this.contentHeight = contentHeight;
+        this.containerWidth = containerWidth;
+        this.containerHeight = containerHeight;
+        this.resolutionMultiplier = resolutionMultiplier;
+    }
+
+    public void dispose() {
+        textureManager.clearCache(this);
+        defaultFont.dispose(this);
+        VAO.disposeAll(this);
+    }
+
+    public TextureManager getTextureManager() {
+        return textureManager;
+    }
+
+    public ShaderManager getShaderManager() {
+        return shaderManager;
+    }
+
+    public OpenGL getOpenGL() {
+        return openGL;
+    }
+
+    public MatrixStack getMatrixStack() {
+        return matrixStack;
+    }
+
+    public Matrix4f getProjectionMatrix() {
+        return projectionMatrix;
+    }
+
+    public Matrix4f getModelViewProjectionMatrix() {
+        projectionMatrix.multiply(matrixStack.current().getModelViewMatrix(),
+                modelViewProjectionMatrix);
+        return modelViewProjectionMatrix;
+    }
+
+    public void setProjectionPerspective(float width, float height, Cam cam) {
+        projectionMatrix.identity();
+        projectionMatrix
+                .perspective(cam.fov, width / height, cam.near, cam.far);
+        Matrix matrix = matrixStack.current();
+        matrix.identity();
+        Matrix4f viewMatrix = matrix.getModelViewMatrix();
+        viewMatrix.rotate(-cam.tilt, 0.0f, 0.0f, 1.0f);
+        viewMatrix.rotate(-cam.pitch - 90.0f, 1.0f, 0.0f, 0.0f);
+        viewMatrix.rotate(-cam.yaw + 90.0f, 0.0f, 0.0f, 1.0f);
+        openGL.enableCulling();
+        openGL.enableDepthTest();
+        openGL.setBlending(BlendingMode.NORMAL);
+    }
+
+    public void setProjectionOrthogonal(float x, float y, float width,
+            float height) {
+        projectionMatrix.identity();
+        projectionMatrix
+                .orthogonal(x, x + width, y + height, y, -1024.0f, 1024.0f);
+        Matrix matrix = matrixStack.current();
+        matrix.identity();
+        openGL.disableCulling();
+        openGL.disableDepthTest();
+        openGL.setBlending(BlendingMode.NORMAL);
+    }
+
+    public int getSceneWidth() {
+        return (int) (contentWidth * resolutionMultiplier);
+    }
+
+    public int getSceneHeight() {
+        return (int) (contentHeight * resolutionMultiplier);
+    }
+
+    public int getContentWidth() {
+        return contentWidth;
+    }
+
+    public int getContentHeight() {
+        return contentHeight;
+    }
+
+    public int getContainerWidth() {
+        return containerWidth;
+    }
+
+    public int getContainerHeight() {
+        return containerHeight;
+    }
+
+    @OpenGLFunction
+    public void reset() {
+        Texture.disposeAll(this);
+        VAO.disposeAll(this);
+        FBO.disposeAll(this);
+        shaderManager.clearCache(this);
+    }
+}

@@ -48,60 +48,58 @@ public class GuiComponentHotbar extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GraphicsSystem graphics, Shader shader,
+    public void renderComponent(GL gl, Shader shader,
             FontRenderer font, double delta) {
-        MatrixStack matrixStack = graphics.getMatrixStack();
-        OpenGL openGL = graphics.getOpenGL();
+        MatrixStack matrixStack = gl.getMatrixStack();
+        OpenGL openGL = gl.getOpenGL();
         for (int i = 0; i < 10; i++) {
             if (i == player.getInventorySelectLeft()) {
                 openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, 0.0f, 0.0f,
                         0.8f);
                 Matrix matrix = matrixStack.push();
                 matrix.translate(i * (height + 10.0f), 0, 0.0f);
-                graphics.getTextureManager().unbind(graphics);
-                vao2.render(graphics, shader);
-                vao3.render(graphics, shader);
+                gl.getTextureManager().unbind(gl);
+                vao2.render(gl, shader);
+                vao3.render(gl, shader);
                 org.tobi29.scapes.client.gui.GuiUtils
                         .renderItem(0.0f, 0.0f, height, height,
-                                player.getInventory().getItem(i), graphics,
+                                player.getInventory().getItem(i), gl,
                                 shader, font);
-                graphics.getTextureManager()
-                        .bind("Scapes:image/gui/HotbarLeft", graphics);
+                gl.getTextureManager().bind("Scapes:image/gui/HotbarLeft", gl);
                 openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
                         1.0f);
-                vao1.render(graphics, shader);
+                vao1.render(gl, shader);
                 matrixStack.pop();
             } else if (i == player.getInventorySelectRight()) {
                 openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, 0.0f, 0.0f,
                         0.8f);
                 Matrix matrix = matrixStack.push();
                 matrix.translate(i * (height + 10.0f), 0.0f, 0.0f);
-                graphics.getTextureManager().unbind(graphics);
-                vao2.render(graphics, shader);
-                vao3.render(graphics, shader);
+                gl.getTextureManager().unbind(gl);
+                vao2.render(gl, shader);
+                vao3.render(gl, shader);
                 org.tobi29.scapes.client.gui.GuiUtils
                         .renderItem(0.0f, 0.0f, height, height,
-                                player.getInventory().getItem(i), graphics,
+                                player.getInventory().getItem(i), gl,
                                 shader, font);
-                graphics.getTextureManager()
-                        .bind("Scapes:image/gui/HotbarRight", graphics);
+                gl.getTextureManager().bind("Scapes:image/gui/HotbarRight", gl);
                 openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
                         1.0f);
-                vao1.render(graphics, shader);
+                vao1.render(gl, shader);
                 matrixStack.pop();
             } else {
                 openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, 0.0f, 0.0f,
                         0.6f);
                 Matrix matrix = matrixStack.push();
                 matrix.translate(i * (height + 10.0f), 0.0f, 0.0f);
-                graphics.getTextureManager().unbind(graphics);
-                vao2.render(graphics, shader);
-                vao3.render(graphics, shader);
+                gl.getTextureManager().unbind(gl);
+                vao2.render(gl, shader);
+                vao3.render(gl, shader);
                 openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
                         1.0f);
                 org.tobi29.scapes.client.gui.GuiUtils
                         .renderItem(0.0f, 0.0f, height, height,
-                                player.getInventory().getItem(i), graphics,
+                                player.getInventory().getItem(i), gl,
                                 shader, font);
                 matrixStack.pop();
             }

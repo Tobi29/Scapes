@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.*;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.texture.TextureFilter;
 import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
 import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
@@ -147,14 +148,12 @@ public class LWJGL3OpenGL implements OpenGL {
     @Override
     public void enableScissor(int x, int y, int width, int height) {
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        GL11.glScissor((int) ((double) x / 800 *
-                        engine.getGraphics().getContentWidth()),
-                (int) ((double) (512 - y - height) / 512 *
-                        engine.getGraphics().getContentHeight()) + 1,
-                (int) ((double) width / 800 *
-                        engine.getGraphics().getContentWidth()),
-                (int) ((double) height / 512 *
-                        engine.getGraphics().getContentHeight()));
+        int w = engine.container().getContentWidth();
+        int h = engine.container().getContentHeight();
+        GL11.glScissor((int) ((double) x / 800 * w),
+                (int) ((double) (512 - y - height) / 512 * h) + 1,
+                (int) ((double) width / 800 * w),
+                (int) ((double) height / 512 * h));
     }
 
     @Override
@@ -246,22 +245,18 @@ public class LWJGL3OpenGL implements OpenGL {
     }
 
     @Override
-    public void screenShot(Path path, GraphicsSystem graphics) {
-        int width = graphics.getSceneWidth(), height =
-                graphics.getSceneHeight();
+    public void screenShot(Path path, GL gl) {
+        int width = gl.getSceneWidth(), height = gl.getSceneHeight();
         GL11.glReadBuffer(GL11.GL_FRONT);
         ByteBuffer buffer = BufferCreatorDirect.byteBuffer(width * height * 4);
         GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA,
                 GL11.GL_UNSIGNED_BYTE, buffer);
-        graphics.getEngine().getTaskExecutor().runTask(joiner -> {
-            Image image = new Image(width, height, buffer);
-            try {
-                FileUtil.write(path,
-                        stream -> PNG.encode(image, stream, 9, false));
-            } catch (IOException e) {
-                LOGGER.error("Error saving screenshot: {}", e.toString());
-            }
-        }, "Saving-Screenshot");
+        Image image = new Image(width, height, buffer);
+        try {
+            FileUtil.write(path, stream -> PNG.encode(image, stream, 9, false));
+        } catch (IOException e) {
+            LOGGER.error("Error saving screenshot: {}", e.toString());
+        }
     }
     // Shader
 
@@ -275,10 +270,10 @@ public class LWJGL3OpenGL implements OpenGL {
     }
 
     @Override
-    public Image screenShotFBO(GraphicsSystem graphics, FBO fbo,
+    public Image screenShotFBO(GL gl, FBO fbo,
             int colorAttachment) {
-        graphics.getTextureManager()
-                .bind(fbo.getTexturesColor()[colorAttachment], graphics);
+        gl.getTextureManager()
+                .bind(fbo.getTexturesColor()[colorAttachment], gl);
         ByteBuffer buffer = BufferCreatorDirect
                 .byteBuffer(fbo.getWidth() * fbo.getHeight() << 2);
         GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA,

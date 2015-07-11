@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.entity.skin;
 
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.OpenGLFunction;
 import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
 
@@ -38,9 +38,9 @@ public class ClientSkin extends TextureCustom {
 
     @OpenGLFunction
     @Override
-    public void bind(GraphicsSystem graphics) {
+    public void bind(GL gl) {
         unusedTicks = 0;
-        super.bind(graphics);
+        super.bind(gl);
     }
 
     public byte[] checksum() {

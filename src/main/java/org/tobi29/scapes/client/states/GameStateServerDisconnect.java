@@ -20,7 +20,7 @@ import org.tobi29.scapes.client.gui.GuiDisconnected;
 import org.tobi29.scapes.client.states.scenes.SceneError;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.utils.Sync;
+import org.tobi29.scapes.engine.opengl.GL;
 
 import java.net.InetSocketAddress;
 import java.util.Optional;
@@ -44,11 +44,11 @@ public class GameStateServerDisconnect extends GameState {
     }
 
     @Override
-    public void dispose() {
+    public void dispose(GL gl) {
     }
 
     @Override
-    public void init() {
+    public void init(GL gl) {
     }
 
     @Override
@@ -62,9 +62,9 @@ public class GameStateServerDisconnect extends GameState {
     }
 
     @Override
-    public void stepComponent(Sync sync) {
+    public void stepComponent(double delta) {
         address.ifPresent(address -> {
-            reconnectTimer -= sync.getSpeedFactor();
+            reconnectTimer -= delta;
             if (reconnectTimer <= 0.0) {
                 engine.setState(new GameStateLoadMP(address, engine,
                         (SceneError) scene));

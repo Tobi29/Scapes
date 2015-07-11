@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.block;
 
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.utils.graphics.MipMapGenerator;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
@@ -41,10 +41,10 @@ public class AnimatedTerrainTexture extends TerrainTexture {
     }
 
     @Override
-    protected void renderAnim(GraphicsSystem graphics) {
+    protected void renderAnim(GL gl) {
         if (dirty) {
-            registry.getTexture().bind(graphics);
-            graphics.getOpenGL()
+            registry.getTexture().bind(gl);
+            gl.getOpenGL()
                     .replaceTextureMipMap(tileX, tileY, resolution, resolution,
                             frames[i]);
             dirty = false;

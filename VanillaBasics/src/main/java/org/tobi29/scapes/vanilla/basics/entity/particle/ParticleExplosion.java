@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.particle;
 
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
@@ -40,7 +40,7 @@ public class ParticleExplosion extends Particle {
 
     @Override
     public void renderParticle(float x, float y, float z, float r, float g,
-            float b, float a, GraphicsSystem graphics, Shader shader) {
+            float b, float a, GL gl, Shader shader) {
     }
 
     @Override

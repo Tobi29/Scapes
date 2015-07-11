@@ -29,7 +29,7 @@ import org.tobi29.scapes.chunk.terrain.Terrain;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.math.AABB;
@@ -244,15 +244,15 @@ public class BlockFlower extends VanillaBlock {
     }
 
     @Override
-    public void render(ItemStack item, GraphicsSystem graphics, Shader shader,
+    public void render(ItemStack item, GL gl, Shader shader,
             float r, float g, float b, float a) {
-        modelsItem[item.getData()].render(graphics, shader);
+        modelsItem[item.getData()].render(gl, shader);
     }
 
     @Override
-    public void renderInventory(ItemStack item, GraphicsSystem graphics,
+    public void renderInventory(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a) {
-        modelsItem[item.getData()].renderInventory(graphics, shader);
+        modelsItem[item.getData()].renderInventory(gl, shader);
     }
 
     @Override

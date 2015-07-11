@@ -25,7 +25,7 @@ import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.connection.Account;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.utils.Sync;
+import org.tobi29.scapes.engine.opengl.GL;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -39,14 +39,14 @@ public class GameStateMenu extends GameState {
     }
 
     @Override
-    public void dispose() {
-        engine.getSounds().stopMusic();
+    public void dispose(GL gl) {
+        engine.sounds().stopMusic();
     }
 
     @Override
-    public void init() {
+    public void init(GL gl) {
         try {
-            Path file = engine.getHome().resolve("Account.properties");
+            Path file = engine.home().resolve("Account.properties");
             Account.Client account = Account.read(file);
             if (account.valid()) {
                 add(new GuiMainMenu(this));
@@ -72,6 +72,6 @@ public class GameStateMenu extends GameState {
     }
 
     @Override
-    public void stepComponent(Sync sync) {
+    public void stepComponent(double delta) {
     }
 }

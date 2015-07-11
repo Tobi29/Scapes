@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.engine.opengl.texture;
 
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.OpenGL;
 
 public class TextureFBODepth extends Texture {
@@ -26,8 +26,8 @@ public class TextureFBODepth extends Texture {
     }
 
     @Override
-    protected void store(GraphicsSystem graphics) {
-        OpenGL openGL = graphics.getOpenGL();
+    protected void store(GL gl) {
+        OpenGL openGL = gl.getOpenGL();
         textureID = openGL.createTexture();
         openGL.bindTexture(textureID);
         openGL.bufferTextureDepth(width, height, null);

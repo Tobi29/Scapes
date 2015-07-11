@@ -25,6 +25,7 @@ import org.tobi29.scapes.chunk.generator.ChunkPopulator;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteChunk;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteServer;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
@@ -526,9 +527,9 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
     }
 
     @Override
-    public WorldSkybox createSkybox(WorldClient world) {
-        return new WorldSkyboxOverworld(climateGenerator, biomeGenerator,
-                world);
+    public WorldSkybox createSkybox(WorldClient world, GL gl) {
+        return new WorldSkyboxOverworld(climateGenerator, biomeGenerator, world,
+                gl);
     }
 
     public void simulateSeason(TerrainServer.TerrainMutable terrain, int x,

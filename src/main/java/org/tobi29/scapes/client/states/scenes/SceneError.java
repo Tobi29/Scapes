@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.client.states.scenes;
 
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 
 public class SceneError extends SceneMenu {
     public SceneError() {
@@ -24,12 +24,11 @@ public class SceneError extends SceneMenu {
     }
 
     @Override
-    protected void loadTextures() {
-        GraphicsSystem graphics = state.getEngine().getGraphics();
+    protected void loadTextures(GL gl) {
         for (int i = 0; i < 6; i++) {
-            setBackground(graphics.getTextureManager()
-                    .getTexture("Scapes:image/gui/panorama/error/Panorama" + i),
-                    i);
+            setBackground(gl.getTextureManager().getTexture(
+                            "Scapes:image/gui/panorama/error/Panorama" + i), i,
+                    gl);
         }
     }
 }

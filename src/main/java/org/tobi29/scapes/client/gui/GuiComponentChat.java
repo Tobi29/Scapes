@@ -18,7 +18,7 @@ package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.gui.GuiComponent;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -50,9 +50,9 @@ public class GuiComponentChat extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GraphicsSystem graphics, Shader shader,
+    public void renderComponent(GL gl, Shader shader,
             FontRenderer font, double delta) {
-        MatrixStack matrixStack = graphics.getMatrixStack();
+        MatrixStack matrixStack = gl.getMatrixStack();
         if (this.font != font) {
             this.font = font;
         }
@@ -62,7 +62,7 @@ public class GuiComponentChat extends GuiComponent {
             for (ChatLine line : meshText) {
                 Matrix matrix = matrixStack.push();
                 matrix.translate(0.0f, yy, 0.0f);
-                line.vao.render(graphics, shader);
+                line.vao.render(gl, shader);
                 matrixStack.pop();
                 yy -= 20;
             }

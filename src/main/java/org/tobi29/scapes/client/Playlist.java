@@ -76,8 +76,7 @@ public class Playlist {
             return;
         }
         try {
-            Path path =
-                    player.getGame().getEngine().getHome().resolve("playlists")
+            Path path = player.getGame().getEngine().home().resolve("playlists")
                             .resolve(music.getName());
             List<Path> titles = new ArrayList<>();
             Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
@@ -96,12 +95,12 @@ public class Playlist {
                         new GuiMessage(500, 0, 290, 60, GuiAlignment.RIGHT,
                                 3.0);
                 message.add(new GuiComponentIcon(10, 10, 40, 40,
-                        engine.getGraphics().getTextureManager()
+                        engine.graphics().getTextureManager()
                                 .getTexture("Scapes:image/gui/Playlist")));
                 String name = title.getFileName().toString();
                 name = name.substring(0, name.lastIndexOf('.'));
                 message.add(new GuiComponentText(60, 23, 420, 16, name));
-                engine.getGlobalGui().add(message);
+                engine.globalGUI().add(message);
                 sounds.playMusic(FileUtil.read(title), 1.0f, 1.0f);
             }
         } catch (IOException e) {

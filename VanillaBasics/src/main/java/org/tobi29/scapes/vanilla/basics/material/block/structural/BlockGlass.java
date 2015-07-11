@@ -25,7 +25,7 @@ import org.tobi29.scapes.chunk.data.ChunkMesh;
 import org.tobi29.scapes.chunk.terrain.Terrain;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
@@ -112,17 +112,17 @@ public class BlockGlass extends VanillaBlock {
     }
 
     @Override
-    public void render(ItemStack item, GraphicsSystem graphics, Shader shader,
+    public void render(ItemStack item, GL gl, Shader shader,
             float r, float g, float b, float a) {
-        modelFrame.render(graphics, shader);
-        modelTransparent.render(graphics, shader);
+        modelFrame.render(gl, shader);
+        modelTransparent.render(gl, shader);
     }
 
     @Override
-    public void renderInventory(ItemStack item, GraphicsSystem graphics,
+    public void renderInventory(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a) {
-        modelFrame.renderInventory(graphics, shader);
-        modelTransparent.renderInventory(graphics, shader);
+        modelFrame.renderInventory(gl, shader);
+        modelTransparent.renderInventory(gl, shader);
     }
 
     @Override

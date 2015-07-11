@@ -53,7 +53,7 @@ public class GuiServerSelect extends GuiMenu {
     public GuiServerSelect(GameState state, Gui previous) {
         super(state, "Multiplayer", previous);
         TagStructure scapesTag =
-                state.getEngine().getTagStructure().getStructure("Scapes");
+                state.getEngine().tagStructure().getStructure("Scapes");
         if (scapesTag.has("Servers")) {
             servers.addAll(scapesTag.getList("Servers"));
         }
@@ -110,7 +110,7 @@ public class GuiServerSelect extends GuiMenu {
     public void addServer(TagStructure server) {
         servers.add(server);
         TagStructure scapesTag =
-                state.getEngine().getTagStructure().getStructure("Scapes");
+                state.getEngine().tagStructure().getStructure("Scapes");
         scapesTag.setList("Servers", servers);
     }
 
@@ -137,7 +137,7 @@ public class GuiServerSelect extends GuiMenu {
                     new GuiComponentTextButton(280, 20, 60, 30, 18, "Delete");
             delete.addLeftClick(event -> {
                 servers.remove(tagStructure);
-                TagStructure scapesTag = state.getEngine().getTagStructure()
+                TagStructure scapesTag = state.getEngine().tagStructure()
                         .getStructure("Scapes");
                 scapesTag.setList("Servers", servers);
                 elements.remove(this);

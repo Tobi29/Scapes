@@ -20,7 +20,7 @@ import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.GuiComponent;
 import org.tobi29.scapes.engine.opengl.FBO;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.Pair;
 
@@ -63,10 +63,10 @@ public abstract class Scene {
         guis.forEach(gui -> gui.update(engine));
     }
 
-    public void renderGui(GraphicsSystem graphics, Shader shader,
+    public void renderGui(GL gl, Shader shader,
             double delta) {
         for (GuiComponent gui : guis) {
-            gui.render(graphics, shader, state.getFont(), delta);
+            gui.render(gl, shader, gl.getDefaultFont(), delta);
         }
     }
 
@@ -78,16 +78,15 @@ public abstract class Scene {
         this.state = state;
     }
 
-    public abstract void init(GraphicsSystem graphics);
+    public abstract void init(GL gl);
 
-    public abstract void renderScene(GraphicsSystem graphics);
+    public abstract void renderScene(GL gl);
 
-    public void postRender(GraphicsSystem graphics, double delta) {
+    public void postRender(GL gl, double delta) {
     }
 
-    public Shader postProcessing(GraphicsSystem graphics, int pass) {
-        return graphics.getShaderManager()
-                .getShader("Engine:shader/Textured", graphics);
+    public Shader postProcessing(GL gl, int pass) {
+        return gl.getShaderManager().getShader("Engine:shader/Textured", gl);
     }
 
     public int getWidth(int width) {
@@ -109,5 +108,5 @@ public abstract class Scene {
     public void initFBO(int i, FBO fbo) {
     }
 
-    public abstract void dispose(GraphicsSystem graphics);
+    public abstract void dispose(GL gl);
 }

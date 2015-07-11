@@ -26,7 +26,7 @@ public class GuiShaderSettings extends GuiMenu {
     public GuiShaderSettings(GameState state, Gui previous) {
         super(state, "Shader Settings", previous);
         TagStructure scapesTag =
-                state.getEngine().getTagStructure().getStructure("Scapes");
+                state.getEngine().tagStructure().getStructure("Scapes");
         GuiComponentSlider animationDistance =
                 new GuiComponentSlider(16, 80, 368, 30, 18,
                         "Animation Distance",

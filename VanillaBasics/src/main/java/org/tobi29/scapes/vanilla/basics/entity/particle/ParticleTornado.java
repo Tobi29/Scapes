@@ -59,8 +59,8 @@ public class ParticleTornado extends Particle {
 
     @Override
     public void renderParticle(float x, float y, float z, float r, float g,
-            float b, float a, GraphicsSystem graphics, Shader shader) {
-        MatrixStack matrixStack = graphics.getMatrixStack();
+            float b, float a, GL gl, Shader shader) {
+        MatrixStack matrixStack = gl.getMatrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(x, y, z);
         double camDir = FastMath.pointDirection(x, y, 0.0, 0.0);
@@ -68,13 +68,13 @@ public class ParticleTornado extends Particle {
         matrix.rotate((float) (FastMath.atan2(z, FastMath.length(x, y)) *
                 FastMath.RAD_2_DEG), 1, 0, 0);
         matrix.rotate((float) (camDir + dir), 0, 1, 0);
-        graphics.getTextureManager()
-                .bind("VanillaBasics:image/entity/particle/Cloud", graphics);
-        OpenGL openGL = graphics.getOpenGL();
+        gl.getTextureManager()
+                .bind("VanillaBasics:image/entity/particle/Cloud", gl);
+        OpenGL openGL = gl.getOpenGL();
         openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, r, g, b, a);
         float size = (float) width + 1;
         matrix.scale(size, 1.0f, size);
-        VAO.render(graphics, shader);
+        VAO.render(gl, shader);
         matrixStack.pop();
     }
 

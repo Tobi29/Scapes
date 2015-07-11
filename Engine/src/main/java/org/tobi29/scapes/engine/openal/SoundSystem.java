@@ -116,12 +116,12 @@ public class SoundSystem {
     }
 
     public void playMusic(String asset, float pitch, float gain) {
-        playMusic(engine.getFiles().get(asset), pitch, gain);
+        playMusic(engine.files().get(asset), pitch, gain);
     }
 
     public void playMusic(String asset, float pitch, float gain,
             Vector3 position, Vector3 velocity) {
-        playMusic(engine.getFiles().get(asset), pitch, gain, position,
+        playMusic(engine.files().get(asset), pitch, gain, position,
                 velocity);
     }
 
@@ -253,12 +253,12 @@ public class SoundSystem {
                     .poll(this, openAL, listenerPosition, delta, lagSilence))
                     .collect(Collectors.toList()));
             openAL.checkError("Sound-Effects");
-            float musicVolume = (float) engine.getConfig().getMusicVolume();
+            float musicVolume = (float) engine.config().getMusicVolume();
             if (music != null && musicVolume != this.musicVolume) {
                 openAL.setGain(musicSource, music.gain * musicVolume);
                 this.musicVolume = musicVolume;
             }
-            soundVolume = (float) engine.getConfig().getSoundVolume();
+            soundVolume = (float) engine.config().getSoundVolume();
             openAL.setListener(listenerPosition.minus(origin),
                     listenerOrientation, listenerVelocity);
             if (!isSoundPlaying()) {
@@ -311,7 +311,7 @@ public class SoundSystem {
 
     protected Optional<AudioData> getAudio(String asset) {
         if (!cache.containsKey(asset)) {
-            Resource resource = engine.getFiles().get(asset);
+            Resource resource = engine.files().get(asset);
             if (resource.exists()) {
                 try (ReadableAudioStream stream = AudioStream
                         .create(resource)) {

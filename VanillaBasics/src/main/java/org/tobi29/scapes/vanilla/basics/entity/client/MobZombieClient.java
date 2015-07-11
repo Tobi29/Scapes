@@ -48,7 +48,7 @@ public class MobZombieClient extends MobLivingEquippedClient {
     @Override
     public void onDeath() {
         Texture texture =
-                world.getGame().getEngine().getGraphics().getTextureManager()
+                world.getGame().getEngine().graphics().getTextureManager()
                         .getTexture("VanillaBasics:image/entity/mob/Skeleton");
         ParticleManager particleManager = world.getParticleManager();
         MobLivingModelHuman
@@ -69,7 +69,7 @@ public class MobZombieClient extends MobLivingEquippedClient {
     @Override
     public Optional<MobModel> createModel() {
         Texture texture =
-                world.getGame().getEngine().getGraphics().getTextureManager()
+                world.getGame().getEngine().graphics().getTextureManager()
                         .getTexture("VanillaBasics:image/entity/mob/Zombie");
         return Optional.of(new MobLivingModelHuman(this, texture));
     }

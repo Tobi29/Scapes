@@ -16,11 +16,11 @@
 
 package org.tobi29.scapes.block.models;
 
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 
 public interface ItemModel {
-    void render(GraphicsSystem graphics, Shader shader);
+    void render(GL gl, Shader shader);
 
-    void renderInventory(GraphicsSystem graphics, Shader shader);
+    void renderInventory(GL gl, Shader shader);
 }

@@ -33,6 +33,7 @@ import org.tobi29.scapes.engine.input.Controller;
 import org.tobi29.scapes.engine.input.ControllerDefault;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.input.InputException;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
 import org.tobi29.scapes.engine.utils.VersionUtil;
 import org.tobi29.scapes.engine.utils.graphics.Image;
@@ -109,14 +110,14 @@ public class ScapesClient extends Game {
     @Override
     public void init() {
         try {
-            Path path = engine.getHome();
+            Path path = engine.home();
             Path playlistsPath = path.resolve("playlists");
             Files.createDirectories(playlistsPath.resolve("day"));
             Files.createDirectories(playlistsPath.resolve("night"));
             Files.createDirectories(playlistsPath.resolve("battle"));
             Files.createDirectories(path.resolve("plugins"));
             Files.createDirectories(path.resolve("saves"));
-            FileSystemContainer files = engine.getFiles();
+            FileSystemContainer files = engine.files();
             files.registerFileSystem("Scapes",
                     new ClasspathPath(getClass().getClassLoader(),
                             "assets/scapes/tobi29/"));
@@ -125,7 +126,7 @@ public class ScapesClient extends Game {
         } catch (IOException e) {
             engine.crash(e);
         }
-        TagStructure tagStructure = engine.getTagStructure();
+        TagStructure tagStructure = engine.tagStructure();
         if (!tagStructure.has("Scapes")) {
             TagStructure scapesTag = tagStructure.getStructure("Scapes");
             scapesTag.setFloat("AnimationDistance", 0.15f);
@@ -145,13 +146,13 @@ public class ScapesClient extends Game {
     }
 
     @Override
-    public void initLate() {
+    public void initLate(GL gl) {
         loadInput();
     }
 
     @Override
     public void step() {
-        if (engine.getGraphics().getContainer().joysticksChanged()) {
+        if (engine.container().joysticksChanged()) {
             loadInput();
         }
         InputMode newInputMode = null;
@@ -164,15 +165,15 @@ public class ScapesClient extends Game {
                 !freezeInputMode) {
             LOGGER.info("Setting input mode to {}", newInputMode);
             inputMode = newInputMode;
-            engine.setGuiController(inputMode.getGuiController());
+            engine.setGUIController(inputMode.getGuiController());
             GuiMessage message =
                     new GuiMessage(500, 0, 290, 60, GuiAlignment.RIGHT, 3.0);
             message.add(new GuiComponentIcon(10, 10, 40, 40,
-                    engine.getGraphics().getTextureManager()
+                    engine.graphics().getTextureManager()
                             .getTexture("Scapes:image/gui/input/Default")));
             message.add(new GuiComponentText(60, 25, 420, 10,
                     inputMode.toString()));
-            engine.getGlobalGui().add(message);
+            engine.globalGUI().add(message);
         }
     }
 
@@ -182,23 +183,22 @@ public class ScapesClient extends Game {
 
     public void loadInput() {
         LOGGER.info("Loading input");
-        TagStructure tagStructure =
-                engine.getTagStructure().getStructure("Scapes")
+        TagStructure tagStructure = engine.tagStructure().getStructure("Scapes")
                         .getStructure("Input");
         Optional<InputMode> inputModeDefault =
-                loadService(engine, engine.getController(), tagStructure);
+                loadService(engine, engine.controller(), tagStructure);
         if (!inputModeDefault.isPresent()) {
             throw new InputException("No keyboard controller installed");
         }
         inputModes.clear();
         inputModeDefault.ifPresent(inputModes::add);
-        for (ControllerJoystick joystick : engine.getGraphics().getContainer()
+        for (ControllerJoystick joystick : engine.container()
                 .getJoysticks()) {
             loadService(engine, joystick, tagStructure)
                     .ifPresent(inputModes::add);
         }
         inputMode = inputModes.get(0);
-        engine.setGuiController(inputMode.getGuiController());
+        engine.setGUIController(inputMode.getGuiController());
     }
 
     public void setFreezeInputMode(boolean freezeInputMode) {

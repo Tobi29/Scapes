@@ -18,7 +18,7 @@ package org.tobi29.scapes.vanilla.basics.gui;
 
 import org.tobi29.scapes.client.gui.GuiContainerInventory;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
@@ -40,9 +40,9 @@ public class GuiAlloyInventory extends GuiContainerInventory {
     }
 
     @Override
-    public void renderOverlay(GraphicsSystem graphics, Shader shader,
+    public void renderOverlay(GL gl, Shader shader,
             FontRenderer font) {
-        super.renderOverlay(graphics, shader, font);
+        super.renderOverlay(gl, shader, font);
         StringBuilder textBuilder = new StringBuilder(64);
         textBuilder.append("Metal: ");
         String result = container.getResult();
@@ -67,6 +67,6 @@ public class GuiAlloyInventory extends GuiContainerInventory {
             vaoInfoText =
                     font.render(text, 260, 160, 18, 1.0f, 1.0f, 1.0f, 1.0f);
         }
-        vaoInfoText.render(graphics, shader);
+        vaoInfoText.render(gl, shader);
     }
 }

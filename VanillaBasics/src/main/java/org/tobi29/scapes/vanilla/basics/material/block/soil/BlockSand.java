@@ -24,7 +24,7 @@ import org.tobi29.scapes.block.models.BlockModelSimpleBlock;
 import org.tobi29.scapes.chunk.data.ChunkMesh;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -84,15 +84,15 @@ public class BlockSand extends BlockSoil implements ItemHeatable {
     }
 
     @Override
-    public void render(ItemStack item, GraphicsSystem graphics, Shader shader,
+    public void render(ItemStack item, GL gl, Shader shader,
             float r, float g, float b, float a) {
-        models[item.getData()].render(graphics, shader);
+        models[item.getData()].render(gl, shader);
     }
 
     @Override
-    public void renderInventory(ItemStack item, GraphicsSystem graphics,
+    public void renderInventory(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a) {
-        models[item.getData()].renderInventory(graphics, shader);
+        models[item.getData()].renderInventory(gl, shader);
     }
 
     @Override

@@ -54,12 +54,12 @@ public class GuiComponentIcon extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GraphicsSystem graphics, Shader shader,
+    public void renderComponent(GL gl, Shader shader,
             FontRenderer font, double delta) {
-        texture.bind(graphics);
-        graphics.getOpenGL().setAttribute4f(OpenGL.COLOR_ATTRIBUTE, r, g, b, a);
-        vao.render(graphics, shader);
-        graphics.getTextureManager().unbind(graphics);
-        vaoShadow.render(graphics, shader);
+        texture.bind(gl);
+        gl.getOpenGL().setAttribute4f(OpenGL.COLOR_ATTRIBUTE, r, g, b, a);
+        vao.render(gl, shader);
+        gl.getTextureManager().unbind(gl);
+        vaoShadow.render(gl, shader);
     }
 }

@@ -58,20 +58,20 @@ public class GuiComponentBar extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GraphicsSystem graphics, Shader shader,
+    public void renderComponent(GL gl, Shader shader,
             FontRenderer font, double delta) {
         double factor = FastMath.min(1.0, delta);
         value += (FastMath.clamp(supplier.get(), 0.0, 1.0) - value) * factor;
-        graphics.getTextureManager().unbind(graphics);
-        MatrixStack matrixStack = graphics.getMatrixStack();
+        gl.getTextureManager().unbind(gl);
+        MatrixStack matrixStack = gl.getMatrixStack();
         Matrix matrix = matrixStack.push();
         matrix.scale(value, 1.0f, 1.0f);
-        vao1.render(graphics, shader);
+        vao1.render(gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
         matrix.translate(value * width, 0.0f, 0.0f);
         matrix.scale(1.0f - value, 1.0f, 1.0f);
-        vao2.render(graphics, shader);
+        vao2.render(gl, shader);
         matrixStack.pop();
     }
 

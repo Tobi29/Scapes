@@ -18,7 +18,7 @@ package org.tobi29.scapes.engine.gui;
 
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.Mesh;
 import org.tobi29.scapes.engine.opengl.VAO;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -35,20 +35,20 @@ public class GuiComponentButton extends GuiComponent {
     @Override
     public void clickLeft(GuiComponentEvent event, ScapesEngine engine) {
         super.clickLeft(event, engine);
-        engine.getSounds().playSound("Engine:sound/Click.ogg", 1.0f, 1.0f);
+        engine.sounds().playSound("Engine:sound/Click.ogg", 1.0f, 1.0f);
     }
 
     @Override
     public void clickRight(GuiComponentEvent event, ScapesEngine engine) {
         super.clickRight(event, engine);
-        engine.getSounds().playSound("Engine:sound/Click.ogg", 1.0f, 1.0f);
+        engine.sounds().playSound("Engine:sound/Click.ogg", 1.0f, 1.0f);
     }
 
     @Override
-    public void renderComponent(GraphicsSystem graphics, Shader shader,
+    public void renderComponent(GL gl, Shader shader,
             FontRenderer font, double delta) {
-        graphics.getTextureManager().unbind(graphics);
-        vao.render(graphics, shader);
+        gl.getTextureManager().unbind(gl);
+        vao.render(gl, shader);
     }
 
     @Override

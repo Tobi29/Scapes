@@ -26,16 +26,16 @@ public class GuiOptionsInGame extends Gui {
                 new GuiComponentVisiblePane(200, 0, 400, 512);
         GuiComponentSlider musicVolume =
                 new GuiComponentSlider(16, 80, 368, 30, 18, "Music",
-                        state.getEngine().getConfig().getMusicVolume());
-        musicVolume.addHover(event -> state.getEngine().getConfig()
+                        state.getEngine().config().getMusicVolume());
+        musicVolume.addHover(event -> state.getEngine().config()
                 .setMusicVolume((float) musicVolume.value));
         GuiComponentSlider soundVolume =
                 new GuiComponentSlider(16, 120, 368, 30, 18, "Sound",
-                        state.getEngine().getConfig().getSoundVolume());
-        soundVolume.addHover(event -> state.getEngine().getConfig()
+                        state.getEngine().config().getSoundVolume());
+        soundVolume.addHover(event -> state.getEngine().config()
                 .setSoundVolume((float) soundVolume.value));
         GuiComponentTextButton fullscreen;
-        if (state.getEngine().getConfig().isFullscreen()) {
+        if (state.getEngine().config().isFullscreen()) {
             fullscreen = new GuiComponentTextButton(16, 160, 368, 30, 18,
                     "Fullscreen: ON");
         } else {
@@ -43,14 +43,14 @@ public class GuiOptionsInGame extends Gui {
                     "Fullscreen: OFF");
         }
         fullscreen.addLeftClick(event -> {
-            if (!state.getEngine().getConfig().isFullscreen()) {
+            if (!state.getEngine().config().isFullscreen()) {
                 fullscreen.setText("Fullscreen: ON");
-                state.getEngine().getConfig().setFullscreen(true);
+                state.getEngine().config().setFullscreen(true);
             } else {
                 fullscreen.setText("Fullscreen: OFF");
-                state.getEngine().getConfig().setFullscreen(false);
+                state.getEngine().config().setFullscreen(false);
             }
-            state.getEngine().getGraphics().getContainer().updateContainer();
+            state.getEngine().container().updateContainer();
         });
         GuiComponentTextButton back =
                 new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");

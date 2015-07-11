@@ -17,7 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.entity.model;
 
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
@@ -77,37 +77,36 @@ public class EntityModelBellows implements EntityModel {
     }
 
     @Override
-    public void render(GraphicsSystem graphics, WorldClient world, Cam cam,
+    public void render(GL gl, WorldClient world, Cam cam,
             Shader shader) {
         float posRenderX = (float) (pos.doubleX() - cam.position.doubleX());
         float posRenderY = (float) (pos.doubleY() - cam.position.doubleY());
         float posRenderZ = (float) (pos.doubleZ() - cam.position.doubleZ());
-        OpenGL openGL = graphics.getOpenGL();
+        OpenGL openGL = gl.getOpenGL();
         openGL.setAttribute2f(4, world.getTerrain()
                         .blockLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f,
                 world.getTerrain()
                         .sunLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f);
-        MatrixStack matrixStack = graphics.getMatrixStack();
+        MatrixStack matrixStack = gl.getMatrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(posRenderX, posRenderY, posRenderZ);
         matrix = matrixStack.push();
         matrix.scale(1.0f, 1.0f, scale);
-        graphics.getTextureManager()
-                .bind("VanillaBasics:image/terrain/tree/birch/Planks",
-                        graphics);
-        MIDDLE.render(1.0f, 1.0f, 1.0f, 1.0f, graphics, shader);
+        gl.getTextureManager()
+                .bind("VanillaBasics:image/terrain/tree/birch/Planks", gl);
+        MIDDLE.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
-        graphics.getTextureManager()
-                .bind("VanillaBasics:image/terrain/tree/oak/Planks", graphics);
+        gl.getTextureManager()
+                .bind("VanillaBasics:image/terrain/tree/oak/Planks", gl);
         matrix.translate(0.0f, 0.0f, scale * 0.5f);
-        SIDE.render(1.0f, 1.0f, 1.0f, 1.0f, graphics, shader);
+        SIDE.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
         matrix.translate(0.0f, 0.0f, -scale * 0.5f);
-        SIDE.render(1.0f, 1.0f, 1.0f, 1.0f, graphics, shader);
+        SIDE.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
         matrixStack.pop();
-        SIDE.render(1.0f, 1.0f, 1.0f, 1.0f, graphics, shader);
+        SIDE.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
         matrix = matrixStack.push();
         switch (entity.getFace()) {
             case DOWN:
@@ -126,9 +125,9 @@ public class EntityModelBellows implements EntityModel {
                 matrix.rotate(270, 0, 1, 0);
                 break;
         }
-        graphics.getTextureManager()
-                .bind("VanillaBasics:image/terrain/device/Anvil", graphics);
-        PIPE.render(1.0f, 1.0f, 1.0f, 1.0f, graphics, shader);
+        gl.getTextureManager()
+                .bind("VanillaBasics:image/terrain/device/Anvil", gl);
+        PIPE.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
         matrixStack.pop();
         matrixStack.pop();
     }

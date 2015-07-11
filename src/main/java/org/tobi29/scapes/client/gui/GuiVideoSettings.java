@@ -27,7 +27,7 @@ public class GuiVideoSettings extends GuiMenu {
     public GuiVideoSettings(GameState state, Gui previous) {
         super(state, "Video Settings", previous);
         TagStructure scapesTag =
-                state.getEngine().getTagStructure().getStructure("Scapes");
+                state.getEngine().tagStructure().getStructure("Scapes");
         GuiComponentSlider viewDistance =
                 new GuiComponentSlider(16, 80, 368, 30, 18, "View distance",
                         (scapesTag.getDouble("RenderDistance") - 10.0) / 246.0,
@@ -43,7 +43,7 @@ public class GuiVideoSettings extends GuiMenu {
             state.add(new GuiShaderSettings(state, this));
         });
         GuiComponentTextButton fullscreen;
-        if (state.getEngine().getConfig().isFullscreen()) {
+        if (state.getEngine().config().isFullscreen()) {
             fullscreen = new GuiComponentTextButton(16, 160, 368, 30, 18,
                     "Fullscreen: ON");
         } else {
@@ -51,14 +51,14 @@ public class GuiVideoSettings extends GuiMenu {
                     "Fullscreen: OFF");
         }
         fullscreen.addLeftClick(event -> {
-            if (!state.getEngine().getConfig().isFullscreen()) {
+            if (!state.getEngine().config().isFullscreen()) {
                 fullscreen.setText("Fullscreen: ON");
-                state.getEngine().getConfig().setFullscreen(true);
+                state.getEngine().config().setFullscreen(true);
             } else {
                 fullscreen.setText("Fullscreen: OFF");
-                state.getEngine().getConfig().setFullscreen(false);
+                state.getEngine().config().setFullscreen(false);
             }
-            state.getEngine().getGraphics().getContainer().updateContainer();
+            state.getEngine().container().updateContainer();
         });
         GuiComponentTextButton keepInvisibleVbos;
         if (scapesTag.getBoolean("KeepInvisibleChunkVbos")) {
@@ -79,12 +79,12 @@ public class GuiVideoSettings extends GuiMenu {
         });
         GuiComponentSlider resolutionMultiplier =
                 new GuiComponentSlider(16, 240, 368, 30, 18, "Resolution",
-                        reverseResolution(state.getEngine().getConfig()
+                        reverseResolution(state.getEngine().config()
                                 .getResolutionMultiplier()),
                         (text, value) -> text + ": " +
                                 FastMath.round(resolution(value) * 100.0) +
                                 '%');
-        resolutionMultiplier.addHover(event -> state.getEngine().getConfig()
+        resolutionMultiplier.addHover(event -> state.getEngine().config()
                 .setResolutionMultiplier(
                         (float) resolution(resolutionMultiplier.value)));
         pane.add(viewDistance);

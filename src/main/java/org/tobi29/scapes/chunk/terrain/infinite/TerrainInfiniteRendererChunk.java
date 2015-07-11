@@ -91,11 +91,10 @@ public class TerrainInfiniteRendererChunk {
         return geometryDirty[i];
     }
 
-    public void render(GraphicsSystem graphics, Shader shader,
-            boolean ensureStored, Cam cam) {
+    public void render(GL gl, Shader shader, boolean ensureStored, Cam cam) {
         double relativeX = chunk.getBlockX() - cam.position.doubleX();
         double relativeY = chunk.getBlockY() - cam.position.doubleY();
-        MatrixStack matrixStack = graphics.getMatrixStack();
+        MatrixStack matrixStack = gl.getMatrixStack();
         for (int i = 0; i < vao.length; i++) {
             double relativeZ = (i << 4) - cam.position.doubleZ();
             boolean oldLod = (lod[i] & 1) == 1;
@@ -120,20 +119,20 @@ public class TerrainInfiniteRendererChunk {
                     Matrix matrix = matrixStack.push();
                     matrix.translate((float) relativeX, (float) relativeY,
                             (float) relativeZ);
-                    vao.render(graphics, shader);
+                    vao.render(gl, shader);
                     matrixStack.pop();
                 } else if (ensureStored) {
-                    vao.ensureStored(graphics);
+                    vao.ensureStored(gl);
                 }
             }
         }
     }
 
-    public void renderAlpha(GraphicsSystem graphics, Shader shader,
-            boolean ensureStored, Cam cam) {
+    public void renderAlpha(GL gl, Shader shader, boolean ensureStored,
+            Cam cam) {
         double relativeX = chunk.getBlockX() - cam.position.doubleX();
         double relativeY = chunk.getBlockY() - cam.position.doubleY();
-        MatrixStack matrixStack = graphics.getMatrixStack();
+        MatrixStack matrixStack = gl.getMatrixStack();
         for (int i = 0; i < vao.length; i++) {
             VAO vao = vaoAlpha[i];
             AABB aabb = aabbAlpha[i];
@@ -142,10 +141,10 @@ public class TerrainInfiniteRendererChunk {
                     Matrix matrix = matrixStack.push();
                     matrix.translate((float) relativeX, (float) relativeY,
                             (float) ((i << 4) - cam.position.doubleZ()));
-                    vao.render(graphics, shader);
+                    vao.render(gl, shader);
                     matrixStack.pop();
                 } else if (ensureStored) {
-                    vao.ensureStored(graphics);
+                    vao.ensureStored(gl);
                 }
             }
         }
@@ -155,9 +154,9 @@ public class TerrainInfiniteRendererChunk {
         return geometryInit[0] && chunk.isLoaded();
     }
 
-    public void renderFrame(GraphicsSystem graphics, Shader shader, Cam cam) {
-        MatrixStack matrixStack = graphics.getMatrixStack();
-        OpenGL openGL = graphics.getOpenGL();
+    public void renderFrame(GL gl, Shader shader, Cam cam) {
+        MatrixStack matrixStack = gl.getMatrixStack();
+        OpenGL openGL = gl.getOpenGL();
         for (int i = 0; i < aabb.length; i++) {
             AABB aabb = this.aabb[i];
             if (aabb != null) {
@@ -179,7 +178,7 @@ public class TerrainInfiniteRendererChunk {
                 matrix.scale((float) (aabb.maxX - aabb.minX),
                         (float) (aabb.maxY - aabb.minY),
                         (float) (aabb.maxZ - aabb.minZ));
-                FRAME.render(graphics, shader);
+                FRAME.render(gl, shader);
                 matrixStack.pop();
             }
         }

@@ -42,7 +42,7 @@ public class GuiChatWrite extends Gui {
 
     @Override
     public void updateComponent() {
-        if (state.getEngine().getController()
+        if (state.getEngine().controller()
                 .isPressed(ControllerKey.KEY_ENTER)) {
             String text = write.getText();
             if (!text.isEmpty()) {

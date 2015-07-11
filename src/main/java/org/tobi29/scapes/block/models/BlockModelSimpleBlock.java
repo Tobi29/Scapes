@@ -21,7 +21,7 @@ import org.tobi29.scapes.block.TerrainTexture;
 import org.tobi29.scapes.block.TerrainTextureRegistry;
 import org.tobi29.scapes.chunk.data.ChunkMesh;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.Mesh;
 import org.tobi29.scapes.engine.opengl.VAO;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
@@ -71,20 +71,20 @@ public class BlockModelSimpleBlock implements BlockModel {
     }
 
     @Override
-    public void render(GraphicsSystem graphics, Shader shader) {
-        registry.getTexture().bind(graphics);
-        vao.render(graphics, shader);
+    public void render(GL gl, Shader shader) {
+        registry.getTexture().bind(gl);
+        vao.render(gl, shader);
     }
 
     @Override
-    public void renderInventory(GraphicsSystem graphics, Shader shader) {
-        registry.getTexture().bind(graphics);
-        MatrixStack matrixStack = graphics.getMatrixStack();
+    public void renderInventory(GL gl, Shader shader) {
+        registry.getTexture().bind(gl);
+        MatrixStack matrixStack = gl.getMatrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(0.5f, 0.5f, 0.5f);
         matrix.rotate(57.5f, 1, 0, 0);
         matrix.rotate(45, 0, 0, 1);
-        vaoInventory.render(graphics, shader);
+        vaoInventory.render(gl, shader);
         matrixStack.pop();
     }
 

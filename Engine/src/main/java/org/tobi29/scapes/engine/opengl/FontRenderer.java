@@ -158,9 +158,9 @@ public class FontRenderer {
     }
 
     @OpenGLFunction
-    public void dispose(GraphicsSystem graphics) {
+    public void dispose(GL gl) {
         Arrays.stream(pages).filter(Objects::nonNull)
-                .forEach(page -> page.texture.dispose(graphics));
+                .forEach(page -> page.texture.dispose(gl));
         glyphRenderer.dispose();
     }
 
@@ -178,18 +178,17 @@ public class FontRenderer {
         }
 
         @OpenGLFunction
-        public void render(GraphicsSystem graphics, Shader shader) {
-            render(graphics, shader, true);
+        public void render(GL gl, Shader shader) {
+            render(gl, shader, true);
         }
 
         @OpenGLFunction
-        public void render(GraphicsSystem graphics, Shader shader,
-                boolean textured) {
+        public void render(GL gl, Shader shader, boolean textured) {
             Arrays.stream(vaos).forEach(vao -> {
                 if (textured) {
-                    vao.texture.bind(graphics);
+                    vao.texture.bind(gl);
                 }
-                vao.vao.render(graphics, shader);
+                vao.vao.render(gl, shader);
             });
         }
 

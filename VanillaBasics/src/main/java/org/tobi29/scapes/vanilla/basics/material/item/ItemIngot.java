@@ -21,7 +21,7 @@ import org.tobi29.scapes.block.TerrainTexture;
 import org.tobi29.scapes.block.TerrainTextureRegistry;
 import org.tobi29.scapes.block.models.ItemModel;
 import org.tobi29.scapes.block.models.ItemModelSimple;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.entity.server.MobItemServer;
@@ -60,11 +60,11 @@ public class ItemIngot extends VanillaItem implements ItemHeatable, ItemMetal {
     }
 
     @Override
-    public void render(ItemStack item, GraphicsSystem graphics, Shader shader,
+    public void render(ItemStack item, GL gl, Shader shader,
             float r, float g, float b, float a) {
         if ("Stone"
                 .equals(item.getMetaData("Vanilla").getString("MetalType"))) {
-            modelStone.render(graphics, shader);
+            modelStone.render(gl, shader);
         } else {
             MetalType metal = plugin.getMetalType(
                     item.getMetaData("Vanilla").getString("MetalType"));
@@ -73,22 +73,22 @@ public class ItemIngot extends VanillaItem implements ItemHeatable, ItemMetal {
             }
             switch (item.getData()) {
                 case 1:
-                    getModelShaped(metal).render(graphics, shader);
+                    getModelShaped(metal).render(gl, shader);
                     break;
                 default:
-                    getModelRaw(metal).render(graphics, shader);
-                    modelMold.render(graphics, shader);
+                    getModelRaw(metal).render(gl, shader);
+                    modelMold.render(gl, shader);
                     break;
             }
         }
     }
 
     @Override
-    public void renderInventory(ItemStack item, GraphicsSystem graphics,
+    public void renderInventory(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a) {
         if ("Stone"
                 .equals(item.getMetaData("Vanilla").getString("MetalType"))) {
-            modelStone.renderInventory(graphics, shader);
+            modelStone.renderInventory(gl, shader);
         } else {
             MetalType metal = plugin.getMetalType(
                     item.getMetaData("Vanilla").getString("MetalType"));
@@ -97,11 +97,11 @@ public class ItemIngot extends VanillaItem implements ItemHeatable, ItemMetal {
             }
             switch (item.getData()) {
                 case 1:
-                    getModelShaped(metal).renderInventory(graphics, shader);
+                    getModelShaped(metal).renderInventory(gl, shader);
                     break;
                 default:
-                    getModelRaw(metal).renderInventory(graphics, shader);
-                    modelMold.renderInventory(graphics, shader);
+                    getModelRaw(metal).renderInventory(gl, shader);
+                    modelMold.renderInventory(gl, shader);
                     break;
             }
         }

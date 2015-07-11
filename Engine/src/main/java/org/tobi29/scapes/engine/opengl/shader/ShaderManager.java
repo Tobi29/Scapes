@@ -16,10 +16,8 @@
 
 package org.tobi29.scapes.engine.opengl.shader;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
 import org.tobi29.scapes.engine.utils.io.filesystem.Resource;
 
@@ -29,8 +27,6 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ShaderManager {
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(ShaderManager.class);
     private final ScapesEngine engine;
     private final Map<String, Shader> cache = new ConcurrentHashMap<>();
     private final Map<String, ShaderCompileInformation> compileInformation =
@@ -40,17 +36,17 @@ public class ShaderManager {
         this.engine = engine;
     }
 
-    public Shader getShader(String asset, GraphicsSystem graphics) {
+    public Shader getShader(String asset, GL gl) {
         if (!cache.containsKey(asset)) {
-            loadFromAsset(asset, graphics);
+            loadFromAsset(asset, gl);
         }
         return cache.get(asset);
     }
 
-    private void loadFromAsset(String asset, GraphicsSystem graphics) {
+    private void loadFromAsset(String asset, GL gl) {
         try {
             Properties properties = new Properties();
-            FileSystemContainer files = engine.getFiles();
+            FileSystemContainer files = engine.files();
             Resource vertexResource = files.get(asset + ".vsh");
             Resource fragmentResource = files.get(asset + ".fsh");
             Resource propertiesResource = files.get(asset + ".properties");
@@ -59,7 +55,7 @@ public class ShaderManager {
             }
             Shader shader =
                     new Shader(vertexResource, fragmentResource, properties,
-                            getCompileInformation(asset), graphics);
+                            getCompileInformation(asset), gl);
             cache.put(asset, shader);
         } catch (IOException e) {
             engine.crash(e);
@@ -75,9 +71,9 @@ public class ShaderManager {
         return information;
     }
 
-    public void clearCache(GraphicsSystem graphics) {
+    public void clearCache(GL gl) {
         for (Shader shader : cache.values()) {
-            shader.dispose(graphics);
+            shader.dispose(gl);
         }
         cache.clear();
     }

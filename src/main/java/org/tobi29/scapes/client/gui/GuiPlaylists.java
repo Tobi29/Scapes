@@ -61,10 +61,9 @@ public class GuiPlaylists extends GuiMenu {
                 new GuiComponentTextButton(112, 370, 176, 30, 18, "Add");
         add.addLeftClick(event -> {
             try {
-                Path directory =
-                        state.getEngine().getHome().resolve("playlists")
+                Path directory = state.getEngine().home().resolve("playlists")
                                 .resolve(playlist);
-                state.getEngine().getGraphics().getContainer()
+                state.getEngine().container()
                         .importFromUser(directory,
                                 new Pair[]{new Pair<>("*.*", "All Files"),
                                         new Pair<>("*.ogg", "ogg-Vorbis File"),
@@ -89,7 +88,7 @@ public class GuiPlaylists extends GuiMenu {
         elements.clear();
         this.playlist = playlist;
         try {
-            Path path = state.getEngine().getHome().resolve("playlists")
+            Path path = state.getEngine().home().resolve("playlists")
                     .resolve(playlist);
             List<Path> titles = new ArrayList<>();
             Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
@@ -118,7 +117,7 @@ public class GuiPlaylists extends GuiMenu {
             super(0, 0, 378, 20);
             GuiComponentTextButton play =
                     new GuiComponentTextButton(20, 2, 30, 15, 12, "Play");
-            play.addLeftClick(event -> state.getEngine().getSounds()
+            play.addLeftClick(event -> state.getEngine().sounds()
                     .playMusic(FileUtil.read(path), 1.0f, 1.0f));
             GuiComponentTextButton label =
                     new GuiComponentTextButton(60, 2, 220, 15, 12, title);

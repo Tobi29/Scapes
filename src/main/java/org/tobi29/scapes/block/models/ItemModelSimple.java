@@ -17,7 +17,7 @@
 package org.tobi29.scapes.block.models;
 
 import org.tobi29.scapes.block.TerrainTexture;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.Mesh;
 import org.tobi29.scapes.engine.opengl.VAO;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
@@ -133,18 +133,18 @@ public class ItemModelSimple implements ItemModel {
     }
 
     @Override
-    public void render(GraphicsSystem graphics, Shader shader) {
-        texture.getTerrainTextureRegistry().getTexture().bind(graphics);
-        MatrixStack matrixStack = graphics.getMatrixStack();
+    public void render(GL gl, Shader shader) {
+        texture.getTerrainTextureRegistry().getTexture().bind(gl);
+        MatrixStack matrixStack = gl.getMatrixStack();
         Matrix matrix = matrixStack.push();
         matrix.rotate(315.0f, 0.0f, 1.0f, 0.0f);
-        vao.render(graphics, shader);
+        vao.render(gl, shader);
         matrixStack.pop();
     }
 
     @Override
-    public void renderInventory(GraphicsSystem graphics, Shader shader) {
-        texture.getTerrainTextureRegistry().getTexture().bind(graphics);
-        vaoInventory.render(graphics, shader);
+    public void renderInventory(GL gl, Shader shader) {
+        texture.getTerrainTextureRegistry().getTexture().bind(gl);
+        vaoInventory.render(gl, shader);
     }
 }

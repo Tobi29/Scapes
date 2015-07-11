@@ -19,7 +19,7 @@ package org.tobi29.scapes.client.gui;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiAlignment;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -37,17 +37,17 @@ public class GuiHud extends Gui {
     }
 
     @Override
-    public void render(GraphicsSystem graphics, Shader shader,
+    public void render(GL gl, Shader shader,
             FontRenderer font, double delta) {
         if (visible) {
-            super.render(graphics, shader, font, delta);
-            MatrixStack matrixStack = graphics.getMatrixStack();
+            super.render(gl, shader, font, delta);
+            MatrixStack matrixStack = gl.getMatrixStack();
             Matrix matrix = matrixStack.push();
-            float ratio = (float) graphics.getSceneHeight() /
-                    graphics.getSceneWidth() * 1.5625f;
+            float ratio =
+                    (float) gl.getSceneHeight() / gl.getSceneWidth() * 1.5625f;
             matrix.scale(ratio, 1.0f, 1.0f);
             matrix.translate(-400.0f + 400.0f / ratio, 0.0f, 0.0f);
-            cross.render(graphics, shader, font, delta);
+            cross.render(gl, shader, font, delta);
             matrixStack.pop();
         }
     }

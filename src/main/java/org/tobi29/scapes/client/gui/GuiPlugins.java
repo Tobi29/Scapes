@@ -38,13 +38,13 @@ public class GuiPlugins extends GuiMenu {
     @SuppressWarnings("unchecked")
     public GuiPlugins(GameState state, Gui previous) {
         super(state, "Plugins", previous);
-        path = state.getEngine().getHome().resolve("plugins");
+        path = state.getEngine().home().resolve("plugins");
         scrollPane = new GuiComponentScrollPaneList(16, 80, 368, 250, 70);
         GuiComponentTextButton add =
                 new GuiComponentTextButton(112, 370, 176, 30, 18, "Add");
         add.addLeftClick(event -> {
             try {
-                state.getEngine().getGraphics().getContainer()
+                state.getEngine().container()
                         .importFromUser(path,
                                 new Pair[]{new Pair<>("*.jar", "Jar Archive")},
                                 "Import plugin", true);

@@ -19,7 +19,7 @@ package org.tobi29.scapes.engine.opengl.scenes;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiAlignment;
 import org.tobi29.scapes.engine.gui.GuiComponentIcon;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 
@@ -34,22 +34,21 @@ public class SceneImage extends Scene {
     }
 
     @Override
-    public void init(GraphicsSystem graphics) {
+    public void init(GL gl) {
         addGui(new GuiImage(image));
     }
 
     @Override
-    public void renderScene(GraphicsSystem graphics) {
+    public void renderScene(GL gl) {
     }
 
     @Override
-    public Shader postProcessing(GraphicsSystem graphics, int pass) {
-        return graphics.getShaderManager()
-                .getShader("Engine:shader/Textured", graphics);
+    public Shader postProcessing(GL gl, int pass) {
+        return gl.getShaderManager().getShader("Engine:shader/Textured", gl);
     }
 
     @Override
-    public void dispose(GraphicsSystem graphics) {
+    public void dispose(GL gl) {
     }
 
     public GuiComponentIcon getImage() {

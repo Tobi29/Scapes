@@ -77,10 +77,10 @@ public class Box {
         this.maxZ = maxZ;
     }
 
-    public void render(float r, float g, float b, float a,
-            GraphicsSystem graphics, Shader shader) {
-        OpenGL openGL = graphics.getOpenGL();
+    public void render(float r, float g, float b, float a, GL gl,
+            Shader shader) {
+        OpenGL openGL = gl.getOpenGL();
         openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, r, g, b, a);
-        vao.render(graphics, shader);
+        vao.render(gl, shader);
     }
 }

@@ -65,6 +65,7 @@ public class SceneMenu extends Scene {
     private final Cam cam;
     private float speed = 0.6f, yaw;
     private VAO vao;
+    private Optional<Path[]> save = Optional.empty();
 
     public SceneMenu() {
         cam = new Cam(0.4f, 2.0f);
@@ -72,16 +73,13 @@ public class SceneMenu extends Scene {
         yaw = random.nextFloat() * 360.0f;
     }
 
-    public void changeBackground(Path path) throws IOException {
-        Optional<Path[]> save = saveBackground(path);
-        if (save.isPresent()) {
-            changeBackground(save.get());
-        }
+    public void changeBackground(Path path) {
+        save = saveBackground(path);
     }
 
     @Override
-    public void init(GraphicsSystem graphics) {
-        ShaderManager shaderManager = graphics.getShaderManager();
+    public void init(GL gl) {
+        ShaderManager shaderManager = gl.getShaderManager();
         ShaderCompileInformation information =
                 shaderManager.getCompileInformation("Scapes:shader/Menu1");
         information.supplyExternal("BLUR_OFFSET", BLUR_OFFSET);
@@ -97,21 +95,28 @@ public class SceneMenu extends Scene {
                         -1.0f, 1.0f, -1.0f, -1.0f},
                 new float[]{1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f},
                 new int[]{0, 1, 2, 2, 1, 3}, RenderType.TRIANGLES);
-        loadTextures();
+        loadTextures(gl);
     }
 
     @Override
-    public void renderScene(GraphicsSystem graphics) {
-        cam.setPerspective(
-                (float) graphics.getSceneWidth() / graphics.getSceneHeight(),
+    public void renderScene(GL gl) {
+        if (save.isPresent()) {
+            try {
+                changeBackground(save.get(), gl);
+            } catch (IOException e) {
+                LOGGER.warn("Failed to load background", e);
+            }
+            save = Optional.empty();
+        }
+        cam.setPerspective((float) gl.getSceneWidth() / gl.getSceneHeight(),
                 90.0f);
         cam.setView(0.0f, yaw, 0.0f);
-        graphics.setProjectionPerspective(graphics.getSceneWidth(),
-                graphics.getSceneHeight(), cam);
-        Shader shader = graphics.getShaderManager()
-                .getShader("Engine:shader/Textured", graphics);
-        OpenGL openGL = graphics.getOpenGL();
-        MatrixStack matrixStack = graphics.getMatrixStack();
+        gl.setProjectionPerspective(gl.getSceneWidth(), gl.getSceneHeight(),
+                cam);
+        Shader shader =
+                gl.getShaderManager().getShader("Engine:shader/Textured", gl);
+        OpenGL openGL = gl.getOpenGL();
+        MatrixStack matrixStack = gl.getMatrixStack();
         for (int i = 0; i < 6; i++) {
             Texture texture = textures[i];
             if (texture != null) {
@@ -127,25 +132,25 @@ public class SceneMenu extends Scene {
                 } else if (i == 5) {
                     matrix.rotate(-90.0f, 1.0f, 0.0f, 0.0f);
                 }
-                texture.bind(graphics);
+                texture.bind(gl);
                 openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
                         1.0f);
-                vao.render(graphics, shader);
+                vao.render(gl, shader);
                 matrixStack.pop();
             }
         }
     }
 
     @Override
-    public void postRender(GraphicsSystem graphics, double delta) {
+    public void postRender(GL gl, double delta) {
         yaw -= speed * delta;
         yaw %= 360;
     }
 
     @Override
-    public Shader postProcessing(GraphicsSystem graphics, int pass) {
-        return graphics.getShaderManager()
-                .getShader("Scapes:shader/Menu" + (pass + 1), graphics);
+    public Shader postProcessing(GL gl, int pass) {
+        return gl.getShaderManager()
+                .getShader("Scapes:shader/Menu" + (pass + 1), gl);
     }
 
     @Override
@@ -154,11 +159,11 @@ public class SceneMenu extends Scene {
     }
 
     @Override
-    public void dispose(GraphicsSystem graphics) {
+    public void dispose(GL gl) {
         for (int i = 0; i < 6; i++) {
             Texture texture = textures[i];
             if (texture != null) {
-                texture.dispose(graphics);
+                texture.dispose(gl);
             }
         }
     }
@@ -167,10 +172,10 @@ public class SceneMenu extends Scene {
         this.speed = speed;
     }
 
-    protected void loadTextures() {
+    protected void loadTextures(GL gl) {
         List<Path[]> saves = new ArrayList<>();
         try {
-            Path path = state.getEngine().getHome().resolve("saves");
+            Path path = state.getEngine().home().resolve("saves");
             for (Path directory : Files.newDirectoryStream(path)) {
                 if (Files.isDirectory(directory) &&
                         !Files.isHidden(directory) &&
@@ -182,29 +187,27 @@ public class SceneMenu extends Scene {
         } catch (IOException e) {
             LOGGER.warn("Failed to read saves: {}", e.toString());
         }
-        GraphicsSystem graphics = state.getEngine().getGraphics();
         Random random = ThreadLocalRandom.current();
         if (saves.isEmpty()) {
             int r = random.nextInt(2);
             for (int i = 0; i < 6; i++) {
-                setBackground(graphics.getTextureManager()
+                setBackground(gl.getTextureManager()
                         .getTexture("Scapes:image/gui/panorama/" +
-                                r + "/Panorama" + i), i);
+                                r + "/Panorama" + i), i, gl);
             }
         } else {
             try {
-                changeBackground(saves.get(random.nextInt(saves.size())));
+                changeBackground(saves.get(random.nextInt(saves.size())), gl);
             } catch (IOException e) {
                 LOGGER.warn("Failed to load save background: {}", e.toString());
             }
         }
     }
 
-    protected void setBackground(Texture replace, int i) {
-        GraphicsSystem graphics = state.getEngine().getGraphics();
+    protected void setBackground(Texture replace, int i, GL gl) {
         Texture texture = textures[i];
         if (texture != null) {
-            texture.dispose(graphics);
+            texture.dispose(gl);
         }
         textures[i] = replace;
     }
@@ -222,12 +225,12 @@ public class SceneMenu extends Scene {
         return Optional.of(save);
     }
 
-    private void changeBackground(Path[] save) throws IOException {
+    private void changeBackground(Path[] save, GL gl) throws IOException {
         for (int i = 0; i < 6; i++) {
             setBackground(FileUtil.readReturn(save[i],
                     input -> new TextureFile(input, 0, TextureFilter.LINEAR,
                             TextureFilter.LINEAR, TextureWrap.CLAMP,
-                            TextureWrap.CLAMP)), i);
+                            TextureWrap.CLAMP)), i, gl);
         }
     }
 }

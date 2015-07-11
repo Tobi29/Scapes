@@ -18,7 +18,7 @@ package org.tobi29.scapes.entity.model;
 
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.engine.opengl.GraphicsSystem;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
@@ -269,7 +269,7 @@ public class MobLivingModelHuman implements MobModel {
     }
 
     @Override
-    public void render(GraphicsSystem graphics, WorldClient world, Cam cam,
+    public void render(GL gl, WorldClient world, Cam cam,
             Shader shader) {
         float damageColor = (float) (1.0 - FastMath.min(1.0,
                 FastMath.max(0.0f, entity.getInvincibleTicks() / 0.8)));
@@ -285,7 +285,7 @@ public class MobLivingModelHuman implements MobModel {
         double swingDir = FastMath.cosTable(swing) * moveSpeedRender * 0.5;
         double lazyNameDir = (FastMath.cosTable(lazyName) * 0.5 + 0.5) *
                 (moveSpeedRender * 0.2 + 0.2);
-        OpenGL openGL = graphics.getOpenGL();
+        OpenGL openGL = gl.getOpenGL();
         openGL.setAttribute2f(4, world.getTerrain()
                         .blockLight(FastMath.floor(entity.getX()),
                                 FastMath.floor(entity.getY()),
@@ -293,29 +293,29 @@ public class MobLivingModelHuman implements MobModel {
                 world.getTerrain().sunLight(FastMath.floor(entity.getX()),
                         FastMath.floor(entity.getY()),
                         FastMath.floor(entity.getZ())) / 15.0f);
-        texture.bind(graphics);
+        texture.bind(gl);
         if (!culling) {
             openGL.disableCulling();
         }
-        MatrixStack matrixStack = graphics.getMatrixStack();
+        MatrixStack matrixStack = gl.getMatrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(posRenderX, posRenderY, posRenderZ);
         matrix.rotate(zRotRender - 90.0f, 0.0f, 0.0f, 1.0f);
-        BODY.render(1.0f, damageColor, damageColor, 1.0f, graphics, shader);
+        BODY.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrix = matrixStack.push();
         matrix.translate(0, 0, 0.375f);
         matrix.rotate(xRotRender, 1, 0, 0);
-        HEAD.render(1.0f, damageColor, damageColor, 1.0f, graphics, shader);
+        HEAD.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
         matrix.translate(-0.125f, 0, -0.5f);
         matrix.rotate((float) swingDir * 30, 1, 0, 0);
-        legLeft.render(1.0f, damageColor, damageColor, 1.0f, graphics, shader);
+        legLeft.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
         matrix.translate(0.125f, 0, -0.5f);
         matrix.rotate((float) -swingDir * 30, 1, 0, 0);
-        legRight.render(1.0f, damageColor, damageColor, 1.0f, graphics, shader);
+        legRight.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
         matrix.translate(-0.25f, 0, 0.25f);
@@ -349,7 +349,7 @@ public class MobLivingModelHuman implements MobModel {
             }
         }
         rot = FastMath.min(rot * 2, 1);
-        armLeft.render(1.0f, damageColor, damageColor, 1.0f, graphics, shader);
+        armLeft.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrix.translate(0, 0.4f, -0.6f);
         if (item.getMaterial().isWeapon(item)) {
             matrix.translate(0, -0.5f, 0);
@@ -367,7 +367,7 @@ public class MobLivingModelHuman implements MobModel {
             openGL.enableCulling();
         }
         item.getMaterial()
-                .render(item, graphics, shader, 1.0f, damageColor, damageColor,
+                .render(item, gl, shader, 1.0f, damageColor, damageColor,
                         1.0f);
         if (!culling) {
             openGL.disableCulling();
@@ -405,8 +405,8 @@ public class MobLivingModelHuman implements MobModel {
             }
         }
         rot = FastMath.min(rot * 2, 1);
-        texture.bind(graphics);
-        armRight.render(1.0f, damageColor, damageColor, 1.0f, graphics, shader);
+        texture.bind(gl);
+        armRight.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrix.translate(0, 0.4f, -0.6f);
         if (item.getMaterial().isWeapon(item)) {
             matrix.translate(0, -0.5f, 0);
@@ -424,7 +424,7 @@ public class MobLivingModelHuman implements MobModel {
             openGL.enableCulling();
         }
         item.getMaterial()
-                .render(item, graphics, shader, 1.0f, damageColor, damageColor,
+                .render(item, gl, shader, 1.0f, damageColor, damageColor,
                         1.0f);
         matrixStack.pop();
         matrixStack.pop();
