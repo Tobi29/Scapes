@@ -25,6 +25,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
 import org.tobi29.scapes.engine.utils.io.filesystem.Resource;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Properties;
@@ -81,10 +82,12 @@ public class TextureManager {
             Resource imageResource = files.get(asset + ".png");
             Resource propertiesResource = files.get(asset + ".properties");
             if (propertiesResource.exists()) {
-                properties.load(propertiesResource.readIO());
+                try (InputStream streamIn = propertiesResource.readIO()) {
+                    properties.load(streamIn);
+                }
             }
-            TextureAsset texture =
-                    new TextureAsset(imageResource.readIO(), properties);
+            TextureAsset texture = imageResource
+                    .readReturn(stream -> new TextureAsset(stream, properties));
             cache.put(asset, texture);
             return texture;
         } catch (IOException e) {

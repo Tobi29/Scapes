@@ -22,6 +22,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
 import org.tobi29.scapes.engine.utils.io.filesystem.Resource;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -51,7 +52,9 @@ public class ShaderManager {
             Resource fragmentResource = files.get(asset + ".fsh");
             Resource propertiesResource = files.get(asset + ".properties");
             if (propertiesResource.exists()) {
-                properties.load(propertiesResource.readIO());
+                try (InputStream streamIn = propertiesResource.readIO()) {
+                    properties.load(streamIn);
+                }
             }
             Shader shader =
                     new Shader(vertexResource, fragmentResource, properties,

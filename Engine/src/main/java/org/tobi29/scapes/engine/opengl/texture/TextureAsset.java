@@ -19,16 +19,15 @@ package org.tobi29.scapes.engine.opengl.texture;
 import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.graphics.PNG;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 public class TextureAsset extends Texture {
-    public TextureAsset(InputStream streamIn, Properties properties)
+    public TextureAsset(ReadableByteStream stream, Properties properties)
             throws IOException {
-        this(PNG.decode(streamIn, BufferCreatorDirect::byteBuffer), properties);
-        streamIn.close();
+        this(PNG.decode(stream, BufferCreatorDirect::byteBuffer), properties);
     }
 
     public TextureAsset(Image image, Properties properties) {

@@ -56,8 +56,10 @@ public class ClasspathResource implements Resource {
 
     @Override
     public void read(IOConsumer<ReadableByteStream> reader) throws IOException {
-        reader.accept(
-                new BufferedReadChannelStream(Channels.newChannel(readIO())));
+        try (InputStream streamIn = readIO()) {
+            reader.accept(new BufferedReadChannelStream(
+                    Channels.newChannel(streamIn)));
+        }
     }
 
     @Override
@@ -68,13 +70,17 @@ public class ClasspathResource implements Resource {
     @Override
     public <R> R readReturn(IOFunction<ReadableByteStream, R> reader)
             throws IOException {
-        return reader.apply(new BufferedReadChannelStream(
-                Channels.newChannel(readIO())));
+        try (InputStream streamIn = readIO()) {
+            return reader.apply(new BufferedReadChannelStream(
+                    Channels.newChannel(streamIn)));
+        }
     }
 
     @Override
     public String getMIMEType() throws IOException {
-        return new Tika().detect(readIO(), path);
+        try (InputStream streamIn = readIO()) {
+            return new Tika().detect(streamIn, path);
+        }
     }
 
     @Override
