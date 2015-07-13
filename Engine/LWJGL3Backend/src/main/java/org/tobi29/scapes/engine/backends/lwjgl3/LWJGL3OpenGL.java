@@ -24,7 +24,8 @@ import org.tobi29.scapes.engine.opengl.*;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.texture.TextureFilter;
 import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
-import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
+import org.tobi29.scapes.engine.utils.BufferCreator;
+import org.tobi29.scapes.engine.utils.BufferCreatorNative;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.graphics.PNG;
 import org.tobi29.scapes.engine.utils.io.FileUtil;
@@ -39,10 +40,12 @@ import java.nio.file.Path;
 public class LWJGL3OpenGL implements OpenGL {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(LWJGL3OpenGL.class);
-    protected final int[] lastTextureBind = new int[32];
+    private final int[] lastTextureBind = new int[32];
     private final ScapesEngine engine;
-    private final IntBuffer attachBuffer = BufferCreatorDirect.intBuffer(16);
-    protected int activeTexture, activeShader;
+    private final IntBuffer intBuffer = BufferCreatorNative.intsD(4);
+    private final IntBuffer attachBuffer = BufferCreatorNative.intsD(16);
+    private ByteBuffer directBuffer = BufferCreatorNative.bytesD(8192);
+    private int activeTexture, activeShader;
 
     public LWJGL3OpenGL(ScapesEngine engine) {
         this.engine = engine;
@@ -247,11 +250,7 @@ public class LWJGL3OpenGL implements OpenGL {
     @Override
     public void screenShot(Path path, GL gl) {
         int width = gl.getSceneWidth(), height = gl.getSceneHeight();
-        GL11.glReadBuffer(GL11.GL_FRONT);
-        ByteBuffer buffer = BufferCreatorDirect.byteBuffer(width * height * 4);
-        GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA,
-                GL11.GL_UNSIGNED_BYTE, buffer);
-        Image image = new Image(width, height, buffer);
+        Image image = screenShot(width, height);
         try {
             FileUtil.write(path, stream -> PNG.encode(image, stream, 9, false));
         } catch (IOException e) {
@@ -263,21 +262,25 @@ public class LWJGL3OpenGL implements OpenGL {
     @Override
     public Image screenShot(int width, int height) {
         GL11.glReadBuffer(GL11.GL_FRONT);
-        ByteBuffer buffer = BufferCreatorDirect.byteBuffer(width * height * 4);
+        int capacity = width * height << 2;
+        direct(capacity);
         GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA,
-                GL11.GL_UNSIGNED_BYTE, buffer);
+                GL11.GL_UNSIGNED_BYTE, directBuffer);
+        ByteBuffer buffer = BufferCreator.byteBuffer(capacity);
+        buffer.put(directBuffer);
         return new Image(width, height, buffer);
     }
 
     @Override
-    public Image screenShotFBO(GL gl, FBO fbo,
-            int colorAttachment) {
+    public Image screenShotFBO(GL gl, FBO fbo, int colorAttachment) {
         gl.getTextureManager()
                 .bind(fbo.getTexturesColor()[colorAttachment], gl);
-        ByteBuffer buffer = BufferCreatorDirect
-                .byteBuffer(fbo.getWidth() * fbo.getHeight() << 2);
+        int capacity = fbo.getWidth() * fbo.getHeight() << 2;
+        direct(capacity);
         GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA,
-                GL11.GL_UNSIGNED_BYTE, buffer);
+                GL11.GL_UNSIGNED_BYTE, directBuffer);
+        ByteBuffer buffer = BufferCreator.byteBuffer(capacity);
+        buffer.put(directBuffer);
         return new Image(fbo.getWidth(), fbo.getHeight(), buffer);
     }
 
@@ -344,14 +347,12 @@ public class LWJGL3OpenGL implements OpenGL {
 
     @Override
     public void printLogShader(int id) {
-        int l = GL20.glGetShaderi(id, GL20.GL_INFO_LOG_LENGTH);
-        if (l > 1) {
-            IntBuffer length = BufferCreatorDirect.intBuffer(1);
-            length.put(l);
-            length.rewind();
-            ByteBuffer log = BufferCreatorDirect.byteBuffer(l);
-            GL20.glGetShaderInfoLog(id, length, log);
-            byte[] infoBytes = new byte[l];
+        int length = GL20.glGetShaderi(id, GL20.GL_INFO_LOG_LENGTH);
+        if (length > 1) {
+            intBuffer.put(0, length);
+            ByteBuffer log = direct(length);
+            GL20.glGetShaderInfoLog(id, intBuffer, log);
+            byte[] infoBytes = new byte[length];
             log.get(infoBytes);
             String out = new String(infoBytes);
             LOGGER.info("Shader log: {}", out);
@@ -360,14 +361,12 @@ public class LWJGL3OpenGL implements OpenGL {
 
     @Override
     public void printLogProgram(int id) {
-        int l = GL20.glGetProgrami(id, GL20.GL_INFO_LOG_LENGTH);
-        if (l > 1) {
-            IntBuffer length = BufferCreatorDirect.intBuffer(1);
-            length.put(l);
-            length.rewind();
-            ByteBuffer log = BufferCreatorDirect.byteBuffer(l);
-            GL20.glGetProgramInfoLog(id, length, log);
-            byte[] infoBytes = new byte[l];
+        int length = GL20.glGetProgrami(id, GL20.GL_INFO_LOG_LENGTH);
+        if (length > 1) {
+            intBuffer.put(0, length);
+            ByteBuffer log = direct(length);
+            GL20.glGetProgramInfoLog(id, intBuffer, log);
+            byte[] infoBytes = new byte[length];
             log.get(infoBytes);
             String out = new String(infoBytes);
             LOGGER.info("Shader log: {}", out);
@@ -523,11 +522,11 @@ public class LWJGL3OpenGL implements OpenGL {
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL,
                 buffers.length - 1);
         GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, width, height, 0,
-                GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffers[0]);
+                GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, direct(buffers[0]));
         for (int i = 1; i < buffers.length; i++) {
             GL11.glTexImage2D(GL11.GL_TEXTURE_2D, i, GL11.GL_RGBA,
                     FastMath.max(width >> i, 1), FastMath.max(height >> i, 1),
-                    0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffers[i]);
+                    0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, direct(buffers[i]));
         }
     }
 
@@ -537,7 +536,7 @@ public class LWJGL3OpenGL implements OpenGL {
         GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0,
                 alpha ? GL11.GL_RGBA : GL11.GL_RGB, width, height, 0,
                 alpha ? GL11.GL_RGBA : GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE,
-                buffer);
+                direct(buffer));
     }
 
     @Override
@@ -546,14 +545,14 @@ public class LWJGL3OpenGL implements OpenGL {
         GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0,
                 alpha ? GL30.GL_RGBA16F : GL30.GL_RGB16F, width, height, 0,
                 alpha ? GL11.GL_RGBA : GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE,
-                buffer);
+                direct(buffer));
     }
 
     @Override
     public void bufferTextureDepth(int width, int height, ByteBuffer buffer) {
         GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL14.GL_DEPTH_COMPONENT24,
                 width, height, 0, GL11.GL_DEPTH_COMPONENT, GL11.GL_UNSIGNED_INT,
-                buffer);
+                direct(buffer));
     }
 
     @Override
@@ -624,20 +623,20 @@ public class LWJGL3OpenGL implements OpenGL {
     public void replaceTexture(int x, int y, int width, int height,
             ByteBuffer buffer) {
         GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, x, y, width, height,
-                GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
+                GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, direct(buffer));
     }
 
     @Override
     public void replaceTextureMipMap(int x, int y, int width, int height,
             ByteBuffer... buffers) {
         GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, x, y, width, height,
-                GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffers[0]);
+                GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, direct(buffers[0]));
         for (int i = 1; i < buffers.length; i++) {
             int scale = (int) FastMath.pow(2, i);
             GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, i, x / scale, y / scale,
                     FastMath.max(width / scale, 1),
                     FastMath.max(height / scale, 1), GL11.GL_RGBA,
-                    GL11.GL_UNSIGNED_BYTE, buffers[i]);
+                    GL11.GL_UNSIGNED_BYTE, direct(buffers[i]));
         }
     }
 
@@ -765,12 +764,13 @@ public class LWJGL3OpenGL implements OpenGL {
 
     @Override
     public void bufferVBODataArray(ByteBuffer buffer) {
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, direct(buffer),
+                GL15.GL_STATIC_DRAW);
     }
 
     @Override
     public void bufferVBODataElement(ByteBuffer buffer) {
-        GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, buffer,
+        GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, direct(buffer),
                 GL15.GL_STATIC_DRAW);
     }
 
@@ -794,5 +794,28 @@ public class LWJGL3OpenGL implements OpenGL {
     public void drawLines(int length, long offset) {
         GL11.glDrawElements(GL11.GL_LINES, length, GL11.GL_UNSIGNED_SHORT,
                 offset);
+    }
+
+    @SuppressWarnings("ReturnOfNull")
+    private ByteBuffer direct(ByteBuffer buffer) {
+        if (buffer == null) {
+            return null;
+        }
+        direct(buffer.remaining());
+        directBuffer.put(buffer);
+        buffer.flip();
+        directBuffer.flip();
+        return directBuffer;
+    }
+
+    private ByteBuffer direct(int size) {
+        directBuffer.clear();
+        if (directBuffer.remaining() < size) {
+            int capacity = (size >> 10) + 1 << 10;
+            LOGGER.debug("Resizing direct buffer: {} ({})", capacity, size);
+            directBuffer = BufferCreatorNative.bytesD(capacity);
+        }
+        directBuffer.limit(size);
+        return directBuffer;
     }
 }

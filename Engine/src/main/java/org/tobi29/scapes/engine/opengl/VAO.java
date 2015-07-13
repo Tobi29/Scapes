@@ -18,7 +18,7 @@ package org.tobi29.scapes.engine.opengl;
 
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
+import org.tobi29.scapes.engine.utils.BufferCreatorNative;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import java.nio.ByteBuffer;
@@ -64,10 +64,10 @@ public class VAO {
             stride += (size | 0x03) + 1;
         }
         this.stride = stride;
-        buffer = BufferCreatorDirect.byteBuffer(vertices * stride)
+        buffer = BufferCreatorNative.bytes(vertices * stride)
                 .order(ByteOrder.nativeOrder());
         attributes.forEach(attribute -> addToBuffer(attribute, vertices));
-        this.index = BufferCreatorDirect.byteBuffer(index.length << 1)
+        this.index = BufferCreatorNative.bytes(index.length << 1)
                 .order(ByteOrder.nativeOrder());
         for (int i : index) {
             this.index.putShort((short) i);

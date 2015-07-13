@@ -19,7 +19,7 @@ package org.tobi29.scapes.entity.skin;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
-import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
+import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.packets.PacketSkin;
 
@@ -60,8 +60,7 @@ public class ClientSkinStorage {
 
     public void addSkin(byte[] checksum, Image image) {
         ByteBuffer imageBuffer = image.getBuffer();
-        ByteBuffer buffer =
-                BufferCreatorDirect.byteBuffer(imageBuffer.remaining());
+        ByteBuffer buffer = BufferCreator.byteBuffer(imageBuffer.remaining());
         buffer.put(imageBuffer);
         buffer.rewind();
         ClientSkin skin = skins.get(new Checksum(checksum));

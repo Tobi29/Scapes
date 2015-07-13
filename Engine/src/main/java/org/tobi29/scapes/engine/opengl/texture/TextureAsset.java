@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.engine.opengl.texture;
 
-import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
+import org.tobi29.scapes.engine.utils.BufferCreatorNative;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.graphics.PNG;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
@@ -27,7 +27,7 @@ import java.util.Properties;
 public class TextureAsset extends Texture {
     public TextureAsset(ReadableByteStream stream, Properties properties)
             throws IOException {
-        this(PNG.decode(stream, BufferCreatorDirect::byteBuffer), properties);
+        this(PNG.decode(stream, BufferCreatorNative::bytes), properties);
     }
 
     public TextureAsset(Image image, Properties properties) {

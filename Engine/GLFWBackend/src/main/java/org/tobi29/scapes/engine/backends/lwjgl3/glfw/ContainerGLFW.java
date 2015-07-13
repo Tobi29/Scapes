@@ -30,7 +30,7 @@ import org.tobi29.scapes.engine.gui.GlyphRenderer;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.opengl.GraphicsCheckException;
 import org.tobi29.scapes.engine.opengl.GraphicsException;
-import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
+import org.tobi29.scapes.engine.utils.BufferCreatorNative;
 import org.tobi29.scapes.engine.utils.DesktopException;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Sync;
@@ -238,6 +238,7 @@ public class ContainerGLFW extends ContainerLWJGL3 {
             engine.render(sync.getSpeedFactor());
             containerResized = false;
             dialogs.renderTick();
+            sync.capTPS();
             GLFW.glfwSwapBuffers(window);
             if (!visible) {
                 GLFW.glfwShowWindow(window);
@@ -309,8 +310,8 @@ public class ContainerGLFW extends ContainerLWJGL3 {
         LOGGER.info("Creating GLFW window...");
         String title = engine.game().getName();
         long monitor = GLFW.glfwGetPrimaryMonitor();
-        IntBuffer xBuffer = BufferCreatorDirect.intBuffer(1);
-        IntBuffer yBuffer = BufferCreatorDirect.intBuffer(1);
+        IntBuffer xBuffer = BufferCreatorNative.intsD(1);
+        IntBuffer yBuffer = BufferCreatorNative.intsD(1);
         GLFW.glfwGetMonitorPos(monitor, xBuffer, yBuffer);
         ByteBuffer videoMode = GLFW.glfwGetVideoMode(monitor);
         int monitorX = xBuffer.get(0);
@@ -347,8 +348,8 @@ public class ContainerGLFW extends ContainerLWJGL3 {
             GLFW.glfwSetWindowPos(window, monitorX + (monitorWidth - width) / 2,
                     monitorY + (monitorHeight - height) / 2);
         }
-        IntBuffer widthBuffer = BufferCreatorDirect.intBuffer(1);
-        IntBuffer heightBuffer = BufferCreatorDirect.intBuffer(1);
+        IntBuffer widthBuffer = BufferCreatorNative.intsD(1);
+        IntBuffer heightBuffer = BufferCreatorNative.intsD(1);
         GLFW.glfwGetWindowSize(window, widthBuffer, heightBuffer);
         containerWidth = widthBuffer.get(0);
         containerHeight = heightBuffer.get(0);

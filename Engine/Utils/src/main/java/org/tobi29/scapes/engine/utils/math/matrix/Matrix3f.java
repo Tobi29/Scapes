@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.engine.utils.math.matrix;
 
-import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
+import org.tobi29.scapes.engine.utils.BufferCreatorNative;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import java.nio.FloatBuffer;
@@ -27,7 +27,7 @@ public class Matrix3f {
     private boolean changed = true;
 
     public Matrix3f() {
-        this(BufferCreatorDirect.floatBuffer(9));
+        this(BufferCreatorNative.floatsD(9));
     }
 
     public Matrix3f(FloatBuffer buffer) {

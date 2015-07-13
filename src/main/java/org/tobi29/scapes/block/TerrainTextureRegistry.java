@@ -23,7 +23,6 @@ import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
 import org.tobi29.scapes.engine.utils.BufferCreator;
-import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.graphics.PNG;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -79,8 +78,7 @@ public class TerrainTextureRegistry {
                 width = source.getWidth();
                 height = source.getHeight();
                 if (paths.length > 1) {
-                    buffer =
-                            BufferCreatorDirect.byteBuffer(width * height << 2);
+                    buffer = BufferCreator.byteBuffer(width * height << 2);
                     buffer.put(source.getBuffer());
                     buffer.rewind();
                     source.getBuffer().rewind();
@@ -141,7 +139,7 @@ public class TerrainTextureRegistry {
             } catch (IOException e) {
                 LOGGER.error("Failed to load terrain texture: {}",
                         e.toString());
-                buffer = BufferCreatorDirect.byteBuffer(0x400);
+                buffer = BufferCreator.byteBuffer(0x400);
                 width = 16;
                 height = 16;
             }
@@ -234,7 +232,7 @@ public class TerrainTextureRegistry {
         }
         int imageSize = size << 4;
         ByteBuffer buffer =
-                BufferCreatorDirect.byteBuffer(imageSize * imageSize << 4);
+                BufferCreator.byteBuffer(imageSize * imageSize << 4);
         for (y = 0; y < size; y++) {
             int yy = y << 4;
             for (x = 0; x < size; x++) {

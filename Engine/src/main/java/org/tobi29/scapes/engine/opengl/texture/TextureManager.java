@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
+import org.tobi29.scapes.engine.utils.BufferCreatorNative;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
 import org.tobi29.scapes.engine.utils.io.filesystem.Resource;
 
@@ -40,7 +40,7 @@ public class TextureManager {
 
     public TextureManager(ScapesEngine engine) {
         this.engine = engine;
-        ByteBuffer buffer = BufferCreatorDirect.byteBuffer(4);
+        ByteBuffer buffer = BufferCreatorNative.bytes(4);
         buffer.put((byte) -1);
         buffer.put((byte) -1);
         buffer.put((byte) -1);

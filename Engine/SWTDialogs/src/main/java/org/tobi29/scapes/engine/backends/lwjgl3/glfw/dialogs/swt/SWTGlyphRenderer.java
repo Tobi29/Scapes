@@ -20,7 +20,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.widgets.Display;
 import org.tobi29.scapes.engine.gui.GlyphRenderer;
-import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
+import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.MutableSingle;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
@@ -100,7 +100,7 @@ public class SWTGlyphRenderer implements GlyphRenderer {
             image.getImageData()
                     .getPixels(0, 0, imageSize * imageSize, color, 0);
             ByteBuffer buffer =
-                    BufferCreatorDirect.byteBuffer(imageSize * imageSize << 2);
+                    BufferCreator.byteBuffer(imageSize * imageSize << 2);
             i = 0;
             while (buffer.hasRemaining()) {
                 buffer.put(WHITE);

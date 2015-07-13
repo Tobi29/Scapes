@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.engine.utils.graphics;
 
-import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
+import org.tobi29.scapes.engine.utils.BufferCreatorNative;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import java.nio.ByteBuffer;
@@ -98,9 +98,9 @@ public final class MipMapGenerator {
         int scale = 1 << scaleBits;
         int widthScaled = width >> scaleBits;
         int heightScaled = height >> scaleBits;
-        ByteBuffer mipmap = BufferCreatorDirect.byteBuffer(
-                FastMath.max(widthScaled, 1) * FastMath.max(heightScaled, 1) <<
-                        2);
+        ByteBuffer mipmap = BufferCreatorNative
+                .bytes(FastMath.max(widthScaled, 1) *
+                        FastMath.max(heightScaled, 1) << 2);
         int samples = 1 << (scaleBits << 1);
         int minVisible = samples >> 1;
         int lowerWidth = widthScaled >> lowerScaleBits;

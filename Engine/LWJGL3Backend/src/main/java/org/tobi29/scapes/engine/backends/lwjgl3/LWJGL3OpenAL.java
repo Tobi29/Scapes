@@ -25,20 +25,19 @@ import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.openal.AudioFormat;
 import org.tobi29.scapes.engine.openal.OpenAL;
 import org.tobi29.scapes.engine.openal.SoundException;
-import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
+import org.tobi29.scapes.engine.utils.BufferCreatorNative;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 
 public class LWJGL3OpenAL implements OpenAL {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(LWJGL3OpenAL.class);
-    private final IntBuffer buffer = BufferCreatorDirect.intBuffer(1);
     private final FloatBuffer listenerOrientation =
-            BufferCreatorDirect.floatBuffer(6);
+            BufferCreatorNative.floatsD(6);
+    private ByteBuffer directBuffer = BufferCreatorNative.bytesD(8192);
     private ALContext context;
 
     @Override
@@ -173,10 +172,12 @@ public class LWJGL3OpenAL implements OpenAL {
             int rate) {
         switch (format) {
             case MONO:
-                AL10.alBufferData(id, AL10.AL_FORMAT_MONO16, buffer, rate);
+                AL10.alBufferData(id, AL10.AL_FORMAT_MONO16, direct(buffer),
+                        rate);
                 break;
             case STEREO:
-                AL10.alBufferData(id, AL10.AL_FORMAT_STEREO16, buffer, rate);
+                AL10.alBufferData(id, AL10.AL_FORMAT_STEREO16, direct(buffer),
+                        rate);
                 break;
         }
     }
@@ -209,12 +210,34 @@ public class LWJGL3OpenAL implements OpenAL {
 
     @Override
     public int unqueue() {
-        AL10.alSourceUnqueueBuffers(1, buffer);
-        return buffer.get(0);
+        return AL10.alSourceUnqueueBuffers(1);
     }
 
     @Override
     public int getBuffer(int id) {
         return AL10.alGetSourcei(id, AL10.AL_BUFFER);
+    }
+
+    @SuppressWarnings("ReturnOfNull")
+    private ByteBuffer direct(ByteBuffer buffer) {
+        if (buffer == null) {
+            return null;
+        }
+        direct(buffer.remaining());
+        directBuffer.put(buffer);
+        buffer.flip();
+        directBuffer.flip();
+        return directBuffer;
+    }
+
+    private ByteBuffer direct(int size) {
+        directBuffer.clear();
+        if (directBuffer.remaining() < size) {
+            int capacity = (size >> 10) + 1 << 10;
+            LOGGER.debug("Resizing direct buffer: {} ({})", capacity, size);
+            directBuffer = BufferCreatorNative.bytesD(capacity);
+        }
+        directBuffer.limit(size);
+        return directBuffer;
     }
 }

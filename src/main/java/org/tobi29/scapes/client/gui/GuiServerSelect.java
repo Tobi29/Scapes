@@ -30,7 +30,6 @@ import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
 import org.tobi29.scapes.engine.opengl.texture.TextureFilter;
 import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
 import org.tobi29.scapes.engine.utils.BufferCreator;
-import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.server.controlpanel.ServerInfo;
@@ -199,7 +198,7 @@ public class GuiServerSelect extends GuiMenu {
                             label.setText(serverInfo.getName());
                             Image image = serverInfo.getImage();
                             ByteBuffer imageBuffer = image.getBuffer();
-                            ByteBuffer buffer = BufferCreatorDirect
+                            ByteBuffer buffer = BufferCreator
                                     .byteBuffer(imageBuffer.remaining());
                             buffer.put(imageBuffer);
                             buffer.rewind();

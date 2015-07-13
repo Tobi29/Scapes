@@ -22,7 +22,7 @@ import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.openal.codec.AudioStream;
 import org.tobi29.scapes.engine.openal.codec.ReadableAudioStream;
 import org.tobi29.scapes.engine.utils.BufferCreator;
-import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
+import org.tobi29.scapes.engine.utils.BufferCreatorNative;
 import org.tobi29.scapes.engine.utils.io.ReadSource;
 import org.tobi29.scapes.engine.utils.io.filesystem.Resource;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -64,8 +64,8 @@ public class SoundSystem {
         openAL.create();
         musicSource = openAL.createSource();
         streamReadBuffer = BufferCreator.floatBuffer(4096 << 2);
-        streamBuffer = BufferCreatorDirect
-                .byteBuffer(streamReadBuffer.capacity() << 1);
+        streamBuffer =
+                BufferCreatorNative.bytes(streamReadBuffer.capacity() << 1);
         for (int i = 0; i < queuedBuffers.length; i++) {
             queuedBuffers[i] = openAL.createBuffer();
         }

@@ -34,7 +34,7 @@ import org.tobi29.scapes.engine.input.ControllerDefault;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.input.InputException;
 import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
+import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.VersionUtil;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.graphics.PNG;
@@ -121,8 +121,8 @@ public class ScapesClient extends Game {
             files.registerFileSystem("Scapes",
                     new ClasspathPath(getClass().getClassLoader(),
                             "assets/scapes/tobi29/"));
-            icon = files.get("Scapes:image/Icon.png").readReturn(streamIn -> PNG
-                    .decode(streamIn, BufferCreatorDirect::byteBuffer));
+            icon = files.get("Scapes:image/Icon.png").readReturn(
+                    stream -> PNG.decode(stream, BufferCreator::byteBuffer));
         } catch (IOException e) {
             engine.crash(e);
         }
@@ -184,7 +184,7 @@ public class ScapesClient extends Game {
     public void loadInput() {
         LOGGER.info("Loading input");
         TagStructure tagStructure = engine.tagStructure().getStructure("Scapes")
-                        .getStructure("Input");
+                .getStructure("Input");
         Optional<InputMode> inputModeDefault =
                 loadService(engine, engine.controller(), tagStructure);
         if (!inputModeDefault.isPresent()) {
@@ -192,8 +192,7 @@ public class ScapesClient extends Game {
         }
         inputModes.clear();
         inputModeDefault.ifPresent(inputModes::add);
-        for (ControllerJoystick joystick : engine.container()
-                .getJoysticks()) {
+        for (ControllerJoystick joystick : engine.container().getJoysticks()) {
             loadService(engine, joystick, tagStructure)
                     .ifPresent(inputModes::add);
         }

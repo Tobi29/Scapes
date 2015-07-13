@@ -18,7 +18,7 @@ package org.tobi29.scapes.engine.openal;
 
 import org.tobi29.scapes.engine.openal.codec.ReadableAudioStream;
 import org.tobi29.scapes.engine.utils.BufferCreator;
-import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
+import org.tobi29.scapes.engine.utils.BufferCreatorNative;
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream;
 
 import java.io.IOException;
@@ -43,7 +43,7 @@ public class AudioData {
     private static ByteBuffer read(ReadableAudioStream input)
             throws IOException {
         ByteBufferStream output = new ByteBufferStream(
-                capacity -> BufferCreatorDirect.byteBuffer(capacity + 40960));
+                capacity -> BufferCreatorNative.bytes(capacity + 40960));
         FloatBuffer buffer = BufferCreator.floatBuffer(40960);
         boolean valid = true;
         while (valid) {

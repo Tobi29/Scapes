@@ -16,13 +16,13 @@
 
 package org.tobi29.scapes.engine.opengl.texture;
 
-import org.tobi29.scapes.engine.utils.BufferCreatorDirect;
+import org.tobi29.scapes.engine.utils.BufferCreatorNative;
 
 import java.nio.ByteBuffer;
 
 public class TextureCustom extends Texture {
     public TextureCustom(int width, int height) {
-        this(width, height, BufferCreatorDirect.byteBuffer(width * height * 4),
+        this(width, height, BufferCreatorNative.bytes(width * height * 4),
                 0);
     }
 
@@ -40,14 +40,14 @@ public class TextureCustom extends Texture {
     }
 
     public TextureCustom(int width, int height, int mipmaps) {
-        this(width, height, BufferCreatorDirect.byteBuffer(width * height * 4),
+        this(width, height, BufferCreatorNative.bytes(width * height * 4),
                 mipmaps);
     }
 
     public TextureCustom(int width, int height, int mipmaps,
             TextureFilter minFilter, TextureFilter magFilter, TextureWrap wrapS,
             TextureWrap wrapT) {
-        this(width, height, BufferCreatorDirect.byteBuffer(width * height * 4),
+        this(width, height, BufferCreatorNative.bytes(width * height * 4),
                 mipmaps, minFilter, magFilter, wrapS, wrapT);
     }
 
