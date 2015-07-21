@@ -17,6 +17,7 @@
 package org.tobi29.scapes.chunk.terrain;
 
 import org.tobi29.scapes.chunk.WorldClient;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.packets.PacketBlockChange;
 
 public interface TerrainClient extends Terrain {
@@ -31,4 +32,6 @@ public interface TerrainClient extends Terrain {
     void reloadGeometry();
 
     void process(PacketBlockChange packet);
+
+    void dispose(GL gl);
 }

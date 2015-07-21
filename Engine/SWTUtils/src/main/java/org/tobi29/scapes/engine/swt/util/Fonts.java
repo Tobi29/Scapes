@@ -32,16 +32,16 @@ public final class Fonts {
     private static final Pattern SPLIT_SEMICOLON = Pattern.compile(";");
     private static final Pattern SPLIT_BAR = Pattern.compile("\\|");
     private static final Pattern SPLIT_COMMA = Pattern.compile(",");
-    private static final FontData[] MONOSPACED = getFontDatas("Monospaced");
+    private static final FontData[] MONOSPACED = fontDatas("Monospaced");
 
     private Fonts() {
     }
 
-    public static FontData[] getMonospacedFont() {
+    public static FontData[] monospace() {
         return Arrays.copyOf(MONOSPACED, MONOSPACED.length);
     }
 
-    private static FontData[] getFontDatas(String font) {
+    private static FontData[] fontDatas(String font) {
         try {
             ClassLoader classLoader = Fonts.class.getClassLoader();
             Properties properties = new Properties();
@@ -49,8 +49,8 @@ public final class Fonts {
                     .getResourceAsStream("fonts/" + font + ".properties")) {
                 properties.load(streamIn);
             }
-            String os = getIdentifier(System.getProperty("os.name"));
-            String ws = getIdentifier(SWT.getPlatform());
+            String os = identifier(System.getProperty("os.name"));
+            String ws = identifier(SWT.getPlatform());
             String fonts = properties.getProperty(os + '_' + ws);
             if (fonts == null) {
                 fonts = properties.getProperty(os);
@@ -90,7 +90,7 @@ public final class Fonts {
         return null;
     }
 
-    private static String getIdentifier(String str) {
+    private static String identifier(String str) {
         char[] characters = new char[str.length()];
         int i = 0;
         for (int j = 0; j < str.length(); j++) {

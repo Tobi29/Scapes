@@ -22,36 +22,37 @@ import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.ShaderManager;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.opengl.texture.TextureManager;
+import org.tobi29.scapes.engine.utils.BufferCreatorNative;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f;
 
-public class GL {
+public abstract class GL implements OpenGL {
+    protected final ScapesEngine engine;
     private final FontRenderer defaultFont;
     private final TextureManager textureManager;
     private final ShaderManager shaderManager;
     private final MatrixStack matrixStack;
     private final Matrix4f projectionMatrix, modelViewProjectionMatrix;
-    private final OpenGL openGL;
     private double resolutionMultiplier = 1.0;
     private int containerWidth = 1, containerHeight = 1, contentWidth = 1,
             contentHeight = 1;
 
-    public GL(ScapesEngine engine, OpenGL openGL) {
-        this.openGL = openGL;
+    protected GL(ScapesEngine engine, Container container) {
+        this.engine = engine;
         matrixStack = new MatrixStack(64);
-        projectionMatrix = new Matrix4f();
-        modelViewProjectionMatrix = new Matrix4f();
+        projectionMatrix = new Matrix4f(BufferCreatorNative.floatsD(16));
+        modelViewProjectionMatrix =
+                new Matrix4f(BufferCreatorNative.floatsD(16));
         textureManager = new TextureManager(engine);
         shaderManager = new ShaderManager(engine);
-        resolutionMultiplier = engine.config().getResolutionMultiplier();
-        Container container = engine.container();
+        resolutionMultiplier = engine.config().resolutionMultiplier();
         container.loadFont(
                 engine.files().get("Engine:font/QuicksandPro-Regular.otf"));
         defaultFont = new FontRenderer(
                 container.createGlyphRenderer("Quicksand Pro", 128));
     }
 
-    public FontRenderer getDefaultFont() {
+    public FontRenderer defaultFont() {
         return defaultFont;
     }
 
@@ -70,28 +71,24 @@ public class GL {
         VAO.disposeAll(this);
     }
 
-    public TextureManager getTextureManager() {
+    public TextureManager textures() {
         return textureManager;
     }
 
-    public ShaderManager getShaderManager() {
+    public ShaderManager shaders() {
         return shaderManager;
     }
 
-    public OpenGL getOpenGL() {
-        return openGL;
-    }
-
-    public MatrixStack getMatrixStack() {
+    public MatrixStack matrixStack() {
         return matrixStack;
     }
 
-    public Matrix4f getProjectionMatrix() {
+    public Matrix4f projectionMatrix() {
         return projectionMatrix;
     }
 
-    public Matrix4f getModelViewProjectionMatrix() {
-        projectionMatrix.multiply(matrixStack.current().getModelViewMatrix(),
+    public Matrix4f modelViewProjectionMatrix() {
+        projectionMatrix.multiply(matrixStack.current().modelView(),
                 modelViewProjectionMatrix);
         return modelViewProjectionMatrix;
     }
@@ -102,13 +99,13 @@ public class GL {
                 .perspective(cam.fov, width / height, cam.near, cam.far);
         Matrix matrix = matrixStack.current();
         matrix.identity();
-        Matrix4f viewMatrix = matrix.getModelViewMatrix();
+        Matrix4f viewMatrix = matrix.modelView();
         viewMatrix.rotate(-cam.tilt, 0.0f, 0.0f, 1.0f);
         viewMatrix.rotate(-cam.pitch - 90.0f, 1.0f, 0.0f, 0.0f);
         viewMatrix.rotate(-cam.yaw + 90.0f, 0.0f, 0.0f, 1.0f);
-        openGL.enableCulling();
-        openGL.enableDepthTest();
-        openGL.setBlending(BlendingMode.NORMAL);
+        enableCulling();
+        enableDepthTest();
+        setBlending(BlendingMode.NORMAL);
     }
 
     public void setProjectionOrthogonal(float x, float y, float width,
@@ -118,32 +115,32 @@ public class GL {
                 .orthogonal(x, x + width, y + height, y, -1024.0f, 1024.0f);
         Matrix matrix = matrixStack.current();
         matrix.identity();
-        openGL.disableCulling();
-        openGL.disableDepthTest();
-        openGL.setBlending(BlendingMode.NORMAL);
+        disableCulling();
+        disableDepthTest();
+        setBlending(BlendingMode.NORMAL);
     }
 
-    public int getSceneWidth() {
+    public int sceneWidth() {
         return (int) (contentWidth * resolutionMultiplier);
     }
 
-    public int getSceneHeight() {
+    public int sceneHeight() {
         return (int) (contentHeight * resolutionMultiplier);
     }
 
-    public int getContentWidth() {
+    public int contentWidth() {
         return contentWidth;
     }
 
-    public int getContentHeight() {
+    public int contentHeight() {
         return contentHeight;
     }
 
-    public int getContainerWidth() {
+    public int containerWidth() {
         return containerWidth;
     }
 
-    public int getContainerHeight() {
+    public int containerHeight() {
         return containerHeight;
     }
 

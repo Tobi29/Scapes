@@ -19,7 +19,6 @@ package org.tobi29.scapes.engine.opengl.shader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.OpenGLFunction;
 import org.tobi29.scapes.engine.utils.io.ProcessStream;
 import org.tobi29.scapes.engine.utils.io.filesystem.Resource;
@@ -41,32 +40,31 @@ public class Shader {
     public Shader(Resource vertexResource, Resource fragmentResource,
             Properties properties, ShaderCompileInformation information, GL gl)
             throws IOException {
-        OpenGL openGL = gl.getOpenGL();
         vertexShader = createShader(
                 information.processVertexSource(readSource(vertexResource)),
-                openGL.createVertexObject(), gl);
+                gl.createVertexObject(), gl);
         fragmentShader = createShader(
                 information.processFragmentSource(readSource(fragmentResource)),
-                openGL.createFragmentObject(), gl);
-        program = openGL.createProgram();
-        openGL.attach(program, vertexShader);
-        openGL.attach(program, fragmentShader);
+                gl.createFragmentObject(), gl);
+        program = gl.createProgram();
+        gl.attach(program, vertexShader);
+        gl.attach(program, fragmentShader);
         for (int i = 0; i < 8; i++) {
             String attribute = properties.getProperty("Attribute." + i);
             if (attribute != null) {
-                openGL.bindAttributeLocation(program, i, attribute);
+                gl.bindAttributeLocation(program, i, attribute);
             }
         }
         for (int i = 0; i < 8; i++) {
             String fragment = properties.getProperty("Fragment." + i);
             if (fragment != null) {
-                openGL.bindFragmentLocation(program, i, fragment);
+                gl.bindFragmentLocation(program, i, fragment);
             }
         }
-        openGL.link(program);
-        if (!openGL.checkLinkStatus(program)) {
+        gl.link(program);
+        if (!gl.checkLinkStatus(program)) {
             LOGGER.error("Failed to link status bar!");
-            openGL.printLogProgram(program);
+            gl.printLogProgram(program);
         }
         uniformLocations = new int[32];
         for (int i = 0; i < 32; i++) {
@@ -74,8 +72,7 @@ public class Shader {
             if (uniform == null) {
                 uniformLocations[i] = -1;
             } else {
-                uniformLocations[i] =
-                        openGL.getUniformLocation(program, uniform);
+                uniformLocations[i] = gl.getUniformLocation(program, uniform);
             }
         }
         information.postCompile(this);
@@ -87,31 +84,29 @@ public class Shader {
     }
 
     private static int createShader(String source, int shader, GL gl) {
-        OpenGL openGL = gl.getOpenGL();
-        openGL.source(shader, source);
-        openGL.compile(shader);
-        openGL.printLogShader(shader);
+        gl.source(shader, source);
+        gl.compile(shader);
+        gl.printLogShader(shader);
         return shader;
     }
 
-    public int getProgramID() {
+    public int programID() {
         return program;
     }
 
-    public Queue<Uniform> getUniforms() {
+    public Queue<Uniform> uniforms() {
         return uniforms;
     }
 
-    public int getUniformLocation(int uniform) {
+    public int uniformLocation(int uniform) {
         return uniformLocations[uniform];
     }
 
     @OpenGLFunction
     public void dispose(GL gl) {
-        OpenGL openGL = gl.getOpenGL();
-        openGL.deleteProgram(program);
-        openGL.deleteShader(fragmentShader);
-        openGL.deleteShader(vertexShader);
+        gl.deleteProgram(program);
+        gl.deleteShader(fragmentShader);
+        gl.deleteShader(vertexShader);
     }
 
     public void setUniform1f(int uniform, float v0) {
@@ -272,6 +267,6 @@ public class Shader {
 
     @FunctionalInterface
     public interface Uniform {
-        void set(OpenGL openGL);
+        void set(GL gl);
     }
 }

@@ -20,7 +20,6 @@ import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
-import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.MobLivingClient;
 import org.tobi29.scapes.entity.server.MobLivingServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
@@ -28,41 +27,41 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 import java.io.IOException;
 
 public class PacketMobDamage extends Packet implements PacketClient {
-    private int entityId;
-    private double lives, maxLives;
+    private int entityID;
+    private double health, maxHealth;
 
     public PacketMobDamage() {
     }
 
     public PacketMobDamage(MobLivingServer entity) {
-        super(entity.getPos());
-        entityId = entity.getEntityID();
-        lives = entity.getLives();
-        maxLives = entity.getMaxLives();
+        super(entity.pos());
+        entityID = entity.entityID();
+        health = entity.health();
+        maxHealth = entity.maxHealth();
     }
 
-    public double getLives() {
-        return lives;
+    public double health() {
+        return health;
     }
 
-    public double getMaxLives() {
-        return maxLives;
+    public double maxHealth() {
+        return maxHealth;
     }
 
     @Override
     public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        stream.putInt(entityId);
-        stream.putDouble(lives);
-        stream.putDouble(maxLives);
+        stream.putInt(entityID);
+        stream.putDouble(health);
+        stream.putDouble(maxHealth);
     }
 
     @Override
     public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        entityId = stream.getInt();
-        lives = stream.getDouble();
-        maxLives = stream.getDouble();
+        entityID = stream.getInt();
+        health = stream.getDouble();
+        maxHealth = stream.getDouble();
     }
 
     @Override
@@ -70,9 +69,10 @@ public class PacketMobDamage extends Packet implements PacketClient {
         if (world == null) {
             return;
         }
-        EntityClient entity = world.getEntity(entityId);
-        if (entity instanceof MobLivingClient) {
-            ((MobLivingClient) entity).processPacket(this);
-        }
+        world.entity(entityID).ifPresent(entity -> {
+            if (entity instanceof MobLivingClient) {
+                ((MobLivingClient) entity).processPacket(this);
+            }
+        });
     }
 }

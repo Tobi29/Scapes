@@ -28,22 +28,22 @@ public class ItemPickaxe extends ItemTool {
 
     @Override
     public void click(MobPlayerServer entity, ItemStack item) {
-        if (item.getData() == 0) {
+        if (item.data() == 0) {
             ItemStack itemHandle = new ItemStack(materials.stick, (short) 0);
             ItemStack itemString =
                     new ItemStack(materials.string, (short) 0, 2);
-            if (entity.getInventory().canTake(itemHandle) &&
-                    entity.getInventory().canTake(itemString)) {
-                entity.getInventory().take(itemHandle);
-                entity.getInventory().take(itemString);
+            if (entity.inventory().canTake(itemHandle) &&
+                    entity.inventory().canTake(itemString)) {
+                entity.inventory().take(itemHandle);
+                entity.inventory().take(itemString);
                 item.setData((short) 1);
-                entity.getConnection().send(new PacketUpdateInventory(entity));
+                entity.connection().send(new PacketUpdateInventory(entity));
             }
         }
     }
 
     @Override
-    public String getType() {
+    public String type() {
         return "Pickaxe";
     }
 }

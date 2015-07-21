@@ -77,14 +77,14 @@ public class BlockDirt extends BlockSoil {
     }
 
     @Override
-    public String getName(ItemStack item) {
+    public String name(ItemStack item) {
         return "Dirt";
     }
 
     @Override
     public boolean destroy(TerrainServer.TerrainMutable terrain, int x, int y,
             int z, Face face, MobPlayerServer player, ItemStack item) {
-        if ("Hoe".equals(item.getMaterial().getToolType(item))) {
+        if ("Hoe".equals(item.material().toolType(item))) {
             terrain.type(x, y, z, materials.farmland);
             terrain.world().addEntity(new EntityFarmlandServer(terrain.world(),
                     new Vector3d(x + 0.5, y + 0.5, z + 0.5), 0.1f, 0.1f, 0.1f));
@@ -94,17 +94,17 @@ public class BlockDirt extends BlockSoil {
     }
 
     @Override
-    public double getResistance(ItemStack item, int data) {
-        return "Shovel".equals(item.getMaterial().getToolType(item)) ? 2 : 20;
+    public double resistance(ItemStack item, int data) {
+        return "Shovel".equals(item.material().toolType(item)) ? 2 : 20;
     }
 
     @Override
-    public Optional<TerrainTexture> getParticleTexture(Face face,
+    public Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
         WorldEnvironmentOverworld environment =
-                (WorldEnvironmentOverworld) terrain.world().getEnvironment();
-        ClimateGenerator climateGenerator = environment.getClimateGenerator();
-        double humidity = climateGenerator.getHumidity(x, y, z);
+                (WorldEnvironmentOverworld) terrain.world().environment();
+        ClimateGenerator climateGenerator = environment.climate();
+        double humidity = climateGenerator.humidity(x, y, z);
         if (humidity < 0.3) {
             return Optional.of(textureSand);
         } else {
@@ -117,7 +117,7 @@ public class BlockDirt extends BlockSoil {
             TerrainClient terrain, TerrainRenderInfo info, int x, int y, int z,
             float xx, float yy, float zz, boolean lod) {
         ClimateInfoLayer climateLayer = info.get("VanillaBasics:Climate");
-        double humidity = climateLayer.getHumidity(x, y);
+        double humidity = climateLayer.humidity(x, y);
         if (humidity < 0.3) {
             modelSand.addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz, 1.0f,
                     1.0f, 1.0f, 1.0f, lod);

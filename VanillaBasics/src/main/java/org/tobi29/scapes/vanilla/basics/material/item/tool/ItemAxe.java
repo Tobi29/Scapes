@@ -30,12 +30,12 @@ public class ItemAxe extends ItemTool {
     }
 
     @Override
-    public int getHitWait(ItemStack item) {
+    public int hitWait(ItemStack item) {
         return 2000;
     }
 
     @Override
-    public String getType() {
+    public String type() {
         return "Axe";
     }
 }

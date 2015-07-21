@@ -42,11 +42,11 @@ public class GuiChatWrite extends Gui {
 
     @Override
     public void updateComponent() {
-        if (state.getEngine().controller()
+        if (state.engine().controller()
                 .isPressed(ControllerKey.KEY_ENTER)) {
-            String text = write.getText();
+            String text = write.text();
             if (!text.isEmpty()) {
-                state.getClient().send(new PacketChat(text));
+                state.client().send(new PacketChat(text));
             }
             player.closeGui();
         }

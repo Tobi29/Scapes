@@ -25,7 +25,7 @@ public interface Controller {
 
     boolean isPressed(ControllerKey key);
 
-    Stream<PressEvent> getPressEvents();
+    Stream<PressEvent> pressEvents();
 
     void poll();
 
@@ -46,11 +46,11 @@ public interface Controller {
             this.state = state;
         }
 
-        public ControllerKey getKey() {
+        public ControllerKey key() {
             return key;
         }
 
-        public PressState getState() {
+        public PressState state() {
             return state;
         }
     }

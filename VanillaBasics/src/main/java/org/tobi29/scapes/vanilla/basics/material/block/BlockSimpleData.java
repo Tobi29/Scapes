@@ -39,12 +39,12 @@ public abstract class BlockSimpleData extends VanillaBlock {
         super(materials, nameID);
     }
 
-    protected abstract int getTypes();
+    protected abstract int types();
 
-    protected abstract String getTexture(int data);
+    protected abstract String texture(int data);
 
     @Override
-    public Optional<TerrainTexture> getParticleTexture(Face face,
+    public Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
         return Optional.of(textures[terrain.data(x, y, z)]);
     }
@@ -60,10 +60,10 @@ public abstract class BlockSimpleData extends VanillaBlock {
 
     @Override
     public void registerTextures(TerrainTextureRegistry registry) {
-        int types = getTypes();
+        int types = types();
         textures = new TerrainTexture[types];
         for (int i = 0; i < types; i++) {
-            textures[i] = registry.registerTexture(getTexture(i));
+            textures[i] = registry.registerTexture(texture(i));
         }
     }
 
@@ -80,12 +80,12 @@ public abstract class BlockSimpleData extends VanillaBlock {
     @Override
     public void render(ItemStack item, GL gl, Shader shader,
             float r, float g, float b, float a) {
-        models[item.getData()].render(gl, shader);
+        models[item.data()].render(gl, shader);
     }
 
     @Override
     public void renderInventory(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a) {
-        models[item.getData()].renderInventory(gl, shader);
+        models[item.data()].renderInventory(gl, shader);
     }
 }

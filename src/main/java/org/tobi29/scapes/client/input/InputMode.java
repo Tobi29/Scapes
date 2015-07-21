@@ -24,9 +24,9 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 public interface InputMode {
     boolean poll();
 
-    Gui createControlsGui(GameState state, Gui prev);
+    Gui createControlsGUI(GameState state, Gui prev);
 
-    MobPlayerClientMain.Controller getPlayerController();
+    MobPlayerClientMain.Controller playerController();
 
-    GuiController getGuiController();
+    GuiController guiController();
 }

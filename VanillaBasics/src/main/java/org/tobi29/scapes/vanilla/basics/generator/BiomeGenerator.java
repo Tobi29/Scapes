@@ -24,12 +24,10 @@ public class BiomeGenerator {
     }
 
     public Biome get(double x, double y) {
-        double humidity3 = climateGenerator.getHumidity3(x, y);
-        double temperature2 =
-                climateGenerator.getTemperature2D(x, y, humidity3);
-        double riverHumidity = climateGenerator.getRiverHumidity(x, y);
-        double humidity2 =
-                climateGenerator.getHumidity2D(temperature2, humidity3);
+        double humidity3 = climateGenerator.humidity3(x, y);
+        double temperature2 = climateGenerator.temperature2D(x, y, humidity3);
+        double riverHumidity = climateGenerator.riverHumidity(x, y);
+        double humidity2 = climateGenerator.humidity2D(temperature2, humidity3);
         return getD(humidity2, riverHumidity, temperature2);
     }
 
@@ -86,7 +84,7 @@ public class BiomeGenerator {
             this.zone = zone;
         }
 
-        public Zone getZone() {
+        public Zone zone() {
             return zone;
         }
     }

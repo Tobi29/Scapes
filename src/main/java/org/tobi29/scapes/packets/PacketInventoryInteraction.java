@@ -42,17 +42,17 @@ public class PacketInventoryInteraction extends Packet implements PacketServer {
 
     public PacketInventoryInteraction(EntityContainerClient chest, byte type,
             int slot) {
-        entityID = ((EntityClient) chest).getEntityID();
+        entityID = ((EntityClient) chest).entityID();
         this.type = type;
         this.slot = slot;
     }
 
     private static void updateInventory(MobPlayerServer interactE,
             EntityContainerServer chestE) {
-        chestE.getViewers().forEach(player -> {
-            player.getConnection().send(new PacketUpdateInventory(chestE));
+        chestE.viewers().forEach(player -> {
+            player.connection().send(new PacketUpdateInventory(chestE));
             if (interactE != chestE) {
-                player.getConnection()
+                player.connection()
                         .send(new PacketUpdateInventory(interactE));
             }
         });
@@ -79,51 +79,51 @@ public class PacketInventoryInteraction extends Packet implements PacketServer {
         if (world == null) {
             return;
         }
-        MobPlayerServer playerE = player.getMob();
+        MobPlayerServer playerE = player.mob();
         EntityContainerServer chestE =
-                (EntityContainerServer) world.getEntity(entityID);
+                (EntityContainerServer) world.entity(entityID);
         if (chestE != null &&
-                chestE.getViewers().filter(check -> check == playerE).findAny()
+                chestE.viewers().filter(check -> check == playerE).findAny()
                         .isPresent()) {
             synchronized (chestE) {
-                Inventory chestI = chestE.getInventory(), playerI =
-                        playerE.getInventory();
+                Inventory chestI = chestE.inventory(), playerI =
+                        playerE.inventory();
                 switch (type) {
                     case LEFT:
-                        Optional<ItemStack> hold = playerI.getHold();
+                        Optional<ItemStack> hold = playerI.hold();
                         if (hold.isPresent()) {
                             ItemStack item = hold.get();
-                            int amount = chestI.getItem(slot).canStack(item);
+                            int amount = chestI.item(slot).canStack(item);
                             if (amount == 0) {
-                                playerI.setHold(chestI.getItem(slot));
+                                playerI.setHold(chestI.item(slot));
                                 chestI.setItem(slot, item);
                             } else {
-                                chestI.getItem(slot).stack(item);
-                                item.setAmount(item.getAmount() - amount);
-                                if (item.getAmount() <= 0) {
+                                chestI.item(slot).stack(item);
+                                item.setAmount(item.amount() - amount);
+                                if (item.amount() <= 0) {
                                     playerI.setHold(Optional.empty());
                                 }
                             }
                         } else {
-                            playerI.setHold(chestI.getItem(slot)
-                                    .take(chestI.getItem(slot)));
+                            playerI.setHold(
+                                    chestI.item(slot).take(chestI.item(slot)));
                         }
                         updateInventory(playerE, chestE);
                         break;
                     case RIGHT:
-                        hold = playerI.getHold();
+                        hold = playerI.hold();
                         if (hold.isPresent()) {
                             ItemStack item = hold.get();
-                            item.setAmount(item.getAmount() -
-                                    chestI.getItem(slot).stack(item, 1));
-                            if (item.getAmount() <= 0) {
+                            item.setAmount(item.amount() -
+                                    chestI.item(slot).stack(item, 1));
+                            if (item.amount() <= 0) {
                                 playerI.setHold(Optional.empty());
                             }
                         } else {
-                            playerI.setHold(chestI.getItem(slot)
-                                    .take(chestI.getItem(slot), (int) FastMath
-                                            .ceil(chestI.getItem(slot)
-                                                    .getAmount() / 2.0)));
+                            playerI.setHold(chestI.item(slot)
+                                    .take(chestI.item(slot), (int) FastMath
+                                            .ceil(chestI.item(slot).amount() /
+                                                    2.0)));
                         }
                         updateInventory(playerE, chestE);
                         break;

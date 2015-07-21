@@ -42,16 +42,16 @@ public class ParticleRaindrop extends Particle {
 
     @Override
     public void move(double delta) {
-        WorldClient world = particleManager.getWorld();
+        WorldClient world = particleManager.world();
         speed.div(airFriction);
         pos.plusX(speed.doubleX());
         pos.plusY(speed.doubleY());
         pos.plusZ(-180.0 * delta);
         if (inWater || ground || slidingWall ||
-                world.getTerrain().getHighestBlockZAt(pos.intX(), pos.intY()) >
+                world.terrain().highestBlockZAt(pos.intX(), pos.intY()) >
                         pos.doubleZ()) {
             if (time > 0.1) {
-                ((WorldSkyboxOverworld) world.getScene().getSkybox())
+                ((WorldSkyboxOverworld) world.scene().skybox())
                         .addRaindrop();
                 particleManager.delete(this);
             }
@@ -66,12 +66,11 @@ public class ParticleRaindrop extends Particle {
     @Override
     public void renderParticle(float x, float y, float z, float r, float g,
             float b, float a, GL gl, Shader shader) {
-        MatrixStack matrixStack = gl.getMatrixStack();
+        MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(x, y, z);
-        gl.getTextureManager().unbind(gl);
-        OpenGL openGL = gl.getOpenGL();
-        openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, g * 0.3f, b * 0.5f,
+        gl.textures().unbind(gl);
+        gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, g * 0.3f, b * 0.5f,
                 a * 0.3f);
         VAO.render(gl, shader);
         matrixStack.pop();

@@ -49,7 +49,7 @@ public class MobPigServer extends MobLivingServer {
         rot.setZ(zRot);
         Random random = ThreadLocalRandom.current();
         VanillaBasics plugin =
-                (VanillaBasics) world.getPlugins().getPlugin("VanillaBasics");
+                (VanillaBasics) world.plugins().plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         listener((DamageListener) damage -> world
                 .playSound("VanillaBasics:sound/entity/mob/pig/Hurt" +
@@ -74,12 +74,12 @@ public class MobPigServer extends MobLivingServer {
     }
 
     @Override
-    public CreatureType getCreatureType() {
+    public CreatureType creatureType() {
         return CreatureType.CREATURE;
     }
 
     @Override
-    public Vector3 getViewOffset() {
+    public Vector3 viewOffset() {
         return new Vector3d(0.0, 0.0, 0.2);
     }
 
@@ -94,7 +94,7 @@ public class MobPigServer extends MobLivingServer {
         double walkSpeed = 0.0;
         if (ai.hasTarget()) {
             walkSpeed = 40.0;
-            rot.setZ(ai.getTargetYaw());
+            rot.setZ(ai.targetYaw());
         } else {
             walkWait -= delta;
             if (walkWait <= 0.0) {

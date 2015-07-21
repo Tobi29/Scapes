@@ -51,23 +51,23 @@ public class StoneType {
         this.resistance = resistance;
     }
 
-    public String getName() {
+    public String name() {
         return name;
     }
 
-    public String getTexture() {
+    public String texture() {
         return texture;
     }
 
-    public String getTextureRoot() {
+    public String textureRoot() {
         return textureRoot;
     }
 
-    public double getResistance() {
+    public double resistance() {
         return resistance;
     }
 
-    public int getData(GameRegistry registry) {
+    public int data(GameRegistry registry) {
         return registry.get("VanillaBasics", "StoneType").get(this);
     }
 }

@@ -67,9 +67,9 @@ public class BlockGrass extends VanillaBlock {
     @Override
     public boolean destroy(TerrainServer.TerrainMutable terrain, int x, int y,
             int z, Face face, MobPlayerServer player, ItemStack item) {
-        if ("Hoe".equals(item.getMaterial().getToolType(item))) {
+        if ("Hoe".equals(item.material().toolType(item))) {
             if (terrain.data(x, y, z) > 0) {
-                if (item.getMaterial().getToolLevel(item) >= 10) {
+                if (item.material().toolLevel(item) >= 10) {
                     terrain.world().dropItem(
                             new ItemStack(materials.grassBundle, (short) 0,
                                     terrain.data(x, y, z)), x, y, z + 1);
@@ -100,80 +100,74 @@ public class BlockGrass extends VanillaBlock {
     }
 
     @Override
-    public double getResistance(ItemStack item, int data) {
-        return "Shovel".equals(item.getMaterial().getToolType(item)) ? 3 :
-                "Hoe".equals(item.getMaterial().getToolType(item)) ? 0.2 : 30;
+    public double resistance(ItemStack item, int data) {
+        return "Shovel".equals(item.material().toolType(item)) ? 3 :
+                "Hoe".equals(item.material().toolType(item)) ? 0.2 : 30;
     }
 
     @Override
-    public List<ItemStack> getDrops(ItemStack item, int data) {
+    public List<ItemStack> drops(ItemStack item, int data) {
         return Collections
                 .singletonList(new ItemStack(materials.dirt, (short) 0));
     }
 
     @Override
-    public String getFootStep(int data) {
+    public String footStepSound(int data) {
         return "VanillaBasics:sound/footsteps/Grass.ogg";
     }
 
     @Override
-    public String getBreak(ItemStack item, int data) {
+    public String breakSound(ItemStack item, int data) {
         return "VanillaBasics:sound/blocks/Stone.ogg";
     }
 
     @Override
-    public float getParticleColorR(Face face, TerrainClient terrain, int x,
-            int y, int z) {
+    public float particleColorR(Face face, TerrainClient terrain, int x, int y,
+            int z) {
         if (face == Face.DOWN) {
             return 1.0f;
         } else {
             WorldEnvironmentOverworld environment =
-                    (WorldEnvironmentOverworld) terrain.world()
-                            .getEnvironment();
-            ClimateGenerator climateGenerator =
-                    environment.getClimateGenerator();
+                    (WorldEnvironmentOverworld) terrain.world().environment();
+            ClimateGenerator climateGenerator = environment.climate();
             return (float) climateGenerator
-                    .getGrassColorR(climateGenerator.getTemperature(x, y, z),
-                            climateGenerator.getHumidity(x, y, z));
+                    .grassColorR(climateGenerator.temperature(x, y, z),
+                            climateGenerator.humidity(x, y, z));
         }
     }
 
     @Override
-    public float getParticleColorG(Face face, TerrainClient terrain, int x,
-            int y, int z) {
+    public float particleColorG(Face face, TerrainClient terrain, int x, int y,
+            int z) {
         if (face == Face.DOWN) {
             return 1.0f;
         } else {
             WorldEnvironmentOverworld environment =
-                    (WorldEnvironmentOverworld) terrain.world()
-                            .getEnvironment();
-            ClimateGenerator climateGenerator =
-                    environment.getClimateGenerator();
+                    (WorldEnvironmentOverworld) terrain.world().environment();
+            ClimateGenerator climateGenerator = environment.climate();
             return (float) climateGenerator
-                    .getGrassColorG(climateGenerator.getTemperature(x, y, z),
-                            climateGenerator.getHumidity(x, y, z));
+                    .grassColorG(climateGenerator.temperature(x, y, z),
+                            climateGenerator.humidity(x, y, z));
         }
     }
 
     @Override
-    public float getParticleColorB(Face face, TerrainClient terrain, int x,
-            int y, int z) {
+    public float particleColorB(Face face, TerrainClient terrain, int x, int y,
+            int z) {
         if (face == Face.DOWN) {
             return 1.0f;
         } else {
             WorldEnvironmentOverworld environment =
-                    (WorldEnvironmentOverworld) terrain.world()
-                            .getEnvironment();
-            ClimateGenerator climateGenerator =
-                    environment.getClimateGenerator();
+                    (WorldEnvironmentOverworld) terrain.world().environment();
+            ClimateGenerator climateGenerator = environment.climate();
             return (float) climateGenerator
-                    .getGrassColorB(climateGenerator.getTemperature(x, y, z),
-                            climateGenerator.getHumidity(x, y, z));
+                    .grassColorB(climateGenerator.temperature(x, y, z),
+                            climateGenerator.humidity(x, y, z));
         }
     }
 
     @Override
-    public Optional<TerrainTexture> getParticleTexture(Face face,
+    public Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
         if (face == Face.DOWN) {
             return Optional.of(textureBottomDirt);
@@ -186,14 +180,14 @@ public class BlockGrass extends VanillaBlock {
             TerrainClient terrain, TerrainRenderInfo info, int x, int y, int z,
             float xx, float yy, float zz, boolean lod) {
         WorldEnvironmentOverworld environment =
-                (WorldEnvironmentOverworld) terrain.world().getEnvironment();
-        ClimateGenerator climateGenerator = environment.getClimateGenerator();
+                (WorldEnvironmentOverworld) terrain.world().environment();
+        ClimateGenerator climateGenerator = environment.climate();
         ClimateInfoLayer climateLayer = info.get("VanillaBasics:Climate");
-        double temperature = climateLayer.getTemperature(x, y, z);
-        double humidity = climateLayer.getHumidity(x, y);
-        double grassR = climateGenerator.getGrassColorR(temperature, humidity);
-        double grassG = climateGenerator.getGrassColorG(temperature, humidity);
-        double grassB = climateGenerator.getGrassColorB(temperature, humidity);
+        double temperature = climateLayer.temperature(x, y, z);
+        double humidity = climateLayer.humidity(x, y);
+        double grassR = climateGenerator.grassColorR(temperature, humidity);
+        double grassG = climateGenerator.grassColorG(temperature, humidity);
+        double grassB = climateGenerator.grassColorB(temperature, humidity);
         if (lod) {
             modelBlockGrass.addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz,
                     (float) grassR, (float) grassG, (float) grassB, 1.0f, lod);
@@ -239,7 +233,7 @@ public class BlockGrass extends VanillaBlock {
                 .isTransparent(terrain, x, y, z + 1)) {
             terrain.typeData(x, y, z, materials.dirt, (short) 0);
         }
-        if (terrain.getHighestTerrainBlockZAt(x, y) > z + 1 &&
+        if (terrain.highestTerrainBlockZAt(x, y) > z + 1 &&
                 !terrain.hasDelayedUpdate(x, y, z)) {
             Random random = ThreadLocalRandom.current();
             terrain.addDelayedUpdate(new UpdateGrassGrowth()
@@ -320,12 +314,12 @@ public class BlockGrass extends VanillaBlock {
     }
 
     @Override
-    public String getName(ItemStack item) {
+    public String name(ItemStack item) {
         return "Grass";
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 16;
     }
 }

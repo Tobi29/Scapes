@@ -25,7 +25,7 @@ public class GuiScreenshot extends GuiMenu {
     public GuiScreenshot(GameState state, Gui previous, Texture texture) {
         super(state, "Screenshots", previous);
         GuiComponentIcon image = new GuiComponentIcon(16, 80, 368,
-                (int) ((double) texture.getHeight() / texture.getWidth() * 368),
+                (int) ((double) texture.height() / texture.width() * 368),
                 texture);
         pane.add(image);
     }

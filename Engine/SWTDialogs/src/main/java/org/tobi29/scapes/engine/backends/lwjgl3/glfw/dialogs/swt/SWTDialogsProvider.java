@@ -23,9 +23,9 @@ import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.PlatformDialogs;
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.spi.GLFWDialogsProvider;
 import org.tobi29.scapes.engine.gui.GlyphRenderer;
-import org.tobi29.scapes.engine.utils.io.FileUtil;
 import org.tobi29.scapes.engine.utils.io.ProcessStream;
-import org.tobi29.scapes.engine.utils.io.ReadSource;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
+import org.tobi29.scapes.engine.utils.io.filesystem.ReadSource;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,11 +42,11 @@ public class SWTDialogsProvider implements GLFWDialogsProvider {
 
     @Override
     public PlatformDialogs createDialogs(ScapesEngine engine) {
-        return new PlatformDialogsSWT(engine.game().getName());
+        return new PlatformDialogsSWT(engine.game().name());
     }
 
     @Override
-    public boolean loadFont(ReadSource font) {
+    public boolean loadFont(ScapesEngine engine, ReadSource font) {
         String fontPath = null;
         try {
             Path fontFile = Files.createTempFile("Scapes", ".ttf");
@@ -73,7 +73,8 @@ public class SWTDialogsProvider implements GLFWDialogsProvider {
     }
 
     @Override
-    public GlyphRenderer createGlyphRenderer(String fontName, int size) {
+    public GlyphRenderer createGlyphRenderer(ScapesEngine engine,
+            String fontName, int size) {
         return new SWTGlyphRenderer(fontName, size);
     }
 }

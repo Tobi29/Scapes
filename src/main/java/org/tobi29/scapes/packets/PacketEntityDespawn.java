@@ -20,7 +20,6 @@ import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
-import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.MobLivingClient;
 import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.entity.server.MobLivingServer;
@@ -36,7 +35,7 @@ public class PacketEntityDespawn extends Packet implements PacketClient {
     }
 
     public PacketEntityDespawn(EntityServer entity) {
-        entityID = entity.getEntityID();
+        entityID = entity.entityID();
         if (entity instanceof MobLivingServer) {
             dead = ((MobLivingServer) entity).isDead();
         }
@@ -61,14 +60,13 @@ public class PacketEntityDespawn extends Packet implements PacketClient {
         if (world == null) {
             return;
         }
-        EntityClient entity = world.getEntity(entityID);
-        if (entity != null) {
+        world.entity(entityID).ifPresent(entity -> {
             if (dead) {
                 if (entity instanceof MobLivingClient) {
                     ((MobLivingClient) entity).onDeath();
                 }
             }
             world.removeEntity(entity);
-        }
+        });
     }
 }

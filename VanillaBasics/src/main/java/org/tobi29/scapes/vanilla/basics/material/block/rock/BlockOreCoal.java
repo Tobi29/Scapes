@@ -38,12 +38,11 @@ public class BlockOreCoal extends BlockOre {
     @Override
     public boolean destroy(TerrainServer.TerrainMutable terrain, int x, int y,
             int z, Face face, MobPlayerServer player, ItemStack item) {
-        if ("Pickaxe".equals(item.getMaterial().getToolType(item)) &&
-                !canBeBroken(item.getMaterial().getToolLevel(item),
+        if ("Pickaxe".equals(item.material().toolType(item)) &&
+                !canBeBroken(item.material().toolLevel(item),
                         terrain.data(x, y, z))) {
-            terrain.world()
-                    .dropItem(new ItemStack(materials.oreChunk, (short) 0),
-                            x + face.getX(), y + face.getY(), z + face.getZ());
+            terrain.world().dropItem(new ItemStack(materials.coal, (short) 0),
+                    x + face.getX(), y + face.getY(), z + face.getZ());
             terrain.type(x, y, z, materials.stoneRaw);
             return false;
         }
@@ -51,10 +50,10 @@ public class BlockOreCoal extends BlockOre {
     }
 
     @Override
-    public List<ItemStack> getDrops(ItemStack item, int data) {
-        if ("Pickaxe".equals(item.getMaterial().getToolType(item)) &&
-                canBeBroken(item.getMaterial().getToolLevel(item), data)) {
-            return Arrays.asList(new ItemStack(materials.oreChunk, (short) 0),
+    public List<ItemStack> drops(ItemStack item, int data) {
+        if ("Pickaxe".equals(item.material().toolType(item)) &&
+                canBeBroken(item.material().toolLevel(item), data)) {
+            return Arrays.asList(new ItemStack(materials.coal, (short) 0),
                     new ItemStack(materials.stoneRock, data,
                             new Random().nextInt(4) + 8));
         }
@@ -62,17 +61,17 @@ public class BlockOreCoal extends BlockOre {
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 4;
     }
 
     @Override
-    public String getName(ItemStack item) {
-        return getStoneName(item) + " Coal Ore";
+    public String name(ItemStack item) {
+        return stoneName(item) + " Coal Ore";
     }
 
     @Override
-    protected String getOreTexture() {
+    protected String oreTexture() {
         return "Coal";
     }
 }

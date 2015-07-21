@@ -16,6 +16,9 @@
 
 package org.tobi29.scapes.vanilla.basics.material;
 
+import java.util.Arrays;
+import java.util.stream.Stream;
+
 public class ResearchRecipe {
     private final String[] items;
     private final String name;
@@ -27,15 +30,15 @@ public class ResearchRecipe {
         this.text = text;
     }
 
-    public String[] getItems() {
-        return items;
+    public Stream<String> items() {
+        return Arrays.stream(items);
     }
 
-    public String getName() {
+    public String name() {
         return name;
     }
 
-    public String getText() {
+    public String text() {
         return text;
     }
 }

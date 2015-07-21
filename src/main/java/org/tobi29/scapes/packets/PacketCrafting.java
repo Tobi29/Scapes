@@ -61,20 +61,20 @@ public class PacketCrafting extends Packet implements PacketServer {
         if (world == null) {
             return;
         }
-        Inventory inventory = player.getMob().getInventory();
+        Inventory inventory = player.mob().inventory();
         CraftingRecipe recipe =
-                world.getPlugins().getRegistry().getCraftingRecipes(table)
-                        .get(type).getRecipes().get(id);
-        ItemStack result = recipe.getResult();
-        if (inventory.canAdd(result) >= result.getAmount()) {
-            recipe.getTakes(inventory).ifPresent(takes -> {
+                world.plugins().registry().getCraftingRecipes(table).get(type)
+                        .recipes().get(id);
+        ItemStack result = recipe.result();
+        if (inventory.canAdd(result) >= result.amount()) {
+            recipe.takes(inventory).ifPresent(takes -> {
                 takes.forEach(inventory::take);
                 inventory.add(result);
-                for (int i = 0; i < recipe.getResult().getAmount(); i++) {
-                    player.getStatistics()
-                            .blockCraft(result.getMaterial(), result.getData());
+                for (int i = 0; i < recipe.result().amount(); i++) {
+                    player.statistics()
+                            .blockCraft(result.material(), result.data());
                 }
-                player.send(new PacketUpdateInventory(player.getMob()));
+                player.send(new PacketUpdateInventory(player.mob()));
             });
         }
     }

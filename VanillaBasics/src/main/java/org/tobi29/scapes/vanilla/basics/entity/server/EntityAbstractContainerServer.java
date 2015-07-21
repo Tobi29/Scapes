@@ -42,7 +42,7 @@ public abstract class EntityAbstractContainerServer extends EntityServer
     }
 
     @Override
-    public Inventory getInventory() {
+    public Inventory inventory() {
         return inventory;
     }
 
@@ -54,7 +54,7 @@ public abstract class EntityAbstractContainerServer extends EntityServer
     }
 
     @Override
-    public Stream<MobPlayerServer> getViewers() {
+    public Stream<MobPlayerServer> viewers() {
         return viewers.stream();
     }
 
@@ -81,8 +81,8 @@ public abstract class EntityAbstractContainerServer extends EntityServer
         WorldServer world = terrain.world();
         if (!isValidOn(terrain, x, y, z)) {
             synchronized (this) {
-                for (int i = 0; i < inventory.getSize(); i++) {
-                    world.dropItem(inventory.getItem(i),
+                for (int i = 0; i < inventory.size(); i++) {
+                    world.dropItem(inventory.item(i),
                             pos.now().plus(new Vector3d(0.5, 0.5, 0.5)));
                 }
             }

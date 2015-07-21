@@ -99,7 +99,7 @@ public class PrimsAlgorithmMazeGenerator implements MazeGenerator {
             if (list.isEmpty()) {
                 break;
             }
-            MutableVector2 next = list.get(random.nextInt(list.getSize()));
+            MutableVector2 next = list.get(random.nextInt(list.size()));
             x = next.intX();
             y = next.intY();
             current.set(x, y);

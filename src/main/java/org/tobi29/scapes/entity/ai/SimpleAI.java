@@ -35,10 +35,10 @@ public class SimpleAI implements AI {
     @Override
     public void update(double delta) {
         if (mobTarget != null) {
-            target = mobTarget.getPos();
+            target = mobTarget.pos();
         }
         if (target != null) {
-            Vector3 pos = mob.getPos();
+            Vector3 pos = mob.pos();
             yaw = FastMath.pointDirection(pos, target);
             timeout -= delta;
             if (timeout <= 0.0) {
@@ -73,7 +73,7 @@ public class SimpleAI implements AI {
     }
 
     @Override
-    public double getTargetYaw() {
+    public double targetYaw() {
         return yaw;
     }
 }

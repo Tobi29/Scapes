@@ -51,51 +51,51 @@ public class MetalType {
         this.toolLevel = toolLevel;
     }
 
-    public String getID() {
+    public String id() {
         return id;
     }
 
-    public String getName() {
+    public String name() {
         return name;
     }
 
-    public String getIngotName() {
+    public String ingotName() {
         return ingotName;
     }
 
-    public Map<String, Double> getIngredients() {
+    public Map<String, Double> ingredients() {
         return ingredients;
     }
 
-    public float getR() {
+    public float r() {
         return r;
     }
 
-    public float getG() {
+    public float g() {
         return g;
     }
 
-    public float getB() {
+    public float b() {
         return b;
     }
 
-    public float getMeltingPoint() {
+    public float meltingPoint() {
         return meltingPoint;
     }
 
-    public double getBaseToolEfficiency() {
+    public double baseToolEfficiency() {
         return toolEfficiency;
     }
 
-    public double getBaseToolStrength() {
+    public double baseToolStrength() {
         return toolStrength;
     }
 
-    public double getBaseToolDamage() {
+    public double baseToolDamage() {
         return toolDamage;
     }
 
-    public int getBaseToolLevel() {
+    public int baseToolLevel() {
         return toolLevel;
     }
 }

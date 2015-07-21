@@ -19,8 +19,8 @@ package org.tobi29.scapes.server.shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.utils.Crashable;
-import org.tobi29.scapes.engine.utils.io.CrashReportFile;
-import org.tobi29.scapes.engine.utils.io.FileUtil;
+import org.tobi29.scapes.engine.utils.io.filesystem.CrashReportFile;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
 import org.tobi29.scapes.server.ControlPanel;
@@ -74,20 +74,20 @@ public abstract class ScapesStandaloneServer
         server =
                 new ScapesServer(path.resolve("data"), tagStructure, serverInfo,
                         this, initialControlPanels);
-        ServerConnection connection = server.getConnection();
+        ServerConnection connection = server.connection();
         connection.setAllowsCreation(
                 tagStructure.getBoolean("AllowAccountCreation"));
-        server.start(tagStructure.getInteger("ServerPort"));
+        server.connection().start(tagStructure.getInteger("ServerPort"));
     }
 
     private ScapesServer.ShutdownReason stopServer() throws IOException {
         if (server == null) {
             return ScapesServer.ShutdownReason.STOP;
         }
-        server.getWorldFormat().save();
+        server.worldFormat().save();
         ScapesServer server = this.server;
         this.server = null;
-        return server.getShutdownReason();
+        return server.shutdownReason();
     }
 
     protected ScapesServer.ShutdownReason stop() throws IOException {
@@ -123,7 +123,7 @@ public abstract class ScapesStandaloneServer
         LOGGER.error("Stopping due to a crash", e);
         Map<String, String> debugValues = new ConcurrentHashMap<>();
         try {
-            CrashReportFile.writeCrashReport(e, CrashReportFile.getFile(path),
+            CrashReportFile.writeCrashReport(e, CrashReportFile.file(path),
                     "ScapesServer", debugValues);
         } catch (IOException e1) {
             LOGGER.warn("Failed to write crash report: {}", e1.toString());
@@ -132,7 +132,7 @@ public abstract class ScapesStandaloneServer
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return "Server";
     }
 }

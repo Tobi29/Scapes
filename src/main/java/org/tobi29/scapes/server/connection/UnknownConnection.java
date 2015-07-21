@@ -35,7 +35,7 @@ public class UnknownConnection implements Connection {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(UnknownConnection.class);
     private static final byte[] CONNECTION_KEY;
-    private static final byte[] CONNECTION_HEADER = ConnectionInfo.getHeader();
+    private static final byte[] CONNECTION_HEADER = ConnectionInfo.header();
 
     static {
         Random random = new Random(12345);
@@ -44,7 +44,7 @@ public class UnknownConnection implements Connection {
     }
 
     private final ByteBuffer buffer =
-            BufferCreator.byteBuffer(CONNECTION_HEADER.length + 1);
+            BufferCreator.bytes(CONNECTION_HEADER.length + 1);
     private final ServerConnection connection;
     private SocketChannel channel;
     private boolean done;
@@ -74,8 +74,8 @@ public class UnknownConnection implements Connection {
                             case GET_INFO:
                                 worker.addConnection(
                                         new GetInfoConnection(channel,
-                                                connection.getServer()
-                                                        .getServerInfo()));
+                                                connection.server()
+                                                        .serverInfo()));
                                 channel = null;
                                 break;
                             case PLAY:
@@ -89,7 +89,7 @@ public class UnknownConnection implements Connection {
                             case CONTROL_PANEL:
                                 worker.addConnection(
                                         new ControlPanelConnection(channel,
-                                                connection.getServer()));
+                                                connection.server()));
                                 channel = null;
                                 break;
                         }

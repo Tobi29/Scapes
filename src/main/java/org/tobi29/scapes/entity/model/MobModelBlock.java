@@ -19,7 +19,6 @@ package org.tobi29.scapes.entity.model;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -38,22 +37,22 @@ public class MobModelBlock implements MobModel {
 
     public MobModelBlock(MobClient entity, ItemStack item) {
         this.entity = entity;
-        pos = new MutableVector3d(entity.getPos());
+        pos = new MutableVector3d(entity.pos());
         this.item = item;
     }
 
     @Override
-    public float getPitch() {
+    public float pitch() {
         return 0.0f;
     }
 
     @Override
-    public float getYaw() {
+    public float yaw() {
         return 0.0f;
     }
 
     @Override
-    public Vector3 getPos() {
+    public Vector3 pos() {
         return pos.now();
     }
 
@@ -70,7 +69,7 @@ public class MobModelBlock implements MobModel {
     @Override
     public void renderUpdate(double delta) {
         double factor = FastMath.min(1.0, delta * 10.0);
-        pos.plus(entity.getPos().minus(pos.now()).multiply(factor));
+        pos.plus(entity.pos().minus(pos.now()).multiply(factor));
     }
 
     @Override
@@ -79,15 +78,14 @@ public class MobModelBlock implements MobModel {
         float posRenderX = (float) (pos.doubleX() - cam.position.doubleX());
         float posRenderY = (float) (pos.doubleY() - cam.position.doubleY());
         float posRenderZ = (float) (pos.doubleZ() - cam.position.doubleZ());
-        OpenGL openGL = gl.getOpenGL();
-        openGL.setAttribute2f(4, world.getTerrain()
+        gl.setAttribute2f(4, world.terrain()
                         .blockLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f,
-                world.getTerrain()
+                world.terrain()
                         .sunLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f);
-        MatrixStack matrixStack = gl.getMatrixStack();
+        MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(posRenderX, posRenderY, posRenderZ);
-        item.getMaterial().render(item, gl, shader, 1.0f, 1.0f, 1.0f, 1.0f);
+        item.material().render(item, gl, shader, 1.0f, 1.0f, 1.0f, 1.0f);
         matrixStack.pop();
     }
 }

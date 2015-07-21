@@ -57,11 +57,10 @@ public class FBO {
     @OpenGLFunction
     private void init(GL gl) {
         init(gl, alpha, hdr);
-        OpenGL openGL = gl.getOpenGL();
-        framebufferID = openGL.createFBO();
+        framebufferID = gl.createFBO();
         activate(gl);
         attach(gl);
-        if (openGL.checkFBO() != FBOStatus.COMPLETE) {
+        if (gl.checkFBO() != FBOStatus.COMPLETE) {
             for (TextureFBOColor textureColor : texturesColor) {
                 textureColor.dispose(gl);
             }
@@ -71,7 +70,7 @@ public class FBO {
             init(gl, alpha, false);
             attach(gl);
         }
-        openGL.clear(0.0f, 0.0f, 0.0f, 0.0f);
+        gl.clear(0.0f, 0.0f, 0.0f, 0.0f);
         deactivate(gl);
         FBOS.add(this);
     }
@@ -96,19 +95,17 @@ public class FBO {
 
     @OpenGLFunction
     private void attach(GL gl) {
-        OpenGL openGL = gl.getOpenGL();
         if (depth) {
-            openGL.attachDepth(textureDepth.getTextureID());
+            gl.attachDepth(textureDepth.textureID());
         }
         for (int i = 0; i < texturesColor.length; i++) {
-            openGL.attachColor(texturesColor[i].getTextureID(), i);
+            gl.attachColor(texturesColor[i].textureID(), i);
         }
     }
 
     @OpenGLFunction
     public void deactivate(GL gl) {
-        OpenGL openGL = gl.getOpenGL();
-        openGL.bindFBO(lastFBO);
+        gl.bindFBO(lastFBO);
         currentBO = lastFBO;
         lastFBO = 0;
     }
@@ -120,9 +117,8 @@ public class FBO {
         }
         lastFBO = currentBO;
         currentBO = framebufferID;
-        OpenGL openGL = gl.getOpenGL();
-        openGL.bindFBO(framebufferID);
-        openGL.drawbuffersFBO(texturesColor.length);
+        gl.bindFBO(framebufferID);
+        gl.drawbuffersFBO(texturesColor.length);
     }
 
     @OpenGLFunction
@@ -136,8 +132,7 @@ public class FBO {
     @OpenGLFunction
     public void dispose(GL gl) {
         if (framebufferID != -1) {
-            OpenGL openGL = gl.getOpenGL();
-            openGL.deleteFBO(framebufferID);
+            gl.deleteFBO(framebufferID);
             for (TextureFBOColor textureColor : texturesColor) {
                 textureColor.dispose(gl);
             }
@@ -149,19 +144,19 @@ public class FBO {
         FBOS.remove(this);
     }
 
-    public int getWidth() {
+    public int width() {
         return width;
     }
 
-    public int getHeight() {
+    public int height() {
         return height;
     }
 
-    public TextureFBOColor[] getTexturesColor() {
+    public TextureFBOColor[] texturesColor() {
         return texturesColor;
     }
 
-    public TextureFBODepth getTextureDepth() {
+    public TextureFBODepth textureDepth() {
         if (!depth) {
             throw new IllegalStateException("FBO has no depth buffer");
         }

@@ -43,16 +43,16 @@ public abstract class ControllerDefault implements Controller {
 
     @Override
     public boolean isDown(ControllerKey key) {
-        return states[key.getID()] >= 1;
+        return states[key.id()] >= 1;
     }
 
     @Override
     public boolean isPressed(ControllerKey key) {
-        return states[key.getID()] >= 2;
+        return states[key.id()] >= 2;
     }
 
     @Override
-    public Stream<PressEvent> getPressEvents() {
+    public Stream<PressEvent> pressEvents() {
         return pressEvents.stream();
     }
 
@@ -73,7 +73,7 @@ public abstract class ControllerDefault implements Controller {
         active = !pressEventQueue.isEmpty();
         while (!pressEventQueue.isEmpty()) {
             PressEvent event = pressEventQueue.poll();
-            int keyID = event.key.getID();
+            int keyID = event.key.id();
             switch (event.state) {
                 case PRESS:
                     states[keyID] = 2;
@@ -108,33 +108,33 @@ public abstract class ControllerDefault implements Controller {
         pressEventQueue.add(new PressEvent(key, state));
     }
 
-    public Stream<KeyTypeEvent> getKeyTypeEvents() {
+    public Stream<KeyTypeEvent> typeEvents() {
         return typeEvents.stream();
     }
 
     public abstract boolean isModifierDown();
 
-    public double getX() {
+    public double x() {
         return x;
     }
 
-    public double getY() {
+    public double y() {
         return y;
     }
 
-    public double getDeltaX() {
+    public double deltaX() {
         return deltaX;
     }
 
-    public double getDeltaY() {
+    public double deltaY() {
         return deltaY;
     }
 
-    public double getScrollX() {
+    public double scrollX() {
         return scrollX;
     }
 
-    public double getScrollY() {
+    public double scrollY() {
         return scrollY;
     }
 
@@ -186,7 +186,7 @@ public abstract class ControllerDefault implements Controller {
             this.character = character;
         }
 
-        public char getCharacter() {
+        public char character() {
             return character;
         }
     }

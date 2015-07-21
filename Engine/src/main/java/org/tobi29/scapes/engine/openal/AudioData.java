@@ -30,7 +30,7 @@ public class AudioData {
 
     public AudioData(ReadableAudioStream stream, OpenAL openAL)
             throws IOException {
-        this(read(stream), stream.getRate(), stream.getChannels(), openAL);
+        this(read(stream), stream.rate(), stream.channels(), openAL);
     }
 
     public AudioData(ByteBuffer data, int rate, int channels, OpenAL openAL) {
@@ -44,7 +44,7 @@ public class AudioData {
             throws IOException {
         ByteBufferStream output = new ByteBufferStream(
                 capacity -> BufferCreatorNative.bytes(capacity + 40960));
-        FloatBuffer buffer = BufferCreator.floatBuffer(40960);
+        FloatBuffer buffer = BufferCreator.floats(40960);
         boolean valid = true;
         while (valid) {
             valid = input.getSome(buffer);
@@ -63,7 +63,7 @@ public class AudioData {
         openAL.deleteBuffer(buffer);
     }
 
-    public int getBuffer() {
+    public int buffer() {
         return buffer;
     }
 }

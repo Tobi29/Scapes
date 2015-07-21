@@ -19,7 +19,6 @@ package org.tobi29.scapes.engine.backends.lwjgl3.glfw;
 import org.tobi29.scapes.engine.opengl.Container;
 import org.tobi29.scapes.engine.utils.Pair;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -29,15 +28,6 @@ public interface PlatformDialogs {
 
     Optional<Path> saveFileDialog(Pair<String, String>[] extensions,
             String title);
-
-    boolean exportToUser(Path path, Pair<String, String>[] extensions,
-            String title) throws IOException;
-
-    boolean importFromUser(Path path, Pair<String, String>[] extensions,
-            String title) throws IOException;
-
-    boolean importFromUser(Path path, Pair<String, String>[] extensions,
-            String title, boolean multiple) throws IOException;
 
     void message(Container.MessageType messageType, String title,
             String message);

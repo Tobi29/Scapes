@@ -37,10 +37,9 @@ public class GuiComponentCross extends GuiComponent {
     @Override
     public void renderComponent(GL gl, Shader shader,
             FontRenderer font, double delta) {
-        gl.getTextureManager().bind("Scapes:image/gui/Cross", gl);
-        OpenGL openGL = gl.getOpenGL();
-        openGL.setBlending(BlendingMode.INVERT);
+        gl.textures().bind("Scapes:image/gui/Cross", gl);
+        gl.setBlending(BlendingMode.INVERT);
         vao.render(gl, shader);
-        openGL.setBlending(BlendingMode.NORMAL);
+        gl.setBlending(BlendingMode.NORMAL);
     }
 }

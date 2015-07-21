@@ -17,6 +17,7 @@
 package org.tobi29.scapes.block;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 public class CraftingRecipe {
     private final List<Ingredient> ingredients, requirements;
@@ -37,15 +38,15 @@ public class CraftingRecipe {
         this.result = result;
     }
 
-    public List<Ingredient> getIngredients() {
-        return ingredients;
+    public Stream<Ingredient> ingredients() {
+        return ingredients.stream();
     }
 
-    public List<Ingredient> getRequirements() {
-        return requirements;
+    public Stream<Ingredient> requirements() {
+        return requirements.stream();
     }
 
-    public Optional<List<ItemStack>> getTakes(Inventory inventory) {
+    public Optional<Stream<ItemStack>> takes(Inventory inventory) {
         List<ItemStack> takes = new ArrayList<>();
         for (Ingredient ingredient : ingredients) {
             Optional<ItemStack> take = ingredient.match(inventory);
@@ -61,10 +62,10 @@ public class CraftingRecipe {
                 return Optional.empty();
             }
         }
-        return Optional.of(takes);
+        return Optional.of(takes.stream());
     }
 
-    public ItemStack getResult() {
+    public ItemStack result() {
         return new ItemStack(result);
     }
 

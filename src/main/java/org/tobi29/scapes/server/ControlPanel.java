@@ -23,7 +23,7 @@ import java.util.Optional;
 
 public interface ControlPanel extends Command.Executor {
     @Override
-    default Optional<String> getPlayerName() {
+    default Optional<String> playerName() {
         return Optional.empty();
     }
 
@@ -33,11 +33,11 @@ public interface ControlPanel extends Command.Executor {
     }
 
     @Override
-    default int getPermissionLevel() {
+    default int permissionLevel() {
         return 10;
     }
 
-    String getID();
+    String id();
 
     void updatePlayers(String[] players);
 

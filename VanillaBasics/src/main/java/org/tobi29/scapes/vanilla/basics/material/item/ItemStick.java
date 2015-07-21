@@ -57,12 +57,12 @@ public class ItemStick extends VanillaItem {
     }
 
     @Override
-    public String getName(ItemStack item) {
+    public String name(ItemStack item) {
         return "Stick";
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 16;
     }
 }

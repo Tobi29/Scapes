@@ -46,15 +46,15 @@ public class EffectAudio implements Audio {
         if (hasPosition) {
             time += speedFactor;
             flag = time >=
-                    FastMath.pointDistanceSqr(listenerPosition, pos) / 343.3;
+                    FastMath.pointDistance(listenerPosition, pos) / 343.3;
         } else {
             flag = true;
         }
         if (flag) {
             if (!lagSilence) {
-                Optional<AudioData> audio = sounds.getAudio(asset);
+                Optional<AudioData> audio = sounds.get(asset);
                 if (audio.isPresent()) {
-                    sounds.playSound(audio.get().getBuffer(), pitch, gain,
+                    sounds.playSound(audio.get().buffer(), pitch, gain,
                             range, pos, velocity, false, hasPosition);
                 }
             }

@@ -24,7 +24,7 @@ public class ItemHammer extends ItemTool {
     }
 
     @Override
-    public String getType() {
+    public String type() {
         return "Hammer";
     }
 }

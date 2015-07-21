@@ -64,7 +64,7 @@ public class EntityBellowsServer extends EntityServer {
     public void updateTile(TerrainServer terrain, int x, int y, int z) {
         WorldServer world = terrain.world();
         VanillaBasics plugin =
-                (VanillaBasics) world.getPlugins().getPlugin("VanillaBasics");
+                (VanillaBasics) world.plugins().plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         if (terrain.type(pos.intX(), pos.intY(), pos.intZ()) !=
                 materials.bellows) {
@@ -72,7 +72,7 @@ public class EntityBellowsServer extends EntityServer {
         }
     }
 
-    public Face getFace() {
+    public Face face() {
         return face;
     }
 }

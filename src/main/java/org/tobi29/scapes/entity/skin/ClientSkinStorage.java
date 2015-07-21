@@ -38,7 +38,7 @@ public class ClientSkinStorage {
     private final ByteBuffer defaultSkin;
 
     public ClientSkinStorage(Texture defaultTexture) {
-        defaultSkin = defaultTexture.getBuffer();
+        defaultSkin = defaultTexture.buffer();
     }
 
     public void update(GL gl, ClientConnection connection) {
@@ -59,8 +59,8 @@ public class ClientSkinStorage {
     }
 
     public void addSkin(byte[] checksum, Image image) {
-        ByteBuffer imageBuffer = image.getBuffer();
-        ByteBuffer buffer = BufferCreator.byteBuffer(imageBuffer.remaining());
+        ByteBuffer imageBuffer = image.buffer();
+        ByteBuffer buffer = BufferCreator.bytes(imageBuffer.remaining());
         buffer.put(imageBuffer);
         buffer.rewind();
         ClientSkin skin = skins.get(new Checksum(checksum));
@@ -69,7 +69,7 @@ public class ClientSkinStorage {
         }
     }
 
-    public Texture getSkin(byte[] checksum) {
+    public Texture get(byte[] checksum) {
         ClientSkin skin = skins.get(checksum);
         if (skin == null) {
             skin = new ClientSkin(defaultSkin, checksum);

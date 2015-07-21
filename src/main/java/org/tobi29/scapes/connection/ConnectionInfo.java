@@ -22,7 +22,7 @@ public final class ConnectionInfo {
     private ConnectionInfo() {
     }
 
-    public static byte[] getHeader() {
+    public static byte[] header() {
         return HEADER.clone();
     }
 }

@@ -17,6 +17,7 @@
 package org.tobi29.scapes.engine.utils.io;
 
 import org.tobi29.scapes.engine.utils.BufferCreator;
+import org.tobi29.scapes.engine.utils.io.filesystem.ReadSource;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -51,7 +52,7 @@ public final class ProcessStream {
 
     public static <E> E process(ReadableByteStream input,
             StreamProcessor<E> processor, int bufferSize) throws IOException {
-        ByteBuffer buffer = BufferCreator.byteBuffer(bufferSize);
+        ByteBuffer buffer = BufferCreator.bytes(bufferSize);
         boolean available = true;
         while (available) {
             available = input.getSome(buffer);
@@ -82,7 +83,7 @@ public final class ProcessStream {
     }
 
     public static StreamProcessor<ByteBuffer> asBuffer() {
-        return asBuffer(capacity -> BufferCreator.byteBuffer(capacity + 8192));
+        return asBuffer(capacity -> BufferCreator.bytes(capacity + 8192));
     }
 
     public static StreamProcessor<ByteBuffer> asBuffer(

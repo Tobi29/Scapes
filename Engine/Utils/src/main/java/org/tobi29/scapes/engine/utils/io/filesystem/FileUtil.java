@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.io;
+package org.tobi29.scapes.engine.utils.io.filesystem;
 
 import org.apache.tika.Tika;
+import org.tobi29.scapes.engine.utils.io.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.*;
+import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 
 public class FileUtil {
     private FileUtil() {
     }
 
-    public static ReadSource read(Path path) {
+    public static ReadSource read(java.nio.file.Path path) {
         return new ReadSource() {
             @Override
             public boolean exists() {
@@ -59,18 +61,18 @@ public class FileUtil {
             }
 
             @Override
-            public String getMIMEType() throws IOException {
+            public String mimeType() throws IOException {
                 return new Tika().detect(readIO(), path.toString());
             }
         };
     }
 
-    public static void read(Path path,
+    public static void read(java.nio.file.Path path,
             IOConsumer<BufferedReadChannelStream> read) throws IOException {
         read(path, read, StandardOpenOption.READ);
     }
 
-    public static void read(Path path,
+    public static void read(java.nio.file.Path path,
             IOConsumer<BufferedReadChannelStream> read, OpenOption... options)
             throws IOException {
         try (FileChannel channel = FileChannel.open(path, options)) {
@@ -78,12 +80,12 @@ public class FileUtil {
         }
     }
 
-    public static <R> R readReturn(Path path,
+    public static <R> R readReturn(java.nio.file.Path path,
             IOFunction<BufferedReadChannelStream, R> read) throws IOException {
         return readReturn(path, read, StandardOpenOption.READ);
     }
 
-    public static <R> R readReturn(Path path,
+    public static <R> R readReturn(java.nio.file.Path path,
             IOFunction<BufferedReadChannelStream, R> read,
             OpenOption... options) throws IOException {
         try (FileChannel channel = FileChannel.open(path, options)) {
@@ -91,13 +93,13 @@ public class FileUtil {
         }
     }
 
-    public static void write(Path path,
+    public static void write(java.nio.file.Path path,
             IOConsumer<BufferedWriteChannelStream> write) throws IOException {
         write(path, write, StandardOpenOption.WRITE, StandardOpenOption.CREATE,
                 StandardOpenOption.TRUNCATE_EXISTING);
     }
 
-    public static void write(Path path,
+    public static void write(java.nio.file.Path path,
             IOConsumer<BufferedWriteChannelStream> write, OpenOption... options)
             throws IOException {
         try (FileChannel channel = FileChannel.open(path, options)) {
@@ -108,7 +110,7 @@ public class FileUtil {
         }
     }
 
-    public static <R> R writeReturn(Path path,
+    public static <R> R writeReturn(java.nio.file.Path path,
             IOFunction<BufferedWriteChannelStream, R> write)
             throws IOException {
         return writeReturn(path, write, StandardOpenOption.WRITE,
@@ -116,7 +118,7 @@ public class FileUtil {
                 StandardOpenOption.TRUNCATE_EXISTING);
     }
 
-    public static <R> R writeReturn(Path path,
+    public static <R> R writeReturn(java.nio.file.Path path,
             IOFunction<BufferedWriteChannelStream, R> write,
             OpenOption... options) throws IOException {
         try (FileChannel channel = FileChannel.open(path, options)) {
@@ -128,10 +130,10 @@ public class FileUtil {
         }
     }
 
-    public static void deleteDir(Path path) throws IOException {
-        Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+    public static void deleteDir(java.nio.file.Path path) throws IOException {
+        Files.walkFileTree(path, new SimpleFileVisitor<java.nio.file.Path>() {
             @Override
-            public FileVisitResult visitFile(Path file,
+            public FileVisitResult visitFile(java.nio.file.Path file,
                     BasicFileAttributes attrs) throws IOException {
                 Files.delete(file);
                 return FileVisitResult.CONTINUE;

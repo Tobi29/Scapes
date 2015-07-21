@@ -30,7 +30,7 @@ public class EntityFurnaceServer extends EntityAbstractFurnaceServer {
     }
 
     public EntityFurnaceServer(WorldServer world, Vector3 pos) {
-        super(world, pos, new Inventory(world.getRegistry(), 8), 4, 3, 800.0f,
+        super(world, pos, new Inventory(world.registry(), 8), 4, 3, 800.0f,
                 1.001f, 3, 0);
     }
 
@@ -41,8 +41,8 @@ public class EntityFurnaceServer extends EntityAbstractFurnaceServer {
 
     @Override
     public boolean isValidOn(TerrainServer terrain, int x, int y, int z) {
-        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
-                .getPlugin("VanillaBasics");
+        VanillaBasics plugin = (VanillaBasics) terrain.world().plugins()
+                .plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         return terrain.type(x, y, z) == materials.furnace;
     }

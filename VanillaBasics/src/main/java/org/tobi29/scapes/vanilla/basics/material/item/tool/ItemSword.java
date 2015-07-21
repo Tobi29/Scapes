@@ -30,12 +30,12 @@ public class ItemSword extends ItemTool {
     }
 
     @Override
-    public double getHitRange(ItemStack item) {
+    public double hitRange(ItemStack item) {
         return 4;
     }
 
     @Override
-    public String getType() {
+    public String type() {
         return "Sword";
     }
 }

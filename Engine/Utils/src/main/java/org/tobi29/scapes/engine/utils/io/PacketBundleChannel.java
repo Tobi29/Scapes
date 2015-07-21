@@ -55,11 +55,10 @@ public class PacketBundleChannel {
 
     private final SocketChannel channel;
     private final ByteBufferStream dataStreamOut = new ByteBufferStream(
-            length -> BufferCreator.byteBuffer(length + 102400)),
+            length -> BufferCreator.bytes(length + 102400)),
             byteBufferStreamOut = new ByteBufferStream(
-                    length -> BufferCreator.byteBuffer(length + 102400));
-    private final ByteBuffer header =
-            BufferCreator.byteBuffer(BUNDLE_HEADER_SIZE);
+                    length -> BufferCreator.bytes(length + 102400));
+    private final ByteBuffer header = BufferCreator.bytes(BUNDLE_HEADER_SIZE);
     private final Queue<ByteBuffer> queue = new ConcurrentLinkedQueue<>();
     private final List<WeakReference<ByteBuffer>> bufferCache =
             new ArrayList<>();
@@ -69,7 +68,7 @@ public class PacketBundleChannel {
             new AtomicInteger();
     private Optional<Selector> selector = Optional.empty();
     private boolean encrypt, hasInput;
-    private ByteBuffer output, input = BufferCreator.byteBuffer(1024);
+    private ByteBuffer output, input = BufferCreator.bytes(1024);
 
     public PacketBundleChannel(SocketChannel channel) {
         this(channel, null, null);
@@ -137,7 +136,7 @@ public class PacketBundleChannel {
             }
         }
         if (bundle == null) {
-            bundle = BufferCreator.byteBuffer(capacity);
+            bundle = BufferCreator.bytes(capacity);
         }
         bundle.position(BUNDLE_HEADER_SIZE);
         int size;
@@ -185,7 +184,7 @@ public class PacketBundleChannel {
                 header.flip();
                 int limit = header.getInt();
                 if (limit > input.capacity()) {
-                    input = BufferCreator.byteBuffer(limit);
+                    input = BufferCreator.bytes(limit);
                 } else {
                     input.clear().limit(limit);
                 }

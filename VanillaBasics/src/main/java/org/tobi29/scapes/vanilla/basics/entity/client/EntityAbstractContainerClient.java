@@ -34,7 +34,7 @@ public abstract class EntityAbstractContainerClient extends EntityClient
     }
 
     @Override
-    public Inventory getInventory() {
+    public Inventory inventory() {
         return inventory;
     }
 

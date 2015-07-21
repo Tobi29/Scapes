@@ -27,7 +27,7 @@ public class GuiVideoSettings extends GuiMenu {
     public GuiVideoSettings(GameState state, Gui previous) {
         super(state, "Video Settings", previous);
         TagStructure scapesTag =
-                state.getEngine().tagStructure().getStructure("Scapes");
+                state.engine().tagStructure().getStructure("Scapes");
         GuiComponentSlider viewDistance =
                 new GuiComponentSlider(16, 80, 368, 30, 18, "View distance",
                         (scapesTag.getDouble("RenderDistance") - 10.0) / 246.0,
@@ -43,7 +43,7 @@ public class GuiVideoSettings extends GuiMenu {
             state.add(new GuiShaderSettings(state, this));
         });
         GuiComponentTextButton fullscreen;
-        if (state.getEngine().config().isFullscreen()) {
+        if (state.engine().config().isFullscreen()) {
             fullscreen = new GuiComponentTextButton(16, 160, 368, 30, 18,
                     "Fullscreen: ON");
         } else {
@@ -51,46 +51,28 @@ public class GuiVideoSettings extends GuiMenu {
                     "Fullscreen: OFF");
         }
         fullscreen.addLeftClick(event -> {
-            if (!state.getEngine().config().isFullscreen()) {
+            if (!state.engine().config().isFullscreen()) {
                 fullscreen.setText("Fullscreen: ON");
-                state.getEngine().config().setFullscreen(true);
+                state.engine().config().setFullscreen(true);
             } else {
                 fullscreen.setText("Fullscreen: OFF");
-                state.getEngine().config().setFullscreen(false);
+                state.engine().config().setFullscreen(false);
             }
-            state.getEngine().container().updateContainer();
-        });
-        GuiComponentTextButton keepInvisibleVbos;
-        if (scapesTag.getBoolean("KeepInvisibleChunkVbos")) {
-            keepInvisibleVbos = new GuiComponentTextButton(16, 200, 368, 30, 18,
-                    "Unload unused Chunk-Geom: OFF");
-        } else {
-            keepInvisibleVbos = new GuiComponentTextButton(16, 200, 368, 30, 18,
-                    "Unload unused Chunk-Geom: ON");
-        }
-        keepInvisibleVbos.addLeftClick(event -> {
-            if (scapesTag.getBoolean("KeepInvisibleChunkVbos")) {
-                keepInvisibleVbos.setText("Unload unused Chunk-Geom: ON");
-                scapesTag.setBoolean("KeepInvisibleChunkVbos", false);
-            } else {
-                keepInvisibleVbos.setText("Unload unused Chunk-Geom: OFF");
-                scapesTag.setBoolean("KeepInvisibleChunkVbos", true);
-            }
+            state.engine().container().updateContainer();
         });
         GuiComponentSlider resolutionMultiplier =
-                new GuiComponentSlider(16, 240, 368, 30, 18, "Resolution",
-                        reverseResolution(state.getEngine().config()
-                                .getResolutionMultiplier()),
+                new GuiComponentSlider(16, 200, 368, 30, 18, "Resolution",
+                        reverseResolution(
+                                state.engine().config().resolutionMultiplier()),
                         (text, value) -> text + ": " +
                                 FastMath.round(resolution(value) * 100.0) +
                                 '%');
-        resolutionMultiplier.addHover(event -> state.getEngine().config()
+        resolutionMultiplier.addHover(event -> state.engine().config()
                 .setResolutionMultiplier(
                         (float) resolution(resolutionMultiplier.value)));
         pane.add(viewDistance);
         pane.add(shader);
         pane.add(fullscreen);
-        pane.add(keepInvisibleVbos);
         pane.add(resolutionMultiplier);
     }
 

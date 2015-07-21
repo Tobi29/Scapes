@@ -55,21 +55,21 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
             Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final WorldFormat worldFormat;
     private final String name, id;
-    private final List<ChunkPopulator> pop = new ArrayList<>();
+    private final List<ChunkPopulator> populators = new ArrayList<>();
     private final TerrainServer terrain;
     private final ServerConnection connection;
     private final Sync sync = new Sync(20, 5000000000L, true, "Server-Update");
     private final Map<String, MobPlayerServer> players =
             new ConcurrentHashMap<>();
     private Joiner joiner;
-    private ChunkGenerator gen;
+    private ChunkGenerator generator;
 
     public WorldServer(WorldFormat worldFormat, String name, String id,
             ServerConnection connection, TaskExecutor taskExecutor,
             TerrainSupplier terrainSupplier) {
-        super(connection, worldFormat.getPlugins(), taskExecutor,
-                worldFormat.getPlugins().getRegistry());
-        seed = worldFormat.getSeed();
+        super(connection, worldFormat.plugins(), taskExecutor,
+                worldFormat.plugins().registry());
+        seed = worldFormat.seed();
         this.name = name;
         this.id = id;
         this.worldFormat = worldFormat;
@@ -78,7 +78,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
     }
 
     @Override
-    public ServerConnection getConnection() {
+    public ServerConnection connection() {
         return connection;
     }
 
@@ -98,9 +98,9 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
 
     public void init(WorldEnvironment environment) {
         this.environment = environment;
-        gen = environment.getGenerator();
-        pop.add(environment.getPopulator());
-        worldFormat.getPlugins().getPlugins()
+        generator = environment.generator();
+        populators.add(environment.populator());
+        worldFormat.plugins().plugins()
                 .forEach(plugin -> plugin.worldInit(this));
     }
 
@@ -108,19 +108,19 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
         spawn = environment.calculateSpawn(terrain);
     }
 
-    public List<MobServer> getEntities(List<MobServer> exceptions,
+    public List<MobServer> entities(List<MobServer> exceptions,
             Frustum hitField) {
         return entities.values().stream()
                 .filter(entity -> entity instanceof MobServer)
                 .map(entity -> (MobServer) entity)
                 .filter(mob -> !exceptions.contains(mob) &&
-                        hitField.inView(mob.getAABB()) > 0)
+                        hitField.inView(mob.aabb()) > 0)
                 .collect(Collectors.toList());
     }
 
     public void addEntity(EntityServer add) {
         synchronized (entities) {
-            addEntity(add, getFreeEntityID());
+            addEntity(add, freeEntityID());
         }
     }
 
@@ -128,19 +128,19 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
         entityListeners.forEach(listener -> listener.listen(add));
         add.setEntityID(id);
         entities.put(id, add);
-        if (add.getID(plugins.getRegistry()) >= 0) {
-            connection.send(new PacketEntityAdd(add, plugins.getRegistry()));
+        if (add.id(plugins.registry()) >= 0) {
+            connection.send(new PacketEntityAdd(add, plugins.registry()));
         }
     }
 
     public void deleteEntity(EntityServer del) {
         if (del != null) {
-            entities.remove(del.getEntityID());
+            entities.remove(del.entityID());
             connection.send(new PacketEntityDespawn(del));
         }
     }
 
-    protected int getFreeEntityID() {
+    protected int freeEntityID() {
         Random random = ThreadLocalRandom.current();
         int out = 0;
         while (out == 0) {
@@ -152,42 +152,42 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
         return out;
     }
 
-    public List<MobServer> getEntities(AABB aabb) {
+    public List<MobServer> entities(AABB aabb) {
         return entities.values().stream()
                 .filter(entity -> entity instanceof MobServer)
                 .map(entity -> (MobServer) entity)
-                .filter(mob -> aabb.inside(mob.getPos()))
+                .filter(mob -> aabb.inside(mob.pos()))
                 .collect(Collectors.toList());
     }
 
-    public List<EntityServer> getEntities(Vector3 pos, double rangeSqr) {
+    public List<EntityServer> entities(Vector3 pos, double rangeSqr) {
         return entities.values().stream().filter(entity ->
-                FastMath.pointDistanceSqr(pos, entity.getPos()) <= rangeSqr)
+                        FastMath.pointDistanceSqr(pos, entity.pos()) <=
+                                rangeSqr)
                 .collect(Collectors.toList());
     }
 
-    public List<EntityServer> getEntities(int x, int y, int z) {
+    public List<EntityServer> entities(int x, int y, int z) {
         return entities.values().stream()
-                .filter(entity -> FastMath.floor(entity.getX()) == x &&
-                        FastMath.floor(entity.getY()) == y &&
-                        FastMath.floor(entity.getZ()) == z)
+                .filter(entity -> FastMath.floor(entity.x()) == x &&
+                        FastMath.floor(entity.y()) == y &&
+                        FastMath.floor(entity.z()) == z)
                 .collect(Collectors.toList());
     }
 
-    public EntityServer getEntity(int i) {
+    public EntityServer entity(int i) {
         return entities.get(i);
     }
 
-    public Stream<EntityServer> getEntities() {
+    public Stream<EntityServer> entities() {
         return entities.values().stream();
     }
 
-    public int getMobs(CreatureType creatureType) {
+    public int mobs(CreatureType creatureType) {
         int i = 0;
         for (EntityServer entity : entities.values()) {
             if (entity instanceof MobLivingServer) {
-                if (((MobLivingServer) entity).getCreatureType() ==
-                        creatureType) {
+                if (((MobLivingServer) entity).creatureType() == creatureType) {
                     i++;
                 }
             }
@@ -209,13 +209,12 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                         deleteEntity(entity);
                     }
                 } else {
-                    if (((MobLivingServer) entity).getCreatureType()
-                            .getDespawn()) {
-                        MobPlayerServer player =
-                                getNearestPlayer(entity.getPos());
+                    if (((MobLivingServer) entity).creatureType()
+                            .doesDespawn()) {
+                        MobPlayerServer player = nearestPlayer(entity.pos());
                         if (player != null) {
-                            if (FastMath.pointDistanceSqr(entity.getPos(),
-                                    player.getPos()) > 16384.0) {
+                            if (FastMath.pointDistanceSqr(entity.pos(),
+                                    player.pos()) > 16384.0) {
                                 deleteEntity(entity);
                             }
                         } else {
@@ -225,7 +224,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                 }
             }
         });
-        worldFormat.getPlugins().getPlugins()
+        worldFormat.plugins().plugins()
                 .forEach(plugin -> plugin.worldTick(this));
         environment.tick(delta);
         taskExecutor.tick();
@@ -234,10 +233,14 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
 
     public List<MobServer> damageEntities(List<MobServer> exceptions,
             Frustum hitField, double damage) {
-        List<MobServer> entities = getEntities(exceptions, hitField);
+        List<MobServer> entities = entities(exceptions, hitField);
         entities.stream().filter(entity -> entity instanceof MobLivingServer)
                 .forEach(entity -> ((MobLivingServer) entity).damage(damage));
         return entities;
+    }
+
+    public void dropItems(List<ItemStack> items, int x, int y, int z) {
+        dropItems(items, x, y, z, 600.0);
     }
 
     public void dropItems(List<ItemStack> items, int x, int y, int z,
@@ -248,6 +251,19 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
         }
     }
 
+    public void dropItem(ItemStack item, int x, int y, int z) {
+        dropItem(item, x, y, z, 600.0);
+    }
+
+    public void dropItem(ItemStack item, int x, int y, int z,
+            double despawntime) {
+        dropItem(item, new Vector3d(x + 0.5, y + 0.5, z + 0.5), despawntime);
+    }
+
+    public void dropItem(ItemStack item, Vector3 pos) {
+        dropItem(item, pos, 600.0);
+    }
+
     public void dropItem(ItemStack item, Vector3 pos, double despawntime) {
         Random random = ThreadLocalRandom.current();
         EntityServer entity = new MobItemServer(this, pos,
@@ -256,26 +272,6 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                         random.nextDouble() * 1.0 + 0.5), item, despawntime);
         entity.onSpawn();
         addEntity(entity);
-    }
-
-    public void dropItem(ItemStack item, int x, int y, int z) {
-        dropItem(item, new Vector3d(x + 0.5, y + 0.5, z + 0.5), 600.0);
-    }
-
-    public void dropItem(ItemStack item, int x, int y, int z,
-            double despawntime) {
-        dropItem(item, new Vector3d(x + 0.5, y + 0.5, z + 0.5), despawntime);
-    }
-
-    public void dropItems(List<ItemStack> items, int x, int y, int z) {
-        Vector3 pos = new Vector3d(x + 0.5, y + 0.5, z + 0.5);
-        for (ItemStack item : items) {
-            dropItem(item, pos);
-        }
-    }
-
-    public void dropItem(ItemStack item, Vector3 pos) {
-        dropItem(item, pos, 600.0);
     }
 
     public boolean checkBlocked(int x1, int y1, int z1, int x2, int y2,
@@ -300,7 +296,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
         entities.values().stream().filter(entity -> entity instanceof MobServer)
                 .forEach(entity -> {
                     Vector3 relative =
-                            entity.getPos().minus(new Vector3d(x, y, z));
+                            entity.pos().minus(new Vector3d(x, y, z));
                     double s = radius - FastMath.length(relative);
                     if (s > 0) {
                         double p = s * push;
@@ -344,8 +340,8 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                                                 zzz);
                             } else {
                                 if (random.nextDouble() < dropChance) {
-                                    dropItems(type.getDrops(
-                                                    new ItemStack(registry),
+                                    dropItems(
+                                            type.drops(new ItemStack(registry),
                                                     terrain.data(xxx, yyy,
                                                             zzz)), xxx, yyy,
                                             zzz);
@@ -382,12 +378,12 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
         });
     }
 
-    public MobPlayerServer getNearestPlayer(Vector3 pos) {
+    public MobPlayerServer nearestPlayer(Vector3 pos) {
         MobPlayerServer player = null;
         double distance = -1;
         for (MobPlayerServer playerCheck : players.values()) {
             double distanceCheck =
-                    FastMath.pointDistanceSqr(playerCheck.getPos(), pos);
+                    FastMath.pointDistanceSqr(playerCheck.pos(), pos);
             if (distanceCheck < distance || distance == -1) {
                 player = playerCheck;
                 distance = distanceCheck;
@@ -396,16 +392,16 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
         return player;
     }
 
-    public Collection<MobPlayerServer> getPlayers() {
+    public Collection<MobPlayerServer> players() {
         return players.values();
     }
 
     public void addPlayer(MobPlayerServer player) {
-        players.put(player.getNickname(), player);
+        players.put(player.nickname(), player);
     }
 
     public synchronized void removePlayer(MobPlayerServer player) {
-        players.remove(player.getNickname(), player);
+        players.remove(player.nickname(), player);
     }
 
     public void addSpawner(MobSpawner spawner) {
@@ -414,24 +410,24 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
         }
     }
 
-    public String getName() {
+    public String name() {
         return name;
     }
 
-    public Sync getSync() {
+    public Sync sync() {
         return sync;
     }
 
-    public void addPopulator(ChunkPopulator pop) {
-        this.pop.add(pop);
+    public void addPopulator(ChunkPopulator populator) {
+        populators.add(populator);
     }
 
-    public ChunkGenerator getGenerator() {
-        return gen;
+    public ChunkGenerator generator() {
+        return generator;
     }
 
-    public Stream<ChunkPopulator> getPopulators() {
-        return pop.stream();
+    public Stream<ChunkPopulator> populators() {
+        return populators.stream();
     }
 
     public TerrainServer getTerrain() {
@@ -453,11 +449,10 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
     public void playSound(String audio, EntityServer entity, float pitch,
             float gain, float range) {
         if (entity instanceof MobServer) {
-            playSound(audio, entity.getPos(), ((MobServer) entity).getSpeed(),
-                    pitch, gain, range);
+            playSound(audio, entity.pos(), ((MobServer) entity).speed(), pitch,
+                    gain, range);
         } else {
-            playSound(audio, entity.getPos(), Vector3d.ZERO, pitch, gain,
-                    range);
+            playSound(audio, entity.pos(), Vector3d.ZERO, pitch, gain, range);
         }
     }
 
@@ -497,7 +492,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
             sync.init();
             while (!joiner.marked()) {
                 update(0.05);
-                sync.capTPS();
+                sync.cap();
             }
         }, "Tick-" + id, TaskExecutor.Priority.MEDIUM);
     }

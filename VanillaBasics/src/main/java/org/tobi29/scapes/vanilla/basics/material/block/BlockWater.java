@@ -56,7 +56,7 @@ public class BlockWater extends VanillaBlock {
     }
 
     @Override
-    public List<AABBElement> getCollision(int data, int x, int y, int z) {
+    public List<AABBElement> collision(int data, int x, int y, int z) {
         List<AABBElement> aabbs = new ArrayList<>();
         aabbs.add(new AABBElement(new AABB(x, y, z, x + 1, y + 1, z + 1),
                 CollisionWater.INSTANCE));
@@ -69,27 +69,27 @@ public class BlockWater extends VanillaBlock {
     }
 
     @Override
-    public double getResistance(ItemStack item, int data) {
+    public double resistance(ItemStack item, int data) {
         return -1;
     }
 
     @Override
-    public List<ItemStack> getDrops(ItemStack item, int data) {
+    public List<ItemStack> drops(ItemStack item, int data) {
         return Collections.singletonList(new ItemStack(this, data));
     }
 
     @Override
-    public String getFootStep(int data) {
+    public String footStepSound(int data) {
         return "VanillaBasics:sound/footsteps/Water.ogg";
     }
 
     @Override
-    public String getBreak(ItemStack item, int data) {
+    public String breakSound(ItemStack item, int data) {
         return "";
     }
 
     @Override
-    public Optional<TerrainTexture> getParticleTexture(Face face,
+    public Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
         return Optional.empty();
     }
@@ -160,12 +160,12 @@ public class BlockWater extends VanillaBlock {
     }
 
     @Override
-    public String getName(ItemStack item) {
+    public String name(ItemStack item) {
         return "Water";
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 1;
     }
 }

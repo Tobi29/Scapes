@@ -38,8 +38,8 @@ public class BlockOreChalcocite extends BlockOre {
     @Override
     public boolean destroy(TerrainServer.TerrainMutable terrain, int x, int y,
             int z, Face face, MobPlayerServer player, ItemStack item) {
-        if ("Pickaxe".equals(item.getMaterial().getToolType(item)) &&
-                !canBeBroken(item.getMaterial().getToolLevel(item),
+        if ("Pickaxe".equals(item.material().toolType(item)) &&
+                !canBeBroken(item.material().toolLevel(item),
                         terrain.data(x, y, z))) {
             terrain.world()
                     .dropItem(new ItemStack(materials.oreChunk, (short) 1),
@@ -51,9 +51,9 @@ public class BlockOreChalcocite extends BlockOre {
     }
 
     @Override
-    public List<ItemStack> getDrops(ItemStack item, int data) {
-        if ("Pickaxe".equals(item.getMaterial().getToolType(item)) &&
-                canBeBroken(item.getMaterial().getToolLevel(item), data)) {
+    public List<ItemStack> drops(ItemStack item, int data) {
+        if ("Pickaxe".equals(item.material().toolType(item)) &&
+                canBeBroken(item.material().toolLevel(item), data)) {
             return Arrays.asList(new ItemStack(materials.oreChunk, (short) 1),
                     new ItemStack(materials.stoneRock, data,
                             new Random().nextInt(4) + 8));
@@ -62,17 +62,17 @@ public class BlockOreChalcocite extends BlockOre {
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 4;
     }
 
     @Override
-    public String getName(ItemStack item) {
-        return getStoneName(item) + " Chalcocite Ore";
+    public String name(ItemStack item) {
+        return stoneName(item) + " Chalcocite Ore";
     }
 
     @Override
-    protected String getOreTexture() {
+    protected String oreTexture() {
         return "Chalcocite";
     }
 }

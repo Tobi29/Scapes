@@ -51,7 +51,7 @@ public class BlockQuern extends VanillaBlock {
     @Override
     public boolean click(TerrainServer terrain, int x, int y, int z, Face face,
             MobPlayerServer player) {
-        terrain.world().getEntities(x, y, z).stream()
+        terrain.world().entities(x, y, z).stream()
                 .filter(entity -> entity instanceof EntityQuernServer).forEach(
                 entity -> player.openGui((EntityContainerServer) entity));
         return true;
@@ -68,30 +68,30 @@ public class BlockQuern extends VanillaBlock {
     }
 
     @Override
-    public double getResistance(ItemStack item, int data) {
-        return "Pickaxe".equals(item.getMaterial().getToolType(item)) ? 12 : -1;
+    public double resistance(ItemStack item, int data) {
+        return "Pickaxe".equals(item.material().toolType(item)) ? 12 : -1;
     }
 
     @Override
-    public List<ItemStack> getDrops(ItemStack item, int data) {
-        if ("Pickaxe".equals(item.getMaterial().getToolType(item))) {
+    public List<ItemStack> drops(ItemStack item, int data) {
+        if ("Pickaxe".equals(item.material().toolType(item))) {
             return Collections.singletonList(new ItemStack(this, (short) 0));
         }
         return Collections.emptyList();
     }
 
     @Override
-    public String getFootStep(int data) {
+    public String footStepSound(int data) {
         return "VanillaBasics:sound/footsteps/Stone.ogg";
     }
 
     @Override
-    public String getBreak(ItemStack item, int data) {
+    public String breakSound(ItemStack item, int data) {
         return "VanillaBasics:sound/blocks/Stone.ogg";
     }
 
     @Override
-    public Optional<TerrainTexture> getParticleTexture(Face face,
+    public Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
         return Optional.of(textureSide);
     }
@@ -140,12 +140,12 @@ public class BlockQuern extends VanillaBlock {
     }
 
     @Override
-    public String getName(ItemStack item) {
+    public String name(ItemStack item) {
         return "Quern";
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 1;
     }
 }

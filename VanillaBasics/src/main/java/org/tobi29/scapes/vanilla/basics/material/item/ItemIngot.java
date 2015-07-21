@@ -62,21 +62,20 @@ public class ItemIngot extends VanillaItem implements ItemHeatable, ItemMetal {
     @Override
     public void render(ItemStack item, GL gl, Shader shader,
             float r, float g, float b, float a) {
-        if ("Stone"
-                .equals(item.getMetaData("Vanilla").getString("MetalType"))) {
+        if ("Stone".equals(item.metaData("Vanilla").getString("MetalType"))) {
             modelStone.render(gl, shader);
         } else {
             MetalType metal = plugin.getMetalType(
-                    item.getMetaData("Vanilla").getString("MetalType"));
+                    item.metaData("Vanilla").getString("MetalType"));
             if (metal == null) {
                 metal = plugin.getMetalType("Iron");
             }
-            switch (item.getData()) {
+            switch (item.data()) {
                 case 1:
-                    getModelShaped(metal).render(gl, shader);
+                    modelShaped(metal).render(gl, shader);
                     break;
                 default:
-                    getModelRaw(metal).render(gl, shader);
+                    modelRaw(metal).render(gl, shader);
                     modelMold.render(gl, shader);
                     break;
             }
@@ -86,21 +85,20 @@ public class ItemIngot extends VanillaItem implements ItemHeatable, ItemMetal {
     @Override
     public void renderInventory(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a) {
-        if ("Stone"
-                .equals(item.getMetaData("Vanilla").getString("MetalType"))) {
+        if ("Stone".equals(item.metaData("Vanilla").getString("MetalType"))) {
             modelStone.renderInventory(gl, shader);
         } else {
             MetalType metal = plugin.getMetalType(
-                    item.getMetaData("Vanilla").getString("MetalType"));
+                    item.metaData("Vanilla").getString("MetalType"));
             if (metal == null) {
                 metal = plugin.getMetalType("Iron");
             }
-            switch (item.getData()) {
+            switch (item.data()) {
                 case 1:
-                    getModelShaped(metal).renderInventory(gl, shader);
+                    modelShaped(metal).renderInventory(gl, shader);
                     break;
                 default:
-                    getModelRaw(metal).renderInventory(gl, shader);
+                    modelRaw(metal).renderInventory(gl, shader);
                     modelMold.renderInventory(gl, shader);
                     break;
             }
@@ -108,18 +106,18 @@ public class ItemIngot extends VanillaItem implements ItemHeatable, ItemMetal {
     }
 
     @Override
-    public String getName(ItemStack item) {
+    public String name(ItemStack item) {
         StringBuilder name = new StringBuilder(50);
-        if (item.getData() == 0) {
+        if (item.data() == 0) {
             name.append("Unshaped ");
         }
-        MetalType metalType = getMetalType(item);
-        name.append(metalType.getIngotName());
-        float temperature = getTemperature(item);
+        MetalType metalType = metalType(item);
+        name.append(metalType.ingotName());
+        float temperature = temperature(item);
         if (temperature > 0.1f) {
             name.append("\nTemp.:").append(FastMath.floor(temperature))
                     .append("°C");
-            if (temperature > getMeltingPoint(item)) {
+            if (temperature > meltingPoint(item)) {
                 name.append("\n - Liquid");
             }
         }
@@ -127,21 +125,20 @@ public class ItemIngot extends VanillaItem implements ItemHeatable, ItemMetal {
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 1;
     }
 
     @Override
     public void heat(ItemStack item, float temperature) {
-        float currentTemperature = getTemperature(item);
+        float currentTemperature = temperature(item);
         if (currentTemperature < 1 && temperature < currentTemperature) {
-            item.getMetaData("Vanilla").setFloat("Temperature", 0.0f);
+            item.metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
-            item.getMetaData("Vanilla").setFloat("Temperature", FastMath.max(
+            item.metaData("Vanilla").setFloat("Temperature", FastMath.max(
                     currentTemperature +
                             (temperature - currentTemperature) / 400.0f, 1.1f));
-            if (currentTemperature >= getMeltingPoint(item) &&
-                    item.getData() == 1) {
+            if (currentTemperature >= meltingPoint(item) && item.data() == 1) {
                 item.setAmount(0);
             }
         }
@@ -149,70 +146,70 @@ public class ItemIngot extends VanillaItem implements ItemHeatable, ItemMetal {
 
     @Override
     public void cool(ItemStack item) {
-        float currentTemperature = getTemperature(item);
+        float currentTemperature = temperature(item);
         if (currentTemperature < 1) {
-            item.getMetaData("Vanilla").setFloat("Temperature", 0.0f);
+            item.metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
-            item.getMetaData("Vanilla")
+            item.metaData("Vanilla")
                     .setFloat("Temperature", currentTemperature / 1.002f);
         }
     }
 
     @Override
     public void cool(MobItemServer item) {
-        float currentTemperature = getTemperature(item.getItem());
+        float currentTemperature = temperature(item.item());
         if (currentTemperature < 1) {
-            item.getItem().getMetaData("Vanilla").setFloat("Temperature", 0.0f);
+            item.item().metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
             if (item.isInWater()) {
-                item.getItem().getMetaData("Vanilla")
+                item.item().metaData("Vanilla")
                         .setFloat("Temperature", currentTemperature / 1.1f);
             } else {
-                item.getItem().getMetaData("Vanilla")
+                item.item().metaData("Vanilla")
                         .setFloat("Temperature", currentTemperature / 1.002f);
             }
         }
     }
 
     @Override
-    public float getMeltingPoint(ItemStack item) {
+    public float meltingPoint(ItemStack item) {
         MetalType metal = plugin.getMetalType(
-                item.getMetaData("Vanilla").getString("MetalType"));
+                item.metaData("Vanilla").getString("MetalType"));
         if (metal != null) {
-            return metal.getMeltingPoint();
+            return metal.meltingPoint();
         }
         return 100.0f;
     }
 
     @Override
-    public float getTemperature(ItemStack item) {
-        return item.getMetaData("Vanilla").getFloat("Temperature");
+    public float temperature(ItemStack item) {
+        return item.metaData("Vanilla").getFloat("Temperature");
     }
 
     @Override
-    public MetalType getMetalType(ItemStack item) {
+    public MetalType metalType(ItemStack item) {
         return plugin.getMetalType(
-                item.getMetaData("Vanilla").getString("MetalType"));
+                item.metaData("Vanilla").getString("MetalType"));
     }
 
-    private ItemModel getModelRaw(MetalType metal) {
+    private ItemModel modelRaw(MetalType metal) {
         ItemModel model = modelsRaw.get(metal);
         if (model == null) {
-            float r = metal.getR();
-            float g = metal.getG();
-            float b = metal.getB();
+            float r = metal.r();
+            float g = metal.g();
+            float b = metal.b();
             model = new ItemModelSimple(textureRaw, r, g, b, 1.0f);
             modelsRaw.put(metal, model);
         }
         return model;
     }
 
-    private ItemModel getModelShaped(MetalType metal) {
+    private ItemModel modelShaped(MetalType metal) {
         ItemModel model = modelsShaped.get(metal);
         if (model == null) {
-            float r = metal.getR();
-            float g = metal.getG();
-            float b = metal.getB();
+            float r = metal.r();
+            float g = metal.g();
+            float b = metal.b();
             model = new ItemModelSimple(textureShaped, r, g, b, 1.0f);
             modelsShaped.put(metal, model);
         }

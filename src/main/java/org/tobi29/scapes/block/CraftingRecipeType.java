@@ -25,13 +25,13 @@ import java.util.List;
 public abstract class CraftingRecipeType {
     protected final List<CraftingRecipe> recipes = new ArrayList<>();
 
-    public abstract String getName();
+    public abstract String name();
 
     public abstract boolean availableFor(MobPlayerServer player);
 
     public abstract boolean availableFor(MobPlayerClientMain player);
 
-    public List<CraftingRecipe> getRecipes() {
+    public List<CraftingRecipe> recipes() {
         return recipes;
     }
 }

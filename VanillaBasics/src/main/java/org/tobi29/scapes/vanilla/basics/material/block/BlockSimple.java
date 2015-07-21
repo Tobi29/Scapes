@@ -40,7 +40,7 @@ public abstract class BlockSimple extends VanillaBlock {
     }
 
     @Override
-    public Optional<TerrainTexture> getParticleTexture(Face face,
+    public Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
         return Optional.of(texture);
     }

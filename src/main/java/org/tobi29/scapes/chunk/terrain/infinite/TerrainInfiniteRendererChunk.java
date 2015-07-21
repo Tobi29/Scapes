@@ -58,7 +58,7 @@ public class TerrainInfiniteRendererChunk {
             TerrainInfiniteRenderer renderer) {
         this.chunk = chunk;
         this.renderer = renderer;
-        int zSections = chunk.getZSize() >> 4;
+        int zSections = chunk.zSize() >> 4;
         geometryDirty = new boolean[zSections];
         geometryInit = new boolean[zSections + 1];
         vao = new VAO[zSections];
@@ -75,15 +75,15 @@ public class TerrainInfiniteRendererChunk {
         renderer.addToLoadQueue(this);
     }
 
-    public TerrainInfiniteChunkClient getChunk() {
+    public TerrainInfiniteChunkClient chunk() {
         return chunk;
     }
 
-    public int getZSections() {
+    public int zSections() {
         return vao.length;
     }
 
-    public boolean getLod(int i) {
+    public boolean lod(int i) {
         return (lod[i] & 1) == 1;
     }
 
@@ -91,10 +91,10 @@ public class TerrainInfiniteRendererChunk {
         return geometryDirty[i];
     }
 
-    public void render(GL gl, Shader shader, boolean ensureStored, Cam cam) {
-        double relativeX = chunk.getBlockX() - cam.position.doubleX();
-        double relativeY = chunk.getBlockY() - cam.position.doubleY();
-        MatrixStack matrixStack = gl.getMatrixStack();
+    public void render(GL gl, Shader shader, Cam cam) {
+        double relativeX = chunk.blockX() - cam.position.doubleX();
+        double relativeY = chunk.blockY() - cam.position.doubleY();
+        MatrixStack matrixStack = gl.matrixStack();
         for (int i = 0; i < vao.length; i++) {
             double relativeZ = (i << 4) - cam.position.doubleZ();
             boolean oldLod = (lod[i] & 1) == 1;
@@ -121,18 +121,17 @@ public class TerrainInfiniteRendererChunk {
                             (float) relativeZ);
                     vao.render(gl, shader);
                     matrixStack.pop();
-                } else if (ensureStored) {
+                } else {
                     vao.ensureStored(gl);
                 }
             }
         }
     }
 
-    public void renderAlpha(GL gl, Shader shader, boolean ensureStored,
-            Cam cam) {
-        double relativeX = chunk.getBlockX() - cam.position.doubleX();
-        double relativeY = chunk.getBlockY() - cam.position.doubleY();
-        MatrixStack matrixStack = gl.getMatrixStack();
+    public void renderAlpha(GL gl, Shader shader, Cam cam) {
+        double relativeX = chunk.blockX() - cam.position.doubleX();
+        double relativeY = chunk.blockY() - cam.position.doubleY();
+        MatrixStack matrixStack = gl.matrixStack();
         for (int i = 0; i < vao.length; i++) {
             VAO vao = vaoAlpha[i];
             AABB aabb = aabbAlpha[i];
@@ -143,7 +142,7 @@ public class TerrainInfiniteRendererChunk {
                             (float) ((i << 4) - cam.position.doubleZ()));
                     vao.render(gl, shader);
                     matrixStack.pop();
-                } else if (ensureStored) {
+                } else {
                     vao.ensureStored(gl);
                 }
             }
@@ -155,22 +154,21 @@ public class TerrainInfiniteRendererChunk {
     }
 
     public void renderFrame(GL gl, Shader shader, Cam cam) {
-        MatrixStack matrixStack = gl.getMatrixStack();
-        OpenGL openGL = gl.getOpenGL();
+        MatrixStack matrixStack = gl.matrixStack();
         for (int i = 0; i < aabb.length; i++) {
             AABB aabb = this.aabb[i];
             if (aabb != null) {
                 Matrix matrix = matrixStack.push();
-                openGL.setAttribute2f(4, 1.0f, 1.0f);
+                gl.setAttribute2f(4, 1.0f, 1.0f);
                 if (!chunk.isLoaded()) {
-                    openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 0.0f,
-                            0.0f, 1.0f);
+                    gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 0.0f, 0.0f,
+                            1.0f);
                 } else if (geometryDirty[i]) {
-                    openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f,
-                            0.0f, 1.0f);
+                    gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 0.0f,
+                            1.0f);
                 } else {
-                    openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, 1.0f,
-                            0.0f, 1.0f);
+                    gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, 1.0f, 0.0f,
+                            1.0f);
                 }
                 matrix.translate((float) (aabb.minX - cam.position.doubleX()),
                         (float) (aabb.minY - cam.position.doubleY()),
@@ -190,10 +188,10 @@ public class TerrainInfiniteRendererChunk {
             vao[i] = render;
             vaoAlpha[i] = renderAlpha;
             if (aabb != null) {
-                aabb.add(chunk.getBlockX(), chunk.getBlockY(), i << 4);
+                aabb.add(chunk.blockX(), chunk.blockY(), i << 4);
             }
             if (aabbAlpha != null) {
-                aabbAlpha.add(chunk.getBlockX(), chunk.getBlockY(), i << 4);
+                aabbAlpha.add(chunk.blockX(), chunk.blockY(), i << 4);
             }
             this.aabb[i] = aabb;
             this.aabbAlpha[i] = aabbAlpha;
@@ -298,12 +296,12 @@ public class TerrainInfiniteRendererChunk {
     }
 
     public void reset() {
+        Arrays.fill(vao, null);
+        Arrays.fill(vaoAlpha, null);
         Arrays.fill(solid, true);
         Arrays.fill(geometryDirty, true);
         Arrays.fill(geometryInit, false);
         Arrays.fill(culled, false);
-        Arrays.fill(vao, null);
-        Arrays.fill(vaoAlpha, null);
         renderer.addToLoadQueue(this);
     }
 }

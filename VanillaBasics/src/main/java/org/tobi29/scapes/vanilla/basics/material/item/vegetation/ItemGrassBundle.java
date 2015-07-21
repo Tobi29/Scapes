@@ -24,9 +24,10 @@ import org.tobi29.scapes.block.models.ItemModelSimple;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
+import org.tobi29.scapes.vanilla.basics.material.item.ItemFuel;
 import org.tobi29.scapes.vanilla.basics.material.item.VanillaItem;
 
-public class ItemGrassBundle extends VanillaItem {
+public class ItemGrassBundle extends VanillaItem implements ItemFuel {
     private TerrainTexture[] textures;
     private ItemModel[] models;
 
@@ -55,18 +56,18 @@ public class ItemGrassBundle extends VanillaItem {
     @Override
     public void render(ItemStack item, GL gl, Shader shader,
             float r, float g, float b, float a) {
-        models[item.getData()].render(gl, shader);
+        models[item.data()].render(gl, shader);
     }
 
     @Override
     public void renderInventory(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a) {
-        models[item.getData()].renderInventory(gl, shader);
+        models[item.data()].renderInventory(gl, shader);
     }
 
     @Override
-    public String getName(ItemStack item) {
-        switch (item.getData()) {
+    public String name(ItemStack item) {
+        switch (item.data()) {
             case 1:
                 return "Straw";
             default:
@@ -75,7 +76,22 @@ public class ItemGrassBundle extends VanillaItem {
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 128;
+    }
+
+    @Override
+    public float fuelTemperature(ItemStack item) {
+        return 0.06f;
+    }
+
+    @Override
+    public float fuelTime(ItemStack item) {
+        return 1600.0f;
+    }
+
+    @Override
+    public int fuelTier(ItemStack item) {
+        return 0;
     }
 }

@@ -24,11 +24,11 @@ public class GuiComponentEvent {
         this.y = y;
     }
 
-    public double getX() {
+    public double x() {
         return x;
     }
 
-    public double getY() {
+    public double y() {
         return y;
     }
 }

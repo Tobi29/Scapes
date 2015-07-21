@@ -54,7 +54,7 @@ public class PacketNotification extends Packet implements PacketClient {
 
     @Override
     public void runClient(ClientConnection client, WorldClient world) {
-        client.getEntity()
-                .openGui(new GuiInGameMessage(client.getGame(), title, text));
+        client.entity()
+                .openGui(new GuiInGameMessage(client.game(), title, text));
     }
 }

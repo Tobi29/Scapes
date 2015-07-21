@@ -19,7 +19,6 @@ package org.tobi29.scapes.engine.gui;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
 import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -49,7 +48,7 @@ public class GuiComponentScrollPane extends GuiComponentVisiblePane {
     public void render(GL gl, Shader shader,
             FontRenderer font, double delta) {
         if (visible) {
-            MatrixStack matrixStack = gl.getMatrixStack();
+            MatrixStack matrixStack = gl.matrixStack();
             Matrix matrix = matrixStack.push();
             transform(matrix);
             renderComponent(gl, shader, font, delta);
@@ -64,13 +63,12 @@ public class GuiComponentScrollPane extends GuiComponentVisiblePane {
                 other = other.parent;
                 yy += other.y;
             }
-            OpenGL openGL = gl.getOpenGL();
-            openGL.enableScissor(0, yy, 800, height);
+            gl.enableScissor(0, yy, 800, height);
             components.stream().filter(component ->
-                    component.getY() - scroll > -scrollStep &&
-                            component.getY() - scroll < height).forEach(
+                    component.y() - scroll > -scrollStep &&
+                            component.y() - scroll < height).forEach(
                     component -> component.render(gl, shader, font, delta));
-            openGL.disableScissor();
+            gl.disableScissor();
             matrixStack.pop();
             renderOverlay(gl, shader, font);
             slider.render(gl, shader, font, delta);
@@ -86,7 +84,7 @@ public class GuiComponentScrollPane extends GuiComponentVisiblePane {
         boolean inside = mouseInside && checkInside(mouseX, mouseY);
         if (inside) {
             GuiController guiController = engine.guiController();
-            scroll -= guiController.getScroll() * scrollStep;
+            scroll -= guiController.scroll() * scrollStep;
         }
         scroll = FastMath.clamp(scroll, 0,
                 Math.max(0, maxY + scrollStep - height));
@@ -104,7 +102,7 @@ public class GuiComponentScrollPane extends GuiComponentVisiblePane {
     @Override
     protected void updateChild(GuiComponent component, double mouseX,
             double mouseY, boolean inside, ScapesEngine engine) {
-        double y = component.getY() - scroll;
+        double y = component.y() - scroll;
         component.update(mouseX, mouseY + scroll,
                 inside && y > -scrollStep && y < height, engine);
     }

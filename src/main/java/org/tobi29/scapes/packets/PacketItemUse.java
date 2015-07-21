@@ -71,30 +71,30 @@ public class PacketItemUse extends Packet implements PacketServer {
         }
         ItemStack item;
         if (side) {
-            player.getMob().attackLeft(strength * strength);
-            item = player.getMob().getLeftWeapon();
+            player.mob().attackLeft(strength * strength);
+            item = player.mob().leftWeapon();
         } else {
-            player.getMob().attackRight(strength * strength);
-            item = player.getMob().getRightWeapon();
+            player.mob().attackRight(strength * strength);
+            item = player.mob().rightWeapon();
         }
-        item.getMaterial().click(player.getMob(), item);
-        player.getMob().onPunch(strength);
-        PointerPane pane = player.getMob().getSelectedBlock();
+        item.material().click(player.mob(), item);
+        player.mob().onPunch(strength);
+        PointerPane pane = player.mob().selectedBlock();
         if (pane != null) {
             Vector3 block = new Vector3i(pane.x, pane.y, pane.z);
             Face face = pane.face;
-            double br = item.getMaterial()
-                    .click(player.getMob(), item, world.getTerrain(),
+            double br = item.material()
+                    .click(player.mob(), item, world.getTerrain(),
                             block.intX(), block.intY(), block.intZ(), face);
             boolean flag = false;
             if (strength < 0.6) {
                 flag = world.getTerrain()
                         .type(block.intX(), block.intY(), block.intZ())
                         .click(world.getTerrain(), block.intX(), block.intY(),
-                                block.intZ(), face, player.getMob());
+                                block.intZ(), face, player.mob());
             }
             if (!flag && br > 0.0 && strength > 0.0) {
-                world.getTaskExecutor().addTask(() -> {
+                world.taskExecutor().addTask(() -> {
                             world.getTerrain().queue(handler -> {
                                 BlockType type =
                                         handler.type(block.intX(), block.intY(),
@@ -103,17 +103,17 @@ public class PacketItemUse extends Packet implements PacketServer {
                                         handler.data(block.intX(), block.intY(),
                                                 block.intZ());
                                 double punch =
-                                        br / type.getResistance(item, data) *
+                                        br / type.resistance(item, data) *
                                                 strength * strength;
                                 if (punch > 0) {
-                                    world.playSound(type.getBreak(item, data),
+                                    world.playSound(type.breakSound(item, data),
                                             new Vector3d(block.intX() + 0.5,
                                                     block.intY() + 0.5,
                                                     block.intZ() + 0.5),
                                             Vector3d.ZERO);
                                     EntityBlockBreakServer entityBreak = null;
                                     for (EntityServer entity : world
-                                            .getEntities(block.intX(),
+                                            .entities(block.intX(),
                                                     block.intY(),
                                                     block.intZ())) {
                                         if (entity instanceof EntityBlockBreakServer) {
@@ -134,21 +134,21 @@ public class PacketItemUse extends Packet implements PacketServer {
                                     if (entityBreak.punch(world, punch)) {
                                         if (type.destroy(handler, block.intX(),
                                                 block.intY(), block.intZ(),
-                                                face, player.getMob(), item)) {
+                                                face, player.mob(), item)) {
                                             List<ItemStack> drops =
-                                                    type.getDrops(item, data);
+                                                    type.drops(item, data);
                                             world.dropItems(drops, block.intX(),
                                                     block.intY(), block.intZ());
                                             if (!drops.isEmpty()) {
-                                                player.getStatistics()
+                                                player.statistics()
                                                         .blockBreak(drops.get(0)
-                                                                        .getMaterial(),
+                                                                        .material(),
                                                                 drops.get(0)
-                                                                        .getData());
+                                                                        .data());
                                             }
                                             handler.typeData(block.intX(),
                                                     block.intY(), block.intZ(),
-                                                    handler.world().getAir(),
+                                                    handler.world().air(),
                                                     (short) 0);
                                         }
                                     }
@@ -156,10 +156,10 @@ public class PacketItemUse extends Packet implements PacketServer {
                             });
                             return -1;
                         }, "Block-Break",
-                        (long) (item.getMaterial().getHitWait(item) * 0.23),
+                        (long) (item.material().hitWait(item) * 0.23),
                         false);
             }
         }
-        world.getConnection().send(new PacketUpdateInventory(player.getMob()));
+        world.connection().send(new PacketUpdateInventory(player.mob()));
     }
 }

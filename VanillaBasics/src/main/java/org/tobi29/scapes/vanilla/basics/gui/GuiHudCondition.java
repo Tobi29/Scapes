@@ -28,16 +28,16 @@ public class GuiHudCondition extends GuiComponent {
         super(8, 418, 560, 24);
         this.player = player;
         add(new GuiComponentBar(0, 0, 560, 8, 0.0f, 1.0f, 0.0f, 0.6f,
-                () -> getValue("Stamina")));
+                () -> value("Stamina")));
         add(new GuiComponentBar(280, 8, 280, 8, 1.0f, 0.5f, 0.0f, 0.6f,
-                () -> getValue("Hunger")));
+                () -> value("Hunger")));
         add(new GuiComponentBar(280, 16, 280, 8, 0.0f, 0.2f, 1.0f, 0.6f,
-                () -> getValue("Thirst")));
+                () -> value("Thirst")));
     }
 
-    private double getValue(String name) {
+    private double value(String name) {
         TagStructure conditionTag =
-                player.getMetaData("Vanilla").getStructure("Condition");
+                player.metaData("Vanilla").getStructure("Condition");
         return conditionTag.getDouble(name);
     }
 }

@@ -36,18 +36,17 @@ public class ClimateInfoLayer implements TerrainRenderInfo.InfoLayer {
         xSize--;
         ySize--;
         zSize--;
-        temperature00 = climateGenerator.getTemperature(x, y, z);
-        temperature10 = climateGenerator.getTemperature(x + xSize, y, z);
-        temperature01 = climateGenerator.getTemperature(x, y + ySize, z);
-        temperature11 =
-                climateGenerator.getTemperature(x + xSize, y + ySize, z);
-        humidity00 = climateGenerator.getHumidity(x, y, z);
-        humidity10 = climateGenerator.getHumidity(x + xSize, y, z);
-        humidity01 = climateGenerator.getHumidity(x, y + ySize, z);
-        humidity11 = climateGenerator.getHumidity(x + xSize, y + ySize, z);
+        temperature00 = climateGenerator.temperature(x, y, z);
+        temperature10 = climateGenerator.temperature(x + xSize, y, z);
+        temperature01 = climateGenerator.temperature(x, y + ySize, z);
+        temperature11 = climateGenerator.temperature(x + xSize, y + ySize, z);
+        humidity00 = climateGenerator.humidity(x, y, z);
+        humidity10 = climateGenerator.humidity(x + xSize, y, z);
+        humidity01 = climateGenerator.humidity(x, y + ySize, z);
+        humidity11 = climateGenerator.humidity(x + xSize, y + ySize, z);
     }
 
-    public double getTemperature(int x, int y, int z) {
+    public double temperature(int x, int y, int z) {
         x -= sx;
         y -= sy;
         double mixX = x / 15.0;
@@ -55,11 +54,11 @@ public class ClimateInfoLayer implements TerrainRenderInfo.InfoLayer {
         double temperature0 = FastMath.mix(temperature00, temperature01, mixY);
         double temperature1 = FastMath.mix(temperature10, temperature11, mixY);
         return climateGenerator
-                .getTemperatureD(FastMath.mix(temperature0, temperature1, mixX),
+                .temperatureD(FastMath.mix(temperature0, temperature1, mixX),
                         z);
     }
 
-    public double getHumidity(int x, int y) {
+    public double humidity(int x, int y) {
         x -= sx;
         y -= sy;
         double mixX = x / 15.0;

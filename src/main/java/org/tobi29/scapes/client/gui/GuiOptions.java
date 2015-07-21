@@ -26,13 +26,13 @@ public class GuiOptions extends GuiMenu {
         super(state, "Options", previous);
         GuiComponentSlider musicVolume =
                 new GuiComponentSlider(16, 80, 368, 30, 18, "Music",
-                        state.getEngine().config().getMusicVolume());
-        musicVolume.addHover(event -> state.getEngine().config()
+                        state.engine().config().musicVolume());
+        musicVolume.addHover(event -> state.engine().config()
                 .setMusicVolume((float) musicVolume.value));
         GuiComponentSlider soundVolume =
                 new GuiComponentSlider(16, 120, 368, 30, 18, "Sound",
-                        state.getEngine().config().getSoundVolume());
-        soundVolume.addHover(event -> state.getEngine().config()
+                        state.engine().config().soundVolume());
+        soundVolume.addHover(event -> state.engine().config()
                 .setSoundVolume((float) soundVolume.value));
         GuiComponentTextButton controls =
                 new GuiComponentTextButton(16, 160, 368, 30, 18, "Controls");

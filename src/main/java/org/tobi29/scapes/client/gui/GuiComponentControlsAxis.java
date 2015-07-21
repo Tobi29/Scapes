@@ -60,9 +60,9 @@ public class GuiComponentControlsAxis extends GuiComponentTextButton {
             ScapesEngine engine) {
         super.update(mouseX, mouseY, mouseInside, engine);
         if (editing > 1) {
-            int axes = controller.getAxes();
+            int axes = controller.axes();
             for (int i = 0; i < axes; i++) {
-                if (controller.getAxis(i) > 0.5) {
+                if (controller.axis(i) > 0.5) {
                     axis = i;
                     tagStructure.setInteger(id, axis);
                     editing = 0;

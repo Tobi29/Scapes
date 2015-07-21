@@ -31,7 +31,7 @@ public class TextureAsset extends Texture {
     }
 
     public TextureAsset(Image image, Properties properties) {
-        super(image.getWidth(), image.getHeight(), image.getBuffer(),
+        super(image.width(), image.height(), image.buffer(),
                 Integer.valueOf(properties.getProperty("Mipmaps", "4")),
                 TextureFilter
                         .get(properties.getProperty("MinFilter", "Nearest")),

@@ -47,7 +47,7 @@ public class AABBElement {
         return collision.isSolid();
     }
 
-    public AABB getAABB() {
+    public AABB aabb() {
         return aabb;
     }
 }

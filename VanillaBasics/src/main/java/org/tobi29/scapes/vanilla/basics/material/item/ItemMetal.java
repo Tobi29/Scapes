@@ -20,5 +20,5 @@ import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.vanilla.basics.material.MetalType;
 
 public interface ItemMetal {
-    MetalType getMetalType(ItemStack item);
+    MetalType metalType(ItemStack item);
 }

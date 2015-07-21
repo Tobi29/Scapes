@@ -29,5 +29,5 @@ public interface TerrainRenderer {
 
     void blockChange(int x, int y, int z);
 
-    double getActualRenderDistance();
+    double actualRenderDistance();
 }

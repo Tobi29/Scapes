@@ -58,11 +58,11 @@ public class EntityBellowsClient extends EntityClient {
         return Optional.of(new EntityModelBellows(this));
     }
 
-    public float getScale() {
+    public float scale() {
         return scale;
     }
 
-    public Face getFace() {
+    public Face face() {
         return face;
     }
 }

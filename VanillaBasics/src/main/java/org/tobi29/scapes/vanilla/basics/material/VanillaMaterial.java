@@ -51,6 +51,7 @@ public class VanillaMaterial {
     public final BlockType brick;
     public final BlockType bush;
     public final BlockType chest;
+    public final Material coal;
     public final BlockType cobblestone;
     public final BlockType cobblestoneCracked;
     public final BlockType cobblestoneMossy;
@@ -116,7 +117,7 @@ public class VanillaMaterial {
             GameRegistry.Registry<StoneType> stoneRegistry) {
         this.plugin = plugin;
         this.registry = registry;
-        air = registry.getAir();
+        air = registry.air();
         anvil = register(new BlockAnvil(this));
         alloy = register(new BlockAlloy(this));
         baked = register(new ItemBaked(this, cropRegistry));
@@ -126,6 +127,7 @@ public class VanillaMaterial {
         brick = register(new BlockBrick(this));
         bush = register(new BlockBush(this));
         chest = register(new BlockChest(this));
+        coal = register(new ItemCoal(this));
         cobblestone = register(new BlockCobblestone(this, stoneRegistry));
         cobblestoneCracked =
                 register(new BlockCobblestoneCracked(this, stoneRegistry));

@@ -42,9 +42,9 @@ public class ItemModelSimple implements ItemModel {
 
     public VAO buildVAO(boolean inventory) {
         Mesh mesh = new Mesh(false);
-        float texMinX = texture.getRealX();
-        float texMinY = texture.getRealY();
-        float texSize = texture.getRealSize();
+        float texMinX = texture.realX();
+        float texMinY = texture.realY();
+        float texSize = texture.realSize();
         float texMaxX = texSize + texMinX;
         float texMaxY = texSize + texMinY;
         mesh.color(r, g, b, a);
@@ -58,7 +58,7 @@ public class ItemModelSimple implements ItemModel {
             mesh.texture(texMinX, texMaxY);
             mesh.vertex(0, 1, 0);
         } else {
-            float pixelCount = texture.getResolution();
+            float pixelCount = texture.resolution();
             float pixel = 1.0f / pixelCount;
             float halfPixel = pixel / 2.0f;
             mesh.normal(0, 1, 0);
@@ -134,8 +134,8 @@ public class ItemModelSimple implements ItemModel {
 
     @Override
     public void render(GL gl, Shader shader) {
-        texture.getTerrainTextureRegistry().getTexture().bind(gl);
-        MatrixStack matrixStack = gl.getMatrixStack();
+        texture.registry().texture().bind(gl);
+        MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.rotate(315.0f, 0.0f, 1.0f, 0.0f);
         vao.render(gl, shader);
@@ -144,7 +144,7 @@ public class ItemModelSimple implements ItemModel {
 
     @Override
     public void renderInventory(GL gl, Shader shader) {
-        texture.getTerrainTextureRegistry().getTexture().bind(gl);
+        texture.registry().texture().bind(gl);
         vaoInventory.render(gl, shader);
     }
 }

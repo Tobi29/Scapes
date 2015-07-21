@@ -24,5 +24,5 @@ public interface TerrainInfiniteChunkManager {
 
     boolean has(int x, int y);
 
-    Collection<? extends TerrainInfiniteChunk> getIterator();
+    Collection<? extends TerrainInfiniteChunk> iterator();
 }

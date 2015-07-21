@@ -48,11 +48,11 @@ public class EntityModelBlockBreak implements EntityModel {
 
     public EntityModelBlockBreak(EntityBlockBreakClient entity) {
         this.entity = entity;
-        pos = new MutableVector3d(entity.getPos());
+        pos = new MutableVector3d(entity.pos());
     }
 
     @Override
-    public Vector3 getPos() {
+    public Vector3 pos() {
         return pos.now();
     }
 
@@ -69,7 +69,7 @@ public class EntityModelBlockBreak implements EntityModel {
     @Override
     public void renderUpdate(double delta) {
         double factor = FastMath.min(1.0, delta * 5.0);
-        pos.plus(entity.getPos().minus(pos.now()).multiply(factor));
+        pos.plus(entity.pos().minus(pos.now()).multiply(factor));
     }
 
     @Override
@@ -78,18 +78,17 @@ public class EntityModelBlockBreak implements EntityModel {
         float posRenderX = (float) (pos.doubleX() - cam.position.doubleX());
         float posRenderY = (float) (pos.doubleY() - cam.position.doubleY());
         float posRenderZ = (float) (pos.doubleZ() - cam.position.doubleZ());
-        int i = FastMath.floor(entity.getProgress() * 10) + 1;
+        int i = FastMath.floor(entity.progress() * 10) + 1;
         if (i < 1 || i > 10) {
             return;
         }
-        OpenGL openGL = gl.getOpenGL();
-        openGL.setAttribute2f(4, world.getTerrain()
+        gl.setAttribute2f(4, world.terrain()
                         .blockLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f,
-                world.getTerrain()
+                world.terrain()
                         .sunLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f);
-        gl.getTextureManager().bind("Scapes:image/entity/Break" + i, gl);
-        for (PointerPane pane : entity.getPointerPanes()) {
-            MatrixStack matrixStack = gl.getMatrixStack();
+        gl.textures().bind("Scapes:image/entity/Break" + i, gl);
+        for (PointerPane pane : entity.pointerPanes()) {
+            MatrixStack matrixStack = gl.matrixStack();
             Matrix matrix = matrixStack.push();
             matrix.translate((float) (posRenderX - 0.5 +
                             (pane.aabb.minX + pane.aabb.maxX) / 2),
@@ -117,8 +116,7 @@ public class EntityModelBlockBreak implements EntityModel {
                     matrix.rotate(270, 0, 1, 0);
                     break;
             }
-            openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.3f, 0.3f, 0.3f,
-                    0.4f);
+            gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.3f, 0.3f, 0.3f, 0.4f);
             VAO.render(gl, shader);
             matrixStack.pop();
         }

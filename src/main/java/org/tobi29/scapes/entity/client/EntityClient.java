@@ -36,16 +36,16 @@ public class EntityClient implements MultiTag.Readable {
 
     protected EntityClient(WorldClient world, Vector3 pos) {
         this.world = world;
-        registry = world.getRegistry();
+        registry = world.registry();
         this.pos = new MutableVector3d(pos);
     }
 
     public static EntityClient make(int id, WorldClient world) {
-        return world.getRegistry().<Supplier>get("Core", "EntityClient").get(id)
+        return world.registry().<Supplier>get("Core", "EntityClient").get(id)
                 .get(world);
     }
 
-    public int getEntityID() {
+    public int entityID() {
         return entityID;
     }
 
@@ -53,23 +53,23 @@ public class EntityClient implements MultiTag.Readable {
         this.entityID = entityID;
     }
 
-    public WorldClient getWorld() {
+    public WorldClient world() {
         return world;
     }
 
-    public Vector3 getPos() {
+    public Vector3 pos() {
         return pos.now();
     }
 
-    public double getX() {
+    public double x() {
         return pos.doubleX();
     }
 
-    public double getY() {
+    public double y() {
         return pos.doubleY();
     }
 
-    public double getZ() {
+    public double z() {
         return pos.doubleZ();
     }
 
@@ -79,7 +79,7 @@ public class EntityClient implements MultiTag.Readable {
         metaData = tagStructure.getStructure("MetaData");
     }
 
-    public TagStructure getMetaData(String category) {
+    public TagStructure metaData(String category) {
         return metaData.getStructure(category);
     }
 
@@ -91,7 +91,7 @@ public class EntityClient implements MultiTag.Readable {
     }
 
     public void processPacket(PacketEntityMetaData packet) {
-        metaData.setStructure(packet.getCategory(), packet.getTag());
+        metaData.setStructure(packet.category(), packet.tagStructure());
     }
 
     public interface Supplier {

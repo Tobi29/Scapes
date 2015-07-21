@@ -50,7 +50,7 @@ public class ClimateGenerator {
         updateTime();
     }
 
-    public long getDay() {
+    public long day() {
         return day;
     }
 
@@ -59,7 +59,7 @@ public class ClimateGenerator {
         updateTime();
     }
 
-    public double getDayTime() {
+    public double dayTime() {
         return dayTime;
     }
 
@@ -75,7 +75,7 @@ public class ClimateGenerator {
         }
         double axialTilt = -23.44 * FastMath.DEG_2_RAD;
         sunDeclination = FastMath.asin(FastMath.sin(axialTilt) *
-                FastMath.sin(getSeason() * FastMath.TWO_PI));
+                FastMath.sin(season() * FastMath.TWO_PI));
         sunHourAngleCos = FastMath.sin(dayTime * FastMath.TWO_PI);
     }
 
@@ -89,11 +89,11 @@ public class ClimateGenerator {
         return climateGenerator;
     }
 
-    public double getSeason() {
+    public double season() {
         return (day % 50 + dayTime) / 50.0 % 1.0;
     }
 
-    public double getLatitude(double y) {
+    public double latitude(double y) {
         double latitude = y / SCALE * FastMath.PI % FastMath.TWO_PI;
         if (latitude < 0.0) {
             latitude += FastMath.TWO_PI;
@@ -101,15 +101,15 @@ public class ClimateGenerator {
         return latitude;
     }
 
-    public double getSunElevation(double x, double y) {
-        return getSunElevationD(getLatitude(y));
+    public double sunElevation(double x, double y) {
+        return sunElevationD(latitude(y));
     }
 
-    public double getSunElevationD(double latitude) {
-        return getSunElevationD(sunHourAngleCos, sunDeclination, latitude);
+    public double sunElevationD(double latitude) {
+        return sunElevationD(sunHourAngleCos, sunDeclination, latitude);
     }
 
-    public double getSunElevationD(double hourAngleCos, double declination,
+    public double sunElevationD(double hourAngleCos, double declination,
             double latitude) {
         return FastMath.asinTable(
                 FastMath.sinTable(latitude) * FastMath.sinTable(declination) +
@@ -118,15 +118,15 @@ public class ClimateGenerator {
                                 hourAngleCos);
     }
 
-    public double getSunIntensity(double y, double factor) {
-        return getSunIntensityD(getLatitude(y), sunDeclination * factor);
+    public double sunIntensity(double y, double factor) {
+        return sunIntensityD(latitude(y), sunDeclination * factor);
     }
 
-    public double getSunIntensityD(double latitude) {
-        return getSunIntensityD(latitude, sunDeclination);
+    public double sunIntensityD(double latitude) {
+        return sunIntensityD(latitude, sunDeclination);
     }
 
-    public double getSunIntensityD(double latitude, double declination) {
+    public double sunIntensityD(double latitude, double declination) {
         declination *= 0.5;
         boolean swap = latitude > FastMath.PI;
         if (latitude > FastMath.HALF_PI && latitude < FastMath.HALF_PI * 3.0) {
@@ -142,16 +142,16 @@ public class ClimateGenerator {
         return FastMath.abs(delta);
     }
 
-    public double getSunAzimuth(double x, double y) {
-        return getSunAzimuthD(getSunElevation(x, y), getLatitude(y));
+    public double sunAzimuth(double x, double y) {
+        return sunAzimuthD(sunElevation(x, y), latitude(y));
     }
 
-    public double getSunAzimuthD(double elevation, double latitude) {
-        return getSunAzimuthD(sunHourAngleCos, sunDeclination, elevation,
+    public double sunAzimuthD(double elevation, double latitude) {
+        return sunAzimuthD(sunHourAngleCos, sunDeclination, elevation,
                 latitude);
     }
 
-    public double getSunAzimuthD(double hourAngleCos, double declination,
+    public double sunAzimuthD(double hourAngleCos, double declination,
             double elevation, double latitude) {
         double azimuth =
                 FastMath.sinTable(declination) * FastMath.cosTable(latitude);
@@ -165,13 +165,12 @@ public class ClimateGenerator {
         return azimuth;
     }
 
-    public double getWeather(double x, double y) {
-        double humidity3 = getHumidity3(x, y);
-        double temperature2 = getTemperature2D(x, y, humidity3);
-        return getWeatherD(x, y, humidity3);
+    public double weather(double x, double y) {
+        double humidity3 = humidity3(x, y);
+        return weatherD(x, y, humidity3);
     }
 
-    public double getWeatherD(double x, double y, double humidity3) {
+    public double weatherD(double x, double y, double humidity3) {
         double weather =
                 weatherNoise.noise(day + dayTime, x / 16000.0, y / 16000.0) *
                         0.5 + 0.5;
@@ -182,37 +181,37 @@ public class ClimateGenerator {
         return weather;
     }
 
-    public double getTemperature(int x, int y, int z) {
-        return getTemperature(x, y) - FastMath.max(z - 300, 0) / 10.0;
+    public double temperature(int x, int y, int z) {
+        return temperature(x, y) - FastMath.max(z - 300, 0) / 10.0;
     }
 
-    public double getTemperatureD(double temperature, int z) {
+    public double temperatureD(double temperature, int z) {
         return temperature - FastMath.max(z - 300, 0) / 10.0;
     }
 
-    public double getTemperature(double x, double y) {
-        double humidity3 = getHumidity3(x, y);
-        double temperature2 = getTemperature2D(x, y, humidity3);
-        return getTemperatureD(temperature2, getSunLightReduction(x, y),
-                getWeatherD(x, y, humidity3), humidity3);
+    public double temperature(double x, double y) {
+        double humidity3 = humidity3(x, y);
+        double temperature2 = temperature2D(x, y, humidity3);
+        return temperatureD(temperature2, sunLightReduction(x, y),
+                weatherD(x, y, humidity3), humidity3);
     }
 
-    public double getTemperatureD(double temperature2, double sunLightReduction,
+    public double temperatureD(double temperature2, double sunLightReduction,
             double weather, double humidity3) {
         temperature2 *= FastMath.clamp(2.0 - weather * 2.0, 0.0, 1.0);
         temperature2 -= sunLightReduction * 0.8 * (1.0 - humidity3);
         return temperature2;
     }
 
-    public double getTemperature2(double x, double y) {
-        return getTemperature2D(x, y, getHumidity3(x, y));
+    public double temperature2(double x, double y) {
+        return temperature2D(x, y, humidity3(x, y));
     }
 
-    public double getTemperature2D(double x, double y, double humidity3) {
-        return getTemperature2D(x, y, humidity3, getSunIntensity(y, 0.9));
+    public double temperature2D(double x, double y, double humidity3) {
+        return temperature2D(x, y, humidity3, sunIntensity(y, 0.9));
     }
 
-    public double getTemperature2D(double x, double y, double humidity3,
+    public double temperature2D(double x, double y, double humidity3,
             double sunIntensity) {
         double temperature =
                 FastMath.mix(sunIntensity, sunIntensity * sunIntensity, 0.5) *
@@ -232,40 +231,40 @@ public class ClimateGenerator {
         return temperature;
     }
 
-    public double getHumidity(int x, int y, int z) {
-        return getHumidity(x, y);
+    public double humidity(int x, int y, int z) {
+        return humidity(x, y);
     }
 
-    public double getHumidity(double x, double y) {
-        double humidity3 = getHumidity3(x, y);
-        double temperature2 = getTemperature2D(x, y, humidity3);
-        double weather = getWeatherD(x, y, humidity3);
-        double humidity2 = getHumidity2D(temperature2, humidity3);
-        return getHumidityD(humidity2, getRiverHumidity(x, y), weather);
+    public double humidity(double x, double y) {
+        double humidity3 = humidity3(x, y);
+        double temperature2 = temperature2D(x, y, humidity3);
+        double weather = weatherD(x, y, humidity3);
+        double humidity2 = humidity2D(temperature2, humidity3);
+        return humidityD(humidity2, riverHumidity(x, y), weather);
     }
 
-    public double getHumidityD(double humidity2, double riverHumidity,
+    public double humidityD(double humidity2, double riverHumidity,
             double weather) {
         return FastMath
                 .clamp(humidity2 + FastMath.max(weather * 2.0 - 1.0, 0.0) +
                         riverHumidity, 0.0, 1.0);
     }
 
-    public double getHumidity2(double x, double y) {
-        double humidity3 = getHumidity3(x, y);
-        double temperature2 = getTemperature2D(x, y, humidity3);
-        return getHumidity2D(temperature2, humidity3);
+    public double humidity2(double x, double y) {
+        double humidity3 = humidity3(x, y);
+        double temperature2 = temperature2D(x, y, humidity3);
+        return humidity2D(temperature2, humidity3);
     }
 
-    public double getHumidity2D(double temperature2, double humidity3) {
+    public double humidity2D(double temperature2, double humidity3) {
         if (temperature2 < 0.0) {
             humidity3 += temperature2 / 30.0;
         }
         return FastMath.clamp(humidity3, 0.0, 1.0);
     }
 
-    public double getHumidity3(double x, double y) {
-        double intensity = getSunIntensity(y, 0.4);
+    public double humidity3(double x, double y) {
+        double intensity = sunIntensity(y, 0.4);
         double rain = 0.8f - intensity;
         if (rain < 0.0) {
             rain *= -8.0;
@@ -275,20 +274,20 @@ public class ClimateGenerator {
                 rain, 0.0, 1.0);
     }
 
-    public double getRiverHumidity(double x, double y) {
+    public double riverHumidity(double x, double y) {
         return (1.0 - terrainGenerator.generateRiverLayer(x, y,
                 terrainGenerator.generateMountainFactorLayer(x, y), 4.0)) * 0.5;
     }
 
-    public double getSunLightReduction(double x, double y) {
-        return getSunLightReductionD(getSunElevation(x, y));
+    public double sunLightReduction(double x, double y) {
+        return sunLightReductionD(sunElevation(x, y));
     }
 
-    public double getSunLightReductionD(double elevation) {
+    public double sunLightReductionD(double elevation) {
         return 15.0 - FastMath.clamp(elevation * 2.0 + 0.6, 0.0, 1.0) * 15.0;
     }
 
-    public double getAutumnLeaves(double y) {
+    public double autumnLeaves(double y) {
         double yy = y / SCALE / 4.0 % 1.0;
         if (yy < 0.0) {
             yy++;
@@ -300,16 +299,16 @@ public class ClimateGenerator {
         factor = FastMath.min(factor * 5.0, 1.0);
         if (yy > 0.5) {
             return FastMath
-                    .clamp(-FastMath.cosTable(getSeason() * FastMath.TWO_PI) *
+                    .clamp(-FastMath.cosTable(season() * FastMath.TWO_PI) *
                             20 - 18, 0, 1) * factor;
         } else {
             return FastMath.clamp(-FastMath.cosTable(
-                            (getSeason() + 0.5) * FastMath.TWO_PI) * 20 - 18, 0,
+                            (season() + 0.5) * FastMath.TWO_PI) * 20 - 18, 0,
                     1) * factor;
         }
     }
 
-    public double getGrassColorR(double temperature, double humidity) {
+    public double grassColorR(double temperature, double humidity) {
         if (humidity < 0.5f) {
             double v = FastMath.min(humidity * 7.4f + 0.6f, 1.0);
             return (0.8f + FastMath.clamp(0.5f - humidity, 0.0, 0.5f) * 0.4f) *
@@ -319,7 +318,7 @@ public class ClimateGenerator {
         }
     }
 
-    public double getGrassColorG(double temperature, double humidity) {
+    public double grassColorG(double temperature, double humidity) {
         if (humidity < 0.5f) {
             double v = FastMath.min(humidity * 7.4f + 0.6f, 1.0);
             return (1.0 - FastMath.clamp(0.5f - humidity, 0.0, 0.5f) * 1.6f) *
@@ -329,7 +328,7 @@ public class ClimateGenerator {
         }
     }
 
-    public double getGrassColorB(double temperature, double humidity) {
+    public double grassColorB(double temperature, double humidity) {
         double v = FastMath.min(humidity * 7.4f + 0.6f, 1.0);
         return FastMath.clamp(0.3f - temperature / 60.0, 0.0, 0.3f) * v;
     }

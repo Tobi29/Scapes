@@ -25,11 +25,11 @@ public class Pair<A, B> {
         this.b = b;
     }
 
-    public A getA() {
+    public A a() {
         return a;
     }
 
-    public B getB() {
+    public B b() {
         return b;
     }
 

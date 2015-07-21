@@ -39,10 +39,11 @@ public class TerrainInfiniteChunkManagerClient
     }
 
     public synchronized void add(TerrainInfiniteChunkClient chunk) {
-        int xx = chunk.getX() - x;
-        int yy = chunk.getY() - y;
+        int xx = chunk.x() - x;
+        int yy = chunk.y() - y;
         if (xx >= 0 && xx < size && yy >= 0 && yy < size) {
             int i = yy * size + xx;
+            array[i] = null;
             array[i] = chunk;
         }
     }
@@ -54,9 +55,9 @@ public class TerrainInfiniteChunkManagerClient
         if (xx >= 0 && xx < size && yy >= 0 && yy < size) {
             int i = yy * size + xx;
             TerrainInfiniteChunkClient chunk = array[i];
-            array[i] = null;
             if (chunk != null) {
-                return chunk.getOptional();
+                array[i] = null;
+                return Optional.of(chunk);
             }
         }
         return Optional.empty();
@@ -75,7 +76,7 @@ public class TerrainInfiniteChunkManagerClient
                 if (value == null) {
                     return Optional.empty();
                 } else {
-                    return value.getOptional();
+                    return value.optional();
                 }
             }
         }
@@ -88,7 +89,7 @@ public class TerrainInfiniteChunkManagerClient
                 if (value == null) {
                     return Optional.empty();
                 } else {
-                    return value.getOptional();
+                    return value.optional();
                 }
             } else {
                 return Optional.empty();
@@ -102,7 +103,7 @@ public class TerrainInfiniteChunkManagerClient
     }
 
     @Override
-    public Collection<TerrainInfiniteChunkClient> getIterator() {
+    public Collection<TerrainInfiniteChunkClient> iterator() {
         return Arrays.stream(array).filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
@@ -151,9 +152,7 @@ public class TerrainInfiniteChunkManagerClient
     }
 
     private void clear() {
-        for (int i = 0; i < array.length; i++) {
-            array[i] = null;
-        }
+        Arrays.fill(array, null);
     }
 
     private void shiftXPositive() {

@@ -54,12 +54,12 @@ public class ParticleBlock extends Particle {
         this.g = g;
         this.b = b;
         this.a = a;
-        texSize = tex.getSize() / 4.0f;
+        texSize = tex.size() / 4.0f;
         Random random = ThreadLocalRandom.current();
-        texPos = new Vector2f(tex.getX() + random.nextInt(3) * texSize,
-                tex.getY() + random.nextInt(3) * texSize);
+        texPos = new Vector2f(tex.x() + random.nextInt(3) * texSize,
+                tex.y() + random.nextInt(3) * texSize);
         time = random.nextDouble() * 1.0 + 2.0;
-        texture = tex.getTerrainTextureRegistry().getTexture();
+        texture = tex.registry().texture();
     }
 
     public static void clear() {
@@ -82,7 +82,7 @@ public class ParticleBlock extends Particle {
             mesh.vertex(-SIZE, 0.0f, SIZE);
             BLOCKS.put(texPos.floatX() + "/" + texPos.floatY(), mesh.finish());
         }
-        MatrixStack matrixStack = gl.getMatrixStack();
+        MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(x, y, z - (float) FastMath.max(0.0, 1.0 - time));
         double camDir = FastMath.pointDirection(x, y, 0.0, 0.0);
@@ -91,8 +91,7 @@ public class ParticleBlock extends Particle {
                 FastMath.RAD_2_DEG), 1, 0, 0);
         matrix.rotate((float) (camDir + dir), 0, 1, 0);
         texture.bind(gl);
-        OpenGL openGL = gl.getOpenGL();
-        openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, r * this.r, g * this.g,
+        gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, r * this.r, g * this.g,
                 b * this.b, a * this.a);
         BLOCKS.get(texPos.floatX() + "/" + texPos.floatY()).render(gl, shader);
         matrixStack.pop();

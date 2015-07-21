@@ -77,7 +77,7 @@ public class ClasspathResource implements Resource {
     }
 
     @Override
-    public String getMIMEType() throws IOException {
+    public String mimeType() throws IOException {
         try (InputStream streamIn = readIO()) {
             return new Tika().detect(streamIn, path);
         }

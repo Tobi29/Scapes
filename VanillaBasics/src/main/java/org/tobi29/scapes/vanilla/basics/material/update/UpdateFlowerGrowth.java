@@ -30,8 +30,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public class UpdateFlowerGrowth extends Update {
     @Override
     public void run(TerrainServer.TerrainMutable terrain) {
-        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
-                .getPlugin("VanillaBasics");
+        VanillaBasics plugin = (VanillaBasics) terrain.world().plugins()
+                .plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         BlockType type = terrain.type(x, y, z);
         if (type == materials.air) {

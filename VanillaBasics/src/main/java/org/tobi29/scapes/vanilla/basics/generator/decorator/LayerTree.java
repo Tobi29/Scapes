@@ -35,7 +35,7 @@ public class LayerTree implements BiomeDecorator.Layer {
     public void decorate(TerrainServer.TerrainMutable terrain, int x, int y,
             VanillaMaterial materials, Random random) {
         if (random.nextInt(chance) == 0) {
-            int z = terrain.getHighestTerrainBlockZAt(x, y);
+            int z = terrain.highestTerrainBlockZAt(x, y);
             tree.gen(terrain, x, y, z, materials, random);
         }
     }

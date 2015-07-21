@@ -68,9 +68,9 @@ public class GLFWControllers {
                     joysticksChanged = true;
                 } else {
                     assert states != null;
-                    if (!name.equals(virtualJoystick.getName()) ||
+                    if (!name.equals(virtualJoystick.name()) ||
                             buttons.remaining() != states.length ||
-                            axes.remaining() != virtualJoystick.getAxes()) {
+                            axes.remaining() != virtualJoystick.axes()) {
                         virtualJoystick =
                                 new ControllerJoystick(name, axes.capacity());
                         states = new boolean[buttons.remaining()];
@@ -86,7 +86,7 @@ public class GLFWControllers {
                     boolean value = buttons.get() == 1;
                     if (states[i] != value) {
                         states[i] = value;
-                        ControllerKey button = ControllerKey.getButton(i);
+                        ControllerKey button = ControllerKey.button(i);
                         if (button != ControllerKey.UNKNOWN) {
                             virtualJoystick.addPressEvent(button,
                                     value ? Controller.PressState.PRESS :

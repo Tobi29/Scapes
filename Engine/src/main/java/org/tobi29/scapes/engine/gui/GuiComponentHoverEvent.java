@@ -24,7 +24,7 @@ public class GuiComponentHoverEvent extends GuiComponentEvent {
         this.state = state;
     }
 
-    public State getState() {
+    public State state() {
         return state;
     }
 

@@ -19,15 +19,15 @@ package org.tobi29.scapes.entity.server;
 import org.tobi29.scapes.block.ItemStack;
 
 public interface EntityEquippedServer {
-    ItemStack getLeftWeapon();
+    ItemStack leftWeapon();
 
-    ItemStack getRightWeapon();
+    ItemStack rightWeapon();
 
-    default float getLeftCharge() {
+    default float leftCharge() {
         return 0.0f;
     }
 
-    default float getRightCharge() {
+    default float rightCharge() {
         return 0.0f;
     }
 }

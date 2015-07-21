@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.io;
+package org.tobi29.scapes.engine.utils.io.filesystem;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.utils.ArrayUtil;
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
+import org.tobi29.scapes.engine.utils.io.ChecksumUtil;
+import org.tobi29.scapes.engine.utils.io.ProcessStream;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -109,7 +112,7 @@ public class FileCache {
     public synchronized Optional<Path> retrieve(Location location)
             throws IOException {
         String name = ArrayUtil.toHexadecimal(location.array);
-        Path file = getFile(location.type, name);
+        Path file = file(location.type, name);
         if (Files.exists(file)) {
             Files.setLastModifiedTime(file, FileTime.from(Instant.now()));
             return Optional.of(file);
@@ -124,7 +127,7 @@ public class FileCache {
      */
     public synchronized void delete(Location location) throws IOException {
         String name = ArrayUtil.toHexadecimal(location.array);
-        Path file = getFile(location.type, name);
+        Path file = file(location.type, name);
         Files.deleteIfExists(file);
     }
 
@@ -156,7 +159,7 @@ public class FileCache {
         }
     }
 
-    private Path getFile(String type, String name) {
+    private Path file(String type, String name) {
         return root.resolve(type + '/' + name);
     }
 

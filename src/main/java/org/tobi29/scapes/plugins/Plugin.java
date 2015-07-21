@@ -72,7 +72,7 @@ public interface Plugin {
      */
     void dispose(GameRegistry registry);
 
-    String getID();
+    String id();
 
-    String getAssetRoot();
+    String assetRoot();
 }

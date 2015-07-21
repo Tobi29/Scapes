@@ -266,25 +266,25 @@ public enum ControllerKey {
         this.name = name;
     }
 
-    public static ControllerKey getButton(int i) {
+    public static ControllerKey button(int i) {
         if (i < 0 || i >= BUTTONS.size()) {
             return UNKNOWN;
         }
         return BUTTONS.get(i);
     }
 
-    public static ControllerKey getAxis(int i) {
+    public static ControllerKey axis(int i) {
         if (i < 0 || i >= AXES.size()) {
             return UNKNOWN;
         }
         return AXES.get(i);
     }
 
-    public String getName() {
+    public String humanName() {
         return name;
     }
 
-    public int getID() {
+    public int id() {
         return id;
     }
 }

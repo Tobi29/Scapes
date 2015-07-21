@@ -47,12 +47,12 @@ public class ChunkData {
         }
     }
 
-    public ChunkArraySection getSection(int xOffset, int yOffset, int zOffset) {
-        return getSection(
+    public ChunkArraySection section(int xOffset, int yOffset, int zOffset) {
+        return section(
                 (zOffset << ySectionBits | yOffset) << xSectionBits | xOffset);
     }
 
-    public ChunkArraySection getSection(int offset) {
+    public ChunkArraySection section(int offset) {
         if (offset < 0 || offset >= data.length) {
             throw new IllegalArgumentException(
                     "Offset out of range: " + offset);
@@ -67,7 +67,7 @@ public class ChunkData {
 
     private int getData(int xOffset, int yOffset, int zOffset, int x, int y,
             int z, int offset) {
-        return getSection(xOffset, yOffset, zOffset).data(x, y, z, offset);
+        return section(xOffset, yOffset, zOffset).data(x, y, z, offset);
     }
 
     public void setData(int x, int y, int z, int offset, int value) {
@@ -77,7 +77,7 @@ public class ChunkData {
 
     private void setData(int xOffset, int yOffset, int zOffset, int x, int y,
             int z, int offset, int value) {
-        getSection(xOffset, yOffset, zOffset).data(x, y, z, offset, value);
+        section(xOffset, yOffset, zOffset).data(x, y, z, offset, value);
     }
 
     public List<TagStructure> save() {
@@ -119,7 +119,7 @@ public class ChunkData {
         for (int z = zMin; z <= zMax; z++) {
             for (int y = yMin; y <= yMax; y++) {
                 for (int x = xMin; x <= xMax; x++) {
-                    if (!getSection(x, y, z).isEmpty()) {
+                    if (!section(x, y, z).isEmpty()) {
                         return false;
                     }
                 }

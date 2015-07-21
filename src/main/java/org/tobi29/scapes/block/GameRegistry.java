@@ -98,7 +98,6 @@ public class GameRegistry {
         pr.regS(PacketUpdateInventory::new, "core.packet.UpdateInventory");
         pr.regS(PacketUpdateStatistics::new, "core.packet.UpdateStatistics");
         pr.regS(PacketChat::new, "core.packet.Chat");
-        pr.regS(PacketPlayerHunger::new, "core.packet.PlayerHunger");
         pr.regS(PacketItemUse::new, "core.packet.ItemUse");
         pr.regS(PacketCrafting::new, "core.packet.Crafting");
         pr.regS(PacketDisconnect::new, "core.packet.Disconnect");
@@ -159,31 +158,31 @@ public class GameRegistry {
                 .get(new Pair<>(module, type));
     }
 
-    public Material getMaterial(String name) {
+    public Material material(String name) {
         return materialNames.get(name);
     }
 
-    public Material getMaterial(int id) {
+    public Material material(int id) {
         return materials[id];
     }
 
-    public Material[] getMaterials() {
+    public Material[] materials() {
         return materials;
     }
 
-    public BlockType getBlock(int id) {
+    public BlockType block(int id) {
         return blocks[id];
     }
 
-    public BlockType[] getBlocks() {
+    public BlockType[] blocks() {
         return blocks;
     }
 
-    public BlockType getAir() {
+    public BlockType air() {
         return air;
     }
 
-    public int getEntityID(EntityServer entity) {
+    public int entityID(EntityServer entity) {
         return entityIDs.get(entity.getClass());
     }
 
@@ -191,7 +190,7 @@ public class GameRegistry {
         if (locked) {
             throw new IllegalStateException("Initializing already ended");
         }
-        String nameID = material.getNameID();
+        String nameID = material.nameID();
         boolean blockType = material instanceof BlockType;
         int id = idStorage.get("Core", "Material", nameID,
                 blockType ? 1 : Short.MAX_VALUE + 1,
@@ -323,7 +322,7 @@ public class GameRegistry {
             return id;
         }
 
-        public int getID(E object) {
+        public int id(E object) {
             return suppliers.get(object.getClass());
         }
     }

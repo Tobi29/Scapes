@@ -24,7 +24,7 @@ import org.tobi29.scapes.engine.gui.GuiComponentIcon;
 import org.tobi29.scapes.engine.gui.GuiComponentText;
 import org.tobi29.scapes.engine.gui.GuiMessage;
 import org.tobi29.scapes.engine.openal.SoundSystem;
-import org.tobi29.scapes.engine.utils.io.FileUtil;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 
@@ -56,9 +56,9 @@ public class Playlist {
                 musicWait -= delta;
             } else {
                 Music music;
-                if (player.getWorld().getEnvironment()
-                        .getSunLightReduction(FastMath.floor(player.getX()),
-                                FastMath.floor(player.getY())) > 8) {
+                if (player.world().environment()
+                        .sunLightReduction(FastMath.floor(player.x()),
+                                FastMath.floor(player.y())) > 8) {
                     music = Music.NIGHT;
                 } else {
                     music = Music.DAY;
@@ -72,12 +72,12 @@ public class Playlist {
 
     private void playMusic(Music music, MobPlayerClientMain player) {
         currentMusic = music;
-        if (sounds.getMusicVolume() <= 0.0) {
+        if (sounds.musicVolume() <= 0.0) {
             return;
         }
         try {
-            Path path = player.getGame().getEngine().home().resolve("playlists")
-                            .resolve(music.getName());
+            Path path = player.game().engine().home().resolve("playlists")
+                    .resolve(music.dirName());
             List<Path> titles = new ArrayList<>();
             Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
                 @Override
@@ -90,13 +90,13 @@ public class Playlist {
             if (!titles.isEmpty()) {
                 Random random = ThreadLocalRandom.current();
                 Path title = titles.get(random.nextInt(titles.size()));
-                ScapesEngine engine = player.getGame().getEngine();
+                ScapesEngine engine = player.game().engine();
                 GuiMessage message =
                         new GuiMessage(500, 0, 290, 60, GuiAlignment.RIGHT,
                                 3.0);
                 message.add(new GuiComponentIcon(10, 10, 40, 40,
-                        engine.graphics().getTextureManager()
-                                .getTexture("Scapes:image/gui/Playlist")));
+                        engine.graphics().textures()
+                                .get("Scapes:image/gui/Playlist")));
                 String name = title.getFileName().toString();
                 name = name.substring(0, name.lastIndexOf('.'));
                 message.add(new GuiComponentText(60, 23, 420, 16, name));
@@ -126,7 +126,7 @@ public class Playlist {
             this.name = name;
         }
 
-        public String getName() {
+        public String dirName() {
             return name;
         }
     }

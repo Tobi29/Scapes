@@ -17,7 +17,6 @@
 package org.tobi29.scapes.engine.opengl.texture;
 
 import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.OpenGL;
 
 public class TextureFBOColor extends Texture {
     private final boolean alpha, hdr;
@@ -32,13 +31,12 @@ public class TextureFBOColor extends Texture {
 
     @Override
     protected void store(GL gl) {
-        OpenGL openGL = gl.getOpenGL();
-        textureID = openGL.createTexture();
-        openGL.bindTexture(textureID);
+        textureID = gl.createTexture();
+        gl.bindTexture(textureID);
         if (hdr) {
-            openGL.bufferTextureFloat(width, height, alpha, null);
+            gl.bufferTextureFloat(width, height, alpha, null);
         } else {
-            openGL.bufferTexture(width, height, alpha, null);
+            gl.bufferTexture(width, height, alpha, null);
         }
         dirtyFilter = true;
         TEXTURES.add(this);

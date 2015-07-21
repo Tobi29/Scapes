@@ -23,7 +23,6 @@ import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.MobileEntity;
-import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
@@ -68,11 +67,12 @@ public class PacketMobChangeRot extends Packet
         if (world == null) {
             return;
         }
-        EntityClient entity = world.getEntity(entityID);
-        if (entity instanceof MobileEntity) {
-            ((MobileEntity) entity).getPositionHandler()
-                    .receiveRotation(x, y, z);
-        }
+        world.entity(entityID).ifPresent(entity -> {
+            if (entity instanceof MobileEntity) {
+                ((MobileEntity) entity).positionHandler()
+                        .receiveRotation(x, y, z);
+            }
+        });
     }
 
     @Override
@@ -93,6 +93,6 @@ public class PacketMobChangeRot extends Packet
 
     @Override
     public void runServer(PlayerConnection player, WorldServer world) {
-        player.getMob().getPositionHandler().receiveRotation(x, y, z);
+        player.mob().positionHandler().receiveRotation(x, y, z);
     }
 }

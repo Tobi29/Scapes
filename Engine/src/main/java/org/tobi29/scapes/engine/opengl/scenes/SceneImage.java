@@ -44,22 +44,22 @@ public class SceneImage extends Scene {
 
     @Override
     public Shader postProcessing(GL gl, int pass) {
-        return gl.getShaderManager().getShader("Engine:shader/Textured", gl);
+        return gl.shaders().get("Engine:shader/Textured", gl);
     }
 
     @Override
     public void dispose(GL gl) {
     }
 
-    public GuiComponentIcon getImage() {
+    public GuiComponentIcon image() {
         return icon;
     }
 
     private class GuiImage extends Gui {
         public GuiImage(Texture texture) {
             super(GuiAlignment.CENTER);
-            int width = texture.getWidth();
-            int height = texture.getHeight();
+            int width = texture.width();
+            int height = texture.height();
             double ratio = (double) width / height;
             width = (int) (512 * ratio * scale);
             height = (int) (512 * scale);

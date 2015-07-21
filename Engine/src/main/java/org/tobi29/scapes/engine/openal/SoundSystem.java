@@ -23,7 +23,7 @@ import org.tobi29.scapes.engine.openal.codec.AudioStream;
 import org.tobi29.scapes.engine.openal.codec.ReadableAudioStream;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.BufferCreatorNative;
-import org.tobi29.scapes.engine.utils.io.ReadSource;
+import org.tobi29.scapes.engine.utils.io.filesystem.ReadSource;
 import org.tobi29.scapes.engine.utils.io.filesystem.Resource;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
@@ -63,7 +63,7 @@ public class SoundSystem {
         this.openAL = openAL;
         openAL.create();
         musicSource = openAL.createSource();
-        streamReadBuffer = BufferCreator.floatBuffer(4096 << 2);
+        streamReadBuffer = BufferCreator.floats(4096 << 2);
         streamBuffer =
                 BufferCreatorNative.bytes(streamReadBuffer.capacity() << 1);
         for (int i = 0; i < queuedBuffers.length; i++) {
@@ -140,7 +140,7 @@ public class SoundSystem {
                 false);
     }
 
-    public float getMusicVolume() {
+    public float musicVolume() {
         return musicVolume;
     }
 
@@ -170,7 +170,7 @@ public class SoundSystem {
         return staticAudio;
     }
 
-    public float getSoundVolume() {
+    public float soundVolume() {
         return soundVolume;
     }
 
@@ -253,12 +253,12 @@ public class SoundSystem {
                     .poll(this, openAL, listenerPosition, delta, lagSilence))
                     .collect(Collectors.toList()));
             openAL.checkError("Sound-Effects");
-            float musicVolume = (float) engine.config().getMusicVolume();
+            float musicVolume = (float) engine.config().musicVolume();
             if (music != null && musicVolume != this.musicVolume) {
                 openAL.setGain(musicSource, music.gain * musicVolume);
                 this.musicVolume = musicVolume;
             }
-            soundVolume = (float) engine.config().getSoundVolume();
+            soundVolume = (float) engine.config().soundVolume();
             openAL.setListener(listenerPosition.minus(origin),
                     listenerOrientation, listenerVelocity);
             if (!isSoundPlaying()) {
@@ -282,7 +282,7 @@ public class SoundSystem {
                 return;
             }
         }
-        int source = getFreeSource();
+        int source = freeSource();
         if (source == -1) {
             return;
         }
@@ -309,7 +309,7 @@ public class SoundSystem {
         openAL.play(source);
     }
 
-    protected Optional<AudioData> getAudio(String asset) {
+    protected Optional<AudioData> get(String asset) {
         if (!cache.containsKey(asset)) {
             Resource resource = engine.files().get(asset);
             if (resource.exists()) {
@@ -333,7 +333,7 @@ public class SoundSystem {
                 });
     }
 
-    private int getFreeSource() {
+    private int freeSource() {
         Random random = ThreadLocalRandom.current();
         int offset = random.nextInt(sources.length);
         for (int i = 0; i < sources.length; i++) {
@@ -370,8 +370,8 @@ public class SoundSystem {
         streamReadBuffer.clear();
         streamBuffer.flip();
         openAL.storeBuffer(buffer,
-                stream.getChannels() > 1 ? AudioFormat.STEREO :
-                        AudioFormat.MONO, streamBuffer, stream.getRate());
+                stream.channels() > 1 ? AudioFormat.STEREO : AudioFormat.MONO,
+                streamBuffer, stream.rate());
         return valid;
     }
 

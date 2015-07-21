@@ -45,17 +45,17 @@ public class GuiAlloyInventory extends GuiContainerInventory {
         super.renderOverlay(gl, shader, font);
         StringBuilder textBuilder = new StringBuilder(64);
         textBuilder.append("Metal: ");
-        String result = container.getResult();
+        String result = container.result();
         if (!result.isEmpty()) {
             textBuilder.append(result);
         } else {
             textBuilder.append("Unknown");
         }
         double size = 0.0f;
-        for (Double amount : container.getMetals().values()) {
+        for (Double amount : container.metals().values()) {
             size += amount;
         }
-        for (Map.Entry<String, Double> entry : container.getMetals()
+        for (Map.Entry<String, Double> entry : container.metals()
                 .entrySet()) {
             textBuilder.append('\n').append(entry.getKey()).append(" - ")
                     .append(FastMath.round(entry.getValue() / size * 100.0f))

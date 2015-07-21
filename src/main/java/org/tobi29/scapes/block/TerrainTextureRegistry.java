@@ -72,26 +72,26 @@ public class TerrainTextureRegistry {
                 if (source == null) {
                     source = engine.files().get(paths[0])
                             .readReturn(streamIn -> PNG.decode(streamIn,
-                                    BufferCreator::byteBuffer));
+                                    BufferCreator::bytes));
                     sources.put(paths[0], source);
                 }
-                width = source.getWidth();
-                height = source.getHeight();
+                width = source.width();
+                height = source.height();
                 if (paths.length > 1) {
-                    buffer = BufferCreator.byteBuffer(width * height << 2);
-                    buffer.put(source.getBuffer());
+                    buffer = BufferCreator.bytes(width * height << 2);
+                    buffer.put(source.buffer());
                     buffer.rewind();
-                    source.getBuffer().rewind();
+                    source.buffer().rewind();
                     for (int i = 1; i < paths.length; i++) {
                         Image layer = sources.get(paths[i]);
                         if (layer == null) {
                             layer = engine.files().get(paths[i]).readReturn(
                                     streamIn -> PNG.decode(streamIn,
-                                            BufferCreator::byteBuffer));
+                                            BufferCreator::bytes));
                             sources.put(paths[i], layer);
                         }
-                        if (layer.getWidth() != source.getWidth() ||
-                                layer.getHeight() != source.getHeight()) {
+                        if (layer.width() != source.width() ||
+                                layer.height() != source.height()) {
                             LOGGER.warn(
                                     "Invalid size for layered texture from: {}",
                                     paths[i]);
@@ -99,7 +99,7 @@ public class TerrainTextureRegistry {
                         }
                         int bufferR, bufferG, bufferB, bufferA, layerR, layerG,
                                 layerB, layerA;
-                        ByteBuffer layerBuffer = layer.getBuffer();
+                        ByteBuffer layerBuffer = layer.buffer();
                         while (layerBuffer.hasRemaining()) {
                             layerR = layerBuffer.get() & 0xFF;
                             layerG = layerBuffer.get() & 0xFF;
@@ -134,12 +134,12 @@ public class TerrainTextureRegistry {
                         buffer.rewind();
                     }
                 } else {
-                    buffer = source.getBuffer();
+                    buffer = source.buffer();
                 }
             } catch (IOException e) {
                 LOGGER.error("Failed to load terrain texture: {}",
                         e.toString());
-                buffer = BufferCreator.byteBuffer(0x400);
+                buffer = BufferCreator.bytes(0x400);
                 width = 16;
                 height = 16;
             }
@@ -231,8 +231,7 @@ public class TerrainTextureRegistry {
             }
         }
         int imageSize = size << 4;
-        ByteBuffer buffer =
-                BufferCreator.byteBuffer(imageSize * imageSize << 4);
+        ByteBuffer buffer = BufferCreator.bytes(imageSize * imageSize << 4);
         for (y = 0; y < size; y++) {
             int yy = y << 4;
             for (x = 0; x < size; x++) {
@@ -264,7 +263,7 @@ public class TerrainTextureRegistry {
         return textures.size();
     }
 
-    public Texture getTexture() {
+    public Texture texture() {
         return texture;
     }
 

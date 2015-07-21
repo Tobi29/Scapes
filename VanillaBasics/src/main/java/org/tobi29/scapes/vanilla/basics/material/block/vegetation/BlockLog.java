@@ -32,12 +32,13 @@ import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.vanilla.basics.material.TreeType;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock;
+import org.tobi29.scapes.vanilla.basics.material.item.ItemFuel;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class BlockLog extends VanillaBlock {
+public class BlockLog extends VanillaBlock implements ItemFuel {
     private final GameRegistry.Registry<TreeType> treeRegistry;
     private TerrainTexture[] texturesTop;
     private TerrainTexture[] texturesSide;
@@ -52,7 +53,7 @@ public class BlockLog extends VanillaBlock {
     @Override
     public boolean destroy(TerrainServer.TerrainMutable terrain, int x, int y,
             int z, Face face, MobPlayerServer player, ItemStack item) {
-        if ("Axe".equals(item.getMaterial().getToolType(item))) {
+        if ("Axe".equals(item.material().toolType(item))) {
             destroy(terrain, new Vector3i(x, y, z), terrain.data(x, y, z), 512,
                     player, z);
         }
@@ -60,14 +61,14 @@ public class BlockLog extends VanillaBlock {
     }
 
     @Override
-    public double getResistance(ItemStack item, int data) {
-        return "Axe".equals(item.getMaterial().getToolType(item)) ? 10 :
-                "Saw".equals(item.getMaterial().getToolType(item)) ? 2 : -1;
+    public double resistance(ItemStack item, int data) {
+        return "Axe".equals(item.material().toolType(item)) ? 10 :
+                "Saw".equals(item.material().toolType(item)) ? 2 : -1;
     }
 
     @Override
-    public List<ItemStack> getDrops(ItemStack item, int data) {
-        if ("Saw".equals(item.getMaterial().getToolType(item))) {
+    public List<ItemStack> drops(ItemStack item, int data) {
+        if ("Saw".equals(item.material().toolType(item))) {
             return Collections
                     .singletonList(new ItemStack(materials.wood, data, 2));
         }
@@ -75,19 +76,19 @@ public class BlockLog extends VanillaBlock {
     }
 
     @Override
-    public String getFootStep(int data) {
+    public String footStepSound(int data) {
         return "VanillaBasics:sound/footsteps/Wood.ogg";
     }
 
     @Override
-    public String getBreak(ItemStack item, int data) {
-        return "Axe".equals(item.getMaterial().getToolType(item)) ?
+    public String breakSound(ItemStack item, int data) {
+        return "Axe".equals(item.material().toolType(item)) ?
                 "VanillaBasics:sound/blocks/Axe.ogg" :
                 "VanillaBasics:sound/blocks/Saw.ogg";
     }
 
     @Override
-    public Optional<TerrainTexture> getParticleTexture(Face face,
+    public Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
         if (face == Face.UP || face == Face.DOWN) {
             return Optional.of(texturesTop[terrain.data(x, y, z)]);
@@ -110,7 +111,7 @@ public class BlockLog extends VanillaBlock {
         texturesTop = new TerrainTexture[types.size()];
         texturesSide = new TerrainTexture[types.size()];
         for (int i = 0; i < types.size(); i++) {
-            String texture = types.get(i).getTexture();
+            String texture = types.get(i).texture();
             texturesTop[i] = registry.registerTexture(texture + "/LogTop.png");
             texturesSide[i] =
                     registry.registerTexture(texture + "/LogSide.png");
@@ -131,24 +132,24 @@ public class BlockLog extends VanillaBlock {
     }
 
     @Override
-    public void render(ItemStack item, GL gl, Shader shader,
-            float r, float g, float b, float a) {
-        models[item.getData()].render(gl, shader);
+    public void render(ItemStack item, GL gl, Shader shader, float r, float g,
+            float b, float a) {
+        models[item.data()].render(gl, shader);
     }
 
     @Override
-    public void renderInventory(ItemStack item, GL gl,
-            Shader shader, float r, float g, float b, float a) {
-        models[item.getData()].renderInventory(gl, shader);
+    public void renderInventory(ItemStack item, GL gl, Shader shader, float r,
+            float g, float b, float a) {
+        models[item.data()].renderInventory(gl, shader);
     }
 
     @Override
-    public String getName(ItemStack item) {
-        return treeRegistry.get(item.getData()).getName();
+    public String name(ItemStack item) {
+        return treeRegistry.get(item.data()).name();
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 16;
     }
 
@@ -226,5 +227,20 @@ public class BlockLog extends VanillaBlock {
             destroy(terrain, pos.plus(new Vector3i(1, 1, 1)), data, length,
                     player, minZ);
         }
+    }
+
+    @Override
+    public float fuelTemperature(ItemStack item) {
+        return 0.2f;
+    }
+
+    @Override
+    public float fuelTime(ItemStack item) {
+        return 100.0f;
+    }
+
+    @Override
+    public int fuelTier(ItemStack item) {
+        return 10;
     }
 }

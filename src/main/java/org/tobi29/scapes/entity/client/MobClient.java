@@ -40,10 +40,10 @@ public abstract class MobClient extends EntityClient implements MobileEntity {
         super(world, pos);
         this.speed = new MutableVector3d(speed);
         collision = aabb;
-        positionHandler = createPositionHandler(world.getConnection());
+        positionHandler = createPositionHandler(world.connection());
     }
 
-    public AABB getAABB() {
+    public AABB aabb() {
         AABB aabb = new AABB(collision);
         aabb.add(pos.doubleX(), pos.doubleY(), pos.doubleZ());
         return aabb;
@@ -76,39 +76,39 @@ public abstract class MobClient extends EntityClient implements MobileEntity {
     }
 
     @Override
-    public MobPositionHandler getPositionHandler() {
+    public MobPositionHandler positionHandler() {
         return positionHandler;
     }
 
-    public Vector3 getSpeed() {
+    public Vector3 speed() {
         return speed.now();
     }
 
-    public Vector3 getRot() {
+    public Vector3 rot() {
         return rot.now();
     }
 
-    public double getXSpeed() {
+    public double speedX() {
         return speed.doubleX();
     }
 
-    public double getXRot() {
+    public double pitch() {
         return rot.doubleX();
     }
 
-    public double getYSpeed() {
+    public double speedY() {
         return speed.doubleY();
     }
 
-    public double getYRot() {
+    public double tilt() {
         return rot.doubleY();
     }
 
-    public double getZSpeed() {
+    public double speedZ() {
         return speed.doubleZ();
     }
 
-    public double getZRot() {
+    public double yaw() {
         return rot.doubleZ();
     }
 
@@ -129,7 +129,7 @@ public abstract class MobClient extends EntityClient implements MobileEntity {
     }
 
     public void move(double delta) {
-        headInWater = world.getTerrain().type(pos.intX(), pos.intY(),
+        headInWater = world.terrain().type(pos.intX(), pos.intY(),
                 FastMath.floor(pos.doubleZ() + 0.7)).isLiquid();
     }
 }

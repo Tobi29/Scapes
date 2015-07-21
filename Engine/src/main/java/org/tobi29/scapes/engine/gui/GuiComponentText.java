@@ -37,7 +37,7 @@ public class GuiComponentText extends GuiComponent {
         this.textSize = textSize;
     }
 
-    public String getText() {
+    public String text() {
         return text;
     }
 

@@ -19,7 +19,6 @@ package org.tobi29.scapes.entity.model;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -39,22 +38,22 @@ public class MobModelItem implements MobModel {
 
     public MobModelItem(MobClient entity, ItemStack item) {
         this.entity = entity;
-        pos = new MutableVector3d(entity.getPos());
+        pos = new MutableVector3d(entity.pos());
         this.item = item;
     }
 
     @Override
-    public float getPitch() {
+    public float pitch() {
         return 0.0f;
     }
 
     @Override
-    public float getYaw() {
+    public float yaw() {
         return dir;
     }
 
     @Override
-    public Vector3 getPos() {
+    public Vector3 pos() {
         return pos.now();
     }
 
@@ -71,7 +70,7 @@ public class MobModelItem implements MobModel {
     @Override
     public void renderUpdate(double delta) {
         double factor = FastMath.min(1.0, delta * 10.0);
-        pos.plus(entity.getPos().minus(pos.now()).multiply(factor));
+        pos.plus(entity.pos().minus(pos.now()).multiply(factor));
         dir += 45.0 * delta;
         dir %= 360.0f;
     }
@@ -82,20 +81,19 @@ public class MobModelItem implements MobModel {
         float posRenderX = (float) (pos.doubleX() - cam.position.doubleX());
         float posRenderY = (float) (pos.doubleY() - cam.position.doubleY());
         float posRenderZ = (float) (pos.doubleZ() - cam.position.doubleZ());
-        OpenGL openGL = gl.getOpenGL();
-        openGL.setAttribute2f(4, world.getTerrain()
-                        .blockLight(FastMath.floor(entity.getX()),
-                                FastMath.floor(entity.getY()),
-                                FastMath.floor(entity.getZ())) / 15.0f,
-                world.getTerrain().sunLight(FastMath.floor(entity.getX()),
-                        FastMath.floor(entity.getY()),
-                        FastMath.floor(entity.getZ())) / 15.0f);
-        MatrixStack matrixStack = gl.getMatrixStack();
+        gl.setAttribute2f(4, world.terrain()
+                        .blockLight(FastMath.floor(entity.x()),
+                                FastMath.floor(entity.y()),
+                                FastMath.floor(entity.z())) / 15.0f,
+                world.terrain().sunLight(FastMath.floor(entity.x()),
+                        FastMath.floor(entity.y()),
+                        FastMath.floor(entity.z())) / 15.0f);
+        MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(posRenderX, posRenderY, posRenderZ);
         matrix.scale(0.4f, 0.4f, 0.4f);
         matrix.rotate(dir, 0.0f, 0.0f, 1.0f);
-        item.getMaterial().render(item, gl, shader, 1.0f, 1.0f, 1.0f, 1.0f);
+        item.material().render(item, gl, shader, 1.0f, 1.0f, 1.0f, 1.0f);
         matrixStack.pop();
     }
 }

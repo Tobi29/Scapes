@@ -20,7 +20,6 @@ import org.tobi29.scapes.block.AABBElement;
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
@@ -48,7 +47,7 @@ public abstract class Particle {
         collision = aabb;
     }
 
-    public Vector3 getPos() {
+    public Vector3 pos() {
         return pos.now();
     }
 
@@ -56,11 +55,11 @@ public abstract class Particle {
         this.pos.set(pos);
     }
 
-    public Vector3 getPosRender() {
+    public Vector3 posRender() {
         return posRender.now();
     }
 
-    public Vector3 getSpeed() {
+    public Vector3 speed() {
         return speed.now();
     }
 
@@ -69,8 +68,8 @@ public abstract class Particle {
     }
 
     public void move(double delta) {
-        WorldClient world = particleManager.getWorld();
-        double gravitation = world.getGravitation();
+        WorldClient world = particleManager.world();
+        double gravitation = world.gravity();
         speed.plusZ(-gravitationMultiplier * delta * gravitation);
         speed.div(1.0 + airFriction * delta);
         if (inWater) {
@@ -91,7 +90,7 @@ public abstract class Particle {
         boolean inWater;
         AABB aabb = new AABB(collision);
         aabb.add(pos.doubleX(), pos.doubleY(), pos.doubleZ());
-        Pool<AABBElement> aabbs = world.getTerrain().getCollisions(
+        Pool<AABBElement> aabbs = world.terrain().collisions(
                 FastMath.floor(aabb.minX + FastMath.min(goX, 0.0)),
                 FastMath.floor(aabb.minY + FastMath.min(goY, 0.0)),
                 FastMath.floor(aabb.minZ + FastMath.min(goZ, 0.0)),
@@ -100,7 +99,7 @@ public abstract class Particle {
                 FastMath.floor(aabb.maxZ + FastMath.max(goZ, 0.0)));
         double lastGoZ = aabb.moveOutZ(
                 aabbs.stream().filter(AABBElement::isSolid)
-                        .map(AABBElement::getAABB).iterator(), goZ);
+                        .map(AABBElement::aabb).iterator(), goZ);
         pos.plusZ(lastGoZ);
         aabb.add(0.0, 0.0, lastGoZ);
         if (lastGoZ - goZ > 0.0) {
@@ -109,7 +108,7 @@ public abstract class Particle {
         }
         double lastGoX = aabb.moveOutX(
                 aabbs.stream().filter(AABBElement::isSolid)
-                        .map(AABBElement::getAABB).iterator(), goX);
+                        .map(AABBElement::aabb).iterator(), goX);
         pos.plusX(lastGoX);
         aabb.add(lastGoX, 0.0, 0.0);
         if (lastGoX != goX) {
@@ -118,7 +117,7 @@ public abstract class Particle {
         }
         double lastGoY = aabb.moveOutY(
                 aabbs.stream().filter(AABBElement::isSolid)
-                        .map(AABBElement::getAABB).iterator(), goY);
+                        .map(AABBElement::aabb).iterator(), goY);
         pos.plusY(lastGoY);
         aabb.add(0.0, lastGoY, 0.0);
         if (lastGoY != goY) {
@@ -151,16 +150,14 @@ public abstract class Particle {
     }
 
     public void render(GL gl, Cam cam, Shader shader) {
-        WorldClient world = particleManager.getWorld();
+        WorldClient world = particleManager.world();
         posRender.set(pos.now());
         int x = posRender.intX(), y = posRender.intY(), z = posRender.intZ();
-        BlockType type = world.getTerrain().type(x, y, z);
-        if (!type.isSolid(world.getTerrain(), x, y, z) ||
-                type.isTransparent(world.getTerrain(), x, y, z)) {
-            OpenGL openGL = gl.getOpenGL();
-            openGL.setAttribute2f(4,
-                    world.getTerrain().blockLight(x, y, z) / 15.0f,
-                    world.getTerrain().sunLight(x, y, z) / 15.0f);
+        BlockType type = world.terrain().type(x, y, z);
+        if (!type.isSolid(world.terrain(), x, y, z) ||
+                type.isTransparent(world.terrain(), x, y, z)) {
+            gl.setAttribute2f(4, world.terrain().blockLight(x, y, z) / 15.0f,
+                    world.terrain().sunLight(x, y, z) / 15.0f);
             float posRenderX =
                     (float) (posRender.doubleX() - cam.position.doubleX());
             float posRenderY =

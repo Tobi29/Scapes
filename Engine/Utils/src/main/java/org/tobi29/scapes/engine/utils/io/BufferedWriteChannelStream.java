@@ -24,7 +24,7 @@ import java.nio.channels.WritableByteChannel;
 
 public class BufferedWriteChannelStream implements WritableByteStream {
     private final WritableByteChannel channel;
-    private final ByteBuffer buffer = BufferCreator.byteBuffer(8192);
+    private final ByteBuffer buffer = BufferCreator.bytes(8192);
 
     public BufferedWriteChannelStream(WritableByteChannel channel) {
         this.channel = channel;

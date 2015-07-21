@@ -23,25 +23,25 @@ public interface GuiController {
 
     boolean processTextField(TextFieldData data, boolean multiline);
 
-    double getCursorX();
+    double cursorX();
 
-    double getCursorY();
+    double cursorY();
 
-    double getGuiCursorX();
+    double guiCursorX();
 
-    double getGuiCursorY();
+    double guiCursorY();
 
     boolean isSoftwareMouse();
 
-    boolean getLeftClick();
+    boolean leftClick();
 
-    boolean getRightClick();
+    boolean rightClick();
 
-    boolean getLeftDrag();
+    boolean leftDrag();
 
-    boolean getRightDrag();
+    boolean rightDrag();
 
-    double getScroll();
+    double scroll();
 
     class TextFieldData {
         @SuppressWarnings("StringBufferField")

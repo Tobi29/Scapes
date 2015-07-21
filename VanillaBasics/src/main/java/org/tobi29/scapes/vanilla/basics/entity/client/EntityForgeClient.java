@@ -35,12 +35,12 @@ public class EntityForgeClient extends EntityAbstractFurnaceClient {
     }
 
     public EntityForgeClient(WorldClient world, Vector3 pos) {
-        super(world, pos, new Inventory(world.getRegistry(), 9), 4, 3,
+        super(world, pos, new Inventory(world.registry(), 9), 4, 3,
                 Float.POSITIVE_INFINITY, 1.006f, 10, 50);
     }
 
     @Override
-    public Gui getGui(MobPlayerClientMain player) {
+    public Gui gui(MobPlayerClientMain player) {
         return new GuiForgeInventory(this, player);
     }
 
@@ -49,7 +49,7 @@ public class EntityForgeClient extends EntityAbstractFurnaceClient {
         super.update(delta);
         if (temperature > 10) {
             Random random = ThreadLocalRandom.current();
-            ParticleManager particleManager = world.getParticleManager();
+            ParticleManager particleManager = world.particleManager();
             particleManager.add(new ParticleSmoke(particleManager, pos.now(),
                     new Vector3d(random.nextDouble() * 0.1 - 0.05,
                             random.nextDouble() * 0.1 - 0.05, 0.0),

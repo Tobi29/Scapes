@@ -37,9 +37,9 @@ public class PacketEntityAdd extends Packet implements PacketClient {
     }
 
     public PacketEntityAdd(EntityServer entity, GameRegistry registry) {
-        super(entity.getPos());
-        entityID = entity.getEntityID();
-        id = entity.getID(registry);
+        super(entity.pos());
+        entityID = entity.entityID();
+        id = entity.id(registry);
         tag = entity.write();
     }
 
@@ -65,7 +65,7 @@ public class PacketEntityAdd extends Packet implements PacketClient {
         EntityClient entity = EntityClient.make(id, world);
         if (entity != null) {
             entity.read(tag);
-            client.getWorld().addEntity(entity, entityID);
+            client.world().addEntity(entity, entityID);
         }
     }
 }

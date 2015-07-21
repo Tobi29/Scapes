@@ -36,7 +36,7 @@ public class EntityBloomeryServer extends EntityAbstractFurnaceServer {
     }
 
     public EntityBloomeryServer(WorldServer world, Vector3 pos) {
-        super(world, pos, new Inventory(world.getRegistry(), 14), 4, 9, 800.0f,
+        super(world, pos, new Inventory(world.registry(), 14), 4, 9, 800.0f,
                 1.004f, 4, 50);
     }
 
@@ -58,7 +58,7 @@ public class EntityBloomeryServer extends EntityAbstractFurnaceServer {
     public void update(double delta) {
         super.update(delta);
         VanillaBasics plugin =
-                (VanillaBasics) world.getPlugins().getPlugin("VanillaBasics");
+                (VanillaBasics) world.plugins().plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         temperature /= 1.01;
         temperature = FastMath.max(10, temperature);
@@ -86,8 +86,8 @@ public class EntityBloomeryServer extends EntityAbstractFurnaceServer {
 
     @Override
     protected boolean isValidOn(TerrainServer terrain, int x, int y, int z) {
-        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
-                .getPlugin("VanillaBasics");
+        VanillaBasics plugin = (VanillaBasics) terrain.world().plugins()
+                .plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         return terrain.type(x, y, z) == materials.bloomery;
     }
@@ -95,8 +95,8 @@ public class EntityBloomeryServer extends EntityAbstractFurnaceServer {
     public void updateBellows(TerrainServer terrain) {
         WorldServer world = terrain.world();
         VanillaBasics plugin =
-                (VanillaBasics) world.getPlugins().getPlugin("VanillaBasics");
-        GameRegistry registry = world.getRegistry();
+                (VanillaBasics) world.plugins().plugin("VanillaBasics");
+        GameRegistry registry = world.registry();
         VanillaMaterial materials = plugin.getMaterials();
         boolean hasBellows = false;
         int xx = pos.intX();
@@ -120,6 +120,6 @@ public class EntityBloomeryServer extends EntityAbstractFurnaceServer {
         }
         this.hasBellows = hasBellows;
         maximumTemperature = hasBellows ? Float.POSITIVE_INFINITY : 600.0f;
-        world.getConnection().send(new PacketEntityChange(this));
+        world.connection().send(new PacketEntityChange(this));
     }
 }

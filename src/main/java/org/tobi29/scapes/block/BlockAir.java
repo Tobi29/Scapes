@@ -61,7 +61,7 @@ public class BlockAir extends BlockType {
     }
 
     @Override
-    public List<AABBElement> getCollision(int data, int x, int y, int z) {
+    public List<AABBElement> collision(int data, int x, int y, int z) {
         return new ArrayList<>();
     }
 
@@ -71,27 +71,27 @@ public class BlockAir extends BlockType {
     }
 
     @Override
-    public double getResistance(ItemStack item, int data) {
+    public double resistance(ItemStack item, int data) {
         return -1;
     }
 
     @Override
-    public List<ItemStack> getDrops(ItemStack item, int data) {
+    public List<ItemStack> drops(ItemStack item, int data) {
         return Collections.emptyList();
     }
 
     @Override
-    public String getFootStep(int data) {
+    public String footStepSound(int data) {
         return "";
     }
 
     @Override
-    public String getBreak(ItemStack item, int data) {
+    public String breakSound(ItemStack item, int data) {
         return "";
     }
 
     @Override
-    public Optional<TerrainTexture> getParticleTexture(Face face,
+    public Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
         return Optional.empty();
     }
@@ -123,7 +123,7 @@ public class BlockAir extends BlockType {
     }
 
     @Override
-    public int getItemID() {
+    public int itemID() {
         return 0;
     }
 
@@ -146,12 +146,12 @@ public class BlockAir extends BlockType {
     }
 
     @Override
-    public String getName(ItemStack item) {
+    public String name(ItemStack item) {
         return "";
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return Integer.MAX_VALUE;
     }
 }

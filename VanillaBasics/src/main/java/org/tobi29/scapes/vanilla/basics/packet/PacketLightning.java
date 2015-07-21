@@ -70,7 +70,7 @@ public class PacketLightning extends Packet implements PacketClient {
             return;
         }
         Vector3 pos = new Vector3d(x, y, z);
-        ParticleManager particleManager = world.getParticleManager();
+        ParticleManager particleManager = world.particleManager();
         particleManager.add(new ParticleLightning(particleManager, pos,
                 Vector3d.ZERO));
         Random random = ThreadLocalRandom.current();

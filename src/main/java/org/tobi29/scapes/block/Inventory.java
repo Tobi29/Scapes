@@ -40,35 +40,34 @@ public class Inventory {
             throw new IllegalArgumentException("Item cannot be null!");
         }
         for (ItemStack item : items) {
-            if (item.canStack(add) > 0 &&
-                    item.getMaterial() != registry.getAir()) {
-                add.setAmount(add.getAmount() - item.stack(add));
-                if (add.getAmount() <= 0) {
-                    return add.getAmount();
+            if (item.canStack(add) > 0 && item.material() != registry.air()) {
+                add.setAmount(add.amount() - item.stack(add));
+                if (add.amount() <= 0) {
+                    return add.amount();
                 }
             }
         }
         for (ItemStack item : items) {
-            add.setAmount(add.getAmount() - item.stack(add));
-            if (add.getAmount() <= 0) {
-                return add.getAmount();
+            add.setAmount(add.amount() - item.stack(add));
+            if (add.amount() <= 0) {
+                return add.amount();
             }
         }
-        return add.getAmount();
+        return add.amount();
     }
 
     public int canAdd(ItemStack add) {
         if (add == null) {
             throw new IllegalArgumentException("Item cannot be null!");
         }
-        int hasToStack = add.getAmount();
+        int hasToStack = add.amount();
         for (ItemStack item : items) {
             hasToStack -= item.canStack(add);
             if (hasToStack <= 0) {
-                return add.getAmount();
+                return add.amount();
             }
         }
-        return add.getAmount() - hasToStack;
+        return add.amount() - hasToStack;
     }
 
     public boolean canTake(ItemStack take) {
@@ -79,10 +78,10 @@ public class Inventory {
         for (ItemStack item : items) {
             amount += item.canTake(take);
         }
-        return amount >= take.getAmount();
+        return amount >= take.amount();
     }
 
-    public Optional<ItemStack> getHold() {
+    public Optional<ItemStack> hold() {
         return hold;
     }
 
@@ -94,11 +93,11 @@ public class Inventory {
         this.hold = Optional.of(hold);
     }
 
-    public ItemStack getItem(int id) {
+    public ItemStack item(int id) {
         return items[id];
     }
 
-    public int getSize() {
+    public int size() {
         return items.length;
     }
 
@@ -140,12 +139,12 @@ public class Inventory {
             throw new IllegalArgumentException("Item cannot be null!");
         }
         ItemStack give = null;
-        int amount = take.getAmount();
+        int amount = take.amount();
         for (int i = 0; i < items.length && amount > 0; i++) {
             Optional<ItemStack> give2 = items[i].take(take, amount);
             if (give2.isPresent()) {
                 ItemStack item = give2.get();
-                amount -= item.getAmount();
+                amount -= item.amount();
                 if (give == null) {
                     give = item;
                 } else {

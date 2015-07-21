@@ -147,7 +147,7 @@ public class GLFWKeyMap {
         KEYS[GLFW.GLFW_KEY_MENU] = ControllerKey.KEY_MENU;
     }
 
-    public static ControllerKey getKey(int id) {
+    public static ControllerKey key(int id) {
         if (id < 0 || id >= KEYS.length) {
             return ControllerKey.UNKNOWN;
         }

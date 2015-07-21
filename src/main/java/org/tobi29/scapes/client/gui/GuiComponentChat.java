@@ -52,7 +52,7 @@ public class GuiComponentChat extends GuiComponent {
     @Override
     public void renderComponent(GL gl, Shader shader,
             FontRenderer font, double delta) {
-        MatrixStack matrixStack = gl.getMatrixStack();
+        MatrixStack matrixStack = gl.matrixStack();
         if (this.font != font) {
             this.font = font;
         }

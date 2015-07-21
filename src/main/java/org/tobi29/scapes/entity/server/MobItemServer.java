@@ -30,7 +30,7 @@ public class MobItemServer extends MobServer {
 
     public MobItemServer(WorldServer world) {
         this(world, Vector3d.ZERO, Vector3d.ZERO,
-                new ItemStack(world.getRegistry()), Double.NaN);
+                new ItemStack(world.registry()), Double.NaN);
     }
 
     public MobItemServer(WorldServer world, Vector3 pos, Vector3 speed,
@@ -59,34 +59,33 @@ public class MobItemServer extends MobServer {
         despawntime = tagStructure.getDouble("Despawntime");
     }
 
-    public ItemStack getItem() {
+    public ItemStack item() {
         return item;
     }
 
     @Override
     public void update(double delta) {
         if (pickupwait <= 0) {
-            AABB aabb = getAABB().grow(0.8, 0.8, 0.4);
-            world.getPlayers().stream()
-                    .filter(entity -> aabb.overlay(entity.getAABB()))
+            AABB aabb = aabb().grow(0.8, 0.8, 0.4);
+            world.players().stream()
+                    .filter(entity -> aabb.overlay(entity.aabb()))
                     .forEach(entity -> {
                         world.playSound("Scapes:sound/entity/mob/Item.ogg",
                                 this);
-                        item.setAmount(item.getAmount() -
-                                entity.getInventory().add(item));
-                        entity.getConnection()
+                        item.setAmount(
+                                item.amount() - entity.inventory().add(item));
+                        entity.connection()
                                 .send(new PacketUpdateInventory(entity));
                     });
             stackwait -= delta;
             if (stackwait <= 0) {
                 aabb.grow(0.0, 0.0, 0.4);
-                world.getEntities()
+                world.entities()
                         .filter(entity -> entity instanceof MobItemServer)
                         .forEach(entity -> {
-                            if (aabb.overlay(
-                                    ((MobItemServer) entity).getAABB()) &&
+                            if (aabb.overlay(((MobItemServer) entity).aabb()) &&
                                     entity != this) {
-                                item.setAmount(item.getAmount() -
+                                item.setAmount(item.amount() -
                                         ((MobItemServer) entity).item
                                                 .stack(item));
                             }
@@ -96,7 +95,7 @@ public class MobItemServer extends MobServer {
         } else {
             pickupwait -= delta;
         }
-        if (item.getAmount() <= 0 || item.getMaterial() == registry.getAir()) {
+        if (item.amount() <= 0 || item.material() == registry.air()) {
             world.deleteEntity(this);
         }
         if (!Double.isNaN(despawntime)) {

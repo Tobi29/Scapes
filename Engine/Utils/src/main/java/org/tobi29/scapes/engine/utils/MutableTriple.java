@@ -36,15 +36,15 @@ public class MutableTriple<A, B, C> {
         this.c = c;
     }
 
-    public A getA() {
+    public A a() {
         return a;
     }
 
-    public B getB() {
+    public B b() {
         return b;
     }
 
-    public C getC() {
+    public C c() {
         return c;
     }
 

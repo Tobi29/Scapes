@@ -37,14 +37,10 @@ public class UpdateLavaFlow extends Update {
                 if (terrain.type(x, y, z + 1) == materials.lava) {
                     dataNeed = 1;
                 } else {
-                    dataNeed =
-                            getData(terrain, x - 1, y, z, dataNeed, materials);
-                    dataNeed =
-                            getData(terrain, x + 1, y, z, dataNeed, materials);
-                    dataNeed =
-                            getData(terrain, x, y - 1, z, dataNeed, materials);
-                    dataNeed =
-                            getData(terrain, x, y + 1, z, dataNeed, materials);
+                    dataNeed = data(terrain, x - 1, y, z, dataNeed, materials);
+                    dataNeed = data(terrain, x + 1, y, z, dataNeed, materials);
+                    dataNeed = data(terrain, x, y - 1, z, dataNeed, materials);
+                    dataNeed = data(terrain, x, y + 1, z, dataNeed, materials);
                 }
                 dataNeed++;
                 if (dataNeed <= 6) {
@@ -65,7 +61,7 @@ public class UpdateLavaFlow extends Update {
         return true;
     }
 
-    private static short getData(TerrainServer terrain, int x, int y, int z,
+    private static short data(TerrainServer terrain, int x, int y, int z,
             short oldData, VanillaMaterial materials) {
         if (terrain.type(x, y, z) == materials.lava) {
             short data =
@@ -79,10 +75,10 @@ public class UpdateLavaFlow extends Update {
 
     @Override
     public void run(TerrainServer.TerrainMutable terrain) {
-        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
-                .getPlugin("VanillaBasics");
+        VanillaBasics plugin = (VanillaBasics) terrain.world().plugins()
+                .plugin("VanillaBasics");
         GameRegistry.Registry<StoneType> stoneRegistry =
-                terrain.world().getRegistry().get("VanillaBasics", "StoneType");
+                terrain.world().registry().get("VanillaBasics", "StoneType");
         VanillaMaterial materials = plugin.getMaterials();
         flow(terrain, x, y, z, materials, stoneRegistry);
         if (flow(terrain, x, y, z - 1, materials, stoneRegistry)) {
@@ -95,8 +91,8 @@ public class UpdateLavaFlow extends Update {
 
     @Override
     public boolean isValidOn(BlockType type, TerrainServer terrain) {
-        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
-                .getPlugin("VanillaBasics");
+        VanillaBasics plugin = (VanillaBasics) terrain.world().plugins()
+                .plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         return type == materials.lava;
     }

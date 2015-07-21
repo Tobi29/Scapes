@@ -32,7 +32,7 @@ import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
 import org.tobi29.scapes.engine.utils.ArrayUtil;
 import org.tobi29.scapes.engine.utils.graphics.BlurOffset;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
-import org.tobi29.scapes.engine.utils.io.FileUtil;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.server.format.WorldFormat;
 
@@ -79,14 +79,13 @@ public class SceneMenu extends Scene {
 
     @Override
     public void init(GL gl) {
-        ShaderManager shaderManager = gl.getShaderManager();
+        ShaderManager shaderManager = gl.shaders();
         ShaderCompileInformation information =
-                shaderManager.getCompileInformation("Scapes:shader/Menu1");
+                shaderManager.compileInformation("Scapes:shader/Menu1");
         information.supplyExternal("BLUR_OFFSET", BLUR_OFFSET);
         information.supplyExternal("BLUR_WEIGHT", BLUR_WEIGHT);
         information.supplyExternal("BLUR_LENGTH", BLUR_LENGTH);
-        information =
-                shaderManager.getCompileInformation("Scapes:shader/Menu2");
+        information = shaderManager.compileInformation("Scapes:shader/Menu2");
         information.supplyExternal("BLUR_OFFSET", BLUR_OFFSET);
         information.supplyExternal("BLUR_WEIGHT", BLUR_WEIGHT);
         information.supplyExternal("BLUR_LENGTH", BLUR_LENGTH);
@@ -108,15 +107,13 @@ public class SceneMenu extends Scene {
             }
             save = Optional.empty();
         }
-        cam.setPerspective((float) gl.getSceneWidth() / gl.getSceneHeight(),
+        cam.setPerspective((float) gl.sceneWidth() / gl.sceneHeight(),
                 90.0f);
         cam.setView(0.0f, yaw, 0.0f);
-        gl.setProjectionPerspective(gl.getSceneWidth(), gl.getSceneHeight(),
+        gl.setProjectionPerspective(gl.sceneWidth(), gl.sceneHeight(),
                 cam);
-        Shader shader =
-                gl.getShaderManager().getShader("Engine:shader/Textured", gl);
-        OpenGL openGL = gl.getOpenGL();
-        MatrixStack matrixStack = gl.getMatrixStack();
+        Shader shader = gl.shaders().get("Engine:shader/Textured", gl);
+        MatrixStack matrixStack = gl.matrixStack();
         for (int i = 0; i < 6; i++) {
             Texture texture = textures[i];
             if (texture != null) {
@@ -133,7 +130,7 @@ public class SceneMenu extends Scene {
                     matrix.rotate(-90.0f, 1.0f, 0.0f, 0.0f);
                 }
                 texture.bind(gl);
-                openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
+                gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
                         1.0f);
                 vao.render(gl, shader);
                 matrixStack.pop();
@@ -149,12 +146,11 @@ public class SceneMenu extends Scene {
 
     @Override
     public Shader postProcessing(GL gl, int pass) {
-        return gl.getShaderManager()
-                .getShader("Scapes:shader/Menu" + (pass + 1), gl);
+        return gl.shaders().get("Scapes:shader/Menu" + (pass + 1), gl);
     }
 
     @Override
-    public int getRenderPasses() {
+    public int renderPasses() {
         return 2;
     }
 
@@ -175,12 +171,12 @@ public class SceneMenu extends Scene {
     protected void loadTextures(GL gl) {
         List<Path[]> saves = new ArrayList<>();
         try {
-            Path path = state.getEngine().home().resolve("saves");
+            Path path = state.engine().home().resolve("saves");
             for (Path directory : Files.newDirectoryStream(path)) {
                 if (Files.isDirectory(directory) &&
                         !Files.isHidden(directory) &&
                         directory.getFileName().toString()
-                                .endsWith(WorldFormat.getFilenameExtension())) {
+                                .endsWith(WorldFormat.filenameExtension())) {
                     saveBackground(directory).ifPresent(saves::add);
                 }
             }
@@ -191,8 +187,7 @@ public class SceneMenu extends Scene {
         if (saves.isEmpty()) {
             int r = random.nextInt(2);
             for (int i = 0; i < 6; i++) {
-                setBackground(gl.getTextureManager()
-                        .getTexture("Scapes:image/gui/panorama/" +
+                setBackground(gl.textures().get("Scapes:image/gui/panorama/" +
                                 r + "/Panorama" + i), i, gl);
             }
         } else {

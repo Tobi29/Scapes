@@ -65,12 +65,12 @@ public class MobPlayerClientMain extends MobPlayerClient {
     public MobPlayerClientMain(WorldClient world, Vector3 pos, Vector3 speed,
             double xRot, double zRot, String nickname) {
         super(world, pos, speed, xRot, zRot, nickname);
-        game = world.getGame();
+        game = world.game();
     }
 
-    private static Iterator<AABB> getCollisions(Pool<AABBElement> aabbs) {
+    private static Iterator<AABB> collisions(Pool<AABBElement> aabbs) {
         return aabbs.stream().filter(AABBElement::isSolid)
-                .map(AABBElement::getAABB).iterator();
+                .map(AABBElement::aabb).iterator();
     }
 
     private void updateVelocity(double gravitation, double delta) {
@@ -92,7 +92,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
             double goY, double goZ) {
         boolean ground = false;
         boolean slidingWall = false;
-        double lastGoZ = aabb.moveOutZ(getCollisions(aabbs), goZ);
+        double lastGoZ = aabb.moveOutZ(collisions(aabbs), goZ);
         pos.plusZ(lastGoZ);
         aabb.add(0, 0, lastGoZ);
         if (lastGoZ - goZ > 0) {
@@ -103,7 +103,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
         while (walking) {
             walking = false;
             if (goX != 0.0) {
-                double lastGoX = aabb.moveOutX(getCollisions(aabbs), goX);
+                double lastGoX = aabb.moveOutX(collisions(aabbs), goX);
                 if (lastGoX != 0.0) {
                     pos.plusX(lastGoX);
                     aabb.add(lastGoX, 0.0, 0.0);
@@ -112,7 +112,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
                 }
             }
             if (goY != 0.0) {
-                double lastGoY = aabb.moveOutY(getCollisions(aabbs), goY);
+                double lastGoY = aabb.moveOutY(collisions(aabbs), goY);
                 if (lastGoY != 0.0) {
                     pos.plusY(lastGoY);
                     aabb.add(0.0, lastGoY, 0.0);
@@ -129,21 +129,19 @@ public class MobPlayerClientMain extends MobPlayerClient {
                 // Step
                 // Calculate step height
                 AABB aabbStep = new AABB(aabb).add(goX, 0.0, 0.0);
-                double stepX =
-                        aabbStep.moveOutZ(getCollisions(aabbs), stepHeight);
+                double stepX = aabbStep.moveOutZ(collisions(aabbs), stepHeight);
                 aabbStep = new AABB(aabb).add(0.0, goY, 0.0);
-                double stepY =
-                        aabbStep.moveOutZ(getCollisions(aabbs), stepHeight);
+                double stepY = aabbStep.moveOutZ(collisions(aabbs), stepHeight);
                 double step = FastMath.max(stepX, stepY);
                 aabbStep = new AABB(aabb).add(goX, goY, step);
-                step += aabbStep.moveOutZ(getCollisions(aabbs), -step);
+                step += aabbStep.moveOutZ(collisions(aabbs), -step);
                 // Check step height
                 aabbStep.copy(aabb).add(0.0, 0.0, step);
-                step = aabb.moveOutZ(getCollisions(aabbs), step);
+                step = aabb.moveOutZ(collisions(aabbs), step);
                 // Attempt walk at new height
-                double lastGoX = aabbStep.moveOutX(getCollisions(aabbs), goX);
+                double lastGoX = aabbStep.moveOutX(collisions(aabbs), goX);
                 aabbStep.add(lastGoX, 0.0, 0.0);
-                double lastGoY = aabbStep.moveOutY(getCollisions(aabbs), goY);
+                double lastGoY = aabbStep.moveOutY(collisions(aabbs), goY);
                 // Check if walk was successful
                 if (lastGoX != 0.0 || lastGoY != 0.0) {
                     pos.plusX(lastGoX);
@@ -214,26 +212,25 @@ public class MobPlayerClientMain extends MobPlayerClient {
     @Override
     public void update(double delta) {
         Controller controller =
-                ((ScapesClient) game.getEngine().game()).getInputMode()
-                        .getPlayerController();
-        if (controller.getInventory()) {
+                ((ScapesClient) game.engine().game()).inputMode()
+                        .playerController();
+        if (controller.inventory()) {
             if (!(currentGui instanceof GuiChatWrite)) {
                 if (hasGui()) {
-                    world.getConnection().send(new PacketInteraction(
+                    world.connection().send(new PacketInteraction(
                             PacketInteraction.CLOSE_INVENTORY));
                 } else {
-                    world.getConnection().send(new PacketInteraction(
+                    world.connection().send(new PacketInteraction(
                             PacketInteraction.OPEN_INVENTORY));
                 }
             }
         }
-        if (controller.getChat()) {
+        if (controller.chat()) {
             if (!hasGui()) {
-                openGui(new GuiChatWrite(game, this,
-                        world.getScene().getChat()));
+                openGui(new GuiChatWrite(game, this, world.scene().chat()));
             }
         }
-        if (controller.getMenu()) {
+        if (controller.menu()) {
             if (hasGui()) {
                 closeGui();
             } else {
@@ -243,25 +240,25 @@ public class MobPlayerClientMain extends MobPlayerClient {
         if (currentGui == null) {
             // Inventory
             int previous = inventorySelectLeft;
-            int hotbar = controller.getHotbarLeft(previous);
+            int hotbar = controller.hotbarLeft(previous);
             if (hotbar != previous) {
                 setInventorySelectLeft(hotbar);
-                world.getConnection().send(new PacketInteraction(
+                world.connection().send(new PacketInteraction(
                         PacketInteraction.INVENTORY_SLOT_CHANGE,
                         (byte) inventorySelectLeft));
             }
             previous = inventorySelectRight;
-            hotbar = controller.getHotbarRight(previous);
+            hotbar = controller.hotbarRight(previous);
             if (hotbar != previous) {
                 setInventorySelectRight(hotbar);
-                world.getConnection().send(new PacketInteraction(
+                world.connection().send(new PacketInteraction(
                         PacketInteraction.INVENTORY_SLOT_CHANGE,
                         (byte) (inventorySelectRight + 10)));
             }
             // Debug
             if (Scapes.debug) {
                 ControllerDefault controllerDefault =
-                        game.getEngine().controller();
+                        game.engine().controller();
                 if (controllerDefault.isPressed(ControllerKey.KEY_F5)) {
                     flying = !flying;
                 }
@@ -275,7 +272,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
                 }
             }
             // Movement
-            if (controller.getJump()) {
+            if (controller.jump()) {
                 if (swimming) {
                     speed.plusZ(1.2);
                 } else if (ground) {
@@ -283,11 +280,11 @@ public class MobPlayerClientMain extends MobPlayerClient {
                     ground = false;
                 }
             }
-            Vector2 camera = controller.getCamera(delta);
+            Vector2 camera = controller.camera(delta);
             rot.setZ((rot.doubleZ() - camera.doubleX()) % 360);
             rot.setX(FastMath.min(89,
                     FastMath.max(-89, rot.doubleX() - camera.doubleY())));
-            Vector2 walk = controller.getWalk();
+            Vector2 walk = controller.walk();
             double walkSpeed = FastMath.clamp(
                     FastMath.max(FastMath.abs(walk.doubleX()),
                             FastMath.abs(walk.doubleY())), 0.0, 1.0) * 120.0;
@@ -306,7 +303,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
                 speed.plusY(FastMath.sinTable(dir) * walkSpeed);
             }
             // Placement
-            if (controller.getLeft()) {
+            if (controller.left()) {
                 if (chargeLeft < 0.01f) {
                     if (punchLeft == -1) {
                         punchLeft = System.currentTimeMillis();
@@ -314,15 +311,15 @@ public class MobPlayerClientMain extends MobPlayerClient {
                 }
             } else if (punchLeft != -1) {
                 updatePosition();
-                breakParticles(world.getTerrain(), 16);
-                world.getConnection().send(new PacketItemUse(true, FastMath.min(
+                breakParticles(world.terrain(), 16);
+                world.connection().send(new PacketItemUse(true, FastMath.min(
                         (double) (System.currentTimeMillis() - punchLeft) /
-                                getLeftWeapon().getMaterial()
-                                        .getHitWait(getLeftWeapon()), 0.5) *
+                                leftWeapon().material().hitWait(leftWeapon()),
+                        0.5) *
                         2.0));
                 punchLeft = -1;
             }
-            if (controller.getRight()) {
+            if (controller.right()) {
                 if (chargeRight < 0.01f) {
                     if (punchRight == -1) {
                         punchRight = System.currentTimeMillis();
@@ -330,11 +327,12 @@ public class MobPlayerClientMain extends MobPlayerClient {
                 }
             } else if (punchRight != -1) {
                 updatePosition();
-                breakParticles(world.getTerrain(), 16);
-                world.getConnection().send(new PacketItemUse(false,
+                breakParticles(world.terrain(), 16);
+                world.connection().send(new PacketItemUse(false,
                         FastMath.min((double) (System.currentTimeMillis() -
-                                punchRight) / getRightWeapon().getMaterial()
-                                .getHitWait(getRightWeapon()), 0.5) * 2.0));
+                                punchRight) /
+                                rightWeapon().material().hitWait(rightWeapon()),
+                                0.5) * 2.0));
                 punchRight = -1;
             }
             if (blockWait > 0) {
@@ -342,8 +340,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
             }
         }
         long time = System.currentTimeMillis();
-        float swingTime =
-                getLeftWeapon().getMaterial().getHitWait(getLeftWeapon());
+        float swingTime = leftWeapon().material().hitWait(leftWeapon());
         long punch;
         if (punchLeft == -1) {
             punch = 0;
@@ -361,7 +358,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
                 }
             }
         }
-        swingTime = getRightWeapon().getMaterial().getHitWait(getRightWeapon());
+        swingTime = rightWeapon().material().hitWait(rightWeapon());
         if (punchRight == -1) {
             punch = 0;
         } else {
@@ -383,29 +380,29 @@ public class MobPlayerClientMain extends MobPlayerClient {
     @Override
     public void onNotice(MobClient notice) {
         if (notice instanceof MobLivingClient) {
-            if (((MobLivingClient) notice).getCreatureType() ==
+            if (((MobLivingClient) notice).creatureType() ==
                     CreatureType.MONSTER) {
-                game.getPlaylist().setMusic(Playlist.Music.BATTLE, this);
+                game.playlist().setMusic(Playlist.Music.BATTLE, this);
             }
         }
     }
 
     @Override
     public void onDamage(double damage) {
-        game.getClient().getWorld().getScene().damageShake(damage);
+        game.client().world().scene().damageShake(damage);
     }
 
     @Override
     public void move(double delta) {
-        updateVelocity(flying ? 0.0 : world.getGravitation(), delta);
+        updateVelocity(flying ? 0.0 : world.gravity(), delta);
         double goX = FastMath.clamp(speed.doubleX() * delta, -1.0, 1.0);
         double goY = FastMath.clamp(speed.doubleY() * delta, -1.0, 1.0);
         double goZ = FastMath.clamp(speed.doubleZ() * delta, -1.0, 1.0);
         if (flying) {
             pos.plus(new Vector3d(goX, goY, goZ));
         } else {
-            AABB aabb = getAABB();
-            Pool<AABBElement> aabbs = world.getTerrain().getCollisions(
+            AABB aabb = aabb();
+            Pool<AABBElement> aabbs = world.terrain().collisions(
                     FastMath.floor(aabb.minX + FastMath.min(goX, 0.0)),
                     FastMath.floor(aabb.minY + FastMath.min(goY, 0.0)),
                     FastMath.floor(aabb.minZ + FastMath.min(goZ, 0.0)),
@@ -416,7 +413,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
             if (ground) {
                 speed.setZ(speed.doubleZ() / (1.0 + 4.0 * delta));
             }
-            headInWater = world.getTerrain().type(pos.intX(), pos.intY(),
+            headInWater = world.terrain().type(pos.intX(), pos.intY(),
                     FastMath.floor(pos.doubleZ() + 0.7)).isLiquid();
             collide(aabb, aabbs);
             aabbs.reset();
@@ -429,15 +426,15 @@ public class MobPlayerClientMain extends MobPlayerClient {
         double lookY = FastMath.sinTable(rot.doubleZ() * FastMath.PI / 180) *
                 FastMath.cosTable(rot.doubleX() * FastMath.PI / 180) * 6;
         double lookZ = FastMath.sinTable(rot.doubleX() * FastMath.PI / 180) * 6;
-        Vector3 viewOffset = getViewOffset();
+        Vector3 viewOffset = viewOffset();
         viewField.setView(pos.doubleX() + viewOffset.doubleX(),
                 pos.doubleY() + viewOffset.doubleY(),
                 pos.doubleZ() + viewOffset.doubleZ(), pos.doubleX() + lookX,
                 pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0, 0, 1);
-        world.getEntities().filter(entity -> entity instanceof MobClient)
+        world.entities().filter(entity -> entity instanceof MobClient)
                 .forEach(entity -> {
                     MobClient mob = (MobClient) entity;
-                    if (viewField.inView(mob.getAABB()) > 0) {
+                    if (viewField.inView(mob.aabb()) > 0) {
                         if (!world.checkBlocked(pos.intX(), pos.intY(),
                                 pos.intZ(), entity.pos.intX(),
                                 entity.pos.intY(), entity.pos.intZ())) {
@@ -451,16 +448,16 @@ public class MobPlayerClientMain extends MobPlayerClient {
             if (FastMath.max(FastMath.abs((Vector2) speed.now())) > 0.1) {
                 int x = pos.intX(), y = pos.intY(), z =
                         FastMath.floor(pos.doubleZ() - 0.1);
-                String footSteepSound = world.getTerrain().type(x, y, z)
-                        .getFootStep(world.getTerrain().data(x, y, z));
+                String footSteepSound = world.terrain().type(x, y, z)
+                        .footStepSound(world.terrain().data(x, y, z));
                 if (footSteepSound.isEmpty() && ground) {
                     z = FastMath.floor(pos.doubleZ() - 1.4);
-                    footSteepSound = world.getTerrain().type(x, y, z)
-                            .getFootStep(world.getTerrain().data(x, y, z));
+                    footSteepSound = world.terrain().type(x, y, z)
+                            .footStepSound(world.terrain().data(x, y, z));
                 }
                 if (!footSteepSound.isEmpty()) {
                     Random random = ThreadLocalRandom.current();
-                    game.getEngine().sounds().playSound(footSteepSound,
+                    game.engine().sounds().playSound(footSteepSound,
                             0.9f + random.nextFloat() * 0.2f, 1.0f);
                     footStep = 1.0 /
                             FastMath.clamp(FastMath.length(speed.now()), 1.0,
@@ -474,26 +471,26 @@ public class MobPlayerClientMain extends MobPlayerClient {
     }
 
     @Override
-    public float getLeftCharge() {
+    public float leftCharge() {
         return chargeLeft;
     }
 
     @Override
-    public float getRightCharge() {
+    public float rightCharge() {
         return chargeRight;
     }
 
     private void breakParticles(TerrainClient terrain, int amount) {
-        PointerPane pane = getSelectedBlock();
+        PointerPane pane = selectedBlock();
         if (pane != null) {
             BlockType type = terrain.type(pane.x, pane.y, pane.z);
             Optional<TerrainTexture> tex =
-                    type.getParticleTexture(pane.face, terrain, pane.x, pane.y,
+                    type.particleTexture(pane.face, terrain, pane.x, pane.y,
                             pane.z);
             if (tex.isPresent()) {
                 TerrainTexture texture = tex.get();
                 Vector3 blockPos = new Vector3d(pane.x, pane.y, pane.z);
-                ParticleManager particleManager = world.getParticleManager();
+                ParticleManager particleManager = world.particleManager();
                 Random random = ThreadLocalRandom.current();
                 for (int i = 0; i < amount; i++) {
                     particleManager.add(new ParticleBlock(particleManager,
@@ -503,11 +500,11 @@ public class MobPlayerClientMain extends MobPlayerClient {
                                     -1.0 + random.nextDouble() * 2.0,
                                     random.nextDouble() * 2.0 + 1.0), texture,
                             random.nextFloat() * 360,
-                            type.getParticleColorR(pane.face, terrain, pane.x,
+                            type.particleColorR(pane.face, terrain, pane.x,
                                     pane.y, pane.z),
-                            type.getParticleColorG(pane.face, terrain, pane.x,
+                            type.particleColorG(pane.face, terrain, pane.x,
                                     pane.y, pane.z),
-                            type.getParticleColorB(pane.face, terrain, pane.x,
+                            type.particleColorB(pane.face, terrain, pane.x,
                                     pane.y, pane.z), 1.0f));
                 }
             }
@@ -520,7 +517,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
         }
         game.add(gui);
         currentGui = gui;
-        game.getClient().getWorld().getScene().setHudVisible(false);
+        game.client().world().scene().setHudVisible(false);
     }
 
     public boolean hasGui() {
@@ -531,37 +528,37 @@ public class MobPlayerClientMain extends MobPlayerClient {
         if (currentGui != null) {
             game.remove(currentGui);
             currentGui = null;
-            game.getClient().getWorld().getScene().setHudVisible(true);
+            game.client().world().scene().setHudVisible(true);
         }
     }
 
-    public GameStateGameMP getGame() {
+    public GameStateGameMP game() {
         return game;
     }
 
-    public ClientConnection getConnection() {
-        return game.getClient();
+    public ClientConnection connection() {
+        return game.client();
     }
 
     public interface Controller {
-        Vector2 getWalk();
+        Vector2 walk();
 
-        Vector2 getCamera(double delta);
+        Vector2 camera(double delta);
 
-        boolean getLeft();
+        boolean left();
 
-        boolean getRight();
+        boolean right();
 
-        boolean getJump();
+        boolean jump();
 
-        boolean getInventory();
+        boolean inventory();
 
-        boolean getMenu();
+        boolean menu();
 
-        boolean getChat();
+        boolean chat();
 
-        int getHotbarLeft(int previous);
+        int hotbarLeft(int previous);
 
-        int getHotbarRight(int previous);
+        int hotbarRight(int previous);
     }
 }

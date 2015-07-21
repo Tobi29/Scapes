@@ -40,7 +40,7 @@ public enum ConnectionType {
         return VALUES.get(data);
     }
 
-    public byte getData() {
+    public byte data() {
         return data;
     }
 }

@@ -23,13 +23,13 @@ import org.tobi29.scapes.engine.utils.graphics.Image;
 public abstract class Game {
     protected ScapesEngine engine;
 
-    public abstract String getName();
+    public abstract String name();
 
-    public abstract String getID();
+    public abstract String id();
 
-    public abstract VersionUtil.Version getVersion();
+    public abstract VersionUtil.Version version();
 
-    public abstract Image getIcon();
+    public abstract Image icon();
 
     public abstract void init();
 

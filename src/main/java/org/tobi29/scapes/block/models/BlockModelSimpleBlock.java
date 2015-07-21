@@ -72,14 +72,14 @@ public class BlockModelSimpleBlock implements BlockModel {
 
     @Override
     public void render(GL gl, Shader shader) {
-        registry.getTexture().bind(gl);
+        registry.texture().bind(gl);
         vao.render(gl, shader);
     }
 
     @Override
     public void renderInventory(GL gl, Shader shader) {
-        registry.getTexture().bind(gl);
-        MatrixStack matrixStack = gl.getMatrixStack();
+        registry.texture().bind(gl);
+        MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(0.5f, 0.5f, 0.5f);
         matrix.rotate(57.5f, 1, 0, 0);
@@ -111,18 +111,18 @@ public class BlockModelSimpleBlock implements BlockModel {
             float xx1 = xx + 1.0f;
             float yy1 = yy + 1.0f;
             float zz1 = zz + 1.0f;
-            float terrainTile = texTop.getSize();
-            byte anim = texTop.getShaderAnimation().getID();
-            mesh.addVertex(terrain, Face.UP, x, y, z1, xx, yy, zz1,
-                    texTop.getX(), texTop.getY(), r, g, b, a, lod, anim);
+            float terrainTile = texTop.size();
+            byte anim = texTop.shaderAnimation().id();
+            mesh.addVertex(terrain, Face.UP, x, y, z1, xx, yy, zz1, texTop.x(),
+                    texTop.y(), r, g, b, a, lod, anim);
             mesh.addVertex(terrain, Face.UP, x1, y, z1, xx1, yy, zz1,
-                    texTop.getX() + terrainTile, texTop.getY(), r, g, b, a, lod,
+                    texTop.x() + terrainTile, texTop.y(), r, g, b, a, lod,
                     anim);
             mesh.addVertex(terrain, Face.UP, x1, y1, z1, xx1, yy1, zz1,
-                    texTop.getX() + terrainTile, texTop.getY() + terrainTile, r,
+                    texTop.x() + terrainTile, texTop.y() + terrainTile, r,
                     g, b, a, lod, anim);
             mesh.addVertex(terrain, Face.UP, x, y1, z1, xx, yy1, zz1,
-                    texTop.getX(), texTop.getY() + terrainTile, r, g, b, a, lod,
+                    texTop.x(), texTop.y() + terrainTile, r, g, b, a, lod,
                     anim);
         }
         if (texBottom != null &&
@@ -130,38 +130,38 @@ public class BlockModelSimpleBlock implements BlockModel {
                         connectStage) {
             float xx1 = xx + 1.0f;
             float yy1 = yy + 1.0f;
-            float terrainTile = texBottom.getSize();
-            byte anim = texBottom.getShaderAnimation().getID();
+            float terrainTile = texBottom.size();
+            byte anim = texBottom.shaderAnimation().id();
             mesh.addVertex(terrain, Face.DOWN, x, y1, z, xx, yy1, zz,
-                    texBottom.getX(), texBottom.getY() + terrainTile, r, g, b,
+                    texBottom.x(), texBottom.y() + terrainTile, r, g, b,
                     a, lod, anim);
             mesh.addVertex(terrain, Face.DOWN, x1, y1, z, xx1, yy1, zz,
-                    texBottom.getX() + terrainTile,
-                    texBottom.getY() + terrainTile, r, g, b, a, lod, anim);
+                    texBottom.x() + terrainTile, texBottom.y() + terrainTile, r,
+                    g, b, a, lod, anim);
             mesh.addVertex(terrain, Face.DOWN, x1, y, z, xx1, yy, zz,
-                    texBottom.getX() + terrainTile, texBottom.getY(), r, g, b,
+                    texBottom.x() + terrainTile, texBottom.y(), r, g, b,
                     a, lod, anim);
             mesh.addVertex(terrain, Face.DOWN, x, y, z, xx, yy, zz,
-                    texBottom.getX(), texBottom.getY(), r, g, b, a, lod, anim);
+                    texBottom.x(), texBottom.y(), r, g, b, a, lod, anim);
         }
         if (texSide1 != null &&
                 terrain.type(x, y0, z).connectStage(terrain, x, y0, z) <
                         connectStage) {
             float xx1 = xx + 1.0f;
             float zz1 = zz + 1.0f;
-            float terrainTile = texSide1.getSize();
-            byte anim = texSide1.getShaderAnimation().getID();
+            float terrainTile = texSide1.size();
+            byte anim = texSide1.shaderAnimation().id();
             mesh.addVertex(terrain, Face.NORTH, x1, y, z1, xx1, yy, zz1,
-                    texSide1.getX() + terrainTile, texSide1.getY(), r, g, b, a,
+                    texSide1.x() + terrainTile, texSide1.y(), r, g, b, a,
                     lod, anim);
             mesh.addVertex(terrain, Face.NORTH, x, y, z1, xx, yy, zz1,
-                    texSide1.getX(), texSide1.getY(), r, g, b, a, lod, anim);
+                    texSide1.x(), texSide1.y(), r, g, b, a, lod, anim);
             mesh.addVertex(terrain, Face.NORTH, x, y, z, xx, yy, zz,
-                    texSide1.getX(), texSide1.getY() + terrainTile, r, g, b, a,
+                    texSide1.x(), texSide1.y() + terrainTile, r, g, b, a,
                     lod, anim);
             mesh.addVertex(terrain, Face.NORTH, x1, y, z, xx1, yy, zz,
-                    texSide1.getX() + terrainTile,
-                    texSide1.getY() + terrainTile, r, g, b, a, lod, anim);
+                    texSide1.x() + terrainTile, texSide1.y() + terrainTile, r,
+                    g, b, a, lod, anim);
         }
         if (texSide2 != null &&
                 terrain.type(x1, y, z).connectStage(terrain, x1, y, z) <
@@ -169,19 +169,19 @@ public class BlockModelSimpleBlock implements BlockModel {
             float xx1 = xx + 1.0f;
             float yy1 = yy + 1.0f;
             float zz1 = zz + 1.0f;
-            float terrainTile = texSide2.getSize();
-            byte anim = texSide2.getShaderAnimation().getID();
+            float terrainTile = texSide2.size();
+            byte anim = texSide2.shaderAnimation().id();
             mesh.addVertex(terrain, Face.EAST, x1, y1, z1, xx1, yy1, zz1,
-                    texSide2.getX() + terrainTile, texSide2.getY(), r, g, b, a,
+                    texSide2.x() + terrainTile, texSide2.y(), r, g, b, a,
                     lod, anim);
             mesh.addVertex(terrain, Face.EAST, x1, y, z1, xx1, yy, zz1,
-                    texSide2.getX(), texSide2.getY(), r, g, b, a, lod, anim);
+                    texSide2.x(), texSide2.y(), r, g, b, a, lod, anim);
             mesh.addVertex(terrain, Face.EAST, x1, y, z, xx1, yy, zz,
-                    texSide2.getX(), texSide2.getY() + terrainTile, r, g, b, a,
+                    texSide2.x(), texSide2.y() + terrainTile, r, g, b, a,
                     lod, anim);
             mesh.addVertex(terrain, Face.EAST, x1, y1, z, xx1, yy1, zz,
-                    texSide2.getX() + terrainTile,
-                    texSide2.getY() + terrainTile, r, g, b, a, lod, anim);
+                    texSide2.x() + terrainTile, texSide2.y() + terrainTile, r,
+                    g, b, a, lod, anim);
         }
         if (texSide3 != null &&
                 terrain.type(x, y1, z).connectStage(terrain, x, y1, z) <
@@ -189,38 +189,38 @@ public class BlockModelSimpleBlock implements BlockModel {
             float xx1 = xx + 1.0f;
             float yy1 = yy + 1.0f;
             float zz1 = zz + 1.0f;
-            float terrainTile = texSide3.getSize();
-            byte anim = texSide3.getShaderAnimation().getID();
+            float terrainTile = texSide3.size();
+            byte anim = texSide3.shaderAnimation().id();
             mesh.addVertex(terrain, Face.SOUTH, x1, y1, z, xx1, yy1, zz,
-                    texSide3.getX(), texSide3.getY() + terrainTile, r, g, b, a,
+                    texSide3.x(), texSide3.y() + terrainTile, r, g, b, a,
                     lod, anim);
             mesh.addVertex(terrain, Face.SOUTH, x, y1, z, xx, yy1, zz,
-                    texSide3.getX() + terrainTile,
-                    texSide3.getY() + terrainTile, r, g, b, a, lod, anim);
+                    texSide3.x() + terrainTile, texSide3.y() + terrainTile, r,
+                    g, b, a, lod, anim);
             mesh.addVertex(terrain, Face.SOUTH, x, y1, z1, xx, yy1, zz1,
-                    texSide3.getX() + terrainTile, texSide3.getY(), r, g, b, a,
+                    texSide3.x() + terrainTile, texSide3.y(), r, g, b, a,
                     lod, anim);
             mesh.addVertex(terrain, Face.SOUTH, x1, y1, z1, xx1, yy1, zz1,
-                    texSide3.getX(), texSide3.getY(), r, g, b, a, lod, anim);
+                    texSide3.x(), texSide3.y(), r, g, b, a, lod, anim);
         }
         if (texSide4 != null &&
                 terrain.type(x0, y, z).connectStage(terrain, x0, y, z) <
                         connectStage) {
             float yy1 = yy + 1.0f;
             float zz1 = zz + 1.0f;
-            float terrainTile = texSide4.getSize();
-            byte anim = texSide4.getShaderAnimation().getID();
+            float terrainTile = texSide4.size();
+            byte anim = texSide4.shaderAnimation().id();
             mesh.addVertex(terrain, Face.WEST, x, y1, z, xx, yy1, zz,
-                    texSide4.getX(), texSide4.getY() + terrainTile, r, g, b, a,
+                    texSide4.x(), texSide4.y() + terrainTile, r, g, b, a,
                     lod, anim);
             mesh.addVertex(terrain, Face.WEST, x, y, z, xx, yy, zz,
-                    texSide4.getX() + terrainTile,
-                    texSide4.getY() + terrainTile, r, g, b, a, lod, anim);
+                    texSide4.x() + terrainTile, texSide4.y() + terrainTile, r,
+                    g, b, a, lod, anim);
             mesh.addVertex(terrain, Face.WEST, x, y, z1, xx, yy, zz1,
-                    texSide4.getX() + terrainTile, texSide4.getY(), r, g, b, a,
+                    texSide4.x() + terrainTile, texSide4.y(), r, g, b, a,
                     lod, anim);
             mesh.addVertex(terrain, Face.WEST, x, y1, z1, xx, yy1, zz1,
-                    texSide4.getX(), texSide4.getY(), r, g, b, a, lod, anim);
+                    texSide4.x(), texSide4.y(), r, g, b, a, lod, anim);
         }
     }
 
@@ -237,88 +237,87 @@ public class BlockModelSimpleBlock implements BlockModel {
             TerrainTexture texSide4) {
         mesh.color(r, g, b, a);
         if (texTop != null) {
-            float terrainTile = texTop.getSize();
+            float terrainTile = texTop.size();
             mesh.normal(0, 0, 1);
-            mesh.texture(texTop.getX(), texTop.getY());
+            mesh.texture(texTop.x(), texTop.y());
             mesh.vertex(-0.5f, -0.5f, 0.5f);
-            mesh.texture(texTop.getX() + terrainTile, texTop.getY());
+            mesh.texture(texTop.x() + terrainTile, texTop.y());
             mesh.vertex(0.5f, -0.5f, 0.5f);
-            mesh.texture(texTop.getX() + terrainTile,
-                    texTop.getY() + terrainTile);
+            mesh.texture(texTop.x() + terrainTile, texTop.y() + terrainTile);
             mesh.vertex(0.5f, 0.5f, 0.5f);
-            mesh.texture(texTop.getX(), texTop.getY() + terrainTile);
+            mesh.texture(texTop.x(), texTop.y() + terrainTile);
             mesh.vertex(-0.5f, 0.5f, 0.5f);
         }
         if (texSide2 != null) {
             if (inventory) {
                 mesh.color(r * 0.7f, g * 0.7f, b * 0.7f, a * 1.0f);
             }
-            float terrainTile = texSide2.getSize();
+            float terrainTile = texSide2.size();
             mesh.normal(1, 0, 0);
-            mesh.texture(texSide2.getX(), texSide2.getY());
+            mesh.texture(texSide2.x(), texSide2.y());
             mesh.vertex(0.5f, 0.5f, 0.5f);
-            mesh.texture(texSide2.getX() + terrainTile, texSide2.getY());
+            mesh.texture(texSide2.x() + terrainTile, texSide2.y());
             mesh.vertex(0.5f, -0.5f, 0.5f);
-            mesh.texture(texSide2.getX() + terrainTile,
-                    texSide2.getY() + terrainTile);
+            mesh.texture(texSide2.x() + terrainTile,
+                    texSide2.y() + terrainTile);
             mesh.vertex(0.5f, -0.5f, -0.5f);
-            mesh.texture(texSide2.getX(), texSide2.getY() + terrainTile);
+            mesh.texture(texSide2.x(), texSide2.y() + terrainTile);
             mesh.vertex(0.5f, 0.5f, -0.5f);
         }
         if (texSide3 != null) {
             if (inventory) {
                 mesh.color(r * 0.8f, g * 0.8f, b * 0.8f, a);
             }
-            float terrainTile = texSide3.getSize();
+            float terrainTile = texSide3.size();
             mesh.normal(0, 1, 0);
-            mesh.texture(texSide3.getX() + terrainTile,
-                    texSide3.getY() + terrainTile);
+            mesh.texture(texSide3.x() + terrainTile,
+                    texSide3.y() + terrainTile);
             mesh.vertex(0.5f, 0.5f, -0.5f);
-            mesh.texture(texSide3.getX(), texSide3.getY() + terrainTile);
+            mesh.texture(texSide3.x(), texSide3.y() + terrainTile);
             mesh.vertex(-0.5f, 0.5f, -0.5f);
-            mesh.texture(texSide3.getX(), texSide3.getY());
+            mesh.texture(texSide3.x(), texSide3.y());
             mesh.vertex(-0.5f, 0.5f, 0.5f);
-            mesh.texture(texSide3.getX() + terrainTile, texSide3.getY());
+            mesh.texture(texSide3.x() + terrainTile, texSide3.y());
             mesh.vertex(0.5f, 0.5f, 0.5f);
         }
         if (!inventory) {
             if (texSide4 != null) {
-                float terrainTile = texSide4.getSize();
+                float terrainTile = texSide4.size();
                 mesh.normal(-1, 0, 0);
-                mesh.texture(texSide4.getX(), texSide4.getY() + terrainTile);
+                mesh.texture(texSide4.x(), texSide4.y() + terrainTile);
                 mesh.vertex(-0.5f, 0.5f, -0.5f);
-                mesh.texture(texSide4.getX() + terrainTile,
-                        texSide4.getY() + terrainTile);
+                mesh.texture(texSide4.x() + terrainTile,
+                        texSide4.y() + terrainTile);
                 mesh.vertex(-0.5f, -0.5f, -0.5f);
-                mesh.texture(texSide4.getX() + terrainTile, texSide4.getY());
+                mesh.texture(texSide4.x() + terrainTile, texSide4.y());
                 mesh.vertex(-0.5f, -0.5f, 0.5f);
-                mesh.texture(texSide4.getX(), texSide4.getY());
+                mesh.texture(texSide4.x(), texSide4.y());
                 mesh.vertex(-0.5f, 0.5f, 0.5f);
             }
             if (texSide1 != null) {
-                float terrainTile = texSide1.getSize();
+                float terrainTile = texSide1.size();
                 mesh.normal(0, -1, 0);
-                mesh.texture(texSide1.getX(), texSide1.getY());
+                mesh.texture(texSide1.x(), texSide1.y());
                 mesh.vertex(0.5f, -0.5f, 0.5f);
-                mesh.texture(texSide1.getX() + terrainTile, texSide1.getY());
+                mesh.texture(texSide1.x() + terrainTile, texSide1.y());
                 mesh.vertex(-0.5f, -0.5f, 0.5f);
-                mesh.texture(texSide1.getX() + terrainTile,
-                        texSide1.getY() + terrainTile);
+                mesh.texture(texSide1.x() + terrainTile,
+                        texSide1.y() + terrainTile);
                 mesh.vertex(-0.5f, -0.5f, -0.5f);
-                mesh.texture(texSide1.getX(), texSide1.getY() + terrainTile);
+                mesh.texture(texSide1.x(), texSide1.y() + terrainTile);
                 mesh.vertex(0.5f, -0.5f, -0.5f);
             }
             if (texBottom != null) {
-                float terrainTile = texBottom.getSize();
+                float terrainTile = texBottom.size();
                 mesh.normal(0, 0, -1);
-                mesh.texture(texBottom.getX(), texBottom.getY() + terrainTile);
+                mesh.texture(texBottom.x(), texBottom.y() + terrainTile);
                 mesh.vertex(-0.5f, 0.5f, -0.5f);
-                mesh.texture(texBottom.getX() + terrainTile,
-                        texBottom.getY() + terrainTile);
+                mesh.texture(texBottom.x() + terrainTile,
+                        texBottom.y() + terrainTile);
                 mesh.vertex(0.5f, 0.5f, -0.5f);
-                mesh.texture(texBottom.getX() + terrainTile, texBottom.getY());
+                mesh.texture(texBottom.x() + terrainTile, texBottom.y());
                 mesh.vertex(0.5f, -0.5f, -0.5f);
-                mesh.texture(texBottom.getX(), texBottom.getY());
+                mesh.texture(texBottom.x(), texBottom.y());
                 mesh.vertex(-0.5f, -0.5f, -0.5f);
             }
         }

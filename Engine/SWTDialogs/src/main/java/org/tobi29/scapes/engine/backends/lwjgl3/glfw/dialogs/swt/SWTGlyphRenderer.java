@@ -56,7 +56,7 @@ public class SWTGlyphRenderer implements GlyphRenderer {
 
     @SuppressWarnings("AccessToStaticFieldLockedOnInstance")
     @Override
-    public synchronized GlyphPage getPage(int id) {
+    public synchronized GlyphPage page(int id) {
         float[] width = new float[pageTiles];
         MutableSingle<ByteBuffer> output = new MutableSingle<>(null);
         Display display = Display.getDefault();
@@ -99,8 +99,7 @@ public class SWTGlyphRenderer implements GlyphRenderer {
             gc.dispose();
             image.getImageData()
                     .getPixels(0, 0, imageSize * imageSize, color, 0);
-            ByteBuffer buffer =
-                    BufferCreator.byteBuffer(imageSize * imageSize << 2);
+            ByteBuffer buffer = BufferCreator.bytes(imageSize * imageSize << 2);
             i = 0;
             while (buffer.hasRemaining()) {
                 buffer.put(WHITE);
@@ -114,12 +113,12 @@ public class SWTGlyphRenderer implements GlyphRenderer {
     }
 
     @Override
-    public int getPageID(char character) {
+    public int pageID(char character) {
         return character >> pageTileBits;
     }
 
     @Override
-    public int getPageLetter(char character) {
+    public int pageCode(char character) {
         return character & pageTileMask;
     }
 

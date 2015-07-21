@@ -17,5 +17,5 @@
 package org.tobi29.scapes.entity;
 
 public interface MobileEntity {
-    MobPositionHandler getPositionHandler();
+    MobPositionHandler positionHandler();
 }

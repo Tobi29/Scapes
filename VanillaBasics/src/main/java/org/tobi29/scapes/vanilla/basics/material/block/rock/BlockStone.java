@@ -38,45 +38,45 @@ public abstract class BlockStone extends BlockSimpleData {
     }
 
     @Override
-    protected int getTypes() {
+    protected int types() {
         return stoneRegistry.values().size();
     }
 
     @Override
-    public Optional<TerrainTexture> getParticleTexture(Face face,
+    public Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
         return Optional.of(textures[terrain.data(x, y, z)]);
     }
 
     @Override
-    public double getResistance(ItemStack item, int data) {
-        return "Pickaxe".equals(item.getMaterial().getToolType(item)) &&
-                canBeBroken(item.getMaterial().getToolLevel(item), data) ?
-                8 * stoneRegistry.values().get(data).getResistance() : -1;
+    public double resistance(ItemStack item, int data) {
+        return "Pickaxe".equals(item.material().toolType(item)) &&
+                canBeBroken(item.material().toolLevel(item), data) ?
+                8 * stoneRegistry.values().get(data).resistance() : -1;
     }
 
     @Override
-    public String getFootStep(int data) {
+    public String footStepSound(int data) {
         return "VanillaBasics:sound/footsteps/Stone.ogg";
     }
 
     @Override
-    public String getBreak(ItemStack item, int data) {
+    public String breakSound(ItemStack item, int data) {
         return "VanillaBasics:sound/blocks/Stone.ogg";
     }
 
     public boolean canBeBroken(int toolLevel, int data) {
-        return FastMath
-                .round(stoneRegistry.values().get(data).getResistance()) * 10 <=
+        return FastMath.round(stoneRegistry.values().get(data).resistance()) *
+                10 <=
                 toolLevel;
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 16;
     }
 
-    protected String getStoneName(ItemStack item) {
-        return stoneRegistry.values().get(item.getData()).getName();
+    protected String stoneName(ItemStack item) {
+        return stoneRegistry.values().get(item.data()).name();
     }
 }

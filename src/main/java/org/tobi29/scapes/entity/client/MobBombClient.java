@@ -35,7 +35,7 @@ public class MobBombClient extends MobClient {
     private boolean exploded;
 
     public MobBombClient(WorldClient world) {
-        this(world, Vector3d.ZERO, Vector3d.ZERO, world.getAir(), 0, 0.0);
+        this(world, Vector3d.ZERO, Vector3d.ZERO, world.air(), 0, 0.0);
     }
 
     public MobBombClient(WorldClient world, Vector3 pos, Vector3 speed,
@@ -61,7 +61,7 @@ public class MobBombClient extends MobClient {
     public void update(double delta) {
         time -= delta;
         if (time < 0.05 && !exploded) { // TODO: Replace with proper packet
-            ((BlockExplosive) item.getMaterial())
+            ((BlockExplosive) item.material())
                     .explodeClient(world, pos.now(), speed.now());
             exploded = true;
         }

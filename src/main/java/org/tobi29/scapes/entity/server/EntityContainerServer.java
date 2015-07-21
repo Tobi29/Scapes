@@ -21,11 +21,11 @@ import org.tobi29.scapes.block.Inventory;
 import java.util.stream.Stream;
 
 public interface EntityContainerServer {
-    Inventory getInventory();
+    Inventory inventory();
 
     void addViewer(MobPlayerServer player);
 
-    Stream<MobPlayerServer> getViewers();
+    Stream<MobPlayerServer> viewers();
 
     void removeViewer(MobPlayerServer player);
 }

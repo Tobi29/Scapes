@@ -24,7 +24,7 @@ import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteServer;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.graphics.PNG;
-import org.tobi29.scapes.engine.utils.io.FileUtil;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
@@ -75,46 +75,46 @@ public class WorldFormat {
         plugins.initServer(server);
         seed = tagStructure.getLong("Seed");
         worldsTagStructure = tagStructure.getStructure("Worlds");
-        Iterator<Dimension> iterator = plugins.getDimensions().iterator();
+        Iterator<Dimension> iterator = plugins.dimensions().iterator();
         while (iterator.hasNext()) {
             registerWorld(iterator.next());
         }
-        defaultWorld = worlds.get(plugins.getWorldType().getID());
+        defaultWorld = worlds.get(plugins.worldType().id());
     }
 
-    public static String getFilenameExtension() {
+    public static String filenameExtension() {
         return FILENAME_EXTENSION;
     }
 
-    public IDStorage getIDStorage() {
+    public IDStorage idStorage() {
         return idStorage;
     }
 
-    public PlayerData getPlayerData() {
+    public PlayerData playerData() {
         return playerData;
     }
 
-    public PlayerBans getPlayerBans() {
+    public PlayerBans playerBans() {
         return playerBans;
     }
 
-    public long getSeed() {
+    public long seed() {
         return seed;
     }
 
-    public Plugins getPlugins() {
+    public Plugins plugins() {
         return plugins;
     }
 
-    public WorldServer getWorld(String name) {
+    public WorldServer world(String name) {
         return worlds.get(name);
     }
 
-    public WorldServer getDefaultWorld() {
+    public WorldServer defaultWorld() {
         return defaultWorld;
     }
 
-    public Collection<String> getWorldNames() {
+    public Collection<String> worldNames() {
         return worlds.keySet();
     }
 
@@ -122,30 +122,31 @@ public class WorldFormat {
         Collection<String> worlds = this.worlds.keySet();
         String[] worldsArray = new String[worlds.size()];
         worlds.toArray(worldsArray);
-        server.getControlPanels().forEach(
+        server.controlPanels().forEach(
                 controlPanel -> controlPanel.updateWorlds(worldsArray));
     }
 
     public synchronized WorldServer registerWorld(Dimension dimension)
             throws IOException {
-        return registerWorld(dimension, dimension.getID());
+        return registerWorld(dimension, dimension.id());
     }
 
     public synchronized WorldServer registerWorld(Dimension dimension,
             String name) throws IOException {
         Path worldDirectory = regionPath.resolve(name.toLowerCase());
         Files.createDirectories(worldDirectory);
-        WorldServer world = new WorldServer(this, name, dimension.getID(),
-                server.getConnection(), server.getTaskExecutor(),
+        WorldServer world =
+                new WorldServer(this, name, dimension.id(), server.connection(),
+                        server.taskExecutor(),
                 newWorld -> new TerrainInfiniteServer(newWorld, 512,
-                        worldDirectory, server.getTaskExecutor(),
-                        plugins.getRegistry().getAir()));
+                        worldDirectory, server.taskExecutor(),
+                        plugins.registry().air()));
         WorldEnvironment environment = dimension.createEnvironment(world);
         LOGGER.info("Adding world: {} (Environment:{})", name, environment);
         world.init(environment);
-        world.read(worldsTagStructure.getStructure(dimension.getID()));
+        world.read(worldsTagStructure.getStructure(dimension.id()));
         world.calculateSpawn();
-        worlds.put(dimension.getID(), world);
+        worlds.put(dimension.id(), world);
         world.start();
         updateControlPanelWorlds();
         return world;
@@ -159,7 +160,7 @@ public class WorldFormat {
         LOGGER.info("Removing world: {}", name);
         world.stop();
         world.dispose();
-        worldsTagStructure.setStructure(world.getName(), world.write());
+        worldsTagStructure.setStructure(world.name(), world.write());
         updateControlPanelWorlds();
     }
 
@@ -187,7 +188,7 @@ public class WorldFormat {
         }
     }
 
-    public Collection<WorldServer> getWorlds() {
+    public Collection<WorldServer> worlds() {
         return worlds.values();
     }
 

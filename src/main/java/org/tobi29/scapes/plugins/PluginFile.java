@@ -19,7 +19,7 @@ package org.tobi29.scapes.plugins;
 import org.tobi29.scapes.engine.utils.VersionUtil;
 import org.tobi29.scapes.engine.utils.io.BufferedReadChannelStream;
 import org.tobi29.scapes.engine.utils.io.ChecksumUtil;
-import org.tobi29.scapes.engine.utils.io.FileUtil;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
 
@@ -53,31 +53,31 @@ public class PluginFile {
         }
     }
 
-    public VersionUtil.Version getVersion() {
+    public VersionUtil.Version version() {
         return version;
     }
 
-    public VersionUtil.Version getScapesVersion() {
+    public VersionUtil.Version scapesVersion() {
         return scapesVersion;
     }
 
-    public Path getFile() {
+    public Path file() {
         return path;
     }
 
-    public String getName() {
+    public String name() {
         return name;
     }
 
-    public String getParent() {
+    public String parent() {
         return parent;
     }
 
-    public byte[] getChecksum() {
+    public byte[] checksum() {
         return checksum.clone();
     }
 
-    public Plugin getPlugin(ClassLoader classLoader) throws IOException {
+    public Plugin plugin(ClassLoader classLoader) throws IOException {
         try {
             return (Plugin) classLoader.loadClass(mainClass).getConstructor()
                     .newInstance();

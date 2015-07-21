@@ -63,8 +63,8 @@ public class GuiComponentSliderVert extends GuiComponent {
             FontRenderer font, double delta) {
         float slider = (float) value * (height - sliderHeight) + y +
                 sliderHeight * 0.5f;
-        gl.getTextureManager().unbind(gl);
-        MatrixStack matrixStack = gl.getMatrixStack();
+        gl.textures().unbind(gl);
+        MatrixStack matrixStack = gl.matrixStack();
         vaoShadow.render(gl, shader);
         Matrix matrix = matrixStack.push();
         matrix.translate(0.0f, slider, 0.0f);
@@ -85,7 +85,7 @@ public class GuiComponentSliderVert extends GuiComponent {
             ScapesEngine engine) {
         super.update(mouseX, mouseY, mouseInside, engine);
         if (dragging) {
-            if (engine.guiController().getLeftDrag()) {
+            if (engine.guiController().leftDrag()) {
                 value = FastMath.clamp((mouseY - y - sliderHeight * 0.5) /
                         (height - sliderHeight), 0, 1);
                 if (hovering) {
@@ -101,7 +101,7 @@ public class GuiComponentSliderVert extends GuiComponent {
             }
         }
         if (checkInside(mouseX, mouseY)) {
-            if (engine.guiController().getLeftClick()) {
+            if (engine.guiController().leftClick()) {
                 engine.sounds()
                         .playSound("Engine:sound/Click.ogg", 1.0f, 1.0f);
             }

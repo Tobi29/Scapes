@@ -46,15 +46,15 @@ public class GuiWidget extends Gui {
     public void update(double mouseX, double mouseY, boolean mouseInside,
             ScapesEngine engine) {
         super.update(mouseX, mouseY, mouseInside, engine);
-        double mouseXX = getAlignedX(mouseX, engine);
+        double mouseXX = alignedX(mouseX, engine);
         GuiController guiController = engine.guiController();
-        if (guiController.getLeftClick() &&
+        if (guiController.leftClick() &&
                 titleBar.checkInside(mouseXX - x, mouseY - y)) {
             dragX = x - mouseXX;
             dragY = y - mouseY;
             dragging = true;
         }
-        if (guiController.getLeftDrag()) {
+        if (guiController.leftDrag()) {
             if (dragging) {
                 x = (int) (dragX + mouseXX);
                 y = (int) (dragY + mouseY);
@@ -67,9 +67,8 @@ public class GuiWidget extends Gui {
     @Override
     public void renderComponent(GL gl, Shader shader,
             FontRenderer font, double delta) {
-        gl.getTextureManager().unbind(gl);
-        OpenGL openGL = gl.getOpenGL();
-        openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
+        gl.textures().unbind(gl);
+        gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
         vao.render(gl, shader);
     }
 }

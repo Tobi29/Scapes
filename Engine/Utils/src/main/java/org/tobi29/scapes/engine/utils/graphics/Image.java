@@ -29,7 +29,7 @@ public class Image {
     }
 
     public Image(int width, int height) {
-        this(width, height, BufferCreator.byteBuffer(width * height << 2));
+        this(width, height, BufferCreator.bytes(width * height << 2));
     }
 
     public Image(int width, int height, ByteBuffer buffer) {
@@ -38,15 +38,15 @@ public class Image {
         this.buffer = buffer;
     }
 
-    public int getWidth() {
+    public int width() {
         return width;
     }
 
-    public int getHeight() {
+    public int height() {
         return height;
     }
 
-    public ByteBuffer getBuffer() {
+    public ByteBuffer buffer() {
         return buffer.asReadOnlyBuffer();
     }
 }

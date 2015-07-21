@@ -40,9 +40,9 @@ public class PacketSendChunk extends Packet implements PacketClient {
     }
 
     public PacketSendChunk(TerrainInfiniteChunkServer chunk) {
-        super(new Vector3d(chunk.getBlockX(), chunk.getBlockY(), 0), true);
-        x = chunk.getX();
-        y = chunk.getY();
+        super(new Vector3d(chunk.blockX(), chunk.blockY(), 0), true);
+        x = chunk.x();
+        y = chunk.y();
         tag = chunk.save(true);
     }
 
@@ -65,12 +65,12 @@ public class PacketSendChunk extends Packet implements PacketClient {
 
     @Override
     public void runClient(ClientConnection client, WorldClient world) {
-        Terrain terrain = client.getWorld().getTerrain();
+        Terrain terrain = client.world().terrain();
         if (terrain instanceof TerrainInfiniteClient) {
             TerrainInfiniteClient terrainInfinite =
                     (TerrainInfiniteClient) terrain;
             Optional<TerrainInfiniteChunkClient> chunk =
-                    terrainInfinite.getChunkNoLoad(x, y);
+                    terrainInfinite.chunkNoLoad(x, y);
             if (chunk.isPresent()) {
                 TerrainInfiniteChunkClient chunk2 = chunk.get();
                 chunk2.load(tag);
@@ -78,11 +78,10 @@ public class PacketSendChunk extends Packet implements PacketClient {
                 for (int x = -1; x <= 1; x++) {
                     for (int y = -1; y <= 1; y++) {
                         Optional<TerrainInfiniteChunkClient> geomRenderer =
-                                terrainInfinite
-                                        .getChunkNoLoad(chunk2.getX() + x,
-                                                chunk2.getY() + y);
+                                terrainInfinite.chunkNoLoad(chunk2.x() + x,
+                                        chunk2.y() + y);
                         if (geomRenderer.isPresent()) {
-                            geomRenderer.get().getRendererChunk()
+                            geomRenderer.get().rendererChunk()
                                     .setGeometryDirty();
                         }
                     }

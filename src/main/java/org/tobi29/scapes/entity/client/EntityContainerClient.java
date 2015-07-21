@@ -20,7 +20,7 @@ import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.engine.gui.Gui;
 
 public interface EntityContainerClient {
-    Gui getGui(MobPlayerClientMain player);
+    Gui gui(MobPlayerClientMain player);
 
-    Inventory getInventory();
+    Inventory inventory();
 }

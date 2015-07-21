@@ -225,11 +225,11 @@ public class ChunkMesh {
         return new VAO(vaoAttributes, pos, indexArray, RenderType.TRIANGLES);
     }
 
-    public int getSize() {
+    public int size() {
         return (int) (pos * 1.5);
     }
 
-    public AABB getAABB() {
+    public AABB aabb() {
         return aabb;
     }
 

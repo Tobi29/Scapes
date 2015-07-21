@@ -24,7 +24,7 @@ import org.tobi29.scapes.engine.gui.GuiComponentPane;
 import org.tobi29.scapes.engine.gui.GuiComponentScrollPaneList;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.engine.utils.Pair;
-import org.tobi29.scapes.engine.utils.io.FileUtil;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -61,15 +61,17 @@ public class GuiPlaylists extends GuiMenu {
                 new GuiComponentTextButton(112, 370, 176, 30, 18, "Add");
         add.addLeftClick(event -> {
             try {
-                Path directory = state.getEngine().home().resolve("playlists")
+                Path directory = state.engine().home().resolve("playlists")
                                 .resolve(playlist);
-                state.getEngine().container()
-                        .importFromUser(directory,
-                                new Pair[]{new Pair<>("*.*", "All Files"),
-                                        new Pair<>("*.ogg", "ogg-Vorbis File"),
-                                        new Pair<>("*.mp3", "MP3 File"),
-                                        new Pair<>("*.wav", "Wave File")},
-                                "Import music", true);
+                Path[] imports = state.engine().container().openFileDialog(
+                        new Pair[]{new Pair<>("*.*", "All Files"),
+                                new Pair<>("*.ogg", "ogg-Vorbis File"),
+                                new Pair<>("*.mp3", "MP3 File"),
+                                new Pair<>("*.wav", "Wave File")},
+                        "Import music", true);
+                for (Path copy : imports) {
+                    Files.copy(copy, directory.resolve(copy.getFileName()));
+                }
                 updateTitles(playlist);
             } catch (IOException e) {
                 LOGGER.warn("Failed to import music: {}", e.toString());
@@ -88,7 +90,7 @@ public class GuiPlaylists extends GuiMenu {
         elements.clear();
         this.playlist = playlist;
         try {
-            Path path = state.getEngine().home().resolve("playlists")
+            Path path = state.engine().home().resolve("playlists")
                     .resolve(playlist);
             List<Path> titles = new ArrayList<>();
             Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
@@ -117,7 +119,7 @@ public class GuiPlaylists extends GuiMenu {
             super(0, 0, 378, 20);
             GuiComponentTextButton play =
                     new GuiComponentTextButton(20, 2, 30, 15, 12, "Play");
-            play.addLeftClick(event -> state.getEngine().sounds()
+            play.addLeftClick(event -> state.engine().sounds()
                     .playMusic(FileUtil.read(path), 1.0f, 1.0f));
             GuiComponentTextButton label =
                     new GuiComponentTextButton(60, 2, 220, 15, 12, title);

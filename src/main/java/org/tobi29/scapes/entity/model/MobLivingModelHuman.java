@@ -19,7 +19,6 @@ package org.tobi29.scapes.entity.model;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -60,7 +59,7 @@ public class MobLivingModelHuman implements MobModel {
     private final Box legLeft, legRight, armLeft, armRight;
     private double swing, lazyName, moveSpeedRender;
     private float armDirLeft, armDirRight, armDirLeftRender, armDirRightRender,
-            armDirLeft2, armDirRight2, xRotRender, zRotRender;
+            armDirLeft2, armDirRight2, pitch, yaw;
 
     public MobLivingModelHuman(MobLivingEquippedClient entity,
             Texture texture) {
@@ -75,7 +74,7 @@ public class MobLivingModelHuman implements MobModel {
     public MobLivingModelHuman(MobLivingEquippedClient entity, Texture texture,
             boolean thin, boolean culling) {
         this.entity = entity;
-        pos = new MutableVector3d(entity.getPos());
+        pos = new MutableVector3d(entity.pos());
         this.texture = texture;
         this.culling = culling;
         if (thin) {
@@ -91,20 +90,19 @@ public class MobLivingModelHuman implements MobModel {
         }
     }
 
-    public static void getParticles(ParticleManager particleManager,
-            Vector3 pos, Vector3 speed, Vector3 rot, Texture texture) {
-        getParticles(particleManager, pos, speed, rot, texture, false);
+    public static void particles(ParticleManager particleManager, Vector3 pos,
+            Vector3 speed, Vector3 rot, Texture texture) {
+        particles(particleManager, pos, speed, rot, texture, false);
     }
 
-    public static void getParticles(ParticleManager particleManager,
-            Vector3 pos, Vector3 speed, Vector3 rot, Texture texture,
-            boolean thin) {
-        getParticles(particleManager, pos, speed, rot, texture, thin, true);
+    public static void particles(ParticleManager particleManager, Vector3 pos,
+            Vector3 speed, Vector3 rot, Texture texture, boolean thin) {
+        particles(particleManager, pos, speed, rot, texture, thin, true);
     }
 
-    public static void getParticles(ParticleManager particleManager,
-            Vector3 pos, Vector3 speed, Vector3 rot, Texture texture,
-            boolean thin, boolean culling) {
+    public static void particles(ParticleManager particleManager, Vector3 pos,
+            Vector3 speed, Vector3 rot, Texture texture, boolean thin,
+            boolean culling) {
         Box legLeft, legRight, armLeft, armRight;
         if (thin) {
             legLeft = LEG_THIN_LEFT;
@@ -180,7 +178,7 @@ public class MobLivingModelHuman implements MobModel {
     }
 
     @Override
-    public Vector3 getPos() {
+    public Vector3 pos() {
         return pos.now();
     }
 
@@ -200,27 +198,24 @@ public class MobLivingModelHuman implements MobModel {
         double factorRot = FastMath.min(1.0, delta * 20.0);
         double factorSpeed = FastMath.min(1.0, delta * 5.0);
         double moveSpeed = FastMath.min(
-                FastMath.sqrt(FastMath.length((Vector2) entity.getSpeed())),
-                2.0);
-        xRotRender -=
-                FastMath.angleDiff(entity.getXRot(), xRotRender) * factorRot;
-        zRotRender -=
-                FastMath.angleDiff(entity.getZRot(), zRotRender) * factorRot;
-        pos.plus(entity.getPos().minus(pos.now()).multiply(factorPos));
+                FastMath.sqrt(FastMath.length((Vector2) entity.speed())), 2.0);
+        pitch -= FastMath.angleDiff(entity.pitch(), pitch) * factorRot;
+        yaw -= FastMath.angleDiff(entity.yaw(), yaw) * factorRot;
+        pos.plus(entity.pos().minus(pos.now()).multiply(factorPos));
         swing += moveSpeed * 2.0 * delta;
         swing %= FastMath.TWO_PI;
         lazyName += delta;
         lazyName %= FastMath.TWO_PI;
         moveSpeedRender += (moveSpeed - moveSpeedRender) * factorSpeed;
-        float newChargeLeft = entity.getLeftCharge();
-        ItemStack weaponLeft = entity.getLeftWeapon();
+        float newChargeLeft = entity.leftCharge();
+        ItemStack weaponLeft = entity.leftWeapon();
         if (newChargeLeft > 0.01f) {
             armDirLeft2 += 2.4 * delta;
             armDirLeft2 -= armDirLeft2 * 2.7 * delta;
         } else {
             if (armDirLeft > 0.01f) {
                 if (armDirLeft >= 0.45f) {
-                    if (weaponLeft.getMaterial().isWeapon(weaponLeft)) {
+                    if (weaponLeft.material().isWeapon(weaponLeft)) {
                         armDirLeftRender = -1.1f;
                     } else {
                         armDirLeftRender = -1.2f;
@@ -232,22 +227,22 @@ public class MobLivingModelHuman implements MobModel {
             }
         }
         armDirLeft = newChargeLeft;
-        if (weaponLeft.getMaterial().isWeapon(weaponLeft) &&
+        if (weaponLeft.material().isWeapon(weaponLeft) &&
                 armDirLeftRender < -0.6f) {
             armDirLeftRender +=
                     (armDirLeft - armDirLeftRender) * factorPos / 12.0;
         } else {
             armDirLeftRender += (armDirLeft - armDirLeftRender) * factorPos;
         }
-        float newChargeRight = entity.getRightCharge();
-        ItemStack weaponRight = entity.getRightWeapon();
+        float newChargeRight = entity.rightCharge();
+        ItemStack weaponRight = entity.rightWeapon();
         if (newChargeRight > 0.01f) {
             armDirRight2 += 2.4 * delta;
             armDirRight2 -= armDirRight2 * 2.7 * delta;
         } else {
             if (armDirRight > 0.01f) {
                 if (armDirRight >= 0.45f) {
-                    if (weaponRight.getMaterial().isWeapon(weaponRight)) {
+                    if (weaponRight.material().isWeapon(weaponRight)) {
                         armDirRightRender = -1.1f;
                     } else {
                         armDirRightRender = -1.2f;
@@ -259,7 +254,7 @@ public class MobLivingModelHuman implements MobModel {
             }
         }
         armDirRight = newChargeRight;
-        if (weaponRight.getMaterial().isWeapon(weaponRight) &&
+        if (weaponRight.material().isWeapon(weaponRight) &&
                 armDirRightRender < -0.6f) {
             armDirRightRender +=
                     (armDirRight - armDirRightRender) * factorPos / 12.0;
@@ -269,42 +264,40 @@ public class MobLivingModelHuman implements MobModel {
     }
 
     @Override
-    public void render(GL gl, WorldClient world, Cam cam,
-            Shader shader) {
+    public void render(GL gl, WorldClient world, Cam cam, Shader shader) {
         float damageColor = (float) (1.0 - FastMath.min(1.0,
-                FastMath.max(0.0f, entity.getInvincibleTicks() / 0.8)));
+                FastMath.max(0.0f, entity.invincibleTicks() / 0.8)));
         float posRenderX = (float) (pos.doubleX() - cam.position.doubleX());
         float posRenderY = (float) (pos.doubleY() - cam.position.doubleY());
         float posRenderZ = (float) (pos.doubleZ() - cam.position.doubleZ());
-        double l = xRotRender * 0.004;
+        double l = pitch * 0.004;
         if (l < 0.0) {
-            double d = zRotRender * FastMath.DEG_2_RAD;
+            double d = yaw * FastMath.DEG_2_RAD;
             posRenderX += FastMath.cosTable(d) * l;
             posRenderY += FastMath.sinTable(d) * l;
         }
         double swingDir = FastMath.cosTable(swing) * moveSpeedRender * 0.5;
         double lazyNameDir = (FastMath.cosTable(lazyName) * 0.5 + 0.5) *
                 (moveSpeedRender * 0.2 + 0.2);
-        OpenGL openGL = gl.getOpenGL();
-        openGL.setAttribute2f(4, world.getTerrain()
-                        .blockLight(FastMath.floor(entity.getX()),
-                                FastMath.floor(entity.getY()),
-                                FastMath.floor(entity.getZ())) / 15.0f,
-                world.getTerrain().sunLight(FastMath.floor(entity.getX()),
-                        FastMath.floor(entity.getY()),
-                        FastMath.floor(entity.getZ())) / 15.0f);
+        gl.setAttribute2f(4, world.terrain()
+                        .blockLight(FastMath.floor(entity.x()),
+                                FastMath.floor(entity.y()),
+                                FastMath.floor(entity.z())) / 15.0f,
+                world.terrain().sunLight(FastMath.floor(entity.x()),
+                        FastMath.floor(entity.y()),
+                        FastMath.floor(entity.z())) / 15.0f);
         texture.bind(gl);
         if (!culling) {
-            openGL.disableCulling();
+            gl.disableCulling();
         }
-        MatrixStack matrixStack = gl.getMatrixStack();
+        MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(posRenderX, posRenderY, posRenderZ);
-        matrix.rotate(zRotRender - 90.0f, 0.0f, 0.0f, 1.0f);
+        matrix.rotate(yaw - 90.0f, 0.0f, 0.0f, 1.0f);
         BODY.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrix = matrixStack.push();
         matrix.translate(0, 0, 0.375f);
-        matrix.rotate(xRotRender, 1, 0, 0);
+        matrix.rotate(pitch, 1, 0, 0);
         HEAD.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
@@ -321,17 +314,16 @@ public class MobLivingModelHuman implements MobModel {
         matrix.translate(-0.25f, 0, 0.25f);
         matrix.rotate((float) lazyNameDir * 60, 0, 1, 0);
         float rot;
-        ItemStack item = entity.getLeftWeapon();
-        if (item.getMaterial() == world.getAir()) {
+        ItemStack item = entity.leftWeapon();
+        if (item.material() == world.air()) {
             matrix.rotate((float) -swingDir * 60, 1, 0, 0);
             rot = (float) FastMath.sinTable(armDirLeftRender * FastMath.PI);
             matrix.rotate(armDirLeft2 * -20, 0, 0, 1);
-            matrix.rotate(
-                    rot * 50 + armDirLeft2 * 90 + xRotRender * armDirLeft2, 1,
+            matrix.rotate(rot * 50 + armDirLeft2 * 90 + pitch * armDirLeft2, 1,
                     0, 0);
         } else {
             matrix.rotate((float) -swingDir * 30, 1, 0, 0);
-            if (item.getMaterial().isWeapon(item)) {
+            if (item.material().isWeapon(item)) {
                 rot = (float) FastMath
                         .sinTable(-armDirLeftRender * FastMath.PI);
                 if (rot < 0 && armDirLeftRender > 0.0) {
@@ -340,23 +332,23 @@ public class MobLivingModelHuman implements MobModel {
                 matrix.rotate(rot * -60, 0, 0, 1);
                 matrix.rotate(rot * -60, 0, 1, 0);
                 matrix.rotate(rot * 10 + 40 + armDirLeft2 * 45 +
-                        xRotRender * armDirLeft2, 1, 0, 0);
+                        pitch * armDirLeft2, 1, 0, 0);
             } else {
                 rot = (float) FastMath.sinTable(armDirLeftRender * FastMath.PI);
                 matrix.rotate(armDirLeft2 * -20, 0, 0, 1);
                 matrix.rotate(rot * 50 + 40 + armDirLeft2 * 45 +
-                        xRotRender * armDirLeft2, 1, 0, 0);
+                        pitch * armDirLeft2, 1, 0, 0);
             }
         }
         rot = FastMath.min(rot * 2, 1);
         armLeft.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrix.translate(0, 0.4f, -0.6f);
-        if (item.getMaterial().isWeapon(item)) {
+        if (item.material().isWeapon(item)) {
             matrix.translate(0, -0.5f, 0);
             matrix.rotate(-rot * 90, 1, 0, 0);
             matrix.rotate(-rot * 50, 0, 1, 0);
             matrix.translate(0, 0.5f, 0);
-        } else if (!item.getMaterial().isTool(item)) {
+        } else if (!item.material().isTool(item)) {
             matrix.translate(0.02f, -0.3f, -0.07f);
             matrix.scale(0.3f, 0.3f, 0.3f);
         }
@@ -364,29 +356,27 @@ public class MobLivingModelHuman implements MobModel {
         matrix.rotate(80, 0, 0, 1);
         matrix.rotate(300, 0, 1, 0);
         if (!culling) {
-            openGL.enableCulling();
+            gl.enableCulling();
         }
-        item.getMaterial()
-                .render(item, gl, shader, 1.0f, damageColor, damageColor,
-                        1.0f);
+        item.material()
+                .render(item, gl, shader, 1.0f, damageColor, damageColor, 1.0f);
         if (!culling) {
-            openGL.disableCulling();
+            gl.disableCulling();
         }
         matrixStack.pop();
         matrix = matrixStack.push();
         matrix.translate(0.25f, 0, 0.25f);
         matrix.rotate((float) lazyNameDir * -60, 0, 1, 0);
-        item = entity.getRightWeapon();
-        if (item.getMaterial() == world.getAir()) {
+        item = entity.rightWeapon();
+        if (item.material() == world.air()) {
             matrix.rotate((float) swingDir * 60, 1, 0, 0);
             rot = (float) FastMath.sinTable(armDirRightRender * FastMath.PI);
             matrix.rotate(armDirRight2 * -20, 0, 0, 1);
-            matrix.rotate(
-                    rot * 50 + armDirRight2 * 90 + xRotRender * armDirRight2, 1,
-                    0, 0);
+            matrix.rotate(rot * 50 + armDirRight2 * 90 + pitch * armDirRight2,
+                    1, 0, 0);
         } else {
             matrix.rotate((float) swingDir * 30, 1, 0, 0);
-            if (item.getMaterial().isWeapon(item)) {
+            if (item.material().isWeapon(item)) {
                 rot = (float) FastMath
                         .sinTable(-armDirRightRender * FastMath.PI);
                 if (rot < 0 && armDirRightRender > 0.0) {
@@ -395,25 +385,25 @@ public class MobLivingModelHuman implements MobModel {
                 matrix.rotate(rot * 60, 0, 0, 1);
                 matrix.rotate(rot * 60, 0, 1, 0);
                 matrix.rotate(rot * 10 + 40 + armDirRight2 * 45 +
-                        xRotRender * armDirRight2, 1, 0, 0);
+                        pitch * armDirRight2, 1, 0, 0);
             } else {
                 rot = (float) FastMath
                         .sinTable(armDirRightRender * FastMath.PI);
                 matrix.rotate(armDirRight2 * -20, 0, 0, 1);
                 matrix.rotate(rot * 50 + 40 + armDirRight2 * 45 +
-                        xRotRender * armDirRight2, 1, 0, 0);
+                        pitch * armDirRight2, 1, 0, 0);
             }
         }
         rot = FastMath.min(rot * 2, 1);
         texture.bind(gl);
         armRight.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrix.translate(0, 0.4f, -0.6f);
-        if (item.getMaterial().isWeapon(item)) {
+        if (item.material().isWeapon(item)) {
             matrix.translate(0, -0.5f, 0);
             matrix.rotate(-rot * 90, 1, 0, 0);
             matrix.rotate(-rot * -50, 0, 1, 0);
             matrix.translate(0, 0.5f, 0);
-        } else if (!item.getMaterial().isTool(item)) {
+        } else if (!item.material().isTool(item)) {
             matrix.translate(0.02f, -0.3f, -0.07f);
             matrix.scale(0.3f, 0.3f, 0.3f);
         }
@@ -421,22 +411,21 @@ public class MobLivingModelHuman implements MobModel {
         matrix.rotate(100, 0, 0, 1);
         matrix.rotate(300, 0, 1, 0);
         if (!culling) {
-            openGL.enableCulling();
+            gl.enableCulling();
         }
-        item.getMaterial()
-                .render(item, gl, shader, 1.0f, damageColor, damageColor,
-                        1.0f);
+        item.material()
+                .render(item, gl, shader, 1.0f, damageColor, damageColor, 1.0f);
         matrixStack.pop();
         matrixStack.pop();
     }
 
     @Override
-    public float getPitch() {
-        return xRotRender;
+    public float pitch() {
+        return pitch;
     }
 
     @Override
-    public float getYaw() {
-        return zRotRender;
+    public float yaw() {
+        return yaw;
     }
 }

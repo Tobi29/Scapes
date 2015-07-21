@@ -38,6 +38,6 @@ public class PacketOpenCrafting extends Packet implements PacketClient {
 
     @Override
     public void runClient(ClientConnection client, WorldClient world) {
-        client.getEntity().openGui(new GuiCrafting(true, client.getEntity()));
+        client.entity().openGui(new GuiCrafting(true, client.entity()));
     }
 }

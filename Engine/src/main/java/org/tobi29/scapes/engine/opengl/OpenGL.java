@@ -23,7 +23,6 @@ import org.tobi29.scapes.engine.utils.graphics.Image;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.nio.file.Path;
 
 public interface OpenGL {
     int VERTEX_ATTRIBUTE = 0, COLOR_ATTRIBUTE = 1, TEXTURE_ATTRIBUTE = 2,
@@ -123,13 +122,10 @@ public interface OpenGL {
     FBOStatus checkFBO();
 
     @OpenGLFunction
-    void screenShot(Path path, GL gl);
+    Image screenShot(int x, int y, int width, int height);
 
     @OpenGLFunction
-    Image screenShot(int width, int height);
-
-    @OpenGLFunction
-    Image screenShotFBO(GL gl, FBO fbo, int colorAttachment);
+    Image screenShotFBO(FBO fbo);
 
     @OpenGLFunction
     void activateShader(int id);
@@ -287,12 +283,6 @@ public interface OpenGL {
             ByteBuffer... buffers);
 
     @OpenGLFunction
-    void getImage(ByteBuffer buffer);
-
-    @OpenGLFunction
-    void getDepth(FloatBuffer buffer);
-
-    @OpenGLFunction
     void wrapS(TextureWrap wrap);
 
     @OpenGLFunction
@@ -313,9 +303,6 @@ public interface OpenGL {
     @OpenGLFunction
     void setAttribute(int id, int size, VertexType vertexType,
             boolean normalized, int stride, int offset);
-
-    @OpenGLFunction
-    void disableAttribute(int id);
 
     @OpenGLFunction
     void bindVBOArray(int id);

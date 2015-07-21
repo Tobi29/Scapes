@@ -38,15 +38,15 @@ public class ControllerJoystick implements Controller {
         axes = new double[axisCount];
     }
 
-    public String getName() {
+    public String name() {
         return name;
     }
 
-    public String getID() {
+    public String id() {
         return id;
     }
 
-    public int getAxes() {
+    public int axes() {
         return axes.length;
     }
 
@@ -57,16 +57,16 @@ public class ControllerJoystick implements Controller {
 
     @Override
     public boolean isDown(ControllerKey key) {
-        return states[key.getID()] >= 1;
+        return states[key.id()] >= 1;
     }
 
     @Override
     public boolean isPressed(ControllerKey key) {
-        return states[key.getID()] >= 2;
+        return states[key.id()] >= 2;
     }
 
     @Override
-    public Stream<PressEvent> getPressEvents() {
+    public Stream<PressEvent> pressEvents() {
         return pressEvents.stream();
     }
 
@@ -86,7 +86,7 @@ public class ControllerJoystick implements Controller {
         active = !pressEventQueue.isEmpty();
         while (!pressEventQueue.isEmpty()) {
             PressEvent event = pressEventQueue.poll();
-            int keyID = event.key.getID();
+            int keyID = event.key.id();
             switch (event.state) {
                 case PRESS:
                     states[keyID] = 2;
@@ -109,7 +109,7 @@ public class ControllerJoystick implements Controller {
         pressEventQueue.add(new PressEvent(key, state));
     }
 
-    public double getAxis(int axis) {
+    public double axis(int axis) {
         if (axis < 0 || axis >= axes.length) {
             return 0.0;
         }
@@ -118,9 +118,9 @@ public class ControllerJoystick implements Controller {
 
     public synchronized void setAxis(int axis, double value) {
         if (axes[axis] < 0.5 && value >= 0.5) {
-            addPressEvent(ControllerKey.getAxis(axis), PressState.PRESS);
+            addPressEvent(ControllerKey.axis(axis), PressState.PRESS);
         } else if (axes[axis] >= 0.5 && value < 0.5) {
-            addPressEvent(ControllerKey.getAxis(axis), PressState.RELEASE);
+            addPressEvent(ControllerKey.axis(axis), PressState.RELEASE);
         }
         axes[axis] = value;
     }

@@ -27,28 +27,23 @@ import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.BufferCreatorNative;
 import org.tobi29.scapes.engine.utils.graphics.Image;
-import org.tobi29.scapes.engine.utils.graphics.PNG;
-import org.tobi29.scapes.engine.utils.io.FileUtil;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.nio.file.Path;
 
-public class LWJGL3OpenGL implements OpenGL {
+public class LWJGL3OpenGL extends GL {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(LWJGL3OpenGL.class);
     private final int[] lastTextureBind = new int[32];
-    private final ScapesEngine engine;
     private final IntBuffer intBuffer = BufferCreatorNative.intsD(4);
     private final IntBuffer attachBuffer = BufferCreatorNative.intsD(16);
     private ByteBuffer directBuffer = BufferCreatorNative.bytesD(8192);
     private int activeTexture, activeShader;
 
-    public LWJGL3OpenGL(ScapesEngine engine) {
-        this.engine = engine;
+    public LWJGL3OpenGL(ScapesEngine engine, Container container) {
+        super(engine, container);
     }
     // Basic
 
@@ -151,8 +146,8 @@ public class LWJGL3OpenGL implements OpenGL {
     @Override
     public void enableScissor(int x, int y, int width, int height) {
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        int w = engine.container().getContentWidth();
-        int h = engine.container().getContentHeight();
+        int w = engine.container().contentWidth();
+        int h = engine.container().contentHeight();
         GL11.glScissor((int) ((double) x / 800 * w),
                 (int) ((double) (512 - y - height) / 512 * h) + 1,
                 (int) ((double) width / 800 * w),
@@ -247,41 +242,29 @@ public class LWJGL3OpenGL implements OpenGL {
         }
     }
 
-    @Override
-    public void screenShot(Path path, GL gl) {
-        int width = gl.getSceneWidth(), height = gl.getSceneHeight();
-        Image image = screenShot(width, height);
-        try {
-            FileUtil.write(path, stream -> PNG.encode(image, stream, 9, false));
-        } catch (IOException e) {
-            LOGGER.error("Error saving screenshot: {}", e.toString());
-        }
-    }
     // Shader
 
     @Override
-    public Image screenShot(int width, int height) {
+    public Image screenShot(int x, int y, int width, int height) {
         GL11.glReadBuffer(GL11.GL_FRONT);
         int capacity = width * height << 2;
         direct(capacity);
-        GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA,
+        GL11.glReadPixels(x, y, width, height, GL11.GL_RGBA,
                 GL11.GL_UNSIGNED_BYTE, directBuffer);
-        ByteBuffer buffer = BufferCreator.byteBuffer(capacity);
+        ByteBuffer buffer = BufferCreator.bytes(capacity);
         buffer.put(directBuffer);
         return new Image(width, height, buffer);
     }
 
     @Override
-    public Image screenShotFBO(GL gl, FBO fbo, int colorAttachment) {
-        gl.getTextureManager()
-                .bind(fbo.getTexturesColor()[colorAttachment], gl);
-        int capacity = fbo.getWidth() * fbo.getHeight() << 2;
+    public Image screenShotFBO(FBO fbo) {
+        int capacity = fbo.width() * fbo.height() << 2;
         direct(capacity);
         GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA,
                 GL11.GL_UNSIGNED_BYTE, directBuffer);
-        ByteBuffer buffer = BufferCreator.byteBuffer(capacity);
+        ByteBuffer buffer = BufferCreator.bytes(capacity);
         buffer.put(directBuffer);
-        return new Image(fbo.getWidth(), fbo.getHeight(), buffer);
+        return new Image(fbo.width(), fbo.height(), buffer);
     }
 
     @Override
@@ -641,18 +624,6 @@ public class LWJGL3OpenGL implements OpenGL {
     }
 
     @Override
-    public void getImage(ByteBuffer buffer) {
-        GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA,
-                GL11.GL_UNSIGNED_BYTE, buffer);
-    }
-
-    @Override
-    public void getDepth(FloatBuffer buffer) {
-        GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_DEPTH_COMPONENT,
-                GL11.GL_FLOAT, buffer);
-    }
-
-    @Override
     public void wrapS(TextureWrap wrap) {
         switch (wrap) {
             case REPEAT:
@@ -746,10 +717,6 @@ public class LWJGL3OpenGL implements OpenGL {
         }
     }
 
-    @Override
-    public void disableAttribute(int id) {
-        GL20.glDisableVertexAttribArray(id);
-    }
     // VBO
 
     @Override

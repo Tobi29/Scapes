@@ -16,49 +16,27 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item;
 
-import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.TerrainTexture;
 import org.tobi29.scapes.block.TerrainTextureRegistry;
 import org.tobi29.scapes.block.models.ItemModel;
 import org.tobi29.scapes.block.models.ItemModelSimple;
-import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.engine.utils.math.Face;
-import org.tobi29.scapes.entity.server.MobPlayerServer;
-import org.tobi29.scapes.entity.server.MobServer;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
-import org.tobi29.scapes.vanilla.basics.material.update.UpdateSaplingGrowth;
 
-public class ItemFertilizer extends VanillaItem {
+public class ItemCoal extends VanillaItem implements ItemFuel {
     private TerrainTexture texture;
     private ItemModel model;
 
-    public ItemFertilizer(VanillaMaterial materials) {
-        super(materials, "vanilla.basics.item.Fertilizer");
-    }
-
-    @Override
-    public double click(MobPlayerServer entity, ItemStack item,
-            TerrainServer terrain, int x, int y, int z, Face face) {
-        BlockType type = terrain.type(x, y, z);
-        if (type == materials.sapling) {
-            terrain.addDelayedUpdate(
-                    new UpdateSaplingGrowth().set(x, y, z, 3.0));
-        }
-        return 0;
-    }
-
-    @Override
-    public double click(MobPlayerServer entity, ItemStack item, MobServer hit) {
-        return 0;
+    public ItemCoal(VanillaMaterial materials) {
+        super(materials, "vanilla.basics.item.Coal");
     }
 
     @Override
     public void registerTextures(TerrainTextureRegistry registry) {
         texture = registry.registerTexture(
-                "VanillaBasics:image/terrain/other/Fertilizer.png");
+                "VanillaBasics:image/terrain/ore/coal/Coal.png");
     }
 
     @Override
@@ -67,24 +45,39 @@ public class ItemFertilizer extends VanillaItem {
     }
 
     @Override
-    public void render(ItemStack item, GL gl, Shader shader,
-            float r, float g, float b, float a) {
+    public void render(ItemStack item, GL gl, Shader shader, float r, float g,
+            float b, float a) {
         model.render(gl, shader);
     }
 
     @Override
-    public void renderInventory(ItemStack item, GL gl,
-            Shader shader, float r, float g, float b, float a) {
+    public void renderInventory(ItemStack item, GL gl, Shader shader, float r,
+            float g, float b, float a) {
         model.renderInventory(gl, shader);
     }
 
     @Override
     public String name(ItemStack item) {
-        return "Fertilizer (Debug)";
+        return "Coal";
     }
 
     @Override
     public int maxStackSize(ItemStack item) {
-        return 64;
+        return 16;
+    }
+
+    @Override
+    public float fuelTemperature(ItemStack item) {
+        return 0.8f;
+    }
+
+    @Override
+    public float fuelTime(ItemStack item) {
+        return 200.0f;
+    }
+
+    @Override
+    public int fuelTier(ItemStack item) {
+        return 50;
     }
 }

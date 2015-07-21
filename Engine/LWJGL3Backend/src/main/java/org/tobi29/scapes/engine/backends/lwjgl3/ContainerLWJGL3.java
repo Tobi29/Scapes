@@ -24,18 +24,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.input.ControllerDefault;
-import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.openal.OpenAL;
 import org.tobi29.scapes.engine.opengl.Container;
-import org.tobi29.scapes.engine.opengl.OpenGL;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.utils.MutableSingle;
-import org.tobi29.scapes.engine.utils.io.IOSupplier;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Supplier;
 
@@ -43,13 +40,11 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
         implements Container {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ContainerLWJGL3.class);
-    protected final Map<Integer, ControllerJoystick> virtualJoysticks =
-            new ConcurrentHashMap<>();
     protected final Queue<Runnable> tasks = new ConcurrentLinkedQueue<>();
     protected final ScapesEngine engine;
     protected final Thread mainThread;
-    protected final OpenGL openGL;
-    protected final OpenAL openAL;
+    protected final LWJGL3OpenGL openGL;
+    protected final LWJGL3OpenAL openAL;
     protected final boolean superModifier;
     protected GLContext context;
     protected boolean focus = true, valid, visible, containerResized = true,
@@ -61,7 +56,7 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
         this.engine = engine;
         mainThread = Thread.currentThread();
         LOGGER.info("LWJGL version: {}", Sys.getVersion());
-        openGL = new LWJGL3OpenGL(engine);
+        openGL = new LWJGL3OpenGL(engine, this);
         openAL = new LWJGL3OpenAL();
         superModifier = LWJGLUtil.getPlatform() == LWJGLUtil.Platform.MACOSX;
     }
@@ -105,22 +100,22 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
     }
 
     @Override
-    public int getContainerWidth() {
+    public int containerWidth() {
         return containerWidth;
     }
 
     @Override
-    public int getContainerHeight() {
+    public int containerHeight() {
         return containerHeight;
     }
 
     @Override
-    public int getContentWidth() {
+    public int contentWidth() {
         return contentWidth;
     }
 
     @Override
-    public int getContentHeight() {
+    public int contentHeight() {
         return contentHeight;
     }
 
@@ -135,27 +130,18 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
     }
 
     @Override
-    public OpenGL getOpenGL() {
+    public GL gl() {
         return openGL;
     }
 
     @Override
-    public OpenAL getOpenAL() {
+    public OpenAL al() {
         return openAL;
     }
 
     @Override
-    public ControllerDefault getController() {
+    public ControllerDefault controller() {
         return this;
-    }
-
-    @Override
-    public Collection<ControllerJoystick> getJoysticks() {
-        joysticksChanged = false;
-        Collection<ControllerJoystick> collection =
-                new ArrayList<>(virtualJoysticks.size());
-        collection.addAll(virtualJoysticks.values());
-        return collection;
     }
 
     @Override
@@ -190,7 +176,7 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
             runnable.run();
             joinable.join();
         });
-        joinable.getJoiner().join();
+        joinable.joiner().join();
     }
 
     protected <R> R exec(Supplier<R> runnable) {
@@ -204,30 +190,7 @@ public abstract class ContainerLWJGL3 extends ControllerDefault
             output.a = runnable.get();
             joinable.join();
         });
-        joinable.getJoiner().join();
-        return output.a;
-    }
-
-    protected <R> R execIO(IOSupplier<R> runnable) throws IOException {
-        Thread thread = Thread.currentThread();
-        if (thread == mainThread) {
-            return runnable.get();
-        }
-        Joiner.Joinable joinable = new Joiner.Joinable();
-        MutableSingle<R> output = new MutableSingle<>(null);
-        MutableSingle<IOException> exception = new MutableSingle<>(null);
-        tasks.add(() -> {
-            try {
-                output.a = runnable.get();
-            } catch (IOException e) {
-                exception.a = e;
-            }
-            joinable.join();
-        });
-        joinable.getJoiner().join();
-        if (exception.a != null) {
-            throw new IOException(exception.a);
-        }
+        joinable.joiner().join();
         return output.a;
     }
 }

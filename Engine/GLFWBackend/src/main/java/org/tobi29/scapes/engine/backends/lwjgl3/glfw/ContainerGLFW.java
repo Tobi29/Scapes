@@ -27,6 +27,7 @@ import org.tobi29.scapes.engine.backends.lwjgl3.GLFWControllers;
 import org.tobi29.scapes.engine.backends.lwjgl3.GLFWKeyMap;
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.spi.GLFWDialogsProvider;
 import org.tobi29.scapes.engine.gui.GlyphRenderer;
+import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.opengl.GraphicsCheckException;
 import org.tobi29.scapes.engine.opengl.GraphicsException;
@@ -34,24 +35,24 @@ import org.tobi29.scapes.engine.utils.BufferCreatorNative;
 import org.tobi29.scapes.engine.utils.DesktopException;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Sync;
-import org.tobi29.scapes.engine.utils.io.ReadSource;
+import org.tobi29.scapes.engine.utils.io.filesystem.ReadSource;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.file.Path;
-import java.util.Optional;
-import java.util.ServiceConfigurationError;
-import java.util.ServiceLoader;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ContainerGLFW extends ContainerLWJGL3 {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ContainerGLFW.class);
-    private final GLFWDialogsProvider dialogsProvider;
+    private static final GLFWDialogsProvider DIALOGS_PROVIDER = loadDialogs();
     private final PlatformDialogs dialogs;
     private final Sync sync;
     private final GLFWControllers controllers;
+    private final Map<Integer, ControllerJoystick> virtualJoysticks =
+            new ConcurrentHashMap<>();
     @SuppressWarnings("FieldCanBeLocal")
     private final GLFWErrorCallback errorFun;
     private final GLFWWindowSizeCallback windowSizeFun;
@@ -67,22 +68,15 @@ public class ContainerGLFW extends ContainerLWJGL3 {
     private boolean running = true, skipMouseCallback, mouseGrabbed;
 
     public ContainerGLFW(ScapesEngine engine) {
-        this(engine, loadDialogs());
-    }
-
-    public ContainerGLFW(ScapesEngine engine,
-            GLFWDialogsProvider dialogsProvider) {
         super(engine);
-        this.dialogsProvider = dialogsProvider;
-        dialogs = dialogsProvider.createDialogs(engine);
+        dialogs = DIALOGS_PROVIDER.createDialogs(engine);
         errorFun = Callbacks.errorCallbackPrint();
         GLFW.glfwSetErrorCallback(errorFun);
         if (GLFW.glfwInit() != GL11.GL_TRUE) {
             throw new GraphicsException("Unable to initialize GLFW");
         }
         LOGGER.info("GLFW version: {}", GLFW.glfwGetVersionString());
-        sync = new Sync(engine.config().getFPS(), 5000000000L, false,
-                "Rendering");
+        sync = new Sync(engine.config().fps(), 5000000000L, false, "Rendering");
         controllers = new GLFWControllers(virtualJoysticks);
         windowSizeFun = GLFW.GLFWWindowSizeCallback((window, width, height) -> {
             containerWidth = width;
@@ -99,7 +93,7 @@ public class ContainerGLFW extends ContainerLWJGL3 {
                     containerResized = true;
                 });
         keyFun = GLFW.GLFWKeyCallback((window, key, scancode, action, mods) -> {
-            ControllerKey virtualKey = GLFWKeyMap.getKey(key);
+            ControllerKey virtualKey = GLFWKeyMap.key(key);
             if (virtualKey != null) {
                 if (virtualKey == ControllerKey.KEY_BACKSPACE &&
                         action != GLFW.GLFW_RELEASE) {
@@ -122,7 +116,7 @@ public class ContainerGLFW extends ContainerLWJGL3 {
                 (window, codepoint) -> addTypeEvent((char) codepoint));
         mouseButtonFun =
                 GLFW.GLFWMouseButtonCallback((window, button, action, mods) -> {
-                    ControllerKey virtualKey = ControllerKey.getButton(button);
+                    ControllerKey virtualKey = ControllerKey.button(button);
                     if (virtualKey != ControllerKey.UNKNOWN) {
                         switch (action) {
                             case GLFW.GLFW_PRESS:
@@ -203,13 +197,22 @@ public class ContainerGLFW extends ContainerLWJGL3 {
     }
 
     @Override
+    public Collection<ControllerJoystick> joysticks() {
+        joysticksChanged = false;
+        Collection<ControllerJoystick> collection =
+                new ArrayList<>(virtualJoysticks.size());
+        collection.addAll(virtualJoysticks.values());
+        return collection;
+    }
+
+    @Override
     public boolean loadFont(ReadSource font) {
-        return dialogsProvider.loadFont(font);
+        return DIALOGS_PROVIDER.loadFont(engine, font);
     }
 
     @Override
     public GlyphRenderer createGlyphRenderer(String fontName, int size) {
-        return dialogsProvider.createGlyphRenderer(fontName, size);
+        return DIALOGS_PROVIDER.createGlyphRenderer(engine, fontName, size);
     }
 
     @Override
@@ -225,7 +228,7 @@ public class ContainerGLFW extends ContainerLWJGL3 {
                     cleanWindow();
                 }
                 initWindow(engine.config().isFullscreen(),
-                        engine.config().getVSync());
+                        engine.config().vSync());
                 Optional<String> check = initContext();
                 if (check.isPresent()) {
                     throw new GraphicsCheckException(check.get());
@@ -235,10 +238,10 @@ public class ContainerGLFW extends ContainerLWJGL3 {
             }
             GLFW.glfwPollEvents();
             joysticksChanged = controllers.poll();
-            engine.render(sync.getSpeedFactor());
+            engine.render(sync.delta());
             containerResized = false;
             dialogs.renderTick();
-            sync.capTPS();
+            sync.cap();
             GLFW.glfwSwapBuffers(window);
             if (!visible) {
                 GLFW.glfwShowWindow(window);
@@ -278,25 +281,6 @@ public class ContainerGLFW extends ContainerLWJGL3 {
     }
 
     @Override
-    public boolean exportToUser(Path path, Pair<String, String>[] extensions,
-            String title) throws IOException {
-        return execIO(() -> dialogs.exportToUser(path, extensions, title));
-    }
-
-    @Override
-    public boolean importFromUser(Path path, Pair<String, String>[] extensions,
-            String title) throws IOException {
-        return execIO(() -> dialogs.importFromUser(path, extensions, title));
-    }
-
-    @Override
-    public boolean importFromUser(Path path, Pair<String, String>[] extensions,
-            String title, boolean multiple) throws IOException {
-        return execIO(() -> dialogs
-                .importFromUser(path, extensions, title, multiple));
-    }
-
-    @Override
     public void message(MessageType messageType, String title, String message) {
         exec(() -> dialogs.message(messageType, title, message));
     }
@@ -308,7 +292,7 @@ public class ContainerGLFW extends ContainerLWJGL3 {
 
     protected void initWindow(boolean fullscreen, boolean vSync) {
         LOGGER.info("Creating GLFW window...");
-        String title = engine.game().getName();
+        String title = engine.game().name();
         long monitor = GLFW.glfwGetPrimaryMonitor();
         IntBuffer xBuffer = BufferCreatorNative.intsD(1);
         IntBuffer yBuffer = BufferCreatorNative.intsD(1);

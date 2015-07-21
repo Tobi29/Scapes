@@ -40,7 +40,7 @@ public class GameStateLoadSP extends GameState {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GameStateLoadSP.class);
     private final Path path;
-    private int step;
+    private int step, port;
     private ScapesServer server;
     private SocketChannel channel;
     private ClientConnection client;
@@ -91,13 +91,18 @@ public class GameStateLoadSP extends GameState {
                     step++;
                     break;
                 case 1:
-                    server.start(12345);
+                    port = server.connection().start(0);
+                    if (port <= 0) {
+                        throw new IOException(
+                                "Unable to open server socket (Invalid port returned: " +
+                                        port + ')');
+                    }
                     progress.setLabel("Connecting to server...");
                     step++;
                     break;
                 case 2:
                     InetSocketAddress address =
-                            new InetSocketAddress("localhost", 12345);
+                            new InetSocketAddress("localhost", port);
                     if (address.isUnresolved()) {
                         throw new IOException("Could not resolve address");
                     }

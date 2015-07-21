@@ -38,16 +38,16 @@ public class EntityServer implements MultiTag.ReadAndWrite {
 
     protected EntityServer(WorldServer world, Vector3 pos) {
         this.world = world;
-        registry = world.getRegistry();
+        registry = world.registry();
         this.pos = new MutableVector3d(pos);
     }
 
     public static EntityServer make(int id, WorldServer world) {
-        return world.getRegistry().<Supplier>get("Core", "Entity").get(id)
+        return world.registry().<Supplier>get("Core", "Entity").get(id)
                 .get(world);
     }
 
-    public int getEntityID() {
+    public int entityID() {
         return entityID;
     }
 
@@ -55,27 +55,27 @@ public class EntityServer implements MultiTag.ReadAndWrite {
         this.entityID = entityID;
     }
 
-    public int getID(GameRegistry registry) {
-        return registry.getEntityID(this);
+    public int id(GameRegistry registry) {
+        return registry.entityID(this);
     }
 
-    public WorldServer getWorld() {
+    public WorldServer world() {
         return world;
     }
 
-    public Vector3 getPos() {
+    public Vector3 pos() {
         return pos.now();
     }
 
-    public double getX() {
+    public double x() {
         return pos.doubleX();
     }
 
-    public double getY() {
+    public double y() {
         return pos.doubleY();
     }
 
-    public double getZ() {
+    public double z() {
         return pos.doubleZ();
     }
 
@@ -93,7 +93,7 @@ public class EntityServer implements MultiTag.ReadAndWrite {
         metaData = tagStructure.getStructure("MetaData");
     }
 
-    public TagStructure getMetaData(String category) {
+    public TagStructure metaData(String category) {
         return metaData.getStructure(category);
     }
 

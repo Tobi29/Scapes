@@ -73,7 +73,7 @@ public class GuiMainMenu extends Gui {
         });
         GuiComponentTextButton quit =
                 new GuiComponentTextButton(16, 400, 120, 30, 18, "Quit");
-        quit.addLeftClick(event -> state.getEngine().stop());
+        quit.addLeftClick(event -> state.engine().stop());
         pane.add(logo);
         pane.add(singlePlayer);
         pane.add(multiPlayer);

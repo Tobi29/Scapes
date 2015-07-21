@@ -29,7 +29,7 @@ public enum VertexType {
         this.bytes = bytes;
     }
 
-    public int getBytes() {
+    public int bytes() {
         return bytes;
     }
 }

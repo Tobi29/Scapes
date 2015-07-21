@@ -38,9 +38,9 @@ public class ItemOreChunk extends VanillaItem
 
     @Override
     public void registerTextures(TerrainTextureRegistry registry) {
-        textures = new TerrainTexture[11];
+        textures = new TerrainTexture[10];
         for (short i = 0; i < textures.length; i++) {
-            textures[i] = registry.registerTexture(getItemTexture(i));
+            textures[i] = registry.registerTexture(itemTexture(i));
         }
     }
 
@@ -54,22 +54,22 @@ public class ItemOreChunk extends VanillaItem
     }
 
     @Override
-    public void render(ItemStack item, GL gl, Shader shader,
-            float r, float g, float b, float a) {
-        models[item.getData()].render(gl, shader);
+    public void render(ItemStack item, GL gl, Shader shader, float r, float g,
+            float b, float a) {
+        models[item.data()].render(gl, shader);
     }
 
     @Override
-    public void renderInventory(ItemStack item, GL gl,
-            Shader shader, float r, float g, float b, float a) {
-        models[item.getData()].renderInventory(gl, shader);
+    public void renderInventory(ItemStack item, GL gl, Shader shader, float r,
+            float g, float b, float a) {
+        models[item.data()].renderInventory(gl, shader);
     }
 
     @Override
-    public String getName(ItemStack item) {
+    public String name(ItemStack item) {
         StringBuilder name = new StringBuilder(50);
-        name.append(getOreName(item));
-        float temperature = getTemperature(item);
+        name.append(oreName(item));
+        float temperature = temperature(item);
         if (temperature > 0.1f) {
             name.append("\nTemp.:").append(FastMath.floor(temperature))
                     .append("°C");
@@ -78,16 +78,18 @@ public class ItemOreChunk extends VanillaItem
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
-        if (item.getData() == 0) {
-            return getTemperature(item) == 0 ? 16 : 1;
+    public int maxStackSize(ItemStack item) {
+        if (item.data() == 0) {
+            return temperature(item) == 0 ? 16 : 1;
         } else {
-            return getTemperature(item) == 0 ? 4 : 1;
+            return temperature(item) == 0 ? 4 : 1;
         }
     }
 
-    public String getItemTexture(short data) {
+    public String itemTexture(short data) {
         switch (data) {
+            case 0:
+                return "VanillaBasics:image/terrain/ore/chunk/Bismuthinite.png";
             case 1:
                 return "VanillaBasics:image/terrain/ore/chunk/Chalcocite.png";
             case 2:
@@ -105,15 +107,15 @@ public class ItemOreChunk extends VanillaItem
             case 8:
             case 9:
                 return "VanillaBasics:image/terrain/ore/chunk/IronBloom.png";
-            case 10:
-                return "VanillaBasics:image/terrain/ore/chunk/Bismuthinite.png";
             default:
-                return "VanillaBasics:image/terrain/ore/chunk/Coal.png";
+                throw new IllegalArgumentException("Unknown data: {}" + data);
         }
     }
 
-    public String getOreName(ItemStack item) {
-        switch (item.getData()) {
+    public String oreName(ItemStack item) {
+        switch (item.data()) {
+            case 0:
+                return "Bismuthinite";
             case 1:
                 return "Chalcocite";
             case 2:
@@ -132,33 +134,29 @@ public class ItemOreChunk extends VanillaItem
                 return "Iron Bloom";
             case 9:
                 return "Worked Iron Bloom";
-            case 10:
-                return "Bismuthinite";
             default:
-                return "Coal";
+                throw new IllegalArgumentException(
+                        "Unknown data: {}" + item.data());
         }
     }
 
     @Override
     public void heat(ItemStack item, float temperature) {
-        float currentTemperature = getTemperature(item);
+        float currentTemperature = temperature(item);
         if (currentTemperature < 1 && temperature < currentTemperature) {
-            item.getMetaData("Vanilla").setFloat("Temperature", 0.0f);
+            item.metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
-            item.getMetaData("Vanilla").setFloat("Temperature", FastMath.max(
+            item.metaData("Vanilla").setFloat("Temperature", FastMath.max(
                     currentTemperature +
                             (temperature - currentTemperature) / 400.0f, 1.1f));
-            if (currentTemperature >= getMeltingPoint(item)) {
-                String metal = getMetalName(item);
-                if (metal != null) {
-                    if ("Iron Bloom".equals(metal)) {
-                        item.setData((short) 8);
-                    } else {
-                        item.setMaterial(materials.ingot);
-                        item.setData((short) 1);
-                        item.getMetaData("Vanilla")
-                                .setString("MetalType", metal);
-                    }
+            if (currentTemperature >= meltingPoint(item)) {
+                String metal = metalName(item);
+                if ("Iron Bloom".equals(metal)) {
+                    item.setData((short) 8);
+                } else {
+                    item.setMaterial(materials.ingot);
+                    item.setData((short) 1);
+                    item.metaData("Vanilla").setString("MetalType", metal);
                 }
             }
         }
@@ -166,34 +164,36 @@ public class ItemOreChunk extends VanillaItem
 
     @Override
     public void cool(ItemStack item) {
-        float currentTemperature = getTemperature(item);
+        float currentTemperature = temperature(item);
         if (currentTemperature < 1) {
-            item.getMetaData("Vanilla").setFloat("Temperature", 0.0f);
+            item.metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
-            item.getMetaData("Vanilla")
+            item.metaData("Vanilla")
                     .setFloat("Temperature", currentTemperature / 1.002f);
         }
     }
 
     @Override
     public void cool(MobItemServer item) {
-        float currentTemperature = getTemperature(item.getItem());
+        float currentTemperature = temperature(item.item());
         if (currentTemperature < 1) {
-            item.getItem().getMetaData("Vanilla").setFloat("Temperature", 0.0f);
+            item.item().metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
             if (item.isInWater()) {
-                item.getItem().getMetaData("Vanilla")
+                item.item().metaData("Vanilla")
                         .setFloat("Temperature", currentTemperature / 4.0f);
             } else {
-                item.getItem().getMetaData("Vanilla")
+                item.item().metaData("Vanilla")
                         .setFloat("Temperature", currentTemperature / 1.002f);
             }
         }
     }
 
     @Override
-    public float getMeltingPoint(ItemStack item) {
-        switch (item.getData()) {
+    public float meltingPoint(ItemStack item) {
+        switch (item.data()) {
+            case 0:
+                return 271.0f;
             case 1:
                 return 1084.0f;
             case 2:
@@ -212,20 +212,21 @@ public class ItemOreChunk extends VanillaItem
                 return 1538.0f;
             case 9:
                 return 1538.0f;
-            case 10:
-                return 271.0f;
             default:
-                return 1000000000000.0f;
+                throw new IllegalArgumentException(
+                        "Unknown data: {}" + item.data());
         }
     }
 
     @Override
-    public float getTemperature(ItemStack item) {
-        return item.getMetaData("Vanilla").getFloat("Temperature");
+    public float temperature(ItemStack item) {
+        return item.metaData("Vanilla").getFloat("Temperature");
     }
 
-    public String getMetalName(ItemStack item) {
-        switch (item.getData()) {
+    public String metalName(ItemStack item) {
+        switch (item.data()) {
+            case 0:
+                return "Bismuth";
             case 1:
                 return "Copper";
             case 2:
@@ -242,17 +243,15 @@ public class ItemOreChunk extends VanillaItem
                 return "Gold";
             case 9:
                 return "Iron";
-            case 10:
-                return "Bismuth";
             default:
                 throw new IllegalArgumentException(
-                        "Unknown data: {}" + item.getData());
+                        "Unknown data: {}" + item.data());
         }
     }
 
     @Override
-    public String[] getIdentifiers(ItemStack item) {
+    public String[] identifiers(ItemStack item) {
         return new String[]{"vanilla.basics.item.OreChunk",
-                "vanilla.basics.item.OreChunk." + getOreName(item)};
+                "vanilla.basics.item.OreChunk." + oreName(item)};
     }
 }

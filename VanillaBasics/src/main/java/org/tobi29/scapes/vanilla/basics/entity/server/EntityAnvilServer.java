@@ -30,7 +30,7 @@ public class EntityAnvilServer extends EntityAbstractContainerServer {
     }
 
     public EntityAnvilServer(WorldServer world, Vector3 pos) {
-        super(world, pos, new Inventory(world.getRegistry(), 2));
+        super(world, pos, new Inventory(world.registry(), 2));
     }
 
     /*@Override
@@ -40,8 +40,8 @@ public class EntityAnvilServer extends EntityAbstractContainerServer {
 
     @Override
     public boolean isValidOn(TerrainServer terrain, int x, int y, int z) {
-        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
-                .getPlugin("VanillaBasics");
+        VanillaBasics plugin = (VanillaBasics) terrain.world().plugins()
+                .plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         return terrain.type(x, y, z) == materials.anvil;
     }

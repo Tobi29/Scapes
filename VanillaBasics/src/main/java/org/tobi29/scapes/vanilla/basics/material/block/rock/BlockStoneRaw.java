@@ -32,9 +32,9 @@ public class BlockStoneRaw extends BlockStone {
     }
 
     @Override
-    public List<ItemStack> getDrops(ItemStack item, int data) {
-        if ("Pickaxe".equals(item.getMaterial().getToolType(item)) &&
-                canBeBroken(item.getMaterial().getToolLevel(item), data)) {
+    public List<ItemStack> drops(ItemStack item, int data) {
+        if ("Pickaxe".equals(item.material().toolType(item)) &&
+                canBeBroken(item.material().toolLevel(item), data)) {
             return Collections.singletonList(
                     new ItemStack(materials.stoneRock, data,
                             new Random().nextInt(4) + 8));
@@ -43,15 +43,15 @@ public class BlockStoneRaw extends BlockStone {
     }
 
     @Override
-    protected String getTexture(int data) {
+    protected String texture(int data) {
         StoneType type = stoneRegistry.get(data);
-        return type.getTextureRoot() + "/raw/" +
-                type.getTexture() +
+        return type.textureRoot() + "/raw/" +
+                type.texture() +
                 ".png";
     }
 
     @Override
-    public String getName(ItemStack item) {
-        return getStoneName(item);
+    public String name(ItemStack item) {
+        return stoneName(item);
     }
 }

@@ -33,7 +33,12 @@ import org.tobi29.scapes.engine.utils.MutableSingle;
 import org.tobi29.scapes.engine.utils.SleepUtil;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.graphics.PNG;
-import org.tobi29.scapes.engine.utils.io.*;
+import org.tobi29.scapes.engine.utils.io.LimitedBufferStream;
+import org.tobi29.scapes.engine.utils.io.PacketBundleChannel;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileCache;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -144,7 +149,7 @@ public class ClientConnection
                         output.put(cipher.doFinal(keyClient));
                         channel.queueBundle();
                         channel.setKey(keyClient, keyServer);
-                        KeyPair keyPair = loginData.account.getKeyPair();
+                        KeyPair keyPair = loginData.account.keyPair();
                         array = keyPair.getPublic().getEncoded();
                         output.put(array);
                         channel.queueBundle();
@@ -166,7 +171,7 @@ public class ClientConnection
                     try {
                         Cipher cipher = Cipher.getInstance("RSA");
                         cipher.init(Cipher.DECRYPT_MODE,
-                                loginData.account.getKeyPair().getPrivate());
+                                loginData.account.keyPair().getPrivate());
                         challenge = cipher.doFinal(challenge);
                     } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException e) {
                         throw new IOException(e);
@@ -184,7 +189,7 @@ public class ClientConnection
                     readIDStorage(input);
                     WritableByteStream output = channel.getOutputStream();
                     output.put(challenge);
-                    output.putString(loginData.account.getNickname());
+                    output.putString(loginData.account.nickname());
                     output.putInt(loadingDistanceRequest);
                     sendSkin(output);
                     output.putInt(loginData.pluginRequests.size());
@@ -251,22 +256,21 @@ public class ClientConnection
         Path path = engine.home().resolve("Skin.png");
         if (Files.exists(path)) {
             image.a = FileUtil.readReturn(path,
-                    stream -> PNG.decode(stream, BufferCreator::byteBuffer));
-            if (image.a.getWidth() != 64 || image.a.getHeight() != 64) {
+                    stream -> PNG.decode(stream, BufferCreator::bytes));
+            if (image.a.width() != 64 || image.a.height() != 64) {
                 throw new ConnectionCloseException("Invalid skin!");
             }
         } else {
             engine.files().get("Scapes:image/entity/mob/Player.png")
                     .read(stream -> {
-                        image.a = PNG.decode(stream, BufferCreator::byteBuffer);
-                        if (image.a.getWidth() != 64 ||
-                                image.a.getHeight() != 64) {
+                        image.a = PNG.decode(stream, BufferCreator::bytes);
+                        if (image.a.width() != 64 || image.a.height() != 64) {
                             throw new ConnectionCloseException("Invalid skin!");
                         }
                     });
         }
         byte[] skin = new byte[64 * 64 * 4];
-        image.a.getBuffer().get(skin);
+        image.a.buffer().get(skin);
         output.put(skin);
     }
 
@@ -277,7 +281,7 @@ public class ClientConnection
                 WritableByteStream output = channel.getOutputStream();
                 while (!sendQueue.isEmpty()) {
                     Packet packet = sendQueue.poll();
-                    output.putShort(packet.getID(plugins.getRegistry()));
+                    output.putShort(packet.id(plugins.registry()));
                     ((PacketServer) packet).sendServer(this, output);
                 }
                 channel.queueBundle();
@@ -286,8 +290,7 @@ public class ClientConnection
                     ReadableByteStream input = bundle.get();
                     while (input.hasRemaining()) {
                         PacketClient packet = (PacketClient) Packet
-                                .makePacket(plugins.getRegistry(),
-                                        input.getShort());
+                                .make(plugins.registry(), input.getShort());
                         packet.parseClient(this, input);
                         packet.runClient(this, world);
                     }
@@ -330,7 +333,7 @@ public class ClientConnection
     }
 
     @Override
-    public int getLoadingRadius() {
+    public int loadingRadius() {
         if (loadingDistance == -1) {
             throw new IllegalStateException("Client not logged in");
         }
@@ -353,26 +356,26 @@ public class ClientConnection
         joiner.join();
     }
 
-    public MobPlayerClientMain getEntity() {
+    public MobPlayerClientMain entity() {
         return entity;
     }
 
-    public WorldClient getWorld() {
+    public WorldClient world() {
         return world;
     }
 
-    public GameStateGameMP getGame() {
+    public GameStateGameMP game() {
         return game;
     }
 
-    public Plugins getPlugins() {
+    public Plugins plugins() {
         return plugins;
     }
 
     public void changeWorld(WorldClient world) {
         this.world = world;
-        entity = world.getPlayer();
-        game.setScene(world.getScene());
+        entity = world.player();
+        game.setScene(world.scene());
     }
 
     public void updatePing(long ping) {
@@ -395,7 +398,7 @@ public class ClientConnection
         private final Account.Client account;
         private final ByteBuffer headerBuffer = BufferCreator
                 .wrap(new byte[]{'S', 'c', 'a', 'p', 'e', 's',
-                        ConnectionType.PLAY.getData()});
+                        ConnectionType.PLAY.data()});
 
         private LoginData(SocketChannel channel, Account.Client account) {
             this.channel = channel;

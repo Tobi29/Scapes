@@ -30,13 +30,13 @@ public interface WorldSkybox {
 
     void dispose(GL gl, Cam cam);
 
-    float getExposure();
+    float exposure();
 
-    float getFogR();
+    float fogR();
 
-    float getFogG();
+    float fogG();
 
-    float getFogB();
+    float fogB();
 
-    float getFogDistance();
+    float fogDistance();
 }

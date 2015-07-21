@@ -47,40 +47,38 @@ public class MobSkeletonClient extends MobLivingEquippedClient {
 
     @Override
     public void onDeath() {
-        Texture texture =
-                world.getGame().getEngine().graphics().getTextureManager()
-                        .getTexture("VanillaBasics:image/entity/mob/Skeleton");
-        ParticleManager particleManager = world.getParticleManager();
+        Texture texture = world.game().engine().graphics().textures()
+                .get("VanillaBasics:image/entity/mob/Skeleton");
+        ParticleManager particleManager = world.particleManager();
         MobLivingModelHuman
-                .getParticles(particleManager, pos.now(), speed.now(),
-                        rot.now(), texture, true, false);
+                .particles(particleManager, pos.now(), speed.now(), rot.now(),
+                        texture, true, false);
     }
 
     @Override
-    public CreatureType getCreatureType() {
+    public CreatureType creatureType() {
         return CreatureType.MONSTER;
     }
 
     @Override
-    public Vector3 getViewOffset() {
+    public Vector3 viewOffset() {
         return new Vector3d(0.0, 0.0, 0.7);
     }
 
     @Override
     public Optional<MobModel> createModel() {
-        Texture texture =
-                world.getGame().getEngine().graphics().getTextureManager()
-                        .getTexture("VanillaBasics:image/entity/mob/Skeleton");
+        Texture texture = world.game().engine().graphics().textures()
+                .get("VanillaBasics:image/entity/mob/Skeleton");
         return Optional.of(new MobLivingModelHuman(this, texture, true, false));
     }
 
     @Override
-    public ItemStack getLeftWeapon() {
+    public ItemStack leftWeapon() {
         return new ItemStack(registry);
     }
 
     @Override
-    public ItemStack getRightWeapon() {
+    public ItemStack rightWeapon() {
         return new ItemStack(registry);
     }
 }

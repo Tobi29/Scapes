@@ -40,7 +40,7 @@ public class UpdateBlockUpdate extends Update {
             int y, int z, boolean updateTile) {
         BlockType type = terrain.type(x, y, z);
         if (updateTile || type.causesTileUpdate()) {
-            for (EntityServer entity : terrain.world().getEntities(x, y, z)) {
+            for (EntityServer entity : terrain.world().entities(x, y, z)) {
                 entity.updateTile(terrain, x, y, z);
             }
         }

@@ -71,7 +71,7 @@ public class BlockLeaves extends VanillaBlock {
     }
 
     @Override
-    public List<AABBElement> getCollision(int data, int x, int y, int z) {
+    public List<AABBElement> collision(int data, int x, int y, int z) {
         List<AABBElement> aabbs = new ArrayList<>();
         aabbs.add(new AABBElement(new AABB(x, y, z, x + 1, y + 1, z + 1),
                 CollisionLeaves.INSTANCE));
@@ -86,16 +86,16 @@ public class BlockLeaves extends VanillaBlock {
     }
 
     @Override
-    public double getResistance(ItemStack item, int data) {
+    public double resistance(ItemStack item, int data) {
         return 0.1;
     }
 
     @Override
-    public List<ItemStack> getDrops(ItemStack item, int data) {
+    public List<ItemStack> drops(ItemStack item, int data) {
         TreeType type = treeRegistry.get(data);
         Random random = new Random();
         List<ItemStack> drops = new ArrayList<>();
-        if (random.nextInt(type.getDropChance()) == 0) {
+        if (random.nextInt(type.dropChance()) == 0) {
             if (random.nextInt(3) == 0) {
                 drops.add(new ItemStack(materials.sapling, data));
             } else {
@@ -106,77 +106,77 @@ public class BlockLeaves extends VanillaBlock {
     }
 
     @Override
-    public String getFootStep(int data) {
+    public String footStepSound(int data) {
         return "VanillaBasics:sound/footsteps/Grass.ogg";
     }
 
     @Override
-    public String getBreak(ItemStack item, int data) {
+    public String breakSound(ItemStack item, int data) {
         return "VanillaBasics:sound/blocks/Foliage.ogg";
     }
 
     @Override
-    public float getParticleColorR(Face face, TerrainClient terrain, int x,
-            int y, int z) {
+    public float particleColorR(Face face, TerrainClient terrain, int x, int y,
+            int z) {
         TreeType type = treeRegistry.get(terrain.data(x, y, z));
         WorldEnvironmentOverworld environment =
-                (WorldEnvironmentOverworld) terrain.world().getEnvironment();
-        ClimateGenerator climateGenerator = environment.getClimateGenerator();
-        double temperature = climateGenerator.getTemperature(x, y, z);
+                (WorldEnvironmentOverworld) terrain.world().environment();
+        ClimateGenerator climateGenerator = environment.climate();
+        double temperature = climateGenerator.temperature(x, y, z);
         double mix = FastMath.clamp(temperature / 30.0f, 0.0f, 1.0f);
-        Vector3 colorCold = type.getColorCold();
-        Vector3 colorWarm = type.getColorWarm();
+        Vector3 colorCold = type.colorCold();
+        Vector3 colorWarm = type.colorWarm();
         double r = FastMath.mix(colorCold.floatX(), colorWarm.floatX(), mix);
         if (!type.isEvergreen()) {
-            double autumn = climateGenerator.getAutumnLeaves(y);
-            Vector3 colorAutumn = type.getColorAutumn();
+            double autumn = climateGenerator.autumnLeaves(y);
+            Vector3 colorAutumn = type.colorAutumn();
             r = FastMath.mix(r, colorAutumn.floatX(), autumn);
         }
         return (float) r;
     }
 
     @Override
-    public float getParticleColorG(Face face, TerrainClient terrain, int x,
-            int y, int z) {
+    public float particleColorG(Face face, TerrainClient terrain, int x, int y,
+            int z) {
         TreeType type = treeRegistry.get(terrain.data(x, y, z));
         WorldEnvironmentOverworld environment =
-                (WorldEnvironmentOverworld) terrain.world().getEnvironment();
-        ClimateGenerator climateGenerator = environment.getClimateGenerator();
-        double temperature = climateGenerator.getTemperature(x, y, z);
+                (WorldEnvironmentOverworld) terrain.world().environment();
+        ClimateGenerator climateGenerator = environment.climate();
+        double temperature = climateGenerator.temperature(x, y, z);
         double mix = FastMath.clamp(temperature / 30.0f, 0.0f, 1.0f);
-        Vector3 colorCold = type.getColorCold();
-        Vector3 colorWarm = type.getColorWarm();
+        Vector3 colorCold = type.colorCold();
+        Vector3 colorWarm = type.colorWarm();
         double g = FastMath.mix(colorCold.floatY(), colorWarm.floatY(), mix);
         if (!type.isEvergreen()) {
-            double autumn = climateGenerator.getAutumnLeaves(y);
-            Vector3 colorAutumn = type.getColorAutumn();
+            double autumn = climateGenerator.autumnLeaves(y);
+            Vector3 colorAutumn = type.colorAutumn();
             g = FastMath.mix(g, colorAutumn.floatY(), autumn);
         }
         return (float) g;
     }
 
     @Override
-    public float getParticleColorB(Face face, TerrainClient terrain, int x,
-            int y, int z) {
+    public float particleColorB(Face face, TerrainClient terrain, int x, int y,
+            int z) {
         TreeType type = treeRegistry.get(terrain.data(x, y, z));
         WorldEnvironmentOverworld environment =
-                (WorldEnvironmentOverworld) terrain.world().getEnvironment();
-        ClimateGenerator climateGenerator = environment.getClimateGenerator();
-        double temperature = climateGenerator.getTemperature(x, y, z);
+                (WorldEnvironmentOverworld) terrain.world().environment();
+        ClimateGenerator climateGenerator = environment.climate();
+        double temperature = climateGenerator.temperature(x, y, z);
         double mix = FastMath.clamp(temperature / 30.0f, 0.0f, 1.0f);
-        Vector3 colorCold = type.getColorCold();
-        Vector3 colorWarm = type.getColorWarm();
+        Vector3 colorCold = type.colorCold();
+        Vector3 colorWarm = type.colorWarm();
         double b = FastMath.mix(colorCold.floatZ(), colorWarm.floatZ(), mix);
         if (!type.isEvergreen()) {
-            double autumn = climateGenerator.getAutumnLeaves(y);
-            Vector3 colorAutumn = type.getColorAutumn();
+            double autumn = climateGenerator.autumnLeaves(y);
+            Vector3 colorAutumn = type.colorAutumn();
             b = FastMath.mix(b, colorAutumn.floatZ(), autumn);
         }
         return (float) b;
     }
 
     @Override
-    public Optional<TerrainTexture> getParticleTexture(Face face,
+    public Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
         return Optional.of(texturesFancy[terrain.data(x, y, z)]);
     }
@@ -203,11 +203,11 @@ public class BlockLeaves extends VanillaBlock {
         if (!isCovered(terrain, x, y, z)) {
             TreeType type = treeRegistry.get(data);
             ClimateInfoLayer climateLayer = info.get("VanillaBasics:Climate");
-            double temperature = climateLayer.getTemperature(x, y, z);
+            double temperature = climateLayer.temperature(x, y, z);
             double mix =
                     FastMath.clamp((temperature + 20.0f) / 50.0f, 0.0f, 1.0f);
-            Vector3 colorCold = type.getColorCold();
-            Vector3 colorWarm = type.getColorWarm();
+            Vector3 colorCold = type.colorCold();
+            Vector3 colorWarm = type.colorWarm();
             double r =
                     FastMath.mix(colorCold.floatX(), colorWarm.floatX(), mix);
             double g =
@@ -217,11 +217,10 @@ public class BlockLeaves extends VanillaBlock {
             if (!type.isEvergreen()) {
                 WorldEnvironmentOverworld environment =
                         (WorldEnvironmentOverworld) terrain.world()
-                                .getEnvironment();
-                ClimateGenerator climateGenerator =
-                        environment.getClimateGenerator();
-                double autumn = climateGenerator.getAutumnLeaves(y);
-                Vector3 colorAutumn = type.getColorAutumn();
+                                .environment();
+                ClimateGenerator climateGenerator = environment.climate();
+                double autumn = climateGenerator.autumnLeaves(y);
+                Vector3 colorAutumn = type.colorAutumn();
                 r = FastMath.mix(r, colorAutumn.floatX(), autumn);
                 g = FastMath.mix(g, colorAutumn.floatY(), autumn);
                 b = FastMath.mix(b, colorAutumn.floatZ(), autumn);
@@ -244,7 +243,7 @@ public class BlockLeaves extends VanillaBlock {
         texturesFancy = new TerrainTexture[types.size()];
         texturesFast = new TerrainTexture[types.size()];
         for (int i = 0; i < types.size(); i++) {
-            String texture = types.get(i).getTexture();
+            String texture = types.get(i).texture();
             texturesFancy[i] =
                     registry.registerTexture(texture + "/LeavesFancy.png",
                             ShaderAnimation.LEAVES);
@@ -261,8 +260,8 @@ public class BlockLeaves extends VanillaBlock {
         modelsColored = new BlockModel[types.size()];
         for (int i = 0; i < types.size(); i++) {
             TreeType type = treeRegistry.get(i);
-            Vector3 colorCold = type.getColorCold();
-            Vector3 colorWarm = type.getColorWarm();
+            Vector3 colorCold = type.colorCold();
+            Vector3 colorWarm = type.colorWarm();
             float r =
                     FastMath.mix(colorCold.floatX(), colorWarm.floatX(), 0.5f);
             float g =
@@ -296,22 +295,22 @@ public class BlockLeaves extends VanillaBlock {
     @Override
     public void render(ItemStack item, GL gl, Shader shader,
             float r, float g, float b, float a) {
-        modelsColored[item.getData()].render(gl, shader);
+        modelsColored[item.data()].render(gl, shader);
     }
 
     @Override
     public void renderInventory(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a) {
-        modelsColored[item.getData()].renderInventory(gl, shader);
+        modelsColored[item.data()].renderInventory(gl, shader);
     }
 
     @Override
-    public String getName(ItemStack item) {
-        return materials.log.getName(item) + " Leaves";
+    public String name(ItemStack item) {
+        return materials.log.name(item) + " Leaves";
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 16;
     }
 
@@ -356,8 +355,7 @@ public class BlockLeaves extends VanillaBlock {
             checks = checks2;
             checks2 = checksSwap;
         }
-        terrain.world().dropItems(
-                getDrops(new ItemStack(materials.air, (short) 0),
+        terrain.world().dropItems(drops(new ItemStack(materials.air, (short) 0),
                         terrain.data(pos.intX(), pos.intY(), pos.intZ())),
                 pos.intX(), pos.intY(), pos.intZ());
         terrain.typeData(pos.intX(), pos.intY(), pos.intZ(), materials.air,

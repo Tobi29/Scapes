@@ -52,20 +52,20 @@ public abstract class Packet {
         this(pos, 0.0, isChunkContent);
     }
 
-    public static Packet makePacket(GameRegistry registry, short id) {
+    public static Packet make(GameRegistry registry, short id) {
         return registry.<Packet>getSupplier("Core", "Packet").get(id)
                 .apply(registry);
     }
 
-    public short getID(GameRegistry registry) {
-        return (short) registry.getSupplier("Core", "Packet").getID(this);
+    public short id(GameRegistry registry) {
+        return (short) registry.getSupplier("Core", "Packet").id(this);
     }
 
-    public Vector3 getPosition() {
+    public Vector3 pos() {
         return pos;
     }
 
-    public double getRange() {
+    public double range() {
         return range;
     }
 

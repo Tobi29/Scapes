@@ -26,7 +26,7 @@ public interface ItemHeatable {
 
     void cool(MobItemServer item);
 
-    float getMeltingPoint(ItemStack item);
+    float meltingPoint(ItemStack item);
 
-    float getTemperature(ItemStack item);
+    float temperature(ItemStack item);
 }

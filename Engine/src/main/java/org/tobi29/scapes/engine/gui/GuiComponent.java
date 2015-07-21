@@ -108,7 +108,7 @@ public abstract class GuiComponent
         for (GuiComponentEventListener event1 : events) {
             event1.click(event);
         }
-        getGui().ifPresent(gui -> gui.setLastClicked(this));
+        gui().ifPresent(gui -> gui.setLastClicked(this));
     }
 
     @Override
@@ -116,7 +116,7 @@ public abstract class GuiComponent
         for (GuiComponentEventListener rightEvent : rightEvents) {
             rightEvent.click(event);
         }
-        getGui().ifPresent(gui -> gui.setLastClicked(this));
+        gui().ifPresent(gui -> gui.setLastClicked(this));
     }
 
     @Override
@@ -135,7 +135,7 @@ public abstract class GuiComponent
                 y < this.y + height;
     }
 
-    public int getX() {
+    public int x() {
         return x;
     }
 
@@ -143,7 +143,7 @@ public abstract class GuiComponent
         this.x = x;
     }
 
-    public int getY() {
+    public int y() {
         return y;
     }
 
@@ -151,7 +151,7 @@ public abstract class GuiComponent
         this.y = y;
     }
 
-    public Optional<Gui> getGui() {
+    public Optional<Gui> gui() {
         GuiComponent other = this;
         while (true) {
             if (other.parent != null) {
@@ -165,26 +165,24 @@ public abstract class GuiComponent
         }
     }
 
-    public void render(GL gl, Shader shader,
-            FontRenderer font, double delta) {
+    public void render(GL gl, Shader shader, FontRenderer font, double delta) {
         if (visible) {
-            MatrixStack matrixStack = gl.getMatrixStack();
+            MatrixStack matrixStack = gl.matrixStack();
             Matrix matrix = matrixStack.push();
             transform(matrix);
             renderComponent(gl, shader, font, delta);
-            components.stream().forEach(component -> component
-                    .render(gl, shader, font, delta));
+            components.stream().forEach(
+                    component -> component.render(gl, shader, font, delta));
             renderOverlay(gl, shader, font);
             matrixStack.pop();
         }
     }
 
-    public void renderComponent(GL gl, Shader shader,
-            FontRenderer font, double delta) {
+    public void renderComponent(GL gl, Shader shader, FontRenderer font,
+            double delta) {
     }
 
-    public void renderOverlay(GL gl, Shader shader,
-            FontRenderer font) {
+    public void renderOverlay(GL gl, Shader shader, FontRenderer font) {
     }
 
     public void setHover(boolean hover, ScapesEngine engine) {
@@ -200,7 +198,7 @@ public abstract class GuiComponent
 
     public void update(ScapesEngine engine) {
         GuiController guiController = engine.guiController();
-        update(guiController.getGuiCursorX(), guiController.getGuiCursorY(),
+        update(guiController.guiCursorX(), guiController.guiCursorY(),
                 true, engine);
     }
 
@@ -211,10 +209,10 @@ public abstract class GuiComponent
             boolean inside = mouseInside && checkInside(mouseX, mouseY);
             if (inside) {
                 GuiController guiController = engine.guiController();
-                if (guiController.getLeftClick()) {
+                if (guiController.leftClick()) {
                     clickLeft(new GuiComponentEvent(mouseX, mouseY), engine);
                 }
-                if (guiController.getRightClick()) {
+                if (guiController.rightClick()) {
                     clickRight(new GuiComponentEvent(mouseX, mouseY), engine);
                 }
                 setHover(true, engine);

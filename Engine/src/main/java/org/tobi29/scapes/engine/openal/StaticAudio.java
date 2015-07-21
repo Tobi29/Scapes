@@ -50,16 +50,16 @@ public class StaticAudio implements Audio {
     public boolean poll(SoundSystem sounds, OpenAL openAL,
             Vector3 listenerPosition, double speedFactor, boolean lagSilence) {
         if (buffer == -1) {
-            Optional<AudioData> audio = sounds.getAudio(asset);
+            Optional<AudioData> audio = sounds.get(asset);
             if (audio.isPresent()) {
-                buffer = audio.get().getBuffer();
+                buffer = audio.get().buffer();
             }
         }
         if (source == -1) {
             source = openAL.createSource();
         }
         if (gain > 0.001f) {
-            float gainAL = gain * sounds.getSoundVolume();
+            float gainAL = gain * sounds.soundVolume();
             float pitchAL = pitch;
             if (playing) {
                 if (FastMath.abs(gainAL - this.gainAL) > 0.001f) {

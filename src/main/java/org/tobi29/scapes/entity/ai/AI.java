@@ -30,5 +30,5 @@ public interface AI {
 
     boolean hasMobTarget();
 
-    double getTargetYaw();
+    double targetYaw();
 }

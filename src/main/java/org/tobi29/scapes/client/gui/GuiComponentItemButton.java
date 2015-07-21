@@ -31,7 +31,7 @@ public class GuiComponentItemButton extends GuiComponentButton {
         this.item = item;
     }
 
-    public ItemStack getItem() {
+    public ItemStack item() {
         return item;
     }
 

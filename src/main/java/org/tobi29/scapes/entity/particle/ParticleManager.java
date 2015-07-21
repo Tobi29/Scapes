@@ -49,15 +49,14 @@ public class ParticleManager {
 
     public void render(GL gl, Cam cam) {
         Vector3 camPos = cam.position.now();
-        Shader shader =
-                gl.getShaderManager().getShader("Scapes:shader/Entity", gl);
+        Shader shader = gl.shaders().get("Scapes:shader/Entity", gl);
         synchronized (particles) {
             particles.stream().sorted((particle1, particle2) -> {
                 double distance1 =
-                        FastMath.pointDistanceSqr(particle1.getPosRender(),
+                        FastMath.pointDistanceSqr(particle1.posRender(),
                                 camPos);
                 double distance2 =
-                        FastMath.pointDistanceSqr(particle2.getPosRender(),
+                        FastMath.pointDistanceSqr(particle2.posRender(),
                                 camPos);
                 return distance1 == distance2 ? 0 :
                         distance1 < distance2 ? 1 : -1;
@@ -76,7 +75,7 @@ public class ParticleManager {
         particles.forEach(particle -> particle.move(delta));
     }
 
-    public WorldClient getWorld() {
+    public WorldClient world() {
         return world;
     }
 }

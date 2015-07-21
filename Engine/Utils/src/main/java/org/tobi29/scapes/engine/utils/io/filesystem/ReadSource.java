@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.io;
+package org.tobi29.scapes.engine.utils.io.filesystem;
+
+import org.tobi29.scapes.engine.utils.io.IOConsumer;
+import org.tobi29.scapes.engine.utils.io.IOFunction;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -38,5 +42,5 @@ public interface ReadSource {
         return new BufferedReader(new InputStreamReader(readIO()));
     }
 
-    String getMIMEType() throws IOException;
+    String mimeType() throws IOException;
 }

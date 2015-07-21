@@ -27,27 +27,23 @@ import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 public class UpdateGrassGrowth extends Update {
     @Override
     public void run(TerrainServer.TerrainMutable terrain) {
-        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
-                .getPlugin("VanillaBasics");
+        VanillaBasics plugin = (VanillaBasics) terrain.world().plugins()
+                .plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         BlockType type = terrain.type(x, y, z);
         if (type == materials.grass) {
             WorldEnvironmentOverworld environment =
-                    (WorldEnvironmentOverworld) terrain.world()
-                            .getEnvironment();
-            ClimateGenerator climateGenerator =
-                    environment.getClimateGenerator();
-            double humidity = climateGenerator.getHumidity(x, y, z);
+                    (WorldEnvironmentOverworld) terrain.world().environment();
+            ClimateGenerator climateGenerator = environment.climate();
+            double humidity = climateGenerator.humidity(x, y, z);
             if (humidity < 0.2) {
                 terrain.type(x, y, z, materials.dirt);
             }
         } else if (type == materials.dirt) {
             WorldEnvironmentOverworld environment =
-                    (WorldEnvironmentOverworld) terrain.world()
-                            .getEnvironment();
-            ClimateGenerator climateGenerator =
-                    environment.getClimateGenerator();
-            double humidity = climateGenerator.getHumidity(x, y, z);
+                    (WorldEnvironmentOverworld) terrain.world().environment();
+            ClimateGenerator climateGenerator = environment.climate();
+            double humidity = climateGenerator.humidity(x, y, z);
             if (humidity > 0.2 && (terrain.blockLight(x, y, z + 1) > 8 ||
                     terrain.sunLight(x, y, z + 1) > 8) &&
                     terrain.type(x, y, z + 1)
@@ -59,8 +55,8 @@ public class UpdateGrassGrowth extends Update {
 
     @Override
     public boolean isValidOn(BlockType type, TerrainServer terrain) {
-        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
-                .getPlugin("VanillaBasics");
+        VanillaBasics plugin = (VanillaBasics) terrain.world().plugins()
+                .plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         return type == materials.grass || type == materials.dirt;
     }

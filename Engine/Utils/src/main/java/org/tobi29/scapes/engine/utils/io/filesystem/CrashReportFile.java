@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.engine.utils.io;
+package org.tobi29.scapes.engine.utils.io.filesystem;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -47,8 +47,8 @@ public final class CrashReportFile {
      * @param path Parent directory to put the file into
      * @return A file inside of the given directory with appropriate name
      */
-    public static Path getFile(Path path) {
-        return getFile(path, DEFAULT_CLOCK);
+    public static Path file(Path path) {
+        return file(path, DEFAULT_CLOCK);
     }
 
     /**
@@ -58,7 +58,7 @@ public final class CrashReportFile {
      * @param clock The clock used to name the file
      * @return A file inside of the given directory with appropriate name
      */
-    public static Path getFile(Path path, Clock clock) {
+    public static Path file(Path path, Clock clock) {
         return path.resolve("CrashReport-" +
                 OffsetDateTime.now(clock).format(FILE_FORMATTER) +
                 ".txt");

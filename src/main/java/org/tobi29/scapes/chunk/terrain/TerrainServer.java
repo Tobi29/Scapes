@@ -38,6 +38,8 @@ public interface TerrainServer extends Terrain {
     boolean isBlockSendable(MobPlayerServer player, int x, int y, int z,
             boolean chunkContent);
 
+    void dispose();
+
     @FunctionalInterface
     interface BlockChanges {
         void run(TerrainMutable handler);

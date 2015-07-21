@@ -37,14 +37,14 @@ public class ShaderManager {
         this.engine = engine;
     }
 
-    public Shader getShader(String asset, GL gl) {
+    public Shader get(String asset, GL gl) {
         if (!cache.containsKey(asset)) {
-            loadFromAsset(asset, gl);
+            load(asset, gl);
         }
         return cache.get(asset);
     }
 
-    private void loadFromAsset(String asset, GL gl) {
+    private void load(String asset, GL gl) {
         try {
             Properties properties = new Properties();
             FileSystemContainer files = engine.files();
@@ -58,14 +58,14 @@ public class ShaderManager {
             }
             Shader shader =
                     new Shader(vertexResource, fragmentResource, properties,
-                            getCompileInformation(asset), gl);
+                            compileInformation(asset), gl);
             cache.put(asset, shader);
         } catch (IOException e) {
             engine.crash(e);
         }
     }
 
-    public ShaderCompileInformation getCompileInformation(String asset) {
+    public ShaderCompileInformation compileInformation(String asset) {
         ShaderCompileInformation information = compileInformation.get(asset);
         if (information == null) {
             information = new ShaderCompileInformation();

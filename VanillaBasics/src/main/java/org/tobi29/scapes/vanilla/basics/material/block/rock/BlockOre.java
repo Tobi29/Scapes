@@ -32,18 +32,18 @@ public abstract class BlockOre extends BlockStone {
     }
 
     @Override
-    public double getResistance(ItemStack item, int data) {
-        if ("Pickaxe".equals(item.getMaterial().getToolType(item)) &&
-                canBeBroken(item.getMaterial().getToolLevel(item), data)) {
-            return super.getResistance(item, data);
-        } else if ("Pickaxe".equals(item.getMaterial().getToolType(item))) {
+    public double resistance(ItemStack item, int data) {
+        if ("Pickaxe".equals(item.material().toolType(item)) &&
+                canBeBroken(item.material().toolLevel(item), data)) {
+            return super.resistance(item, data);
+        } else if ("Pickaxe".equals(item.material().toolType(item))) {
             return 12.0;
         }
         return -1;
     }
 
     @Override
-    protected String getTexture(int data) {
+    protected String texture(int data) {
         return "";
     }
 
@@ -52,15 +52,15 @@ public abstract class BlockOre extends BlockStone {
         List<StoneType> types = stoneRegistry.values();
         textures = new TerrainTexture[types.size()];
         String ore = "VanillaBasics:image/terrain/ore/block/" +
-                getOreTexture() + ".png";
+                oreTexture() + ".png";
         int i = 0;
         for (StoneType type : types) {
             textures[i++] =
-                    registry.registerTexture(type.getTextureRoot() + "/raw/" +
-                            type.getTexture() +
+                    registry.registerTexture(type.textureRoot() + "/raw/" +
+                            type.texture() +
                             ".png", ore);
         }
     }
 
-    protected abstract String getOreTexture();
+    protected abstract String oreTexture();
 }

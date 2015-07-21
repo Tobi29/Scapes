@@ -37,39 +37,39 @@ public class TerrainTexture {
         tiles = resolution >> 4;
     }
 
-    public float getX() {
+    public float x() {
         return x + size * 0.005f;
     }
 
-    public float getRealX() {
+    public float realX() {
         return x;
     }
 
-    public float getY() {
+    public float y() {
         return y + size * 0.005f;
     }
 
-    public float getRealY() {
+    public float realY() {
         return y;
     }
 
-    public float getSize() {
+    public float size() {
         return size * 0.99f;
     }
 
-    public float getRealSize() {
+    public float realSize() {
         return size;
     }
 
-    public int getResolution() {
+    public int resolution() {
         return resolution;
     }
 
-    public TerrainTextureRegistry getTerrainTextureRegistry() {
+    public TerrainTextureRegistry registry() {
         return registry;
     }
 
-    public ShaderAnimation getShaderAnimation() {
+    public ShaderAnimation shaderAnimation() {
         return shaderAnimation;
     }
 

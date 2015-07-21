@@ -41,9 +41,9 @@ public class PacketSetWorld extends Packet implements PacketClient {
 
     public PacketSetWorld(WorldServer world, MobPlayerServer player) {
         tag = player.write();
-        seed = world.getSeed();
-        name = world.getName();
-        entityID = player.getEntityID();
+        seed = world.seed();
+        name = world.name();
+        entityID = player.entityID();
     }
 
     @Override
@@ -68,10 +68,10 @@ public class PacketSetWorld extends Packet implements PacketClient {
     @Override
     public void runClient(ClientConnection client, WorldClient world) {
         client.changeWorld(new WorldClient(client,
-                new Cam(0.01f, client.getLoadingRadius()), seed, name,
+                new Cam(0.01f, client.loadingRadius()), seed, name,
                 newWorld -> new TerrainInfiniteClient(newWorld,
-                        client.getLoadingRadius() >> 4, 512,
-                        client.getGame().getEngine().taskExecutor()), tag,
+                        client.loadingRadius() >> 4, 512,
+                        client.game().engine().taskExecutor()), tag,
                 entityID));
     }
 }

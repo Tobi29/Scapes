@@ -54,18 +54,18 @@ public class ItemString extends VanillaItem {
     @Override
     public void render(ItemStack item, GL gl, Shader shader,
             float r, float g, float b, float a) {
-        models[item.getData()].render(gl, shader);
+        models[item.data()].render(gl, shader);
     }
 
     @Override
     public void renderInventory(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a) {
-        models[item.getData()].renderInventory(gl, shader);
+        models[item.data()].renderInventory(gl, shader);
     }
 
     @Override
-    public String getName(ItemStack item) {
-        switch (item.getData()) {
+    public String name(ItemStack item) {
+        switch (item.data()) {
             case 1:
                 return "Fabric";
             default:
@@ -74,7 +74,7 @@ public class ItemString extends VanillaItem {
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 32;
     }
 }

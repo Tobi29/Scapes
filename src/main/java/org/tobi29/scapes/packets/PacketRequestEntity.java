@@ -52,11 +52,11 @@ public class PacketRequestEntity extends Packet implements PacketServer {
         if (world == null) {
             return;
         }
-        EntityServer entity = world.getEntity(entityId);
+        EntityServer entity = world.entity(entityId);
         if (entity != null) {
             player.send(new PacketEntityAdd(entity,
-                    player.getServer().getServer().getWorldFormat().getPlugins()
-                            .getRegistry()));
+                    player.server().server().worldFormat().plugins()
+                            .registry()));
         }
     }
 }

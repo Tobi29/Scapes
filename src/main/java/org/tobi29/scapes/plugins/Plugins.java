@@ -50,7 +50,7 @@ public class Plugins {
         registry = new GameRegistry(idStorage);
         classLoader = new PluginClassLoader(files, path);
         for (PluginFile file : files) {
-            Plugin plugin = file.getPlugin(classLoader);
+            Plugin plugin = file.plugin(classLoader);
             plugins.add(plugin);
             if (plugin instanceof Dimension) {
                 dimensions.add((Dimension) plugin);
@@ -83,37 +83,37 @@ public class Plugins {
         classLoader = null;
     }
 
-    public GameRegistry getRegistry() {
+    public GameRegistry registry() {
         return registry;
     }
 
-    public int getFileCount() {
+    public int fileCount() {
         return files.size();
     }
 
-    public Stream<PluginFile> getFiles() {
+    public Stream<PluginFile> files() {
         return files.stream();
     }
 
-    public PluginFile getFile(int i) {
+    public PluginFile file(int i) {
         return files.get(i);
     }
 
-    public Stream<Plugin> getPlugins() {
+    public Stream<Plugin> plugins() {
         return plugins.stream();
     }
 
-    public Stream<Dimension> getDimensions() {
+    public Stream<Dimension> dimensions() {
         return dimensions.stream();
     }
 
-    public WorldType getWorldType() {
+    public WorldType worldType() {
         return worldType;
     }
 
-    public Plugin getPlugin(String name) {
+    public Plugin plugin(String name) {
         for (Plugin plugin : plugins) {
-            if (plugin.getID().equals(name)) {
+            if (plugin.id().equals(name)) {
                 return plugin;
             }
         }
@@ -122,14 +122,14 @@ public class Plugins {
 
     public void addFileSystems(FileSystemContainer files) {
         for (Plugin plugin : plugins) {
-            files.registerFileSystem(plugin.getID(),
-                    new ClasspathPath(classLoader, plugin.getAssetRoot()));
+            files.registerFileSystem(plugin.id(),
+                    new ClasspathPath(classLoader, plugin.assetRoot()));
         }
     }
 
     public void removeFileSystems(FileSystemContainer files) {
         for (Plugin plugin : plugins) {
-            files.removeFileSystem(plugin.getID());
+            files.removeFileSystem(plugin.id());
         }
     }
 

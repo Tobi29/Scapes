@@ -57,12 +57,12 @@ public class ParticleTornadoBlock extends Particle {
     @Override
     public void renderParticle(float x, float y, float z, float r, float g,
             float b, float a, GL gl, Shader shader) {
-        MatrixStack matrixStack = gl.getMatrixStack();
+        MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(x, y, z);
         matrix.rotate((float) spin, 0, 0, 1);
         matrix.rotate(dir, 1, 0, 0);
-        item.getMaterial().render(item, gl, shader, r, g, b, a);
+        item.material().render(item, gl, shader, r, g, b, a);
         matrixStack.pop();
     }
 

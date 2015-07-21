@@ -51,7 +51,7 @@ public class GuiComponentControlsButton extends GuiComponentTextButton {
         }
         text.append(name);
         text.append(": ");
-        text.append(key.getName());
+        text.append(key.humanName());
         if (editing > 0) {
             text.append('>');
         }
@@ -64,11 +64,10 @@ public class GuiComponentControlsButton extends GuiComponentTextButton {
         super.update(mouseX, mouseY, mouseInside, engine);
         if (editing > 1) {
             Optional<Controller.PressEvent> keyEvent =
-                    controller.getPressEvents()
-                            .filter(event -> event.getState() ==
+                    controller.pressEvents().filter(event -> event.state() ==
                                     Controller.PressState.PRESS).findFirst();
             if (keyEvent.isPresent()) {
-                key = keyEvent.get().getKey();
+                key = keyEvent.get().key();
                 tagStructure.setString(id, key.toString());
                 editing = 0;
                 updateText();

@@ -36,7 +36,7 @@ public class PluginClassLoader extends URLClassLoader {
 
     public PluginClassLoader(List<PluginFile> files, Path path)
             throws IOException {
-        super(getURLs(files));
+        super(urls(files));
         if (System.getSecurityManager() == null) {
             LOGGER.warn("No security manager installed!");
         }
@@ -49,11 +49,11 @@ public class PluginClassLoader extends URLClassLoader {
         permissions.setReadOnly();
     }
 
-    private static URL[] getURLs(List<PluginFile> files) throws IOException {
+    private static URL[] urls(List<PluginFile> files) throws IOException {
         URL[] urls = new URL[files.size()];
         int i = 0;
         for (PluginFile file : files) {
-            urls[i] = file.getFile().toUri().toURL();
+            urls[i] = file.file().toUri().toURL();
             i++;
         }
         return urls;

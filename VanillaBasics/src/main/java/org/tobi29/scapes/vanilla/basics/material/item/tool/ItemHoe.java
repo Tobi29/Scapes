@@ -30,7 +30,7 @@ public class ItemHoe extends ItemTool {
     }
 
     @Override
-    public String getType() {
+    public String type() {
         return "Hoe";
     }
 }

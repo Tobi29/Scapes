@@ -24,7 +24,7 @@ import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 
 public interface EntityModel {
-    Vector3 getPos();
+    Vector3 pos();
 
     void shapeAABB(AABB aabb);
 

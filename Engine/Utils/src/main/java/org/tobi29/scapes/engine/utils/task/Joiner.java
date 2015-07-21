@@ -74,7 +74,7 @@ public class Joiner {
             notifyAll();
         }
 
-        public Joiner getJoiner() {
+        public Joiner joiner() {
             return joiner;
         }
     }

@@ -28,25 +28,25 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 import java.io.IOException;
 
 public class PacketOpenGui extends Packet implements PacketClient {
-    private int entityId;
+    private int entityID;
 
     public PacketOpenGui() {
     }
 
     public PacketOpenGui(EntityContainerServer entity) {
-        entityId = ((EntityServer) entity).getEntityID();
+        entityID = ((EntityServer) entity).entityID();
     }
 
     @Override
     public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        stream.putInt(entityId);
+        stream.putInt(entityID);
     }
 
     @Override
     public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        entityId = stream.getInt();
+        entityID = stream.getInt();
     }
 
     @Override
@@ -54,8 +54,11 @@ public class PacketOpenGui extends Packet implements PacketClient {
         if (world == null) {
             return;
         }
-        EntityContainerClient entity =
-                (EntityContainerClient) world.getEntity(entityId);
-        client.getEntity().openGui(entity.getGui(client.getEntity()));
+        world.entity(entityID).ifPresent(entity -> {
+            if (entity instanceof EntityContainerClient) {
+                client.entity().openGui(
+                        ((EntityContainerClient) entity).gui(client.entity()));
+            }
+        });
     }
 }

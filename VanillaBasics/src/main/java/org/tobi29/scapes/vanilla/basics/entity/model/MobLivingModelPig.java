@@ -18,7 +18,6 @@ package org.tobi29.scapes.vanilla.basics.entity.model;
 
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -55,12 +54,12 @@ public class MobLivingModelPig implements MobModel {
 
     public MobLivingModelPig(MobLivingClient entity, Texture texture) {
         this.entity = entity;
-        pos = new MutableVector3d(entity.getPos());
+        pos = new MutableVector3d(entity.pos());
         this.texture = texture;
     }
 
     @Override
-    public Vector3 getPos() {
+    public Vector3 pos() {
         return pos.now();
     }
 
@@ -80,13 +79,12 @@ public class MobLivingModelPig implements MobModel {
         double factorRot = FastMath.min(1.0, delta * 20.0);
         double factorSpeed = FastMath.min(1.0, delta * 5.0);
         double moveSpeed = FastMath.min(
-                FastMath.sqrt(FastMath.length((Vector2) entity.getSpeed())),
+                FastMath.sqrt(FastMath.length((Vector2) entity.speed())),
                 2.0);
         xRotRender -=
-                FastMath.angleDiff(entity.getXRot(), xRotRender) * factorRot;
-        zRotRender -=
-                FastMath.angleDiff(entity.getZRot(), zRotRender) * factorRot;
-        pos.plus(entity.getPos().minus(pos.now()).multiply(factorPos));
+                FastMath.angleDiff(entity.pitch(), xRotRender) * factorRot;
+        zRotRender -= FastMath.angleDiff(entity.yaw(), zRotRender) * factorRot;
+        pos.plus(entity.pos().minus(pos.now()).multiply(factorPos));
         swing += moveSpeed * 2.0 * delta;
         swing %= FastMath.TWO_PI;
         moveSpeedRender += (moveSpeed - moveSpeedRender) * factorSpeed;
@@ -96,18 +94,17 @@ public class MobLivingModelPig implements MobModel {
     public void render(GL gl, WorldClient world, Cam cam,
             Shader shader) {
         float damageColor = (float) (1.0 - FastMath.min(1.0,
-                FastMath.max(0.0f, entity.getInvincibleTicks() / 0.8)));
+                FastMath.max(0.0f, entity.invincibleTicks() / 0.8)));
         float posRenderX = (float) (pos.doubleX() - cam.position.doubleX());
         float posRenderY = (float) (pos.doubleY() - cam.position.doubleY());
         float posRenderZ = (float) (pos.doubleZ() - cam.position.doubleZ());
         double swingDir = FastMath.cosTable(swing) * moveSpeedRender * 0.5;
-        OpenGL openGL = gl.getOpenGL();
-        openGL.setAttribute2f(4, world.getTerrain()
+        gl.setAttribute2f(4, world.terrain()
                         .blockLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f,
-                world.getTerrain()
+                world.terrain()
                         .sunLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f);
         texture.bind(gl);
-        MatrixStack matrixStack = gl.getMatrixStack();
+        MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(posRenderX, posRenderY, posRenderZ);
         matrix.rotate(zRotRender - 90, 0, 0, 1);
@@ -142,12 +139,12 @@ public class MobLivingModelPig implements MobModel {
     }
 
     @Override
-    public float getPitch() {
+    public float pitch() {
         return xRotRender;
     }
 
     @Override
-    public float getYaw() {
+    public float yaw() {
         return zRotRender;
     }
 }

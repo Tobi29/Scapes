@@ -28,7 +28,7 @@ public class ByteBufferStream
     private ByteBuffer buffer;
 
     public ByteBufferStream() {
-        this(capacity -> BufferCreator.byteBuffer(capacity + 8192));
+        this(capacity -> BufferCreator.bytes(capacity + 8192));
     }
 
     public ByteBufferStream(IntFunction<ByteBuffer> supplier) {
@@ -36,7 +36,7 @@ public class ByteBufferStream
     }
 
     public ByteBufferStream(ByteBuffer buffer) {
-        this(length -> BufferCreator.byteBuffer(length + 8192), buffer);
+        this(length -> BufferCreator.bytes(length + 8192), buffer);
     }
 
     public ByteBufferStream(IntFunction<ByteBuffer> supplier,

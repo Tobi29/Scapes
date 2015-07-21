@@ -25,7 +25,7 @@ public enum CreatureType {
         this.despawn = despawn;
     }
 
-    public boolean getDespawn() {
+    public boolean doesDespawn() {
         return despawn;
     }
 }

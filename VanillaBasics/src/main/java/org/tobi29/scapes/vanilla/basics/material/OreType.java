@@ -36,27 +36,27 @@ public class OreType {
         this.stoneTypes = stoneTypes;
     }
 
-    public int getRarity() {
+    public int rarity() {
         return rarity;
     }
 
-    public double getSize() {
+    public double size() {
         return size;
     }
 
-    public int getChance() {
+    public int chance() {
         return chance;
     }
 
-    public int getRockChance() {
+    public int rockChance() {
         return rockChance;
     }
 
-    public BlockType getBlockType() {
+    public BlockType type() {
         return type;
     }
 
-    public List<Integer> getStoneTypes() {
+    public List<Integer> stoneTypes() {
         return stoneTypes;
     }
 }

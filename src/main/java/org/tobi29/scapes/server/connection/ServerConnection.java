@@ -32,6 +32,7 @@ import org.tobi29.scapes.server.ScapesServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -74,24 +75,24 @@ public class ServerConnection implements PlayConnection {
         }
     }
 
-    public PlayerConnection getPlayer(String id) {
+    public PlayerConnection player(String id) {
         return players.get(id);
     }
 
-    public PlayerConnection getPlayerByName(String name) {
+    public PlayerConnection playerByName(String name) {
         return playerByName.get(name);
     }
 
-    public Optional<ServerSkin> getSkin(byte[] checksum) {
+    public Optional<ServerSkin> skin(byte[] checksum) {
         for (PlayerConnection player : playerByName.values()) {
-            if (Arrays.equals(player.getSkin().checksum(), checksum)) {
-                return Optional.of(player.getSkin());
+            if (Arrays.equals(player.skin().checksum(), checksum)) {
+                return Optional.of(player.skin());
             }
         }
         return Optional.empty();
     }
 
-    public ScapesServer getServer() {
+    public ScapesServer server() {
         return server;
     }
 
@@ -101,7 +102,7 @@ public class ServerConnection implements PlayConnection {
     }
 
     @Override
-    public int getLoadingRadius() {
+    public int loadingRadius() {
         throw new UnsupportedOperationException(
                 "Cannot check loading radius from server.");
     }
@@ -112,8 +113,13 @@ public class ServerConnection implements PlayConnection {
                 .forEach(player -> player.send(packet));
     }
 
-    public void start(int port) throws IOException {
-        LOGGER.info("Start server on port {}", port);
+    public int start(int port) throws IOException {
+        InetSocketAddress address = start(new InetSocketAddress(port));
+        return address.getPort();
+    }
+
+    @SuppressWarnings("unchecked")
+    public <A extends SocketAddress> A start(A address) throws IOException {
         LOGGER.info("Starting worker {} threads...", workerCount);
         List<Joiner> joiners = new ArrayList<>(workerCount + 1);
         for (int i = 0; i < workerCount; i++) {
@@ -124,7 +130,7 @@ public class ServerConnection implements PlayConnection {
         LOGGER.info("Starting socket thread...");
         ServerSocketChannel channel = ServerSocketChannel.open();
         channel.configureBlocking(false);
-        channel.bind(new InetSocketAddress(port));
+        channel.bind(address);
         joiners.add(taskExecutor.runTask(joiner -> {
             try {
                 while (!joiner.marked()) {
@@ -155,13 +161,14 @@ public class ServerConnection implements PlayConnection {
             }
         }, "Socket"));
         joiner = new Joiner(joiners);
+        return (A) channel.getLocalAddress();
     }
 
     public void stop() {
         joiner.join();
     }
 
-    public boolean getAllowsJoin() {
+    public boolean doesAllowJoin() {
         return allowsJoin;
     }
 
@@ -169,7 +176,7 @@ public class ServerConnection implements PlayConnection {
         this.allowsJoin = allowsJoin;
     }
 
-    public boolean getAllowsCreation() {
+    public boolean doesAllowCreation() {
         return allowsCreation;
     }
 
@@ -177,7 +184,7 @@ public class ServerConnection implements PlayConnection {
         this.allowsCreation = allowsCreation;
     }
 
-    protected KeyPair getKeyPair() {
+    protected KeyPair keyPair() {
         return keyPair;
     }
 
@@ -186,7 +193,7 @@ public class ServerConnection implements PlayConnection {
         players.addAll(playerByName.keySet());
         String[] array = new String[players.size()];
         players.toArray(array);
-        server.getControlPanels().forEach(controlPanel -> controlPanel.
+        server.controlPanels().forEach(controlPanel -> controlPanel.
                 updatePlayers(array));
     }
 
@@ -195,22 +202,22 @@ public class ServerConnection implements PlayConnection {
             if (players.size() >= mayPlayers) {
                 return Optional.of("Server full");
             }
-            if (players.containsKey(connection.getID())) {
+            if (players.containsKey(connection.id())) {
                 return Optional.of("User already online");
             }
-            if (playerByName.containsKey(connection.getNickname())) {
+            if (playerByName.containsKey(connection.nickname())) {
                 return Optional.of("User with same name online");
             }
-            players.put(connection.getID(), connection);
-            playerByName.put(connection.getNickname(), connection);
+            players.put(connection.id(), connection);
+            playerByName.put(connection.nickname(), connection);
         }
         updateControlPanelPlayers();
         return Optional.empty();
     }
 
     protected void removePlayer(PlayerConnection connection) {
-        players.remove(connection.getID());
-        playerByName.remove(connection.getNickname());
+        players.remove(connection.id());
+        playerByName.remove(connection.nickname());
         updateControlPanelPlayers();
     }
 

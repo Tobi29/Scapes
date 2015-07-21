@@ -46,7 +46,7 @@ public class ItemBaked extends VanillaItem {
     @Override
     public void click(MobPlayerServer entity, ItemStack item) {
         TagStructure conditionTag =
-                entity.getMetaData("Vanilla").getStructure("Condition");
+                entity.metaData("Vanilla").getStructure("Condition");
         synchronized (conditionTag) {
             double stamina = conditionTag.getDouble("Stamina");
             conditionTag.setDouble("Stamina", stamina - 0.1);
@@ -55,7 +55,7 @@ public class ItemBaked extends VanillaItem {
             double thirst = conditionTag.getDouble("Thirst");
             conditionTag.setDouble("Thirst", thirst - 0.1);
         }
-        item.setAmount(item.getAmount() - 1);
+        item.setAmount(item.amount() - 1);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class ItemBaked extends VanillaItem {
         int i = 0;
         for (CropType type : types) {
             textures[i++] =
-                    registry.registerTexture(type.getTexture() + "/Baked.png");
+                    registry.registerTexture(type.texture() + "/Baked.png");
         }
     }
 
@@ -81,22 +81,22 @@ public class ItemBaked extends VanillaItem {
     @Override
     public void render(ItemStack item, GL gl, Shader shader,
             float r, float g, float b, float a) {
-        models[item.getData()].render(gl, shader);
+        models[item.data()].render(gl, shader);
     }
 
     @Override
     public void renderInventory(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a) {
-        models[item.getData()].renderInventory(gl, shader);
+        models[item.data()].renderInventory(gl, shader);
     }
 
     @Override
-    public String getName(ItemStack item) {
-        return cropRegistry.get(item.getData()).getBakedName();
+    public String name(ItemStack item) {
+        return cropRegistry.get(item.data()).bakedName();
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 16;
     }
 }

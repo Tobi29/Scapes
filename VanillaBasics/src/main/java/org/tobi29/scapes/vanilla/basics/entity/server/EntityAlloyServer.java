@@ -45,7 +45,7 @@ public class EntityAlloyServer extends EntityAbstractContainerServer {
     }
 
     public EntityAlloyServer(WorldServer world, Vector3 pos) {
-        super(world, pos, new Inventory(world.getRegistry(), 2));
+        super(world, pos, new Inventory(world.registry(), 2));
     }
 
     @Override
@@ -75,8 +75,8 @@ public class EntityAlloyServer extends EntityAbstractContainerServer {
 
     @Override
     public boolean isValidOn(TerrainServer terrain, int x, int y, int z) {
-        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
-                .getPlugin("VanillaBasics");
+        VanillaBasics plugin = (VanillaBasics) terrain.world().plugins()
+                .plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         return terrain.type(x, y, z) == materials.alloy;
     }
@@ -84,19 +84,19 @@ public class EntityAlloyServer extends EntityAbstractContainerServer {
     @Override
     public void update(double delta) {
         VanillaBasics plugin =
-                (VanillaBasics) world.getPlugins().getPlugin("VanillaBasics");
+                (VanillaBasics) world.plugins().plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         temperature /= 1.002f;
-        ItemStack input = inventory.getItem(0);
-        Material type = input.getMaterial();
+        ItemStack input = inventory.item(0);
+        Material type = input.material();
         if (type instanceof ItemIngot) {
-            if (((ItemIngot) type).getTemperature(input) >=
-                    ((ItemIngot) type).getMeltingPoint(input)) {
+            if (((ItemIngot) type).temperature(input) >=
+                    ((ItemIngot) type).meltingPoint(input)) {
                 MetalType inputAlloy = plugin.getMetalType(
-                        input.getMetaData("Vanilla").getString("MetalType"));
+                        input.metaData("Vanilla").getString("MetalType"));
                 if (inputAlloy != null) {
                     for (Map.Entry<String, Double> entry : inputAlloy
-                            .getIngredients().entrySet()) {
+                            .ingredients().entrySet()) {
                         if (metals.containsKey(entry.getKey())) {
                             metals.put(entry.getKey(),
                                     metals.get(entry.getKey()) +
@@ -106,28 +106,27 @@ public class EntityAlloyServer extends EntityAbstractContainerServer {
                         }
                     }
                     temperature = FastMath.max(temperature,
-                            input.getMetaData("Vanilla")
+                            input.metaData("Vanilla")
                                     .getFloat("Temperature"));
                     inventory.setItem(0,
                             new ItemStack(materials.mold, (short) 1));
                     updateResult(plugin);
-                    world.getConnection().send(new PacketEntityChange(this));
+                    world.connection().send(new PacketEntityChange(this));
                 }
             }
         }
         if (!result.isEmpty()) {
-            ItemStack output = inventory.getItem(1);
-            if (output.getMaterial() == materials.mold &&
-                    output.getData() == 1) {
+            ItemStack output = inventory.item(1);
+            if (output.material() == materials.mold && output.data() == 1) {
                 output.setMaterial(materials.ingot);
                 output.setData((short) 0);
-                output.getMetaData("Vanilla").setString("MetalType", result);
-                output.getMetaData("Vanilla")
+                output.metaData("Vanilla").setString("MetalType", result);
+                output.metaData("Vanilla")
                         .setFloat("Temperature", temperature);
                 MetalType alloy = plugin.getMetalType(result);
                 for (Map.Entry<String, Double> entry : metals.entrySet()) {
                     double amount = entry.getValue() -
-                            alloy.getIngredients().get(entry.getKey());
+                            alloy.ingredients().get(entry.getKey());
                     if (amount > 0.001f) {
                         metals.put(entry.getKey(), amount);
                     } else {
@@ -135,7 +134,7 @@ public class EntityAlloyServer extends EntityAbstractContainerServer {
                     }
                 }
                 updateResult(plugin);
-                world.getConnection().send(new PacketEntityChange(this));
+                world.connection().send(new PacketEntityChange(this));
             }
         }
     }
@@ -147,7 +146,7 @@ public class EntityAlloyServer extends EntityAbstractContainerServer {
         }
         double finalSize = size;
         Optional<MetalType> result = plugin.getMetalTypes().filter(metal -> {
-            Map<String, Double> ingredients = metal.getIngredients();
+            Map<String, Double> ingredients = metal.ingredients();
             if (ingredients.size() != metals.size()) {
                 return false;
             }
@@ -163,7 +162,7 @@ public class EntityAlloyServer extends EntityAbstractContainerServer {
             return flag;
         }).findFirst();
         if (result.isPresent()) {
-            this.result = result.get().getID();
+            this.result = result.get().id();
         } else {
             this.result = null;
         }

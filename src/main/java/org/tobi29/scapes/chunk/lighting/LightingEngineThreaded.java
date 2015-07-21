@@ -171,7 +171,7 @@ public class LightingEngineThreaded
 
     private byte calcSunLightAt(int x, int y, int z) {
         byte sunLight = 15;
-        for (int zz = terrain.getHighestBlockZAt(x, y); zz >= z && zz >= 0;
+        for (int zz = terrain.highestBlockZAt(x, y); zz >= z && zz >= 0;
                 zz--) {
             BlockType type = terrain.type(x, y, zz);
             if (type.isSolid(terrain, x, y, zz) ||

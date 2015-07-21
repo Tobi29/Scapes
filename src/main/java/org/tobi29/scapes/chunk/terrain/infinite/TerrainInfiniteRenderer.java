@@ -44,7 +44,6 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     private final TerrainInfiniteRendererThread updateThread, loadThread;
     private final TerrainInfiniteClient terrain;
     private final double chunkDistanceMax;
-    private final boolean keepInvisibleChunkVbos;
     private final List<TerrainInfiniteRendererChunk> chunks = new ArrayList<>();
     private final Joiner joiner;
     private int playerX, playerY, playerZ;
@@ -60,22 +59,20 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
         this.terrain = terrain;
         this.sortedLocations = sortedLocations;
         WorldClient world = terrain.world();
-        chunkDistanceMax = FastMath.sqr(chunkDistance - 1.0);
+        chunkDistanceMax = chunkDistance * 16.0 - 16.0;
         Queue<TerrainInfiniteRendererChunk> loadQueue =
                 new ConcurrentLinkedQueue<>();
         Queue<TerrainInfiniteRendererChunk> updateQueue =
                 new ConcurrentLinkedQueue<>();
         updateThread =
                 new TerrainInfiniteRendererThread(updateQueue, loadQueue, true,
-                        world.getInfoLayers());
+                        world.infoLayers());
         loadThread =
                 new TerrainInfiniteRendererThread(loadQueue, updateQueue, false,
-                        world.getInfoLayers());
-        keepInvisibleChunkVbos = player.getGame().getEngine().tagStructure()
-                .getStructure("Scapes").getBoolean("KeepInvisibleChunkVbos");
-        Joiner updateJoiner = player.getGame().getEngine().taskExecutor()
+                        world.infoLayers());
+        Joiner updateJoiner = player.game().engine().taskExecutor()
                 .runTask(updateThread, "TerrainInfiniteChunk-Geometry-Update");
-        Joiner loadJoiner = player.getGame().getEngine().taskExecutor()
+        Joiner loadJoiner = player.game().engine().taskExecutor()
                 .runTask(loadThread, "TerrainInfiniteChunk-Geometry-Load");
         joiner = new Joiner(updateJoiner, loadJoiner);
     }
@@ -85,17 +82,16 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     }
 
     public void reloadGeometry() {
-        terrain.getLoadedChunks()
-                .forEach(chunk -> chunk.getRendererChunk().reset());
+        terrain.loadedChunks().forEach(chunk -> chunk.rendererChunk().reset());
     }
 
-    public void dispose() {
+    public void dispose(GL gl) {
         joiner.join();
         disposed = true;
     }
 
     public void addToUpdateQueue(TerrainInfiniteRendererChunk chunk) {
-        if (chunk == null || !chunk.getChunk().isLoaded() ||
+        if (chunk == null || !chunk.chunk().isLoaded() ||
                 disposed) {
             return;
         }
@@ -103,7 +99,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     }
 
     public void addToLoadQueue(TerrainInfiniteRendererChunk chunk) {
-        if (chunk == null || !chunk.getChunk().isLoaded() ||
+        if (chunk == null || !chunk.chunk().isLoaded() ||
                 disposed) {
             return;
         }
@@ -118,37 +114,33 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
         this.cam = cam;
         int camX = FastMath.floor(cam.position.doubleX() / 16.0);
         int camY = FastMath.floor(cam.position.doubleY() / 16.0);
-        double newChunkDistance = chunkDistanceMax;
         chunks.clear();
         for (Vector2i pos : sortedLocations) {
             Optional<TerrainInfiniteChunkClient> chunk =
-                    terrain.getChunkNoLoad(pos.intX() + camX,
-                            pos.intY() + camY);
+                    terrain.chunkNoLoad(camX + pos.intX(), camY + pos.intY());
             if (chunk.isPresent()) {
                 TerrainInfiniteRendererChunk rendererChunk =
-                        chunk.get().getRendererChunk();
+                        chunk.get().rendererChunk();
                 if (rendererChunk.isLoaded()) {
                     chunks.add(rendererChunk);
                     continue;
                 }
             }
-            newChunkDistance = FastMath.min(newChunkDistance,
-                    FastMath.sqr(pos.intX()) + FastMath.sqr(pos.intY()) - 1.0);
+            chunkDistance = FastMath.min(chunkDistanceMax, FastMath.sqrt(
+                    FastMath.sqr(pos.intX()) + FastMath.sqr(pos.intY()) - 2.0) *
+                    16.0);
             break;
         }
-        chunkDistance = FastMath.sqrt(newChunkDistance) * 16.0;
     }
 
     @Override
-    public void render(GL gl, Shader shader, Cam cam,
-            boolean debug) {
+    public void render(GL gl, Shader shader, Cam cam, boolean debug) {
         if (disposed) {
             return;
         }
-        chunks.forEach(chunk -> chunk
-                .render(gl, shader, keepInvisibleChunkVbos, cam));
+        chunks.forEach(chunk -> chunk.render(gl, shader, cam));
         if (debug) {
-            gl.getTextureManager().unbind(gl);
+            gl.textures().unbind(gl);
             chunks.forEach(chunk -> chunk.renderFrame(gl, shader, cam));
         }
     }
@@ -161,8 +153,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
         ListIterator<TerrainInfiniteRendererChunk> iterator =
                 chunks.listIterator(chunks.size());
         while (iterator.hasPrevious()) {
-            iterator.previous()
-                    .renderAlpha(gl, shader, keepInvisibleChunkVbos, cam);
+            iterator.previous().renderAlpha(gl, shader, cam);
         }
     }
 
@@ -170,10 +161,10 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     public void blockChange(int x, int y, int z) {
         int xx = x >> 4;
         int yy = y >> 4;
-        Optional<TerrainInfiniteChunkClient> chunk = terrain.getChunk(xx, yy);
+        Optional<TerrainInfiniteChunkClient> chunk = terrain.chunk(xx, yy);
         if (chunk.isPresent()) {
             TerrainInfiniteRendererChunk rendererChunk =
-                    chunk.get().getRendererChunk();
+                    chunk.get().rendererChunk();
             int zz = z >> 4;
             int xxx = x - (xx << 4);
             int yyy = y - (yy << 4);
@@ -189,7 +180,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
             } else if (yyy == 15) {
                 setDirty(xx, yy + 1, zz);
             }
-            if (zzz == 15 && zz < rendererChunk.getZSections() - 1) {
+            if (zzz == 15 && zz < rendererChunk.zSections() - 1) {
                 rendererChunk.setGeometryDirty(zz + 1);
                 if (xxx == 0) {
                     setDirty(xx - 1, yy, zz + 1);
@@ -218,7 +209,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     }
 
     @Override
-    public double getActualRenderDistance() {
+    public double actualRenderDistance() {
         if (staticRenderDistance) {
             return 4096.0;
         }
@@ -226,44 +217,44 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     }
 
     private void updateVisible() {
-        terrain.getLoadedChunks().forEach(
-                chunk -> chunk.getRendererChunk().resetPrepareVisible());
+        terrain.loadedChunks()
+                .forEach(chunk -> chunk.rendererChunk().resetPrepareVisible());
         Optional<TerrainInfiniteChunkClient> startChunk =
-                terrain.getChunkNoLoad(playerX, playerY);
+                terrain.chunkNoLoad(playerX, playerY);
         checkVisible(playerX, playerY, playerZ, startChunk);
-        terrain.getLoadedChunks().stream()
-                .map(TerrainInfiniteChunkClient::getRendererChunk)
+        terrain.loadedChunks().stream()
+                .map(TerrainInfiniteChunkClient::rendererChunk)
                 .forEach(TerrainInfiniteRendererChunk::updateVisible);
     }
 
     private void checkVisible(int x, int y, int z,
             Optional<TerrainInfiniteChunkClient> chunk) {
         if (chunk.isPresent()) {
-            chunk.get().getRendererChunk().setPrepareVisible(z);
-            cullingPool1.push().set(x, y, z + 1, chunk.get(),
-                    chunk.get().getRendererChunk());
-            cullingPool1.push().set(x, y, z - 1, chunk.get(),
-                    chunk.get().getRendererChunk());
+            chunk.get().rendererChunk().setPrepareVisible(z);
+            cullingPool1.push()
+                    .set(x, y, z + 1, chunk.get(), chunk.get().rendererChunk());
+            cullingPool1.push()
+                    .set(x, y, z - 1, chunk.get(), chunk.get().rendererChunk());
         }
-        chunk = terrain.getChunkNoLoad(x, y - 1);
+        chunk = terrain.chunkNoLoad(x, y - 1);
         if (chunk.isPresent()) {
-            cullingPool1.push().set(x, y - 1, z, chunk.get(),
-                    chunk.get().getRendererChunk());
+            cullingPool1.push()
+                    .set(x, y - 1, z, chunk.get(), chunk.get().rendererChunk());
         }
-        chunk = terrain.getChunkNoLoad(x + 1, y);
+        chunk = terrain.chunkNoLoad(x + 1, y);
         if (chunk.isPresent()) {
-            cullingPool1.push().set(x + 1, y, z, chunk.get(),
-                    chunk.get().getRendererChunk());
+            cullingPool1.push()
+                    .set(x + 1, y, z, chunk.get(), chunk.get().rendererChunk());
         }
-        chunk = terrain.getChunkNoLoad(x, y + 1);
+        chunk = terrain.chunkNoLoad(x, y + 1);
         if (chunk.isPresent()) {
-            cullingPool1.push().set(x, y + 1, z, chunk.get(),
-                    chunk.get().getRendererChunk());
+            cullingPool1.push()
+                    .set(x, y + 1, z, chunk.get(), chunk.get().rendererChunk());
         }
-        chunk = terrain.getChunkNoLoad(x - 1, y);
+        chunk = terrain.chunkNoLoad(x - 1, y);
         if (chunk.isPresent()) {
-            cullingPool1.push().set(x - 1, y, z, chunk.get(),
-                    chunk.get().getRendererChunk());
+            cullingPool1.push()
+                    .set(x - 1, y, z, chunk.get(), chunk.get().rendererChunk());
         }
         while (!cullingPool1.isEmpty()) {
             cullingPool1.stream()
@@ -274,8 +265,8 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
             cullingPool1 = cullingPool2;
             cullingPool2 = swap;
         }
-        terrain.getLoadedChunks().forEach(
-                visible -> visible.getRendererChunk().setCulled(false));
+        terrain.loadedChunks()
+                .forEach(visible -> visible.rendererChunk().setCulled(false));
     }
 
     private void checkVisible(VisibleUpdate update, Pool<VisibleUpdate> pool) {
@@ -287,7 +278,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
             int z = update.z - playerZ;
             if (z >= 0) {
                 TerrainInfiniteRendererChunk rendererChunk =
-                        update.chunk.getRendererChunk();
+                        update.chunk.rendererChunk();
                 if (!rendererChunk.isCulled(update.z + 1)) {
                     pool.push()
                             .set(update.x, update.y, update.z + 1, update.chunk,
@@ -296,7 +287,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
             }
             if (z <= 0) {
                 TerrainInfiniteRendererChunk rendererChunk =
-                        update.chunk.getRendererChunk();
+                        update.chunk.rendererChunk();
                 if (!rendererChunk.isCulled(update.z - 1)) {
                     pool.push()
                             .set(update.x, update.y, update.z - 1, update.chunk,
@@ -305,10 +296,10 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
             }
             if (y <= 0) {
                 Optional<TerrainInfiniteChunkClient> chunk =
-                        terrain.getChunkNoLoad(update.x, update.y - 1);
+                        terrain.chunkNoLoad(update.x, update.y - 1);
                 if (chunk.isPresent()) {
                     TerrainInfiniteRendererChunk rendererChunk =
-                            chunk.get().getRendererChunk();
+                            chunk.get().rendererChunk();
                     if (!rendererChunk.isCulled(update.z)) {
                         pool.push().set(update.x, update.y - 1, update.z,
                                 chunk.get(), rendererChunk);
@@ -317,10 +308,10 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
             }
             if (x >= 0) {
                 Optional<TerrainInfiniteChunkClient> chunk =
-                        terrain.getChunkNoLoad(update.x + 1, update.y);
+                        terrain.chunkNoLoad(update.x + 1, update.y);
                 if (chunk.isPresent()) {
                     TerrainInfiniteRendererChunk rendererChunk =
-                            chunk.get().getRendererChunk();
+                            chunk.get().rendererChunk();
                     if (!rendererChunk.isCulled(update.z)) {
                         pool.push().set(update.x + 1, update.y, update.z,
                                 chunk.get(), rendererChunk);
@@ -329,10 +320,10 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
             }
             if (y >= 0) {
                 Optional<TerrainInfiniteChunkClient> chunk =
-                        terrain.getChunkNoLoad(update.x, update.y + 1);
+                        terrain.chunkNoLoad(update.x, update.y + 1);
                 if (chunk.isPresent()) {
                     TerrainInfiniteRendererChunk rendererChunk =
-                            chunk.get().getRendererChunk();
+                            chunk.get().rendererChunk();
                     if (!rendererChunk.isCulled(update.z)) {
                         pool.push().set(update.x, update.y + 1, update.z,
                                 chunk.get(), rendererChunk);
@@ -341,10 +332,10 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
             }
             if (x <= 0) {
                 Optional<TerrainInfiniteChunkClient> chunk =
-                        terrain.getChunkNoLoad(update.x - 1, update.y);
+                        terrain.chunkNoLoad(update.x - 1, update.y);
                 if (chunk.isPresent()) {
                     TerrainInfiniteRendererChunk rendererChunk =
-                            chunk.get().getRendererChunk();
+                            chunk.get().rendererChunk();
                     if (!rendererChunk.isCulled(update.z)) {
                         pool.push().set(update.x - 1, update.y, update.z,
                                 chunk.get(), rendererChunk);
@@ -355,7 +346,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     }
 
     private void setDirty(int x, int y, int z) {
-        terrain.getChunk(x, y).map(TerrainInfiniteChunkClient::getRendererChunk)
+        terrain.chunk(x, y).map(TerrainInfiniteChunkClient::rendererChunk)
                 .ifPresent(chunk -> chunk.setGeometryDirty(z));
     }
 
@@ -394,7 +385,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
             arraysAlpha = new ChunkMesh.VertexArrays();
             info = new TerrainRenderInfo(infoLayers);
             section = new TerrainInfiniteSection(terrain, terrain.zSize,
-                    terrain.world().getAir());
+                    terrain.world().air());
         }
 
         @Override
@@ -435,7 +426,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
 
         private void process(TerrainInfiniteRendererChunk chunk) {
             if (chunk != null) {
-                for (int i = 0; i < chunk.getZSections(); i++) {
+                for (int i = 0; i < chunk.zSections(); i++) {
                     if (chunk.isGeometryDirty(i)) {
                         chunk.unsetGeometryDirty(i);
                         process(chunk, i);
@@ -447,14 +438,14 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
         private void process(TerrainInfiniteRendererChunk chunk, int i) {
             VAO vao = null, vaoAlpha = null;
             AABB aabb = null, aabbAlpha = null;
-            TerrainInfiniteChunk terrainChunk = chunk.getChunk();
+            TerrainInfiniteChunk terrainChunk = chunk.chunk();
             if (terrainChunk.isEmpty(i)) {
                 chunk.setSolid(i, false);
             } else {
-                BlockType air = terrain.world().getAir();
-                section.init(terrainChunk.getPos());
-                int bx = terrainChunk.getBlockX();
-                int by = terrainChunk.getBlockY();
+                BlockType air = terrain.world().air();
+                section.init(terrainChunk.pos());
+                int bx = terrainChunk.blockX();
+                int by = terrainChunk.blockY();
                 int bz = i << 4;
                 boolean solid = true, empty = true;
                 for (int xxx = 0; xxx < 16; xxx++) {
@@ -488,7 +479,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                     ChunkMesh mesh = new ChunkMesh(arrays);
                     ChunkMesh meshAlpha = new ChunkMesh(arraysAlpha);
                     info.init(bx, by, bz, 16, 16, 16);
-                    boolean lod = chunk.getLod(i);
+                    boolean lod = chunk.lod(i);
                     boolean needsLod = false;
                     for (int xxx = 0; xxx < 16; xxx++) {
                         int bxx = bx + xxx;
@@ -509,13 +500,13 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                         }
                     }
                     chunk.setNeedsLod(i, needsLod);
-                    if (mesh.getSize() > 0) {
+                    if (mesh.size() > 0) {
                         vao = mesh.finish();
-                        aabb = mesh.getAABB();
+                        aabb = mesh.aabb();
                     }
-                    if (meshAlpha.getSize() > 0) {
+                    if (meshAlpha.size() > 0) {
                         vaoAlpha = meshAlpha.finish();
-                        aabbAlpha = meshAlpha.getAABB();
+                        aabbAlpha = meshAlpha.aabb();
                     }
                 }
             }

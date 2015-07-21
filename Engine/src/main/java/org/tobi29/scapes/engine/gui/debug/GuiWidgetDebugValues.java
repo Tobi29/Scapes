@@ -44,7 +44,7 @@ public class GuiWidgetDebugValues extends GuiWidget {
         return element;
     }
 
-    public Set<Map.Entry<String, Element>> getElements() {
+    public Set<Map.Entry<String, Element>> elements() {
         return elements.entrySet();
     }
 
@@ -111,7 +111,7 @@ public class GuiWidgetDebugValues extends GuiWidget {
             if (text != null) {
                 return text;
             }
-            return value.getText();
+            return value.text();
         }
     }
 }

@@ -45,7 +45,7 @@ public class PacketAnvil extends Packet implements PacketServer {
     }
 
     public PacketAnvil(EntityAnvilClient anvil, int id) {
-        entityID = anvil.getEntityID();
+        entityID = anvil.entityID();
         this.id = id;
     }
 
@@ -68,29 +68,28 @@ public class PacketAnvil extends Packet implements PacketServer {
         if (world == null) {
             return;
         }
-        EntityServer entity = world.getEntity(entityID);
+        EntityServer entity = world.entity(entityID);
         if (entity instanceof EntityAnvilServer) {
             EntityAnvilServer anvil = (EntityAnvilServer) entity;
-            MobPlayerServer playerE = player.getMob();
-            if (anvil.getViewers().filter(check -> check == playerE).findAny()
+            MobPlayerServer playerE = player.mob();
+            if (anvil.viewers().filter(check -> check == playerE).findAny()
                     .isPresent()) {
-                VanillaBasics plugin = (VanillaBasics) world.getPlugins()
-                        .getPlugin("VanillaBasics");
+                VanillaBasics plugin =
+                        (VanillaBasics) world.plugins().plugin("VanillaBasics");
                 synchronized (anvil) {
-                    if (!"Hammer".equals(anvil.getInventory().getItem(1)
-                            .getMaterial()
-                            .getToolType(anvil.getInventory().getItem(1)))) {
+                    if (!"Hammer".equals(anvil.inventory().item(1).material()
+                            .toolType(anvil.inventory().item(1)))) {
                         return;
                     }
                     world.playSound("VanillaBasics:sound/blocks/Metal.ogg",
                             anvil);
-                    ItemStack ingredient = anvil.getInventory().getItem(0);
-                    Material type = ingredient.getMaterial();
+                    ItemStack ingredient = anvil.inventory().item(0);
+                    Material type = ingredient.material();
                     if (type instanceof ItemIngot) {
                         float meltingPoint = ((ItemHeatable) type)
-                                .getMeltingPoint(ingredient);
+                                .meltingPoint(ingredient);
                         float temperature = ((ItemHeatable) type)
-                                .getTemperature(ingredient);
+                                .temperature(ingredient);
                         if (temperature >= meltingPoint ||
                                 temperature < meltingPoint * 0.7f) {
                             return;
@@ -98,29 +97,28 @@ public class PacketAnvil extends Packet implements PacketServer {
                         if (id == 0) {
                             ingredient.setData((short) 1);
                         } else {
-                            if (ingredient.getData() == 0) {
+                            if (ingredient.data() == 0) {
                                 return;
                             }
                             ToolUtil.createTool(plugin, ingredient, id);
                             ingredient.setData((short) 0);
                         }
                         Packet packet = new PacketUpdateInventory(anvil);
-                        anvil.getViewers().map(MobPlayerServer::getConnection)
+                        anvil.viewers().map(MobPlayerServer::connection)
                                 .forEach(connection -> connection.send(packet));
                     } else if (type instanceof ItemOreChunk) {
-                        if (id == 0 && ingredient.getData() == 8) {
+                        if (id == 0 && ingredient.data() == 8) {
                             float meltingPoint = ((ItemHeatable) type)
-                                    .getMeltingPoint(ingredient);
+                                    .meltingPoint(ingredient);
                             float temperature = ((ItemHeatable) type)
-                                    .getTemperature(ingredient);
+                                    .temperature(ingredient);
                             if (temperature >= meltingPoint ||
                                     temperature < meltingPoint * 0.7f) {
                                 return;
                             }
                             ingredient.setData((short) 9);
                             Packet packet = new PacketUpdateInventory(anvil);
-                            anvil.getViewers()
-                                    .map(MobPlayerServer::getConnection)
+                            anvil.viewers().map(MobPlayerServer::connection)
                                     .forEach(connection -> connection
                                             .send(packet));
                         }

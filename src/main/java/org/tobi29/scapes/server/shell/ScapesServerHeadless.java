@@ -50,7 +50,7 @@ public class ScapesServerHeadless extends ScapesStandaloneServer {
                     if (reader.ready()) {
                         String line = reader.readLine();
                         if (line != null) {
-                            server.getCommandRegistry().get(line, this)
+                            server.commandRegistry().get(line, this)
                                     .execute().forEach(output -> System.out
                                     .println(output.toString()));
                         }
@@ -70,7 +70,7 @@ public class ScapesServerHeadless extends ScapesStandaloneServer {
     }
 
     @Override
-    public Optional<String> getPlayerName() {
+    public Optional<String> playerName() {
         return Optional.empty();
     }
 
@@ -80,7 +80,7 @@ public class ScapesServerHeadless extends ScapesStandaloneServer {
     }
 
     @Override
-    public int getPermissionLevel() {
+    public int permissionLevel() {
         return 10;
     }
 }

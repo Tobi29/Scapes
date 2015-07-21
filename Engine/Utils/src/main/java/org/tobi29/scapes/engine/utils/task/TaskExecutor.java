@@ -96,7 +96,7 @@ public class TaskExecutor {
     public Joiner runTask(ASyncTask task, String name, Priority priority) {
         ThreadWrapper thread = new ThreadWrapper(task, this.name + name);
         threadPools.get(priority).execute(thread);
-        return thread.joinable.getJoiner();
+        return thread.joinable.joiner();
     }
 
     public void addTask(Task task, String name, long delay, boolean async) {
@@ -171,7 +171,7 @@ public class TaskExecutor {
             try {
                 Thread thread = Thread.currentThread();
                 thread.setName(name);
-                task.run(joinable.getJoiner());
+                task.run(joinable.joiner());
             } catch (Throwable e) { // Yes this catches ThreadDeath, so don't use it
                 crashHandler.crash(e);
             } finally {

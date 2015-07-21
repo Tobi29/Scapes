@@ -32,7 +32,7 @@ public class GuiHud extends Gui {
         super(GuiAlignment.LEFT);
         add(new GuiComponentHotbar(8, 464, 560, 40, player));
         add(new GuiComponentBar(8, 426, 280, 16, 1.0f, 0.0f, 0.0f, 0.6f,
-                () -> player.getLives() / player.getMaxLives()));
+                () -> player.health() / player.maxHealth()));
         cross = new GuiComponentCross(392, 248, 16, 16);
     }
 
@@ -41,10 +41,9 @@ public class GuiHud extends Gui {
             FontRenderer font, double delta) {
         if (visible) {
             super.render(gl, shader, font, delta);
-            MatrixStack matrixStack = gl.getMatrixStack();
+            MatrixStack matrixStack = gl.matrixStack();
             Matrix matrix = matrixStack.push();
-            float ratio =
-                    (float) gl.getSceneHeight() / gl.getSceneWidth() * 1.5625f;
+            float ratio = (float) gl.sceneHeight() / gl.sceneWidth() * 1.5625f;
             matrix.scale(ratio, 1.0f, 1.0f);
             matrix.translate(-400.0f + 400.0f / ratio, 0.0f, 0.0f);
             cross.render(gl, shader, font, delta);

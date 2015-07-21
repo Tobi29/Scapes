@@ -30,7 +30,7 @@ public class TerrainInfiniteChunkManagerServer
     private TerrainInfiniteChunkServer lastLookup;
 
     public void add(TerrainInfiniteChunkServer chunk) {
-        chunks.put(chunk.getPos(), chunk);
+        chunks.put(chunk.pos(), chunk);
     }
 
     public TerrainInfiniteChunkServer remove(int x, int y) {
@@ -45,8 +45,8 @@ public class TerrainInfiniteChunkManagerServer
     public Optional<TerrainInfiniteChunkServer> get(int x, int y) {
         TerrainInfiniteChunkServer lastChunk = lastLookup;
         if (lastChunk != null) {
-            if (lastChunk.getX() == x && lastChunk.getY() == y) {
-                return lastChunk.getOptional();
+            if (lastChunk.x() == x && lastChunk.y() == y) {
+                return lastChunk.optional();
             }
         }
         TerrainInfiniteChunkServer chunk = chunks.get(new Vector2i(x, y));
@@ -54,7 +54,7 @@ public class TerrainInfiniteChunkManagerServer
         if (chunk == null) {
             return Optional.empty();
         } else {
-            return chunk.getOptional();
+            return chunk.optional();
         }
     }
 
@@ -64,11 +64,11 @@ public class TerrainInfiniteChunkManagerServer
     }
 
     @Override
-    public Collection<TerrainInfiniteChunkServer> getIterator() {
+    public Collection<TerrainInfiniteChunkServer> iterator() {
         return chunks.values();
     }
 
-    public int getAmount() {
+    public int chunks() {
         return chunks.size();
     }
 }

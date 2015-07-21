@@ -55,7 +55,7 @@ public class TextureManager {
         } else if (asset.isEmpty()) {
             unbind(gl);
         } else {
-            bind(getTexture(asset), gl);
+            bind(get(asset), gl);
         }
     }
 
@@ -67,15 +67,15 @@ public class TextureManager {
         }
     }
 
-    public Texture getTexture(String asset) {
+    public Texture get(String asset) {
         Texture texture = cache.get(asset);
         if (texture == null) {
-            texture = loadFromAsset(asset);
+            texture = load(asset);
         }
         return texture;
     }
 
-    private Texture loadFromAsset(String asset) {
+    private Texture load(String asset) {
         try {
             Properties properties = new Properties();
             FileSystemContainer files = engine.files();

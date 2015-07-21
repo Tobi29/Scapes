@@ -30,7 +30,7 @@ public interface ReadableByteStream {
     }
 
     default void skip(int len) throws IOException {
-        get(BufferCreator.byteBuffer(len));
+        get(BufferCreator.bytes(len));
     }
 
     default ReadableByteStream get(ByteBuffer buffer) throws IOException {

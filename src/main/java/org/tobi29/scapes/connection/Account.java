@@ -22,7 +22,7 @@ import org.tobi29.scapes.engine.utils.RSAUtil;
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
 import org.tobi29.scapes.engine.utils.io.ByteStreamInputStream;
 import org.tobi29.scapes.engine.utils.io.ByteStreamOutputStream;
-import org.tobi29.scapes.engine.utils.io.FileUtil;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -131,11 +131,11 @@ public class Account {
                     .store(new ByteStreamOutputStream(stream), ""));
         }
 
-        public KeyPair getKeyPair() {
+        public KeyPair keyPair() {
             return keyPair;
         }
 
-        public String getNickname() {
+        public String nickname() {
             return nickname;
         }
 

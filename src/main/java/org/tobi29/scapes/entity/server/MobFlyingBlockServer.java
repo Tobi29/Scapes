@@ -33,7 +33,7 @@ public class MobFlyingBlockServer extends MobServer {
     private double time;
 
     public MobFlyingBlockServer(WorldServer world) {
-        this(world, Vector3d.ZERO, Vector3d.ZERO, world.getAir(), 0);
+        this(world, Vector3d.ZERO, Vector3d.ZERO, world.air(), 0);
     }
 
     public MobFlyingBlockServer(WorldServer world, Vector3 pos, Vector3 speed,
@@ -80,8 +80,8 @@ public class MobFlyingBlockServer extends MobServer {
             } else if (FastMath.abs(speed.doubleX()) < 0.1 &&
                     FastMath.abs(speed.doubleY()) < 0.1) {
                 world.getTerrain().queue(handler -> handler
-                        .typeData(x, y, z, (BlockType) item.getMaterial(),
-                                item.getData()));
+                        .typeData(x, y, z, (BlockType) item.material(),
+                                item.data()));
                 world.deleteEntity(this);
             }
         }

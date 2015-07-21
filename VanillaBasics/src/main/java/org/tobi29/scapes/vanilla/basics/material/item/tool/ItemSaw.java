@@ -24,7 +24,7 @@ public class ItemSaw extends ItemTool {
     }
 
     @Override
-    public String getType() {
+    public String type() {
         return "Saw";
     }
 }

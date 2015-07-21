@@ -126,19 +126,19 @@ public final class VersionUtil {
             this.build = build;
         }
 
-        public int getMajor() {
+        public int major() {
             return major;
         }
 
-        public int getMinor() {
+        public int minor() {
             return minor;
         }
 
-        public int getRevision() {
+        public int revision() {
             return revision;
         }
 
-        public int getBuild() {
+        public int build() {
             return build;
         }
 

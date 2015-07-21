@@ -74,7 +74,7 @@ public class BlockAlloy extends VanillaBlockContainer {
     }
 
     @Override
-    public List<AABBElement> getCollision(int data, int x, int y, int z) {
+    public List<AABBElement> collision(int data, int x, int y, int z) {
         List<AABBElement> aabbs = new ArrayList<>();
         aabbs.add(new AABBElement(
                 new AABB(x + 0.0625, y + 0.0625, z, x + 0.9375, y + 0.9375,
@@ -83,27 +83,27 @@ public class BlockAlloy extends VanillaBlockContainer {
     }
 
     @Override
-    public double getResistance(ItemStack item, int data) {
-        return "Pickaxe".equals(item.getMaterial().getToolType(item)) ? 1 : 240;
+    public double resistance(ItemStack item, int data) {
+        return "Pickaxe".equals(item.material().toolType(item)) ? 1 : 240;
     }
 
     @Override
-    public List<ItemStack> getDrops(ItemStack item, int data) {
+    public List<ItemStack> drops(ItemStack item, int data) {
         return Collections.emptyList();
     }
 
     @Override
-    public String getFootStep(int data) {
+    public String footStepSound(int data) {
         return "VanillaBasics:sound/footsteps/Stone.ogg";
     }
 
     @Override
-    public String getBreak(ItemStack item, int data) {
+    public String breakSound(ItemStack item, int data) {
         return "VanillaBasics:sound/blocks/Stone.ogg";
     }
 
     @Override
-    public Optional<TerrainTexture> getParticleTexture(Face face,
+    public Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
         return Optional.of(texture);
     }
@@ -169,12 +169,12 @@ public class BlockAlloy extends VanillaBlockContainer {
     }
 
     @Override
-    public String getName(ItemStack item) {
+    public String name(ItemStack item) {
         return "Alloy Mold";
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 16;
     }
 }

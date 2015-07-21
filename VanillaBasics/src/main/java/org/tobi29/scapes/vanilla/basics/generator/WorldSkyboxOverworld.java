@@ -71,7 +71,7 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         this.climateGenerator = climateGenerator;
         this.biomeGenerator = biomeGenerator;
         this.world = world;
-        long seed = world.getSeed();
+        long seed = world.seed();
         fbo = new FBO(512, 512, 1, false, false, true, gl);
         billboardMesh = VAOUtility.createVTI(
                 new float[]{1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f,
@@ -196,10 +196,9 @@ public class WorldSkyboxOverworld implements WorldSkybox {
 
     @Override
     public void update(double delta) {
-        MobPlayerClient player = world.getPlayer();
-        double weather = climateGenerator
-                .getWeather(FastMath.floor(player.getX()),
-                        FastMath.floor(player.getY()));
+        MobPlayerClient player = world.player();
+        double weather = climateGenerator.weather(FastMath.floor(player.x()),
+                FastMath.floor(player.y()));
         rainGainWait -= delta;
         if (rainGainWait <= 0.0) {
             rainGainWait += 0.05;
@@ -210,13 +209,13 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         }
         windAudio
                 .setGain((float) FastMath.clamp(weather * 8.0 - 6.0, 0.0, 1.0));
-        Vector3 weatherPos = player.getPos()
-                .plus(new Vector3d(player.getXSpeed(), player.getYSpeed(),
-                        player.getZSpeed() + 16));
+        Vector3 weatherPos = player.pos()
+                .plus(new Vector3d(player.speedX(), player.speedY(),
+                        player.speedZ() + 16));
         double temperature = climateGenerator
-                .getTemperature(weatherPos.intX(), weatherPos.intY(),
+                .temperature(weatherPos.intX(), weatherPos.intY(),
                         weatherPos.intZ());
-        ParticleManager particleManager = world.getParticleManager();
+        ParticleManager particleManager = world.particleManager();
         double downfallIntensity = FastMath.max(weather * 2.0 - 1.0, 0.0);
         Random random = ThreadLocalRandom.current();
         if (temperature > 0) {
@@ -242,17 +241,17 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         }
         // Debug
         temperatureDebug.setValue(climateGenerator
-                .getTemperature(FastMath.floor(player.getX()),
-                        FastMath.floor(player.getY()),
-                        FastMath.floor(player.getZ())));
+                .temperature(FastMath.floor(player.x()),
+                        FastMath.floor(player.y()),
+                        FastMath.floor(player.z())));
         humidityDebug.setValue(climateGenerator
-                .getHumidity(FastMath.floor(player.getX()),
-                        FastMath.floor(player.getY()),
-                        FastMath.floor(player.getZ())));
+                .humidity(FastMath.floor(player.x()),
+                        FastMath.floor(player.y()),
+                        FastMath.floor(player.z())));
         weatherDebug.setValue(weather);
-        biomeDebug.setValue(biomeGenerator.get(player.getX(), player.getY()));
+        biomeDebug.setValue(biomeGenerator.get(player.x(), player.y()));
         TagStructure conditionTag =
-                player.getMetaData("Vanilla").getStructure("Condition");
+                player.metaData("Vanilla").getStructure("Condition");
         staminaDebug.setValue(conditionTag.getDouble("Stamina"));
         hungerDebug.setValue(conditionTag.getDouble("Hunger"));
         thirstDebug.setValue(conditionTag.getDouble("Thirst"));
@@ -263,7 +262,7 @@ public class WorldSkyboxOverworld implements WorldSkybox {
 
     @Override
     public void init(GL gl, Cam cam) {
-        ScapesEngine engine = world.getGame().getEngine();
+        ScapesEngine engine = world.game().engine();
         GuiWidgetDebugValues debugValues = engine.debugValues();
         temperatureDebug = debugValues.get("Vanilla-Environment-Temperature");
         humidityDebug = debugValues.get("Vanilla-Environment-Humidity");
@@ -281,38 +280,36 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         windAudio = engine.sounds().playStaticAudio(
                 "VanillaBasics:sound/entity/particle/rain/Wind1.ogg", 1.0f,
                 0.0f);
-        world.getScene().getHud().add(new GuiHudCondition(world.getPlayer()));
+        world.scene().hud().add(new GuiHudCondition(world.player()));
     }
 
     @Override
     public void renderUpdate(GL gl, Cam cam, double delta) {
-        MobPlayerClient player = world.getPlayer();
-        SceneScapesVoxelWorld scene = world.getScene();
+        MobPlayerClient player = world.player();
+        SceneScapesVoxelWorld scene = world.scene();
         double factor = FastMath.min(1.0, delta * 10.0);
-        if (world.getTerrain().sunLight(scene.getCam().position.intX(),
-                scene.getCam().position.intY(),
-                scene.getCam().position.intZ()) > 0) {
+        if (world.terrain().sunLight(scene.cam().position.intX(),
+                scene.cam().position.intY(), scene.cam().position.intZ()) > 0) {
             fogBrightness += (1.0f - fogBrightness) * factor;
         } else {
             fogBrightness -= fogBrightness * factor;
         }
         float skyLight = (float) (15.0 - climateGenerator
-                .getSunLightReduction(scene.getCam().position.intX(),
-                        scene.getCam().position.intY())) / 15.0f;
+                .sunLightReduction(scene.cam().position.intX(),
+                        scene.cam().position.intY())) / 15.0f;
         if (player.isHeadInWater()) {
-            float light = FastMath.clamp(world.getTerrain()
-                    .light(FastMath.floor(player.getX()),
-                            FastMath.floor(player.getY()),
-                            FastMath.floor(player.getZ() + 0.7)) * 0.09333f +
+            float light = FastMath.clamp(world.terrain()
+                    .light(FastMath.floor(player.x()),
+                            FastMath.floor(player.y()),
+                            FastMath.floor(player.z() + 0.7)) * 0.09333f +
                     0.2f, 0.0f, 1.0f);
             fogR = 0.1f * light;
             fogG = 0.5f * light;
             fogB = 0.8f * light;
             fogDistance = 0.1f;
         } else {
-            double latitude =
-                    climateGenerator.getLatitude(cam.position.doubleY());
-            double elevation = climateGenerator.getSunElevationD(latitude);
+            double latitude = climateGenerator.latitude(cam.position.doubleY());
+            double elevation = climateGenerator.sunElevationD(latitude);
             float sunsetLight = (float) FastMath
                     .abs(FastMath.clamp(elevation * 2.0, -1.0, 1.0));
             fogR = FastMath.mix(1.2f, skyLight * fogBrightness, sunsetLight);
@@ -322,7 +319,7 @@ public class WorldSkyboxOverworld implements WorldSkybox {
                     sunsetLight);
             fogDistance = 1.0f;
         }
-        TagStructure conditionTag = world.getPlayer().getMetaData("Vanilla")
+        TagStructure conditionTag = world.player().metaData("Vanilla")
                 .getStructure("Condition");
         double temperature = conditionTag.getDouble("BodyTemperature");
         double heatstroke = FastMath.max((temperature - 37.1) * 7.5, 0.0) + 1.0;
@@ -331,40 +328,37 @@ public class WorldSkyboxOverworld implements WorldSkybox {
 
     @Override
     public void render(GL gl, Cam cam) {
-        MobPlayerClient player = world.getPlayer();
-        SceneScapesVoxelWorld scene = world.getScene();
-        OpenGL openGL = gl.getOpenGL();
-        MatrixStack matrixStack = gl.getMatrixStack();
+        MobPlayerClient player = world.player();
+        SceneScapesVoxelWorld scene = world.scene();
+        MatrixStack matrixStack = gl.matrixStack();
         float skyLight = (float) (15.0 - climateGenerator
-                .getSunLightReduction(scene.getCam().position.intX(),
-                        scene.getCam().position.intY())) / 15.0f;
+                .sunLightReduction(scene.cam().position.intX(),
+                        scene.cam().position.intY())) / 15.0f;
         float skyboxLight = skyLight * fogBrightness;
         float weather = (float) climateGenerator
-                .getWeather(FastMath.floor(player.getX()),
-                        FastMath.floor(player.getY()));
+                .weather(FastMath.floor(player.x()),
+                        FastMath.floor(player.y()));
         float sunElevation = (float) (climateGenerator
-                .getSunElevation(cam.position.doubleX(),
-                        cam.position.doubleY()) * FastMath.RAD_2_DEG);
+                .sunElevation(cam.position.doubleX(), cam.position.doubleY()) *
+                FastMath.RAD_2_DEG);
         float sunAzimuth = (float) (climateGenerator
-                .getSunAzimuth(cam.position.doubleX(), cam.position.doubleY()) *
+                .sunAzimuth(cam.position.doubleX(), cam.position.doubleY()) *
                 FastMath.RAD_2_DEG);
         // Sky
-        gl.getTextureManager().unbind(gl);
-        openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
-        ShaderManager shaderManager = gl.getShaderManager();
-        Shader shader =
-                shaderManager.getShader("VanillaBasics:shader/Skybox", gl);
-        shader.setUniform3f(4, scene.getFogR(), scene.getFogG(),
-                scene.getFogB());
-        shader.setUniform1f(5, scene.getFogDistance());
+        gl.textures().unbind(gl);
+        gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
+        ShaderManager shaderManager = gl.shaders();
+        Shader shader = shaderManager.get("VanillaBasics:shader/Skybox", gl);
+        shader.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB());
+        shader.setUniform1f(5, scene.fogDistance());
         shader.setUniform4f(6, skyboxLight * skyboxLight, skyboxLight,
                 skyboxLight, 1.0f);
         skyboxMesh.render(gl, shader);
         // Stars
         if (skyLight < 1.0f) {
             Random random = ThreadLocalRandom.current();
-            openGL.setBlending(BlendingMode.ADD);
-            shader = shaderManager.getShader("VanillaBasics:shader/Glow", gl);
+            gl.setBlending(BlendingMode.ADD);
+            shader = shaderManager.get("VanillaBasics:shader/Glow", gl);
             float brightness =
                     FastMath.max(1.0f - skyLight - random.nextFloat() * 0.1f,
                             0.0f);
@@ -375,14 +369,14 @@ public class WorldSkyboxOverworld implements WorldSkybox {
             starMesh.render(gl, shader);
             matrixStack.pop();
         } else {
-            openGL.setBlending(BlendingMode.ADD);
+            gl.setBlending(BlendingMode.ADD);
         }
         // Sun
         Matrix matrix = matrixStack.push();
         matrix.rotate(sunAzimuth + 180.0f, 0.0f, 0.0f, 1.0f);
         matrix.rotate(-sunElevation, 1.0f, 0.0f, 0.0f);
         matrix.scale(1.0f, 1.0f, 1.0f);
-        shader = shaderManager.getShader("VanillaBasics:shader/Glow", gl);
+        shader = shaderManager.get("VanillaBasics:shader/Glow", gl);
         shader.setUniform4f(4, fogR * 1.0f, fogG * 1.1f, fogB * 1.1f, 1.0f);
         billboardMesh.render(gl, shader);
         matrix.scale(0.2f, 1.0f, 0.2f);
@@ -390,33 +384,33 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         billboardMesh.render(gl, shader);
         matrixStack.pop();
         // Moon
-        shader = shaderManager.getShader("Engine:shader/Textured", gl);
-        gl.getTextureManager().bind("VanillaBasics:image/Moon", gl);
+        shader = shaderManager.get("Engine:shader/Textured", gl);
+        gl.textures().bind("VanillaBasics:image/Moon", gl);
         matrix = matrixStack.push();
         matrix.rotate(sunAzimuth, 0.0f, 0.0f, 1.0f);
         matrix.rotate(sunElevation, 1.0f, 0.0f, 0.0f);
         matrix.scale(0.1f, 1.0f, 0.1f);
         billboardMesh.render(gl, shader);
         matrixStack.pop();
-        openGL.setBlending(BlendingMode.NORMAL);
-        shader = shaderManager.getShader("VanillaBasics:shader/Skybox", gl);
+        gl.setBlending(BlendingMode.NORMAL);
+        shader = shaderManager.get("VanillaBasics:shader/Skybox", gl);
         // Clouds
-        gl.getTextureManager().bind(fbo.getTexturesColor()[0], gl);
+        gl.textures().bind(fbo.texturesColor()[0], gl);
         cloudMesh.render(gl, shader);
-        gl.getTextureManager().unbind(gl);
+        gl.textures().unbind(gl);
         // Bottom
         skyboxBottomMesh.render(gl, shader);
         float cloudTime = (System.currentTimeMillis() % 1000000) / 1000000.0f;
         fbo.activate(gl);
-        openGL.viewport(0, 0, fbo.getWidth(), fbo.getHeight());
-        openGL.clear(0.0f, 0.0f, 0.0f, 0.0f);
+        gl.viewport(0, 0, fbo.width(), fbo.height());
+        gl.clear(0.0f, 0.0f, 0.0f, 0.0f);
         gl.setProjectionOrthogonal(0, 0, 1, 1);
-        shader = shaderManager.getShader("VanillaBasics:shader/Clouds", gl);
+        shader = shaderManager.get("VanillaBasics:shader/Clouds", gl);
         shader.setUniform1f(4, cloudTime);
         shader.setUniform1f(5, weather);
         shader.setUniform2f(6,
-                (float) (scene.getCam().position.doubleX() / 2048.0 % 1024.0),
-                (float) (scene.getCam().position.doubleY() / 2048.0 % 1024.0));
+                (float) (scene.cam().position.doubleX() / 2048.0 % 1024.0),
+                (float) (scene.cam().position.doubleY() / 2048.0 % 1024.0));
         cloudTextureMesh.render(gl, shader);
         fbo.deactivate(gl);
     }
@@ -429,27 +423,27 @@ public class WorldSkyboxOverworld implements WorldSkybox {
     }
 
     @Override
-    public float getExposure() {
+    public float exposure() {
         return (float) exposure;
     }
 
     @Override
-    public float getFogR() {
+    public float fogR() {
         return fogR;
     }
 
     @Override
-    public float getFogG() {
+    public float fogG() {
         return fogG;
     }
 
     @Override
-    public float getFogB() {
+    public float fogB() {
         return fogB;
     }
 
     @Override
-    public float getFogDistance() {
+    public float fogDistance() {
         return fogDistance;
     }
 

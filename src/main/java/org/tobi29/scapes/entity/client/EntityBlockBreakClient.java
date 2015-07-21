@@ -48,8 +48,8 @@ public class EntityBlockBreakClient extends EntityClient {
     @Override
     public void update(double delta) {
         pointerPanes.reset();
-        world.getTerrain().type(pos.intX(), pos.intY(), pos.intZ())
-                .addPointerCollision(world.getTerrain()
+        world.terrain().type(pos.intX(), pos.intY(), pos.intZ())
+                .addPointerCollision(world.terrain()
                                 .data(pos.intX(), pos.intY(), pos.intZ()),
                         pointerPanes, pos.intX(), pos.intY(), pos.intZ());
     }
@@ -59,11 +59,11 @@ public class EntityBlockBreakClient extends EntityClient {
         return Optional.of(new EntityModelBlockBreak(this));
     }
 
-    public double getProgress() {
+    public double progress() {
         return progress;
     }
 
-    public Pool<PointerPane> getPointerPanes() {
+    public Pool<PointerPane> pointerPanes() {
         return pointerPanes;
     }
 }

@@ -24,7 +24,6 @@ import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.MobileEntity;
-import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
@@ -72,11 +71,12 @@ public class PacketMobChangeSpeed extends Packet
         if (world == null) {
             return;
         }
-        EntityClient entity = world.getEntity(entityID);
-        if (entity instanceof MobileEntity) {
-            ((MobileEntity) entity).getPositionHandler()
-                    .receiveSpeed(x / 100.0, y / 100.0, z / 100.0);
-        }
+        world.entity(entityID).ifPresent(entity -> {
+            if (entity instanceof MobileEntity) {
+                ((MobileEntity) entity).positionHandler()
+                        .receiveSpeed(x / 100.0, y / 100.0, z / 100.0);
+            }
+        });
     }
 
     @Override
@@ -97,7 +97,7 @@ public class PacketMobChangeSpeed extends Packet
 
     @Override
     public void runServer(PlayerConnection player, WorldServer world) {
-        player.getMob().getPositionHandler()
+        player.mob().positionHandler()
                 .receiveSpeed(x / 100.0, y / 100.0, z / 100.0);
     }
 }

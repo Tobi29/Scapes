@@ -24,16 +24,13 @@ import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
 import org.tobi29.scapes.engine.opengl.texture.TextureFile;
 import org.tobi29.scapes.engine.utils.Pair;
-import org.tobi29.scapes.engine.utils.io.FileUtil;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class GuiScreenshots extends GuiMenu {
     private static final Logger LOGGER =
@@ -47,9 +44,9 @@ public class GuiScreenshots extends GuiMenu {
         this.state = state;
         scrollPane = new GuiComponentScrollPaneList(16, 80, 368, 350, 70);
         pane.add(scrollPane);
-        joiner = state.getEngine().taskExecutor().runTask(joiner -> {
+        joiner = state.engine().taskExecutor().runTask(joiner -> {
             try {
-                Path path = state.getEngine().home().resolve("screenshots");
+                Path path = state.engine().home().resolve("screenshots");
                 List<Path> files = new ArrayList<>();
                 for (Path file : Files.newDirectoryStream(path)) {
                     if (Files.isRegularFile(file) && !Files.isHidden(file)) {
@@ -91,10 +88,13 @@ public class GuiScreenshots extends GuiMenu {
                     new GuiComponentTextButton(70, 20, 100, 30, 18, "Save");
             label.addLeftClick(event -> {
                 try {
-                    state.getEngine().container()
-                            .exportToUser(path, new Pair[]{
+                    Optional<Path> export = state.engine().container()
+                            .saveFileDialog(new Pair[]{
                                             new Pair<>("*.png", "PNG Picture")},
                                     "Export screenshot");
+                    if (export.isPresent()) {
+                        Files.copy(path, export.get());
+                    }
                 } catch (IOException e) {
                     LOGGER.warn("Failed to export screenshot: {}",
                             e.toString());

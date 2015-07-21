@@ -18,7 +18,6 @@ package org.tobi29.scapes.vanilla.basics.entity.model;
 
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -47,11 +46,11 @@ public class EntityModelBellows implements EntityModel {
 
     public EntityModelBellows(EntityBellowsClient entity) {
         this.entity = entity;
-        pos = new MutableVector3d(entity.getPos());
+        pos = new MutableVector3d(entity.pos());
     }
 
     @Override
-    public Vector3 getPos() {
+    public Vector3 pos() {
         return pos.now();
     }
 
@@ -68,8 +67,8 @@ public class EntityModelBellows implements EntityModel {
     @Override
     public void renderUpdate(double delta) {
         double factor = FastMath.min(1.0, delta * 10.0);
-        pos.plus(entity.getPos().minus(pos.now()).multiply(factor));
-        float value = entity.getScale();
+        pos.plus(entity.pos().minus(pos.now()).multiply(factor));
+        float value = entity.scale();
         scale += FastMath.diff(scale,
                 (value > 1.0f ? 2.0f - value : value) * 0.4f + 0.4f, 2) *
                 factor;
@@ -82,22 +81,21 @@ public class EntityModelBellows implements EntityModel {
         float posRenderX = (float) (pos.doubleX() - cam.position.doubleX());
         float posRenderY = (float) (pos.doubleY() - cam.position.doubleY());
         float posRenderZ = (float) (pos.doubleZ() - cam.position.doubleZ());
-        OpenGL openGL = gl.getOpenGL();
-        openGL.setAttribute2f(4, world.getTerrain()
+        gl.setAttribute2f(4, world.terrain()
                         .blockLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f,
-                world.getTerrain()
+                world.terrain()
                         .sunLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f);
-        MatrixStack matrixStack = gl.getMatrixStack();
+        MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(posRenderX, posRenderY, posRenderZ);
         matrix = matrixStack.push();
         matrix.scale(1.0f, 1.0f, scale);
-        gl.getTextureManager()
+        gl.textures()
                 .bind("VanillaBasics:image/terrain/tree/birch/Planks", gl);
         MIDDLE.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
-        gl.getTextureManager()
+        gl.textures()
                 .bind("VanillaBasics:image/terrain/tree/oak/Planks", gl);
         matrix.translate(0.0f, 0.0f, scale * 0.5f);
         SIDE.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
@@ -108,7 +106,7 @@ public class EntityModelBellows implements EntityModel {
         matrixStack.pop();
         SIDE.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
         matrix = matrixStack.push();
-        switch (entity.getFace()) {
+        switch (entity.face()) {
             case DOWN:
                 matrix.rotate(180, 1, 0, 0);
                 break;
@@ -125,7 +123,7 @@ public class EntityModelBellows implements EntityModel {
                 matrix.rotate(270, 0, 1, 0);
                 break;
         }
-        gl.getTextureManager()
+        gl.textures()
                 .bind("VanillaBasics:image/terrain/device/Anvil", gl);
         PIPE.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
         matrixStack.pop();

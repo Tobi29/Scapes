@@ -25,7 +25,6 @@ import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.client.states.scenes.SceneScapesVoxelWorld;
 import org.tobi29.scapes.engine.opengl.BlendingMode;
 import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.opengl.shader.ShaderManager;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
@@ -45,6 +44,7 @@ import org.tobi29.scapes.plugins.Dimension;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -69,38 +69,38 @@ public class WorldClient extends World {
     public WorldClient(ClientConnection connection, Cam cam, long seed,
             String name, TerrainSupplier terrainSupplier,
             TagStructure playerTag, int playerID) {
-        super(connection, connection.getPlugins(),
-                connection.getGame().getEngine().taskExecutor(),
-                connection.getPlugins().getRegistry());
-        game = connection.getGame();
+        super(connection, connection.plugins(),
+                connection.game().engine().taskExecutor(),
+                connection.plugins().registry());
+        game = connection.game();
         player =
                 new MobPlayerClientMain(this, Vector3d.ZERO, Vector3d.ZERO, 0.0,
                         0.0, "");
         player.read(playerTag);
         this.seed = seed;
         environment =
-                ((Dimension) plugins.getPlugin(name)).createEnvironment(this);
+                ((Dimension) plugins.plugin(name)).createEnvironment(this);
         scene = new SceneScapesVoxelWorld(this, cam);
         playerModel = player.createModel().get();
         addEntity(player, playerID);
         LOGGER.info("Received player entity: {} with id: {}", player, playerID);
-        connection.getPlugins().getPlugins()
+        connection.plugins().plugins()
                 .forEach(plugin -> plugin.worldInit(this));
         terrain = terrainSupplier.get(this);
     }
 
-    public List<MobClient> getEntities(List<MobClient> exceptions,
+    public List<MobClient> entities(List<MobClient> exceptions,
             Frustum hitField) {
         return entities.values().stream()
                 .filter(entity -> entity instanceof MobClient)
                 .map(entity -> (MobClient) entity)
                 .filter(mob -> !exceptions.contains(mob) &&
-                        hitField.inView(mob.getAABB()) > 0)
+                        hitField.inView(mob.aabb()) > 0)
                 .collect(Collectors.toList());
     }
 
     public void addEntity(EntityClient add, int id) {
-        if (id != player.getEntityID()) {
+        if (id != player.entityID()) {
             if (add != player) {
                 add.createModel()
                         .ifPresent(model -> entityModels.put(id, model));
@@ -112,24 +112,23 @@ public class WorldClient extends World {
 
     public void removeEntity(EntityClient del) {
         if (del != null) {
-            entities.remove(del.getEntityID());
-            entityModels.remove(del.getEntityID());
+            entities.remove(del.entityID());
+            entityModels.remove(del.entityID());
         }
     }
 
-    public Stream<EntityClient> getEntities() {
+    public Stream<EntityClient> entities() {
         return entities.values().stream();
     }
 
-    public EntityClient getEntity(int i) {
-        return entities.get(i);
+    public Optional<EntityClient> entity(int i) {
+        return Optional.ofNullable(entities.get(i));
     }
 
     public void update(double delta) {
         entities.values().stream().forEach(entity -> {
-            if (terrain.isBlockTicking(FastMath.floor(entity.getX()),
-                    FastMath.floor(entity.getY()),
-                    FastMath.floor(entity.getZ()))) {
+            if (terrain.isBlockTicking(FastMath.floor(entity.x()),
+                    FastMath.floor(entity.y()), FastMath.floor(entity.z()))) {
                 entity.update(delta);
                 if (entity instanceof MobClient) {
                     ((MobClient) entity).move(delta);
@@ -145,9 +144,9 @@ public class WorldClient extends World {
         terrain.update(delta);
         particleManager.update(delta);
         environment.tick(delta);
-        scene.getTerrainTextureRegistry().update(delta);
-        scene.getSkybox().update(delta);
-        spawn = player.getPos();
+        scene.terrainTextureRegistry().update(delta);
+        scene.skybox().update(delta);
+        spawn = player.pos();
     }
 
     public void updateRender(Cam cam, double delta) {
@@ -156,56 +155,47 @@ public class WorldClient extends World {
         terrain.renderer().renderUpdate(cam);
     }
 
-    public void render(GL gl, Cam cam,
-            float animationDistance, boolean debug) {
+    public void render(GL gl, Cam cam, float animationDistance, boolean debug) {
         float time = (System.currentTimeMillis() % 10000000) / 1000.0f;
         float sunLightReduction = environment
-                .getSunLightReduction(cam.position.doubleX(),
+                .sunLightReduction(cam.position.doubleX(),
                         cam.position.doubleY()) / 15.0f;
         Vector3 sunlightNormal = environment
-                .getSunLightNormal(cam.position.doubleX(),
-                        cam.position.doubleY());
-        ShaderManager shaderManager = gl.getShaderManager();
-        Shader shaderTerrain =
-                shaderManager.getShader("Scapes:shader/Terrain", gl);
-        shaderTerrain.setUniform3f(4, scene.getFogR(), scene.getFogG(),
-                scene.getFogB());
-        shaderTerrain.setUniform1f(5,
-                scene.getFogDistance() * scene.getRenderDistance());
+                .sunLightNormal(cam.position.doubleX(), cam.position.doubleY());
+        ShaderManager shaderManager = gl.shaders();
+        Shader shaderTerrain = shaderManager.get("Scapes:shader/Terrain", gl);
+        shaderTerrain.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB());
+        shaderTerrain
+                .setUniform1f(5, scene.fogDistance() * scene.renderDistance());
         shaderTerrain.setUniform1i(6, 1);
-        shaderTerrain.setUniform2f(7, gl.getSceneWidth(), gl.getSceneHeight());
+        shaderTerrain.setUniform2f(7, gl.sceneWidth(), gl.sceneHeight());
         shaderTerrain.setUniform1f(8, time);
         shaderTerrain.setUniform1f(9, sunLightReduction);
         shaderTerrain.setUniform3f(10, sunlightNormal.floatX(),
                 sunlightNormal.floatY(), sunlightNormal.floatZ());
         shaderTerrain.setUniform1f(11, FastMath.max(
-                player.getLeftWeapon().getMaterial()
-                        .getPlayerLight(player.getLeftWeapon()),
-                player.getRightWeapon().getMaterial()
-                        .getPlayerLight(player.getRightWeapon())));
+                player.leftWeapon().material().playerLight(player.leftWeapon()),
+                player.rightWeapon().material()
+                        .playerLight(player.rightWeapon())));
         shaderTerrain.setUniform1f(12, animationDistance * cam.far);
-        Shader shaderEntity =
-                shaderManager.getShader("Scapes:shader/Entity", gl);
-        shaderEntity.setUniform3f(4, scene.getFogR(), scene.getFogG(),
-                scene.getFogB());
-        shaderEntity.setUniform1f(5,
-                scene.getFogDistance() * scene.getRenderDistance());
+        Shader shaderEntity = shaderManager.get("Scapes:shader/Entity", gl);
+        shaderEntity.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB());
+        shaderEntity
+                .setUniform1f(5, scene.fogDistance() * scene.renderDistance());
         shaderEntity.setUniform1i(6, 1);
-        shaderEntity.setUniform2f(7, gl.getSceneWidth(), gl.getSceneHeight());
+        shaderEntity.setUniform2f(7, gl.sceneWidth(), gl.sceneHeight());
         shaderEntity.setUniform1f(8, time);
         shaderEntity.setUniform1f(9, sunLightReduction);
         shaderEntity.setUniform3f(10, sunlightNormal.floatX(),
                 sunlightNormal.floatY(), sunlightNormal.floatZ());
         shaderEntity.setUniform1f(11, FastMath.max(
-                player.getLeftWeapon().getMaterial()
-                        .getPlayerLight(player.getLeftWeapon()),
-                player.getRightWeapon().getMaterial()
-                        .getPlayerLight(player.getRightWeapon())));
-        OpenGL openGL = gl.getOpenGL();
-        openGL.setBlending(BlendingMode.NONE);
-        scene.getTerrainTextureRegistry().getTexture().bind(gl);
+                player.leftWeapon().material().playerLight(player.leftWeapon()),
+                player.rightWeapon().material()
+                        .playerLight(player.rightWeapon())));
+        gl.setBlending(BlendingMode.NONE);
+        scene.terrainTextureRegistry().texture().bind(gl);
         terrain.renderer().render(gl, shaderTerrain, cam, debug);
-        openGL.setBlending(BlendingMode.NORMAL);
+        gl.setBlending(BlendingMode.NORMAL);
         if (!scene.isGuiHidden()) {
             playerModel.render(gl, this, cam, shaderEntity);
         }
@@ -215,11 +205,11 @@ public class WorldClient extends World {
             return cam.frustum.inView(aabb) != 0;
         }).forEach(model -> model.render(gl, this, cam, shaderEntity));
         particleManager.render(gl, cam);
-        scene.getTerrainTextureRegistry().getTexture().bind(gl);
+        scene.terrainTextureRegistry().texture().bind(gl);
         terrain.renderer().renderAlpha(gl, shaderTerrain, cam);
     }
 
-    public TerrainClient getTerrain() {
+    public TerrainClient terrain() {
         return terrain;
     }
 
@@ -251,11 +241,10 @@ public class WorldClient extends World {
     public void playSound(String audio, EntityClient entity, float pitch,
             float gain, float range) {
         if (entity instanceof MobClient) {
-            playSound(audio, entity.getPos(), ((MobClient) entity).getSpeed(),
-                    pitch, gain, range);
+            playSound(audio, entity.pos(), ((MobClient) entity).speed(), pitch,
+                    gain, range);
         } else {
-            playSound(audio, entity.getPos(), Vector3d.ZERO, pitch, gain,
-                    range);
+            playSound(audio, entity.pos(), Vector3d.ZERO, pitch, gain, range);
         }
     }
 
@@ -270,41 +259,41 @@ public class WorldClient extends World {
 
     public void playSound(String audio, Vector3 position, Vector3 velocity,
             float pitch, float gain, float range) {
-        game.getEngine().sounds()
+        game.engine().sounds()
                 .playSound(audio, position, velocity, pitch, gain, range);
     }
 
-    public MobPlayerClientMain getPlayer() {
+    public MobPlayerClientMain player() {
         return player;
     }
 
-    public MobModel getPlayerModel() {
+    public MobModel playerModel() {
         return playerModel;
     }
 
-    public GameStateGameMP getGame() {
+    public GameStateGameMP game() {
         return game;
     }
 
-    public SceneScapesVoxelWorld getScene() {
+    public SceneScapesVoxelWorld scene() {
         return scene;
     }
 
-    public ParticleManager getParticleManager() {
+    public ParticleManager particleManager() {
         return particleManager;
     }
 
-    public void renderInfoLayer(String name,
+    public void infoLayer(String name,
             Supplier<TerrainRenderInfo.InfoLayer> layer) {
         infoLayers.put(name, layer);
     }
 
-    public Stream<Map.Entry<String, Supplier<TerrainRenderInfo.InfoLayer>>> getInfoLayers() {
+    public Stream<Map.Entry<String, Supplier<TerrainRenderInfo.InfoLayer>>> infoLayers() {
         return infoLayers.entrySet().stream();
     }
 
-    public void dispose() {
-        terrain.dispose();
+    public void dispose(GL gl) {
+        terrain.dispose(gl);
     }
 
     @FunctionalInterface

@@ -18,7 +18,6 @@ package org.tobi29.scapes.vanilla.basics;
 
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.GameRegistry;
-import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.World;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldEnvironment;
@@ -39,9 +38,11 @@ import java.util.stream.Stream;
 
 public class VanillaBasics implements WorldType {
     public final Config c = new Config();
-    private final List<FurnaceFuel> furnaceFuels = new ArrayList<>();
     private final List<ResearchRecipe> researchRecipes = new ArrayList<>();
     private final Map<String, MetalType> metalTypes = new ConcurrentHashMap<>();
+    private final MetalType crapMetal =
+            new MetalType("Crap Metal", "Crap Metal", new ConcurrentHashMap<>(),
+                    0.17f, 0.12f, 0.1f, 200.0f, 0.0, 0.0, 0.0, 0);
     private final List<OreType> oreTypes = new ArrayList<>();
     private final Map<BiomeGenerator.Biome, Map<String, BiomeDecorator>>
             biomeDecorators = new EnumMap<>(BiomeGenerator.Biome.class);
@@ -51,10 +52,6 @@ public class VanillaBasics implements WorldType {
     public VanillaBasics() {
         Arrays.stream(BiomeGenerator.Biome.values()).forEach(
                 biome -> biomeDecorators.put(biome, new ConcurrentHashMap<>()));
-    }
-
-    public void addFuel(FurnaceFuel fuel) {
-        furnaceFuels.add(fuel);
     }
 
     public void addResearchRecipe(ResearchRecipe recipe) {
@@ -68,7 +65,7 @@ public class VanillaBasics implements WorldType {
         if (locked) {
             throw new IllegalStateException("Initializing already ended");
         }
-        metalTypes.put(recipe.getID(), recipe);
+        metalTypes.put(recipe.id(), recipe);
     }
 
     public void addOreType(OreType oreType) {
@@ -93,19 +90,6 @@ public class VanillaBasics implements WorldType {
         return biomeDecorator;
     }
 
-    public Optional<FurnaceFuel> getFuel(ItemStack fuel) {
-        if (!locked) {
-            throw new IllegalStateException("Initializing still running");
-        }
-        for (FurnaceFuel fuelType : furnaceFuels) {
-            if (fuel.canTake(fuelType.getFuel()) ==
-                    fuelType.getFuel().getAmount()) {
-                return Optional.of(fuelType);
-            }
-        }
-        return Optional.empty();
-    }
-
     public Stream<ResearchRecipe> getResearchRecipes() {
         if (!locked) {
             throw new IllegalStateException("Initializing still running");
@@ -117,7 +101,7 @@ public class VanillaBasics implements WorldType {
         if (!locked) {
             throw new IllegalStateException("Initializing still running");
         }
-        return metalTypes.get(id);
+        return metalTypes.getOrDefault(id, crapMetal);
     }
 
     public Stream<MetalType> getMetalTypes() {
@@ -156,7 +140,6 @@ public class VanillaBasics implements WorldType {
         VanillaBasicsRegisters.registerEntities(registry);
         VanillaBasicsRegisters.registerUpdates(registry);
         VanillaBasicsRegisters.registerPackets(registry);
-        VanillaBasicsRegisters.registerFuels(this);
         VanillaBasicsRegisters.registerOres(this);
         VanillaBasicsRegisters.registerResearch(this);
         VanillaBasicsRegisters.registerMetals(this);
@@ -165,6 +148,8 @@ public class VanillaBasics implements WorldType {
 
     @Override
     public void initEnd(GameRegistry registry) {
+        c.decoratorOverlays.values().forEach(config -> biomeDecorators.values()
+                .forEach(biome -> biome.values().forEach(config::accept)));
         locked = true;
         VanillaBasicsRegisters.registerRecipes(registry, materials);
     }
@@ -181,9 +166,9 @@ public class VanillaBasics implements WorldType {
     @Override
     public void worldInit(WorldClient world) {
         WorldEnvironmentOverworld environment =
-                (WorldEnvironmentOverworld) world.getEnvironment();
-        world.renderInfoLayer("VanillaBasics:Climate",
-                () -> new ClimateInfoLayer(environment.getClimateGenerator()));
+                (WorldEnvironmentOverworld) world.environment();
+        world.infoLayer("VanillaBasics:Climate",
+                () -> new ClimateInfoLayer(environment.climate()));
     }
 
     @Override
@@ -195,12 +180,12 @@ public class VanillaBasics implements WorldType {
     }
 
     @Override
-    public String getID() {
+    public String id() {
         return "VanillaBasics";
     }
 
     @Override
-    public String getAssetRoot() {
+    public String assetRoot() {
         return "assets/scapes/tobi29/vanilla/basics/";
     }
 
@@ -214,11 +199,18 @@ public class VanillaBasics implements WorldType {
     }
 
     public class Config {
+        private final Map<String, Consumer<BiomeDecorator>> decoratorOverlays =
+                new ConcurrentHashMap<>();
+
         public void research(String name, String text, String... items) {
             addResearchRecipe(new ResearchRecipe(name, text, items));
         }
 
-        public void biomeDecorator(BiomeGenerator.Biome biome, String name,
+        public void decorator(String name, Consumer<BiomeDecorator> config) {
+            decoratorOverlays.put(name, config);
+        }
+
+        public void decorator(BiomeGenerator.Biome biome, String name,
                 int weight, Consumer<BiomeDecorator> config) {
             config.accept(addBiomeDecorator(biome, name, weight));
         }

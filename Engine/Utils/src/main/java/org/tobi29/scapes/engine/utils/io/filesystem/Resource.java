@@ -16,7 +16,5 @@
 
 package org.tobi29.scapes.engine.utils.io.filesystem;
 
-import org.tobi29.scapes.engine.utils.io.ReadSource;
-
 public interface Resource extends ReadSource {
 }

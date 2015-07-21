@@ -19,7 +19,7 @@ package org.tobi29.scapes.engine.openal.codec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.openal.codec.spi.ReadableAudioStreamProvider;
-import org.tobi29.scapes.engine.utils.io.ReadSource;
+import org.tobi29.scapes.engine.utils.io.filesystem.ReadSource;
 
 import java.io.IOException;
 import java.util.Map;
@@ -39,7 +39,7 @@ public class AudioStream {
 
     public static ReadableAudioStream create(ReadSource resource)
             throws IOException {
-        String mime = resource.getMIMEType();
+        String mime = resource.mimeType();
         Optional<ReadableAudioStreamProvider> codec = get(mime);
         if (codec.isPresent()) {
             return codec.get().get(resource.channel());
@@ -48,7 +48,7 @@ public class AudioStream {
     }
 
     public static boolean playable(ReadSource resource) throws IOException {
-        return playable(resource.getMIMEType());
+        return playable(resource.mimeType());
     }
 
     public static boolean playable(String mime) {

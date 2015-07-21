@@ -32,7 +32,7 @@ public class GeneratorOutput {
     }
 
     public void type(int z, BlockType type) {
-        this.type[z] = type.getID();
+        this.type[z] = type.id();
     }
 
     public void data(int z, int data) {

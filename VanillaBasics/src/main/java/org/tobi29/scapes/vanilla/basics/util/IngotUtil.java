@@ -28,7 +28,7 @@ public class IngotUtil {
 
     public static void createIngot(ItemStack item, MetalType metalType,
             float temperature) {
-        item.getMetaData("Vanilla").setString("MetalType", metalType.getID());
-        item.getMetaData("Vanilla").setFloat("Temperature", temperature);
+        item.metaData("Vanilla").setString("MetalType", metalType.id());
+        item.metaData("Vanilla").setFloat("Temperature", temperature);
     }
 }

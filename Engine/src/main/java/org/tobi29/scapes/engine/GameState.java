@@ -54,7 +54,7 @@ public abstract class GameState {
                 new int[]{0, 1, 2, 3, 2, 1}, RenderType.TRIANGLES);
     }
 
-    public ScapesEngine getEngine() {
+    public ScapesEngine engine() {
         return engine;
     }
 
@@ -70,8 +70,8 @@ public abstract class GameState {
         if (fboBack != null) {
             fboBack.dispose(gl);
         }
-        gl.getShaderManager().clearCache(gl);
-        gl.getTextureManager().clearCache(gl);
+        gl.shaders().clearCache(gl);
+        gl.textures().clearCache(gl);
     }
 
     public abstract void dispose(GL gl);
@@ -94,7 +94,7 @@ public abstract class GameState {
         }
     }
 
-    public Scene getScene() {
+    public Scene scene() {
         return scene;
     }
 
@@ -136,11 +136,11 @@ public abstract class GameState {
                 fboBack = null;
             }
         }
-        int sceneWidth = scene.getWidth(gl.getSceneWidth());
-        int sceneHeight = scene.getHeight(gl.getSceneHeight());
+        int sceneWidth = scene.width(gl.sceneWidth());
+        int sceneHeight = scene.height(gl.sceneHeight());
         if (fboScene == null) {
             fboScene = new FBO(sceneWidth, sceneHeight,
-                    scene.getColorAttachments(), true, true, false, gl);
+                    scene.colorAttachments(), true, true, false, gl);
             scene.initFBO(0, fboScene);
         }
         if (updateSize) {
@@ -157,39 +157,38 @@ public abstract class GameState {
                 scene.initFBO(2, fboBack);
             }
         }
-        OpenGL openGL = gl.getOpenGL();
-        openGL.checkError("Initializing-Scene-Rendering");
+        gl.checkError("Initializing-Scene-Rendering");
         fboScene.activate(gl);
-        openGL.viewport(0, 0, sceneWidth, sceneHeight);
-        openGL.clearDepth();
+        gl.viewport(0, 0, sceneWidth, sceneHeight);
+        gl.clearDepth();
         scene.renderScene(gl);
         fboScene.deactivate(gl);
-        openGL.checkError("Scene-Rendering");
+        gl.checkError("Scene-Rendering");
         gl.setProjectionOrthogonal(0.0f, 0.0f, 800.0f, 512.0f);
-        int renderPasses = scene.getRenderPasses() - 1;
+        int renderPasses = scene.renderPasses() - 1;
         if (renderPasses == 0) {
-            openGL.viewport(0, 0, gl.getContentWidth(), gl.getContentHeight());
+            gl.viewport(0, 0, gl.contentWidth(), gl.contentHeight());
             renderPostProcess(gl, fboScene, fboScene, renderPasses);
         } else if (renderPasses == 1) {
             if (fboFront == null) {
                 fboFront = new FBO(sceneWidth, sceneHeight,
-                        scene.getColorAttachments(), false, true, false, gl);
+                        scene.colorAttachments(), false, true, false, gl);
                 scene.initFBO(1, fboFront);
             }
             fboFront.activate(gl);
             renderPostProcess(gl, fboScene, fboScene, 0);
             fboFront.deactivate(gl);
-            openGL.viewport(0, 0, gl.getContentWidth(), gl.getContentHeight());
+            gl.viewport(0, 0, gl.contentWidth(), gl.contentHeight());
             renderPostProcess(gl, fboFront, fboScene, renderPasses);
         } else {
             if (fboFront == null) {
                 fboFront = new FBO(sceneWidth, sceneHeight,
-                        scene.getColorAttachments(), false, true, false, gl);
+                        scene.colorAttachments(), false, true, false, gl);
                 scene.initFBO(1, fboFront);
             }
             if (fboBack == null) {
                 fboBack = new FBO(sceneWidth, sceneHeight,
-                        scene.getColorAttachments(), false, true, false, gl);
+                        scene.colorAttachments(), false, true, false, gl);
                 scene.initFBO(2, fboBack);
             }
             fboFront.activate(gl);
@@ -203,47 +202,45 @@ public abstract class GameState {
                 fboFront = fboBack;
                 fboBack = fboSwap;
             }
-            openGL.viewport(0, 0, gl.getContentWidth(), gl.getContentHeight());
+            gl.viewport(0, 0, gl.contentWidth(), gl.contentHeight());
             renderPostProcess(gl, fboFront, fboScene, renderPasses);
         }
-        openGL.checkError("Post-Processing");
-        Shader shader =
-                gl.getShaderManager().getShader("Engine:shader/Gui", gl);
+        gl.checkError("Post-Processing");
+        Shader shader = gl.shaders().get("Engine:shader/Gui", gl);
         scene.renderGui(gl, shader, delta);
-        engine.globalGUI().render(gl, shader, gl.getDefaultFont(), delta);
+        engine.globalGUI().render(gl, shader, gl.defaultFont(), delta);
         GuiController guiController = engine.guiController();
         if (guiController.isSoftwareMouse() && !isMouseGrabbed()) {
-            gl.setProjectionOrthogonal(0.0f, 0.0f, gl.getContentWidth(),
-                    gl.getContainerHeight());
-            gl.getTextureManager().bind("Engine:image/Cursor", gl);
-            MatrixStack matrixStack = gl.getMatrixStack();
+            gl.setProjectionOrthogonal(0.0f, 0.0f, gl.contentWidth(),
+                    gl.containerHeight());
+            gl.textures().bind("Engine:image/Cursor", gl);
+            MatrixStack matrixStack = gl.matrixStack();
             Matrix matrix = matrixStack.push();
-            matrix.translate((float) guiController.getCursorX(),
-                    (float) guiController.getCursorY(), 0.0f);
+            matrix.translate((float) guiController.cursorX(),
+                    (float) guiController.cursorY(), 0.0f);
             CURSOR.render(gl, shader);
             matrixStack.pop();
         }
-        openGL.checkError("Gui-Rendering");
+        gl.checkError("Gui-Rendering");
         scene.postRender(gl, delta);
-        openGL.checkError("Post-Render");
+        gl.checkError("Post-Render");
     }
 
     public void renderPostProcess(GL gl, FBO fbo, FBO depthFBO, int i) {
-        OpenGL openGL = gl.getOpenGL();
-        openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
-        TextureFBOColor[] texturesColor = fbo.getTexturesColor();
+        gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
+        TextureFBOColor[] texturesColor = fbo.texturesColor();
         for (int j = 1; j < texturesColor.length; j++) {
-            openGL.activeTexture(j + 1);
+            gl.activeTexture(j + 1);
             texturesColor[j].bind(gl);
         }
-        openGL.activeTexture(1);
-        depthFBO.getTextureDepth().bind(gl);
-        openGL.activeTexture(0);
+        gl.activeTexture(1);
+        depthFBO.textureDepth().bind(gl);
+        gl.activeTexture(0);
         texturesColor[0].bind(gl);
         vao.render(gl, scene.postProcessing(gl, i));
     }
 
-    public FBO getFBOScene() {
+    public FBO fboScene() {
         return fboScene;
     }
 }

@@ -55,11 +55,11 @@ public class ToolUtil {
             int id) {
         VanillaMaterial materials = plugin.getMaterials();
         MetalType metal = plugin.getMetalType(
-                item.getMetaData("Vanilla").getString("MetalType"));
-        double efficiency = metal.getBaseToolEfficiency();
-        double strength = metal.getBaseToolStrength();
-        double damage = metal.getBaseToolDamage();
-        int level = metal.getBaseToolLevel();
+                item.metaData("Vanilla").getString("MetalType"));
+        double efficiency = metal.baseToolEfficiency();
+        double strength = metal.baseToolStrength();
+        double damage = metal.baseToolDamage();
+        int level = metal.baseToolLevel();
         switch (id) {
             case 1:
                 item.setMaterial(materials.pickaxe);
@@ -91,9 +91,9 @@ public class ToolUtil {
                 efficiency = 0.0;
                 break;
         }
-        item.getMetaData("Vanilla").setDouble("ToolEfficiency", efficiency);
-        item.getMetaData("Vanilla").setDouble("ToolStrength", strength);
-        item.getMetaData("Vanilla").setDouble("ToolDamageAdd", damage);
-        item.getMetaData("Vanilla").setInteger("ToolLevel", level);
+        item.metaData("Vanilla").setDouble("ToolEfficiency", efficiency);
+        item.metaData("Vanilla").setDouble("ToolStrength", strength);
+        item.metaData("Vanilla").setDouble("ToolDamageAdd", damage);
+        item.metaData("Vanilla").setInteger("ToolLevel", level);
     }
 }

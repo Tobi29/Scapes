@@ -68,7 +68,7 @@ public class MobPlayerServer extends MobLivingEquippedServer
         this.skin = skin;
         inventory = new Inventory(registry, 44);
         this.connection = connection;
-        serverConnection = connection.getServer();
+        serverConnection = connection.server();
         viewers.add(this);
         List<PlayerConnection> exceptions =
                 Collections.singletonList(connection);
@@ -79,26 +79,26 @@ public class MobPlayerServer extends MobLivingEquippedServer
         }, (ground, slidingWall, inWater, swimming) -> {
         });
         listener((DeathListener) () -> {
-            for (int i = 0; i < inventory.getSize(); i++) {
-                world.dropItem(inventory.getItem(i), this.pos.now());
+            for (int i = 0; i < inventory.size(); i++) {
+                world.dropItem(inventory.item(i), this.pos.now());
                 inventory.setItem(i, new ItemStack(registry));
             }
             setSpeed(Vector3d.ZERO);
-            setPos(new Vector3d(0.5, 0.5, 1.5).plus(world.getSpawn()));
-            lives = maxLives;
-            world.getConnection().send(new PacketEntityChange(this));
+            setPos(new Vector3d(0.5, 0.5, 1.5).plus(world.spawn()));
+            health = maxHealth;
+            world.connection().send(new PacketEntityChange(this));
             onSpawn();
         });
     }
 
     @Override
-    public ItemStack getLeftWeapon() {
-        return inventory.getItem(inventorySelectLeft);
+    public ItemStack leftWeapon() {
+        return inventory.item(inventorySelectLeft);
     }
 
     @Override
-    public ItemStack getRightWeapon() {
-        return inventory.getItem(inventorySelectRight);
+    public ItemStack rightWeapon() {
+        return inventory.item(inventorySelectRight);
     }
 
     public void setInventorySelectLeft(int select) {
@@ -139,12 +139,12 @@ public class MobPlayerServer extends MobLivingEquippedServer
         inventorySelectRight = select;
     }
 
-    public String getNickname() {
+    public String nickname() {
         return nickname;
     }
 
-    public PointerPane getSelectedBlock() {
-        return getBlock(6);
+    public PointerPane selectedBlock() {
+        return block(6);
     }
 
     public TagStructure write(boolean packet) {
@@ -159,7 +159,7 @@ public class MobPlayerServer extends MobLivingEquippedServer
     }
 
     @Override
-    public Inventory getInventory() {
+    public Inventory inventory() {
         return inventory;
     }
 
@@ -171,7 +171,7 @@ public class MobPlayerServer extends MobLivingEquippedServer
     }
 
     @Override
-    public Stream<MobPlayerServer> getViewers() {
+    public Stream<MobPlayerServer> viewers() {
         return viewers.stream();
     }
 
@@ -187,15 +187,15 @@ public class MobPlayerServer extends MobLivingEquippedServer
         double lookY = FastMath.sinTable(rot.doubleZ() * FastMath.PI / 180) *
                 FastMath.cosTable(rot.doubleX() * FastMath.PI / 180) * 6;
         double lookZ = FastMath.sinTable(rot.doubleX() * FastMath.PI / 180) * 6;
-        Vector3 viewOffset = getViewOffset();
+        Vector3 viewOffset = viewOffset();
         viewField.setView(pos.doubleX() + viewOffset.doubleX(),
                 pos.doubleY() + viewOffset.doubleY(),
                 pos.doubleZ() + viewOffset.doubleZ(), pos.doubleX() + lookX,
                 pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0, 0, 1);
-        world.getEntities().filter(entity -> entity instanceof MobServer)
+        world.entities().filter(entity -> entity instanceof MobServer)
                 .forEach(entity -> {
                     MobServer mob = (MobServer) entity;
-                    if (viewField.inView(mob.getAABB()) > 0) {
+                    if (viewField.inView(mob.aabb()) > 0) {
                         if (!world.checkBlocked(pos.intX(), pos.intY(),
                                 pos.intZ(), mob.pos.intX(), mob.pos.intY(),
                                 mob.pos.intZ())) {
@@ -206,7 +206,7 @@ public class MobPlayerServer extends MobLivingEquippedServer
         if (pos.doubleZ() < -100.0) {
             damage(-pos.doubleZ() - 100.0);
         }
-        if (lives < 10.0) {
+        if (health < 10.0) {
             Random random = ThreadLocalRandom.current();
             if (random.nextInt(40) == 0) {
                 push(random.nextDouble() * 2 - 1, 0, 0);
@@ -215,10 +215,10 @@ public class MobPlayerServer extends MobLivingEquippedServer
                 push(0, random.nextDouble() * 2 - 1, 0);
             }
             if (random.nextInt(20) == 0) {
-                setXRot(getXRot() + random.nextDouble() * 60 - 30);
+                setPitch(pitch() + random.nextDouble() * 60 - 30);
             }
             if (random.nextInt(20) == 0) {
-                setZRot(getZRot() + random.nextDouble() * 60 - 30);
+                setYaw(yaw() + random.nextDouble() * 60 - 30);
             }
         }
     }
@@ -260,8 +260,8 @@ public class MobPlayerServer extends MobLivingEquippedServer
     }
 
     @Override
-    public synchronized void setXSpeed(double x) {
-        super.setXSpeed(x);
+    public synchronized void setSpeedX(double x) {
+        super.setSpeedX(x);
         if (sendPositionHandler != null) {
             sendPositionHandler.sendSpeed(entityID, speed.now(), true,
                     serverConnection::send);
@@ -269,8 +269,8 @@ public class MobPlayerServer extends MobLivingEquippedServer
     }
 
     @Override
-    public synchronized void setXRot(double xRot) {
-        super.setXRot(xRot);
+    public synchronized void setPitch(double x) {
+        super.setPitch(x);
         if (sendPositionHandler != null) {
             sendPositionHandler.sendRotation(entityID, rot.now(), true,
                     serverConnection::send);
@@ -278,8 +278,8 @@ public class MobPlayerServer extends MobLivingEquippedServer
     }
 
     @Override
-    public synchronized void setYSpeed(double y) {
-        super.setYSpeed(y);
+    public synchronized void setSpeedY(double y) {
+        super.setSpeedY(y);
         if (sendPositionHandler != null) {
             sendPositionHandler.sendSpeed(entityID, speed.now(), true,
                     serverConnection::send);
@@ -287,8 +287,8 @@ public class MobPlayerServer extends MobLivingEquippedServer
     }
 
     @Override
-    public synchronized void setYRot(double yRot) {
-        super.setYRot(yRot);
+    public synchronized void setTilt(double y) {
+        super.setTilt(y);
         if (sendPositionHandler != null) {
             sendPositionHandler.sendRotation(entityID, rot.now(), true,
                     serverConnection::send);
@@ -296,8 +296,8 @@ public class MobPlayerServer extends MobLivingEquippedServer
     }
 
     @Override
-    public synchronized void setZSpeed(double z) {
-        super.setZSpeed(z);
+    public synchronized void setSpeedZ(double z) {
+        super.setSpeedZ(z);
         if (sendPositionHandler != null) {
             sendPositionHandler.sendSpeed(entityID, speed.now(), true,
                     serverConnection::send);
@@ -305,8 +305,8 @@ public class MobPlayerServer extends MobLivingEquippedServer
     }
 
     @Override
-    public synchronized void setZRot(double zRot) {
-        super.setZRot(zRot);
+    public synchronized void setYaw(double z) {
+        super.setYaw(z);
         if (sendPositionHandler != null) {
             sendPositionHandler.sendRotation(entityID, rot.now(), true,
                     serverConnection::send);
@@ -366,7 +366,7 @@ public class MobPlayerServer extends MobLivingEquippedServer
         }
     }
 
-    public PlayerConnection getConnection() {
+    public PlayerConnection connection() {
         return connection;
     }
 
@@ -385,30 +385,29 @@ public class MobPlayerServer extends MobLivingEquippedServer
         double lookY = FastMath.sinTable(rot.doubleZ() * FastMath.PI / 180) *
                 FastMath.cosTable(rot.doubleX() * FastMath.PI / 180) * 6;
         double lookZ = FastMath.sinTable(rot.doubleX() * FastMath.PI / 180) * 6;
-        Vector3 viewOffset = getViewOffset();
+        Vector3 viewOffset = viewOffset();
         hitField.setView(pos.doubleX() + viewOffset.doubleX(),
                 pos.doubleY() + viewOffset.doubleY(),
                 pos.doubleZ() + viewOffset.doubleZ(), pos.doubleX() + lookX,
                 pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0, 0, 1);
         double range;
         if (side) {
-            range = getLeftWeapon().getMaterial().getHitRange(getLeftWeapon());
+            range = leftWeapon().material().hitRange(leftWeapon());
         } else {
-            range = getRightWeapon().getMaterial()
-                    .getHitRange(getRightWeapon());
+            range = rightWeapon().material().hitRange(rightWeapon());
         }
         hitField.setPerspective(100 / range, 1, 0.1, range);
         List<MobServer> entities =
-                world.getEntities(Collections.singletonList((MobServer) this),
+                world.entities(Collections.singletonList((MobServer) this),
                         hitField);
         entities.stream().filter(entity -> entity instanceof MobLivingServer &&
                 entity != this).forEach(entity -> {
             if (side) {
-                ((MobLivingServer) entity).damage(getLeftWeapon().getMaterial()
-                        .click(this, getLeftWeapon(), entity) * strength);
+                ((MobLivingServer) entity).damage(leftWeapon().material()
+                        .click(this, leftWeapon(), entity) * strength);
             } else {
-                ((MobLivingServer) entity).damage(getRightWeapon().getMaterial()
-                        .click(this, getRightWeapon(), entity) * strength);
+                ((MobLivingServer) entity).damage(rightWeapon().material()
+                        .click(this, rightWeapon(), entity) * strength);
             }
             ((MobLivingServer) entity).onNotice(this);
             entity.push(
@@ -428,8 +427,8 @@ public class MobPlayerServer extends MobLivingEquippedServer
             closeGui();
         }
         currentContainer = gui;
-        world.getConnection().send(new PacketUpdateInventory(gui));
-        world.getConnection().send(new PacketUpdateInventory(this));
+        world.connection().send(new PacketUpdateInventory(gui));
+        world.connection().send(new PacketUpdateInventory(this));
         gui.addViewer(this);
         connection.send(new PacketOpenGui(gui));
     }
@@ -447,7 +446,7 @@ public class MobPlayerServer extends MobLivingEquippedServer
     }
 
     @Override
-    public CreatureType getCreatureType() {
+    public CreatureType creatureType() {
         return CreatureType.CREATURE;
     }
 
@@ -465,9 +464,9 @@ public class MobPlayerServer extends MobLivingEquippedServer
 
     @Override
     public void move(double delta) {
-        AABB aabb = getAABB();
+        AABB aabb = aabb();
         Pool<AABBElement> aabbs = world.getTerrain()
-                .getCollisions(FastMath.floor(aabb.minX),
+                .collisions(FastMath.floor(aabb.minX),
                         FastMath.floor(aabb.minY), FastMath.floor(aabb.minZ),
                         FastMath.floor(aabb.maxX), FastMath.floor(aabb.maxY),
                         FastMath.floor(aabb.maxZ));
@@ -484,7 +483,7 @@ public class MobPlayerServer extends MobLivingEquippedServer
     }
 
     @Override
-    public Vector3 getViewOffset() {
+    public Vector3 viewOffset() {
         return new Vector3d(0.0, 0.0, 0.63);
     }
 

@@ -36,9 +36,9 @@ public class GameStateGameMP extends GameState {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GameStateGameMP.class);
     protected final ClientConnection client;
-    protected final Playlist playlist;
+    private final Playlist playlist;
     private final GuiWidgetDebugValues.Element tickDebug;
-    protected double pingWait;
+    private double pingWait;
 
     protected GameStateGameMP(ClientConnection client, Scene scene,
             ScapesEngine engine) {
@@ -48,7 +48,7 @@ public class GameStateGameMP extends GameState {
         tickDebug = engine.debugValues().get("Client-TPS");
     }
 
-    public ClientConnection getClient() {
+    public ClientConnection client() {
         return client;
     }
 
@@ -57,17 +57,17 @@ public class GameStateGameMP extends GameState {
         client.stop();
         engine.sounds().stopMusic();
         ParticleBlock.clear();
-        if (client.getPlugins() != null) {
-            client.getPlugins().dispose();
-            client.getPlugins().removeFileSystems(engine.files());
+        if (client.plugins() != null) {
+            client.plugins().dispose();
+            client.plugins().removeFileSystems(engine.files());
         }
         LOGGER.info("Stopped game!");
     }
 
     @Override
     public void init(GL gl) {
-        client.getPlugins().addFileSystems(engine.files());
-        client.getPlugins().init();
+        client.plugins().addFileSystems(engine.files());
+        client.plugins().init();
         client.start(this);
     }
 
@@ -95,7 +95,7 @@ public class GameStateGameMP extends GameState {
                 engine.controller().isPressed(ControllerKey.KEY_F6)) {
             scene.toggleDebug();
         }
-        MobPlayerClientMain player = scene.getPlayer();
+        MobPlayerClientMain player = scene.player();
         playlist.update(player, delta);
         scene.update(delta);
         pingWait -= delta;
@@ -106,7 +106,7 @@ public class GameStateGameMP extends GameState {
         tickDebug.setValue(1.0 / delta);
     }
 
-    public Playlist getPlaylist() {
+    public Playlist playlist() {
         return playlist;
     }
 }

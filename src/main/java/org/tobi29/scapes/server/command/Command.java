@@ -115,14 +115,14 @@ public interface Command {
 
     static void requirePermission(Executor executor, int level)
             throws CommandException {
-        if (executor.getPermissionLevel() < level) {
+        if (executor.permissionLevel() < level) {
             throw new CommandException(243, "Missing permissions");
         }
     }
 
     static void requirePermission(Executor executor, int level, char object)
             throws CommandException {
-        if (executor.getPermissionLevel() < level) {
+        if (executor.permissionLevel() < level) {
             throw new CommandException(243,
                     "Missing permissions for: " + object);
         }
@@ -142,13 +142,13 @@ public interface Command {
     }
 
     interface Executor {
-        Optional<String> getPlayerName();
+        Optional<String> playerName();
 
-        String getName();
+        String name();
 
         void tell(String message);
 
-        int getPermissionLevel();
+        int permissionLevel();
     }
 
     class CommandOptions {

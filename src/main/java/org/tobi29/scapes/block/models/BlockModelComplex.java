@@ -62,14 +62,14 @@ public class BlockModelComplex implements BlockModel {
 
     @Override
     public void render(GL gl, Shader shader) {
-        registry.getTexture().bind(gl);
+        registry.texture().bind(gl);
         vao.render(gl, shader);
     }
 
     @Override
     public void renderInventory(GL gl, Shader shader) {
-        registry.getTexture().bind(gl);
-        MatrixStack matrixStack = gl.getMatrixStack();
+        registry.texture().bind(gl);
+        MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(0.5f, 0.5f, 0.5f);
         matrix.rotate(57.5f, 1, 0, 0);
@@ -265,8 +265,8 @@ public class BlockModelComplex implements BlockModel {
             b *= this.b;
             a *= this.a;
             if (texTop != null) {
-                float terrainTile = texTop.getSize();
-                byte anim = texTop.getShaderAnimation().getID();
+                float terrainTile = texTop.size();
+                byte anim = texTop.shaderAnimation().id();
                 float texMinX = terrainTile * minX;
                 float texMaxX = terrainTile * maxX;
                 float texMinY = terrainTile * minY;
@@ -274,27 +274,27 @@ public class BlockModelComplex implements BlockModel {
                 mesh.addVertex(terrain, Face.UP, x + tllh.floatX(),
                         y + tllh.floatY(), z + tllh.floatZ(),
                         xx + tllh.floatX(), yy + tllh.floatY(),
-                        zz + tllh.floatZ(), texTop.getX() + texMinX,
-                        texTop.getY() + texMinY, r, g, b, a, lod, anim);
+                        zz + tllh.floatZ(), texTop.x() + texMinX,
+                        texTop.y() + texMinY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.UP, x + thlh.floatX(),
                         y + thlh.floatY(), z + thlh.floatZ(),
                         xx + thlh.floatX(), yy + thlh.floatY(),
-                        zz + thlh.floatZ(), texTop.getX() + texMaxX,
-                        texTop.getY() + texMinY, r, g, b, a, lod, anim);
+                        zz + thlh.floatZ(), texTop.x() + texMaxX,
+                        texTop.y() + texMinY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.UP, x + thhh.floatX(),
                         y + thhh.floatY(), z + thhh.floatZ(),
                         xx + thhh.floatX(), yy + thhh.floatY(),
-                        zz + thhh.floatZ(), texTop.getX() + texMaxX,
-                        texTop.getY() + texMaxY, r, g, b, a, lod, anim);
+                        zz + thhh.floatZ(), texTop.x() + texMaxX,
+                        texTop.y() + texMaxY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.UP, x + tlhh.floatX(),
                         y + tlhh.floatY(), z + tlhh.floatZ(),
                         xx + tlhh.floatX(), yy + tlhh.floatY(),
-                        zz + tlhh.floatZ(), texTop.getX() + texMinX,
-                        texTop.getY() + texMaxY, r, g, b, a, lod, anim);
+                        zz + tlhh.floatZ(), texTop.x() + texMinX,
+                        texTop.y() + texMaxY, r, g, b, a, lod, anim);
             }
             if (texBottom != null) {
-                float terrainTile = texBottom.getSize();
-                byte anim = texBottom.getShaderAnimation().getID();
+                float terrainTile = texBottom.size();
+                byte anim = texBottom.shaderAnimation().id();
                 float texMinX = terrainTile * minX;
                 float texMaxX = terrainTile * maxX;
                 float texMinY = terrainTile * minY;
@@ -302,27 +302,27 @@ public class BlockModelComplex implements BlockModel {
                 mesh.addVertex(terrain, Face.DOWN, x + tlhl.floatX(),
                         y + tlhl.floatY(), z + tlhl.floatZ(),
                         xx + tlhl.floatX(), yy + tlhl.floatY(),
-                        zz + tlhl.floatZ(), texBottom.getX() + texMinX,
-                        texBottom.getY() + texMaxY, r, g, b, a, lod, anim);
+                        zz + tlhl.floatZ(), texBottom.x() + texMinX,
+                        texBottom.y() + texMaxY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.DOWN, x + thhl.floatX(),
                         y + thhl.floatY(), z + thhl.floatZ(),
                         xx + thhl.floatX(), yy + thhl.floatY(),
-                        zz + thhl.floatZ(), texBottom.getX() + texMaxX,
-                        texBottom.getY() + texMaxY, r, g, b, a, lod, anim);
+                        zz + thhl.floatZ(), texBottom.x() + texMaxX,
+                        texBottom.y() + texMaxY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.DOWN, x + thll.floatX(),
                         y + thll.floatY(), z + thll.floatZ(),
                         xx + thll.floatX(), yy + thll.floatY(),
-                        zz + thll.floatZ(), texBottom.getX() + texMaxX,
-                        texBottom.getY() + texMinY, r, g, b, a, lod, anim);
+                        zz + thll.floatZ(), texBottom.x() + texMaxX,
+                        texBottom.y() + texMinY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.DOWN, x + tlll.floatX(),
                         y + tlll.floatY(), z + tlll.floatZ(),
                         xx + tlll.floatX(), yy + tlll.floatY(),
-                        zz + tlll.floatZ(), texBottom.getX() + texMinX,
-                        texBottom.getY() + texMinY, r, g, b, a, lod, anim);
+                        zz + tlll.floatZ(), texBottom.x() + texMinX,
+                        texBottom.y() + texMinY, r, g, b, a, lod, anim);
             }
             if (texSide1 != null) {
-                float terrainTile = texSide1.getSize();
-                byte anim = texSide1.getShaderAnimation().getID();
+                float terrainTile = texSide1.size();
+                byte anim = texSide1.shaderAnimation().id();
                 float texMinX = terrainTile * minX;
                 float texMaxX = terrainTile * maxX;
                 float texMinY = terrainTile * minZ;
@@ -330,27 +330,27 @@ public class BlockModelComplex implements BlockModel {
                 mesh.addVertex(terrain, Face.NORTH, x + thlh.floatX(),
                         y + thlh.floatY(), z + thlh.floatZ(),
                         xx + thlh.floatX(), yy + thlh.floatY(),
-                        zz + thlh.floatZ(), texSide1.getX() + texMaxX,
-                        texSide1.getY() + texMinY, r, g, b, a, lod, anim);
+                        zz + thlh.floatZ(), texSide1.x() + texMaxX,
+                        texSide1.y() + texMinY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.NORTH, x + tllh.floatX(),
                         y + tllh.floatY(), z + tllh.floatZ(),
                         xx + tllh.floatX(), yy + tllh.floatY(),
-                        zz + tllh.floatZ(), texSide1.getX() + texMinX,
-                        texSide1.getY() + texMinY, r, g, b, a, lod, anim);
+                        zz + tllh.floatZ(), texSide1.x() + texMinX,
+                        texSide1.y() + texMinY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.NORTH, x + tlll.floatX(),
                         y + tlll.floatY(), z + tlll.floatZ(),
                         xx + tlll.floatX(), yy + tlll.floatY(),
-                        zz + tlll.floatZ(), texSide1.getX() + texMinX,
-                        texSide1.getY() + texMaxY, r, g, b, a, lod, anim);
+                        zz + tlll.floatZ(), texSide1.x() + texMinX,
+                        texSide1.y() + texMaxY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.NORTH, x + thll.floatX(),
                         y + thll.floatY(), z + thll.floatZ(),
                         xx + thll.floatX(), yy + thll.floatY(),
-                        zz + thll.floatZ(), texSide1.getX() + texMaxX,
-                        texSide1.getY() + texMaxY, r, g, b, a, lod, anim);
+                        zz + thll.floatZ(), texSide1.x() + texMaxX,
+                        texSide1.y() + texMaxY, r, g, b, a, lod, anim);
             }
             if (texSide2 != null) {
-                float terrainTile = texSide2.getSize();
-                byte anim = texSide2.getShaderAnimation().getID();
+                float terrainTile = texSide2.size();
+                byte anim = texSide2.shaderAnimation().id();
                 float texMinX = terrainTile * minY;
                 float texMaxX = terrainTile * maxY;
                 float texMinY = terrainTile * minZ;
@@ -358,27 +358,27 @@ public class BlockModelComplex implements BlockModel {
                 mesh.addVertex(terrain, Face.EAST, x + thhh.floatX(),
                         y + thhh.floatY(), z + thhh.floatZ(),
                         xx + thhh.floatX(), yy + thhh.floatY(),
-                        zz + thhh.floatZ(), texSide2.getX() + texMaxX,
-                        texSide2.getY() + texMinY, r, g, b, a, lod, anim);
+                        zz + thhh.floatZ(), texSide2.x() + texMaxX,
+                        texSide2.y() + texMinY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.EAST, x + thlh.floatX(),
                         y + thlh.floatY(), z + thlh.floatZ(),
                         xx + thlh.floatX(), yy + thlh.floatY(),
-                        zz + thlh.floatZ(), texSide2.getX() + texMinX,
-                        texSide2.getY() + texMinY, r, g, b, a, lod, anim);
+                        zz + thlh.floatZ(), texSide2.x() + texMinX,
+                        texSide2.y() + texMinY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.EAST, x + thll.floatX(),
                         y + thll.floatY(), z + thll.floatZ(),
                         xx + thll.floatX(), yy + thll.floatY(),
-                        zz + thll.floatZ(), texSide2.getX() + texMinX,
-                        texSide2.getY() + texMaxY, r, g, b, a, lod, anim);
+                        zz + thll.floatZ(), texSide2.x() + texMinX,
+                        texSide2.y() + texMaxY, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.EAST, x + thhl.floatX(),
                         y + thhl.floatY(), z + thhl.floatZ(),
                         xx + thhl.floatX(), yy + thhl.floatY(),
-                        zz + thhl.floatZ(), texSide2.getX() + texMaxX,
-                        texSide2.getY() + texMaxY, r, g, b, a, lod, anim);
+                        zz + thhl.floatZ(), texSide2.x() + texMaxX,
+                        texSide2.y() + texMaxY, r, g, b, a, lod, anim);
             }
             if (texSide3 != null) {
-                float terrainTile = texSide3.getSize();
-                byte anim = texSide3.getShaderAnimation().getID();
+                float terrainTile = texSide3.size();
+                byte anim = texSide3.shaderAnimation().id();
                 float texMinX = terrainTile * minX;
                 float texMaxX = terrainTile * maxX;
                 float texMinZ = terrainTile * minZ;
@@ -386,27 +386,27 @@ public class BlockModelComplex implements BlockModel {
                 mesh.addVertex(terrain, Face.SOUTH, x + thhl.floatX(),
                         y + thhl.floatY(), z + thhl.floatZ(),
                         xx + thhl.floatX(), yy + thhl.floatY(),
-                        zz + thhl.floatZ(), texSide3.getX() + texMinX,
-                        texSide3.getY() + texMaxZ, r, g, b, a, lod, anim);
+                        zz + thhl.floatZ(), texSide3.x() + texMinX,
+                        texSide3.y() + texMaxZ, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.SOUTH, x + tlhl.floatX(),
                         y + tlhl.floatY(), z + tlhl.floatZ(),
                         xx + tlhl.floatX(), yy + tlhl.floatY(),
-                        zz + tlhl.floatZ(), texSide3.getX() + texMaxX,
-                        texSide3.getY() + texMaxZ, r, g, b, a, lod, anim);
+                        zz + tlhl.floatZ(), texSide3.x() + texMaxX,
+                        texSide3.y() + texMaxZ, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.SOUTH, x + tlhh.floatX(),
                         y + tlhh.floatY(), z + tlhh.floatZ(),
                         xx + tlhh.floatX(), yy + tlhh.floatY(),
-                        zz + tlhh.floatZ(), texSide3.getX() + texMaxX,
-                        texSide3.getY() + texMinZ, r, g, b, a, lod, anim);
+                        zz + tlhh.floatZ(), texSide3.x() + texMaxX,
+                        texSide3.y() + texMinZ, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.SOUTH, x + thhh.floatX(),
                         y + thhh.floatY(), z + thhh.floatZ(),
                         xx + thhh.floatX(), yy + thhh.floatY(),
-                        zz + thhh.floatZ(), texSide3.getX() + texMinX,
-                        texSide3.getY() + texMinZ, r, g, b, a, lod, anim);
+                        zz + thhh.floatZ(), texSide3.x() + texMinX,
+                        texSide3.y() + texMinZ, r, g, b, a, lod, anim);
             }
             if (texSide4 != null) {
-                float terrainTile = texSide4.getSize();
-                byte anim = texSide4.getShaderAnimation().getID();
+                float terrainTile = texSide4.size();
+                byte anim = texSide4.shaderAnimation().id();
                 float texMinX = terrainTile * minY;
                 float texMaxX = terrainTile * maxY;
                 float texMinZ = terrainTile * minZ;
@@ -414,23 +414,23 @@ public class BlockModelComplex implements BlockModel {
                 mesh.addVertex(terrain, Face.WEST, x + tlhl.floatX(),
                         y + tlhl.floatY(), z + tlhl.floatZ(),
                         xx + tlhl.floatX(), yy + tlhl.floatY(),
-                        zz + tlhl.floatZ(), texSide4.getX() + texMinX,
-                        texSide4.getY() + texMaxZ, r, g, b, a, lod, anim);
+                        zz + tlhl.floatZ(), texSide4.x() + texMinX,
+                        texSide4.y() + texMaxZ, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.WEST, x + tlll.floatX(),
                         y + tlll.floatY(), z + tlll.floatZ(),
                         xx + tlll.floatX(), yy + tlll.floatY(),
-                        zz + tlll.floatZ(), texSide4.getX() + texMaxX,
-                        texSide4.getY() + texMaxZ, r, g, b, a, lod, anim);
+                        zz + tlll.floatZ(), texSide4.x() + texMaxX,
+                        texSide4.y() + texMaxZ, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.WEST, x + tllh.floatX(),
                         y + tllh.floatY(), z + tllh.floatZ(),
                         xx + tllh.floatX(), yy + tllh.floatY(),
-                        zz + tllh.floatZ(), texSide4.getX() + texMaxX,
-                        texSide4.getY() + texMinZ, r, g, b, a, lod, anim);
+                        zz + tllh.floatZ(), texSide4.x() + texMaxX,
+                        texSide4.y() + texMinZ, r, g, b, a, lod, anim);
                 mesh.addVertex(terrain, Face.WEST, x + tlhh.floatX(),
                         y + tlhh.floatY(), z + tlhh.floatZ(),
                         xx + tlhh.floatX(), yy + tlhh.floatY(),
-                        zz + tlhh.floatZ(), texSide4.getX() + texMinX,
-                        texSide4.getY() + texMinZ, r, g, b, a, lod, anim);
+                        zz + tlhh.floatZ(), texSide4.x() + texMinX,
+                        texSide4.y() + texMinZ, r, g, b, a, lod, anim);
             }
         }
 
@@ -438,126 +438,118 @@ public class BlockModelComplex implements BlockModel {
         public void addToMesh(Mesh mesh, boolean inventory) {
             mesh.color(r, g, b, a);
             if (texTop != null) {
-                float terrainTile = texTop.getSize();
+                float terrainTile = texTop.size();
                 float texMinX = terrainTile * minX;
                 float texMaxX = terrainTile * maxX;
                 float texMinY = terrainTile * minY;
                 float texMaxY = terrainTile * maxY;
                 mesh.normal(0, 0, 1);
-                mesh.texture(texTop.getX() + texMinX, texTop.getY() + texMinY);
+                mesh.texture(texTop.x() + texMinX, texTop.y() + texMinY);
                 mesh.vertex(llh.floatX(), llh.floatY(), llh.floatZ());
-                mesh.texture(texTop.getX() + texMaxX, texTop.getY() + texMinY);
+                mesh.texture(texTop.x() + texMaxX, texTop.y() + texMinY);
                 mesh.vertex(hlh.floatX(), hlh.floatY(), hlh.floatZ());
-                mesh.texture(texTop.getX() + texMaxX, texTop.getY() + texMaxY);
+                mesh.texture(texTop.x() + texMaxX, texTop.y() + texMaxY);
                 mesh.vertex(hhh.floatX(), hhh.floatY(), hhh.floatZ());
-                mesh.texture(texTop.getX() + texMinX, texTop.getY() + texMaxY);
+                mesh.texture(texTop.x() + texMinX, texTop.y() + texMaxY);
                 mesh.vertex(lhh.floatX(), lhh.floatY(), lhh.floatZ());
             }
             if (texSide2 != null) {
                 if (inventory) {
                     mesh.color(r * 0.7f, g * 0.7f, b * 0.7f, a * 1.0f);
                 }
-                float terrainTile = texSide2.getSize();
+                float terrainTile = texSide2.size();
                 float texMinX = terrainTile * minY;
                 float texMaxX = terrainTile * maxY;
                 float texMinY = terrainTile * minZ;
                 float texMaxY = terrainTile * maxZ;
                 mesh.normal(1, 0, 0);
-                mesh.texture(texSide2.getX() + texMinX,
-                        texSide2.getY() + texMinY);
+                mesh.texture(texSide2.x() + texMinX, texSide2.y() + texMinY);
                 mesh.vertex(hhh.floatX(), hhh.floatY(), hhh.floatZ());
-                mesh.texture(texSide2.getX() + texMaxX,
-                        texSide2.getY() + texMinY);
+                mesh.texture(texSide2.x() + texMaxX, texSide2.y() + texMinY);
                 mesh.vertex(hlh.floatX(), hlh.floatY(), hlh.floatZ());
-                mesh.texture(texSide2.getX() + texMaxX,
-                        texSide2.getY() + texMaxY);
+                mesh.texture(texSide2.x() + texMaxX, texSide2.y() + texMaxY);
                 mesh.vertex(hll.floatX(), hll.floatY(), hll.floatZ());
-                mesh.texture(texSide2.getX() + texMinX,
-                        texSide2.getY() + texMaxY);
+                mesh.texture(texSide2.x() + texMinX, texSide2.y() + texMaxY);
                 mesh.vertex(hhl.floatX(), hhl.floatY(), hhl.floatZ());
             }
             if (texSide3 != null) {
                 if (inventory) {
                     mesh.color(r * 0.8f, g * 0.8f, b * 0.8f, a);
                 }
-                float terrainTile = texSide3.getSize();
+                float terrainTile = texSide3.size();
                 float texMinX = terrainTile * minX;
                 float texMaxX = terrainTile * maxX;
                 float texMinY = terrainTile * minZ;
                 float texMaxY = terrainTile * maxZ;
                 mesh.normal(0, 1, 0);
-                mesh.texture(texSide3.getX() + texMaxX,
-                        texSide3.getY() + texMaxY);
+                mesh.texture(texSide3.x() + texMaxX, texSide3.y() + texMaxY);
                 mesh.vertex(hhl.floatX(), hhl.floatY(), hhl.floatZ());
-                mesh.texture(texSide3.getX() + texMinX,
-                        texSide3.getY() + texMaxY);
+                mesh.texture(texSide3.x() + texMinX, texSide3.y() + texMaxY);
                 mesh.vertex(lhl.floatX(), lhl.floatY(), lhl.floatZ());
-                mesh.texture(texSide3.getX() + texMinX,
-                        texSide3.getY() + texMinY);
+                mesh.texture(texSide3.x() + texMinX, texSide3.y() + texMinY);
                 mesh.vertex(lhh.floatX(), lhh.floatY(), lhh.floatZ());
-                mesh.texture(texSide3.getX() + texMaxX,
-                        texSide3.getY() + texMinY);
+                mesh.texture(texSide3.x() + texMaxX, texSide3.y() + texMinY);
                 mesh.vertex(hhh.floatX(), hhh.floatY(), hhh.floatZ());
             }
             if (!inventory) {
                 if (texSide4 != null) {
-                    float terrainTile = texSide4.getSize();
+                    float terrainTile = texSide4.size();
                     float texMinX = terrainTile * minY;
                     float texMaxX = terrainTile * maxY;
                     float texMinY = terrainTile * minZ;
                     float texMaxY = terrainTile * maxZ;
                     mesh.normal(-1, 0, 0);
-                    mesh.texture(texSide4.getX() + texMinX,
-                            texSide4.getY() + texMaxY);
+                    mesh.texture(texSide4.x() + texMinX,
+                            texSide4.y() + texMaxY);
                     mesh.vertex(lhl.floatX(), lhl.floatY(), lhl.floatZ());
-                    mesh.texture(texSide4.getX() + texMaxX,
-                            texSide4.getY() + texMaxY);
+                    mesh.texture(texSide4.x() + texMaxX,
+                            texSide4.y() + texMaxY);
                     mesh.vertex(lll.floatX(), lll.floatY(), lll.floatZ());
-                    mesh.texture(texSide4.getX() + texMaxX,
-                            texSide4.getY() + texMinY);
+                    mesh.texture(texSide4.x() + texMaxX,
+                            texSide4.y() + texMinY);
                     mesh.vertex(llh.floatX(), llh.floatY(), llh.floatZ());
-                    mesh.texture(texSide4.getX() + texMinX,
-                            texSide4.getY() + texMinY);
+                    mesh.texture(texSide4.x() + texMinX,
+                            texSide4.y() + texMinY);
                     mesh.vertex(lhh.floatX(), lhh.floatY(), lhh.floatZ());
                 }
                 if (texSide1 != null) {
-                    float terrainTile = texSide1.getSize();
+                    float terrainTile = texSide1.size();
                     float texMinX = terrainTile * minX;
                     float texMaxX = terrainTile * maxX;
                     float texMinY = terrainTile * minZ;
                     float texMaxY = terrainTile * maxZ;
                     mesh.normal(0, -1, 0);
-                    mesh.texture(texSide1.getX() + texMinX,
-                            texSide1.getY() + texMinY);
+                    mesh.texture(texSide1.x() + texMinX,
+                            texSide1.y() + texMinY);
                     mesh.vertex(hlh.floatX(), hlh.floatY(), hlh.floatZ());
-                    mesh.texture(texSide1.getX() + texMaxX,
-                            texSide1.getY() + texMinY);
+                    mesh.texture(texSide1.x() + texMaxX,
+                            texSide1.y() + texMinY);
                     mesh.vertex(llh.floatX(), llh.floatY(), llh.floatZ());
-                    mesh.texture(texSide1.getX() + texMaxX,
-                            texSide1.getY() + texMaxY);
+                    mesh.texture(texSide1.x() + texMaxX,
+                            texSide1.y() + texMaxY);
                     mesh.vertex(lll.floatX(), lll.floatY(), lll.floatZ());
-                    mesh.texture(texSide1.getX() + texMinX,
-                            texSide1.getY() + texMaxY);
+                    mesh.texture(texSide1.x() + texMinX,
+                            texSide1.y() + texMaxY);
                     mesh.vertex(hll.floatX(), hll.floatY(), hll.floatZ());
                 }
                 if (texBottom != null) {
-                    float terrainTile = texBottom.getSize();
+                    float terrainTile = texBottom.size();
                     float texMinX = terrainTile * minX;
                     float texMaxX = terrainTile * maxX;
                     float texMinY = terrainTile * minY;
                     float texMaxY = terrainTile * maxY;
                     mesh.normal(0, 0, -1);
-                    mesh.texture(texBottom.getX() + texMinX,
-                            texBottom.getY() + texMaxY);
+                    mesh.texture(texBottom.x() + texMinX,
+                            texBottom.y() + texMaxY);
                     mesh.vertex(lhl.floatX(), lhl.floatY(), lhl.floatZ());
-                    mesh.texture(texBottom.getX() + texMaxX,
-                            texBottom.getY() + texMaxY);
+                    mesh.texture(texBottom.x() + texMaxX,
+                            texBottom.y() + texMaxY);
                     mesh.vertex(hhl.floatX(), hhl.floatY(), hhl.floatZ());
-                    mesh.texture(texBottom.getX() + texMaxX,
-                            texBottom.getY() + texMinY);
+                    mesh.texture(texBottom.x() + texMaxX,
+                            texBottom.y() + texMinY);
                     mesh.vertex(hll.floatX(), hll.floatY(), hll.floatZ());
-                    mesh.texture(texBottom.getX() + texMinX,
-                            texBottom.getY() + texMinY);
+                    mesh.texture(texBottom.x() + texMinX,
+                            texBottom.y() + texMinY);
                     mesh.vertex(lll.floatX(), lll.floatY(), lll.floatZ());
                 }
             }
@@ -613,12 +605,12 @@ public class BlockModelComplex implements BlockModel {
             b *= this.b;
             a *= this.a;
             if (texture != null) {
-                float terrainTile = texture.getSize();
-                ShaderAnimation animation = texture.getShaderAnimation();
-                byte animBottom = animation.getID();
+                float terrainTile = texture.size();
+                ShaderAnimation animation = texture.shaderAnimation();
+                byte animBottom = animation.id();
                 byte animTop;
                 if (animation == ShaderAnimation.TALL_GRASS) {
-                    animTop = ShaderAnimation.NONE.getID();
+                    animTop = ShaderAnimation.NONE.id();
                 } else {
                     animTop = animBottom;
                 }
@@ -629,98 +621,98 @@ public class BlockModelComplex implements BlockModel {
                 mesh.addVertex(terrain, Face.NONE, x + tlll.floatX(),
                         y + tlll.floatY(), z + tlll.floatZ(),
                         xx + tlll.floatX(), yy + tlll.floatY(),
-                        zz + tlll.floatZ(), nx, ny, nz,
-                        texture.getX() + texMinX, texture.getY() + texMaxY, r,
+                        zz + tlll.floatZ(), nx, ny, nz, texture.x() + texMinX,
+                        texture.y() + texMaxY, r,
                         g, b, a, lod, animTop);
                 mesh.addVertex(terrain, Face.NONE, x + tlhl.floatX(),
                         y + tlhl.floatY(), z + tlhl.floatZ(),
                         xx + tlhl.floatX(), yy + tlhl.floatY(),
-                        zz + tlhl.floatZ(), nx, ny, nz,
-                        texture.getX() + texMaxX, texture.getY() + texMaxY, r,
+                        zz + tlhl.floatZ(), nx, ny, nz, texture.x() + texMaxX,
+                        texture.y() + texMaxY, r,
                         g, b, a, lod, animTop);
                 mesh.addVertex(terrain, Face.NONE, x + tlhh.floatX(),
                         y + tlhh.floatY(), z + tlhh.floatZ(),
                         xx + tlhh.floatX(), yy + tlhh.floatY(),
-                        zz + tlhh.floatZ(), nx, ny, nz,
-                        texture.getX() + texMaxX, texture.getY() + texMinY, r,
+                        zz + tlhh.floatZ(), nx, ny, nz, texture.x() + texMaxX,
+                        texture.y() + texMinY, r,
                         g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + tllh.floatX(),
                         y + tllh.floatY(), z + tllh.floatZ(),
                         xx + tllh.floatX(), yy + tllh.floatY(),
-                        zz + tllh.floatZ(), nx, ny, nz,
-                        texture.getX() + texMinX, texture.getY() + texMinY, r,
+                        zz + tllh.floatZ(), nx, ny, nz, texture.x() + texMinX,
+                        texture.y() + texMinY, r,
                         g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + tllh.floatX(),
                         y + tllh.floatY(), z + tllh.floatZ(),
                         xx + tllh.floatX(), yy + tllh.floatY(),
-                        zz + tllh.floatZ(), nx, ny, nz,
-                        texture.getX() + texMaxX, texture.getY() + texMinY, r,
+                        zz + tllh.floatZ(), nx, ny, nz, texture.x() + texMaxX,
+                        texture.y() + texMinY, r,
                         g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + tlhh.floatX(),
                         y + tlhh.floatY(), z + tlhh.floatZ(),
                         xx + tlhh.floatX(), yy + tlhh.floatY(),
-                        zz + tlhh.floatZ(), nx, ny, nz,
-                        texture.getX() + texMinX, texture.getY() + texMinY, r,
+                        zz + tlhh.floatZ(), nx, ny, nz, texture.x() + texMinX,
+                        texture.y() + texMinY, r,
                         g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + tlhl.floatX(),
                         y + tlhl.floatY(), z + tlhl.floatZ(),
                         xx + tlhl.floatX(), yy + tlhl.floatY(),
-                        zz + tlhl.floatZ(), nx, ny, nz,
-                        texture.getX() + texMinX, texture.getY() + texMaxY, r,
+                        zz + tlhl.floatZ(), nx, ny, nz, texture.x() + texMinX,
+                        texture.y() + texMaxY, r,
                         g, b, a, lod, animTop);
                 mesh.addVertex(terrain, Face.NONE, x + tlll.floatX(),
                         y + tlll.floatY(), z + tlll.floatZ(),
                         xx + tlll.floatX(), yy + tlll.floatY(),
-                        zz + tlll.floatZ(), nx, ny, nz,
-                        texture.getX() + texMaxX, texture.getY() + texMaxY, r,
+                        zz + tlll.floatZ(), nx, ny, nz, texture.x() + texMaxX,
+                        texture.y() + texMaxY, r,
                         g, b, a, lod, animTop);
                 mesh.addVertex(terrain, Face.NONE, x + thll.floatX(),
                         y + thll.floatY(), z + thll.floatZ(),
                         xx + thll.floatX(), yy + thll.floatY(),
-                        zz + thll.floatZ(), nx, ny, nz,
-                        texture.getX() + texMinX, texture.getY() + texMaxY, r,
+                        zz + thll.floatZ(), nx, ny, nz, texture.x() + texMinX,
+                        texture.y() + texMaxY, r,
                         g, b, a, lod, animTop);
                 mesh.addVertex(terrain, Face.NONE, x + thhl.floatX(),
                         y + thhl.floatY(), z + thhl.floatZ(),
                         xx + thhl.floatX(), yy + thhl.floatY(),
-                        zz + thhl.floatZ(), nx, ny, nz,
-                        texture.getX() + texMaxX, texture.getY() + texMaxY, r,
+                        zz + thhl.floatZ(), nx, ny, nz, texture.x() + texMaxX,
+                        texture.y() + texMaxY, r,
                         g, b, a, lod, animTop);
                 mesh.addVertex(terrain, Face.NONE, x + thhh.floatX(),
                         y + thhh.floatY(), z + thhh.floatZ(),
                         xx + thhh.floatX(), yy + thhh.floatY(),
-                        zz + thhh.floatZ(), nx, ny, nz,
-                        texture.getX() + texMaxX, texture.getY() + texMinY, r,
+                        zz + thhh.floatZ(), nx, ny, nz, texture.x() + texMaxX,
+                        texture.y() + texMinY, r,
                         g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + thlh.floatX(),
                         y + thlh.floatY(), z + thlh.floatZ(),
                         xx + thlh.floatX(), yy + thlh.floatY(),
-                        zz + thlh.floatZ(), nx, ny, nz,
-                        texture.getX() + texMinX, texture.getY() + texMinY, r,
+                        zz + thlh.floatZ(), nx, ny, nz, texture.x() + texMinX,
+                        texture.y() + texMinY, r,
                         g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + thlh.floatX(),
                         y + thlh.floatY(), z + thlh.floatZ(),
                         xx + thlh.floatX(), yy + thlh.floatY(),
-                        zz + thlh.floatZ(), nx, ny, nz,
-                        texture.getX() + texMaxX, texture.getY() + texMinY, r,
+                        zz + thlh.floatZ(), nx, ny, nz, texture.x() + texMaxX,
+                        texture.y() + texMinY, r,
                         g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + thhh.floatX(),
                         y + thhh.floatY(), z + thhh.floatZ(),
                         xx + thhh.floatX(), yy + thhh.floatY(),
-                        zz + thhh.floatZ(), nx, ny, nz,
-                        texture.getX() + texMinX, texture.getY() + texMinY, r,
+                        zz + thhh.floatZ(), nx, ny, nz, texture.x() + texMinX,
+                        texture.y() + texMinY, r,
                         g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + thhl.floatX(),
                         y + thhl.floatY(), z + thhl.floatZ(),
                         xx + thhl.floatX(), yy + thhl.floatY(),
-                        zz + thhl.floatZ(), nx, ny, nz,
-                        texture.getX() + texMinX, texture.getY() + texMaxY, r,
+                        zz + thhl.floatZ(), nx, ny, nz, texture.x() + texMinX,
+                        texture.y() + texMaxY, r,
                         g, b, a, lod, animTop);
                 mesh.addVertex(terrain, Face.NONE, x + thll.floatX(),
                         y + thll.floatY(), z + thll.floatZ(),
                         xx + thll.floatX(), yy + thll.floatY(),
-                        zz + thll.floatZ(), nx, ny, nz,
-                        texture.getX() + texMaxX, texture.getY() + texMaxY, r,
+                        zz + thll.floatZ(), nx, ny, nz, texture.x() + texMaxX,
+                        texture.y() + texMaxY, r,
                         g, b, a, lod, animTop);
             }
         }
@@ -728,60 +720,44 @@ public class BlockModelComplex implements BlockModel {
         @Override
         public void addToMesh(Mesh mesh, boolean inventory) {
             if (texture != null) {
-                float terrainTile = texture.getSize();
+                float terrainTile = texture.size();
                 float texMinX = terrainTile * minX;
                 float texMaxX = terrainTile * maxX;
                 float texMinY = terrainTile * minY;
                 float texMaxY = terrainTile * maxY;
                 mesh.color(r, g, b, a);
                 mesh.normal(0, 0, 1); // TODO: Implement proper normals
-                mesh.texture(texture.getX() + texMinX,
-                        texture.getY() + texMaxY);
+                mesh.texture(texture.x() + texMinX, texture.y() + texMaxY);
                 mesh.vertex(lll.floatX(), lll.floatY(), lll.floatZ());
-                mesh.texture(texture.getX() + texMaxX,
-                        texture.getY() + texMaxY);
+                mesh.texture(texture.x() + texMaxX, texture.y() + texMaxY);
                 mesh.vertex(lhl.floatX(), lhl.floatY(), lhl.floatZ());
-                mesh.texture(texture.getX() + texMaxX,
-                        texture.getY() + texMinY);
+                mesh.texture(texture.x() + texMaxX, texture.y() + texMinY);
                 mesh.vertex(lhh.floatX(), lhh.floatY(), lhh.floatZ());
-                mesh.texture(texture.getX() + texMinX,
-                        texture.getY() + texMinY);
+                mesh.texture(texture.x() + texMinX, texture.y() + texMinY);
                 mesh.vertex(llh.floatX(), llh.floatY(), llh.floatZ());
-                mesh.texture(texture.getX() + texMinX,
-                        texture.getY() + texMinY);
+                mesh.texture(texture.x() + texMinX, texture.y() + texMinY);
                 mesh.vertex(llh.floatX(), llh.floatY(), llh.floatZ());
-                mesh.texture(texture.getX() + texMaxX,
-                        texture.getY() + texMinY);
+                mesh.texture(texture.x() + texMaxX, texture.y() + texMinY);
                 mesh.vertex(lhh.floatX(), lhh.floatY(), lhh.floatZ());
-                mesh.texture(texture.getX() + texMaxX,
-                        texture.getY() + texMaxY);
+                mesh.texture(texture.x() + texMaxX, texture.y() + texMaxY);
                 mesh.vertex(lhl.floatX(), lhl.floatY(), lhl.floatZ());
-                mesh.texture(texture.getX() + texMinX,
-                        texture.getY() + texMaxY);
+                mesh.texture(texture.x() + texMinX, texture.y() + texMaxY);
                 mesh.vertex(lll.floatX(), lll.floatY(), lll.floatZ());
-                mesh.texture(texture.getX() + texMinX,
-                        texture.getY() + texMaxY);
+                mesh.texture(texture.x() + texMinX, texture.y() + texMaxY);
                 mesh.vertex(hll.floatX(), hll.floatY(), hll.floatZ());
-                mesh.texture(texture.getX() + texMaxX,
-                        texture.getY() + texMaxY);
+                mesh.texture(texture.x() + texMaxX, texture.y() + texMaxY);
                 mesh.vertex(hhl.floatX(), hhl.floatY(), hhl.floatZ());
-                mesh.texture(texture.getX() + texMaxX,
-                        texture.getY() + texMinY);
+                mesh.texture(texture.x() + texMaxX, texture.y() + texMinY);
                 mesh.vertex(hhh.floatX(), hhh.floatY(), hhh.floatZ());
-                mesh.texture(texture.getX() + texMinX,
-                        texture.getY() + texMinY);
+                mesh.texture(texture.x() + texMinX, texture.y() + texMinY);
                 mesh.vertex(hlh.floatX(), hlh.floatY(), hlh.floatZ());
-                mesh.texture(texture.getX() + texMinX,
-                        texture.getY() + texMinY);
+                mesh.texture(texture.x() + texMinX, texture.y() + texMinY);
                 mesh.vertex(hlh.floatX(), hlh.floatY(), hlh.floatZ());
-                mesh.texture(texture.getX() + texMaxX,
-                        texture.getY() + texMinY);
+                mesh.texture(texture.x() + texMaxX, texture.y() + texMinY);
                 mesh.vertex(hhh.floatX(), hhh.floatY(), hhh.floatZ());
-                mesh.texture(texture.getX() + texMaxX,
-                        texture.getY() + texMaxY);
+                mesh.texture(texture.x() + texMaxX, texture.y() + texMaxY);
                 mesh.vertex(hhl.floatX(), hhl.floatY(), hhl.floatZ());
-                mesh.texture(texture.getX() + texMinX,
-                        texture.getY() + texMaxY);
+                mesh.texture(texture.x() + texMinX, texture.y() + texMaxY);
                 mesh.vertex(hll.floatX(), hll.floatY(), hll.floatZ());
             }
         }

@@ -30,11 +30,11 @@ public class EntityAnvilClient extends EntityAbstractContainerClient {
     }
 
     public EntityAnvilClient(WorldClient world, Vector3 pos) {
-        super(world, pos, new Inventory(world.getRegistry(), 2));
+        super(world, pos, new Inventory(world.registry(), 2));
     }
 
     @Override
-    public Gui getGui(MobPlayerClientMain player) {
+    public Gui gui(MobPlayerClientMain player) {
         return new GuiAnvilInventory(this, player);
     }
 }

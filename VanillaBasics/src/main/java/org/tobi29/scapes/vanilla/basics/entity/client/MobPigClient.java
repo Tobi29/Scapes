@@ -44,20 +44,19 @@ public class MobPigClient extends MobLivingClient {
     }
 
     @Override
-    public CreatureType getCreatureType() {
+    public CreatureType creatureType() {
         return CreatureType.CREATURE;
     }
 
     @Override
-    public Vector3 getViewOffset() {
+    public Vector3 viewOffset() {
         return new Vector3d(0.0, 0.0, 0.2);
     }
 
     @Override
     public Optional<MobModel> createModel() {
-        Texture texture =
-                world.getGame().getEngine().graphics().getTextureManager()
-                        .getTexture("VanillaBasics:image/entity/mob/Pig");
+        Texture texture = world.game().engine().graphics().textures()
+                .get("VanillaBasics:image/entity/mob/Pig");
         return Optional.of(new MobLivingModelPig(this, texture));
     }
 }

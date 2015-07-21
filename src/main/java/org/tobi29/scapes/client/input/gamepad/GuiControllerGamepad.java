@@ -51,16 +51,16 @@ public class GuiControllerGamepad implements GuiController {
     @Override
     public void update(double delta) {
         Container container = engine.container();
-        double width = container.getContainerWidth();
-        double height = container.getContainerHeight();
+        double width = container.containerWidth();
+        double height = container.containerHeight();
         if (!cursorCentered) {
             cursorCentered = true;
             cursorX = width / 2.0;
             cursorY = height / 2.0;
         }
-        cursorX += controller.getAxis(axisCursorX) * cursorSensitivity * delta;
-        cursorY += controller.getAxis(axisCursorY) * cursorSensitivity * delta;
-        scroll = controller.getAxis(axisScroll) * scrollSensitivity * delta;
+        cursorX += controller.axis(axisCursorX) * cursorSensitivity * delta;
+        cursorY += controller.axis(axisCursorY) * cursorSensitivity * delta;
+        scroll = controller.axis(axisScroll) * scrollSensitivity * delta;
         cursorX = FastMath.clamp(cursorX, 0.0, width);
         cursorY = FastMath.clamp(cursorY, 0.0, height);
         guiCursorX = cursorX / width * 800.0;
@@ -73,22 +73,22 @@ public class GuiControllerGamepad implements GuiController {
     }
 
     @Override
-    public double getCursorX() {
+    public double cursorX() {
         return cursorX;
     }
 
     @Override
-    public double getCursorY() {
+    public double cursorY() {
         return cursorY;
     }
 
     @Override
-    public double getGuiCursorX() {
+    public double guiCursorX() {
         return guiCursorX;
     }
 
     @Override
-    public double getGuiCursorY() {
+    public double guiCursorY() {
         return guiCursorY;
     }
 
@@ -98,27 +98,27 @@ public class GuiControllerGamepad implements GuiController {
     }
 
     @Override
-    public boolean getLeftClick() {
+    public boolean leftClick() {
         return controller.isPressed(primaryButton);
     }
 
     @Override
-    public boolean getRightClick() {
+    public boolean rightClick() {
         return controller.isPressed(secondaryButton);
     }
 
     @Override
-    public boolean getLeftDrag() {
+    public boolean leftDrag() {
         return controller.isDown(primaryButton);
     }
 
     @Override
-    public boolean getRightDrag() {
+    public boolean rightDrag() {
         return controller.isDown(secondaryButton);
     }
 
     @Override
-    public double getScroll() {
+    public double scroll() {
         return scroll;
     }
 }

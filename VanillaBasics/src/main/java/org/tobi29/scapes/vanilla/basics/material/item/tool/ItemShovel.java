@@ -24,7 +24,7 @@ public class ItemShovel extends ItemTool {
     }
 
     @Override
-    public String getType() {
+    public String type() {
         return "Shovel";
     }
 }

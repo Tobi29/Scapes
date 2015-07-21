@@ -58,11 +58,11 @@ public class Matrix {
         normalMatrix.markChanged();
     }
 
-    public Matrix4f getModelViewMatrix() {
+    public Matrix4f modelView() {
         return modelViewMatrix;
     }
 
-    public Matrix3f getNormalMatrix() {
+    public Matrix3f normal() {
         return normalMatrix;
     }
 }

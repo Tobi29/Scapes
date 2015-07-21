@@ -25,6 +25,7 @@ import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.packets.PacketCrafting;
 
+import java.util.Iterator;
 import java.util.List;
 
 public class GuiCrafting extends GuiInventory {
@@ -48,7 +49,7 @@ public class GuiCrafting extends GuiInventory {
     private void updateTypes() {
         scrollPaneTypes.removeAll();
         List<CraftingRecipeType> recipeTypes;
-        recipeTypes = player.getConnection().getPlugins().getRegistry()
+        recipeTypes = player.connection().plugins().registry()
                 .getCraftingRecipes(table);
         int id = 0;
         for (CraftingRecipeType recipeType : recipeTypes) {
@@ -75,11 +76,10 @@ public class GuiCrafting extends GuiInventory {
 
     private void updateRecipes() {
         scrollPaneRecipes.removeAll();
-        CraftingRecipeType recipeType =
-                player.getConnection().getPlugins().getRegistry()
+        CraftingRecipeType recipeType = player.connection().plugins().registry()
                         .getCraftingRecipes(table).get(type);
         int id = 0;
-        for (CraftingRecipe recipe : recipeType.getRecipes()) {
+        for (CraftingRecipe recipe : recipeType.recipes()) {
             Element element = new Element(recipe, type, id++);
             scrollPaneRecipes.add(element);
         }
@@ -90,8 +90,7 @@ public class GuiCrafting extends GuiInventory {
         public ElementType(CraftingRecipeType recipe, int id) {
             super(0, 0, 378, 40);
             GuiComponentTextButton label =
-                    new GuiComponentTextButton(0, 5, 80, 30, 18,
-                            recipe.getName());
+                    new GuiComponentTextButton(0, 5, 80, 30, 18, recipe.name());
             label.addLeftClick(event -> {
                 type = id;
                 example = 0;
@@ -105,40 +104,38 @@ public class GuiCrafting extends GuiInventory {
         public Element(CraftingRecipe recipe, int type, int id) {
             super(0, 0, 378, 40);
             GuiComponentItemButton result =
-                    new GuiComponentItemButton(15, 5, 30, 30,
-                            recipe.getResult());
-            result.addLeftClick(event -> player.getConnection()
+                    new GuiComponentItemButton(15, 5, 30, 30, recipe.result());
+            result.addLeftClick(event -> player.connection()
                     .send(new PacketCrafting(type, id, table)));
-            result.addHover(event -> setTooltip(result.getItem(), "Result:\n"));
+            result.addHover(event -> setTooltip(result.item(), "Result:\n"));
             add(result);
             add(new GuiComponentText(47, 12, 16, "<="));
             int x = 70;
-            List<CraftingRecipe.Ingredient> ingredients =
-                    recipe.getIngredients();
-            List<CraftingRecipe.Ingredient> requirements =
-                    recipe.getRequirements();
-            if (!ingredients.isEmpty()) {
-                for (CraftingRecipe.Ingredient ingredient : recipe
-                        .getIngredients()) {
+            Iterator<CraftingRecipe.Ingredient> ingredients =
+                    recipe.ingredients().iterator();
+            Iterator<CraftingRecipe.Ingredient> requirements =
+                    recipe.requirements().iterator();
+            if (ingredients.hasNext()) {
+                while (ingredients.hasNext()) {
+                    CraftingRecipe.Ingredient ingredient = ingredients.next();
                     GuiComponentItemButton b =
                             new GuiComponentItemButton(x, 7, 25, 25,
                                     ingredient.example(example));
-                    b.addHover(
-                            event -> setTooltip(b.getItem(), "Ingredient:\n"));
+                    b.addHover(event -> setTooltip(b.item(), "Ingredient:\n"));
                     add(b);
                     x += 35;
                 }
-                if (!requirements.isEmpty()) {
+                if (requirements.hasNext()) {
                     add(new GuiComponentText(x + 2, 12, 16, "+"));
                     x += 20;
                 }
             }
-            for (CraftingRecipe.Ingredient requirement : recipe
-                    .getRequirements()) {
+            while (requirements.hasNext()) {
+                CraftingRecipe.Ingredient requirement = requirements.next();
                 GuiComponentItemButton b =
                         new GuiComponentItemButton(x, 7, 25, 25,
                                 requirement.example(example));
-                b.addHover(event -> setTooltip(b.getItem(), "Requirement:\n"));
+                b.addHover(event -> setTooltip(b.item(), "Requirement:\n"));
                 add(b);
                 x += 35;
             }

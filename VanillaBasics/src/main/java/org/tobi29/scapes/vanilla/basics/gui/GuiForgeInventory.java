@@ -48,7 +48,7 @@ public class GuiForgeInventory extends GuiContainerInventory {
     public void renderOverlay(GL gl, Shader shader,
             FontRenderer font) {
         super.renderOverlay(gl, shader, font);
-        String text = FastMath.floor(container.getTemperature()) + "°C";
+        String text = FastMath.floor(container.temperature()) + "°C";
         if (!text.equals(currentText) || vaoTemperatureText == null) {
             currentText = text;
             vaoTemperatureText =

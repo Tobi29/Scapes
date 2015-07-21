@@ -43,7 +43,7 @@ public final class CompressionUtil {
     public static ByteBuffer compress(ReadableByteStream input, int level)
             throws IOException {
         return compress(input, level,
-                length -> BufferCreator.byteBuffer(length + 1024));
+                length -> BufferCreator.bytes(length + 1024));
     }
 
     public static ByteBuffer compress(ReadableByteStream input, int level,
@@ -67,8 +67,7 @@ public final class CompressionUtil {
 
     public static ByteBuffer decompress(ReadableByteStream input)
             throws IOException {
-        return decompress(input,
-                length -> BufferCreator.byteBuffer(length + 1024));
+        return decompress(input, length -> BufferCreator.bytes(length + 1024));
     }
 
     public static ByteBuffer decompress(ReadableByteStream input,

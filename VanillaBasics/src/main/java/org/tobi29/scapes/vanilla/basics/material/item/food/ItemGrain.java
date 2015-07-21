@@ -49,7 +49,7 @@ public class ItemGrain extends VanillaItem implements ItemResearch {
         int i = 0;
         for (CropType type : types) {
             textures[i++] =
-                    registry.registerTexture(type.getTexture() + "/Grain.png");
+                    registry.registerTexture(type.texture() + "/Grain.png");
         }
     }
 
@@ -65,28 +65,28 @@ public class ItemGrain extends VanillaItem implements ItemResearch {
     @Override
     public void render(ItemStack item, GL gl, Shader shader,
             float r, float g, float b, float a) {
-        models[item.getData()].render(gl, shader);
+        models[item.data()].render(gl, shader);
     }
 
     @Override
     public void renderInventory(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a) {
-        models[item.getData()].renderInventory(gl, shader);
+        models[item.data()].renderInventory(gl, shader);
     }
 
     @Override
-    public String getName(ItemStack item) {
-        return materials.cropDrop.getName(item);
+    public String name(ItemStack item) {
+        return materials.cropDrop.name(item);
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 64;
     }
 
     @Override
-    public String[] getIdentifiers(ItemStack item) {
+    public String[] identifiers(ItemStack item) {
         return new String[]{"vanilla.basics.item.Grain",
-                "vanilla.basics.item.Grain." + materials.crop.getName(item)};
+                "vanilla.basics.item.Grain." + materials.crop.name(item)};
     }
 }

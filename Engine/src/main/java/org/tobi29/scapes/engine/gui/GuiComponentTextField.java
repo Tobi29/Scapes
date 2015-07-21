@@ -20,7 +20,6 @@ import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.BlendingMode;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
 import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
@@ -87,8 +86,8 @@ public class GuiComponentTextField extends GuiComponentTextButton {
     public void update(double mouseX, double mouseY, boolean mouseInside,
             ScapesEngine engine) {
         super.update(mouseX, mouseY, mouseInside, engine);
-        getGui().ifPresent(gui -> {
-            if (gui.getLastClicked() == this || major) {
+        gui().ifPresent(gui -> {
+            if (gui.lastClicked() == this || major) {
                 if (engine.guiController().processTextField(data, false)) {
                     if (data.text.length() > maxLength) {
                         data.text.delete(maxLength, data.text.length());
@@ -110,13 +109,12 @@ public class GuiComponentTextField extends GuiComponentTextButton {
         if (cursor) {
             vaoCursor.render(gl, shader);
         }
-        gl.getTextureManager().unbind(gl);
-        OpenGL openGL = gl.getOpenGL();
-        openGL.setBlending(BlendingMode.INVERT);
+        gl.textures().unbind(gl);
+        gl.setBlending(BlendingMode.INVERT);
         vaoSelection.render(gl, shader, false);
-        openGL.setBlending(BlendingMode.NORMAL);
-        getGui().ifPresent(gui -> {
-            if (gui.getLastClicked() == this || major) {
+        gl.setBlending(BlendingMode.NORMAL);
+        gui().ifPresent(gui -> {
+            if (gui.lastClicked() == this || major) {
                 cursor = System.currentTimeMillis() / 600 % 2 == 0;
             } else if (cursor) {
                 cursor = false;
@@ -128,7 +126,7 @@ public class GuiComponentTextField extends GuiComponentTextButton {
     protected void updateText(String text) {
         super.updateText(text);
         if (vaoText != null) {
-            int maxLengthFont = vaoText.getLength();
+            int maxLengthFont = vaoText.length();
             if (data.text.length() > maxLengthFont) {
                 data.text = data.text.delete(maxLengthFont, data.text.length());
                 data.cursor = FastMath.min(data.cursor, maxLengthFont);

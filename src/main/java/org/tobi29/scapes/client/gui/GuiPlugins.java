@@ -38,16 +38,18 @@ public class GuiPlugins extends GuiMenu {
     @SuppressWarnings("unchecked")
     public GuiPlugins(GameState state, Gui previous) {
         super(state, "Plugins", previous);
-        path = state.getEngine().home().resolve("plugins");
+        path = state.engine().home().resolve("plugins");
         scrollPane = new GuiComponentScrollPaneList(16, 80, 368, 250, 70);
         GuiComponentTextButton add =
                 new GuiComponentTextButton(112, 370, 176, 30, 18, "Add");
         add.addLeftClick(event -> {
             try {
-                state.getEngine().container()
-                        .importFromUser(path,
-                                new Pair[]{new Pair<>("*.jar", "Jar Archive")},
-                                "Import plugin", true);
+                Path[] imports = state.engine().container().openFileDialog(
+                        new Pair[]{new Pair<>("*.jar", "Jar Archive")},
+                        "Import plugin", true);
+                for (Path copy : imports) {
+                    Files.copy(copy, path.resolve(copy.getFileName()));
+                }
                 updatePlugins();
             } catch (IOException e) {
                 LOGGER.warn("Failed to import plugin: {}", e.toString());
@@ -87,7 +89,7 @@ public class GuiPlugins extends GuiMenu {
             }
             GuiComponentTextButton label =
                     new GuiComponentTextButton(70, 20, 170, 30, 18,
-                            plugin.getName());
+                            plugin.name());
             GuiComponentTextButton delete =
                     new GuiComponentTextButton(250, 20, 100, 30, 18, "Delete");
             delete.addLeftClick(event -> {

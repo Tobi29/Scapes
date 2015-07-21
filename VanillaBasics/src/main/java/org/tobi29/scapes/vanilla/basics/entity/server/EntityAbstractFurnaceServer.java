@@ -17,6 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.entity.server;
 
 import org.tobi29.scapes.block.Inventory;
+import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.Material;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -25,12 +26,12 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.packets.PacketEntityChange;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
+import org.tobi29.scapes.vanilla.basics.material.item.ItemFuel;
 import org.tobi29.scapes.vanilla.basics.material.item.ItemHeatable;
 
 public abstract class EntityAbstractFurnaceServer
         extends EntityAbstractContainerServer {
-    protected final int[] fuel;
-    protected final float[] fuelTemperature;
+    protected final float[] fuel, fuelTemperature;
     protected final float temperatureFalloff;
     protected final int items, fuelHeat, fuelTier;
     protected float temperature, maximumTemperature;
@@ -40,7 +41,7 @@ public abstract class EntityAbstractFurnaceServer
             Inventory inventory, int fuel, int items, float maximumTemperature,
             float temperatureFalloff, int fuelHeat, int fuelTier) {
         super(world, pos, inventory);
-        this.fuel = new int[fuel];
+        this.fuel = new float[fuel];
         fuelTemperature = new float[fuel];
         this.items = items;
         this.maximumTemperature = maximumTemperature;
@@ -53,7 +54,7 @@ public abstract class EntityAbstractFurnaceServer
     public TagStructure write() {
         TagStructure tagStructure = super.write();
         for (int i = 0; i < fuel.length; i++) {
-            tagStructure.setInteger("Fuel" + i, fuel[i]);
+            tagStructure.setFloat("Fuel" + i, fuel[i]);
         }
         for (int i = 0; i < fuelTemperature.length; i++) {
             tagStructure.setFloat("FuelTemperature" + i, fuelTemperature[i]);
@@ -66,7 +67,7 @@ public abstract class EntityAbstractFurnaceServer
     public void read(TagStructure tagStructure) {
         super.read(tagStructure);
         for (int i = 0; i < fuel.length; i++) {
-            fuel[i] = tagStructure.getInteger("Fuel" + i);
+            fuel[i] = tagStructure.getFloat("Fuel" + i);
         }
         for (int i = 0; i < fuelTemperature.length; i++) {
             fuelTemperature[i] = tagStructure.getFloat("FuelTemperature" + i);
@@ -74,14 +75,14 @@ public abstract class EntityAbstractFurnaceServer
         temperature = tagStructure.getFloat("Temperature");
     }
 
-    public float getTemperature() {
+    public float temperature() {
         return temperature;
     }
 
     @Override
     public void update(double delta) {
         VanillaBasics plugin =
-                (VanillaBasics) world.getPlugins().getPlugin("VanillaBasics");
+                (VanillaBasics) world.plugins().plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         heatWait -= delta;
         while (heatWait <= 0.0) {
@@ -94,43 +95,37 @@ public abstract class EntityAbstractFurnaceServer
                         temperature += fuelTemperature[i];
                         fuel[i]--;
                     } else {
-                        int j = i;
-                        plugin.getFuel(inventory.getItem(j))
-                                .ifPresent(fuelType -> {
-                                    if (inventory.getItem(j)
-                                            .canTake(fuelType.getFuel()) ==
-                                            fuelType.getFuel().getAmount() &&
-                                            fuelType.getTier() >= fuelTier) {
-                                        fuel[j] = fuelType.getTime() * fuelHeat;
-                                        fuelTemperature[j] =
-                                                fuelType.getTemperature() *
-                                                        fuelHeat;
-                                        inventory.getItem(j)
-                                                .take(fuelType.getFuel());
-                                        world.getConnection()
-                                                .send(new PacketEntityChange(
-                                                        this));
-                                    }
-                                });
+                        ItemStack item = inventory.item(i);
+                        Material material = item.material();
+                        if (material instanceof ItemFuel) {
+                            ItemFuel fuel = (ItemFuel) material;
+                            if (fuel.fuelTier(item) >= fuelTier) {
+                                this.fuel[i] = fuel.fuelTime(item) * fuelHeat;
+                                fuelTemperature[i] =
+                                        fuel.fuelTemperature(item) * fuelHeat;
+                                inventory.item(i).take(1);
+                                world.connection()
+                                        .send(new PacketEntityChange(this));
+                            }
+                        }
                     }
                 }
                 int max = items + fuel.length + 1;
                 for (int i = fuel.length + 1; i < max; i++) {
-                    if (inventory.getItem(i).getAmount() == 1) {
-                        Material type = inventory.getItem(i).getMaterial();
+                    if (inventory.item(i).amount() == 1) {
+                        Material type = inventory.item(i).material();
                         if (type instanceof ItemHeatable) {
                             ((ItemHeatable) type)
-                                    .heat(inventory.getItem(i), temperature);
+                                    .heat(inventory.item(i), temperature);
                         }
-                    } else if (inventory.getItem(i).isEmpty() &&
-                            !inventory.getItem(fuel.length).isEmpty()) {
+                    } else if (inventory.item(i).isEmpty() &&
+                            !inventory.item(fuel.length).isEmpty()) {
                         int j = i;
-                        inventory.getItem(fuel.length).take(1)
-                                .ifPresent(item -> {
-                                    inventory.getItem(j).stack(item);
-                                    world.getConnection()
-                                            .send(new PacketEntityChange(this));
-                                });
+                        inventory.item(fuel.length).take(1).ifPresent(item -> {
+                            inventory.item(j).stack(item);
+                            world.connection()
+                                    .send(new PacketEntityChange(this));
+                        });
                     }
                 }
             }

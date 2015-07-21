@@ -36,18 +36,16 @@ public interface Terrain {
 
     int blockLight(int x, int y, int z);
 
-    int getHighestBlockZAt(int x, int y);
+    int highestBlockZAt(int x, int y);
 
-    int getHighestTerrainBlockZAt(int x, int y);
+    int highestTerrainBlockZAt(int x, int y);
 
     boolean isBlockLoaded(int x, int y, int z);
 
     boolean isBlockTicking(int x, int y, int z);
 
-    Pool<AABBElement> getCollisions(int minX, int minY, int minZ, int maxX,
+    Pool<AABBElement> collisions(int minX, int minY, int minZ, int maxX,
             int maxY, int maxZ);
 
-    Pool<PointerPane> getPointerPanes(int x, int y, int z, int range);
-
-    void dispose();
+    Pool<PointerPane> pointerPanes(int x, int y, int z, int range);
 }

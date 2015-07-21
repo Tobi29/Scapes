@@ -53,7 +53,7 @@ public class ItemDough extends VanillaItem
         int i = 0;
         for (CropType type : types) {
             textures[i++] =
-                    registry.registerTexture(type.getTexture() + "/Dough.png");
+                    registry.registerTexture(type.texture() + "/Dough.png");
         }
     }
 
@@ -69,20 +69,20 @@ public class ItemDough extends VanillaItem
     @Override
     public void render(ItemStack item, GL gl, Shader shader,
             float r, float g, float b, float a) {
-        models[item.getData()].render(gl, shader);
+        models[item.data()].render(gl, shader);
     }
 
     @Override
     public void renderInventory(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a) {
-        models[item.getData()].renderInventory(gl, shader);
+        models[item.data()].renderInventory(gl, shader);
     }
 
     @Override
-    public String getName(ItemStack item) {
+    public String name(ItemStack item) {
         StringBuilder name = new StringBuilder(40);
-        name.append(materials.crop.getName(item)).append("Dough");
-        float temperature = getTemperature(item);
+        name.append(materials.crop.name(item)).append("Dough");
+        float temperature = temperature(item);
         if (temperature > 0.1f) {
             name.append("\nTemp.:").append(FastMath.floor(temperature))
                     .append("°C");
@@ -91,20 +91,20 @@ public class ItemDough extends VanillaItem
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
-        return getTemperature(item) == 0 ? 8 : 1;
+    public int maxStackSize(ItemStack item) {
+        return temperature(item) == 0 ? 8 : 1;
     }
 
     @Override
     public void heat(ItemStack item, float temperature) {
-        float currentTemperature = getTemperature(item);
+        float currentTemperature = temperature(item);
         if (currentTemperature < 1 && temperature < currentTemperature) {
-            item.getMetaData("Vanilla").setFloat("Temperature", 0.0f);
+            item.metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
-            item.getMetaData("Vanilla").setFloat("Temperature", FastMath.max(
+            item.metaData("Vanilla").setFloat("Temperature", FastMath.max(
                     currentTemperature +
                             (temperature - currentTemperature) / 400.0f, 1.1f));
-            if (currentTemperature >= getMeltingPoint(item)) {
+            if (currentTemperature >= meltingPoint(item)) {
                 item.setMaterial(materials.baked);
             }
         }
@@ -112,47 +112,47 @@ public class ItemDough extends VanillaItem
 
     @Override
     public void cool(ItemStack item) {
-        float currentTemperature = getTemperature(item);
+        float currentTemperature = temperature(item);
         if (currentTemperature < 1) {
-            item.getMetaData("Vanilla").setFloat("Temperature", 0.0f);
+            item.metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
-            item.getMetaData("Vanilla")
+            item.metaData("Vanilla")
                     .setFloat("Temperature", currentTemperature / 1.002f);
         }
     }
 
     @Override
     public void cool(MobItemServer item) {
-        float currentTemperature = getTemperature(item.getItem());
+        float currentTemperature = temperature(item.item());
         if (currentTemperature < 1) {
-            item.getItem().getMetaData("Vanilla").setFloat("Temperature", 0.0f);
+            item.item().metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
             if (item.isInWater()) {
-                item.getItem().getMetaData("Vanilla")
+                item.item().metaData("Vanilla")
                         .setFloat("Temperature", currentTemperature / 4.0f);
             } else {
-                item.getItem().getMetaData("Vanilla")
+                item.item().metaData("Vanilla")
                         .setFloat("Temperature", currentTemperature / 1.002f);
             }
         }
     }
 
     @Override
-    public float getMeltingPoint(ItemStack item) {
-        switch (item.getData()) {
+    public float meltingPoint(ItemStack item) {
+        switch (item.data()) {
             default:
                 return 40;
         }
     }
 
     @Override
-    public float getTemperature(ItemStack item) {
-        return item.getMetaData("Vanilla").getFloat("Temperature");
+    public float temperature(ItemStack item) {
+        return item.metaData("Vanilla").getFloat("Temperature");
     }
 
     @Override
-    public String[] getIdentifiers(ItemStack item) {
+    public String[] identifiers(ItemStack item) {
         return new String[]{"vanilla.basics.item.Dough",
-                "vanilla.basics.item.Dough." + materials.crop.getName(item)};
+                "vanilla.basics.item.Dough." + materials.crop.name(item)};
     }
 }

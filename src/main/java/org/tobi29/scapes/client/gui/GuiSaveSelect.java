@@ -23,7 +23,7 @@ import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.opengl.texture.*;
-import org.tobi29.scapes.engine.utils.io.FileUtil;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.plugins.PluginFile;
 import org.tobi29.scapes.server.format.WorldFormat;
 
@@ -47,7 +47,7 @@ public class GuiSaveSelect extends GuiMenu {
                 new GuiComponentTextButton(112, 410, 176, 30, 18, "Create");
         create.addLeftClick(event -> {
             try {
-                Path path = state.getEngine().home().resolve("plugins");
+                Path path = state.engine().home().resolve("plugins");
                 List<Path> files = new ArrayList<>();
                 for (Path file : Files.newDirectoryStream(path)) {
                     if (Files.isRegularFile(file) && !Files.isHidden(file)) {
@@ -58,7 +58,7 @@ public class GuiSaveSelect extends GuiMenu {
                 List<PluginFile> plugins = new ArrayList<>();
                 for (Path file : files) {
                     PluginFile plugin = new PluginFile(file);
-                    if ("WorldType".equals(plugin.getParent())) {
+                    if ("WorldType".equals(plugin.parent())) {
                         worldTypes.add(plugin);
                     }
                 }
@@ -69,7 +69,7 @@ public class GuiSaveSelect extends GuiMenu {
                 } else {
                     state.add(
                             new GuiCreateWorld(state, this, worldTypes, plugins,
-                                    state.getEngine().home()
+                                    state.engine().home()
                                             .resolve("saves")));
                 }
             } catch (IOException e) {
@@ -83,13 +83,13 @@ public class GuiSaveSelect extends GuiMenu {
 
     public void updateSaves() {
         try {
-            Path path = state.getEngine().home().resolve("saves");
+            Path path = state.engine().home().resolve("saves");
             scrollPane.removeAll();
             for (Path directory : Files.newDirectoryStream(path)) {
                 if (Files.isDirectory(directory) &&
                         !Files.isHidden(directory) &&
                         directory.getFileName().toString()
-                                .endsWith(WorldFormat.getFilenameExtension())) {
+                                .endsWith(WorldFormat.filenameExtension())) {
                     Element element = null;
                     try {
                         element = new Element(directory);
@@ -114,12 +114,12 @@ public class GuiSaveSelect extends GuiMenu {
             GuiComponentTextButton label =
                     new GuiComponentTextButton(70, 20, 200, 30, 18,
                             filename.substring(0, filename.lastIndexOf('.')));
-            label.addLeftClick(event -> state.getEngine().setState(
-                    new GameStateLoadSP(path, state.getEngine(),
-                            (SceneMenu) state.getScene())));
+            label.addLeftClick(event -> state.engine().setState(
+                    new GameStateLoadSP(path, state.engine(),
+                            (SceneMenu) state.scene())));
             label.addHover(event -> {
-                if (event.getState() == GuiComponentHoverEvent.State.ENTER) {
-                    ((SceneMenu) state.getScene()).changeBackground(path);
+                if (event.state() == GuiComponentHoverEvent.State.ENTER) {
+                    ((SceneMenu) state.scene()).changeBackground(path);
                 }
             });
             GuiComponentTextButton delete =

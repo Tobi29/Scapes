@@ -33,7 +33,7 @@ public abstract class Material {
         this.registry = registry;
     }
 
-    public ItemStack getExampleStack(int data) {
+    public ItemStack example(int data) {
         return new ItemStack(this, data);
     }
 
@@ -49,23 +49,23 @@ public abstract class Material {
         return 0.0;
     }
 
-    public String getNameID() {
+    public String nameID() {
         return nameID;
     }
 
-    public GameRegistry getRegistry() {
+    public GameRegistry registry() {
         return registry;
     }
 
-    public int getItemID() {
+    public int itemID() {
         return id;
     }
 
-    public int getToolLevel(ItemStack item) {
+    public int toolLevel(ItemStack item) {
         return 0;
     }
 
-    public String getToolType(ItemStack item) {
+    public String toolType(ItemStack item) {
         return "None";
     }
 
@@ -77,11 +77,11 @@ public abstract class Material {
         return false;
     }
 
-    public int getHitWait(ItemStack item) {
+    public int hitWait(ItemStack item) {
         return 500;
     }
 
-    public double getHitRange(ItemStack item) {
+    public double hitRange(ItemStack item) {
         return 2;
     }
 
@@ -96,11 +96,11 @@ public abstract class Material {
             float r, float g, float b,
             float a);
 
-    public float getPlayerLight(ItemStack item) {
+    public float playerLight(ItemStack item) {
         return 0;
     }
 
-    public abstract String getName(ItemStack item);
+    public abstract String name(ItemStack item);
 
-    public abstract int getStackSize(ItemStack item);
+    public abstract int maxStackSize(ItemStack item);
 }

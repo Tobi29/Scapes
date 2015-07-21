@@ -26,7 +26,7 @@ public class SceneError extends SceneMenu {
     @Override
     protected void loadTextures(GL gl) {
         for (int i = 0; i < 6; i++) {
-            setBackground(gl.getTextureManager().getTexture(
+            setBackground(gl.textures().get(
                             "Scapes:image/gui/panorama/error/Panorama" + i), i,
                     gl);
         }

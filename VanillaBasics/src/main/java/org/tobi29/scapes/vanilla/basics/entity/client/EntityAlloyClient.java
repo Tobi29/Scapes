@@ -38,11 +38,11 @@ public class EntityAlloyClient extends EntityAbstractContainerClient {
     }
 
     public EntityAlloyClient(WorldClient world, Vector3 pos) {
-        super(world, pos, new Inventory(world.getRegistry(), 2));
+        super(world, pos, new Inventory(world.registry(), 2));
     }
 
     @Override
-    public Gui getGui(MobPlayerClientMain player) {
+    public Gui gui(MobPlayerClientMain player) {
         return new GuiAlloyInventory(this, player);
     }
 
@@ -58,11 +58,11 @@ public class EntityAlloyClient extends EntityAbstractContainerClient {
         temperature = tagStructure.getFloat("Temperature");
     }
 
-    public Map<String, Double> getMetals() {
+    public Map<String, Double> metals() {
         return metals;
     }
 
-    public String getResult() {
+    public String result() {
         return result;
     }
 }

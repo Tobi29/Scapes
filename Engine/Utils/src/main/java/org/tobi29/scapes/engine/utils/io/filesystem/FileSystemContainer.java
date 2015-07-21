@@ -34,7 +34,7 @@ public class FileSystemContainer implements Path {
         fileSystems.remove(id);
     }
 
-    public Path getFileSystem(String id) {
+    private Path fileSystem(String id) {
         Path fileSystem = fileSystems.get(id);
         if (fileSystem == null) {
             throw new IllegalArgumentException("Unknown file system: " + id);
@@ -45,7 +45,7 @@ public class FileSystemContainer implements Path {
     @Override
     public Resource get(String path) {
         Pair<String, String> location = splitPath(path);
-        return getFileSystem(location.a).get(location.b);
+        return fileSystem(location.a).get(location.b);
     }
 
     private Pair<String, String> splitPath(String path) {

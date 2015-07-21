@@ -121,17 +121,16 @@ public class ParticleLightning extends Particle {
     @Override
     public void renderParticle(float x, float y, float z, float r, float g,
             float b, float a, GL gl, Shader shader) {
-        OpenGL openGL = gl.getOpenGL();
-        MatrixStack matrixStack = gl.getMatrixStack();
+        MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(x, y, z);
-        gl.getTextureManager().unbind(gl);
-        openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, r * 0.2f, g * 0.7f,
-                b * 1.0f, a * 0.7f);
-        openGL.setBlending(BlendingMode.ADD);
+        gl.textures().unbind(gl);
+        gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, r * 0.2f, g * 0.7f, b * 1.0f,
+                a * 0.7f);
+        gl.setBlending(BlendingMode.ADD);
         vao.render(gl, shader);
         matrixStack.pop();
-        openGL.setBlending(BlendingMode.NORMAL);
+        gl.setBlending(BlendingMode.NORMAL);
     }
 
     @Override

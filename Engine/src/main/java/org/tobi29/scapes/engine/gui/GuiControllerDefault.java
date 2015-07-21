@@ -45,11 +45,11 @@ public class GuiControllerDefault implements GuiController {
 
     @Override
     public void update(double delta) {
-        cursorX = controller.getX();
-        cursorY = controller.getY();
-        scroll = controller.getScrollY() * scrollSensitivity;
-        double width = engine.container().getContainerWidth();
-        double height = engine.container().getContainerHeight();
+        cursorX = controller.x();
+        cursorY = controller.y();
+        scroll = controller.scrollY() * scrollSensitivity;
+        double width = engine.container().containerWidth();
+        double height = engine.container().containerHeight();
         guiCursorX = cursorX / width * 800.0;
         guiCursorY = cursorY / height * 512.0;
     }
@@ -60,9 +60,9 @@ public class GuiControllerDefault implements GuiController {
         boolean shift = controller.isDown(ControllerKey.KEY_LEFT_SHIFT) ||
                 controller.isDown(ControllerKey.KEY_RIGHT_SHIFT);
         if (controller.isModifierDown()) {
-            controller.getPressEvents().filter(event -> event.getState() !=
+            controller.pressEvents().filter(event -> event.state() !=
                     Controller.PressState.RELEASE).forEach(event -> {
-                switch (event.getKey()) {
+                switch (event.key()) {
                     case KEY_A:
                         data.selectAll();
                         break;
@@ -85,16 +85,16 @@ public class GuiControllerDefault implements GuiController {
                 changed.a = true;
             });
         } else {
-            controller.getKeyTypeEvents().forEach(event -> {
-                char character = event.getCharacter();
+            controller.typeEvents().forEach(event -> {
+                char character = event.character();
                 if (!Character.isISOControl(character)) {
                     data.insert(character);
                     changed.a = true;
                 }
             });
-            controller.getPressEvents().filter(event -> event.getState() !=
+            controller.pressEvents().filter(event -> event.state() !=
                     Controller.PressState.RELEASE).forEach(event -> {
-                switch (event.getKey()) {
+                switch (event.key()) {
                     case KEY_LEFT:
                         data.left(shift);
                         break;
@@ -139,22 +139,22 @@ public class GuiControllerDefault implements GuiController {
     }
 
     @Override
-    public double getCursorX() {
+    public double cursorX() {
         return cursorX;
     }
 
     @Override
-    public double getCursorY() {
+    public double cursorY() {
         return cursorY;
     }
 
     @Override
-    public double getGuiCursorX() {
+    public double guiCursorX() {
         return guiCursorX;
     }
 
     @Override
-    public double getGuiCursorY() {
+    public double guiCursorY() {
         return guiCursorY;
     }
 
@@ -164,27 +164,27 @@ public class GuiControllerDefault implements GuiController {
     }
 
     @Override
-    public boolean getLeftClick() {
+    public boolean leftClick() {
         return controller.isPressed(ControllerKey.BUTTON_LEFT);
     }
 
     @Override
-    public boolean getRightClick() {
+    public boolean rightClick() {
         return controller.isPressed(ControllerKey.BUTTON_RIGHT);
     }
 
     @Override
-    public boolean getLeftDrag() {
+    public boolean leftDrag() {
         return controller.isDown(ControllerKey.BUTTON_LEFT);
     }
 
     @Override
-    public boolean getRightDrag() {
+    public boolean rightDrag() {
         return controller.isDown(ControllerKey.BUTTON_RIGHT);
     }
 
     @Override
-    public double getScroll() {
+    public double scroll() {
         return scroll;
     }
 }

@@ -44,7 +44,7 @@ public abstract class BlockType extends Material {
         super(registry, nameID);
     }
 
-    public short getID() {
+    public short id() {
         return (short) id;
     }
 
@@ -72,10 +72,10 @@ public abstract class BlockType extends Material {
                     .isReplaceable(handler, place.intX(), place.intY(),
                             place.intZ())) {
                 List<AABBElement> aabbs =
-                        getCollision(item.getData(), place.intX(), place.intY(),
+                        collision(item.data(), place.intX(), place.intY(),
                                 place.intZ());
                 boolean flag = true;
-                AABB coll = entity.getAABB();
+                AABB coll = entity.aabb();
                 for (AABBElement element : aabbs) {
                     if (coll.overlay(element.aabb) &&
                             element.collision.isSolid()) {
@@ -84,16 +84,16 @@ public abstract class BlockType extends Material {
                 }
                 if (flag) {
                     handler.data(place.intX(), place.intY(), place.intZ(),
-                            item.getData());
+                            item.data());
                     if (place(handler, place.intX(), place.intY(), place.intZ(),
                             face, entity)) {
                         handler.type(place.intX(), place.intY(), place.intZ(),
                                 this);
-                        item.setAmount(item.getAmount() - 1);
-                        handler.world().getConnection()
+                        item.setAmount(item.amount() - 1);
+                        handler.world().connection()
                                 .send(new PacketUpdateInventory(entity));
-                        entity.getConnection().getStatistics()
-                                .blockPlace(this, item.getData());
+                        entity.connection().statistics()
+                                .blockPlace(this, item.data());
                     }
                 }
             }
@@ -107,7 +107,7 @@ public abstract class BlockType extends Material {
     }
 
     @Override
-    public String getToolType(ItemStack item) {
+    public String toolType(ItemStack item) {
         return "Block";
     }
 
@@ -116,7 +116,7 @@ public abstract class BlockType extends Material {
         aabbs.push().set(x, y, z, x + 1, y + 1, z + 1, STANDARD_COLLISION);
     }
 
-    public List<AABBElement> getCollision(int data, int x, int y, int z) {
+    public List<AABBElement> collision(int data, int x, int y, int z) {
         List<AABBElement> aabbs = new ArrayList<>();
         aabbs.add(new AABBElement(new AABB(x, y, z, x + 1, y + 1, z + 1),
                 STANDARD_COLLISION));
@@ -137,32 +137,32 @@ public abstract class BlockType extends Material {
         return true;
     }
 
-    public abstract double getResistance(ItemStack item, int data);
+    public abstract double resistance(ItemStack item, int data);
 
-    public List<ItemStack> getDrops(ItemStack item, int data) {
+    public List<ItemStack> drops(ItemStack item, int data) {
         return Collections.singletonList(new ItemStack(this, data));
     }
 
-    public abstract String getFootStep(int data);
+    public abstract String footStepSound(int data);
 
-    public abstract String getBreak(ItemStack item, int data);
+    public abstract String breakSound(ItemStack item, int data);
 
-    public float getParticleColorR(Face face, TerrainClient terrain, int x,
-            int y, int z) {
+    public float particleColorR(Face face, TerrainClient terrain, int x, int y,
+            int z) {
         return 1.0f;
     }
 
-    public float getParticleColorG(Face face, TerrainClient terrain, int x,
-            int y, int z) {
+    public float particleColorG(Face face, TerrainClient terrain, int x, int y,
+            int z) {
         return 1.0f;
     }
 
-    public float getParticleColorB(Face face, TerrainClient terrain, int x,
-            int y, int z) {
+    public float particleColorB(Face face, TerrainClient terrain, int x, int y,
+            int z) {
         return 1.0f;
     }
 
-    public abstract Optional<TerrainTexture> getParticleTexture(Face face,
+    public abstract Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z);
 
     public boolean isLiquid() {

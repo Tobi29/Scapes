@@ -31,23 +31,23 @@ public class GuiContainerInventory extends GuiInventory {
     }
 
     protected void addButton(int x, int y, int width, int height, int slot) {
-        Inventory inventory = container.getInventory();
+        Inventory inventory = container.inventory();
         GuiComponentItemButton button =
                 new GuiComponentItemButton(x, y, width, height,
-                        inventory.getItem(slot));
+                        inventory.item(slot));
         button.addLeftClick(event -> leftClickContainer(slot));
         button.addRightClick(event -> rightClickContainer(slot));
-        button.addHover(event -> setTooltip(inventory.getItem(slot)));
+        button.addHover(event -> setTooltip(inventory.item(slot)));
         pane.add(button);
     }
 
     protected void leftClickContainer(int i) {
-        player.getConnection().send(new PacketInventoryInteraction(container,
+        player.connection().send(new PacketInventoryInteraction(container,
                 PacketInventoryInteraction.LEFT, i));
     }
 
     protected void rightClickContainer(int i) {
-        player.getConnection().send(new PacketInventoryInteraction(container,
+        player.connection().send(new PacketInventoryInteraction(container,
                 PacketInventoryInteraction.RIGHT, i));
     }
 }

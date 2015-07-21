@@ -43,27 +43,27 @@ public class BlockFarmland extends VanillaBlock {
     }
 
     @Override
-    public double getResistance(ItemStack item, int data) {
-        return "Shovel".equals(item.getMaterial().getToolType(item)) ? 2 : 20;
+    public double resistance(ItemStack item, int data) {
+        return "Shovel".equals(item.material().toolType(item)) ? 2 : 20;
     }
 
     @Override
-    public List<ItemStack> getDrops(ItemStack item, int data) {
+    public List<ItemStack> drops(ItemStack item, int data) {
         return Collections.singletonList(new ItemStack(materials.dirt, data));
     }
 
     @Override
-    public String getFootStep(int data) {
+    public String footStepSound(int data) {
         return "VanillaBasics:sound/footsteps/Dirt.ogg";
     }
 
     @Override
-    public String getBreak(ItemStack item, int data) {
+    public String breakSound(ItemStack item, int data) {
         return "VanillaBasics:sound/blocks/Stone.ogg";
     }
 
     @Override
-    public Optional<TerrainTexture> getParticleTexture(Face face,
+    public Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
         return Optional.of(textureSide);
     }
@@ -109,12 +109,12 @@ public class BlockFarmland extends VanillaBlock {
     }
 
     @Override
-    public String getName(ItemStack item) {
+    public String name(ItemStack item) {
         return "Dirt";
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 16;
     }
 }

@@ -17,7 +17,6 @@
 package org.tobi29.scapes.engine.opengl.texture;
 
 import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.OpenGL;
 import org.tobi29.scapes.engine.opengl.OpenGLFunction;
 import org.tobi29.scapes.engine.utils.graphics.MipMapGenerator;
 
@@ -67,7 +66,7 @@ public abstract class Texture {
         }
     }
 
-    public static int getTextureCount() {
+    public static int textureCount() {
         return TEXTURES.size();
     }
 
@@ -76,28 +75,26 @@ public abstract class Texture {
         if (textureID == -1) {
             store(gl);
         }
-        OpenGL openGL = gl.getOpenGL();
-        openGL.bindTexture(textureID);
+        gl.bindTexture(textureID);
         if (dirtyFilter) {
-            openGL.minFilter(minFilter, mipmaps > 0);
-            openGL.magFilter(magFilter);
-            openGL.wrapS(wrapS);
-            openGL.wrapT(wrapT);
+            gl.minFilter(minFilter, mipmaps > 0);
+            gl.magFilter(magFilter);
+            gl.wrapS(wrapS);
+            gl.wrapT(wrapT);
             dirtyFilter = false;
         }
     }
 
     protected void store(GL gl) {
-        OpenGL openGL = gl.getOpenGL();
         buffer.rewind();
-        textureID = openGL.createTexture();
-        openGL.bindTexture(textureID);
+        textureID = gl.createTexture();
+        gl.bindTexture(textureID);
         if (mipmaps > 0) {
-            openGL.bufferTextureMipMap(width, height, MipMapGenerator
+            gl.bufferTextureMipMap(width, height, MipMapGenerator
                     .generateMipMaps(buffer, width, height, mipmaps,
                             minFilter == TextureFilter.LINEAR));
         } else {
-            openGL.bufferTexture(width, height, true, buffer);
+            gl.bufferTexture(width, height, true, buffer);
         }
         dirtyFilter = true;
         TEXTURES.add(this);
@@ -105,9 +102,8 @@ public abstract class Texture {
 
     @OpenGLFunction
     public void dispose(GL gl) {
-        OpenGL openGL = gl.getOpenGL();
         if (textureID != -1) {
-            openGL.deleteTexture(textureID);
+            gl.deleteTexture(textureID);
             textureID = -1;
         }
         TEXTURES.remove(this);
@@ -117,11 +113,11 @@ public abstract class Texture {
         DISPOSE_TEXTURES.add(this);
     }
 
-    public TextureFilter getFilterMag() {
+    public TextureFilter filterMag() {
         return magFilter;
     }
 
-    public TextureFilter getFilterMin() {
+    public TextureFilter filterMin() {
         return minFilter;
     }
 
@@ -131,19 +127,19 @@ public abstract class Texture {
         dirtyFilter = true;
     }
 
-    public int getHeight() {
-        return height;
-    }
-
-    public int getWidth() {
+    public int width() {
         return width;
     }
 
-    public TextureWrap getWrapS() {
+    public int height() {
+        return height;
+    }
+
+    public TextureWrap wrapS() {
         return wrapS;
     }
 
-    public TextureWrap getWrapT() {
+    public TextureWrap wrapT() {
         return wrapT;
     }
 
@@ -153,11 +149,11 @@ public abstract class Texture {
         dirtyFilter = true;
     }
 
-    public int getTextureID() {
+    public int textureID() {
         return textureID;
     }
 
-    public ByteBuffer getBuffer() {
+    public ByteBuffer buffer() {
         return buffer;
     }
 }

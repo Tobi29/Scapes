@@ -31,7 +31,7 @@ public final class BufferCreator {
      * @param size Capacity of the buffer
      * @return A {@code ByteBuffer} with big-endian byte-order
      */
-    public static ByteBuffer byteBuffer(int size) {
+    public static ByteBuffer bytes(int size) {
         return ByteBuffer.allocate(size).order(ByteOrder.BIG_ENDIAN);
     }
 
@@ -41,8 +41,8 @@ public final class BufferCreator {
      * @param size Capacity of the buffer
      * @return A {@code ShortBuffer} with big-endian byte-order
      */
-    public static ShortBuffer shortBuffer(int size) {
-        return byteBuffer(size << 1).asShortBuffer();
+    public static ShortBuffer shorts(int size) {
+        return bytes(size << 1).asShortBuffer();
     }
 
     /**
@@ -51,8 +51,8 @@ public final class BufferCreator {
      * @param size Capacity of the buffer
      * @return A {@code IntBuffer} with big-endian byte-order
      */
-    public static IntBuffer intBuffer(int size) {
-        return byteBuffer(size << 2).asIntBuffer();
+    public static IntBuffer ints(int size) {
+        return bytes(size << 2).asIntBuffer();
     }
 
     /**
@@ -61,8 +61,8 @@ public final class BufferCreator {
      * @param size Capacity of the buffer
      * @return A {@code LongBuffer} with big-endian byte-order
      */
-    public static LongBuffer longBuffer(int size) {
-        return byteBuffer(size << 3).asLongBuffer();
+    public static LongBuffer longs(int size) {
+        return bytes(size << 3).asLongBuffer();
     }
 
     /**
@@ -71,8 +71,8 @@ public final class BufferCreator {
      * @param size Capacity of the buffer
      * @return A {@code FloatBuffer} with big-endian byte-order
      */
-    public static FloatBuffer floatBuffer(int size) {
-        return byteBuffer(size << 2).asFloatBuffer();
+    public static FloatBuffer floats(int size) {
+        return bytes(size << 2).asFloatBuffer();
     }
 
     /**
@@ -81,89 +81,47 @@ public final class BufferCreator {
      * @param size Capacity of the buffer
      * @return A {@code DoubleBuffer} with big-endian byte-order
      */
-    public static DoubleBuffer doubleBuffer(int size) {
-        return byteBuffer(size << 3).asDoubleBuffer();
+    public static DoubleBuffer doubles(int size) {
+        return bytes(size << 3).asDoubleBuffer();
     }
 
     public static ByteBuffer wrap(byte... array) {
-        ByteBuffer buffer = byteBuffer(array.length);
+        ByteBuffer buffer = bytes(array.length);
         buffer.put(array);
         buffer.rewind();
         return buffer;
     }
 
     public static ShortBuffer wrap(short... array) {
-        ShortBuffer buffer = shortBuffer(array.length);
+        ShortBuffer buffer = shorts(array.length);
         buffer.put(array);
         buffer.rewind();
         return buffer;
     }
 
     public static IntBuffer wrap(int... array) {
-        IntBuffer buffer = intBuffer(array.length);
+        IntBuffer buffer = ints(array.length);
         buffer.put(array);
         buffer.rewind();
         return buffer;
     }
 
     public static LongBuffer wrap(long... array) {
-        LongBuffer buffer = longBuffer(array.length);
+        LongBuffer buffer = longs(array.length);
         buffer.put(array);
         buffer.rewind();
         return buffer;
     }
 
     public static FloatBuffer wrap(float... array) {
-        FloatBuffer buffer = floatBuffer(array.length);
+        FloatBuffer buffer = floats(array.length);
         buffer.put(array);
         buffer.rewind();
         return buffer;
     }
 
     public static DoubleBuffer wrap(double... array) {
-        DoubleBuffer buffer = doubleBuffer(array.length);
-        buffer.put(array);
-        buffer.rewind();
-        return buffer;
-    }
-
-    public static ByteBuffer wrap(ByteBuffer array) {
-        ByteBuffer buffer = byteBuffer(array.remaining());
-        buffer.put(array);
-        buffer.rewind();
-        return buffer;
-    }
-
-    public static ShortBuffer wrap(ShortBuffer array) {
-        ShortBuffer buffer = shortBuffer(array.remaining());
-        buffer.put(array);
-        buffer.rewind();
-        return buffer;
-    }
-
-    public static IntBuffer wrap(IntBuffer array) {
-        IntBuffer buffer = intBuffer(array.remaining());
-        buffer.put(array);
-        buffer.rewind();
-        return buffer;
-    }
-
-    public static LongBuffer wrap(LongBuffer array) {
-        LongBuffer buffer = longBuffer(array.remaining());
-        buffer.put(array);
-        buffer.rewind();
-        return buffer;
-    }
-
-    public static FloatBuffer wrap(FloatBuffer array) {
-        FloatBuffer buffer = floatBuffer(array.remaining());
-        buffer.put(array);
-        buffer.rewind();
-        return buffer;
-    }
-
-    public static DoubleBuffer wrap(DoubleBuffer array) {
-        DoubleBuffer buffer = doubleBuffer(array.remaining());
+        DoubleBuffer buffer = doubles(array.length);
         buffer.put(array);
         buffer.rewind();
         return buffer;

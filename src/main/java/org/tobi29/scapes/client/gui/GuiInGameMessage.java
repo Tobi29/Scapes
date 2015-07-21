@@ -27,7 +27,7 @@ public class GuiInGameMessage extends Gui {
                 new GuiComponentVisiblePane(200, 0, 400, 512);
         GuiComponentTextButton back =
                 new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");
-        back.addLeftClick(event -> state.getClient().getEntity().closeGui());
+        back.addLeftClick(event -> state.client().entity().closeGui());
         pane.add(new GuiComponentText(16, 16, 32, title));
         pane.add(new GuiComponentSeparator(24, 64, 352, 2));
         pane.add(new GuiComponentText(16, 80, 18, message));

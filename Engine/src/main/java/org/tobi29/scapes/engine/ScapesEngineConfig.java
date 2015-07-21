@@ -33,7 +33,7 @@ public class ScapesEngineConfig {
         fullscreen = tagStructure.getBoolean("Fullscreen");
     }
 
-    public boolean getVSync() {
+    public boolean vSync() {
         return vSync;
     }
 
@@ -42,7 +42,7 @@ public class ScapesEngineConfig {
         tagStructure.setBoolean("VSync", true);
     }
 
-    public double getFPS() {
+    public double fps() {
         return fps;
     }
 
@@ -51,7 +51,7 @@ public class ScapesEngineConfig {
         tagStructure.setDouble("Framerate", fps);
     }
 
-    public double getResolutionMultiplier() {
+    public double resolutionMultiplier() {
         return resolutionMultiplier;
     }
 
@@ -60,7 +60,7 @@ public class ScapesEngineConfig {
         tagStructure.setDouble("ResolutionMultiplier", resolutionMultiplier);
     }
 
-    public double getMusicVolume() {
+    public double musicVolume() {
         return musicVolume;
     }
 
@@ -69,7 +69,7 @@ public class ScapesEngineConfig {
         tagStructure.setDouble("MusicVolume", musicVolume);
     }
 
-    public double getSoundVolume() {
+    public double soundVolume() {
         return soundVolume;
     }
 

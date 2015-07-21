@@ -51,10 +51,10 @@ public class ItemSeed extends VanillaItem {
     public double click(MobPlayerServer entity, ItemStack item,
             TerrainServer terrain, int x, int y, int z, Face face) {
         if (face == Face.UP) {
-            item.setAmount(item.getAmount() - 1);
+            item.setAmount(item.amount() - 1);
             Random random = ThreadLocalRandom.current();
             if (random.nextInt(1) == 0) {
-                terrain.world().getEntities(x, y, z).stream()
+                terrain.world().entities(x, y, z).stream()
                         .filter(farmland -> farmland instanceof EntityFarmlandServer)
                         .forEach(farmland -> ((EntityFarmlandServer) farmland)
                                 .seed(CropType.WHEAT));
@@ -70,7 +70,7 @@ public class ItemSeed extends VanillaItem {
         int i = 0;
         for (CropType type : types) {
             textures[i++] =
-                    registry.registerTexture(type.getTexture() + "/Seed.png");
+                    registry.registerTexture(type.texture() + "/Seed.png");
         }
     }
 
@@ -86,22 +86,22 @@ public class ItemSeed extends VanillaItem {
     @Override
     public void render(ItemStack item, GL gl, Shader shader,
             float r, float g, float b, float a) {
-        models[item.getData()].render(gl, shader);
+        models[item.data()].render(gl, shader);
     }
 
     @Override
     public void renderInventory(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a) {
-        models[item.getData()].renderInventory(gl, shader);
+        models[item.data()].renderInventory(gl, shader);
     }
 
     @Override
-    public String getName(ItemStack item) {
-        return materials.crop.getName(item) + " Seeds";
+    public String name(ItemStack item) {
+        return materials.crop.name(item) + " Seeds";
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 128;
     }
 }

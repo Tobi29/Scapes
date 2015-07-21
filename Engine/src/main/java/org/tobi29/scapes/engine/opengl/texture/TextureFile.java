@@ -61,7 +61,7 @@ public class TextureFile extends Texture {
 
     public TextureFile(Image image, int mipmaps, TextureFilter minFilter,
             TextureFilter magFilter, TextureWrap wrapS, TextureWrap wrapT) {
-        super(image.getWidth(), image.getHeight(), image.getBuffer(), mipmaps,
+        super(image.width(), image.height(), image.buffer(), mipmaps,
                 minFilter, magFilter, wrapS, wrapT);
     }
 }

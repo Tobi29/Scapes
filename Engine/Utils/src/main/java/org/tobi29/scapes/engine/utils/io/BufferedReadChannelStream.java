@@ -24,7 +24,7 @@ import java.nio.channels.ReadableByteChannel;
 
 public class BufferedReadChannelStream implements ReadableByteStream {
     private final ReadableByteChannel channel;
-    private final ByteBuffer buffer = BufferCreator.byteBuffer(8192);
+    private final ByteBuffer buffer = BufferCreator.bytes(8192);
 
     public BufferedReadChannelStream(ReadableByteChannel channel) {
         this.channel = channel;

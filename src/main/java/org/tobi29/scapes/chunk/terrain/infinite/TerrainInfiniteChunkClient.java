@@ -38,17 +38,17 @@ public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
         rendererChunk = new TerrainInfiniteRendererChunk(this, renderer);
     }
 
-    public Optional<TerrainInfiniteChunkClient> getOptional() {
+    public Optional<TerrainInfiniteChunkClient> optional() {
         return optional;
     }
 
     public void updateClient() {
         if (state.id < State.LOADED.id) {
             TerrainInfiniteClient terrainClient = terrain;
-            if (!requested && terrainClient.getRequestedChunks() < 10) {
+            if (!requested && terrainClient.requestedChunks() < 10) {
                 requested = true;
                 terrainClient.changeRequestedChunks(1);
-                terrain.world().getConnection()
+                terrain.world().connection()
                         .send(new PacketRequestChunk(pos.intX(), pos.intY()));
             }
         }
@@ -63,7 +63,7 @@ public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
         terrain.renderer()
                 .blockChange(x + posBlock.intX(), y + posBlock.intY(), z);
         if (state.id >= State.LOADED.id) {
-            terrain.getLighting()
+            terrain.lighting()
                     .updateLight(x + posBlock.intX(), y + posBlock.intY(), z);
         }
     }
@@ -74,7 +74,7 @@ public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
                 .blockChange(x + posBlock.intX(), y + posBlock.intY(), z);
     }
 
-    public TerrainInfiniteRendererChunk getRendererChunk() {
+    public TerrainInfiniteRendererChunk rendererChunk() {
         return rendererChunk;
     }
 

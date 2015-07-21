@@ -25,12 +25,12 @@ public class CollisionLeaves extends Collision {
 
     @Override
     public void inside(MobServer mob, double delta) {
-        mob.setSpeed(mob.getSpeed().div(1.0 + 1.2 * delta));
+        mob.setSpeed(mob.speed().div(1.0 + 1.2 * delta));
     }
 
     @Override
     public void inside(Particle particle, double delta) {
-        particle.setSpeed(particle.getSpeed().div(1.0 + 1.2 * delta));
+        particle.setSpeed(particle.speed().div(1.0 + 1.2 * delta));
     }
 
     @Override

@@ -25,7 +25,7 @@ public class ServerSkin {
 
     public ServerSkin(Image image) {
         this.image = image;
-        checksum = ChecksumUtil.createChecksum(image.getBuffer());
+        checksum = ChecksumUtil.createChecksum(image.buffer());
     }
 
     public Image image() {

@@ -24,6 +24,12 @@ import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
 import org.tobi29.scapes.engine.opengl.shader.ShaderManager;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.opengl.texture.TextureManager;
+import org.tobi29.scapes.engine.utils.graphics.Image;
+import org.tobi29.scapes.engine.utils.graphics.PNG;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
+
+import java.io.IOException;
+import java.nio.file.Path;
 
 public class GraphicsSystem {
     private static final Logger LOGGER =
@@ -31,56 +37,53 @@ public class GraphicsSystem {
     private final ScapesEngine engine;
     private final GuiWidgetDebugValues.Element fpsDebug, widthDebug,
             heightDebug, textureDebug, vaoDebug;
-    private final OpenGL openGL;
     private final GL gl;
     private boolean triggerScreenshot;
     private double resolutionMultiplier = 1.0;
 
-    public GraphicsSystem(ScapesEngine engine, OpenGL openGL) {
+    public GraphicsSystem(ScapesEngine engine, GL gl) {
         this.engine = engine;
-        this.openGL = openGL;
-        resolutionMultiplier = engine.config().getResolutionMultiplier();
+        this.gl = gl;
+        resolutionMultiplier = engine.config().resolutionMultiplier();
         GuiWidgetDebugValues debugValues = engine.debugValues();
         fpsDebug = debugValues.get("Graphics-Fps");
         widthDebug = debugValues.get("Graphics-Width");
         heightDebug = debugValues.get("Graphics-Height");
         textureDebug = debugValues.get("Graphics-Textures");
         vaoDebug = debugValues.get("Graphics-VAOs");
-        gl = new GL(engine, openGL);
     }
 
     public void dispose() {
         GameState state = engine.state();
-        state.getScene().dispose(gl);
+        state.scene().dispose(gl);
         state.dispose(gl);
         gl.dispose();
     }
 
-    public ScapesEngine getEngine() {
+    public ScapesEngine engine() {
         return engine;
     }
 
-    public TextureManager getTextureManager() {
-        return gl.getTextureManager();
+    public TextureManager textures() {
+        return gl.textures();
     }
 
-    public ShaderManager getShaderManager() {
-        return gl.getShaderManager();
+    public ShaderManager shaders() {
+        return gl.shaders();
     }
 
     public void render(double delta) {
         try {
-            openGL.checkError("Pre-Render");
+            gl.checkError("Pre-Render");
             Container container = engine.container();
-            int containerWidth = container.getContainerWidth();
-            int containerHeight = container.getContainerHeight();
+            int containerWidth = container.containerWidth();
+            int containerHeight = container.containerHeight();
             boolean fboSizeDirty;
             if (container.contentResized() || resolutionMultiplier !=
-                    engine.config().getResolutionMultiplier()) {
-                resolutionMultiplier =
-                        engine.config().getResolutionMultiplier();
-                int contentWidth = container.getContentWidth();
-                int contentHeight = container.getContentHeight();
+                    engine.config().resolutionMultiplier()) {
+                resolutionMultiplier = engine.config().resolutionMultiplier();
+                int contentWidth = container.contentWidth();
+                int contentHeight = container.contentHeight();
                 fboSizeDirty = true;
                 widthDebug.setValue(contentWidth);
                 heightDebug.setValue(contentHeight);
@@ -93,13 +96,24 @@ public class GraphicsSystem {
             GameState state = engine.state();
             state.render(gl, delta, fboSizeDirty);
             fpsDebug.setValue(1.0 / delta);
-            textureDebug.setValue(Texture.getTextureCount());
-            vaoDebug.setValue(VAO.getVAOCount());
+            textureDebug.setValue(Texture.textureCount());
+            vaoDebug.setValue(VAO.vaos());
             if (triggerScreenshot) {
                 triggerScreenshot = false;
-                openGL.screenShot(engine.home().resolve("screenshots/" +
+                int width = gl.sceneWidth(), height = gl.sceneHeight();
+                Image image = gl.screenShot(0, 0, width, height);
+                Path path = engine.home().resolve("screenshots/" +
                         System.currentTimeMillis() +
-                        ".png"), gl);
+                        ".png");
+                engine.taskExecutor().runTask(joiner -> {
+                    try {
+                        FileUtil.write(path,
+                                stream -> PNG.encode(image, stream, 9, false));
+                    } catch (IOException e) {
+                        LOGGER.error("Error saving screenshot: {}",
+                                e.toString());
+                    }
+                }, "Screenshot-Writer");
             }
             VAO.disposeUnused(gl);
             Texture.disposeUnused(gl);

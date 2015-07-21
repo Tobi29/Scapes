@@ -65,26 +65,26 @@ public class PacketBlockChange extends Packet implements PacketClient {
         if (world == null) {
             return;
         }
-        world.getTerrain().process(this);
+        world.terrain().process(this);
     }
 
-    public int getX() {
+    public int x() {
         return x;
     }
 
-    public int getY() {
+    public int y() {
         return y;
     }
 
-    public int getZ() {
+    public int z() {
         return z;
     }
 
-    public int getBlockId() {
+    public int id() {
         return id;
     }
 
-    public int getBlockData() {
+    public int data() {
         return data;
     }
 }

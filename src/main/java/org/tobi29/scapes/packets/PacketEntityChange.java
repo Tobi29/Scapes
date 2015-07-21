@@ -22,7 +22,6 @@ import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
-import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
@@ -36,8 +35,8 @@ public class PacketEntityChange extends Packet implements PacketClient {
     }
 
     public PacketEntityChange(EntityServer entity) {
-        super(entity.getPos());
-        entityID = entity.getEntityID();
+        super(entity.pos());
+        entityID = entity.entityID();
         tag = entity.write();
     }
 
@@ -61,9 +60,6 @@ public class PacketEntityChange extends Packet implements PacketClient {
         if (world == null) {
             return;
         }
-        EntityClient entity = world.getEntity(entityID);
-        if (entity != null) {
-            entity.read(tag);
-        }
+        world.entity(entityID).ifPresent(entity -> entity.read(tag));
     }
 }

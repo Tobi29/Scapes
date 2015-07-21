@@ -79,8 +79,7 @@ public class Box {
 
     public void render(float r, float g, float b, float a, GL gl,
             Shader shader) {
-        OpenGL openGL = gl.getOpenGL();
-        openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, r, g, b, a);
+        gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, r, g, b, a);
         vao.render(gl, shader);
     }
 }

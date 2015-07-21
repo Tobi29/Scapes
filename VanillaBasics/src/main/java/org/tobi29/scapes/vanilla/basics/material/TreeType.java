@@ -84,31 +84,31 @@ public class TreeType {
         this.evergreen = evergreen;
     }
 
-    public String getName() {
+    public String name() {
         return name;
     }
 
-    public String getTexture() {
+    public String texture() {
         return texture;
     }
 
-    public Vector3 getColorCold() {
+    public Vector3 colorCold() {
         return colorCold;
     }
 
-    public Vector3 getColorWarm() {
+    public Vector3 colorWarm() {
         return colorWarm;
     }
 
-    public Vector3 getColorAutumn() {
+    public Vector3 colorAutumn() {
         return colorAutumn;
     }
 
-    public int getDropChance() {
+    public int dropChance() {
         return dropChance;
     }
 
-    public Tree getGenerator() {
+    public Tree generator() {
         return generator;
     }
 
@@ -116,7 +116,7 @@ public class TreeType {
         return evergreen;
     }
 
-    public int getData(GameRegistry registry) {
+    public int data(GameRegistry registry) {
         return registry.get("VanillaBasics", "TreeType").get(this);
     }
 }

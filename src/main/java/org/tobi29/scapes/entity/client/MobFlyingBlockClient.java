@@ -32,7 +32,7 @@ public class MobFlyingBlockClient extends MobClient {
     private final ItemStack item;
 
     public MobFlyingBlockClient(WorldClient world) {
-        this(world, Vector3d.ZERO, Vector3d.ZERO, world.getAir(), 0);
+        this(world, Vector3d.ZERO, Vector3d.ZERO, world.air(), 0);
     }
 
     public MobFlyingBlockClient(WorldClient world, Vector3 pos, Vector3 speed,

@@ -39,14 +39,14 @@ public class ControlPanelConnection implements Connection, ControlPanel {
     @SuppressWarnings("ObjectToString")
     public ControlPanelConnection(SocketChannel channel, ScapesServer server)
             throws IOException {
-        String password = server.getControlPanelPassword();
+        String password = server.controlPanelPassword();
         if (password.isEmpty()) {
             throw new IOException("No control panel password set");
         }
         protocol = new ControlPanelProtocol(channel, password,
-                Optional.of(server.getConnection().getKeyPair()));
+                Optional.of(server.connection().keyPair()));
         protocol.addCommand("scapescmd",
-                command -> server.getCommandRegistry().get(command[0], this)
+                command -> server.commandRegistry().get(command[0], this)
                         .execute()
                         .forEach(output -> appendLog(output.toString())));
         id = channel.getRemoteAddress().toString();
@@ -85,12 +85,12 @@ public class ControlPanelConnection implements Connection, ControlPanel {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return "Server";
     }
 
     @Override
-    public String getID() {
+    public String id() {
         return id;
     }
 

@@ -21,15 +21,15 @@ import org.tobi29.scapes.entity.CreatureType;
 import org.tobi29.scapes.entity.server.MobServer;
 
 public interface MobSpawner {
-    double getMobsPerChunk();
+    double mobsPerChunk();
 
-    int getChunkChance();
+    int chunkChance();
 
-    int getSpawnAttempts();
+    int spawnAttempts();
 
     boolean canSpawn(TerrainServer terrain, int x, int y, int z);
 
     MobServer spawn(TerrainServer terrain, int x, int y, int z);
 
-    CreatureType getCreatureType();
+    CreatureType creatureType();
 }

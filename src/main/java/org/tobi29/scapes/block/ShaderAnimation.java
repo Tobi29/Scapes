@@ -27,7 +27,7 @@ public enum ShaderAnimation {
         this.id = id;
     }
 
-    public byte getID() {
+    public byte id() {
         return id;
     }
 }

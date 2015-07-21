@@ -17,7 +17,7 @@
 package org.tobi29.scapes.entity.model;
 
 public interface MobModel extends EntityModel {
-    float getPitch();
+    float pitch();
 
-    float getYaw();
+    float yaw();
 }

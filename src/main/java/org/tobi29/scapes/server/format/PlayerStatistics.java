@@ -31,8 +31,8 @@ public class PlayerStatistics {
 
     public void blockBreak(Material type, int data) {
         for (StatisticMaterial statisticMaterial : statisticMaterials) {
-            if (statisticMaterial.getType() == type &&
-                    statisticMaterial.getData() == data) {
+            if (statisticMaterial.type() == type &&
+                    statisticMaterial.data() == data) {
                 statisticMaterial.blockBreak();
                 return;
             }
@@ -42,8 +42,8 @@ public class PlayerStatistics {
 
     public void blockCraft(Material type, int data) {
         for (StatisticMaterial statisticMaterial : statisticMaterials) {
-            if (statisticMaterial.getType() == type &&
-                    statisticMaterial.getData() == data) {
+            if (statisticMaterial.type() == type &&
+                    statisticMaterial.data() == data) {
                 statisticMaterial.blockCraft();
                 return;
             }
@@ -53,8 +53,8 @@ public class PlayerStatistics {
 
     public void blockPlace(Material type, int data) {
         for (StatisticMaterial statisticMaterial : statisticMaterials) {
-            if (statisticMaterial.getType() == type &&
-                    statisticMaterial.getData() == data) {
+            if (statisticMaterial.type() == type &&
+                    statisticMaterial.data() == data) {
                 statisticMaterial.blockPlace();
                 return;
             }
@@ -62,14 +62,14 @@ public class PlayerStatistics {
         statisticMaterials.add(new StatisticMaterial(type, data, 0, 1, 0));
     }
 
-    public List<StatisticMaterial> getStatisticMaterials() {
+    public List<StatisticMaterial> statisticMaterials() {
         return Collections.unmodifiableList(statisticMaterials);
     }
 
     public void load(GameRegistry registry, List<TagStructure> tagStructures) {
         statisticMaterials.addAll(tagStructures.stream()
                 .map(tagStructure -> new StatisticMaterial(
-                        registry.getMaterial(tagStructure.getInteger("ID")),
+                        registry.material(tagStructure.getInteger("ID")),
                         tagStructure.getShort("Data"),
                         tagStructure.getInteger("BreakAmount"),
                         tagStructure.getInteger("PlaceAmount"),
@@ -81,8 +81,7 @@ public class PlayerStatistics {
         List<TagStructure> tagStructures = new ArrayList<>();
         for (StatisticMaterial statisticMaterial : statisticMaterials) {
             TagStructure tagStructure = new TagStructure();
-            tagStructure
-                    .setInteger("ID", statisticMaterial.getType().getItemID());
+            tagStructure.setInteger("ID", statisticMaterial.type().itemID());
             tagStructure.setInteger("Data", statisticMaterial.data);
             tagStructure
                     .setInteger("BreakAmount", statisticMaterial.breakAmount);
@@ -121,23 +120,23 @@ public class PlayerStatistics {
             placeAmount++;
         }
 
-        public int getBreakAmount() {
+        public int breakAmount() {
             return breakAmount;
         }
 
-        public int getCraftAmount() {
+        public int craftAmount() {
             return craftAmount;
         }
 
-        public int getData() {
+        public int data() {
             return data;
         }
 
-        public int getPlaceAmount() {
+        public int placeAmount() {
             return placeAmount;
         }
 
-        public Material getType() {
+        public Material type() {
             return type;
         }
     }

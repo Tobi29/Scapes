@@ -46,7 +46,7 @@ public class GuiCredits extends Gui {
         GuiComponentTextButton back =
                 new GuiComponentTextButton(13, 64, 70, 30, 18, "Back");
         StringBuilder credits = new StringBuilder(200);
-        try (BufferedReader reader = state.getEngine().files()
+        try (BufferedReader reader = state.engine().files()
                 .get("Scapes:Readme.txt").reader()) {
             String line = reader.readLine();
             while (line != null) {
@@ -64,13 +64,13 @@ public class GuiCredits extends Gui {
         }
         this.credits = credits.toString();
         back.addLeftClick(event -> {
-            state.getEngine().sounds().stopMusic();
+            state.engine().sounds().stopMusic();
             state.remove(this);
             state.add(prev);
         });
         pane.add(back);
         add(pane);
-        state.getEngine().sounds()
+        state.engine().sounds()
                 .playMusic("Scapes:sound/Credits.ogg", 1.0f, 1.0f);
     }
 
@@ -78,11 +78,10 @@ public class GuiCredits extends Gui {
     public void renderComponent(GL gl, Shader shader, FontRenderer font,
             double delta) {
         if (vaoText == null) {
-            vaoText =
-                    gl.getDefaultFont().render(credits, 20, 0, 18, 1, 1, 1, 1);
+            vaoText = gl.defaultFont().render(credits, 20, 0, 18, 1, 1, 1, 1);
         }
         y += 40.0 * delta;
-        MatrixStack matrixStack = gl.getMatrixStack();
+        MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(0, (float) -y, 0);
         vaoText.render(gl, shader);

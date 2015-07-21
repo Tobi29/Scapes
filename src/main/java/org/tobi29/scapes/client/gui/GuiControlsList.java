@@ -29,7 +29,7 @@ public class GuiControlsList extends GuiMenu {
     public GuiControlsList(GameState state, Gui previous) {
         super(state, "Controls", previous);
         Map<String, InputMode> inputModes = new ConcurrentHashMap<>();
-        ((ScapesClient) state.getEngine().game()).getInputModes().forEach(
+        ((ScapesClient) state.engine().game()).inputModes().forEach(
                 inputMode -> inputModes.put(inputMode.toString(), inputMode));
         int y = 80;
         for (InputMode inputMode : inputModes.values()) {
@@ -38,7 +38,7 @@ public class GuiControlsList extends GuiMenu {
                             inputMode.toString());
             controls.addLeftClick(event -> {
                 state.remove(this);
-                state.add(inputMode.createControlsGui(state, this));
+                state.add(inputMode.createControlsGUI(state, this));
             });
             pane.add(controls);
             y += 40;

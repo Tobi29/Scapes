@@ -58,7 +58,7 @@ public abstract class EntityAbstractFurnaceClient
         temperature = tagStructure.getFloat("Temperature");
     }
 
-    public float getTemperature() {
+    public float temperature() {
         return temperature;
     }
 
@@ -77,11 +77,11 @@ public abstract class EntityAbstractFurnaceClient
             }
             int max = items + fuel.length + 1;
             for (int i = fuel.length + 1; i < max; i++) {
-                if (inventory.getItem(i).getAmount() == 1) {
-                    Material type = inventory.getItem(i).getMaterial();
+                if (inventory.item(i).amount() == 1) {
+                    Material type = inventory.item(i).material();
                     if (type instanceof ItemHeatable) {
                         ((ItemHeatable) type)
-                                .heat(inventory.getItem(i), temperature);
+                                .heat(inventory.item(i), temperature);
                     }
                 }
             }

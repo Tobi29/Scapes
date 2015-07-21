@@ -59,8 +59,7 @@ public final class StructureSmallRuin {
             d = (double) i / pillars * FastMath.TWO_PI;
             xx = x + FastMath.floor(FastMath.cosTable(d) * size);
             yy = y + FastMath.floor(FastMath.sinTable(d) * size);
-            placePillar(terrain, xx, yy,
-                    terrain.getHighestTerrainBlockZAt(xx, yy),
+            placePillar(terrain, xx, yy, terrain.highestTerrainBlockZAt(xx, yy),
                     new BlockType[]{pillar[random.nextInt(pillar.length)],
                             pillar[random.nextInt(pillar.length)],
                             pillar[random.nextInt(pillar.length)], top},

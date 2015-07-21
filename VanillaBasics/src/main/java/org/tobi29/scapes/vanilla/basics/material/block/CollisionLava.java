@@ -25,12 +25,12 @@ public class CollisionLava extends Collision {
 
     @Override
     public void inside(MobServer mob, double delta) {
-        mob.setXSpeed(mob.getXSpeed() / 4.0);
-        mob.setYSpeed(mob.getYSpeed() / 4.0);
-        mob.setZSpeed(-0.8);
+        mob.setSpeedX(mob.speedX() / 4.0);
+        mob.setSpeedY(mob.speedY() / 4.0);
+        mob.setSpeedZ(-0.8);
         if (mob instanceof MobLivingServer) {
             ((MobLivingServer) mob)
-                    .damage(((MobLivingServer) mob).getMaxLives() / 5.0);
+                    .damage(((MobLivingServer) mob).maxHealth() / 5.0);
         }
     }
 

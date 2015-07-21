@@ -23,7 +23,7 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 public class GuiPlayerInventory extends GuiInventory {
     public GuiPlayerInventory(MobPlayerClientMain player) {
         super("Inventory", player);
-        Inventory inventory = player.getInventory();
+        Inventory inventory = player.inventory();
         GuiComponentTextButton crafting =
                 new GuiComponentTextButton(16, 80, 368, 30, 18, "Crafting");
         crafting.addLeftClick(
@@ -35,10 +35,10 @@ public class GuiPlayerInventory extends GuiInventory {
             int id = i + 40;
             GuiComponentItemButton item =
                     new GuiComponentItemButton(xx, 119, 30, 30,
-                            inventory.getItem(id));
+                            inventory.item(id));
             item.addLeftClick(event -> leftClick(id));
             item.addRightClick(event -> rightClick(id));
-            item.addHover(event -> setTooltip(inventory.getItem(id)));
+            item.addHover(event -> setTooltip(inventory.item(id)));
             pane.add(item);
             i++;
         }

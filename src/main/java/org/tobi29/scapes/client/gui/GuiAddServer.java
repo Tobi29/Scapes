@@ -30,10 +30,9 @@ public class GuiAddServer extends GuiMenuDouble {
                 new GuiComponentTextField(16, 180, 368, 30, 18, "12345");
         save.addLeftClick(event -> {
             TagStructure tagStructure = new TagStructure();
-            tagStructure.setString("Address", ip.getText());
+            tagStructure.setString("Address", ip.text());
             try {
-                tagStructure
-                        .setInteger("Port", Integer.valueOf(port.getText()));
+                tagStructure.setInteger("Port", Integer.valueOf(port.text()));
             } catch (NumberFormatException e) {
                 tagStructure.setInteger("Port", 12345);
             }

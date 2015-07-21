@@ -32,12 +32,12 @@ public abstract class BlockSoil extends VanillaBlock {
     }
 
     @Override
-    public String getFootStep(int data) {
+    public String footStepSound(int data) {
         return "VanillaBasics:sound/footsteps/Dirt.ogg";
     }
 
     @Override
-    public String getBreak(ItemStack item, int data) {
+    public String breakSound(ItemStack item, int data) {
         return "VanillaBasics:sound/blocks/Stone.ogg";
     }
 
@@ -96,12 +96,12 @@ public abstract class BlockSoil extends VanillaBlock {
             terrain.world().addEntity(new MobFlyingBlockServer(terrain.world(),
                     new Vector3d(x + xx + 0.5, y + yy + 0.5, z + 0.5),
                     new Vector3d(0, 0, -1.0), this, terrain.data(x, y, z)));
-            terrain.typeData(x, y, z, terrain.world().getAir(), (short) 0);
+            terrain.typeData(x, y, z, terrain.world().air(), (short) 0);
         }
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 16;
     }
 }

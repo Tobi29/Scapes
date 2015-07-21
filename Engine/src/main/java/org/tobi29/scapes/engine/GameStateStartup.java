@@ -54,7 +54,7 @@ public class GameStateStartup extends GameState {
 
     @Override
     public void stepComponent(double delta) {
-        GuiComponentIcon image = scene.getImage();
+        GuiComponentIcon image = scene.image();
         if (image != null) {
             if (warmUp > 20) {
                 time += delta / 5.0;

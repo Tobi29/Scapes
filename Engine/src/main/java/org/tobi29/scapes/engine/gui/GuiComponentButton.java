@@ -47,7 +47,7 @@ public class GuiComponentButton extends GuiComponent {
     @Override
     public void renderComponent(GL gl, Shader shader,
             FontRenderer font, double delta) {
-        gl.getTextureManager().unbind(gl);
+        gl.textures().unbind(gl);
         vao.render(gl, shader);
     }
 

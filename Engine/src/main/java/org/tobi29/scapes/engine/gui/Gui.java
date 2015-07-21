@@ -42,9 +42,9 @@ public class Gui extends GuiComponent {
             if (alignment == GuiAlignment.STRETCH) {
                 super.render(gl, shader, font, delta);
             } else {
-                MatrixStack matrixStack = gl.getMatrixStack();
+                MatrixStack matrixStack = gl.matrixStack();
                 Matrix matrix = matrixStack.push();
-                float ratio = (float) gl.getSceneHeight() / gl.getSceneWidth() *
+                float ratio = (float) gl.sceneHeight() / gl.sceneWidth() *
                         1.5625f;
                 matrix.scale(ratio, 1.0f, 1.0f);
                 switch (alignment) {
@@ -64,10 +64,10 @@ public class Gui extends GuiComponent {
     @Override
     public void update(double mouseX, double mouseY, boolean mouseInside,
             ScapesEngine engine) {
-        super.update(getAlignedX(mouseX, engine), mouseY, mouseInside, engine);
+        super.update(alignedX(mouseX, engine), mouseY, mouseInside, engine);
     }
 
-    public GuiComponent getLastClicked() {
+    public GuiComponent lastClicked() {
         return lastClicked;
     }
 
@@ -75,23 +75,23 @@ public class Gui extends GuiComponent {
         lastClicked = component;
     }
 
-    protected double getAlignedX(double x, ScapesEngine engine) {
+    protected double alignedX(double x, ScapesEngine engine) {
         switch (alignment) {
             case LEFT:
-                x *= engine.container().getContainerWidth() * 512.0f /
-                        engine.container().getContainerHeight() /
+                x *= engine.container().containerWidth() * 512.0f /
+                        engine.container().containerHeight() /
                         800.0f;
                 return x;
             case CENTER: {
-                float width = engine.container().getContainerWidth() * 512.0f /
-                        engine.container().getContainerHeight();
+                float width = engine.container().containerWidth() * 512.0f /
+                        engine.container().containerHeight();
                 x *= width / 800.0f;
                 x += (800.0f - width) * 0.5f;
                 return x;
             }
             case RIGHT: {
-                float width = engine.container().getContainerWidth() * 512.0f /
-                        engine.container().getContainerHeight();
+                float width = engine.container().containerWidth() * 512.0f /
+                        engine.container().containerHeight();
                 x *= width / 800.0f;
                 x += 800.0f - width;
                 return x;

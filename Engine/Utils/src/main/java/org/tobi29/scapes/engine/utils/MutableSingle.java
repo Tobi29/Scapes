@@ -30,7 +30,7 @@ public class MutableSingle<A> {
         this.a = a;
     }
 
-    public A getA() {
+    public A a() {
         return a;
     }
 

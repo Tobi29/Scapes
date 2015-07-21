@@ -37,6 +37,6 @@ public class PacketCloseGui extends Packet implements PacketClient {
 
     @Override
     public void runClient(ClientConnection client, WorldClient world) {
-        client.getEntity().closeGui();
+        client.entity().closeGui();
     }
 }

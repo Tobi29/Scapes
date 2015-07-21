@@ -63,7 +63,7 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
         this.world = world;
         materials = plugin.getMaterials();
         {
-            Random random = new Random(world.getSeed());
+            Random random = new Random(world.seed());
             TerrainGenerator terrainGenerator = new TerrainGenerator(random);
             climateGenerator = new ClimateGenerator(random, terrainGenerator);
             biomeGenerator = new BiomeGenerator(climateGenerator);
@@ -75,17 +75,17 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
             WorldServer worldServer = (WorldServer) world;
             worldServer.addSpawner(new MobSpawner() {
                 @Override
-                public double getMobsPerChunk() {
+                public double mobsPerChunk() {
                     return 0.1;
                 }
 
                 @Override
-                public int getSpawnAttempts() {
+                public int spawnAttempts() {
                     return 1;
                 }
 
                 @Override
-                public int getChunkChance() {
+                public int chunkChance() {
                     return 2;
                 }
 
@@ -120,23 +120,23 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                 }
 
                 @Override
-                public CreatureType getCreatureType() {
+                public CreatureType creatureType() {
                     return CreatureType.MONSTER;
                 }
             });
             worldServer.addSpawner(new MobSpawner() {
                 @Override
-                public double getMobsPerChunk() {
+                public double mobsPerChunk() {
                     return 0.1;
                 }
 
                 @Override
-                public int getSpawnAttempts() {
+                public int spawnAttempts() {
                     return 1;
                 }
 
                 @Override
-                public int getChunkChance() {
+                public int chunkChance() {
                     return 2;
                 }
 
@@ -171,23 +171,23 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                 }
 
                 @Override
-                public CreatureType getCreatureType() {
+                public CreatureType creatureType() {
                     return CreatureType.MONSTER;
                 }
             });
             worldServer.addSpawner(new MobSpawner() {
                 @Override
-                public double getMobsPerChunk() {
+                public double mobsPerChunk() {
                     return 0.01;
                 }
 
                 @Override
-                public int getChunkChance() {
+                public int chunkChance() {
                     return 10;
                 }
 
                 @Override
-                public int getSpawnAttempts() {
+                public int spawnAttempts() {
                     return 1;
                 }
 
@@ -215,7 +215,7 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                 }
 
                 @Override
-                public CreatureType getCreatureType() {
+                public CreatureType creatureType() {
                     return CreatureType.CREATURE;
                 }
             });
@@ -227,7 +227,7 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                 player.listener("VanillaBasics:Condition",
                         (EntityServer.SpawnListener) () -> {
                             TagStructure conditionTag =
-                                    player.getMetaData("Vanilla")
+                                    player.metaData("Vanilla")
                                             .getStructure("Condition");
                             synchronized (conditionTag) {
                                 conditionTag.setDouble("Stamina", 1.0);
@@ -239,7 +239,7 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                 player.listener("VanillaBasics:Condition",
                         (MobLivingServer.JumpListener) () -> {
                             TagStructure conditionTag =
-                                    player.getMetaData("Vanilla")
+                                    player.metaData("Vanilla")
                                             .getStructure("Condition");
                             synchronized (conditionTag) {
                                 double stamina =
@@ -255,7 +255,7 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                 player.listener("VanillaBasics:Condition",
                         (MobPlayerServer.PunchListener) strength -> {
                             TagStructure conditionTag =
-                                    player.getMetaData("Vanilla")
+                                    player.metaData("Vanilla")
                                             .getStructure("Condition");
                             synchronized (conditionTag) {
                                 double stamina =
@@ -270,23 +270,23 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                         });
                 player.listener("VanillaBasics:DeathMessage",
                         (MobLivingServer.DeathListener) () -> worldServer
-                                .getConnection()
-                                .chat(player.getNickname() + " died!"));
+                                .connection()
+                                .chat(player.nickname() + " died!"));
             });
         }
     }
 
-    public ClimateGenerator getClimateGenerator() {
+    public ClimateGenerator climate() {
         return climateGenerator;
     }
 
     @Override
-    public ChunkGenerator getGenerator() {
+    public ChunkGenerator generator() {
         return gen;
     }
 
     @Override
-    public ChunkPopulator getPopulator() {
+    public ChunkPopulator populator() {
         return pop;
     }
 
@@ -299,7 +299,7 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
             x += 16;
             boolean flag = false;
             while (!flag) {
-                double temperature = climateGenerator.getTemperature(x, y);
+                double temperature = climateGenerator.temperature2(x, y);
                 if (temperature < 10.0 || temperature > 15.0 ||
                         !gen.isValidSpawn(x, y)) {
                     x += 512;
@@ -307,7 +307,7 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                     flag = true;
                 }
             }
-            z = terrain.getHighestTerrainBlockZAt(x, y);
+            z = terrain.highestTerrainBlockZAt(x, y);
         }
         return new Vector3i(x, y, z);
     }
@@ -330,8 +330,8 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
     @Override
     public TagStructure save() {
         TagStructure tagStructure = new TagStructure();
-        tagStructure.setDouble("DayTime", climateGenerator.getDayTime());
-        tagStructure.setLong("Day", climateGenerator.getDay());
+        tagStructure.setDouble("DayTime", climateGenerator.dayTime());
+        tagStructure.setLong("Day", climateGenerator.day());
         tagStructure.setLong("SimulationCount", simulationCount);
         return tagStructure;
     }
@@ -344,10 +344,10 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
             playerUpdateWait -= delta;
             while (playerUpdateWait <= 0.0) {
                 playerUpdateWait += 0.25;
-                worldServer.getPlayers().forEach(player -> {
-                    double health = player.getLives();
-                    double maxHealth = player.getMaxLives();
-                    TagStructure conditionTag = player.getMetaData("Vanilla")
+                worldServer.players().forEach(player -> {
+                    double health = player.health();
+                    double maxHealth = player.maxHealth();
+                    TagStructure conditionTag = player.metaData("Vanilla")
                             .getStructure("Condition");
                     synchronized (conditionTag) {
                         double stamina = conditionTag.getDouble("Stamina");
@@ -357,9 +357,9 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                                 conditionTag.getDouble("BodyTemperature");
                         boolean ground = player.isOnGround();
                         boolean inWater = player.isInWater();
-                        Vector3 pos = player.getPos();
+                        Vector3 pos = player.pos();
                         double temperature = climateGenerator
-                                .getTemperature(pos.intX(), pos.intY(),
+                                .temperature(pos.intX(), pos.intY(),
                                         pos.intZ());
                         if (stamina > 0.2 && health < maxHealth) {
                             double rate = stamina * 0.5;
@@ -368,14 +368,14 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                         }
                         if (inWater) {
                             double rate = FastMath.clamp(
-                                    FastMath.lengthSqr(player.getSpeed()) *
+                                    FastMath.lengthSqr(player.speed()) *
                                             0.00125, 0.0, 0.05);
                             stamina -= rate;
                             bodyTemperature += rate;
                             thirst -= rate * 0.075;
                         } else if (ground) {
                             double rate = FastMath.clamp(
-                                    FastMath.lengthSqr(player.getSpeed()) *
+                                    FastMath.lengthSqr(player.speed()) *
                                             0.00025, 0.0, 0.05);
                             stamina -= rate;
                             bodyTemperature += rate;
@@ -419,35 +419,34 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                         conditionTag
                                 .setDouble("BodyTemperature", bodyTemperature);
                     }
-                    player.getConnection()
+                    player.connection()
                             .send(new PacketEntityMetaData(player, "Vanilla"));
                 });
             }
             itemUpdateWait -= delta;
             while (itemUpdateWait <= 0.0) {
                 itemUpdateWait += 1.0;
-                worldServer.getEntities().forEach(entity -> {
+                worldServer.entities().forEach(entity -> {
                     if (entity instanceof EntityContainerServer) {
                         Inventory inventory =
-                                ((EntityContainerServer) entity).getInventory();
+                                ((EntityContainerServer) entity).inventory();
                         boolean flag = false;
-                        for (int i = 0; i < inventory.getSize(); i++) {
-                            Material type = inventory.getItem(i).getMaterial();
+                        for (int i = 0; i < inventory.size(); i++) {
+                            Material type = inventory.item(i).material();
                             if (type instanceof ItemHeatable) {
-                                ((ItemHeatable) type)
-                                        .cool(inventory.getItem(i));
+                                ((ItemHeatable) type).cool(inventory.item(i));
                                 flag = true;
                             }
                         }
                         if (flag) {
-                            ((EntityContainerServer) entity).getViewers()
-                                    .forEach(viewer -> viewer.getConnection()
+                            ((EntityContainerServer) entity).viewers()
+                                    .forEach(viewer -> viewer.connection()
                                             .send(new PacketUpdateInventory(
                                                     (EntityContainerServer) entity)));
                         }
                     } else if (entity instanceof MobItemServer) {
-                        Material type = ((MobItemServer) entity).getItem()
-                                .getMaterial();
+                        Material type =
+                                ((MobItemServer) entity).item().material();
                         if (type instanceof ItemHeatable) {
                             ((ItemHeatable) type).cool((MobItemServer) entity);
                         }
@@ -457,9 +456,9 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
             syncWait -= delta;
             while (syncWait <= 0.0) {
                 syncWait += 4.0;
-                world.getConnection().send(new PacketDayTimeSync(
-                        climateGenerator.getDayTime(),
-                        climateGenerator.getDay()));
+                world.connection()
+                        .send(new PacketDayTimeSync(climateGenerator.dayTime(),
+                                climateGenerator.day()));
             }
             tickWait -= delta;
             while (tickWait <= 0.0) {
@@ -470,35 +469,33 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                 }
                 TerrainInfiniteServer terrain =
                         (TerrainInfiniteServer) worldServer.getTerrain();
-                for (TerrainInfiniteChunk chunk : terrain.getLoadedChunks()) {
+                for (TerrainInfiniteChunk chunk : terrain.loadedChunks()) {
                     Random random = ThreadLocalRandom.current();
                     if (chunk.isLoaded()) {
-                        simulateSeason(terrain, chunk.getBlockX(),
-                                chunk.getBlockY(), 16, 16,
-                                chunk.getMetaData("Vanilla"));
+                        simulateSeason(terrain, chunk.blockX(), chunk.blockY(),
+                                16, 16, chunk.metaData("Vanilla"));
                     }
                     int x = random.nextInt(16);
                     int y = random.nextInt(16);
                     double weather = climateGenerator
-                            .getWeather(x + chunk.getBlockX(),
-                                    y + chunk.getBlockY());
+                            .weather(x + chunk.blockX(), y + chunk.blockY());
                     if (random.nextInt((int) (513 - weather * 512)) == 0 &&
                             random.nextInt(1000) == 0 &&
                             weather > 0.7f) {
-                        world.getConnection()
-                                .send(new PacketLightning(chunk.getBlockX() + x,
-                                        chunk.getBlockY() + y,
-                                        chunk.getHighestTerrainBlockZAt(x, y)));
+                        world.connection()
+                                .send(new PacketLightning(chunk.blockX() + x,
+                                        chunk.blockY() + y,
+                                        chunk.highestTerrainBlockZAt(x, y)));
                     } else if (
                             random.nextInt((int) (513 - weather * 512)) == 0 &&
                                     random.nextInt(10000) == 0 &&
                                     weather > 0.85f) {
                         EntityServer entity =
                                 new EntityTornadoServer(worldServer,
-                                        new Vector3d(chunk.getBlockX() + x,
-                                                chunk.getBlockY() + y,
-                                                chunk.getHighestTerrainBlockZAt(
-                                                        x, y)));
+                                        new Vector3d(chunk.blockX() + x,
+                                                chunk.blockY() + y,
+                                                chunk.highestTerrainBlockZAt(x,
+                                                        y)));
                         entity.onSpawn();
                         worldServer.addEntity(entity);
                     }
@@ -508,15 +505,15 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
     }
 
     @Override
-    public float getSunLightReduction(double x, double y) {
-        return (float) climateGenerator.getSunLightReduction(x, y);
+    public float sunLightReduction(double x, double y) {
+        return (float) climateGenerator.sunLightReduction(x, y);
     }
 
     @Override
-    public Vector3 getSunLightNormal(double x, double y) {
-        double latitude = climateGenerator.getLatitude(y);
-        double elevation = climateGenerator.getSunElevationD(latitude);
-        double azimuth = climateGenerator.getSunAzimuthD(elevation, latitude);
+    public Vector3 sunLightNormal(double x, double y) {
+        double latitude = climateGenerator.latitude(y);
+        double elevation = climateGenerator.sunElevationD(latitude);
+        double azimuth = climateGenerator.sunAzimuthD(elevation, latitude);
         azimuth += FastMath.HALF_PI;
         double rz = FastMath.sinTable(elevation);
         double rd = FastMath.cosTable(elevation);
@@ -553,14 +550,14 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
     private void simulateSeason(TerrainServer.TerrainMutable chunk, int x,
             int y, int dx, int dy, int chance) {
         Random random = ThreadLocalRandom.current();
-        double humidity00 = climateGenerator.getHumidity(x, y);
-        double temperature00 = climateGenerator.getTemperature(x, y);
-        double humidity10 = climateGenerator.getHumidity(x + 15, y);
-        double temperature10 = climateGenerator.getTemperature(x + 15, y);
-        double humidity01 = climateGenerator.getHumidity(x, y + 15);
-        double temperature01 = climateGenerator.getTemperature(x, y + 15);
-        double humidity11 = climateGenerator.getHumidity(x + 15, y + 15);
-        double temperature11 = climateGenerator.getTemperature(x + 15, y + 15);
+        double humidity00 = climateGenerator.humidity(x, y);
+        double temperature00 = climateGenerator.temperature(x, y);
+        double humidity10 = climateGenerator.humidity(x + 15, y);
+        double temperature10 = climateGenerator.temperature(x + 15, y);
+        double humidity01 = climateGenerator.humidity(x, y + 15);
+        double temperature01 = climateGenerator.temperature(x, y + 15);
+        double humidity11 = climateGenerator.humidity(x + 15, y + 15);
+        double temperature11 = climateGenerator.temperature(x + 15, y + 15);
         for (int yy = 0; yy < dx; yy++) {
             int yyy = yy + y;
             double mixY = yy / 15.0;
@@ -573,10 +570,10 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
             for (int xx = 0; xx < dy; xx++) {
                 if (random.nextInt(chance) == 0) {
                     int xxx = xx + x;
-                    int z = chunk.getHighestTerrainBlockZAt(xxx, yyy);
+                    int z = chunk.highestTerrainBlockZAt(xxx, yyy);
                     double mixX = xx / 15.0;
                     double humidity = FastMath.mix(humidity0, humidity1, mixX);
-                    double temperature = climateGenerator.getTemperatureD(
+                    double temperature = climateGenerator.temperatureD(
                             FastMath.mix(temperature0, temperature1, mixX), z);
                     BlockType spaceType = chunk.type(xxx, yyy, z);
                     BlockType groundType = chunk.type(xxx, yyy, z - 1);
@@ -605,7 +602,7 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                             }
                         }
                     } else {
-                        double weather = climateGenerator.getWeather(xxx, yyy);
+                        double weather = climateGenerator.weather(xxx, yyy);
                         if (temperature < 0.0 &&
                                 (weather > 0.5 || chance == 1)) {
                             if (spaceType == materials.air ||

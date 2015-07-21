@@ -62,8 +62,8 @@ public class GuiComponentBar extends GuiComponent {
             FontRenderer font, double delta) {
         double factor = FastMath.min(1.0, delta);
         value += (FastMath.clamp(supplier.get(), 0.0, 1.0) - value) * factor;
-        gl.getTextureManager().unbind(gl);
-        MatrixStack matrixStack = gl.getMatrixStack();
+        gl.textures().unbind(gl);
+        MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.scale(value, 1.0f, 1.0f);
         vao1.render(gl, shader);

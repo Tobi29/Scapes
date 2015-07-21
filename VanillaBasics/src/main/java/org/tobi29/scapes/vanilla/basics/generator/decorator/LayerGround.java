@@ -40,7 +40,7 @@ public class LayerGround implements BiomeDecorator.Layer {
     public void decorate(TerrainServer.TerrainMutable terrain, int x, int y,
             VanillaMaterial materials, Random random) {
         if (random.nextInt(chance) == 0) {
-            int z = terrain.getHighestTerrainBlockZAt(x, y);
+            int z = terrain.highestTerrainBlockZAt(x, y);
             if (check.canPlace(terrain, x, y, z)) {
                 terrain.typeData(x, y, z, material,
                         data.data(terrain, x, y, z, random));

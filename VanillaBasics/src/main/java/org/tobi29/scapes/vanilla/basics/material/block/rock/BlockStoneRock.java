@@ -94,7 +94,7 @@ public class BlockStoneRock extends VanillaBlock {
     }
 
     @Override
-    public List<AABBElement> getCollision(int data, int x, int y, int z) {
+    public List<AABBElement> collision(int data, int x, int y, int z) {
         return new ArrayList<>();
     }
 
@@ -110,22 +110,22 @@ public class BlockStoneRock extends VanillaBlock {
     }
 
     @Override
-    public double getResistance(ItemStack item, int data) {
+    public double resistance(ItemStack item, int data) {
         return 0;
     }
 
     @Override
-    public String getFootStep(int data) {
+    public String footStepSound(int data) {
         return "VanillaBasics:sound/footsteps/Stone.ogg";
     }
 
     @Override
-    public String getBreak(ItemStack item, int data) {
+    public String breakSound(ItemStack item, int data) {
         return "VanillaBasics:sound/blocks/Stone.ogg";
     }
 
     @Override
-    public Optional<TerrainTexture> getParticleTexture(Face face,
+    public Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
         return Optional.of(textures[terrain.data(x, y, z)]);
     }
@@ -165,9 +165,9 @@ public class BlockStoneRock extends VanillaBlock {
             int z) {
         if (!terrain.type(x, y, z - 1).isSolid(terrain, x, y, z - 1)) {
             terrain.world().dropItems(
-                    getDrops(new ItemStack(materials.air, (short) 0),
+                    drops(new ItemStack(materials.air, (short) 0),
                             terrain.data(x, y, z)), x, y, z);
-            terrain.typeData(x, y, z, terrain.world().getAir(), (short) 0);
+            terrain.typeData(x, y, z, terrain.world().air(), (short) 0);
         }
     }
 
@@ -179,11 +179,11 @@ public class BlockStoneRock extends VanillaBlock {
         int i = 0;
         for (StoneType type : types) {
             textures[i] =
-                    registry.registerTexture(type.getTextureRoot() + "/raw/" +
-                            type.getTexture() + ".png");
+                    registry.registerTexture(type.textureRoot() + "/raw/" +
+                            type.texture() + ".png");
             texturesItem[i++] = registry.registerTexture(
                     "VanillaBasics:image/terrain/stone/rock/" +
-                            type.getTexture() + ".png");
+                            type.texture() + ".png");
         }
     }
 
@@ -215,22 +215,22 @@ public class BlockStoneRock extends VanillaBlock {
     @Override
     public void render(ItemStack item, GL gl, Shader shader,
             float r, float g, float b, float a) {
-        modelsItem[item.getData()].render(gl, shader);
+        modelsItem[item.data()].render(gl, shader);
     }
 
     @Override
     public void renderInventory(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a) {
-        modelsItem[item.getData()].renderInventory(gl, shader);
+        modelsItem[item.data()].renderInventory(gl, shader);
     }
 
     @Override
-    public String getName(ItemStack item) {
-        return materials.stoneRaw.getName(item) + " Rock";
+    public String name(ItemStack item) {
+        return materials.stoneRaw.name(item) + " Rock";
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 128;
     }
 }

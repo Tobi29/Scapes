@@ -33,12 +33,12 @@ public class ItemStack {
     }
 
     public ItemStack(GameRegistry registry) {
-        this(registry.getAir(), 0, 0);
+        this(registry.air(), 0, 0);
     }
 
     public ItemStack(Material material, int data, int amount,
             TagStructure metaData) {
-        registry = material.getRegistry();
+        registry = material.registry();
         this.material = material;
         this.data = data;
         this.amount = amount;
@@ -57,21 +57,21 @@ public class ItemStack {
         this(material, data, 1, metaData);
     }
 
-    public int getAmount() {
+    public int amount() {
         return amount;
     }
 
     public ItemStack setAmount(int amount) {
         this.amount = amount;
-        if (this.amount <= 0 || material == registry.getAir()) {
+        if (this.amount <= 0 || material == registry.air()) {
             metaData = new TagStructure();
             this.amount = 0;
-            material = registry.getAir();
+            material = registry.air();
         }
         return this;
     }
 
-    public int getData() {
+    public int data() {
         return data;
     }
 
@@ -80,13 +80,13 @@ public class ItemStack {
         return this;
     }
 
-    public Material getMaterial() {
+    public Material material() {
         return material;
     }
 
     public ItemStack setMaterial(Material material) {
         if (material == null) {
-            material = registry.getAir();
+            material = registry.air();
         }
         this.material = material;
         return this;
@@ -94,15 +94,15 @@ public class ItemStack {
 
     public int canStack(ItemStack add) {
         return canStack(add, FastMath.min(
-                FastMath.min(material.getStackSize(this),
-                        add.material.getStackSize(add)) - amount, add.amount));
+                FastMath.min(material.maxStackSize(this),
+                        add.material.maxStackSize(add)) - amount, add.amount));
     }
 
     public int canStack(ItemStack add, int amount) {
         if ((add.material != material || add.data != data ||
-                amount + this.amount > FastMath.min(material.getStackSize(this),
-                        add.material.getStackSize(add))) &&
-                material != registry.getAir() && this.amount > 0) {
+                amount + this.amount > FastMath.min(material.maxStackSize(this),
+                        add.material.maxStackSize(add))) &&
+                material != registry.air() && this.amount > 0) {
             return 0;
         }
         return amount;
@@ -114,7 +114,7 @@ public class ItemStack {
 
     public int canTake(ItemStack take, int amount) {
         if (take.material != material ||
-                take.data != data || material == registry.getAir() ||
+                take.data != data || material == registry.air() ||
                 this.amount <= 0) {
             return 0;
         }
@@ -122,7 +122,7 @@ public class ItemStack {
     }
 
     public void load(TagStructure tag) {
-        material = registry.getMaterial(tag.getInteger("Type"));
+        material = registry.material(tag.getInteger("Type"));
         data = tag.getShort("Data");
         amount = tag.getInteger("Amount");
         metaData = tag.getStructure("MetaData");
@@ -130,14 +130,14 @@ public class ItemStack {
 
     public TagStructure save() {
         TagStructure tag = new TagStructure();
-        tag.setInteger("Type", material.getItemID());
+        tag.setInteger("Type", material.itemID());
         tag.setInteger("Data", data);
         tag.setInteger("Amount", amount);
         tag.setStructure("MetaData", metaData);
         return tag;
     }
 
-    public TagStructure getMetaData(String category) {
+    public TagStructure metaData(String category) {
         return metaData.getStructure(category);
     }
 
@@ -146,15 +146,15 @@ public class ItemStack {
     }
 
     public int stack(ItemStack add) {
-        return stack(add, FastMath.min(FastMath.min(material.getStackSize(this),
-                add.material.getStackSize(add)) - amount, add.amount));
+        return stack(add, FastMath.min(FastMath.min(material.maxStackSize(this),
+                add.material.maxStackSize(add)) - amount, add.amount));
     }
 
     public int stack(ItemStack add, int amount) {
         if ((add.material != material || add.data != data ||
-                amount + this.amount > FastMath.min(material.getStackSize(this),
-                        add.material.getStackSize(add))) &&
-                material != registry.getAir() && this.amount > 0) {
+                amount + this.amount > FastMath.min(material.maxStackSize(this),
+                        add.material.maxStackSize(add))) &&
+                material != registry.air() && this.amount > 0) {
             return 0;
         }
         material = add.material;
@@ -172,7 +172,7 @@ public class ItemStack {
 
     public Optional<ItemStack> take(ItemStack take, int amount) {
         if (take.material != material ||
-                take.data != data || material == registry.getAir() ||
+                take.data != data || material == registry.air() ||
                 this.amount <= 0) {
             return Optional.empty();
         }
@@ -182,31 +182,31 @@ public class ItemStack {
         if (this.amount <= 0) {
             metaData = new TagStructure();
             this.amount = 0;
-            material = registry.getAir();
+            material = registry.air();
         }
         return Optional.of(give);
     }
 
     public Optional<ItemStack> take(int amount) {
-        if (material == registry.getAir() || this.amount <= 0) {
+        if (material == registry.air() || this.amount <= 0) {
             return Optional.empty();
         }
         ItemStack give = new ItemStack(this);
         give.setAmount(amount);
         this.amount -= amount;
-        if (this.amount <= 0 || material == registry.getAir()) {
+        if (this.amount <= 0 || material == registry.air()) {
             metaData = new TagStructure();
             this.amount = 0;
-            material = registry.getAir();
+            material = registry.air();
         }
         return Optional.of(give);
     }
 
     public boolean isEmpty() {
-        return amount <= 0 || material == registry.getAir();
+        return amount <= 0 || material == registry.air();
     }
 
-    public String getName() {
-        return material.getName(this);
+    public String name() {
+        return material.name(this);
     }
 }

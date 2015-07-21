@@ -77,12 +77,12 @@ public class MP3ReadStream implements ReadableAudioStream {
     }
 
     @Override
-    public int getChannels() {
+    public int channels() {
         return channels;
     }
 
     @Override
-    public int getRate() {
+    public int rate() {
         return rate;
     }
 
@@ -153,7 +153,7 @@ public class MP3ReadStream implements ReadableAudioStream {
         private final int[] index;
 
         public OutputBuffer() {
-            buffer = BufferCreator.floatBuffer(OBUFFERSIZE * MAXCHANNELS);
+            buffer = BufferCreator.floats(OBUFFERSIZE * MAXCHANNELS);
             index = new int[MAXCHANNELS];
             clear_buffer();
         }

@@ -48,10 +48,10 @@ public class FontRenderer {
 
     private void initPage(int id) {
         long timestamp = System.currentTimeMillis();
-        GlyphRenderer.GlyphPage page = glyphRenderer.getPage(id);
-        int imageSize = page.getSize();
+        GlyphRenderer.GlyphPage page = glyphRenderer.page(id);
+        int imageSize = page.size();
         Texture texture =
-                new TextureCustom(imageSize, imageSize, page.getBuffer(), 2,
+                new TextureCustom(imageSize, imageSize, page.buffer(), 2,
                         TextureFilter.LINEAR, TextureFilter.LINEAR,
                         TextureWrap.CLAMP, TextureWrap.CLAMP);
         timestamp = System.currentTimeMillis() - timestamp;
@@ -61,8 +61,8 @@ public class FontRenderer {
             System.arraycopy(pages, 0, newPages, 0, pages.length);
             pages = newPages;
         }
-        pages[id] = new GlyphPage(texture, page.getWidth(), page.getTiles(),
-                page.getTileSize());
+        pages[id] = new GlyphPage(texture, page.width(), page.tiles(),
+                page.tileSize());
     }
 
     public Text render(String text, float x, float y, float size, float r,
@@ -99,8 +99,8 @@ public class FontRenderer {
                 yy += line;
                 length++;
             } else {
-                int id = glyphRenderer.getPageID(letter);
-                int pageLetter = glyphRenderer.getPageLetter(letter);
+                int id = glyphRenderer.pageID(letter);
+                int pageLetter = glyphRenderer.pageCode(letter);
                 if (id >= pages.length || pages[id] == null) {
                     initPage(id);
                 }
@@ -192,7 +192,7 @@ public class FontRenderer {
             });
         }
 
-        public int getLength() {
+        public int length() {
             return length;
         }
     }

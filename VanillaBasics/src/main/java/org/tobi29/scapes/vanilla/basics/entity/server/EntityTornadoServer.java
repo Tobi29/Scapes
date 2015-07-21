@@ -42,8 +42,8 @@ public class EntityTornadoServer extends EntityServer implements MobileEntity {
         super(world, pos);
         Random random = ThreadLocalRandom.current();
         dir = random.nextDouble() * 360;
-        time = random.nextInt(1600) + 800;
-        PlayConnection connection = world.getConnection();
+        time = random.nextInt(100) + 20;
+        PlayConnection connection = world.connection();
         positionHandler =
                 new MobPositionHandler(pos, connection::send, this.pos::set,
                         newSpeed -> {
@@ -74,21 +74,21 @@ public class EntityTornadoServer extends EntityServer implements MobileEntity {
     @Override
     public void update(double delta) {
         Random random = ThreadLocalRandom.current();
-        dir += random.nextDouble() * 4 - 2;
+        dir += (random.nextDouble() * 80.0 - 40.0) * delta;
         double d = dir * FastMath.DEG_2_RAD;
-        double speed = 0.2 * delta;
+        double speed = 2.0 * delta;
         pos.plusX(FastMath.cosTable(d) * speed);
         pos.plusY(FastMath.sinTable(d) * speed);
         pos.setZ(world.getTerrain()
-                .getHighestTerrainBlockZAt(pos.intX(), pos.intY()) + 0.5);
+                .highestTerrainBlockZAt(pos.intX(), pos.intY()) + 0.5);
         positionHandler
                 .submitUpdate(entityID, pos.now(), Vector3d.ZERO, Vector3d.ZERO,
                         false, false, false, false);
         Vector3 currentPos = pos.now();
-        world.getEntities(currentPos, 256.0).stream()
+        world.entities(currentPos, 256.0).stream()
                 .filter(entity -> entity instanceof MobServer)
                 .forEach(entity -> {
-                    Vector3 push = entity.getPos().minus(currentPos);
+                    Vector3 push = entity.pos().minus(currentPos);
                     double s = FastMath.max(0.0,
                             320.0 - FastMath.length(push) * 8.0) * delta;
                     Vector3 force = FastMath.normalizeSafe(push).multiply(-s);
@@ -102,7 +102,7 @@ public class EntityTornadoServer extends EntityServer implements MobileEntity {
     }
 
     @Override
-    public MobPositionHandler getPositionHandler() {
+    public MobPositionHandler positionHandler() {
         return positionHandler;
     }
 }

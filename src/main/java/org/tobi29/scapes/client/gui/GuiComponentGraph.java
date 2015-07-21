@@ -67,7 +67,7 @@ public class GuiComponentGraph extends GuiComponent {
             index[j++] = i;
             index[j] = i + 1;
         }
-        gl.getTextureManager().unbind(gl);
+        gl.textures().unbind(gl);
         VAO vao = VAOUtility.createVCI(vertex, color, index, RenderType.LINES);
         vao.render(gl, shader);
         vao.markAsDisposed();

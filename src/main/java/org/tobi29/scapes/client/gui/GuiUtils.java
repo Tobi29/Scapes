@@ -32,7 +32,7 @@ public class GuiUtils {
         if (item == null) {
             return;
         }
-        renderItem(x, y, width, height, item, item.getAmount() > 1, gl, shader,
+        renderItem(x, y, width, height, item, item.amount() > 1, gl, shader,
                 font);
     }
 
@@ -42,15 +42,15 @@ public class GuiUtils {
         if (item == null) {
             return;
         }
-        if (item.getAmount() > 0) {
-            MatrixStack matrixStack = gl.getMatrixStack();
+        if (item.amount() > 0) {
+            MatrixStack matrixStack = gl.matrixStack();
             Matrix matrix = matrixStack.push();
             matrix.translate(x + width / 4.0f, y + height / 4.0f, 4);
             matrix.scale(width / 2.0f, height / 2.0f, 4);
-            item.getMaterial().renderInventory(item, gl, shader, 1, 1, 1, 1);
+            item.material().renderInventory(item, gl, shader, 1, 1, 1, 1);
             matrixStack.pop();
             if (number) {
-                int i = item.getAmount();
+                int i = item.amount();
                 if (NUMBERS[i] == null) {
                     NUMBERS[i] =
                             font.render(String.valueOf(i), 2.0f, -18.0f, 16.0f,

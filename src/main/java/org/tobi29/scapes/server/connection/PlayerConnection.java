@@ -24,6 +24,7 @@ import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.connection.*;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.*;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -93,28 +94,27 @@ public class PlayerConnection
             ServerConnection server) throws IOException {
         this.channel = channel;
         this.server = server;
-        registry =
-                server.getServer().getWorldFormat().getPlugins().getRegistry();
+        registry = server.server().worldFormat().plugins().registry();
         loginStep1();
     }
 
-    public MobPlayerServer getMob() {
+    public MobPlayerServer mob() {
         return entity;
     }
 
-    public ServerSkin getSkin() {
+    public ServerSkin skin() {
         return skin;
     }
 
-    public PublicKey getKey() {
+    public PublicKey key() {
         return key;
     }
 
-    public String getID() {
+    public String id() {
         return id;
     }
 
-    public Optional<InetAddress> getAddress() {
+    public Optional<InetAddress> address() {
         Optional<InetSocketAddress> address = channel.getRemoteAddress();
         if (address.isPresent()) {
             return Optional.of(address.get().getAddress());
@@ -122,25 +122,25 @@ public class PlayerConnection
         return Optional.empty();
     }
 
-    public String getNickname() {
+    public String nickname() {
         return nickname;
     }
 
-    public ServerConnection getServer() {
+    public ServerConnection server() {
         return server;
     }
 
-    public PlayerStatistics getStatistics() {
+    public PlayerStatistics statistics() {
         return statistics;
     }
 
-    public long getPing() {
+    public long ping() {
         return ping;
     }
 
     private void loginStep1() throws IOException {
         WritableByteStream output = channel.getOutputStream();
-        KeyPair keyPair = server.getKeyPair();
+        KeyPair keyPair = server.keyPair();
         byte[] array = keyPair.getPublic().getEncoded();
         output.putInt(array.length);
         output.put(array);
@@ -154,7 +154,7 @@ public class PlayerConnection
         byte[] keyServer = new byte[keyLength];
         byte[] keyClient = new byte[keyLength];
         try {
-            KeyPair keyPair = server.getKeyPair();
+            KeyPair keyPair = server.keyPair();
             Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
             byte[] array = new byte[cipher.getOutputSize(keyLength << 1)];
@@ -185,25 +185,24 @@ public class PlayerConnection
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidKeySpecException e) {
             throw new IOException(e);
         }
-        Plugins plugins = server.getServer().getWorldFormat().getPlugins();
-        output.putInt(plugins.getFileCount());
-        Iterator<PluginFile> pluginIterator = plugins.getFiles().iterator();
+        Plugins plugins = server.server().worldFormat().plugins();
+        output.putInt(plugins.fileCount());
+        Iterator<PluginFile> pluginIterator = plugins.files().iterator();
         while (pluginIterator.hasNext()) {
             sendPluginChecksum(pluginIterator.next(), output);
         }
-        TagStructureBinary
-                .write(server.getServer().getWorldFormat().getIDStorage()
+        TagStructureBinary.write(server.server().worldFormat().idStorage()
                         .save(), output);
         channel.queueBundle();
     }
 
     private void loginStep4(ReadableByteStream input) throws IOException {
-        Plugins plugins = server.getServer().getWorldFormat().getPlugins();
+        Plugins plugins = server.server().worldFormat().plugins();
         byte[] challenge = new byte[this.challenge.length];
         input.get(challenge);
         nickname = input.getString();
         loadingRadius = FastMath.clamp(input.getInt(), 10,
-                server.getServer().getMaxLoadingRadius());
+                server.server().maxLoadingRadius());
         ByteBuffer buffer = ByteBuffer.allocate(64 * 64 * 4);
         input.get(buffer);
         buffer.flip();
@@ -228,7 +227,7 @@ public class PlayerConnection
             output.putBoolean(false);
             output.putInt(loadingRadius);
             for (int request : requests) {
-                sendPlugin(plugins.getFile(request).getFile(), output);
+                sendPlugin(plugins.file(request).file(), output);
             }
             channel.queueBundle();
             long currentTime = System.currentTimeMillis();
@@ -240,23 +239,23 @@ public class PlayerConnection
     }
 
     private Optional<String> start() {
-        WorldFormat worldFormat = server.getServer().getWorldFormat();
-        Optional<TagStructure> tag = worldFormat.getPlayerData().load(id);
+        WorldFormat worldFormat = server.server().worldFormat();
+        Optional<TagStructure> tag = worldFormat.playerData().load(id);
         WorldServer world;
         statistics = new PlayerStatistics();
         if (tag.isPresent()) {
             TagStructure tagStructure = tag.get();
-            world = worldFormat.getWorld(tagStructure.getString("World"));
+            world = worldFormat.world(tagStructure.getString("World"));
             entity = new MobPlayerServer(world, Vector3d.ZERO, Vector3d.ZERO,
                     0.0, 0.0, nickname, skin.checksum(), this);
             entity.read(tagStructure.getStructure("Entity"));
-            statistics.load(world.getRegistry(),
+            statistics.load(world.registry(),
                     tagStructure.getList("Statistics"));
             permissionLevel = tagStructure.getInteger("Permissions");
         } else {
-            world = worldFormat.getDefaultWorld();
+            world = worldFormat.defaultWorld();
             entity = new MobPlayerServer(world,
-                    new Vector3d(0.5, 0.5, 1.0).plus(world.getSpawn()),
+                    new Vector3d(0.5, 0.5, 1.0).plus(world.spawn()),
                     Vector3d.ZERO, 0.0, 0.0, nickname, skin.checksum(), this);
             entity.onSpawn();
         }
@@ -269,15 +268,15 @@ public class PlayerConnection
     }
 
     private Optional<String> generateResponse(boolean challengeMatch) {
-        if (!server.getAllowsJoin()) {
+        if (!server.doesAllowJoin()) {
             return Optional.of("Server not public!");
         }
         if (!challengeMatch) {
             return Optional.of("Invalid private key!");
         }
-        if (!server.getServer().getWorldFormat().getPlayerData()
+        if (!server.server().worldFormat().playerData()
                 .playerExists(id)) {
-            if (!server.getAllowsCreation()) {
+            if (!server.doesAllowCreation()) {
                 return Optional
                         .of("This server does not allow account creation!");
             }
@@ -286,8 +285,7 @@ public class PlayerConnection
         if (nicknameCheck.isPresent()) {
             return nicknameCheck;
         }
-        Optional<String> banCheck =
-                server.getServer().getWorldFormat().getPlayerBans()
+        Optional<String> banCheck = server.server().worldFormat().playerBans()
                         .matches(this);
         if (banCheck.isPresent()) {
             return banCheck;
@@ -307,13 +305,13 @@ public class PlayerConnection
     }
 
     @Override
-    public int getLoadingRadius() {
+    public int loadingRadius() {
         return loadingRadius;
     }
 
     private void sendPluginChecksum(PluginFile plugin,
             WritableByteStream output) throws IOException {
-        byte[] checksum = plugin.getChecksum();
+        byte[] checksum = plugin.checksum();
         output.putInt(checksum.length);
         output.put(checksum);
     }
@@ -329,19 +327,19 @@ public class PlayerConnection
         if (!packet.isVital() && sendQueueSize.get() > 256) {
             return;
         }
-        Vector3 pos3d = packet.getPosition();
+        Vector3 pos3d = packet.pos();
         boolean flag = true;
         if (pos3d != null) {
-            WorldServer world = entity.getWorld();
+            WorldServer world = entity.world();
             if (world != null && !world.getTerrain()
                     .isBlockSendable(entity, pos3d.intX(), pos3d.intY(),
                             pos3d.intZ(), packet.isChunkContent())) {
                 flag = false;
             }
             if (flag) {
-                double range = packet.getRange();
+                double range = packet.range();
                 if (range > 0.0) {
-                    if (FastMath.pointDistanceSqr(pos3d, entity.getPos()) >
+                    if (FastMath.pointDistanceSqr(pos3d, entity.pos()) >
                             range * range) {
                         flag = false;
                     }
@@ -351,9 +349,8 @@ public class PlayerConnection
         if (flag) {
             try {
                 WritableByteStream output = channel.getOutputStream();
-                output.putShort(packet.getID(
-                        server.getServer().getWorldFormat().getPlugins()
-                                .getRegistry()));
+                output.putShort(packet.id(
+                        server.server().worldFormat().plugins().registry()));
                 ((PacketClient) packet).sendClient(this, output);
             } catch (SocketException e) {
             } catch (IOException e) {
@@ -418,9 +415,9 @@ public class PlayerConnection
                         ReadableByteStream stream = bundle.get();
                         while (stream.hasRemaining()) {
                             PacketServer packet = (PacketServer) Packet
-                                    .makePacket(registry, stream.getShort());
+                                    .make(registry, stream.getShort());
                             packet.parseServer(this, stream);
-                            packet.runServer(this, entity.getWorld());
+                            packet.runServer(this, entity.world());
                         }
                     }
                     return channel.process();
@@ -453,16 +450,16 @@ public class PlayerConnection
         channel.close();
         if (entity != null) {
             server.removePlayer(this);
-            WorldServer world = entity.getWorld();
+            WorldServer world = entity.world();
             if (world != null) {
                 world.deleteEntity(entity);
                 world.removePlayer(entity);
                 TagStructure tagStructure = new TagStructure();
                 tagStructure.setStructure("Entity", entity.write(false));
-                tagStructure.setString("World", world.getName());
+                tagStructure.setString("World", world.name());
                 tagStructure.setList("Statistics", statistics.save());
                 tagStructure.setInteger("Permissions", permissionLevel);
-                server.getServer().getWorldFormat().getPlayerData()
+                server.server().worldFormat().playerData()
                         .save(tagStructure, id);
             }
         }
@@ -475,12 +472,12 @@ public class PlayerConnection
     }
 
     @Override
-    public Optional<String> getPlayerName() {
+    public Optional<String> playerName() {
         return Optional.of(nickname);
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return nickname;
     }
 
@@ -491,7 +488,7 @@ public class PlayerConnection
     }
 
     @Override
-    public int getPermissionLevel() {
+    public int permissionLevel() {
         if (Scapes.debug) {
             return 10;
         }

@@ -66,7 +66,7 @@ public class ScapesServer {
         taskExecutor = new TaskExecutor(crashHandler, "Server");
         commandRegistry = new CommandRegistry();
         initalControlPanels.forEach(controlPanel -> controlPanels
-                .put(controlPanel.getID(), controlPanel));
+                .put(controlPanel.id(), controlPanel));
         logJoiner = taskExecutor.runTask(joiner -> {
             try (SystemOutReader logReader = new SystemOutReader()) {
                 while (!joiner.marked()) {
@@ -104,28 +104,28 @@ public class ScapesServer {
             sync.init();
             while (!joiner.marked()) {
                 long ram = runtime.totalMemory() - runtime.freeMemory();
-                Collection<WorldServer> worlds = worldFormat.getWorlds();
+                Collection<WorldServer> worlds = worldFormat.worlds();
                 Map<String, Double> tps =
                         new ConcurrentHashMap<>(worlds.size());
                 worlds.forEach(world -> {
-                    Sync worldSync = world.getSync();
-                    tps.put(world.getName(), (double) worldSync.getDiff() /
-                            worldSync.getMaxDiff());
+                    Sync worldSync = world.sync();
+                    tps.put(world.name(),
+                            (double) worldSync.diff() / worldSync.maxDiff());
                 });
                 controlPanels.values().forEach(controlPanel -> controlPanel
                         .sendProfilerResults(ram, tps));
-                sync.capTPS();
+                sync.cap();
             }
         }, "Profiler");
     }
 
-    public ShutdownReason getShutdownReason() {
+    public ShutdownReason shutdownReason() {
         return shutdownReason;
     }
 
     public void addControlPanel(ControlPanel controlPanel) {
         ControlPanel oldControlPanel =
-                controlPanels.put(controlPanel.getID(), controlPanel);
+                controlPanels.put(controlPanel.id(), controlPanel);
         if (oldControlPanel != null) {
             oldControlPanel.replaced();
         }
@@ -134,47 +134,39 @@ public class ScapesServer {
     }
 
     public void removeControlPanel(ControlPanel controlPanel) {
-        controlPanels.remove(controlPanel.getID(), controlPanel);
+        controlPanels.remove(controlPanel.id(), controlPanel);
         serverConnection.updateControlPanelPlayers();
     }
 
-    public Stream<ControlPanel> getControlPanels() {
+    public Stream<ControlPanel> controlPanels() {
         return controlPanels.values().stream();
     }
 
-    public ServerConnection getConnection() {
+    public ServerConnection connection() {
         return serverConnection;
     }
 
-    public WorldFormat getWorldFormat() {
+    public WorldFormat worldFormat() {
         return worldFormat;
     }
 
-    public ServerInfo getServerInfo() {
+    public ServerInfo serverInfo() {
         return serverInfo;
     }
 
-    public int getMaxLoadingRadius() {
+    public int maxLoadingRadius() {
         return maxLoadingRadius;
     }
 
-    public String getControlPanelPassword() {
+    public String controlPanelPassword() {
         return controlPanelPassword;
     }
 
-    public void start(int port) {
-        try {
-            serverConnection.start(port);
-        } catch (IOException e) {
-            LOGGER.error("Error starting server: {}", e.toString());
-        }
-    }
-
-    public TaskExecutor getTaskExecutor() {
+    public TaskExecutor taskExecutor() {
         return taskExecutor;
     }
 
-    public CommandRegistry getCommandRegistry() {
+    public CommandRegistry commandRegistry() {
         return commandRegistry;
     }
 
@@ -186,7 +178,7 @@ public class ScapesServer {
 
     public void stop(ShutdownReason shutdownReason) {
         this.shutdownReason = shutdownReason;
-        worldFormat.getWorldNames().forEach(worldFormat::removeWorld);
+        worldFormat.worldNames().forEach(worldFormat::removeWorld);
         profilerJoiner.join();
         serverConnection.stop();
         logJoiner.join();

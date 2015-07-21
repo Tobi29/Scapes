@@ -73,7 +73,7 @@ public class BlockAnvil extends VanillaBlockContainer {
     }
 
     @Override
-    public List<AABBElement> getCollision(int data, int x, int y, int z) {
+    public List<AABBElement> collision(int data, int x, int y, int z) {
         List<AABBElement> aabbs = new ArrayList<>();
         aabbs.add(new AABBElement(
                 new AABB(x + 0.125, y, z, x + 0.875, y + 1, z + 1),
@@ -82,22 +82,22 @@ public class BlockAnvil extends VanillaBlockContainer {
     }
 
     @Override
-    public double getResistance(ItemStack item, int data) {
-        return "Pickaxe".equals(item.getMaterial().getToolType(item)) ? 8 : -1;
+    public double resistance(ItemStack item, int data) {
+        return "Pickaxe".equals(item.material().toolType(item)) ? 8 : -1;
     }
 
     @Override
-    public String getFootStep(int data) {
+    public String footStepSound(int data) {
         return "VanillaBasics:sound/footsteps/Stone.ogg";
     }
 
     @Override
-    public String getBreak(ItemStack item, int data) {
+    public String breakSound(ItemStack item, int data) {
         return "VanillaBasics:sound/blocks/Metal.ogg";
     }
 
     @Override
-    public Optional<TerrainTexture> getParticleTexture(Face face,
+    public Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
         return Optional.of(texture);
     }
@@ -129,7 +129,7 @@ public class BlockAnvil extends VanillaBlockContainer {
                     this, terrain.data(x, y, z));
             entity.onSpawn();
             terrain.world().addEntity(entity);
-            terrain.typeData(x, y, z, terrain.world().getAir(), (short) 0);
+            terrain.typeData(x, y, z, terrain.world().air(), (short) 0);
         }
     }
 
@@ -177,12 +177,12 @@ public class BlockAnvil extends VanillaBlockContainer {
     }
 
     @Override
-    public String getName(ItemStack item) {
+    public String name(ItemStack item) {
         return "Anvil";
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 1;
     }
 }

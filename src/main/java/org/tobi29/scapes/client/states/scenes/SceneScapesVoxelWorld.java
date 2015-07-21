@@ -100,8 +100,7 @@ public class SceneScapesVoxelWorld extends Scene {
     public SceneScapesVoxelWorld(WorldClient world, Cam cam) {
         this.world = world;
         this.cam = cam;
-        GuiWidgetDebugValues debugValues =
-                world.getGame().getEngine().debugValues();
+        GuiWidgetDebugValues debugValues = world.game().engine().debugValues();
         cameraPositionXDebug = debugValues.get("Camera-Position-X");
         cameraPositionYDebug = debugValues.get("Camera-Position-Y");
         cameraPositionZDebug = debugValues.get("Camera-Position-Z");
@@ -115,37 +114,37 @@ public class SceneScapesVoxelWorld extends Scene {
         addGui(performanceWidget);
         performanceWidget.setVisible(false);
         skinStorage = new ClientSkinStorage(
-                world.getGame().getEngine().graphics().getTextureManager()
-                        .getTexture("Scapes:image/entity/mob/Player"));
+                world.game().engine().graphics().textures()
+                        .get("Scapes:image/entity/mob/Player"));
         vao = VAOUtility.createVTI(
                 new float[]{0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
                         0.0f, 1.0f, 0.0f, 0.0f},
                 new float[]{0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f},
                 new int[]{0, 1, 2, 3, 2, 1}, RenderType.TRIANGLES);
-        TagStructure scapesTag = world.getGame().getEngine().tagStructure()
-                .getStructure("Scapes");
+        TagStructure scapesTag =
+                world.game().engine().tagStructure().getStructure("Scapes");
         animationDistance = scapesTag.getFloat("AnimationDistance");
         fxaa = scapesTag.getBoolean("FXAA");
         bloom = scapesTag.getBoolean("Bloom");
     }
 
-    public float getFogR() {
-        return skybox.getFogR();
+    public float fogR() {
+        return skybox.fogR();
     }
 
-    public float getFogG() {
-        return skybox.getFogG();
+    public float fogG() {
+        return skybox.fogG();
     }
 
-    public float getFogB() {
-        return skybox.getFogB();
+    public float fogB() {
+        return skybox.fogB();
     }
 
-    public float getFogDistance() {
-        return skybox.getFogDistance();
+    public float fogDistance() {
+        return skybox.fogDistance();
     }
 
-    public float getRenderDistance() {
+    public float renderDistance() {
         return renderDistance;
     }
 
@@ -157,7 +156,7 @@ public class SceneScapesVoxelWorld extends Scene {
         return mouseGrabbed;
     }
 
-    public Image[] getPanorama() {
+    public Image[] panorama() {
         return panorama;
     }
 
@@ -177,19 +176,19 @@ public class SceneScapesVoxelWorld extends Scene {
         chat.addLine(line);
     }
 
-    public MobPlayerClientMain getPlayer() {
-        return world.getPlayer();
+    public MobPlayerClientMain player() {
+        return world.player();
     }
 
-    public WorldClient getWorld() {
+    public WorldClient world() {
         return world;
     }
 
-    public Cam getCam() {
+    public Cam cam() {
         return cam;
     }
 
-    public ClientSkinStorage getSkinStorage() {
+    public ClientSkinStorage skinStorage() {
         return skinStorage;
     }
 
@@ -202,12 +201,12 @@ public class SceneScapesVoxelWorld extends Scene {
 
     @Override
     public void init(GL gl) {
-        MobPlayerClientMain player = world.getPlayer();
+        MobPlayerClientMain player = world.player();
         skyboxFBO = new FBO(1, 1, 1, false, true, false, gl);
         exposureFBO = new FBO(1, 1, 1, false, true, false, gl);
         long time = System.currentTimeMillis();
-        terrainTextureRegistry = new TerrainTextureRegistry(state.getEngine());
-        for (Material type : world.getRegistry().getMaterials()) {
+        terrainTextureRegistry = new TerrainTextureRegistry(state.engine());
+        for (Material type : world.registry().materials()) {
             if (type != null) {
                 type.registerTextures(terrainTextureRegistry);
             }
@@ -216,7 +215,7 @@ public class SceneScapesVoxelWorld extends Scene {
         time = System.currentTimeMillis() - time;
         LOGGER.info("Created terrain texture atlas with {} textures in {} ms.",
                 size, time);
-        for (Material type : world.getRegistry().getMaterials()) {
+        for (Material type : world.registry().materials()) {
             if (type != null) {
                 type.createModels(terrainTextureRegistry);
             }
@@ -224,47 +223,47 @@ public class SceneScapesVoxelWorld extends Scene {
         hud = new GuiHud(player);
         hud.add(chat);
         addGui(hud);
-        ShaderManager shaderManager = gl.getShaderManager();
+        ShaderManager shaderManager = gl.shaders();
         ShaderCompileInformation information =
-                shaderManager.getCompileInformation("Scapes:shader/Terrain");
+                shaderManager.compileInformation("Scapes:shader/Terrain");
         information.supplyDefine("ENABLE_ANIMATIONS", animationDistance > 0.0f);
         information =
-                shaderManager.getCompileInformation("Scapes:shader/Exposure");
+                shaderManager.compileInformation("Scapes:shader/Exposure");
         information.supplyExternal("SAMPLE_OFFSET", SAMPLE_OFFSET);
         information.supplyExternal("SAMPLE_WEIGHT", SAMPLE_WEIGHT);
         information.supplyExternal("SAMPLE_LENGTH", SAMPLE_LENGTH);
         if (bloom) {
             information = shaderManager
-                    .getCompileInformation("Scapes:shader/Composite1");
+                    .compileInformation("Scapes:shader/Composite1");
             information.supplyExternal("BLUR_OFFSET", BLUR_OFFSET);
             information.supplyExternal("BLUR_WEIGHT", BLUR_WEIGHT);
             information.supplyExternal("BLUR_LENGTH", BLUR_LENGTH);
         }
         information =
-                shaderManager.getCompileInformation("Scapes:shader/Composite2");
+                shaderManager.compileInformation("Scapes:shader/Composite2");
         information.supplyDefine("ENABLE_BLOOM", bloom);
         if (bloom) {
             information.supplyExternal("BLUR_OFFSET", BLUR_OFFSET);
             information.supplyExternal("BLUR_WEIGHT", BLUR_WEIGHT);
             information.supplyExternal("BLUR_LENGTH", BLUR_LENGTH);
         }
-        skybox = world.getEnvironment().createSkybox(world, gl);
+        skybox = world.environment().createSkybox(world, gl);
         skybox.init(gl, cam);
     }
 
     @Override
     public void renderScene(GL gl) {
-        MobPlayerClientMain player = world.getPlayer();
-        MobModel playerModel = world.getPlayerModel();
+        MobPlayerClientMain player = world.player();
+        MobModel playerModel = world.playerModel();
         float blackout = 1.0f -
-                FastMath.clamp(1.0f - (float) player.getLives() * 0.05f, 0.0f,
+                FastMath.clamp(1.0f - (float) player.health() * 0.05f, 0.0f,
                         1.0f);
         brightness += (blackout - brightness) * 0.1;
         brightness = FastMath.clamp(brightness, 0, 1);
         mouseGrabbed = !player.hasGui();
-        float pitch = playerModel.getPitch();
+        float pitch = playerModel.pitch();
         float tilt = 0.0f;
-        float yaw = playerModel.getYaw();
+        float yaw = playerModel.yaw();
         long flashDiff = flashTime - flashStart, flashPos =
                 System.currentTimeMillis() - flashStart;
         if (flashDiff > 0.0f && flashPos > 0.0f) {
@@ -279,32 +278,28 @@ public class SceneScapesVoxelWorld extends Scene {
                 }
             }
         }
-        cam.setView(playerModel.getPos().plus(player.getViewOffset()),
-                player.getSpeed(), pitch, yaw, tilt);
-        cam.setPerspective((float) gl.getSceneWidth() / gl.getSceneHeight(),
-                fov);
-        state.getEngine().sounds()
-                .setListener(cam.position.now(), player.getRot(),
-                        player.getSpeed());
+        cam.setView(playerModel.pos().plus(player.viewOffset()), player.speed(),
+                pitch, yaw, tilt);
+        cam.setPerspective((float) gl.sceneWidth() / gl.sceneHeight(), fov);
+        state.engine().sounds()
+                .setListener(cam.position.now(), player.rot(), player.speed());
         terrainTextureRegistry.render(gl);
         renderWorld(gl, cam);
     }
 
     @Override
     public void postRender(GL gl, double delta) {
-        OpenGL openGL = gl.getOpenGL();
-        state.getFBOScene().getTexturesColor()[0].bind(gl);
+        state.fboScene().texturesColor()[0].bind(gl);
         exposureFBO.activate(gl);
-        openGL.viewport(0, 0, 1, 1);
+        gl.viewport(0, 0, 1, 1);
         gl.setProjectionOrthogonal(0.0f, 0.0f, 1.0f, 1.0f);
-        Shader shader =
-                gl.getShaderManager().getShader("Scapes:shader/Exposure", gl);
+        Shader shader = gl.shaders().get("Scapes:shader/Exposure", gl);
         shader.setUniform1f(4, (float) FastMath.min(1.0, delta * 0.5));
         vao.render(gl, shader);
         exposureFBO.deactivate(gl);
-        MobPlayerClientMain player = world.getPlayer();
+        MobPlayerClientMain player = world.player();
         float newRenderDistance =
-                (float) world.getTerrain().renderer().getActualRenderDistance();
+                (float) world.terrain().renderer().actualRenderDistance();
         if (renderDistance > newRenderDistance) {
             renderDistance = newRenderDistance;
         } else {
@@ -315,9 +310,8 @@ public class SceneScapesVoxelWorld extends Scene {
             renderDistance = 0.0f;
         }
         float newFov = FastMath.min((float) FastMath
-                        .sqrt(FastMath.sqr(player.getXSpeed()) +
-                                FastMath.sqr(player.getYSpeed())) * 2.0f +
-                        90.0f, 120.0f);
+                .sqrt(FastMath.sqr(player.speedX()) +
+                        FastMath.sqr(player.speedY())) * 2.0f + 90.0f, 120.0f);
         double factor = FastMath.min(1.0, delta * 10.0);
         fov += (newFov - fov) * factor;
         if (!Float.isFinite(fov)) {
@@ -329,45 +323,41 @@ public class SceneScapesVoxelWorld extends Scene {
         int xx = FastMath.floor(cam.position.doubleX());
         int yy = FastMath.floor(cam.position.doubleY());
         int zz = FastMath.floor(cam.position.doubleZ());
-        lightDebug.setValue(world.getTerrain().light(xx, yy, zz));
-        blockLightDebug.setValue(world.getTerrain().blockLight(xx, yy, zz));
-        sunLightDebug.setValue(world.getTerrain().sunLight(xx, yy, zz));
+        lightDebug.setValue(world.terrain().light(xx, yy, zz));
+        blockLightDebug.setValue(world.terrain().blockLight(xx, yy, zz));
+        sunLightDebug.setValue(world.terrain().sunLight(xx, yy, zz));
         performanceWidget.graphRender.addStamp(delta);
         world.updateRender(cam, delta);
         skybox.renderUpdate(gl, cam, delta);
-        skinStorage.update(gl, player.getGame().getClient());
+        skinStorage.update(gl, player.game().client());
     }
 
     @Override
     public Shader postProcessing(GL gl, int pass) {
-        ShaderManager shaderManager = gl.getShaderManager();
+        ShaderManager shaderManager = gl.shaders();
         if (fxaa) {
             if (pass == 0) {
-                OpenGL openGL = gl.getOpenGL();
-                openGL.activeTexture(3);
-                gl.getTextureManager().bind("Scapes:image/Noise", gl);
-                openGL.activeTexture(0);
-                Shader shader =
-                        shaderManager.getShader("Scapes:shader/Fxaa", gl);
+                gl.activeTexture(3);
+                gl.textures().bind("Scapes:image/Noise", gl);
+                gl.activeTexture(0);
+                Shader shader = shaderManager.get("Scapes:shader/Fxaa", gl);
                 shader.setUniform1i(4, 3);
-                shader.setUniform2f(5, gl.getSceneWidth(), gl.getSceneHeight());
+                shader.setUniform2f(5, gl.sceneWidth(), gl.sceneHeight());
                 return shader;
             } else {
                 pass--;
             }
         }
         if (pass == 0 && bloom) {
-            return shaderManager.getShader("Scapes:shader/Composite1", gl);
+            return shaderManager.get("Scapes:shader/Composite1", gl);
         } else {
-            OpenGL openGL = gl.getOpenGL();
-            openGL.activeTexture(3);
-            exposureFBO.getTexturesColor()[0].bind(gl);
-            openGL.activeTexture(0);
-            Shader shader =
-                    shaderManager.getShader("Scapes:shader/Composite2", gl);
+            gl.activeTexture(3);
+            exposureFBO.texturesColor()[0].bind(gl);
+            gl.activeTexture(0);
+            Shader shader = shaderManager.get("Scapes:shader/Composite2", gl);
             shader.setUniform1f(6, brightness);
             shader.setUniform1f(7,
-                    (float) FastMath.pow(2.0, skybox.getExposure()));
+                    (float) FastMath.pow(2.0, skybox.exposure()));
             shader.setUniform1i(8, 2);
             shader.setUniform1i(9, 3);
             return shader;
@@ -375,7 +365,7 @@ public class SceneScapesVoxelWorld extends Scene {
     }
 
     @Override
-    public int getRenderPasses() {
+    public int renderPasses() {
         if (fxaa) {
             if (bloom) {
                 return 3;
@@ -390,7 +380,7 @@ public class SceneScapesVoxelWorld extends Scene {
     }
 
     @Override
-    public int getColorAttachments() {
+    public int colorAttachments() {
         if (bloom) {
             return 2;
         } else {
@@ -408,7 +398,7 @@ public class SceneScapesVoxelWorld extends Scene {
         fbo.dispose(gl);
         skyboxFBO.dispose(gl);
         exposureFBO.dispose(gl);
-        world.dispose();
+        world.dispose(gl);
         terrainTextureRegistry.dispose(gl);
         skinStorage.dispose(gl);
     }
@@ -418,7 +408,6 @@ public class SceneScapesVoxelWorld extends Scene {
         Image[] images = new Image[6];
         Cam cam = new Cam(this.cam.near, this.cam.far);
         cam.setPerspective(1.0f, 90.0f);
-        OpenGL openGL = gl.getOpenGL();
         for (int i = 0; i < 6; i++) {
             float pitch = 0.0f;
             float yaw = 0.0f;
@@ -435,52 +424,51 @@ public class SceneScapesVoxelWorld extends Scene {
             }
             cam.setView(this.cam.position.now(), this.cam.velocity.now(), pitch,
                     yaw, 0.0f);
-            openGL.clearDepth();
+            gl.clearDepth();
             renderWorld(gl, cam, 256, 256);
-            images[i] = gl.getOpenGL().screenShotFBO(gl, fbo, 0);
+            gl.textures().bind(fbo.texturesColor()[0], gl);
+            images[i] = gl.screenShotFBO(fbo);
         }
         guiHide = false;
         return images;
     }
 
     public void renderWorld(GL gl, Cam cam) {
-        renderWorld(gl, cam, gl.getSceneWidth(), gl.getSceneHeight());
+        renderWorld(gl, cam, gl.sceneWidth(), gl.sceneHeight());
     }
 
     public void renderWorld(GL gl, Cam cam, int width, int height) {
-        if (width != skyboxFBO.getWidth() || height != skyboxFBO.getHeight()) {
+        if (width != skyboxFBO.width() || height != skyboxFBO.height()) {
             skyboxFBO.setSize(width, height, gl);
         }
-        OpenGL openGL = gl.getOpenGL();
-        MatrixStack matrixStack = gl.getMatrixStack();
-        openGL.viewport(0, 0, width, height);
+        MatrixStack matrixStack = gl.matrixStack();
+        gl.viewport(0, 0, width, height);
         skyboxFBO.activate(gl);
-        openGL.disableDepthTest();
-        openGL.disableDepthMask();
+        gl.disableDepthTest();
+        gl.disableDepthMask();
         gl.setProjectionPerspective(width, height, cam);
         matrixStack.push();
         skybox.render(gl, cam);
         matrixStack.pop();
         skyboxFBO.deactivate(gl);
-        openGL.viewport(0, 0, width, height);
+        gl.viewport(0, 0, width, height);
         gl.setProjectionOrthogonal(0.0f, 0.0f, 1.0f, 1.0f);
-        gl.getTextureManager().bind(skyboxFBO.getTexturesColor()[0], gl);
-        Shader shader =
-                gl.getShaderManager().getShader("Engine:shader/Textured", gl);
+        gl.textures().bind(skyboxFBO.texturesColor()[0], gl);
+        Shader shader = gl.shaders().get("Engine:shader/Textured", gl);
         vao.render(gl, shader);
         gl.setProjectionPerspective(width, height, cam);
-        openGL.enableDepthTest();
-        openGL.enableDepthMask();
-        openGL.activeTexture(1);
-        gl.getTextureManager().bind(skyboxFBO.getTexturesColor()[0], gl);
-        openGL.activeTexture(0);
+        gl.enableDepthTest();
+        gl.enableDepthMask();
+        gl.activeTexture(1);
+        gl.textures().bind(skyboxFBO.texturesColor()[0], gl);
+        gl.activeTexture(0);
         boolean wireframe = this.wireframe;
         if (wireframe) {
-            gl.getOpenGL().enableWireframe();
+            gl.enableWireframe();
         }
         world.render(gl, cam, animationDistance, chunkGeometryDebug);
         if (wireframe) {
-            gl.getOpenGL().disableWireframe();
+            gl.disableWireframe();
         }
     }
 
@@ -497,19 +485,19 @@ public class SceneScapesVoxelWorld extends Scene {
         debugWidget.setVisible(!debugWidget.isVisible());
     }
 
-    public TerrainTextureRegistry getTerrainTextureRegistry() {
+    public TerrainTextureRegistry terrainTextureRegistry() {
         return terrainTextureRegistry;
     }
 
-    public WorldSkybox getSkybox() {
+    public WorldSkybox skybox() {
         return skybox;
     }
 
-    public GuiComponentChat getChat() {
+    public GuiComponentChat chat() {
         return chat;
     }
 
-    public GuiHud getHud() {
+    public GuiHud hud() {
         return hud;
     }
 
@@ -546,13 +534,13 @@ public class SceneScapesVoxelWorld extends Scene {
                     new GuiComponentTextButton(10, 50, 140, 15, 12,
                             "Static Render Distance");
             distanceButton.addLeftClick(
-                    event -> world.getTerrain().toggleStaticRenderDistance());
+                    event -> world.terrain().toggleStaticRenderDistance());
             add(distanceButton);
             GuiComponentTextButton reloadGeometryButton =
                     new GuiComponentTextButton(10, 70, 140, 15, 12,
                             "Reload Geometry");
             reloadGeometryButton
-                    .addLeftClick(event -> world.getTerrain().reloadGeometry());
+                    .addLeftClick(event -> world.terrain().reloadGeometry());
             add(reloadGeometryButton);
             GuiComponentTextButton performanceButton =
                     new GuiComponentTextButton(10, 90, 140, 15, 12,

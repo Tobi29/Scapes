@@ -29,7 +29,7 @@ public class Sync {
     private final long minSkipDelay, maxDiff;
     private final boolean logSkip;
     private final String name;
-    private double currentTPS, speedFactor;
+    private double currentTPS, delta;
     private long lastSync, sync, diff, tickDiff;
 
     /**
@@ -46,7 +46,7 @@ public class Sync {
         this.logSkip = logSkip;
         this.name = name;
         currentTPS = tps;
-        speedFactor = 1.0 / tps;
+        delta = 1.0 / tps;
     }
 
     /**
@@ -62,19 +62,19 @@ public class Sync {
     /**
      * Get the TPS
      *
-     * @return Calculated TPS
+     * @return Calculated TPS (1 / delta)
      */
-    public double getTPS() {
+    public double tps() {
         return currentTPS;
     }
 
     /**
-     * Get the "speed factor"
+     * Get the delta time in seconds
      *
-     * @return Current speed factor (1 / TPS)
+     * @return Current delta (1 / TPS)
      */
-    public double getSpeedFactor() {
-        return speedFactor;
+    public double delta() {
+        return delta;
     }
 
     /**
@@ -82,7 +82,7 @@ public class Sync {
      *
      * @return Nanoseconds between syncs (excluding sleep)
      */
-    public int getDiff() {
+    public int diff() {
         return (int) diff;
     }
 
@@ -91,7 +91,7 @@ public class Sync {
      *
      * @return Nanoseconds between syncs (including sleep)
      */
-    public int getTickDiff() {
+    public int tickDiff() {
         return (int) tickDiff;
     }
 
@@ -100,7 +100,7 @@ public class Sync {
      *
      * @return Nanoseconds between syncs
      */
-    public long getLastSync() {
+    public long lastSync() {
         return lastSync;
     }
 
@@ -109,7 +109,7 @@ public class Sync {
      *
      * @return Nanoseconds between syncs including sleeping time
      */
-    public int getMaxDiff() {
+    public int maxDiff() {
         return (int) maxDiff;
     }
 
@@ -118,9 +118,9 @@ public class Sync {
      * <p>
      * Non capping counterpart:
      *
-     * @see #calculateTPS()
+     * @see #tick()
      */
-    public void capTPS() {
+    public void cap() {
         long current = System.nanoTime();
         diff = current - lastSync;
         sync += maxDiff;
@@ -141,7 +141,7 @@ public class Sync {
         long newSync = System.nanoTime();
         tickDiff = newSync - lastSync;
         currentTPS = 1000000000.0 / tickDiff;
-        speedFactor = tickDiff / 1000000000.0;
+        delta = tickDiff / 1000000000.0;
         lastSync = newSync;
     }
 
@@ -150,14 +150,14 @@ public class Sync {
      * <p>
      * Capping counterpart:
      *
-     * @see #capTPS()
+     * @see #cap()
      */
-    public void calculateTPS() {
+    public void tick() {
         long newSync = System.nanoTime();
         diff = newSync - lastSync;
         tickDiff = diff;
         currentTPS = 1000000000.0 / tickDiff;
-        speedFactor = tickDiff / 1000000000.0;
+        delta = tickDiff / 1000000000.0;
         lastSync = newSync;
     }
 }

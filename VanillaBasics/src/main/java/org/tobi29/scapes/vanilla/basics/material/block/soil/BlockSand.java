@@ -43,12 +43,12 @@ public class BlockSand extends BlockSoil implements ItemHeatable {
     }
 
     @Override
-    public double getResistance(ItemStack item, int data) {
-        return "Shovel".equals(item.getMaterial().getToolType(item)) ? 2 : 20;
+    public double resistance(ItemStack item, int data) {
+        return "Shovel".equals(item.material().toolType(item)) ? 2 : 20;
     }
 
     @Override
-    public Optional<TerrainTexture> getParticleTexture(Face face,
+    public Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
         return Optional.of(textures[terrain.data(x, y, z)]);
     }
@@ -86,49 +86,49 @@ public class BlockSand extends BlockSoil implements ItemHeatable {
     @Override
     public void render(ItemStack item, GL gl, Shader shader,
             float r, float g, float b, float a) {
-        models[item.getData()].render(gl, shader);
+        models[item.data()].render(gl, shader);
     }
 
     @Override
     public void renderInventory(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a) {
-        models[item.getData()].renderInventory(gl, shader);
+        models[item.data()].renderInventory(gl, shader);
     }
 
     @Override
-    public String getName(ItemStack item) {
-        switch (item.getData()) {
+    public String name(ItemStack item) {
+        switch (item.data()) {
             case 1:
                 return "Gravel";
             case 2:
-                return "Clay\nTemp.: " + getTemperature(item) + " C";
+                return "Clay\nTemp.: " + temperature(item) + " C";
             default:
-                return "Sand\nTemp.: " + getTemperature(item) + " C";
+                return "Sand\nTemp.: " + temperature(item) + " C";
         }
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
-        return getTemperature(item) == 0 ? 16 : 1;
+    public int maxStackSize(ItemStack item) {
+        return temperature(item) == 0 ? 16 : 1;
     }
 
     @Override
     public void heat(ItemStack item, float temperature) {
-        if (item.getData() == 1) {
+        if (item.data() == 1) {
             return;
         }
-        float currentTemperature = getTemperature(item);
+        float currentTemperature = temperature(item);
         if (currentTemperature < 1 && temperature < currentTemperature) {
-            item.getMetaData("Vanilla").setFloat("Temperature", 0.0f);
+            item.metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
-            if (temperature >= getMeltingPoint(item)) {
-                if (item.getData() == 0) {
+            if (temperature >= meltingPoint(item)) {
+                if (item.data() == 0) {
                     item.setMaterial(materials.glass);
-                } else if (item.getData() == 2) {
+                } else if (item.data() == 2) {
                     item.setMaterial(materials.brick);
                 }
             }
-            item.getMetaData("Vanilla").setFloat("Temperature", FastMath.max(
+            item.metaData("Vanilla").setFloat("Temperature", FastMath.max(
                     currentTemperature +
                             (temperature - currentTemperature) / 400.0f, 1.1f));
         }
@@ -136,40 +136,40 @@ public class BlockSand extends BlockSoil implements ItemHeatable {
 
     @Override
     public void cool(ItemStack item) {
-        if (item.getData() == 1) {
+        if (item.data() == 1) {
             return;
         }
-        float currentTemperature = getTemperature(item);
+        float currentTemperature = temperature(item);
         if (currentTemperature < 1) {
-            item.getMetaData("Vanilla").setFloat("Temperature", 0.0f);
+            item.metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
-            item.getMetaData("Vanilla")
+            item.metaData("Vanilla")
                     .setFloat("Temperature", currentTemperature / 1.002f);
         }
     }
 
     @Override
     public void cool(MobItemServer item) {
-        if (item.getItem().getData() == 1) {
+        if (item.item().data() == 1) {
             return;
         }
-        float currentTemperature = getTemperature(item.getItem());
+        float currentTemperature = temperature(item.item());
         if (currentTemperature < 1) {
-            item.getItem().getMetaData("Vanilla").setFloat("Temperature", 0.0f);
+            item.item().metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
             if (item.isInWater()) {
-                item.getItem().getMetaData("Vanilla")
+                item.item().metaData("Vanilla")
                         .setFloat("Temperature", currentTemperature / 4.0f);
             } else {
-                item.getItem().getMetaData("Vanilla")
+                item.item().metaData("Vanilla")
                         .setFloat("Temperature", currentTemperature / 1.002f);
             }
         }
     }
 
     @Override
-    public float getMeltingPoint(ItemStack item) {
-        switch (item.getData()) {
+    public float meltingPoint(ItemStack item) {
+        switch (item.data()) {
             case 1:
                 return 0.0f;
             case 2:
@@ -180,10 +180,10 @@ public class BlockSand extends BlockSoil implements ItemHeatable {
     }
 
     @Override
-    public float getTemperature(ItemStack item) {
-        if (item.getData() == 1) {
+    public float temperature(ItemStack item) {
+        if (item.data() == 1) {
             return 0.0f;
         }
-        return item.getMetaData("Vanilla").getFloat("Temperature");
+        return item.metaData("Vanilla").getFloat("Temperature");
     }
 }

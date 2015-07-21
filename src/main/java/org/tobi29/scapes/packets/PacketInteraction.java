@@ -22,7 +22,6 @@ import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.connection.InvalidPacketDataException;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
-import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.MobPlayerClient;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
@@ -77,15 +76,17 @@ public class PacketInteraction extends Packet
         }
         switch (type) {
             case INVENTORY_SLOT_CHANGE:
-                EntityClient entity = world.getEntity(entityID);
-                if (entity instanceof MobPlayerClient) {
-                    if (data > 9) {
-                        ((MobPlayerClient) entity)
-                                .setInventorySelectRight(data - 10);
-                    } else {
-                        ((MobPlayerClient) entity).setInventorySelectLeft(data);
+                world.entity(entityID).ifPresent(entity -> {
+                    if (entity instanceof MobPlayerClient) {
+                        if (data > 9) {
+                            ((MobPlayerClient) entity)
+                                    .setInventorySelectRight(data - 10);
+                        } else {
+                            ((MobPlayerClient) entity)
+                                    .setInventorySelectLeft(data);
+                        }
                     }
-                }
+                });
                 break;
         }
     }
@@ -116,28 +117,28 @@ public class PacketInteraction extends Packet
                             "Invalid slot change data!");
                 }
                 if (data > 9) {
-                    player.getMob().setInventorySelectRight(data - 10);
+                    player.mob().setInventorySelectRight(data - 10);
                 } else {
-                    player.getMob().setInventorySelectLeft(data);
+                    player.mob().setInventorySelectLeft(data);
                 }
-                world.getConnection().send(new PacketInteraction(
-                        player.getMob().getEntityID(), INVENTORY_SLOT_CHANGE,
-                        data));
+                world.connection()
+                        .send(new PacketInteraction(player.mob().entityID(),
+                                INVENTORY_SLOT_CHANGE, data));
                 break;
             case OPEN_INVENTORY:
-                world.getConnection()
-                        .send(new PacketUpdateInventory(player.getMob()));
-                player.send(new PacketOpenGui(player.getMob()));
+                world.connection()
+                        .send(new PacketUpdateInventory(player.mob()));
+                player.send(new PacketOpenGui(player.mob()));
                 break;
             case CLOSE_INVENTORY:
-                player.getMob().getInventory().getHold().ifPresent(hold -> {
-                    player.getMob().dropItem(hold);
-                    player.getMob().getInventory().setHold(Optional.empty());
+                player.mob().inventory().hold().ifPresent(hold -> {
+                    player.mob().dropItem(hold);
+                    player.mob().inventory().setHold(Optional.empty());
                 });
                 player.send(new PacketCloseGui());
                 break;
             case OPEN_STATISTICS:
-                player.send(new PacketUpdateStatistics(player.getMob()));
+                player.send(new PacketUpdateStatistics(player.mob()));
                 break;
             default:
                 throw new InvalidPacketDataException(

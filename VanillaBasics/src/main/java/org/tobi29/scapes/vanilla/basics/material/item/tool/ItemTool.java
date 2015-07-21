@@ -52,21 +52,21 @@ public abstract class ItemTool extends VanillaItem
     }
 
     @Override
-    public ItemStack getExampleStack(int data) {
-        ItemStack item = super.getExampleStack((short) 1);
-        item.getMetaData("Vanilla").setString("MetalType", "Iron");
-        ToolUtil.createTool(plugin, item, getType());
+    public ItemStack example(int data) {
+        ItemStack item = super.example((short) 1);
+        item.metaData("Vanilla").setString("MetalType", "Iron");
+        ToolUtil.createTool(plugin, item, type());
         return item;
     }
 
     @Override
     public void click(MobPlayerServer entity, ItemStack item) {
-        if (item.getData() == 0) {
+        if (item.data() == 0) {
             ItemStack itemHandle = new ItemStack(materials.stick, (short) 0);
-            if (entity.getInventory().canTake(itemHandle)) {
-                entity.getInventory().take(itemHandle);
+            if (entity.inventory().canTake(itemHandle)) {
+                entity.inventory().take(itemHandle);
                 item.setData((short) 1);
-                entity.getConnection().send(new PacketUpdateInventory(entity));
+                entity.connection().send(new PacketUpdateInventory(entity));
             }
         }
     }
@@ -74,11 +74,11 @@ public abstract class ItemTool extends VanillaItem
     @Override
     public double click(MobPlayerServer entity, ItemStack item,
             TerrainServer terrain, int x, int y, int z, Face face) {
-        if (item.getData() > 0) {
-            double damage = item.getMetaData("Vanilla").getDouble("ToolDamage");
-            item.getMetaData("Vanilla").setDouble("ToolDamage", damage +
-                    item.getMetaData("Vanilla").getDouble("ToolDamageAdd"));
-            return item.getMetaData("Vanilla").getDouble("ToolEfficiency") *
+        if (item.data() > 0) {
+            double damage = item.metaData("Vanilla").getDouble("ToolDamage");
+            item.metaData("Vanilla").setDouble("ToolDamage", damage +
+                    item.metaData("Vanilla").getDouble("ToolDamageAdd"));
+            return item.metaData("Vanilla").getDouble("ToolEfficiency") *
                     (1.0 - FastMath.tanh(damage));
         } else {
             return 0;
@@ -87,10 +87,10 @@ public abstract class ItemTool extends VanillaItem
 
     @Override
     public double click(MobPlayerServer entity, ItemStack item, MobServer hit) {
-        if (item.getData() > 0) {
-            double damage = item.getMetaData("Vanilla").getDouble("ToolDamage");
-            item.getMetaData("Vanilla").setDouble("ToolDamage", damage);
-            return item.getMetaData("Vanilla").getDouble("ToolStrength") *
+        if (item.data() > 0) {
+            double damage = item.metaData("Vanilla").getDouble("ToolDamage");
+            item.metaData("Vanilla").setDouble("ToolDamage", damage);
+            return item.metaData("Vanilla").getDouble("ToolStrength") *
                     (1.0 - FastMath.tanh(damage));
         } else {
             return 0;
@@ -98,16 +98,16 @@ public abstract class ItemTool extends VanillaItem
     }
 
     @Override
-    public int getToolLevel(ItemStack item) {
-        return item.getMetaData("Vanilla").getInteger("ToolLevel");
+    public int toolLevel(ItemStack item) {
+        return item.metaData("Vanilla").getInteger("ToolLevel");
     }
 
     @Override
-    public String getToolType(ItemStack item) {
-        if (item.getData() > 0) {
-            return getType();
+    public String toolType(ItemStack item) {
+        if (item.data() > 0) {
+            return type();
         } else {
-            return getType() + "Head";
+            return type() + "Head";
         }
     }
 
@@ -120,10 +120,10 @@ public abstract class ItemTool extends VanillaItem
     public void registerTextures(TerrainTextureRegistry registry) {
         textureHandle = registry.registerTexture(
                 "VanillaBasics:image/terrain/tools/handle/" +
-                        getType() + ".png");
+                        type() + ".png");
         textureHead = registry.registerTexture(
                 "VanillaBasics:image/terrain/tools/head/" +
-                        getType() + ".png");
+                        type() + ".png");
     }
 
     @Override
@@ -135,46 +135,46 @@ public abstract class ItemTool extends VanillaItem
     @Override
     public void render(ItemStack item, GL gl, Shader shader,
             float r, float g, float b, float a) {
-        if (item.getData() > 0) {
+        if (item.data() > 0) {
             modelHandle.render(gl, shader);
         }
         MetalType metal = plugin.getMetalType(
-                item.getMetaData("Vanilla").getString("MetalType"));
+                item.metaData("Vanilla").getString("MetalType"));
         if (metal == null) {
             metal = plugin.getMetalType("Iron");
         }
-        getModelHead(metal).render(gl, shader);
+        modelHead(metal).render(gl, shader);
     }
 
     @Override
     public void renderInventory(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a) {
-        if (item.getData() > 0) {
+        if (item.data() > 0) {
             modelHandle.renderInventory(gl, shader);
         }
         MetalType metal = plugin.getMetalType(
-                item.getMetaData("Vanilla").getString("MetalType"));
+                item.metaData("Vanilla").getString("MetalType"));
         if (metal == null) {
             metal = plugin.getMetalType("Iron");
         }
-        getModelHead(metal).renderInventory(gl, shader);
+        modelHead(metal).renderInventory(gl, shader);
     }
 
     @Override
-    public String getName(ItemStack item) {
+    public String name(ItemStack item) {
         StringBuilder name = new StringBuilder(100);
-        MetalType metalType = getMetalType(item);
-        name.append(metalType.getName()).append(' ').append(getType());
-        float temperature = getTemperature(item);
+        MetalType metalType = metalType(item);
+        name.append(metalType.name()).append(' ').append(type());
+        float temperature = temperature(item);
         if (temperature > 0.1f) {
             name.append("\nTemp.:").append(FastMath.floor(temperature))
                     .append("°C");
-            if (temperature > getMeltingPoint(item)) {
+            if (temperature > meltingPoint(item)) {
                 name.append("\n - Liquid");
             }
         }
         double damage = (1.0 - FastMath.tanh(
-                item.getMetaData("Vanilla").getDouble("ToolDamage"))) * 100.0;
+                item.metaData("Vanilla").getDouble("ToolDamage"))) * 100.0;
         if (damage > 0.1) {
             name.append("\nDamage: ").append(FastMath.floor(damage));
         }
@@ -182,22 +182,22 @@ public abstract class ItemTool extends VanillaItem
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 1;
     }
 
-    public abstract String getType();
+    public abstract String type();
 
     @Override
     public void heat(ItemStack item, float temperature) {
-        float currentTemperature = getTemperature(item);
+        float currentTemperature = temperature(item);
         if (currentTemperature < 1 && temperature < currentTemperature) {
-            item.getMetaData("Vanilla").setFloat("Temperature", 0.0f);
+            item.metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
-            item.getMetaData("Vanilla").setFloat("Temperature", FastMath.max(
+            item.metaData("Vanilla").setFloat("Temperature", FastMath.max(
                     currentTemperature +
                             (temperature - currentTemperature) / 400.0f, 1.1f));
-            if (currentTemperature >= getMeltingPoint(item)) {
+            if (currentTemperature >= meltingPoint(item)) {
                 item.setMaterial(materials.ingot);
                 item.setData((short) 0);
             }
@@ -206,53 +206,53 @@ public abstract class ItemTool extends VanillaItem
 
     @Override
     public void cool(ItemStack item) {
-        float currentTemperature = getTemperature(item);
+        float currentTemperature = temperature(item);
         if (currentTemperature < 1) {
-            item.getMetaData("Vanilla").setFloat("Temperature", 0.0f);
+            item.metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
-            item.getMetaData("Vanilla")
+            item.metaData("Vanilla")
                     .setFloat("Temperature", currentTemperature / 1.002f);
         }
     }
 
     @Override
     public void cool(MobItemServer item) {
-        float currentTemperature = getTemperature(item.getItem());
+        float currentTemperature = temperature(item.item());
         if (currentTemperature < 1) {
-            item.getItem().getMetaData("Vanilla").setFloat("Temperature", 0.0f);
+            item.item().metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
             if (item.isInWater()) {
-                item.getItem().getMetaData("Vanilla")
+                item.item().metaData("Vanilla")
                         .setFloat("Temperature", currentTemperature / 4.0f);
             } else {
-                item.getItem().getMetaData("Vanilla")
+                item.item().metaData("Vanilla")
                         .setFloat("Temperature", currentTemperature / 1.002f);
             }
         }
     }
 
     @Override
-    public float getMeltingPoint(ItemStack item) {
-        return materials.ingot.getMeltingPoint(item);
+    public float meltingPoint(ItemStack item) {
+        return materials.ingot.meltingPoint(item);
     }
 
     @Override
-    public float getTemperature(ItemStack item) {
-        return item.getMetaData("Vanilla").getFloat("Temperature");
+    public float temperature(ItemStack item) {
+        return item.metaData("Vanilla").getFloat("Temperature");
     }
 
     @Override
-    public MetalType getMetalType(ItemStack item) {
+    public MetalType metalType(ItemStack item) {
         return plugin.getMetalType(
-                item.getMetaData("Vanilla").getString("MetalType"));
+                item.metaData("Vanilla").getString("MetalType"));
     }
 
-    private ItemModel getModelHead(MetalType metal) {
+    private ItemModel modelHead(MetalType metal) {
         ItemModel model = modelsHead.get(metal);
         if (model == null) {
-            float r = metal.getR();
-            float g = metal.getG();
-            float b = metal.getB();
+            float r = metal.r();
+            float g = metal.g();
+            float b = metal.b();
             model = new ItemModelSimple(textureHead, r, g, b, 1.0f);
             modelsHead.put(metal, model);
         }

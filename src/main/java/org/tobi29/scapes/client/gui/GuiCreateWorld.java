@@ -22,7 +22,7 @@ import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.opengl.texture.*;
 import org.tobi29.scapes.engine.utils.StringLongHash;
-import org.tobi29.scapes.engine.utils.io.FileUtil;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
 import org.tobi29.scapes.plugins.PluginFile;
@@ -53,7 +53,7 @@ public class GuiCreateWorld extends GuiMenuDouble {
                 new GuiComponentTextField(16, 160, 368, 30, 18, "");
         GuiComponentTextButton environment =
                 new GuiComponentTextButton(16, 200, 368, 30, 18, "Generator: " +
-                        worldTypes.get(environmentID).getName());
+                        worldTypes.get(environmentID).name());
         environment.addLeftClick(event -> {
             environmentID++;
             if (environmentID >= worldTypes.size()) {
@@ -61,22 +61,22 @@ public class GuiCreateWorld extends GuiMenuDouble {
             }
             addons.clear();
             environment.setText(
-                    "Generator: " + worldTypes.get(environmentID).getName());
+                    "Generator: " + worldTypes.get(environmentID).name());
         });
         GuiComponentTextButton addonsButton =
                 new GuiComponentTextButton(16, 240, 368, 30, 18, "Addons");
         addonsButton.addLeftClick(event -> {
             state.remove(this);
             state.add(new GuiAddons(state, this,
-                    worldTypes.get(environmentID).getName(), plugins));
+                    worldTypes.get(environmentID).name(), plugins));
         });
         save.addLeftClick(event -> {
-            if (name.getText().isEmpty()) {
+            if (name.text().isEmpty()) {
                 name.setText("New World");
             }
             try {
                 Path save = path.resolve(
-                        name.getText() + WorldFormat.getFilenameExtension());
+                        name.text() + WorldFormat.filenameExtension());
                 if (Files.exists(save)) {
                     state.remove(this);
                     state.add(
@@ -87,13 +87,13 @@ public class GuiCreateWorld extends GuiMenuDouble {
                 Path data = save.resolve("Data.stag");
                 TagStructure tagStructure = new TagStructure();
                 long randomSeed;
-                if (seed.getText().isEmpty()) {
+                if (seed.text().isEmpty()) {
                     randomSeed = new Random().nextLong();
                 } else {
                     try {
-                        randomSeed = Long.valueOf(seed.getText());
+                        randomSeed = Long.valueOf(seed.text());
                     } catch (NumberFormatException e) {
-                        randomSeed = StringLongHash.hash(seed.getText());
+                        randomSeed = StringLongHash.hash(seed.text());
                     }
                 }
                 tagStructure.setLong("Seed", randomSeed);
@@ -102,11 +102,11 @@ public class GuiCreateWorld extends GuiMenuDouble {
                 Path pluginsDir = save.resolve("plugins");
                 Files.createDirectories(pluginsDir);
                 PluginFile worldType = worldTypes.get(environmentID);
-                Files.copy(worldType.getFile(),
-                        pluginsDir.resolve(worldType.getFile().getFileName()));
+                Files.copy(worldType.file(),
+                        pluginsDir.resolve(worldType.file().getFileName()));
                 for (PluginFile addon : addons) {
-                    Files.copy(addon.getFile(),
-                            pluginsDir.resolve(addon.getFile().getFileName()));
+                    Files.copy(addon.file(),
+                            pluginsDir.resolve(addon.file().getFileName()));
                 }
                 state.remove(this);
                 previous.updateSaves();
@@ -137,7 +137,7 @@ public class GuiCreateWorld extends GuiMenuDouble {
                 state.remove(this);
                 state.add(prev);
             });
-            plugins.stream().filter(plugin -> plugin.getParent().equals(parent))
+            plugins.stream().filter(plugin -> plugin.parent().equals(parent))
                     .forEach(plugin -> {
                         Element element = new Element(plugin);
                         scrollPane.add(element);
@@ -157,7 +157,7 @@ public class GuiCreateWorld extends GuiMenuDouble {
 
             public Element(PluginFile addon) {
                 super(0, 0, 378, 70);
-                try (ZipFile zip = new ZipFile(addon.getFile().toFile())) {
+                try (ZipFile zip = new ZipFile(addon.file().toFile())) {
                     texture = new TextureFile(
                             zip.getInputStream(zip.getEntry("Icon.png")), 0,
                             TextureFilter.LINEAR, TextureFilter.LINEAR,
@@ -167,7 +167,7 @@ public class GuiCreateWorld extends GuiMenuDouble {
                 }
                 GuiComponentTextButton label =
                         new GuiComponentTextButton(70, 20, 200, 30, 18,
-                                addon.getName());
+                                addon.name());
                 active = addons.contains(addon);
                 GuiComponentTextButton edit =
                         new GuiComponentTextButton(280, 20, 30, 30, 18,

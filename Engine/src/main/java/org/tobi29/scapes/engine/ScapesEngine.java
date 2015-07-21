@@ -34,10 +34,10 @@ import org.tobi29.scapes.engine.opengl.GraphicsSystem;
 import org.tobi29.scapes.engine.spi.ScapesEngineBackendProvider;
 import org.tobi29.scapes.engine.utils.Crashable;
 import org.tobi29.scapes.engine.utils.Sync;
-import org.tobi29.scapes.engine.utils.io.CrashReportFile;
-import org.tobi29.scapes.engine.utils.io.FileCache;
-import org.tobi29.scapes.engine.utils.io.FileUtil;
+import org.tobi29.scapes.engine.utils.io.filesystem.CrashReportFile;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileCache;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
@@ -147,14 +147,14 @@ public class ScapesEngine implements Crashable {
         globalGui = new Gui(GuiAlignment.STRETCH);
         debugGui = new GuiDebugLayer();
         globalGui.add(debugGui);
-        GuiWidgetDebugValues debugValues = debugGui.getDebugValues();
+        GuiWidgetDebugValues debugValues = debugGui.values();
         usedMemoryDebug = debugValues.get("Runtime-Memory-Used");
         maxMemoryDebug = debugValues.get("Runtime-Memory-Max");
         game.init();
         container = backend.createContainer(this);
-        graphics = new GraphicsSystem(this, container.getOpenGL());
-        sounds = new SoundSystem(this, container.getOpenAL());
-        controller = container.getController();
+        graphics = new GraphicsSystem(this, container.gl());
+        sounds = new SoundSystem(this, container.al());
+        controller = container.controller();
         guiController = new GuiControllerDefault(this, controller);
     }
 
@@ -245,7 +245,7 @@ public class ScapesEngine implements Crashable {
     }
 
     public GuiWidgetDebugValues debugValues() {
-        return debugGui.getDebugValues();
+        return debugGui.values();
     }
 
     public GameState state() {
@@ -262,14 +262,14 @@ public class ScapesEngine implements Crashable {
             container.run();
         } catch (GraphicsCheckException e) {
             LOGGER.error("Failed to initialize graphics:", e);
-            container.message(Container.MessageType.ERROR, game.getName(),
+            container.message(Container.MessageType.ERROR, game.name(),
                     "Unable to initialize graphics:\n" + e.getMessage());
             return 1;
         } catch (Throwable e) {
             writeCrash(e);
             try {
-                container.message(Container.MessageType.ERROR, game.getName(),
-                        game.getName() + " crashed\n:" + toString());
+                container.message(Container.MessageType.ERROR, game.name(),
+                        game.name() + " crashed\n:" + toString());
             } catch (Exception e2) {
                 LOGGER.error("Failed to show crash message", e2);
             }
@@ -312,11 +312,11 @@ public class ScapesEngine implements Crashable {
         LOGGER.error("Scapes engine shutting down because of crash", e);
         Map<String, String> debugValues = new ConcurrentHashMap<>();
         for (Map.Entry<String, GuiWidgetDebugValues.Element> entry : debugGui
-                .getDebugValues().getElements()) {
+                .values().elements()) {
             debugValues.put(entry.getKey(), entry.getValue().toString());
         }
         try {
-            Path crashReportFile = CrashReportFile.getFile(home);
+            Path crashReportFile = CrashReportFile.file(home);
             CrashReportFile.writeCrashReport(e, crashReportFile, "ScapesEngine",
                     debugValues);
             container.openFile(crashReportFile);
@@ -339,7 +339,7 @@ public class ScapesEngine implements Crashable {
                 state = newState;
                 game.initLate(gl);
             } else {
-                state.getScene().dispose(gl);
+                state.scene().dispose(gl);
                 state.disposeState(gl);
                 state = newState;
             }
@@ -352,11 +352,11 @@ public class ScapesEngine implements Crashable {
                 stateThread.joiner = taskExecutor.runTask(stateThread, "State",
                         TaskExecutor.Priority.MEDIUM);
             }
-        } else if (stateThread != null) {
-            stateThread.joiner.join();
-            stateThread = null;
-        }
-        if (stateThread == null) {
+        } else {
+            if (stateThread != null) {
+                stateThread.joiner.join();
+                stateThread = null;
+            }
             step(delta, state);
         }
     }
@@ -396,12 +396,12 @@ public class ScapesEngine implements Crashable {
         @Override
         public void run(Joiner joiner) {
             try {
-                Sync sync = new Sync(config.getFPS(), 5000000000L, true,
+                Sync sync = new Sync(config.fps(), 5000000000L, true,
                         "Engine-Update");
                 sync.init();
                 while (!joiner.marked()) {
-                    step(sync.getSpeedFactor(), state);
-                    sync.capTPS();
+                    step(sync.delta(), state);
+                    sync.cap();
                 }
             } catch (Throwable e) {
                 crash(e);

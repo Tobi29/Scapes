@@ -83,9 +83,9 @@ public class EntityFarmlandServer extends EntityServer {
     public void update(double delta) {
         growth(delta);
         if (updateBlock) {
-            VanillaBasics plugin = (VanillaBasics) world.getPlugins()
-                    .getPlugin("VanillaBasics");
-            GameRegistry.Registry<CropType> cropRegistry = world.getRegistry()
+            VanillaBasics plugin =
+                    (VanillaBasics) world.plugins().plugin("VanillaBasics");
+            GameRegistry.Registry<CropType> cropRegistry = world.registry()
                     .<CropType>get("VanillaBasics", "CropType");
             VanillaMaterial materials = plugin.getMaterials();
             world.getTerrain().queue(handler -> handler
@@ -100,7 +100,7 @@ public class EntityFarmlandServer extends EntityServer {
     public void updateTile(TerrainServer terrain, int x, int y, int z) {
         WorldServer world = terrain.world();
         VanillaBasics plugin =
-                (VanillaBasics) world.getPlugins().getPlugin("VanillaBasics");
+                (VanillaBasics) world.plugins().plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         if (terrain.type(pos.intX(), pos.intY(), pos.intZ()) !=
                 materials.farmland) {
@@ -132,7 +132,7 @@ public class EntityFarmlandServer extends EntityServer {
             time = 0.0f;
         } else {
             if (stage < 8) {
-                switch (cropType.getNutrient()) {
+                switch (cropType.nutrient()) {
                     case 1:
                         time += nutrientB * delta;
                         nutrientB = (float) FastMath
@@ -148,13 +148,13 @@ public class EntityFarmlandServer extends EntityServer {
                         nutrientA = (float) FastMath
                                 .max(nutrientA - 0.0000005 * delta, 0.0);
                 }
-                while (time >= cropType.getTime()) {
+                while (time >= cropType.time()) {
                     stage++;
                     if (stage >= 8) {
                         time = 0.0f;
                         stage = 8;
                     } else {
-                        time -= cropType.getTime();
+                        time -= cropType.time();
                     }
                     updateBlock = true;
                 }

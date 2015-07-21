@@ -32,7 +32,7 @@ public class GuiStatistics extends Gui {
                 new GuiComponentScrollPaneList(16, 80, 368, 350, 70);
         GuiComponentTextButton back =
                 new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");
-        back.addLeftClick(event -> state.getClient().getEntity().closeGui());
+        back.addLeftClick(event -> state.client().entity().closeGui());
         for (PlayerStatistics.StatisticMaterial statisticMaterial : statisticMaterials) {
             scrollPane.add(new Element(statisticMaterial));
         }
@@ -49,16 +49,16 @@ public class GuiStatistics extends Gui {
             super(0, 0, 378, 70);
             GuiComponentTextButton breakAmount =
                     new GuiComponentTextButton(70, 20, 50, 30, 18,
-                            String.valueOf(statisticMaterial.getBreakAmount()));
+                            String.valueOf(statisticMaterial.breakAmount()));
             GuiComponentTextButton placeAmount =
                     new GuiComponentTextButton(130, 20, 50, 30, 18,
-                            String.valueOf(statisticMaterial.getPlaceAmount()));
+                            String.valueOf(statisticMaterial.placeAmount()));
             GuiComponentTextButton craftAmount =
                     new GuiComponentTextButton(190, 20, 50, 30, 18,
-                            String.valueOf(statisticMaterial.getCraftAmount()));
+                            String.valueOf(statisticMaterial.craftAmount()));
             add(new GuiComponentItemButton(15, 15, 40, 40,
-                    statisticMaterial.getType()
-                            .getExampleStack(statisticMaterial.getData())));
+                    statisticMaterial.type()
+                            .example(statisticMaterial.data())));
             add(breakAmount);
             add(placeAmount);
             add(craftAmount);

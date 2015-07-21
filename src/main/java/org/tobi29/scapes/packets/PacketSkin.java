@@ -48,14 +48,14 @@ public class PacketSkin extends Packet implements PacketServer, PacketClient {
     @Override
     public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        stream.put(image.getBuffer());
+        stream.put(image.buffer());
         stream.putByteArray(checksum);
     }
 
     @Override
     public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        ByteBuffer buffer = BufferCreator.byteBuffer(64 * 64 * 4);
+        ByteBuffer buffer = BufferCreator.bytes(64 * 64 * 4);
         stream.get(buffer);
         buffer.flip();
         image = new Image(64, 64, buffer);
@@ -65,7 +65,7 @@ public class PacketSkin extends Packet implements PacketServer, PacketClient {
     @Override
     public void runClient(ClientConnection client, WorldClient world)
             throws ConnectionCloseException {
-        client.getWorld().getScene().getSkinStorage().addSkin(checksum, image);
+        client.world().scene().skinStorage().addSkin(checksum, image);
     }
 
     @Override
@@ -82,7 +82,7 @@ public class PacketSkin extends Packet implements PacketServer, PacketClient {
 
     @Override
     public void runServer(PlayerConnection player, WorldServer world) {
-        player.getServer().getSkin(checksum).ifPresent(
+        player.server().skin(checksum).ifPresent(
                 skin -> player.send(new PacketSkin(skin.image(), checksum)));
     }
 }

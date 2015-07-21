@@ -34,7 +34,7 @@ public class EntityForgeServer extends EntityAbstractFurnaceServer {
     }
 
     public EntityForgeServer(WorldServer world, Vector3 pos) {
-        super(world, pos, new Inventory(world.getRegistry(), 9), 4, 3,
+        super(world, pos, new Inventory(world.registry(), 9), 4, 3,
                 Float.POSITIVE_INFINITY, 1.006f, 10, 50);
     }
 
@@ -42,23 +42,23 @@ public class EntityForgeServer extends EntityAbstractFurnaceServer {
     public void update(double delta) {
         super.update(delta);
         VanillaBasics plugin =
-                (VanillaBasics) world.getPlugins().getPlugin("VanillaBasics");
+                (VanillaBasics) world.plugins().plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         synchronized (this) {
             int max = items + fuel.length + 1;
             for (int i = fuel.length + 1; i < max; i++) {
-                ItemStack item = inventory.getItem(i);
-                if (item.getAmount() == 1) {
-                    Material type = item.getMaterial();
+                ItemStack item = inventory.item(i);
+                if (item.amount() == 1) {
+                    Material type = item.material();
                     if (type instanceof ItemIngot) {
-                        if (((ItemIngot) type).getTemperature(item) >=
-                                ((ItemIngot) type).getMeltingPoint(item) &&
-                                item.getData() == 1) {
-                            if (inventory.getItem(8)
+                        if (((ItemIngot) type).temperature(item) >=
+                                ((ItemIngot) type).meltingPoint(item) &&
+                                item.data() == 1) {
+                            if (inventory.item(8)
                                     .take(new ItemStack(materials.mold,
                                             (short) 1)) != null) {
                                 item.setData((short) 0);
-                                world.getConnection()
+                                world.connection()
                                         .send(new PacketEntityChange(this));
                             }
                         }
@@ -90,8 +90,8 @@ public class EntityForgeServer extends EntityAbstractFurnaceServer {
 
     @Override
     protected boolean isValidOn(TerrainServer terrain, int x, int y, int z) {
-        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
-                .getPlugin("VanillaBasics");
+        VanillaBasics plugin = (VanillaBasics) terrain.world().plugins()
+                .plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         return terrain.type(x, y, z) == materials.forge;
     }

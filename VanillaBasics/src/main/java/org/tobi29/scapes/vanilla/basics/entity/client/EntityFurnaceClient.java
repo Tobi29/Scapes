@@ -30,12 +30,12 @@ public class EntityFurnaceClient extends EntityAbstractFurnaceClient {
     }
 
     public EntityFurnaceClient(WorldClient world, Vector3 pos) {
-        super(world, pos, new Inventory(world.getRegistry(), 8), 4, 3, 800.0f,
+        super(world, pos, new Inventory(world.registry(), 8), 4, 3, 800.0f,
                 1.001f, 3, 0);
     }
 
     @Override
-    public Gui getGui(MobPlayerClientMain player) {
+    public Gui gui(MobPlayerClientMain player) {
         return new GuiFurnaceInventory(this, player);
     }
 }

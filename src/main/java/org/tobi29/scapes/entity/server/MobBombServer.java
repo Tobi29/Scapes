@@ -30,7 +30,7 @@ public class MobBombServer extends MobServer {
     private double time;
 
     public MobBombServer(WorldServer world) {
-        this(world, Vector3d.ZERO, Vector3d.ZERO, world.getAir(), 0, 0.0);
+        this(world, Vector3d.ZERO, Vector3d.ZERO, world.air(), 0, 0.0);
     }
 
     public MobBombServer(WorldServer world, Vector3 pos, Vector3 speed,
@@ -64,7 +64,7 @@ public class MobBombServer extends MobServer {
                     1024.0f);
             world.deleteEntity(this);
             int x = pos.intX(), y = pos.intY(), z = pos.intZ();
-            ((BlockExplosive) item.getMaterial())
+            ((BlockExplosive) item.material())
                     .explode(world.getTerrain(), x, y, z);
         }
     }

@@ -105,7 +105,7 @@ public class TagStructureArchive {
         byteStream.put(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12});
         byteStream.buffer().flip();
         ByteBuffer buffer =
-                BufferCreator.byteBuffer(byteStream.buffer().remaining());
+                BufferCreator.bytes(byteStream.buffer().remaining());
         buffer.put(byteStream.buffer());
         buffer.flip();
         tagStructures.put(key, buffer);
@@ -172,7 +172,7 @@ public class TagStructureArchive {
             throws IOException {
         List<Entry> entries = readHeader(stream);
         for (Entry entry : entries) {
-            ByteBuffer array = BufferCreator.byteBuffer(entry.length);
+            ByteBuffer array = BufferCreator.bytes(entry.length);
             stream.get(array);
             array.flip();
             tagStructures.put(entry.name, array);

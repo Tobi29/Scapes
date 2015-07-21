@@ -37,7 +37,7 @@ public class PacketUpdateStatistics extends Packet implements PacketClient {
 
     public PacketUpdateStatistics(MobPlayerServer player) {
         statisticMaterials =
-                player.getConnection().getStatistics().getStatisticMaterials();
+                player.connection().statistics().statisticMaterials();
     }
 
     @Override
@@ -45,11 +45,11 @@ public class PacketUpdateStatistics extends Packet implements PacketClient {
             throws IOException {
         stream.putInt(statisticMaterials.size());
         for (PlayerStatistics.StatisticMaterial statisticMaterial : statisticMaterials) {
-            stream.putInt(statisticMaterial.getType().getItemID());
-            stream.putShort(statisticMaterial.getData());
-            stream.putInt(statisticMaterial.getBreakAmount());
-            stream.putInt(statisticMaterial.getPlaceAmount());
-            stream.putInt(statisticMaterial.getCraftAmount());
+            stream.putInt(statisticMaterial.type().itemID());
+            stream.putShort(statisticMaterial.data());
+            stream.putInt(statisticMaterial.breakAmount());
+            stream.putInt(statisticMaterial.placeAmount());
+            stream.putInt(statisticMaterial.craftAmount());
         }
     }
 
@@ -60,15 +60,15 @@ public class PacketUpdateStatistics extends Packet implements PacketClient {
         statisticMaterials = new ArrayList<>();
         for (int i = 0; i < length; i++) {
             statisticMaterials.add(new PlayerStatistics.StatisticMaterial(
-                    client.getPlugins().getRegistry()
-                            .getMaterial(stream.getInt()), stream.getShort(),
+                    client.plugins().registry().material(stream.getInt()),
+                    stream.getShort(),
                     stream.getInt(), stream.getInt(), stream.getInt()));
         }
     }
 
     @Override
     public void runClient(ClientConnection client, WorldClient world) {
-        client.getEntity().openGui(
-                new GuiStatistics(client.getGame(), statisticMaterials));
+        client.entity()
+                .openGui(new GuiStatistics(client.game(), statisticMaterials));
     }
 }

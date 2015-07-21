@@ -24,7 +24,6 @@ import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.MobileEntity;
-import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
@@ -69,15 +68,16 @@ public class PacketMobMoveAbsolute extends Packet
         if (world == null) {
             return;
         }
-        EntityClient entity = world.getEntity(entityID);
-        if (entity instanceof MobileEntity) {
-            ((MobileEntity) entity).getPositionHandler()
-                    .receiveMoveAbsolute(x, y, z);
-        } else if (world.getTerrain()
-                .isBlockTicking(FastMath.floor(x), FastMath.floor(y),
-                        FastMath.floor(z))) {
-            client.send(new PacketRequestEntity(entityID));
-        }
+        world.entity(entityID).ifPresent(entity -> {
+            if (entity instanceof MobileEntity) {
+                ((MobileEntity) entity).positionHandler()
+                        .receiveMoveAbsolute(x, y, z);
+            } else if (world.terrain()
+                    .isBlockTicking(FastMath.floor(x), FastMath.floor(y),
+                            FastMath.floor(z))) {
+                client.send(new PacketRequestEntity(entityID));
+            }
+        });
     }
 
     @Override
@@ -98,6 +98,6 @@ public class PacketMobMoveAbsolute extends Packet
 
     @Override
     public void runServer(PlayerConnection player, WorldServer world) {
-        player.getMob().getPositionHandler().receiveMoveAbsolute(x, y, z);
+        player.mob().positionHandler().receiveMoveAbsolute(x, y, z);
     }
 }

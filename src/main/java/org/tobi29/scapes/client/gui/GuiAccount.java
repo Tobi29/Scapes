@@ -25,6 +25,7 @@ import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.io.ChecksumUtil;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyPair;
 import java.util.Optional;
@@ -42,9 +43,9 @@ public class GuiAccount extends GuiMenu {
         super(state, "Account", "Save");
         try {
             Account.Client account = Account.read(
-                    state.getEngine().home().resolve("Account.properties"));
-            keyPair = account.getKeyPair();
-            nickname = account.getNickname();
+                    state.engine().home().resolve("Account.properties"));
+            keyPair = account.keyPair();
+            nickname = account.nickname();
         } catch (IOException e) {
             LOGGER.error("Failed to read account file: {}", e.toString());
         }
@@ -57,12 +58,12 @@ public class GuiAccount extends GuiMenu {
         GuiComponentText error = new GuiComponentText(16, 320, 18, "");
         GuiComponentButton keyCopy =
                 new GuiComponentTextButton(16, 100, 174, 30, 18, "Copy");
-        keyCopy.addLeftClick(event -> state.getEngine().controller()
+        keyCopy.addLeftClick(event -> state.engine().controller()
                 .clipboardCopy(Account.key(keyPair)));
         GuiComponentButton keyPaste =
                 new GuiComponentTextButton(210, 100, 174, 30, 18, "Paste");
         keyPaste.addLeftClick(event -> {
-            String str = state.getEngine().controller().clipboardPaste();
+            String str = state.engine().controller().clipboardPaste();
             Optional<KeyPair> keyPair =
                     Account.key(REPLACE.matcher(str).replaceAll(""));
             if (keyPair.isPresent()) {
@@ -82,23 +83,26 @@ public class GuiAccount extends GuiMenu {
                 new GuiComponentTextButton(112, 260, 176, 30, 18, "Skin");
         skin.addLeftClick(event -> {
             try {
-                Path path = state.getEngine().home().resolve("Skin.png");
-                state.getEngine().container().importFromUser(path,
+                Path path = state.engine().home().resolve("Skin.png");
+                Path[] imports = state.engine().container().openFileDialog(
                         new Pair[]{new Pair<>("*.png", "PNG Picture")},
-                        "Import skin");
+                        "Import skin", false);
+                for (Path copy : imports) {
+                    Files.copy(copy, path);
+                }
             } catch (IOException e) {
                 LOGGER.warn("Failed to import skin: {}", e.toString());
             }
         });
         back.addLeftClick(event -> {
-            this.nickname = nickname.getText();
+            this.nickname = nickname.text();
             if (!Account.valid(this.nickname)) {
                 error.setText("Invalid Nickname!");
                 return;
             }
             try {
                 new Account.Client(keyPair, this.nickname)
-                        .write(state.getEngine().home()
+                        .write(state.engine().home()
                                 .resolve("Account.properties"));
             } catch (IOException e) {
                 LOGGER.error("Failed to write account file: {}", e.toString());

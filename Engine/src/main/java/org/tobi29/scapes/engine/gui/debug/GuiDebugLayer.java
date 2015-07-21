@@ -32,7 +32,7 @@ public class GuiDebugLayer extends Gui {
         debugValues.setVisible(!debugValues.isVisible());
     }
 
-    public GuiWidgetDebugValues getDebugValues() {
+    public GuiWidgetDebugValues values() {
         return debugValues;
     }
 }

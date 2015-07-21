@@ -21,11 +21,12 @@ import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.vanilla.basics.material.TreeType;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.block.BlockSimpleData;
+import org.tobi29.scapes.vanilla.basics.material.item.ItemFuel;
 
 import java.util.Collections;
 import java.util.List;
 
-public class BlockWood extends BlockSimpleData {
+public class BlockWood extends BlockSimpleData implements ItemFuel {
     private final GameRegistry.Registry<TreeType> treeRegistry;
 
     public BlockWood(VanillaMaterial materials,
@@ -35,14 +36,14 @@ public class BlockWood extends BlockSimpleData {
     }
 
     @Override
-    public double getResistance(ItemStack item, int data) {
-        return "Axe".equals(item.getMaterial().getToolType(item)) ||
-                "Saw".equals(item.getMaterial().getToolType(item)) ? 2 : -1;
+    public double resistance(ItemStack item, int data) {
+        return "Axe".equals(item.material().toolType(item)) ||
+                "Saw".equals(item.material().toolType(item)) ? 2 : -1;
     }
 
     @Override
-    public List<ItemStack> getDrops(ItemStack item, int data) {
-        if ("Saw".equals(item.getMaterial().getToolType(item))) {
+    public List<ItemStack> drops(ItemStack item, int data) {
+        if ("Saw".equals(item.material().toolType(item))) {
             return Collections.singletonList(
                     new ItemStack(materials.stick, (short) 0, 8));
         }
@@ -50,35 +51,50 @@ public class BlockWood extends BlockSimpleData {
     }
 
     @Override
-    public String getFootStep(int data) {
+    public String footStepSound(int data) {
         return "VanillaBasics:sound/footsteps/Wood.ogg";
     }
 
     @Override
-    public String getBreak(ItemStack item, int data) {
-        return "Axe".equals(item.getMaterial().getToolType(item)) ?
+    public String breakSound(ItemStack item, int data) {
+        return "Axe".equals(item.material().toolType(item)) ?
                 "VanillaBasics:sound/blocks/Axe.ogg" :
                 "VanillaBasics:sound/blocks/Saw.ogg";
     }
 
     @Override
-    protected int getTypes() {
+    protected int types() {
         return treeRegistry.values().size();
     }
 
     @Override
-    protected String getTexture(int data) {
+    protected String texture(int data) {
         TreeType type = treeRegistry.get(data);
-        return type.getTexture() + "/Planks.png";
+        return type.texture() + "/Planks.png";
     }
 
     @Override
-    public String getName(ItemStack item) {
-        return materials.log.getName(item) + " Planks";
+    public String name(ItemStack item) {
+        return materials.log.name(item) + " Planks";
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 16;
+    }
+
+    @Override
+    public float fuelTemperature(ItemStack item) {
+        return 0.1f;
+    }
+
+    @Override
+    public float fuelTime(ItemStack item) {
+        return 60.0f;
+    }
+
+    @Override
+    public int fuelTier(ItemStack item) {
+        return 5;
     }
 }

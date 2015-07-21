@@ -19,7 +19,7 @@ package org.tobi29.scapes.chunk.terrain.infinite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream;
-import org.tobi29.scapes.engine.utils.io.FileUtil;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureArchive;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i;
@@ -46,21 +46,20 @@ public class TerrainInfiniteFormat {
         this.terrain = terrain;
     }
 
-    private static String getFilename(int x, int y) {
+    private static String filename(int x, int y) {
         return Integer.toString(x, 36).toUpperCase() + '_' +
                 Integer.toString(y, 36).toUpperCase();
     }
 
-    public synchronized Optional<TagStructure> getChunkTag(int x, int y)
+    public synchronized Optional<TagStructure> chunkTag(int x, int y)
             throws IOException {
         Vector2i location = new Vector2i(x >> 4, y >> 4);
         RegionFile region = regions.get(location);
         if (region == null) {
             region = createRegion(location);
         }
-        return region.tag.getTagStructure(
-                getFilename(x - (location.intX() << 4),
-                        y - (location.intY() << 4)));
+        return region.tag.getTagStructure(filename(x - (location.intX() << 4),
+                y - (location.intY() << 4)));
     }
 
     public synchronized void putChunkTag(int x, int y, TagStructure tag)
@@ -70,7 +69,7 @@ public class TerrainInfiniteFormat {
         if (region == null) {
             region = createRegion(location);
         }
-        region.tag.setTagStructure(getFilename(x - (location.intX() << 4),
+        region.tag.setTagStructure(filename(x - (location.intX() << 4),
                 y - (location.intY() << 4)), tag);
     }
 
@@ -80,7 +79,7 @@ public class TerrainInfiniteFormat {
 
     private RegionFile createRegion(Vector2i location) throws IOException {
         RegionFile region = new RegionFile(path.resolve(
-                getFilename(location.intX(), location.intY()) + ".star"));
+                filename(location.intX(), location.intY()) + ".star"));
         regions.keySet().stream().filter(this::checkRegionUnused)
                 .collect(Collectors.toList()).forEach(this::removeRegion);
         regions.put(location, region);

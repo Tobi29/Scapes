@@ -32,21 +32,21 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class MobLivingClient extends MobClient {
     protected final Frustum viewField, hitField;
-    protected double lives, maxLives, armor = 1.0, footStep, invincibleTicks;
+    protected double health, maxHealth, footStep, invincibleTicks;
 
     protected MobLivingClient(WorldClient world, Vector3 pos, Vector3 speed,
-            AABB aabb, double lives, double maxLives, Frustum viewField,
+            AABB aabb, double health, double maxHealth, Frustum viewField,
             Frustum hitField) {
         super(world, pos, speed, aabb);
-        this.lives = lives;
-        this.maxLives = maxLives;
+        this.health = health;
+        this.maxHealth = maxHealth;
         this.viewField = viewField;
         this.hitField = hitField;
     }
 
-    public PointerPane getBlock(double distance) {
-        Pool<PointerPane> pointerPanes = world.getTerrain()
-                .getPointerPanes(pos.intX(), pos.intY(), pos.intZ(),
+    public PointerPane block(double distance) {
+        Pool<PointerPane> pointerPanes =
+                world.terrain().pointerPanes(pos.intX(), pos.intY(), pos.intZ(),
                         (int) FastMath.ceil(distance));
         double lookX = FastMath.cosTable(rot.doubleZ() * FastMath.PI / 180) *
                 FastMath.cosTable(rot.doubleX() * FastMath.PI / 180) * distance;
@@ -54,7 +54,7 @@ public abstract class MobLivingClient extends MobClient {
                 FastMath.cosTable(rot.doubleX() * FastMath.PI / 180) * distance;
         double lookZ =
                 FastMath.sinTable(rot.doubleX() * FastMath.PI / 180) * distance;
-        Vector3 viewOffset = getViewOffset();
+        Vector3 viewOffset = viewOffset();
         Vector3 f = pos.now().plus(viewOffset);
         Vector3 t = f.plus(new Vector3d(lookX, lookY, lookZ));
         double distanceSqr = distance * distance;
@@ -87,26 +87,25 @@ public abstract class MobLivingClient extends MobClient {
     public void onDeath() {
     }
 
-    public abstract CreatureType getCreatureType();
+    public abstract CreatureType creatureType();
 
-    public double getLives() {
-        return lives;
+    public double health() {
+        return health;
     }
 
-    public double getMaxLives() {
-        return maxLives;
+    public double maxHealth() {
+        return maxHealth;
     }
 
     public boolean isDead() {
-        return lives <= 0;
+        return health <= 0;
     }
 
     @Override
     public void read(TagStructure tagStructure) {
         super.read(tagStructure);
-        lives = tagStructure.getDouble("Lives");
-        maxLives = tagStructure.getDouble("MaxLives");
-        armor = tagStructure.getDouble("Armor");
+        health = tagStructure.getDouble("Health");
+        maxHealth = tagStructure.getDouble("MaxHealth");
     }
 
     @Override
@@ -117,15 +116,15 @@ public abstract class MobLivingClient extends MobClient {
         double lookY = FastMath.sinTable(rot.doubleZ() * FastMath.PI / 180) *
                 FastMath.cosTable(rot.doubleX() * FastMath.PI / 180) * 6;
         double lookZ = FastMath.sinTable(rot.doubleX() * FastMath.PI / 180) * 6;
-        Vector3 viewOffset = getViewOffset();
+        Vector3 viewOffset = viewOffset();
         viewField.setView(pos.doubleX() + viewOffset.doubleX(),
                 pos.doubleY() + viewOffset.doubleY(),
                 pos.doubleZ() + viewOffset.doubleZ(), pos.doubleX() + lookX,
                 pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0, 0, 1);
-        world.getEntities().filter(entity -> entity instanceof MobClient)
+        world.entities().filter(entity -> entity instanceof MobClient)
                 .forEach(entity -> {
                     MobClient mob = (MobClient) entity;
-                    if (viewField.inView(mob.getAABB()) > 0) {
+                    if (viewField.inView(mob.aabb()) > 0) {
                         if (!world.checkBlocked(pos.intX(), pos.intY(),
                                 pos.intZ(), mob.pos.intX(), mob.pos.intY(),
                                 mob.pos.intZ())) {
@@ -139,12 +138,12 @@ public abstract class MobLivingClient extends MobClient {
             if (FastMath.max(FastMath.abs((Vector2) speed.now())) > 0.1) {
                 int x = pos.intX(), y = pos.intY(), z =
                         FastMath.floor(pos.doubleZ() - 0.1);
-                String footSteepSound = world.getTerrain().type(x, y, z)
-                        .getFootStep(world.getTerrain().data(x, y, z));
+                String footSteepSound = world.terrain().type(x, y, z)
+                        .footStepSound(world.terrain().data(x, y, z));
                 if (footSteepSound.isEmpty() && ground) {
                     z = FastMath.floor(pos.doubleZ() - 1.4);
-                    footSteepSound = world.getTerrain().type(x, y, z)
-                            .getFootStep(world.getTerrain().data(x, y, z));
+                    footSteepSound = world.terrain().type(x, y, z)
+                            .footStepSound(world.terrain().data(x, y, z));
                 }
                 if (!footSteepSound.isEmpty()) {
                     Random random = ThreadLocalRandom.current();
@@ -161,22 +160,22 @@ public abstract class MobLivingClient extends MobClient {
         }
     }
 
-    public abstract Vector3 getViewOffset();
+    public abstract Vector3 viewOffset();
 
-    public double getInvincibleTicks() {
+    public double invincibleTicks() {
         return invincibleTicks;
     }
 
     public void processPacket(PacketMobDamage packet) {
-        maxLives = packet.getMaxLives();
-        double newLives = packet.getLives();
-        double oldLives = lives;
+        maxHealth = packet.maxHealth();
+        double newLives = packet.health();
+        double oldLives = health;
         if (newLives < oldLives) {
             invincibleTicks = 0.8;
-            lives = newLives;
+            health = newLives;
             onDamage(oldLives - newLives);
         } else {
-            lives = newLives;
+            health = newLives;
             onHeal(newLives - oldLives);
         }
     }

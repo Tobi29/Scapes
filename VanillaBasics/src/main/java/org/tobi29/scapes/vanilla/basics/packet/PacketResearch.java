@@ -34,6 +34,7 @@ import org.tobi29.scapes.vanilla.basics.entity.server.EntityResearchTableServer;
 import org.tobi29.scapes.vanilla.basics.material.item.ItemResearch;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 public class PacketResearch extends Packet implements PacketServer {
     private int entityID;
@@ -42,8 +43,7 @@ public class PacketResearch extends Packet implements PacketServer {
     }
 
     public PacketResearch(EntityResearchTableClient researchTable) {
-        entityID = researchTable.getEntityID();
-        entityID = 0;
+        entityID = researchTable.entityID();
     }
 
     @Override
@@ -63,40 +63,44 @@ public class PacketResearch extends Packet implements PacketServer {
         if (world == null) {
             return;
         }
-        EntityServer entity = world.getEntity(entityID);
+        EntityServer entity = world.entity(entityID);
         if (entity instanceof EntityResearchTableServer) {
             EntityResearchTableServer researchTable =
                     (EntityResearchTableServer) entity;
-            MobPlayerServer playerE = player.getMob();
-            if (researchTable.getViewers().filter(check -> check == playerE)
+            MobPlayerServer playerE = player.mob();
+            if (researchTable.viewers().filter(check -> check == playerE)
                     .findAny().isPresent()) {
-                VanillaBasics plugin = (VanillaBasics) world.getPlugins()
-                        .getPlugin("VanillaBasics");
+                VanillaBasics plugin =
+                        (VanillaBasics) world.plugins().plugin("VanillaBasics");
                 synchronized (researchTable) {
-                    ItemStack item = researchTable.getInventory().getItem(0);
-                    Material material = item.getMaterial();
+                    ItemStack item = researchTable.inventory().item(0);
+                    Material material = item.material();
                     if (material instanceof ItemResearch) {
                         for (String identifier : ((ItemResearch) material)
-                                .getIdentifiers(item)) {
-                            player.getMob().getMetaData("Vanilla")
+                                .identifiers(item)) {
+                            player.mob().metaData("Vanilla")
                                     .getStructure("Research")
                                     .getStructure("Items")
                                     .setBoolean(identifier, true);
                         }
                     } else {
-                        player.getMob().getMetaData("Vanilla")
+                        player.mob().metaData("Vanilla")
                                 .getStructure("Research").getStructure("Items")
-                                .setBoolean(Integer.toHexString(
-                                        material.getItemID()), true);
+                                .setBoolean(
+                                        Integer.toHexString(material.itemID()),
+                                        true);
                     }
                     plugin.getResearchRecipes().forEach(recipe -> {
-                        if (!player.getMob().getMetaData("Vanilla")
+                        if (!player.mob().metaData("Vanilla")
                                 .getStructure("Research")
                                 .getStructure("Finished")
-                                .getBoolean(recipe.getName())) {
+                                .getBoolean(recipe.name())) {
                             boolean flag = true;
-                            for (String requirement : recipe.getItems()) {
-                                if (!player.getMob().getMetaData("Vanilla")
+                            Iterator<String> requirements =
+                                    recipe.items().iterator();
+                            while (requirements.hasNext()) {
+                                String requirement = requirements.next();
+                                if (!player.mob().metaData("Vanilla")
                                         .getStructure("Research")
                                         .getStructure("Items")
                                         .getBoolean(requirement)) {
@@ -105,15 +109,14 @@ public class PacketResearch extends Packet implements PacketServer {
                                 }
                             }
                             if (flag) {
-                                player.getMob().getMetaData("Vanilla")
+                                player.mob().metaData("Vanilla")
                                         .getStructure("Research")
                                         .getStructure("Finished")
-                                        .setBoolean(recipe.getName(), true);
-                                player.getServer()
-                                        .send(new PacketEntityMetaData(
-                                                player.getMob(), "Vanilla"));
+                                        .setBoolean(recipe.name(), true);
+                                player.server().send(new PacketEntityMetaData(
+                                        player.mob(), "Vanilla"));
                                 player.send(new PacketNotification("Research",
-                                        recipe.getText()));
+                                        recipe.text()));
                             }
                         }
                     });

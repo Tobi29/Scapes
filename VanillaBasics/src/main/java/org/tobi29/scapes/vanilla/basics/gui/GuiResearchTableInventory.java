@@ -29,7 +29,7 @@ public class GuiResearchTableInventory extends GuiContainerInventory {
         addButton(185, 90, 30, 30, 0);
         GuiComponentTextButton research =
                 new GuiComponentTextButton(27, 210, 120, 30, 18, "Research");
-        research.addLeftClick(event -> player.getConnection()
+        research.addLeftClick(event -> player.connection()
                 .send(new PacketResearch(container)));
         pane.add(research);
     }

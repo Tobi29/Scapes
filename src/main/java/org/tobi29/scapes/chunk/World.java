@@ -34,7 +34,7 @@ public abstract class World {
     protected Vector3 spawn = new Vector3i(0, 0, 0);
     protected long seed, tick;
     @SuppressWarnings("CanBeFinal")
-    protected double gravitation = 9.8;
+    protected double gravity = 9.8;
 
     protected World(PlayConnection connection, Plugins plugins,
             TaskExecutor taskExecutor, GameRegistry registry) {
@@ -42,46 +42,46 @@ public abstract class World {
         this.plugins = plugins;
         this.taskExecutor = taskExecutor;
         this.registry = registry;
-        air = registry.getAir();
+        air = registry.air();
     }
 
-    public Plugins getPlugins() {
+    public Plugins plugins() {
         return plugins;
     }
 
-    public BlockType getAir() {
+    public BlockType air() {
         return air;
     }
 
-    public PlayConnection getConnection() {
+    public PlayConnection connection() {
         return connection;
     }
 
-    public WorldEnvironment getEnvironment() {
+    public WorldEnvironment environment() {
         return environment;
     }
 
-    public long getSeed() {
+    public long seed() {
         return seed;
     }
 
-    public Vector3 getSpawn() {
+    public Vector3 spawn() {
         return spawn;
     }
 
-    public TaskExecutor getTaskExecutor() {
+    public TaskExecutor taskExecutor() {
         return taskExecutor;
     }
 
-    public GameRegistry getRegistry() {
+    public GameRegistry registry() {
         return registry;
     }
 
-    public long getTick() {
+    public long tick() {
         return tick;
     }
 
-    public double getGravitation() {
-        return gravitation;
+    public double gravity() {
+        return gravity;
     }
 }

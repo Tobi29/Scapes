@@ -21,5 +21,5 @@ import org.tobi29.scapes.packets.Packet;
 public interface PlayConnection {
     void send(Packet packet);
 
-    int getLoadingRadius();
+    int loadingRadius();
 }

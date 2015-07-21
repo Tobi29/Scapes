@@ -66,11 +66,11 @@ public abstract class Scene {
     public void renderGui(GL gl, Shader shader,
             double delta) {
         for (GuiComponent gui : guis) {
-            gui.render(gl, shader, gl.getDefaultFont(), delta);
+            gui.render(gl, shader, gl.defaultFont(), delta);
         }
     }
 
-    public GameState getState() {
+    public GameState state() {
         return state;
     }
 
@@ -86,22 +86,22 @@ public abstract class Scene {
     }
 
     public Shader postProcessing(GL gl, int pass) {
-        return gl.getShaderManager().getShader("Engine:shader/Textured", gl);
+        return gl.shaders().get("Engine:shader/Textured", gl);
     }
 
-    public int getWidth(int width) {
+    public int width(int width) {
         return width;
     }
 
-    public int getHeight(int height) {
+    public int height(int height) {
         return height;
     }
 
-    public int getRenderPasses() {
+    public int renderPasses() {
         return 1;
     }
 
-    public int getColorAttachments() {
+    public int colorAttachments() {
         return 1;
     }
 

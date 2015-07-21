@@ -51,7 +51,7 @@ public abstract class TerrainInfiniteChunk {
         this.terrain = terrain;
         this.world = world;
         this.zSize = zSize;
-        blocks = world.getRegistry().getBlocks();
+        blocks = world.registry().blocks();
         bData = new ChunkData(0, 0, 5, 4, 4, 4, ChunkArraySection1x16::new);
         bID = new ChunkData(0, 0, 5, 4, 4, 4, ChunkArraySection1x16::new);
         bLight = new ChunkData(0, 0, 5, 4, 4, 4, ChunkArraySection2x4::new);
@@ -162,31 +162,31 @@ public abstract class TerrainInfiniteChunk {
         }
     }
 
-    public TagStructure getMetaData(String category) {
+    public TagStructure metaData(String category) {
         return metaData.getStructure(category);
     }
 
-    public Vector2i getPos() {
+    public Vector2i pos() {
         return pos;
     }
 
-    public int getX() {
+    public int x() {
         return pos.intX();
     }
 
-    public int getY() {
+    public int y() {
         return pos.intY();
     }
 
-    public int getBlockX() {
+    public int blockX() {
         return posBlock.intX();
     }
 
-    public int getBlockY() {
+    public int blockY() {
         return posBlock.intY();
     }
 
-    public int getZSize() {
+    public int zSize() {
         return zSize;
     }
 
@@ -199,11 +199,11 @@ public abstract class TerrainInfiniteChunk {
         return bID.isEmpty(0, 0, i, 15, 15, i + 15);
     }
 
-    public TerrainInfinite getTerrain() {
+    public TerrainInfinite terrain() {
         return terrain;
     }
 
-    public int getHighestBlockZAt(int x, int y) {
+    public int highestBlockZAt(int x, int y) {
         if (x >= 0 && x < 16 && y >= 0 && y < 16) {
             return heightMap[y << 4 | x] + 1;
         }
@@ -212,7 +212,7 @@ public abstract class TerrainInfiniteChunk {
                 ' ' + pos.intY());
     }
 
-    public int getHighestTerrainBlockZAt(int x, int y) {
+    public int highestTerrainBlockZAt(int x, int y) {
         if (x >= 0 && x < 16 && y >= 0 && y < 16) {
             for (int z = heightMap[y << 4 | x]; z >= 0; z--) {
                 int id = bID.getData(x, y, z, 0);
@@ -277,8 +277,8 @@ public abstract class TerrainInfiniteChunk {
         if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 &&
                 z < zSize) {
             return (int) FastMath.max(bLight.getData(x, y, z, 1),
-                    bLight.getData(x, y, z, 0) - world.getEnvironment()
-                            .getSunLightReduction(x + posBlock.intX(),
+                    bLight.getData(x, y, z, 0) - world.environment()
+                            .sunLightReduction(x + posBlock.intX(),
                                     y + posBlock.intY()));
         }
         throw new ChunkMissException(
@@ -332,7 +332,7 @@ public abstract class TerrainInfiniteChunk {
                 z < zSize) {
             BlockType oldType = blocks[bID.getData(x, y, z, 0)];
             if (oldType != type) {
-                bID.setData(x, y, z, 0, type.getID());
+                bID.setData(x, y, z, 0, type.id());
                 updateHeightMap(x, y, z, type);
                 update(x, y, z, oldType.causesTileUpdate());
             }
@@ -355,7 +355,7 @@ public abstract class TerrainInfiniteChunk {
                 z < zSize) {
             BlockType oldType = blocks[bID.getData(x, y, z, 0)];
             if (oldType != type || bData.getData(x, y, z, 0) != data) {
-                bID.setData(x, y, z, 0, type.getID());
+                bID.setData(x, y, z, 0, type.id());
                 bData.setData(x, y, z, 0, data);
                 updateHeightMap(x, y, z, type);
                 update(x, y, z, oldType.causesTileUpdate());
@@ -443,9 +443,9 @@ public abstract class TerrainInfiniteChunk {
 
     protected void updateHeightMap(int x, int y, int z, BlockType type) {
         int height = heightMap[y << 4 | x];
-        if (z > height && type != world.getAir()) {
+        if (z > height && type != world.air()) {
             heightMap[y << 4 | x] = z;
-        } else if (height == z && type == world.getAir()) {
+        } else if (height == z && type == world.air()) {
             int zzz = 0;
             for (int zz = height; zz >= 0; zz--) {
                 if (bID.getData(x, y, zz, 0) != 0) {

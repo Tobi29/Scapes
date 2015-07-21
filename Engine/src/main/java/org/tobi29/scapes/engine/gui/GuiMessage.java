@@ -45,9 +45,8 @@ public class GuiMessage extends Gui {
     public void renderComponent(GL gl, Shader shader,
             FontRenderer font, double delta) {
         progress += speed * delta;
-        gl.getTextureManager().unbind(gl);
-        OpenGL openGL = gl.getOpenGL();
-        openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
+        gl.textures().unbind(gl);
+        gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
         vao.render(gl, shader);
         GuiComponent parent = this.parent;
         if (progress >= 1.0 && parent != null) {

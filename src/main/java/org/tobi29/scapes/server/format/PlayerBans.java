@@ -50,9 +50,9 @@ public class PlayerBans implements MultiTag.Writeable {
     }
 
     public Optional<String> matches(PlayerConnection player) {
-        PublicKey key = player.getKey();
-        Optional<InetAddress> address = player.getAddress();
-        String nickname = player.getNickname();
+        PublicKey key = player.key();
+        Optional<InetAddress> address = player.address();
+        String nickname = player.nickname();
         return entries.stream()
                 .map(entry -> entry.matches(key, address, nickname))
                 .filter(Optional::isPresent).map(Optional::get).findAny();
@@ -62,19 +62,19 @@ public class PlayerBans implements MultiTag.Writeable {
             boolean banKey, boolean banAddress, boolean banNickname) {
         Optional<PublicKey> key;
         if (banKey) {
-            key = Optional.of(player.getKey());
+            key = Optional.of(player.key());
         } else {
             key = Optional.empty();
         }
         Optional<String> address;
         if (banAddress) {
-            address = player.getAddress().map(InetAddress::getHostAddress);
+            address = player.address().map(InetAddress::getHostAddress);
         } else {
             address = Optional.empty();
         }
         Optional<String> nickname;
         if (banNickname) {
-            nickname = Optional.of(player.getNickname());
+            nickname = Optional.of(player.nickname());
         } else {
             nickname = Optional.empty();
         }
@@ -86,7 +86,7 @@ public class PlayerBans implements MultiTag.Writeable {
                 .collect(Collectors.toList()));
     }
 
-    public Stream<Entry> getEntries() {
+    public Stream<Entry> entries() {
         return entries.stream();
     }
 

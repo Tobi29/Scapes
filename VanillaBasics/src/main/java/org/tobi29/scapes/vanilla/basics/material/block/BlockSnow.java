@@ -63,7 +63,7 @@ public class BlockSnow extends VanillaBlock {
     }
 
     @Override
-    public List<AABBElement> getCollision(int data, int x, int y, int z) {
+    public List<AABBElement> collision(int data, int x, int y, int z) {
         return new ArrayList<>();
     }
 
@@ -73,27 +73,27 @@ public class BlockSnow extends VanillaBlock {
     }
 
     @Override
-    public double getResistance(ItemStack item, int data) {
+    public double resistance(ItemStack item, int data) {
         return 1;
     }
 
     @Override
-    public List<ItemStack> getDrops(ItemStack item, int data) {
+    public List<ItemStack> drops(ItemStack item, int data) {
         return Collections.emptyList();
     }
 
     @Override
-    public String getFootStep(int data) {
+    public String footStepSound(int data) {
         return "VanillaBasics:sound/footsteps/Snow.ogg";
     }
 
     @Override
-    public String getBreak(ItemStack item, int data) {
+    public String breakSound(ItemStack item, int data) {
         return "";
     }
 
     @Override
-    public Optional<TerrainTexture> getParticleTexture(Face face,
+    public Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
         return Optional.of(texture);
     }
@@ -132,7 +132,7 @@ public class BlockSnow extends VanillaBlock {
         BlockType type = terrain.type(x, y, z - 1);
         if (type == materials.air || type == materials.snow ||
                 type.isLiquid()) {
-            terrain.typeData(x, y, z, terrain.world().getAir(), (short) 0);
+            terrain.typeData(x, y, z, terrain.world().air(), (short) 0);
         }
     }
 
@@ -162,12 +162,12 @@ public class BlockSnow extends VanillaBlock {
     }
 
     @Override
-    public String getName(ItemStack item) {
+    public String name(ItemStack item) {
         return "Snow";
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 16;
     }
 }

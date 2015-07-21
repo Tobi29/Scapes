@@ -33,9 +33,8 @@ public class GuiAnvilInventory extends GuiContainerInventory {
             MobPlayerClientMain player) {
         super("Anvil", player, container);
         this.container = container;
-        VanillaBasics plugin =
-                (VanillaBasics) player.getConnection().getPlugins()
-                        .getPlugin("VanillaBasics");
+        VanillaBasics plugin = (VanillaBasics) player.connection().plugins()
+                .plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         addButton(16, 120, 30, 30, 0);
         addButton(16, 210, 30, 30, 1);
@@ -51,10 +50,10 @@ public class GuiAnvilInventory extends GuiContainerInventory {
 
     private void addAction(int x, int y, Material material, int i) {
         ItemStack icon = new ItemStack(material, 1);
-        icon.getMetaData("Vanilla").setString("MetalType", "Iron");
+        icon.metaData("Vanilla").setString("MetalType", "Iron");
         GuiComponentItemButton item =
                 new GuiComponentItemButton(x, y, 30, 30, icon);
-        item.addLeftClick(event -> player.getConnection()
+        item.addLeftClick(event -> player.connection()
                 .send(new PacketAnvil(container, i)));
         pane.add(item);
     }

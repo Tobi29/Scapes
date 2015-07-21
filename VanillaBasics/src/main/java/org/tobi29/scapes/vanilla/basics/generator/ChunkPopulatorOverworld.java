@@ -45,7 +45,7 @@ public class ChunkPopulatorOverworld implements ChunkPopulator {
             BiomeGenerator biomeGenerator) {
         this.plugin = plugin;
         this.biomeGenerator = biomeGenerator;
-        Random random = new Random(world.getSeed());
+        Random random = new Random(world.seed());
         seedInt = (long) random.nextInt() << 32;
         for (BiomeGenerator.Biome biome : BiomeGenerator.Biome.values()) {
             BiomeDecoratorChooser chooser =
@@ -63,42 +63,41 @@ public class ChunkPopulatorOverworld implements ChunkPopulator {
         hash = 31 * hash + y;
         Random random = new Random(hash + seedInt);
         ChunkGeneratorOverworld gen =
-                (ChunkGeneratorOverworld) terrain.world().getGenerator();
+                (ChunkGeneratorOverworld) terrain.world().generator();
         VanillaMaterial materials = plugin.getMaterials();
         int passes = dx * dy / 256;
         for (int i = 0; i < passes; i++) {
             if (random.nextInt(400) == 0) {
                 int xx = random.nextInt(dx) + x;
                 int yy = random.nextInt(dy) + y;
-                int zz = terrain.getHighestTerrainBlockZAt(xx, yy);
+                int zz = terrain.highestTerrainBlockZAt(xx, yy);
                 StructureSmallRuin
                         .placeRandomRuin(terrain, xx, yy, zz, materials,
-                                gen.getStoneType(xx + random.nextInt(200) - 100,
+                                gen.stoneType(xx + random.nextInt(200) - 100,
                                         yy + random.nextInt(200) - 100,
                                         zz - random.nextInt(100)), random);
             }
             int xx = x + (dx >> 1);
             int yy = y + (dy >> 1);
-            int zz = random.nextInt(terrain.getHighestTerrainBlockZAt(xx, yy));
+            int zz = random.nextInt(terrain.highestTerrainBlockZAt(xx, yy));
             int data = terrain.data(xx, yy, zz);
-            if (gen.getStoneType(xx + random.nextInt(21) - 10,
+            if (gen.stoneType(xx + random.nextInt(21) - 10,
                     yy + random.nextInt(21) - 10, zz + random.nextInt(9) - 4) !=
                     data) {
-                OreType oreType = gen.getRandomOreType(plugin, data, random);
+                OreType oreType = gen.randomOreType(plugin, data, random);
                 if (oreType != null) {
                     StructureOre.genOre(terrain, xx, yy, zz, materials.stoneRaw,
-                            oreType.getBlockType(), (int) FastMath
-                                    .ceil(random.nextDouble() *
-                                            oreType.getSize()), (int) FastMath
-                                    .ceil(random.nextDouble() *
-                                            oreType.getSize()), (int) FastMath
-                                    .ceil(random.nextDouble() *
-                                            oreType.getSize()),
-                            oreType.getChance(), random);
-                    if (random.nextInt(oreType.getRockChance()) == 0) {
+                            oreType.type(), (int) FastMath
+                                    .ceil(random.nextDouble() * oreType.size()),
+                            (int) FastMath
+                                    .ceil(random.nextDouble() * oreType.size()),
+                            (int) FastMath
+                                    .ceil(random.nextDouble() * oreType.size()),
+                            oreType.chance(), random);
+                    if (random.nextInt(oreType.rockChance()) == 0) {
                         int xxx = xx + random.nextInt(21) - 10;
                         int yyy = yy + random.nextInt(21) - 10;
-                        int zzz = terrain.getHighestTerrainBlockZAt(xxx, yyy) -
+                        int zzz = terrain.highestTerrainBlockZAt(xxx, yyy) -
                                 random.nextInt(4);
                         BlockType blockType = terrain.type(xxx, yyy, zzz);
                         if (blockType == materials.grass ||
@@ -112,8 +111,8 @@ public class ChunkPopulatorOverworld implements ChunkPopulator {
                                 size = random.nextDouble() * 2.0 + 2.0;
                             }
                             StructureRock.genOreRock(terrain, xxx, yyy, zzz,
-                                    materials.stoneRaw, oreType.getBlockType(),
-                                    gen.getStoneType(xxx, yyy, zzz), 10, size,
+                                    materials.stoneRaw, oreType.type(),
+                                    gen.stoneType(xxx, yyy, zzz), 10, size,
                                     random);
                         }
                     }
@@ -139,11 +138,11 @@ public class ChunkPopulatorOverworld implements ChunkPopulator {
     public void load(TerrainServer.TerrainMutable terrain, int x, int y, int dx,
             int dy) {
         if (terrain instanceof TerrainInfinite) {
-            ((TerrainInfinite) terrain).getChunk(x >> 4, y >> 4).ifPresent(
+            ((TerrainInfinite) terrain).chunk(x >> 4, y >> 4).ifPresent(
                     chunk -> ((WorldEnvironmentOverworld) terrain.world()
-                            .getEnvironment())
+                            .environment())
                             .simulateSeason(terrain, x, y, dx, dy,
-                                    chunk.getMetaData("Vanilla")));
+                                    chunk.metaData("Vanilla")));
         }
     }
 
@@ -155,7 +154,7 @@ public class ChunkPopulatorOverworld implements ChunkPopulator {
                 Random random) {
             List<BiomeDecorator> decorators = new ArrayList<>();
             collection.forEach(decorator -> {
-                for (int i = 0; i < decorator.getWeight(); i++) {
+                for (int i = 0; i < decorator.weight(); i++) {
                     decorators.add(decorator);
                 }
             });

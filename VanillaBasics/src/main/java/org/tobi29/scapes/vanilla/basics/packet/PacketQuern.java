@@ -42,7 +42,7 @@ public class PacketQuern extends Packet implements PacketServer {
     }
 
     public PacketQuern(EntityQuernClient quern) {
-        entityID = quern.getEntityID();
+        entityID = quern.entityID();
         entityID = 0;
     }
 
@@ -63,23 +63,23 @@ public class PacketQuern extends Packet implements PacketServer {
         if (world == null) {
             return;
         }
-        EntityServer entity = world.getEntity(entityID);
+        EntityServer entity = world.entity(entityID);
         if (entity instanceof EntityQuernServer) {
             EntityQuernServer quern = (EntityQuernServer) entity;
-            MobPlayerServer playerE = player.getMob();
-            if (quern.getViewers().filter(check -> check == playerE).findAny()
+            MobPlayerServer playerE = player.mob();
+            if (quern.viewers().filter(check -> check == playerE).findAny()
                     .isPresent()) {
-                VanillaBasics plugin = (VanillaBasics) world.getPlugins()
-                        .getPlugin("VanillaBasics");
+                VanillaBasics plugin =
+                        (VanillaBasics) world.plugins().plugin("VanillaBasics");
                 VanillaMaterial materials = plugin.getMaterials();
                 synchronized (quern) {
-                    Inventory inventory = quern.getInventory();
-                    ItemStack item = inventory.getItem(0);
-                    if (item.getMaterial() == materials.cropDrop) {
+                    Inventory inventory = quern.inventory();
+                    ItemStack item = inventory.item(0);
+                    if (item.material() == materials.cropDrop) {
                         item.setMaterial(materials.grain);
-                        item.setAmount(item.getAmount() << 2);
+                        item.setAmount(item.amount() << 2);
                         Packet packet = new PacketUpdateInventory(quern);
-                        quern.getViewers().map(MobPlayerServer::getConnection)
+                        quern.viewers().map(MobPlayerServer::connection)
                                 .forEach(connection -> connection.send(packet));
                     }
                 }

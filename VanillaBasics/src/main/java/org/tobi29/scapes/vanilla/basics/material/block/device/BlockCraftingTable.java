@@ -47,27 +47,27 @@ public class BlockCraftingTable extends VanillaBlock {
     @Override
     public boolean click(TerrainServer terrain, int x, int y, int z, Face face,
             MobPlayerServer player) {
-        player.getConnection().send(new PacketOpenCrafting());
+        player.connection().send(new PacketOpenCrafting());
         return true;
     }
 
     @Override
-    public double getResistance(ItemStack item, int data) {
-        return "Axe".equals(item.getMaterial().getToolType(item)) ? 4 : -1;
+    public double resistance(ItemStack item, int data) {
+        return "Axe".equals(item.material().toolType(item)) ? 4 : -1;
     }
 
     @Override
-    public String getFootStep(int data) {
+    public String footStepSound(int data) {
         return "VanillaBasics:sound/footsteps/Wood.ogg";
     }
 
     @Override
-    public String getBreak(ItemStack item, int data) {
+    public String breakSound(ItemStack item, int data) {
         return "VanillaBasics:sound/blocks/Axe.ogg";
     }
 
     @Override
-    public Optional<TerrainTexture> getParticleTexture(Face face,
+    public Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
         return Optional.of(textureSide1);
     }
@@ -112,12 +112,12 @@ public class BlockCraftingTable extends VanillaBlock {
     }
 
     @Override
-    public String getName(ItemStack item) {
+    public String name(ItemStack item) {
         return "Crafting Table";
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 1;
     }
 }

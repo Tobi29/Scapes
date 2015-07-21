@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.block;
+package org.tobi29.scapes.vanilla.basics.material.item;
 
-public interface ItemArmor {
-    double getArmor(ItemStack item);
+import org.tobi29.scapes.block.ItemStack;
+
+public interface ItemFuel {
+    float fuelTemperature(ItemStack item);
+
+    float fuelTime(ItemStack item);
+
+    int fuelTier(ItemStack item);
 }

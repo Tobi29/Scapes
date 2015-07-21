@@ -75,12 +75,12 @@ public class WAVReadStream implements ReadableAudioStream {
     }
 
     @Override
-    public int getChannels() {
+    public int channels() {
         return channels;
     }
 
     @Override
-    public int getRate() {
+    public int rate() {
         return rate;
     }
 

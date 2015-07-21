@@ -22,21 +22,20 @@ import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.openal.OpenAL;
 import org.tobi29.scapes.engine.utils.DesktopException;
 import org.tobi29.scapes.engine.utils.Pair;
-import org.tobi29.scapes.engine.utils.io.ReadSource;
+import org.tobi29.scapes.engine.utils.io.filesystem.ReadSource;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
 
 public interface Container {
-    int getContainerWidth();
+    int containerWidth();
 
-    int getContainerHeight();
+    int containerHeight();
 
-    int getContentWidth();
+    int contentWidth();
 
-    int getContentHeight();
+    int contentHeight();
 
     boolean contentResized();
 
@@ -44,13 +43,13 @@ public interface Container {
 
     void updateContainer();
 
-    OpenGL getOpenGL();
+    GL gl();
 
-    OpenAL getOpenAL();
+    OpenAL al();
 
-    ControllerDefault getController();
+    ControllerDefault controller();
 
-    Collection<ControllerJoystick> getJoysticks();
+    Collection<ControllerJoystick> joysticks();
 
     boolean joysticksChanged();
 
@@ -67,15 +66,6 @@ public interface Container {
 
     Optional<Path> saveFileDialog(Pair<String, String>[] extensions,
             String title);
-
-    boolean exportToUser(Path path, Pair<String, String>[] extensions,
-            String title) throws IOException;
-
-    boolean importFromUser(Path path, Pair<String, String>[] extensions,
-            String title) throws IOException;
-
-    boolean importFromUser(Path path, Pair<String, String>[] extensions,
-            String title, boolean multiple) throws IOException;
 
     void message(MessageType messageType, String title, String message);
 

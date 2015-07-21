@@ -163,7 +163,7 @@ public class Pool<E> implements Iterable<E> {
         return size == 0;
     }
 
-    public int getSize() {
+    public int size() {
         return size;
     }
 }

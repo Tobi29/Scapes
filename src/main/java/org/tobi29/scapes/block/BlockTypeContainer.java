@@ -30,7 +30,7 @@ public abstract class BlockTypeContainer extends BlockType {
     @Override
     public boolean click(TerrainServer terrain, int x, int y, int z, Face face,
             MobPlayerServer player) {
-        for (EntityServer entity : terrain.world().getEntities(x, y, z)) {
+        for (EntityServer entity : terrain.world().entities(x, y, z)) {
             if (entity instanceof EntityContainerServer) {
                 player.openGui((EntityContainerServer) entity);
                 return true;

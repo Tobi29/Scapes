@@ -39,27 +39,27 @@ public class CropType {
         this.nutrient = nutrient;
     }
 
-    public String getName() {
+    public String name() {
         return name;
     }
 
-    public String getBakedName() {
+    public String bakedName() {
         return bakedName;
     }
 
-    public String getTexture() {
+    public String texture() {
         return texture;
     }
 
-    public double getTime() {
+    public double time() {
         return time;
     }
 
-    public int getNutrient() {
+    public int nutrient() {
         return nutrient;
     }
 
-    public int getData(GameRegistry registry) {
+    public int data(GameRegistry registry) {
         return registry.get("VanillaBasics", "CropType").get(this);
     }
 }

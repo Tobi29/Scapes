@@ -50,56 +50,55 @@ public class GuiComponentHotbar extends GuiComponent {
     @Override
     public void renderComponent(GL gl, Shader shader,
             FontRenderer font, double delta) {
-        MatrixStack matrixStack = gl.getMatrixStack();
-        OpenGL openGL = gl.getOpenGL();
+        MatrixStack matrixStack = gl.matrixStack();
         for (int i = 0; i < 10; i++) {
-            if (i == player.getInventorySelectLeft()) {
-                openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, 0.0f, 0.0f,
+            if (i == player.inventorySelectLeft()) {
+                gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, 0.0f, 0.0f,
                         0.8f);
                 Matrix matrix = matrixStack.push();
                 matrix.translate(i * (height + 10.0f), 0, 0.0f);
-                gl.getTextureManager().unbind(gl);
+                gl.textures().unbind(gl);
                 vao2.render(gl, shader);
                 vao3.render(gl, shader);
                 org.tobi29.scapes.client.gui.GuiUtils
                         .renderItem(0.0f, 0.0f, height, height,
-                                player.getInventory().getItem(i), gl,
+                                player.inventory().item(i), gl,
                                 shader, font);
-                gl.getTextureManager().bind("Scapes:image/gui/HotbarLeft", gl);
-                openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
+                gl.textures().bind("Scapes:image/gui/HotbarLeft", gl);
+                gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
                         1.0f);
                 vao1.render(gl, shader);
                 matrixStack.pop();
-            } else if (i == player.getInventorySelectRight()) {
-                openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, 0.0f, 0.0f,
+            } else if (i == player.inventorySelectRight()) {
+                gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, 0.0f, 0.0f,
                         0.8f);
                 Matrix matrix = matrixStack.push();
                 matrix.translate(i * (height + 10.0f), 0.0f, 0.0f);
-                gl.getTextureManager().unbind(gl);
+                gl.textures().unbind(gl);
                 vao2.render(gl, shader);
                 vao3.render(gl, shader);
                 org.tobi29.scapes.client.gui.GuiUtils
                         .renderItem(0.0f, 0.0f, height, height,
-                                player.getInventory().getItem(i), gl,
+                                player.inventory().item(i), gl,
                                 shader, font);
-                gl.getTextureManager().bind("Scapes:image/gui/HotbarRight", gl);
-                openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
+                gl.textures().bind("Scapes:image/gui/HotbarRight", gl);
+                gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
                         1.0f);
                 vao1.render(gl, shader);
                 matrixStack.pop();
             } else {
-                openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, 0.0f, 0.0f,
+                gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, 0.0f, 0.0f,
                         0.6f);
                 Matrix matrix = matrixStack.push();
                 matrix.translate(i * (height + 10.0f), 0.0f, 0.0f);
-                gl.getTextureManager().unbind(gl);
+                gl.textures().unbind(gl);
                 vao2.render(gl, shader);
                 vao3.render(gl, shader);
-                openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
+                gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
                         1.0f);
                 org.tobi29.scapes.client.gui.GuiUtils
                         .renderItem(0.0f, 0.0f, height, height,
-                                player.getInventory().getItem(i), gl,
+                                player.inventory().item(i), gl,
                                 shader, font);
                 matrixStack.pop();
             }

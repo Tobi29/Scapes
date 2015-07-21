@@ -29,21 +29,21 @@ import java.util.Random;
 public class UpdateSaplingGrowth extends Update {
     @Override
     public void run(TerrainServer.TerrainMutable terrain) {
-        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
-                .getPlugin("VanillaBasics");
+        VanillaBasics plugin = (VanillaBasics) terrain.world().plugins()
+                .plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         int data = terrain.data(x, y, z);
         terrain.typeData(x, y, z, materials.air, (short) 0);
         GameRegistry.Registry<TreeType> treeRegistry =
-                terrain.world().getRegistry().get("VanillaBasics", "TreeType");
-        treeRegistry.get(data).getGenerator()
+                terrain.world().registry().get("VanillaBasics", "TreeType");
+        treeRegistry.get(data).generator()
                 .gen(terrain, x, y, z, materials, new Random());
     }
 
     @Override
     public boolean isValidOn(BlockType type, TerrainServer terrain) {
-        VanillaBasics plugin = (VanillaBasics) terrain.world().getPlugins()
-                .getPlugin("VanillaBasics");
+        VanillaBasics plugin = (VanillaBasics) terrain.world().plugins()
+                .plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         return type == materials.sapling;
     }

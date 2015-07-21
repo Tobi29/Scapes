@@ -46,7 +46,7 @@ public class GuiComponentLogo extends GuiComponent {
 
     public GuiComponentLogo(int x, int y, int width, int height) {
         super(x, y, width, height);
-        text = getSplash();
+        text = splash();
         textX = x + height - 8;
         textY = y + 4;
         vao = VAOUtility.createVTI(
@@ -56,7 +56,7 @@ public class GuiComponentLogo extends GuiComponent {
                 new int[]{0, 1, 2, 3, 2, 1}, RenderType.TRIANGLES);
     }
 
-    private static String getSplash() {
+    private static String splash() {
         String text;
         LocalDate date = LocalDate.now();
         if (date.getDayOfMonth() == 1 && date.getMonth() == Month.APRIL) {
@@ -86,16 +86,15 @@ public class GuiComponentLogo extends GuiComponent {
     public void clickLeft(GuiComponentEvent event, ScapesEngine engine) {
         engine.sounds().playSound("Engine:sound/Click.ogg", 1.0f, 1.0f);
         super.clickLeft(event, engine);
-        text = getSplash();
+        text = splash();
         updateText();
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader,
-            FontRenderer font, double delta) {
-        gl.getTextureManager().bind("Scapes:image/Icon", gl);
-        OpenGL openGL = gl.getOpenGL();
-        openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
+    public void renderComponent(GL gl, Shader shader, FontRenderer font,
+            double delta) {
+        gl.textures().bind("Scapes:image/Icon", gl);
+        gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
         vao.render(gl, shader);
         if (this.font != font) {
             this.font = font;

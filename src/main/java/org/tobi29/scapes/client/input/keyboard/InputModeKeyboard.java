@@ -113,19 +113,19 @@ public class InputModeKeyboard implements InputMode {
     }
 
     @Override
-    public Gui createControlsGui(GameState state, Gui prev) {
+    public Gui createControlsGUI(GameState state, Gui prev) {
         return new GuiControlsDefault(state, prev,
-                (ScapesClient) state.getEngine().game(), tagStructure,
+                (ScapesClient) state.engine().game(), tagStructure,
                 controller);
     }
 
     @Override
-    public MobPlayerClientMain.Controller getPlayerController() {
+    public MobPlayerClientMain.Controller playerController() {
         return playerController;
     }
 
     @Override
-    public GuiController getGuiController() {
+    public GuiController guiController() {
         return guiController;
     }
 
@@ -184,7 +184,7 @@ public class InputModeKeyboard implements InputMode {
         }
 
         @Override
-        public Vector2 getWalk() {
+        public Vector2 walk() {
             double x = 0.0, y = 0.0;
             if (controller.isDown(walkForward)) {
                 y += 1.0;
@@ -206,44 +206,44 @@ public class InputModeKeyboard implements InputMode {
         }
 
         @Override
-        public Vector2 getCamera(double delta) {
-            Vector2 camera = new Vector2d(controller.getDeltaX(),
-                    controller.getDeltaY());
+        public Vector2 camera(double delta) {
+            Vector2 camera =
+                    new Vector2d(controller.deltaX(), controller.deltaY());
             return camera.multiply(cameraSensitivity);
         }
 
         @Override
-        public boolean getLeft() {
+        public boolean left() {
             return controller.isDown(left);
         }
 
         @Override
-        public boolean getRight() {
+        public boolean right() {
             return controller.isDown(right);
         }
 
         @Override
-        public boolean getJump() {
+        public boolean jump() {
             return controller.isDown(jump);
         }
 
         @Override
-        public boolean getInventory() {
+        public boolean inventory() {
             return controller.isPressed(inventory);
         }
 
         @Override
-        public boolean getMenu() {
+        public boolean menu() {
             return controller.isPressed(menu);
         }
 
         @Override
-        public boolean getChat() {
+        public boolean chat() {
             return controller.isPressed(chat);
         }
 
         @Override
-        public int getHotbarLeft(int previous) {
+        public int hotbarLeft(int previous) {
             if (controller.isDown(hotbarLeft)) {
                 if (controller.isPressed(hotbar0)) {
                     previous = 0;
@@ -273,13 +273,13 @@ public class InputModeKeyboard implements InputMode {
                     previous--;
                 }
                 previous += FastMath.round(
-                        controller.getScrollY() * scrollSensitivity);
+                        controller.scrollY() * scrollSensitivity);
             }
             return previous;
         }
 
         @Override
-        public int getHotbarRight(int previous) {
+        public int hotbarRight(int previous) {
             if (!controller.isDown(hotbarLeft)) {
                 if (controller.isPressed(hotbar0)) {
                     previous = 0;
@@ -309,7 +309,7 @@ public class InputModeKeyboard implements InputMode {
                     previous--;
                 }
                 previous += FastMath.round(
-                        controller.getScrollY() * scrollSensitivity);
+                        controller.scrollY() * scrollSensitivity);
             }
             return previous;
         }

@@ -43,8 +43,8 @@ public class AnimatedTerrainTexture extends TerrainTexture {
     @Override
     protected void renderAnim(GL gl) {
         if (dirty) {
-            registry.getTexture().bind(gl);
-            gl.getOpenGL()
+            registry.texture().bind(gl);
+            gl
                     .replaceTextureMipMap(tileX, tileY, resolution, resolution,
                             frames[i]);
             dirty = false;

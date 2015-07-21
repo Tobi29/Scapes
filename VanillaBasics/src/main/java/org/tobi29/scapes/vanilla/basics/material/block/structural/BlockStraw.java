@@ -49,23 +49,23 @@ public class BlockStraw extends BlockSimpleData {
     }
 
     @Override
-    public double getResistance(ItemStack item, int data) {
+    public double resistance(ItemStack item, int data) {
         return 0.1;
     }
 
     @Override
-    public List<ItemStack> getDrops(ItemStack item, int data) {
+    public List<ItemStack> drops(ItemStack item, int data) {
         return Collections
                 .singletonList(new ItemStack(materials.grassBundle, data, 2));
     }
 
     @Override
-    public String getFootStep(int data) {
+    public String footStepSound(int data) {
         return "VanillaBasics:sound/footsteps/Grass.ogg";
     }
 
     @Override
-    public String getBreak(ItemStack item, int data) {
+    public String breakSound(ItemStack item, int data) {
         return "VanillaBasics:sound/blocks/Foliage.ogg";
     }
 
@@ -75,8 +75,8 @@ public class BlockStraw extends BlockSimpleData {
     }
 
     @Override
-    public String getName(ItemStack item) {
-        switch (item.getData()) {
+    public String name(ItemStack item) {
+        switch (item.data()) {
             case 1:
                 return "Straw";
             default:
@@ -85,17 +85,17 @@ public class BlockStraw extends BlockSimpleData {
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 16;
     }
 
     @Override
-    protected int getTypes() {
+    protected int types() {
         return TEXTURES.length;
     }
 
     @Override
-    protected String getTexture(int data) {
+    protected String texture(int data) {
         return TEXTURES[data];
     }
 }

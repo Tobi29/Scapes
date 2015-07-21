@@ -33,9 +33,9 @@ public class BlockCobblestone extends BlockStone {
     }
 
     @Override
-    public List<ItemStack> getDrops(ItemStack item, int data) {
-        if ("Pickaxe".equals(item.getMaterial().getToolType(item)) &&
-                canBeBroken(item.getMaterial().getToolLevel(item), data)) {
+    public List<ItemStack> drops(ItemStack item, int data) {
+        if ("Pickaxe".equals(item.material().toolType(item)) &&
+                canBeBroken(item.material().toolLevel(item), data)) {
             return Collections
                     .singletonList(new ItemStack(materials.stoneRock, data, 9));
         }
@@ -43,7 +43,7 @@ public class BlockCobblestone extends BlockStone {
     }
 
     @Override
-    protected String getTexture(int data) {
+    protected String texture(int data) {
         return "";
     }
 
@@ -54,14 +54,14 @@ public class BlockCobblestone extends BlockStone {
         int i = 0;
         for (StoneType type : types) {
             textures[i++] =
-                    registry.registerTexture(type.getTextureRoot() + "/raw/" +
-                                    type.getTexture() + ".png",
+                    registry.registerTexture(type.textureRoot() + "/raw/" +
+                                    type.texture() + ".png",
                             "VanillaBasics:image/terrain/stone/overlay/Cobble.png");
         }
     }
 
     @Override
-    public String getName(ItemStack item) {
-        return getStoneName(item) + " Cobblestone";
+    public String name(ItemStack item) {
+        return stoneName(item) + " Cobblestone";
     }
 }

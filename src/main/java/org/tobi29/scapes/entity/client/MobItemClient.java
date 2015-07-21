@@ -32,7 +32,7 @@ public class MobItemClient extends MobClient {
 
     public MobItemClient(WorldClient world) {
         this(world, Vector3d.ZERO, Vector3d.ZERO,
-                new ItemStack(world.getRegistry()));
+                new ItemStack(world.registry()));
     }
 
     public MobItemClient(WorldClient world, Vector3 pos, Vector3 speed,
@@ -52,7 +52,7 @@ public class MobItemClient extends MobClient {
         return Optional.of(new MobModelItem(this, item));
     }
 
-    public ItemStack getItem() {
+    public ItemStack item() {
         return item;
     }
 }

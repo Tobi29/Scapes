@@ -79,9 +79,9 @@ public final class PNG {
     public static void encode(Image image, OutputStream streamOut, int level,
             boolean alpha) throws IOException {
         try {
-            int width = image.getWidth();
-            int height = image.getHeight();
-            ByteBuffer buffer = image.getBuffer();
+            int width = image.width();
+            int height = image.height();
+            ByteBuffer buffer = image.buffer();
             ImageInfo info = new ImageInfo(width, height, 8, alpha);
             PngWriter writer = new PngWriter(streamOut, info);
             writer.setCompLevel(level);

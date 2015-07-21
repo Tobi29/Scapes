@@ -30,7 +30,7 @@ public class GuiPause extends Gui {
                 new GuiComponentVisiblePane(200, 0, 400, 512);
         GuiComponentTextButton achievements =
                 new GuiComponentTextButton(16, 120, 368, 30, 18, "Statistics");
-        achievements.addLeftClick(event -> player.getConnection()
+        achievements.addLeftClick(event -> player.connection()
                 .send(new PacketInteraction(
                         PacketInteraction.OPEN_STATISTICS)));
         GuiComponentTextButton options =
@@ -45,8 +45,8 @@ public class GuiPause extends Gui {
             disconnect = new GuiComponentTextButton(16, 426, 368, 30, 18,
                     "Disconnect");
         }
-        disconnect.addLeftClick(event -> state.getEngine()
-                .setState(new GameStateMenu(state.getEngine())));
+        disconnect.addLeftClick(event -> state.engine()
+                .setState(new GameStateMenu(state.engine())));
         GuiComponentTextButton back =
                 new GuiComponentTextButton(16, 466, 368, 30, 18, "Back");
         back.addLeftClick(event -> player.closeGui());

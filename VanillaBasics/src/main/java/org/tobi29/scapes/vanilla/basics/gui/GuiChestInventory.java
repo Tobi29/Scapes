@@ -25,9 +25,9 @@ public class GuiChestInventory extends GuiContainerInventory {
     public GuiChestInventory(EntityChestClient container,
             MobPlayerClientMain player) {
         super("Chest", player, container);
-        Inventory inventory = container.getInventory();
+        Inventory inventory = container.inventory();
         int x = -1, y = 0, xx, yy = 91;
-        for (int i = 0; i < inventory.getSize(); i++) {
+        for (int i = 0; i < inventory.size(); i++) {
             if (++x >= 10) {
                 y++;
                 yy = y * 35 + 91;

@@ -36,7 +36,7 @@ public class BiomeDecorator {
         layers.add(layer);
     }
 
-    public int getWeight() {
+    public int weight() {
         if (weightCount == 0) {
             return 0;
         }

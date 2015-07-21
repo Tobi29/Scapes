@@ -70,7 +70,7 @@ public class GuiComponentTextButton extends GuiComponentButton {
         }
     }
 
-    public String getText() {
+    public String text() {
         return text;
     }
 

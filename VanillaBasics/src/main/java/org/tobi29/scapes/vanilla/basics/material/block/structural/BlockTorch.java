@@ -75,7 +75,7 @@ public class BlockTorch extends VanillaBlock {
     }
 
     @Override
-    public List<AABBElement> getCollision(int data, int x, int y, int z) {
+    public List<AABBElement> collision(int data, int x, int y, int z) {
         return new ArrayList<>();
     }
 
@@ -97,27 +97,27 @@ public class BlockTorch extends VanillaBlock {
     }
 
     @Override
-    public double getResistance(ItemStack item, int data) {
+    public double resistance(ItemStack item, int data) {
         return 0;
     }
 
     @Override
-    public List<ItemStack> getDrops(ItemStack item, int data) {
+    public List<ItemStack> drops(ItemStack item, int data) {
         return Collections.singletonList(new ItemStack(this, (short) 0));
     }
 
     @Override
-    public String getFootStep(int data) {
+    public String footStepSound(int data) {
         return "";
     }
 
     @Override
-    public String getBreak(ItemStack item, int data) {
+    public String breakSound(ItemStack item, int data) {
         return "";
     }
 
     @Override
-    public Optional<TerrainTexture> getParticleTexture(Face face,
+    public Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
         return Optional.of(textureSide);
     }
@@ -169,9 +169,9 @@ public class BlockTorch extends VanillaBlock {
                         .isTransparent(terrain, ground.intX(), ground.intY(),
                                 ground.intZ())) {
             terrain.world().dropItems(
-                    getDrops(new ItemStack(materials.air, (short) 0),
+                    drops(new ItemStack(materials.air, (short) 0),
                             terrain.data(x, y, z)), x, y, z);
-            terrain.typeData(x, y, z, terrain.world().getAir(), (short) 0);
+            terrain.typeData(x, y, z, terrain.world().air(), (short) 0);
         }
     }
 
@@ -236,27 +236,27 @@ public class BlockTorch extends VanillaBlock {
     @Override
     public void render(ItemStack item, GL gl, Shader shader,
             float r, float g, float b, float a) {
-        models[item.getData()].render(gl, shader);
+        models[item.data()].render(gl, shader);
     }
 
     @Override
     public void renderInventory(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a) {
-        models[item.getData()].renderInventory(gl, shader);
+        models[item.data()].renderInventory(gl, shader);
     }
 
     @Override
-    public float getPlayerLight(ItemStack item) {
+    public float playerLight(ItemStack item) {
         return 0.7f;
     }
 
     @Override
-    public String getName(ItemStack item) {
+    public String name(ItemStack item) {
         return "Torch";
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 32;
     }
 }

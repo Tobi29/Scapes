@@ -46,9 +46,9 @@ public class GameStateGameSP extends GameStateGameMP {
         super.dispose(gl);
         server.stop(ScapesServer.ShutdownReason.STOP);
         try {
-            server.getWorldFormat().save();
-            server.getWorldFormat()
-                    .savePanorama(client.getWorld().getScene().getPanorama());
+            server.worldFormat().save();
+            server.worldFormat()
+                    .savePanorama(client.world().scene().panorama());
         } catch (IOException e) {
             LOGGER.error("Error stopping internal server: {}", e.toString());
         }
@@ -57,7 +57,7 @@ public class GameStateGameSP extends GameStateGameMP {
 
     private class ClientControlPanel implements ControlPanel {
         @Override
-        public String getID() {
+        public String id() {
             return "LocalClient";
         }
 
@@ -92,7 +92,7 @@ public class GameStateGameSP extends GameStateGameMP {
         }
 
         @Override
-        public String getName() {
+        public String name() {
             return "Host";
         }
     }

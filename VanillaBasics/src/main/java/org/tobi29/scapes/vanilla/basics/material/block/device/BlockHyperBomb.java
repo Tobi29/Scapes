@@ -53,7 +53,7 @@ public class BlockHyperBomb extends BlockSimple implements BlockExplosive {
     @Override
     public void explodeClient(WorldClient world, Vector3 pos, Vector3 speed) {
         Random random = new Random();
-        ParticleManager particleManager = world.getParticleManager();
+        ParticleManager particleManager = world.particleManager();
         for (int i = 0; i < 40; i++) {
             double dirZ = random.nextDouble() * FastMath.TWO_PI;
             double dirX = random.nextDouble() * FastMath.PI - FastMath.HALF_PI;
@@ -99,22 +99,22 @@ public class BlockHyperBomb extends BlockSimple implements BlockExplosive {
     }
 
     @Override
-    public double getResistance(ItemStack item, int data) {
+    public double resistance(ItemStack item, int data) {
         return 0;
     }
 
     @Override
-    public List<ItemStack> getDrops(ItemStack item, int data) {
+    public List<ItemStack> drops(ItemStack item, int data) {
         return Collections.emptyList();
     }
 
     @Override
-    public String getFootStep(int data) {
+    public String footStepSound(int data) {
         return "VanillaBasics:sound/footsteps/Wood.ogg";
     }
 
     @Override
-    public String getBreak(ItemStack item, int data) {
+    public String breakSound(ItemStack item, int data) {
         return "";
     }
 
@@ -125,12 +125,12 @@ public class BlockHyperBomb extends BlockSimple implements BlockExplosive {
     }
 
     @Override
-    public String getName(ItemStack item) {
+    public String name(ItemStack item) {
         return "HYPER-Bomb";
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
-        return 8;
+    public int maxStackSize(ItemStack item) {
+        return 256;
     }
 }

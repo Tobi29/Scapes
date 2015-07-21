@@ -83,27 +83,27 @@ public class ScapesClient extends Game {
         return Optional.empty();
     }
 
-    public InputMode getInputMode() {
+    public InputMode inputMode() {
         return inputMode;
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return "Scapes";
     }
 
     @Override
-    public String getID() {
+    public String id() {
         return "Scapes";
     }
 
     @Override
-    public VersionUtil.Version getVersion() {
+    public VersionUtil.Version version() {
         return Scapes.VERSION;
     }
 
     @Override
-    public Image getIcon() {
+    public Image icon() {
         return icon;
     }
 
@@ -122,7 +122,7 @@ public class ScapesClient extends Game {
                     new ClasspathPath(getClass().getClassLoader(),
                             "assets/scapes/tobi29/"));
             icon = files.get("Scapes:image/Icon.png").readReturn(
-                    stream -> PNG.decode(stream, BufferCreator::byteBuffer));
+                    stream -> PNG.decode(stream, BufferCreator::bytes));
         } catch (IOException e) {
             engine.crash(e);
         }
@@ -133,7 +133,6 @@ public class ScapesClient extends Game {
             scapesTag.setBoolean("FXAA", true);
             scapesTag.setBoolean("Bloom", true);
             scapesTag.setDouble("RenderDistance", 128.0);
-            scapesTag.setBoolean("KeepInvisibleChunkVbos", true);
             TagStructure integratedServerTag =
                     scapesTag.getStructure("IntegratedServer");
             TagStructure serverTag = integratedServerTag.getStructure("Server");
@@ -165,12 +164,12 @@ public class ScapesClient extends Game {
                 !freezeInputMode) {
             LOGGER.info("Setting input mode to {}", newInputMode);
             inputMode = newInputMode;
-            engine.setGUIController(inputMode.getGuiController());
+            engine.setGUIController(inputMode.guiController());
             GuiMessage message =
                     new GuiMessage(500, 0, 290, 60, GuiAlignment.RIGHT, 3.0);
             message.add(new GuiComponentIcon(10, 10, 40, 40,
-                    engine.graphics().getTextureManager()
-                            .getTexture("Scapes:image/gui/input/Default")));
+                    engine.graphics().textures()
+                            .get("Scapes:image/gui/input/Default")));
             message.add(new GuiComponentText(60, 25, 420, 10,
                     inputMode.toString()));
             engine.globalGUI().add(message);
@@ -192,19 +191,19 @@ public class ScapesClient extends Game {
         }
         inputModes.clear();
         inputModeDefault.ifPresent(inputModes::add);
-        for (ControllerJoystick joystick : engine.container().getJoysticks()) {
+        for (ControllerJoystick joystick : engine.container().joysticks()) {
             loadService(engine, joystick, tagStructure)
                     .ifPresent(inputModes::add);
         }
         inputMode = inputModes.get(0);
-        engine.setGUIController(inputMode.getGuiController());
+        engine.setGUIController(inputMode.guiController());
     }
 
     public void setFreezeInputMode(boolean freezeInputMode) {
         this.freezeInputMode = freezeInputMode;
     }
 
-    public Stream<InputMode> getInputModes() {
+    public Stream<InputMode> inputModes() {
         return inputModes.stream();
     }
 }

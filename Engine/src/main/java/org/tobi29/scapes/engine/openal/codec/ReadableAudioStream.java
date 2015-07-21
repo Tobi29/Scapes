@@ -20,9 +20,9 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 
 public interface ReadableAudioStream extends AutoCloseable {
-    int getChannels();
+    int channels();
 
-    int getRate();
+    int rate();
 
     default boolean getSome(FloatBuffer buffer) throws IOException {
         return getSome(buffer, buffer.remaining());

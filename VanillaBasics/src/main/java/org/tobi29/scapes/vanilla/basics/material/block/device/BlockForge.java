@@ -56,22 +56,22 @@ public class BlockForge extends VanillaBlockContainer {
     }
 
     @Override
-    public double getResistance(ItemStack item, int data) {
-        return "Shovel".equals(item.getMaterial().getToolType(item)) ? 4 : 12;
+    public double resistance(ItemStack item, int data) {
+        return "Shovel".equals(item.material().toolType(item)) ? 4 : 12;
     }
 
     @Override
-    public String getFootStep(int data) {
+    public String footStepSound(int data) {
         return "VanillaBasics:sound/footsteps/Stone.ogg";
     }
 
     @Override
-    public String getBreak(ItemStack item, int data) {
+    public String breakSound(ItemStack item, int data) {
         return "VanillaBasics:sound/blocks/Stone.ogg";
     }
 
     @Override
-    public Optional<TerrainTexture> getParticleTexture(Face face,
+    public Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
         return Optional.of(terrain.data(x, y, z) > 0 ? textureOn : textureOff);
     }
@@ -126,12 +126,12 @@ public class BlockForge extends VanillaBlockContainer {
     }
 
     @Override
-    public String getName(ItemStack item) {
+    public String name(ItemStack item) {
         return "Forge";
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
+    public int maxStackSize(ItemStack item) {
         return 1;
     }
 }

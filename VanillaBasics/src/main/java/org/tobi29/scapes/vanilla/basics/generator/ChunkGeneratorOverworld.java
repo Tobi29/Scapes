@@ -124,16 +124,16 @@ public class ChunkGeneratorOverworld implements ChunkGenerator {
         return output.height > output.waterHeight;
     }
 
-    public OreType getRandomOreType(VanillaBasics plugin, int stoneType,
+    public OreType randomOreType(VanillaBasics plugin, int stoneType,
             Random random) {
         OreType type = null;
         int max = -1;
         Iterator<OreType> iterator = plugin.getOreTypes()
-                .filter(oreType -> oreType.getStoneTypes().contains(stoneType))
+                .filter(oreType -> oreType.stoneTypes().contains(stoneType))
                 .iterator();
         while (iterator.hasNext()) {
             OreType oreType = iterator.next();
-            int check = random.nextInt(oreType.getRarity());
+            int check = random.nextInt(oreType.rarity());
             if (random.nextBoolean()) {
                 if (check > max) {
                     type = oreType;
@@ -149,7 +149,7 @@ public class ChunkGeneratorOverworld implements ChunkGenerator {
         return type;
     }
 
-    public short getStoneType(int xxx, int yyy, int zzz) {
+    public short stoneType(int xxx, int yyy, int zzz) {
         zzz += (int) (terrainGenerator.generateMountainFactorLayer(xxx, yyy) *
                 300);
         if (zzz <= 96) {

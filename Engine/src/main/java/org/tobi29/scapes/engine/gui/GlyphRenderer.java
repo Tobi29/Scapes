@@ -19,11 +19,11 @@ package org.tobi29.scapes.engine.gui;
 import java.nio.ByteBuffer;
 
 public interface GlyphRenderer {
-    GlyphPage getPage(int id);
+    GlyphPage page(int id);
 
-    int getPageID(char character);
+    int pageID(char character);
 
-    int getPageLetter(char character);
+    int pageCode(char character);
 
     void dispose();
 
@@ -42,24 +42,24 @@ public interface GlyphRenderer {
             this.tileSize = tileSize;
         }
 
-        public ByteBuffer getBuffer() {
+        public ByteBuffer buffer() {
             return buffer;
         }
 
         @SuppressWarnings("ReturnOfCollectionOrArrayField")
-        public float[] getWidth() {
+        public float[] width() {
             return width;
         }
 
-        public int getSize() {
+        public int size() {
             return size;
         }
 
-        public int getTiles() {
+        public int tiles() {
             return tiles;
         }
 
-        public float getTileSize() {
+        public float tileSize() {
             return tileSize;
         }
     }

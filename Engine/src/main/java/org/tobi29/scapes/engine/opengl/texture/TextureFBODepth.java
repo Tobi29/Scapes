@@ -17,7 +17,6 @@
 package org.tobi29.scapes.engine.opengl.texture;
 
 import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.OpenGL;
 
 public class TextureFBODepth extends Texture {
     public TextureFBODepth(int width, int height, TextureFilter minFilter,
@@ -27,10 +26,9 @@ public class TextureFBODepth extends Texture {
 
     @Override
     protected void store(GL gl) {
-        OpenGL openGL = gl.getOpenGL();
-        textureID = openGL.createTexture();
-        openGL.bindTexture(textureID);
-        openGL.bufferTextureDepth(width, height, null);
+        textureID = gl.createTexture();
+        gl.bindTexture(textureID);
+        gl.bufferTextureDepth(width, height, null);
         dirtyFilter = true;
         TEXTURES.add(this);
     }

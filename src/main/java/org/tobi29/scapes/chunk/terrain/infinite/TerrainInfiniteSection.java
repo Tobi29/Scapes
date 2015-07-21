@@ -21,6 +21,7 @@ import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderer;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.math.PointerPane;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
@@ -47,15 +48,15 @@ public class TerrainInfiniteSection implements TerrainClient {
     public void init(Vector2 pos) {
         x = pos.intX() - 1;
         y = pos.intY() - 1;
-        chunks[0] = terrain.getChunk(x, y);
-        chunks[1] = terrain.getChunk(x + 1, y);
-        chunks[2] = terrain.getChunk(x + 2, y);
-        chunks[3] = terrain.getChunk(x, y + 1);
-        chunks[4] = terrain.getChunk(x + 1, y + 1);
-        chunks[5] = terrain.getChunk(x + 2, y + 1);
-        chunks[6] = terrain.getChunk(x, y + 2);
-        chunks[7] = terrain.getChunk(x + 1, y + 2);
-        chunks[8] = terrain.getChunk(x + 2, y + 2);
+        chunks[0] = terrain.chunk(x, y);
+        chunks[1] = terrain.chunk(x + 1, y);
+        chunks[2] = terrain.chunk(x + 2, y);
+        chunks[3] = terrain.chunk(x, y + 1);
+        chunks[4] = terrain.chunk(x + 1, y + 1);
+        chunks[5] = terrain.chunk(x + 2, y + 1);
+        chunks[6] = terrain.chunk(x, y + 2);
+        chunks[7] = terrain.chunk(x + 1, y + 2);
+        chunks[8] = terrain.chunk(x + 2, y + 2);
     }
 
     @Override
@@ -147,25 +148,25 @@ public class TerrainInfiniteSection implements TerrainClient {
     }
 
     @Override
-    public int getHighestBlockZAt(int x, int y) {
+    public int highestBlockZAt(int x, int y) {
         Optional<? extends TerrainInfiniteChunk> chunk = get(x, y);
         if (chunk.isPresent()) {
             TerrainInfiniteChunk chunk2 = chunk.get();
-            return chunk2.getHighestBlockZAt(x - chunk2.getBlockX(),
-                    y - chunk2.getBlockY());
+            return chunk2
+                    .highestBlockZAt(x - chunk2.blockX(), y - chunk2.blockY());
         }
-        return terrain.getHighestBlockZAt(x, y);
+        return terrain.highestBlockZAt(x, y);
     }
 
     @Override
-    public int getHighestTerrainBlockZAt(int x, int y) {
+    public int highestTerrainBlockZAt(int x, int y) {
         Optional<? extends TerrainInfiniteChunk> chunk = get(x, y);
         if (chunk.isPresent()) {
             TerrainInfiniteChunk chunk2 = chunk.get();
-            return chunk2.getHighestTerrainBlockZAt(x - chunk2.getBlockX(),
-                    y - chunk2.getBlockY());
+            return chunk2.highestTerrainBlockZAt(x - chunk2.blockX(),
+                    y - chunk2.blockY());
         }
-        return terrain.getHighestTerrainBlockZAt(x, y);
+        return terrain.highestTerrainBlockZAt(x, y);
     }
 
     @Override
@@ -179,18 +180,18 @@ public class TerrainInfiniteSection implements TerrainClient {
     }
 
     @Override
-    public Pool<AABBElement> getCollisions(int minX, int minY, int minZ,
-            int maxX, int maxY, int maxZ) {
-        return terrain.getCollisions(minX, minY, minZ, maxX, maxY, maxZ);
+    public Pool<AABBElement> collisions(int minX, int minY, int minZ, int maxX,
+            int maxY, int maxZ) {
+        return terrain.collisions(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
     @Override
-    public Pool<PointerPane> getPointerPanes(int x, int y, int z, int range) {
-        return terrain.getPointerPanes(x, y, z, range);
+    public Pool<PointerPane> pointerPanes(int x, int y, int z, int range) {
+        return terrain.pointerPanes(x, y, z, range);
     }
 
     @Override
-    public void dispose() {
+    public void dispose(GL gl) {
         throw new UnsupportedOperationException("Terrain not disposable");
     }
 

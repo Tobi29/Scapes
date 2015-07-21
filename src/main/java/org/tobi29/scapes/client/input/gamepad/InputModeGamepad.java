@@ -40,7 +40,7 @@ public class InputModeGamepad implements InputMode {
     public InputModeGamepad(ScapesEngine engine, ControllerJoystick controller,
             TagStructure tagStructure) {
         this.controller = controller;
-        String id = controller.getID();
+        String id = controller.id();
         this.tagStructure = tagStructure.getStructure(id);
         defaultConfig(this.tagStructure);
         TagStructure guiTag = this.tagStructure.getStructure("GUI");
@@ -125,7 +125,7 @@ public class InputModeGamepad implements InputMode {
 
     @Override
     public String toString() {
-        return controller.getName();
+        return controller.name();
     }
 
     @Override
@@ -135,19 +135,18 @@ public class InputModeGamepad implements InputMode {
     }
 
     @Override
-    public Gui createControlsGui(GameState state, Gui prev) {
+    public Gui createControlsGUI(GameState state, Gui prev) {
         return new GuiControlsGamepad(state, prev,
-                (ScapesClient) state.getEngine().game(), tagStructure,
-                controller);
+                (ScapesClient) state.engine().game(), tagStructure, controller);
     }
 
     @Override
-    public MobPlayerClientMain.Controller getPlayerController() {
+    public MobPlayerClientMain.Controller playerController() {
         return playerController;
     }
 
     @Override
-    public GuiController getGuiController() {
+    public GuiController guiController() {
         return guiController;
     }
 
@@ -185,15 +184,15 @@ public class InputModeGamepad implements InputMode {
         }
 
         @Override
-        public Vector2 getWalk() {
-            return new Vector2d(controller.getAxis(axisWalkX),
-                    -controller.getAxis(axisWalkY));
+        public Vector2 walk() {
+            return new Vector2d(controller.axis(axisWalkX),
+                    -controller.axis(axisWalkY));
         }
 
         @Override
-        public Vector2 getCamera(double delta) {
-            double x = controller.getAxis(axisCameraX);
-            double y = controller.getAxis(axisCameraY);
+        public Vector2 camera(double delta) {
+            double x = controller.axis(axisCameraX);
+            double y = controller.axis(axisCameraY);
             double cx = FastMath.sqrNoAbs(x);
             double cy = FastMath.sqrNoAbs(y);
             x = FastMath.mix(x, cx, 0.5);
@@ -202,37 +201,37 @@ public class InputModeGamepad implements InputMode {
         }
 
         @Override
-        public boolean getLeft() {
+        public boolean left() {
             return controller.isDown(left);
         }
 
         @Override
-        public boolean getRight() {
+        public boolean right() {
             return controller.isDown(right);
         }
 
         @Override
-        public boolean getJump() {
+        public boolean jump() {
             return controller.isDown(jump);
         }
 
         @Override
-        public boolean getInventory() {
+        public boolean inventory() {
             return controller.isPressed(inventory);
         }
 
         @Override
-        public boolean getMenu() {
+        public boolean menu() {
             return controller.isPressed(menu);
         }
 
         @Override
-        public boolean getChat() {
+        public boolean chat() {
             return controller.isPressed(chat);
         }
 
         @Override
-        public int getHotbarLeft(int previous) {
+        public int hotbarLeft(int previous) {
             if (controller.isDown(hotbarLeft)) {
                 if (controller.isPressed(hotbarAdd)) {
                     previous++;
@@ -245,7 +244,7 @@ public class InputModeGamepad implements InputMode {
         }
 
         @Override
-        public int getHotbarRight(int previous) {
+        public int hotbarRight(int previous) {
             if (!controller.isDown(hotbarLeft)) {
                 if (controller.isPressed(hotbarAdd)) {
                     previous++;

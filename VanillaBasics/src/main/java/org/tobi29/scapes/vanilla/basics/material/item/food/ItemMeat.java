@@ -44,7 +44,7 @@ public class ItemMeat extends VanillaItem implements ItemHeatable {
     @Override
     public void click(MobPlayerServer entity, ItemStack item) {
         TagStructure conditionTag =
-                entity.getMetaData("Vanilla").getStructure("Condition");
+                entity.metaData("Vanilla").getStructure("Condition");
         synchronized (conditionTag) {
             double stamina = conditionTag.getDouble("Stamina");
             conditionTag.setDouble("Stamina", stamina - 0.8);
@@ -54,14 +54,14 @@ public class ItemMeat extends VanillaItem implements ItemHeatable {
             conditionTag.setDouble("Thirst", thirst - 0.3);
         }
         entity.damage(5.0);
-        item.setAmount(item.getAmount() - 1);
+        item.setAmount(item.amount() - 1);
     }
 
     @Override
     public double click(MobPlayerServer entity, ItemStack item, MobServer hit) {
         if (hit instanceof MobLivingServer) {
             ((MobLivingServer) hit).damage(1);
-            item.setAmount(item.getAmount() - 1);
+            item.setAmount(item.amount() - 1);
         }
         return 0;
     }
@@ -85,23 +85,23 @@ public class ItemMeat extends VanillaItem implements ItemHeatable {
     @Override
     public void render(ItemStack item, GL gl, Shader shader,
             float r, float g, float b, float a) {
-        models[item.getData()].render(gl, shader);
+        models[item.data()].render(gl, shader);
     }
 
     @Override
     public void renderInventory(ItemStack item, GL gl,
             Shader shader, float r, float g, float b, float a) {
-        models[item.getData()].renderInventory(gl, shader);
+        models[item.data()].renderInventory(gl, shader);
     }
 
     @Override
-    public String getName(ItemStack item) {
+    public String name(ItemStack item) {
         StringBuilder name = new StringBuilder(40);
-        switch (item.getData()) {
+        switch (item.data()) {
             default:
                 name.append("Porkchop");
         }
-        float temperature = getTemperature(item);
+        float temperature = temperature(item);
         if (temperature > 0.1f) {
             name.append("\nTemp.:").append(FastMath.floor(temperature))
                     .append("°C");
@@ -110,20 +110,20 @@ public class ItemMeat extends VanillaItem implements ItemHeatable {
     }
 
     @Override
-    public int getStackSize(ItemStack item) {
-        return getTemperature(item) == 0 ? 32 : 1;
+    public int maxStackSize(ItemStack item) {
+        return temperature(item) == 0 ? 32 : 1;
     }
 
     @Override
     public void heat(ItemStack item, float temperature) {
-        float currentTemperature = getTemperature(item);
+        float currentTemperature = temperature(item);
         if (currentTemperature < 1 && temperature < currentTemperature) {
-            item.getMetaData("Vanilla").setFloat("Temperature", 0.0f);
+            item.metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
-            item.getMetaData("Vanilla").setFloat("Temperature", FastMath.max(
+            item.metaData("Vanilla").setFloat("Temperature", FastMath.max(
                     currentTemperature +
                             (temperature - currentTemperature) / 400.0f, 1.1f));
-            if (currentTemperature >= getMeltingPoint(item)) {
+            if (currentTemperature >= meltingPoint(item)) {
                 item.setMaterial(materials.cookedMeat);
             }
         }
@@ -131,41 +131,41 @@ public class ItemMeat extends VanillaItem implements ItemHeatable {
 
     @Override
     public void cool(ItemStack item) {
-        float currentTemperature = getTemperature(item);
+        float currentTemperature = temperature(item);
         if (currentTemperature < 1) {
-            item.getMetaData("Vanilla").setFloat("Temperature", 0.0f);
+            item.metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
-            item.getMetaData("Vanilla")
+            item.metaData("Vanilla")
                     .setFloat("Temperature", currentTemperature / 1.002f);
         }
     }
 
     @Override
     public void cool(MobItemServer item) {
-        float currentTemperature = getTemperature(item.getItem());
+        float currentTemperature = temperature(item.item());
         if (currentTemperature < 1) {
-            item.getItem().getMetaData("Vanilla").setFloat("Temperature", 0.0f);
+            item.item().metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
             if (item.isInWater()) {
-                item.getItem().getMetaData("Vanilla")
+                item.item().metaData("Vanilla")
                         .setFloat("Temperature", currentTemperature / 4.0f);
             } else {
-                item.getItem().getMetaData("Vanilla")
+                item.item().metaData("Vanilla")
                         .setFloat("Temperature", currentTemperature / 1.002f);
             }
         }
     }
 
     @Override
-    public float getMeltingPoint(ItemStack item) {
-        switch (item.getData()) {
+    public float meltingPoint(ItemStack item) {
+        switch (item.data()) {
             default:
                 return 60;
         }
     }
 
     @Override
-    public float getTemperature(ItemStack item) {
-        return item.getMetaData("Vanilla").getFloat("Temperature");
+    public float temperature(ItemStack item) {
+        return item.metaData("Vanilla").getFloat("Temperature");
     }
 }

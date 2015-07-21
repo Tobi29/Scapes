@@ -24,7 +24,7 @@ import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.graphics.PNG;
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream;
 import org.tobi29.scapes.engine.utils.io.CompressionUtil;
-import org.tobi29.scapes.engine.utils.io.FileUtil;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import java.io.IOException;
@@ -46,9 +46,9 @@ public class ServerInfo {
         if (Files.exists(iconPath)) {
             try {
                 Image icon = FileUtil.readReturn(iconPath, stream -> PNG
-                        .decode(stream, BufferCreator::byteBuffer));
-                int width = icon.getWidth();
-                if (width != icon.getHeight()) {
+                        .decode(stream, BufferCreator::bytes));
+                int width = icon.width();
+                if (width != icon.height()) {
                     LOGGER.warn("The icon has to be square sized.");
                 } else if (width > 256) {
                     LOGGER.warn("The icon may not be larger than 256x256.");
@@ -63,14 +63,14 @@ public class ServerInfo {
         ByteBuffer buffer;
         try {
             buffer = CompressionUtil
-                    .compress(new ByteBufferStream(image.getBuffer()));
+                    .compress(new ByteBufferStream(image.buffer()));
         } catch (IOException e) {
             throw new UnsupportedJVMException(e);
         }
         buffer.flip();
         byte[] array = name.getBytes(StandardCharsets.UTF_8);
         int size = 1 + array.length + buffer.remaining();
-        this.buffer = BufferCreator.byteBuffer(4 + size);
+        this.buffer = BufferCreator.bytes(4 + size);
         this.buffer.putInt(size);
         this.buffer.put((byte) array.length);
         this.buffer.put(array);

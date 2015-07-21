@@ -21,9 +21,9 @@ import org.tobi29.scapes.block.ItemStack;
 import java.util.Optional;
 
 public interface ItemResearch {
-    default Optional<String> getInfoText(ItemStack item) {
+    default Optional<String> infoText(ItemStack item) {
         return Optional.empty();
     }
 
-    String[] getIdentifiers(ItemStack item);
+    String[] identifiers(ItemStack item);
 }

@@ -50,7 +50,7 @@ public class PacketChat extends Packet implements PacketServer, PacketClient {
 
     @Override
     public void runClient(ClientConnection client, WorldClient world) {
-        client.getWorld().getScene().chat(text);
+        client.world().scene().chat(text);
     }
 
     @Override
@@ -71,11 +71,11 @@ public class PacketChat extends Packet implements PacketServer, PacketClient {
             throw new InvalidPacketDataException("Invalid chat text length!");
         }
         if (text.charAt(0) == '/') {
-            player.getServer().getServer().getCommandRegistry()
+            player.server().server().commandRegistry()
                     .get(text.substring(1), player).execute()
                     .forEach(output -> player.tell(output.toString()));
         } else {
-            player.getServer().chat('<' + player.getMob().getNickname() + "> " +
+            player.server().chat('<' + player.mob().nickname() + "> " +
                     text);
         }
     }

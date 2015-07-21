@@ -22,7 +22,6 @@ import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
-import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
@@ -31,16 +30,16 @@ import java.io.IOException;
 public class PacketEntityMetaData extends Packet implements PacketClient {
     private int entityID;
     private String category;
-    private TagStructure tag;
+    private TagStructure tagStructure;
 
     public PacketEntityMetaData() {
     }
 
     public PacketEntityMetaData(EntityServer entity, String category) {
-        super(entity.getPos());
-        entityID = entity.getEntityID();
+        super(entity.pos());
+        entityID = entity.entityID();
         this.category = category;
-        tag = entity.getMetaData(category);
+        tagStructure = entity.metaData(category);
     }
 
     @Override
@@ -48,7 +47,7 @@ public class PacketEntityMetaData extends Packet implements PacketClient {
             throws IOException {
         stream.putInt(entityID);
         stream.putString(category);
-        TagStructureBinary.write(tag, stream);
+        TagStructureBinary.write(tagStructure, stream);
     }
 
     @Override
@@ -56,8 +55,8 @@ public class PacketEntityMetaData extends Packet implements PacketClient {
             throws IOException {
         entityID = stream.getInt();
         category = stream.getString();
-        tag = new TagStructure();
-        TagStructureBinary.read(tag, stream);
+        tagStructure = new TagStructure();
+        TagStructureBinary.read(tagStructure, stream);
     }
 
     @Override
@@ -65,17 +64,14 @@ public class PacketEntityMetaData extends Packet implements PacketClient {
         if (world == null) {
             return;
         }
-        EntityClient entity = world.getEntity(entityID);
-        if (entity != null) {
-            entity.processPacket(this);
-        }
+        world.entity(entityID).ifPresent(entity -> entity.processPacket(this));
     }
 
-    public String getCategory() {
+    public String category() {
         return category;
     }
 
-    public TagStructure getTag() {
-        return tag;
+    public TagStructure tagStructure() {
+        return tagStructure;
     }
 }

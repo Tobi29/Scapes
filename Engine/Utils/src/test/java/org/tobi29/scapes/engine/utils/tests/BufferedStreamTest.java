@@ -30,7 +30,7 @@ public class BufferedStreamTest {
     @Test
     public void testWriteRead() throws IOException {
         ByteBufferChannel channel =
-                new ByteBufferChannel(BufferCreator.byteBuffer(1 << 16));
+                new ByteBufferChannel(BufferCreator.bytes(1 << 16));
         byte[][] arrays = RandomInput.createRandomArrays(16, 8);
         for (int size = 0; size < 16; size++) {
             channel.buffer().clear();

@@ -53,6 +53,6 @@ public class PacketBlockChangeAir extends PacketBlockChange {
         if (world == null) {
             return;
         }
-        world.getTerrain().process(this);
+        world.terrain().process(this);
     }
 }

@@ -75,12 +75,12 @@ public class MobZombieServer extends MobLivingEquippedServer {
     }
 
     @Override
-    public CreatureType getCreatureType() {
+    public CreatureType creatureType() {
         return CreatureType.MONSTER;
     }
 
     @Override
-    public Vector3 getViewOffset() {
+    public Vector3 viewOffset() {
         return new Vector3d(0.0, 0.0, 0.7);
     }
 
@@ -99,7 +99,7 @@ public class MobZombieServer extends MobLivingEquippedServer {
         }
         if (ai.hasTarget()) {
             walkSpeed = 60.0;
-            rot.setZ(ai.getTargetYaw());
+            rot.setZ(ai.targetYaw());
         } else {
             walkWait -= delta;
             if (walkWait <= 0.0) {
@@ -140,12 +140,12 @@ public class MobZombieServer extends MobLivingEquippedServer {
     }
 
     @Override
-    public ItemStack getLeftWeapon() {
+    public ItemStack leftWeapon() {
         return new ItemStack(registry);
     }
 
     @Override
-    public ItemStack getRightWeapon() {
+    public ItemStack rightWeapon() {
         return new ItemStack(registry);
     }
 

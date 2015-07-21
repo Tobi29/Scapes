@@ -44,7 +44,7 @@ import java.util.List;
 public class GuiServerSelect extends GuiMenu {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GuiServerSelect.class);
-    private static final byte[] CONNECTION_HEADER = ConnectionInfo.getHeader();
+    private static final byte[] CONNECTION_HEADER = ConnectionInfo.header();
     private final List<TagStructure> servers = new ArrayList<>();
     private final List<Element> elements = new ArrayList<>();
     private final GuiComponentScrollPaneList scrollPane;
@@ -52,7 +52,7 @@ public class GuiServerSelect extends GuiMenu {
     public GuiServerSelect(GameState state, Gui previous) {
         super(state, "Multiplayer", previous);
         TagStructure scapesTag =
-                state.getEngine().tagStructure().getStructure("Scapes");
+                state.engine().tagStructure().getStructure("Scapes");
         if (scapesTag.has("Servers")) {
             servers.addAll(scapesTag.getList("Servers"));
         }
@@ -69,7 +69,7 @@ public class GuiServerSelect extends GuiMenu {
         updateServers();
     }
 
-    private static String getError(Throwable e) {
+    private static String error(Throwable e) {
         String message = e.getMessage();
         if (message != null) {
             return message;
@@ -109,14 +109,14 @@ public class GuiServerSelect extends GuiMenu {
     public void addServer(TagStructure server) {
         servers.add(server);
         TagStructure scapesTag =
-                state.getEngine().tagStructure().getStructure("Scapes");
+                state.engine().tagStructure().getStructure("Scapes");
         scapesTag.setList("Servers", servers);
     }
 
     private class Element extends GuiComponentPane {
         private final GuiComponentTextButton label;
         private final ByteBuffer outBuffer, headerBuffer =
-                BufferCreator.byteBuffer(4);
+                BufferCreator.bytes(4);
         private SocketChannel channel;
         private int readState;
         private ByteBuffer buffer;
@@ -129,15 +129,15 @@ public class GuiServerSelect extends GuiMenu {
                     new InetSocketAddress(address, port);
             label = new GuiComponentTextButton(70, 20, 200, 30, 18,
                     "Pinging...");
-            label.addLeftClick(event -> state.getEngine().setState(
-                    new GameStateLoadMP(socketAddress, state.getEngine(),
-                            (SceneMenu) state.getScene())));
+            label.addLeftClick(event -> state.engine().setState(
+                    new GameStateLoadMP(socketAddress, state.engine(),
+                            (SceneMenu) state.scene())));
             GuiComponentTextButton delete =
                     new GuiComponentTextButton(280, 20, 60, 30, 18, "Delete");
             delete.addLeftClick(event -> {
                 servers.remove(tagStructure);
-                TagStructure scapesTag = state.getEngine().tagStructure()
-                        .getStructure("Scapes");
+                TagStructure scapesTag =
+                        state.engine().tagStructure().getStructure("Scapes");
                 scapesTag.setList("Servers", servers);
                 elements.remove(this);
                 scrollPane.remove(this);
@@ -154,11 +154,11 @@ public class GuiServerSelect extends GuiMenu {
             } catch (IOException e) {
                 LOGGER.info("Failed connecting to server: {}", e.toString());
                 readState = -1;
-                label.setText(getError(e));
+                label.setText(error(e));
             }
-            outBuffer = BufferCreator.byteBuffer(CONNECTION_HEADER.length + 1);
+            outBuffer = BufferCreator.bytes(CONNECTION_HEADER.length + 1);
             outBuffer.put(CONNECTION_HEADER);
-            outBuffer.put(ConnectionType.GET_INFO.getData());
+            outBuffer.put(ConnectionType.GET_INFO.data());
             outBuffer.rewind();
         }
 
@@ -182,7 +182,7 @@ public class GuiServerSelect extends GuiMenu {
                         int read = channel.read(headerBuffer);
                         if (!headerBuffer.hasRemaining()) {
                             buffer = BufferCreator
-                                    .byteBuffer(4 + headerBuffer.getInt(0));
+                                    .bytes(4 + headerBuffer.getInt(0));
                             headerBuffer.rewind();
                             buffer.put(headerBuffer);
                             readState++;
@@ -197,18 +197,16 @@ public class GuiServerSelect extends GuiMenu {
                             ServerInfo serverInfo = new ServerInfo(buffer);
                             label.setText(serverInfo.getName());
                             Image image = serverInfo.getImage();
-                            ByteBuffer imageBuffer = image.getBuffer();
+                            ByteBuffer imageBuffer = image.buffer();
                             ByteBuffer buffer = BufferCreator
-                                    .byteBuffer(imageBuffer.remaining());
+                                    .bytes(imageBuffer.remaining());
                             buffer.put(imageBuffer);
                             buffer.rewind();
-                            Texture texture =
-                                    new TextureCustom(image.getWidth(),
-                                            image.getHeight(), buffer, 0,
-                                            TextureFilter.NEAREST,
-                                            TextureFilter.NEAREST,
-                                            TextureWrap.CLAMP,
-                                            TextureWrap.CLAMP);
+                            Texture texture = new TextureCustom(image.width(),
+                                    image.height(), buffer, 0,
+                                    TextureFilter.NEAREST,
+                                    TextureFilter.NEAREST, TextureWrap.CLAMP,
+                                    TextureWrap.CLAMP);
                             add(new GuiComponentIcon(15, 15, 40, 40, texture));
                             readState = -1;
                         } else if (read == -1) {
@@ -219,7 +217,7 @@ public class GuiServerSelect extends GuiMenu {
             } catch (IOException e) {
                 LOGGER.info("Failed to fetch server info: {}", e.toString());
                 readState = -1;
-                label.setText(getError(e));
+                label.setText(error(e));
             }
             if (readState == -1) {
                 readState = -2;

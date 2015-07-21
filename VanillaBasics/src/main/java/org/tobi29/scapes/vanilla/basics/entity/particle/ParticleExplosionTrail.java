@@ -48,7 +48,7 @@ public class ParticleExplosionTrail extends Particle {
     @Override
     public void renderParticle(float x, float y, float z, float r, float g,
             float b, float a, GL gl, Shader shader) {
-        MatrixStack matrixStack = gl.getMatrixStack();
+        MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(x, y, z);
         double camDir = FastMath.pointDirection(x, y, 0.0, 0.0);
@@ -56,16 +56,15 @@ public class ParticleExplosionTrail extends Particle {
         matrix.rotate((float) (FastMath.atan2(z, FastMath.length(x, y)) *
                 FastMath.RAD_2_DEG), 1, 0, 0);
         matrix.rotate((float) (camDir + dir), 0, 1, 0);
-        gl.getTextureManager()
+        gl.textures()
                 .bind("VanillaBasics:image/entity/particle/Explosion", gl);
         float color = FastMath.clamp((float) time, 0.0f, 1.0f);
         float alpha = (float) FastMath.sinTable(time * FastMath.PI);
         float size = alpha * 2.0f + 1.0f;
-        OpenGL openGL = gl.getOpenGL();
         r = FastMath.mix(r * 0.3f, 3.4f, color);
         g = FastMath.mix(g * 0.3f, 1.7f, color * color);
         b = FastMath.mix(b * 0.3f, 0.0f, color);
-        openGL.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, r, g, b, a);
+        gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, r, g, b, a);
         matrix.scale(size, 1.0f, size);
         VAO.render(gl, shader);
         matrixStack.pop();

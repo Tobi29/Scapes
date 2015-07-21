@@ -40,7 +40,7 @@ public class GuiInventory extends Gui {
     public GuiInventory(String name, MobPlayerClientMain player) {
         super(GuiAlignment.CENTER);
         this.player = player;
-        Inventory inventory = player.getInventory();
+        Inventory inventory = player.inventory();
         pane = new GuiComponentVisiblePane(200, 0, 400, 512);
         GuiComponentVisiblePane inventoryPane =
                 new GuiComponentVisiblePane(16, 268, 368, 162);
@@ -55,10 +55,10 @@ public class GuiInventory extends Gui {
                 int id = i;
                 GuiComponentItemButton item =
                         new GuiComponentItemButton(xx, yy, 30, 30,
-                                inventory.getItem(i));
+                                inventory.item(i));
                 item.addLeftClick(event -> leftClick(id));
                 item.addRightClick(event -> rightClick(id));
-                item.addHover(event -> setTooltip(inventory.getItem(id)));
+                item.addHover(event -> setTooltip(inventory.item(id)));
                 inventoryPane.add(item);
                 i++;
             }
@@ -71,12 +71,12 @@ public class GuiInventory extends Gui {
     }
 
     protected void leftClick(int i) {
-        player.getConnection().send(new PacketInventoryInteraction(player,
+        player.connection().send(new PacketInventoryInteraction(player,
                 PacketInventoryInteraction.LEFT, i));
     }
 
     protected void rightClick(int i) {
-        player.getConnection().send(new PacketInventoryInteraction(player,
+        player.connection().send(new PacketInventoryInteraction(player,
                 PacketInventoryInteraction.RIGHT, i));
     }
 
@@ -84,7 +84,7 @@ public class GuiInventory extends Gui {
     public void renderOverlay(GL gl, Shader shader,
             FontRenderer font) {
         if (renderHover != null) {
-            MatrixStack matrixStack = gl.getMatrixStack();
+            MatrixStack matrixStack = gl.matrixStack();
             if (!renderHover.equals(currentName) || this.font != font) {
                 this.font = font;
                 updateText(renderHover);
@@ -94,7 +94,7 @@ public class GuiInventory extends Gui {
             vaoText.render(gl, shader);
             matrixStack.pop();
         }
-        player.getInventory().getHold().ifPresent(hold -> GuiUtils
+        player.inventory().hold().ifPresent(hold -> GuiUtils
                 .renderItem((float) cursorX, (float) cursorY, 30.0f, 30.0f,
                         hold, gl, shader, font));
     }
@@ -109,7 +109,7 @@ public class GuiInventory extends Gui {
     public void update(double mouseX, double mouseY, boolean mouseInside,
             ScapesEngine engine) {
         super.update(mouseX, mouseY, mouseInside, engine);
-        cursorX = getAlignedX(mouseX, engine);
+        cursorX = alignedX(mouseX, engine);
         cursorY = mouseY;
     }
 
@@ -118,7 +118,7 @@ public class GuiInventory extends Gui {
     }
 
     protected void setTooltip(ItemStack item, String prefix) {
-        hover = prefix + item.getMaterial().getName(item);
+        hover = prefix + item.material().name(item);
     }
 
     private void updateText(String text) {

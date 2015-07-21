@@ -29,8 +29,10 @@ import org.tobi29.scapes.server.command.CommandRegistry;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 import org.tobi29.scapes.vanilla.basics.entity.client.*;
 import org.tobi29.scapes.vanilla.basics.entity.server.*;
+import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator;
 import org.tobi29.scapes.vanilla.basics.generator.WorldEnvironmentOverworld;
+import org.tobi29.scapes.vanilla.basics.generator.decorator.LayerGround;
 import org.tobi29.scapes.vanilla.basics.generator.decorator.LayerPatch;
 import org.tobi29.scapes.vanilla.basics.generator.decorator.LayerRock;
 import org.tobi29.scapes.vanilla.basics.generator.decorator.LayerTree;
@@ -47,12 +49,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator.Biome.*;
-
 class VanillaBasicsRegisters {
     static void registerCommands(ScapesServer server, VanillaBasics plugin) {
         VanillaMaterial materials = plugin.getMaterials();
-        CommandRegistry registry = server.getCommandRegistry();
+        CommandRegistry registry = server.commandRegistry();
         registry.register("time", 8, options -> {
             options.add("w", "world", true, "World that is targeted");
             options.add("d", "day", true, "Day that time will be set to");
@@ -67,16 +67,15 @@ class VanillaBasicsRegisters {
             if (args.hasOption('d')) {
                 long day = Command.getLong(args.getOption('d'));
                 commands.add(() -> {
-                    WorldServer world =
-                            server.getWorldFormat().getWorld(worldName);
-                    WorldEnvironment environment = world.getEnvironment();
+                    WorldServer world = server.worldFormat().world(worldName);
+                    WorldEnvironment environment = world.environment();
                     if (environment instanceof WorldEnvironmentOverworld) {
                         WorldEnvironmentOverworld environmentOverworld =
                                 (WorldEnvironmentOverworld) environment;
                         ClimateGenerator climateGenerator =
-                                environmentOverworld.getClimateGenerator();
+                                environmentOverworld.climate();
                         climateGenerator.setDay(day +
-                                (relative ? climateGenerator.getDay() : 0));
+                                (relative ? climateGenerator.day() : 0));
                     } else {
                         throw new Command.CommandException(20,
                                 "Unsupported environment");
@@ -86,17 +85,15 @@ class VanillaBasicsRegisters {
             if (args.hasOption('t')) {
                 float dayTime = Command.getFloat(args.getOption('t'));
                 commands.add(() -> {
-                    WorldServer world =
-                            server.getWorldFormat().getWorld(worldName);
-                    WorldEnvironment environment = world.getEnvironment();
+                    WorldServer world = server.worldFormat().world(worldName);
+                    WorldEnvironment environment = world.environment();
                     if (environment instanceof WorldEnvironmentOverworld) {
                         WorldEnvironmentOverworld environmentOverworld =
                                 (WorldEnvironmentOverworld) environment;
                         ClimateGenerator climateGenerator =
-                                environmentOverworld.getClimateGenerator();
+                                environmentOverworld.climate();
                         climateGenerator.setDayTime(dayTime +
-                                (relative ? climateGenerator.getDayTime() :
-                                        0.0f));
+                                (relative ? climateGenerator.dayTime() : 0.0f));
                     } else {
                         throw new Command.CommandException(20,
                                 "Unsupported environment");
@@ -112,17 +109,16 @@ class VanillaBasicsRegisters {
             options.add("t", "thirst", true, "Thirst value (0-1)");
         }, (args, executor, commands) -> {
             String playerName =
-                    args.getOption('p', executor.getPlayerName().orElse(null));
+                    args.getOption('p', executor.playerName().orElse(null));
             Command.require(playerName, 'p');
             if (args.hasOption('s')) {
                 double saturation = Command.getDouble(args.getOption('s'));
                 commands.add(() -> {
                     PlayerConnection player =
-                            server.getConnection().getPlayerByName(playerName);
+                            server.connection().playerByName(playerName);
                     Command.require(player, playerName);
-                    TagStructure conditionTag =
-                            player.getMob().getMetaData("Vanilla")
-                                    .getStructure("Condition");
+                    TagStructure conditionTag = player.mob().metaData("Vanilla")
+                            .getStructure("Condition");
                     synchronized (conditionTag) {
                         conditionTag.setDouble("Hunger", saturation);
                     }
@@ -132,11 +128,10 @@ class VanillaBasicsRegisters {
                 double thirst = Command.getDouble(args.getOption('t'));
                 commands.add(() -> {
                     PlayerConnection player =
-                            server.getConnection().getPlayerByName(playerName);
+                            server.connection().playerByName(playerName);
                     Command.require(player, playerName);
-                    TagStructure conditionTag =
-                            player.getMob().getMetaData("Vanilla")
-                                    .getStructure("Condition");
+                    TagStructure conditionTag = player.mob().metaData("Vanilla")
+                            .getStructure("Condition");
                     synchronized (conditionTag) {
                         conditionTag.setDouble("Thirst", thirst);
                     }
@@ -153,7 +148,7 @@ class VanillaBasicsRegisters {
             options.add("t", "temperature", true, "Temperature of metal");
         }, (args, executor, commands) -> {
             String playerName =
-                    args.getOption('p', executor.getPlayerName().orElse(null));
+                    args.getOption('p', executor.playerName().orElse(null));
             Command.require(playerName, 'p');
             String metal = args.getOption('m');
             Command.require(metal, 'm');
@@ -164,10 +159,10 @@ class VanillaBasicsRegisters {
                 MetalType metalType = plugin.getMetalType(metal);
                 Command.require(metalType, metal);
                 PlayerConnection player =
-                        server.getConnection().getPlayerByName(playerName);
+                        server.connection().playerByName(playerName);
                 ItemStack item = new ItemStack(materials.ingot, data, amount);
                 IngotUtil.createIngot(item, metalType, temperature);
-                player.getMob().getInventory().add(item);
+                player.mob().inventory().add(item);
             });
         });
 
@@ -181,7 +176,7 @@ class VanillaBasicsRegisters {
             options.add("k", "kind", true, "Kind of tool");
         }, (args, executor, commands) -> {
             String playerName =
-                    args.getOption('p', executor.getPlayerName().orElse(null));
+                    args.getOption('p', executor.playerName().orElse(null));
             Command.require(playerName, 'p');
             String metal = args.getOption('m');
             Command.require(metal, 'm');
@@ -194,13 +189,13 @@ class VanillaBasicsRegisters {
                 MetalType metalType = plugin.getMetalType(metal);
                 Command.require(metalType, metal);
                 PlayerConnection player =
-                        server.getConnection().getPlayerByName(playerName);
+                        server.connection().playerByName(playerName);
                 ItemStack item = new ItemStack(materials.ingot, data, amount);
                 IngotUtil.createIngot(item, metalType, temperature);
                 if (!ToolUtil.createTool(plugin, item, kind)) {
                     Command.error("Unknown tool kind: " + kind);
                 }
-                player.getMob().getInventory().add(item);
+                player.mob().inventory().add(item);
             });
         });
     }
@@ -286,7 +281,7 @@ class VanillaBasicsRegisters {
             GameRegistry.Registry<StoneType> stoneRegistry) {
         CraftingRecipeType recipeType = new CraftingRecipeType() {
             @Override
-            public String getName() {
+            public String name() {
                 return "Basics";
             }
 
@@ -316,35 +311,35 @@ class VanillaBasicsRegisters {
         CraftingRecipe.Ingredient plank = new CraftingRecipe.IngredientList(
                 treeRegistry.values().stream()
                         .map(tree -> new ItemStack(materials.wood,
-                                tree.getData(registry)))
+                                tree.data(registry)))
                         .collect(Collectors.toList()));
 
-        recipeType.getRecipes()
+        recipeType.recipes()
                 .add(new CraftingRecipe(Collections.singletonList(plank),
                         Arrays.asList(saw, hammer),
                         new ItemStack(materials.craftingTable, (short) 0)));
-        recipeType.getRecipes()
+        recipeType.recipes()
                 .add(new CraftingRecipe(Collections.singletonList(plank),
                         Collections.singletonList(saw),
                         new ItemStack(materials.chest, (short) 0)));
-        recipeType.getRecipes().add(new CraftingRecipe(Arrays.asList(plank,
+        recipeType.recipes().add(new CraftingRecipe(Arrays.asList(plank,
                 new CraftingRecipe.IngredientList(
                         new ItemStack(materials.string, (short) 1))),
                 Collections.singletonList(saw),
                 new ItemStack(materials.researchTable, (short) 0)));
         for (StoneType stoneType : stoneTypes) {
-            int data = stoneType.getData(registry);
-            recipeType.getRecipes().add(new CraftingRecipe(
+            int data = stoneType.data(registry);
+            recipeType.recipes().add(new CraftingRecipe(
                     new ItemStack(materials.cobblestone, data),
                     new CraftingRecipe.IngredientList(
                             new ItemStack(materials.stoneRock, data, 9))));
         }
-        recipeType.getRecipes().add(new CraftingRecipe(
+        recipeType.recipes().add(new CraftingRecipe(
                 new ItemStack(materials.torch, (short) 0),
                 new CraftingRecipe.IngredientList(
                         new ItemStack(materials.stick, (short) 0)),
                 new CraftingRecipe.IngredientList(
-                        new ItemStack(materials.oreChunk, (short) 0))));
+                        new ItemStack(materials.coal, (short) 0))));
 
         registry.registerCraftingRecipe(recipeType, false);
     }
@@ -354,7 +349,7 @@ class VanillaBasicsRegisters {
             GameRegistry.Registry<StoneType> stoneRegistry) {
         CraftingRecipeType recipeType = new CraftingRecipeType() {
             @Override
-            public String getName() {
+            public String name() {
                 return "Stone";
             }
 
@@ -375,13 +370,13 @@ class VanillaBasicsRegisters {
         List<StoneType> stoneTypes = stoneRegistry.values();
         List<ItemStack> rockItems = new ArrayList<>();
         for (int i = 0; i < stoneTypes.size(); i++) {
-            if (stoneTypes.get(i).getResistance() > 0.1) {
+            if (stoneTypes.get(i).resistance() > 0.1) {
                 rockItems.add(new ItemStack(materials.stoneRock, i, 2));
             }
         }
         CraftingRecipe.Ingredient rocks =
                 new CraftingRecipe.IngredientList(rockItems);
-        recipeType.getRecipes().add(new CraftingRecipe(ingotItem, rocks));
+        recipeType.recipes().add(new CraftingRecipe(ingotItem, rocks));
         ItemStack hoeItem = new ItemStack(ingotItem);
         ToolUtil.createTool(materials.plugin, hoeItem, "Hoe");
         ItemStack hoeHeadItem = new ItemStack(hoeItem).setData(0);
@@ -404,34 +399,33 @@ class VanillaBasicsRegisters {
         ToolUtil.createTool(materials.plugin, swordItem, "Sword");
         ItemStack swordHeadItem = new ItemStack(swordItem).setData(0);
 
-        recipeType.getRecipes().add(new CraftingRecipe(hoeHeadItem, ingot));
-        recipeType.getRecipes().add(new CraftingRecipe(hammerHeadItem, ingot));
-        recipeType.getRecipes().add(new CraftingRecipe(sawHeadItem, ingot));
-        recipeType.getRecipes().add(new CraftingRecipe(axeHeadItem, ingot));
-        recipeType.getRecipes().add(new CraftingRecipe(shovelHeadItem, ingot));
-        recipeType.getRecipes().add(new CraftingRecipe(pickaxeHeadItem, ingot));
-        recipeType.getRecipes().add(new CraftingRecipe(swordHeadItem, ingot));
-        recipeType.getRecipes().add(new CraftingRecipe(Collections
-                .singletonList(
-                        new CraftingRecipe.IngredientList(hoeItem, hammerItem,
-                                sawItem, axeItem, shovelItem, pickaxeItem,
-                                swordItem, hoeHeadItem, hammerHeadItem,
-                                sawHeadItem, axeHeadItem, shovelHeadItem,
-                                pickaxeHeadItem, swordHeadItem)), ingotItem));
-        recipeType.getRecipes().add(new CraftingRecipe(Collections
-                .singletonList(new CraftingRecipe.IngredientList(
+        recipeType.recipes().add(new CraftingRecipe(hoeHeadItem, ingot));
+        recipeType.recipes().add(new CraftingRecipe(hammerHeadItem, ingot));
+        recipeType.recipes().add(new CraftingRecipe(sawHeadItem, ingot));
+        recipeType.recipes().add(new CraftingRecipe(axeHeadItem, ingot));
+        recipeType.recipes().add(new CraftingRecipe(shovelHeadItem, ingot));
+        recipeType.recipes().add(new CraftingRecipe(pickaxeHeadItem, ingot));
+        recipeType.recipes().add(new CraftingRecipe(swordHeadItem, ingot));
+        recipeType.recipes().add(new CraftingRecipe(Collections.singletonList(
+                new CraftingRecipe.IngredientList(hoeItem, hammerItem, sawItem,
+                        axeItem, shovelItem, pickaxeItem, swordItem,
+                        hoeHeadItem, hammerHeadItem, sawHeadItem, axeHeadItem,
+                        shovelHeadItem, pickaxeHeadItem, swordHeadItem)),
+                ingotItem));
+        recipeType.recipes().add(new CraftingRecipe(
+                Collections.singletonList(new CraftingRecipe.IngredientList(
                         new ItemStack(materials.grassBundle, (short) 0, 2))),
                 new ItemStack(materials.string, (short) 0)));
-        recipeType.getRecipes().add(new CraftingRecipe(Collections
-                .singletonList(new CraftingRecipe.IngredientList(
+        recipeType.recipes().add(new CraftingRecipe(
+                Collections.singletonList(new CraftingRecipe.IngredientList(
                         new ItemStack(materials.string, (short) 0, 8))),
                 new ItemStack(materials.string, (short) 1)));
-        recipeType.getRecipes().add(new CraftingRecipe(Collections
-                .singletonList(new CraftingRecipe.IngredientList(
+        recipeType.recipes().add(new CraftingRecipe(
+                Collections.singletonList(new CraftingRecipe.IngredientList(
                         new ItemStack(materials.grassBundle, (short) 0, 2))),
                 new ItemStack(materials.straw, (short) 0)));
-        recipeType.getRecipes().add(new CraftingRecipe(Collections
-                .singletonList(new CraftingRecipe.IngredientList(
+        recipeType.recipes().add(new CraftingRecipe(
+                Collections.singletonList(new CraftingRecipe.IngredientList(
                         new ItemStack(materials.grassBundle, (short) 1, 2))),
                 new ItemStack(materials.straw, (short) 1)));
 
@@ -444,26 +438,26 @@ class VanillaBasicsRegisters {
             GameRegistry.Registry<StoneType> stoneRegistry) {
         CraftingRecipeType recipeType = new CraftingRecipeType() {
             @Override
-            public String getName() {
+            public String name() {
                 return "Food";
             }
 
             @Override
             public boolean availableFor(MobPlayerServer player) {
-                return player.getMetaData("Vanilla").getStructure("Research")
+                return player.metaData("Vanilla").getStructure("Research")
                         .getStructure("Finished").getBoolean("Food");
             }
 
             @Override
             public boolean availableFor(MobPlayerClientMain player) {
-                return player.getMetaData("Vanilla").getStructure("Research")
+                return player.metaData("Vanilla").getStructure("Research")
                         .getStructure("Finished").getBoolean("Food");
             }
         };
         List<StoneType> stoneTypes = stoneRegistry.values();
         List<ItemStack> cobblestoneItems = new ArrayList<>();
         for (int i = 0; i < stoneTypes.size(); i++) {
-            if (stoneTypes.get(i).getResistance() > 0.1) {
+            if (stoneTypes.get(i).resistance() > 0.1) {
                 cobblestoneItems
                         .add(new ItemStack(materials.cobblestone, i, 2));
             }
@@ -476,17 +470,17 @@ class VanillaBasicsRegisters {
         CraftingRecipe.Ingredient hammer = new CraftingRecipe.IngredientList(
                 new ItemStack(materials.hammer, (short) 1));
 
-        recipeType.getRecipes().add(new CraftingRecipe(
+        recipeType.recipes().add(new CraftingRecipe(
                 Arrays.asList(cobblestones, new CraftingRecipe.IngredientList(
                         new ItemStack(materials.stick, (short) 0, 4))),
                 Collections.singletonList(pickaxe),
                 new ItemStack(materials.furnace, (short) 0)));
-        recipeType.getRecipes()
+        recipeType.recipes()
                 .add(new CraftingRecipe(Collections.singletonList(cobblestones),
                         Collections.singletonList(hammer),
                         new ItemStack(materials.quern, (short) 0)));
         for (int i = 0; i < cropTypes.size(); i++) {
-            recipeType.getRecipes().add(new CraftingRecipe(Collections
+            recipeType.recipes().add(new CraftingRecipe(Collections
                     .singletonList(new CraftingRecipe.IngredientList(
                             new ItemStack(materials.grain, i, 8))),
                     new ItemStack(materials.dough, i)));
@@ -500,26 +494,26 @@ class VanillaBasicsRegisters {
             GameRegistry.Registry<StoneType> stoneRegistry) {
         CraftingRecipeType recipeType = new CraftingRecipeType() {
             @Override
-            public String getName() {
+            public String name() {
                 return "Metal";
             }
 
             @Override
             public boolean availableFor(MobPlayerServer player) {
-                return player.getMetaData("Vanilla").getStructure("Research")
+                return player.metaData("Vanilla").getStructure("Research")
                         .getStructure("Finished").getBoolean("Metal");
             }
 
             @Override
             public boolean availableFor(MobPlayerClientMain player) {
-                return player.getMetaData("Vanilla").getStructure("Research")
+                return player.metaData("Vanilla").getStructure("Research")
                         .getStructure("Finished").getBoolean("Metal");
             }
         };
         List<StoneType> stoneTypes = stoneRegistry.values();
         List<ItemStack> cobblestoneItems = new ArrayList<>();
         for (int i = 0; i < stoneTypes.size(); i++) {
-            if (stoneTypes.get(i).getResistance() > 0.1) {
+            if (stoneTypes.get(i).resistance() > 0.1) {
                 cobblestoneItems
                         .add(new ItemStack(materials.cobblestone, i, 2));
             }
@@ -530,17 +524,17 @@ class VanillaBasicsRegisters {
                 new ItemStack(materials.ingot, (short) 0, 5));
         CraftingRecipe.Ingredient pickaxe = new CraftingRecipe.IngredientList(
                 new ItemStack(materials.pickaxe, (short) 1));
-        recipeType.getRecipes().add(new CraftingRecipe(
+        recipeType.recipes().add(new CraftingRecipe(
                 new ItemStack(materials.mold, (short) 0),
                 new CraftingRecipe.IngredientList(
                         new ItemStack(materials.sand, (short) 2))));
-        recipeType.getRecipes().add(new CraftingRecipe(
+        recipeType.recipes().add(new CraftingRecipe(
                 new ItemStack(materials.anvil, (short) 0), ingot));
-        recipeType.getRecipes().add(new CraftingRecipe(
+        recipeType.recipes().add(new CraftingRecipe(
                 new ItemStack(materials.forge, (short) 0),
                 new CraftingRecipe.IngredientList(
-                        new ItemStack(materials.oreChunk, (short) 0, 8))));
-        recipeType.getRecipes()
+                        new ItemStack(materials.coal, (short) 0, 8))));
+        recipeType.recipes()
                 .add(new CraftingRecipe(Collections.singletonList(cobblestones),
                         Collections.singletonList(pickaxe),
                         new ItemStack(materials.alloy, (short) 0)));
@@ -551,19 +545,19 @@ class VanillaBasicsRegisters {
             VanillaMaterial materials) {
         CraftingRecipeType recipeType = new CraftingRecipeType() {
             @Override
-            public String getName() {
+            public String name() {
                 return "Iron";
             }
 
             @Override
             public boolean availableFor(MobPlayerServer player) {
-                return player.getMetaData("Vanilla").getStructure("Research")
+                return player.metaData("Vanilla").getStructure("Research")
                         .getStructure("Finished").getBoolean("Iron");
             }
 
             @Override
             public boolean availableFor(MobPlayerClientMain player) {
-                return player.getMetaData("Vanilla").getStructure("Research")
+                return player.metaData("Vanilla").getStructure("Research")
                         .getStructure("Finished").getBoolean("Iron");
             }
         };
@@ -572,11 +566,11 @@ class VanillaBasicsRegisters {
                 new ItemStack(materials.wood, (short) 1, 1),
                 new ItemStack(materials.wood, (short) 2, 1));
 
-        recipeType.getRecipes().add(new CraftingRecipe(
+        recipeType.recipes().add(new CraftingRecipe(
                 new ItemStack(materials.bloomery, (short) 0),
                 new CraftingRecipe.IngredientList(
                         new ItemStack(materials.sand, (short) 2))));
-        recipeType.getRecipes().add(new CraftingRecipe(Arrays.asList(plank,
+        recipeType.recipes().add(new CraftingRecipe(Arrays.asList(plank,
                 new CraftingRecipe.IngredientList(
                         new ItemStack(materials.string, (short) 1, 4))),
                 Collections.singletonList(new CraftingRecipe.IngredientList(
@@ -584,52 +578,6 @@ class VanillaBasicsRegisters {
                 new ItemStack(materials.bellows, (short) 0)));
 
         registry.registerCraftingRecipe(recipeType, true);
-    }
-
-    static void registerFuels(VanillaBasics plugin) {
-        VanillaMaterial materials = plugin.getMaterials();
-        plugin.addFuel(
-                new FurnaceFuel(new ItemStack(materials.grassBundle, (short) 0),
-                        1600, 0.06f, 0));
-        plugin.addFuel(
-                new FurnaceFuel(new ItemStack(materials.log, (short) 0), 100,
-                        0.2f, 10));
-        plugin.addFuel(
-                new FurnaceFuel(new ItemStack(materials.log, (short) 1), 100,
-                        0.2f, 10));
-        plugin.addFuel(
-                new FurnaceFuel(new ItemStack(materials.log, (short) 2), 100,
-                        0.2f, 10));
-        plugin.addFuel(
-                new FurnaceFuel(new ItemStack(materials.log, (short) 3), 100,
-                        0.2f, 10));
-        plugin.addFuel(
-                new FurnaceFuel(new ItemStack(materials.log, (short) 4), 100,
-                        0.2f, 10));
-        plugin.addFuel(
-                new FurnaceFuel(new ItemStack(materials.log, (short) 5), 100,
-                        0.2f, 10));
-        plugin.addFuel(
-                new FurnaceFuel(new ItemStack(materials.wood, (short) 0), 60,
-                        0.1f, 5));
-        plugin.addFuel(
-                new FurnaceFuel(new ItemStack(materials.wood, (short) 1), 60,
-                        0.1f, 5));
-        plugin.addFuel(
-                new FurnaceFuel(new ItemStack(materials.wood, (short) 2), 60,
-                        0.1f, 5));
-        plugin.addFuel(
-                new FurnaceFuel(new ItemStack(materials.wood, (short) 3), 60,
-                        0.1f, 5));
-        plugin.addFuel(
-                new FurnaceFuel(new ItemStack(materials.wood, (short) 4), 60,
-                        0.1f, 5));
-        plugin.addFuel(
-                new FurnaceFuel(new ItemStack(materials.wood, (short) 5), 60,
-                        0.1f, 5));
-        plugin.addFuel(
-                new FurnaceFuel(new ItemStack(materials.oreChunk, (short) 0),
-                        200, 0.8f, 60));
     }
 
     static void registerResearch(VanillaBasics plugin) {
@@ -770,67 +718,57 @@ class VanillaBasicsRegisters {
     @SuppressWarnings("CodeBlock2Expr")
     static void registerVegetation(VanillaBasics plugin) {
         VanillaMaterial m = plugin.getMaterials();
-        // Polar
-        plugin.c.biomeDecorator(POLAR, "Waste", 10, d -> {
+        // Overlays
+        plugin.c.decorator("Rocks", d -> {
             d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 256,
                     (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
                             m.grass));
+        });
+        plugin.c.decorator("Gravel", d -> {
+            int data = StoneType.DIRT_STONE.data(m.registry);
+            d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 8,
+                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) == m.sand &&
+                            terrain.data(x, y, z - 1) == 1));
+            d.addLayer(new LayerGround(m.stoneRock,
+                    (terrain, x, y, z, random) -> data, 4,
+                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) == m.sand &&
+                            terrain.data(x, y, z - 1) == 1));
+        });
+
+        // Polar
+        plugin.c.decorator(BiomeGenerator.Biome.POLAR, "Waste", 10, d -> {
         });
 
         // Tundra
-        plugin.c.biomeDecorator(TUNDRA, "Waste", 10, d -> {
-            d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 256,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
+        plugin.c.decorator(BiomeGenerator.Biome.TUNDRA, "Waste", 10, d -> {
         });
-        plugin.c.biomeDecorator(TUNDRA, "Spruce", 1, d -> {
-            d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 256,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
+        plugin.c.decorator(BiomeGenerator.Biome.TUNDRA, "Spruce", 1, d -> {
             d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 256));
         });
 
         // Taiga
-        plugin.c.biomeDecorator(TAIGA, "Spruce", 10, d -> {
-            d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 256,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
+        plugin.c.decorator(BiomeGenerator.Biome.TAIGA, "Spruce", 10, d -> {
             d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 32));
         });
-        plugin.c.biomeDecorator(TAIGA, "Sequoia", 2, d -> {
-            d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 256,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
+        plugin.c.decorator(BiomeGenerator.Biome.TAIGA, "Sequoia", 2, d -> {
             d.addLayer(new LayerTree(TreeSequoia.INSTANCE, 256));
             d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 128));
         });
 
         // Wasteland
-        plugin.c.biomeDecorator(WASTELAND, "Waste", 10, d -> {
-            d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 256,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
+        plugin.c.decorator(BiomeGenerator.Biome.WASTELAND, "Waste", 10, d -> {
         });
 
         // Steppe
-        plugin.c.biomeDecorator(STEPPE, "Waste", 10, d -> {
-            d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 256,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
+        plugin.c.decorator(BiomeGenerator.Biome.STEPPE, "Waste", 10, d -> {
         });
-        plugin.c.biomeDecorator(STEPPE, "Birch", 5, d -> {
-            d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 256,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
+        plugin.c.decorator(BiomeGenerator.Biome.STEPPE, "Birch", 5, d -> {
             d.addLayer(new LayerTree(TreeBirch.INSTANCE, 1024));
             d.addLayer(new LayerPatch(m.bush, 0, 16, 64, 1 << 16,
                     (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
                             m.grass));
         });
-        plugin.c.biomeDecorator(STEPPE, "Spruce", 10, d -> {
-            d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 256,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
+        plugin.c.decorator(BiomeGenerator.Biome.STEPPE, "Spruce", 10, d -> {
             d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 512));
             d.addLayer(new LayerPatch(m.bush, 0, 16, 64, 1 << 17,
                     (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
@@ -838,10 +776,7 @@ class VanillaBasicsRegisters {
         });
 
         // Forest
-        plugin.c.biomeDecorator(FOREST, "Deciduous", 10, d -> {
-            d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 256,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
+        plugin.c.decorator(BiomeGenerator.Biome.FOREST, "Deciduous", 10, d -> {
             d.addLayer(new LayerTree(TreeOak.INSTANCE, 64));
             d.addLayer(new LayerTree(TreeBirch.INSTANCE, 128));
             d.addLayer(new LayerTree(TreeMaple.INSTANCE, 32));
@@ -854,10 +789,7 @@ class VanillaBasicsRegisters {
                     (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
                             m.grass));
         });
-        plugin.c.biomeDecorator(FOREST, "Birch", 10, d -> {
-            d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 256,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
+        plugin.c.decorator(BiomeGenerator.Biome.FOREST, "Birch", 10, d -> {
             d.addLayer(new LayerTree(TreeBirch.INSTANCE, 64));
             for (int i = 0; i < 20; i++) {
                 d.addLayer(new LayerPatch(m.flower, i, 16, 24, 1 << 15,
@@ -868,10 +800,7 @@ class VanillaBasicsRegisters {
                     (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
                             m.grass));
         });
-        plugin.c.biomeDecorator(FOREST, "Spruce", 10, d -> {
-            d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 256,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
+        plugin.c.decorator(BiomeGenerator.Biome.FOREST, "Spruce", 10, d -> {
             d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 32));
             for (int i = 0; i < 20; i++) {
                 d.addLayer(new LayerPatch(m.flower, i, 16, 24, 1 << 14,
@@ -882,10 +811,7 @@ class VanillaBasicsRegisters {
                     (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
                             m.grass));
         });
-        plugin.c.biomeDecorator(FOREST, "Willow", 10, d -> {
-            d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 256,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
+        plugin.c.decorator(BiomeGenerator.Biome.FOREST, "Willow", 10, d -> {
             d.addLayer(new LayerTree(TreeWillow.INSTANCE, 64));
             for (int i = 0; i < 20; i++) {
                 d.addLayer(new LayerPatch(m.flower, i, 16, 24, 1 << 14,
@@ -893,57 +819,40 @@ class VanillaBasicsRegisters {
                                 m.grass));
             }
         });
-        plugin.c.biomeDecorator(FOREST, "Sequoia", 2, d -> {
-            d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 256,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
+        plugin.c.decorator(BiomeGenerator.Biome.FOREST, "Sequoia", 2, d -> {
             d.addLayer(new LayerTree(TreeSequoia.INSTANCE, 256));
         });
 
         // Desert
-        plugin.c.biomeDecorator(DESERT, "Waste", 10, d -> {
-            d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 256,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
+        plugin.c.decorator(BiomeGenerator.Biome.DESERT, "Waste", 10, d -> {
         });
 
         // Waste
-        plugin.c.biomeDecorator(SAVANNA, "Waste", 10, d -> {
-            d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 256,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
+        plugin.c.decorator(BiomeGenerator.Biome.SAVANNA, "Waste", 10, d -> {
         });
 
         // Oasis
-        plugin.c.biomeDecorator(OASIS, "Palm", 10, d -> {
-            d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 256,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
+        plugin.c.decorator(BiomeGenerator.Biome.OASIS, "Palm", 10, d -> {
             d.addLayer(new LayerTree(TreePalm.INSTANCE, 128));
         });
 
         // Rainforest
-        plugin.c.biomeDecorator(RAINFOREST, "Deciduous", 10, d -> {
-            d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 256,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
-            d.addLayer(new LayerTree(TreeOak.INSTANCE, 64));
-            d.addLayer(new LayerTree(TreeBirch.INSTANCE, 96));
-            d.addLayer(new LayerTree(TreePalm.INSTANCE, 256));
-            d.addLayer(new LayerTree(TreeMaple.INSTANCE, 32));
-            for (int i = 0; i < 20; i++) {
-                d.addLayer(new LayerPatch(m.flower, i, 16, 24, 1 << 13,
-                        (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                                m.grass));
-            }
-            d.addLayer(new LayerPatch(m.bush, 0, 4, 8, 1024,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
-        });
-        plugin.c.biomeDecorator(RAINFOREST, "Willow", 4, d -> {
-            d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 256,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
+        plugin.c.decorator(BiomeGenerator.Biome.RAINFOREST, "Deciduous", 10,
+                d -> {
+                    d.addLayer(new LayerTree(TreeOak.INSTANCE, 64));
+                    d.addLayer(new LayerTree(TreeBirch.INSTANCE, 96));
+                    d.addLayer(new LayerTree(TreePalm.INSTANCE, 256));
+                    d.addLayer(new LayerTree(TreeMaple.INSTANCE, 32));
+                    for (int i = 0; i < 20; i++) {
+                        d.addLayer(new LayerPatch(m.flower, i, 16, 24, 1 << 13,
+                                (terrain, x, y, z) ->
+                                        terrain.type(x, y, z - 1) == m.grass));
+                    }
+                    d.addLayer(new LayerPatch(m.bush, 0, 4, 8, 1024,
+                            (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
+                                    m.grass));
+                });
+        plugin.c.decorator(BiomeGenerator.Biome.RAINFOREST, "Willow", 4, d -> {
             d.addLayer(new LayerTree(TreeWillow.INSTANCE, 48));
             for (int i = 0; i < 20; i++) {
                 d.addLayer(new LayerPatch(m.flower, i, 16, 24, 1 << 13,

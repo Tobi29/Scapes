@@ -22,7 +22,6 @@ import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
-import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.EntityContainerClient;
 import org.tobi29.scapes.entity.server.EntityContainerServer;
 import org.tobi29.scapes.entity.server.EntityServer;
@@ -38,8 +37,8 @@ public class PacketUpdateInventory extends Packet implements PacketClient {
     }
 
     public PacketUpdateInventory(EntityContainerServer entity) {
-        entityID = ((EntityServer) entity).getEntityID();
-        tag = entity.getInventory().save();
+        entityID = ((EntityServer) entity).entityID();
+        tag = entity.inventory().save();
     }
 
     @Override
@@ -62,11 +61,12 @@ public class PacketUpdateInventory extends Packet implements PacketClient {
         if (world == null) {
             return;
         }
-        EntityClient entity = world.getEntity(entityID);
-        if (entity instanceof EntityContainerClient) {
-            EntityContainerClient entityContainer =
-                    (EntityContainerClient) entity;
-            entityContainer.getInventory().load(tag);
-        }
+        world.entity(entityID).ifPresent(entity -> {
+            if (entity instanceof EntityContainerClient) {
+                EntityContainerClient entityContainer =
+                        (EntityContainerClient) entity;
+                entityContainer.inventory().load(tag);
+            }
+        });
     }
 }

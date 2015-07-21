@@ -26,8 +26,6 @@ import org.tobi29.scapes.engine.backends.lwjgl3.glfw.PlatformDialogs;
 import org.tobi29.scapes.engine.opengl.Container;
 import org.tobi29.scapes.engine.utils.Pair;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -104,37 +102,6 @@ public class PlatformDialogsSWT implements PlatformDialogs {
         String fileName = fileDialog.getFileName();
         return Optional.of(Paths.get(fileDialog.getFilterPath(), fileName)
                 .toAbsolutePath());
-    }
-
-    @Override
-    public boolean exportToUser(Path path, Pair<String, String>[] extensions,
-            String title) throws IOException {
-        Optional<Path> export = saveFileDialog(extensions, title);
-        if (export.isPresent()) {
-            Files.copy(path, export.get());
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean importFromUser(Path path, Pair<String, String>[] extensions,
-            String title) throws IOException {
-        Path[] exports = openFileDialog(extensions, title, false);
-        for (Path export : exports) {
-            Files.copy(export, path);
-        }
-        return exports.length > 0;
-    }
-
-    @Override
-    public boolean importFromUser(Path path, Pair<String, String>[] extensions,
-            String title, boolean multiple) throws IOException {
-        Path[] exports = openFileDialog(extensions, title, multiple);
-        for (Path export : exports) {
-            Files.copy(export, path.resolve(export.getFileName()));
-        }
-        return exports.length > 0;
     }
 
     @Override

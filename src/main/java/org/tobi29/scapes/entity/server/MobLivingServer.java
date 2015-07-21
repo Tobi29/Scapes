@@ -47,14 +47,14 @@ public abstract class MobLivingServer extends MobServer {
             new ConcurrentHashMap<>();
     protected final Frustum viewField, hitField;
     protected final AI ai;
-    protected double lastDamage, lives, maxLives, armor = 1.0, invincibleTicks;
+    protected double lastDamage, health, maxHealth, invincibleTicks;
 
     protected MobLivingServer(WorldServer world, Vector3 pos, Vector3 speed,
-            AABB aabb, double lives, double maxLives, Frustum viewField,
+            AABB aabb, double health, double maxHealth, Frustum viewField,
             Frustum hitField) {
         super(world, pos, speed, aabb);
-        this.lives = lives;
-        this.maxLives = maxLives;
+        this.health = health;
+        this.maxHealth = maxHealth;
         this.viewField = viewField;
         this.hitField = hitField;
         ai = createAI();
@@ -70,7 +70,7 @@ public abstract class MobLivingServer extends MobServer {
         double lookY = FastMath.sinTable(rot.doubleZ() * FastMath.PI / 180) *
                 FastMath.cosTable(rot.doubleX() * FastMath.PI / 180) * 6;
         double lookZ = FastMath.sinTable(rot.doubleX() * FastMath.PI / 180) * 6;
-        Vector3 viewOffset = getViewOffset();
+        Vector3 viewOffset = viewOffset();
         hitField.setView(pos.doubleX() + viewOffset.doubleX(),
                 pos.doubleY() + viewOffset.doubleY(),
                 pos.doubleZ() + viewOffset.doubleZ(), pos.doubleX() + lookX,
@@ -87,9 +87,9 @@ public abstract class MobLivingServer extends MobServer {
         return mobs;
     }
 
-    public PointerPane getBlock(double distance) {
+    public PointerPane block(double distance) {
         Pool<PointerPane> pointerPanes = world.getTerrain()
-                .getPointerPanes(pos.intX(), pos.intY(), pos.intZ(),
+                .pointerPanes(pos.intX(), pos.intY(), pos.intZ(),
                         (int) FastMath.ceil(distance));
         double lookX = FastMath.cosTable(rot.doubleZ() * FastMath.PI / 180) *
                 FastMath.cosTable(rot.doubleX() * FastMath.PI / 180) * distance;
@@ -97,7 +97,7 @@ public abstract class MobLivingServer extends MobServer {
                 FastMath.cosTable(rot.doubleX() * FastMath.PI / 180) * distance;
         double lookZ =
                 FastMath.sinTable(rot.doubleX() * FastMath.PI / 180) * distance;
-        Vector3 viewOffset = getViewOffset();
+        Vector3 viewOffset = viewOffset();
         Vector3 f = pos.now().plus(viewOffset);
         Vector3 t = f.plus(new Vector3d(lookX, lookY, lookZ));
         double distanceSqr = distance * distance;
@@ -121,14 +121,13 @@ public abstract class MobLivingServer extends MobServer {
     public abstract boolean canMoveHere(TerrainServer terrain, int x, int y,
             int z);
 
-    public abstract CreatureType getCreatureType();
+    public abstract CreatureType creatureType();
 
     public void damage(double damage) {
         damage(damage, false);
     }
 
     public void damage(double damage, boolean ignoreInvincible) {
-        damage *= armor;
         double d = damage;
         if (invincibleTicks > 0.0 && !ignoreInvincible) {
             if (damage > lastDamage) {
@@ -141,58 +140,56 @@ public abstract class MobLivingServer extends MobServer {
             lastDamage = damage;
             invincibleTicks = 0.8;
         }
-        lives -= d;
-        if (lives > maxLives) {
-            lives = maxLives;
+        health -= d;
+        if (health > maxHealth) {
+            health = maxHealth;
         }
-        if (lives < 0) {
-            lives = 0;
+        if (health < 0) {
+            health = 0;
         }
         if (d != 0) {
             onDamage(damage);
-            world.getConnection().send(new PacketMobDamage(this));
+            world.connection().send(new PacketMobDamage(this));
         }
     }
 
-    public double getLives() {
-        return lives;
+    public double health() {
+        return health;
     }
 
-    public double getMaxLives() {
-        return maxLives;
+    public double maxHealth() {
+        return maxHealth;
     }
 
     public void heal(double heal) {
-        lives += heal;
-        if (lives > maxLives) {
-            lives = maxLives;
+        health += heal;
+        if (health > maxHealth) {
+            health = maxHealth;
         }
-        if (lives < 0) {
-            lives = 0;
+        if (health < 0) {
+            health = 0;
         }
         onHeal(heal);
-        world.getConnection().send(new PacketMobDamage(this));
+        world.connection().send(new PacketMobDamage(this));
     }
 
     public boolean isDead() {
-        return lives <= 0;
+        return health <= 0;
     }
 
     @Override
     public TagStructure write() {
         TagStructure tag = super.write();
-        tag.setDouble("Lives", lives);
-        tag.setDouble("MaxLives", maxLives);
-        tag.setDouble("Armor", armor);
+        tag.setDouble("Health", health);
+        tag.setDouble("MaxHealth", maxHealth);
         return tag;
     }
 
     @Override
     public void read(TagStructure tagStructure) {
         super.read(tagStructure);
-        lives = tagStructure.getDouble("Lives");
-        maxLives = tagStructure.getDouble("MaxLives");
-        armor = tagStructure.getDouble("Armor");
+        health = tagStructure.getDouble("Health");
+        maxHealth = tagStructure.getDouble("MaxHealth");
     }
 
     @Override
@@ -203,15 +200,15 @@ public abstract class MobLivingServer extends MobServer {
         double lookY = FastMath.sinTable(rot.doubleZ() * FastMath.PI / 180) *
                 FastMath.cosTable(rot.doubleX() * FastMath.PI / 180) * 6;
         double lookZ = FastMath.sinTable(rot.doubleX() * FastMath.PI / 180) * 6;
-        Vector3 viewOffset = getViewOffset();
+        Vector3 viewOffset = viewOffset();
         viewField.setView(pos.doubleX() + viewOffset.doubleX(),
                 pos.doubleY() + viewOffset.doubleY(),
                 pos.doubleZ() + viewOffset.doubleZ(), pos.doubleX() + lookX,
                 pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0, 0, 1);
-        world.getEntities().filter(entity -> entity instanceof MobServer)
+        world.entities().filter(entity -> entity instanceof MobServer)
                 .forEach(entity -> {
                     MobServer mob = (MobServer) entity;
-                    if (viewField.inView(mob.getAABB()) > 0) {
+                    if (viewField.inView(mob.aabb()) > 0) {
                         if (!world.checkBlocked(pos.intX(), pos.intY(),
                                 pos.intZ(), mob.pos.intX(), mob.pos.intY(),
                                 mob.pos.intZ())) {
@@ -224,7 +221,7 @@ public abstract class MobLivingServer extends MobServer {
         }
     }
 
-    public abstract Vector3 getViewOffset();
+    public abstract Vector3 viewOffset();
 
     @Override
     public void listener(String id, EntityServer.Listener listener) {

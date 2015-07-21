@@ -52,23 +52,23 @@ public abstract class Update {
         return delay;
     }
 
-    public double getDelay() {
+    public double delay() {
         return delay;
     }
 
-    public short getID(GameRegistry registry) {
-        return (short) registry.getSupplier("Core", "Update").getID(this);
+    public short id(GameRegistry registry) {
+        return (short) registry.getSupplier("Core", "Update").id(this);
     }
 
-    public int getX() {
+    public int x() {
         return x;
     }
 
-    public int getY() {
+    public int y() {
         return y;
     }
 
-    public int getZ() {
+    public int z() {
         return z;
     }
 

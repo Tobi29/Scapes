@@ -56,16 +56,16 @@ public class MobPlayerClient extends MobLivingEquippedClient
     }
 
     @Override
-    public ItemStack getLeftWeapon() {
-        return inventory.getItem(inventorySelectLeft);
+    public ItemStack leftWeapon() {
+        return inventory.item(inventorySelectLeft);
     }
 
     @Override
-    public ItemStack getRightWeapon() {
-        return inventory.getItem(inventorySelectRight);
+    public ItemStack rightWeapon() {
+        return inventory.item(inventorySelectRight);
     }
 
-    public int getInventorySelectLeft() {
+    public int inventorySelectLeft() {
         return inventorySelectLeft;
     }
 
@@ -88,7 +88,7 @@ public class MobPlayerClient extends MobLivingEquippedClient
         inventorySelectLeft = select;
     }
 
-    public int getInventorySelectRight() {
+    public int inventorySelectRight() {
         return inventorySelectRight;
     }
 
@@ -111,16 +111,16 @@ public class MobPlayerClient extends MobLivingEquippedClient
         inventorySelectRight = select;
     }
 
-    public String getNickname() {
+    public String nickname() {
         return nickname;
     }
 
-    public PointerPane getSelectedBlock() {
-        return getBlock(6);
+    public PointerPane selectedBlock() {
+        return block(6);
     }
 
     @Override
-    public CreatureType getCreatureType() {
+    public CreatureType creatureType() {
         return CreatureType.CREATURE;
     }
 
@@ -138,23 +138,23 @@ public class MobPlayerClient extends MobLivingEquippedClient
     }
 
     @Override
-    public Vector3 getViewOffset() {
+    public Vector3 viewOffset() {
         return new Vector3d(0.0, 0.0, 0.63);
     }
 
     @Override
-    public Gui getGui(MobPlayerClientMain player) {
+    public Gui gui(MobPlayerClientMain player) {
         return new GuiPlayerInventory(player);
     }
 
     @Override
-    public Inventory getInventory() {
+    public Inventory inventory() {
         return inventory;
     }
 
     @Override
     public Optional<MobModel> createModel() {
-        Texture texture = world.getScene().getSkinStorage().getSkin(skin);
+        Texture texture = world.scene().skinStorage().get(skin);
         return Optional.of(new MobLivingModelHuman(this, texture));
     }
 }

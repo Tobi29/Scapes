@@ -60,9 +60,8 @@ public class PacketDayTimeSync extends Packet implements PacketClient {
             return;
         }
         WorldEnvironmentOverworld environmentOverworld =
-                (WorldEnvironmentOverworld) world.getEnvironment();
-        ClimateGenerator climateGenerator =
-                environmentOverworld.getClimateGenerator();
+                (WorldEnvironmentOverworld) world.environment();
+        ClimateGenerator climateGenerator = environmentOverworld.climate();
         climateGenerator.setDayTime(dayTime);
         climateGenerator.setDay(day);
     }

@@ -47,12 +47,12 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
         super(world, pos);
         this.speed = new MutableVector3d(speed);
         collision = aabb;
-        positionHandler = createPositionHandler(world.getConnection());
+        positionHandler = createPositionHandler(world.connection());
     }
 
-    private static Iterator<AABB> getCollisions(Pool<AABBElement> aabbs) {
+    private static Iterator<AABB> collisions(Pool<AABBElement> aabbs) {
         return aabbs.stream().filter(AABBElement::isSolid)
-                .map(AABBElement::getAABB).iterator();
+                .map(AABBElement::aabb).iterator();
     }
 
     protected void updateVelocity(double gravitation, double delta) {
@@ -74,7 +74,7 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
             double goY, double goZ) {
         boolean ground = false;
         boolean slidingWall = false;
-        double lastGoZ = aabb.moveOutZ(getCollisions(aabbs), goZ);
+        double lastGoZ = aabb.moveOutZ(collisions(aabbs), goZ);
         pos.plusZ(lastGoZ);
         aabb.add(0, 0, lastGoZ);
         if (lastGoZ - goZ > 0) {
@@ -85,7 +85,7 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
         while (walking) {
             walking = false;
             if (goX != 0.0) {
-                double lastGoX = aabb.moveOutX(getCollisions(aabbs), goX);
+                double lastGoX = aabb.moveOutX(collisions(aabbs), goX);
                 if (lastGoX != 0.0) {
                     pos.plusX(lastGoX);
                     aabb.add(lastGoX, 0.0, 0.0);
@@ -94,7 +94,7 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
                 }
             }
             if (goY != 0.0) {
-                double lastGoY = aabb.moveOutY(getCollisions(aabbs), goY);
+                double lastGoY = aabb.moveOutY(collisions(aabbs), goY);
                 if (lastGoY != 0.0) {
                     pos.plusY(lastGoY);
                     aabb.add(0.0, lastGoY, 0.0);
@@ -111,21 +111,19 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
                 // Step
                 // Calculate step height
                 AABB aabbStep = new AABB(aabb).add(goX, 0.0, 0.0);
-                double stepX =
-                        aabbStep.moveOutZ(getCollisions(aabbs), stepHeight);
+                double stepX = aabbStep.moveOutZ(collisions(aabbs), stepHeight);
                 aabbStep = new AABB(aabb).add(0.0, goY, 0.0);
-                double stepY =
-                        aabbStep.moveOutZ(getCollisions(aabbs), stepHeight);
+                double stepY = aabbStep.moveOutZ(collisions(aabbs), stepHeight);
                 double step = FastMath.max(stepX, stepY);
                 aabbStep = new AABB(aabb).add(goX, goY, step);
-                step += aabbStep.moveOutZ(getCollisions(aabbs), -step);
+                step += aabbStep.moveOutZ(collisions(aabbs), -step);
                 // Check step height
                 aabbStep.copy(aabb).add(0.0, 0.0, step);
-                step = aabb.moveOutZ(getCollisions(aabbs), step);
+                step = aabb.moveOutZ(collisions(aabbs), step);
                 // Attempt walk at new height
-                double lastGoX = aabbStep.moveOutX(getCollisions(aabbs), goX);
+                double lastGoX = aabbStep.moveOutX(collisions(aabbs), goX);
                 aabbStep.add(lastGoX, 0.0, 0.0);
-                double lastGoY = aabbStep.moveOutY(getCollisions(aabbs), goY);
+                double lastGoY = aabbStep.moveOutY(collisions(aabbs), goY);
                 // Check if walk was successful
                 if (lastGoX != 0.0 || lastGoY != 0.0) {
                     pos.plusX(lastGoX);
@@ -202,7 +200,7 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
         world.addEntity(entity);
     }
 
-    public AABB getAABB() {
+    public AABB aabb() {
         AABB aabb = new AABB(collision);
         aabb.add(pos.doubleX(), pos.doubleY(), pos.doubleZ());
         return aabb;
@@ -238,11 +236,11 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
     }
 
     @Override
-    public MobPositionHandler getPositionHandler() {
+    public MobPositionHandler positionHandler() {
         return positionHandler;
     }
 
-    public Vector3 getSpeed() {
+    public Vector3 speed() {
         return speed.now();
     }
 
@@ -250,7 +248,7 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
         this.speed.set(speed);
     }
 
-    public Vector3 getRot() {
+    public Vector3 rot() {
         return rot.now();
     }
 
@@ -258,52 +256,52 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
         this.rot.set(rot);
     }
 
-    public double getXSpeed() {
+    public double speedX() {
         return speed.doubleX();
     }
 
-    public void setXSpeed(double x) {
+    public void setSpeedX(double x) {
         speed.setX(x);
     }
 
-    public double getXRot() {
+    public double pitch() {
         return rot.doubleX();
     }
 
-    public void setXRot(double xRot) {
-        rot.setX(xRot);
+    public void setPitch(double x) {
+        rot.setX(x);
     }
 
-    public double getYSpeed() {
+    public double speedY() {
         return speed.doubleY();
     }
 
-    public void setYSpeed(double y) {
+    public void setSpeedY(double y) {
         speed.setY(y);
     }
 
-    public double getYRot() {
+    public double tilt() {
         return rot.doubleY();
     }
 
-    public void setYRot(double yRot) {
-        rot.setY(yRot);
+    public void setTilt(double y) {
+        rot.setY(y);
     }
 
-    public double getZSpeed() {
+    public double speedZ() {
         return speed.doubleZ();
     }
 
-    public void setZSpeed(double z) {
+    public void setSpeedZ(double z) {
         speed.setZ(z);
     }
 
-    public double getZRot() {
+    public double yaw() {
         return rot.doubleZ();
     }
 
-    public void setZRot(double zRot) {
-        rot.setZ(zRot);
+    public void setYaw(double z) {
+        rot.setZ(z);
     }
 
     public void push(double x, double y, double z) {
@@ -361,18 +359,19 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
                 .isBlockTicking(pos.intX(), pos.intY(), pos.intZ())) {
             return;
         }
-        updateVelocity(world.getGravitation(), delta);
+        updateVelocity(world.gravity(), delta);
         double goX = FastMath.clamp(speed.doubleX() * delta, -1.0, 1.0);
         double goY = FastMath.clamp(speed.doubleY() * delta, -1.0, 1.0);
         double goZ = FastMath.clamp(speed.doubleZ() * delta, -1.0, 1.0);
-        AABB aabb = getAABB();
-        Pool<AABBElement> aabbs = world.getTerrain().getCollisions(
-                FastMath.floor(aabb.minX + FastMath.min(goX, 0.0)),
-                FastMath.floor(aabb.minY + FastMath.min(goY, 0.0)),
-                FastMath.floor(aabb.minZ + FastMath.min(goZ, 0.0)),
-                FastMath.floor(aabb.maxX + FastMath.max(goX, 0.0)),
-                FastMath.floor(aabb.maxY + FastMath.max(goY, 0.0)),
-                FastMath.floor(aabb.maxZ + FastMath.max(goZ, stepHeight)));
+        AABB aabb = aabb();
+        Pool<AABBElement> aabbs = world.getTerrain()
+                .collisions(FastMath.floor(aabb.minX + FastMath.min(goX, 0.0)),
+                        FastMath.floor(aabb.minY + FastMath.min(goY, 0.0)),
+                        FastMath.floor(aabb.minZ + FastMath.min(goZ, 0.0)),
+                        FastMath.floor(aabb.maxX + FastMath.max(goX, 0.0)),
+                        FastMath.floor(aabb.maxY + FastMath.max(goY, 0.0)),
+                        FastMath.floor(
+                                aabb.maxZ + FastMath.max(goZ, stepHeight)));
         move(aabb, aabbs, goX, goY, goZ);
         if (ground) {
             speed.setZ(speed.doubleZ() / (1.0 + 4.0 * delta));
