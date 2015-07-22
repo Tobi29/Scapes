@@ -721,18 +721,21 @@ class VanillaBasicsRegisters {
         // Overlays
         plugin.c.decorator("Rocks", d -> {
             d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 256,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
+                    (terrain, x, y, z) ->
+                            terrain.type(x, y, z - 1) == m.grass &&
+                                    terrain.type(x, y, z) == m.air));
         });
         plugin.c.decorator("Gravel", d -> {
             int data = StoneType.DIRT_STONE.data(m.registry);
             d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 8,
                     (terrain, x, y, z) -> terrain.type(x, y, z - 1) == m.sand &&
-                            terrain.data(x, y, z - 1) == 1));
+                            terrain.data(x, y, z - 1) == 1 &&
+                            terrain.type(x, y, z) == m.air));
             d.addLayer(new LayerGround(m.stoneRock,
                     (terrain, x, y, z, random) -> data, 4,
                     (terrain, x, y, z) -> terrain.type(x, y, z - 1) == m.sand &&
-                            terrain.data(x, y, z - 1) == 1));
+                            terrain.data(x, y, z - 1) == 1 &&
+                            terrain.type(x, y, z) == m.air));
         });
 
         // Polar
