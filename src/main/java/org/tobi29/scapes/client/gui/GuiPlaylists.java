@@ -62,7 +62,7 @@ public class GuiPlaylists extends GuiMenu {
         add.addLeftClick(event -> {
             try {
                 Path directory = state.engine().home().resolve("playlists")
-                                .resolve(playlist);
+                        .resolve(playlist);
                 Path[] imports = state.engine().container().openFileDialog(
                         new Pair[]{new Pair<>("*.*", "All Files"),
                                 new Pair<>("*.ogg", "ogg-Vorbis File"),

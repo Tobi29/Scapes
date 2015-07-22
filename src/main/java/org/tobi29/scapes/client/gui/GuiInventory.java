@@ -81,8 +81,7 @@ public class GuiInventory extends Gui {
     }
 
     @Override
-    public void renderOverlay(GL gl, Shader shader,
-            FontRenderer font) {
+    public void renderOverlay(GL gl, Shader shader, FontRenderer font) {
         if (renderHover != null) {
             MatrixStack matrixStack = gl.matrixStack();
             if (!renderHover.equals(currentName) || this.font != font) {

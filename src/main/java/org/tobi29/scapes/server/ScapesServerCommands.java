@@ -95,8 +95,8 @@ final class ScapesServerCommands {
                     player.mob().setPos(location);
                 });
             } else {
-                String targetName = args.getOption('t',
-                        executor.playerName().orElse(null));
+                String targetName =
+                        args.getOption('t', executor.playerName().orElse(null));
                 Command.require(playerName, 't');
                 commands.add(() -> {
                     PlayerConnection player =
@@ -221,8 +221,8 @@ final class ScapesServerCommands {
                 (args, executor, commands) -> {
                     String id = args.getOption('i');
                     Command.require(id, 'i');
-                    commands.add(() -> server.worldFormat().playerBans()
-                            .unban(id));
+                    commands.add(
+                            () -> server.worldFormat().playerBans().unban(id));
                 });
 
         registry.register("banlist", 9, options -> {

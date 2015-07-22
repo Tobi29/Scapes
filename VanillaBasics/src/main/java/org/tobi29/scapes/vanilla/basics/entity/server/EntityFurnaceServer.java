@@ -34,11 +34,6 @@ public class EntityFurnaceServer extends EntityAbstractFurnaceServer {
                 1.001f, 3, 0);
     }
 
-    /*@Override
-    public Gui getGui(MobPlayerClientMain player) {
-        return new GuiFurnaceInventory(this, player);
-    }*/
-
     @Override
     public boolean isValidOn(TerrainServer terrain, int x, int y, int z) {
         VanillaBasics plugin = (VanillaBasics) terrain.world().plugins()

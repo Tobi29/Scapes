@@ -133,8 +133,8 @@ public abstract class ItemTool extends VanillaItem
     }
 
     @Override
-    public void render(ItemStack item, GL gl, Shader shader,
-            float r, float g, float b, float a) {
+    public void render(ItemStack item, GL gl, Shader shader, float r, float g,
+            float b, float a) {
         if (item.data() > 0) {
             modelHandle.render(gl, shader);
         }
@@ -147,8 +147,8 @@ public abstract class ItemTool extends VanillaItem
     }
 
     @Override
-    public void renderInventory(ItemStack item, GL gl,
-            Shader shader, float r, float g, float b, float a) {
+    public void renderInventory(ItemStack item, GL gl, Shader shader, float r,
+            float g, float b, float a) {
         if (item.data() > 0) {
             modelHandle.renderInventory(gl, shader);
         }
@@ -243,8 +243,8 @@ public abstract class ItemTool extends VanillaItem
 
     @Override
     public MetalType metalType(ItemStack item) {
-        return plugin.getMetalType(
-                item.metaData("Vanilla").getString("MetalType"));
+        return plugin
+                .getMetalType(item.metaData("Vanilla").getString("MetalType"));
     }
 
     private ItemModel modelHead(MetalType metal) {

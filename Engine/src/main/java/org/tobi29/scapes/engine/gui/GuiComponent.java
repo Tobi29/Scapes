@@ -198,8 +198,8 @@ public abstract class GuiComponent
 
     public void update(ScapesEngine engine) {
         GuiController guiController = engine.guiController();
-        update(guiController.guiCursorX(), guiController.guiCursorY(),
-                true, engine);
+        update(guiController.guiCursorX(), guiController.guiCursorY(), true,
+                engine);
     }
 
     public void update(double mouseX, double mouseY, boolean mouseInside,

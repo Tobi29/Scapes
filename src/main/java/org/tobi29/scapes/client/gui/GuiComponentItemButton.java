@@ -36,10 +36,9 @@ public class GuiComponentItemButton extends GuiComponentButton {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader,
-            FontRenderer font, double delta) {
+    public void renderComponent(GL gl, Shader shader, FontRenderer font,
+            double delta) {
         super.renderComponent(gl, shader, font, delta);
-        GuiUtils.renderItem(0.0f, 0.0f, width, height, item, gl, shader,
-                font);
+        GuiUtils.renderItem(0.0f, 0.0f, width, height, item, gl, shader, font);
     }
 }

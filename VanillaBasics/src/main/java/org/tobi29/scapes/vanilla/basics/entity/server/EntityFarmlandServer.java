@@ -85,8 +85,8 @@ public class EntityFarmlandServer extends EntityServer {
         if (updateBlock) {
             VanillaBasics plugin =
                     (VanillaBasics) world.plugins().plugin("VanillaBasics");
-            GameRegistry.Registry<CropType> cropRegistry = world.registry()
-                    .<CropType>get("VanillaBasics", "CropType");
+            GameRegistry.Registry<CropType> cropRegistry =
+                    world.registry().<CropType>get("VanillaBasics", "CropType");
             VanillaMaterial materials = plugin.getMaterials();
             world.getTerrain().queue(handler -> handler
                     .typeData(pos.intX(), pos.intY(), pos.intZ() + 1,

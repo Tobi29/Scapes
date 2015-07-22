@@ -49,8 +49,8 @@ public class GuiComponentText extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader,
-            FontRenderer font, double delta) {
+    public void renderComponent(GL gl, Shader shader, FontRenderer font,
+            double delta) {
         if (this.font != font) {
             this.font = font;
             updateText();

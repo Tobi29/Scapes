@@ -68,8 +68,7 @@ public class ParticleTornado extends Particle {
         matrix.rotate((float) (FastMath.atan2(z, FastMath.length(x, y)) *
                 FastMath.RAD_2_DEG), 1, 0, 0);
         matrix.rotate((float) (camDir + dir), 0, 1, 0);
-        gl.textures()
-                .bind("VanillaBasics:image/entity/particle/Cloud", gl);
+        gl.textures().bind("VanillaBasics:image/entity/particle/Cloud", gl);
         gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, r, g, b, a);
         float size = (float) width + 1;
         matrix.scale(size, 1.0f, size);

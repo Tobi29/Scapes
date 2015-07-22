@@ -22,8 +22,7 @@ import java.nio.ByteBuffer;
 
 public class TextureCustom extends Texture {
     public TextureCustom(int width, int height) {
-        this(width, height, BufferCreatorNative.bytes(width * height * 4),
-                0);
+        this(width, height, BufferCreatorNative.bytes(width * height * 4), 0);
     }
 
     public TextureCustom(int width, int height, ByteBuffer buffer,

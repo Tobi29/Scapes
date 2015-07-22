@@ -44,8 +44,8 @@ public class Gui extends GuiComponent {
             } else {
                 MatrixStack matrixStack = gl.matrixStack();
                 Matrix matrix = matrixStack.push();
-                float ratio = (float) gl.sceneHeight() / gl.sceneWidth() *
-                        1.5625f;
+                float ratio =
+                        (float) gl.sceneHeight() / gl.sceneWidth() * 1.5625f;
                 matrix.scale(ratio, 1.0f, 1.0f);
                 switch (alignment) {
                     case CENTER:

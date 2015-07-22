@@ -52,8 +52,7 @@ public class PacketInventoryInteraction extends Packet implements PacketServer {
         chestE.viewers().forEach(player -> {
             player.connection().send(new PacketUpdateInventory(chestE));
             if (interactE != chestE) {
-                player.connection()
-                        .send(new PacketUpdateInventory(interactE));
+                player.connection().send(new PacketUpdateInventory(interactE));
             }
         });
     }

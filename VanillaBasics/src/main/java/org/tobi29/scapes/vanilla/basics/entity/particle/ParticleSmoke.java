@@ -57,8 +57,7 @@ public class ParticleSmoke extends Particle {
         matrix.rotate((float) (FastMath.atan2(z, FastMath.length(x, y)) *
                 FastMath.RAD_2_DEG), 1, 0, 0);
         matrix.rotate((float) (camDir + dir), 0, 1, 0);
-        gl.textures()
-                .bind("VanillaBasics:image/entity/particle/Smoke", gl);
+        gl.textures().bind("VanillaBasics:image/entity/particle/Smoke", gl);
         float color = (float) (1.0 - FastMath.clamp(time * 0.2, 0.0, 0.7));
         float size = color * color * 3.0f;
         color = FastMath.min(color * 2.0f, 1.0f);

@@ -27,6 +27,7 @@ public enum Face {
     EAST(3, 1, 0, 0, (byte) 3),
     SOUTH(4, 0, 1, 0, (byte) 4),
     WEST(5, -1, 0, 0, (byte) 5);
+
     static {
         NONE.opposite = NONE;
         UP.opposite = DOWN;

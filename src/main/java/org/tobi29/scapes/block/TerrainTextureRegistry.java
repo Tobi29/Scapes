@@ -70,9 +70,9 @@ public class TerrainTextureRegistry {
             try {
                 Image source = sources.get(paths[0]);
                 if (source == null) {
-                    source = engine.files().get(paths[0])
-                            .readReturn(streamIn -> PNG.decode(streamIn,
-                                    BufferCreator::bytes));
+                    source = engine.files().get(paths[0]).readReturn(
+                            streamIn -> PNG
+                                    .decode(streamIn, BufferCreator::bytes));
                     sources.put(paths[0], source);
                 }
                 width = source.width();

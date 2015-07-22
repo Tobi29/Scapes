@@ -48,8 +48,8 @@ public class GuiComponentHotbar extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader,
-            FontRenderer font, double delta) {
+    public void renderComponent(GL gl, Shader shader, FontRenderer font,
+            double delta) {
         MatrixStack matrixStack = gl.matrixStack();
         for (int i = 0; i < 10; i++) {
             if (i == player.inventorySelectLeft()) {
@@ -62,8 +62,7 @@ public class GuiComponentHotbar extends GuiComponent {
                 vao3.render(gl, shader);
                 org.tobi29.scapes.client.gui.GuiUtils
                         .renderItem(0.0f, 0.0f, height, height,
-                                player.inventory().item(i), gl,
-                                shader, font);
+                                player.inventory().item(i), gl, shader, font);
                 gl.textures().bind("Scapes:image/gui/HotbarLeft", gl);
                 gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
                         1.0f);
@@ -79,8 +78,7 @@ public class GuiComponentHotbar extends GuiComponent {
                 vao3.render(gl, shader);
                 org.tobi29.scapes.client.gui.GuiUtils
                         .renderItem(0.0f, 0.0f, height, height,
-                                player.inventory().item(i), gl,
-                                shader, font);
+                                player.inventory().item(i), gl, shader, font);
                 gl.textures().bind("Scapes:image/gui/HotbarRight", gl);
                 gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
                         1.0f);
@@ -98,8 +96,7 @@ public class GuiComponentHotbar extends GuiComponent {
                         1.0f);
                 org.tobi29.scapes.client.gui.GuiUtils
                         .renderItem(0.0f, 0.0f, height, height,
-                                player.inventory().item(i), gl,
-                                shader, font);
+                                player.inventory().item(i), gl, shader, font);
                 matrixStack.pop();
             }
         }

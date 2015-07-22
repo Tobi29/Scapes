@@ -40,8 +40,7 @@ public class GuiAlloyInventory extends GuiContainerInventory {
     }
 
     @Override
-    public void renderOverlay(GL gl, Shader shader,
-            FontRenderer font) {
+    public void renderOverlay(GL gl, Shader shader, FontRenderer font) {
         super.renderOverlay(gl, shader, font);
         StringBuilder textBuilder = new StringBuilder(64);
         textBuilder.append("Metal: ");
@@ -55,8 +54,7 @@ public class GuiAlloyInventory extends GuiContainerInventory {
         for (Double amount : container.metals().values()) {
             size += amount;
         }
-        for (Map.Entry<String, Double> entry : container.metals()
-                .entrySet()) {
+        for (Map.Entry<String, Double> entry : container.metals().entrySet()) {
             textBuilder.append('\n').append(entry.getKey()).append(" - ")
                     .append(FastMath.round(entry.getValue() / size * 100.0f))
                     .append('%');

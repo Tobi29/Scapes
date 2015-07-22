@@ -61,8 +61,8 @@ public class PacketUpdateStatistics extends Packet implements PacketClient {
         for (int i = 0; i < length; i++) {
             statisticMaterials.add(new PlayerStatistics.StatisticMaterial(
                     client.plugins().registry().material(stream.getInt()),
-                    stream.getShort(),
-                    stream.getInt(), stream.getInt(), stream.getInt()));
+                    stream.getShort(), stream.getInt(), stream.getInt(),
+                    stream.getInt()));
         }
     }
 

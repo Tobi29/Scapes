@@ -162,8 +162,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
 
     public List<EntityServer> entities(Vector3 pos, double rangeSqr) {
         return entities.values().stream().filter(entity ->
-                        FastMath.pointDistanceSqr(pos, entity.pos()) <=
-                                rangeSqr)
+                FastMath.pointDistanceSqr(pos, entity.pos()) <= rangeSqr)
                 .collect(Collectors.toList());
     }
 

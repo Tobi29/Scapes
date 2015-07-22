@@ -299,8 +299,8 @@ public class ClimateGenerator {
         factor = FastMath.min(factor * 5.0, 1.0);
         if (yy > 0.5) {
             return FastMath
-                    .clamp(-FastMath.cosTable(season() * FastMath.TWO_PI) *
-                            20 - 18, 0, 1) * factor;
+                    .clamp(-FastMath.cosTable(season() * FastMath.TWO_PI) * 20 -
+                            18, 0, 1) * factor;
         } else {
             return FastMath.clamp(-FastMath.cosTable(
                             (season() + 0.5) * FastMath.TWO_PI) * 20 - 18, 0,

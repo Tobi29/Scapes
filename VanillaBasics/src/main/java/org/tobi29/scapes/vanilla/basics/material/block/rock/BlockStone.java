@@ -67,8 +67,7 @@ public abstract class BlockStone extends BlockSimpleData {
 
     public boolean canBeBroken(int toolLevel, int data) {
         return FastMath.round(stoneRegistry.values().get(data).resistance()) *
-                10 <=
-                toolLevel;
+                10 <= toolLevel;
     }
 
     @Override

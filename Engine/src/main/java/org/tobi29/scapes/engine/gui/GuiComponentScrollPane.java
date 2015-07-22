@@ -45,8 +45,7 @@ public class GuiComponentScrollPane extends GuiComponentVisiblePane {
     }
 
     @Override
-    public void render(GL gl, Shader shader,
-            FontRenderer font, double delta) {
+    public void render(GL gl, Shader shader, FontRenderer font, double delta) {
         if (visible) {
             MatrixStack matrixStack = gl.matrixStack();
             Matrix matrix = matrixStack.push();
@@ -64,8 +63,8 @@ public class GuiComponentScrollPane extends GuiComponentVisiblePane {
                 yy += other.y;
             }
             gl.enableScissor(0, yy, 800, height);
-            components.stream().filter(component ->
-                    component.y() - scroll > -scrollStep &&
+            components.stream()
+                    .filter(component -> component.y() - scroll > -scrollStep &&
                             component.y() - scroll < height).forEach(
                     component -> component.render(gl, shader, font, delta));
             gl.disableScissor();

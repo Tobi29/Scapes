@@ -52,8 +52,8 @@ public class GuiCreateWorld extends GuiMenuDouble {
         GuiComponentTextField seed =
                 new GuiComponentTextField(16, 160, 368, 30, 18, "");
         GuiComponentTextButton environment =
-                new GuiComponentTextButton(16, 200, 368, 30, 18, "Generator: " +
-                        worldTypes.get(environmentID).name());
+                new GuiComponentTextButton(16, 200, 368, 30, 18,
+                        "Generator: " + worldTypes.get(environmentID).name());
         environment.addLeftClick(event -> {
             environmentID++;
             if (environmentID >= worldTypes.size()) {

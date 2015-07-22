@@ -33,11 +33,6 @@ public class EntityChestServer extends EntityAbstractContainerServer {
         super(world, pos, new Inventory(world.registry(), 40));
     }
 
-    /*@Override
-    public Gui getGui(MobPlayerClientMain player) {
-        return new GuiChestInventory(this, player);
-    }*/
-
     @Override
     public boolean isValidOn(TerrainServer terrain, int x, int y, int z) {
         VanillaBasics plugin = (VanillaBasics) terrain.world().plugins()

@@ -33,11 +33,6 @@ public class EntityResearchTableServer extends EntityAbstractContainerServer {
         super(world, pos, new Inventory(world.registry(), 2));
     }
 
-    /*@Override
-    public Gui getGui(MobPlayerClientMain player) {
-        return new GuiResearchTableInventory(this, player);
-    }*/
-
     @Override
     public boolean isValidOn(TerrainServer terrain, int x, int y, int z) {
         VanillaBasics plugin = (VanillaBasics) terrain.world().plugins()

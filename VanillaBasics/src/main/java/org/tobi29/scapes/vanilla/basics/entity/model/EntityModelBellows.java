@@ -76,27 +76,25 @@ public class EntityModelBellows implements EntityModel {
     }
 
     @Override
-    public void render(GL gl, WorldClient world, Cam cam,
-            Shader shader) {
+    public void render(GL gl, WorldClient world, Cam cam, Shader shader) {
         float posRenderX = (float) (pos.doubleX() - cam.position.doubleX());
         float posRenderY = (float) (pos.doubleY() - cam.position.doubleY());
         float posRenderZ = (float) (pos.doubleZ() - cam.position.doubleZ());
-        gl.setAttribute2f(4, world.terrain()
-                        .blockLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f,
-                world.terrain()
-                        .sunLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f);
+        gl.setAttribute2f(4,
+                world.terrain().blockLight(pos.intX(), pos.intY(), pos.intZ()) /
+                        15.0f,
+                world.terrain().sunLight(pos.intX(), pos.intY(), pos.intZ()) /
+                        15.0f);
         MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(posRenderX, posRenderY, posRenderZ);
         matrix = matrixStack.push();
         matrix.scale(1.0f, 1.0f, scale);
-        gl.textures()
-                .bind("VanillaBasics:image/terrain/tree/birch/Planks", gl);
+        gl.textures().bind("VanillaBasics:image/terrain/tree/birch/Planks", gl);
         MIDDLE.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
-        gl.textures()
-                .bind("VanillaBasics:image/terrain/tree/oak/Planks", gl);
+        gl.textures().bind("VanillaBasics:image/terrain/tree/oak/Planks", gl);
         matrix.translate(0.0f, 0.0f, scale * 0.5f);
         SIDE.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
         matrixStack.pop();
@@ -123,8 +121,7 @@ public class EntityModelBellows implements EntityModel {
                 matrix.rotate(270, 0, 1, 0);
                 break;
         }
-        gl.textures()
-                .bind("VanillaBasics:image/terrain/device/Anvil", gl);
+        gl.textures().bind("VanillaBasics:image/terrain/device/Anvil", gl);
         PIPE.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
         matrixStack.pop();
         matrixStack.pop();

@@ -144,8 +144,8 @@ public class Scapes {
                     engine.setState(
                             new GameStateStartup(new GameStateMenu(engine),
                                     new SceneImage(engine.graphics().textures()
-                                            .get("Engine:image/Logo"),
-                                            0.5), engine));
+                                            .get("Engine:image/Logo"), 0.5),
+                                    engine));
                 }
                 System.exit(engine.run());
                 break;

@@ -301,8 +301,8 @@ public class WorldSkyboxOverworld implements WorldSkybox {
             float light = FastMath.clamp(world.terrain()
                     .light(FastMath.floor(player.x()),
                             FastMath.floor(player.y()),
-                            FastMath.floor(player.z() + 0.7)) * 0.09333f +
-                    0.2f, 0.0f, 1.0f);
+                            FastMath.floor(player.z() + 0.7)) * 0.09333f + 0.2f,
+                    0.0f, 1.0f);
             fogR = 0.1f * light;
             fogG = 0.5f * light;
             fogB = 0.8f * light;
@@ -319,8 +319,8 @@ public class WorldSkyboxOverworld implements WorldSkybox {
                     sunsetLight);
             fogDistance = 1.0f;
         }
-        TagStructure conditionTag = world.player().metaData("Vanilla")
-                .getStructure("Condition");
+        TagStructure conditionTag =
+                world.player().metaData("Vanilla").getStructure("Condition");
         double temperature = conditionTag.getDouble("BodyTemperature");
         double heatstroke = FastMath.max((temperature - 37.1) * 7.5, 0.0) + 1.0;
         exposure += (heatstroke * 0.3 - exposure) * factor;

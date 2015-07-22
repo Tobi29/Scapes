@@ -67,11 +67,12 @@ public class PacketSetWorld extends Packet implements PacketClient {
 
     @Override
     public void runClient(ClientConnection client, WorldClient world) {
-        client.changeWorld(new WorldClient(client,
-                new Cam(0.01f, client.loadingRadius()), seed, name,
-                newWorld -> new TerrainInfiniteClient(newWorld,
-                        client.loadingRadius() >> 4, 512,
-                        client.game().engine().taskExecutor()), tag,
-                entityID));
+        client.changeWorld(
+                new WorldClient(client, new Cam(0.01f, client.loadingRadius()),
+                        seed, name,
+                        newWorld -> new TerrainInfiniteClient(newWorld,
+                                client.loadingRadius() >> 4, 512,
+                                client.game().engine().taskExecutor()), tag,
+                        entityID));
     }
 }

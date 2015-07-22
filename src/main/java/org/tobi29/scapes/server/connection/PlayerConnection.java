@@ -191,8 +191,9 @@ public class PlayerConnection
         while (pluginIterator.hasNext()) {
             sendPluginChecksum(pluginIterator.next(), output);
         }
-        TagStructureBinary.write(server.server().worldFormat().idStorage()
-                        .save(), output);
+        TagStructureBinary
+                .write(server.server().worldFormat().idStorage().save(),
+                        output);
         channel.queueBundle();
     }
 
@@ -249,8 +250,8 @@ public class PlayerConnection
             entity = new MobPlayerServer(world, Vector3d.ZERO, Vector3d.ZERO,
                     0.0, 0.0, nickname, skin.checksum(), this);
             entity.read(tagStructure.getStructure("Entity"));
-            statistics.load(world.registry(),
-                    tagStructure.getList("Statistics"));
+            statistics
+                    .load(world.registry(), tagStructure.getList("Statistics"));
             permissionLevel = tagStructure.getInteger("Permissions");
         } else {
             world = worldFormat.defaultWorld();
@@ -274,8 +275,7 @@ public class PlayerConnection
         if (!challengeMatch) {
             return Optional.of("Invalid private key!");
         }
-        if (!server.server().worldFormat().playerData()
-                .playerExists(id)) {
+        if (!server.server().worldFormat().playerData().playerExists(id)) {
             if (!server.doesAllowCreation()) {
                 return Optional
                         .of("This server does not allow account creation!");
@@ -285,8 +285,8 @@ public class PlayerConnection
         if (nicknameCheck.isPresent()) {
             return nicknameCheck;
         }
-        Optional<String> banCheck = server.server().worldFormat().playerBans()
-                        .matches(this);
+        Optional<String> banCheck =
+                server.server().worldFormat().playerBans().matches(this);
         if (banCheck.isPresent()) {
             return banCheck;
         }

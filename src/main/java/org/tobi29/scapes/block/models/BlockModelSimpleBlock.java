@@ -119,8 +119,8 @@ public class BlockModelSimpleBlock implements BlockModel {
                     texTop.x() + terrainTile, texTop.y(), r, g, b, a, lod,
                     anim);
             mesh.addVertex(terrain, Face.UP, x1, y1, z1, xx1, yy1, zz1,
-                    texTop.x() + terrainTile, texTop.y() + terrainTile, r,
-                    g, b, a, lod, anim);
+                    texTop.x() + terrainTile, texTop.y() + terrainTile, r, g, b,
+                    a, lod, anim);
             mesh.addVertex(terrain, Face.UP, x, y1, z1, xx, yy1, zz1,
                     texTop.x(), texTop.y() + terrainTile, r, g, b, a, lod,
                     anim);
@@ -133,14 +133,14 @@ public class BlockModelSimpleBlock implements BlockModel {
             float terrainTile = texBottom.size();
             byte anim = texBottom.shaderAnimation().id();
             mesh.addVertex(terrain, Face.DOWN, x, y1, z, xx, yy1, zz,
-                    texBottom.x(), texBottom.y() + terrainTile, r, g, b,
-                    a, lod, anim);
+                    texBottom.x(), texBottom.y() + terrainTile, r, g, b, a, lod,
+                    anim);
             mesh.addVertex(terrain, Face.DOWN, x1, y1, z, xx1, yy1, zz,
                     texBottom.x() + terrainTile, texBottom.y() + terrainTile, r,
                     g, b, a, lod, anim);
             mesh.addVertex(terrain, Face.DOWN, x1, y, z, xx1, yy, zz,
-                    texBottom.x() + terrainTile, texBottom.y(), r, g, b,
-                    a, lod, anim);
+                    texBottom.x() + terrainTile, texBottom.y(), r, g, b, a, lod,
+                    anim);
             mesh.addVertex(terrain, Face.DOWN, x, y, z, xx, yy, zz,
                     texBottom.x(), texBottom.y(), r, g, b, a, lod, anim);
         }
@@ -152,13 +152,13 @@ public class BlockModelSimpleBlock implements BlockModel {
             float terrainTile = texSide1.size();
             byte anim = texSide1.shaderAnimation().id();
             mesh.addVertex(terrain, Face.NORTH, x1, y, z1, xx1, yy, zz1,
-                    texSide1.x() + terrainTile, texSide1.y(), r, g, b, a,
-                    lod, anim);
+                    texSide1.x() + terrainTile, texSide1.y(), r, g, b, a, lod,
+                    anim);
             mesh.addVertex(terrain, Face.NORTH, x, y, z1, xx, yy, zz1,
                     texSide1.x(), texSide1.y(), r, g, b, a, lod, anim);
             mesh.addVertex(terrain, Face.NORTH, x, y, z, xx, yy, zz,
-                    texSide1.x(), texSide1.y() + terrainTile, r, g, b, a,
-                    lod, anim);
+                    texSide1.x(), texSide1.y() + terrainTile, r, g, b, a, lod,
+                    anim);
             mesh.addVertex(terrain, Face.NORTH, x1, y, z, xx1, yy, zz,
                     texSide1.x() + terrainTile, texSide1.y() + terrainTile, r,
                     g, b, a, lod, anim);
@@ -172,13 +172,13 @@ public class BlockModelSimpleBlock implements BlockModel {
             float terrainTile = texSide2.size();
             byte anim = texSide2.shaderAnimation().id();
             mesh.addVertex(terrain, Face.EAST, x1, y1, z1, xx1, yy1, zz1,
-                    texSide2.x() + terrainTile, texSide2.y(), r, g, b, a,
-                    lod, anim);
+                    texSide2.x() + terrainTile, texSide2.y(), r, g, b, a, lod,
+                    anim);
             mesh.addVertex(terrain, Face.EAST, x1, y, z1, xx1, yy, zz1,
                     texSide2.x(), texSide2.y(), r, g, b, a, lod, anim);
             mesh.addVertex(terrain, Face.EAST, x1, y, z, xx1, yy, zz,
-                    texSide2.x(), texSide2.y() + terrainTile, r, g, b, a,
-                    lod, anim);
+                    texSide2.x(), texSide2.y() + terrainTile, r, g, b, a, lod,
+                    anim);
             mesh.addVertex(terrain, Face.EAST, x1, y1, z, xx1, yy1, zz,
                     texSide2.x() + terrainTile, texSide2.y() + terrainTile, r,
                     g, b, a, lod, anim);
@@ -192,14 +192,14 @@ public class BlockModelSimpleBlock implements BlockModel {
             float terrainTile = texSide3.size();
             byte anim = texSide3.shaderAnimation().id();
             mesh.addVertex(terrain, Face.SOUTH, x1, y1, z, xx1, yy1, zz,
-                    texSide3.x(), texSide3.y() + terrainTile, r, g, b, a,
-                    lod, anim);
+                    texSide3.x(), texSide3.y() + terrainTile, r, g, b, a, lod,
+                    anim);
             mesh.addVertex(terrain, Face.SOUTH, x, y1, z, xx, yy1, zz,
                     texSide3.x() + terrainTile, texSide3.y() + terrainTile, r,
                     g, b, a, lod, anim);
             mesh.addVertex(terrain, Face.SOUTH, x, y1, z1, xx, yy1, zz1,
-                    texSide3.x() + terrainTile, texSide3.y(), r, g, b, a,
-                    lod, anim);
+                    texSide3.x() + terrainTile, texSide3.y(), r, g, b, a, lod,
+                    anim);
             mesh.addVertex(terrain, Face.SOUTH, x1, y1, z1, xx1, yy1, zz1,
                     texSide3.x(), texSide3.y(), r, g, b, a, lod, anim);
         }
@@ -211,14 +211,14 @@ public class BlockModelSimpleBlock implements BlockModel {
             float terrainTile = texSide4.size();
             byte anim = texSide4.shaderAnimation().id();
             mesh.addVertex(terrain, Face.WEST, x, y1, z, xx, yy1, zz,
-                    texSide4.x(), texSide4.y() + terrainTile, r, g, b, a,
-                    lod, anim);
+                    texSide4.x(), texSide4.y() + terrainTile, r, g, b, a, lod,
+                    anim);
             mesh.addVertex(terrain, Face.WEST, x, y, z, xx, yy, zz,
                     texSide4.x() + terrainTile, texSide4.y() + terrainTile, r,
                     g, b, a, lod, anim);
             mesh.addVertex(terrain, Face.WEST, x, y, z1, xx, yy, zz1,
-                    texSide4.x() + terrainTile, texSide4.y(), r, g, b, a,
-                    lod, anim);
+                    texSide4.x() + terrainTile, texSide4.y(), r, g, b, a, lod,
+                    anim);
             mesh.addVertex(terrain, Face.WEST, x, y1, z1, xx, yy1, zz1,
                     texSide4.x(), texSide4.y(), r, g, b, a, lod, anim);
         }

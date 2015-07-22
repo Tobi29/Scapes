@@ -45,8 +45,8 @@ public class ServerInfo {
         Image image = new Image();
         if (Files.exists(iconPath)) {
             try {
-                Image icon = FileUtil.readReturn(iconPath, stream -> PNG
-                        .decode(stream, BufferCreator::bytes));
+                Image icon = FileUtil.readReturn(iconPath,
+                        stream -> PNG.decode(stream, BufferCreator::bytes));
                 int width = icon.width();
                 if (width != icon.height()) {
                     LOGGER.warn("The icon has to be square sized.");

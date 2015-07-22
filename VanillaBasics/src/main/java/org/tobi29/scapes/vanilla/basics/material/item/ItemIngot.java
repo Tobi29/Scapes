@@ -60,8 +60,8 @@ public class ItemIngot extends VanillaItem implements ItemHeatable, ItemMetal {
     }
 
     @Override
-    public void render(ItemStack item, GL gl, Shader shader,
-            float r, float g, float b, float a) {
+    public void render(ItemStack item, GL gl, Shader shader, float r, float g,
+            float b, float a) {
         if ("Stone".equals(item.metaData("Vanilla").getString("MetalType"))) {
             modelStone.render(gl, shader);
         } else {
@@ -83,8 +83,8 @@ public class ItemIngot extends VanillaItem implements ItemHeatable, ItemMetal {
     }
 
     @Override
-    public void renderInventory(ItemStack item, GL gl,
-            Shader shader, float r, float g, float b, float a) {
+    public void renderInventory(ItemStack item, GL gl, Shader shader, float r,
+            float g, float b, float a) {
         if ("Stone".equals(item.metaData("Vanilla").getString("MetalType"))) {
             modelStone.renderInventory(gl, shader);
         } else {
@@ -188,8 +188,8 @@ public class ItemIngot extends VanillaItem implements ItemHeatable, ItemMetal {
 
     @Override
     public MetalType metalType(ItemStack item) {
-        return plugin.getMetalType(
-                item.metaData("Vanilla").getString("MetalType"));
+        return plugin
+                .getMetalType(item.metaData("Vanilla").getString("MetalType"));
     }
 
     private ItemModel modelRaw(MetalType metal) {

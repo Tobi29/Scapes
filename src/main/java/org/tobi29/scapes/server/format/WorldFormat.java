@@ -138,9 +138,9 @@ public class WorldFormat {
         WorldServer world =
                 new WorldServer(this, name, dimension.id(), server.connection(),
                         server.taskExecutor(),
-                newWorld -> new TerrainInfiniteServer(newWorld, 512,
-                        worldDirectory, server.taskExecutor(),
-                        plugins.registry().air()));
+                        newWorld -> new TerrainInfiniteServer(newWorld, 512,
+                                worldDirectory, server.taskExecutor(),
+                                plugins.registry().air()));
         WorldEnvironment environment = dimension.createEnvironment(world);
         LOGGER.info("Adding world: {} (Environment:{})", name, environment);
         world.init(environment);

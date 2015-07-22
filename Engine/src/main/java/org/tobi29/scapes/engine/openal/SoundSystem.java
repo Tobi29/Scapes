@@ -121,8 +121,7 @@ public class SoundSystem {
 
     public void playMusic(String asset, float pitch, float gain,
             Vector3 position, Vector3 velocity) {
-        playMusic(engine.files().get(asset), pitch, gain, position,
-                velocity);
+        playMusic(engine.files().get(asset), pitch, gain, position, velocity);
     }
 
     public void playMusic(ReadSource asset, float pitch, float gain) {

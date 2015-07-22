@@ -42,8 +42,7 @@ public class GuiChatWrite extends Gui {
 
     @Override
     public void updateComponent() {
-        if (state.engine().controller()
-                .isPressed(ControllerKey.KEY_ENTER)) {
+        if (state.engine().controller().isPressed(ControllerKey.KEY_ENTER)) {
             String text = write.text();
             if (!text.isEmpty()) {
                 state.client().send(new PacketChat(text));

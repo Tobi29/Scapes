@@ -73,8 +73,8 @@ public class GuiComponentSlider extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader,
-            FontRenderer font, double delta) {
+    public void renderComponent(GL gl, Shader shader, FontRenderer font,
+            double delta) {
         float slider = (float) value * (width - 16) + 8;
         gl.textures().unbind(gl);
         vaoShadow.render(gl, shader);
@@ -120,8 +120,7 @@ public class GuiComponentSlider extends GuiComponent {
         }
         if (checkInside(mouseX, mouseY)) {
             if (engine.guiController().leftClick()) {
-                engine.sounds()
-                        .playSound("Engine:sound/Click.ogg", 1.0f, 1.0f);
+                engine.sounds().playSound("Engine:sound/Click.ogg", 1.0f, 1.0f);
             }
         }
     }

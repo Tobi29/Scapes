@@ -77,8 +77,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
                         int xx = FastMath.floor(player.x() / 16.0);
                         int yy = FastMath.floor(player.y() / 16.0);
                         int loadingRadius =
-                                (player.connection().loadingRadius() >>
-                                        4) + 3;
+                                (player.connection().loadingRadius() >> 4) + 3;
                         int loadingRadiusSqr = loadingRadius * loadingRadius;
                         for (int x = -loadingRadius; x <= loadingRadius; x++) {
                             int xxx = x + xx;
@@ -154,14 +153,6 @@ public class TerrainInfiniteServer extends TerrainInfinite
     }
 
     @Override
-    public void dispose() {
-        joiner.join();
-        lighting.dispose();
-        chunkManager.iterator().forEach(this::removeChunk);
-        format.dispose();
-    }
-
-    @Override
     public Optional<TerrainInfiniteChunkServer> chunk(int x, int y) {
         Optional<TerrainInfiniteChunkServer> chunk = chunkManager.get(x, y);
         if (chunk.isPresent()) {
@@ -226,8 +217,8 @@ public class TerrainInfiniteServer extends TerrainInfinite
                                 } else {
                                     double distance =
                                             FastMath.sqr(player.x() - xx) +
-                                                    FastMath.sqr(player.y() -
-                                                            yy) +
+                                                    FastMath.sqr(
+                                                            player.y() - yy) +
                                                     FastMath.sqr(
                                                             player.z() - z);
                                     if (distance > 9216.0 || distance < 256.0) {
@@ -299,6 +290,14 @@ public class TerrainInfiniteServer extends TerrainInfinite
             }
         }
         return true;
+    }
+
+    @Override
+    public void dispose() {
+        joiner.join();
+        lighting.dispose();
+        chunkManager.iterator().forEach(this::removeChunk);
+        format.dispose();
     }
 
     @Override

@@ -44,9 +44,8 @@ public class AnimatedTerrainTexture extends TerrainTexture {
     protected void renderAnim(GL gl) {
         if (dirty) {
             registry.texture().bind(gl);
-            gl
-                    .replaceTextureMipMap(tileX, tileY, resolution, resolution,
-                            frames[i]);
+            gl.replaceTextureMipMap(tileX, tileY, resolution, resolution,
+                    frames[i]);
             dirty = false;
         }
     }

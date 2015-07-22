@@ -37,8 +37,7 @@ public class GuiHud extends Gui {
     }
 
     @Override
-    public void render(GL gl, Shader shader,
-            FontRenderer font, double delta) {
+    public void render(GL gl, Shader shader, FontRenderer font, double delta) {
         if (visible) {
             super.render(gl, shader, font, delta);
             MatrixStack matrixStack = gl.matrixStack();

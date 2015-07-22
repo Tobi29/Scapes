@@ -84,8 +84,8 @@ public class PacketItemUse extends Packet implements PacketServer {
             Vector3 block = new Vector3i(pane.x, pane.y, pane.z);
             Face face = pane.face;
             double br = item.material()
-                    .click(player.mob(), item, world.getTerrain(),
-                            block.intX(), block.intY(), block.intZ(), face);
+                    .click(player.mob(), item, world.getTerrain(), block.intX(),
+                            block.intY(), block.intZ(), face);
             boolean flag = false;
             if (strength < 0.6) {
                 flag = world.getTerrain()
@@ -140,11 +140,9 @@ public class PacketItemUse extends Packet implements PacketServer {
                                             world.dropItems(drops, block.intX(),
                                                     block.intY(), block.intZ());
                                             if (!drops.isEmpty()) {
-                                                player.statistics()
-                                                        .blockBreak(drops.get(0)
-                                                                        .material(),
-                                                                drops.get(0)
-                                                                        .data());
+                                                player.statistics().blockBreak(
+                                                        drops.get(0).material(),
+                                                        drops.get(0).data());
                                             }
                                             handler.typeData(block.intX(),
                                                     block.intY(), block.intZ(),
@@ -156,8 +154,7 @@ public class PacketItemUse extends Packet implements PacketServer {
                             });
                             return -1;
                         }, "Block-Break",
-                        (long) (item.material().hitWait(item) * 0.23),
-                        false);
+                        (long) (item.material().hitWait(item) * 0.23), false);
             }
         }
         world.connection().send(new PacketUpdateInventory(player.mob()));

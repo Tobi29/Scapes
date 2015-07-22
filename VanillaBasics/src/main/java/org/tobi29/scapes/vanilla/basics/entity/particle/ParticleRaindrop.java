@@ -51,8 +51,7 @@ public class ParticleRaindrop extends Particle {
                 world.terrain().highestBlockZAt(pos.intX(), pos.intY()) >
                         pos.doubleZ()) {
             if (time > 0.1) {
-                ((WorldSkyboxOverworld) world.scene().skybox())
-                        .addRaindrop();
+                ((WorldSkyboxOverworld) world.scene().skybox()).addRaindrop();
                 particleManager.delete(this);
             }
         } else {

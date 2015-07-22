@@ -315,8 +315,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
                 world.connection().send(new PacketItemUse(true, FastMath.min(
                         (double) (System.currentTimeMillis() - punchLeft) /
                                 leftWeapon().material().hitWait(leftWeapon()),
-                        0.5) *
-                        2.0));
+                        0.5) * 2.0));
                 punchLeft = -1;
             }
             if (controller.right()) {
@@ -328,11 +327,10 @@ public class MobPlayerClientMain extends MobPlayerClient {
             } else if (punchRight != -1) {
                 updatePosition();
                 breakParticles(world.terrain(), 16);
-                world.connection().send(new PacketItemUse(false,
-                        FastMath.min((double) (System.currentTimeMillis() -
-                                punchRight) /
+                world.connection().send(new PacketItemUse(false, FastMath.min(
+                        (double) (System.currentTimeMillis() - punchRight) /
                                 rightWeapon().material().hitWait(rightWeapon()),
-                                0.5) * 2.0));
+                        0.5) * 2.0));
                 punchRight = -1;
             }
             if (blockWait > 0) {

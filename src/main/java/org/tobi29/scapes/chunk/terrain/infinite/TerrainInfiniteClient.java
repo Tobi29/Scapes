@@ -137,15 +137,15 @@ public class TerrainInfiniteClient extends TerrainInfinite
     }
 
     @Override
-    public Optional<TerrainInfiniteChunkClient> chunkNoLoad(int x, int y) {
-        return chunkManager.get(x, y);
-    }
-
-    @Override
     public void dispose(GL gl) {
         lighting.dispose();
         chunkManager.iterator().forEach(this::removeChunk);
         renderer.dispose(gl);
+    }
+
+    @Override
+    public Optional<TerrainInfiniteChunkClient> chunkNoLoad(int x, int y) {
+        return chunkManager.get(x, y);
     }
 
     @Override

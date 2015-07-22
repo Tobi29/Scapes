@@ -53,8 +53,8 @@ public class GuiComponentTextButton extends GuiComponentButton {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader,
-            FontRenderer font, double delta) {
+    public void renderComponent(GL gl, Shader shader, FontRenderer font,
+            double delta) {
         super.renderComponent(gl, shader, font, delta);
         if (this.font != font) {
             this.font = font;

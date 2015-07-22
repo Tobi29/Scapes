@@ -73,15 +73,15 @@ public class MobModelBlock implements MobModel {
     }
 
     @Override
-    public void render(GL gl, WorldClient world, Cam cam,
-            Shader shader) {
+    public void render(GL gl, WorldClient world, Cam cam, Shader shader) {
         float posRenderX = (float) (pos.doubleX() - cam.position.doubleX());
         float posRenderY = (float) (pos.doubleY() - cam.position.doubleY());
         float posRenderZ = (float) (pos.doubleZ() - cam.position.doubleZ());
-        gl.setAttribute2f(4, world.terrain()
-                        .blockLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f,
-                world.terrain()
-                        .sunLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f);
+        gl.setAttribute2f(4,
+                world.terrain().blockLight(pos.intX(), pos.intY(), pos.intZ()) /
+                        15.0f,
+                world.terrain().sunLight(pos.intX(), pos.intY(), pos.intZ()) /
+                        15.0f);
         MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(posRenderX, posRenderY, posRenderZ);

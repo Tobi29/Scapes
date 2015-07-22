@@ -77,7 +77,7 @@ public class GuiCrafting extends GuiInventory {
     private void updateRecipes() {
         scrollPaneRecipes.removeAll();
         CraftingRecipeType recipeType = player.connection().plugins().registry()
-                        .getCraftingRecipes(table).get(type);
+                .getCraftingRecipes(table).get(type);
         int id = 0;
         for (CraftingRecipe recipe : recipeType.recipes()) {
             Element element = new Element(recipe, type, id++);

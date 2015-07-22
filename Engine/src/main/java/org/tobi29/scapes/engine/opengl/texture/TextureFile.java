@@ -55,13 +55,13 @@ public class TextureFile extends Texture {
     public TextureFile(ReadableByteStream input, int mipmaps,
             TextureFilter minFilter, TextureFilter magFilter, TextureWrap wrapS,
             TextureWrap wrapT) throws IOException {
-        this(PNG.decode(input, BufferCreatorNative::bytes), mipmaps,
-                minFilter, magFilter, wrapS, wrapT);
+        this(PNG.decode(input, BufferCreatorNative::bytes), mipmaps, minFilter,
+                magFilter, wrapS, wrapT);
     }
 
     public TextureFile(Image image, int mipmaps, TextureFilter minFilter,
             TextureFilter magFilter, TextureWrap wrapS, TextureWrap wrapT) {
-        super(image.width(), image.height(), image.buffer(), mipmaps,
-                minFilter, magFilter, wrapS, wrapT);
+        super(image.width(), image.height(), image.buffer(), mipmaps, minFilter,
+                magFilter, wrapS, wrapT);
     }
 }

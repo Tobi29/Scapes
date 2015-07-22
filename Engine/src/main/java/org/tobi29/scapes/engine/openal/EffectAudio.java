@@ -54,8 +54,8 @@ public class EffectAudio implements Audio {
             if (!lagSilence) {
                 Optional<AudioData> audio = sounds.get(asset);
                 if (audio.isPresent()) {
-                    sounds.playSound(audio.get().buffer(), pitch, gain,
-                            range, pos, velocity, false, hasPosition);
+                    sounds.playSound(audio.get().buffer(), pitch, gain, range,
+                            pos, velocity, false, hasPosition);
                 }
             }
             return true;

@@ -79,8 +79,7 @@ public class MobLivingModelPig implements MobModel {
         double factorRot = FastMath.min(1.0, delta * 20.0);
         double factorSpeed = FastMath.min(1.0, delta * 5.0);
         double moveSpeed = FastMath.min(
-                FastMath.sqrt(FastMath.length((Vector2) entity.speed())),
-                2.0);
+                FastMath.sqrt(FastMath.length((Vector2) entity.speed())), 2.0);
         xRotRender -=
                 FastMath.angleDiff(entity.pitch(), xRotRender) * factorRot;
         zRotRender -= FastMath.angleDiff(entity.yaw(), zRotRender) * factorRot;
@@ -91,18 +90,18 @@ public class MobLivingModelPig implements MobModel {
     }
 
     @Override
-    public void render(GL gl, WorldClient world, Cam cam,
-            Shader shader) {
+    public void render(GL gl, WorldClient world, Cam cam, Shader shader) {
         float damageColor = (float) (1.0 - FastMath.min(1.0,
                 FastMath.max(0.0f, entity.invincibleTicks() / 0.8)));
         float posRenderX = (float) (pos.doubleX() - cam.position.doubleX());
         float posRenderY = (float) (pos.doubleY() - cam.position.doubleY());
         float posRenderZ = (float) (pos.doubleZ() - cam.position.doubleZ());
         double swingDir = FastMath.cosTable(swing) * moveSpeedRender * 0.5;
-        gl.setAttribute2f(4, world.terrain()
-                        .blockLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f,
-                world.terrain()
-                        .sunLight(pos.intX(), pos.intY(), pos.intZ()) / 15.0f);
+        gl.setAttribute2f(4,
+                world.terrain().blockLight(pos.intX(), pos.intY(), pos.intZ()) /
+                        15.0f,
+                world.terrain().sunLight(pos.intX(), pos.intY(), pos.intZ()) /
+                        15.0f);
         texture.bind(gl);
         MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();

@@ -69,8 +69,7 @@ public class GuiSaveSelect extends GuiMenu {
                 } else {
                     state.add(
                             new GuiCreateWorld(state, this, worldTypes, plugins,
-                                    state.engine().home()
-                                            .resolve("saves")));
+                                    state.engine().home().resolve("saves")));
                 }
             } catch (IOException e) {
                 LOGGER.warn("Failed to read plugins: {}", e.toString());

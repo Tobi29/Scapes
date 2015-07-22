@@ -50,8 +50,7 @@ public class GuiBloomeryInventory extends GuiContainerInventory {
     }
 
     @Override
-    public void renderOverlay(GL gl, Shader shader,
-            FontRenderer font) {
+    public void renderOverlay(GL gl, Shader shader, FontRenderer font) {
         super.renderOverlay(gl, shader, font);
         if (!container.hasBellows()) {
             if (vaoBellowsText == null) {

@@ -86,10 +86,10 @@ public class PacketAnvil extends Packet implements PacketServer {
                     ItemStack ingredient = anvil.inventory().item(0);
                     Material type = ingredient.material();
                     if (type instanceof ItemIngot) {
-                        float meltingPoint = ((ItemHeatable) type)
-                                .meltingPoint(ingredient);
-                        float temperature = ((ItemHeatable) type)
-                                .temperature(ingredient);
+                        float meltingPoint =
+                                ((ItemHeatable) type).meltingPoint(ingredient);
+                        float temperature =
+                                ((ItemHeatable) type).temperature(ingredient);
                         if (temperature >= meltingPoint ||
                                 temperature < meltingPoint * 0.7f) {
                             return;

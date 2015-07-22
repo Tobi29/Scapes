@@ -107,11 +107,9 @@ public class SceneMenu extends Scene {
             }
             save = Optional.empty();
         }
-        cam.setPerspective((float) gl.sceneWidth() / gl.sceneHeight(),
-                90.0f);
+        cam.setPerspective((float) gl.sceneWidth() / gl.sceneHeight(), 90.0f);
         cam.setView(0.0f, yaw, 0.0f);
-        gl.setProjectionPerspective(gl.sceneWidth(), gl.sceneHeight(),
-                cam);
+        gl.setProjectionPerspective(gl.sceneWidth(), gl.sceneHeight(), cam);
         Shader shader = gl.shaders().get("Engine:shader/Textured", gl);
         MatrixStack matrixStack = gl.matrixStack();
         for (int i = 0; i < 6; i++) {
@@ -188,7 +186,7 @@ public class SceneMenu extends Scene {
             int r = random.nextInt(2);
             for (int i = 0; i < 6; i++) {
                 setBackground(gl.textures().get("Scapes:image/gui/panorama/" +
-                                r + "/Panorama" + i), i, gl);
+                        r + "/Panorama" + i), i, gl);
             }
         } else {
             try {

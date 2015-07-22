@@ -622,98 +622,82 @@ public class BlockModelComplex implements BlockModel {
                         y + tlll.floatY(), z + tlll.floatZ(),
                         xx + tlll.floatX(), yy + tlll.floatY(),
                         zz + tlll.floatZ(), nx, ny, nz, texture.x() + texMinX,
-                        texture.y() + texMaxY, r,
-                        g, b, a, lod, animTop);
+                        texture.y() + texMaxY, r, g, b, a, lod, animTop);
                 mesh.addVertex(terrain, Face.NONE, x + tlhl.floatX(),
                         y + tlhl.floatY(), z + tlhl.floatZ(),
                         xx + tlhl.floatX(), yy + tlhl.floatY(),
                         zz + tlhl.floatZ(), nx, ny, nz, texture.x() + texMaxX,
-                        texture.y() + texMaxY, r,
-                        g, b, a, lod, animTop);
+                        texture.y() + texMaxY, r, g, b, a, lod, animTop);
                 mesh.addVertex(terrain, Face.NONE, x + tlhh.floatX(),
                         y + tlhh.floatY(), z + tlhh.floatZ(),
                         xx + tlhh.floatX(), yy + tlhh.floatY(),
                         zz + tlhh.floatZ(), nx, ny, nz, texture.x() + texMaxX,
-                        texture.y() + texMinY, r,
-                        g, b, a, lod, animBottom);
+                        texture.y() + texMinY, r, g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + tllh.floatX(),
                         y + tllh.floatY(), z + tllh.floatZ(),
                         xx + tllh.floatX(), yy + tllh.floatY(),
                         zz + tllh.floatZ(), nx, ny, nz, texture.x() + texMinX,
-                        texture.y() + texMinY, r,
-                        g, b, a, lod, animBottom);
+                        texture.y() + texMinY, r, g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + tllh.floatX(),
                         y + tllh.floatY(), z + tllh.floatZ(),
                         xx + tllh.floatX(), yy + tllh.floatY(),
                         zz + tllh.floatZ(), nx, ny, nz, texture.x() + texMaxX,
-                        texture.y() + texMinY, r,
-                        g, b, a, lod, animBottom);
+                        texture.y() + texMinY, r, g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + tlhh.floatX(),
                         y + tlhh.floatY(), z + tlhh.floatZ(),
                         xx + tlhh.floatX(), yy + tlhh.floatY(),
                         zz + tlhh.floatZ(), nx, ny, nz, texture.x() + texMinX,
-                        texture.y() + texMinY, r,
-                        g, b, a, lod, animBottom);
+                        texture.y() + texMinY, r, g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + tlhl.floatX(),
                         y + tlhl.floatY(), z + tlhl.floatZ(),
                         xx + tlhl.floatX(), yy + tlhl.floatY(),
                         zz + tlhl.floatZ(), nx, ny, nz, texture.x() + texMinX,
-                        texture.y() + texMaxY, r,
-                        g, b, a, lod, animTop);
+                        texture.y() + texMaxY, r, g, b, a, lod, animTop);
                 mesh.addVertex(terrain, Face.NONE, x + tlll.floatX(),
                         y + tlll.floatY(), z + tlll.floatZ(),
                         xx + tlll.floatX(), yy + tlll.floatY(),
                         zz + tlll.floatZ(), nx, ny, nz, texture.x() + texMaxX,
-                        texture.y() + texMaxY, r,
-                        g, b, a, lod, animTop);
+                        texture.y() + texMaxY, r, g, b, a, lod, animTop);
                 mesh.addVertex(terrain, Face.NONE, x + thll.floatX(),
                         y + thll.floatY(), z + thll.floatZ(),
                         xx + thll.floatX(), yy + thll.floatY(),
                         zz + thll.floatZ(), nx, ny, nz, texture.x() + texMinX,
-                        texture.y() + texMaxY, r,
-                        g, b, a, lod, animTop);
+                        texture.y() + texMaxY, r, g, b, a, lod, animTop);
                 mesh.addVertex(terrain, Face.NONE, x + thhl.floatX(),
                         y + thhl.floatY(), z + thhl.floatZ(),
                         xx + thhl.floatX(), yy + thhl.floatY(),
                         zz + thhl.floatZ(), nx, ny, nz, texture.x() + texMaxX,
-                        texture.y() + texMaxY, r,
-                        g, b, a, lod, animTop);
+                        texture.y() + texMaxY, r, g, b, a, lod, animTop);
                 mesh.addVertex(terrain, Face.NONE, x + thhh.floatX(),
                         y + thhh.floatY(), z + thhh.floatZ(),
                         xx + thhh.floatX(), yy + thhh.floatY(),
                         zz + thhh.floatZ(), nx, ny, nz, texture.x() + texMaxX,
-                        texture.y() + texMinY, r,
-                        g, b, a, lod, animBottom);
+                        texture.y() + texMinY, r, g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + thlh.floatX(),
                         y + thlh.floatY(), z + thlh.floatZ(),
                         xx + thlh.floatX(), yy + thlh.floatY(),
                         zz + thlh.floatZ(), nx, ny, nz, texture.x() + texMinX,
-                        texture.y() + texMinY, r,
-                        g, b, a, lod, animBottom);
+                        texture.y() + texMinY, r, g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + thlh.floatX(),
                         y + thlh.floatY(), z + thlh.floatZ(),
                         xx + thlh.floatX(), yy + thlh.floatY(),
                         zz + thlh.floatZ(), nx, ny, nz, texture.x() + texMaxX,
-                        texture.y() + texMinY, r,
-                        g, b, a, lod, animBottom);
+                        texture.y() + texMinY, r, g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + thhh.floatX(),
                         y + thhh.floatY(), z + thhh.floatZ(),
                         xx + thhh.floatX(), yy + thhh.floatY(),
                         zz + thhh.floatZ(), nx, ny, nz, texture.x() + texMinX,
-                        texture.y() + texMinY, r,
-                        g, b, a, lod, animBottom);
+                        texture.y() + texMinY, r, g, b, a, lod, animBottom);
                 mesh.addVertex(terrain, Face.NONE, x + thhl.floatX(),
                         y + thhl.floatY(), z + thhl.floatZ(),
                         xx + thhl.floatX(), yy + thhl.floatY(),
                         zz + thhl.floatZ(), nx, ny, nz, texture.x() + texMinX,
-                        texture.y() + texMaxY, r,
-                        g, b, a, lod, animTop);
+                        texture.y() + texMaxY, r, g, b, a, lod, animTop);
                 mesh.addVertex(terrain, Face.NONE, x + thll.floatX(),
                         y + thll.floatY(), z + thll.floatZ(),
                         xx + thll.floatX(), yy + thll.floatY(),
                         zz + thll.floatZ(), nx, ny, nz, texture.x() + texMaxX,
-                        texture.y() + texMaxY, r,
-                        g, b, a, lod, animTop);
+                        texture.y() + texMaxY, r, g, b, a, lod, animTop);
             }
         }
 

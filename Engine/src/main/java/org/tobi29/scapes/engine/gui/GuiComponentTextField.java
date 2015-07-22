@@ -103,8 +103,8 @@ public class GuiComponentTextField extends GuiComponentTextButton {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader,
-            FontRenderer font, double delta) {
+    public void renderComponent(GL gl, Shader shader, FontRenderer font,
+            double delta) {
         super.renderComponent(gl, shader, font, delta);
         if (cursor) {
             vaoCursor.render(gl, shader);

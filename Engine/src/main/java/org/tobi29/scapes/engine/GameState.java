@@ -139,8 +139,9 @@ public abstract class GameState {
         int sceneWidth = scene.width(gl.sceneWidth());
         int sceneHeight = scene.height(gl.sceneHeight());
         if (fboScene == null) {
-            fboScene = new FBO(sceneWidth, sceneHeight,
-                    scene.colorAttachments(), true, true, false, gl);
+            fboScene =
+                    new FBO(sceneWidth, sceneHeight, scene.colorAttachments(),
+                            true, true, false, gl);
             scene.initFBO(0, fboScene);
         }
         if (updateSize) {

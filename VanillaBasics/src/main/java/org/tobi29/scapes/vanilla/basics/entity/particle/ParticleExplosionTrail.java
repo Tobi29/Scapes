@@ -56,8 +56,7 @@ public class ParticleExplosionTrail extends Particle {
         matrix.rotate((float) (FastMath.atan2(z, FastMath.length(x, y)) *
                 FastMath.RAD_2_DEG), 1, 0, 0);
         matrix.rotate((float) (camDir + dir), 0, 1, 0);
-        gl.textures()
-                .bind("VanillaBasics:image/entity/particle/Explosion", gl);
+        gl.textures().bind("VanillaBasics:image/entity/particle/Explosion", gl);
         float color = FastMath.clamp((float) time, 0.0f, 1.0f);
         float alpha = (float) FastMath.sinTable(time * FastMath.PI);
         float size = alpha * 2.0f + 1.0f;

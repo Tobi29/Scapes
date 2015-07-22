@@ -63,8 +63,7 @@ public abstract class Scene {
         guis.forEach(gui -> gui.update(engine));
     }
 
-    public void renderGui(GL gl, Shader shader,
-            double delta) {
+    public void renderGui(GL gl, Shader shader, double delta) {
         for (GuiComponent gui : guis) {
             gui.render(gl, shader, gl.defaultFont(), delta);
         }

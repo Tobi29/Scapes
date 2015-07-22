@@ -205,9 +205,9 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
                 xy += 256;
             }
             addDelayedUpdate(Update.make(terrain.world().plugins().registry(),
-                            (xy & 0xF) + posBlock.intX(),
-                            (xy >> 4) + posBlock.intY(), tag.getInteger("PosZ"),
-                            tag.getDouble("Delay"), tag.getShort("ID")));
+                    (xy & 0xF) + posBlock.intX(), (xy >> 4) + posBlock.intY(),
+                    tag.getInteger("PosZ"), tag.getDouble("Delay"),
+                    tag.getShort("ID")));
         }
         if (tagStructure.getBoolean("Populated")) {
             state = State.POPULATED;
@@ -249,9 +249,9 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
         if (!packet) {
             List<TagStructure> updatesTag = new ArrayList<>();
             synchronized (delayedUpdates) {
-                delayedUpdates.stream().filter(update -> update.isValidOn(
-                        typeG(update.x(), update.y(), update.z()),
-                        terrain)).forEach(update -> {
+                delayedUpdates.stream().filter(update -> update
+                        .isValidOn(typeG(update.x(), update.y(), update.z()),
+                                terrain)).forEach(update -> {
                     TagStructure updateTag = new TagStructure();
                     updateTag.setShort("ID", update.id(registry));
                     updateTag.setDouble("Delay", update.delay());

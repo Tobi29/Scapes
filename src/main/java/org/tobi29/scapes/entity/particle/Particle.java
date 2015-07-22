@@ -90,13 +90,13 @@ public abstract class Particle {
         boolean inWater;
         AABB aabb = new AABB(collision);
         aabb.add(pos.doubleX(), pos.doubleY(), pos.doubleZ());
-        Pool<AABBElement> aabbs = world.terrain().collisions(
-                FastMath.floor(aabb.minX + FastMath.min(goX, 0.0)),
-                FastMath.floor(aabb.minY + FastMath.min(goY, 0.0)),
-                FastMath.floor(aabb.minZ + FastMath.min(goZ, 0.0)),
-                FastMath.floor(aabb.maxX + FastMath.max(goX, 0.0)),
-                FastMath.floor(aabb.maxY + FastMath.max(goY, 0.0)),
-                FastMath.floor(aabb.maxZ + FastMath.max(goZ, 0.0)));
+        Pool<AABBElement> aabbs = world.terrain()
+                .collisions(FastMath.floor(aabb.minX + FastMath.min(goX, 0.0)),
+                        FastMath.floor(aabb.minY + FastMath.min(goY, 0.0)),
+                        FastMath.floor(aabb.minZ + FastMath.min(goZ, 0.0)),
+                        FastMath.floor(aabb.maxX + FastMath.max(goX, 0.0)),
+                        FastMath.floor(aabb.maxY + FastMath.max(goY, 0.0)),
+                        FastMath.floor(aabb.maxZ + FastMath.max(goZ, 0.0)));
         double lastGoZ = aabb.moveOutZ(
                 aabbs.stream().filter(AABBElement::isSolid)
                         .map(AABBElement::aabb).iterator(), goZ);

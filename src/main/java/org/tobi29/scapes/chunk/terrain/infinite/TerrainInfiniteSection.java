@@ -190,11 +190,6 @@ public class TerrainInfiniteSection implements TerrainClient {
         return terrain.pointerPanes(x, y, z, range);
     }
 
-    @Override
-    public void dispose(GL gl) {
-        throw new UnsupportedOperationException("Terrain not disposable");
-    }
-
     private Optional<? extends TerrainInfiniteChunk> get(int x, int y) {
         x = (x >> 4) - this.x;
         y = (y >> 4) - this.y;
@@ -232,5 +227,10 @@ public class TerrainInfiniteSection implements TerrainClient {
     @Override
     public void process(PacketBlockChange packet) {
         terrain.process(packet);
+    }
+
+    @Override
+    public void dispose(GL gl) {
+        throw new UnsupportedOperationException("Terrain not disposable");
     }
 }

@@ -63,9 +63,9 @@ public class GuiComponentControlsButton extends GuiComponentTextButton {
             ScapesEngine engine) {
         super.update(mouseX, mouseY, mouseInside, engine);
         if (editing > 1) {
-            Optional<Controller.PressEvent> keyEvent =
-                    controller.pressEvents().filter(event -> event.state() ==
-                                    Controller.PressState.PRESS).findFirst();
+            Optional<Controller.PressEvent> keyEvent = controller.pressEvents()
+                    .filter(event -> event.state() ==
+                            Controller.PressState.PRESS).findFirst();
             if (keyEvent.isPresent()) {
                 key = keyEvent.get().key();
                 tagStructure.setString(id, key.toString());

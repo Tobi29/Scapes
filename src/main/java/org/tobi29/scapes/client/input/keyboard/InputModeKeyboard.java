@@ -115,8 +115,7 @@ public class InputModeKeyboard implements InputMode {
     @Override
     public Gui createControlsGUI(GameState state, Gui prev) {
         return new GuiControlsDefault(state, prev,
-                (ScapesClient) state.engine().game(), tagStructure,
-                controller);
+                (ScapesClient) state.engine().game(), tagStructure, controller);
     }
 
     @Override

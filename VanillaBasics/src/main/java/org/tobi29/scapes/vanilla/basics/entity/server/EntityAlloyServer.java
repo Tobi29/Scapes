@@ -106,8 +106,7 @@ public class EntityAlloyServer extends EntityAbstractContainerServer {
                         }
                     }
                     temperature = FastMath.max(temperature,
-                            input.metaData("Vanilla")
-                                    .getFloat("Temperature"));
+                            input.metaData("Vanilla").getFloat("Temperature"));
                     inventory.setItem(0,
                             new ItemStack(materials.mold, (short) 1));
                     updateResult(plugin);
@@ -121,8 +120,7 @@ public class EntityAlloyServer extends EntityAbstractContainerServer {
                 output.setMaterial(materials.ingot);
                 output.setData((short) 0);
                 output.metaData("Vanilla").setString("MetalType", result);
-                output.metaData("Vanilla")
-                        .setFloat("Temperature", temperature);
+                output.metaData("Vanilla").setFloat("Temperature", temperature);
                 MetalType alloy = plugin.getMetalType(result);
                 for (Map.Entry<String, Double> entry : metals.entrySet()) {
                     double amount = entry.getValue() -
