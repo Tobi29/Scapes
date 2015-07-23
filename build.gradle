@@ -33,7 +33,6 @@ application {
 dependencies {
     compile project(":Engine")
     compile project(":Engine:Utils")
-    compile project(":ControlPanel")
     compile "org.slf4j:slf4j-api:1.7.10"
     compile "commons-cli:commons-cli:1.2"
 
