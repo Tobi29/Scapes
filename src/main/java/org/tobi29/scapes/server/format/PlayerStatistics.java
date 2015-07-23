@@ -69,7 +69,8 @@ public class PlayerStatistics {
     public void load(GameRegistry registry, List<TagStructure> tagStructures) {
         statisticMaterials.addAll(tagStructures.stream()
                 .map(tagStructure -> new StatisticMaterial(
-                        registry.material(tagStructure.getInteger("ID")),
+                        registry.material(tagStructure.getInteger("ID"))
+                                .orElse(registry.air()),
                         tagStructure.getShort("Data"),
                         tagStructure.getInteger("BreakAmount"),
                         tagStructure.getInteger("PlaceAmount"),

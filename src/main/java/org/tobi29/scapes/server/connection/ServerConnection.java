@@ -75,12 +75,12 @@ public class ServerConnection implements PlayConnection {
         }
     }
 
-    public PlayerConnection player(String id) {
-        return players.get(id);
+    public Optional<PlayerConnection> player(String id) {
+        return Optional.ofNullable(players.get(id));
     }
 
-    public PlayerConnection playerByName(String name) {
-        return playerByName.get(name);
+    public Optional<PlayerConnection> playerByName(String name) {
+        return Optional.ofNullable(playerByName.get(name));
     }
 
     public Optional<ServerSkin> skin(byte[] checksum) {

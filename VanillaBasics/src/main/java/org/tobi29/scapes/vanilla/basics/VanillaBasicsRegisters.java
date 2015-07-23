@@ -27,6 +27,7 @@ import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.command.CommandRegistry;
 import org.tobi29.scapes.server.connection.PlayerConnection;
+import org.tobi29.scapes.server.connection.ServerConnection;
 import org.tobi29.scapes.vanilla.basics.entity.client.*;
 import org.tobi29.scapes.vanilla.basics.entity.server.*;
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator;
@@ -43,16 +44,15 @@ import org.tobi29.scapes.vanilla.basics.packet.*;
 import org.tobi29.scapes.vanilla.basics.util.IngotUtil;
 import org.tobi29.scapes.vanilla.basics.util.ToolUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 class VanillaBasicsRegisters {
     static void registerCommands(ScapesServer server, VanillaBasics plugin) {
         VanillaMaterial materials = plugin.getMaterials();
         CommandRegistry registry = server.commandRegistry();
+        ServerConnection connection = server.connection();
+
         registry.register("time", 8, options -> {
             options.add("w", "world", true, "World that is targeted");
             options.add("d", "day", true, "Day that time will be set to");
@@ -61,11 +61,11 @@ class VanillaBasicsRegisters {
             options.add("r", "relative", false,
                     "Add time instead of setting it");
         }, (args, executor, commands) -> {
-            String worldName = args.getOption('w');
-            Command.require(worldName, 'w');
+            String worldName = args.requireOption('w');
             boolean relative = args.hasOption('r');
-            if (args.hasOption('d')) {
-                long day = Command.getLong(args.getOption('d'));
+            Optional<String> dayOption = args.option('d');
+            if (dayOption.isPresent()) {
+                long day = Command.getLong(dayOption.get());
                 commands.add(() -> {
                     WorldServer world = server.worldFormat().world(worldName);
                     WorldEnvironment environment = world.environment();
@@ -82,8 +82,9 @@ class VanillaBasicsRegisters {
                     }
                 });
             }
-            if (args.hasOption('t')) {
-                float dayTime = Command.getFloat(args.getOption('t'));
+            Optional<String> dayTimeOption = args.option('t');
+            if (dayTimeOption.isPresent()) {
+                float dayTime = Command.getFloat(dayTimeOption.get());
                 commands.add(() -> {
                     WorldServer world = server.worldFormat().world(worldName);
                     WorldEnvironment environment = world.environment();
@@ -108,15 +109,14 @@ class VanillaBasicsRegisters {
             options.add("s", "saturation", true, "Saturation value (0-1)");
             options.add("t", "thirst", true, "Thirst value (0-1)");
         }, (args, executor, commands) -> {
-            String playerName =
-                    args.getOption('p', executor.playerName().orElse(null));
-            Command.require(playerName, 'p');
-            if (args.hasOption('s')) {
-                double saturation = Command.getDouble(args.getOption('s'));
+            String playerName = args.requireOption('p', executor.playerName());
+            Optional<String> saturationOption = args.option('s');
+            if (saturationOption.isPresent()) {
+                double saturation = Command.getDouble(saturationOption.get());
                 commands.add(() -> {
                     PlayerConnection player =
-                            server.connection().playerByName(playerName);
-                    Command.require(player, playerName);
+                            Command.require(connection::playerByName,
+                                    playerName);
                     TagStructure conditionTag = player.mob().metaData("Vanilla")
                             .getStructure("Condition");
                     synchronized (conditionTag) {
@@ -124,12 +124,13 @@ class VanillaBasicsRegisters {
                     }
                 });
             }
-            if (args.hasOption('t')) {
-                double thirst = Command.getDouble(args.getOption('t'));
+            Optional<String> thirstOption = args.option('t');
+            if (thirstOption.isPresent()) {
+                double thirst = Command.getDouble(thirstOption.get());
                 commands.add(() -> {
                     PlayerConnection player =
-                            server.connection().playerByName(playerName);
-                    Command.require(player, playerName);
+                            Command.require(connection::playerByName,
+                                    playerName);
                     TagStructure conditionTag = player.mob().metaData("Vanilla")
                             .getStructure("Condition");
                     synchronized (conditionTag) {
@@ -147,19 +148,15 @@ class VanillaBasicsRegisters {
             options.add("a", "amount", true, "Amount of item in stack");
             options.add("t", "temperature", true, "Temperature of metal");
         }, (args, executor, commands) -> {
-            String playerName =
-                    args.getOption('p', executor.playerName().orElse(null));
-            Command.require(playerName, 'p');
-            String metal = args.getOption('m');
-            Command.require(metal, 'm');
-            int data = Command.getInt(args.getOption('d', "0"));
-            int amount = Command.getInt(args.getOption('a', "1"));
-            float temperature = Command.getFloat(args.getOption('t', "0.0"));
+            String playerName = args.requireOption('p', executor.playerName());
+            String metal = args.requireOption('m');
+            int data = Command.getInt(args.option('d', "0"));
+            int amount = Command.getInt(args.option('a', "1"));
+            float temperature = Command.getFloat(args.option('t', "0.0"));
             commands.add(() -> {
-                MetalType metalType = plugin.getMetalType(metal);
-                Command.require(metalType, metal);
                 PlayerConnection player =
-                        server.connection().playerByName(playerName);
+                        Command.require(connection::playerByName, playerName);
+                MetalType metalType = plugin.getMetalType(metal);
                 ItemStack item = new ItemStack(materials.ingot, data, amount);
                 IngotUtil.createIngot(item, metalType, temperature);
                 player.mob().inventory().add(item);
@@ -175,21 +172,16 @@ class VanillaBasicsRegisters {
             options.add("t", "temperature", true, "Temperature of metal");
             options.add("k", "kind", true, "Kind of tool");
         }, (args, executor, commands) -> {
-            String playerName =
-                    args.getOption('p', executor.playerName().orElse(null));
-            Command.require(playerName, 'p');
-            String metal = args.getOption('m');
-            Command.require(metal, 'm');
-            String kind = args.getOption('k');
-            Command.require(kind, 'k');
-            int data = Command.getInt(args.getOption('d', "0"));
-            int amount = Command.getInt(args.getOption('a', "1"));
-            float temperature = Command.getFloat(args.getOption('t', "0.0"));
+            String playerName = args.requireOption('p', executor.playerName());
+            String metal = args.requireOption('m');
+            String kind = args.requireOption('k');
+            int data = Command.getInt(args.option('d', "0"));
+            int amount = Command.getInt(args.option('a', "1"));
+            float temperature = Command.getFloat(args.option('t', "0.0"));
             commands.add(() -> {
-                MetalType metalType = plugin.getMetalType(metal);
-                Command.require(metalType, metal);
                 PlayerConnection player =
-                        server.connection().playerByName(playerName);
+                        Command.require(connection::playerByName, playerName);
+                MetalType metalType = plugin.getMetalType(metal);
                 ItemStack item = new ItemStack(materials.ingot, data, amount);
                 IngotUtil.createIngot(item, metalType, temperature);
                 if (!ToolUtil.createTool(plugin, item, kind)) {

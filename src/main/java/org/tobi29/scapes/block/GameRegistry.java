@@ -22,10 +22,7 @@ import org.tobi29.scapes.entity.client.*;
 import org.tobi29.scapes.entity.server.*;
 import org.tobi29.scapes.packets.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -158,20 +155,20 @@ public class GameRegistry {
                 .get(new Pair<>(module, type));
     }
 
-    public Material material(String name) {
-        return materialNames.get(name);
+    public Optional<Material> material(String name) {
+        return Optional.ofNullable(materialNames.get(name));
     }
 
-    public Material material(int id) {
-        return materials[id];
+    public Optional<Material> material(int id) {
+        return Optional.ofNullable(materials[id]);
     }
 
     public Material[] materials() {
         return materials;
     }
 
-    public BlockType block(int id) {
-        return blocks[id];
+    public Optional<BlockType> block(int id) {
+        return Optional.ofNullable(blocks[id]);
     }
 
     public BlockType[] blocks() {

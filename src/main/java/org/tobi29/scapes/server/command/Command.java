@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
@@ -97,16 +98,29 @@ public interface Command {
         }
     }
 
-    static void require(Object object, char name) throws CommandException {
-        if (object == null) {
+    static <T> T require(Optional<T> object, char name)
+            throws CommandException {
+        if (!object.isPresent()) {
             throw new CommandException(253, "Missing argument: " + name);
         }
+        return object.get();
     }
 
-    static void require(Object object, String name) throws CommandException {
-        if (object == null) {
+    static <O, T> T require(Function<O, Optional<T>> supplier, O option)
+            throws CommandException {
+        Optional<T> object = supplier.apply(option);
+        if (!object.isPresent()) {
+            throw new CommandException(253, "Missing argument: " + option);
+        }
+        return object.get();
+    }
+
+    static <T> T require(Optional<T> object, String name)
+            throws CommandException {
+        if (!object.isPresent()) {
             throw new CommandException(253, "Not found: " + name);
         }
+        return object.get();
     }
 
     static void error(String msg) throws CommandException {
@@ -182,15 +196,34 @@ public interface Command {
             return commandLine.hasOption(option);
         }
 
-        public String getOption(char option) {
-            return commandLine.getOptionValue(option);
+        public String requireOption(char option) throws CommandException {
+            return require(option(option), option);
         }
 
-        public String[] getOptionArray(char option) {
-            return commandLine.getOptionValues(option);
+        public Optional<String> option(char option) {
+            return Optional.ofNullable(commandLine.getOptionValue(option));
         }
 
-        public String getOption(char option, String def) {
+        public String[] requireOptionArray(char option)
+                throws CommandException {
+            return require(optionArray(option), option);
+        }
+
+        public Optional<String[]> optionArray(char option) {
+            return Optional.ofNullable(commandLine.getOptionValues(option));
+        }
+
+        public String requireOption(char option, Optional<String> def)
+                throws CommandException {
+            return require(option(option, def), option);
+        }
+
+        public Optional<String> option(char option, Optional<String> def) {
+            return Optional.ofNullable(
+                    commandLine.getOptionValue(option, def.orElse(null)));
+        }
+
+        public String option(char option, String def) {
             return commandLine.getOptionValue(option, def);
         }
 

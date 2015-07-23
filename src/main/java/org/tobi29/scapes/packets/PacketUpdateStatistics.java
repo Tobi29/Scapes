@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.packets;
 
+import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.client.gui.GuiStatistics;
@@ -58,9 +59,10 @@ public class PacketUpdateStatistics extends Packet implements PacketClient {
             throws IOException {
         int length = stream.getInt();
         statisticMaterials = new ArrayList<>();
+        GameRegistry registry = client.plugins().registry();
         for (int i = 0; i < length; i++) {
             statisticMaterials.add(new PlayerStatistics.StatisticMaterial(
-                    client.plugins().registry().material(stream.getInt()),
+                    registry.material(stream.getInt()).orElse(registry.air()),
                     stream.getShort(), stream.getInt(), stream.getInt(),
                     stream.getInt()));
         }

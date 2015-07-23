@@ -133,7 +133,8 @@ public class TerrainInfiniteClient extends TerrainInfinite
         int y = packet.y();
         int z = packet.z();
         chunk(x >> 4, y >> 4).ifPresent(chunk -> chunk.typeDataG(x, y, z,
-                world.plugins().registry().block(packet.id()), packet.data()));
+                world.plugins().registry().block(packet.id())
+                        .orElse(world.air()), packet.data()));
     }
 
     @Override

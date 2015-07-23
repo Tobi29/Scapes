@@ -122,7 +122,8 @@ public class ItemStack {
     }
 
     public void load(TagStructure tag) {
-        material = registry.material(tag.getInteger("Type"));
+        material = registry.material(tag.getInteger("Type"))
+                .orElse(registry.air());
         data = tag.getShort("Data");
         amount = tag.getInteger("Amount");
         metaData = tag.getStructure("MetaData");

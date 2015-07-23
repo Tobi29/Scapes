@@ -25,7 +25,10 @@ import org.tobi29.scapes.packets.PacketDisconnect;
 import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.command.CommandRegistry;
 import org.tobi29.scapes.server.connection.PlayerConnection;
+import org.tobi29.scapes.server.connection.ServerConnection;
 import org.tobi29.scapes.server.format.PlayerBans;
+
+import java.util.Optional;
 
 final class ScapesServerCommands {
     private ScapesServerCommands() {
@@ -33,6 +36,7 @@ final class ScapesServerCommands {
 
     static void register(CommandRegistry registry, ScapesServer server) {
         GameRegistry gameRegistry = server.worldFormat().plugins().registry();
+        ServerConnection connection = server.connection();
 
         registry.register("give", 8, options -> {
             options.add("p", "player", true,
@@ -41,19 +45,15 @@ final class ScapesServerCommands {
             options.add("d", "data", true, "Data value of item");
             options.add("a", "amount", true, "Amount of item in stack");
         }, (args, executor, commands) -> {
-            String playerName =
-                    args.getOption('p', executor.playerName().orElse(null));
-            Command.require(playerName, 'p');
-            String materialName = args.getOption('m');
-            Command.require(materialName, 'm');
-            int data = Command.getInt(args.getOption('d', "0"));
-            int amount = Command.getInt(args.getOption('a', "1"));
+            String playerName = args.requireOption('p', executor.playerName());
+            String materialName = args.requireOption('m');
+            int data = Command.getInt(args.option('d', "0"));
+            int amount = Command.getInt(args.option('a', "1"));
             commands.add(() -> {
                 PlayerConnection player =
-                        server.connection().playerByName(playerName);
-                Command.require(player, playerName);
-                Material material = gameRegistry.material(materialName);
-                Command.require(material, materialName);
+                        Command.require(connection::playerByName, playerName);
+                Material material =
+                        Command.require(gameRegistry::material, materialName);
                 ItemStack item = new ItemStack(material, data, amount);
                 player.mob().inventory().add(item);
             });
@@ -63,13 +63,12 @@ final class ScapesServerCommands {
                         .add("p", "player", true,
                                 "Player whose inventory will be cleared"),
                 (args, executor, commands) -> {
-                    String playerName = args.getOption('p',
-                            executor.playerName().orElse(null));
-                    Command.require(playerName, 'p');
+                    String playerName =
+                            args.requireOption('p', executor.playerName());
                     commands.add(() -> {
                         PlayerConnection player =
-                                server.connection().playerByName(playerName);
-                        Command.require(player, playerName);
+                                Command.require(connection::playerByName,
+                                        playerName);
                         player.mob().inventory().clear();
                     });
                 });
@@ -81,30 +80,26 @@ final class ScapesServerCommands {
             options.add("l", "location", 3,
                     "Target that the player will be teleported to");
         }, (args, executor, commands) -> {
-            String playerName =
-                    args.getOption('p', executor.playerName().orElse(null));
-            Command.require(playerName, 'p');
-            if (args.hasOption('l')) {
-                String[] locationStr = args.getOptionArray('l');
-                Command.require(locationStr, 'l');
-                Vector3d location = Command.getVector3d(locationStr);
+            String playerName = args.requireOption('p', executor.playerName());
+            Optional<String[]> locationOption = args.optionArray('l');
+            if (locationOption.isPresent()) {
+                Vector3d location = Command.getVector3d(locationOption.get());
                 commands.add(() -> {
                     PlayerConnection player =
-                            server.connection().playerByName(playerName);
-                    Command.require(player, playerName);
+                            Command.require(connection::playerByName,
+                                    playerName);
                     player.mob().setPos(location);
                 });
             } else {
                 String targetName =
-                        args.getOption('t', executor.playerName().orElse(null));
-                Command.require(playerName, 't');
+                        args.requireOption('t', executor.playerName());
                 commands.add(() -> {
                     PlayerConnection player =
-                            server.connection().playerByName(playerName);
-                    Command.require(player, playerName);
+                            Command.require(connection::playerByName,
+                                    playerName);
                     PlayerConnection target =
-                            server.connection().playerByName(targetName);
-                    Command.require(target, targetName);
+                            Command.require(connection::playerByName,
+                                    targetName);
                     player.mob().setPos(target.mob().pos());
                 });
             }
@@ -120,13 +115,13 @@ final class ScapesServerCommands {
                 message = ArrayUtil.join(args.getArgs(), " ");
             } else {
                 String name;
-                if (args.hasOption('n')) {
+                Optional<String> nameOption = args.option('n');
+                if (nameOption.isPresent()) {
                     Command.requirePermission(executor, 8, 'n');
-                    name = args.getOption('n');
+                    name = nameOption.get();
                 } else {
                     name = executor.name();
                 }
-                Command.require(name, 'n');
                 message =
                         '<' + name + "> " + ArrayUtil.join(args.getArgs(), " ");
             }
@@ -138,28 +133,26 @@ final class ScapesServerCommands {
             options.add("n", "name", true, "Name used for prefix");
             options.add("r", "raw", false, "Disable prefix");
         }, (args, executor, commands) -> {
-            String targetName = args.getOption('t');
-            Command.require(targetName, 't');
+            String targetName = args.requireOption('t', executor.playerName());
             String message;
             if (args.hasOption('r')) {
                 Command.requirePermission(executor, 8, 'r');
                 message = ArrayUtil.join(args.getArgs(), " ");
             } else {
                 String name;
-                if (args.hasOption('n')) {
+                Optional<String> nameOption = args.option('n');
+                if (nameOption.isPresent()) {
                     Command.requirePermission(executor, 8, 'n');
-                    name = args.getOption('n');
+                    name = nameOption.get();
                 } else {
                     name = executor.name();
                 }
-                Command.require(name, 'n');
                 message =
                         '[' + name + "] " + ArrayUtil.join(args.getArgs(), " ");
             }
             commands.add(() -> {
                 PlayerConnection target =
-                        server.connection().playerByName(targetName);
-                Command.require(target, targetName);
+                        Command.require(connection::playerByName, targetName);
                 target.tell(message);
             });
         });
@@ -167,8 +160,8 @@ final class ScapesServerCommands {
         registry.register("kick", 9, options -> options
                         .add("p", "player", true, "Player to be kicked"),
                 (args, executor, commands) -> {
-                    String playerName = args.getOption('p');
-                    Command.require(playerName, 'p');
+                    String playerName =
+                            args.requireOption('p', executor.playerName());
                     String message;
                     String[] messageArray = args.getArgs();
                     if (messageArray.length == 0) {
@@ -178,8 +171,8 @@ final class ScapesServerCommands {
                     }
                     commands.add(() -> {
                         PlayerConnection player =
-                                server.connection().playerByName(playerName);
-                        Command.require(player, playerName);
+                                Command.require(connection::playerByName,
+                                        playerName);
                         player.send(new PacketDisconnect(message));
                     });
                 });
@@ -191,8 +184,7 @@ final class ScapesServerCommands {
             options.add("a", "address", false, "Add address to ban entry");
             options.add("n", "nickname", false, "Add nickname to ban entry");
         }, (args, executor, commands) -> {
-            String playerName = args.getOption('p');
-            Command.require(playerName, 'p');
+            String playerName = args.requireOption('p', executor.playerName());
             boolean key = args.hasOption('k');
             boolean address = args.hasOption('a');
             boolean banNickname = args.hasOption('n');
@@ -204,12 +196,11 @@ final class ScapesServerCommands {
                 banKey = key;
                 banAddress = address;
             }
-            String id = args.getOption('i', playerName);
+            String id = args.option('i', playerName);
             String reason = ArrayUtil.join(args.getArgs(), " ");
             commands.add(() -> {
                 PlayerConnection player =
-                        server.connection().playerByName(playerName);
-                Command.require(player, playerName);
+                        Command.require(connection::playerByName, playerName);
                 server.worldFormat().playerBans()
                         .ban(player, id, reason, banKey, banAddress,
                                 banNickname);
@@ -219,8 +210,7 @@ final class ScapesServerCommands {
         registry.register("unban", 9,
                 options -> options.add("i", "id", true, "ID of ban"),
                 (args, executor, commands) -> {
-                    String id = args.getOption('i');
-                    Command.require(id, 'i');
+                    String id = args.requireOption('i');
                     commands.add(
                             () -> server.worldFormat().playerBans().unban(id));
                 });
@@ -236,15 +226,12 @@ final class ScapesServerCommands {
                     "Player whose hunger values will be changed");
             options.add("l", "level", true, "Permission level (0-10)");
         }, (args, executor, commands) -> {
-            String playerName =
-                    args.getOption('p', executor.playerName().orElse(null));
-            Command.require(playerName, 'p');
+            String playerName = args.requireOption('p', executor.playerName());
             Command.require(args, 'l');
-            int permissionLevel = Command.getInt(args.getOption('l'));
+            int permissionLevel = Command.getInt(args.requireOption('l'));
             commands.add(() -> {
                 PlayerConnection player =
-                        server.connection().playerByName(playerName);
-                Command.require(player, playerName);
+                        Command.require(connection::playerByName, playerName);
                 player.setPermissionLevel(permissionLevel);
             });
         });
