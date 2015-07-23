@@ -62,7 +62,7 @@ public class PacketChat extends Packet implements PacketServer, PacketClient {
     @Override
     public void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException {
-        text = stream.getString();
+        text = stream.getString(1 << 10);
     }
 
     @Override

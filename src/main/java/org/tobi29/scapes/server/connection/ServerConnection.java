@@ -188,15 +188,6 @@ public class ServerConnection implements PlayConnection {
         return keyPair;
     }
 
-    public void updateControlPanelPlayers() {
-        List<String> players = new ArrayList<>();
-        players.addAll(playerByName.keySet());
-        String[] array = new String[players.size()];
-        players.toArray(array);
-        server.controlPanels().forEach(controlPanel -> controlPanel.
-                updatePlayers(array));
-    }
-
     protected Optional<String> addPlayer(PlayerConnection connection) {
         synchronized (players) {
             if (players.size() >= mayPlayers) {
@@ -211,14 +202,12 @@ public class ServerConnection implements PlayConnection {
             players.put(connection.id(), connection);
             playerByName.put(connection.nickname(), connection);
         }
-        updateControlPanelPlayers();
         return Optional.empty();
     }
 
     protected void removePlayer(PlayerConnection connection) {
         players.remove(connection.id());
         playerByName.remove(connection.nickname());
-        updateControlPanelPlayers();
     }
 
     public void chat(String message) {

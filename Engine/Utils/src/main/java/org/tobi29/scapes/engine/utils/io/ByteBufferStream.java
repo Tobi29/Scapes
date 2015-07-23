@@ -19,6 +19,7 @@ package org.tobi29.scapes.engine.utils.io;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.function.IntFunction;
 
@@ -62,7 +63,7 @@ public class ByteBufferStream
 
     @Override
     public ByteBufferStream put(ByteBuffer buffer, int len) {
-        ensure(len);
+        ensurePut(len);
         int limit = buffer.limit();
         buffer.limit(buffer.position() + len);
         this.buffer.put(buffer);
@@ -72,47 +73,47 @@ public class ByteBufferStream
 
     @Override
     public ByteBufferStream put(int b) {
-        ensure(1);
+        ensurePut(1);
         buffer.put((byte) b);
         return this;
     }
 
     @Override
     public ByteBufferStream putShort(int value) {
-        ensure(2);
+        ensurePut(2);
         buffer.putShort((short) value);
         return this;
     }
 
     @Override
     public ByteBufferStream putInt(int value) {
-        ensure(4);
+        ensurePut(4);
         buffer.putInt(value);
         return this;
     }
 
     @Override
     public ByteBufferStream putLong(long value) {
-        ensure(8);
+        ensurePut(8);
         buffer.putLong(value);
         return this;
     }
 
     @Override
     public ByteBufferStream putFloat(float value) {
-        ensure(4);
+        ensurePut(4);
         buffer.putFloat(value);
         return this;
     }
 
     @Override
     public ByteBufferStream putDouble(double value) {
-        ensure(8);
+        ensurePut(8);
         buffer.putDouble(value);
         return this;
     }
 
-    private void ensure(int len) {
+    private void ensurePut(int len) {
         while (len > buffer.remaining()) {
             ByteBuffer newBuffer = supplier.apply(buffer.capacity());
             buffer.flip();
@@ -138,7 +139,9 @@ public class ByteBufferStream
     }
 
     @Override
-    public ReadableByteStream get(ByteBuffer buffer, int len) {
+    public ReadableByteStream get(ByteBuffer buffer, int len)
+            throws IOException {
+        ensureGet(len);
         int limit = this.buffer.limit();
         this.buffer.limit(this.buffer.position() + len);
         buffer.put(this.buffer);
@@ -147,7 +150,8 @@ public class ByteBufferStream
     }
 
     @Override
-    public boolean getSome(ByteBuffer buffer, int len) {
+    public boolean getSome(ByteBuffer buffer, int len) throws IOException {
+        ensureGet(len);
         len = FastMath.min(len, this.buffer.remaining());
         int limit = this.buffer.limit();
         this.buffer.limit(this.buffer.position() + len);
@@ -157,32 +161,44 @@ public class ByteBufferStream
     }
 
     @Override
-    public byte get() {
+    public byte get() throws IOException {
+        ensureGet(1);
         return buffer.get();
     }
 
     @Override
-    public short getShort() {
+    public short getShort() throws IOException {
+        ensureGet(2);
         return buffer.getShort();
     }
 
     @Override
-    public int getInt() {
+    public int getInt() throws IOException {
+        ensureGet(4);
         return buffer.getInt();
     }
 
     @Override
-    public long getLong() {
+    public long getLong() throws IOException {
+        ensureGet(8);
         return buffer.getLong();
     }
 
     @Override
-    public float getFloat() {
+    public float getFloat() throws IOException {
+        ensureGet(4);
         return buffer.getFloat();
     }
 
     @Override
-    public double getDouble() {
+    public double getDouble() throws IOException {
+        ensureGet(8);
         return buffer.getDouble();
+    }
+
+    private void ensureGet(int len) throws IOException {
+        if (buffer.remaining() < len) {
+            throw new IOException("End of stream");
+        }
     }
 }

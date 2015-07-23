@@ -118,14 +118,6 @@ public class WorldFormat {
         return worlds.keySet();
     }
 
-    public void updateControlPanelWorlds() {
-        Collection<String> worlds = this.worlds.keySet();
-        String[] worldsArray = new String[worlds.size()];
-        worlds.toArray(worldsArray);
-        server.controlPanels().forEach(
-                controlPanel -> controlPanel.updateWorlds(worldsArray));
-    }
-
     public synchronized WorldServer registerWorld(Dimension dimension)
             throws IOException {
         return registerWorld(dimension, dimension.id());
@@ -148,7 +140,6 @@ public class WorldFormat {
         world.calculateSpawn();
         worlds.put(dimension.id(), world);
         world.start();
-        updateControlPanelWorlds();
         return world;
     }
 
@@ -161,7 +152,6 @@ public class WorldFormat {
         world.stop();
         world.dispose();
         worldsTagStructure.setStructure(world.name(), world.write());
-        updateControlPanelWorlds();
     }
 
     public void save() throws IOException {

@@ -86,12 +86,6 @@ public class UnknownConnection implements Connection {
                                                 connection));
                                 channel = null;
                                 break;
-                            case CONTROL_PANEL:
-                                worker.addConnection(
-                                        new ControlPanelConnection(channel,
-                                                connection.server()));
-                                channel = null;
-                                break;
                         }
                     }
                     done = true;

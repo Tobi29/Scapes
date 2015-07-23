@@ -105,9 +105,17 @@ public interface ReadableByteStream {
     double getDouble() throws IOException;
 
     default byte[] getByteArray() throws IOException {
+        return getByteArray(Integer.MAX_VALUE);
+    }
+
+    default byte[] getByteArray(int limit) throws IOException {
         int len = getUByte();
         if (len == 0xFF) {
             len = getInt();
+        }
+        if (len < 0 || len > limit) {
+            throw new IOException(
+                    "Array length outside of 0 to " + limit + ": " + limit);
         }
         byte[] array = new byte[len];
         get(array);
@@ -115,9 +123,17 @@ public interface ReadableByteStream {
     }
 
     default byte[] getByteArrayLong() throws IOException {
+        return getByteArrayLong(Integer.MAX_VALUE);
+    }
+
+    default byte[] getByteArrayLong(int limit) throws IOException {
         int len = getUShort();
         if (len == 0xFFFF) {
             len = getInt();
+        }
+        if (len < 0 || len > limit) {
+            throw new IOException(
+                    "Array length outside of 0 to " + limit + ": " + limit);
         }
         byte[] array = new byte[len];
         get(array);
@@ -125,6 +141,10 @@ public interface ReadableByteStream {
     }
 
     default String getString() throws IOException {
-        return new String(getByteArray(), StandardCharsets.UTF_8);
+        return getString(Integer.MAX_VALUE);
+    }
+
+    default String getString(int limit) throws IOException {
+        return new String(getByteArray(limit), StandardCharsets.UTF_8);
     }
 }

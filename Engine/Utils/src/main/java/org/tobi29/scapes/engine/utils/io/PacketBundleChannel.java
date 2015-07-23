@@ -44,6 +44,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PacketBundleChannel {
     private static final IvParameterSpec IV;
     private static final int BUNDLE_HEADER_SIZE = 4;
+    private static final int BUNDLE_MAX_SIZE = 1 << 10 << 10 << 6;
 
     static {
         Random random = new Random(
@@ -151,6 +152,10 @@ public class PacketBundleChannel {
             size = byteBufferStreamOut.buffer().remaining();
             bundle.put(byteBufferStreamOut.buffer());
         }
+        if (size > BUNDLE_MAX_SIZE) {
+            throw new IOException(
+                    "Unable to send too large bundle of size: " + size);
+        }
         bundle.flip();
         bundle.putInt(size);
         bundle.rewind();
@@ -183,6 +188,9 @@ public class PacketBundleChannel {
             if (!header.hasRemaining()) {
                 header.flip();
                 int limit = header.getInt();
+                if (limit < 0 || limit > BUNDLE_MAX_SIZE) {
+                    throw new IOException("Invalid bundle length: " + limit);
+                }
                 if (limit > input.capacity()) {
                     input = BufferCreator.bytes(limit);
                 } else {

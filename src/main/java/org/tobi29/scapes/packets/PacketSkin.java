@@ -77,7 +77,7 @@ public class PacketSkin extends Packet implements PacketServer, PacketClient {
     @Override
     public void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException {
-        checksum = stream.getByteArray();
+        checksum = stream.getByteArray(1 << 10);
     }
 
     @Override

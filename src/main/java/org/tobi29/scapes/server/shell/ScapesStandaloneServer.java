@@ -18,22 +18,19 @@ package org.tobi29.scapes.server.shell;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tobi29.scapes.connection.ServerInfo;
 import org.tobi29.scapes.engine.utils.Crashable;
 import org.tobi29.scapes.engine.utils.io.filesystem.CrashReportFile;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
-import org.tobi29.scapes.server.ControlPanel;
 import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.connection.ServerConnection;
-import org.tobi29.scapes.server.controlpanel.ServerInfo;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -59,11 +56,6 @@ public abstract class ScapesStandaloneServer
     public abstract int run() throws IOException;
 
     protected void start() throws IOException {
-        start(Collections.emptyList());
-    }
-
-    protected void start(Collection<ControlPanel> initialControlPanels)
-            throws IOException {
         RUNTIME.addShutdownHook(shutdownHook);
         TagStructure tagStructure;
         tagStructure = loadConfig(path.resolve("Server.json"));
@@ -73,7 +65,7 @@ public abstract class ScapesStandaloneServer
                         path.resolve(serverTag.getString("ServerIcon")));
         server =
                 new ScapesServer(path.resolve("data"), tagStructure, serverInfo,
-                        this, initialControlPanels);
+                        this);
         ServerConnection connection = server.connection();
         connection.setAllowsCreation(
                 tagStructure.getBoolean("AllowAccountCreation"));
@@ -107,7 +99,6 @@ public abstract class ScapesStandaloneServer
         serverTag.setString("ServerName", "My Superb Server");
         serverTag.setString("ServerIcon", "ServerIcon.png");
         serverTag.setInteger("MaxLoadingRadius", 256);
-        serverTag.setString("ControlPanelPassword", "");
         TagStructure socketTag = serverTag.getStructure("Socket");
         socketTag.setInteger("MaxPlayers", 20);
         socketTag.setInteger("WorkerCount", 2);

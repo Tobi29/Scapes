@@ -19,7 +19,6 @@ package org.tobi29.scapes.engine.utils.io;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import java.io.IOException;
-import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 public class LimitedBufferStream implements ReadableByteStream {
@@ -86,9 +85,9 @@ public class LimitedBufferStream implements ReadableByteStream {
         return stream.getDouble();
     }
 
-    private void check(int len) {
+    private void check(int len) throws IOException {
         if (remaining < len) {
-            throw new BufferUnderflowException();
+            throw new IOException("End of stream");
         }
         remaining -= len;
     }

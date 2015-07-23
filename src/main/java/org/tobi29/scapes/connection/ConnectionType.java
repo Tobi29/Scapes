@@ -20,8 +20,7 @@ import java.util.HashMap;
 
 public enum ConnectionType {
     GET_INFO((byte) 1),
-    PLAY((byte) 11),
-    CONTROL_PANEL((byte) 101);
+    PLAY((byte) 11);
     private static final HashMap<Byte, ConnectionType> VALUES = new HashMap<>();
 
     static {

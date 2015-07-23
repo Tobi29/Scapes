@@ -201,7 +201,7 @@ public class PlayerConnection
         Plugins plugins = server.server().worldFormat().plugins();
         byte[] challenge = new byte[this.challenge.length];
         input.get(challenge);
-        nickname = input.getString();
+        nickname = input.getString(1 << 10);
         loadingRadius = FastMath.clamp(input.getInt(), 10,
                 server.server().maxLoadingRadius());
         ByteBuffer buffer = ByteBuffer.allocate(64 * 64 * 4);
@@ -405,7 +405,7 @@ public class PlayerConnection
                         Packet packet = sendQueue.poll();
                         sendPacket(packet);
                         sendQueueSize.decrementAndGet();
-                        if (channel.bundleSize() > 102400) {
+                        if (channel.bundleSize() > 1 << 10 << 4) {
                             break;
                         }
                     }
