@@ -48,11 +48,11 @@ public class MobZombieClient extends MobLivingEquippedClient {
     @Override
     public void onDeath() {
         Texture texture = world.game().engine().graphics().textures()
-                .get("VanillaBasics:image/entity/mob/Skeleton");
+                .get("VanillaBasics:image/entity/mob/Zombie");
         ParticleManager particleManager = world.particleManager();
         MobLivingModelHuman
                 .particles(particleManager, pos.now(), speed.now(), rot.now(),
-                        texture, true, false);
+                        texture);
     }
 
     @Override

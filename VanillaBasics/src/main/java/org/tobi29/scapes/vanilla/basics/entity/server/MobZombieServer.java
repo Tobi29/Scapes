@@ -53,7 +53,7 @@ public class MobZombieServer extends MobLivingEquippedServer {
             }
         });
         listener((DamageListener) damage -> world
-                .playSound("VanillaBasics:sound/entity/mob/skeleton/Hurt" +
+                .playSound("VanillaBasics:sound/entity/mob/zombie/Hurt" +
                         (random.nextInt(3) + 1) + ".ogg", this));
     }
 
