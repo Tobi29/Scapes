@@ -209,16 +209,19 @@ public class MobPlayerServer extends MobLivingEquippedServer
         if (health < 10.0) {
             Random random = ThreadLocalRandom.current();
             if (random.nextInt(40) == 0) {
-                push(random.nextDouble() * 2 - 1, 0, 0);
+                push(random.nextDouble() * 2.0 - 1.0, 0.0, 0.0);
             }
             if (random.nextInt(40) == 0) {
-                push(0, random.nextDouble() * 2 - 1, 0);
+                push(0.0, random.nextDouble() * 2.0 - 1.0, 0.0);
             }
             if (random.nextInt(20) == 0) {
-                setPitch(pitch() + random.nextDouble() * 60 - 30);
+                setRot(new Vector3d(
+                        rot.doubleX() + random.nextDouble() * 60.0 - 30.0,
+                        rot.doubleY(), rot.doubleZ()));
             }
             if (random.nextInt(20) == 0) {
-                setYaw(yaw() + random.nextDouble() * 60 - 30);
+                setRot(new Vector3d(rot.doubleX(), rot.doubleY(),
+                        rot.doubleZ() + random.nextDouble() * 60.0 - 30.0));
             }
         }
     }
@@ -260,60 +263,6 @@ public class MobPlayerServer extends MobLivingEquippedServer
     }
 
     @Override
-    public synchronized void setSpeedX(double x) {
-        super.setSpeedX(x);
-        if (sendPositionHandler != null) {
-            sendPositionHandler.sendSpeed(entityID, speed.now(), true,
-                    serverConnection::send);
-        }
-    }
-
-    @Override
-    public synchronized void setPitch(double x) {
-        super.setPitch(x);
-        if (sendPositionHandler != null) {
-            sendPositionHandler.sendRotation(entityID, rot.now(), true,
-                    serverConnection::send);
-        }
-    }
-
-    @Override
-    public synchronized void setSpeedY(double y) {
-        super.setSpeedY(y);
-        if (sendPositionHandler != null) {
-            sendPositionHandler.sendSpeed(entityID, speed.now(), true,
-                    serverConnection::send);
-        }
-    }
-
-    @Override
-    public synchronized void setTilt(double y) {
-        super.setTilt(y);
-        if (sendPositionHandler != null) {
-            sendPositionHandler.sendRotation(entityID, rot.now(), true,
-                    serverConnection::send);
-        }
-    }
-
-    @Override
-    public synchronized void setSpeedZ(double z) {
-        super.setSpeedZ(z);
-        if (sendPositionHandler != null) {
-            sendPositionHandler.sendSpeed(entityID, speed.now(), true,
-                    serverConnection::send);
-        }
-    }
-
-    @Override
-    public synchronized void setYaw(double z) {
-        super.setYaw(z);
-        if (sendPositionHandler != null) {
-            sendPositionHandler.sendRotation(entityID, rot.now(), true,
-                    serverConnection::send);
-        }
-    }
-
-    @Override
     public synchronized void push(double x, double y, double z) {
         super.push(x, y, z);
         if (sendPositionHandler != null) {
@@ -328,39 +277,6 @@ public class MobPlayerServer extends MobLivingEquippedServer
         if (sendPositionHandler != null) {
             sendPositionHandler
                     .submitUpdate(entityID, value, speed.now(), rot.now(),
-                            ground, slidingWall, inWater, swimming, true,
-                            serverConnection::send);
-        }
-    }
-
-    @Override
-    public synchronized void setX(double x) {
-        super.setX(x);
-        if (sendPositionHandler != null) {
-            sendPositionHandler
-                    .submitUpdate(entityID, pos.now(), speed.now(), rot.now(),
-                            ground, slidingWall, inWater, swimming, true,
-                            serverConnection::send);
-        }
-    }
-
-    @Override
-    public synchronized void setY(double y) {
-        super.setY(y);
-        if (sendPositionHandler != null) {
-            sendPositionHandler
-                    .submitUpdate(entityID, pos.now(), speed.now(), rot.now(),
-                            ground, slidingWall, inWater, swimming, true,
-                            serverConnection::send);
-        }
-    }
-
-    @Override
-    public synchronized void setZ(double z) {
-        super.setZ(z);
-        if (sendPositionHandler != null) {
-            sendPositionHandler
-                    .submitUpdate(entityID, pos.now(), speed.now(), rot.now(),
                             ground, slidingWall, inWater, swimming, true,
                             serverConnection::send);
         }
@@ -400,20 +316,20 @@ public class MobPlayerServer extends MobLivingEquippedServer
         List<MobServer> entities =
                 world.entities(Collections.singletonList((MobServer) this),
                         hitField);
-        entities.stream().filter(entity -> entity instanceof MobLivingServer &&
-                entity != this).forEach(entity -> {
+        entities.stream().filter(mob -> mob instanceof MobLivingServer)
+                .map(mob -> (MobLivingServer) mob).forEach(mob -> {
             if (side) {
-                ((MobLivingServer) entity).damage(leftWeapon().material()
-                        .click(this, leftWeapon(), entity) * strength);
+                mob.damage(
+                        leftWeapon().material().click(this, leftWeapon(), mob) *
+                                strength);
             } else {
-                ((MobLivingServer) entity).damage(rightWeapon().material()
-                        .click(this, rightWeapon(), entity) * strength);
+                mob.damage(rightWeapon().material()
+                        .click(this, rightWeapon(), mob) * strength);
             }
-            ((MobLivingServer) entity).onNotice(this);
-            entity.push(
-                    FastMath.cosTable(rot.doubleZ() * FastMath.DEG_2_RAD) * 0.3,
-                    FastMath.sinTable(rot.doubleZ() * FastMath.DEG_2_RAD) * 0.3,
-                    0.1);
+            mob.onNotice(this);
+            double rad = rot.doubleZ() * FastMath.DEG_2_RAD;
+            mob.push(FastMath.cosTable(rad) * 10.0,
+                    FastMath.sinTable(rad) * 10.0, 2.0);
         });
         return entities;
     }

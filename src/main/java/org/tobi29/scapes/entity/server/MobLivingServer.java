@@ -77,13 +77,13 @@ public abstract class MobLivingServer extends MobServer {
                 pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0, 0, 1);
         List<MobServer> mobs = world.damageEntities(
                 Collections.singletonList((MobServer) this), hitField, damage);
-        mobs.stream().filter(entity -> entity instanceof MobLivingServer)
-                .forEach(mob -> {
-                    ((MobLivingServer) mob).onNotice(this);
-                    double rad = rot.doubleZ() * FastMath.DEG_2_RAD;
-                    mob.push(FastMath.cosTable(rad) * 10.0,
-                            FastMath.sinTable(rad) * 10.0, 2.0);
-                });
+        mobs.stream().filter(mob -> mob instanceof MobLivingServer)
+                .map(mob -> (MobLivingServer) mob).forEach(mob -> {
+            mob.onNotice(this);
+            double rad = rot.doubleZ() * FastMath.DEG_2_RAD;
+            mob.push(FastMath.cosTable(rad) * 10.0,
+                    FastMath.sinTable(rad) * 10.0, 2.0);
+        });
         return mobs;
     }
 

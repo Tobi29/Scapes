@@ -17,6 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.material.block;
 
 import org.tobi29.scapes.block.Collision;
+import org.tobi29.scapes.entity.particle.Particle;
 import org.tobi29.scapes.entity.server.MobLivingServer;
 import org.tobi29.scapes.entity.server.MobServer;
 
@@ -25,13 +26,16 @@ public class CollisionLava extends Collision {
 
     @Override
     public void inside(MobServer mob, double delta) {
-        mob.setSpeedX(mob.speedX() / 4.0);
-        mob.setSpeedY(mob.speedY() / 4.0);
-        mob.setSpeedZ(-0.8);
+        mob.setSpeed(mob.speed().div(1.0 + 1.2 * delta));
         if (mob instanceof MobLivingServer) {
             ((MobLivingServer) mob)
                     .damage(((MobLivingServer) mob).maxHealth() / 5.0);
         }
+    }
+
+    @Override
+    public void inside(Particle particle, double delta) {
+        particle.setSpeed(particle.speed().div(1.0 + 1.2 * delta));
     }
 
     @Override

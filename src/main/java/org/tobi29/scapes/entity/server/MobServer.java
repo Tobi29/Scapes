@@ -260,48 +260,24 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
         return speed.doubleX();
     }
 
-    public void setSpeedX(double x) {
-        speed.setX(x);
-    }
-
     public double pitch() {
         return rot.doubleX();
-    }
-
-    public void setPitch(double x) {
-        rot.setX(x);
     }
 
     public double speedY() {
         return speed.doubleY();
     }
 
-    public void setSpeedY(double y) {
-        speed.setY(y);
-    }
-
     public double tilt() {
         return rot.doubleY();
-    }
-
-    public void setTilt(double y) {
-        rot.setY(y);
     }
 
     public double speedZ() {
         return speed.doubleZ();
     }
 
-    public void setSpeedZ(double z) {
-        speed.setZ(z);
-    }
-
     public double yaw() {
         return rot.doubleZ();
-    }
-
-    public void setYaw(double z) {
-        rot.setZ(z);
     }
 
     public void push(double x, double y, double z) {
@@ -311,24 +287,6 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
     public void setPos(Vector3 value) {
         synchronized (pos) {
             pos.set(value);
-        }
-    }
-
-    public void setX(double x) {
-        synchronized (pos) {
-            pos.setX(x);
-        }
-    }
-
-    public void setY(double y) {
-        synchronized (pos) {
-            pos.setY(y);
-        }
-    }
-
-    public void setZ(double z) {
-        synchronized (pos) {
-            pos.setZ(z);
         }
     }
 
