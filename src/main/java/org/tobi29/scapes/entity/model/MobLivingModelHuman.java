@@ -218,7 +218,7 @@ public class MobLivingModelHuman implements MobModel {
                     if (weaponLeft.material().isWeapon(weaponLeft)) {
                         armDirLeftRender = -1.1f;
                     } else {
-                        armDirLeftRender = -1.2f;
+                        armDirLeftRender = -1.5f;
                     }
                 }
             }
@@ -245,7 +245,7 @@ public class MobLivingModelHuman implements MobModel {
                     if (weaponRight.material().isWeapon(weaponRight)) {
                         armDirRightRender = -1.1f;
                     } else {
-                        armDirRightRender = -1.2f;
+                        armDirRightRender = -1.5f;
                     }
                 }
             }
@@ -329,32 +329,37 @@ public class MobLivingModelHuman implements MobModel {
                 if (rot < 0 && armDirLeftRender > 0.0) {
                     rot /= 4.0f;
                 }
-                matrix.rotate(rot * -60, 0, 0, 1);
-                matrix.rotate(rot * -60, 0, 1, 0);
-                matrix.rotate(rot * 10 + 40 + armDirLeft2 * 45 +
-                        pitch * armDirLeft2, 1, 0, 0);
+                matrix.rotate(rot * -60.0f, 0.0f, 0.0f, 1.0f);
+                matrix.rotate(rot * -60.0f, 0.0f, 1.0f, 0.0f);
+                matrix.rotate(rot * 10.0f + 40.0f + armDirLeft2 * 45.0f +
+                        pitch * armDirLeft2, 1.0f, 0.0f, 0.0f);
             } else {
-                rot = (float) FastMath.sinTable(armDirLeftRender * FastMath.PI);
+                rot = (float) FastMath
+                        .sinTable(armDirLeftRender * FastMath.PI);
                 matrix.rotate(armDirLeft2 * -20, 0, 0, 1);
                 matrix.rotate(rot * 50 + 40 + armDirLeft2 * 45 +
                         pitch * armDirLeft2, 1, 0, 0);
+                if (armDirLeftRender > -1.5f && armDirLeftRender < -0.5f) {
+                    float center = (float) FastMath
+                            .cosTable(armDirLeftRender * FastMath.PI);
+                    matrix.rotate(center * 30.0f, 0.0f, 1.0f, 0.0f);
+                }
             }
         }
         rot = FastMath.min(rot * 2, 1);
         armLeft.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
-        matrix.translate(0, 0.4f, -0.6f);
+        matrix.translate(-0.3f, 0.4f, -0.4f);
         if (item.material().isWeapon(item)) {
-            matrix.translate(0, -0.5f, 0);
-            matrix.rotate(-rot * 90, 1, 0, 0);
-            matrix.rotate(-rot * 50, 0, 1, 0);
-            matrix.translate(0, 0.5f, 0);
+            matrix.translate(0.0f, -0.6f, -0.05f);
+            matrix.rotate(rot * -60.0f, 1.0f, 0.0f, 0.0f);
+            matrix.rotate(rot * -50.0f, 0.0f, 1.0f, 0.0f);
+            matrix.translate(0.0f, 0.6f, 0.0f);
         } else if (!item.material().isTool(item)) {
-            matrix.translate(0.02f, -0.3f, -0.07f);
+            matrix.translate(0.31f, -0.3f, -0.2f);
             matrix.scale(0.3f, 0.3f, 0.3f);
         }
-        matrix.rotate(220, 1, 0, 0);
-        matrix.rotate(80, 0, 0, 1);
-        matrix.rotate(300, 0, 1, 0);
+        matrix.rotate(120.0f, 0.0f, 0.0f, 1.0f);
+        matrix.rotate(60.0f, 0.0f, 1.0f, 0.0f);
         if (!culling) {
             gl.enableCulling();
         }
@@ -379,37 +384,41 @@ public class MobLivingModelHuman implements MobModel {
             if (item.material().isWeapon(item)) {
                 rot = (float) FastMath
                         .sinTable(-armDirRightRender * FastMath.PI);
-                if (rot < 0 && armDirRightRender > 0.0) {
+                if (rot < 0.0f && armDirRightRender > 0.0) {
                     rot /= 4.0f;
                 }
-                matrix.rotate(rot * 60, 0, 0, 1);
-                matrix.rotate(rot * 60, 0, 1, 0);
-                matrix.rotate(rot * 10 + 40 + armDirRight2 * 45 +
-                        pitch * armDirRight2, 1, 0, 0);
+                matrix.rotate(rot * 60.0f, 0.0f, 0.0f, 1.0f);
+                matrix.rotate(rot * 60.0f, 0.0f, 1.0f, 0.0f);
+                matrix.rotate(rot * 10.0f + 40.0f + armDirRight2 * 45.0f +
+                        pitch * armDirRight2, 1.0f, 0.0f, 0.0f);
             } else {
                 rot = (float) FastMath
                         .sinTable(armDirRightRender * FastMath.PI);
                 matrix.rotate(armDirRight2 * -20, 0, 0, 1);
                 matrix.rotate(rot * 50 + 40 + armDirRight2 * 45 +
                         pitch * armDirRight2, 1, 0, 0);
+                if (armDirRightRender > -1.5f && armDirRightRender < -0.5f) {
+                    float center = (float) FastMath
+                            .cosTable(armDirRightRender * FastMath.PI);
+                    matrix.rotate(center * -30.0f, 0.0f, 1.0f, 0.0f);
+                }
             }
         }
         rot = FastMath.min(rot * 2, 1);
         texture.bind(gl);
         armRight.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
-        matrix.translate(0, 0.4f, -0.6f);
+        matrix.translate(0.3f, 0.4f, -0.4f);
         if (item.material().isWeapon(item)) {
-            matrix.translate(0, -0.5f, 0);
-            matrix.rotate(-rot * 90, 1, 0, 0);
-            matrix.rotate(-rot * -50, 0, 1, 0);
-            matrix.translate(0, 0.5f, 0);
+            matrix.translate(0.0f, -0.6f, -0.05f);
+            matrix.rotate(rot * -60.0f, 1.0f, 0.0f, 0.0f);
+            matrix.rotate(rot * 50.0f, 0.0f, 1.0f, 0.0f);
+            matrix.translate(0.0f, 0.6f, 0.0f);
         } else if (!item.material().isTool(item)) {
-            matrix.translate(0.02f, -0.3f, -0.07f);
+            matrix.translate(-0.31f, -0.3f, -0.2f);
             matrix.scale(0.3f, 0.3f, 0.3f);
         }
-        matrix.rotate(220, 1, 0, 0);
-        matrix.rotate(100, 0, 0, 1);
-        matrix.rotate(300, 0, 1, 0);
+        matrix.rotate(-120.0f, 0.0f, 0.0f, 1.0f);
+        matrix.rotate(-60.0f, 0.0f, 1.0f, 0.0f);
         if (!culling) {
             gl.enableCulling();
         }
