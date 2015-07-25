@@ -151,7 +151,6 @@ public class ByteBufferStream
 
     @Override
     public boolean getSome(ByteBuffer buffer, int len) throws IOException {
-        ensureGet(len);
         len = FastMath.min(len, this.buffer.remaining());
         int limit = this.buffer.limit();
         this.buffer.limit(this.buffer.position() + len);
