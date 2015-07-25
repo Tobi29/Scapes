@@ -49,7 +49,7 @@ public abstract class GL implements OpenGL {
         container.loadFont(
                 engine.files().get("Engine:font/QuicksandPro-Regular.otf"));
         defaultFont = new FontRenderer(
-                container.createGlyphRenderer("Quicksand Pro", 128));
+                container.createGlyphRenderer("Quicksand Pro", 64));
     }
 
     public FontRenderer defaultFont() {

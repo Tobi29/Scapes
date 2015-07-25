@@ -49,8 +49,8 @@ public class SWTGlyphRenderer implements GlyphRenderer {
         tileSize = 1.0f / tiles;
         glyphSize = size << 1;
         imageSize = glyphSize << tileBits;
-        renderX = size / 2;
-        renderY = FastMath.round(size * 0.375);
+        renderX = FastMath.round(size * 0.25);
+        renderY = FastMath.round(size * 0.15);
         color = new int[imageSize * imageSize];
     }
 
@@ -70,7 +70,7 @@ public class SWTGlyphRenderer implements GlyphRenderer {
                 font = new Font(display, fontName, size, SWT.NONE);
                 GC gc = new GC(image);
                 gc.setFont(font);
-                int height = FastMath.round(gc.stringExtent("").y * 0.85);
+                int height = FastMath.round(gc.stringExtent("").y * 0.6);
                 if (height != size) {
                     double scale = (double) size / height;
                     font.dispose();
@@ -93,7 +93,7 @@ public class SWTGlyphRenderer implements GlyphRenderer {
                     char c = (char) (i + offset);
                     String str = new String(new char[]{c});
                     gc.drawString(str, xx, yy, true);
-                    width[i++] = (float) gc.stringExtent(str).x / size;
+                    width[i++] = (float) (gc.stringExtent(str).x * 0.75 / size);
                 }
             }
             gc.dispose();

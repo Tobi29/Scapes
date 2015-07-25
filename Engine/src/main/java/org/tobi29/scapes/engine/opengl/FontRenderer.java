@@ -118,16 +118,16 @@ public class FontRenderer {
                         yyy = yy + y;
                         w = width * letterWidth;
                         h = height;
-                        tx = (pageLetter % page.tiles + 0.25f) * page.tileSize;
+                        tx = (pageLetter % page.tiles + 0.125f) * page.tileSize;
                         ty = (FastMath.floor((float) pageLetter / page.tiles) +
-                                0.25f) * page.tileSize;
-                        tw = page.tileSize * letterWidth * 0.5f;
-                        th = page.tileSize * 0.5f;
+                                0.125f) * page.tileSize;
+                        tw = page.tileSize * letterWidth * 0.75f;
+                        th = page.tileSize * 0.75f;
                     } else {
-                        xxx = xx + x - width * 0.5f;
-                        yyy = yy + y - height * 0.5f;
-                        w = width * 2.0f;
-                        h = height * 2.0f;
+                        xxx = xx + x - width * 0.25f;
+                        yyy = yy + y - height * 0.25f;
+                        w = width * 1.5f;
+                        h = height * 1.5f;
                         tx = (pageLetter % page.tiles) * page.tileSize;
                         ty = FastMath.floor((float) pageLetter / page.tiles) *
                                 page.tileSize;
