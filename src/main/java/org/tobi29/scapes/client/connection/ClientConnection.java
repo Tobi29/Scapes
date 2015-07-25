@@ -297,7 +297,7 @@ public class ClientConnection
                 }
                 if (!channel.process() && !joiner.marked()) {
                     try {
-                        selector.select(100);
+                        selector.select(10);
                         selector.selectedKeys().clear();
                     } catch (IOException e) {
                         LOGGER.warn("Error when waiting for events: {}",
