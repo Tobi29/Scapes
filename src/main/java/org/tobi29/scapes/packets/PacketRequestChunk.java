@@ -62,7 +62,6 @@ public class PacketRequestChunk extends Packet
         if (world == null) {
             return;
         }
-        player.send(new PacketRequestChunk(x, y));
         Terrain terrain = world.getTerrain();
         if (terrain instanceof TerrainInfiniteServer) {
             Optional<TerrainInfiniteChunkServer> chunk =
@@ -71,6 +70,7 @@ public class PacketRequestChunk extends Packet
                 player.send(new PacketSendChunk(chunk.get()));
             }
         }
+        player.send(new PacketRequestChunk(x, y));
     }
 
     @Override
