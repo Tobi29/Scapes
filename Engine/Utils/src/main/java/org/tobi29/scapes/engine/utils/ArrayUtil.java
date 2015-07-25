@@ -155,6 +155,28 @@ public final class ArrayUtil {
         return text.toString();
     }
 
+    public static String toHexadecimal(int groups, byte... array) {
+        StringBuilder text =
+                new StringBuilder((array.length << 1) + array.length / groups);
+        int group = 0, limit = array.length - 1;
+        for (int i = 0; i < array.length; i++) {
+            byte value = array[i];
+            String append =
+                    Integer.toHexString(value < 0 ? value + 256 : value);
+            if (append.length() == 1) {
+                text.append('0').append(append);
+            } else {
+                text.append(append);
+            }
+            group++;
+            if (group >= groups && i < limit) {
+                text.append(' ');
+                group = 0;
+            }
+        }
+        return text.toString();
+    }
+
     public static byte[] fromHexadecimal(String text) {
         text = REPLACE.matcher(text).replaceAll("");
         if ((text.length() & 1) == 1) {

@@ -47,4 +47,31 @@ public class ArrayUtilTest {
                     hex2);
         }
     }
+
+    @Test
+    public void testHexadecimalGrouped() {
+        for (byte[] array : RandomInput.createRandomArrays(64, 4)) {
+            for (int group = 1; group < 16; group++) {
+                String hex = ArrayUtil.toHexadecimal(group, array);
+                byte[] bytes = ArrayUtil.fromHexadecimal(hex);
+                Assert.assertArrayEquals(
+                        "Decoded array not equal to original array", array,
+                        bytes);
+                String hex2 = ArrayUtil.toHexadecimal(group, bytes);
+                Assert.assertEquals(
+                        "Encoded string not equal to original encoded string",
+                        hex, hex2);
+            }
+        }
+    }
+
+    @Test
+    public void testHexadecimalGroup() {
+        String hex = "ff 0f 00 f0 ff";
+        byte[] bytes = ArrayUtil.fromHexadecimal(hex);
+        String hex2 = ArrayUtil.toHexadecimal(1, bytes);
+        Assert.assertEquals(
+                "Encoded string not equal to original encoded string", hex,
+                hex2);
+    }
 }
