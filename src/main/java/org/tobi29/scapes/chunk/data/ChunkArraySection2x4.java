@@ -30,7 +30,7 @@ public class ChunkArraySection2x4 implements ChunkArraySection {
     public ChunkArraySection2x4(int xSizeBits, int ySizeBits, int zSizeBits) {
         this.xSizeBits = xSizeBits;
         this.ySizeBits = ySizeBits;
-        size = 2 << xSizeBits + ySizeBits + zSizeBits;
+        size = 1 << xSizeBits + ySizeBits + zSizeBits;
     }
 
     @Override
