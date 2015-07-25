@@ -170,13 +170,14 @@ public class PacketBundleChannel {
         }
         if (output != null) {
             int write = channel.write(output);
-            if (!output.hasRemaining()) {
-                bufferCache.add(new WeakReference<>(output));
-                output = null;
-            } else if (write == -1) {
+            if (write == -1) {
                 throw new IOException("Connection closed");
             }
             outRate.getAndAdd(write);
+            if (!output.hasRemaining()) {
+                bufferCache.add(new WeakReference<>(output));
+                output = null;
+            }
             return true;
         }
         return false;
@@ -185,6 +186,10 @@ public class PacketBundleChannel {
     public Optional<ReadableByteStream> fetch() throws IOException {
         if (!hasInput) {
             int read = channel.read(header);
+            if (read == -1) {
+                throw new IOException("Connection closed");
+            }
+            inRate.getAndAdd(read);
             if (!header.hasRemaining()) {
                 header.flip();
                 int limit = header.getInt();
@@ -198,15 +203,15 @@ public class PacketBundleChannel {
                 }
                 hasInput = true;
                 header.clear();
-            } else if (read == -1) {
-                throw new IOException("Connection closed");
             }
-            inRate.getAndAdd(read);
         }
         if (hasInput) {
             int read = channel.read(input);
+            if (read == -1) {
+                throw new IOException("Connection closed");
+            }
+            inRate.getAndAdd(read);
             if (!input.hasRemaining()) {
-                inRate.getAndAdd(read);
                 input.flip();
                 byteBufferStreamOut.buffer().clear();
                 if (encrypt) {
@@ -220,10 +225,7 @@ public class PacketBundleChannel {
                 bundle.flip();
                 hasInput = false;
                 return Optional.of(new ByteBufferStream(bundle));
-            } else if (read == -1) {
-                throw new IOException("Connection closed");
             }
-            inRate.getAndAdd(read);
         }
         return Optional.empty();
     }
