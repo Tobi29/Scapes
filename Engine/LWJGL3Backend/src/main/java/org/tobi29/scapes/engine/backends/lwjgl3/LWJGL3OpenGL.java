@@ -39,7 +39,7 @@ public class LWJGL3OpenGL extends GL {
     private final int[] lastTextureBind = new int[32];
     private final IntBuffer intBuffer = BufferCreatorNative.intsD(4);
     private final IntBuffer attachBuffer = BufferCreatorNative.intsD(16);
-    private ByteBuffer directBuffer = BufferCreatorNative.bytesD(8192);
+    private ByteBuffer directBuffer = BufferCreatorNative.bytesD(4 << 10 << 10);
     private int activeTexture, activeShader;
 
     public LWJGL3OpenGL(ScapesEngine engine, Container container) {

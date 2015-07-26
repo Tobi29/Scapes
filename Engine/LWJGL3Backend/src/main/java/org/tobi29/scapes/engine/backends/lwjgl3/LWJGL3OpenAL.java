@@ -37,7 +37,7 @@ public class LWJGL3OpenAL implements OpenAL {
             LoggerFactory.getLogger(LWJGL3OpenAL.class);
     private final FloatBuffer listenerOrientation =
             BufferCreatorNative.floatsD(6);
-    private ByteBuffer directBuffer = BufferCreatorNative.bytesD(8192);
+    private ByteBuffer directBuffer = BufferCreatorNative.bytesD(4 << 10 << 10);
     private ALContext context;
 
     @Override
