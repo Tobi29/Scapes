@@ -119,7 +119,9 @@ public class TerrainInfiniteRendererChunk {
                     Matrix matrix = matrixStack.push();
                     matrix.translate((float) relativeX, (float) relativeY,
                             (float) relativeZ);
-                    vao.render(gl, shader);
+                    if (!vao.render(gl, shader)) {
+                        setGeometryDirty(i);
+                    }
                     matrixStack.pop();
                 } else {
                     vao.ensureStored(gl);
@@ -140,7 +142,9 @@ public class TerrainInfiniteRendererChunk {
                     Matrix matrix = matrixStack.push();
                     matrix.translate((float) relativeX, (float) relativeY,
                             (float) ((i << 4) - cam.position.doubleZ()));
-                    vao.render(gl, shader);
+                    if (!vao.render(gl, shader)) {
+                        setGeometryDirty(i);
+                    }
                     matrixStack.pop();
                 } else {
                     vao.ensureStored(gl);
@@ -185,6 +189,12 @@ public class TerrainInfiniteRendererChunk {
     public synchronized void replaceMesh(int i, VAO render, VAO renderAlpha,
             AABB aabb, AABB aabbAlpha) {
         if (visible[i]) {
+            if (render != null) {
+                render.setWeak(true);
+            }
+            if (renderAlpha != null) {
+                renderAlpha.setWeak(true);
+            }
             vao[i] = render;
             vaoAlpha[i] = renderAlpha;
             if (aabb != null) {

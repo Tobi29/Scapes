@@ -19,12 +19,14 @@ package org.tobi29.scapes.engine.opengl;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.BufferCreatorNative;
+import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Queue;
 
 public class VAO {
@@ -32,11 +34,10 @@ public class VAO {
     private static int disposeOffset;
     private final RenderType renderType;
     private final int length, stride;
-    private final ByteBuffer buffer;
-    private final ByteBuffer index;
     private final List<VAOAttributeData> attributes = new ArrayList<>();
+    private Optional<Pair<ByteBuffer, ByteBuffer>> data;
     private int vertexID, indexID, arrayID;
-    private boolean stored, used, markAsDisposed;
+    private boolean stored, used, markAsDisposed, weak;
 
     public VAO(List<VAOAttribute> attributes, int vertices, int[] index,
             RenderType renderType) {
@@ -51,6 +52,7 @@ public class VAO {
             throw new IllegalArgumentException("Length not multiply of 2");
         }
         this.renderType = renderType;
+        this.weak = weak;
         this.length = length;
         int stride = 0;
         for (VAOAttribute attribute : attributes) {
@@ -64,14 +66,16 @@ public class VAO {
             stride += (size | 0x03) + 1;
         }
         this.stride = stride;
-        buffer = BufferCreatorNative.bytes(vertices * stride)
+        ByteBuffer vertexBuffer = BufferCreatorNative.bytes(vertices * stride)
                 .order(ByteOrder.nativeOrder());
-        attributes.forEach(attribute -> addToBuffer(attribute, vertices));
-        this.index = BufferCreatorNative.bytes(index.length << 1)
+        ByteBuffer indexBuffer = BufferCreatorNative.bytes(index.length << 1)
                 .order(ByteOrder.nativeOrder());
+        attributes.forEach(
+                attribute -> addToBuffer(attribute, vertices, vertexBuffer));
         for (int i : index) {
-            this.index.putShort((short) i);
+            indexBuffer.putShort((short) i);
         }
+        data = Optional.of(new Pair<>(vertexBuffer, indexBuffer));
     }
 
     @OpenGLFunction
@@ -105,7 +109,8 @@ public class VAO {
                 attribute.normalized, stride, attribute.offset);
     }
 
-    private void addToBuffer(VAOAttribute attribute, int vertices) {
+    private void addToBuffer(VAOAttribute attribute, int vertices,
+            ByteBuffer buffer) {
         if (attribute.floatArray == null) {
             switch (attribute.vertexType) {
                 case BYTE:
@@ -269,6 +274,9 @@ public class VAO {
     @OpenGLFunction
     public boolean render(GL gl, Shader shader) {
         ensureStored(gl);
+        if (!stored) {
+            return false;
+        }
         Matrix matrix = gl.matrixStack().current();
         gl.bindVAO(arrayID);
         gl.activateShader(shader.programID());
@@ -318,19 +326,25 @@ public class VAO {
     }
 
     private void store(GL gl) {
-        buffer.rewind();
-        index.rewind();
-        arrayID = gl.createVAO();
-        gl.bindVAO(arrayID);
-        vertexID = gl.createVBO();
-        indexID = gl.createVBO();
-        gl.bindVBOArray(vertexID);
-        gl.bufferVBODataArray(buffer);
-        gl.bindVBOElement(indexID);
-        gl.bufferVBODataElement(index);
-        attributes.stream().forEach(attribute -> storeAttribute(gl, attribute));
-        VAO_LIST.add(this);
-        stored = true;
+        data.ifPresent(data -> {
+            data.a.rewind();
+            data.b.rewind();
+            arrayID = gl.createVAO();
+            gl.bindVAO(arrayID);
+            vertexID = gl.createVBO();
+            indexID = gl.createVBO();
+            gl.bindVBOArray(vertexID);
+            gl.bufferVBODataArray(data.a);
+            gl.bindVBOElement(indexID);
+            gl.bufferVBODataElement(data.b);
+            attributes.stream()
+                    .forEach(attribute -> storeAttribute(gl, attribute));
+            VAO_LIST.add(this);
+            stored = true;
+            if (weak) {
+                this.data = Optional.empty();
+            }
+        });
     }
 
     private void dispose(GL gl) {
@@ -339,6 +353,10 @@ public class VAO {
         gl.deleteVAO(arrayID);
         VAO_LIST.remove(this);
         stored = false;
+    }
+
+    public void setWeak(boolean value) {
+        weak = value;
     }
 
     public static class VAOAttribute {
