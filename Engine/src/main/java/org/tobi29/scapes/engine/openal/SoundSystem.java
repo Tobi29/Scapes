@@ -255,8 +255,8 @@ public class SoundSystem {
             float musicVolume = (float) engine.config().musicVolume();
             if (music != null && musicVolume != this.musicVolume) {
                 openAL.setGain(musicSource, music.gain * musicVolume);
-                this.musicVolume = musicVolume;
             }
+            this.musicVolume = musicVolume;
             soundVolume = (float) engine.config().soundVolume();
             openAL.setListener(listenerPosition.minus(origin),
                     listenerOrientation, listenerVelocity);
