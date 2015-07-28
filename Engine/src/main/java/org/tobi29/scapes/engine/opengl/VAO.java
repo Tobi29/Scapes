@@ -52,7 +52,6 @@ public class VAO {
             throw new IllegalArgumentException("Length not multiply of 2");
         }
         this.renderType = renderType;
-        this.weak = weak;
         this.length = length;
         int stride = 0;
         for (VAOAttribute attribute : attributes) {
