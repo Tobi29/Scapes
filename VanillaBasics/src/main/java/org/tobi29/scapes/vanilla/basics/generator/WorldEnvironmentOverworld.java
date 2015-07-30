@@ -580,8 +580,9 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                     if (humidity > 0.2) {
                         if (groundType == materials.dirt) {
                             chunk.typeData(xxx, yyy, z - 1, materials.grass,
-                                    (short) random.nextInt(9));
-                        } else if (groundType == materials.grass) {
+                                    (short) random.nextInt(4));
+                        } else if (groundType == materials.grass &&
+                                random.nextInt(20) == 0) {
                             chunk.data(xxx, yyy, z - 1,
                                     (short) random.nextInt(9));
                         }

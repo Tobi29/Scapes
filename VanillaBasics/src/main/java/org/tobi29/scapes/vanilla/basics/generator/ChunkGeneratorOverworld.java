@@ -227,6 +227,7 @@ public class ChunkGeneratorOverworld implements ChunkGenerator {
                         if (zz == lastFree) {
                             if (generator.soiled) {
                                 type = materials.grass;
+                                data = random.nextInt(9);
                             } else {
                                 if (generator.lavaChance > 0 &&
                                         random.nextInt(generator.lavaChance) ==
