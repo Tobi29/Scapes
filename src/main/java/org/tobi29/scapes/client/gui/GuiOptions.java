@@ -25,38 +25,36 @@ public class GuiOptions extends GuiMenu {
     public GuiOptions(GameState state, Gui previous) {
         super(state, "Options", previous);
         GuiComponentSlider musicVolume =
-                new GuiComponentSlider(16, 80, 368, 30, 18, "Music",
+                new GuiComponentSlider(pane, 16, 80, 368, 30, 18, "Music",
                         state.engine().config().musicVolume());
+        GuiComponentSlider soundVolume =
+                new GuiComponentSlider(pane, 16, 120, 368, 30, 18, "Sound",
+                        state.engine().config().soundVolume());
+        GuiComponentTextButton controls =
+                new GuiComponentTextButton(pane, 16, 160, 368, 30, 18,
+                        "Controls");
+        GuiComponentTextButton graphics =
+                new GuiComponentTextButton(pane, 16, 200, 368, 30, 18,
+                        "Video settings");
+        GuiComponentTextButton account =
+                new GuiComponentTextButton(pane, 16, 240, 368, 30, 18,
+                        "Account");
+
         musicVolume.addHover(event -> state.engine().config()
                 .setMusicVolume((float) musicVolume.value));
-        GuiComponentSlider soundVolume =
-                new GuiComponentSlider(16, 120, 368, 30, 18, "Sound",
-                        state.engine().config().soundVolume());
         soundVolume.addHover(event -> state.engine().config()
                 .setSoundVolume((float) soundVolume.value));
-        GuiComponentTextButton controls =
-                new GuiComponentTextButton(16, 160, 368, 30, 18, "Controls");
         controls.addLeftClick(event -> {
             state.remove(this);
             state.add(new GuiControlsList(state, this));
         });
-        GuiComponentTextButton graphics =
-                new GuiComponentTextButton(16, 200, 368, 30, 18,
-                        "Video settings");
         graphics.addLeftClick(event -> {
             state.remove(this);
             state.add(new GuiVideoSettings(state, this));
         });
-        GuiComponentTextButton account =
-                new GuiComponentTextButton(16, 240, 368, 30, 18, "Account");
         account.addLeftClick(event -> {
             state.remove(this);
             state.add(new GuiAccount(state, this));
         });
-        pane.add(musicVolume);
-        pane.add(soundVolume);
-        pane.add(controls);
-        pane.add(graphics);
-        pane.add(account);
     }
 }

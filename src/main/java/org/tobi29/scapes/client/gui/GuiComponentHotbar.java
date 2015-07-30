@@ -28,9 +28,9 @@ public class GuiComponentHotbar extends GuiComponent {
     private final MobPlayerClientMain player;
     private final VAO vao1, vao2, vao3;
 
-    public GuiComponentHotbar(int x, int y, int width, int height,
-            MobPlayerClientMain player) {
-        super(x, y, width, height);
+    public GuiComponentHotbar(GuiComponent parent, int x, int y, int width,
+            int height, MobPlayerClientMain player) {
+        super(parent, x, y, width, height);
         this.player = player;
         vao1 = VAOUtility.createVTI(
                 new float[]{0.0f, height - 32.0f, 0.0f, height, height - 32.0f,

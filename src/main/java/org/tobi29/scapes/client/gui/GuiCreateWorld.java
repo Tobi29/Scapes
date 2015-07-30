@@ -47,13 +47,20 @@ public class GuiCreateWorld extends GuiMenuDouble {
     public GuiCreateWorld(GameState state, GuiSaveSelect previous,
             List<PluginFile> worldTypes, List<PluginFile> plugins, Path path) {
         super(state, "New World", previous);
+        new GuiComponentText(pane, 16, 80, 18, "Name:");
         GuiComponentTextField name =
-                new GuiComponentTextField(16, 100, 368, 30, 18, "New World");
+                new GuiComponentTextField(pane, 16, 100, 368, 30, 18,
+                        "New World");
+        new GuiComponentText(pane, 16, 140, 18, "Seed:");
         GuiComponentTextField seed =
-                new GuiComponentTextField(16, 160, 368, 30, 18, "");
+                new GuiComponentTextField(pane, 16, 160, 368, 30, 18, "");
         GuiComponentTextButton environment =
-                new GuiComponentTextButton(16, 200, 368, 30, 18,
+                new GuiComponentTextButton(pane, 16, 200, 368, 30, 18,
                         "Generator: " + worldTypes.get(environmentID).name());
+        GuiComponentTextButton addonsButton =
+                new GuiComponentTextButton(pane, 16, 240, 368, 30, 18,
+                        "Addons");
+
         environment.addLeftClick(event -> {
             environmentID++;
             if (environmentID >= worldTypes.size()) {
@@ -63,8 +70,6 @@ public class GuiCreateWorld extends GuiMenuDouble {
             environment.setText(
                     "Generator: " + worldTypes.get(environmentID).name());
         });
-        GuiComponentTextButton addonsButton =
-                new GuiComponentTextButton(16, 240, 368, 30, 18, "Addons");
         addonsButton.addLeftClick(event -> {
             state.remove(this);
             state.add(new GuiAddons(state, this,
@@ -115,39 +120,30 @@ public class GuiCreateWorld extends GuiMenuDouble {
                 LOGGER.error("Failed to create world: {}", e.toString());
             }
         });
-        pane.add(new GuiComponentText(16, 80, 18, "Name:"));
-        pane.add(name);
-        pane.add(new GuiComponentText(16, 140, 18, "Seed:"));
-        pane.add(seed);
-        pane.add(environment);
-        pane.add(addonsButton);
     }
 
     private class GuiAddons extends Gui {
         public GuiAddons(GameState state, GuiCreateWorld prev, String parent,
                 List<PluginFile> plugins) {
             super(GuiAlignment.CENTER);
+            new GuiComponentText(pane, 16, 16, 32, "Addons");
+            new GuiComponentSeparator(pane, 24, 64, 352, 2);
             GuiComponentVisiblePane pane =
-                    new GuiComponentVisiblePane(200, 0, 400, 512);
-            GuiComponentScrollPaneList scrollPane =
-                    new GuiComponentScrollPaneList(16, 80, 368, 350, 70);
+                    new GuiComponentVisiblePane(this, 200, 0, 400, 512);
+            GuiComponentScrollPaneViewport scrollPane =
+                    new GuiComponentScrollPaneList(pane, 16, 80, 368, 350, 70)
+                            .viewport();
             GuiComponentTextButton back =
-                    new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");
+                    new GuiComponentTextButton(pane, 112, 466, 176, 30, 18,
+                            "Back");
+            plugins.stream().filter(plugin -> plugin.parent().equals(parent))
+                    .forEach(plugin -> new Element(scrollPane, plugin));
+            new GuiComponentSeparator(pane, 24, 448, 352, 2);
+
             back.addLeftClick(event -> {
                 state.remove(this);
                 state.add(prev);
             });
-            plugins.stream().filter(plugin -> plugin.parent().equals(parent))
-                    .forEach(plugin -> {
-                        Element element = new Element(plugin);
-                        scrollPane.add(element);
-                    });
-            pane.add(new GuiComponentText(16, 16, 32, "Addons"));
-            pane.add(new GuiComponentSeparator(24, 64, 352, 2));
-            pane.add(scrollPane);
-            pane.add(new GuiComponentSeparator(24, 448, 352, 2));
-            pane.add(back);
-            add(pane);
         }
 
         private class Element extends GuiComponentPane {
@@ -155,8 +151,8 @@ public class GuiCreateWorld extends GuiMenuDouble {
             private boolean active;
             private Texture texture;
 
-            public Element(PluginFile addon) {
-                super(0, 0, 378, 70);
+            public Element(GuiComponent parent, PluginFile addon) {
+                super(parent, 0, 0, 378, 70);
                 try (ZipFile zip = new ZipFile(addon.file().toFile())) {
                     texture = new TextureFile(
                             zip.getInputStream(zip.getEntry("Icon.png")), 0,
@@ -165,12 +161,11 @@ public class GuiCreateWorld extends GuiMenuDouble {
                 } catch (IOException e) {
                     texture = new TextureCustom(1, 1);
                 }
-                GuiComponentTextButton label =
-                        new GuiComponentTextButton(70, 20, 200, 30, 18,
-                                addon.name());
+                new GuiComponentTextButton(this, 70, 20, 200, 30, 18,
+                        addon.name());
                 active = addons.contains(addon);
                 GuiComponentTextButton edit =
-                        new GuiComponentTextButton(280, 20, 30, 30, 18,
+                        new GuiComponentTextButton(this, 280, 20, 30, 30, 18,
                                 active ? "X" : "");
                 edit.addLeftClick(event -> {
                     active = !active;
@@ -182,9 +177,7 @@ public class GuiCreateWorld extends GuiMenuDouble {
                         addons.remove(addon);
                     }
                 });
-                add(new GuiComponentIcon(15, 15, 40, 40, texture));
-                add(label);
-                add(edit);
+                new GuiComponentIcon(this, 15, 15, 40, 40, texture);
             }
         }
     }

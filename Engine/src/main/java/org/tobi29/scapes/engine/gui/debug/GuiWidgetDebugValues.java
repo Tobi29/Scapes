@@ -26,20 +26,19 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class GuiWidgetDebugValues extends GuiWidget {
     private final Map<String, Element> elements = new ConcurrentHashMap<>();
-    private final GuiComponentScrollPaneList scrollPane;
+    private final GuiComponentScrollPaneViewport scrollPane;
 
     public GuiWidgetDebugValues() {
         super(32, 32, 360, 240, "Debug Values");
-        scrollPane = new GuiComponentScrollPaneList(10, 10, 340, 220, 20);
-        add(scrollPane);
+        scrollPane = new GuiComponentScrollPaneList(this, 10, 10, 340, 220, 20)
+                .viewport();
     }
 
     public synchronized Element get(String key) {
         Element element = elements.get(key);
         if (element == null) {
-            element = new Element(key);
+            element = new Element(scrollPane, key);
             elements.put(key, element);
-            scrollPane.add(element);
         }
         return element;
     }
@@ -52,11 +51,10 @@ public class GuiWidgetDebugValues extends GuiWidget {
         private final GuiComponentText value;
         private final AtomicReference<String> text = new AtomicReference<>();
 
-        private Element(String key) {
-            super(0, 0, 378, 20);
-            add(new GuiComponentTextButton(10, 2, 180, 15, 12, key));
-            value = new GuiComponentText(200, 5, 12, "");
-            add(value);
+        private Element(GuiComponent parent, String key) {
+            super(parent, 0, 0, 378, 20);
+            new GuiComponentTextButton(this, 10, 2, 180, 15, 12, key);
+            value = new GuiComponentText(this, 200, 5, 12, "");
         }
 
         public void setValue(String value) {

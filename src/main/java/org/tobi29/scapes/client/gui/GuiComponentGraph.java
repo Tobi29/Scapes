@@ -26,9 +26,9 @@ public class GuiComponentGraph extends GuiComponent {
     private int i;
     private float[] data;
 
-    public GuiComponentGraph(int x, int y, int width, int height, float r,
-            float g, float b, float a) {
-        super(x, y, width, height);
+    public GuiComponentGraph(GuiComponent parent, int x, int y, int width,
+            int height, float r, float g, float b, float a) {
+        super(parent, x, y, width, height);
         this.r = r;
         this.g = g;
         this.b = b;

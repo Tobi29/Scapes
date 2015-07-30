@@ -22,8 +22,9 @@ import org.tobi29.scapes.engine.opengl.shader.Shader;
 public class GuiComponentSeparator extends GuiComponent {
     private final VAO vao;
 
-    public GuiComponentSeparator(int x, int y, int width, int height) {
-        super(x, y, width, height);
+    public GuiComponentSeparator(GuiComponent parent, int x, int y, int width,
+            int height) {
+        super(parent, x, y, width, height);
         Mesh mesh = new Mesh(true);
         GuiUtils.renderShadow(mesh, 0.0f, 0.0f, width, height, 0.1f);
         float halfHeight = height * 0.5f;

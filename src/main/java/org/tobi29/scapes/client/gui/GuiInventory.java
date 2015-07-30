@@ -28,10 +28,12 @@ import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.packets.PacketInventoryInteraction;
 
+import java.util.Objects;
+
 public class GuiInventory extends Gui {
     protected final GuiComponentVisiblePane pane;
     protected final MobPlayerClientMain player;
-    private String hover, renderHover;
+    private String hover, renderHover, currentHover;
     private FontRenderer.Text vaoText;
     private String currentName;
     private double cursorX, cursorY;
@@ -41,9 +43,11 @@ public class GuiInventory extends Gui {
         super(GuiAlignment.CENTER);
         this.player = player;
         Inventory inventory = player.inventory();
-        pane = new GuiComponentVisiblePane(200, 0, 400, 512);
+        pane = new GuiComponentVisiblePane(this, 200, 0, 400, 512);
+        new GuiComponentText(pane, 16, 16, 32, name);
+        new GuiComponentSeparator(pane, 24, 64, 352, 2);
         GuiComponentVisiblePane inventoryPane =
-                new GuiComponentVisiblePane(16, 268, 368, 162);
+                new GuiComponentVisiblePane(pane, 16, 268, 368, 162);
         int i = 0;
         for (int y = -1; y < 3; y++) {
             int yy = y * 35 + 11;
@@ -54,20 +58,15 @@ public class GuiInventory extends Gui {
                 int xx = x * 35 + 11;
                 int id = i;
                 GuiComponentItemButton item =
-                        new GuiComponentItemButton(xx, yy, 30, 30,
-                                inventory.item(i));
+                        new GuiComponentItemButton(inventoryPane, xx, yy, 30,
+                                30, inventory.item(i));
                 item.addLeftClick(event -> leftClick(id));
                 item.addRightClick(event -> rightClick(id));
                 item.addHover(event -> setTooltip(inventory.item(id)));
-                inventoryPane.add(item);
                 i++;
             }
         }
-        pane.add(new GuiComponentText(16, 16, 32, name));
-        pane.add(new GuiComponentSeparator(24, 64, 352, 2));
-        pane.add(inventoryPane);
-        pane.add(new GuiComponentSeparator(24, 448, 352, 2));
-        add(pane);
+        new GuiComponentSeparator(pane, 24, 448, 352, 2);
     }
 
     protected void leftClick(int i) {
@@ -100,7 +99,10 @@ public class GuiInventory extends Gui {
 
     @Override
     public void updateComponent() {
-        renderHover = hover;
+        if (!Objects.equals(hover, currentHover)) {
+            renderHover = hover;
+            currentHover = hover;
+        }
         hover = null;
     }
 

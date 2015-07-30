@@ -227,7 +227,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
         }
         if (controller.chat()) {
             if (!hasGui()) {
-                openGui(new GuiChatWrite(game, this, world.scene().chat()));
+                openGui(new GuiChatWrite(game, this));
             }
         }
         if (controller.menu()) {

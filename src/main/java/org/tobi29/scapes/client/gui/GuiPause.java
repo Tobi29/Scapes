@@ -27,36 +27,35 @@ public class GuiPause extends Gui {
     public GuiPause(GameStateGameMP state, MobPlayerClientMain player) {
         super(GuiAlignment.CENTER);
         GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(200, 0, 400, 512);
+                new GuiComponentVisiblePane(this, 200, 0, 400, 512);
+        new GuiComponentText(pane, 16, 16, 32, "Pause");
+        new GuiComponentSeparator(pane, 24, 64, 352, 2);
         GuiComponentTextButton achievements =
-                new GuiComponentTextButton(16, 120, 368, 30, 18, "Statistics");
+                new GuiComponentTextButton(pane, 16, 120, 368, 30, 18,
+                        "Statistics");
+        GuiComponentTextButton options =
+                new GuiComponentTextButton(pane, 16, 160, 368, 30, 18,
+                        "Options");
+        String disconnectText;
+        if (state instanceof GameStateGameSP) {
+            disconnectText = "Save and quit";
+        } else {
+            disconnectText = "Disconnect";
+        }
+        GuiComponentTextButton disconnect =
+                new GuiComponentTextButton(pane, 16, 426, 368, 30, 18,
+                        disconnectText);
+        new GuiComponentSeparator(pane, 24, 408, 352, 2);
+        GuiComponentTextButton back =
+                new GuiComponentTextButton(pane, 16, 466, 368, 30, 18, "Back");
+
         achievements.addLeftClick(event -> player.connection()
                 .send(new PacketInteraction(
                         PacketInteraction.OPEN_STATISTICS)));
-        GuiComponentTextButton options =
-                new GuiComponentTextButton(16, 160, 368, 30, 18, "Options");
         options.addLeftClick(
                 event -> player.openGui(new GuiOptionsInGame(state)));
-        GuiComponentTextButton disconnect;
-        if (state instanceof GameStateGameSP) {
-            disconnect = new GuiComponentTextButton(16, 426, 368, 30, 18,
-                    "Save and quit");
-        } else {
-            disconnect = new GuiComponentTextButton(16, 426, 368, 30, 18,
-                    "Disconnect");
-        }
         disconnect.addLeftClick(event -> state.engine()
                 .setState(new GameStateMenu(state.engine())));
-        GuiComponentTextButton back =
-                new GuiComponentTextButton(16, 466, 368, 30, 18, "Back");
         back.addLeftClick(event -> player.closeGui());
-        pane.add(new GuiComponentText(16, 16, 32, "Pause"));
-        pane.add(new GuiComponentSeparator(24, 64, 352, 2));
-        pane.add(achievements);
-        pane.add(options);
-        pane.add(new GuiComponentSeparator(24, 408, 352, 2));
-        pane.add(disconnect);
-        pane.add(back);
-        add(pane);
     }
 }

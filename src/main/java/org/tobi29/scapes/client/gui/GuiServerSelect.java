@@ -47,7 +47,7 @@ public class GuiServerSelect extends GuiMenu {
     private static final byte[] CONNECTION_HEADER = ConnectionInfo.header();
     private final List<TagStructure> servers = new ArrayList<>();
     private final List<Element> elements = new ArrayList<>();
-    private final GuiComponentScrollPaneList scrollPane;
+    private final GuiComponentScrollPaneViewport scrollPane;
 
     public GuiServerSelect(GameState state, Gui previous) {
         super(state, "Multiplayer", previous);
@@ -56,17 +56,17 @@ public class GuiServerSelect extends GuiMenu {
         if (scapesTag.has("Servers")) {
             servers.addAll(scapesTag.getList("Servers"));
         }
-        scrollPane = new GuiComponentScrollPaneList(16, 80, 368, 250, 70);
+        scrollPane = new GuiComponentScrollPaneList(pane, 16, 80, 368, 290, 70)
+                .viewport();
+        updateServers();
         GuiComponentTextButton add =
-                new GuiComponentTextButton(112, 370, 176, 30, 18, "Add");
+                new GuiComponentTextButton(pane, 112, 410, 176, 30, 18, "Add");
+
         add.addLeftClick(event -> {
             state.remove(this);
             state.add(new GuiAddServer(state, this));
         });
         back.addLeftClick(event -> disposeServers());
-        pane.add(scrollPane);
-        pane.add(add);
-        updateServers();
     }
 
     private static String error(Throwable e) {
@@ -93,9 +93,8 @@ public class GuiServerSelect extends GuiMenu {
     public void updateServers() {
         disposeServers();
         for (TagStructure tagStructure : servers) {
-            Element element = new Element(tagStructure);
+            Element element = new Element(scrollPane, tagStructure);
             elements.add(element);
-            scrollPane.add(element);
         }
     }
 
@@ -121,19 +120,20 @@ public class GuiServerSelect extends GuiMenu {
         private int readState;
         private ByteBuffer buffer;
 
-        public Element(TagStructure tagStructure) {
-            super(0, 70, 378, 70);
+        public Element(GuiComponent parent, TagStructure tagStructure) {
+            super(parent, 0, 0, 378, 70);
             String address = tagStructure.getString("Address");
             int port = tagStructure.getInteger("Port");
             InetSocketAddress socketAddress =
                     new InetSocketAddress(address, port);
-            label = new GuiComponentTextButton(70, 20, 200, 30, 18,
+            label = new GuiComponentTextButton(this, 70, 20, 180, 30, 18,
                     "Pinging...");
             label.addLeftClick(event -> state.engine().setState(
                     new GameStateLoadMP(socketAddress, state.engine(),
                             (SceneMenu) state.scene())));
             GuiComponentTextButton delete =
-                    new GuiComponentTextButton(280, 20, 60, 30, 18, "Delete");
+                    new GuiComponentTextButton(this, 260, 20, 80, 30, 18,
+                            "Delete");
             delete.addLeftClick(event -> {
                 servers.remove(tagStructure);
                 TagStructure scapesTag =
@@ -142,8 +142,6 @@ public class GuiServerSelect extends GuiMenu {
                 elements.remove(this);
                 scrollPane.remove(this);
             });
-            add(label);
-            add(delete);
             try {
                 channel = SocketChannel.open();
                 channel.configureBlocking(false);
@@ -207,7 +205,7 @@ public class GuiServerSelect extends GuiMenu {
                                     TextureFilter.NEAREST,
                                     TextureFilter.NEAREST, TextureWrap.CLAMP,
                                     TextureWrap.CLAMP);
-                            add(new GuiComponentIcon(15, 15, 40, 40, texture));
+                            new GuiComponentIcon(this, 15, 15, 40, 40, texture);
                             readState = -1;
                         } else if (read == -1) {
                             readState = -1;

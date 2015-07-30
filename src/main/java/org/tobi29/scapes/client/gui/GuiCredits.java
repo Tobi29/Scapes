@@ -42,9 +42,9 @@ public class GuiCredits extends Gui {
     public GuiCredits(GameState state, Gui prev) {
         super(GuiAlignment.RIGHT);
         GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(704, 0, 96, 512);
+                new GuiComponentVisiblePane(this, 704, 0, 96, 512);
         GuiComponentTextButton back =
-                new GuiComponentTextButton(13, 64, 70, 30, 18, "Back");
+                new GuiComponentTextButton(pane, 13, 64, 70, 30, 18, "Back");
         StringBuilder credits = new StringBuilder(200);
         try (BufferedReader reader = state.engine().files()
                 .get("Scapes:Readme.txt").reader()) {
@@ -68,8 +68,6 @@ public class GuiCredits extends Gui {
             state.remove(this);
             state.add(prev);
         });
-        pane.add(back);
-        add(pane);
         state.engine().sounds()
                 .playMusic("Scapes:sound/Credits.ogg", 1.0f, 1.0f);
     }

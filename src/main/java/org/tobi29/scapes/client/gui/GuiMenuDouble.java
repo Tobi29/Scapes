@@ -32,18 +32,18 @@ public class GuiMenuDouble extends Gui {
             String back, Gui previous) {
         super(GuiAlignment.CENTER);
         this.state = state;
-        pane = new GuiComponentVisiblePane(200, 0, 400, 512);
-        pane.add(new GuiComponentText(16, 16, 32, title));
-        pane.add(new GuiComponentSeparator(24, 64, 352, 2));
-        pane.add(new GuiComponentSeparator(24, 408, 352, 2));
-        this.save = new GuiComponentTextButton(112, 426, 176, 30, 18, save);
-        pane.add(this.save);
-        this.back = new GuiComponentTextButton(112, 466, 176, 30, 18, back);
+        pane = new GuiComponentVisiblePane(this, 200, 0, 400, 512);
+        new GuiComponentText(pane, 16, 16, 32, title);
+        new GuiComponentSeparator(pane, 24, 64, 352, 2);
+        new GuiComponentSeparator(pane, 24, 408, 352, 2);
+        this.save =
+                new GuiComponentTextButton(pane, 112, 426, 176, 30, 18, save);
+        this.back =
+                new GuiComponentTextButton(pane, 112, 466, 176, 30, 18, back);
+
         this.back.addLeftClick(event -> {
             state.remove(this);
             state.add(previous);
         });
-        pane.add(this.back);
-        add(pane);
     }
 }

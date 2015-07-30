@@ -278,6 +278,11 @@ class VanillaBasicsRegisters {
             }
 
             @Override
+            public boolean table() {
+                return false;
+            }
+
+            @Override
             public boolean availableFor(MobPlayerServer player) {
                 return true;
             }
@@ -333,7 +338,7 @@ class VanillaBasicsRegisters {
                 new CraftingRecipe.IngredientList(
                         new ItemStack(materials.coal, (short) 0))));
 
-        registry.registerCraftingRecipe(recipeType, false);
+        registry.registerCraftingRecipe(recipeType);
     }
 
     static void registerRecipesStone(GameRegistry registry,
@@ -343,6 +348,11 @@ class VanillaBasicsRegisters {
             @Override
             public String name() {
                 return "Stone";
+            }
+
+            @Override
+            public boolean table() {
+                return false;
             }
 
             @Override
@@ -421,7 +431,7 @@ class VanillaBasicsRegisters {
                         new ItemStack(materials.grassBundle, (short) 1, 2))),
                 new ItemStack(materials.straw, (short) 1)));
 
-        registry.registerCraftingRecipe(recipeType, false);
+        registry.registerCraftingRecipe(recipeType);
     }
 
     static void registerRecipesFood(GameRegistry registry,
@@ -432,6 +442,11 @@ class VanillaBasicsRegisters {
             @Override
             public String name() {
                 return "Food";
+            }
+
+            @Override
+            public boolean table() {
+                return true;
             }
 
             @Override
@@ -478,7 +493,7 @@ class VanillaBasicsRegisters {
                     new ItemStack(materials.dough, i)));
         }
 
-        registry.registerCraftingRecipe(recipeType, true);
+        registry.registerCraftingRecipe(recipeType);
     }
 
     static void registerRecipesMetal(GameRegistry registry,
@@ -488,6 +503,11 @@ class VanillaBasicsRegisters {
             @Override
             public String name() {
                 return "Metal";
+            }
+
+            @Override
+            public boolean table() {
+                return true;
             }
 
             @Override
@@ -530,7 +550,8 @@ class VanillaBasicsRegisters {
                 .add(new CraftingRecipe(Collections.singletonList(cobblestones),
                         Collections.singletonList(pickaxe),
                         new ItemStack(materials.alloy, (short) 0)));
-        registry.registerCraftingRecipe(recipeType, true);
+
+        registry.registerCraftingRecipe(recipeType);
     }
 
     static void registerRecipesIron(GameRegistry registry,
@@ -539,6 +560,11 @@ class VanillaBasicsRegisters {
             @Override
             public String name() {
                 return "Iron";
+            }
+
+            @Override
+            public boolean table() {
+                return true;
             }
 
             @Override
@@ -569,7 +595,7 @@ class VanillaBasicsRegisters {
                         new ItemStack(materials.saw, (short) 1))),
                 new ItemStack(materials.bellows, (short) 0)));
 
-        registry.registerCraftingRecipe(recipeType, true);
+        registry.registerCraftingRecipe(recipeType);
     }
 
     static void registerResearch(VanillaBasics plugin) {

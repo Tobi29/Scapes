@@ -50,7 +50,7 @@ public class PacketChat extends Packet implements PacketServer, PacketClient {
 
     @Override
     public void runClient(ClientConnection client, WorldClient world) {
-        client.world().scene().chat(text);
+        client.game().chatHistory().addLine(text);
     }
 
     @Override

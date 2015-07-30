@@ -45,7 +45,7 @@ public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
     public void updateClient() {
         if (state.id < State.LOADED.id) {
             TerrainInfiniteClient terrainClient = terrain;
-            if (!requested && terrainClient.requestedChunks() < 10) {
+            if (!requested && terrainClient.requestedChunks() < 3) {
                 requested = true;
                 terrainClient.changeRequestedChunks(1);
                 terrain.world().connection()

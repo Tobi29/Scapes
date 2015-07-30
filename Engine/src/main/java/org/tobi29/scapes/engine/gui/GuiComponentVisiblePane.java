@@ -22,8 +22,9 @@ import org.tobi29.scapes.engine.opengl.shader.Shader;
 public class GuiComponentVisiblePane extends GuiComponent {
     private final VAO vao;
 
-    public GuiComponentVisiblePane(int x, int y, int width, int height) {
-        super(x, y, width, height);
+    public GuiComponentVisiblePane(GuiComponent parent, int x, int y, int width,
+            int height) {
+        super(parent, x, y, width, height);
         Mesh mesh = new Mesh(true);
         GuiUtils.renderShadow(mesh, 0.0f, 0.0f, width, height, 0.2f);
         mesh.addVertex(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.3f, 0.0f, 0.0f);

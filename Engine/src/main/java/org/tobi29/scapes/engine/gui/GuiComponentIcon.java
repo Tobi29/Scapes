@@ -25,9 +25,9 @@ public class GuiComponentIcon extends GuiComponent {
     private final VAO vao, vaoShadow;
     private float r = 1.0f, g = 1.0f, b = 1.0f, a = 1.0f;
 
-    public GuiComponentIcon(int x, int y, int width, int height,
-            Texture texture) {
-        super(x, y, width, height);
+    public GuiComponentIcon(GuiComponent parent, int x, int y, int width,
+            int height, Texture texture) {
+        super(parent, x, y, width, height);
         this.width = width;
         this.height = height;
         this.texture = texture;

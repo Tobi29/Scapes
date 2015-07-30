@@ -18,41 +18,44 @@ package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiAlignment;
-import org.tobi29.scapes.engine.opengl.FontRenderer;
-import org.tobi29.scapes.engine.opengl.GL;
+import org.tobi29.scapes.engine.opengl.*;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 
 public class GuiHud extends Gui {
-    public final GuiComponentCross cross;
+    private static final float CROSS_SIZE = 8.0f;
+    private static final VAO CROSS = VAOUtility.createVCTI(
+            new float[]{-CROSS_SIZE, -CROSS_SIZE, 0.0f, CROSS_SIZE, -CROSS_SIZE,
+                    0.0f, CROSS_SIZE, CROSS_SIZE, 0.0f, -CROSS_SIZE, CROSS_SIZE,
+                    0.0f},
+            new float[]{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+                    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+            new float[]{0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f},
+            new int[]{0, 1, 2, 0, 2, 3}, RenderType.TRIANGLES);
 
     public GuiHud(MobPlayerClientMain player) {
         super(GuiAlignment.LEFT);
-        add(new GuiComponentHotbar(8, 464, 560, 40, player));
-        add(new GuiComponentBar(8, 426, 280, 16, 1.0f, 0.0f, 0.0f, 0.6f,
-                () -> player.health() / player.maxHealth()));
-        cross = new GuiComponentCross(392, 248, 16, 16);
+        new GuiComponentHotbar(this, 8, 464, 560, 40, player);
+        new GuiComponentBar(this, 8, 426, 280, 16, 1.0f, 0.0f, 0.0f, 0.6f,
+                () -> player.health() / player.maxHealth());
     }
 
     @Override
     public void render(GL gl, Shader shader, FontRenderer font, double delta) {
+        super.render(gl, shader, font, delta);
         if (visible) {
-            super.render(gl, shader, font, delta);
             MatrixStack matrixStack = gl.matrixStack();
             Matrix matrix = matrixStack.push();
+            matrix.translate(400.0f, 256.0f, 0.0f);
             float ratio = (float) gl.sceneHeight() / gl.sceneWidth() * 1.5625f;
             matrix.scale(ratio, 1.0f, 1.0f);
-            matrix.translate(-400.0f + 400.0f / ratio, 0.0f, 0.0f);
-            cross.render(gl, shader, font, delta);
+            gl.textures().bind("Scapes:image/gui/Cross", gl);
+            gl.setBlending(BlendingMode.INVERT);
+            CROSS.render(gl, shader);
+            gl.setBlending(BlendingMode.NORMAL);
             matrixStack.pop();
         }
-    }
-
-    @Override
-    public void removed() {
-        super.removed();
-        cross.removed();
     }
 }

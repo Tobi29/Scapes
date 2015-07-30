@@ -27,19 +27,17 @@ public class GuiDisconnected extends Gui {
     public GuiDisconnected(GameState state, String message) {
         super(GuiAlignment.CENTER);
         GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(200, 0, 400, 512);
+                new GuiComponentVisiblePane(this, 200, 0, 400, 512);
+        new GuiComponentText(pane, 16, 16, 32, "Error");
+        new GuiComponentSeparator(pane, 24, 64, 352, 2);
+        new GuiComponentText(pane, 16, 80, 12, message);
+        reconnectTimer = new GuiComponentText(pane, 16, 400, 32, "");
+        new GuiComponentSeparator(pane, 24, 448, 352, 2);
         GuiComponentTextButton back =
-                new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");
+                new GuiComponentTextButton(pane, 112, 466, 176, 30, 18, "Back");
+
         back.addLeftClick(event -> state.engine()
                 .setState(new GameStateMenu(state.engine())));
-        pane.add(new GuiComponentText(16, 16, 32, "Error"));
-        pane.add(new GuiComponentSeparator(24, 64, 352, 2));
-        pane.add(new GuiComponentText(16, 80, 12, message));
-        reconnectTimer = new GuiComponentText(16, 400, 32, "");
-        pane.add(reconnectTimer);
-        pane.add(new GuiComponentSeparator(24, 448, 352, 2));
-        pane.add(back);
-        add(pane);
     }
 
     public void setReconnectTimer(double time) {

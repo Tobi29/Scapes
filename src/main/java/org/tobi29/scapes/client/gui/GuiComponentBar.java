@@ -28,9 +28,9 @@ public class GuiComponentBar extends GuiComponent {
     private final VAO vao1, vao2;
     private float value;
 
-    public GuiComponentBar(int x, int y, int width, int height, float r,
-            float g, float b, float a, Supplier supplier) {
-        super(x, y, width, height);
+    public GuiComponentBar(GuiComponent parent, int x, int y, int width,
+            int height, float r, float g, float b, float a, Supplier supplier) {
+        super(parent, x, y, width, height);
         this.supplier = supplier;
         float r2 = r * 0.5f;
         float g2 = g * 0.5f;

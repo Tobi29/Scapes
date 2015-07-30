@@ -17,7 +17,8 @@
 package org.tobi29.scapes.engine.gui;
 
 public class GuiComponentPane extends GuiComponent {
-    public GuiComponentPane(int x, int y, int width, int height) {
-        super(x, y, width, height);
+    public GuiComponentPane(GuiComponent parent, int x, int y, int width,
+            int height) {
+        super(parent, x, y, width, height);
     }
 }

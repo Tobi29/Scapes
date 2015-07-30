@@ -22,7 +22,7 @@ import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.GuiAlignment;
 import org.tobi29.scapes.engine.gui.GuiComponentIcon;
 import org.tobi29.scapes.engine.gui.GuiComponentText;
-import org.tobi29.scapes.engine.gui.GuiMessage;
+import org.tobi29.scapes.engine.gui.GuiNotification;
 import org.tobi29.scapes.engine.openal.SoundSystem;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -91,16 +91,15 @@ public class Playlist {
                 Random random = ThreadLocalRandom.current();
                 Path title = titles.get(random.nextInt(titles.size()));
                 ScapesEngine engine = player.game().engine();
-                GuiMessage message =
-                        new GuiMessage(500, 0, 290, 60, GuiAlignment.RIGHT,
-                                3.0);
-                message.add(new GuiComponentIcon(10, 10, 40, 40,
+                GuiNotification message =
+                        new GuiNotification(engine.globalGUI(), 500, 0, 290, 60,
+                                GuiAlignment.RIGHT, 3.0);
+                new GuiComponentIcon(message, 10, 10, 40, 40,
                         engine.graphics().textures()
-                                .get("Scapes:image/gui/Playlist")));
+                                .get("Scapes:image/gui/Playlist"));
                 String name = title.getFileName().toString();
                 name = name.substring(0, name.lastIndexOf('.'));
-                message.add(new GuiComponentText(60, 23, 420, 16, name));
-                engine.globalGUI().add(message);
+                new GuiComponentText(message, 60, 23, 420, 16, name);
                 sounds.playMusic(FileUtil.read(title), 1.0f, 1.0f);
             }
         } catch (IOException e) {

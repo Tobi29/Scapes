@@ -27,8 +27,9 @@ public class GuiComponentButton extends GuiComponent {
     private boolean hover;
     private VAO vao;
 
-    public GuiComponentButton(int x, int y, int width, int height) {
-        super(x, y, width, height);
+    public GuiComponentButton(GuiComponent parent, int x, int y, int width,
+            int height) {
+        super(parent, x, y, width, height);
         updateMesh();
     }
 

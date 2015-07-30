@@ -21,15 +21,14 @@ import org.tobi29.scapes.engine.gui.GuiAlignment;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 
 public class GuiLoading extends Gui {
-    private final GuiComponentLoading progress =
-            new GuiComponentLoading(300, 280, 200, 16);
-    private final GuiComponentTextButton label =
-            new GuiComponentTextButton(300, 310, 200, 32, 18, "Loading...");
+    private final GuiComponentLoading progress;
+    private final GuiComponentTextButton label;
 
     public GuiLoading() {
         super(GuiAlignment.CENTER);
-        add(progress);
-        add(label);
+        progress = new GuiComponentLoading(this, 300, 280, 200, 16);
+        label = new GuiComponentTextButton(this, 300, 310, 200, 32, 18,
+                "Loading...");
     }
 
     public void setProgress(float value) {

@@ -19,19 +19,9 @@ package org.tobi29.scapes.engine.gui;
 import org.tobi29.scapes.engine.ScapesEngine;
 
 public class GuiComponentScrollPaneList extends GuiComponentScrollPane {
-    public GuiComponentScrollPaneList(int x, int y, int width, int height,
-            int scrollStep) {
-        super(x, y, width, height, scrollStep);
-    }
-
-    @Override
-    public void add(GuiComponent add) {
-        super.add(add);
-    }
-
-    @Override
-    public void remove(GuiComponent remove) {
-        super.remove(remove);
+    public GuiComponentScrollPaneList(GuiComponent parent, int x, int y,
+            int width, int height, int scrollStep) {
+        super(parent, x, y, width, height, scrollStep);
     }
 
     @Override
@@ -39,10 +29,10 @@ public class GuiComponentScrollPaneList extends GuiComponentScrollPane {
             ScapesEngine engine) {
         super.update(mouseX, mouseY, mouseInside, engine);
         int i = 0;
-        for (GuiComponent component : components) {
+        for (GuiComponent component : viewport.components) {
             component.setY(i);
-            i += scrollStep;
+            i += viewport.scrollStep;
         }
-        setMaxY(i - scrollStep);
+        viewport.setMaxY(i - viewport.scrollStep);
     }
 }

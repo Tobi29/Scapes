@@ -32,41 +32,42 @@ public class GuiComponentTextField extends GuiComponentTextButton {
     private boolean cursor;
     private FontRenderer.Text vaoCursor, vaoSelection;
 
-    public GuiComponentTextField(int x, int y, int width, int height,
-            int textSize, String defaultText) {
-        this(x, y, width, height, textSize, defaultText, Integer.MAX_VALUE,
+    public GuiComponentTextField(GuiComponent parent, int x, int y, int width,
+            int height, int textSize, String defaultText) {
+        this(parent, x, y, width, height, textSize, defaultText,
+                Integer.MAX_VALUE, false);
+    }
+
+    public GuiComponentTextField(GuiComponent parent, int x, int y, int width,
+            int height, int textSize, String defaultText, boolean hiddenText) {
+        this(parent, x, y, width, height, textSize, defaultText,
+                Integer.MAX_VALUE, hiddenText, false);
+    }
+
+    public GuiComponentTextField(GuiComponent parent, int x, int y, int width,
+            int height, int textSize, String defaultText, boolean hiddenText,
+            boolean major) {
+        this(parent, x, y, width, height, textSize, defaultText,
+                Integer.MAX_VALUE, hiddenText, major);
+    }
+
+    public GuiComponentTextField(GuiComponent parent, int x, int y, int width,
+            int height, int textSize, String defaultText, int maxLength) {
+        this(parent, x, y, width, height, textSize, defaultText, maxLength,
                 false);
     }
 
-    public GuiComponentTextField(int x, int y, int width, int height,
-            int textSize, String defaultText, boolean hiddenText) {
-        this(x, y, width, height, textSize, defaultText, Integer.MAX_VALUE,
+    public GuiComponentTextField(GuiComponent parent, int x, int y, int width,
+            int height, int textSize, String defaultText, int maxLength,
+            boolean hiddenText) {
+        this(parent, x, y, width, height, textSize, defaultText, maxLength,
                 hiddenText, false);
     }
 
-    public GuiComponentTextField(int x, int y, int width, int height,
-            int textSize, String defaultText, boolean hiddenText,
-            boolean major) {
-        this(x, y, width, height, textSize, defaultText, Integer.MAX_VALUE,
-                hiddenText, major);
-    }
-
-    public GuiComponentTextField(int x, int y, int width, int height,
-            int textSize, String defaultText, int maxLength) {
-        this(x, y, width, height, textSize, defaultText, maxLength, false);
-    }
-
-    public GuiComponentTextField(int x, int y, int width, int height,
-            int textSize, String defaultText, int maxLength,
-            boolean hiddenText) {
-        this(x, y, width, height, textSize, defaultText, maxLength, hiddenText,
-                false);
-    }
-
-    public GuiComponentTextField(int x, int y, int width, int height,
-            int textSize, String defaultText, int maxLength, boolean hiddenText,
-            boolean major) {
-        super(x, y, width, height, textSize, defaultText);
+    public GuiComponentTextField(GuiComponent parent, int x, int y, int width,
+            int height, int textSize, String defaultText, int maxLength,
+            boolean hiddenText, boolean major) {
+        super(parent, x, y, width, height, textSize, defaultText);
         this.major = major;
         this.maxLength = maxLength;
         data = new GuiController.TextFieldData(defaultText,

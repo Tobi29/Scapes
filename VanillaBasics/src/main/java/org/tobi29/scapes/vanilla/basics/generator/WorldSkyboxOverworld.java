@@ -280,7 +280,7 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         windAudio = engine.sounds().playStaticAudio(
                 "VanillaBasics:sound/entity/particle/rain/Wind1.ogg", 1.0f,
                 0.0f);
-        world.scene().hud().add(new GuiHudCondition(world.player()));
+        new GuiHudCondition(world.scene().hud(), world.player());
     }
 
     @Override

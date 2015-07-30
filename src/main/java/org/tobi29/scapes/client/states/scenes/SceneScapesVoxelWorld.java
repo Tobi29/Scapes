@@ -84,7 +84,6 @@ public class SceneScapesVoxelWorld extends Scene {
     private final ClientSkinStorage skinStorage;
     private final GuiWidgetDebugClient debugWidget;
     private final GuiWidgetPerformanceClient performanceWidget;
-    private final GuiComponentChat chat = new GuiComponentChat(8, 416, 0, 0);
     private float brightness;
     private float renderDistance, fov;
     private int flashDir;
@@ -172,10 +171,6 @@ public class SceneScapesVoxelWorld extends Scene {
         this.guiHide = guiHide;
     }
 
-    public void chat(String line) {
-        chat.addLine(line);
-    }
-
     public MobPlayerClientMain player() {
         return world.player();
     }
@@ -221,7 +216,7 @@ public class SceneScapesVoxelWorld extends Scene {
             }
         }
         hud = new GuiHud(player);
-        hud.add(chat);
+        new GuiComponentChat(hud, world.game().chatHistory(), 8, 416, 0, 0);
         addGui(hud);
         ShaderManager shaderManager = gl.shaders();
         ShaderCompileInformation information =
@@ -493,10 +488,6 @@ public class SceneScapesVoxelWorld extends Scene {
         return skybox;
     }
 
-    public GuiComponentChat chat() {
-        return chat;
-    }
-
     public GuiHud hud() {
         return hud;
     }
@@ -507,13 +498,11 @@ public class SceneScapesVoxelWorld extends Scene {
         private GuiWidgetPerformanceClient() {
             super(32, 32, 240, 80, "Performance Graph");
             graphRender =
-                    new GuiComponentGraph(0, 0, width, height, 0.0f, 1.0f, 0.0f,
-                            1.0f);
-            add(graphRender);
+                    new GuiComponentGraph(this, 0, 0, width, height, 0.0f, 1.0f,
+                            0.0f, 1.0f);
             graphUpdate =
-                    new GuiComponentGraph(0, 0, width, height, 0.0f, 0.0f, 1.0f,
-                            1.0f);
-            add(graphUpdate);
+                    new GuiComponentGraph(this, 0, 0, width, height, 0.0f, 0.0f,
+                            1.0f, 1.0f);
         }
     }
 
@@ -521,33 +510,29 @@ public class SceneScapesVoxelWorld extends Scene {
         private GuiWidgetDebugClient() {
             super(32, 32, 160, 120, "Debug Values");
             GuiComponentTextButton geometryButton =
-                    new GuiComponentTextButton(10, 10, 140, 15, 12, "Geometry");
+                    new GuiComponentTextButton(this, 10, 10, 140, 15, 12,
+                            "Geometry");
             geometryButton.addLeftClick(
                     event -> chunkGeometryDebug = !chunkGeometryDebug);
-            add(geometryButton);
             GuiComponentTextButton wireframeButton =
-                    new GuiComponentTextButton(10, 30, 140, 15, 12,
+                    new GuiComponentTextButton(this, 10, 30, 140, 15, 12,
                             "Wireframe");
             wireframeButton.addLeftClick(event -> wireframe = !wireframe);
-            add(wireframeButton);
             GuiComponentTextButton distanceButton =
-                    new GuiComponentTextButton(10, 50, 140, 15, 12,
+                    new GuiComponentTextButton(this, 10, 50, 140, 15, 12,
                             "Static Render Distance");
             distanceButton.addLeftClick(
                     event -> world.terrain().toggleStaticRenderDistance());
-            add(distanceButton);
             GuiComponentTextButton reloadGeometryButton =
-                    new GuiComponentTextButton(10, 70, 140, 15, 12,
+                    new GuiComponentTextButton(this, 10, 70, 140, 15, 12,
                             "Reload Geometry");
             reloadGeometryButton
                     .addLeftClick(event -> world.terrain().reloadGeometry());
-            add(reloadGeometryButton);
             GuiComponentTextButton performanceButton =
-                    new GuiComponentTextButton(10, 90, 140, 15, 12,
+                    new GuiComponentTextButton(this, 10, 90, 140, 15, 12,
                             "Performance");
             performanceButton.addLeftClick(event -> performanceWidget
                     .setVisible(!performanceWidget.isVisible()));
-            add(performanceButton);
         }
     }
 }

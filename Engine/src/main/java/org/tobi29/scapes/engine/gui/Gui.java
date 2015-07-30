@@ -22,6 +22,7 @@ import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.utils.Pair;
 
 public class Gui extends GuiComponent {
     private final GuiAlignment alignment;
@@ -34,6 +35,10 @@ public class Gui extends GuiComponent {
     public Gui(int x, int y, int width, int height, GuiAlignment alignment) {
         super(x, y, width, height);
         this.alignment = alignment;
+    }
+
+    public void add(Gui add) {
+        changeComponents.add(new Pair<>(true, add));
     }
 
     @Override

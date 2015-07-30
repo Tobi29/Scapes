@@ -19,6 +19,7 @@ package org.tobi29.scapes.client.states;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.Scapes;
+import org.tobi29.scapes.client.ChatHistory;
 import org.tobi29.scapes.client.Playlist;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.client.states.scenes.SceneScapesVoxelWorld;
@@ -36,6 +37,7 @@ public class GameStateGameMP extends GameState {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GameStateGameMP.class);
     protected final ClientConnection client;
+    private final ChatHistory chatHistory;
     private final Playlist playlist;
     private final GuiWidgetDebugValues.Element tickDebug;
     private double pingWait;
@@ -43,6 +45,7 @@ public class GameStateGameMP extends GameState {
     protected GameStateGameMP(ClientConnection client, Scene scene,
             ScapesEngine engine) {
         super(engine, scene);
+        chatHistory = new ChatHistory();
         playlist = new Playlist(engine.sounds());
         this.client = client;
         tickDebug = engine.debugValues().get("Client-TPS");
@@ -96,6 +99,7 @@ public class GameStateGameMP extends GameState {
             scene.toggleDebug();
         }
         MobPlayerClientMain player = scene.player();
+        chatHistory.update();
         playlist.update(player, delta);
         scene.update(delta);
         pingWait -= delta;
@@ -104,6 +108,10 @@ public class GameStateGameMP extends GameState {
             client.send(new PacketPingClient(System.currentTimeMillis()));
         }
         tickDebug.setValue(1.0 / delta);
+    }
+
+    public ChatHistory chatHistory() {
+        return chatHistory;
     }
 
     public Playlist playlist() {

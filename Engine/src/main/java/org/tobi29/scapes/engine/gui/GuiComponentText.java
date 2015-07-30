@@ -26,13 +26,14 @@ public class GuiComponentText extends GuiComponent {
     private FontRenderer.Text vaoText;
     private FontRenderer font;
 
-    public GuiComponentText(int x, int y, int textSize, String text) {
-        this(x, y, Integer.MAX_VALUE, textSize, text);
+    public GuiComponentText(GuiComponent parent, int x, int y, int textSize,
+            String text) {
+        this(parent, x, y, Integer.MAX_VALUE, textSize, text);
     }
 
-    public GuiComponentText(int x, int y, int maxLength, int textSize,
-            String text) {
-        super(x, y, maxLength, textSize);
+    public GuiComponentText(GuiComponent parent, int x, int y, int maxLength,
+            int textSize, String text) {
+        super(parent, x, y, maxLength, textSize);
         this.text = text;
         this.textSize = textSize;
     }

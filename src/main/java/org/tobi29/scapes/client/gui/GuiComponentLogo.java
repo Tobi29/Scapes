@@ -44,8 +44,9 @@ public class GuiComponentLogo extends GuiComponent {
     private FontRenderer.Text vaoScapes, vaoSplash;
     private FontRenderer font;
 
-    public GuiComponentLogo(int x, int y, int width, int height) {
-        super(x, y, width, height);
+    public GuiComponentLogo(GuiComponent parent, int x, int y, int width,
+            int height) {
+        super(parent, x, y, width, height);
         text = splash();
         textX = x + height - 8;
         textY = y + 4;

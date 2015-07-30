@@ -17,6 +17,7 @@
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.gui.GuiComponent;
 import org.tobi29.scapes.engine.gui.GuiComponentEvent;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
@@ -29,10 +30,10 @@ public class GuiComponentControlsAxis extends GuiComponentTextButton {
     private byte editing;
     private int axis;
 
-    public GuiComponentControlsAxis(int x, int y, int width, int height,
-            int textSize, String name, String id, TagStructure tagStructure,
-            ControllerJoystick controller) {
-        super(x, y, width, height, textSize, "");
+    public GuiComponentControlsAxis(GuiComponent parent, int x, int y,
+            int width, int height, int textSize, String name, String id,
+            TagStructure tagStructure, ControllerJoystick controller) {
+        super(parent, x, y, width, height, textSize, "");
         this.name = name;
         this.id = id;
         this.tagStructure = tagStructure;

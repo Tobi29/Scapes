@@ -37,9 +37,8 @@ public class GuiWidget extends Gui {
         mesh.addVertex(0.0f, height, 0.0f, 0.0f, 0.0f, 0.0f, 0.3f, 0.0f, 0.0f);
         mesh.addVertex(width, height, 0.0f, 0.0f, 0.0f, 0.0f, 0.3f, 0.0f, 0.0f);
         vao = mesh.finish();
-        titleBar = new GuiComponentVisiblePane(0, -16, width, 16);
-        add(titleBar);
-        titleBar.add(new GuiComponentText(2, 2, 12, name));
+        titleBar = new GuiComponentVisiblePane(this, 0, -16, width, 16);
+        new GuiComponentText(titleBar, 2, 2, 12, name);
     }
 
     @Override

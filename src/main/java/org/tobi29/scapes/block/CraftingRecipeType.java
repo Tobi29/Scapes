@@ -27,6 +27,8 @@ public abstract class CraftingRecipeType {
 
     public abstract String name();
 
+    public abstract boolean table();
+
     public abstract boolean availableFor(MobPlayerServer player);
 
     public abstract boolean availableFor(MobPlayerClientMain player);

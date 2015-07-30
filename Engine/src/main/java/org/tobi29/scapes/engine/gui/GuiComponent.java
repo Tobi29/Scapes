@@ -33,9 +33,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicLong;
 
-public abstract class GuiComponent
-        implements GuiComponentEventListenerContainer,
-        Comparable<GuiComponent> {
+public abstract class GuiComponent implements Comparable<GuiComponent> {
     private static final AtomicLong UID_COUNTER =
             new AtomicLong(Long.MIN_VALUE);
     protected final Queue<Pair<Boolean, GuiComponent>> changeComponents =
@@ -48,20 +46,28 @@ public abstract class GuiComponent
             Collections.newSetFromMap(new ConcurrentHashMap<>());
     protected final Set<GuiComponentEventListener> rightEvents =
             Collections.newSetFromMap(new ConcurrentHashMap<>());
+    protected final Optional<GuiComponent> parent;
     private final long uid = UID_COUNTER.getAndIncrement();
-    protected GuiComponent parent;
     protected boolean visible = true, hovering;
     protected int x, y, width, height;
 
     protected GuiComponent(int x, int y, int width, int height) {
+        this(Optional.empty(), x, y, width, height);
+    }
+
+    protected GuiComponent(GuiComponent parent, int x, int y, int width,
+            int height) {
+        this(Optional.of(parent), x, y, width, height);
+        parent.changeComponents.add(new Pair<>(true, this));
+    }
+
+    protected GuiComponent(Optional<GuiComponent> parent, int x, int y,
+            int width, int height) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
-    }
-
-    public void add(GuiComponent add) {
-        changeComponents.add(new Pair<>(true, add));
+        this.parent = parent;
     }
 
     public void remove(GuiComponent remove) {
@@ -73,37 +79,30 @@ public abstract class GuiComponent
                 .forEach(changeComponents::add);
     }
 
-    @Override
     public void addLeftClick(GuiComponentEventListener add) {
         events.add(add);
     }
 
-    @Override
     public void addRightClick(GuiComponentEventListener add) {
         rightEvents.add(add);
     }
 
-    @Override
     public void addHover(GuiComponentHoverListener add) {
         hovers.add(add);
     }
 
-    @Override
     public void removeLeftClick(GuiComponentEventListener remove) {
         events.remove(remove);
     }
 
-    @Override
     public void removeRightClock(GuiComponentEventListener remove) {
         rightEvents.remove(remove);
     }
 
-    @Override
     public void removeHover(GuiComponentHoverListener remove) {
         hovers.remove(remove);
     }
 
-    @Override
     public void clickLeft(GuiComponentEvent event, ScapesEngine engine) {
         for (GuiComponentEventListener event1 : events) {
             event1.click(event);
@@ -111,7 +110,6 @@ public abstract class GuiComponent
         gui().ifPresent(gui -> gui.setLastClicked(this));
     }
 
-    @Override
     public void clickRight(GuiComponentEvent event, ScapesEngine engine) {
         for (GuiComponentEventListener rightEvent : rightEvents) {
             rightEvent.click(event);
@@ -119,7 +117,6 @@ public abstract class GuiComponent
         gui().ifPresent(gui -> gui.setLastClicked(this));
     }
 
-    @Override
     public void hover(GuiComponentHoverEvent event) {
         for (GuiComponentHoverListener hover : hovers) {
             hover.hover(event);
@@ -154,8 +151,8 @@ public abstract class GuiComponent
     public Optional<Gui> gui() {
         GuiComponent other = this;
         while (true) {
-            if (other.parent != null) {
-                other = other.parent;
+            if (other.parent.isPresent()) {
+                other = other.parent.get();
                 continue;
             }
             if (other instanceof Gui) {
@@ -231,11 +228,9 @@ public abstract class GuiComponent
                 Pair<Boolean, GuiComponent> component = changeComponents.poll();
                 if (component.a) {
                     components.add(component.b);
-                    component.b.parent = this;
                 } else {
                     components.remove(component.b);
                     component.b.removed();
-                    component.b.parent = null;
                 }
             }
             double mouseXX = mouseX - x;

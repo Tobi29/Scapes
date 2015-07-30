@@ -49,19 +49,29 @@ public class GuiAccount extends GuiMenu {
         } catch (IOException e) {
             LOGGER.error("Failed to read account file: {}", e.toString());
         }
-        GuiComponentText hash = new GuiComponentText(16, 140, 12, "Hash: " +
-                ChecksumUtil.getChecksum(keyPair.getPrivate().getEncoded(),
-                        ChecksumUtil.ChecksumAlgorithm.SHA1));
-        GuiComponentText id = new GuiComponentText(16, 160, 12, "ID: " +
+        new GuiComponentText(pane, 16, 80, 18, "Key:");
+        GuiComponentButton keyCopy =
+                new GuiComponentTextButton(pane, 16, 100, 174, 30, 18, "Copy");
+        GuiComponentButton keyPaste =
+                new GuiComponentTextButton(pane, 210, 100, 174, 30, 18,
+                        "Paste");
+        GuiComponentText hash = new GuiComponentText(pane, 16, 140, 12,
+                "Hash: " + ChecksumUtil
+                        .getChecksum(keyPair.getPrivate().getEncoded(),
+                                ChecksumUtil.ChecksumAlgorithm.SHA1));
+        GuiComponentText id = new GuiComponentText(pane, 16, 160, 12, "ID: " +
                 ChecksumUtil.getChecksum(keyPair.getPublic().getEncoded(),
                         ChecksumUtil.ChecksumAlgorithm.SHA1));
-        GuiComponentText error = new GuiComponentText(16, 320, 18, "");
-        GuiComponentButton keyCopy =
-                new GuiComponentTextButton(16, 100, 174, 30, 18, "Copy");
+        new GuiComponentText(pane, 16, 180, 18, "Nickname:");
+        GuiComponentTextField nickname =
+                new GuiComponentTextField(pane, 16, 200, 368, 30, 18,
+                        this.nickname);
+        GuiComponentTextButton skin =
+                new GuiComponentTextButton(pane, 112, 260, 176, 30, 18, "Skin");
+        GuiComponentText error = new GuiComponentText(pane, 16, 320, 18, "");
+
         keyCopy.addLeftClick(event -> state.engine().controller()
                 .clipboardCopy(Account.key(keyPair)));
-        GuiComponentButton keyPaste =
-                new GuiComponentTextButton(210, 100, 174, 30, 18, "Paste");
         keyPaste.addLeftClick(event -> {
             String str = state.engine().controller().clipboardPaste();
             Optional<KeyPair> keyPair =
@@ -77,10 +87,6 @@ public class GuiAccount extends GuiMenu {
                 error.setText("Invalid key!");
             }
         });
-        GuiComponentTextField nickname =
-                new GuiComponentTextField(16, 200, 368, 30, 18, this.nickname);
-        GuiComponentTextButton skin =
-                new GuiComponentTextButton(112, 260, 176, 30, 18, "Skin");
         skin.addLeftClick(event -> {
             try {
                 Path path = state.engine().home().resolve("Skin.png");
@@ -110,14 +116,5 @@ public class GuiAccount extends GuiMenu {
             state.remove(this);
             state.add(previous);
         });
-        pane.add(new GuiComponentText(16, 80, 18, "Key:"));
-        pane.add(keyCopy);
-        pane.add(keyPaste);
-        pane.add(hash);
-        pane.add(id);
-        pane.add(new GuiComponentText(16, 180, 18, "Nickname:"));
-        pane.add(nickname);
-        pane.add(skin);
-        pane.add(error);
     }
 }

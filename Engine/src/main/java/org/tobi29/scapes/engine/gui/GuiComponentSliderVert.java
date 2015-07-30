@@ -30,14 +30,14 @@ public class GuiComponentSliderVert extends GuiComponent {
     private boolean hover, dragging;
     private VAO vaoSlider;
 
-    public GuiComponentSliderVert(int x, int y, int width, int height,
-            double value) {
-        this(x, y, width, height, 16, value);
+    public GuiComponentSliderVert(GuiComponent parent, int x, int y, int width,
+            int height, double value) {
+        this(parent, x, y, width, height, 16, value);
     }
 
-    public GuiComponentSliderVert(int x, int y, int width, int height,
-            int sliderHeight, double value) {
-        super(x, y, width, height);
+    public GuiComponentSliderVert(GuiComponent parent, int x, int y, int width,
+            int height, int sliderHeight, double value) {
+        super(parent, x, y, width, height);
         this.sliderHeight = sliderHeight;
         this.value = value;
         Mesh mesh = new Mesh(true);

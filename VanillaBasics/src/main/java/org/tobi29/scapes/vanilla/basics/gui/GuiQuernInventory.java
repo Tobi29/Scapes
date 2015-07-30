@@ -28,9 +28,8 @@ public class GuiQuernInventory extends GuiContainerInventory {
         super("Quern", player, container);
         addButton(185, 90, 30, 30, 0);
         GuiComponentTextButton quern =
-                new GuiComponentTextButton(27, 210, 120, 30, 18, "Quern");
+                new GuiComponentTextButton(pane, 27, 210, 120, 30, 18, "Quern");
         quern.addLeftClick(
                 event -> player.connection().send(new PacketQuern(container)));
-        pane.add(quern);
     }
 }

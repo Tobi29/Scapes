@@ -18,30 +18,31 @@ package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.block.CraftingRecipe;
 import org.tobi29.scapes.block.CraftingRecipeType;
-import org.tobi29.scapes.engine.gui.GuiComponentPane;
-import org.tobi29.scapes.engine.gui.GuiComponentScrollPaneList;
-import org.tobi29.scapes.engine.gui.GuiComponentText;
-import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
+import org.tobi29.scapes.engine.gui.*;
+import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.packets.PacketCrafting;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 public class GuiCrafting extends GuiInventory {
-    private final GuiComponentScrollPaneList scrollPaneTypes, scrollPaneRecipes;
+    private final GuiComponentScrollPaneViewport scrollPaneTypes,
+            scrollPaneRecipes;
     private final boolean table;
-    private int type, example;
+    private int type = -1, example;
     private long nextExample;
 
     public GuiCrafting(boolean table, MobPlayerClientMain player) {
         super("Crafting" + (table ? " Table" : ""), player);
         this.table = table;
-        scrollPaneTypes = new GuiComponentScrollPaneList(16, 80, 90, 180, 40);
+        scrollPaneTypes =
+                new GuiComponentScrollPaneList(pane, 16, 80, 90, 180, 20)
+                        .viewport();
         scrollPaneRecipes =
-                new GuiComponentScrollPaneList(106, 80, 278, 180, 40);
-        pane.add(scrollPaneTypes);
-        pane.add(scrollPaneRecipes);
+                new GuiComponentScrollPaneList(pane, 116, 80, 268, 180, 40)
+                        .viewport();
         updateTypes();
         updateRecipes();
     }
@@ -49,15 +50,31 @@ public class GuiCrafting extends GuiInventory {
     private void updateTypes() {
         scrollPaneTypes.removeAll();
         List<CraftingRecipeType> recipeTypes;
-        recipeTypes = player.connection().plugins().registry()
-                .getCraftingRecipes(table);
+        recipeTypes =
+                player.connection().plugins().registry().getCraftingRecipes();
         int id = 0;
+        List<Pair<CraftingRecipeType, Integer>> tableOnly = new ArrayList<>();
         for (CraftingRecipeType recipeType : recipeTypes) {
             if (recipeType.availableFor(player)) {
-                ElementType type = new ElementType(recipeType, id);
-                scrollPaneTypes.add(type);
+                boolean enabled = table || !recipeType.table();
+                if (enabled) {
+                    if (type < 0) {
+                        type = id;
+                    }
+                    new ElementType(scrollPaneTypes, recipeType, id, true);
+                } else {
+                    tableOnly.add(new Pair<>(recipeType, id));
+                }
             }
             id++;
+        }
+        if (!tableOnly.isEmpty()) {
+            GuiComponentPane separator =
+                    new GuiComponentPane(scrollPaneTypes, 0, 0, 90, 30);
+            new GuiComponentText(separator, 5, 9, 12, "Table only:");
+            tableOnly.forEach(
+                    type -> new ElementType(scrollPaneTypes, type.a, type.b,
+                            false));
         }
     }
 
@@ -76,40 +93,44 @@ public class GuiCrafting extends GuiInventory {
 
     private void updateRecipes() {
         scrollPaneRecipes.removeAll();
-        CraftingRecipeType recipeType = player.connection().plugins().registry()
-                .getCraftingRecipes(table).get(type);
+        CraftingRecipeType recipeType =
+                player.connection().plugins().registry().getCraftingRecipes()
+                        .get(type);
         int id = 0;
         for (CraftingRecipe recipe : recipeType.recipes()) {
-            Element element = new Element(recipe, type, id++);
-            scrollPaneRecipes.add(element);
+            new Element(scrollPaneRecipes, recipe, type, id++);
         }
         nextExample = System.currentTimeMillis() + 1000;
     }
 
     private class ElementType extends GuiComponentPane {
-        public ElementType(CraftingRecipeType recipe, int id) {
-            super(0, 0, 378, 40);
+        public ElementType(GuiComponent parent, CraftingRecipeType recipe,
+                int id, boolean enabled) {
+            super(parent, 0, 0, 80, 40);
             GuiComponentTextButton label =
-                    new GuiComponentTextButton(0, 5, 80, 30, 18, recipe.name());
-            label.addLeftClick(event -> {
-                type = id;
-                example = 0;
-                updateRecipes();
-            });
-            add(label);
+                    new GuiComponentTextButton(this, 5, 5, 70, 15, 12,
+                            recipe.name());
+            if (enabled) {
+                label.addLeftClick(event -> {
+                    type = id;
+                    example = 0;
+                    updateRecipes();
+                });
+            }
         }
     }
 
     private class Element extends GuiComponentPane {
-        public Element(CraftingRecipe recipe, int type, int id) {
-            super(0, 0, 378, 40);
+        public Element(GuiComponent parent, CraftingRecipe recipe, int type,
+                int id) {
+            super(parent, 0, 0, 268, 40);
             GuiComponentItemButton result =
-                    new GuiComponentItemButton(15, 5, 30, 30, recipe.result());
+                    new GuiComponentItemButton(this, 15, 5, 30, 30,
+                            recipe.result());
             result.addLeftClick(event -> player.connection()
-                    .send(new PacketCrafting(type, id, table)));
+                    .send(new PacketCrafting(type, id)));
             result.addHover(event -> setTooltip(result.item(), "Result:\n"));
-            add(result);
-            add(new GuiComponentText(47, 12, 16, "<="));
+            new GuiComponentText(this, 47, 12, 16, "<=");
             int x = 70;
             Iterator<CraftingRecipe.Ingredient> ingredients =
                     recipe.ingredients().iterator();
@@ -119,24 +140,22 @@ public class GuiCrafting extends GuiInventory {
                 while (ingredients.hasNext()) {
                     CraftingRecipe.Ingredient ingredient = ingredients.next();
                     GuiComponentItemButton b =
-                            new GuiComponentItemButton(x, 7, 25, 25,
+                            new GuiComponentItemButton(this, x, 7, 25, 25,
                                     ingredient.example(example));
                     b.addHover(event -> setTooltip(b.item(), "Ingredient:\n"));
-                    add(b);
                     x += 35;
                 }
                 if (requirements.hasNext()) {
-                    add(new GuiComponentText(x + 2, 12, 16, "+"));
+                    new GuiComponentText(this, x + 2, 12, 16, "+");
                     x += 20;
                 }
             }
             while (requirements.hasNext()) {
                 CraftingRecipe.Ingredient requirement = requirements.next();
                 GuiComponentItemButton b =
-                        new GuiComponentItemButton(x, 7, 25, 25,
+                        new GuiComponentItemButton(this, x, 7, 25, 25,
                                 requirement.example(example));
                 b.addHover(event -> setTooltip(b.item(), "Requirement:\n"));
-                add(b);
                 x += 35;
             }
         }

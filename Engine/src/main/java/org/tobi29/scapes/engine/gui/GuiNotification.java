@@ -21,14 +21,16 @@ import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
-public class GuiMessage extends Gui {
+public class GuiNotification extends Gui {
+    private final Gui parent;
     private final VAO vao;
     private final double speed;
     private double progress;
 
-    public GuiMessage(int x, int y, int width, int height,
+    public GuiNotification(Gui parent, int x, int y, int width, int height,
             GuiAlignment alignment, double time) {
         super(x, y, width, height, alignment);
+        this.parent = parent;
         Mesh mesh = new Mesh(true);
         GuiUtils.renderShadow(mesh, 0.0f, 0.0f, width, height, 0.2f);
         mesh.addVertex(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.3f, 0.0f, 0.0f);
@@ -39,6 +41,7 @@ public class GuiMessage extends Gui {
         mesh.addVertex(width, height, 0.0f, 0.0f, 0.0f, 0.0f, 0.3f, 0.0f, 0.0f);
         vao = mesh.finish();
         speed = 1.0 / time;
+        parent.add(this);
     }
 
     @Override
@@ -48,8 +51,7 @@ public class GuiMessage extends Gui {
         gl.textures().unbind(gl);
         gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
         vao.render(gl, shader);
-        GuiComponent parent = this.parent;
-        if (progress >= 1.0 && parent != null) {
+        if (progress >= 1.0) {
             parent.remove(this);
         }
     }

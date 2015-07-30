@@ -37,8 +37,6 @@ public class GameRegistry {
     private final Map<String, Material> materialNames =
             new ConcurrentHashMap<>();
     private final List<CraftingRecipeType> craftingRecipes = new ArrayList<>();
-    private final List<CraftingRecipeType> craftingRecipesTable =
-            new ArrayList<>();
     private final IDStorage idStorage;
     private final BlockType air;
     private BlockType[] blocks;
@@ -225,23 +223,15 @@ public class GameRegistry {
         entityIDs.put(entityClass, id);
     }
 
-    public void registerCraftingRecipe(CraftingRecipeType recipe,
-            boolean needsTable) {
+    public void registerCraftingRecipe(CraftingRecipeType recipe) {
         if (locked) {
             throw new IllegalStateException("Initializing already ended");
         }
-        if (!needsTable) {
-            craftingRecipes.add(recipe);
-        }
-        craftingRecipesTable.add(recipe);
+        craftingRecipes.add(recipe);
     }
 
-    public List<CraftingRecipeType> getCraftingRecipes(boolean needsTable) {
-        if (needsTable) {
-            return craftingRecipesTable;
-        } else {
-            return craftingRecipes;
-        }
+    public List<CraftingRecipeType> getCraftingRecipes() {
+        return craftingRecipes;
     }
 
     public class Registry<E> {

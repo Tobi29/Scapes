@@ -28,7 +28,7 @@ import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.GuiAlignment;
 import org.tobi29.scapes.engine.gui.GuiComponentIcon;
 import org.tobi29.scapes.engine.gui.GuiComponentText;
-import org.tobi29.scapes.engine.gui.GuiMessage;
+import org.tobi29.scapes.engine.gui.GuiNotification;
 import org.tobi29.scapes.engine.input.Controller;
 import org.tobi29.scapes.engine.input.ControllerDefault;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
@@ -165,14 +165,14 @@ public class ScapesClient extends Game {
             LOGGER.info("Setting input mode to {}", newInputMode);
             inputMode = newInputMode;
             engine.setGUIController(inputMode.guiController());
-            GuiMessage message =
-                    new GuiMessage(500, 0, 290, 60, GuiAlignment.RIGHT, 3.0);
-            message.add(new GuiComponentIcon(10, 10, 40, 40,
+            GuiNotification message =
+                    new GuiNotification(engine.globalGUI(), 500, 0, 290, 60,
+                            GuiAlignment.RIGHT, 3.0);
+            new GuiComponentIcon(message, 10, 10, 40, 40,
                     engine.graphics().textures()
-                            .get("Scapes:image/gui/input/Default")));
-            message.add(new GuiComponentText(60, 25, 420, 10,
-                    inputMode.toString()));
-            engine.globalGUI().add(message);
+                            .get("Scapes:image/gui/input/Default"));
+            new GuiComponentText(message, 60, 25, 420, 10,
+                    inputMode.toString());
         }
     }
 

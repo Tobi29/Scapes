@@ -29,15 +29,13 @@ public class GuiChatWrite extends Gui {
     private final GameStateGameMP state;
     private final MobPlayerClientMain player;
 
-    public GuiChatWrite(GameStateGameMP state, MobPlayerClientMain player,
-            GuiComponentChat chat) {
+    public GuiChatWrite(GameStateGameMP state, MobPlayerClientMain player) {
         super(GuiAlignment.LEFT);
         this.state = state;
         this.player = player;
-        write = new GuiComponentTextField(12, 480, 600, 30, 16, "", 64, false,
-                true);
-        add(chat);
-        add(write);
+        write = new GuiComponentTextField(this, 12, 480, 600, 30, 16, "", 64,
+                false, true);
+        new GuiComponentChat(this, state.chatHistory(), 8, 416, 0, 0);
     }
 
     @Override

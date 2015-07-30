@@ -23,25 +23,31 @@ public class GuiOptionsInGame extends Gui {
     public GuiOptionsInGame(GameStateGameMP state) {
         super(GuiAlignment.CENTER);
         GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(200, 0, 400, 512);
+                new GuiComponentVisiblePane(this, 200, 0, 400, 512);
+        new GuiComponentText(pane, 16, 16, 32, "Options");
+        new GuiComponentSeparator(pane, 24, 64, 352, 2);
         GuiComponentSlider musicVolume =
-                new GuiComponentSlider(16, 80, 368, 30, 18, "Music",
+                new GuiComponentSlider(pane, 16, 80, 368, 30, 18, "Music",
                         state.engine().config().musicVolume());
-        musicVolume.addHover(event -> state.engine().config()
-                .setMusicVolume((float) musicVolume.value));
         GuiComponentSlider soundVolume =
-                new GuiComponentSlider(16, 120, 368, 30, 18, "Sound",
+                new GuiComponentSlider(pane, 16, 120, 368, 30, 18, "Sound",
                         state.engine().config().soundVolume());
-        soundVolume.addHover(event -> state.engine().config()
-                .setSoundVolume((float) soundVolume.value));
         GuiComponentTextButton fullscreen;
         if (state.engine().config().isFullscreen()) {
-            fullscreen = new GuiComponentTextButton(16, 160, 368, 30, 18,
+            fullscreen = new GuiComponentTextButton(pane, 16, 160, 368, 30, 18,
                     "Fullscreen: ON");
         } else {
-            fullscreen = new GuiComponentTextButton(16, 160, 368, 30, 18,
+            fullscreen = new GuiComponentTextButton(pane, 16, 160, 368, 30, 18,
                     "Fullscreen: OFF");
         }
+        new GuiComponentSeparator(pane, 24, 448, 352, 2);
+        GuiComponentTextButton back =
+                new GuiComponentTextButton(pane, 112, 466, 176, 30, 18, "Back");
+
+        musicVolume.addHover(event -> state.engine().config()
+                .setMusicVolume((float) musicVolume.value));
+        soundVolume.addHover(event -> state.engine().config()
+                .setSoundVolume((float) soundVolume.value));
         fullscreen.addLeftClick(event -> {
             if (!state.engine().config().isFullscreen()) {
                 fullscreen.setText("Fullscreen: ON");
@@ -52,16 +58,6 @@ public class GuiOptionsInGame extends Gui {
             }
             state.engine().container().updateContainer();
         });
-        GuiComponentTextButton back =
-                new GuiComponentTextButton(112, 466, 176, 30, 18, "Back");
         back.addLeftClick(event -> state.client().entity().closeGui());
-        pane.add(new GuiComponentText(16, 16, 32, "Options"));
-        pane.add(new GuiComponentSeparator(24, 64, 352, 2));
-        pane.add(musicVolume);
-        pane.add(soundVolume);
-        pane.add(fullscreen);
-        pane.add(new GuiComponentSeparator(24, 448, 352, 2));
-        pane.add(back);
-        add(pane);
     }
 }

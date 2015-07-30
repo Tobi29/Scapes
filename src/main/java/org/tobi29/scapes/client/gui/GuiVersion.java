@@ -24,7 +24,7 @@ import org.tobi29.scapes.engine.gui.GuiComponentText;
 public class GuiVersion extends Gui {
     public GuiVersion() {
         super(GuiAlignment.RIGHT);
-        add(new GuiComponentText(710, 486, 16,
-                'v' + Scapes.VERSION.toString()));
+        new GuiComponentText(this, 710, 486, 16,
+                'v' + Scapes.VERSION.toString());
     }
 }

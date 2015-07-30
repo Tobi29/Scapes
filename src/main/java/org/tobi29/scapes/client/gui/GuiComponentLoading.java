@@ -27,13 +27,14 @@ public class GuiComponentLoading extends GuiComponent {
     private final VAO vao1, vao2;
     protected float value;
 
-    public GuiComponentLoading(int x, int y, int width, int height) {
-        this(x, y, width, height, 0.0f, 1.0f, 0.0f, 1.0f);
+    public GuiComponentLoading(GuiComponent parent, int x, int y, int width,
+            int height) {
+        this(parent, x, y, width, height, 0.0f, 1.0f, 0.0f, 1.0f);
     }
 
-    public GuiComponentLoading(int x, int y, int width, int height, float r,
-            float g, float b, float a) {
-        super(x, y, width, height);
+    public GuiComponentLoading(GuiComponent parent, int x, int y, int width,
+            int height, float r, float g, float b, float a) {
+        super(parent, x, y, width, height);
         float r2 = r * 0.5f;
         float g2 = g * 0.5f;
         float b2 = b * 0.5f;

@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.client.gui;
 
+import org.tobi29.scapes.client.ChatHistory;
 import org.tobi29.scapes.engine.gui.GuiComponent;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
 import org.tobi29.scapes.engine.opengl.GL;
@@ -23,62 +24,44 @@ import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GuiComponentChat extends GuiComponent {
-    private final List<ChatLine> meshText = new ArrayList<>();
-    private FontRenderer font;
+    private final ChatHistory chatHistory;
+    private Map<String, FontRenderer.Text> cache = new ConcurrentHashMap<>(),
+            swapCache = new ConcurrentHashMap<>();
 
-    public GuiComponentChat(int x, int y, int width, int height) {
-        super(x, y, width, height);
-    }
-
-    public void addLine(String line) {
-        String[] lines = line.split("\n");
-        for (String singleLine : lines) {
-            if (font != null) {
-                FontRenderer.Text vao =
-                        font.render(singleLine, 0.0f, 0.0f, 16.0f, 1.0f, 1.0f,
-                                1.0f, 1.0f);
-                synchronized (meshText) {
-                    meshText.add(0, new ChatLine(vao));
-                }
-            }
-        }
+    public GuiComponentChat(GuiComponent parent, ChatHistory chatHistory, int x,
+            int y, int width, int height) {
+        super(parent, x, y, width, height);
+        this.chatHistory = chatHistory;
     }
 
     @Override
     public void renderComponent(GL gl, Shader shader, FontRenderer font,
             double delta) {
         MatrixStack matrixStack = gl.matrixStack();
-        if (this.font != font) {
-            this.font = font;
-        }
-        long time = System.currentTimeMillis();
-        synchronized (meshText) {
-            int yy = -16;
-            for (ChatLine line : meshText) {
-                Matrix matrix = matrixStack.push();
-                matrix.translate(0.0f, yy, 0.0f);
-                line.vao.render(gl, shader);
-                matrixStack.pop();
-                yy -= 20;
+        int yy = -16;
+        Iterator<String> iterator = chatHistory.lines().iterator();
+        while (iterator.hasNext()) {
+            String line = iterator.next();
+            FontRenderer.Text vao = cache.get(line);
+            if (vao == null) {
+                vao = font.render(line, 0.0f, 0.0f, 16.0f, 1.0f, 1.0f, 1.0f,
+                        1.0f);
             }
-            meshText.removeAll(
-                    meshText.stream().filter(line -> time - line.time > 10000)
-                            .collect(Collectors.toList()));
+            swapCache.put(line, vao);
+            Matrix matrix = matrixStack.push();
+            matrix.translate(0.0f, yy, 0.0f);
+            vao.render(gl, shader);
+            matrixStack.pop();
+            yy -= 20;
         }
-    }
-
-    private static class ChatLine {
-        private final FontRenderer.Text vao;
-        private final long time;
-
-        public ChatLine(FontRenderer.Text vao) {
-            this.vao = vao;
-            time = System.currentTimeMillis();
-        }
+        Map<String, FontRenderer.Text> oldCache = cache;
+        cache = swapCache;
+        oldCache.clear();
+        swapCache = oldCache;
     }
 }

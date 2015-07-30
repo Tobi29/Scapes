@@ -27,24 +27,26 @@ public class GuiComponentTextButton extends GuiComponentButton {
     private String text;
     private TextFilter textFilter;
 
-    public GuiComponentTextButton(int x, int y, int width, int height,
-            int textSize, String text) {
-        this(x, y, width, height, textSize, 4, text);
+    public GuiComponentTextButton(GuiComponent parent, int x, int y, int width,
+            int height, int textSize, String text) {
+        this(parent, x, y, width, height, textSize, 4, text);
     }
 
-    public GuiComponentTextButton(int x, int y, int width, int height,
-            int textSize, String text, TextFilter textFilter) {
-        this(x, y, width, height, textSize, 4, text, textFilter);
+    public GuiComponentTextButton(GuiComponent parent, int x, int y, int width,
+            int height, int textSize, String text, TextFilter textFilter) {
+        this(parent, x, y, width, height, textSize, 4, text, textFilter);
     }
 
-    public GuiComponentTextButton(int x, int y, int width, int height,
-            int textSize, int textShift, String text) {
-        this(x, y, width, height, textSize, textShift, text, text1 -> text1);
+    public GuiComponentTextButton(GuiComponent parent, int x, int y, int width,
+            int height, int textSize, int textShift, String text) {
+        this(parent, x, y, width, height, textSize, textShift, text,
+                text1 -> text1);
     }
 
-    public GuiComponentTextButton(int x, int y, int width, int height,
-            int textSize, int textShift, String text, TextFilter textFilter) {
-        super(x, y, width, height);
+    public GuiComponentTextButton(GuiComponent parent, int x, int y, int width,
+            int height, int textSize, int textShift, String text,
+            TextFilter textFilter) {
+        super(parent, x, y, width, height);
         this.text = text;
         this.textSize = textSize;
         this.textFilter = textFilter;

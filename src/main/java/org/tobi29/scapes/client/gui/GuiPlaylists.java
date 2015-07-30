@@ -19,10 +19,7 @@ package org.tobi29.scapes.client.gui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.Gui;
-import org.tobi29.scapes.engine.gui.GuiComponentPane;
-import org.tobi29.scapes.engine.gui.GuiComponentScrollPaneList;
-import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
+import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 
@@ -39,7 +36,7 @@ public class GuiPlaylists extends GuiMenu {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GuiPlaylists.class);
     private final List<Element> elements = new ArrayList<>();
-    private final GuiComponentScrollPaneList scrollPane;
+    private final GuiComponentScrollPaneViewport scrollPane;
     private final GameState state;
     private String playlist;
 
@@ -48,17 +45,20 @@ public class GuiPlaylists extends GuiMenu {
         super(state, "Playlists", previous);
         this.state = state;
         GuiComponentTextButton day =
-                new GuiComponentTextButton(16, 80, 80, 30, 18, "Day");
-        day.addLeftClick(event -> updateTitles("day"));
+                new GuiComponentTextButton(pane, 16, 80, 80, 30, 18, "Day");
         GuiComponentTextButton night =
-                new GuiComponentTextButton(106, 80, 80, 30, 18, "Night");
-        night.addLeftClick(event -> updateTitles("night"));
+                new GuiComponentTextButton(pane, 106, 80, 80, 30, 18, "Night");
         GuiComponentTextButton battle =
-                new GuiComponentTextButton(196, 80, 80, 30, 18, "Battle");
-        battle.addLeftClick(event -> updateTitles("battle"));
-        scrollPane = new GuiComponentScrollPaneList(16, 120, 368, 210, 20);
+                new GuiComponentTextButton(pane, 196, 80, 80, 30, 18, "Battle");
+        scrollPane = new GuiComponentScrollPaneList(pane, 16, 120, 368, 250, 20)
+                .viewport();
         GuiComponentTextButton add =
-                new GuiComponentTextButton(112, 370, 176, 30, 18, "Add");
+                new GuiComponentTextButton(pane, 112, 410, 176, 30, 18, "Add");
+        updateTitles("day");
+
+        day.addLeftClick(event -> updateTitles("day"));
+        night.addLeftClick(event -> updateTitles("night"));
+        battle.addLeftClick(event -> updateTitles("battle"));
         add.addLeftClick(event -> {
             try {
                 Path directory = state.engine().home().resolve("playlists")
@@ -77,12 +77,6 @@ public class GuiPlaylists extends GuiMenu {
                 LOGGER.warn("Failed to import music: {}", e.toString());
             }
         });
-        pane.add(day);
-        pane.add(night);
-        pane.add(battle);
-        pane.add(scrollPane);
-        pane.add(add);
-        updateTitles("day");
     }
 
     private void updateTitles(String playlist) {
@@ -103,11 +97,10 @@ public class GuiPlaylists extends GuiMenu {
             });
             for (Path title : titles) {
                 String fileName = title.getFileName().toString();
-                Element element = new Element(
+                Element element = new Element(scrollPane,
                         fileName.substring(0, fileName.lastIndexOf('.')),
                         title);
                 elements.add(element);
-                scrollPane.add(element);
             }
         } catch (IOException e) {
             LOGGER.warn("Failed to load playlist: {}", e.toString());
@@ -115,16 +108,25 @@ public class GuiPlaylists extends GuiMenu {
     }
 
     private class Element extends GuiComponentPane {
-        public Element(String title, Path path) {
-            super(0, 0, 378, 20);
+        public Element(GuiComponent parent, String title, Path path) {
+            super(parent, 0, 0, 378, 20);
             GuiComponentTextButton play =
-                    new GuiComponentTextButton(20, 2, 30, 15, 12, "Play");
-            play.addLeftClick(event -> state.engine().sounds()
-                    .playMusic(FileUtil.read(path), 1.0f, 1.0f));
-            GuiComponentTextButton label =
-                    new GuiComponentTextButton(60, 2, 220, 15, 12, title);
+                    new GuiComponentTextButton(this, 15, 2, 35, 15, 12, "Play");
+            play.addLeftClick(event -> {
+                GuiNotification message =
+                        new GuiNotification(state.engine().globalGUI(), 500, 0,
+                                290, 60, GuiAlignment.RIGHT, 3.0);
+                new GuiComponentIcon(message, 10, 10, 40, 40,
+                        state.engine().graphics().textures()
+                                .get("Scapes:image/gui/Playlist"));
+                new GuiComponentText(message, 60, 23, 420, 16, title);
+                state.engine().sounds()
+                        .playMusic(FileUtil.read(path), 1.0f, 1.0f);
+            });
+            new GuiComponentTextButton(this, 60, 2, 220, 15, 12, title);
             GuiComponentTextButton delete =
-                    new GuiComponentTextButton(290, 2, 60, 15, 12, "Delete");
+                    new GuiComponentTextButton(this, 290, 2, 60, 15, 12,
+                            "Delete");
             delete.addLeftClick(event -> {
                 try {
                     Files.delete(path);
@@ -133,9 +135,6 @@ public class GuiPlaylists extends GuiMenu {
                     LOGGER.warn("Failed to delete music: {}", e.toString());
                 }
             });
-            add(play);
-            add(label);
-            add(delete);
         }
     }
 }

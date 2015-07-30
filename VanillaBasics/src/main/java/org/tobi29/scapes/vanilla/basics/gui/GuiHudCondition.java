@@ -24,15 +24,15 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 public class GuiHudCondition extends GuiComponent {
     private final MobPlayerClientMain player;
 
-    public GuiHudCondition(MobPlayerClientMain player) {
-        super(8, 418, 560, 24);
+    public GuiHudCondition(GuiComponent parent, MobPlayerClientMain player) {
+        super(parent, 8, 418, 560, 24);
         this.player = player;
-        add(new GuiComponentBar(0, 0, 560, 8, 0.0f, 1.0f, 0.0f, 0.6f,
-                () -> value("Stamina")));
-        add(new GuiComponentBar(280, 8, 280, 8, 1.0f, 0.5f, 0.0f, 0.6f,
-                () -> value("Hunger")));
-        add(new GuiComponentBar(280, 16, 280, 8, 0.0f, 0.2f, 1.0f, 0.6f,
-                () -> value("Thirst")));
+        new GuiComponentBar(this, 0, 0, 560, 8, 0.0f, 1.0f, 0.0f, 0.6f,
+                () -> value("Stamina"));
+        new GuiComponentBar(this, 280, 8, 280, 8, 1.0f, 0.5f, 0.0f, 0.6f,
+                () -> value("Hunger"));
+        new GuiComponentBar(this, 280, 16, 280, 8, 0.0f, 0.2f, 1.0f, 0.6f,
+                () -> value("Thirst"));
     }
 
     private double value(String name) {

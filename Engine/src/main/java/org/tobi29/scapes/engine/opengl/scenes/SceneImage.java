@@ -63,9 +63,8 @@ public class SceneImage extends Scene {
             double ratio = (double) width / height;
             width = (int) (512 * ratio * scale);
             height = (int) (512 * scale);
-            icon = new GuiComponentIcon((800 - width) / 2, (512 - height) / 2,
-                    width, height, texture);
-            add(icon);
+            icon = new GuiComponentIcon(this, (800 - width) / 2,
+                    (512 - height) / 2, width, height, texture);
         }
     }
 }

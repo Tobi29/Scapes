@@ -29,27 +29,37 @@ public class GuiVideoSettings extends GuiMenu {
         TagStructure scapesTag =
                 state.engine().tagStructure().getStructure("Scapes");
         GuiComponentSlider viewDistance =
-                new GuiComponentSlider(16, 80, 368, 30, 18, "View distance",
+                new GuiComponentSlider(pane, 16, 80, 368, 30, 18,
+                        "View distance",
                         (scapesTag.getDouble("RenderDistance") - 10.0) / 246.0,
                         (text, value) -> text + ": " +
                                 FastMath.round(10.0 + value * 246.0) +
                                 'm');
+        GuiComponentTextButton shader =
+                new GuiComponentTextButton(pane, 16, 120, 368, 30, 18,
+                        "Shaders");
+        GuiComponentTextButton fullscreen;
+        if (state.engine().config().isFullscreen()) {
+            fullscreen = new GuiComponentTextButton(pane, 16, 160, 368, 30, 18,
+                    "Fullscreen: ON");
+        } else {
+            fullscreen = new GuiComponentTextButton(pane, 16, 160, 368, 30, 18,
+                    "Fullscreen: OFF");
+        }
+        GuiComponentSlider resolutionMultiplier =
+                new GuiComponentSlider(pane, 16, 200, 368, 30, 18, "Resolution",
+                        reverseResolution(
+                                state.engine().config().resolutionMultiplier()),
+                        (text, value) -> text + ": " +
+                                FastMath.round(resolution(value) * 100.0) +
+                                '%');
+
         viewDistance.addHover(event -> scapesTag.setDouble("RenderDistance",
                 10.0 + viewDistance.value * 246.0));
-        GuiComponentTextButton shader =
-                new GuiComponentTextButton(16, 120, 368, 30, 18, "Shaders");
         shader.addLeftClick(event -> {
             state.remove(this);
             state.add(new GuiShaderSettings(state, this));
         });
-        GuiComponentTextButton fullscreen;
-        if (state.engine().config().isFullscreen()) {
-            fullscreen = new GuiComponentTextButton(16, 160, 368, 30, 18,
-                    "Fullscreen: ON");
-        } else {
-            fullscreen = new GuiComponentTextButton(16, 160, 368, 30, 18,
-                    "Fullscreen: OFF");
-        }
         fullscreen.addLeftClick(event -> {
             if (!state.engine().config().isFullscreen()) {
                 fullscreen.setText("Fullscreen: ON");
@@ -60,20 +70,9 @@ public class GuiVideoSettings extends GuiMenu {
             }
             state.engine().container().updateContainer();
         });
-        GuiComponentSlider resolutionMultiplier =
-                new GuiComponentSlider(16, 200, 368, 30, 18, "Resolution",
-                        reverseResolution(
-                                state.engine().config().resolutionMultiplier()),
-                        (text, value) -> text + ": " +
-                                FastMath.round(resolution(value) * 100.0) +
-                                '%');
         resolutionMultiplier.addHover(event -> state.engine().config()
                 .setResolutionMultiplier(
                         (float) resolution(resolutionMultiplier.value)));
-        pane.add(viewDistance);
-        pane.add(shader);
-        pane.add(fullscreen);
-        pane.add(resolutionMultiplier);
     }
 
     private static double resolution(double value) {

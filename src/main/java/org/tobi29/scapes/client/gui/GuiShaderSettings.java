@@ -28,20 +28,29 @@ public class GuiShaderSettings extends GuiMenu {
         TagStructure scapesTag =
                 state.engine().tagStructure().getStructure("Scapes");
         GuiComponentSlider animationDistance =
-                new GuiComponentSlider(16, 80, 368, 30, 18,
+                new GuiComponentSlider(pane, 16, 80, 368, 30, 18,
                         "Animation Distance",
                         scapesTag.getFloat("AnimationDistance"));
+        GuiComponentTextButton bloom;
+        if (scapesTag.getBoolean("Bloom")) {
+            bloom = new GuiComponentTextButton(pane, 16, 120, 368, 30, 18,
+                    "Bloom: ON");
+        } else {
+            bloom = new GuiComponentTextButton(pane, 16, 120, 368, 30, 18,
+                    "Bloom: OFF");
+        }
+        GuiComponentTextButton fxaa;
+        if (scapesTag.getBoolean("FXAA")) {
+            fxaa = new GuiComponentTextButton(pane, 16, 160, 368, 30, 18,
+                    "FXAA: ON");
+        } else {
+            fxaa = new GuiComponentTextButton(pane, 16, 160, 368, 30, 18,
+                    "FXAA: OFF");
+        }
+
         animationDistance.addHover(event -> scapesTag
                 .setFloat("AnimationDistance",
                         (float) animationDistance.value));
-        GuiComponentTextButton bloom;
-        if (scapesTag.getBoolean("Bloom")) {
-            bloom = new GuiComponentTextButton(16, 120, 368, 30, 18,
-                    "Bloom: ON");
-        } else {
-            bloom = new GuiComponentTextButton(16, 120, 368, 30, 18,
-                    "Bloom: OFF");
-        }
         bloom.addLeftClick(event -> {
             if (!scapesTag.getBoolean("Bloom")) {
                 bloom.setText("Bloom: ON");
@@ -51,13 +60,6 @@ public class GuiShaderSettings extends GuiMenu {
                 scapesTag.setBoolean("Bloom", false);
             }
         });
-        GuiComponentTextButton fxaa;
-        if (scapesTag.getBoolean("FXAA")) {
-            fxaa = new GuiComponentTextButton(16, 160, 368, 30, 18, "FXAA: ON");
-        } else {
-            fxaa = new GuiComponentTextButton(16, 160, 368, 30, 18,
-                    "FXAA: OFF");
-        }
         fxaa.addLeftClick(event -> {
             if (!scapesTag.getBoolean("FXAA")) {
                 fxaa.setText("FXAA: ON");
@@ -67,8 +69,5 @@ public class GuiShaderSettings extends GuiMenu {
                 scapesTag.setBoolean("FXAA", false);
             }
         });
-        pane.add(animationDistance);
-        pane.add(bloom);
-        pane.add(fxaa);
     }
 }

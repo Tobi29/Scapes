@@ -29,15 +29,13 @@ import java.io.IOException;
 
 public class PacketCrafting extends Packet implements PacketServer {
     private int type, id;
-    private boolean table;
 
     public PacketCrafting() {
     }
 
-    public PacketCrafting(int type, int id, boolean table) {
+    public PacketCrafting(int type, int id) {
         this.type = type;
         this.id = id;
-        this.table = table;
     }
 
     @Override
@@ -45,7 +43,6 @@ public class PacketCrafting extends Packet implements PacketServer {
             throws IOException {
         stream.putInt(type);
         stream.putInt(id);
-        stream.putBoolean(table);
     }
 
     @Override
@@ -53,7 +50,6 @@ public class PacketCrafting extends Packet implements PacketServer {
             throws IOException {
         type = stream.getInt();
         id = stream.getInt();
-        table = stream.getBoolean();
     }
 
     @Override
@@ -61,9 +57,10 @@ public class PacketCrafting extends Packet implements PacketServer {
         if (world == null) {
             return;
         }
+        // TODO: Check if table nearby
         Inventory inventory = player.mob().inventory();
         CraftingRecipe recipe =
-                world.plugins().registry().getCraftingRecipes(table).get(type)
+                world.plugins().registry().getCraftingRecipes().get(type)
                         .recipes().get(id);
         ItemStack result = recipe.result();
         if (inventory.canAdd(result) >= result.amount()) {
