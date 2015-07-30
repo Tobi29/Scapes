@@ -426,6 +426,34 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
 
         private void process(TerrainInfiniteRendererChunk chunk) {
             if (chunk != null) {
+                TerrainInfiniteChunkClient terrainChunk = chunk.chunk();
+                int x = terrainChunk.x();
+                int y = terrainChunk.y();
+                TerrainInfinite terrain = terrainChunk.terrain();
+                if (!checkLoaded(terrain, x - 1, y - 1)) {
+                    return;
+                }
+                if (!checkLoaded(terrain, x, y - 1)) {
+                    return;
+                }
+                if (!checkLoaded(terrain, x - 1, y - 1)) {
+                    return;
+                }
+                if (!checkLoaded(terrain, x - 1, y)) {
+                    return;
+                }
+                if (!checkLoaded(terrain, x - 1, y)) {
+                    return;
+                }
+                if (!checkLoaded(terrain, x - 1, y + 1)) {
+                    return;
+                }
+                if (!checkLoaded(terrain, x, y + 1)) {
+                    return;
+                }
+                if (!checkLoaded(terrain, x - 1, y + 1)) {
+                    return;
+                }
                 for (int i = 0; i < chunk.zSections(); i++) {
                     if (chunk.isGeometryDirty(i)) {
                         chunk.unsetGeometryDirty(i);
@@ -433,6 +461,12 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                     }
                 }
             }
+        }
+
+        private boolean checkLoaded(TerrainInfinite terrain, int x, int y) {
+            Optional<? extends TerrainInfiniteChunk> chunk =
+                    terrain.chunkNoLoad(x, y);
+            return chunk.isPresent() && chunk.get().isLoaded();
         }
 
         private void process(TerrainInfiniteRendererChunk chunk, int i) {
