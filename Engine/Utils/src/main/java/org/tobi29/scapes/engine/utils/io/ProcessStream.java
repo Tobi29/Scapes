@@ -99,6 +99,7 @@ public final class ProcessStream {
 
             @Override
             public ByteBuffer result() {
+                stream.buffer().flip();
                 return stream.buffer();
             }
         };
