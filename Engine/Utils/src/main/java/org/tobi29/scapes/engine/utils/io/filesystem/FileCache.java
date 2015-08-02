@@ -19,7 +19,6 @@ package org.tobi29.scapes.engine.utils.io.filesystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.utils.ArrayUtil;
-import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
 import org.tobi29.scapes.engine.utils.io.ChecksumUtil;
 import org.tobi29.scapes.engine.utils.io.ProcessStream;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
@@ -29,7 +28,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
@@ -81,18 +79,13 @@ public class FileCache {
         Files.createDirectories(parent);
         Path write = temp.resolve(UUID.randomUUID().toString());
         byte[] checksum = FileUtil.writeReturn(write, output -> {
-            try {
-                MessageDigest digest = MessageDigest.getInstance(
-                        ChecksumUtil.ChecksumAlgorithm.SHA256.getName());
-                ProcessStream.process(input, buffer -> {
-                    digest.update(buffer);
-                    buffer.rewind();
-                    output.put(buffer);
-                });
-                return digest.digest();
-            } catch (NoSuchAlgorithmException e) {
-                throw new UnsupportedJVMException(e);
-            }
+            MessageDigest digest = ChecksumUtil.Algorithm.SHA256.digest();
+            ProcessStream.process(input, buffer -> {
+                digest.update(buffer);
+                buffer.rewind();
+                output.put(buffer);
+            });
+            return digest.digest();
         });
         String name = ArrayUtil.toHexadecimal(checksum);
         try {

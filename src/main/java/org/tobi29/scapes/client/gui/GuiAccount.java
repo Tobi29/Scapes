@@ -58,10 +58,10 @@ public class GuiAccount extends GuiMenu {
         GuiComponentText hash = new GuiComponentText(pane, 16, 140, 12,
                 "Hash: " + ChecksumUtil
                         .getChecksum(keyPair.getPrivate().getEncoded(),
-                                ChecksumUtil.ChecksumAlgorithm.SHA1));
+                                ChecksumUtil.Algorithm.SHA1));
         GuiComponentText id = new GuiComponentText(pane, 16, 160, 12, "ID: " +
                 ChecksumUtil.getChecksum(keyPair.getPublic().getEncoded(),
-                        ChecksumUtil.ChecksumAlgorithm.SHA1));
+                        ChecksumUtil.Algorithm.SHA1));
         new GuiComponentText(pane, 16, 180, 18, "Nickname:");
         GuiComponentTextField nickname =
                 new GuiComponentTextField(pane, 16, 200, 368, 30, 18,

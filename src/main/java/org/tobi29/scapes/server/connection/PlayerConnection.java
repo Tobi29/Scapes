@@ -171,8 +171,7 @@ public class PlayerConnection
     private void loginStep3(ReadableByteStream input) throws IOException {
         byte[] array = new byte[550];
         input.get(array);
-        id = ChecksumUtil
-                .getChecksum(array, ChecksumUtil.ChecksumAlgorithm.SHA1);
+        id = ChecksumUtil.getChecksum(array, ChecksumUtil.Algorithm.SHA1);
         challenge = new byte[501];
         new SecureRandom().nextBytes(challenge);
         WritableByteStream output = channel.getOutputStream();

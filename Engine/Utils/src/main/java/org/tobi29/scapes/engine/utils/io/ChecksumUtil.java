@@ -39,7 +39,7 @@ public final class ChecksumUtil {
      * checksum
      */
     public static String getChecksum(byte... array) {
-        return getChecksum(array, ChecksumAlgorithm.SHA256);
+        return getChecksum(array, Algorithm.SHA256);
     }
 
     /**
@@ -50,8 +50,7 @@ public final class ChecksumUtil {
      * @return A {@code String} that represents a hexadecimal encoding of the
      * checksum
      */
-    public static String getChecksum(byte[] array,
-            ChecksumAlgorithm algorithm) {
+    public static String getChecksum(byte[] array, Algorithm algorithm) {
         return ArrayUtil.toHexadecimal(createChecksum(array, algorithm));
     }
 
@@ -62,7 +61,7 @@ public final class ChecksumUtil {
      * @return A {@code byte[]} containing the checksum
      */
     public static byte[] createChecksum(byte[] array) {
-        return createChecksum(array, ChecksumAlgorithm.SHA256);
+        return createChecksum(array, Algorithm.SHA256);
     }
 
     /**
@@ -72,71 +71,70 @@ public final class ChecksumUtil {
      * @param algorithm The algorithm that will be used to create the checksum
      * @return A {@code byte[]} containing the checksum
      */
-    public static byte[] createChecksum(byte[] array,
-            ChecksumAlgorithm algorithm) {
-        try {
-            MessageDigest complete =
-                    MessageDigest.getInstance(algorithm.getName());
-            complete.update(array);
-            return complete.digest();
-        } catch (NoSuchAlgorithmException e) {
-            throw new UnsupportedJVMException(e);
-        }
+    public static byte[] createChecksum(byte[] array, Algorithm algorithm) {
+        MessageDigest complete = algorithm.digest();
+        complete.update(array);
+        return complete.digest();
     }
 
     public static byte[] createChecksum(ByteBuffer buffer) {
-        return createChecksum(buffer, ChecksumAlgorithm.SHA256);
+        return createChecksum(buffer, Algorithm.SHA256);
     }
 
     public static byte[] createChecksum(ByteBuffer buffer,
-            ChecksumAlgorithm algorithm) {
-        try {
-            MessageDigest digest =
-                    MessageDigest.getInstance(algorithm.getName());
-            digest.update(buffer);
-            return digest.digest();
-        } catch (NoSuchAlgorithmException e) {
-            throw new UnsupportedJVMException(e);
-        }
+            Algorithm algorithm) {
+        MessageDigest digest = algorithm.digest();
+        digest.update(buffer);
+        return digest.digest();
     }
 
     public static byte[] createChecksum(ReadableByteStream input)
             throws IOException {
-        return createChecksum(input, ChecksumAlgorithm.SHA256);
+        return createChecksum(input, Algorithm.SHA256);
     }
 
     public static byte[] createChecksum(ReadableByteStream input,
-            ChecksumAlgorithm algorithm) throws IOException {
-        try {
-            MessageDigest digest =
-                    MessageDigest.getInstance(algorithm.getName());
-            ProcessStream.process(input, digest::update);
-            return digest.digest();
-        } catch (NoSuchAlgorithmException e) {
-            throw new UnsupportedJVMException(e);
-        }
+            Algorithm algorithm) throws IOException {
+        MessageDigest digest = algorithm.digest();
+        ProcessStream.process(input, digest::update);
+        return digest.digest();
     }
 
     /**
      * Enum containing available checksum algorithms
      */
-    public enum ChecksumAlgorithm {
-        SHA256("SHA-256"),
-        SHA1("SHA1"),
-        @Deprecated MD5("MD5");
+    public enum Algorithm {
+        SHA256("SHA-256", 32),
+        SHA1("SHA1", 20),
+        @Deprecated MD5("MD5", 16);
         private final String name;
+        private final int bytes;
 
-        ChecksumAlgorithm(String name) {
+        Algorithm(String name, int bytes) {
             this.name = name;
+            this.bytes = bytes;
         }
 
         /**
-         * Gives the name of the algorithm to be used for creating checksums
+         * Creates a new {@code MessageDigest}
          *
-         * @return A {@code String} representing the algorithm name
+         * @return {@code MessageDigest} using the specified algorithm
          */
-        public String getName() {
-            return name;
+        public MessageDigest digest() {
+            try {
+                return MessageDigest.getInstance(name);
+            } catch (NoSuchAlgorithmException e) {
+                throw new UnsupportedJVMException(e);
+            }
+        }
+
+        /**
+         * Gives the length of the returned digest
+         *
+         * @return Length of digest in bytes
+         */
+        public int bytes() {
+            return bytes;
         }
     }
 }
