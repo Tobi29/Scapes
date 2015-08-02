@@ -57,6 +57,7 @@ public class ByteBufferStream
 
     @Override
     public ByteBufferStream position(int pos) {
+        ensurePut(pos - buffer.position());
         buffer.position(pos);
         return this;
     }
