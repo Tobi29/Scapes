@@ -84,10 +84,10 @@ class ScapesEngineApplication implements Plugin<Project> {
                 create("application", ScapesEngineApplicationExtension)
 
         // Natives task
-        Copy nativesTask = target.tasks.create("natives", Copy)
+        def nativesTask = target.tasks.create("natives", Copy)
         nativesTask.description = "Extract natives for runtime"
         nativesTask.group = "run"
-        File natives = new File(target.buildDir, "natives")
+        def natives = new File(target.buildDir, "natives")
         nativesTask.from({ ->
             target.configurations.nativesPlatform.files.stream().
                     map({
@@ -98,33 +98,33 @@ class ScapesEngineApplication implements Plugin<Project> {
                     }).collect(Collectors.toList())
         }) {
             eachFile { FileCopyDetails fcp ->
-                String[] segments = [fcp.getName()]
+                String[] segments = [fcp.name]
                 fcp.relativePath = new RelativePath(true, segments)
             }
         }
         nativesTask.into natives
 
         // Run task
-        Task runTask = target.tasks.create("run", JavaExec)
+        def runTask = target.tasks.create("run", JavaExec)
         runTask.description = "Runs this project as a JVM application"
         runTask.group = "Run"
         runTask.conventionMapping.main = { target.application.mainClass }
         target.afterEvaluate {
             runTask.classpath = target.sourceSets.main.runtimeClasspath
         }
-        runTask.jvmArgs "-Xms1024M", "-Xmx2048M", "-XX:+UseG1GC",
+        runTask.jvmArgs "-Xms2048M", "-Xmx2048M", "-XX:+UseG1GC",
                 "-XX:MaxGCPauseMillis=1"
-        if (target.hasProperty("runArgs")) {
-            runTask.args Eval.me(target.runArgs)
+        if (target.rootProject.hasProperty("runArgs")) {
+            runTask.args Eval.me(target.rootProject.runArgs)
         }
-        if (target.hasProperty("jvmArgs")) {
-            runTask.jvmArgs Eval.me(target.jvmArgs)
+        if (target.rootProject.hasProperty("jvmArgs")) {
+            runTask.jvmArgs Eval.me(target.rootProject.jvmArgs)
         }
         if (System.properties["os.name"].toLowerCase().contains("mac")) {
             runTask.jvmArgs "-XstartOnFirstThread"
         }
-        if (target.hasProperty("runtime")) {
-            runTask.jvmArgs "-Duser.dir=$target.runtime"
+        if (target.rootProject.hasProperty("runtime")) {
+            runTask.jvmArgs "-Duser.dir=$target.rootProject.runtime"
         } else {
             runTask.jvmArgs "-Duser.dir=${target.file('runtime')}"
         }
@@ -134,15 +134,23 @@ class ScapesEngineApplication implements Plugin<Project> {
         runTask.dependsOn nativesTask
 
         // Platform deploy tasks
-        Task deployUniversalTask = addDeployUniversalTask(target)
-        Task deployMacOSXTask = addDeployMacOSXTask(target)
-        Task deployWindowsTask = addDeployWindowsTask(target)
+        def deployLinux32Task = addDeployLinuxTask(target, "32",
+                target.configurations.runtimeLinux32,
+                target.configurations.nativesLinux32)
+        def deployLinux64Task = addDeployLinuxTask(target, "64",
+                target.configurations.runtimeLinux64,
+                target.configurations.nativesLinux64)
+        def deployMacOSXTask = addDeployMacOSXTask(target)
+        def deployWindowsTask = addDeployWindowsTask(target)
 
         // Full deploy task
-        Task deployTask = target.tasks.create("deploy", Task)
+        def deployTask = target.tasks.create("deploy", Task)
         deployTask.group = "Deployment"
-        if (deployUniversalTask != null) {
-            deployTask.dependsOn deployUniversalTask
+        if (deployLinux32Task != null) {
+            deployTask.dependsOn deployLinux32Task
+        }
+        if (deployLinux64Task != null) {
+            deployTask.dependsOn deployLinux64Task
         }
         if (deployMacOSXTask != null) {
             deployTask.dependsOn deployMacOSXTask
@@ -152,29 +160,64 @@ class ScapesEngineApplication implements Plugin<Project> {
         }
     }
 
-    private Task addDeployUniversalTask(Project target) {
+    private Task addDeployLinuxTask(Project target, String arch,
+            Configuration runtime, Configuration natives) {
+        def name = "${-> target.project.name.toLowerCase()}"
+        def libPath = "/usr/share/java"
+        if (target.rootProject.hasProperty("libPath")) {
+            libPath = target.rootProject.libPath
+        }
+        def binPath = "/usr/bin"
+        if (target.rootProject.hasProperty("binPath")) {
+            binPath = target.rootProject.binPath
+        }
+
+        // Script task
+        def scriptTask = target.tasks.
+                create("scriptLinux$arch", StartupScriptTask)
+        scriptTask.libPath = "$libPath/$name"
+        scriptTask.mainClass = "${-> target.application.mainClass}"
+        scriptTask.output = new File(scriptTask.temporaryDir, name)
+
         // Main task
-        Tar task = target.tasks.create("deployUniversal", Tar)
+        def task = target.tasks.create("deployLinux$arch", Tar)
+        task.dependsOn scriptTask
         task.description =
-                "Contains platform-independent files useful for creating packages"
+                "Contains tarball that can be extracted into root for easier package creation"
         task.group = "Deployment"
         task.dependsOn target.jar
-        task.baseName = "${-> target.project.name}-Universal"
+        task.baseName = "${-> target.project.name}-Linux$arch"
         task.compression = Compression.GZIP
-        task.from(target.configurations.runtime)
-        task.from(target.jar)
+        task.from(scriptTask.output, { into "$binPath" })
+        task.from(target.configurations.runtime + runtime +
+                target.files(target.jar),
+                { into "$libPath/$name" })
+        task.from({ ->
+            natives.files.stream().
+                    map({
+                        target.zipTree(it).files.stream().filter({
+                            it.isFile() &&
+                                    it.name.matches("(.+)\\.so(.[0-9]+)?")
+                        }).collect(Collectors.toList())
+                    }).collect(Collectors.toList())
+        }) {
+            eachFile { FileCopyDetails fcp ->
+                String[] segments = [libPath, name, fcp.name]
+                fcp.relativePath = new RelativePath(true, segments)
+            }
+        }
         return task
     }
 
     private Task addDeployMacOSXTask(Project target) {
-        File jre = getJRE(target, "MacOSX")
+        def jre = getJRE(target, "MacOSX")
         if (jre == null) {
             target.logger.warn "No JRE for Mac OS X found!"
             return
         }
         pruneJREMacOSX(jre)
         // Bundle task
-        AppBundlerTask bundleTask = target.tasks.
+        def bundleTask = target.tasks.
                 create("bundleMacOSX", AppBundlerTask)
         bundleTask.dependsOn target.jar
         bundleTask.fullName = "${-> target.application.fullName}"
@@ -192,7 +235,7 @@ class ScapesEngineApplication implements Plugin<Project> {
                 "${-> bundleTask.temporaryDir}/${-> target.project.name}.app"
 
         // Natives task
-        Copy nativesTask = target.tasks.create("nativesMacOSX", Copy)
+        def nativesTask = target.tasks.create("nativesMacOSX", Copy)
         nativesTask.dependsOn bundleTask
         nativesTask.from({ ->
             target.configurations.nativesMacOSX.files.stream().
@@ -204,14 +247,14 @@ class ScapesEngineApplication implements Plugin<Project> {
                     }).collect(Collectors.toList())
         }) {
             eachFile { FileCopyDetails fcp ->
-                String[] segments = [fcp.getName()]
+                String[] segments = [fcp.name]
                 fcp.relativePath = new RelativePath(true, segments)
             }
         }
         nativesTask.into "${-> bundleTask.output}/Contents/MacOS"
 
         // Main task
-        Tar task = target.tasks.create("deployMacOSX", Tar)
+        def task = target.tasks.create("deployMacOSX", Tar)
         task.description =
                 "Mac OS X Application containing necessary files to run the game"
         task.group = "Deployment"
@@ -223,10 +266,10 @@ class ScapesEngineApplication implements Plugin<Project> {
     }
 
     private Task addDeployWindowsTask(Project target) {
-        File jre32 = new File(target.buildDir,
+        def jre32 = new File(target.buildDir,
                 "tmp/prepareWindows/install/32/jre")
         if (!jre32.exists()) {
-            File extracted = getJRE(target, "Windows/32", jre32.parentFile)
+            def extracted = getJRE(target, "Windows/32", jre32.parentFile)
             if (extracted == null) {
                 target.logger.warn "No 32-Bit JRE for Windows found!"
                 return
@@ -234,10 +277,10 @@ class ScapesEngineApplication implements Plugin<Project> {
             pruneJREWindows(extracted)
             extracted.renameTo(jre32)
         }
-        File jre64 = new File(target.buildDir,
+        def jre64 = new File(target.buildDir,
                 "tmp/prepareWindows/install/64/jre")
         if (!jre64.exists()) {
-            File extracted = getJRE(target, "Windows/64", jre64.parentFile)
+            def extracted = getJRE(target, "Windows/64", jre64.parentFile)
             if (extracted == null) {
                 target.logger.warn "No 64-Bit JRE for Windows found!"
                 return
@@ -247,8 +290,7 @@ class ScapesEngineApplication implements Plugin<Project> {
         }
 
         // Program task
-        Launch4jTask programTask = target.tasks.
-                create("programWindows", Launch4jTask)
+        def programTask = target.tasks.create("programWindows", Launch4jTask)
         programTask.fullName = "${-> target.application.fullName}"
         programTask.version = "${-> target.application.version}"
         programTask.company = "${-> target.application.company}"
@@ -267,7 +309,7 @@ class ScapesEngineApplication implements Plugin<Project> {
                 target.project.name + ".exe")
 
         // Command task
-        Launch4jTask programCmdTask = target.tasks.
+        def programCmdTask = target.tasks.
                 create("programCmdWindows", Launch4jTask)
         programCmdTask.fullName = "${-> target.application.fullName}"
         programCmdTask.version = "${-> target.application.version}"
@@ -286,19 +328,12 @@ class ScapesEngineApplication implements Plugin<Project> {
         programCmdTask.output = new File(programCmdTask.temporaryDir,
                 target.project.name + "Cmd.exe")
 
-        // InnoSetup Config Task
-        InnoSetupConfigTask isconfigTask = target.tasks.
-                create("isconfigWindows", InnoSetupConfigTask)
-        isconfigTask.config = target.rootProject.file("resources/Setup.iss")
-        isconfigTask.output = new File(isconfigTask.temporaryDir, "Setup.iss")
-
         // Prepare Task
-        Copy prepareTask = target.tasks.create("prepareWindows", Copy)
+        def prepareTask = target.tasks.create("prepareWindows", Copy)
         prepareTask.dependsOn target.jar
         prepareTask.dependsOn programTask
         prepareTask.dependsOn programCmdTask
-        prepareTask.dependsOn isconfigTask
-        prepareTask.from isconfigTask.output
+        prepareTask.from target.rootProject.file("resources/Setup.iss")
         prepareTask.from target.file("project/installer")
         prepareTask.from(programTask.output, { into "install/common" })
         prepareTask.from(programCmdTask.output, { into "install/common" })
@@ -315,7 +350,7 @@ class ScapesEngineApplication implements Plugin<Project> {
                     }).collect(Collectors.toList())
         }) {
             eachFile { FileCopyDetails fcp ->
-                String[] segments = ["install", "32", "lib", fcp.getName()]
+                String[] segments = ["install", "32", name]
                 fcp.relativePath = new RelativePath(true, segments)
             }
         }
@@ -328,7 +363,7 @@ class ScapesEngineApplication implements Plugin<Project> {
                     }).collect(Collectors.toList())
         }) {
             eachFile { FileCopyDetails fcp ->
-                String[] segments = ["install", "64", "lib", fcp.getName()]
+                String[] segments = ["install", "64", name]
                 fcp.relativePath = new RelativePath(true, segments)
             }
         }
@@ -341,20 +376,33 @@ class ScapesEngineApplication implements Plugin<Project> {
         prepareTask.into prepareTask.temporaryDir
 
         // Pack task
-        Exec packTask = target.tasks.create("packWindows", Exec)
+        def packTask = target.tasks.create("packWindows", Exec)
         packTask.dependsOn prepareTask
-        String innoEXE = target.rootProject.
+        def innoEXE = target.rootProject.
                 file("resources/Inno Setup 5/ISCC.exe").absolutePath
-        String innoISS = new File(prepareTask.temporaryDir,
+        def innoArgs = ["/DApplicationFullName=${-> escapeWindows(target.application.fullName)}",
+                "/DApplicationVersion=${-> escapeWindows(target.application.version)}",
+                "/DApplicationCompany=${-> escapeWindows(target.application.company)}",
+                "/DApplicationCopyright=${-> escapeWindows(target.application.copyright)}",
+                "/DApplicationURL=${-> escapeWindows(target.application.url)}",
+                "/DApplicationUUID=${-> escapeWindows(target.application.uuid)}",
+                "/DApplicationName=${-> escapeWindows(target.name)}"]
+        def innoISS = new File(prepareTask.temporaryDir,
                 "Setup.iss").absolutePath
         if (System.properties["os.name"].toLowerCase().contains("win")) {
-            packTask.commandLine innoEXE, innoISS
+            def commandLine = [innoEXE]
+            commandLine += innoArgs
+            commandLine += innoISS
+            packTask.commandLine commandLine
         } else {
-            packTask.commandLine "wine", innoEXE, "Z:${innoISS}"
+            def commandLine = ["wine", innoEXE]
+            commandLine += innoArgs
+            commandLine += "Z:${innoISS}"
+            packTask.commandLine commandLine
         }
 
         // Main task
-        Copy task = target.tasks.create("deployWindows", Copy)
+        def task = target.tasks.create("deployWindows", Copy)
         task.dependsOn packTask
         task.group = "Deployment"
         task.description = "Windows Installer with bundled JRE"
@@ -374,7 +422,7 @@ class ScapesEngineApplication implements Plugin<Project> {
 
     private
     static File getJRE(Project target, String platform, File file) {
-        File[] jres = target.rootProject.file("resources/JRE/" + platform).
+        def jres = target.rootProject.file("resources/JRE/" + platform).
                 listFiles((FileFilter) {
                     !it.isDirectory() && !it.isHidden()
                 })
@@ -390,7 +438,7 @@ class ScapesEngineApplication implements Plugin<Project> {
                 into file
             }
         }
-        File[] jre = file.listFiles((FileFilter) {
+        def jre = file.listFiles((FileFilter) {
             it.isDirectory() && !it.isHidden()
         })
         if (jre == null || jre.length == 0) {
@@ -403,9 +451,9 @@ class ScapesEngineApplication implements Plugin<Project> {
             "sunec.jar", "sunpkcs11.jar", "sunmscapi.jar"]
 
     private static void pruneJREMacOSX(File jre) {
-        File jreHome = new File(jre, "Contents/Home")
+        def jreHome = new File(jre, "Contents/Home")
         pruneJRE(jreHome)
-        File lib = new File(jreHome, "lib")
+        def lib = new File(jreHome, "lib")
         deleteLibrary(lib, "libdecora_sse")
         deleteLibrary(lib, "libfxplugins")
         deleteLibrary(lib, "libglass")
@@ -423,8 +471,8 @@ class ScapesEngineApplication implements Plugin<Project> {
 
     private static void pruneJREWindows(File jre) {
         pruneJRE(jre)
-        File lib = new File(jre, "lib")
-        File bin = new File(jre, "bin")
+        def lib = new File(jre, "lib")
+        def bin = new File(jre, "bin")
         delete(bin, "dtplugin")
         delete(bin, "plugin2")
         deleteBinary(bin, "javacpl")
@@ -464,10 +512,10 @@ class ScapesEngineApplication implements Plugin<Project> {
     }
 
     private static void pruneJRE(File jre) {
-        File lib = new File(jre, "lib")
-        File bin = new File(jre, "bin")
-        File ext = new File(lib, "ext")
-        File[] unusedExtensions = ext.listFiles((FileFilter) {
+        def lib = new File(jre, "lib")
+        def bin = new File(jre, "bin")
+        def ext = new File(lib, "ext")
+        def unusedExtensions = ext.listFiles((FileFilter) {
             !jreExtensions.contains(it.name)
         })
         if (unusedExtensions != null) {
@@ -499,7 +547,7 @@ class ScapesEngineApplication implements Plugin<Project> {
     }
 
     private static void delete(File dir, String name) {
-        File file = new File(dir, name)
+        def file = new File(dir, name)
         if (file.isDirectory()) {
             file.deleteDir()
         } else {
@@ -508,17 +556,21 @@ class ScapesEngineApplication implements Plugin<Project> {
     }
 
     private static void deleteBinary(File dir, String name) {
-        File file = new File(dir, name)
+        def file = new File(dir, name)
         file.delete()
         new File(file.parentFile, file.name + ".exe").delete()
     }
 
     private static void deleteLibrary(File dir, String name) {
-        File file = new File(dir, name)
+        def file = new File(dir, name)
         file.delete()
         new File(file.parentFile, file.name + ".dll").delete()
         new File(file.parentFile, file.name + ".so").delete()
         new File(file.parentFile, file.name + ".dylib").delete()
+    }
+
+    private static String escapeWindows(String str) {
+        return str.replaceAll(" ", "\\ ")
     }
 }
 
@@ -532,23 +584,20 @@ class ScapesEngineApplicationExtension {
     def String mainClass
 }
 
-class InnoSetupConfigTask extends DefaultTask {
-    @InputFile
-    def File config
+class StartupScriptTask extends DefaultTask {
+    @Input
+    def libPath, mainClass
     @OutputFile
     def File output
 
     @TaskAction
     void run() {
         BufferedWriter writer = output.newWriter()
-        writer.write "#define ApplicationFullName \"${project.application.fullName}\"\n"
-        writer.write "#define ApplicationVersion \"${project.application.version}\"\n"
-        writer.write "#define ApplicationCompany \"${project.application.company}\"\n"
-        writer.write "#define ApplicationCopyright \"${project.application.copyright}\"\n"
-        writer.write "#define ApplicationURL \"${project.application.url}\"\n"
-        writer.write "#define ApplicationUUID \"${project.application.uuid}\"\n"
-        writer.write "#define ApplicationName \"${project.name}.exe\"\n"
-        writer << config.newReader()
+        writer.write "#!/bin/bash\n"
+        writer.write "for file in $libPath/*.jar; do\n"
+        writer.write "    CP=\"\$CP:\$file\"\n"
+        writer.write "done\n"
+        writer.write "exec -a scapes java -Djava.library.path=$libPath -cp \$CP $mainClass \$@\n"
         writer.close()
     }
 }
@@ -571,14 +620,14 @@ class AppBundlerTask extends DefaultTask {
 
     @TaskAction
     void run() {
-        File outputFile = getOutput()
+        def outputFile = getOutput()
         ant.taskdef(name: "bundleapp",
                 classpath: appbundler.absolutePath,
                 classname: "com.oracle.appbundler.AppBundlerTask")
         ant.bundleapp(outputdirectory: outputFile.parentFile.absolutePath,
                 name: outputFile.name - ".app",
                 displayname: fullName,
-                identifier: "org.tobi29.scapes.engine",
+                identifier: mainClass,
                 shortversion: version,
                 icon: icon.absolutePath,
                 mainclassname: mainClass,
@@ -646,7 +695,7 @@ class Launch4jTask extends DefaultTask {
                     classPath(classPathMap)
                     jre(jreMap) {
                         opt("-Duser.dir=\"%APPDATA%\\${fullName}\"")
-                        opt("-Djava.library.path=\"%EXEDIR%\"\\lib")
+                        opt("-Djava.library.path=\"%EXEDIR%\"")
                     }
                     versioninfo(versionMap)
                 }
