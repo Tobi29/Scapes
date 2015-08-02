@@ -114,7 +114,7 @@ public class ByteBufferStream
         return this;
     }
 
-    private void ensurePut(int len) {
+    public void ensurePut(int len) {
         while (len > buffer.remaining()) {
             ByteBuffer newBuffer = supplier.apply(buffer.capacity());
             buffer.flip();

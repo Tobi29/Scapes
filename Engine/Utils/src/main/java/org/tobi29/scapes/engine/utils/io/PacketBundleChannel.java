@@ -19,11 +19,8 @@ package org.tobi29.scapes.engine.utils.io;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.StringLongHash;
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
-import org.tobi29.scapes.engine.utils.math.FastMath;
 
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.ShortBufferException;
+import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
@@ -35,14 +32,17 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PacketBundleChannel {
     private static final IvParameterSpec IV;
+    private static final ChecksumUtil.Algorithm CHECKSUM_ALGORITHM =
+            ChecksumUtil.Algorithm.SHA256;
+    private static final int CHECKSUM_LENGTH = CHECKSUM_ALGORITHM.bytes();
     private static final int BUNDLE_HEADER_SIZE = 4;
     private static final int BUNDLE_MAX_SIZE = 1 << 10 << 10 << 6;
 
@@ -63,7 +63,8 @@ public class PacketBundleChannel {
     private final Queue<ByteBuffer> queue = new ConcurrentLinkedQueue<>();
     private final List<WeakReference<ByteBuffer>> bufferCache =
             new ArrayList<>();
-    private final CompressionUtil.Filter deflater, inflater, decipherInflater;
+    private final CompressionUtil.Filter deflater, inflater;
+    private final MessageDigest digest = CHECKSUM_ALGORITHM.digest();
     private final Cipher encryptCipher, decryptCipher;
     private final AtomicInteger inRate = new AtomicInteger(), outRate =
             new AtomicInteger();
@@ -80,10 +81,9 @@ public class PacketBundleChannel {
         this.channel = channel;
         deflater = new CompressionUtil.ZDeflater(1);
         inflater = new CompressionUtil.ZInflater();
-        decipherInflater = new DecipherZInflater();
         try {
-            encryptCipher = Cipher.getInstance("AES/CBC/NoPadding");
-            decryptCipher = Cipher.getInstance("AES/CBC/NoPadding");
+            encryptCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            decryptCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new UnsupportedJVMException(e);
         }
@@ -105,22 +105,22 @@ public class PacketBundleChannel {
             return;
         }
         byteBufferStreamOut.buffer().clear();
+        byteBufferStreamOut.position(CHECKSUM_LENGTH);
         CompressionUtil.filter(new ByteBufferStream(dataStreamOut.buffer()),
                 byteBufferStreamOut, deflater);
+        byteBufferStreamOut.buffer().flip().position(CHECKSUM_LENGTH);
+        digest.update(byteBufferStreamOut.buffer());
+        byteBufferStreamOut.buffer().flip();
+        byteBufferStreamOut.put(digest.digest());
+        byteBufferStreamOut.buffer().rewind();
         int capacity;
         if (encrypt) {
-            int padding = 16 - (byteBufferStreamOut.buffer().position() & 15);
-            Random random = ThreadLocalRandom.current();
-            do {
-                byteBufferStreamOut.put(random.nextInt(256));
-            } while (--padding > 0);
             capacity = BUNDLE_HEADER_SIZE + encryptCipher
-                    .getOutputSize(byteBufferStreamOut.buffer().position());
+                    .getOutputSize(byteBufferStreamOut.buffer().remaining());
         } else {
             capacity = BUNDLE_HEADER_SIZE +
-                    byteBufferStreamOut.buffer().position();
+                    byteBufferStreamOut.buffer().remaining();
         }
-        byteBufferStreamOut.buffer().flip();
         ByteBuffer bundle = null;
         int i = 0;
         while (i < bufferCache.size()) {
@@ -144,8 +144,8 @@ public class PacketBundleChannel {
         if (encrypt) {
             try {
                 size = encryptCipher
-                        .update(byteBufferStreamOut.buffer(), bundle);
-            } catch (ShortBufferException e) {
+                        .doFinal(byteBufferStreamOut.buffer(), bundle);
+            } catch (IllegalBlockSizeException | BadPaddingException | ShortBufferException e) {
                 throw new IOException(e);
             }
         } else {
@@ -161,6 +161,7 @@ public class PacketBundleChannel {
         bundle.rewind();
         queue.add(bundle);
         dataStreamOut.buffer().clear();
+        digest.reset();
         selector.ifPresent(Selector::wakeup);
     }
 
@@ -214,15 +215,32 @@ public class PacketBundleChannel {
             if (!input.hasRemaining()) {
                 input.flip();
                 byteBufferStreamOut.buffer().clear();
+                ByteBufferStream data;
                 if (encrypt) {
-                    CompressionUtil.filter(new ByteBufferStream(input),
-                            byteBufferStreamOut, decipherInflater);
+                    dataStreamOut.buffer().clear();
+                    dataStreamOut.ensurePut(
+                            decryptCipher.getOutputSize(input.remaining()));
+                    try {
+                        decryptCipher.doFinal(input, dataStreamOut.buffer());
+                    } catch (IllegalBlockSizeException | BadPaddingException | ShortBufferException e) {
+                        throw new IOException(e);
+                    }
+                    dataStreamOut.buffer().flip();
+                    data = dataStreamOut;
                 } else {
-                    CompressionUtil.filter(new ByteBufferStream(input),
-                            byteBufferStreamOut, inflater);
+                    data = new ByteBufferStream(input);
                 }
+                byte[] checksum = new byte[CHECKSUM_LENGTH];
+                data.get(checksum);
+                digest.update(data.buffer());
+                if (!Arrays.equals(checksum, digest.digest())) {
+                    throw new IOException("Integrity check failed");
+                }
+                data.buffer().flip().position(CHECKSUM_LENGTH);
+                CompressionUtil.filter(data, byteBufferStreamOut, inflater);
                 ByteBuffer bundle = byteBufferStreamOut.buffer();
                 bundle.flip();
+                dataStreamOut.buffer().clear();
                 hasInput = false;
                 return Optional.of(new ByteBufferStream(bundle));
             }
@@ -284,32 +302,5 @@ public class PacketBundleChannel {
         } catch (IOException e) {
         }
         return super.toString();
-    }
-
-    @SuppressWarnings("AmbiguousFieldAccess")
-    public class DecipherZInflater extends CompressionUtil.ZInflater {
-        public DecipherZInflater() {
-            this(8192);
-        }
-
-        public DecipherZInflater(int buffer) {
-            super(buffer);
-        }
-
-        @Override
-        public void input(ReadableByteStream buffer) throws IOException {
-            int len = FastMath.min(buffer.remaining(), this.buffer);
-            if (input.length < len) {
-                input = new byte[len];
-                output = new byte[len];
-            }
-            buffer.get(output, 0, len);
-            try {
-                decryptCipher.update(output, 0, len, input, 0);
-            } catch (ShortBufferException e) {
-                throw new IOException(e);
-            }
-            inflater.setInput(input, 0, len);
-        }
     }
 }
