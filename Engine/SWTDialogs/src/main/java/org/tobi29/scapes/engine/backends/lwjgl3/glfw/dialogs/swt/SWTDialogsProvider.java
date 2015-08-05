@@ -16,25 +16,11 @@
 
 package org.tobi29.scapes.engine.backends.lwjgl3.glfw.dialogs.swt;
 
-import org.eclipse.swt.widgets.Display;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.PlatformDialogs;
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.spi.GLFWDialogsProvider;
-import org.tobi29.scapes.engine.gui.GlyphRenderer;
-import org.tobi29.scapes.engine.utils.io.ProcessStream;
-import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
-import org.tobi29.scapes.engine.utils.io.filesystem.ReadSource;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class SWTDialogsProvider implements GLFWDialogsProvider {
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(SWTDialogsProvider.class);
-
     @Override
     public boolean available() {
         return true;
@@ -43,38 +29,5 @@ public class SWTDialogsProvider implements GLFWDialogsProvider {
     @Override
     public PlatformDialogs createDialogs(ScapesEngine engine) {
         return new PlatformDialogsSWT(engine.game().name());
-    }
-
-    @Override
-    public boolean loadFont(ScapesEngine engine, ReadSource font) {
-        String fontPath = null;
-        try {
-            Path fontFile = Files.createTempFile("Scapes", ".ttf");
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                try {
-                    Files.delete(fontFile);
-                } catch (IOException e) {
-                    LOGGER.warn("Failed to delete temporary font file: {}",
-                            e.toString());
-                }
-            }));
-            FileUtil.write(fontFile,
-                    stream -> ProcessStream.processSource(font, stream::put));
-            fontPath = fontFile.toAbsolutePath().toString();
-        } catch (IOException e) {
-            LOGGER.warn("Failed to store font file: {}", e.toString());
-            return false;
-        }
-        if (Display.getDefault().loadFont(fontPath)) {
-            return true;
-        }
-        LOGGER.warn("Failed to load font: {}", font);
-        return false;
-    }
-
-    @Override
-    public GlyphRenderer createGlyphRenderer(ScapesEngine engine,
-            String fontName, int size) {
-        return new SWTGlyphRenderer(fontName, size);
     }
 }

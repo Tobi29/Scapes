@@ -33,8 +33,4 @@ public interface PlatformDialogs {
             String message);
 
     void openFile(Path path);
-
-    void renderTick();
-
-    void dispose();
 }

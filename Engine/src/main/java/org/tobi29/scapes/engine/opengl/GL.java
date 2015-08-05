@@ -46,8 +46,7 @@ public abstract class GL implements OpenGL {
         textureManager = new TextureManager(engine);
         shaderManager = new ShaderManager(engine);
         resolutionMultiplier = engine.config().resolutionMultiplier();
-        container.loadFont(
-                engine.files().get("Engine:font/QuicksandPro-Regular.otf"));
+        container.loadFont("Engine:font/QuicksandPro-Regular");
         defaultFont = new FontRenderer(
                 container.createGlyphRenderer("Quicksand Pro", 64));
     }

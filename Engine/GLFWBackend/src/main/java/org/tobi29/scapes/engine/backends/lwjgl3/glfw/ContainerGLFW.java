@@ -25,6 +25,7 @@ import org.tobi29.scapes.engine.ScapesEngineException;
 import org.tobi29.scapes.engine.backends.lwjgl3.ContainerLWJGL3;
 import org.tobi29.scapes.engine.backends.lwjgl3.GLFWControllers;
 import org.tobi29.scapes.engine.backends.lwjgl3.GLFWKeyMap;
+import org.tobi29.scapes.engine.backends.lwjgl3.STBGlyphRenderer;
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.spi.GLFWDialogsProvider;
 import org.tobi29.scapes.engine.gui.GlyphRenderer;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
@@ -35,7 +36,6 @@ import org.tobi29.scapes.engine.utils.BufferCreatorNative;
 import org.tobi29.scapes.engine.utils.DesktopException;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Sync;
-import org.tobi29.scapes.engine.utils.io.filesystem.ReadSource;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
 import java.nio.ByteBuffer;
@@ -206,13 +206,13 @@ public class ContainerGLFW extends ContainerLWJGL3 {
     }
 
     @Override
-    public boolean loadFont(ReadSource font) {
-        return DIALOGS_PROVIDER.loadFont(engine, font);
+    public boolean loadFont(String asset) {
+        return STBGlyphRenderer.loadFont(engine.files().get(asset + ".ttf"));
     }
 
     @Override
     public GlyphRenderer createGlyphRenderer(String fontName, int size) {
-        return DIALOGS_PROVIDER.createGlyphRenderer(engine, fontName, size);
+        return STBGlyphRenderer.fromFont(fontName, size);
     }
 
     @Override
@@ -240,7 +240,6 @@ public class ContainerGLFW extends ContainerLWJGL3 {
             joysticksChanged = controllers.poll();
             engine.render(sync.delta());
             containerResized = false;
-            dialogs.renderTick();
             sync.cap();
             GLFW.glfwSwapBuffers(window);
             if (!visible) {
@@ -249,7 +248,6 @@ public class ContainerGLFW extends ContainerLWJGL3 {
             }
         }
         engine.dispose();
-        dialogs.dispose();
         GLFW.glfwDestroyWindow(window);
         GLFW.glfwTerminate();
         windowSizeFun.release();

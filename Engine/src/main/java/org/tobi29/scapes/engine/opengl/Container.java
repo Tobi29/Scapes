@@ -22,7 +22,6 @@ import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.openal.OpenAL;
 import org.tobi29.scapes.engine.utils.DesktopException;
 import org.tobi29.scapes.engine.utils.Pair;
-import org.tobi29.scapes.engine.utils.io.filesystem.ReadSource;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -53,7 +52,7 @@ public interface Container {
 
     boolean joysticksChanged();
 
-    boolean loadFont(ReadSource font);
+    boolean loadFont(String asset);
 
     GlyphRenderer createGlyphRenderer(String fontName, int size);
 

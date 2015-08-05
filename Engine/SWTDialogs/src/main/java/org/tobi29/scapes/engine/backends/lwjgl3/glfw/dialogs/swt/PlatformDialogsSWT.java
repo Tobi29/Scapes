@@ -32,16 +32,9 @@ import java.util.Optional;
 
 public class PlatformDialogsSWT implements PlatformDialogs {
     private static final Path[] EMPTY_PATH = {};
-    private final Display display;
     private final String name;
 
     public PlatformDialogsSWT(String name) {
-        this(Display.getDefault(), name);
-        Display.setAppName(name);
-    }
-
-    public PlatformDialogsSWT(Display display, String name) {
-        this.display = display;
         this.name = name;
     }
 
@@ -65,7 +58,7 @@ public class PlatformDialogsSWT implements PlatformDialogs {
         fileDialog.setFilterExtensions(filterExtensions);
         fileDialog.setFilterNames(filterNames);
         boolean successful = fileDialog.open() != null;
-        shell.dispose();
+        disposeShell(shell);
         if (!successful) {
             return EMPTY_PATH;
         }
@@ -95,7 +88,7 @@ public class PlatformDialogsSWT implements PlatformDialogs {
         fileDialog.setFilterExtensions(filterExtensions);
         fileDialog.setFilterNames(filterNames);
         boolean successful = fileDialog.open() != null;
-        shell.dispose();
+        disposeShell(shell);
         if (!successful) {
             return Optional.empty();
         }
@@ -127,7 +120,7 @@ public class PlatformDialogsSWT implements PlatformDialogs {
         messageBox.setText(title);
         messageBox.setMessage(message);
         messageBox.open();
-        shell.dispose();
+        disposeShell(shell);
     }
 
     @Override
@@ -135,19 +128,16 @@ public class PlatformDialogsSWT implements PlatformDialogs {
         Program.launch(path.toString());
     }
 
-    @Override
-    public void renderTick() {
-        while (display.readAndDispatch()) {
-        }
-    }
-
-    @Override
-    public void dispose() {
-    }
-
     private Shell createShell() {
-        Shell shell = new Shell(display);
+        Shell shell = new Shell();
         shell.setText(name);
         return shell;
+    }
+
+    private void disposeShell(Shell shell) {
+        Display display = shell.getDisplay();
+        shell.dispose();
+        while (display.readAndDispatch()) {
+        }
     }
 }

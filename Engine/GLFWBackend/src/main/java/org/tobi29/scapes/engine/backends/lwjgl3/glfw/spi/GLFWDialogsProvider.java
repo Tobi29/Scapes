@@ -18,16 +18,9 @@ package org.tobi29.scapes.engine.backends.lwjgl3.glfw.spi;
 
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.PlatformDialogs;
-import org.tobi29.scapes.engine.gui.GlyphRenderer;
-import org.tobi29.scapes.engine.utils.io.filesystem.ReadSource;
 
 public interface GLFWDialogsProvider {
     boolean available();
 
     PlatformDialogs createDialogs(ScapesEngine engine);
-
-    boolean loadFont(ScapesEngine engine, ReadSource font);
-
-    GlyphRenderer createGlyphRenderer(ScapesEngine engine, String fontName,
-            int size);
 }
