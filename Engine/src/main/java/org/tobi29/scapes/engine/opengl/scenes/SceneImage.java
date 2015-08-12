@@ -20,7 +20,6 @@ import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiAlignment;
 import org.tobi29.scapes.engine.gui.GuiComponentIcon;
 import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 
 public class SceneImage extends Scene {
@@ -40,11 +39,6 @@ public class SceneImage extends Scene {
 
     @Override
     public void renderScene(GL gl) {
-    }
-
-    @Override
-    public Shader postProcessing(GL gl, int pass) {
-        return gl.shaders().get("Engine:shader/Textured", gl);
     }
 
     @Override
