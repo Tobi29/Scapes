@@ -20,8 +20,10 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
 public final class Dialogs {
-    public static int openMessage(Shell shell, String message, int style) {
+    public static int openMessage(Shell shell, int style, String title,
+            String message) {
         MessageBox messageBox = new MessageBox(shell, style);
+        messageBox.setText(title);
         messageBox.setMessage(message);
         return messageBox.open();
     }

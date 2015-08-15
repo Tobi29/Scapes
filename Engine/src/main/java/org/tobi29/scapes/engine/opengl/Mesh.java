@@ -72,6 +72,10 @@ public class Mesh {
         addVertex(x, y, z, r, g, b, a, tx, ty, nx, ny, nz);
     }
 
+    public void addVertex(float x, float y, float z, float tx, float ty) {
+        addVertex(x, y, z, 1.0f, 1.0f, 1.0f, 1.0f, tx, ty, 0.0f, 0.0f, 1.0f);
+    }
+
     public void addVertex(float x, float y, float z, float r, float g, float b,
             float a, float tx, float ty) {
         addVertex(x, y, z, r, g, b, a, tx, ty, 0.0f, 0.0f, 1.0f);

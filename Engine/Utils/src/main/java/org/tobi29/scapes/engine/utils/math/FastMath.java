@@ -496,6 +496,32 @@ public final class FastMath {
         return atan2(y2 - y1, x2 - x1) * RAD_2_DEG;
     }
 
+    public static boolean inside(Vector2 origin, Vector2 size, Vector2 point) {
+        return inside(origin.doubleX(), origin.doubleY(), size.doubleX(),
+                size.doubleY(), point.doubleX(), point.doubleY());
+    }
+
+    public static boolean inside(double x1, double y1, double x2, double y2,
+            double x, double y) {
+        x -= x1;
+        y -= y1;
+        return x >= 0.0 && y >= 0.0 && x < x2 && y < y2;
+    }
+
+    public static boolean inside(Vector3 origin, Vector3 size, Vector3 point) {
+        return inside(origin.doubleX(), origin.doubleY(), origin.doubleZ(),
+                size.doubleX(), size.doubleY(), size.doubleZ(), point.doubleX(),
+                point.doubleY(), point.doubleZ());
+    }
+
+    public static boolean inside(double x1, double y1, double z1, double x2,
+            double y2, double z2, double x, double y, double z) {
+        x -= x1;
+        y -= y1;
+        z -= z1;
+        return x >= 0.0 && y >= 0.0 && z >= 0.0 && x < x2 && y < y2 && z < z2;
+    }
+
     public static int nextPowerOfTwo(int value) {
         value--;
         value |= value >> 1;
