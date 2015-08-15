@@ -22,10 +22,12 @@ import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
+import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class PacketEntityMetaData extends Packet implements PacketClient {
     private int entityID;
@@ -64,7 +66,13 @@ public class PacketEntityMetaData extends Packet implements PacketClient {
         if (world == null) {
             return;
         }
-        world.entity(entityID).ifPresent(entity -> entity.processPacket(this));
+        Optional<EntityClient> fetch = world.entity(entityID);
+        if (fetch.isPresent()) {
+            EntityClient entity = fetch.get();
+            entity.processPacket(this);
+        } else {
+            client.send(new PacketRequestEntity(entityID));
+        }
     }
 
     public String category() {

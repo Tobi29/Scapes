@@ -159,7 +159,7 @@ class VanillaBasicsRegisters {
                 MetalType metalType = plugin.getMetalType(metal);
                 ItemStack item = new ItemStack(materials.ingot, data, amount);
                 IngotUtil.createIngot(item, metalType, temperature);
-                player.mob().inventory().add(item);
+                player.mob().inventory("Container").add(item);
             });
         });
 
@@ -187,7 +187,7 @@ class VanillaBasicsRegisters {
                 if (!ToolUtil.createTool(plugin, item, kind)) {
                     Command.error("Unknown tool kind: " + kind);
                 }
-                player.mob().inventory().add(item);
+                player.mob().inventory("Container").add(item);
             });
         });
     }

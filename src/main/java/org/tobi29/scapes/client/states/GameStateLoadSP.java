@@ -91,7 +91,7 @@ public class GameStateLoadSP extends GameState {
                     step++;
                     break;
                 case 1:
-                    port = server.connection().start(0);
+                    port = server.connection().start(23456);
                     if (port <= 0) {
                         throw new IOException(
                                 "Unable to open server socket (Invalid port returned: " +
@@ -143,7 +143,7 @@ public class GameStateLoadSP extends GameState {
             LOGGER.error("Failed to start internal server:", e);
             try {
                 server.stop(ScapesServer.ShutdownReason.ERROR);
-            } catch (RuntimeException e1) {
+            } catch (IOException e1) {
                 LOGGER.error(
                         "Failed to stop internal server after login error:",
                         e1);

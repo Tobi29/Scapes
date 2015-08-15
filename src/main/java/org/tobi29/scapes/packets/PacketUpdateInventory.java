@@ -22,29 +22,34 @@ import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
+import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.EntityContainerClient;
 import org.tobi29.scapes.entity.server.EntityContainerServer;
 import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class PacketUpdateInventory extends Packet implements PacketClient {
     private int entityID;
+    private String id;
     private TagStructure tag;
 
     public PacketUpdateInventory() {
     }
 
-    public PacketUpdateInventory(EntityContainerServer entity) {
+    public PacketUpdateInventory(EntityContainerServer entity, String id) {
         entityID = ((EntityServer) entity).entityID();
-        tag = entity.inventory().save();
+        this.id = id;
+        tag = entity.inventory(id).save();
     }
 
     @Override
     public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
         stream.putInt(entityID);
+        stream.putString(id);
         TagStructureBinary.write(tag, stream);
     }
 
@@ -52,6 +57,7 @@ public class PacketUpdateInventory extends Packet implements PacketClient {
     public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
         entityID = stream.getInt();
+        id = stream.getString();
         tag = new TagStructure();
         TagStructureBinary.read(tag, stream);
     }
@@ -61,12 +67,16 @@ public class PacketUpdateInventory extends Packet implements PacketClient {
         if (world == null) {
             return;
         }
-        world.entity(entityID).ifPresent(entity -> {
+        Optional<EntityClient> fetch = world.entity(entityID);
+        if (fetch.isPresent()) {
+            EntityClient entity = fetch.get();
             if (entity instanceof EntityContainerClient) {
                 EntityContainerClient entityContainer =
                         (EntityContainerClient) entity;
-                entityContainer.inventory().load(tag);
+                entityContainer.inventory(id).load(tag);
             }
-        });
+        } else {
+            client.send(new PacketRequestEntity(entityID));
+        }
     }
 }

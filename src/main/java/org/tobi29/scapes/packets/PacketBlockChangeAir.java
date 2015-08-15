@@ -29,7 +29,7 @@ public class PacketBlockChangeAir extends PacketBlockChange {
     }
 
     public PacketBlockChangeAir(int x, int y, int z) {
-        super(x, y, z, (short) 0, (short) 0);
+        super(x, y, z, 0, 0);
     }
 
     @Override

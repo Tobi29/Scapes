@@ -16,8 +16,6 @@
 
 package org.tobi29.scapes.server;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.connection.ServerInfo;
 import org.tobi29.scapes.engine.utils.Crashable;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -30,8 +28,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 public class ScapesServer {
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(ScapesServer.class);
     private final TaskExecutor taskExecutor;
     private final ServerInfo serverInfo;
     private final ServerConnection serverConnection;
@@ -39,7 +35,7 @@ public class ScapesServer {
     private final CommandRegistry commandRegistry;
     private final int maxLoadingRadius;
     private boolean stopped;
-    private ShutdownReason shutdownReason = ShutdownReason.ERROR;
+    private ShutdownReason shutdownReason = ShutdownReason.RUNNING;
 
     public ScapesServer(Path path, TagStructure tagStructure,
             ServerInfo serverInfo, Crashable crashHandler) throws IOException {
@@ -83,18 +79,25 @@ public class ScapesServer {
     }
 
     public void scheduleStop(ShutdownReason shutdownReason) {
-        Thread thread = new Thread(() -> stop(shutdownReason));
-        thread.setName("Server-Shutdown");
-        thread.start();
+        this.shutdownReason = shutdownReason;
     }
 
-    public void stop(ShutdownReason shutdownReason) {
+    public void stop(ShutdownReason shutdownReason) throws IOException {
         this.shutdownReason = shutdownReason;
+        stop();
+    }
+
+    public void stop() throws IOException {
+        assert shutdownReason != ShutdownReason.RUNNING;
         worldFormat.worldNames().forEach(worldFormat::removeWorld);
         serverConnection.stop();
         stopped = true;
         taskExecutor.shutdown();
-        LOGGER.info("Stopped server");
+        worldFormat.save();
+    }
+
+    public boolean shouldStop() {
+        return shutdownReason != ShutdownReason.RUNNING;
     }
 
     public boolean hasStopped() {
@@ -102,6 +105,7 @@ public class ScapesServer {
     }
 
     public enum ShutdownReason {
+        RUNNING,
         STOP,
         RELOAD,
         ERROR

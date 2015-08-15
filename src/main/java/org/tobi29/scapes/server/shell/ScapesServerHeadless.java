@@ -18,15 +18,12 @@ package org.tobi29.scapes.server.shell;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.engine.utils.SleepUtil;
 import org.tobi29.scapes.server.ScapesServer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
 
 public class ScapesServerHeadless extends ScapesStandaloneServer {
     private static final Logger LOGGER =
@@ -37,50 +34,28 @@ public class ScapesServerHeadless extends ScapesStandaloneServer {
     }
 
     @Override
-    public int run() throws IOException {
-        if (!Files.exists(path)) {
-            throw new IOException("No save found");
-        }
-        while (true) {
-            start();
+    protected Runnable loop() {
+        BufferedReader reader =
+                new BufferedReader(new InputStreamReader(System.in));
+        return () -> {
             try {
-                BufferedReader reader =
-                        new BufferedReader(new InputStreamReader(System.in));
-                while (!server.hasStopped()) {
-                    if (reader.ready()) {
-                        String line = reader.readLine();
-                        if (line != null) {
-                            server.commandRegistry().get(line, this).execute()
-                                    .forEach(output -> System.out
-                                            .println(output.toString()));
-                        }
-                    } else {
-                        SleepUtil.sleep(100);
+                while (reader.ready()) {
+                    String line = reader.readLine();
+                    if (line != null) {
+                        server.commandRegistry().get(line, this).execute()
+                                .forEach(output -> System.out
+                                        .println(output.toString()));
                     }
                 }
             } catch (IOException e) {
                 LOGGER.error("Error reading console input: {}", e.toString());
-                server.stop(ScapesServer.ShutdownReason.ERROR);
+                server.scheduleStop(ScapesServer.ShutdownReason.ERROR);
             }
-            if (stop() != ScapesServer.ShutdownReason.RELOAD) {
-                break;
-            }
-        }
-        return 0;
-    }
-
-    @Override
-    public Optional<String> playerName() {
-        return Optional.empty();
+        };
     }
 
     @Override
     public void tell(String message) {
         System.out.println(message);
-    }
-
-    @Override
-    public int permissionLevel() {
-        return 10;
     }
 }

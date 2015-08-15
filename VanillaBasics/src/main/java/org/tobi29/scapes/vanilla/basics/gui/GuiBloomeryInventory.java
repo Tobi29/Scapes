@@ -33,20 +33,20 @@ public class GuiBloomeryInventory extends GuiContainerInventory {
             MobPlayerClientMain player) {
         super("Bloomery", player, container);
         this.container = container;
-        addButton(16, 210, 30, 30, 0);
-        addButton(56, 210, 30, 30, 1);
-        addButton(96, 210, 30, 30, 2);
-        addButton(136, 210, 30, 30, 3);
-        addButton(16, 80, 30, 30, 4);
-        addButton(16, 120, 30, 30, 5);
-        addButton(56, 120, 30, 30, 6);
-        addButton(96, 120, 30, 30, 7);
-        addButton(136, 120, 30, 30, 8);
-        addButton(176, 120, 30, 30, 9);
-        addButton(216, 120, 30, 30, 10);
-        addButton(256, 120, 30, 30, 11);
-        addButton(296, 120, 30, 30, 12);
-        addButton(336, 120, 30, 30, 13);
+        buttonContainer(16, 210, 30, 30, 0);
+        buttonContainer(56, 210, 30, 30, 1);
+        buttonContainer(96, 210, 30, 30, 2);
+        buttonContainer(136, 210, 30, 30, 3);
+        buttonContainer(16, 80, 30, 30, 4);
+        buttonContainer(16, 120, 30, 30, 5);
+        buttonContainer(56, 120, 30, 30, 6);
+        buttonContainer(96, 120, 30, 30, 7);
+        buttonContainer(136, 120, 30, 30, 8);
+        buttonContainer(176, 120, 30, 30, 9);
+        buttonContainer(216, 120, 30, 30, 10);
+        buttonContainer(256, 120, 30, 30, 11);
+        buttonContainer(296, 120, 30, 30, 12);
+        buttonContainer(336, 120, 30, 30, 13);
     }
 
     @Override

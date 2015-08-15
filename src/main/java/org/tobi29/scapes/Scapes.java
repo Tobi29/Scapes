@@ -151,9 +151,11 @@ public class Scapes {
                 break;
             case "server":
                 try {
-                    ScapesStandaloneServer server;
-                    server = new ScapesServerHeadless(home);
-                    System.exit(server.run());
+                    ScapesStandaloneServer server =
+                            new ScapesServerHeadless(home);
+                    int exit = server.run();
+                    server.dispose();
+                    System.exit(exit);
                 } catch (IOException e) {
                     System.err.println(e.getMessage());
                     System.exit(200);

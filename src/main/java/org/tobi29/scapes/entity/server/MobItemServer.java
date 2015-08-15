@@ -72,10 +72,11 @@ public class MobItemServer extends MobServer {
                     .forEach(entity -> {
                         world.playSound("Scapes:sound/entity/mob/Item.ogg",
                                 this);
-                        item.setAmount(
-                                item.amount() - entity.inventory().add(item));
-                        entity.connection()
-                                .send(new PacketUpdateInventory(entity));
+                        item.setAmount(item.amount() -
+                                entity.inventory("Container").add(item));
+                        world.connection()
+                                .send(new PacketUpdateInventory(entity,
+                                        "Container"));
                     });
             stackwait -= delta;
             if (stackwait <= 0) {

@@ -99,7 +99,7 @@ public class ItemMold extends VanillaItem implements ItemHeatable {
                     currentTemperature +
                             (temperature - currentTemperature) / 400.0f, 1.1f));
             if (currentTemperature >= meltingPoint(item) && item.data() == 0) {
-                item.setData((short) 1);
+                item.setData(1);
             }
         }
     }

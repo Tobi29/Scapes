@@ -284,9 +284,9 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
         speed.plusX(x).plusY(y).plusZ(z);
     }
 
-    public void setPos(Vector3 value) {
-        synchronized (pos) {
-            pos.set(value);
+    public void setPos(Vector3 pos) {
+        synchronized (this.pos) {
+            this.pos.set(pos);
         }
     }
 

@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item.tool;
 
+import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.packets.PacketUpdateInventory;
@@ -29,15 +30,16 @@ public class ItemPickaxe extends ItemTool {
     @Override
     public void click(MobPlayerServer entity, ItemStack item) {
         if (item.data() == 0) {
-            ItemStack itemHandle = new ItemStack(materials.stick, (short) 0);
-            ItemStack itemString =
-                    new ItemStack(materials.string, (short) 0, 2);
-            if (entity.inventory().canTake(itemHandle) &&
-                    entity.inventory().canTake(itemString)) {
-                entity.inventory().take(itemHandle);
-                entity.inventory().take(itemString);
-                item.setData((short) 1);
-                entity.connection().send(new PacketUpdateInventory(entity));
+            ItemStack itemHandle = new ItemStack(materials.stick, 0);
+            ItemStack itemString = new ItemStack(materials.string, 0, 2);
+            Inventory inventory = entity.inventory("Container");
+            if (inventory.canTake(itemHandle) &&
+                    inventory.canTake(itemString)) {
+                inventory.take(itemHandle);
+                inventory.take(itemString);
+                item.setData(1);
+                entity.connection()
+                        .send(new PacketUpdateInventory(entity, "Container"));
             }
         }
     }

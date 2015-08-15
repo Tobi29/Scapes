@@ -31,7 +31,7 @@ import org.tobi29.scapes.packets.PacketInventoryInteraction;
 import java.util.Objects;
 
 public class GuiInventory extends Gui {
-    protected final GuiComponentVisiblePane pane;
+    protected final GuiComponentVisiblePane pane, inventoryPane;
     protected final MobPlayerClientMain player;
     private String hover, renderHover, currentHover;
     private FontRenderer.Text vaoText;
@@ -42,41 +42,50 @@ public class GuiInventory extends Gui {
     public GuiInventory(String name, MobPlayerClientMain player) {
         super(GuiAlignment.CENTER);
         this.player = player;
-        Inventory inventory = player.inventory();
         pane = new GuiComponentVisiblePane(this, 200, 0, 400, 512);
         new GuiComponentText(pane, 16, 16, 32, name);
         new GuiComponentSeparator(pane, 24, 64, 352, 2);
-        GuiComponentVisiblePane inventoryPane =
-                new GuiComponentVisiblePane(pane, 16, 268, 368, 162);
+        inventoryPane = new GuiComponentVisiblePane(pane, 16, 268, 368, 162);
         int i = 0;
-        for (int y = -1; y < 3; y++) {
+        for (int x = 0; x < 10; x++) {
+            int xx = x * 35 + 11;
+            button(xx, 121, 30, 30, i);
+            i++;
+        }
+        for (int y = 0; y < 3; y++) {
             int yy = y * 35 + 11;
-            if (y == -1) {
-                yy = 121;
-            }
             for (int x = 0; x < 10; x++) {
                 int xx = x * 35 + 11;
-                int id = i;
-                GuiComponentItemButton item =
-                        new GuiComponentItemButton(inventoryPane, xx, yy, 30,
-                                30, inventory.item(i));
-                item.addLeftClick(event -> leftClick(id));
-                item.addRightClick(event -> rightClick(id));
-                item.addHover(event -> setTooltip(inventory.item(id)));
+                button(xx, yy, 30, 30, i);
                 i++;
             }
         }
         new GuiComponentSeparator(pane, 24, 448, 352, 2);
     }
 
-    protected void leftClick(int i) {
-        player.connection().send(new PacketInventoryInteraction(player,
-                PacketInventoryInteraction.LEFT, i));
+    protected void button(int x, int y, int width, int height, int slot) {
+        button(x, y, width, height, "Container", slot);
     }
 
-    protected void rightClick(int i) {
+    protected void button(int x, int y, int width, int height, String id,
+            int slot) {
+        Inventory inventory = player.inventory(id);
+        GuiComponentItemButton button =
+                new GuiComponentItemButton(inventoryPane, x, y, width, height,
+                        inventory.item(slot));
+        button.addLeftClick(event -> leftClick(id, slot));
+        button.addRightClick(event -> rightClick(id, slot));
+        button.addHover(event -> setTooltip(inventory.item(slot)));
+    }
+
+    protected void leftClick(String id, int i) {
         player.connection().send(new PacketInventoryInteraction(player,
-                PacketInventoryInteraction.RIGHT, i));
+                PacketInventoryInteraction.LEFT, id, i));
+    }
+
+    protected void rightClick(String id, int i) {
+        player.connection().send(new PacketInventoryInteraction(player,
+                PacketInventoryInteraction.RIGHT, id, i));
     }
 
     @Override
@@ -92,9 +101,8 @@ public class GuiInventory extends Gui {
             vaoText.render(gl, shader);
             matrixStack.pop();
         }
-        player.inventory().hold().ifPresent(hold -> GuiUtils
-                .renderItem((float) cursorX, (float) cursorY, 30.0f, 30.0f,
-                        hold, gl, shader, font));
+        GuiUtils.renderItem((float) cursorX, (float) cursorY, 30.0f, 30.0f,
+                player.inventory("Hold").item(0), gl, shader, font);
     }
 
     @Override

@@ -20,11 +20,13 @@ import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
+import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.MobLivingClient;
 import org.tobi29.scapes.entity.server.MobLivingServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class PacketMobDamage extends Packet implements PacketClient {
     private int entityID;
@@ -69,10 +71,14 @@ public class PacketMobDamage extends Packet implements PacketClient {
         if (world == null) {
             return;
         }
-        world.entity(entityID).ifPresent(entity -> {
+        Optional<EntityClient> fetch = world.entity(entityID);
+        if (fetch.isPresent()) {
+            EntityClient entity = fetch.get();
             if (entity instanceof MobLivingClient) {
                 ((MobLivingClient) entity).processPacket(this);
             }
-        });
+        } else {
+            client.send(new PacketRequestEntity(entityID));
+        }
     }
 }

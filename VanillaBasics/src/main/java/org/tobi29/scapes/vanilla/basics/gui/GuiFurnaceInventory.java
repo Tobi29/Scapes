@@ -33,14 +33,14 @@ public class GuiFurnaceInventory extends GuiContainerInventory {
             MobPlayerClientMain player) {
         super("Furnace", player, container);
         this.container = container;
-        addButton(16, 210, 30, 30, 0);
-        addButton(56, 210, 30, 30, 1);
-        addButton(96, 210, 30, 30, 2);
-        addButton(136, 210, 30, 30, 3);
-        addButton(16, 80, 30, 30, 4);
-        addButton(16, 120, 30, 30, 5);
-        addButton(56, 120, 30, 30, 6);
-        addButton(96, 120, 30, 30, 7);
+        buttonContainer(16, 210, 30, 30, 0);
+        buttonContainer(56, 210, 30, 30, 1);
+        buttonContainer(96, 210, 30, 30, 2);
+        buttonContainer(136, 210, 30, 30, 3);
+        buttonContainer(16, 80, 30, 30, 4);
+        buttonContainer(16, 120, 30, 30, 5);
+        buttonContainer(56, 120, 30, 30, 6);
+        buttonContainer(96, 120, 30, 30, 7);
     }
 
     @Override

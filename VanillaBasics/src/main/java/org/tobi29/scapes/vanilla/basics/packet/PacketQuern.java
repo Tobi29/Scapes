@@ -73,12 +73,13 @@ public class PacketQuern extends Packet implements PacketServer {
                         (VanillaBasics) world.plugins().plugin("VanillaBasics");
                 VanillaMaterial materials = plugin.getMaterials();
                 synchronized (quern) {
-                    Inventory inventory = quern.inventory();
+                    Inventory inventory = quern.inventory("Container");
                     ItemStack item = inventory.item(0);
                     if (item.material() == materials.cropDrop) {
                         item.setMaterial(materials.grain);
                         item.setAmount(item.amount() << 2);
-                        Packet packet = new PacketUpdateInventory(quern);
+                        Packet packet =
+                                new PacketUpdateInventory(quern, "Container");
                         quern.viewers().map(MobPlayerServer::connection)
                                 .forEach(connection -> connection.send(packet));
                     }

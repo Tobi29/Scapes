@@ -30,6 +30,7 @@ import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i;
+import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
@@ -112,9 +113,13 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
             return;
         }
         this.cam = cam;
-        int camX = FastMath.floor(cam.position.doubleX() / 16.0);
-        int camY = FastMath.floor(cam.position.doubleY() / 16.0);
+        Vector3 camPos = cam.position.now().div(16.0);
+        int camX = camPos.intX();
+        int camY = camPos.intY();
+        double offsetX = camX - camPos.doubleX();
+        double offsetY = camY - camPos.doubleY();
         chunks.clear();
+        chunkDistance = chunkDistanceMax;
         for (Vector2i pos : sortedLocations) {
             Optional<TerrainInfiniteChunkClient> chunk =
                     terrain.chunkNoLoad(camX + pos.intX(), camY + pos.intY());
@@ -126,10 +131,9 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                     continue;
                 }
             }
-            chunkDistance = FastMath.min(chunkDistanceMax, FastMath.sqrt(
-                    FastMath.sqr(pos.intX()) + FastMath.sqr(pos.intY()) - 2.0) *
-                    16.0);
-            break;
+            chunkDistance = FastMath.min(chunkDistance, FastMath.sqrt(
+                    FastMath.sqr(offsetX + pos.doubleX()) +
+                            FastMath.sqr(offsetY + pos.intY()) - 2.0) * 16.0);
         }
     }
 

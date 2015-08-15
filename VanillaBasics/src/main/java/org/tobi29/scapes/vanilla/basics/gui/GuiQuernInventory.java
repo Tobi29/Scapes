@@ -26,7 +26,7 @@ public class GuiQuernInventory extends GuiContainerInventory {
     public GuiQuernInventory(EntityQuernClient container,
             MobPlayerClientMain player) {
         super("Quern", player, container);
-        addButton(185, 90, 30, 30, 0);
+        buttonContainer(185, 90, 30, 30, 0);
         GuiComponentTextButton quern =
                 new GuiComponentTextButton(pane, 27, 210, 120, 30, 18, "Quern");
         quern.addLeftClick(

@@ -19,6 +19,7 @@ package org.tobi29.scapes.vanilla.basics.entity.server;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
+import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
@@ -28,22 +29,33 @@ import org.tobi29.scapes.entity.server.MobPlayerServer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public abstract class EntityAbstractContainerServer extends EntityServer
         implements EntityContainerServer {
     protected final Inventory inventory;
+    protected final Map<String, Inventory> inventories =
+            new ConcurrentHashMap<>();
     protected final List<MobPlayerServer> viewers = new ArrayList<>();
 
     protected EntityAbstractContainerServer(WorldServer world, Vector3 pos,
             Inventory inventory) {
         super(world, pos);
         this.inventory = inventory;
+        inventories.put("Container", inventory);
     }
 
     @Override
-    public Inventory inventory() {
-        return inventory;
+    public Inventory inventory(String id) {
+        return inventories.get(id);
+    }
+
+    @Override
+    public Stream<Pair<String, Inventory>> inventories() {
+        return inventories.entrySet().stream()
+                .map(entry -> new Pair<>(entry.getKey(), entry.getValue()));
     }
 
     @Override
@@ -65,15 +77,19 @@ public abstract class EntityAbstractContainerServer extends EntityServer
 
     @Override
     public TagStructure write() {
-        TagStructure tag = super.write();
-        tag.setStructure("Inventory", inventory.save());
-        return tag;
+        TagStructure tagStructure = super.write();
+        TagStructure inventoryTag = tagStructure.getStructure("Inventory");
+        inventories.forEach((id, inventory) -> inventoryTag
+                .setStructure(id, inventory.save()));
+        return tagStructure;
     }
 
     @Override
     public void read(TagStructure tagStructure) {
         super.read(tagStructure);
-        inventory.load(tagStructure.getStructure("Inventory"));
+        TagStructure inventoryTag = tagStructure.getStructure("Inventory");
+        inventories.forEach((id, inventory) -> inventory
+                .load(inventoryTag.getStructure(id)));
     }
 
     @Override

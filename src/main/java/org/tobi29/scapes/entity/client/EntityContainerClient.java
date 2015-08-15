@@ -22,5 +22,5 @@ import org.tobi29.scapes.engine.gui.Gui;
 public interface EntityContainerClient {
     Gui gui(MobPlayerClientMain player);
 
-    Inventory inventory();
+    Inventory inventory(String id);
 }

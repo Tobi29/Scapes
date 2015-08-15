@@ -32,11 +32,15 @@ import org.tobi29.scapes.entity.CreatureType;
 import org.tobi29.scapes.entity.model.MobLivingModelHuman;
 import org.tobi29.scapes.entity.model.MobModel;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MobPlayerClient extends MobLivingEquippedClient
         implements EntityContainerClient {
-    protected final Inventory inventory;
+    protected final Inventory inventoryContainer, inventoryHold;
+    protected final Map<String, Inventory> inventories =
+            new ConcurrentHashMap<>();
     protected int inventorySelectLeft, inventorySelectRight = 9, healWait;
     protected String nickname;
     private byte[] skin;
@@ -52,17 +56,20 @@ public class MobPlayerClient extends MobLivingEquippedClient
         rot.setX(xRot);
         rot.setZ(zRot);
         this.nickname = nickname;
-        inventory = new Inventory(registry, 44);
+        inventoryContainer = new Inventory(registry, 40);
+        inventoryHold = new Inventory(registry, 1);
+        inventories.put("Container", inventoryContainer);
+        inventories.put("Hold", inventoryHold);
     }
 
     @Override
     public ItemStack leftWeapon() {
-        return inventory.item(inventorySelectLeft);
+        return inventoryContainer.item(inventorySelectLeft);
     }
 
     @Override
     public ItemStack rightWeapon() {
-        return inventory.item(inventorySelectRight);
+        return inventoryContainer.item(inventorySelectRight);
     }
 
     public int inventorySelectLeft() {
@@ -128,7 +135,9 @@ public class MobPlayerClient extends MobLivingEquippedClient
     public void read(TagStructure tagStructure) {
         super.read(tagStructure);
         healWait = tagStructure.getInteger("HealWait");
-        inventory.load(tagStructure.getStructure("Inventory"));
+        TagStructure inventoryTag = tagStructure.getStructure("Inventory");
+        inventories.forEach((id, inventory) -> inventory
+                .load(inventoryTag.getStructure(id)));
         if (tagStructure.has("Nickname")) {
             nickname = tagStructure.getString("Nickname");
         }
@@ -148,8 +157,8 @@ public class MobPlayerClient extends MobLivingEquippedClient
     }
 
     @Override
-    public Inventory inventory() {
-        return inventory;
+    public Inventory inventory(String id) {
+        return inventories.get(id);
     }
 
     @Override

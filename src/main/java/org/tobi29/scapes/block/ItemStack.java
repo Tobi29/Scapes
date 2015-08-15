@@ -19,6 +19,7 @@ package org.tobi29.scapes.block;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class ItemStack {
@@ -63,11 +64,32 @@ public class ItemStack {
 
     public ItemStack setAmount(int amount) {
         this.amount = amount;
-        if (this.amount <= 0 || material == registry.air()) {
-            metaData = new TagStructure();
-            this.amount = 0;
-            material = registry.air();
+        checkEmpty();
+        return this;
+    }
+
+    public Material material() {
+        return material;
+    }
+
+    public ItemStack setMaterial(Material material) {
+        Objects.requireNonNull(material);
+        this.material = material;
+        if (amount == 0) {
+            amount = 1;
         }
+        checkEmpty();
+        return this;
+    }
+
+    public ItemStack setMaterial(Material material, int data) {
+        Objects.requireNonNull(material);
+        this.material = material;
+        if (amount == 0) {
+            amount = 1;
+        }
+        this.data = data;
+        checkEmpty();
         return this;
     }
 
@@ -80,25 +102,22 @@ public class ItemStack {
         return this;
     }
 
-    public Material material() {
-        return material;
-    }
-
-    public ItemStack setMaterial(Material material) {
-        if (material == null) {
-            material = registry.air();
-        }
-        this.material = material;
-        return this;
+    public void clear() {
+        material = registry.air();
+        data = 0;
+        amount = 0;
+        metaData = new TagStructure();
     }
 
     public int canStack(ItemStack add) {
+        Objects.requireNonNull(add);
         return canStack(add, FastMath.min(
                 FastMath.min(material.maxStackSize(this),
                         add.material.maxStackSize(add)) - amount, add.amount));
     }
 
     public int canStack(ItemStack add, int amount) {
+        Objects.requireNonNull(add);
         if ((add.material != material || add.data != data ||
                 amount + this.amount > FastMath.min(material.maxStackSize(this),
                         add.material.maxStackSize(add))) &&
@@ -109,10 +128,12 @@ public class ItemStack {
     }
 
     public int canTake(ItemStack take) {
+        Objects.requireNonNull(take);
         return canTake(take, take.amount);
     }
 
     public int canTake(ItemStack take, int amount) {
+        Objects.requireNonNull(take);
         if (take.material != material ||
                 take.data != data || material == registry.air() ||
                 this.amount <= 0) {
@@ -147,11 +168,13 @@ public class ItemStack {
     }
 
     public int stack(ItemStack add) {
+        Objects.requireNonNull(add);
         return stack(add, FastMath.min(FastMath.min(material.maxStackSize(this),
                 add.material.maxStackSize(add)) - amount, add.amount));
     }
 
     public int stack(ItemStack add, int amount) {
+        Objects.requireNonNull(add);
         if ((add.material != material || add.data != data ||
                 amount + this.amount > FastMath.min(material.maxStackSize(this),
                         add.material.maxStackSize(add))) &&
@@ -164,14 +187,34 @@ public class ItemStack {
             metaData = add.metaData.copy();
         }
         this.amount += amount;
+        add.amount -= amount;
+        add.checkEmpty();
         return amount;
     }
 
+    public Optional<ItemStack> take() {
+        return take(Integer.MAX_VALUE);
+    }
+
+    public Optional<ItemStack> take(int amount) {
+        amount = FastMath.min(this.amount, amount);
+        if (material == registry.air() || amount <= 0) {
+            return Optional.empty();
+        }
+        ItemStack give = new ItemStack(this);
+        give.setAmount(amount);
+        this.amount -= amount;
+        checkEmpty();
+        return Optional.of(give);
+    }
+
     public Optional<ItemStack> take(ItemStack take) {
+        Objects.requireNonNull(take);
         return take(take, take.amount);
     }
 
     public Optional<ItemStack> take(ItemStack take, int amount) {
+        Objects.requireNonNull(take);
         if (take.material != material ||
                 take.data != data || material == registry.air() ||
                 this.amount <= 0) {
@@ -180,26 +223,8 @@ public class ItemStack {
         ItemStack give = new ItemStack(this);
         give.setAmount(FastMath.min(this.amount, amount));
         this.amount -= give.amount;
-        if (this.amount <= 0) {
-            metaData = new TagStructure();
-            this.amount = 0;
-            material = registry.air();
-        }
-        return Optional.of(give);
-    }
-
-    public Optional<ItemStack> take(int amount) {
-        if (material == registry.air() || this.amount <= 0) {
-            return Optional.empty();
-        }
-        ItemStack give = new ItemStack(this);
-        give.setAmount(amount);
-        this.amount -= amount;
-        if (this.amount <= 0 || material == registry.air()) {
-            metaData = new TagStructure();
-            this.amount = 0;
-            material = registry.air();
-        }
+        checkEmpty();
+        take.checkEmpty();
         return Optional.of(give);
     }
 
@@ -209,5 +234,11 @@ public class ItemStack {
 
     public String name() {
         return material.name(this);
+    }
+
+    private void checkEmpty() {
+        if (amount <= 0 || material == registry.air()) {
+            clear();
+        }
     }
 }

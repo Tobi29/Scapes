@@ -30,6 +30,10 @@ public class GameStateServerDisconnect extends GameState {
     private final GuiDisconnected gui;
     private double reconnectTimer = 5.0;
 
+    public GameStateServerDisconnect(String message, ScapesEngine engine) {
+        this(message, Optional.empty(), engine);
+    }
+
     public GameStateServerDisconnect(String message, InetSocketAddress address,
             ScapesEngine engine) {
         this(message, Optional.of(address), engine);

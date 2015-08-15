@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.connection.ServerInfo;
 import org.tobi29.scapes.engine.utils.Crashable;
+import org.tobi29.scapes.engine.utils.SleepUtil;
 import org.tobi29.scapes.engine.utils.io.filesystem.CrashReportFile;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -32,6 +33,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class ScapesStandaloneServer
@@ -43,7 +45,10 @@ public abstract class ScapesStandaloneServer
     protected ScapesServer server;
     private final Thread shutdownHook = new Thread(() -> {
         try {
-            stopServer();
+            if (server == null) {
+                return;
+            }
+            server.stop(ScapesServer.ShutdownReason.STOP);
         } catch (IOException e) {
             LOGGER.error("Failed to terminate server: {}", e.toString());
         }
@@ -51,12 +56,33 @@ public abstract class ScapesStandaloneServer
 
     protected ScapesStandaloneServer(Path path) {
         this.path = path;
+        RUNTIME.addShutdownHook(shutdownHook);
     }
 
-    public abstract int run() throws IOException;
+    protected abstract Runnable loop();
+
+    public int run() throws IOException {
+        while (true) {
+            start();
+            try {
+                Runnable loop = loop();
+                while (!server.shouldStop()) {
+                    loop.run();
+                    SleepUtil.sleep(100);
+                }
+                server.stop();
+            } catch (IOException e) {
+                LOGGER.error("Error reading console input: {}", e.toString());
+                server.stop(ScapesServer.ShutdownReason.ERROR);
+            }
+            if (server.shutdownReason() != ScapesServer.ShutdownReason.RELOAD) {
+                break;
+            }
+        }
+        return 0;
+    }
 
     protected void start() throws IOException {
-        RUNTIME.addShutdownHook(shutdownHook);
         TagStructure tagStructure;
         tagStructure = loadConfig(path.resolve("Server.json"));
         TagStructure serverTag = tagStructure.getStructure("Server");
@@ -72,23 +98,7 @@ public abstract class ScapesStandaloneServer
         server.connection().start(tagStructure.getInteger("ServerPort"));
     }
 
-    private ScapesServer.ShutdownReason stopServer() throws IOException {
-        if (server == null) {
-            return ScapesServer.ShutdownReason.STOP;
-        }
-        server.worldFormat().save();
-        ScapesServer server = this.server;
-        this.server = null;
-        return server.shutdownReason();
-    }
-
-    protected ScapesServer.ShutdownReason stop() throws IOException {
-        ScapesServer.ShutdownReason shutdownReason = stopServer();
-        RUNTIME.removeShutdownHook(shutdownHook);
-        return shutdownReason;
-    }
-
-    protected TagStructure loadConfig(Path path) throws IOException {
+    private TagStructure loadConfig(Path path) throws IOException {
         if (Files.exists(path)) {
             return FileUtil.readReturn(path, TagStructureJSON::read);
         }
@@ -123,7 +133,21 @@ public abstract class ScapesStandaloneServer
     }
 
     @Override
+    public Optional<String> playerName() {
+        return Optional.empty();
+    }
+
+    @Override
     public String name() {
         return "Server";
+    }
+
+    @Override
+    public int permissionLevel() {
+        return 10;
+    }
+
+    public void dispose() {
+        RUNTIME.removeShutdownHook(shutdownHook);
     }
 }

@@ -428,22 +428,28 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                 itemUpdateWait += 1.0;
                 worldServer.entities().forEach(entity -> {
                     if (entity instanceof EntityContainerServer) {
-                        Inventory inventory =
-                                ((EntityContainerServer) entity).inventory();
-                        boolean flag = false;
-                        for (int i = 0; i < inventory.size(); i++) {
-                            Material type = inventory.item(i).material();
-                            if (type instanceof ItemHeatable) {
-                                ((ItemHeatable) type).cool(inventory.item(i));
-                                flag = true;
-                            }
-                        }
-                        if (flag) {
-                            ((EntityContainerServer) entity).viewers()
-                                    .forEach(viewer -> viewer.connection()
-                                            .send(new PacketUpdateInventory(
-                                                    (EntityContainerServer) entity)));
-                        }
+                        ((EntityContainerServer) entity).inventories()
+                                .forEach(pair -> {
+                                    Inventory inventory = pair.b;
+                                    boolean flag = false;
+                                    for (int i = 0; i < inventory.size(); i++) {
+                                        Material type =
+                                                inventory.item(i).material();
+                                        if (type instanceof ItemHeatable) {
+                                            ((ItemHeatable) type)
+                                                    .cool(inventory.item(i));
+                                            flag = true;
+                                        }
+                                    }
+                                    if (flag) {
+                                        ((EntityContainerServer) entity)
+                                                .viewers().forEach(
+                                                viewer -> viewer.connection()
+                                                        .send(new PacketUpdateInventory(
+                                                                (EntityContainerServer) entity,
+                                                                pair.a)));
+                                    }
+                                });
                     } else if (entity instanceof MobItemServer) {
                         Material type =
                                 ((MobItemServer) entity).item().material();

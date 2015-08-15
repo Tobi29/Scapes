@@ -40,14 +40,22 @@ public class GameStateGameSP extends GameStateGameMP {
     @Override
     public void dispose(GL gl) {
         super.dispose(gl);
-        server.stop(ScapesServer.ShutdownReason.STOP);
         try {
-            server.worldFormat().save();
+            server.stop(ScapesServer.ShutdownReason.STOP);
             server.worldFormat()
                     .savePanorama(client.world().scene().panorama());
         } catch (IOException e) {
             LOGGER.error("Error stopping internal server: {}", e.toString());
         }
         LOGGER.info("Stopped internal server!");
+    }
+
+    @Override
+    public void stepComponent(double delta) {
+        super.stepComponent(delta);
+        if (server.shouldStop()) {
+            engine.setState(
+                    new GameStateServerDisconnect("Server stopping", engine));
+        }
     }
 }

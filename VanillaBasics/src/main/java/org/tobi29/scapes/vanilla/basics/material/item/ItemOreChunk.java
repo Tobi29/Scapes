@@ -152,10 +152,9 @@ public class ItemOreChunk extends VanillaItem
             if (currentTemperature >= meltingPoint(item)) {
                 String metal = metalName(item);
                 if ("Iron Bloom".equals(metal)) {
-                    item.setData((short) 8);
+                    item.setData(8);
                 } else {
-                    item.setMaterial(materials.ingot);
-                    item.setData((short) 1);
+                    item.setMaterial(materials.ingot, 1);
                     item.metaData("Vanilla").setString("MetalType", metal);
                 }
             }

@@ -22,6 +22,7 @@ import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.connection.InvalidPacketDataException;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
+import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.MobPlayerClient;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
@@ -76,7 +77,9 @@ public class PacketInteraction extends Packet
         }
         switch (type) {
             case INVENTORY_SLOT_CHANGE:
-                world.entity(entityID).ifPresent(entity -> {
+                Optional<EntityClient> fetch = world.entity(entityID);
+                if (fetch.isPresent()) {
+                    EntityClient entity = fetch.get();
                     if (entity instanceof MobPlayerClient) {
                         if (data > 9) {
                             ((MobPlayerClient) entity)
@@ -86,7 +89,9 @@ public class PacketInteraction extends Packet
                                     .setInventorySelectLeft(data);
                         }
                     }
-                });
+                } else {
+                    client.send(new PacketRequestEntity(entityID));
+                }
                 break;
         }
     }
@@ -126,15 +131,15 @@ public class PacketInteraction extends Packet
                                 INVENTORY_SLOT_CHANGE, data));
                 break;
             case OPEN_INVENTORY:
-                world.connection()
-                        .send(new PacketUpdateInventory(player.mob()));
                 player.send(new PacketOpenGui(player.mob()));
                 break;
             case CLOSE_INVENTORY:
-                player.mob().inventory().hold().ifPresent(hold -> {
-                    player.mob().dropItem(hold);
-                    player.mob().inventory().setHold(Optional.empty());
-                });
+                player.mob().inventory("Hold").item(0).take()
+                        .ifPresent(drop -> {
+                            player.mob().dropItem(drop);
+                            world.connection().send(new PacketUpdateInventory(
+                                    player.mob(), "Hold"));
+                        });
                 player.send(new PacketCloseGui());
                 break;
             case OPEN_STATISTICS:

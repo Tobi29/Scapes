@@ -36,8 +36,8 @@ public class GuiAnvilInventory extends GuiContainerInventory {
         VanillaBasics plugin = (VanillaBasics) player.connection().plugins()
                 .plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
-        addButton(16, 120, 30, 30, 0);
-        addButton(16, 210, 30, 30, 1);
+        buttonContainer(16, 120, 30, 30, 0);
+        buttonContainer(16, 210, 30, 30, 1);
         addAction(66, 120, materials.ingot, 0);
         addAction(106, 120, materials.pickaxe, 1);
         addAction(106, 160, materials.axe, 2);

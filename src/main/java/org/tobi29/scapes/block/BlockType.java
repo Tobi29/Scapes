@@ -91,7 +91,8 @@ public abstract class BlockType extends Material {
                                 this);
                         item.setAmount(item.amount() - 1);
                         handler.world().connection()
-                                .send(new PacketUpdateInventory(entity));
+                                .send(new PacketUpdateInventory(entity,
+                                        "Container"));
                         entity.connection().statistics()
                                 .blockPlace(this, item.data());
                     }

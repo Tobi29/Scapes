@@ -73,7 +73,8 @@ public class PacketResearch extends Packet implements PacketServer {
                 VanillaBasics plugin =
                         (VanillaBasics) world.plugins().plugin("VanillaBasics");
                 synchronized (researchTable) {
-                    ItemStack item = researchTable.inventory().item(0);
+                    ItemStack item =
+                            researchTable.inventory("Container").item(0);
                     Material material = item.material();
                     if (material instanceof ItemResearch) {
                         for (String identifier : ((ItemResearch) material)

@@ -45,6 +45,8 @@ public class PacketBundleChannel {
     private static final int CHECKSUM_LENGTH = CHECKSUM_ALGORITHM.bytes();
     private static final int BUNDLE_HEADER_SIZE = 4;
     private static final int BUNDLE_MAX_SIZE = 1 << 10 << 10 << 6;
+    private static final ThreadLocal<List<WeakReference<ByteBuffer>>>
+            BUFFER_CACHE = ThreadLocal.withInitial(ArrayList::new);
 
     static {
         Random random = new Random(
@@ -60,14 +62,14 @@ public class PacketBundleChannel {
             byteBufferStreamOut = new ByteBufferStream(
                     length -> BufferCreator.bytes(length + 102400));
     private final ByteBuffer header = BufferCreator.bytes(BUNDLE_HEADER_SIZE);
+    private final byte[] checksum = new byte[CHECKSUM_LENGTH];
     private final Queue<ByteBuffer> queue = new ConcurrentLinkedQueue<>();
-    private final List<WeakReference<ByteBuffer>> bufferCache =
-            new ArrayList<>();
     private final CompressionUtil.Filter deflater, inflater;
     private final MessageDigest digest = CHECKSUM_ALGORITHM.digest();
     private final Cipher encryptCipher, decryptCipher;
     private final AtomicInteger inRate = new AtomicInteger(), outRate =
             new AtomicInteger();
+    private final List<WeakReference<ByteBuffer>> bufferCache;
     private Optional<Selector> selector = Optional.empty();
     private boolean encrypt, hasInput;
     private ByteBuffer output, input = BufferCreator.bytes(1024);
@@ -87,6 +89,7 @@ public class PacketBundleChannel {
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new UnsupportedJVMException(e);
         }
+        bufferCache = BUFFER_CACHE.get();
         setKey(encryptKey, decryptKey);
     }
 
@@ -106,38 +109,19 @@ public class PacketBundleChannel {
         }
         byteBufferStreamOut.buffer().clear();
         byteBufferStreamOut.position(CHECKSUM_LENGTH);
-        CompressionUtil.filter(new ByteBufferStream(dataStreamOut.buffer()),
-                byteBufferStreamOut, deflater);
+        CompressionUtil.filter(dataStreamOut, byteBufferStreamOut, deflater);
         byteBufferStreamOut.buffer().flip().position(CHECKSUM_LENGTH);
         digest.update(byteBufferStreamOut.buffer());
         byteBufferStreamOut.buffer().flip();
         byteBufferStreamOut.put(digest.digest());
         byteBufferStreamOut.buffer().rewind();
-        int capacity;
+        ByteBuffer bundle;
         if (encrypt) {
-            capacity = BUNDLE_HEADER_SIZE + encryptCipher
-                    .getOutputSize(byteBufferStreamOut.buffer().remaining());
+            bundle = buffer(BUNDLE_HEADER_SIZE + encryptCipher
+                    .getOutputSize(byteBufferStreamOut.buffer().remaining()));
         } else {
-            capacity = BUNDLE_HEADER_SIZE +
-                    byteBufferStreamOut.buffer().remaining();
-        }
-        ByteBuffer bundle = null;
-        int i = 0;
-        while (i < bufferCache.size()) {
-            ByteBuffer cacheBuffer = bufferCache.get(i).get();
-            if (cacheBuffer == null) {
-                bufferCache.remove(i);
-            } else if (cacheBuffer.capacity() >= capacity) {
-                bufferCache.remove(i);
-                bundle = cacheBuffer;
-                bundle.clear();
-                break;
-            } else {
-                i++;
-            }
-        }
-        if (bundle == null) {
-            bundle = BufferCreator.bytes(capacity);
+            bundle = buffer(BUNDLE_HEADER_SIZE +
+                    byteBufferStreamOut.buffer().remaining());
         }
         bundle.position(BUNDLE_HEADER_SIZE);
         int size;
@@ -230,7 +214,6 @@ public class PacketBundleChannel {
                 } else {
                     data = new ByteBufferStream(input);
                 }
-                byte[] checksum = new byte[CHECKSUM_LENGTH];
                 data.get(checksum);
                 digest.update(data.buffer());
                 if (!Arrays.equals(checksum, digest.digest())) {
@@ -238,11 +221,10 @@ public class PacketBundleChannel {
                 }
                 data.buffer().flip().position(CHECKSUM_LENGTH);
                 CompressionUtil.filter(data, byteBufferStreamOut, inflater);
-                ByteBuffer bundle = byteBufferStreamOut.buffer();
-                bundle.flip();
+                byteBufferStreamOut.buffer().flip();
                 dataStreamOut.buffer().clear();
                 hasInput = false;
-                return Optional.of(new ByteBufferStream(bundle));
+                return Optional.of(byteBufferStreamOut);
             }
         }
         return Optional.empty();
@@ -302,5 +284,27 @@ public class PacketBundleChannel {
         } catch (IOException e) {
         }
         return super.toString();
+    }
+
+    private ByteBuffer buffer(int capacity) {
+        ByteBuffer bundle = null;
+        int i = 0;
+        while (i < bufferCache.size()) {
+            ByteBuffer cacheBuffer = bufferCache.get(i).get();
+            if (cacheBuffer == null) {
+                bufferCache.remove(i);
+            } else if (cacheBuffer.capacity() >= capacity) {
+                bufferCache.remove(i);
+                bundle = cacheBuffer;
+                bundle.clear();
+                break;
+            } else {
+                i++;
+            }
+        }
+        if (bundle == null) {
+            bundle = BufferCreator.bytes(capacity);
+        }
+        return bundle;
     }
 }

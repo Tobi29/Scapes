@@ -23,24 +23,32 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.EntityContainerClient;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public abstract class EntityAbstractContainerClient extends EntityClient
         implements EntityContainerClient {
     protected final Inventory inventory;
+    protected final Map<String, Inventory> inventories =
+            new ConcurrentHashMap<>();
 
     protected EntityAbstractContainerClient(WorldClient world, Vector3 pos,
             Inventory inventory) {
         super(world, pos);
         this.inventory = inventory;
+        inventories.put("Container", inventory);
     }
 
     @Override
-    public Inventory inventory() {
-        return inventory;
+    public Inventory inventory(String id) {
+        return inventories.get(id);
     }
 
     @Override
     public void read(TagStructure tagStructure) {
         super.read(tagStructure);
-        inventory.load(tagStructure.getStructure("Inventory"));
+        TagStructure inventoryTag = tagStructure.getStructure("Inventory");
+        inventories.forEach((id, inventory) -> inventory
+                .load(inventoryTag.getStructure(id)));
     }
 }

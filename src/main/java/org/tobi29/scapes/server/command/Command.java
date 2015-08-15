@@ -115,6 +115,15 @@ public interface Command {
         return object.get();
     }
 
+    static <O, T> T requireNullable(Function<O, T> supplier, O option)
+            throws CommandException {
+        T object = supplier.apply(option);
+        if (object == null) {
+            throw new CommandException(253, "Missing argument: " + option);
+        }
+        return object;
+    }
+
     static <T> T require(Optional<T> object, String name)
             throws CommandException {
         if (!object.isPresent()) {

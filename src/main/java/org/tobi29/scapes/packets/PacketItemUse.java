@@ -146,8 +146,7 @@ public class PacketItemUse extends Packet implements PacketServer {
                                             }
                                             handler.typeData(block.intX(),
                                                     block.intY(), block.intZ(),
-                                                    handler.world().air(),
-                                                    (short) 0);
+                                                    handler.world().air(), 0);
                                         }
                                     }
                                 }
@@ -157,6 +156,7 @@ public class PacketItemUse extends Packet implements PacketServer {
                         (long) (item.material().hitWait(item) * 0.23), false);
             }
         }
-        world.connection().send(new PacketUpdateInventory(player.mob()));
+        world.connection()
+                .send(new PacketUpdateInventory(player.mob(), "Container"));
     }
 }

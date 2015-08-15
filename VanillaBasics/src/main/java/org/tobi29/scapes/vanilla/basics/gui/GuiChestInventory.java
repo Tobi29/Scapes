@@ -25,7 +25,7 @@ public class GuiChestInventory extends GuiContainerInventory {
     public GuiChestInventory(EntityChestClient container,
             MobPlayerClientMain player) {
         super("Chest", player, container);
-        Inventory inventory = container.inventory();
+        Inventory inventory = container.inventory("Container");
         int x = -1, y = 0, xx, yy = 91;
         for (int i = 0; i < inventory.size(); i++) {
             if (++x >= 10) {
@@ -34,7 +34,7 @@ public class GuiChestInventory extends GuiContainerInventory {
                 x = 0;
             }
             xx = x * 35 + 27;
-            addButton(xx, yy, 30, 30, i);
+            buttonContainer(xx, yy, 30, 30, i);
         }
     }
 }

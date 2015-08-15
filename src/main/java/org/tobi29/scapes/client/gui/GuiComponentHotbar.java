@@ -62,7 +62,8 @@ public class GuiComponentHotbar extends GuiComponent {
                 vao3.render(gl, shader);
                 org.tobi29.scapes.client.gui.GuiUtils
                         .renderItem(0.0f, 0.0f, height, height,
-                                player.inventory().item(i), gl, shader, font);
+                                player.inventory("Container").item(i), gl,
+                                shader, font);
                 gl.textures().bind("Scapes:image/gui/HotbarLeft", gl);
                 gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
                         1.0f);
@@ -78,7 +79,8 @@ public class GuiComponentHotbar extends GuiComponent {
                 vao3.render(gl, shader);
                 org.tobi29.scapes.client.gui.GuiUtils
                         .renderItem(0.0f, 0.0f, height, height,
-                                player.inventory().item(i), gl, shader, font);
+                                player.inventory("Container").item(i), gl,
+                                shader, font);
                 gl.textures().bind("Scapes:image/gui/HotbarRight", gl);
                 gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
                         1.0f);
@@ -96,7 +98,8 @@ public class GuiComponentHotbar extends GuiComponent {
                         1.0f);
                 org.tobi29.scapes.client.gui.GuiUtils
                         .renderItem(0.0f, 0.0f, height, height,
-                                player.inventory().item(i), gl, shader, font);
+                                player.inventory("Container").item(i), gl,
+                                shader, font);
                 matrixStack.pop();
             }
         }

@@ -25,7 +25,6 @@ import java.util.Optional;
 public class Inventory {
     protected final GameRegistry registry;
     protected final ItemStack[] items;
-    protected Optional<ItemStack> hold = Optional.empty();
 
     public Inventory(GameRegistry registry, int size) {
         this.registry = registry;
@@ -81,57 +80,12 @@ public class Inventory {
         return amount >= take.amount();
     }
 
-    public Optional<ItemStack> hold() {
-        return hold;
-    }
-
-    public void setHold(Optional<ItemStack> hold) {
-        this.hold = hold;
-    }
-
-    public void setHold(ItemStack hold) {
-        this.hold = Optional.of(hold);
-    }
-
     public ItemStack item(int id) {
         return items[id];
     }
 
     public int size() {
         return items.length;
-    }
-
-    public void load(TagStructure tag) {
-        List<TagStructure> list = tag.getList("Items");
-        for (int i = 0; i < list.size(); i++) {
-            items[i].load(list.get(i));
-        }
-        TagStructure holdTag = tag.getStructure("Hold");
-        if (holdTag != null) {
-            ItemStack item = new ItemStack(registry);
-            item.load(holdTag);
-            hold = Optional.of(item);
-        } else {
-            hold = Optional.empty();
-        }
-    }
-
-    public TagStructure save() {
-        TagStructure tag = new TagStructure();
-        List<TagStructure> list = new ArrayList<>();
-        for (int i = 0; i < items.length; i++) {
-            list.add(i, items[i].save());
-        }
-        tag.setList("Items", list);
-        hold.ifPresent(item -> tag.setStructure("Hold", item.save()));
-        return tag;
-    }
-
-    public void setItem(int id, ItemStack item) {
-        if (item == null) {
-            throw new IllegalArgumentException("Item cannot be null!");
-        }
-        items[id] = item;
     }
 
     public ItemStack take(ItemStack take) {
@@ -159,5 +113,22 @@ public class Inventory {
         for (ItemStack item : items) {
             item.setAmount(0);
         }
+    }
+
+    public void load(TagStructure tag) {
+        List<TagStructure> list = tag.getList("Items");
+        for (int i = 0; i < list.size(); i++) {
+            items[i].load(list.get(i));
+        }
+    }
+
+    public TagStructure save() {
+        TagStructure tag = new TagStructure();
+        List<TagStructure> list = new ArrayList<>();
+        for (int i = 0; i < items.length; i++) {
+            list.add(i, items[i].save());
+        }
+        tag.setList("Items", list);
+        return tag;
     }
 }

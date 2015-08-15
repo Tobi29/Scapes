@@ -16,30 +16,19 @@
 
 package org.tobi29.scapes.client.gui;
 
-import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 
 public class GuiPlayerInventory extends GuiInventory {
     public GuiPlayerInventory(MobPlayerClientMain player) {
         super("Inventory", player);
-        Inventory inventory = player.inventory();
-        GuiComponentTextButton crafting =
-                new GuiComponentTextButton(pane, 16, 80, 368, 30, 18,
-                        "Crafting");
-        crafting.addLeftClick(
-                event -> player.openGui(new GuiCrafting(false, player)));
-        int i = 0;
-        for (int x = 0; x < 4; x++) {
-            int xx = x * 35 + 11;
-            int id = i + 40;
-            GuiComponentItemButton item =
-                    new GuiComponentItemButton(pane, xx, 119, 30, 30,
-                            inventory.item(id));
-            item.addLeftClick(event -> leftClick(id));
-            item.addRightClick(event -> rightClick(id));
-            item.addHover(event -> setTooltip(inventory.item(id)));
-            i++;
+        if (!player.connection().plugins().registry().getCraftingRecipes()
+                .isEmpty()) {
+            GuiComponentTextButton crafting =
+                    new GuiComponentTextButton(pane, 16, 80, 368, 30, 18,
+                            "Crafting");
+            crafting.addLeftClick(
+                    event -> player.openGui(new GuiCrafting(false, player)));
         }
     }
 }

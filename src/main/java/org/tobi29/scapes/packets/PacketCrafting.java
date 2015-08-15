@@ -58,7 +58,7 @@ public class PacketCrafting extends Packet implements PacketServer {
             return;
         }
         // TODO: Check if table nearby
-        Inventory inventory = player.mob().inventory();
+        Inventory inventory = player.mob().inventory("Container");
         CraftingRecipe recipe =
                 world.plugins().registry().getCraftingRecipes().get(type)
                         .recipes().get(id);
@@ -71,7 +71,8 @@ public class PacketCrafting extends Packet implements PacketServer {
                     player.statistics()
                             .blockCraft(result.material(), result.data());
                 }
-                player.send(new PacketUpdateInventory(player.mob()));
+                player.send(
+                        new PacketUpdateInventory(player.mob(), "Container"));
             });
         }
     }

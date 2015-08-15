@@ -49,7 +49,7 @@ public class GameRegistry {
         air = new BlockAir(this);
         blocks = new BlockType[1];
         materials[0] = air;
-        blocks[(short) 0] = air;
+        blocks[0] = air;
         air.id = 0;
         Registry<EntityServer.Supplier> entityServerRegistry =
                 add("Core", "Entity", 1, Integer.MAX_VALUE);

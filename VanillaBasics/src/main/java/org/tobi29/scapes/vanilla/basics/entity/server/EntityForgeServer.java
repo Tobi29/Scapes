@@ -55,9 +55,9 @@ public class EntityForgeServer extends EntityAbstractFurnaceServer {
                                 ((ItemIngot) type).meltingPoint(item) &&
                                 item.data() == 1) {
                             if (inventory.item(8)
-                                    .take(new ItemStack(materials.mold,
-                                            (short) 1)) != null) {
-                                item.setData((short) 0);
+                                    .take(new ItemStack(materials.mold, 1)) !=
+                                    null) {
+                                item.setData(0);
                                 world.connection()
                                         .send(new PacketEntityChange(this));
                             }

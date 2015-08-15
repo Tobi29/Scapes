@@ -26,7 +26,7 @@ public class GuiResearchTableInventory extends GuiContainerInventory {
     public GuiResearchTableInventory(EntityResearchTableClient container,
             MobPlayerClientMain player) {
         super("Research Table", player, container);
-        addButton(185, 90, 30, 30, 0);
+        buttonContainer(185, 90, 30, 30, 0);
         GuiComponentTextButton research =
                 new GuiComponentTextButton(pane, 27, 210, 120, 30, 18,
                         "Research");

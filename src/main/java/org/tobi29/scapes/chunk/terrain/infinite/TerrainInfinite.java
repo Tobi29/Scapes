@@ -104,7 +104,7 @@ public abstract class TerrainInfinite implements Terrain {
             TerrainInfiniteChunk chunk2 = chunk.get();
             return chunk2.dataG(x, y, z);
         }
-        return (short) 0;
+        return 0;
     }
 
     @Override

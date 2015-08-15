@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item.tool;
 
+import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.TerrainTexture;
 import org.tobi29.scapes.block.TerrainTextureRegistry;
@@ -62,11 +63,13 @@ public abstract class ItemTool extends VanillaItem
     @Override
     public void click(MobPlayerServer entity, ItemStack item) {
         if (item.data() == 0) {
-            ItemStack itemHandle = new ItemStack(materials.stick, (short) 0);
-            if (entity.inventory().canTake(itemHandle)) {
-                entity.inventory().take(itemHandle);
-                item.setData((short) 1);
-                entity.connection().send(new PacketUpdateInventory(entity));
+            ItemStack itemHandle = new ItemStack(materials.stick, 0);
+            Inventory inventory = entity.inventory("Container");
+            if (inventory.canTake(itemHandle)) {
+                inventory.take(itemHandle);
+                item.setData(1);
+                entity.connection()
+                        .send(new PacketUpdateInventory(entity, "Container"));
             }
         }
     }
@@ -199,7 +202,7 @@ public abstract class ItemTool extends VanillaItem
                             (temperature - currentTemperature) / 400.0f, 1.1f));
             if (currentTemperature >= meltingPoint(item)) {
                 item.setMaterial(materials.ingot);
-                item.setData((short) 0);
+                item.setData(0);
             }
         }
     }

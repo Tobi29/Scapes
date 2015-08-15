@@ -35,8 +35,8 @@ public class GuiAlloyInventory extends GuiContainerInventory {
             MobPlayerClientMain player) {
         super("Alloy Mold", player, container);
         this.container = container;
-        addButton(16, 120, 30, 30, 0);
-        addButton(16, 160, 30, 30, 1);
+        buttonContainer(16, 120, 30, 30, 0);
+        buttonContainer(16, 160, 30, 30, 1);
     }
 
     @Override

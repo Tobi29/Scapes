@@ -77,13 +77,14 @@ public class PacketAnvil extends Packet implements PacketServer {
                 VanillaBasics plugin =
                         (VanillaBasics) world.plugins().plugin("VanillaBasics");
                 synchronized (anvil) {
-                    if (!"Hammer".equals(anvil.inventory().item(1).material()
-                            .toolType(anvil.inventory().item(1)))) {
+                    if (!"Hammer".equals(anvil.inventory("Container").item(1)
+                            .material()
+                            .toolType(anvil.inventory("Container").item(1)))) {
                         return;
                     }
                     world.playSound("VanillaBasics:sound/blocks/Metal.ogg",
                             anvil);
-                    ItemStack ingredient = anvil.inventory().item(0);
+                    ItemStack ingredient = anvil.inventory("Container").item(0);
                     Material type = ingredient.material();
                     if (type instanceof ItemIngot) {
                         float meltingPoint =
@@ -95,15 +96,16 @@ public class PacketAnvil extends Packet implements PacketServer {
                             return;
                         }
                         if (id == 0) {
-                            ingredient.setData((short) 1);
+                            ingredient.setData(1);
                         } else {
                             if (ingredient.data() == 0) {
                                 return;
                             }
+                            ingredient.setData(0);
                             ToolUtil.createTool(plugin, ingredient, id);
-                            ingredient.setData((short) 0);
                         }
-                        Packet packet = new PacketUpdateInventory(anvil);
+                        Packet packet =
+                                new PacketUpdateInventory(anvil, "Container");
                         anvil.viewers().map(MobPlayerServer::connection)
                                 .forEach(connection -> connection.send(packet));
                     } else if (type instanceof ItemOreChunk) {
@@ -116,8 +118,9 @@ public class PacketAnvil extends Packet implements PacketServer {
                                     temperature < meltingPoint * 0.7f) {
                                 return;
                             }
-                            ingredient.setData((short) 9);
-                            Packet packet = new PacketUpdateInventory(anvil);
+                            ingredient.setData(9);
+                            Packet packet = new PacketUpdateInventory(anvil,
+                                    "Container");
                             anvil.viewers().map(MobPlayerServer::connection)
                                     .forEach(connection -> connection
                                             .send(packet));

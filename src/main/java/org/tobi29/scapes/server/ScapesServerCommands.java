@@ -22,6 +22,7 @@ import org.tobi29.scapes.block.Material;
 import org.tobi29.scapes.engine.utils.ArrayUtil;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.packets.PacketDisconnect;
+import org.tobi29.scapes.packets.PacketUpdateInventory;
 import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.command.CommandRegistry;
 import org.tobi29.scapes.server.connection.PlayerConnection;
@@ -55,7 +56,10 @@ final class ScapesServerCommands {
                 Material material =
                         Command.require(gameRegistry::material, materialName);
                 ItemStack item = new ItemStack(material, data, amount);
-                player.mob().inventory().add(item);
+                player.mob().inventory("Container").add(item);
+                player.mob().world().connection()
+                        .send(new PacketUpdateInventory(player.mob(),
+                                "Container"));
             });
         });
 
@@ -69,7 +73,10 @@ final class ScapesServerCommands {
                         PlayerConnection player =
                                 Command.require(connection::playerByName,
                                         playerName);
-                        player.mob().inventory().clear();
+                        player.mob().inventory("Container").clear();
+                        player.mob().world().connection()
+                                .send(new PacketUpdateInventory(player.mob(),
+                                        "Container"));
                     });
                 });
 

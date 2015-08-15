@@ -22,6 +22,7 @@ import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.connection.PlayConnection;
+import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.AABB;
@@ -34,7 +35,6 @@ import org.tobi29.scapes.entity.CreatureType;
 import org.tobi29.scapes.entity.MobPositionHandler;
 import org.tobi29.scapes.packets.PacketEntityChange;
 import org.tobi29.scapes.packets.PacketOpenGui;
-import org.tobi29.scapes.packets.PacketUpdateInventory;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 import org.tobi29.scapes.server.connection.ServerConnection;
 
@@ -50,7 +50,9 @@ public class MobPlayerServer extends MobLivingEquippedServer
     protected final ServerConnection serverConnection;
     protected final List<MobPlayerServer> viewers = new ArrayList<>();
     protected final String nickname;
-    protected final Inventory inventory;
+    protected final Inventory inventoryContainer, inventoryHold;
+    protected final Map<String, Inventory> inventories =
+            new ConcurrentHashMap<>();
     private final byte[] skin;
     private final Map<String, PunchListener> punchListeners =
             new ConcurrentHashMap<>();
@@ -66,7 +68,10 @@ public class MobPlayerServer extends MobLivingEquippedServer
         rot.setZ(zRot);
         this.nickname = nickname;
         this.skin = skin;
-        inventory = new Inventory(registry, 44);
+        inventoryContainer = new Inventory(registry, 40);
+        inventoryHold = new Inventory(registry, 1);
+        inventories.put("Container", inventoryContainer);
+        inventories.put("Hold", inventoryHold);
         this.connection = connection;
         serverConnection = connection.server();
         viewers.add(this);
@@ -79,10 +84,12 @@ public class MobPlayerServer extends MobLivingEquippedServer
         }, (ground, slidingWall, inWater, swimming) -> {
         });
         listener((DeathListener) () -> {
-            for (int i = 0; i < inventory.size(); i++) {
-                world.dropItem(inventory.item(i), this.pos.now());
-                inventory.setItem(i, new ItemStack(registry));
+            for (int i = 0; i < inventoryContainer.size(); i++) {
+                inventoryContainer.item(i).take().ifPresent(
+                        item -> world.dropItem(item, this.pos.now()));
             }
+            inventoryHold.item(0).take()
+                    .ifPresent(item -> world.dropItem(item, this.pos.now()));
             setSpeed(Vector3d.ZERO);
             setPos(new Vector3d(0.5, 0.5, 1.5).plus(world.spawn()));
             health = maxHealth;
@@ -93,12 +100,12 @@ public class MobPlayerServer extends MobLivingEquippedServer
 
     @Override
     public ItemStack leftWeapon() {
-        return inventory.item(inventorySelectLeft);
+        return inventoryContainer.item(inventorySelectLeft);
     }
 
     @Override
     public ItemStack rightWeapon() {
-        return inventory.item(inventorySelectRight);
+        return inventoryContainer.item(inventorySelectRight);
     }
 
     public void setInventorySelectLeft(int select) {
@@ -150,7 +157,9 @@ public class MobPlayerServer extends MobLivingEquippedServer
     public TagStructure write(boolean packet) {
         TagStructure tagStructure = super.write();
         tagStructure.setInteger("HealWait", healWait);
-        tagStructure.setStructure("Inventory", inventory.save());
+        TagStructure inventoryTag = tagStructure.getStructure("Inventory");
+        inventories.forEach((id, inventory) -> inventoryTag
+                .setStructure(id, inventory.save()));
         if (packet) {
             tagStructure.setString("Nickname", nickname);
             tagStructure.setByteArray("SkinChecksum", skin);
@@ -159,8 +168,14 @@ public class MobPlayerServer extends MobLivingEquippedServer
     }
 
     @Override
-    public Inventory inventory() {
-        return inventory;
+    public Inventory inventory(String id) {
+        return inventories.get(id);
+    }
+
+    @Override
+    public Stream<Pair<String, Inventory>> inventories() {
+        return inventories.entrySet().stream()
+                .map(entry -> new Pair<>(entry.getKey(), entry.getValue()));
     }
 
     @Override
@@ -247,39 +262,29 @@ public class MobPlayerServer extends MobLivingEquippedServer
     @Override
     public synchronized void setSpeed(Vector3 speed) {
         super.setSpeed(speed);
-        if (sendPositionHandler != null) {
-            sendPositionHandler.sendSpeed(entityID, this.speed.now(), true,
-                    serverConnection::send);
-        }
+        positionHandler
+                .sendSpeed(entityID, this.speed.now(), true, connection::send);
     }
 
     @Override
     public synchronized void setRot(Vector3 rot) {
         super.setRot(rot);
-        if (sendPositionHandler != null) {
-            sendPositionHandler.sendRotation(entityID, this.rot.now(), true,
-                    serverConnection::send);
-        }
+        positionHandler
+                .sendRotation(entityID, this.rot.now(), true, connection::send);
     }
 
     @Override
     public synchronized void push(double x, double y, double z) {
         super.push(x, y, z);
-        if (sendPositionHandler != null) {
-            sendPositionHandler.sendSpeed(entityID, speed.now(), true,
-                    serverConnection::send);
-        }
+        positionHandler
+                .sendSpeed(entityID, speed.now(), true, connection::send);
     }
 
     @Override
-    public synchronized void setPos(Vector3 value) {
-        super.setPos(value);
-        if (sendPositionHandler != null) {
-            sendPositionHandler
-                    .submitUpdate(entityID, value, speed.now(), rot.now(),
-                            ground, slidingWall, inWater, swimming, true,
-                            serverConnection::send);
-        }
+    public synchronized void setPos(Vector3 pos) {
+        super.setPos(pos);
+        positionHandler
+                .sendPos(entityID, this.pos.now(), true, connection::send);
     }
 
     public PlayerConnection connection() {
@@ -343,8 +348,7 @@ public class MobPlayerServer extends MobLivingEquippedServer
             closeGui();
         }
         currentContainer = gui;
-        world.connection().send(new PacketUpdateInventory(gui));
-        world.connection().send(new PacketUpdateInventory(this));
+        world.connection().send(new PacketEntityChange((EntityServer) gui));
         gui.addViewer(this);
         connection.send(new PacketOpenGui(gui));
     }
@@ -375,7 +379,9 @@ public class MobPlayerServer extends MobLivingEquippedServer
     public void read(TagStructure tagStructure) {
         super.read(tagStructure);
         healWait = tagStructure.getInteger("HealWait");
-        inventory.load(tagStructure.getStructure("Inventory"));
+        TagStructure inventoryTag = tagStructure.getStructure("Inventory");
+        inventories.forEach((id, inventory) -> inventory
+                .load(inventoryTag.getStructure(id)));
     }
 
     @Override

@@ -79,11 +79,7 @@ public class MobPositionHandler {
             if (forced || FastMath.max(
                     FastMath.abs(sentPosAbsolute.now().minus(pos))) >
                     POSITION_SEND_ABSOLUTE_OFFSET) {
-                sentPosRelative.set(pos);
-                sentPosAbsolute.set(pos);
-                packetHandler.sendPacket(
-                        new PacketMobMoveAbsolute(entityID, oldPos,
-                                pos.doubleX(), pos.doubleY(), pos.doubleZ()));
+                sendPos(entityID, pos, forced);
                 sendSpeed(entityID, speed, forced);
             } else {
                 if (FastMath
@@ -141,6 +137,25 @@ public class MobPositionHandler {
                                 slidingWall, inWater, swimming));
             }
         }
+    }
+
+    public void sendPos(int entityID, Vector3 pos, boolean forced) {
+        sendPos(entityID, pos, forced, packetHandler);
+    }
+
+    public void sendPos(int entityID, Vector3 pos, boolean forced,
+            PacketHandler packetHandler) {
+        Vector3 oldPos;
+        if (forced) {
+            oldPos = null;
+        } else {
+            oldPos = sentPosAbsolute.now();
+        }
+        sentPosRelative.set(pos);
+        sentPosAbsolute.set(pos);
+        packetHandler.sendPacket(
+                new PacketMobMoveAbsolute(entityID, oldPos, pos.doubleX(),
+                        pos.doubleY(), pos.doubleZ()));
     }
 
     public void sendRotation(int entityID, Vector3 rot, boolean forced) {
