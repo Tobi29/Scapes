@@ -75,8 +75,8 @@ public class MobLivingModelPig implements MobModel {
 
     @Override
     public void renderUpdate(double delta) {
-        double factorPos = FastMath.min(1.0, delta * 10.0);
-        double factorRot = FastMath.min(1.0, delta * 20.0);
+        double factorPos = FastMath.min(1.0, delta * 20.0);
+        double factorRot = FastMath.min(1.0, delta * 40.0);
         double factorSpeed = FastMath.min(1.0, delta * 5.0);
         double moveSpeed = FastMath.min(
                 FastMath.sqrt(FastMath.length((Vector2) entity.speed())), 2.0);
