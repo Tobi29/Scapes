@@ -17,7 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.connection.PlayConnection;
+import org.tobi29.scapes.engine.server.PlayConnection;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;

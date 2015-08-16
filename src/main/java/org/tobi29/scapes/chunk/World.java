@@ -18,14 +18,15 @@ package org.tobi29.scapes.chunk;
 
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.GameRegistry;
-import org.tobi29.scapes.connection.PlayConnection;
+import org.tobi29.scapes.engine.server.PlayConnection;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
+import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.plugins.Plugins;
 
 public abstract class World {
-    protected final PlayConnection connection;
+    protected final PlayConnection<Packet> connection;
     protected final BlockType air;
     protected final Plugins plugins;
     protected final TaskExecutor taskExecutor;
@@ -36,7 +37,7 @@ public abstract class World {
     @SuppressWarnings("CanBeFinal")
     protected double gravity = 9.8;
 
-    protected World(PlayConnection connection, Plugins plugins,
+    protected World(PlayConnection<Packet> connection, Plugins plugins,
             TaskExecutor taskExecutor, GameRegistry registry) {
         this.connection = connection;
         this.plugins = plugins;
@@ -53,7 +54,7 @@ public abstract class World {
         return air;
     }
 
-    public PlayConnection connection() {
+    public PlayConnection<Packet> connection() {
         return connection;
     }
 

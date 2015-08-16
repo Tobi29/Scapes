@@ -18,8 +18,8 @@ package org.tobi29.scapes.server.connection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.connection.Connection;
 import org.tobi29.scapes.connection.ServerInfo;
+import org.tobi29.scapes.engine.server.Connection;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

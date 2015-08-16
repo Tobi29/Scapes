@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.server.connection;
 
 import org.slf4j.Logger;
@@ -21,7 +20,12 @@ import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.Scapes;
 import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldServer;
-import org.tobi29.scapes.connection.*;
+import org.tobi29.scapes.connection.Account;
+import org.tobi29.scapes.engine.server.ConnectionCloseException;
+import org.tobi29.scapes.engine.server.InvalidPacketDataException;
+import org.tobi29.scapes.engine.server.AbstractServerConnection;
+import org.tobi29.scapes.engine.server.Connection;
+import org.tobi29.scapes.engine.server.PlayConnection;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.*;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
@@ -59,7 +63,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PlayerConnection
-        implements Connection, PlayConnection, Command.Executor {
+        implements Connection, PlayConnection<Packet>, Command.Executor {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(PlayerConnection.class);
     private static final int AES_KEY_LENGTH;
@@ -303,7 +307,6 @@ public class PlayerConnection
         sendQueue.add(packet);
     }
 
-    @Override
     public int loadingRadius() {
         return loadingRadius;
     }
@@ -364,7 +367,7 @@ public class PlayerConnection
     }
 
     @Override
-    public boolean tick(ServerConnection.NetWorkerThread worker) {
+    public boolean tick(AbstractServerConnection.NetWorkerThread worker) {
         try {
             switch (state) {
                 case LOGIN_STEP_1: {

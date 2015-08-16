@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.connection;
 
 import org.slf4j.Logger;
@@ -23,11 +22,11 @@ import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.client.states.GameStateServerDisconnect;
 import org.tobi29.scapes.connection.Account;
-import org.tobi29.scapes.connection.ConnectionCloseException;
+import org.tobi29.scapes.engine.server.ConnectionCloseException;
 import org.tobi29.scapes.connection.ConnectionType;
-import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
+import org.tobi29.scapes.engine.server.PlayConnection;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.MutableSingle;
 import org.tobi29.scapes.engine.utils.SleepUtil;
@@ -70,7 +69,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ClientConnection
-        implements TaskExecutor.ASyncTask, PlayConnection {
+        implements TaskExecutor.ASyncTask, PlayConnection<Packet> {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ClientConnection.class);
     private static final int AES_KEY_LENGTH;
@@ -332,7 +331,6 @@ public class ClientConnection
         sendQueue.add(packet);
     }
 
-    @Override
     public int loadingRadius() {
         if (loadingDistance == -1) {
             throw new IllegalStateException("Client not logged in");
