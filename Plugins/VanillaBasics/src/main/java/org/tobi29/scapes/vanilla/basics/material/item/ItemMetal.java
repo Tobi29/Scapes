@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-Closure subProjects = { root ->
-    def list = []
-    new File(rootDir, root.replaceAll(":", "/")).eachDir() { dir ->
-        dir.eachFile({
-            if (it.name == "build.gradle") {
-                list += root + ":" + dir.name
-            }
-        })
-    }
-    list.toArray(new java.lang.String[0])
+package org.tobi29.scapes.vanilla.basics.material.item;
+
+import org.tobi29.scapes.block.ItemStack;
+import org.tobi29.scapes.vanilla.basics.material.MetalType;
+
+public interface ItemMetal {
+    MetalType metalType(ItemStack item);
 }
-
-apply from: "ScapesEngine/include.gradle"
-
-include subProjects("Plugins")

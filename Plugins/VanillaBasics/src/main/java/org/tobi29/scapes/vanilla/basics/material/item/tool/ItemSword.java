@@ -14,18 +14,28 @@
  * limitations under the License.
  */
 
-Closure subProjects = { root ->
-    def list = []
-    new File(rootDir, root.replaceAll(":", "/")).eachDir() { dir ->
-        dir.eachFile({
-            if (it.name == "build.gradle") {
-                list += root + ":" + dir.name
-            }
-        })
+package org.tobi29.scapes.vanilla.basics.material.item.tool;
+
+import org.tobi29.scapes.block.ItemStack;
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
+
+public class ItemSword extends ItemTool {
+    public ItemSword(VanillaMaterial materials) {
+        super(materials, "vanilla.basics.item.Sword");
     }
-    list.toArray(new java.lang.String[0])
+
+    @Override
+    public boolean isWeapon(ItemStack item) {
+        return true;
+    }
+
+    @Override
+    public double hitRange(ItemStack item) {
+        return 4;
+    }
+
+    @Override
+    public String type() {
+        return "Sword";
+    }
 }
-
-apply from: "ScapesEngine/include.gradle"
-
-include subProjects("Plugins")

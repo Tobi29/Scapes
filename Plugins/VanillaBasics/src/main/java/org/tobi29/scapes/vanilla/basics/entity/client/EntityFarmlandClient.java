@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-Closure subProjects = { root ->
-    def list = []
-    new File(rootDir, root.replaceAll(":", "/")).eachDir() { dir ->
-        dir.eachFile({
-            if (it.name == "build.gradle") {
-                list += root + ":" + dir.name
-            }
-        })
+package org.tobi29.scapes.vanilla.basics.entity.client;
+
+import org.tobi29.scapes.chunk.WorldClient;
+import org.tobi29.scapes.engine.utils.math.vector.Vector3;
+import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
+import org.tobi29.scapes.entity.client.EntityClient;
+
+public class EntityFarmlandClient extends EntityClient {
+    public EntityFarmlandClient(WorldClient world) {
+        this(world, Vector3d.ZERO);
     }
-    list.toArray(new java.lang.String[0])
+
+    public EntityFarmlandClient(WorldClient world, Vector3 pos) {
+        super(world, pos);
+    }
 }
-
-apply from: "ScapesEngine/include.gradle"
-
-include subProjects("Plugins")

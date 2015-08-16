@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-Closure subProjects = { root ->
-    def list = []
-    new File(rootDir, root.replaceAll(":", "/")).eachDir() { dir ->
-        dir.eachFile({
-            if (it.name == "build.gradle") {
-                list += root + ":" + dir.name
-            }
-        })
+package org.tobi29.scapes.vanilla.basics.material.block;
+
+import org.tobi29.scapes.block.BlockTypeContainer;
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
+
+public abstract class VanillaBlockContainer extends BlockTypeContainer {
+    protected final VanillaMaterial materials;
+
+    protected VanillaBlockContainer(VanillaMaterial materials, String nameID) {
+        super(materials.registry, nameID);
+        this.materials = materials;
     }
-    list.toArray(new java.lang.String[0])
 }
-
-apply from: "ScapesEngine/include.gradle"
-
-include subProjects("Plugins")

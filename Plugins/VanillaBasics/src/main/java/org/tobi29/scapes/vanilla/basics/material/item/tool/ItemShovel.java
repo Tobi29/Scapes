@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-Closure subProjects = { root ->
-    def list = []
-    new File(rootDir, root.replaceAll(":", "/")).eachDir() { dir ->
-        dir.eachFile({
-            if (it.name == "build.gradle") {
-                list += root + ":" + dir.name
-            }
-        })
+package org.tobi29.scapes.vanilla.basics.material.item.tool;
+
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
+
+public class ItemShovel extends ItemTool {
+    public ItemShovel(VanillaMaterial materials) {
+        super(materials, "vanilla.basics.item.Shovel");
     }
-    list.toArray(new java.lang.String[0])
+
+    @Override
+    public String type() {
+        return "Shovel";
+    }
 }
-
-apply from: "ScapesEngine/include.gradle"
-
-include subProjects("Plugins")

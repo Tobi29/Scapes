@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-Closure subProjects = { root ->
-    def list = []
-    new File(rootDir, root.replaceAll(":", "/")).eachDir() { dir ->
-        dir.eachFile({
-            if (it.name == "build.gradle") {
-                list += root + ":" + dir.name
-            }
-        })
-    }
-    list.toArray(new java.lang.String[0])
+package org.tobi29.scapes.vanilla.basics.generator.tree;
+
+import org.tobi29.scapes.chunk.terrain.TerrainServer;
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
+
+import java.util.Random;
+
+public interface Tree {
+    void gen(TerrainServer.TerrainMutable terrain, int x, int y, int z,
+            VanillaMaterial materials, Random random);
 }
-
-apply from: "ScapesEngine/include.gradle"
-
-include subProjects("Plugins")
