@@ -1,0 +1,3 @@
+[submodule "ScapesEngine"]
+	path = ScapesEngine
+	url = https://github.com/Tobi29/ScapesEngine
