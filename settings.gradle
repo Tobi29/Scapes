@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 Closure subProjects = { root ->
     def list = []
     new File(rootDir, root.replaceAll(":", "/")).eachDir() { dir ->
@@ -27,8 +26,4 @@ Closure subProjects = { root ->
     list.toArray(new java.lang.String[0])
 }
 
-include "ControlPanel"
-
-include subProjects("Engine")
-
-include "VanillaBasics"
+apply from: "ScapesEngine/include.gradle"

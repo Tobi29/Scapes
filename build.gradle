@@ -15,8 +15,8 @@
  */
 
 
-apply from: "$rootDir/resources/scapesengineapplication.gradle"
-apply from: "$rootDir/backends/glfw.gradle"
+apply from: "$rootDir/ScapesEngine/resources/scapesengineapplication.gradle"
+apply from: "$rootDir/ScapesEngine/Backends/glfw.gradle"
 
 version = "0.0.0_1"
 
@@ -31,16 +31,16 @@ application {
 }
 
 dependencies {
-    compile project(":Engine")
-    compile project(":Engine:Utils")
+    compile project(":ScapesEngine")
+    compile project(":ScapesEngine:Utils")
     compile "org.slf4j:slf4j-api:1.7.10"
     compile "commons-cli:commons-cli:1.2"
 
     testCompile "junit:junit:4.12"
 
-    runtime project(":Engine:CodecOGG")
-    runtime project(":Engine:CodecMP3")
-    runtime project(":Engine:CodecWAV")
+    compile project(":ScapesEngine:Codecs:CodecOGG")
+    compile project(":ScapesEngine:Codecs:CodecMP3")
+    compile project(":ScapesEngine:Codecs:CodecWAV")
     runtime "org.apache.logging.log4j:log4j-api:2.1"
     runtime "org.apache.logging.log4j:log4j-core:2.1"
     runtime "org.apache.logging.log4j:log4j-slf4j-impl:2.1"
@@ -48,12 +48,4 @@ dependencies {
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.5'
-}
-
-idea {
-    module {
-        excludeDirs += file("$rootDir/resources/Inno Setup 5")
-        excludeDirs += file("$rootDir/resources/JRE")
-        excludeDirs += file("$rootDir/resources/Launch4j")
-    }
 }
