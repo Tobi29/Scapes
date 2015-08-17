@@ -17,6 +17,7 @@ In order to actually create any world, you need to also build the
 `:Plugins:VanillaBasics` jar and add it to the game using the in-game Plugins
 menu.
 
+
 ## Running
 The build scripts can run the game without any OS specific preparing, by
 executing the `run` task.
@@ -28,6 +29,7 @@ executing the `run` task.
 ### Windows
   * Open cmd.exe and navigate to project directory
   * Execute `gradlew.bat :run`
+
 
 ## Deploy
 You can check the available deployment targets using the `task` target (in
@@ -55,17 +57,17 @@ For deployment however additional software needs to be set up:
   * Run `tasks` target to check if `deployMacOSX` is available
 
 ### Windows
-  * Download a Windows (32bit + 64bit, tar.gz version) JRE
-    (Oracle JRE recommended)
+  * Download a Windows (32bit + 64bit, tar.gz version)
+    JRE (Oracle JRE recommended)
   * Place the unextracted archive into `ScapesEngine/resources/JRE/Windows/32`
     and `ScapesEngine/resources/JRE/Windows/64` respectively
-  * Download the Launch4j for your platform
-  * Place the extracted archive into `ScapesEngine/resources/Launch4j` (Make
-    sure the jar is in `ScapesEngine/resources/Launch4j/launch4j.jar`!)
+  * Download Launch4j for your platform
+  * Place the extracted archive into `ScapesEngine/resources/Launch4j`
+    (Make sure the jar is in `ScapesEngine/resources/Launch4j/launch4j.jar`!)
   * Download Inno Setup (Unicode version recommended)
   * Windows only:
-    * Run the installer and install everything into `ScapesEngine/resources/Inno
-      Setup 5` (Make sure the compiler is in
+    * Run the installer and install everything into
+      `ScapesEngine/resources/Inno Setup 5` (Make sure the compiler is in
       `ScapesEngine/resources/Inno Setup 5/ISCC.exe`!)
   * Non-Windows only:
     * Install Wine for your system (Running `wine --version` in the terminal has
