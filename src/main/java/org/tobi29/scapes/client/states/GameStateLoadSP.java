@@ -91,7 +91,7 @@ public class GameStateLoadSP extends GameState {
                     step++;
                     break;
                 case 1:
-                    port = server.connection().start(23456);
+                    port = server.connection().start(0);
                     if (port <= 0) {
                         throw new IOException(
                                 "Unable to open server socket (Invalid port returned: " +
