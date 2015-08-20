@@ -22,10 +22,10 @@ import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.client.states.GameStateServerDisconnect;
 import org.tobi29.scapes.connection.Account;
-import org.tobi29.scapes.engine.server.ConnectionCloseException;
 import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
+import org.tobi29.scapes.engine.server.ConnectionCloseException;
 import org.tobi29.scapes.engine.server.PlayConnection;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.MutableSingle;
@@ -72,7 +72,7 @@ public class ClientConnection
         implements TaskExecutor.ASyncTask, PlayConnection<Packet> {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ClientConnection.class);
-    private static final int AES_KEY_LENGTH;
+    private static final int AES_MIN_KEY_LENGTH, AES_MAX_KEY_LENGTH;
 
     static {
         int length = 16;
@@ -81,7 +81,8 @@ public class ClientConnection
         } catch (NoSuchAlgorithmException e) {
             LOGGER.warn("Failed to detect maximum key length", e);
         }
-        AES_KEY_LENGTH = length;
+        AES_MAX_KEY_LENGTH = length;
+        AES_MIN_KEY_LENGTH = FastMath.min(16, length);
     }
 
     private final ScapesEngine engine;
@@ -132,7 +133,11 @@ public class ClientConnection
                         byte[] array = new byte[input.getInt()];
                         input.get(array);
                         int keyLength = input.getInt();
-                        keyLength = FastMath.min(keyLength, AES_KEY_LENGTH);
+                        keyLength = FastMath.min(keyLength, AES_MAX_KEY_LENGTH);
+                        if (keyLength < AES_MIN_KEY_LENGTH) {
+                            throw new IOException(
+                                    "Key length too short: " + keyLength);
+                        }
                         byte[] keyServer = new byte[keyLength];
                         byte[] keyClient = new byte[keyLength];
                         Random random = new SecureRandom();

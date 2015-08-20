@@ -21,11 +21,7 @@ import org.tobi29.scapes.Scapes;
 import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.connection.Account;
-import org.tobi29.scapes.engine.server.ConnectionCloseException;
-import org.tobi29.scapes.engine.server.InvalidPacketDataException;
-import org.tobi29.scapes.engine.server.AbstractServerConnection;
-import org.tobi29.scapes.engine.server.Connection;
-import org.tobi29.scapes.engine.server.PlayConnection;
+import org.tobi29.scapes.engine.server.*;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.*;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
@@ -66,7 +62,7 @@ public class PlayerConnection
         implements Connection, PlayConnection<Packet>, Command.Executor {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(PlayerConnection.class);
-    private static final int AES_KEY_LENGTH;
+    private static final int AES_MIN_KEY_LENGTH, AES_MAX_KEY_LENGTH;
 
     static {
         int length = 16;
@@ -76,7 +72,8 @@ public class PlayerConnection
             LOGGER.warn("Failed to detect maximum key length", e);
         }
         length = FastMath.min(length, 32);
-        AES_KEY_LENGTH = length;
+        AES_MAX_KEY_LENGTH = length;
+        AES_MIN_KEY_LENGTH = FastMath.min(16, length);
     }
 
     private final ServerConnection server;
@@ -148,13 +145,16 @@ public class PlayerConnection
         byte[] array = keyPair.getPublic().getEncoded();
         output.putInt(array.length);
         output.put(array);
-        output.putInt(AES_KEY_LENGTH);
+        output.putInt(AES_MAX_KEY_LENGTH);
         channel.queueBundle();
     }
 
     private void loginStep2(ReadableByteStream input) throws IOException {
         int keyLength = input.getInt();
-        keyLength = FastMath.min(keyLength, AES_KEY_LENGTH);
+        keyLength = FastMath.min(keyLength, AES_MAX_KEY_LENGTH);
+        if (keyLength < AES_MIN_KEY_LENGTH) {
+            throw new IOException("Key length too short: " + keyLength);
+        }
         byte[] keyServer = new byte[keyLength];
         byte[] keyClient = new byte[keyLength];
         try {
