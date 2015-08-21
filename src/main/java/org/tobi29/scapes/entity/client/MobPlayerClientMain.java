@@ -1,79 +1,55 @@
-/*
- * Copyright 2012-2015 Tobi29
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.tobi29.scapes.entity.client;
 
-import org.tobi29.scapes.Scapes;
 import org.tobi29.scapes.block.AABBElement;
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.TerrainTexture;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
-import org.tobi29.scapes.client.Playlist;
-import org.tobi29.scapes.client.ScapesClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
-import org.tobi29.scapes.client.gui.GuiChatWrite;
-import org.tobi29.scapes.client.gui.GuiPause;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.engine.gui.Gui;
-import org.tobi29.scapes.engine.input.ControllerDefault;
-import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
+import org.tobi29.scapes.engine.utils.math.Frustum;
 import org.tobi29.scapes.engine.utils.math.PointerPane;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
-import org.tobi29.scapes.engine.utils.math.vector.Vector2d;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
-import org.tobi29.scapes.entity.CreatureType;
 import org.tobi29.scapes.entity.particle.ParticleBlock;
 import org.tobi29.scapes.entity.particle.ParticleManager;
-import org.tobi29.scapes.packets.PacketInteraction;
-import org.tobi29.scapes.packets.PacketItemUse;
 
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class MobPlayerClientMain extends MobPlayerClient {
-    private final GameStateGameMP game;
-    private int blockWait;
-    private Gui currentGui;
-    private long punchLeft = -1, punchRight = -1;
-    private boolean flying;
-    private int swim;
-    private double gravitationMultiplier = 1.0, airFriction = 0.2,
+public abstract class MobPlayerClientMain extends MobPlayerClient {
+    protected final GameStateGameMP game;
+    protected int blockWait;
+    protected Gui currentGui;
+    protected long punchLeft = -1, punchRight = -1;
+    protected boolean flying;
+    protected int swim;
+    protected double gravitationMultiplier = 1.0, airFriction = 0.2,
             groundFriction = 1.6, wallFriction = 2.0, waterFriction = 8.0,
             stepHeight = 1.0;
-    private float chargeLeft, chargeRight;
+    protected float chargeLeft, chargeRight;
 
-    public MobPlayerClientMain(WorldClient world, Vector3 pos, Vector3 speed,
-            double xRot, double zRot, String nickname) {
-        super(world, pos, speed, xRot, zRot, nickname);
+    protected MobPlayerClientMain(WorldClient world, Vector3 pos, Vector3 speed,
+            AABB aabb, double lives, double maxLives, Frustum viewField,
+            Frustum hitField, String nickname) {
+        super(world, pos, speed, aabb, lives, maxLives, viewField, hitField,
+                nickname);
         game = world.game();
     }
 
-    private static Iterator<AABB> collisions(Pool<AABBElement> aabbs) {
+    protected static Iterator<AABB> collisions(Pool<AABBElement> aabbs) {
         return aabbs.stream().filter(AABBElement::isSolid)
                 .map(AABBElement::aabb).iterator();
     }
 
-    private void updateVelocity(double gravitation, double delta) {
+    protected void updateVelocity(double gravitation, double delta) {
         speed.div(1.0 + airFriction * delta);
         if (inWater) {
             speed.div(1.0 + waterFriction * delta);
@@ -88,7 +64,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
         speed.plusZ(-gravitation * gravitationMultiplier * delta);
     }
 
-    private void move(AABB aabb, Pool<AABBElement> aabbs, double goX,
+    protected void move(AABB aabb, Pool<AABBElement> aabbs, double goX,
             double goY, double goZ) {
         boolean ground = false;
         boolean slidingWall = false;
@@ -173,7 +149,7 @@ public class MobPlayerClientMain extends MobPlayerClient {
         this.slidingWall = slidingWall;
     }
 
-    private void collide(AABB aabb, Pool<AABBElement> aabbs) {
+    protected void collide(AABB aabb, Pool<AABBElement> aabbs) {
         boolean inWater = false;
         boolean swimming;
         for (AABBElement element : aabbs) {
@@ -211,132 +187,6 @@ public class MobPlayerClientMain extends MobPlayerClient {
 
     @Override
     public void update(double delta) {
-        Controller controller =
-                ((ScapesClient) game.engine().game()).inputMode()
-                        .playerController();
-        if (controller.inventory()) {
-            if (!(currentGui instanceof GuiChatWrite)) {
-                if (hasGui()) {
-                    world.connection().send(new PacketInteraction(
-                            PacketInteraction.CLOSE_INVENTORY));
-                } else {
-                    world.connection().send(new PacketInteraction(
-                            PacketInteraction.OPEN_INVENTORY));
-                }
-            }
-        }
-        if (controller.chat()) {
-            if (!hasGui()) {
-                openGui(new GuiChatWrite(game, this));
-            }
-        }
-        if (controller.menu()) {
-            if (hasGui()) {
-                closeGui();
-            } else {
-                openGui(new GuiPause(game, this));
-            }
-        }
-        if (currentGui == null) {
-            // Inventory
-            int previous = inventorySelectLeft;
-            int hotbar = controller.hotbarLeft(previous);
-            if (hotbar != previous) {
-                setInventorySelectLeft(hotbar);
-                world.connection().send(new PacketInteraction(
-                        PacketInteraction.INVENTORY_SLOT_CHANGE,
-                        (byte) inventorySelectLeft));
-            }
-            previous = inventorySelectRight;
-            hotbar = controller.hotbarRight(previous);
-            if (hotbar != previous) {
-                setInventorySelectRight(hotbar);
-                world.connection().send(new PacketInteraction(
-                        PacketInteraction.INVENTORY_SLOT_CHANGE,
-                        (byte) (inventorySelectRight + 10)));
-            }
-            // Debug
-            if (Scapes.debug) {
-                ControllerDefault controllerDefault =
-                        game.engine().controller();
-                if (controllerDefault.isPressed(ControllerKey.KEY_F5)) {
-                    flying = !flying;
-                }
-                if (flying) {
-                    if (controllerDefault.isDown(ControllerKey.KEY_Q)) {
-                        speed.plusZ(1.0);
-                    }
-                    if (controllerDefault.isDown(ControllerKey.KEY_C)) {
-                        speed.plusZ(-1.0);
-                    }
-                }
-            }
-            // Movement
-            if (controller.jump()) {
-                if (swimming) {
-                    speed.plusZ(1.2);
-                } else if (ground) {
-                    speed.setZ(5.1);
-                    ground = false;
-                }
-            }
-            Vector2 camera = controller.camera(delta);
-            rot.setZ((rot.doubleZ() - camera.doubleX()) % 360);
-            rot.setX(FastMath.min(89,
-                    FastMath.max(-89, rot.doubleX() - camera.doubleY())));
-            Vector2 walk = controller.walk();
-            double walkSpeed = FastMath.clamp(
-                    FastMath.max(FastMath.abs(walk.doubleX()),
-                            FastMath.abs(walk.doubleY())), 0.0, 1.0) * 120.0;
-            if (!ground && !slidingWall && !inWater && !flying) {
-                walkSpeed *= 0.0006;
-            } else if (!ground && !inWater && !flying) {
-                walkSpeed *= 0.05;
-            } else if (inWater) {
-                walkSpeed *= 0.2;
-            }
-            if (walkSpeed > 0.0) {
-                double dir = (FastMath.pointDirection(Vector2d.ZERO, walk) +
-                        rot.doubleZ() - 90.0) * FastMath.DEG_2_RAD;
-                walkSpeed *= delta;
-                speed.plusX(FastMath.cosTable(dir) * walkSpeed);
-                speed.plusY(FastMath.sinTable(dir) * walkSpeed);
-            }
-            // Placement
-            if (controller.left()) {
-                if (chargeLeft < 0.01f) {
-                    if (punchLeft == -1) {
-                        punchLeft = System.currentTimeMillis();
-                    }
-                }
-            } else if (punchLeft != -1) {
-                updatePosition();
-                breakParticles(world.terrain(), 16);
-                world.connection().send(new PacketItemUse(true, FastMath.min(
-                        (double) (System.currentTimeMillis() - punchLeft) /
-                                leftWeapon().material().hitWait(leftWeapon()),
-                        0.5) * 2.0));
-                punchLeft = -1;
-            }
-            if (controller.right()) {
-                if (chargeRight < 0.01f) {
-                    if (punchRight == -1) {
-                        punchRight = System.currentTimeMillis();
-                    }
-                }
-            } else if (punchRight != -1) {
-                updatePosition();
-                breakParticles(world.terrain(), 16);
-                world.connection().send(new PacketItemUse(false, FastMath.min(
-                        (double) (System.currentTimeMillis() - punchRight) /
-                                rightWeapon().material().hitWait(rightWeapon()),
-                        0.5) * 2.0));
-                punchRight = -1;
-            }
-            if (blockWait > 0) {
-                blockWait--;
-            }
-        }
         long time = System.currentTimeMillis();
         float swingTime = leftWeapon().material().hitWait(leftWeapon());
         long punch;
@@ -371,16 +221,6 @@ public class MobPlayerClientMain extends MobPlayerClient {
                 } else {
                     chargeRight = 0.0f;
                 }
-            }
-        }
-    }
-
-    @Override
-    public void onNotice(MobClient notice) {
-        if (notice instanceof MobLivingClient) {
-            if (((MobLivingClient) notice).creatureType() ==
-                    CreatureType.MONSTER) {
-                game.playlist().setMusic(Playlist.Music.BATTLE, this);
             }
         }
     }
@@ -455,8 +295,9 @@ public class MobPlayerClientMain extends MobPlayerClient {
                 }
                 if (!footSteepSound.isEmpty()) {
                     Random random = ThreadLocalRandom.current();
-                    game.engine().sounds().playSound(footSteepSound,
-                            0.9f + random.nextFloat() * 0.2f, 1.0f);
+                    game.engine().sounds()
+                            .playSound(footSteepSound, "sound.World",
+                                    0.9f + random.nextFloat() * 0.2f, 1.0f);
                     footStep = 1.0 /
                             FastMath.clamp(FastMath.length(speed.now()), 1.0,
                                     4.0);
@@ -478,8 +319,8 @@ public class MobPlayerClientMain extends MobPlayerClient {
         return chargeRight;
     }
 
-    private void breakParticles(TerrainClient terrain, int amount) {
-        PointerPane pane = selectedBlock();
+    protected void breakParticles(TerrainClient terrain, int amount) {
+        PointerPane pane = block(6);
         if (pane != null) {
             BlockType type = terrain.type(pane.x, pane.y, pane.z);
             Optional<TerrainTexture> tex =

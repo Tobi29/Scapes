@@ -47,7 +47,6 @@ public class Plugins {
     public Plugins(List<PluginFile> files, IDStorage idStorage, Path path)
             throws IOException {
         this.files = files;
-        registry = new GameRegistry(idStorage);
         classLoader = new PluginClassLoader(files, path);
         for (PluginFile file : files) {
             Plugin plugin = file.plugin(classLoader);
@@ -65,6 +64,7 @@ public class Plugins {
         if (worldType == null) {
             throw new IOException("No world type found");
         }
+        registry = new GameRegistry(idStorage,this);
     }
 
     public void dispose() {

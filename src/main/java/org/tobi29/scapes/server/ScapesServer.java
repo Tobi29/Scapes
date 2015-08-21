@@ -44,8 +44,7 @@ public class ScapesServer {
         TagStructure serverTag = tagStructure.getStructure("Server");
         maxLoadingRadius = serverTag.getInteger("MaxLoadingRadius");
         this.serverInfo = serverInfo;
-        serverConnection = new ServerConnection(this, taskExecutor,
-                serverTag.getStructure("Socket"));
+        serverConnection = new ServerConnection(this, serverTag.getStructure("Socket"));
         worldFormat = new WorldFormat(this, path);
         ScapesServerCommands.register(commandRegistry, this);
     }

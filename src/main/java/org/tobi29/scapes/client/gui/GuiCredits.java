@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.slf4j.Logger;
@@ -64,12 +63,14 @@ public class GuiCredits extends Gui {
         }
         this.credits = credits.toString();
         back.addLeftClick(event -> {
-            state.engine().sounds().stopMusic();
+            state.engine().sounds().stop("music.Credits");
             state.remove(this);
             state.add(prev);
         });
+        state.engine().sounds().stop("music");
         state.engine().sounds()
-                .playMusic("Scapes:sound/Credits.ogg", 1.0f, 1.0f);
+                .playMusic("Scapes:sound/Credits.ogg", "music.Credits", 1.0f,
+                        1.0f, true);
     }
 
     @Override

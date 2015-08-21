@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.entity.client;
 
 import org.tobi29.scapes.chunk.WorldClient;
@@ -45,8 +44,8 @@ public abstract class MobLivingClient extends MobClient {
     }
 
     public PointerPane block(double distance) {
-        Pool<PointerPane> pointerPanes =
-                world.terrain().pointerPanes(pos.intX(), pos.intY(), pos.intZ(),
+        Pool<PointerPane> pointerPanes = world.terrain()
+                .pointerPanes(pos.intX(), pos.intY(), pos.intZ(),
                         (int) FastMath.ceil(distance));
         double lookX = FastMath.cosTable(rot.doubleZ() * FastMath.PI / 180) *
                 FastMath.cosTable(rot.doubleX() * FastMath.PI / 180) * distance;
@@ -148,7 +147,7 @@ public abstract class MobLivingClient extends MobClient {
                 if (!footSteepSound.isEmpty()) {
                     Random random = ThreadLocalRandom.current();
                     world.playSound(footSteepSound, this,
-                            0.9f + random.nextFloat() * 0.2f, 1.0f, 1.0f);
+                            0.9f + random.nextFloat() * 0.2f, 1.0f);
                     footStep = 1.0 /
                             FastMath.clamp(FastMath.length(speed.now()), 1.0,
                                     4.0);

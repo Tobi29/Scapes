@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.GameState;
@@ -26,10 +25,10 @@ public class GuiOptions extends GuiMenu {
         super(state, "Options", previous);
         GuiComponentSlider musicVolume =
                 new GuiComponentSlider(pane, 16, 80, 368, 30, 18, "Music",
-                        state.engine().config().musicVolume());
+                        state.engine().config().volume("music"));
         GuiComponentSlider soundVolume =
                 new GuiComponentSlider(pane, 16, 120, 368, 30, 18, "Sound",
-                        state.engine().config().soundVolume());
+                        state.engine().config().volume("music"));
         GuiComponentTextButton controls =
                 new GuiComponentTextButton(pane, 16, 160, 368, 30, 18,
                         "Controls");
@@ -41,9 +40,9 @@ public class GuiOptions extends GuiMenu {
                         "Account");
 
         musicVolume.addHover(event -> state.engine().config()
-                .setMusicVolume((float) musicVolume.value));
+                .setVolume("music", musicVolume.value));
         soundVolume.addHover(event -> state.engine().config()
-                .setSoundVolume((float) soundVolume.value));
+                .setVolume("sound", soundVolume.value));
         controls.addLeftClick(event -> {
             state.remove(this);
             state.add(new GuiControlsList(state, this));

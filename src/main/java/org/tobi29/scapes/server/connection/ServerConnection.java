@@ -21,11 +21,9 @@ import org.tobi29.scapes.connection.ConnectionInfo;
 import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.server.AbstractServerConnection;
 import org.tobi29.scapes.engine.server.Connection;
-import org.tobi29.scapes.engine.server.PlayConnection;
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
 import org.tobi29.scapes.engine.utils.io.PacketBundleChannel;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
-import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 import org.tobi29.scapes.entity.skin.ServerSkin;
 import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketChat;
@@ -54,9 +52,8 @@ public class ServerConnection extends AbstractServerConnection<Packet> {
             new ConcurrentHashMap<>();
     private boolean allowsJoin = true, allowsCreation = true;
 
-    public ServerConnection(ScapesServer server, TaskExecutor taskExecutor,
-            TagStructure tagStructure) {
-        super(taskExecutor, ConnectionInfo.header(), tagStructure);
+    public ServerConnection(ScapesServer server, TagStructure tagStructure) {
+        super(server.taskExecutor(), ConnectionInfo.header(), tagStructure);
         mayPlayers = tagStructure.getInteger("MaxPlayers");
         this.server = server;
         try {

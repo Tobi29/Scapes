@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk;
 
 import org.tobi29.scapes.block.BlockExplosive;
@@ -162,8 +161,8 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
 
     public List<EntityServer> entities(Vector3 pos, double rangeSqr) {
         return entities.values().stream().filter(entity ->
-                FastMath.pointDistanceSqr(pos, entity.pos()) <= rangeSqr)
-                .collect(Collectors.toList());
+                        FastMath.pointDistanceSqr(pos, entity.pos()) <=
+                                rangeSqr).collect(Collectors.toList());
     }
 
     public List<EntityServer> entities(int x, int y, int z) {
@@ -438,11 +437,16 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
     }
 
     public void playSound(String audio, EntityServer entity) {
-        playSound(audio, entity, 16.0f);
+        playSound(audio, entity, 1.0f, 1.0f);
     }
 
     public void playSound(String audio, EntityServer entity, float range) {
         playSound(audio, entity, 1.0f, 1.0f, range);
+    }
+
+    public void playSound(String audio, EntityServer entity, float pitch,
+            float gain) {
+        playSound(audio, entity, pitch, gain, 16.0f);
     }
 
     public void playSound(String audio, EntityServer entity, float pitch,
@@ -455,13 +459,18 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
         }
     }
 
+    public void playSound(String name, Vector3 position, Vector3 velocity) {
+        playSound(name, position, velocity, 1.0f, 1.0f);
+    }
+
     public void playSound(String audio, Vector3 position, Vector3 velocity,
             float range) {
         playSound(audio, position, velocity, 1.0f, 1.0f, range);
     }
 
-    public void playSound(String name, Vector3 position, Vector3 velocity) {
-        playSound(name, position, velocity, 16.0f);
+    public void playSound(String audio, Vector3 position, Vector3 velocity,
+            float pitch, float gain) {
+        playSound(audio, position, velocity, pitch, gain, 16.0f);
     }
 
     public void playSound(String audio, Vector3 position, Vector3 velocity,

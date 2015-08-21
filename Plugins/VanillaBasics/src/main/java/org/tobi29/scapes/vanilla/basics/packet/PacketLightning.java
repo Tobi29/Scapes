@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.packet;
 
 import org.tobi29.scapes.chunk.WorldClient;
@@ -75,6 +74,6 @@ public class PacketLightning extends Packet implements PacketClient {
                 Vector3d.ZERO));
         Random random = ThreadLocalRandom.current();
         world.playSound(SOUNDS[random.nextInt(3)], pos, Vector3d.ZERO, 1.0f,
-                1.0f, 1024.0f);
+                64.0f);
     }
 }

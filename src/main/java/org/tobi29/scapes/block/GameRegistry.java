@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.block;
 
 import org.tobi29.scapes.chunk.IDStorage;
@@ -21,6 +20,8 @@ import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.entity.client.*;
 import org.tobi29.scapes.entity.server.*;
 import org.tobi29.scapes.packets.*;
+import org.tobi29.scapes.plugins.Plugins;
+import org.tobi29.scapes.plugins.WorldType;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,7 +44,7 @@ public class GameRegistry {
     private Material[] materials;
     private boolean locked;
 
-    public GameRegistry(IDStorage idStorage) {
+    public GameRegistry(IDStorage idStorage, Plugins plugins) {
         this.idStorage = idStorage;
         materials = new Material[1];
         air = new BlockAir(this);
@@ -55,9 +56,10 @@ public class GameRegistry {
                 add("Core", "Entity", 1, Integer.MAX_VALUE);
         Registry<EntityClient.Supplier> entityClientRegistry =
                 add("Core", "EntityClient", 1, Integer.MAX_VALUE);
+        WorldType worldType = plugins.worldType();
         int id = entityServerRegistry.reg(null, "core.mob.Player");
-        entityClientRegistry.register(MobPlayerClient::new, id);
-        entityIDs.put(MobPlayerServer.class, id);
+        entityClientRegistry.register(worldType.playerSupplier(), id);
+        entityIDs.put(worldType.playerClass(), id);
         registerEntity(EntityBlockBreakServer::new, EntityBlockBreakClient::new,
                 EntityBlockBreakServer.class, "core.entity.BlockBreak");
         registerEntity(MobItemServer::new, MobItemClient::new,
@@ -206,9 +208,8 @@ public class GameRegistry {
             blocks[id] = (BlockType) material;
         }
         materialNames.put(nameID, material);
-        materialNames.put(nameID
-                .substring(nameID.lastIndexOf('.') + 1, nameID.length()),
-                material);
+        materialNames.put(nameID.substring(nameID.lastIndexOf('.') + 1,
+                        nameID.length()), material);
     }
 
     public void registerEntity(EntityServer.Supplier serverSupplier,

@@ -29,7 +29,7 @@ import java.io.IOException;
 public class PacketSoundEffect extends Packet implements PacketClient {
     private String audio;
     private Vector3 position, velocity;
-    private float pitch, gain, range;
+    private float pitch, gain;
 
     public PacketSoundEffect() {
     }
@@ -42,7 +42,6 @@ public class PacketSoundEffect extends Packet implements PacketClient {
         this.audio = audio;
         this.pitch = pitch;
         this.gain = gain;
-        this.range = range;
     }
 
     @Override
@@ -57,7 +56,6 @@ public class PacketSoundEffect extends Packet implements PacketClient {
         stream.putDouble(velocity.doubleZ());
         stream.putFloat(pitch);
         stream.putFloat(gain);
-        stream.putFloat(range);
     }
 
     @Override
@@ -70,11 +68,10 @@ public class PacketSoundEffect extends Packet implements PacketClient {
                 stream.getDouble());
         pitch = stream.getFloat();
         gain = stream.getFloat();
-        range = stream.getFloat();
     }
 
     @Override
     public void runClient(ClientConnection client, WorldClient world) {
-        world.playSound(audio, position, velocity, pitch, gain, range);
+        world.playSound(audio, position, velocity, pitch, gain);
     }
 }

@@ -28,10 +28,10 @@ public class GuiOptionsInGame extends Gui {
         new GuiComponentSeparator(pane, 24, 64, 352, 2);
         GuiComponentSlider musicVolume =
                 new GuiComponentSlider(pane, 16, 80, 368, 30, 18, "Music",
-                        state.engine().config().musicVolume());
+                        state.engine().config().volume("music"));
         GuiComponentSlider soundVolume =
                 new GuiComponentSlider(pane, 16, 120, 368, 30, 18, "Sound",
-                        state.engine().config().soundVolume());
+                        state.engine().config().volume("sound"));
         GuiComponentTextButton fullscreen;
         if (state.engine().config().isFullscreen()) {
             fullscreen = new GuiComponentTextButton(pane, 16, 160, 368, 30, 18,
@@ -45,9 +45,9 @@ public class GuiOptionsInGame extends Gui {
                 new GuiComponentTextButton(pane, 112, 466, 176, 30, 18, "Back");
 
         musicVolume.addHover(event -> state.engine().config()
-                .setMusicVolume((float) musicVolume.value));
+                .setVolume("music", musicVolume.value));
         soundVolume.addHover(event -> state.engine().config()
-                .setSoundVolume((float) soundVolume.value));
+                .setVolume("sound", soundVolume.value));
         fullscreen.addLeftClick(event -> {
             if (!state.engine().config().isFullscreen()) {
                 fullscreen.setText("Fullscreen: ON");

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.generator;
 
 import org.tobi29.scapes.chunk.WorldClient;
@@ -275,11 +274,11 @@ public class WorldSkyboxOverworld implements WorldSkybox {
                 debugValues.get("Vanilla-Condition-Body-Temperature");
         exposureDebug = debugValues.get("Vanilla-Exposure");
         rainAudio = engine.sounds().playStaticAudio(
-                "VanillaBasics:sound/entity/particle/rain/Rain1.ogg", 1.0f,
-                0.0f);
+                "VanillaBasics:sound/entity/particle/rain/Rain1.ogg",
+                "sound.Weather", 1.0f, 0.0f);
         windAudio = engine.sounds().playStaticAudio(
-                "VanillaBasics:sound/entity/particle/rain/Wind1.ogg", 1.0f,
-                0.0f);
+                "VanillaBasics:sound/entity/particle/rain/Wind1.ogg",
+                "sound.Weather", 1.0f, 0.0f);
         new GuiHudCondition(world.scene().hud(), world.player());
     }
 

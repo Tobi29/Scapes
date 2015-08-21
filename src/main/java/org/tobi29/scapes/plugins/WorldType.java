@@ -13,11 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.plugins;
+
+import org.tobi29.scapes.chunk.WorldClient;
+import org.tobi29.scapes.chunk.WorldServer;
+import org.tobi29.scapes.engine.utils.math.vector.Vector3;
+import org.tobi29.scapes.entity.client.EntityClient;
+import org.tobi29.scapes.entity.client.MobPlayerClientMain;
+import org.tobi29.scapes.entity.server.MobPlayerServer;
+import org.tobi29.scapes.server.connection.PlayerConnection;
 
 /**
  * Basic interface for standalone world-type plugins
  */
 public interface WorldType extends Dimension {
+    EntityClient.Supplier playerSupplier();
+
+    Class<? extends MobPlayerServer> playerClass();
+
+    MobPlayerClientMain newPlayer(WorldClient world, Vector3 pos, Vector3 speed,
+            double xRot, double zRot, String nickname);
+
+    MobPlayerServer newPlayer(WorldServer world, Vector3 pos, Vector3 speed,
+            double xRot, double zRot, String nickname, byte[] skin,
+            PlayerConnection connection);
 }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics;
 
 import org.tobi29.scapes.block.BlockType;
@@ -22,8 +21,16 @@ import org.tobi29.scapes.chunk.World;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldEnvironment;
 import org.tobi29.scapes.chunk.WorldServer;
+import org.tobi29.scapes.engine.utils.math.vector.Vector3;
+import org.tobi29.scapes.entity.client.EntityClient;
+import org.tobi29.scapes.entity.client.MobPlayerClientMain;
+import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
+import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientVB;
+import org.tobi29.scapes.entity.server.MobPlayerServer;
+import org.tobi29.scapes.vanilla.basics.entity.server.MobPlayerServerVB;
 import org.tobi29.scapes.plugins.WorldType;
 import org.tobi29.scapes.server.ScapesServer;
+import org.tobi29.scapes.server.connection.PlayerConnection;
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateInfoLayer;
 import org.tobi29.scapes.vanilla.basics.generator.WorldEnvironmentOverworld;
@@ -196,6 +203,31 @@ public class VanillaBasics implements WorldType {
 
     public VanillaMaterial getMaterials() {
         return materials;
+    }
+
+    @Override
+    public EntityClient.Supplier playerSupplier() {
+        return MobPlayerClientVB::new;
+    }
+
+    @Override
+    public Class<? extends MobPlayerServer> playerClass() {
+        return MobPlayerServerVB.class;
+    }
+
+    @Override
+    public MobPlayerClientMain newPlayer(WorldClient world, Vector3 pos,
+            Vector3 speed, double xRot, double zRot, String nickname) {
+        return new MobPlayerClientMainVB(world, pos, speed, xRot, zRot,
+                nickname);
+    }
+
+    @Override
+    public MobPlayerServer newPlayer(WorldServer world, Vector3 pos,
+            Vector3 speed, double xRot, double zRot, String nickname,
+            byte[] skin, PlayerConnection connection) {
+        return new MobPlayerServerVB(world, pos, speed, xRot, zRot, nickname,
+                skin, connection);
     }
 
     public class Config {

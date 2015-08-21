@@ -153,7 +153,8 @@ public class PlayerConnection
         int keyLength = input.getInt();
         keyLength = FastMath.min(keyLength, AES_MAX_KEY_LENGTH);
         if (keyLength < AES_MIN_KEY_LENGTH) {
-            throw new IOException("Key length too short: " + keyLength);
+            throw new IOException(
+                    "Key length too short: " + keyLength);
         }
         byte[] keyServer = new byte[keyLength];
         byte[] keyClient = new byte[keyLength];
@@ -250,17 +251,20 @@ public class PlayerConnection
         if (tag.isPresent()) {
             TagStructure tagStructure = tag.get();
             world = worldFormat.world(tagStructure.getString("World"));
-            entity = new MobPlayerServer(world, Vector3d.ZERO, Vector3d.ZERO,
-                    0.0, 0.0, nickname, skin.checksum(), this);
+            entity = server().server().worldFormat().plugins().worldType()
+                    .newPlayer(world, Vector3d.ZERO, Vector3d.ZERO, 0.0, 0.0,
+                            nickname, skin.checksum(), this);
             entity.read(tagStructure.getStructure("Entity"));
             statistics
                     .load(world.registry(), tagStructure.getList("Statistics"));
             permissionLevel = tagStructure.getInteger("Permissions");
         } else {
             world = worldFormat.defaultWorld();
-            entity = new MobPlayerServer(world,
-                    new Vector3d(0.5, 0.5, 1.0).plus(world.spawn()),
-                    Vector3d.ZERO, 0.0, 0.0, nickname, skin.checksum(), this);
+            entity = server().server().worldFormat().plugins().worldType()
+                    .newPlayer(world,
+                            new Vector3d(0.5, 0.5, 1.0).plus(world.spawn()),
+                            Vector3d.ZERO, 0.0, 0.0, nickname, skin.checksum(),
+                            this);
             entity.onSpawn();
         }
         world.addEntity(entity);

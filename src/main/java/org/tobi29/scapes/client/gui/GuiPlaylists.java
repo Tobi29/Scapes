@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.slf4j.Logger;
@@ -120,8 +119,10 @@ public class GuiPlaylists extends GuiMenu {
                         state.engine().graphics().textures()
                                 .get("Scapes:image/gui/Playlist"));
                 new GuiComponentText(message, 60, 23, 420, 16, title);
+                state.engine().sounds().stop("music");
                 state.engine().sounds()
-                        .playMusic(FileUtil.read(path), 1.0f, 1.0f);
+                        .playMusic(FileUtil.read(path), "music.Playlist", 1.0f,
+                                1.0f,true);
             });
             new GuiComponentTextButton(this, 60, 2, 220, 15, 12, title);
             GuiComponentTextButton delete =

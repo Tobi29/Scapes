@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk;
 
 import org.slf4j.Logger;
@@ -73,9 +72,8 @@ public class WorldClient extends World {
                 connection.game().engine().taskExecutor(),
                 connection.plugins().registry());
         game = connection.game();
-        player =
-                new MobPlayerClientMain(this, Vector3d.ZERO, Vector3d.ZERO, 0.0,
-                        0.0, "");
+        player = connection.plugins().worldType()
+                .newPlayer(this, Vector3d.ZERO, Vector3d.ZERO, 0.0, 0.0, "");
         player.read(playerTag);
         this.seed = seed;
         environment =
@@ -231,36 +229,28 @@ public class WorldClient extends World {
     }
 
     public void playSound(String audio, EntityClient entity) {
-        playSound(audio, entity, 16.0f);
-    }
-
-    public void playSound(String audio, EntityClient entity, float range) {
-        playSound(audio, entity, 1.0f, 1.0f, range);
+        playSound(audio, entity, 1.0f, 1.0f);
     }
 
     public void playSound(String audio, EntityClient entity, float pitch,
-            float gain, float range) {
+            float gain) {
         if (entity instanceof MobClient) {
             playSound(audio, entity.pos(), ((MobClient) entity).speed(), pitch,
-                    gain, range);
+                    gain);
         } else {
-            playSound(audio, entity.pos(), Vector3d.ZERO, pitch, gain, range);
+            playSound(audio, entity.pos(), Vector3d.ZERO, pitch, gain);
         }
     }
 
-    public void playSound(String audio, Vector3 position, Vector3 velocity,
-            float range) {
-        playSound(audio, position, velocity, 1.0f, 1.0f, range);
-    }
-
-    public void playSound(String name, Vector3 position, Vector3 velocity) {
-        playSound(name, position, velocity, 16.0f);
+    public void playSound(String audio, Vector3 position, Vector3 velocity) {
+        playSound(audio, position, velocity, 1.0f, 1.0f);
     }
 
     public void playSound(String audio, Vector3 position, Vector3 velocity,
-            float pitch, float gain, float range) {
+            float pitch, float gain) {
         game.engine().sounds()
-                .playSound(audio, position, velocity, pitch, gain, range);
+                .playSound(audio, "sound.World", position, velocity, pitch,
+                        gain);
     }
 
     public MobPlayerClientMain player() {

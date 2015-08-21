@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.entity.server;
 
 import org.tobi29.scapes.block.BlockExplosive;
@@ -61,7 +60,7 @@ public class MobBombServer extends MobServer {
         time -= delta;
         if (time <= 0.0) {
             world.playSound("Scapes:sound/entity/mob/Explosion1.ogg", this,
-                    1024.0f);
+                    1.0f, 64.0f);
             world.deleteEntity(this);
             int x = pos.intX(), y = pos.intY(), z = pos.intZ();
             ((BlockExplosive) item.material())

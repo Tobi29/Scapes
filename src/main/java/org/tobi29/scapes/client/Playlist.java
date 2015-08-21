@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client;
 
 import org.slf4j.Logger;
@@ -34,8 +33,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -51,7 +53,7 @@ public class Playlist {
     }
 
     public void update(MobPlayerClientMain player, double delta) {
-        if (!sounds.isMusicPlaying()) {
+        if (!sounds.isPlaying("music")) {
             if (musicWait >= 0.0) {
                 musicWait -= delta;
             } else {
@@ -72,39 +74,53 @@ public class Playlist {
 
     private void playMusic(Music music, MobPlayerClientMain player) {
         currentMusic = music;
-        if (sounds.musicVolume() <= 0.0) {
+        if (sounds.volume("music") <= 0.0) {
             return;
         }
-        try {
-            Path path = player.game().engine().home().resolve("playlists")
-                    .resolve(music.dirName());
-            List<Path> titles = new ArrayList<>();
-            Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult visitFile(Path file,
-                        BasicFileAttributes attrs) {
-                    titles.add(file);
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-            if (!titles.isEmpty()) {
-                Random random = ThreadLocalRandom.current();
-                Path title = titles.get(random.nextInt(titles.size()));
-                ScapesEngine engine = player.game().engine();
-                GuiNotification message =
-                        new GuiNotification(engine.globalGUI(), 500, 0, 290, 60,
-                                GuiAlignment.RIGHT, 3.0);
-                new GuiComponentIcon(message, 10, 10, 40, 40,
-                        engine.graphics().textures()
-                                .get("Scapes:image/gui/Playlist"));
-                String name = title.getFileName().toString();
-                name = name.substring(0, name.lastIndexOf('.'));
-                new GuiComponentText(message, 60, 23, 420, 16, name);
-                sounds.playMusic(FileUtil.read(title), 1.0f, 1.0f);
-            }
-        } catch (IOException e) {
-            LOGGER.warn("Failed to play music: {}", e.toString());
+        Optional<Path> title = playMusic(
+                player.game().engine().home().resolve("playlists")
+                        .resolve(music.dirName()));
+        if (title.isPresent()) {
+            ScapesEngine engine = player.game().engine();
+            GuiNotification message =
+                    new GuiNotification(engine.globalGUI(), 500, 0, 290, 60,
+                            GuiAlignment.RIGHT, 3.0);
+            new GuiComponentIcon(message, 10, 10, 40, 40,
+                    engine.graphics().textures()
+                            .get("Scapes:image/gui/Playlist"));
+            String name = title.get().getFileName().toString();
+            name = name.substring(0, name.lastIndexOf('.'));
+            new GuiComponentText(message, 60, 23, 420, 16, name);
         }
+    }
+
+    private Optional<Path> playMusic(Path path) {
+        return AccessController
+                .doPrivileged((PrivilegedAction<Optional<Path>>) () -> {
+                    try {
+                        List<Path> titles = new ArrayList<>();
+                        Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+                            @Override
+                            public FileVisitResult visitFile(Path file,
+                                    BasicFileAttributes attrs) {
+                                titles.add(file);
+                                return FileVisitResult.CONTINUE;
+                            }
+                        });
+                        if (!titles.isEmpty()) {
+                            Random random = ThreadLocalRandom.current();
+                            Path title =
+                                    titles.get(random.nextInt(titles.size()));
+                            sounds.stop("music");
+                            sounds.playMusic(FileUtil.read(title),
+                                    "music.Playlist", 1.0f, 1.0f, false);
+                            return Optional.of(title);
+                        }
+                    } catch (IOException e) {
+                        LOGGER.warn("Failed to play music: {}", e.toString());
+                    }
+                    return Optional.empty();
+                });
     }
 
     public void setMusic(Music music, MobPlayerClientMain player) {
