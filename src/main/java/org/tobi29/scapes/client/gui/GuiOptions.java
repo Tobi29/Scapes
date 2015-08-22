@@ -28,7 +28,7 @@ public class GuiOptions extends GuiMenu {
                         state.engine().config().volume("music"));
         GuiComponentSlider soundVolume =
                 new GuiComponentSlider(pane, 16, 120, 368, 30, 18, "Sound",
-                        state.engine().config().volume("music"));
+                        state.engine().config().volume("sound"));
         GuiComponentTextButton controls =
                 new GuiComponentTextButton(pane, 16, 160, 368, 30, 18,
                         "Controls");
