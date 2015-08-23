@@ -30,8 +30,9 @@ import java.util.Optional;
 
 public class PacketInteraction extends Packet
         implements PacketClient, PacketServer {
-    public static final byte INVENTORY_SLOT_CHANGE = 0, OPEN_INVENTORY = 1,
-            CLOSE_INVENTORY = 2, OPEN_STATISTICS = 3;
+    public static final byte INVENTORY_SLOT_LEFT = 0x00, INVENTORY_SLOT_RIGHT =
+            0x01, OPEN_INVENTORY = 0x10, CLOSE_INVENTORY = 0x11,
+            OPEN_STATISTICS = 0x20;
     private int entityID;
     private byte type, data;
 
@@ -74,24 +75,22 @@ public class PacketInteraction extends Packet
         if (world == null) {
             return;
         }
-        switch (type) {
-            case INVENTORY_SLOT_CHANGE:
-                Optional<EntityClient> fetch = world.entity(entityID);
-                if (fetch.isPresent()) {
-                    EntityClient entity = fetch.get();
-                    if (entity instanceof MobPlayerClient) {
-                        if (data > 9) {
-                            ((MobPlayerClient) entity)
-                                    .setInventorySelectRight(data - 10);
-                        } else {
-                            ((MobPlayerClient) entity)
-                                    .setInventorySelectLeft(data);
-                        }
-                    }
-                } else {
-                    client.send(new PacketRequestEntity(entityID));
+        Optional<EntityClient> fetch = world.entity(entityID);
+        if (fetch.isPresent()) {
+            EntityClient entity = fetch.get();
+            if (entity instanceof MobPlayerClient) {
+                switch (type) {
+                    case INVENTORY_SLOT_LEFT:
+                        ((MobPlayerClient) entity).setInventorySelectLeft(data);
+                        break;
+                    case INVENTORY_SLOT_RIGHT:
+                        ((MobPlayerClient) entity)
+                                .setInventorySelectRight(data);
+                        break;
                 }
-                break;
+            }
+        } else {
+            client.send(new PacketRequestEntity(entityID));
         }
     }
 
@@ -115,19 +114,25 @@ public class PacketInteraction extends Packet
             return;
         }
         switch (type) {
-            case INVENTORY_SLOT_CHANGE:
-                if (data < 0 || data >= 20) {
+            case INVENTORY_SLOT_LEFT:
+                if (data < 0 || data >= 10) {
                     throw new InvalidPacketDataException(
                             "Invalid slot change data!");
                 }
-                if (data > 9) {
-                    player.mob().setInventorySelectRight(data - 10);
-                } else {
-                    player.mob().setInventorySelectLeft(data);
-                }
+                player.mob().setInventorySelectLeft(data);
                 world.connection()
                         .send(new PacketInteraction(player.mob().entityID(),
-                                INVENTORY_SLOT_CHANGE, data));
+                                INVENTORY_SLOT_LEFT, data));
+                break;
+            case INVENTORY_SLOT_RIGHT:
+                if (data < 0 || data >= 10) {
+                    throw new InvalidPacketDataException(
+                            "Invalid slot change data!");
+                }
+                player.mob().setInventorySelectRight(data);
+                world.connection()
+                        .send(new PacketInteraction(player.mob().entityID(),
+                                INVENTORY_SLOT_RIGHT, data));
                 break;
             case OPEN_INVENTORY:
                 player.send(new PacketOpenGui(player.mob()));

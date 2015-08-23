@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import org.tobi29.scapes.chunk.WorldClient;
@@ -22,6 +21,7 @@ import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.EntityContainerClient;
+import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.server.EntityContainerServer;
 import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
@@ -60,8 +60,9 @@ public class PacketOpenGui extends Packet implements PacketClient {
         if (fetch.isPresent()) {
             EntityClient entity = fetch.get();
             if (entity instanceof EntityContainerClient) {
-                client.entity().openGui(
-                        ((EntityContainerClient) entity).gui(client.entity()));
+                MobPlayerClientMain player = client.entity();
+                ((EntityContainerClient) entity).gui(player)
+                        .ifPresent(player::openGui);
             }
         } else {
             client.send(new PacketRequestEntity(entityID));

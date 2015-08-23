@@ -17,6 +17,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.CreatureType;
 import org.tobi29.scapes.entity.MobPositionHandler;
+import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketEntityChange;
 import org.tobi29.scapes.packets.PacketOpenGui;
 import org.tobi29.scapes.server.connection.PlayerConnection;
@@ -93,40 +94,10 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
     }
 
     public void setInventorySelectLeft(int select) {
-        int c = 1;
-        if (select < inventorySelectLeft) {
-            c = -1;
-        }
-        select %= 10;
-        if (select < 0) {
-            select += 10;
-        }
-        if (select == inventorySelectRight) {
-            select += c;
-        }
-        select %= 10;
-        if (select < 0) {
-            select += 10;
-        }
         inventorySelectLeft = select;
     }
 
     public void setInventorySelectRight(int select) {
-        int c = 1;
-        if (select < inventorySelectRight) {
-            c = -1;
-        }
-        select %= 10;
-        if (select < 0) {
-            select += 10;
-        }
-        if (select == inventorySelectLeft) {
-            select += c;
-        }
-        select %= 10;
-        if (select < 0) {
-            select += 10;
-        }
         inventorySelectRight = select;
     }
 
@@ -168,7 +139,7 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
 
     @Override
     protected MobPositionHandler createPositionHandler(
-            PlayConnection connection) {
+            PlayConnection<Packet> connection) {
         return new MobPositionHandler(pos.now(), packet -> {
         }, super::setPos, super::setSpeed, super::setRot,
                 (ground, slidingWall, inWater, swimming) -> {
@@ -300,19 +271,6 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
         return write(true);
     }
 
-    public TagStructure write(boolean packet) {
-        TagStructure tagStructure = super.write();
-        tagStructure.setInteger("HealWait", healWait);
-        TagStructure inventoryTag = tagStructure.getStructure("Inventory");
-        inventories.forEach((id, inventory) -> inventoryTag
-                .setStructure(id, inventory.save()));
-        if (packet) {
-            tagStructure.setString("Nickname", nickname);
-            tagStructure.setByteArray("SkinChecksum", skin);
-        }
-        return tagStructure;
-    }
-
     @Override
     public void read(TagStructure tagStructure) {
         super.read(tagStructure);
@@ -348,6 +306,19 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
         if (listener instanceof PunchListener) {
             punchListeners.put(id, (PunchListener) listener);
         }
+    }
+
+    public TagStructure write(boolean packet) {
+        TagStructure tagStructure = super.write();
+        tagStructure.setInteger("HealWait", healWait);
+        TagStructure inventoryTag = tagStructure.getStructure("Inventory");
+        inventories.forEach((id, inventory) -> inventoryTag
+                .setStructure(id, inventory.save()));
+        if (packet) {
+            tagStructure.setString("Nickname", nickname);
+            tagStructure.setByteArray("SkinChecksum", skin);
+        }
+        return tagStructure;
     }
 
     public void onPunch(double strength) {

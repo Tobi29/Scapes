@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
 import org.tobi29.scapes.block.Inventory;
@@ -26,6 +25,7 @@ import org.tobi29.scapes.entity.particle.ParticleManager;
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleSmoke;
 import org.tobi29.scapes.vanilla.basics.gui.GuiForgeInventory;
 
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -40,8 +40,12 @@ public class EntityForgeClient extends EntityAbstractFurnaceClient {
     }
 
     @Override
-    public Gui gui(MobPlayerClientMain player) {
-        return new GuiForgeInventory(this, player);
+    public Optional<Gui> gui(MobPlayerClientMain player) {
+        if (player instanceof MobPlayerClientMainVB) {
+            return Optional.of(new GuiForgeInventory(this,
+                    (MobPlayerClientMainVB) player));
+        }
+        return Optional.empty();
     }
 
     @Override

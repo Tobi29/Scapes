@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
 import org.tobi29.scapes.block.Inventory;
@@ -26,6 +25,7 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.vanilla.basics.gui.GuiAlloyInventory;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EntityAlloyClient extends EntityAbstractContainerClient {
@@ -42,8 +42,12 @@ public class EntityAlloyClient extends EntityAbstractContainerClient {
     }
 
     @Override
-    public Gui gui(MobPlayerClientMain player) {
-        return new GuiAlloyInventory(this, player);
+    public Optional<Gui> gui(MobPlayerClientMain player) {
+        if (player instanceof MobPlayerClientMainVB) {
+            return Optional.of(new GuiAlloyInventory(this,
+                    (MobPlayerClientMainVB) player));
+        }
+        return Optional.empty();
     }
 
     @Override

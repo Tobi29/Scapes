@@ -215,7 +215,7 @@ public class SceneScapesVoxelWorld extends Scene {
                 type.createModels(terrainTextureRegistry);
             }
         }
-        hud = new GuiHud(player);
+        hud = new GuiHud();
         new GuiComponentChat(hud, world.game().chatHistory(), 8, 416, 0, 0);
         addGui(hud);
         ShaderManager shaderManager = gl.shaders();

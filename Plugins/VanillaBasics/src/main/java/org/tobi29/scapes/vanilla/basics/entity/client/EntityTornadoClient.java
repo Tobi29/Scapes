@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
 import org.tobi29.scapes.chunk.WorldClient;
@@ -25,6 +24,7 @@ import org.tobi29.scapes.entity.MobPositionHandler;
 import org.tobi29.scapes.entity.MobileEntity;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.particle.ParticleManager;
+import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleTornado;
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleTornadoBlock;
 
@@ -41,7 +41,7 @@ public class EntityTornadoClient extends EntityClient implements MobileEntity {
 
     public EntityTornadoClient(WorldClient world, Vector3 pos) {
         super(world, pos);
-        PlayConnection connection = world.connection();
+        PlayConnection<Packet> connection = world.connection();
         positionHandler =
                 new MobPositionHandler(pos, connection::send, this.pos::set,
                         newSpeed -> {

@@ -26,7 +26,6 @@ import org.tobi29.scapes.engine.gui.GuiControllerDefault;
 import org.tobi29.scapes.engine.input.ControllerDefault;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
-import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
@@ -243,35 +242,37 @@ public class InputModeKeyboard implements InputMode {
         @Override
         public int hotbarLeft(int previous) {
             if (controller.isDown(hotbarLeft)) {
-                if (controller.isPressed(hotbar0)) {
-                    previous = 0;
-                } else if (controller.isPressed(hotbar1)) {
-                    previous = 1;
-                } else if (controller.isPressed(hotbar2)) {
-                    previous = 2;
-                } else if (controller.isPressed(hotbar3)) {
-                    previous = 3;
-                } else if (controller.isPressed(hotbar4)) {
-                    previous = 4;
-                } else if (controller.isPressed(hotbar5)) {
-                    previous = 5;
-                } else if (controller.isPressed(hotbar6)) {
-                    previous = 6;
-                } else if (controller.isPressed(hotbar7)) {
-                    previous = 7;
-                } else if (controller.isPressed(hotbar8)) {
-                    previous = 8;
-                } else if (controller.isPressed(hotbar9)) {
-                    previous = 9;
-                }
                 if (controller.isPressed(hotbarAdd)) {
                     previous++;
                 }
                 if (controller.isPressed(hotbarSubtract)) {
                     previous--;
                 }
-                previous += FastMath.round(
-                        controller.scrollY() * scrollSensitivity);
+                if (controller.isDown(hotbar0)) {
+                    previous = 0;
+                } else if (controller.isDown(hotbar1)) {
+                    previous = 1;
+                } else if (controller.isDown(hotbar2)) {
+                    previous = 2;
+                } else if (controller.isDown(hotbar3)) {
+                    previous = 3;
+                } else if (controller.isDown(hotbar4)) {
+                    previous = 4;
+                } else if (controller.isDown(hotbar5)) {
+                    previous = 5;
+                } else if (controller.isDown(hotbar6)) {
+                    previous = 6;
+                } else if (controller.isDown(hotbar7)) {
+                    previous = 7;
+                } else if (controller.isDown(hotbar8)) {
+                    previous = 8;
+                } else if (controller.isDown(hotbar9)) {
+                    previous = 9;
+                }
+            }
+            previous %= 10;
+            if (previous < 0) {
+                previous += 10;
             }
             return previous;
         }
@@ -279,35 +280,37 @@ public class InputModeKeyboard implements InputMode {
         @Override
         public int hotbarRight(int previous) {
             if (!controller.isDown(hotbarLeft)) {
-                if (controller.isPressed(hotbar0)) {
-                    previous = 0;
-                } else if (controller.isPressed(hotbar1)) {
-                    previous = 1;
-                } else if (controller.isPressed(hotbar2)) {
-                    previous = 2;
-                } else if (controller.isPressed(hotbar3)) {
-                    previous = 3;
-                } else if (controller.isPressed(hotbar4)) {
-                    previous = 4;
-                } else if (controller.isPressed(hotbar5)) {
-                    previous = 5;
-                } else if (controller.isPressed(hotbar6)) {
-                    previous = 6;
-                } else if (controller.isPressed(hotbar7)) {
-                    previous = 7;
-                } else if (controller.isPressed(hotbar8)) {
-                    previous = 8;
-                } else if (controller.isPressed(hotbar9)) {
-                    previous = 9;
-                }
                 if (controller.isPressed(hotbarAdd)) {
                     previous++;
                 }
                 if (controller.isPressed(hotbarSubtract)) {
                     previous--;
                 }
-                previous += FastMath.round(
-                        controller.scrollY() * scrollSensitivity);
+                if (controller.isDown(hotbar0)) {
+                    previous = 0;
+                } else if (controller.isDown(hotbar1)) {
+                    previous = 1;
+                } else if (controller.isDown(hotbar2)) {
+                    previous = 2;
+                } else if (controller.isDown(hotbar3)) {
+                    previous = 3;
+                } else if (controller.isDown(hotbar4)) {
+                    previous = 4;
+                } else if (controller.isDown(hotbar5)) {
+                    previous = 5;
+                } else if (controller.isDown(hotbar6)) {
+                    previous = 6;
+                } else if (controller.isDown(hotbar7)) {
+                    previous = 7;
+                } else if (controller.isDown(hotbar8)) {
+                    previous = 8;
+                } else if (controller.isDown(hotbar9)) {
+                    previous = 9;
+                }
+            }
+            previous %= 10;
+            if (previous < 0) {
+                previous += 10;
             }
             return previous;
         }

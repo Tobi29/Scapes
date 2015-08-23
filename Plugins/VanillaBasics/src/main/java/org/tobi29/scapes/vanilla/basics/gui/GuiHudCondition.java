@@ -27,6 +27,8 @@ public class GuiHudCondition extends GuiComponent {
     public GuiHudCondition(GuiComponent parent, MobPlayerClientMain player) {
         super(parent, 8, 418, 560, 24);
         this.player = player;
+        new GuiComponentBar(this, 0, 8, 280, 16, 1.0f, 0.0f, 0.0f, 0.6f,
+                () -> player.health() / player.maxHealth());
         new GuiComponentBar(this, 0, 0, 560, 8, 0.0f, 1.0f, 0.0f, 0.6f,
                 () -> value("Stamina"));
         new GuiComponentBar(this, 280, 8, 280, 8, 1.0f, 0.5f, 0.0f, 0.6f,

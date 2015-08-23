@@ -29,7 +29,7 @@ import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
-import org.tobi29.scapes.packets.PacketOpenCrafting;
+import org.tobi29.scapes.vanilla.basics.packet.PacketOpenCrafting;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock;
 

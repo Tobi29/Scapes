@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.generator;
 
 import org.tobi29.scapes.block.BlockType;
@@ -32,6 +31,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i;
 import org.tobi29.scapes.entity.CreatureType;
+import org.tobi29.scapes.entity.WieldMode;
 import org.tobi29.scapes.entity.server.*;
 import org.tobi29.scapes.packets.PacketEntityMetaData;
 import org.tobi29.scapes.packets.PacketUpdateInventory;
@@ -254,6 +254,9 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                         });
                 player.listener("VanillaBasics:Condition",
                         (MobPlayerServer.PunchListener) strength -> {
+                            if (player.wieldMode() != WieldMode.DUAL) {
+                                strength *= 1.7;
+                            }
                             TagStructure conditionTag =
                                     player.metaData("Vanilla")
                                             .getStructure("Condition");

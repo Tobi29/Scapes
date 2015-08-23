@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.tobi29.scapes.client.gui;
+package org.tobi29.scapes.vanilla.basics.gui;
 
 import org.tobi29.scapes.block.CraftingRecipe;
 import org.tobi29.scapes.block.CraftingRecipeType;
+import org.tobi29.scapes.client.gui.GuiComponentItemButton;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.utils.Pair;
-import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.packets.PacketCrafting;
+import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -34,7 +34,7 @@ public class GuiCrafting extends GuiInventory {
     private int type = -1, example;
     private long nextExample;
 
-    public GuiCrafting(boolean table, MobPlayerClientMain player) {
+    public GuiCrafting(boolean table, MobPlayerClientMainVB player) {
         super("Crafting" + (table ? " Table" : ""), player);
         this.table = table;
         scrollPaneTypes =

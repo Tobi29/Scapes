@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.entity.client;
 
 import org.tobi29.scapes.chunk.WorldClient;
@@ -26,6 +25,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.MobPositionHandler;
 import org.tobi29.scapes.entity.MobileEntity;
 import org.tobi29.scapes.entity.model.MobModel;
+import org.tobi29.scapes.packets.Packet;
 
 import java.util.Optional;
 
@@ -64,7 +64,7 @@ public abstract class MobClient extends EntityClient implements MobileEntity {
     }
 
     protected MobPositionHandler createPositionHandler(
-            PlayConnection connection) {
+            PlayConnection<Packet> connection) {
         return new MobPositionHandler(pos.now(), connection::send, pos::set,
                 speed::set, rot::set,
                 (ground, slidingWall, inWater, swimming) -> {

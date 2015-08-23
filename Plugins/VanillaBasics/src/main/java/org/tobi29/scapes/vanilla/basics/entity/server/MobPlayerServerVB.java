@@ -21,6 +21,7 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.Frustum;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
+import org.tobi29.scapes.entity.WieldMode;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.entity.server.MobServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
@@ -37,6 +38,12 @@ public class MobPlayerServerVB extends MobPlayerServer {
                 nickname, skin, connection);
         rot.setX(xRot);
         rot.setZ(zRot);
+    }
+
+    @Override
+    public WieldMode wieldMode() {
+        return inventorySelectLeft == inventorySelectRight ? WieldMode.RIGHT :
+                WieldMode.DUAL;
     }
 
     @Override

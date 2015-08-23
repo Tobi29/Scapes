@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.item.tool;
 
 import org.tobi29.scapes.block.Inventory;
@@ -27,6 +26,7 @@ import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.engine.utils.math.FastMath;
+import org.tobi29.scapes.entity.WieldMode;
 import org.tobi29.scapes.entity.server.MobItemServer;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.entity.server.MobServer;
@@ -79,10 +79,11 @@ public abstract class ItemTool extends VanillaItem
             TerrainServer terrain, int x, int y, int z, Face face) {
         if (item.data() > 0) {
             double damage = item.metaData("Vanilla").getDouble("ToolDamage");
+            double modifier = entity.wieldMode() == WieldMode.DUAL ? 1.0 : 2.1;
             item.metaData("Vanilla").setDouble("ToolDamage", damage +
                     item.metaData("Vanilla").getDouble("ToolDamageAdd"));
             return item.metaData("Vanilla").getDouble("ToolEfficiency") *
-                    (1.0 - FastMath.tanh(damage));
+                    (1.0 - FastMath.tanh(damage)) * modifier;
         } else {
             return 0;
         }
@@ -92,9 +93,10 @@ public abstract class ItemTool extends VanillaItem
     public double click(MobPlayerServer entity, ItemStack item, MobServer hit) {
         if (item.data() > 0) {
             double damage = item.metaData("Vanilla").getDouble("ToolDamage");
+            double modifier = entity.wieldMode() == WieldMode.DUAL ? 2.1 : 1.0;
             item.metaData("Vanilla").setDouble("ToolDamage", damage);
             return item.metaData("Vanilla").getDouble("ToolStrength") *
-                    (1.0 - FastMath.tanh(damage));
+                    (1.0 - FastMath.tanh(damage)) * modifier;
         } else {
             return 0;
         }

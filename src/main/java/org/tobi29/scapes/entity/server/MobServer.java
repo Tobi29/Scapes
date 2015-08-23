@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.entity.server;
 
 import org.tobi29.scapes.block.AABBElement;
@@ -29,6 +28,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.MobPositionHandler;
 import org.tobi29.scapes.entity.MobileEntity;
+import org.tobi29.scapes.packets.Packet;
 
 import java.util.Iterator;
 
@@ -224,7 +224,7 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
     }
 
     protected MobPositionHandler createPositionHandler(
-            PlayConnection connection) {
+            PlayConnection<Packet> connection) {
         return new MobPositionHandler(pos.now(), connection::send, pos::set,
                 speed::set, rot::set,
                 (ground, slidingWall, inWater, swimming) -> {

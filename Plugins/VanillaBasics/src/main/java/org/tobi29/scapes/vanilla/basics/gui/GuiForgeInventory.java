@@ -16,13 +16,13 @@
 
 package org.tobi29.scapes.vanilla.basics.gui;
 
-import org.tobi29.scapes.client.gui.GuiContainerInventory;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityForgeClient;
+import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
 public class GuiForgeInventory extends GuiContainerInventory {
     private final EntityForgeClient container;
@@ -30,7 +30,7 @@ public class GuiForgeInventory extends GuiContainerInventory {
     private String currentText;
 
     public GuiForgeInventory(EntityForgeClient container,
-            MobPlayerClientMain player) {
+            MobPlayerClientMainVB player) {
         super("Forge", player, container);
         this.container = container;
         buttonContainer(16, 210, 30, 30, 0);

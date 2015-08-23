@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.client.gui;
+package org.tobi29.scapes.vanilla.basics.gui;
 
 import org.tobi29.scapes.block.Inventory;
+import org.tobi29.scapes.client.gui.GuiComponentItemButton;
 import org.tobi29.scapes.entity.client.EntityContainerClient;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.packets.PacketInventoryInteraction;
+import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
 public class GuiContainerInventory extends GuiInventory {
     protected final EntityContainerClient container;
 
-    public GuiContainerInventory(String name, MobPlayerClientMain player,
+    public GuiContainerInventory(String name, MobPlayerClientMainVB player,
             EntityContainerClient container) {
         super(name, player);
         this.container = container;

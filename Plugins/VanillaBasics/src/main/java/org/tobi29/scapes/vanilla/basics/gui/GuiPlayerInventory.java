@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.client.gui;
+package org.tobi29.scapes.vanilla.basics.gui;
 
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
+import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
 public class GuiPlayerInventory extends GuiInventory {
-    public GuiPlayerInventory(MobPlayerClientMain player) {
+    public GuiPlayerInventory(MobPlayerClientMainVB player) {
         super("Inventory", player);
         if (!player.connection().plugins().registry().getCraftingRecipes()
                 .isEmpty()) {

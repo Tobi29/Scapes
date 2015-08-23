@@ -16,13 +16,13 @@
 
 package org.tobi29.scapes.vanilla.basics.gui;
 
-import org.tobi29.scapes.client.gui.GuiContainerInventory;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityBloomeryClient;
+import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
 public class GuiBloomeryInventory extends GuiContainerInventory {
     private final EntityBloomeryClient container;
@@ -30,7 +30,7 @@ public class GuiBloomeryInventory extends GuiContainerInventory {
     private String currentText;
 
     public GuiBloomeryInventory(EntityBloomeryClient container,
-            MobPlayerClientMain player) {
+            MobPlayerClientMainVB player) {
         super("Bloomery", player, container);
         this.container = container;
         buttonContainer(16, 210, 30, 30, 0);

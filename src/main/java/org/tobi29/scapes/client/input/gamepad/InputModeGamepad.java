@@ -239,6 +239,10 @@ public class InputModeGamepad implements InputMode {
                     previous--;
                 }
             }
+            previous %= 10;
+            if (previous < 0) {
+                previous += 10;
+            }
             return previous;
         }
 
@@ -251,6 +255,10 @@ public class InputModeGamepad implements InputMode {
                 if (controller.isPressed(hotbarSubtract)) {
                     previous--;
                 }
+            }
+            previous %= 10;
+            if (previous < 0) {
+                previous += 10;
             }
             return previous;
         }

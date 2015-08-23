@@ -19,10 +19,10 @@ package org.tobi29.scapes.vanilla.basics.gui;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.Material;
 import org.tobi29.scapes.client.gui.GuiComponentItemButton;
-import org.tobi29.scapes.client.gui.GuiContainerInventory;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityAnvilClient;
+import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.packet.PacketAnvil;
 
@@ -30,7 +30,7 @@ public class GuiAnvilInventory extends GuiContainerInventory {
     private final EntityAnvilClient container;
 
     public GuiAnvilInventory(EntityAnvilClient container,
-            MobPlayerClientMain player) {
+            MobPlayerClientMainVB player) {
         super("Anvil", player, container);
         this.container = container;
         VanillaBasics plugin = (VanillaBasics) player.connection().plugins()

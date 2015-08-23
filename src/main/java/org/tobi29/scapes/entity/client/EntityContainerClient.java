@@ -19,8 +19,10 @@ package org.tobi29.scapes.entity.client;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.engine.gui.Gui;
 
+import java.util.Optional;
+
 public interface EntityContainerClient {
-    Gui gui(MobPlayerClientMain player);
+    Optional<Gui> gui(MobPlayerClientMain player);
 
     Inventory inventory(String id);
 }

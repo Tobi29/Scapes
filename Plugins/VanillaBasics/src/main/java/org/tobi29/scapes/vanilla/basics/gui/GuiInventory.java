@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.tobi29.scapes.client.gui;
+package org.tobi29.scapes.vanilla.basics.gui;
 
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
+import org.tobi29.scapes.client.gui.GuiComponentItemButton;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
@@ -24,21 +25,21 @@ import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.packets.PacketInventoryInteraction;
+import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
 import java.util.Objects;
 
 public class GuiInventory extends Gui {
     protected final GuiComponentVisiblePane pane, inventoryPane;
-    protected final MobPlayerClientMain player;
+    protected final MobPlayerClientMainVB player;
     private String hover, renderHover, currentHover;
     private FontRenderer.Text vaoText;
     private String currentName;
     private double cursorX, cursorY;
     private FontRenderer font;
 
-    public GuiInventory(String name, MobPlayerClientMain player) {
+    public GuiInventory(String name, MobPlayerClientMainVB player) {
         super(GuiAlignment.CENTER);
         this.player = player;
         pane = new GuiComponentVisiblePane(this, 200, 0, 400, 512);
@@ -100,8 +101,9 @@ public class GuiInventory extends Gui {
             vaoText.render(gl, shader);
             matrixStack.pop();
         }
-        GuiUtils.renderItem((float) cursorX, (float) cursorY, 30.0f, 30.0f,
-                player.inventory("Hold").item(0), gl, shader, font);
+        org.tobi29.scapes.client.gui.GuiUtils
+                .renderItem((float) cursorX, (float) cursorY, 30.0f, 30.0f,
+                        player.inventory("Hold").item(0), gl, shader, font);
     }
 
     @Override

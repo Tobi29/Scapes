@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.entity.model;
 
 import org.tobi29.scapes.block.ItemStack;
@@ -27,6 +26,7 @@ import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.*;
+import org.tobi29.scapes.entity.WieldMode;
 import org.tobi29.scapes.entity.client.MobLivingEquippedClient;
 import org.tobi29.scapes.entity.particle.ParticleFallenBodyPart;
 import org.tobi29.scapes.entity.particle.ParticleManager;
@@ -310,120 +310,166 @@ public class MobLivingModelHuman implements MobModel {
         matrix.rotate((float) -swingDir * 30, 1, 0, 0);
         legRight.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrixStack.pop();
+        WieldMode wieldMode = entity.wieldMode();
         matrix = matrixStack.push();
         matrix.translate(-0.25f, 0, 0.25f);
-        matrix.rotate((float) lazyNameDir * 60, 0, 1, 0);
-        float rot;
-        ItemStack item = entity.leftWeapon();
-        if (item.material() == world.air()) {
-            matrix.rotate((float) -swingDir * 60, 1, 0, 0);
-            rot = (float) FastMath.sinTable(armDirLeftRender * FastMath.PI);
-            matrix.rotate(armDirLeft2 * -20, 0, 0, 1);
-            matrix.rotate(rot * 50 + armDirLeft2 * 90 + pitch * armDirLeft2, 1,
-                    0, 0);
+        float rot, charge, charge2;
+        ItemStack item;
+        if (wieldMode == WieldMode.RIGHT) {
+            item = entity.rightWeapon();
+            charge = armDirRightRender;
+            charge2 = armDirRight2 * 0.4f;
         } else {
-            matrix.rotate((float) -swingDir * 30, 1, 0, 0);
+            item = entity.leftWeapon();
+            charge = armDirLeftRender;
+            charge2 = armDirLeft2;
+        }
+        if (item.material() == world.air()) {
+            matrix.rotate((float) lazyNameDir * 60, 0, 1, 0);
+            matrix.rotate((float) -swingDir * 60, 1, 0, 0);
+            rot = (float) FastMath.sinTable(charge * FastMath.PI);
+            matrix.rotate(charge2 * -20, 0, 0, 1);
+            matrix.rotate(rot * 50 + charge2 * 90 + pitch * charge2, 1, 0, 0);
+        } else {
+            if (wieldMode == WieldMode.DUAL) {
+                matrix.rotate((float) lazyNameDir * 60, 0, 1, 0);
+                matrix.rotate((float) -swingDir * 30, 1, 0, 0);
+            } else {
+                matrix.rotate((float) swingDir * 10, 1, 0, 0);
+            }
             if (item.material().isWeapon(item)) {
-                rot = (float) FastMath
-                        .sinTable(-armDirLeftRender * FastMath.PI);
-                if (rot < 0 && armDirLeftRender > 0.0) {
+                rot = (float) FastMath.sinTable(-charge * FastMath.PI);
+                if (rot < 0 && charge > 0.0) {
                     rot /= 4.0f;
+                }
+                if (wieldMode == WieldMode.RIGHT) {
+                    rot = -rot;
                 }
                 matrix.rotate(rot * -60.0f, 0.0f, 0.0f, 1.0f);
                 matrix.rotate(rot * -60.0f, 0.0f, 1.0f, 0.0f);
-                matrix.rotate(rot * 10.0f + 40.0f + armDirLeft2 * 45.0f +
-                        pitch * armDirLeft2, 1.0f, 0.0f, 0.0f);
+                matrix.rotate(rot * 10.0f + 40.0f + charge2 * 45.0f +
+                        pitch * charge2, 1.0f, 0.0f, 0.0f);
             } else {
-                rot = (float) FastMath
-                        .sinTable(armDirLeftRender * FastMath.PI);
-                matrix.rotate(armDirLeft2 * -20, 0, 0, 1);
-                matrix.rotate(rot * 50 + 40 + armDirLeft2 * 45 +
-                        pitch * armDirLeft2, 1, 0, 0);
-                if (armDirLeftRender > -1.5f && armDirLeftRender < -0.5f) {
-                    float center = (float) FastMath
-                            .cosTable(armDirLeftRender * FastMath.PI);
+                rot = (float) FastMath.sinTable(charge * FastMath.PI);
+                matrix.rotate(charge2 * -20, 0, 0, 1);
+                matrix.rotate(rot * 50 + 40 + charge2 * 45 +
+                        pitch * charge2, 1, 0, 0);
+                if (charge > -1.5f && charge < -0.5f) {
+                    float center =
+                            (float) FastMath.cosTable(charge * FastMath.PI);
                     matrix.rotate(center * 30.0f, 0.0f, 1.0f, 0.0f);
                 }
+            }
+            if (wieldMode == WieldMode.LEFT) {
+                matrix.rotate(-20.0f, 0, 1, 0);
+            } else if (wieldMode == WieldMode.RIGHT) {
+                matrix.rotate(-50.0f, 0, 1, 0);
+                matrix.rotate(-2.0f, 1, 0, 0);
             }
         }
         rot = FastMath.min(rot * 2, 1);
         armLeft.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
-        matrix.translate(-0.3f, 0.4f, -0.4f);
-        if (item.material().isWeapon(item)) {
-            matrix.translate(0.0f, -0.6f, -0.05f);
-            matrix.rotate(rot * -60.0f, 1.0f, 0.0f, 0.0f);
-            matrix.rotate(rot * -50.0f, 0.0f, 1.0f, 0.0f);
-            matrix.translate(0.0f, 0.6f, 0.0f);
-        } else if (!item.material().isTool(item)) {
-            matrix.translate(0.31f, -0.3f, -0.2f);
-            matrix.scale(0.3f, 0.3f, 0.3f);
-        }
-        matrix.rotate(120.0f, 0.0f, 0.0f, 1.0f);
-        matrix.rotate(60.0f, 0.0f, 1.0f, 0.0f);
-        if (!culling) {
-            gl.enableCulling();
-        }
-        item.material()
-                .render(item, gl, shader, 1.0f, damageColor, damageColor, 1.0f);
-        if (!culling) {
-            gl.disableCulling();
+        if (wieldMode != WieldMode.RIGHT) {
+            matrix.translate(-0.3f, 0.4f, -0.4f);
+            if (item.material().isWeapon(item)) {
+                matrix.translate(0.0f, -0.6f, -0.05f);
+                matrix.rotate(rot * -60.0f, 1.0f, 0.0f, 0.0f);
+                matrix.rotate(rot * -50.0f, 0.0f, 1.0f, 0.0f);
+                matrix.translate(0.0f, 0.6f, 0.0f);
+            } else if (!item.material().isTool(item)) {
+                matrix.translate(0.31f, -0.3f, -0.2f);
+                matrix.scale(0.3f, 0.3f, 0.3f);
+            }
+            matrix.rotate(120.0f, 0.0f, 0.0f, 1.0f);
+            matrix.rotate(60.0f, 0.0f, 1.0f, 0.0f);
+            if (!culling) {
+                gl.enableCulling();
+            }
+            item.material()
+                    .render(item, gl, shader, 1.0f, damageColor, damageColor,
+                            1.0f);
+            if (!culling) {
+                gl.disableCulling();
+            }
         }
         matrixStack.pop();
         matrix = matrixStack.push();
         matrix.translate(0.25f, 0, 0.25f);
-        matrix.rotate((float) lazyNameDir * -60, 0, 1, 0);
-        item = entity.rightWeapon();
-        if (item.material() == world.air()) {
-            matrix.rotate((float) swingDir * 60, 1, 0, 0);
-            rot = (float) FastMath.sinTable(armDirRightRender * FastMath.PI);
-            matrix.rotate(armDirRight2 * -20, 0, 0, 1);
-            matrix.rotate(rot * 50 + armDirRight2 * 90 + pitch * armDirRight2,
-                    1, 0, 0);
+        if (wieldMode == WieldMode.LEFT) {
+            item = entity.leftWeapon();
+            charge = armDirLeftRender;
+            charge2 = armDirLeft2 * 0.4f;
         } else {
-            matrix.rotate((float) swingDir * 30, 1, 0, 0);
+            item = entity.rightWeapon();
+            charge = armDirRightRender;
+            charge2 = armDirRight2;
+        }
+        if (item.material() == world.air()) {
+            matrix.rotate((float) lazyNameDir * -60, 0, 1, 0);
+            matrix.rotate((float) swingDir * 60, 1, 0, 0);
+            rot = (float) FastMath.sinTable(charge * FastMath.PI);
+            matrix.rotate(charge2 * -20, 0, 0, 1);
+            matrix.rotate(rot * 50 + charge2 * 90 + pitch * charge2, 1, 0, 0);
+        } else {
+            if (wieldMode == WieldMode.DUAL) {
+                matrix.rotate((float) lazyNameDir * -60, 0, 1, 0);
+                matrix.rotate((float) swingDir * 30, 1, 0, 0);
+            } else {
+                matrix.rotate((float) swingDir * 10, 1, 0, 0);
+            }
             if (item.material().isWeapon(item)) {
-                rot = (float) FastMath
-                        .sinTable(-armDirRightRender * FastMath.PI);
-                if (rot < 0.0f && armDirRightRender > 0.0) {
+                rot = (float) FastMath.sinTable(-charge * FastMath.PI);
+                if (rot < 0.0f && charge > 0.0) {
                     rot /= 4.0f;
+                }
+                if (wieldMode == WieldMode.LEFT) {
+                    rot = -rot;
                 }
                 matrix.rotate(rot * 60.0f, 0.0f, 0.0f, 1.0f);
                 matrix.rotate(rot * 60.0f, 0.0f, 1.0f, 0.0f);
-                matrix.rotate(rot * 10.0f + 40.0f + armDirRight2 * 45.0f +
-                        pitch * armDirRight2, 1.0f, 0.0f, 0.0f);
+                matrix.rotate(rot * 10.0f + 40.0f + charge2 * 45.0f +
+                        pitch * charge2, 1.0f, 0.0f, 0.0f);
             } else {
-                rot = (float) FastMath
-                        .sinTable(armDirRightRender * FastMath.PI);
-                matrix.rotate(armDirRight2 * -20, 0, 0, 1);
-                matrix.rotate(rot * 50 + 40 + armDirRight2 * 45 +
-                        pitch * armDirRight2, 1, 0, 0);
-                if (armDirRightRender > -1.5f && armDirRightRender < -0.5f) {
-                    float center = (float) FastMath
-                            .cosTable(armDirRightRender * FastMath.PI);
+                rot = (float) FastMath.sinTable(charge * FastMath.PI);
+                matrix.rotate(charge2 * -20, 0, 0, 1);
+                matrix.rotate(rot * 50 + 40 + charge2 * 45 +
+                        pitch * charge2, 1, 0, 0);
+                if (charge > -1.5f && charge < -0.5f) {
+                    float center =
+                            (float) FastMath.cosTable(charge * FastMath.PI);
                     matrix.rotate(center * -30.0f, 0.0f, 1.0f, 0.0f);
                 }
+            }
+            if (wieldMode == WieldMode.RIGHT) {
+                matrix.rotate(20.0f, 0, 1, 0);
+            } else if (wieldMode == WieldMode.LEFT) {
+                matrix.rotate(50.0f, 0, 1, 0);
+                matrix.rotate(-2.0f, 1, 0, 0);
             }
         }
         rot = FastMath.min(rot * 2, 1);
         texture.bind(gl);
         armRight.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
-        matrix.translate(0.3f, 0.4f, -0.4f);
-        if (item.material().isWeapon(item)) {
-            matrix.translate(0.0f, -0.6f, -0.05f);
-            matrix.rotate(rot * -60.0f, 1.0f, 0.0f, 0.0f);
-            matrix.rotate(rot * 50.0f, 0.0f, 1.0f, 0.0f);
-            matrix.translate(0.0f, 0.6f, 0.0f);
-        } else if (!item.material().isTool(item)) {
-            matrix.translate(-0.31f, -0.3f, -0.2f);
-            matrix.scale(0.3f, 0.3f, 0.3f);
+        if (wieldMode != WieldMode.LEFT) {
+            matrix.translate(0.3f, 0.4f, -0.4f);
+            if (item.material().isWeapon(item)) {
+                matrix.translate(0.0f, -0.6f, -0.05f);
+                matrix.rotate(rot * -60.0f, 1.0f, 0.0f, 0.0f);
+                matrix.rotate(rot * 50.0f, 0.0f, 1.0f, 0.0f);
+                matrix.translate(0.0f, 0.6f, 0.0f);
+            } else if (!item.material().isTool(item)) {
+                matrix.translate(-0.31f, -0.3f, -0.2f);
+                matrix.scale(0.3f, 0.3f, 0.3f);
+            }
+            matrix.rotate(60.0f, 0.0f, 0.0f, 1.0f);
+            matrix.rotate(60.0f, 0.0f, 1.0f, 0.0f);
+            if (!culling) {
+                gl.enableCulling();
+            }
+            item.material()
+                    .render(item, gl, shader, 1.0f, damageColor, damageColor,
+                            1.0f);
         }
-        matrix.rotate(-120.0f, 0.0f, 0.0f, 1.0f);
-        matrix.rotate(-60.0f, 0.0f, 1.0f, 0.0f);
-        if (!culling) {
-            gl.enableCulling();
-        }
-        item.material()
-                .render(item, gl, shader, 1.0f, damageColor, damageColor, 1.0f);
         matrixStack.pop();
         matrixStack.pop();
     }

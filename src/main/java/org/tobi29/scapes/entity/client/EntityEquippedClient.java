@@ -13,15 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.entity.client;
 
 import org.tobi29.scapes.block.ItemStack;
+import org.tobi29.scapes.entity.WieldMode;
 
 public interface EntityEquippedClient {
     ItemStack leftWeapon();
 
     ItemStack rightWeapon();
+
+    default WieldMode wieldMode() {
+        return WieldMode.DUAL;
+    }
 
     default float leftCharge() {
         return 0.0f;

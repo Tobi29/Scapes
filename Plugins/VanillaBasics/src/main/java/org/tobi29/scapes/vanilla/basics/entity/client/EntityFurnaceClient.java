@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
 import org.tobi29.scapes.block.Inventory;
@@ -23,6 +22,8 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.vanilla.basics.gui.GuiFurnaceInventory;
+
+import java.util.Optional;
 
 public class EntityFurnaceClient extends EntityAbstractFurnaceClient {
     public EntityFurnaceClient(WorldClient world) {
@@ -35,7 +36,11 @@ public class EntityFurnaceClient extends EntityAbstractFurnaceClient {
     }
 
     @Override
-    public Gui gui(MobPlayerClientMain player) {
-        return new GuiFurnaceInventory(this, player);
+    public Optional<Gui> gui(MobPlayerClientMain player) {
+        if (player instanceof MobPlayerClientMainVB) {
+            return Optional.of(new GuiFurnaceInventory(this,
+                    (MobPlayerClientMainVB) player));
+        }
+        return Optional.empty();
     }
 }

@@ -16,15 +16,15 @@
 
 package org.tobi29.scapes.vanilla.basics.gui;
 
-import org.tobi29.scapes.client.gui.GuiContainerInventory;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityQuernClient;
+import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 import org.tobi29.scapes.vanilla.basics.packet.PacketQuern;
 
 public class GuiQuernInventory extends GuiContainerInventory {
     public GuiQuernInventory(EntityQuernClient container,
-            MobPlayerClientMain player) {
+            MobPlayerClientMainVB player) {
         super("Quern", player, container);
         buttonContainer(185, 90, 30, 30, 0);
         GuiComponentTextButton quern =

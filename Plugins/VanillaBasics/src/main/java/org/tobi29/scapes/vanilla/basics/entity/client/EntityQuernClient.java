@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
 import org.tobi29.scapes.block.Inventory;
@@ -23,6 +22,8 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.vanilla.basics.gui.GuiQuernInventory;
+
+import java.util.Optional;
 
 public class EntityQuernClient extends EntityAbstractContainerClient {
     public EntityQuernClient(WorldClient world) {
@@ -34,7 +35,11 @@ public class EntityQuernClient extends EntityAbstractContainerClient {
     }
 
     @Override
-    public Gui gui(MobPlayerClientMain player) {
-        return new GuiQuernInventory(this, player);
+    public Optional<Gui> gui(MobPlayerClientMain player) {
+        if (player instanceof MobPlayerClientMainVB) {
+            return Optional.of(new GuiQuernInventory(this,
+                    (MobPlayerClientMainVB) player));
+        }
+        return Optional.empty();
     }
 }

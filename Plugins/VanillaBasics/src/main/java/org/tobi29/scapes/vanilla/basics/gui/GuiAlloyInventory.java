@@ -16,13 +16,13 @@
 
 package org.tobi29.scapes.vanilla.basics.gui;
 
-import org.tobi29.scapes.client.gui.GuiContainerInventory;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityAlloyClient;
+import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
 import java.util.Map;
 
@@ -32,7 +32,7 @@ public class GuiAlloyInventory extends GuiContainerInventory {
     private String currentText;
 
     public GuiAlloyInventory(EntityAlloyClient container,
-            MobPlayerClientMain player) {
+            MobPlayerClientMainVB player) {
         super("Alloy Mold", player, container);
         this.container = container;
         buttonContainer(16, 120, 30, 30, 0);

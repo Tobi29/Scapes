@@ -8,12 +8,13 @@ import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.Frustum;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.CreatureType;
+import org.tobi29.scapes.entity.WieldMode;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class MobPlayerClient extends MobLivingEquippedClient
-        implements EntityContainerClient {
+         {
     protected final Inventory inventoryContainer, inventoryHold;
     protected final Map<String, Inventory> inventories =
             new ConcurrentHashMap<>();
@@ -32,36 +33,12 @@ public abstract class MobPlayerClient extends MobLivingEquippedClient
         inventories.put("Hold", inventoryHold);
     }
 
-    @Override
-    public ItemStack leftWeapon() {
-        return inventoryContainer.item(inventorySelectLeft);
-    }
-
-    @Override
-    public ItemStack rightWeapon() {
-        return inventoryContainer.item(inventorySelectRight);
-    }
 
     public int inventorySelectLeft() {
         return inventorySelectLeft;
     }
 
     public void setInventorySelectLeft(int select) {
-        int c = 1;
-        if (select < inventorySelectLeft) {
-            c = -1;
-        }
-        select %= 10;
-        if (select < 0) {
-            select += 10;
-        }
-        if (select == inventorySelectRight) {
-            select += c;
-        }
-        select %= 10;
-        if (select < 0) {
-            select += 10;
-        }
         inventorySelectLeft = select;
     }
 
@@ -70,21 +47,6 @@ public abstract class MobPlayerClient extends MobLivingEquippedClient
     }
 
     public void setInventorySelectRight(int select) {
-        int c = 1;
-        if (select < inventorySelectRight) {
-            c = -1;
-        }
-        select %= 10;
-        if (select < 0) {
-            select += 10;
-        }
-        if (select == inventorySelectLeft) {
-            select += c;
-        }
-        select %= 10;
-        if (select < 0) {
-            select += 10;
-        }
         inventorySelectRight = select;
     }
 
@@ -110,10 +72,5 @@ public abstract class MobPlayerClient extends MobLivingEquippedClient
         if (tagStructure.has("SkinChecksum")) {
             skin = tagStructure.getByteArray("SkinChecksum");
         }
-    }
-
-    @Override
-    public Inventory inventory(String id) {
-        return inventories.get(id);
     }
 }

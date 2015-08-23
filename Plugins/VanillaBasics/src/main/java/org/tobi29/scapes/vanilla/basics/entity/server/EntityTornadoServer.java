@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.entity.server;
 
 import org.tobi29.scapes.chunk.WorldServer;
@@ -26,6 +25,7 @@ import org.tobi29.scapes.entity.MobPositionHandler;
 import org.tobi29.scapes.entity.MobileEntity;
 import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.entity.server.MobServer;
+import org.tobi29.scapes.packets.Packet;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -43,7 +43,7 @@ public class EntityTornadoServer extends EntityServer implements MobileEntity {
         Random random = ThreadLocalRandom.current();
         dir = random.nextDouble() * 360;
         time = random.nextInt(100) + 20;
-        PlayConnection connection = world.connection();
+        PlayConnection<Packet> connection = world.connection();
         positionHandler =
                 new MobPositionHandler(pos, connection::send, this.pos::set,
                         newSpeed -> {

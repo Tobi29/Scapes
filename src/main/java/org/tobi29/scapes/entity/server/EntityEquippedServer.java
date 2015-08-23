@@ -17,11 +17,16 @@
 package org.tobi29.scapes.entity.server;
 
 import org.tobi29.scapes.block.ItemStack;
+import org.tobi29.scapes.entity.WieldMode;
 
 public interface EntityEquippedServer {
     ItemStack leftWeapon();
 
     ItemStack rightWeapon();
+
+    default WieldMode wieldMode() {
+        return WieldMode.DUAL;
+    }
 
     default float leftCharge() {
         return 0.0f;

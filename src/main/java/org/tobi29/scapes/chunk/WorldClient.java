@@ -158,6 +158,10 @@ public class WorldClient extends World {
         float sunLightReduction = environment
                 .sunLightReduction(cam.position.doubleX(),
                         cam.position.doubleY()) / 15.0f;
+        float playerLight = FastMath.max(
+                player.leftWeapon().material().playerLight(player.leftWeapon()),
+                player.rightWeapon().material()
+                        .playerLight(player.rightWeapon()));
         Vector3 sunlightNormal = environment
                 .sunLightNormal(cam.position.doubleX(), cam.position.doubleY());
         ShaderManager shaderManager = gl.shaders();
@@ -171,10 +175,7 @@ public class WorldClient extends World {
         shaderTerrain.setUniform1f(9, sunLightReduction);
         shaderTerrain.setUniform3f(10, sunlightNormal.floatX(),
                 sunlightNormal.floatY(), sunlightNormal.floatZ());
-        shaderTerrain.setUniform1f(11, FastMath.max(
-                player.leftWeapon().material().playerLight(player.leftWeapon()),
-                player.rightWeapon().material()
-                        .playerLight(player.rightWeapon())));
+        shaderTerrain.setUniform1f(11, playerLight);
         shaderTerrain.setUniform1f(12, animationDistance * cam.far);
         Shader shaderEntity = shaderManager.get("Scapes:shader/Entity", gl);
         shaderEntity.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB());
@@ -186,10 +187,7 @@ public class WorldClient extends World {
         shaderEntity.setUniform1f(9, sunLightReduction);
         shaderEntity.setUniform3f(10, sunlightNormal.floatX(),
                 sunlightNormal.floatY(), sunlightNormal.floatZ());
-        shaderEntity.setUniform1f(11, FastMath.max(
-                player.leftWeapon().material().playerLight(player.leftWeapon()),
-                player.rightWeapon().material()
-                        .playerLight(player.rightWeapon())));
+        shaderEntity.setUniform1f(11, playerLight);
         gl.setBlending(BlendingMode.NONE);
         scene.terrainTextureRegistry().texture().bind(gl);
         terrain.renderer().render(gl, shaderTerrain, cam, debug);

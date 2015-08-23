@@ -15,14 +15,18 @@
  */
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
+import org.tobi29.scapes.block.Inventory;
+import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.client.gui.GuiPlayerInventory;
+import org.tobi29.scapes.vanilla.basics.gui.GuiPlayerInventory;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.Frustum;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
+import org.tobi29.scapes.entity.WieldMode;
+import org.tobi29.scapes.entity.client.EntityContainerClient;
 import org.tobi29.scapes.entity.client.MobPlayerClient;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.model.MobLivingModelHuman;
@@ -30,7 +34,8 @@ import org.tobi29.scapes.entity.model.MobModel;
 
 import java.util.Optional;
 
-public class MobPlayerClientVB extends MobPlayerClient {
+public class MobPlayerClientVB extends MobPlayerClient
+        implements EntityContainerClient {
     public MobPlayerClientVB(WorldClient world) {
         this(world, Vector3d.ZERO, Vector3d.ZERO, 0.0, 0.0, "");
     }
@@ -45,14 +50,35 @@ public class MobPlayerClientVB extends MobPlayerClient {
     }
 
     @Override
+    public ItemStack leftWeapon() {
+        return inventoryContainer.item(inventorySelectLeft);
+    }
+
+    @Override
+    public ItemStack rightWeapon() {
+        return inventoryContainer.item(inventorySelectRight);
+    }
+
+    @Override
+    public WieldMode wieldMode() {
+        return inventorySelectLeft == inventorySelectRight ? WieldMode.RIGHT :
+                WieldMode.DUAL;
+    }
+
+    @Override
     public Vector3 viewOffset() {
         return new Vector3d(0.0, 0.0, 0.63);
     }
 
     @Override
-    public Gui gui(MobPlayerClientMain player) {
+    public Optional<Gui> gui(MobPlayerClientMain player) {
         // TODO: Trade or steal UI maybe?
-        return new GuiPlayerInventory(player);
+        return Optional.empty();
+    }
+
+    @Override
+    public Inventory inventory(String id) {
+        return inventories.get(id);
     }
 
     @Override

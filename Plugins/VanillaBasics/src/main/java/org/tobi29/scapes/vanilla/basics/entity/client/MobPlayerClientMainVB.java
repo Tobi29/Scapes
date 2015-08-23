@@ -16,12 +16,13 @@
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
 import org.tobi29.scapes.Scapes;
+import org.tobi29.scapes.block.Inventory;
+import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.Playlist;
 import org.tobi29.scapes.client.ScapesClient;
 import org.tobi29.scapes.client.gui.GuiChatWrite;
 import org.tobi29.scapes.client.gui.GuiPause;
-import org.tobi29.scapes.client.gui.GuiPlayerInventory;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.input.ControllerDefault;
 import org.tobi29.scapes.engine.input.ControllerKey;
@@ -34,6 +35,8 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector2d;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.CreatureType;
+import org.tobi29.scapes.entity.WieldMode;
+import org.tobi29.scapes.entity.client.EntityContainerClient;
 import org.tobi29.scapes.entity.client.MobClient;
 import org.tobi29.scapes.entity.client.MobLivingClient;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
@@ -41,10 +44,15 @@ import org.tobi29.scapes.entity.model.MobLivingModelHuman;
 import org.tobi29.scapes.entity.model.MobModel;
 import org.tobi29.scapes.packets.PacketInteraction;
 import org.tobi29.scapes.packets.PacketItemUse;
+import org.tobi29.scapes.vanilla.basics.gui.GuiPlayerInventory;
 
 import java.util.Optional;
 
-public class MobPlayerClientMainVB extends MobPlayerClientMain {
+public class MobPlayerClientMainVB extends MobPlayerClientMain
+        implements EntityContainerClient {
+    protected long punchLeft = -1, punchRight = -1;
+    protected float chargeLeft, chargeRight;
+
     public MobPlayerClientMainVB(WorldClient world, Vector3 pos, Vector3 speed,
             double xRot, double zRot, String nickname) {
         super(world, pos, speed, new AABB(-0.4, -0.4, -1, 0.4, 0.4, 0.9), 100,
@@ -90,7 +98,7 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain {
             if (hotbar != previous) {
                 setInventorySelectLeft(hotbar);
                 world.connection().send(new PacketInteraction(
-                        PacketInteraction.INVENTORY_SLOT_CHANGE,
+                        PacketInteraction.INVENTORY_SLOT_LEFT,
                         (byte) inventorySelectLeft));
             }
             previous = inventorySelectRight;
@@ -98,8 +106,8 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain {
             if (hotbar != previous) {
                 setInventorySelectRight(hotbar);
                 world.connection().send(new PacketInteraction(
-                        PacketInteraction.INVENTORY_SLOT_CHANGE,
-                        (byte) (inventorySelectRight + 10)));
+                        PacketInteraction.INVENTORY_SLOT_RIGHT,
+                        (byte) inventorySelectRight));
             }
             // Debug
             if (Scapes.debug) {
@@ -149,7 +157,7 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain {
                 speed.plusY(FastMath.sinTable(dir) * walkSpeed);
             }
             // Placement
-            if (controller.left()) {
+            if (controller.left() && wieldMode() != WieldMode.RIGHT) {
                 if (chargeLeft < 0.01f) {
                     if (punchLeft == -1) {
                         punchLeft = System.currentTimeMillis();
@@ -164,7 +172,7 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain {
                         0.5) * 2.0));
                 punchLeft = -1;
             }
-            if (controller.right()) {
+            if (controller.right() && wieldMode() != WieldMode.LEFT) {
                 if (chargeRight < 0.01f) {
                     if (punchRight == -1) {
                         punchRight = System.currentTimeMillis();
@@ -179,8 +187,41 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain {
                         0.5) * 2.0));
                 punchRight = -1;
             }
-            if (blockWait > 0) {
-                blockWait--;
+            long time = System.currentTimeMillis();
+            float swingTime = leftWeapon().material().hitWait(leftWeapon());
+            long punch;
+            if (punchLeft == -1) {
+                punch = 0;
+            } else {
+                punch = time - punchLeft;
+            }
+            if (punch > 0) {
+                chargeLeft = FastMath.min(punch / swingTime, 0.5f);
+            } else {
+                if (chargeLeft > 0.0f) {
+                    if (chargeLeft >= 0.45f) {
+                        chargeLeft = 0.0f;
+                    } else {
+                        chargeLeft = 0.0f;
+                    }
+                }
+            }
+            swingTime = rightWeapon().material().hitWait(rightWeapon());
+            if (punchRight == -1) {
+                punch = 0;
+            } else {
+                punch = time - punchRight;
+            }
+            if (punch > 0) {
+                chargeRight = FastMath.min(punch / swingTime, 0.5f);
+            } else {
+                if (chargeRight > 0.0f) {
+                    if (chargeRight >= 0.45f) {
+                        chargeRight = 0.0f;
+                    } else {
+                        chargeRight = 0.0f;
+                    }
+                }
             }
         }
     }
@@ -201,8 +242,43 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain {
     }
 
     @Override
-    public Gui gui(MobPlayerClientMain player) {
-        return new GuiPlayerInventory(player);
+    public ItemStack leftWeapon() {
+        return inventoryContainer.item(inventorySelectLeft);
+    }
+
+    @Override
+    public ItemStack rightWeapon() {
+        return inventoryContainer.item(inventorySelectRight);
+    }
+
+    @Override
+    public WieldMode wieldMode() {
+        return inventorySelectLeft == inventorySelectRight ? WieldMode.RIGHT :
+                WieldMode.DUAL;
+    }
+
+    @Override
+    public float leftCharge() {
+        return chargeLeft;
+    }
+
+    @Override
+    public float rightCharge() {
+        return chargeRight;
+    }
+
+    @Override
+    public Optional<Gui> gui(MobPlayerClientMain player) {
+        if (player instanceof MobPlayerClientMainVB) {
+            return Optional
+                    .of(new GuiPlayerInventory((MobPlayerClientMainVB) player));
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Inventory inventory(String id) {
+        return inventories.get(id);
     }
 
     @Override

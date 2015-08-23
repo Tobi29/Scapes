@@ -35,11 +35,8 @@ public class GuiHud extends Gui {
             new float[]{0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f},
             new int[]{0, 1, 2, 0, 2, 3}, RenderType.TRIANGLES);
 
-    public GuiHud(MobPlayerClientMain player) {
+    public GuiHud() {
         super(GuiAlignment.LEFT);
-        new GuiComponentHotbar(this, 8, 464, 560, 40, player);
-        new GuiComponentBar(this, 8, 426, 280, 16, 1.0f, 0.0f, 0.0f, 0.6f,
-                () -> player.health() / player.maxHealth());
     }
 
     @Override

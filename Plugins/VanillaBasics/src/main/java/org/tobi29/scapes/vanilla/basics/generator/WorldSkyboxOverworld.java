@@ -32,9 +32,12 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.client.MobPlayerClient;
+import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.particle.ParticleManager;
+import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleRaindrop;
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleSnowflake;
+import org.tobi29.scapes.vanilla.basics.gui.GuiComponentHotbar;
 import org.tobi29.scapes.vanilla.basics.gui.GuiHudCondition;
 
 import java.util.Random;
@@ -279,7 +282,13 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         windAudio = engine.sounds().playStaticAudio(
                 "VanillaBasics:sound/entity/particle/rain/Wind1.ogg",
                 "sound.Weather", 1.0f, 0.0f);
-        new GuiHudCondition(world.scene().hud(), world.player());
+        MobPlayerClientMain player = world.player();
+        if (player instanceof MobPlayerClientMainVB) {
+            MobPlayerClientMainVB playerVB = (MobPlayerClientMainVB) player;
+            new GuiComponentHotbar(world.scene().hud(), 8, 464, 560, 40,
+                    playerVB);
+            new GuiHudCondition(world.scene().hud(), playerVB);
+        }
     }
 
     @Override
@@ -298,10 +307,10 @@ public class WorldSkyboxOverworld implements WorldSkybox {
                         scene.cam().position.intY())) / 15.0f;
         if (player.isHeadInWater()) {
             float light = FastMath.clamp(world.terrain()
-                            .light(FastMath.floor(player.x()),
-                                    FastMath.floor(player.y()),
-                                    FastMath.floor(player.z() + 0.7)) *
-                            0.09333f + 0.2f, 0.0f, 1.0f);
+                    .light(FastMath.floor(player.x()),
+                            FastMath.floor(player.y()),
+                            FastMath.floor(player.z() + 0.7)) * 0.09333f + 0.2f,
+                    0.0f, 1.0f);
             fogR = 0.1f * light;
             fogG = 0.5f * light;
             fogB = 0.8f * light;

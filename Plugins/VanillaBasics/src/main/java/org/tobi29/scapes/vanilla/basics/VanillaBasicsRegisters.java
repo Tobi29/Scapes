@@ -245,6 +245,7 @@ class VanillaBasicsRegisters {
         GameRegistry.SupplierRegistry<Packet> pr =
                 registry.getSupplier("Core", "Packet");
         pr.regS(PacketDayTimeSync::new, "vanilla.basics.packet.DayTimeSync");
+        pr.regS(PacketOpenCrafting::new, "vanilla.basics.packet.OpenCrafting");
         pr.regS(PacketAnvil::new, "vanilla.basics.packet.Anvil");
         pr.regS(PacketLightning::new, "vanilla.basics.packet.Lightning");
         pr.regS(PacketNotification::new, "vanilla.basics.packet.Notification");

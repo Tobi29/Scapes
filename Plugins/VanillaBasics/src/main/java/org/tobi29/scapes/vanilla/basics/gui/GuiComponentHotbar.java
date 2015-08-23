@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.tobi29.scapes.client.gui;
+package org.tobi29.scapes.vanilla.basics.gui;
 
 import org.tobi29.scapes.engine.gui.GuiComponent;
 import org.tobi29.scapes.engine.gui.GuiUtils;
@@ -21,14 +21,14 @@ import org.tobi29.scapes.engine.opengl.*;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.entity.client.MobPlayerClientMain;
+import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
 public class GuiComponentHotbar extends GuiComponent {
-    private final MobPlayerClientMain player;
+    private final MobPlayerClientMainVB player;
     private final VAO vao1, vao2, vao3;
 
     public GuiComponentHotbar(GuiComponent parent, int x, int y, int width,
-            int height, MobPlayerClientMain player) {
+            int height, MobPlayerClientMainVB player) {
         super(parent, x, y, width, height);
         this.player = player;
         vao1 = VAOUtility.createVTI(

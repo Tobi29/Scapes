@@ -26,15 +26,12 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class MobPlayerClientMain extends MobPlayerClient {
     protected final GameStateGameMP game;
-    protected int blockWait;
     protected Gui currentGui;
-    protected long punchLeft = -1, punchRight = -1;
     protected boolean flying;
     protected int swim;
     protected double gravitationMultiplier = 1.0, airFriction = 0.2,
             groundFriction = 1.6, wallFriction = 2.0, waterFriction = 8.0,
             stepHeight = 1.0;
-    protected float chargeLeft, chargeRight;
 
     protected MobPlayerClientMain(WorldClient world, Vector3 pos, Vector3 speed,
             AABB aabb, double lives, double maxLives, Frustum viewField,
@@ -186,46 +183,6 @@ public abstract class MobPlayerClientMain extends MobPlayerClient {
     }
 
     @Override
-    public void update(double delta) {
-        long time = System.currentTimeMillis();
-        float swingTime = leftWeapon().material().hitWait(leftWeapon());
-        long punch;
-        if (punchLeft == -1) {
-            punch = 0;
-        } else {
-            punch = time - punchLeft;
-        }
-        if (punch > 0) {
-            chargeLeft = FastMath.min(punch / swingTime, 0.5f);
-        } else {
-            if (chargeLeft > 0.0f) {
-                if (chargeLeft >= 0.45f) {
-                    chargeLeft = 0.0f;
-                } else {
-                    chargeLeft = 0.0f;
-                }
-            }
-        }
-        swingTime = rightWeapon().material().hitWait(rightWeapon());
-        if (punchRight == -1) {
-            punch = 0;
-        } else {
-            punch = time - punchRight;
-        }
-        if (punch > 0) {
-            chargeRight = FastMath.min(punch / swingTime, 0.5f);
-        } else {
-            if (chargeRight > 0.0f) {
-                if (chargeRight >= 0.45f) {
-                    chargeRight = 0.0f;
-                } else {
-                    chargeRight = 0.0f;
-                }
-            }
-        }
-    }
-
-    @Override
     public void onDamage(double damage) {
         game.client().world().scene().damageShake(damage);
     }
@@ -307,16 +264,6 @@ public abstract class MobPlayerClientMain extends MobPlayerClient {
         if (invincibleTicks > 0) {
             invincibleTicks--;
         }
-    }
-
-    @Override
-    public float leftCharge() {
-        return chargeLeft;
-    }
-
-    @Override
-    public float rightCharge() {
-        return chargeRight;
     }
 
     protected void breakParticles(TerrainClient terrain, int amount) {

@@ -89,7 +89,6 @@ public class GameRegistry {
         pr.regS(PacketInteraction::new, "core.packet.Interaction");
         pr.regS(PacketInventoryInteraction::new,
                 "core.packet.InventoryInteraction");
-        pr.regS(PacketOpenCrafting::new, "core.packet.OpenCrafting");
         pr.regS(PacketOpenGui::new, "core.packet.OpenGui");
         pr.regS(PacketCloseGui::new, "core.packet.CloseGui");
         pr.regS(PacketUpdateInventory::new, "core.packet.UpdateInventory");
