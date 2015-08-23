@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.server;
 
 import org.tobi29.scapes.connection.ServerInfo;
@@ -44,7 +43,8 @@ public class ScapesServer {
         TagStructure serverTag = tagStructure.getStructure("Server");
         maxLoadingRadius = serverTag.getInteger("MaxLoadingRadius");
         this.serverInfo = serverInfo;
-        serverConnection = new ServerConnection(this, serverTag.getStructure("Socket"));
+        serverConnection =
+                new ServerConnection(this, serverTag.getStructure("Socket"));
         worldFormat = new WorldFormat(this, path);
         ScapesServerCommands.register(commandRegistry, this);
     }
@@ -86,13 +86,17 @@ public class ScapesServer {
         stop();
     }
 
-    public void stop() throws IOException {
+    public synchronized void stop() throws IOException {
+        if (stopped) {
+            return;
+        }
         assert shutdownReason != ShutdownReason.RUNNING;
+        stopped = true;
         worldFormat.worldNames().forEach(worldFormat::removeWorld);
         serverConnection.stop();
-        stopped = true;
         taskExecutor.shutdown();
         worldFormat.save();
+        worldFormat.plugins().dispose();
     }
 
     public boolean shouldStop() {

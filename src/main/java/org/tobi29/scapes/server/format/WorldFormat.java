@@ -164,7 +164,6 @@ public class WorldFormat {
                 streamOut -> TagStructureBinary.write(tagStructure, streamOut));
         FileUtil.write(path.resolve("Bans.json"), streamOut -> TagStructureJSON
                 .write(playerBans.write(), streamOut));
-        plugins.dispose();
     }
 
     public void savePanorama(Image[] images) throws IOException {

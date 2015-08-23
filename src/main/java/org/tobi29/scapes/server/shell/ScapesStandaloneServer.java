@@ -28,6 +28,7 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
 import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.connection.ServerConnection;
+import sun.misc.SignalHandler;
 
 import java.io.IOException;
 import java.nio.file.Files;
