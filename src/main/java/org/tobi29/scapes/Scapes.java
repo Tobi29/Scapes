@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes;
 
 import org.apache.commons.cli.*;
@@ -131,6 +130,7 @@ public class Scapes {
         if (cmdArgs.length > 0) {
             home = Paths.get(HOME_PATH.matcher(cmdArgs[0])
                     .replaceAll(System.getProperty("user.home")));
+            System.setProperty("user.dir", home.toAbsolutePath().toString());
         } else {
             home = Paths.get(System.getProperty("user.dir"));
         }
