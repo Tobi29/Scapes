@@ -5,7 +5,7 @@ import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
-import org.tobi29.scapes.engine.server.PlayConnection;
+import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -17,7 +17,6 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.CreatureType;
 import org.tobi29.scapes.entity.MobPositionHandler;
-import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketEntityChange;
 import org.tobi29.scapes.packets.PacketOpenGui;
 import org.tobi29.scapes.server.connection.PlayerConnection;
@@ -63,7 +62,7 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
         List<PlayerConnection> exceptions =
                 Collections.singletonList(connection);
         sendPositionHandler = new MobPositionHandler(pos,
-                packet -> serverConnection.send(packet, exceptions), pos2 -> {
+                packet -> world.send(packet, exceptions), pos2 -> {
         }, speed2 -> {
         }, rot -> {
         }, (ground, slidingWall, inWater, swimming) -> {
@@ -78,7 +77,7 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
             setSpeed(Vector3d.ZERO);
             setPos(new Vector3d(0.5, 0.5, 1.5).plus(world.spawn()));
             health = maxHealth;
-            world.connection().send(new PacketEntityChange(this));
+            world.send(new PacketEntityChange(this));
             onSpawn();
         });
     }
@@ -139,7 +138,7 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
 
     @Override
     protected MobPositionHandler createPositionHandler(
-            PlayConnection<Packet> connection) {
+            PlayConnection connection) {
         return new MobPositionHandler(pos.now(), packet -> {
         }, super::setPos, super::setSpeed, super::setRot,
                 (ground, slidingWall, inWater, swimming) -> {
@@ -244,7 +243,7 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
             closeGui();
         }
         currentContainer = gui;
-        world.connection().send(new PacketEntityChange((EntityServer) gui));
+        world.send(new PacketEntityChange((EntityServer) gui));
         gui.addViewer(this);
         connection.send(new PacketOpenGui(gui));
     }

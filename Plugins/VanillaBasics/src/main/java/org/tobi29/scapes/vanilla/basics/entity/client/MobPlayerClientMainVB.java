@@ -71,10 +71,10 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain
         if (controller.inventory()) {
             if (!(currentGui instanceof GuiChatWrite)) {
                 if (hasGui()) {
-                    world.connection().send(new PacketInteraction(
+                    world.send(new PacketInteraction(
                             PacketInteraction.CLOSE_INVENTORY));
                 } else {
-                    world.connection().send(new PacketInteraction(
+                    world.send(new PacketInteraction(
                             PacketInteraction.OPEN_INVENTORY));
                 }
             }
@@ -97,7 +97,7 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain
             int hotbar = controller.hotbarLeft(previous);
             if (hotbar != previous) {
                 setInventorySelectLeft(hotbar);
-                world.connection().send(new PacketInteraction(
+                world.send(new PacketInteraction(
                         PacketInteraction.INVENTORY_SLOT_LEFT,
                         (byte) inventorySelectLeft));
             }
@@ -105,7 +105,7 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain
             hotbar = controller.hotbarRight(previous);
             if (hotbar != previous) {
                 setInventorySelectRight(hotbar);
-                world.connection().send(new PacketInteraction(
+                world.send(new PacketInteraction(
                         PacketInteraction.INVENTORY_SLOT_RIGHT,
                         (byte) inventorySelectRight));
             }
@@ -166,7 +166,7 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain
             } else if (punchLeft != -1) {
                 updatePosition();
                 breakParticles(world.terrain(), 16);
-                world.connection().send(new PacketItemUse(true, FastMath.min(
+                world.send(new PacketItemUse(true, FastMath.min(
                         (double) (System.currentTimeMillis() - punchLeft) /
                                 leftWeapon().material().hitWait(leftWeapon()),
                         0.5) * 2.0));
@@ -181,7 +181,7 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain
             } else if (punchRight != -1) {
                 updatePosition();
                 breakParticles(world.terrain(), 16);
-                world.connection().send(new PacketItemUse(false, FastMath.min(
+                world.send(new PacketItemUse(false, FastMath.min(
                         (double) (System.currentTimeMillis() - punchRight) /
                                 rightWeapon().material().hitWait(rightWeapon()),
                         0.5) * 2.0));

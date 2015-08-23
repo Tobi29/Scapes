@@ -156,7 +156,7 @@ public class PacketItemUse extends Packet implements PacketServer {
                         (long) (item.material().hitWait(item) * 0.23), false);
             }
         }
-        world.connection()
+        world
                 .send(new PacketUpdateInventory(player.mob(), "Container"));
     }
 }

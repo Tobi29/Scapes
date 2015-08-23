@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.packet;
 
 import org.tobi29.scapes.block.ItemStack;
@@ -114,8 +113,10 @@ public class PacketResearch extends Packet implements PacketServer {
                                         .getStructure("Research")
                                         .getStructure("Finished")
                                         .setBoolean(recipe.name(), true);
-                                player.server().send(new PacketEntityMetaData(
-                                        player.mob(), "Vanilla"));
+                                player.mob().world()
+                                        .send(new PacketEntityMetaData(
+                                                        player.mob(),
+                                                        "Vanilla"));
                                 player.send(new PacketNotification("Research",
                                         recipe.text()));
                             }

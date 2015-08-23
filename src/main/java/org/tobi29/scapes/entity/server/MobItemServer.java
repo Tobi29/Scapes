@@ -74,7 +74,7 @@ public class MobItemServer extends MobServer {
                                 this);
                         item.setAmount(item.amount() -
                                 entity.inventory("Container").add(item));
-                        world.connection()
+                        world
                                 .send(new PacketUpdateInventory(entity,
                                         "Container"));
                     });

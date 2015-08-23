@@ -16,7 +16,7 @@
 package org.tobi29.scapes.entity.client;
 
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.engine.server.PlayConnection;
+import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -25,7 +25,6 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.MobPositionHandler;
 import org.tobi29.scapes.entity.MobileEntity;
 import org.tobi29.scapes.entity.model.MobModel;
-import org.tobi29.scapes.packets.Packet;
 
 import java.util.Optional;
 
@@ -40,7 +39,7 @@ public abstract class MobClient extends EntityClient implements MobileEntity {
         super(world, pos);
         this.speed = new MutableVector3d(speed);
         collision = aabb;
-        positionHandler = createPositionHandler(world.connection());
+        positionHandler = createPositionHandler(world);
     }
 
     public AABB aabb() {
@@ -64,7 +63,7 @@ public abstract class MobClient extends EntityClient implements MobileEntity {
     }
 
     protected MobPositionHandler createPositionHandler(
-            PlayConnection<Packet> connection) {
+            PlayConnection connection) {
         return new MobPositionHandler(pos.now(), connection::send, pos::set,
                 speed::set, rot::set,
                 (ground, slidingWall, inWater, swimming) -> {

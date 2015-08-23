@@ -465,7 +465,7 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
             syncWait -= delta;
             while (syncWait <= 0.0) {
                 syncWait += 4.0;
-                world.connection()
+                world
                         .send(new PacketDayTimeSync(climateGenerator.dayTime(),
                                 climateGenerator.day()));
             }
@@ -491,7 +491,7 @@ public class WorldEnvironmentOverworld implements WorldEnvironment {
                     if (random.nextInt((int) (513 - weather * 512)) == 0 &&
                             random.nextInt(1000) == 0 &&
                             weather > 0.7f) {
-                        world.connection()
+                        world
                                 .send(new PacketLightning(chunk.blockX() + x,
                                         chunk.blockY() + y,
                                         chunk.highestTerrainBlockZAt(x, y)));

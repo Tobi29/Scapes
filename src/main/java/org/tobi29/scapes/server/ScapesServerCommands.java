@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.server;
 
 import org.tobi29.scapes.block.GameRegistry;
@@ -57,7 +56,7 @@ final class ScapesServerCommands {
                         Command.require(gameRegistry::material, materialName);
                 ItemStack item = new ItemStack(material, data, amount);
                 player.mob().inventory("Container").add(item);
-                player.mob().world().connection()
+                player.mob().world()
                         .send(new PacketUpdateInventory(player.mob(),
                                 "Container"));
             });
@@ -74,7 +73,7 @@ final class ScapesServerCommands {
                                 Command.require(connection::playerByName,
                                         playerName);
                         player.mob().inventory("Container").clear();
-                        player.mob().world().connection()
+                        player.mob().world()
                                 .send(new PacketUpdateInventory(player.mob(),
                                         "Container"));
                     });

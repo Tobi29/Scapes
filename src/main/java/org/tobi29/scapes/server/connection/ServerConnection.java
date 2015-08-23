@@ -21,6 +21,7 @@ import org.tobi29.scapes.connection.ConnectionInfo;
 import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.server.AbstractServerConnection;
 import org.tobi29.scapes.engine.server.Connection;
+import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
 import org.tobi29.scapes.engine.utils.io.PacketBundleChannel;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -35,12 +36,11 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ServerConnection extends AbstractServerConnection<Packet> {
+public class ServerConnection extends AbstractServerConnection {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ServerConnection.class);
     private final int mayPlayers;
@@ -87,15 +87,8 @@ public class ServerConnection extends AbstractServerConnection<Packet> {
         return server;
     }
 
-    @Override
     public void send(Packet packet) {
         playerByName.values().forEach(player -> player.send(packet));
-    }
-
-    public void send(Packet packet, List<PlayerConnection> exceptions) {
-        playerByName.values().stream()
-                .filter(player -> !exceptions.contains(player))
-                .forEach(player -> player.send(packet));
     }
 
     public boolean doesAllowJoin() {

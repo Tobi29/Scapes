@@ -93,10 +93,10 @@ public class PacketInventoryInteraction extends Packet implements PacketServer {
                                 swap.ifPresent(hold::stack);
                             }
                         }
-                        world.connection()
+                        world
                                 .send(new PacketUpdateInventory(playerE,
                                         "Hold"));
-                        world.connection()
+                        world
                                 .send(new PacketUpdateInventory(chestE, id));
                         break;
                     case RIGHT:
@@ -106,10 +106,10 @@ public class PacketInventoryInteraction extends Packet implements PacketServer {
                         } else {
                             hold.take(1).ifPresent(item::stack);
                         }
-                        world.connection()
+                        world
                                 .send(new PacketUpdateInventory(playerE,
                                         "Hold"));
-                        world.connection()
+                        world
                                 .send(new PacketUpdateInventory(chestE, id));
                         break;
                 }

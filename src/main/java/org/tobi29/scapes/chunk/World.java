@@ -13,20 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk;
 
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.GameRegistry;
-import org.tobi29.scapes.engine.server.PlayConnection;
+import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
-import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.plugins.Plugins;
 
-public abstract class World {
-    protected final PlayConnection<Packet> connection;
+public abstract class World implements PlayConnection {
     protected final BlockType air;
     protected final Plugins plugins;
     protected final TaskExecutor taskExecutor;
@@ -37,9 +34,8 @@ public abstract class World {
     @SuppressWarnings("CanBeFinal")
     protected double gravity = 9.8;
 
-    protected World(PlayConnection<Packet> connection, Plugins plugins,
-            TaskExecutor taskExecutor, GameRegistry registry) {
-        this.connection = connection;
+    protected World(Plugins plugins, TaskExecutor taskExecutor,
+            GameRegistry registry) {
         this.plugins = plugins;
         this.taskExecutor = taskExecutor;
         this.registry = registry;
@@ -52,10 +48,6 @@ public abstract class World {
 
     public BlockType air() {
         return air;
-    }
-
-    public PlayConnection<Packet> connection() {
-        return connection;
     }
 
     public WorldEnvironment environment() {

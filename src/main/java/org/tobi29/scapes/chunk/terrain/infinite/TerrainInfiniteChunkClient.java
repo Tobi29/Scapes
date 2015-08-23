@@ -48,7 +48,7 @@ public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
             if (!requested && terrainClient.requestedChunks() < 3) {
                 requested = true;
                 terrainClient.changeRequestedChunks(1);
-                terrain.world().connection()
+                terrain.world()
                         .send(new PacketRequestChunk(pos.intX(), pos.intY()));
             }
         }

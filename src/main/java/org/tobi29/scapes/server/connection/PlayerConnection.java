@@ -21,6 +21,7 @@ import org.tobi29.scapes.Scapes;
 import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.connection.Account;
+import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.server.*;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.*;
@@ -59,7 +60,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PlayerConnection
-        implements Connection, PlayConnection<Packet>, Command.Executor {
+        implements Connection, PlayConnection, Command.Executor {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(PlayerConnection.class);
     private static final int AES_MIN_KEY_LENGTH, AES_MAX_KEY_LENGTH;

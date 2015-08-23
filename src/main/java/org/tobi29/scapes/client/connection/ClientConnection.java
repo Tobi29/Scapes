@@ -26,7 +26,7 @@ import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
 import org.tobi29.scapes.engine.server.ConnectionCloseException;
-import org.tobi29.scapes.engine.server.PlayConnection;
+import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.MutableSingle;
 import org.tobi29.scapes.engine.utils.SleepUtil;
@@ -69,7 +69,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ClientConnection
-        implements TaskExecutor.ASyncTask, PlayConnection<Packet> {
+        implements TaskExecutor.ASyncTask, PlayConnection {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ClientConnection.class);
     private static final int AES_MIN_KEY_LENGTH, AES_MAX_KEY_LENGTH;

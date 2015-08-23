@@ -120,7 +120,7 @@ public class PacketInteraction extends Packet
                             "Invalid slot change data!");
                 }
                 player.mob().setInventorySelectLeft(data);
-                world.connection()
+                world
                         .send(new PacketInteraction(player.mob().entityID(),
                                 INVENTORY_SLOT_LEFT, data));
                 break;
@@ -130,7 +130,7 @@ public class PacketInteraction extends Packet
                             "Invalid slot change data!");
                 }
                 player.mob().setInventorySelectRight(data);
-                world.connection()
+                world
                         .send(new PacketInteraction(player.mob().entityID(),
                                 INVENTORY_SLOT_RIGHT, data));
                 break;
@@ -141,7 +141,7 @@ public class PacketInteraction extends Packet
                 player.mob().inventory("Hold").item(0).take()
                         .ifPresent(drop -> {
                             player.mob().dropItem(drop);
-                            world.connection().send(new PacketUpdateInventory(
+                            world.send(new PacketUpdateInventory(
                                     player.mob(), "Hold"));
                         });
                 player.send(new PacketCloseGui());

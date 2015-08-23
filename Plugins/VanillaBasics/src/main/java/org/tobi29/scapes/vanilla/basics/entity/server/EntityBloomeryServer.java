@@ -120,6 +120,6 @@ public class EntityBloomeryServer extends EntityAbstractFurnaceServer {
         }
         this.hasBellows = hasBellows;
         maximumTemperature = hasBellows ? Float.POSITIVE_INFINITY : 600.0f;
-        world.connection().send(new PacketEntityChange(this));
+        world.send(new PacketEntityChange(this));
     }
 }

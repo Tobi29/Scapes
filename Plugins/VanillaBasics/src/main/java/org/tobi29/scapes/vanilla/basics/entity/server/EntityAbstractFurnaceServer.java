@@ -104,7 +104,7 @@ public abstract class EntityAbstractFurnaceServer
                                 fuelTemperature[i] =
                                         fuel.fuelTemperature(item) * fuelHeat;
                                 inventory.item(i).take(1);
-                                world.connection()
+                                world
                                         .send(new PacketEntityChange(this));
                             }
                         }
@@ -123,7 +123,7 @@ public abstract class EntityAbstractFurnaceServer
                         int j = i;
                         inventory.item(fuel.length).take(1).ifPresent(item -> {
                             inventory.item(j).stack(item);
-                            world.connection()
+                            world
                                     .send(new PacketEntityChange(this));
                         });
                     }

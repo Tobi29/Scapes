@@ -58,7 +58,7 @@ public class EntityForgeServer extends EntityAbstractFurnaceServer {
                                     .take(new ItemStack(materials.mold, 1)) !=
                                     null) {
                                 item.setData(0);
-                                world.connection()
+                                world
                                         .send(new PacketEntityChange(this));
                             }
                         }

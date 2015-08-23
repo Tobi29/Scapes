@@ -16,7 +16,7 @@
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.engine.server.PlayConnection;
+import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
@@ -24,7 +24,6 @@ import org.tobi29.scapes.entity.MobPositionHandler;
 import org.tobi29.scapes.entity.MobileEntity;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.particle.ParticleManager;
-import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleTornado;
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleTornadoBlock;
 
@@ -41,7 +40,7 @@ public class EntityTornadoClient extends EntityClient implements MobileEntity {
 
     public EntityTornadoClient(WorldClient world, Vector3 pos) {
         super(world, pos);
-        PlayConnection<Packet> connection = world.connection();
+        PlayConnection connection = world;
         positionHandler =
                 new MobPositionHandler(pos, connection::send, this.pos::set,
                         newSpeed -> {

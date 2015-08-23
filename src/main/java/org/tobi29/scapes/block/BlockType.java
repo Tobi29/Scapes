@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.block;
 
 import org.tobi29.scapes.chunk.data.ChunkMesh;
@@ -90,9 +89,8 @@ public abstract class BlockType extends Material {
                         handler.type(place.intX(), place.intY(), place.intZ(),
                                 this);
                         item.setAmount(item.amount() - 1);
-                        handler.world().connection()
-                                .send(new PacketUpdateInventory(entity,
-                                        "Container"));
+                        handler.world().send(new PacketUpdateInventory(entity,
+                                "Container"));
                         entity.connection().statistics()
                                 .blockPlace(this, item.data());
                     }

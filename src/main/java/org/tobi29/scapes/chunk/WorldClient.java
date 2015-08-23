@@ -39,6 +39,7 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.model.EntityModel;
 import org.tobi29.scapes.entity.model.MobModel;
 import org.tobi29.scapes.entity.particle.ParticleManager;
+import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.plugins.Dimension;
 
 import java.util.List;
@@ -59,6 +60,7 @@ public class WorldClient extends World {
     private final SceneScapesVoxelWorld scene;
     private final MobPlayerClientMain player;
     private final MobModel playerModel;
+    private final ClientConnection connection;
     private final GameStateGameMP game;
     private final TerrainClient terrain;
     private final Map<Integer, EntityModel> entityModels =
@@ -68,9 +70,9 @@ public class WorldClient extends World {
     public WorldClient(ClientConnection connection, Cam cam, long seed,
             String name, TerrainSupplier terrainSupplier,
             TagStructure playerTag, int playerID) {
-        super(connection, connection.plugins(),
-                connection.game().engine().taskExecutor(),
+        super(connection.plugins(), connection.game().engine().taskExecutor(),
                 connection.plugins().registry());
+        this.connection = connection;
         game = connection.game();
         player = connection.plugins().worldType()
                 .newPlayer(this, Vector3d.ZERO, Vector3d.ZERO, 0.0, 0.0, "");
@@ -282,6 +284,11 @@ public class WorldClient extends World {
 
     public void dispose(GL gl) {
         terrain.dispose(gl);
+    }
+
+    @Override
+    public void send(Packet packet) {
+        connection.send(packet);
     }
 
     @FunctionalInterface

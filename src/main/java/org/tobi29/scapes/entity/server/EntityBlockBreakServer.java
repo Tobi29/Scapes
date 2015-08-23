@@ -60,7 +60,7 @@ public class EntityBlockBreakServer extends EntityServer {
     public boolean punch(WorldServer world, double strength) {
         wait = 0.0;
         progress = FastMath.clamp(progress + strength, 0.0, 1.0);
-        world.connection().send(new PacketEntityChange(this));
+        world.send(new PacketEntityChange(this));
         return progress >= 1.0;
     }
 }

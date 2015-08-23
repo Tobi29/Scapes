@@ -149,7 +149,7 @@ public abstract class MobLivingServer extends MobServer {
         }
         if (d != 0) {
             onDamage(damage);
-            world.connection().send(new PacketMobDamage(this));
+            world.send(new PacketMobDamage(this));
         }
     }
 
@@ -170,7 +170,7 @@ public abstract class MobLivingServer extends MobServer {
             health = 0;
         }
         onHeal(heal);
-        world.connection().send(new PacketMobDamage(this));
+        world.send(new PacketMobDamage(this));
     }
 
     public boolean isDead() {

@@ -110,7 +110,7 @@ public class EntityAlloyServer extends EntityAbstractContainerServer {
                     input.clear();
                     input.setMaterial(materials.mold, 1);
                     updateResult(plugin);
-                    world.connection().send(new PacketEntityChange(this));
+                    world.send(new PacketEntityChange(this));
                 }
             }
         }
@@ -131,7 +131,7 @@ public class EntityAlloyServer extends EntityAbstractContainerServer {
                     }
                 }
                 updateResult(plugin);
-                world.connection().send(new PacketEntityChange(this));
+                world.send(new PacketEntityChange(this));
             }
         }
     }

@@ -33,9 +33,11 @@ import org.tobi29.scapes.engine.utils.task.Joiner;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 import org.tobi29.scapes.entity.CreatureType;
 import org.tobi29.scapes.entity.server.*;
+import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketEntityAdd;
 import org.tobi29.scapes.packets.PacketEntityDespawn;
 import org.tobi29.scapes.packets.PacketSoundEffect;
+import org.tobi29.scapes.server.connection.PlayerConnection;
 import org.tobi29.scapes.server.connection.ServerConnection;
 import org.tobi29.scapes.server.format.WorldFormat;
 
@@ -66,7 +68,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
     public WorldServer(WorldFormat worldFormat, String name, String id,
             ServerConnection connection, TaskExecutor taskExecutor,
             TerrainSupplier terrainSupplier) {
-        super(connection, worldFormat.plugins(), taskExecutor,
+        super(worldFormat.plugins(), taskExecutor,
                 worldFormat.plugins().registry());
         seed = worldFormat.seed();
         this.name = name;
@@ -76,7 +78,6 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
         terrain = terrainSupplier.get(this);
     }
 
-    @Override
     public ServerConnection connection() {
         return connection;
     }
@@ -128,14 +129,14 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
         add.setEntityID(id);
         entities.put(id, add);
         if (add.id(plugins.registry()) >= 0) {
-            connection.send(new PacketEntityAdd(add, plugins.registry()));
+            send(new PacketEntityAdd(add, plugins.registry()));
         }
     }
 
     public void deleteEntity(EntityServer del) {
         if (del != null) {
             entities.remove(del.entityID());
-            connection.send(new PacketEntityDespawn(del));
+            send(new PacketEntityDespawn(del));
         }
     }
 
@@ -161,8 +162,8 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
 
     public List<EntityServer> entities(Vector3 pos, double rangeSqr) {
         return entities.values().stream().filter(entity ->
-                        FastMath.pointDistanceSqr(pos, entity.pos()) <=
-                                rangeSqr).collect(Collectors.toList());
+                FastMath.pointDistanceSqr(pos, entity.pos()) <= rangeSqr)
+                .collect(Collectors.toList());
     }
 
     public List<EntityServer> entities(int x, int y, int z) {
@@ -477,8 +478,8 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
             float pitch, float gain, float range) {
         if (audio != null) {
             if (!audio.isEmpty()) {
-                connection.send(new PacketSoundEffect(audio, position, velocity,
-                        pitch, gain, range));
+                send(new PacketSoundEffect(audio, position, velocity, pitch,
+                        gain, range));
             }
         }
     }
@@ -503,6 +504,17 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                 sync.cap();
             }
         }, "Tick-" + id, TaskExecutor.Priority.MEDIUM);
+    }
+
+    @Override
+    public void send(Packet packet) {
+        players.values().forEach(player -> player.connection().send(packet));
+    }
+
+    public void send(Packet packet, List<PlayerConnection> exceptions) {
+        players.values().stream().map(MobPlayerServer::connection)
+                .filter(player -> !exceptions.contains(player))
+                .forEach(player -> player.send(packet));
     }
 
     @FunctionalInterface

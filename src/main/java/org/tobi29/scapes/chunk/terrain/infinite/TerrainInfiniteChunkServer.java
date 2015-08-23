@@ -162,11 +162,11 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
         if (state.id >= State.SENDABLE.id) {
             BlockType type = typeL(x, y, z);
             if (type == terrain.world().air()) {
-                terrain.world().connection()
+                terrain.world()
                         .send(new PacketBlockChangeAir(x + posBlock.intX(),
                                 y + posBlock.intY(), z));
             } else {
-                terrain.world().connection()
+                terrain.world()
                         .send(new PacketBlockChange(x + posBlock.intX(),
                                 y + posBlock.intY(), z, type.id(),
                                 dataL(x, y, z)));
