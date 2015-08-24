@@ -1,14 +1,12 @@
 package org.tobi29.scapes.entity.client;
 
 import org.tobi29.scapes.block.Inventory;
-import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.Frustum;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.CreatureType;
-import org.tobi29.scapes.entity.WieldMode;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

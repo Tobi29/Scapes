@@ -35,7 +35,6 @@ import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateInfoLayer;
 import org.tobi29.scapes.vanilla.basics.generator.WorldEnvironmentOverworld;
 import org.tobi29.scapes.vanilla.basics.generator.decorator.BiomeDecorator;
-import org.tobi29.scapes.vanilla.basics.gui.GuiComponentHotbar;
 import org.tobi29.scapes.vanilla.basics.material.*;
 
 import java.util.*;

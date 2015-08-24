@@ -22,7 +22,6 @@ import org.tobi29.scapes.engine.opengl.*;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 
 public class GuiHud extends Gui {
     private static final float CROSS_SIZE = 8.0f;

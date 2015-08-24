@@ -18,7 +18,6 @@ package org.tobi29.scapes.vanilla.basics.entity.client;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.vanilla.basics.gui.GuiPlayerInventory;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.utils.math.AABB;

@@ -85,7 +85,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
         terrain.loadedChunks().forEach(chunk -> chunk.rendererChunk().reset());
     }
 
-    public void dispose(GL gl) {
+    public void dispose() {
         joiner.join();
         disposed = true;
     }

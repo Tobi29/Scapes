@@ -141,7 +141,7 @@ public class TerrainInfiniteClient extends TerrainInfinite
     public void dispose(GL gl) {
         lighting.dispose();
         chunkManager.iterator().forEach(this::removeChunk);
-        renderer.dispose(gl);
+        renderer.dispose();
     }
 
     @Override

@@ -323,7 +323,7 @@ public class SceneScapesVoxelWorld extends Scene {
         sunLightDebug.setValue(world.terrain().sunLight(xx, yy, zz));
         performanceWidget.graphRender.addStamp(delta);
         world.updateRender(cam, delta);
-        skybox.renderUpdate(gl, cam, delta);
+        skybox.renderUpdate(cam, delta);
         skinStorage.update(gl, player.game().client());
     }
 

@@ -19,7 +19,6 @@ package org.tobi29.scapes.vanilla.basics.gui;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.Material;
 import org.tobi29.scapes.client.gui.GuiComponentItemButton;
-import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityAnvilClient;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;

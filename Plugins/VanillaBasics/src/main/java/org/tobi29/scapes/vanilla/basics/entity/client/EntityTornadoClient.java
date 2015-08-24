@@ -16,7 +16,6 @@
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
@@ -40,9 +39,8 @@ public class EntityTornadoClient extends EntityClient implements MobileEntity {
 
     public EntityTornadoClient(WorldClient world, Vector3 pos) {
         super(world, pos);
-        PlayConnection connection = world;
         positionHandler =
-                new MobPositionHandler(pos, connection::send, this.pos::set,
+                new MobPositionHandler(pos, world::send, this.pos::set,
                         newSpeed -> {
                         }, newPos -> {
                 }, (ground, slidingWall, inWater, swimming) -> {

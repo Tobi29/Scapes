@@ -21,7 +21,6 @@ import org.tobi29.scapes.connection.ConnectionInfo;
 import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.server.AbstractServerConnection;
 import org.tobi29.scapes.engine.server.Connection;
-import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
 import org.tobi29.scapes.engine.utils.io.PacketBundleChannel;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;

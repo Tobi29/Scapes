@@ -24,7 +24,7 @@ public interface WorldSkybox {
 
     void init(GL gl, Cam cam);
 
-    void renderUpdate(GL gl, Cam cam, double delta);
+    void renderUpdate(Cam cam, double delta);
 
     void render(GL gl, Cam cam);
 

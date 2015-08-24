@@ -17,7 +17,6 @@
 package org.tobi29.scapes.vanilla.basics.gui;
 
 import org.tobi29.scapes.block.Inventory;
-import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityChestClient;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 

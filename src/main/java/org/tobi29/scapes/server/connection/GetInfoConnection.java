@@ -19,6 +19,7 @@ package org.tobi29.scapes.server.connection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.connection.ServerInfo;
+import org.tobi29.scapes.engine.server.AbstractServerConnection;
 import org.tobi29.scapes.engine.server.Connection;
 
 import java.io.IOException;
@@ -44,7 +45,7 @@ public class GetInfoConnection implements Connection {
     }
 
     @Override
-    public boolean tick(ServerConnection.NetWorkerThread worker) {
+    public boolean tick(AbstractServerConnection.NetWorkerThread worker) {
         if (!done) {
             try {
                 int write = channel.write(buffer);

@@ -16,7 +16,6 @@
 package org.tobi29.scapes.vanilla.basics.entity.server;
 
 import org.tobi29.scapes.chunk.WorldServer;
-import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
@@ -42,9 +41,8 @@ public class EntityTornadoServer extends EntityServer implements MobileEntity {
         Random random = ThreadLocalRandom.current();
         dir = random.nextDouble() * 360;
         time = random.nextInt(100) + 20;
-        PlayConnection connection = world;
         positionHandler =
-                new MobPositionHandler(pos, connection::send, this.pos::set,
+                new MobPositionHandler(pos, world::send, this.pos::set,
                         newSpeed -> {
                         }, newPos -> {
                 }, (ground, slidingWall, inWater, swimming) -> {

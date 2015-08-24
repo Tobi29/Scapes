@@ -18,6 +18,7 @@ package org.tobi29.scapes.vanilla.basics.gui;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.client.gui.GuiComponentItemButton;
+import org.tobi29.scapes.client.gui.GuiUtils;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
@@ -101,9 +102,8 @@ public class GuiInventory extends Gui {
             vaoText.render(gl, shader);
             matrixStack.pop();
         }
-        org.tobi29.scapes.client.gui.GuiUtils
-                .renderItem((float) cursorX, (float) cursorY, 30.0f, 30.0f,
-                        player.inventory("Hold").item(0), gl, shader, font);
+        GuiUtils.renderItem((float) cursorX, (float) cursorY, 30.0f, 30.0f,
+                player.inventory("Hold").item(0), gl, shader, font);
     }
 
     @Override
