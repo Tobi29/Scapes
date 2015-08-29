@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.server;
 
-import org.tobi29.scapes.connection.ServerInfo;
+import org.tobi29.scapes.engine.server.ServerInfo;
 import org.tobi29.scapes.engine.utils.Crashable;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;

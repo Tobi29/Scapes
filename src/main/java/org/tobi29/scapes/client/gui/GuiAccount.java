@@ -18,7 +18,7 @@ package org.tobi29.scapes.client.gui;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.connection.Account;
+import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.utils.Pair;
@@ -42,8 +42,8 @@ public class GuiAccount extends GuiMenu {
     public GuiAccount(GameState state, Gui previous) {
         super(state, "Account", "Save");
         try {
-            Account.Client account = Account.read(
-                    state.engine().home().resolve("Account.properties"));
+            Account account = Account
+                    .read(state.engine().home().resolve("Account.properties"));
             keyPair = account.keyPair();
             nickname = account.nickname();
         } catch (IOException e) {
@@ -75,7 +75,8 @@ public class GuiAccount extends GuiMenu {
         keyPaste.addLeftClick(event -> {
             String str = state.engine().controller().clipboardPaste();
             Optional<KeyPair> keyPair =
-                    Account.key(REPLACE.matcher(str).replaceAll(""));
+                    Account
+                            .key(REPLACE.matcher(str).replaceAll(""));
             if (keyPair.isPresent()) {
                 this.keyPair = keyPair.get();
                 hash.setText("Hash: " + ChecksumUtil
@@ -107,7 +108,7 @@ public class GuiAccount extends GuiMenu {
                 return;
             }
             try {
-                new Account.Client(keyPair, this.nickname)
+                new Account(keyPair, this.nickname)
                         .write(state.engine().home()
                                 .resolve("Account.properties"));
             } catch (IOException e) {

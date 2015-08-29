@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.connection;
 
 import java.util.HashMap;
 
 public enum ConnectionType {
     GET_INFO((byte) 1),
-    PLAY((byte) 11);
+    PLAY((byte) 11),
+    CONTROL((byte) 21);
     private static final HashMap<Byte, ConnectionType> VALUES = new HashMap<>();
 
     static {

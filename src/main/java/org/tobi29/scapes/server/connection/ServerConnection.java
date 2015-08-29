@@ -17,16 +17,15 @@ package org.tobi29.scapes.server.connection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.connection.ConnectionInfo;
 import org.tobi29.scapes.connection.ConnectionType;
-import org.tobi29.scapes.engine.server.AbstractServerConnection;
-import org.tobi29.scapes.engine.server.Connection;
+import org.tobi29.scapes.engine.server.*;
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
 import org.tobi29.scapes.engine.utils.io.PacketBundleChannel;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.entity.skin.ServerSkin;
 import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketChat;
+import org.tobi29.scapes.server.ControlPanel;
 import org.tobi29.scapes.server.ScapesServer;
 
 import java.io.IOException;
@@ -38,11 +37,13 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 public class ServerConnection extends AbstractServerConnection {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ServerConnection.class);
     private final int mayPlayers;
+    private final String controlPassword;
     private final ScapesServer server;
     private final KeyPair keyPair;
     private final Map<String, PlayerConnection> players =
@@ -54,6 +55,7 @@ public class ServerConnection extends AbstractServerConnection {
     public ServerConnection(ScapesServer server, TagStructure tagStructure) {
         super(server.taskExecutor(), ConnectionInfo.header(), tagStructure);
         mayPlayers = tagStructure.getInteger("MaxPlayers");
+        controlPassword = tagStructure.getString("ControlPassword");
         this.server = server;
         try {
             KeyPairGenerator keyPairGenerator =
@@ -84,6 +86,10 @@ public class ServerConnection extends AbstractServerConnection {
 
     public ScapesServer server() {
         return server;
+    }
+
+    public Stream<PlayerConnection> players() {
+        return playerByName.values().stream();
     }
 
     public void send(Packet packet) {
@@ -148,6 +154,15 @@ public class ServerConnection extends AbstractServerConnection {
                 PacketBundleChannel bundleChannel =
                         new PacketBundleChannel(channel);
                 return Optional.of(new PlayerConnection(bundleChannel, this));
+            case CONTROL:
+                if (controlPassword.isEmpty()) {
+                    break;
+                }
+                ControlPanelProtocol controlChannel =
+                        new ControlPanelProtocol(channel, controlPassword,
+                                keyPair);
+                new ControlPanel(controlChannel, server);
+                return Optional.of(controlChannel);
         }
         return Optional.empty();
     }

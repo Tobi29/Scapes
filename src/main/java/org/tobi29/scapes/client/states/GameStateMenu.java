@@ -21,7 +21,7 @@ import org.tobi29.scapes.client.gui.GuiAccount;
 import org.tobi29.scapes.client.gui.GuiMainMenu;
 import org.tobi29.scapes.client.gui.GuiVersion;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
-import org.tobi29.scapes.connection.Account;
+import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.GL;
@@ -46,7 +46,8 @@ public class GameStateMenu extends GameState {
     public void init(GL gl) {
         try {
             Path file = engine.home().resolve("Account.properties");
-            Account.Client account = Account.read(file);
+            Account
+                    account = Account.read(file);
             if (account.valid()) {
                 add(new GuiMainMenu(this));
             } else {

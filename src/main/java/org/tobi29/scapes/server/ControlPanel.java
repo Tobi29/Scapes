@@ -1,53 +1,72 @@
-/*
- * Copyright 2012-2015 Tobi29
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.tobi29.scapes.server;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.tobi29.scapes.engine.server.ControlPanelProtocol;
+import org.tobi29.scapes.engine.utils.CPUUtil;
 import org.tobi29.scapes.server.command.Command;
+import org.tobi29.scapes.server.connection.PlayerConnection;
 
-import java.util.Map;
 import java.util.Optional;
 
-public interface ControlPanel extends Command.Executor {
+public class ControlPanel implements Command.Executor {
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(ControlPanel.class);
+    private final ControlPanelProtocol connection;
+    private final ScapesServer server;
+
+    public ControlPanel(ControlPanelProtocol connection, ScapesServer server) {
+        this.connection = connection;
+        this.server = server;
+        initCommands();
+        LOGGER.info("Control panel accepted from {}",
+                connection.toString());
+    }
+
+    private void initCommands() {
+        connection.addCommand("Ping:Ping", command -> {
+            if (command.length >= 1) {
+                connection.send("Ping:Pong", command[0]);
+            }
+        });
+        connection.addCommand("Scapes:Command", command -> {
+            if (command.length != 1) {
+                return;
+            }
+            server.commandRegistry().get(command[0], this).execute()
+                    .forEach(output -> tell(output.toString()));
+        });
+        CPUUtil.Reader cpuReader = CPUUtil.reader();
+        Runtime runtime = Runtime.getRuntime();
+        connection.addCommand("Stat:List", command -> {
+            double cpu = cpuReader.totalCPU();
+            long memory = runtime.totalMemory() - runtime.freeMemory();
+            connection.send("Stat:Send", "CPU", String.valueOf(cpu), "Memory",
+                    String.valueOf(memory));
+        });
+        connection.addCommand("Players:List", command -> connection
+                .send("Players:Send", server.connection().players()
+                        .map(PlayerConnection::nickname)
+                        .toArray(String[]::new)));
+    }
+
     @Override
-    default Optional<String> playerName() {
+    public Optional<String> playerName() {
         return Optional.empty();
     }
 
     @Override
-    default void tell(String message) {
-        appendLog(message);
+    public String name() {
+        return "Control Panel";
     }
 
     @Override
-    default int permissionLevel() {
-        return 10;
+    public void tell(String message) {
+        connection.send("Core:Message", message);
     }
 
-    String id();
-
-    void updatePlayers(String[] players);
-
-    void updateWorlds(String[] worlds);
-
-    void appendLog(String line);
-
-    void sendProfilerResults(long ram, Map<String, Double> tps);
-
-    void replaced();
-
-    boolean isClosed();
+    @Override
+    public int permissionLevel() {
+        return 10;
+    }
 }

@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.opengl.texture.*;
-import org.tobi29.scapes.engine.utils.StringLongHash;
+import org.tobi29.scapes.engine.utils.StringUtil;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
@@ -98,7 +98,7 @@ public class GuiCreateWorld extends GuiMenuDouble {
                     try {
                         randomSeed = Long.valueOf(seed.text());
                     } catch (NumberFormatException e) {
-                        randomSeed = StringLongHash.hash(seed.text());
+                        randomSeed = StringUtil.hash(seed.text());
                     }
                 }
                 tagStructure.setLong("Seed", randomSeed);

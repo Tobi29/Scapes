@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.server.format;
 
 import org.slf4j.Logger;
@@ -32,6 +31,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -56,6 +56,10 @@ public class PlayerBans implements MultiTag.Writeable {
         return entries.stream()
                 .map(entry -> entry.matches(key, address, nickname))
                 .filter(Optional::isPresent).map(Optional::get).findAny();
+    }
+
+    public Stream<Entry> matches(Pattern pattern) {
+        return entries.stream().filter(entry -> entry.matches(pattern));
     }
 
     public void ban(PlayerConnection player, String id, String reason,
@@ -128,7 +132,7 @@ public class PlayerBans implements MultiTag.Writeable {
             }
             Optional<String> nickname = Optional.empty();
             if (tagStructure.has("Nickname")) {
-                address = Optional.of(tagStructure.getString("Nickname"));
+                nickname = Optional.of(tagStructure.getString("Nickname"));
             }
             String id = tagStructure.getString("ID");
             String reason = tagStructure.getString("Reason");
@@ -160,6 +164,10 @@ public class PlayerBans implements MultiTag.Writeable {
                 return Optional.of("Banned nickname: " + reason);
             }
             return Optional.empty();
+        }
+
+        public boolean matches(Pattern pattern) {
+            return pattern.matcher(id).matches();
         }
 
         @Override

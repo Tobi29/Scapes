@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.Scapes;
 import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldServer;
-import org.tobi29.scapes.connection.Account;
 import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.server.*;
 import org.tobi29.scapes.engine.utils.graphics.Image;

@@ -19,6 +19,7 @@ import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.Material;
 import org.tobi29.scapes.engine.utils.ArrayUtil;
+import org.tobi29.scapes.engine.utils.StringUtil;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.packets.PacketDisconnect;
 import org.tobi29.scapes.packets.PacketUpdateInventory;
@@ -29,6 +30,7 @@ import org.tobi29.scapes.server.connection.ServerConnection;
 import org.tobi29.scapes.server.format.PlayerBans;
 
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 final class ScapesServerCommands {
     private ScapesServerCommands() {
@@ -163,6 +165,17 @@ final class ScapesServerCommands {
             });
         });
 
+        registry.register("list", 9, options -> options
+                        .add("i", "id", true, "Wildcard match for nickname"),
+                (args, executor, commands) -> {
+                    String exp = args.option('i', "*");
+                    Pattern pattern = StringUtil.wildcard(exp);
+                    commands.add(() -> server.connection().players()
+                            .map(PlayerConnection::nickname)
+                            .filter(nickname -> pattern.matcher(nickname)
+                                    .matches()).forEach(executor::tell));
+                });
+
         registry.register("kick", 9, options -> options
                         .add("p", "player", true, "Player to be kicked"),
                 (args, executor, commands) -> {
@@ -221,11 +234,15 @@ final class ScapesServerCommands {
                             () -> server.worldFormat().playerBans().unban(id));
                 });
 
-        registry.register("banlist", 9, options -> {
-        }, (args, executor, commands) -> commands
-                .add(() -> server.worldFormat().playerBans().entries()
-                        .map(PlayerBans.Entry::toString)
-                        .forEach(executor::tell)));
+        registry.register("banlist", 9, options -> options
+                        .add("i", "id", true, "Wildcard match for ID"),
+                (args, executor, commands) -> {
+                    String exp = args.option('i', "*");
+                    Pattern pattern = StringUtil.wildcard(exp);
+                    commands.add(() -> server.worldFormat().playerBans()
+                            .matches(pattern).map(PlayerBans.Entry::toString)
+                            .forEach(executor::tell));
+                });
 
         registry.register("op", 10, options -> {
             options.add("p", "player", true,

@@ -21,7 +21,7 @@ import org.tobi29.scapes.chunk.IDStorage;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.client.states.GameStateServerDisconnect;
-import org.tobi29.scapes.connection.Account;
+import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
@@ -104,7 +104,7 @@ public class ClientConnection
     private Plugins plugins;
 
     public ClientConnection(ScapesEngine engine, SocketChannel channel,
-            Account.Client account, int loadingDistance) throws IOException {
+            Account account, int loadingDistance) throws IOException {
         this.engine = engine;
         loadingDistanceRequest = loadingDistance;
         this.channel = new PacketBundleChannel(channel);
@@ -398,12 +398,12 @@ public class ClientConnection
         private final SocketChannel channel;
         private final List<Integer> pluginRequests = new ArrayList<>();
         private final List<PluginFile> plugins = new ArrayList<>();
-        private final Account.Client account;
+        private final Account account;
         private final ByteBuffer headerBuffer = BufferCreator
                 .wrap(new byte[]{'S', 'c', 'a', 'p', 'e', 's',
                         ConnectionType.PLAY.data()});
 
-        private LoginData(SocketChannel channel, Account.Client account) {
+        private LoginData(SocketChannel channel, Account account) {
             this.channel = channel;
             this.account = account;
         }

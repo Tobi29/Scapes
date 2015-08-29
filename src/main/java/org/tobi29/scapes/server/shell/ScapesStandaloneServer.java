@@ -18,7 +18,7 @@ package org.tobi29.scapes.server.shell;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.connection.ServerInfo;
+import org.tobi29.scapes.engine.server.ServerInfo;
 import org.tobi29.scapes.engine.utils.Crashable;
 import org.tobi29.scapes.engine.utils.SleepUtil;
 import org.tobi29.scapes.engine.utils.io.filesystem.CrashReportFile;
@@ -111,6 +111,7 @@ public abstract class ScapesStandaloneServer
         serverTag.setInteger("MaxLoadingRadius", 256);
         TagStructure socketTag = serverTag.getStructure("Socket");
         socketTag.setInteger("MaxPlayers", 20);
+        socketTag.setString("ControlPassword", "");
         socketTag.setInteger("WorkerCount", 2);
         socketTag.setInteger("RSASize", 2048);
         FileUtil.write(path,

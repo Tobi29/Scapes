@@ -21,8 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.client.gui.GuiLoading;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
-import org.tobi29.scapes.connection.Account;
-import org.tobi29.scapes.connection.ServerInfo;
+import org.tobi29.scapes.engine.server.Account;
+import org.tobi29.scapes.engine.server.ServerInfo;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.GL;
@@ -120,8 +120,9 @@ public class GameStateLoadSP extends GameState {
                     int loadingRadius = FastMath.round(
                             engine.tagStructure().getStructure("Scapes")
                                     .getDouble("RenderDistance"));
-                    Account.Client account = Account.read(
-                            engine.home().resolve("Account.properties"));
+                    Account
+                            account = Account
+                            .read(engine.home().resolve("Account.properties"));
                     client = new ClientConnection(engine, channel, account,
                             loadingRadius);
                     step++;
