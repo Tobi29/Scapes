@@ -21,21 +21,19 @@ import org.tobi29.scapes.chunk.IDStorage;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.client.states.GameStateServerDisconnect;
-import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.connection.ConnectionType;
+import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
+import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.server.ConnectionCloseException;
-import org.tobi29.scapes.connection.PlayConnection;
+import org.tobi29.scapes.engine.utils.ArrayUtil;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.MutableSingle;
 import org.tobi29.scapes.engine.utils.SleepUtil;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.graphics.PNG;
-import org.tobi29.scapes.engine.utils.io.LimitedBufferStream;
-import org.tobi29.scapes.engine.utils.io.PacketBundleChannel;
-import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
-import org.tobi29.scapes.engine.utils.io.WritableByteStream;
+import org.tobi29.scapes.engine.utils.io.*;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileCache;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -118,126 +116,153 @@ public class ClientConnection
         loginData = new LoginData(channel, account);
     }
 
-    public boolean login() throws IOException {
-        switch (state) {
-            case LOGIN_STEP_1:
-                loginData.channel.write(loginData.headerBuffer);
-                if (!loginData.headerBuffer.hasRemaining()) {
-                    state = State.LOGIN_STEP_2;
-                }
-            case LOGIN_STEP_2:
-                Optional<ReadableByteStream> bundle = channel.fetch();
-                if (bundle.isPresent()) {
-                    ReadableByteStream input = bundle.get();
-                    try {
-                        byte[] array = new byte[input.getInt()];
-                        input.get(array);
-                        int keyLength = input.getInt();
-                        keyLength = FastMath.min(keyLength, AES_MAX_KEY_LENGTH);
-                        if (keyLength < AES_MIN_KEY_LENGTH) {
-                            throw new IOException(
-                                    "Key length too short: " + keyLength);
-                        }
-                        byte[] keyServer = new byte[keyLength];
-                        byte[] keyClient = new byte[keyLength];
-                        Random random = new SecureRandom();
-                        random.nextBytes(keyServer);
-                        random.nextBytes(keyClient);
-                        WritableByteStream output = channel.getOutputStream();
-                        output.putInt(keyLength);
-                        PublicKey rsaKey = KeyFactory.getInstance("RSA")
-                                .generatePublic(new X509EncodedKeySpec(array));
-                        Cipher cipher = Cipher.getInstance("RSA");
-                        cipher.init(Cipher.ENCRYPT_MODE, rsaKey);
-                        output.put(cipher.update(keyServer));
-                        output.put(cipher.doFinal(keyClient));
-                        channel.queueBundle();
-                        channel.setKey(keyClient, keyServer);
-                        KeyPair keyPair = loginData.account.keyPair();
-                        array = keyPair.getPublic().getEncoded();
-                        output.put(array);
-                        channel.queueBundle();
-                        while (channel.process()) {
-                            SleepUtil.sleep(10);
-                        }
-                    } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidKeySpecException e) {
-                        throw new IOException(e);
-                    }
-                    state = State.LOGIN_STEP_3;
-                }
-                break;
-            case LOGIN_STEP_3:
-                bundle = channel.fetch();
-                if (bundle.isPresent()) {
-                    ReadableByteStream input = bundle.get();
-                    byte[] challenge = new byte[512];
-                    input.get(challenge);
-                    try {
-                        Cipher cipher = Cipher.getInstance("RSA");
-                        cipher.init(Cipher.DECRYPT_MODE,
-                                loginData.account.keyPair().getPrivate());
-                        challenge = cipher.doFinal(challenge);
-                    } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException e) {
-                        throw new IOException(e);
-                    }
-                    int length = input.getInt();
-                    for (int i = 0; i < length; i++) {
-                        Optional<Path> file = checkPlugin(input);
-                        if (file.isPresent()) {
-                            loginData.plugins.add(new PluginFile(file.get()));
-                        } else {
-                            loginData.pluginRequests.add(i);
-                            loginData.plugins.add(null);
-                        }
-                    }
-                    readIDStorage(input);
-                    WritableByteStream output = channel.getOutputStream();
-                    output.put(challenge);
-                    output.putString(loginData.account.nickname());
-                    output.putInt(loadingDistanceRequest);
-                    sendSkin(output);
-                    output.putInt(loginData.pluginRequests.size());
-                    for (int i : loginData.pluginRequests) {
-                        output.putInt(i);
-                    }
-                    channel.queueBundle();
-                    while (channel.process()) {
-                        SleepUtil.sleep(10);
-                    }
-                    state = State.LOGIN_STEP_4;
-                }
-                break;
-            case LOGIN_STEP_4:
-                bundle = channel.fetch();
-                if (bundle.isPresent()) {
-                    ReadableByteStream input = bundle.get();
-                    if (input.getBoolean()) {
-                        throw new ConnectionCloseException(input.getString());
-                    }
-                    loadingDistance = input.getInt();
-                    for (Integer request : loginData.pluginRequests) {
-                        Optional<Path> file = cache.retrieve(cache.store(
-                                new LimitedBufferStream(input, input.getInt()),
-                                "plugins"));
-                        if (!file.isPresent()) {
-                            throw new IllegalStateException(
-                                    "Concurrent cache modification");
-                        }
-                        loginData.plugins
-                                .set(request, new PluginFile(file.get()));
-                    }
-                    loginData.pluginRequests.clear();
-                    plugins = new Plugins(loginData.plugins, idStorage);
-                    state = State.OPEN;
-                    loginData = null;
-                    return true;
-                }
-                break;
-            default:
-                throw new IllegalStateException(
-                        "Invalid state for login: " + state);
+    private void loginStep1() throws IOException {
+        loginData.channel.write(loginData.headerBuffer);
+        if (!loginData.headerBuffer.hasRemaining()) {
+            state = State.LOGIN_STEP_2;
         }
-        return false;
+    }
+
+    private void loginStep2(ReadableByteStream input) throws IOException {
+        try {
+            byte[] array = new byte[input.getInt()];
+            input.get(array);
+            int keyLength = input.getInt();
+            keyLength = FastMath.min(keyLength, AES_MAX_KEY_LENGTH);
+            if (keyLength < AES_MIN_KEY_LENGTH) {
+                throw new IOException("Key length too short: " + keyLength);
+            }
+            byte[] keyServer = new byte[keyLength];
+            byte[] keyClient = new byte[keyLength];
+            Random random = new SecureRandom();
+            random.nextBytes(keyServer);
+            random.nextBytes(keyClient);
+            WritableByteStream output = channel.getOutputStream();
+            output.putInt(keyLength);
+            PublicKey rsaKey = KeyFactory.getInstance("RSA")
+                    .generatePublic(new X509EncodedKeySpec(array));
+            Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.ENCRYPT_MODE, rsaKey);
+            output.put(cipher.update(keyServer));
+            output.put(cipher.doFinal(keyClient));
+            channel.queueBundle();
+            channel.setKey(keyClient, keyServer);
+            KeyPair keyPair = loginData.account.keyPair();
+            array = keyPair.getPublic().getEncoded();
+            output.put(array);
+            channel.queueBundle();
+            while (channel.process()) {
+                SleepUtil.sleep(10);
+            }
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidKeySpecException e) {
+            throw new IOException(e);
+        }
+        state = State.LOGIN_STEP_3;
+    }
+
+    private void loginStep3(ReadableByteStream input) throws IOException {
+        byte[] challenge = new byte[512];
+        input.get(challenge);
+        try {
+            Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.DECRYPT_MODE,
+                    loginData.account.keyPair().getPrivate());
+            challenge = cipher.doFinal(challenge);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException e) {
+            throw new IOException(e);
+        }
+        int length = input.getInt();
+        for (int i = 0; i < length; i++) {
+            Optional<Path> file = checkPlugin(input);
+            if (file.isPresent()) {
+                loginData.plugins.add(new PluginFile(file.get()));
+            } else {
+                loginData.pluginRequests.add(i);
+                loginData.plugins.add(null);
+            }
+        }
+        readIDStorage(input);
+        WritableByteStream output = channel.getOutputStream();
+        output.put(challenge);
+        output.putString(loginData.account.nickname());
+        output.putInt(loadingDistanceRequest);
+        sendSkin(output);
+        output.putInt(loginData.pluginRequests.size());
+        for (int i : loginData.pluginRequests) {
+            output.putInt(i);
+        }
+        channel.queueBundle();
+        while (channel.process()) {
+            SleepUtil.sleep(10);
+        }
+        state = State.LOGIN_STEP_4;
+    }
+
+    private void loginStep4(ReadableByteStream input) throws IOException {
+        if (input.getBoolean()) {
+            throw new ConnectionCloseException(input.getString());
+        }
+        loadingDistance = input.getInt();
+        state = State.LOGIN_STEP_5;
+        if (loginData.pluginRequests.isEmpty()) {
+            finishLogin();
+        }
+    }
+
+    private void loginStep5(ReadableByteStream input) throws IOException {
+        int request = loginData.pluginRequests.get(0);
+        if (input.getBoolean()) {
+            loginData.pluginStream.buffer().flip();
+            Optional<Path> file = cache.retrieve(
+                    cache.store(loginData.pluginStream, "plugins"));
+            loginData.pluginStream.buffer().clear();
+            if (!file.isPresent()) {
+                throw new IllegalStateException(
+                        "Concurrent cache modification");
+            }
+            loginData.plugins.set(request, new PluginFile(file.get()));
+            loginData.pluginRequests.remove(0);
+            if (loginData.pluginRequests.isEmpty()) {
+                finishLogin();
+            }
+        } else {
+            ProcessStream.process(input, loginData.pluginStream::put);
+        }
+    }
+
+    private void finishLogin() throws IOException {
+        plugins = new Plugins(loginData.plugins, idStorage);
+        state = State.OPEN;
+        loginData = null;
+    }
+
+    public boolean login() throws IOException {
+        if (state == State.LOGIN_STEP_1) {
+            loginStep1();
+        } else {
+            Optional<ReadableByteStream> bundle = channel.fetch();
+            if (bundle.isPresent()) {
+                ReadableByteStream input = bundle.get();
+                switch (state) {
+                    case LOGIN_STEP_2:
+                        loginStep2(input);
+                        break;
+                    case LOGIN_STEP_3:
+                        loginStep3(input);
+                        break;
+                    case LOGIN_STEP_4:
+                        loginStep4(input);
+                        break;
+                    case LOGIN_STEP_5:
+                        loginStep5(input);
+                        break;
+                    default:
+                        throw new IllegalStateException(
+                                "Invalid state for login: " + state);
+                }
+            }
+        }
+        return state == State.OPEN;
     }
 
     private void readIDStorage(ReadableByteStream stream) throws IOException {
@@ -390,6 +415,7 @@ public class ClientConnection
         LOGIN_STEP_2,
         LOGIN_STEP_3,
         LOGIN_STEP_4,
+        LOGIN_STEP_5,
         OPEN,
         CLOSED
     }
@@ -398,6 +424,7 @@ public class ClientConnection
         private final SocketChannel channel;
         private final List<Integer> pluginRequests = new ArrayList<>();
         private final List<PluginFile> plugins = new ArrayList<>();
+        private final ByteBufferStream pluginStream = new ByteBufferStream();
         private final Account account;
         private final ByteBuffer headerBuffer = BufferCreator
                 .wrap(new byte[]{'S', 'c', 'a', 'p', 'e', 's',

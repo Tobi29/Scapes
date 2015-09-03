@@ -49,7 +49,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Selector;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
@@ -96,7 +95,7 @@ public class PlayerConnection
         this.channel = channel;
         this.server = server;
         registry = server.server().worldFormat().plugins().registry();
-        loginStep1();
+        loginStep0();
     }
 
     public MobPlayerServer mob() {
@@ -139,7 +138,7 @@ public class PlayerConnection
         return ping;
     }
 
-    private void loginStep1() throws IOException {
+    private void loginStep0() throws IOException {
         WritableByteStream output = channel.getOutputStream();
         KeyPair keyPair = server.keyPair();
         byte[] array = keyPair.getPublic().getEncoded();
@@ -149,12 +148,11 @@ public class PlayerConnection
         channel.queueBundle();
     }
 
-    private void loginStep2(ReadableByteStream input) throws IOException {
+    private void loginStep1(ReadableByteStream input) throws IOException {
         int keyLength = input.getInt();
         keyLength = FastMath.min(keyLength, AES_MAX_KEY_LENGTH);
         if (keyLength < AES_MIN_KEY_LENGTH) {
-            throw new IOException(
-                    "Key length too short: " + keyLength);
+            throw new IOException("Key length too short: " + keyLength);
         }
         byte[] keyServer = new byte[keyLength];
         byte[] keyClient = new byte[keyLength];
@@ -171,9 +169,10 @@ public class PlayerConnection
             throw new IOException(e);
         }
         channel.setKey(keyServer, keyClient);
+        state = State.LOGIN_STEP_2;
     }
 
-    private void loginStep3(ReadableByteStream input) throws IOException {
+    private void loginStep2(ReadableByteStream input) throws IOException {
         byte[] array = new byte[550];
         input.get(array);
         id = ChecksumUtil.getChecksum(array, ChecksumUtil.Algorithm.SHA1);
@@ -199,9 +198,10 @@ public class PlayerConnection
                 .write(server.server().worldFormat().idStorage().save(),
                         output);
         channel.queueBundle();
+        state = State.LOGIN_STEP_3;
     }
 
-    private void loginStep4(ReadableByteStream input) throws IOException {
+    private void loginStep3(ReadableByteStream input) throws IOException {
         Plugins plugins = server.server().worldFormat().plugins();
         byte[] challenge = new byte[this.challenge.length];
         input.get(challenge);
@@ -231,10 +231,10 @@ public class PlayerConnection
         } else {
             output.putBoolean(false);
             output.putInt(loadingRadius);
+            channel.queueBundle();
             for (int request : requests) {
                 sendPlugin(plugins.file(request).file(), output);
             }
-            channel.queueBundle();
             long currentTime = System.currentTimeMillis();
             pingWait = currentTime + 1000;
             pingTimeout = currentTime + 10000;
@@ -324,9 +324,13 @@ public class PlayerConnection
 
     private void sendPlugin(Path path, WritableByteStream output)
             throws IOException {
-        output.putInt((int) Files.size(path));
-        FileUtil.read(path,
-                stream -> ProcessStream.process(stream, output::put));
+        FileUtil.read(path, stream -> ProcessStream.process(stream, buffer -> {
+            output.putBoolean(false);
+            output.put(buffer);
+            channel.queueBundle();
+        }, 1 << 10 << 10));
+        output.putBoolean(true);
+        channel.queueBundle();
     }
 
     private void sendPacket(Packet packet) {
@@ -374,29 +378,6 @@ public class PlayerConnection
     public boolean tick(AbstractServerConnection.NetWorkerThread worker) {
         try {
             switch (state) {
-                case LOGIN_STEP_1: {
-                    Optional<ReadableByteStream> bundle = channel.fetch();
-                    if (bundle.isPresent()) {
-                        loginStep2(bundle.get());
-                        state = State.LOGIN_STEP_2;
-                    }
-                    return channel.process();
-                }
-                case LOGIN_STEP_2: {
-                    Optional<ReadableByteStream> bundle = channel.fetch();
-                    if (bundle.isPresent()) {
-                        loginStep3(bundle.get());
-                        state = State.LOGIN_STEP_3;
-                    }
-                    return channel.process();
-                }
-                case LOGIN_STEP_3: {
-                    Optional<ReadableByteStream> bundle = channel.fetch();
-                    if (bundle.isPresent()) {
-                        loginStep4(bundle.get());
-                    }
-                    return channel.process();
-                }
                 case OPEN:
                     long currentTime = System.currentTimeMillis();
                     if (pingTimeout < currentTime) {
@@ -434,6 +415,22 @@ public class PlayerConnection
                         state = State.CLOSED;
                     }
                     break;
+                default:
+                    bundle = channel.fetch();
+                    if (bundle.isPresent()) {
+                        switch (state) {
+                            case LOGIN_STEP_1:
+                                loginStep1(bundle.get());
+                                break;
+                            case LOGIN_STEP_2:
+                                loginStep2(bundle.get());
+                                break;
+                            case LOGIN_STEP_3:
+                                loginStep3(bundle.get());
+                                break;
+                        }
+                    }
+                    return channel.process();
             }
         } catch (ConnectionCloseException | InvalidPacketDataException e) {
             LOGGER.info("Disconnecting player: {}", e.toString());
