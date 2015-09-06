@@ -91,7 +91,7 @@ public class PlayerConnection
     private long ping, pingTimeout, pingWait;
 
     public PlayerConnection(PacketBundleChannel channel,
-            ServerConnection server) throws IOException {
+                            ServerConnection server) throws IOException {
         this.channel = channel;
         this.server = server;
         registry = server.server().worldFormat().plugins().registry();
@@ -316,7 +316,7 @@ public class PlayerConnection
     }
 
     private void sendPluginChecksum(PluginFile plugin,
-            WritableByteStream output) throws IOException {
+                                    WritableByteStream output) throws IOException {
         byte[] checksum = plugin.checksum();
         output.putInt(checksum.length);
         output.put(checksum);
@@ -396,7 +396,9 @@ public class PlayerConnection
                             break;
                         }
                     }
-                    channel.queueBundle();
+                    if (channel.bundleSize() > 0) {
+                        channel.queueBundle();
+                    }
                     Optional<ReadableByteStream> bundle = channel.fetch();
                     if (bundle.isPresent()) {
                         ReadableByteStream stream = bundle.get();

@@ -313,7 +313,9 @@ public class ClientConnection
                     output.putShort(packet.id(plugins.registry()));
                     ((PacketServer) packet).sendServer(this, output);
                 }
-                channel.queueBundle();
+                if (channel.bundleSize() > 0) {
+                    channel.queueBundle();
+                }
                 Optional<ReadableByteStream> bundle = channel.fetch();
                 if (bundle.isPresent()) {
                     ReadableByteStream input = bundle.get();
