@@ -13,25 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.states;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.client.connection.ClientConnection;
+import org.tobi29.scapes.client.connection.NewConnection;
 import org.tobi29.scapes.client.gui.GuiLoading;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
-import org.tobi29.scapes.engine.server.Account;
-import org.tobi29.scapes.engine.server.ServerInfo;
+import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.GL;
+import org.tobi29.scapes.engine.server.Account;
+import org.tobi29.scapes.engine.server.ServerInfo;
+import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.server.ScapesServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -40,10 +42,13 @@ public class GameStateLoadSP extends GameState {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GameStateLoadSP.class);
     private final Path path;
+    private final ByteBuffer headerBuffer = BufferCreator
+            .wrap(new byte[]{'S', 'c', 'a', 'p', 'e', 's',
+                    ConnectionType.PLAY.data()});
     private int step, port;
     private ScapesServer server;
     private SocketChannel channel;
-    private ClientConnection client;
+    private NewConnection client;
     private GuiLoading progress;
 
     public GameStateLoadSP(Path path, ScapesEngine engine, SceneMenu scene) {
@@ -113,30 +118,37 @@ public class GameStateLoadSP extends GameState {
                 case 3:
                     if (channel.finishConnect()) {
                         step++;
+                        progress.setLabel("Sending request...");
                     }
-                    progress.setLabel("Logging in...");
                     break;
                 case 4:
+                    channel.write(headerBuffer);
+                    if (!headerBuffer.hasRemaining()) {
+                        step++;
+                        progress.setLabel("Logging in...");
+                    }
+                    break;
+                case 5:
                     int loadingRadius = FastMath.round(
                             engine.tagStructure().getStructure("Scapes")
                                     .getDouble("RenderDistance"));
-                    Account
-                            account = Account
-                            .read(engine.home().resolve("Account.properties"));
-                    client = new ClientConnection(engine, channel, account,
+                    Account account = Account.read(
+                            engine.home().resolve("Account.properties"));
+                    client = new NewConnection(engine, channel, account,
                             loadingRadius);
                     step++;
                     break;
-                case 5:
+                case 6:
                     if (client.login()) {
                         step++;
+                        progress.setLabel("Loading world...");
                     }
-                    progress.setLabel("Loading world...");
                     break;
-                case 6:
+                case 7:
                     remove(progress);
                     GameStateGameSP game =
-                            new GameStateGameSP(client, server, scene, engine);
+                            new GameStateGameSP(client.finish(), server, scene,
+                                    engine);
                     engine.setState(game);
                     break;
             }
@@ -154,6 +166,6 @@ public class GameStateLoadSP extends GameState {
             step = -1;
             return;
         }
-        progress.setProgress(step / 6.0f);
+        progress.setProgress(step / 7.0f);
     }
 }

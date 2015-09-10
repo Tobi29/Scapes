@@ -13,31 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.states;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.client.connection.ClientConnection;
+import org.tobi29.scapes.client.connection.NewConnection;
 import org.tobi29.scapes.client.gui.GuiLoading;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
-import org.tobi29.scapes.engine.server.Account;
+import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.GL;
+import org.tobi29.scapes.engine.server.Account;
+import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 public class GameStateLoadMP extends GameState {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GameStateLoadMP.class);
     private final InetSocketAddress address;
+    private final ByteBuffer headerBuffer = BufferCreator
+            .wrap(new byte[]{'S', 'c', 'a', 'p', 'e', 's',
+                    ConnectionType.PLAY.data()});
     private int step;
     private SocketChannel channel;
-    private ClientConnection client;
+    private NewConnection client;
     private GuiLoading progress;
 
     public GameStateLoadMP(InetSocketAddress address, ScapesEngine engine,
@@ -83,30 +88,36 @@ public class GameStateLoadMP extends GameState {
                 case 1:
                     if (channel.finishConnect()) {
                         step++;
-                        progress.setLabel("Logging in...");
+                        progress.setLabel("Sending request...");
                     }
                     break;
                 case 2:
+                    channel.write(headerBuffer);
+                    if (!headerBuffer.hasRemaining()) {
+                        step++;
+                        progress.setLabel("Logging in...");
+                    }
+                    break;
+                case 3:
                     int loadingRadius = FastMath.round(
                             engine.tagStructure().getStructure("Scapes")
                                     .getDouble("RenderDistance"));
-                    Account
-                            account = Account
-                            .read(engine.home().resolve("Account.properties"));
-                    client = new ClientConnection(engine, channel, account,
+                    Account account = Account.read(
+                            engine.home().resolve("Account.properties"));
+                    client = new NewConnection(engine, channel, account,
                             loadingRadius);
                     step++;
                     break;
-                case 3:
+                case 4:
                     if (client.login()) {
                         step++;
+                        progress.setLabel("Loading world...");
                     }
-                    progress.setLabel("Loading world...");
                     break;
-                case 4:
+                case 5:
                     remove(progress);
                     GameStateGameMP game =
-                            new GameStateGameMP(client, scene, engine);
+                            new GameStateGameMP(client.finish(), scene, engine);
                     engine.setState(game);
                     break;
             }
@@ -118,6 +129,6 @@ public class GameStateLoadMP extends GameState {
             step = -1;
             return;
         }
-        progress.setProgress(step / 4.0f);
+        progress.setProgress(step / 5.0f);
     }
 }
