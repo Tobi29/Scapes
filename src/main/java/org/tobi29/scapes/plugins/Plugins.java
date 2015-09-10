@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.plugins;
 
 import org.slf4j.Logger;
@@ -22,7 +21,6 @@ import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.IDStorage;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath;
-import org.tobi29.scapes.server.ScapesServer;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -64,13 +62,10 @@ public class Plugins {
         if (worldType == null) {
             throw new IOException("No world type found");
         }
-        registry = new GameRegistry(idStorage,this);
+        registry = new GameRegistry(idStorage, this);
     }
 
     public void dispose() {
-        for (Plugin plugin : plugins) {
-            plugin.dispose(registry);
-        }
         plugins.clear();
         dimensions.clear();
         worldType = null;
@@ -134,18 +129,8 @@ public class Plugins {
     }
 
     public void init() {
-        for (Plugin plugin : plugins) {
-            plugin.init(registry);
-        }
-        for (Plugin plugin : plugins) {
-            plugin.initEnd(registry);
-        }
+        plugins.forEach(plugin -> plugin.init(registry));
+        plugins.forEach(plugin -> plugin.initEnd(registry));
         registry.lock();
-    }
-
-    public void initServer(ScapesServer server) {
-        for (Plugin plugin : plugins) {
-            plugin.initServer(server);
-        }
     }
 }

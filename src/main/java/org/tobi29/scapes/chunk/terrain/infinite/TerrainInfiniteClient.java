@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import org.tobi29.scapes.chunk.WorldClient;
@@ -181,5 +180,10 @@ public class TerrainInfiniteClient extends TerrainInfinite
         int x = chunk.x();
         int y = chunk.y();
         chunkManager.remove(x, y);
+    }
+
+    @Override
+    public int sunLightReduction(int x, int y) {
+        return (int) world.environment().sunLightReduction(x, y);
     }
 }

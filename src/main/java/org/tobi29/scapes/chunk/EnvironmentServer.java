@@ -13,17 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk;
 
 import org.tobi29.scapes.chunk.generator.ChunkGenerator;
 import org.tobi29.scapes.chunk.generator.ChunkPopulator;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
-import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 
-public interface WorldEnvironment {
+public interface EnvironmentServer {
     ChunkGenerator generator();
 
     ChunkPopulator populator();
@@ -39,6 +37,4 @@ public interface WorldEnvironment {
     float sunLightReduction(double x, double y);
 
     Vector3 sunLightNormal(double x, double y);
-
-    WorldSkybox createSkybox(WorldClient world, GL gl);
 }

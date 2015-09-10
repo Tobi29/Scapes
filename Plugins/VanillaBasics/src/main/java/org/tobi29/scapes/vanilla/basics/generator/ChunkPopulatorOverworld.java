@@ -139,7 +139,7 @@ public class ChunkPopulatorOverworld implements ChunkPopulator {
             int dy) {
         if (terrain instanceof TerrainInfinite) {
             ((TerrainInfinite) terrain).chunk(x >> 4, y >> 4).ifPresent(
-                    chunk -> ((WorldEnvironmentOverworld) terrain.world()
+                    chunk -> ((EnvironmentOverworldServer) terrain.world()
                             .environment())
                             .simulateSeason(terrain, x, y, dx, dy,
                                     chunk.metaData("Vanilla")));

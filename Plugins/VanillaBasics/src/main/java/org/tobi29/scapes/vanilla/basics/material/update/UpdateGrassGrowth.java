@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.update;
 
 import org.tobi29.scapes.block.BlockType;
@@ -21,7 +20,7 @@ import org.tobi29.scapes.block.Update;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator;
-import org.tobi29.scapes.vanilla.basics.generator.WorldEnvironmentOverworld;
+import org.tobi29.scapes.vanilla.basics.generator.EnvironmentOverworldServer;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
 public class UpdateGrassGrowth extends Update {
@@ -32,16 +31,18 @@ public class UpdateGrassGrowth extends Update {
         VanillaMaterial materials = plugin.getMaterials();
         BlockType type = terrain.type(x, y, z);
         if (type == materials.grass) {
-            WorldEnvironmentOverworld environment =
-                    (WorldEnvironmentOverworld) terrain.world().environment();
+            EnvironmentOverworldServer environment =
+                    (EnvironmentOverworldServer) terrain.world()
+                            .environment();
             ClimateGenerator climateGenerator = environment.climate();
             double humidity = climateGenerator.humidity(x, y, z);
             if (humidity < 0.2) {
                 terrain.type(x, y, z, materials.dirt);
             }
         } else if (type == materials.dirt) {
-            WorldEnvironmentOverworld environment =
-                    (WorldEnvironmentOverworld) terrain.world().environment();
+            EnvironmentOverworldServer environment =
+                    (EnvironmentOverworldServer) terrain.world()
+                            .environment();
             ClimateGenerator climateGenerator = environment.climate();
             double humidity = climateGenerator.humidity(x, y, z);
             if (humidity > 0.2 && (terrain.blockLight(x, y, z + 1) > 8 ||

@@ -17,10 +17,11 @@ package org.tobi29.scapes.vanilla.basics;
 
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.GameRegistry;
-import org.tobi29.scapes.chunk.World;
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.chunk.WorldEnvironment;
+import org.tobi29.scapes.chunk.EnvironmentClient;
+import org.tobi29.scapes.chunk.EnvironmentServer;
 import org.tobi29.scapes.chunk.WorldServer;
+import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
@@ -33,7 +34,8 @@ import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientVB;
 import org.tobi29.scapes.vanilla.basics.entity.server.MobPlayerServerVB;
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateInfoLayer;
-import org.tobi29.scapes.vanilla.basics.generator.WorldEnvironmentOverworld;
+import org.tobi29.scapes.vanilla.basics.generator.EnvironmentOverworldClient;
+import org.tobi29.scapes.vanilla.basics.generator.EnvironmentOverworldServer;
 import org.tobi29.scapes.vanilla.basics.generator.decorator.BiomeDecorator;
 import org.tobi29.scapes.vanilla.basics.material.*;
 
@@ -135,6 +137,14 @@ public class VanillaBasics implements WorldType {
 
     @Override
     public void init(GameRegistry registry) {
+        GameRegistry.AsymSupplierRegistry<WorldServer, EnvironmentServer, WorldClient, EnvironmentClient>
+                environmentRegistry =
+                registry.getAsymSupplier("Core", "Environment");
+        environmentRegistry
+                .reg(world -> new EnvironmentOverworldServer(world, this),
+                        EnvironmentOverworldClient::new,
+                        EnvironmentOverworldServer.class,
+                        "vanilla.basics.Overworld");
         GameRegistry.Registry<TreeType> treeRegistry =
                 VanillaBasicsRegisters.registerTreeTypes(registry);
         GameRegistry.Registry<CropType> cropRegistry =
@@ -167,23 +177,27 @@ public class VanillaBasics implements WorldType {
     }
 
     @Override
+    public void initServerEnd(ScapesServer server) {
+    }
+
+    @Override
+    public void initClient(GameStateGameMP game) {
+    }
+
+    @Override
+    public void initClientEnd(GameStateGameMP game) {
+    }
+
+    @Override
     public void worldInit(WorldServer world) {
     }
 
     @Override
     public void worldInit(WorldClient world) {
-        WorldEnvironmentOverworld environment =
-                (WorldEnvironmentOverworld) world.environment();
+        EnvironmentOverworldClient environment =
+                (EnvironmentOverworldClient) world.environment();
         world.infoLayer("VanillaBasics:Climate",
                 () -> new ClimateInfoLayer(environment.climate()));
-    }
-
-    @Override
-    public void worldTick(WorldServer world) {
-    }
-
-    @Override
-    public void dispose(GameRegistry registry) {
     }
 
     @Override
@@ -194,11 +208,6 @@ public class VanillaBasics implements WorldType {
     @Override
     public String assetRoot() {
         return "assets/scapes/tobi29/vanilla/basics/";
-    }
-
-    @Override
-    public WorldEnvironment createEnvironment(World world) {
-        return new WorldEnvironmentOverworld(world, this);
     }
 
     public VanillaMaterial getMaterials() {
@@ -228,6 +237,11 @@ public class VanillaBasics implements WorldType {
             byte[] skin, PlayerConnection connection) {
         return new MobPlayerServerVB(world, pos, speed, xRot, zRot, nickname,
                 skin, connection);
+    }
+
+    @Override
+    public EnvironmentServer createEnvironment(WorldServer world) {
+        return new EnvironmentOverworldServer(world, this);
     }
 
     public class Config {

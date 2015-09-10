@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.block;
 
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
@@ -26,8 +25,8 @@ public abstract class Update {
     public static Update make(GameRegistry registry, int x, int y, int z,
             double delay, short id) {
         try {
-            return registry.<Update>getSupplier("Core", "Update").get(id)
-                    .apply(registry).set(x, y, z, delay);
+            return registry.<GameRegistry, Update>getSupplier("Core", "Update")
+                    .get(id).apply(registry).set(x, y, z, delay);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(
                     "Failed to make update over reflection! (id: " +

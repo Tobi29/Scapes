@@ -16,6 +16,8 @@
 package org.tobi29.scapes.block;
 
 import org.tobi29.scapes.chunk.IDStorage;
+import org.tobi29.scapes.chunk.WorldClient;
+import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.entity.client.*;
 import org.tobi29.scapes.entity.server.*;
@@ -31,10 +33,10 @@ import java.util.function.Supplier;
 public class GameRegistry {
     private final Map<Pair<String, String>, Registry<?>> registries =
             new ConcurrentHashMap<>();
-    private final Map<Pair<String, String>, SupplierRegistry<?>>
+    private final Map<Pair<String, String>, SupplierRegistry<?, ?>>
             supplierRegistries = new ConcurrentHashMap<>();
-    private final Map<Class<? extends EntityServer>, Integer> entityIDs =
-            new ConcurrentHashMap<>();
+    private final Map<Pair<String, String>, AsymSupplierRegistry<?, ?, ?, ?>>
+            asymSupplierRegistries = new ConcurrentHashMap<>();
     private final Map<String, Material> materialNames =
             new ConcurrentHashMap<>();
     private final List<CraftingRecipeType> craftingRecipes = new ArrayList<>();
@@ -52,23 +54,21 @@ public class GameRegistry {
         materials[0] = air;
         blocks[0] = air;
         air.id = 0;
-        Registry<EntityServer.Supplier> entityServerRegistry =
-                add("Core", "Entity", 1, Integer.MAX_VALUE);
-        Registry<EntityClient.Supplier> entityClientRegistry =
-                add("Core", "EntityClient", 1, Integer.MAX_VALUE);
+        AsymSupplierRegistry<WorldServer, EntityServer, WorldClient, EntityClient>
+                er = addAsymSupplier("Core", "Entity", 1, Integer.MAX_VALUE);
+        addAsymSupplier("Core", "Environment", 1, Integer.MAX_VALUE);
         WorldType worldType = plugins.worldType();
-        int id = entityServerRegistry.reg(null, "core.mob.Player");
-        entityClientRegistry.register(worldType.playerSupplier(), id);
-        entityIDs.put(worldType.playerClass(), id);
-        registerEntity(EntityBlockBreakServer::new, EntityBlockBreakClient::new,
+        er.reg(null, worldType.playerSupplier()::get, worldType.playerClass(),
+                "core.mob.Player");
+        er.reg(EntityBlockBreakServer::new, EntityBlockBreakClient::new,
                 EntityBlockBreakServer.class, "core.entity.BlockBreak");
-        registerEntity(MobItemServer::new, MobItemClient::new,
-                MobItemServer.class, "core.mob.Item");
-        registerEntity(MobFlyingBlockServer::new, MobFlyingBlockClient::new,
+        er.reg(MobItemServer::new, MobItemClient::new, MobItemServer.class,
+                "core.mob.Item");
+        er.reg(MobFlyingBlockServer::new, MobFlyingBlockClient::new,
                 MobFlyingBlockServer.class, "core.mob.FlyingBlock");
-        registerEntity(MobBombServer::new, MobBombClient::new,
-                MobBombServer.class, "core.mob.Bomb");
-        SupplierRegistry<Packet> pr =
+        er.reg(MobBombServer::new, MobBombClient::new, MobBombServer.class,
+                "core.mob.Bomb");
+        SupplierRegistry<GameRegistry, Packet> pr =
                 addSupplier("Core", "Packet", 1, Short.MAX_VALUE);
         pr.regS(PacketRequestChunk::new, "core.packet.RequestChunk");
         pr.regS(PacketRequestEntity::new, "core.packet.RequestEntity");
@@ -101,7 +101,7 @@ public class GameRegistry {
         pr.regS(PacketPingClient::new, "core.packet.PingClient");
         pr.regS(PacketPingServer::new, "core.packet.PingServer");
         pr.regS(PacketSkin::new, "core.packet.Skin");
-        SupplierRegistry<Update> ur =
+        SupplierRegistry<GameRegistry, Update> ur =
                 addSupplier("Core", "Update", 1, Short.MAX_VALUE);
         ur.regS(UpdateBlockUpdate::new, "core.update.BlockUpdate");
         ur.regS(UpdateBlockUpdateUpdateTile::new,
@@ -128,19 +128,36 @@ public class GameRegistry {
     }
 
     @SuppressWarnings("unchecked")
-    public synchronized <E> SupplierRegistry<E> addSupplier(String module,
+    public synchronized <D, E> SupplierRegistry<D, E> addSupplier(String module,
             String type, int min, int max) {
         if (locked) {
             throw new IllegalStateException("Initializing already ended");
         }
         Pair<String, String> pair = new Pair<>(module, type);
-        SupplierRegistry<?> registry = supplierRegistries.get(pair);
+        SupplierRegistry<?, ?> registry = supplierRegistries.get(pair);
         if (registry == null) {
             registry = new SupplierRegistry<>(module, type, min, max);
             registries.put(pair, registry);
             supplierRegistries.put(pair, registry);
         }
-        return (SupplierRegistry<E>) registry;
+        return (SupplierRegistry<D, E>) registry;
+    }
+
+    @SuppressWarnings("unchecked")
+    public synchronized <D, E, F, G> AsymSupplierRegistry<D, E, F, G> addAsymSupplier(
+            String module, String type, int min, int max) {
+        if (locked) {
+            throw new IllegalStateException("Initializing already ended");
+        }
+        Pair<String, String> pair = new Pair<>(module, type);
+        AsymSupplierRegistry<?, ?, ?, ?> registry =
+                asymSupplierRegistries.get(pair);
+        if (registry == null) {
+            registry = new AsymSupplierRegistry<>(module, type, min, max);
+            registries.put(pair, registry);
+            asymSupplierRegistries.put(pair, registry);
+        }
+        return (AsymSupplierRegistry<D, E, F, G>) registry;
     }
 
     @SuppressWarnings("unchecked")
@@ -149,8 +166,16 @@ public class GameRegistry {
     }
 
     @SuppressWarnings("unchecked")
-    public <E> SupplierRegistry<E> getSupplier(String module, String type) {
-        return (SupplierRegistry<E>) supplierRegistries
+    public <D, E> SupplierRegistry<D, E> getSupplier(String module,
+            String type) {
+        return (SupplierRegistry<D, E>) supplierRegistries
+                .get(new Pair<>(module, type));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <D, E, F, G> AsymSupplierRegistry<D, E, F, G> getAsymSupplier(
+            String module, String type) {
+        return (AsymSupplierRegistry<D, E, F, G>) asymSupplierRegistries
                 .get(new Pair<>(module, type));
     }
 
@@ -178,10 +203,6 @@ public class GameRegistry {
         return air;
     }
 
-    public int entityID(EntityServer entity) {
-        return entityIDs.get(entity.getClass());
-    }
-
     public void registerMaterial(Material material) {
         if (locked) {
             throw new IllegalStateException("Initializing already ended");
@@ -207,20 +228,9 @@ public class GameRegistry {
             blocks[id] = (BlockType) material;
         }
         materialNames.put(nameID, material);
-        materialNames.put(nameID.substring(nameID.lastIndexOf('.') + 1,
-                        nameID.length()), material);
-    }
-
-    public void registerEntity(EntityServer.Supplier serverSupplier,
-            EntityClient.Supplier clientSupplier,
-            Class<? extends EntityServer> entityClass, String name) {
-        Registry<EntityServer.Supplier> entityServerRegistry =
-                get("Core", "Entity");
-        Registry<EntityClient.Supplier> entityClientRegistry =
-                get("Core", "EntityClient");
-        int id = entityServerRegistry.reg(serverSupplier, name);
-        entityClientRegistry.register(clientSupplier, id);
-        entityIDs.put(entityClass, id);
+        materialNames.put(
+                nameID.substring(nameID.lastIndexOf('.') + 1, nameID.length()),
+                material);
     }
 
     public void registerCraftingRecipe(CraftingRecipeType recipe) {
@@ -285,8 +295,8 @@ public class GameRegistry {
         }
     }
 
-    public class SupplierRegistry<E>
-            extends Registry<Function<GameRegistry, ? extends E>> {
+    public class SupplierRegistry<D, E>
+            extends Registry<Function<D, ? extends E>> {
         private final Map<Class<?>, Integer> suppliers =
                 new ConcurrentHashMap<>();
 
@@ -298,19 +308,72 @@ public class GameRegistry {
             return reg(registry -> element.get(), name);
         }
 
-        @Override
-        public int reg(Function<GameRegistry, ? extends E> element,
-                String name) {
+        public int reg(Function<D, ? extends E> element,
+                Class<? extends E> clazz, String name) {
             if (locked) {
                 throw new IllegalStateException("Initializing already ended");
             }
             int id = super.reg(element, name);
-            suppliers.put(element.apply(GameRegistry.this).getClass(), id);
+            suppliers.put(clazz, id);
             return id;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public int reg(Function<D, ? extends E> element, String name) {
+            return reg(element,
+                    (Class<? extends E>) element.apply(null).getClass(), name);
         }
 
         public int id(E object) {
             return suppliers.get(object.getClass());
+        }
+    }
+
+    public class AsymSupplierRegistry<D, E, F, G> extends
+            Registry<Pair<Function<D, ? extends E>, Function<F, ? extends G>>> {
+        private final Map<Class<?>, Integer> suppliers =
+                new ConcurrentHashMap<>();
+
+        private AsymSupplierRegistry(String module, String type, int min,
+                int max) {
+            super(module, type, min, max);
+        }
+
+        public int id(E object) {
+            return suppliers.get(object.getClass());
+        }
+
+        public int regS(Supplier<? extends E> element1,
+                Supplier<? extends G> element2, Class<? extends E> clazz,
+                String name) {
+            return reg(registry -> element1.get(), registry -> element2.get(),
+                    clazz, name);
+        }
+
+        public int reg(Function<D, ? extends E> element1,
+                Function<F, ? extends G> element2, Class<? extends E> clazz,
+                String name) {
+            return reg(new Pair<>(element1, element2), clazz, name);
+        }
+
+        public int reg(
+                Pair<Function<D, ? extends E>, Function<F, ? extends G>> element,
+                Class<? extends E> clazz, String name) {
+            int id = super.reg(element, name);
+            suppliers.put(clazz, id);
+            return id;
+        }
+
+        @Deprecated
+        @SuppressWarnings("unchecked")
+        @Override
+        public int reg(
+                Pair<Function<D, ? extends E>, Function<F, ? extends G>> element,
+                String name) {
+            return reg(element,
+                    (Class<? extends E>) element.a.apply(null).getClass(),
+                    name);
         }
     }
 }

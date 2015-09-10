@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.block.soil;
 
 import org.tobi29.scapes.block.*;
 import org.tobi29.scapes.block.models.BlockModel;
 import org.tobi29.scapes.block.models.BlockModelComplex;
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock;
+import org.tobi29.scapes.chunk.EnvironmentClient;
 import org.tobi29.scapes.chunk.data.ChunkMesh;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
@@ -32,7 +32,7 @@ import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityFarmlandServer;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateInfoLayer;
-import org.tobi29.scapes.vanilla.basics.generator.WorldEnvironmentOverworld;
+import org.tobi29.scapes.vanilla.basics.generator.EnvironmentClimate;
 import org.tobi29.scapes.vanilla.basics.material.CropType;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock;
@@ -124,74 +124,98 @@ public class BlockGrass extends VanillaBlock {
     @Override
     public float particleColorR(Face face, TerrainClient terrain, int x, int y,
             int z) {
-        if (face == Face.DOWN) {
-            return 1.0f;
-        } else {
-            WorldEnvironmentOverworld environment =
-                    (WorldEnvironmentOverworld) terrain.world().environment();
-            ClimateGenerator climateGenerator = environment.climate();
-            return (float) climateGenerator
-                    .grassColorR(climateGenerator.temperature(x, y, z),
-                            climateGenerator.humidity(x, y, z));
+        if (face != Face.DOWN) {
+            EnvironmentClient environment = terrain.world().environment();
+            if (environment instanceof EnvironmentClimate) {
+                EnvironmentClimate environmentClimate =
+                        (EnvironmentClimate) environment;
+                ClimateGenerator climateGenerator =
+                        environmentClimate.climate();
+                return (float) climateGenerator
+                        .grassColorR(climateGenerator.temperature(x, y, z),
+                                climateGenerator.humidity(x, y, z));
+            }
         }
+        return 1.0f;
     }
 
     @Override
     public float particleColorG(Face face, TerrainClient terrain, int x, int y,
             int z) {
-        if (face == Face.DOWN) {
-            return 1.0f;
-        } else {
-            WorldEnvironmentOverworld environment =
-                    (WorldEnvironmentOverworld) terrain.world().environment();
-            ClimateGenerator climateGenerator = environment.climate();
-            return (float) climateGenerator
-                    .grassColorG(climateGenerator.temperature(x, y, z),
-                            climateGenerator.humidity(x, y, z));
+        if (face != Face.DOWN) {
+            EnvironmentClient environment = terrain.world().environment();
+            if (environment instanceof EnvironmentClimate) {
+                EnvironmentClimate environmentClimate =
+                        (EnvironmentClimate) environment;
+                ClimateGenerator climateGenerator =
+                        environmentClimate.climate();
+                return (float) climateGenerator
+                        .grassColorG(climateGenerator.temperature(x, y, z),
+                                climateGenerator.humidity(x, y, z));
+            }
         }
+        return 1.0f;
     }
 
     @Override
     public float particleColorB(Face face, TerrainClient terrain, int x, int y,
             int z) {
-        if (face == Face.DOWN) {
-            return 1.0f;
-        } else {
-            WorldEnvironmentOverworld environment =
-                    (WorldEnvironmentOverworld) terrain.world().environment();
-            ClimateGenerator climateGenerator = environment.climate();
-            return (float) climateGenerator
-                    .grassColorB(climateGenerator.temperature(x, y, z),
-                            climateGenerator.humidity(x, y, z));
+        if (face != Face.DOWN) {
+            EnvironmentClient environment = terrain.world().environment();
+            if (environment instanceof EnvironmentClimate) {
+                EnvironmentClimate environmentClimate =
+                        (EnvironmentClimate) environment;
+                ClimateGenerator climateGenerator =
+                        environmentClimate.climate();
+                return (float) climateGenerator
+                        .grassColorB(climateGenerator.temperature(x, y, z),
+                                climateGenerator.humidity(x, y, z));
+            }
         }
+        return 1.0f;
     }
 
     @Override
     public Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
-        if (face == Face.DOWN) {
+        if (face != Face.DOWN) {
+            return Optional.of(textureTop);
+        }
+        if (BlockDirt.isSand(terrain, x, y, z)) {
+            return Optional.of(textureBottomSand);
+        } else {
             return Optional.of(textureBottomDirt);
         }
-        return Optional.of(textureTop);
     }
 
     @Override
     public void addToChunkMesh(ChunkMesh mesh, ChunkMesh meshAlpha, int data,
             TerrainClient terrain, TerrainRenderInfo info, int x, int y, int z,
             float xx, float yy, float zz, boolean lod) {
-        WorldEnvironmentOverworld environment =
-                (WorldEnvironmentOverworld) terrain.world().environment();
-        ClimateGenerator climateGenerator = environment.climate();
-        ClimateInfoLayer climateLayer = info.get("VanillaBasics:Climate");
-        double temperature = climateLayer.temperature(x, y, z);
-        double humidity = climateLayer.humidity(x, y);
-        double grassR = climateGenerator.grassColorR(temperature, humidity);
-        double grassG = climateGenerator.grassColorG(temperature, humidity);
-        double grassB = climateGenerator.grassColorB(temperature, humidity);
+        double grassR, grassG, grassB;
+        boolean sand;
+        EnvironmentClient environment = terrain.world().environment();
+        if (environment instanceof EnvironmentClimate) {
+            EnvironmentClimate environmentClimate =
+                    (EnvironmentClimate) environment;
+            ClimateGenerator climateGenerator = environmentClimate.climate();
+            ClimateInfoLayer climateLayer = info.get("VanillaBasics:Climate");
+            double temperature = climateLayer.temperature(x, y, z);
+            double humidity = climateLayer.humidity(x, y);
+            grassR = climateGenerator.grassColorR(temperature, humidity);
+            grassG = climateGenerator.grassColorG(temperature, humidity);
+            grassB = climateGenerator.grassColorB(temperature, humidity);
+            sand = humidity < 0.3;
+        } else {
+            grassR = 1.0;
+            grassG = 1.0;
+            grassB = 1.0;
+            sand = false;
+        }
         if (lod) {
             modelBlockGrass.addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz,
                     (float) grassR, (float) grassG, (float) grassB, 1.0f, lod);
-            if (humidity < 0.3) {
+            if (sand) {
                 modelBlockSand
                         .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz,
                                 1.0f, 1.0f, 1.0f, 1.0f, lod);
@@ -213,7 +237,7 @@ public class BlockGrass extends VanillaBlock {
                     .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz,
                             (float) grassR, (float) grassG, (float) grassB,
                             1.0f, lod);
-            if (humidity < 0.3) {
+            if (sand) {
                 modelBlockFastSand
                         .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz,
                                 1.0f, 1.0f, 1.0f, 1.0f, lod);

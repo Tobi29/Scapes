@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.states.scenes;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.block.Material;
 import org.tobi29.scapes.block.TerrainTextureRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldSkybox;
@@ -81,6 +79,7 @@ public class SceneScapesVoxelWorld extends Scene {
     private final GuiWidgetDebugValues.Element cameraPositionXDebug,
             cameraPositionYDebug, cameraPositionZDebug, lightDebug,
             blockLightDebug, sunLightDebug;
+    private final TerrainTextureRegistry terrainTextureRegistry;
     private final ClientSkinStorage skinStorage;
     private final GuiWidgetDebugClient debugWidget;
     private final GuiWidgetPerformanceClient performanceWidget;
@@ -93,12 +92,13 @@ public class SceneScapesVoxelWorld extends Scene {
     private FBO skyboxFBO, exposureFBO;
     private GuiHud hud;
     private WorldSkybox skybox;
-    private TerrainTextureRegistry terrainTextureRegistry;
     private boolean chunkGeometryDebug;
 
     public SceneScapesVoxelWorld(WorldClient world, Cam cam) {
         this.world = world;
         this.cam = cam;
+        terrainTextureRegistry = world.game().terrainTextureRegistry();
+        skinStorage = world.game().skinStorage();
         GuiWidgetDebugValues debugValues = world.game().engine().debugValues();
         cameraPositionXDebug = debugValues.get("Camera-Position-X");
         cameraPositionYDebug = debugValues.get("Camera-Position-Y");
@@ -112,9 +112,6 @@ public class SceneScapesVoxelWorld extends Scene {
         performanceWidget = new GuiWidgetPerformanceClient();
         addGui(performanceWidget);
         performanceWidget.setVisible(false);
-        skinStorage = new ClientSkinStorage(
-                world.game().engine().graphics().textures()
-                        .get("Scapes:image/entity/mob/Player"));
         vao = VAOUtility.createVTI(
                 new float[]{0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
                         0.0f, 1.0f, 0.0f, 0.0f},
@@ -196,25 +193,8 @@ public class SceneScapesVoxelWorld extends Scene {
 
     @Override
     public void init(GL gl) {
-        MobPlayerClientMain player = world.player();
         skyboxFBO = new FBO(1, 1, 1, false, true, false, gl);
         exposureFBO = new FBO(1, 1, 1, false, true, false, gl);
-        long time = System.currentTimeMillis();
-        terrainTextureRegistry = new TerrainTextureRegistry(state.engine());
-        for (Material type : world.registry().materials()) {
-            if (type != null) {
-                type.registerTextures(terrainTextureRegistry);
-            }
-        }
-        int size = terrainTextureRegistry.init();
-        time = System.currentTimeMillis() - time;
-        LOGGER.info("Created terrain texture atlas with {} textures in {} ms.",
-                size, time);
-        for (Material type : world.registry().materials()) {
-            if (type != null) {
-                type.createModels(terrainTextureRegistry);
-            }
-        }
         hud = new GuiHud();
         new GuiComponentChat(hud, world.game().chatHistory(), 8, 416, 0, 0);
         addGui(hud);
@@ -394,8 +374,6 @@ public class SceneScapesVoxelWorld extends Scene {
         skyboxFBO.dispose(gl);
         exposureFBO.dispose(gl);
         world.dispose(gl);
-        terrainTextureRegistry.dispose(gl);
-        skinStorage.dispose(gl);
     }
 
     public Image[] takePanorama(GL gl, FBO fbo) {

@@ -53,7 +53,7 @@ public abstract class Packet {
     }
 
     public static Packet make(GameRegistry registry, short id) {
-        return registry.<Packet>getSupplier("Core", "Packet").get(id)
+        return registry.<GameRegistry,Packet>getSupplier("Core", "Packet").get(id)
                 .apply(registry);
     }
 

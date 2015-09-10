@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import org.slf4j.Logger;
@@ -141,6 +140,11 @@ public class TerrainInfiniteServer extends TerrainInfinite
                 }
             }
         }, "Chunk-Loading");
+    }
+
+    @Override
+    public int sunLightReduction(int x, int y) {
+        return (int) world.environment().sunLightReduction(x, y);
     }
 
     public TerrainInfiniteFormat terrainFormat() {

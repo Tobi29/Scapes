@@ -13,21 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.plugins;
 
-import org.tobi29.scapes.chunk.World;
-import org.tobi29.scapes.chunk.WorldEnvironment;
+import org.tobi29.scapes.chunk.EnvironmentServer;
+import org.tobi29.scapes.chunk.WorldServer;
 
 /**
  * Basic interface dor dimension addons
  */
 public interface Dimension extends Plugin {
-    /**
-     * Called to create a {@code WorldEnvironment}
-     *
-     * @param world The {@code World} that the environment is created for
-     * @return A newly created {@code WorldEnvironment} for the given world
-     */
-    WorldEnvironment createEnvironment(World world);
+    EnvironmentServer createEnvironment(WorldServer world);
 }

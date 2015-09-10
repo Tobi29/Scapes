@@ -18,6 +18,9 @@ package org.tobi29.scapes.client.states;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.Scapes;
+import org.tobi29.scapes.block.GameRegistry;
+import org.tobi29.scapes.block.Material;
+import org.tobi29.scapes.block.TerrainTextureRegistry;
 import org.tobi29.scapes.client.ChatHistory;
 import org.tobi29.scapes.client.Playlist;
 import org.tobi29.scapes.client.connection.ClientConnection;
@@ -30,6 +33,7 @@ import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.particle.ParticleBlock;
+import org.tobi29.scapes.entity.skin.ClientSkinStorage;
 import org.tobi29.scapes.packets.PacketPingClient;
 
 public class GameStateGameMP extends GameState {
@@ -39,6 +43,8 @@ public class GameStateGameMP extends GameState {
     private final ChatHistory chatHistory;
     private final Playlist playlist;
     private final GuiWidgetDebugValues.Element tickDebug;
+    private final TerrainTextureRegistry terrainTextureRegistry;
+    private final ClientSkinStorage skinStorage;
     private double pingWait;
 
     protected GameStateGameMP(ClientConnection client, Scene scene,
@@ -48,6 +54,9 @@ public class GameStateGameMP extends GameState {
         playlist = new Playlist(engine.sounds());
         this.client = client;
         tickDebug = engine.debugValues().get("Client-TPS");
+        terrainTextureRegistry = new TerrainTextureRegistry(engine);
+        skinStorage = new ClientSkinStorage(engine.graphics().textures()
+                .get("Scapes:image/entity/mob/Player"));
     }
 
     public ClientConnection client() {
@@ -58,6 +67,8 @@ public class GameStateGameMP extends GameState {
     public void dispose(GL gl) {
         client.stop();
         engine.sounds().stop("music");
+        terrainTextureRegistry.dispose(gl);
+        skinStorage.dispose(gl);
         ParticleBlock.clear();
         if (client.plugins() != null) {
             client.plugins().dispose();
@@ -70,6 +81,25 @@ public class GameStateGameMP extends GameState {
     public void init(GL gl) {
         client.plugins().addFileSystems(engine.files());
         client.plugins().init();
+        client.plugins().plugins().forEach(plugin -> plugin.initClient(this));
+        client.plugins().plugins()
+                .forEach(plugin -> plugin.initClientEnd(this));
+        long time = System.currentTimeMillis();
+        GameRegistry registry = client.plugins().registry();
+        for (Material type : registry.materials()) {
+            if (type != null) {
+                type.registerTextures(terrainTextureRegistry);
+            }
+        }
+        int size = terrainTextureRegistry.init();
+        time = System.currentTimeMillis() - time;
+        for (Material type : registry.materials()) {
+            if (type != null) {
+                type.createModels(terrainTextureRegistry);
+            }
+        }
+        LOGGER.info("Loaded terrain models with {} textures in {} ms.", size,
+                time);
         client.start(this);
     }
 
@@ -107,6 +137,14 @@ public class GameStateGameMP extends GameState {
             client.send(new PacketPingClient(System.currentTimeMillis()));
         }
         tickDebug.setValue(1.0 / delta);
+    }
+
+    public TerrainTextureRegistry terrainTextureRegistry() {
+        return terrainTextureRegistry;
+    }
+
+    public ClientSkinStorage skinStorage() {
+        return skinStorage;
     }
 
     public ChatHistory chatHistory() {

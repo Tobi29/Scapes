@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain;
 
 import org.tobi29.scapes.block.AABBElement;
@@ -35,6 +34,8 @@ public interface Terrain {
     int sunLight(int x, int y, int z);
 
     int blockLight(int x, int y, int z);
+
+    int sunLightReduction(int x, int y);
 
     int highestBlockZAt(int x, int y);
 

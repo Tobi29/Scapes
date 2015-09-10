@@ -93,7 +93,7 @@ public abstract class ItemTool extends VanillaItem
     public double click(MobPlayerServer entity, ItemStack item, MobServer hit) {
         if (item.data() > 0) {
             double damage = item.metaData("Vanilla").getDouble("ToolDamage");
-            double modifier = entity.wieldMode() == WieldMode.DUAL ? 2.1 : 1.0;
+            double modifier = entity.wieldMode() == WieldMode.DUAL ? 1.0 : 2.1;
             item.metaData("Vanilla").setDouble("ToolDamage", damage);
             return item.metaData("Vanilla").getDouble("ToolStrength") *
                     (1.0 - FastMath.tanh(damage)) * modifier;

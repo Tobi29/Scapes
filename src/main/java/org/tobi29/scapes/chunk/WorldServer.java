@@ -44,6 +44,7 @@ import org.tobi29.scapes.server.format.WorldFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -55,27 +56,33 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
     private final Collection<MobSpawner> spawners =
             Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final WorldFormat worldFormat;
-    private final String name, id;
+    private final String id;
     private final List<ChunkPopulator> populators = new ArrayList<>();
     private final TerrainServer terrain;
     private final ServerConnection connection;
     private final Sync sync = new Sync(20, 5000000000L, true, "Server-Update");
     private final Map<String, MobPlayerServer> players =
             new ConcurrentHashMap<>();
+    private final EnvironmentServer environment;
+    private final ChunkGenerator generator;
     private Joiner joiner;
-    private ChunkGenerator generator;
 
-    public WorldServer(WorldFormat worldFormat, String name, String id,
+    public WorldServer(WorldFormat worldFormat, String id,
             ServerConnection connection, TaskExecutor taskExecutor,
-            TerrainSupplier terrainSupplier) {
+            Function<WorldServer, TerrainServer> terrainSupplier,
+            Function<WorldServer, EnvironmentServer> environmentSupplier) {
         super(worldFormat.plugins(), taskExecutor,
                 worldFormat.plugins().registry());
         seed = worldFormat.seed();
-        this.name = name;
         this.id = id;
         this.worldFormat = worldFormat;
         this.connection = connection;
-        terrain = terrainSupplier.get(this);
+        environment = environmentSupplier.apply(this);
+        terrain = terrainSupplier.apply(this);
+        generator = environment.generator();
+        populators.add(environment.populator());
+        worldFormat.plugins().plugins()
+                .forEach(plugin -> plugin.worldInit(this));
     }
 
     public ServerConnection connection() {
@@ -94,14 +101,6 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
         tagStructure.setLong("Tick", tick);
         tagStructure.setStructure("Environment", environment.save());
         return tagStructure;
-    }
-
-    public void init(WorldEnvironment environment) {
-        this.environment = environment;
-        generator = environment.generator();
-        populators.add(environment.populator());
-        worldFormat.plugins().plugins()
-                .forEach(plugin -> plugin.worldInit(this));
     }
 
     public void calculateSpawn() {
@@ -223,8 +222,6 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                 }
             }
         });
-        worldFormat.plugins().plugins()
-                .forEach(plugin -> plugin.worldTick(this));
         environment.tick(delta);
         taskExecutor.tick();
         tick++;
@@ -409,8 +406,12 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
         }
     }
 
-    public String name() {
-        return name;
+    public EnvironmentServer environment() {
+        return environment;
+    }
+
+    public String id() {
+        return id;
     }
 
     public Sync sync() {
@@ -520,10 +521,5 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
     @FunctionalInterface
     public interface EntityListener {
         void listen(EntityServer entity);
-    }
-
-    @FunctionalInterface
-    public interface TerrainSupplier {
-        TerrainServer get(WorldServer world);
     }
 }

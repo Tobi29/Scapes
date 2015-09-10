@@ -18,9 +18,11 @@ package org.tobi29.scapes.server;
 import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.Material;
+import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.engine.utils.ArrayUtil;
 import org.tobi29.scapes.engine.utils.StringUtil;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
+import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.packets.PacketDisconnect;
 import org.tobi29.scapes.packets.PacketUpdateInventory;
 import org.tobi29.scapes.server.command.Command;
@@ -85,31 +87,68 @@ final class ScapesServerCommands {
             options.add("p", "player", true, "Player who will be teleported");
             options.add("t", "target", true,
                     "Target that the player will be teleported to");
+            options.add("w", "world", 3,
+                    "World that the player will be teleported to");
             options.add("l", "location", 3,
                     "Target that the player will be teleported to");
         }, (args, executor, commands) -> {
             String playerName = args.requireOption('p', executor.playerName());
+            Optional<String> worldOption = args.option('w');
             Optional<String[]> locationOption = args.optionArray('l');
             if (locationOption.isPresent()) {
                 Vector3d location = Command.getVector3d(locationOption.get());
-                commands.add(() -> {
-                    PlayerConnection player =
-                            Command.require(connection::playerByName,
-                                    playerName);
-                    player.mob().setPos(location);
-                });
+                if (worldOption.isPresent()) {
+                    commands.add(() -> {
+                        PlayerConnection player =
+                                Command.require(connection::playerByName,
+                                        playerName);
+                        WorldServer world =
+                                Command.require(server.worldFormat()::world,
+                                        worldOption.get());
+                        player.setWorld(world, location);
+                    });
+                } else {
+                    commands.add(() -> {
+                        PlayerConnection player =
+                                Command.require(connection::playerByName,
+                                        playerName);
+                        player.mob().setPos(location);
+                    });
+                }
             } else {
                 String targetName =
                         args.requireOption('t', executor.playerName());
-                commands.add(() -> {
-                    PlayerConnection player =
-                            Command.require(connection::playerByName,
-                                    playerName);
-                    PlayerConnection target =
-                            Command.require(connection::playerByName,
-                                    targetName);
-                    player.mob().setPos(target.mob().pos());
-                });
+                if (worldOption.isPresent()) {
+                    commands.add(() -> {
+                        PlayerConnection player =
+                                Command.require(connection::playerByName,
+                                        playerName);
+                        PlayerConnection target =
+                                Command.require(connection::playerByName,
+                                        targetName);
+                        WorldServer world =
+                                Command.require(server.worldFormat()::world,
+                                        worldOption.get());
+                        MobPlayerServer targetMob = target.mob();
+                        player.setWorld(world, targetMob.pos());
+                    });
+                } else {
+                    commands.add(() -> {
+                        PlayerConnection player =
+                                Command.require(connection::playerByName,
+                                        playerName);
+                        PlayerConnection target =
+                                Command.require(connection::playerByName,
+                                        targetName);
+                        MobPlayerServer playerMob = target.mob();
+                        MobPlayerServer targetMob = target.mob();
+                        if (playerMob.world() == targetMob.world()) {
+                            playerMob.setPos(targetMob.pos());
+                        } else {
+                            player.setWorld(targetMob.world(), targetMob.pos());
+                        }
+                    });
+                }
             }
         });
 

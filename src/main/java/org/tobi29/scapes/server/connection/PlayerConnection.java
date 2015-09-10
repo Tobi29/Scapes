@@ -91,7 +91,7 @@ public class PlayerConnection
     private long ping, pingTimeout, pingWait;
 
     public PlayerConnection(PacketBundleChannel channel,
-                            ServerConnection server) throws IOException {
+            ServerConnection server) throws IOException {
         this.channel = channel;
         this.server = server;
         registry = server.server().worldFormat().plugins().registry();
@@ -244,35 +244,64 @@ public class PlayerConnection
     }
 
     private Optional<String> start() {
-        WorldFormat worldFormat = server.server().worldFormat();
-        Optional<TagStructure> tag = worldFormat.playerData().load(id);
-        WorldServer world;
-        statistics = new PlayerStatistics();
-        if (tag.isPresent()) {
-            TagStructure tagStructure = tag.get();
-            world = worldFormat.world(tagStructure.getString("World"));
+        setWorld();
+        state = State.OPEN;
+        return server.addPlayer(this);
+    }
+
+    public synchronized void setWorld() {
+        setWorld(null);
+    }
+
+    public synchronized void setWorld(WorldServer world) {
+        setWorld(world, null);
+    }
+
+    public synchronized void setWorld(WorldServer world, Vector3 pos) {
+        if (entity != null) {
+            entity.world().deleteEntity(entity);
+            entity.world().removePlayer(entity);
+            TagStructure tagStructure = entity.write(false);
             entity = server().server().worldFormat().plugins().worldType()
                     .newPlayer(world, Vector3d.ZERO, Vector3d.ZERO, 0.0, 0.0,
                             nickname, skin.checksum(), this);
-            entity.read(tagStructure.getStructure("Entity"));
-            statistics
-                    .load(world.registry(), tagStructure.getList("Statistics"));
-            permissionLevel = tagStructure.getInteger("Permissions");
+            entity.read(tagStructure);
         } else {
-            world = worldFormat.defaultWorld();
-            entity = server().server().worldFormat().plugins().worldType()
-                    .newPlayer(world,
-                            new Vector3d(0.5, 0.5, 1.0).plus(world.spawn()),
-                            Vector3d.ZERO, 0.0, 0.0, nickname, skin.checksum(),
-                            this);
-            entity.onSpawn();
+            WorldFormat worldFormat = server.server().worldFormat();
+            Optional<TagStructure> tag = worldFormat.playerData().load(id);
+            statistics = new PlayerStatistics();
+            if (tag.isPresent()) {
+                TagStructure tagStructure = tag.get();
+                if (world == null) {
+                    world = worldFormat.world(tagStructure.getString("World"))
+                            .orElseGet(worldFormat::defaultWorld);
+                }
+                entity = server().server().worldFormat().plugins().worldType()
+                        .newPlayer(world, Vector3d.ZERO, Vector3d.ZERO, 0.0,
+                                0.0, nickname, skin.checksum(), this);
+                entity.read(tagStructure.getStructure("Entity"));
+                statistics.load(world.registry(),
+                        tagStructure.getList("Statistics"));
+                permissionLevel = tagStructure.getInteger("Permissions");
+            } else {
+                if (world == null) {
+                    world = worldFormat.defaultWorld();
+                }
+                entity = server().server().worldFormat().plugins().worldType()
+                        .newPlayer(world,
+                                new Vector3d(0.5, 0.5, 1.0).plus(world.spawn()),
+                                Vector3d.ZERO, 0.0, 0.0, nickname,
+                                skin.checksum(), this);
+                entity.onSpawn();
+            }
+        }
+        if (pos != null) {
+            entity.setPos(pos);
         }
         world.addEntity(entity);
         world.addPlayer(entity);
         sendQueueSize.incrementAndGet();
         sendQueue.add(new PacketSetWorld(world, entity));
-        state = State.OPEN;
-        return server.addPlayer(this);
     }
 
     private Optional<String> generateResponse(boolean challengeMatch) {
@@ -316,7 +345,7 @@ public class PlayerConnection
     }
 
     private void sendPluginChecksum(PluginFile plugin,
-                                    WritableByteStream output) throws IOException {
+            WritableByteStream output) throws IOException {
         byte[] checksum = plugin.checksum();
         output.putInt(checksum.length);
         output.put(checksum);
@@ -461,7 +490,7 @@ public class PlayerConnection
                 world.removePlayer(entity);
                 TagStructure tagStructure = new TagStructure();
                 tagStructure.setStructure("Entity", entity.write(false));
-                tagStructure.setString("World", world.name());
+                tagStructure.setString("World", world.id());
                 tagStructure.setList("Statistics", statistics.save());
                 tagStructure.setInteger("Permissions", permissionLevel);
                 server.server().worldFormat().playerData()

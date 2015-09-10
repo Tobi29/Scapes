@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import org.tobi29.scapes.block.AABBElement;
@@ -145,6 +144,11 @@ public class TerrainInfiniteSection implements TerrainClient {
             return chunk.get().blockLightG(x, y, z);
         }
         return terrain.blockLight(x, y, z);
+    }
+
+    @Override
+    public int sunLightReduction(int x, int y) {
+        return terrain.sunLightReduction(x, y);
     }
 
     @Override

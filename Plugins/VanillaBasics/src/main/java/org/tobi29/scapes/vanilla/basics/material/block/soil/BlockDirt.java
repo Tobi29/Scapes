@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.block.soil;
 
 import org.tobi29.scapes.block.ItemStack;
@@ -21,6 +20,7 @@ import org.tobi29.scapes.block.TerrainTexture;
 import org.tobi29.scapes.block.TerrainTextureRegistry;
 import org.tobi29.scapes.block.models.BlockModel;
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock;
+import org.tobi29.scapes.chunk.EnvironmentClient;
 import org.tobi29.scapes.chunk.data.ChunkMesh;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
@@ -33,7 +33,7 @@ import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityFarmlandServer;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateInfoLayer;
-import org.tobi29.scapes.vanilla.basics.generator.WorldEnvironmentOverworld;
+import org.tobi29.scapes.vanilla.basics.generator.EnvironmentClimate;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
 import java.util.Optional;
@@ -44,6 +44,20 @@ public class BlockDirt extends BlockSoil {
 
     public BlockDirt(VanillaMaterial materials) {
         super(materials, "vanilla.basics.block.Dirt");
+    }
+
+    public static boolean isSand(TerrainClient terrain, int x, int y, int z) {
+        EnvironmentClient environment = terrain.world().environment();
+        if (environment instanceof EnvironmentClimate) {
+            EnvironmentClimate environmentClimate =
+                    (EnvironmentClimate) environment;
+            ClimateGenerator climateGenerator = environmentClimate.climate();
+            double humidity = climateGenerator.humidity(x, y, z);
+            if (humidity < 0.3) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -101,11 +115,7 @@ public class BlockDirt extends BlockSoil {
     @Override
     public Optional<TerrainTexture> particleTexture(Face face,
             TerrainClient terrain, int x, int y, int z) {
-        WorldEnvironmentOverworld environment =
-                (WorldEnvironmentOverworld) terrain.world().environment();
-        ClimateGenerator climateGenerator = environment.climate();
-        double humidity = climateGenerator.humidity(x, y, z);
-        if (humidity < 0.3) {
+        if (isSand(terrain, x, y, z)) {
             return Optional.of(textureSand);
         } else {
             return Optional.of(textureDirt);

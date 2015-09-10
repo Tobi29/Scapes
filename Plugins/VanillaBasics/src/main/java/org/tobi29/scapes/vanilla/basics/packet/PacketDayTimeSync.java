@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.packet;
 
+import org.tobi29.scapes.chunk.EnvironmentClient;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
@@ -24,7 +24,7 @@ import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketClient;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator;
-import org.tobi29.scapes.vanilla.basics.generator.WorldEnvironmentOverworld;
+import org.tobi29.scapes.vanilla.basics.generator.EnvironmentClimate;
 
 import java.io.IOException;
 
@@ -59,10 +59,13 @@ public class PacketDayTimeSync extends Packet implements PacketClient {
         if (world == null) {
             return;
         }
-        WorldEnvironmentOverworld environmentOverworld =
-                (WorldEnvironmentOverworld) world.environment();
-        ClimateGenerator climateGenerator = environmentOverworld.climate();
-        climateGenerator.setDayTime(dayTime);
-        climateGenerator.setDay(day);
+        EnvironmentClient environment = world.environment();
+        if (environment instanceof EnvironmentClimate) {
+            EnvironmentClimate environmentClimate =
+                    (EnvironmentClimate) environment;
+            ClimateGenerator climateGenerator = environmentClimate.climate();
+            climateGenerator.setDayTime(dayTime);
+            climateGenerator.setDay(day);
+        }
     }
 }

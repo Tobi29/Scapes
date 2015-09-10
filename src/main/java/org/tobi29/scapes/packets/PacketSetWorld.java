@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
+import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
+import org.tobi29.scapes.chunk.EnvironmentClient;
+import org.tobi29.scapes.chunk.EnvironmentServer;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
@@ -33,8 +35,7 @@ import java.io.IOException;
 public class PacketSetWorld extends Packet implements PacketClient {
     private TagStructure tag;
     private long seed;
-    private String name;
-    private int entityID;
+    private int entityID, environment;
 
     public PacketSetWorld() {
     }
@@ -42,8 +43,9 @@ public class PacketSetWorld extends Packet implements PacketClient {
     public PacketSetWorld(WorldServer world, MobPlayerServer player) {
         tag = player.write();
         seed = world.seed();
-        name = world.name();
         entityID = player.entityID();
+        environment = world.registry().getAsymSupplier("Core", "Environment")
+                .id(world.environment());
     }
 
     @Override
@@ -51,8 +53,8 @@ public class PacketSetWorld extends Packet implements PacketClient {
             throws IOException {
         TagStructureBinary.write(tag, stream);
         stream.putLong(seed);
-        stream.putString(name);
         stream.putInt(entityID);
+        stream.putInt(environment);
     }
 
     @Override
@@ -61,18 +63,21 @@ public class PacketSetWorld extends Packet implements PacketClient {
         tag = new TagStructure();
         TagStructureBinary.read(tag, stream);
         seed = stream.getLong();
-        name = stream.getString();
         entityID = stream.getInt();
+        environment = stream.getInt();
     }
 
     @Override
     public void runClient(ClientConnection client, WorldClient world) {
+        GameRegistry.AsymSupplierRegistry<WorldServer, EnvironmentServer, WorldClient, EnvironmentClient>
+                environmentRegistry = client.plugins().registry()
+                .getAsymSupplier("Core", "Environment");
         client.changeWorld(
                 new WorldClient(client, new Cam(0.01f, client.loadingRadius()),
-                        seed, name,
-                        newWorld -> new TerrainInfiniteClient(newWorld,
-                                client.loadingRadius() >> 4, 512,
-                                client.game().engine().taskExecutor()), tag,
+                        seed, newWorld -> new TerrainInfiniteClient(newWorld,
+                        client.loadingRadius() >> 4, 512,
+                        client.game().engine().taskExecutor()),
+                        environmentRegistry.get(environment).b::apply, tag,
                         entityID));
     }
 }

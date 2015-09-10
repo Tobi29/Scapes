@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics;
 
 import org.tobi29.scapes.block.*;
-import org.tobi29.scapes.chunk.WorldEnvironment;
+import org.tobi29.scapes.chunk.WorldClient;
+import org.tobi29.scapes.chunk.EnvironmentServer;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
+import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
+import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.server.ScapesServer;
@@ -32,7 +34,7 @@ import org.tobi29.scapes.vanilla.basics.entity.client.*;
 import org.tobi29.scapes.vanilla.basics.entity.server.*;
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator;
-import org.tobi29.scapes.vanilla.basics.generator.WorldEnvironmentOverworld;
+import org.tobi29.scapes.vanilla.basics.generator.EnvironmentOverworldServer;
 import org.tobi29.scapes.vanilla.basics.generator.decorator.LayerGround;
 import org.tobi29.scapes.vanilla.basics.generator.decorator.LayerPatch;
 import org.tobi29.scapes.vanilla.basics.generator.decorator.LayerRock;
@@ -67,11 +69,13 @@ class VanillaBasicsRegisters {
             if (dayOption.isPresent()) {
                 long day = Command.getLong(dayOption.get());
                 commands.add(() -> {
-                    WorldServer world = server.worldFormat().world(worldName);
-                    WorldEnvironment environment = world.environment();
-                    if (environment instanceof WorldEnvironmentOverworld) {
-                        WorldEnvironmentOverworld environmentOverworld =
-                                (WorldEnvironmentOverworld) environment;
+                    WorldServer world =
+                            Command.require(server.worldFormat()::world,
+                                    worldName);
+                    EnvironmentServer environment = world.environment();
+                    if (environment instanceof EnvironmentOverworldServer) {
+                        EnvironmentOverworldServer environmentOverworld =
+                                (EnvironmentOverworldServer) environment;
                         ClimateGenerator climateGenerator =
                                 environmentOverworld.climate();
                         climateGenerator.setDay(day +
@@ -86,11 +90,13 @@ class VanillaBasicsRegisters {
             if (dayTimeOption.isPresent()) {
                 float dayTime = Command.getFloat(dayTimeOption.get());
                 commands.add(() -> {
-                    WorldServer world = server.worldFormat().world(worldName);
-                    WorldEnvironment environment = world.environment();
-                    if (environment instanceof WorldEnvironmentOverworld) {
-                        WorldEnvironmentOverworld environmentOverworld =
-                                (WorldEnvironmentOverworld) environment;
+                    WorldServer world =
+                            Command.require(server.worldFormat()::world,
+                                    worldName);
+                    EnvironmentServer environment = world.environment();
+                    if (environment instanceof EnvironmentOverworldServer) {
+                        EnvironmentOverworldServer environmentOverworld =
+                                (EnvironmentOverworldServer) environment;
                         ClimateGenerator climateGenerator =
                                 environmentOverworld.climate();
                         climateGenerator.setDayTime(dayTime +
@@ -193,44 +199,41 @@ class VanillaBasicsRegisters {
     }
 
     static void registerEntities(GameRegistry registry) {
-        registry.registerEntity(MobPigServer::new, MobPigClient::new,
-                MobPigServer.class, "vanilla.basics.mob.Pig");
-        registry.registerEntity(MobZombieServer::new, MobZombieClient::new,
+        GameRegistry.AsymSupplierRegistry<WorldServer, EntityServer, WorldClient, EntityClient>
+                er = registry.getAsymSupplier("Core", "Entity");
+        er.reg(MobPigServer::new, MobPigClient::new, MobPigServer.class,
+                "vanilla.basics.mob.Pig");
+        er.reg(MobZombieServer::new, MobZombieClient::new,
                 MobZombieServer.class, "vanilla.basics.mob.Zombie");
-        registry.registerEntity(MobSkeletonServer::new, MobSkeletonClient::new,
+        er.reg(MobSkeletonServer::new, MobSkeletonClient::new,
                 MobSkeletonServer.class, "vanilla.basics.mob.Skeleton");
-        registry.registerEntity(EntityTornadoServer::new,
-                EntityTornadoClient::new, EntityTornadoServer.class,
-                "vanilla.basics.entity.Tornado");
-        registry.registerEntity(EntityAlloyServer::new, EntityAlloyClient::new,
+        er.reg(EntityTornadoServer::new, EntityTornadoClient::new,
+                EntityTornadoServer.class, "vanilla.basics.entity.Tornado");
+        er.reg(EntityAlloyServer::new, EntityAlloyClient::new,
                 EntityAlloyServer.class, "vanilla.basics.entity.Alloy");
-        registry.registerEntity(EntityAnvilServer::new, EntityAnvilClient::new,
+        er.reg(EntityAnvilServer::new, EntityAnvilClient::new,
                 EntityAnvilServer.class, "vanilla.basics.entity.Anvil");
-        registry.registerEntity(EntityBellowsServer::new,
-                EntityBellowsClient::new, EntityBellowsServer.class,
-                "vanilla.basics.entity.Bellows");
-        registry.registerEntity(EntityBloomeryServer::new,
-                EntityBloomeryClient::new, EntityBloomeryServer.class,
-                "vanilla.basics.entity.Bloomery");
-        registry.registerEntity(EntityChestServer::new, EntityChestClient::new,
+        er.reg(EntityBellowsServer::new, EntityBellowsClient::new,
+                EntityBellowsServer.class, "vanilla.basics.entity.Bellows");
+        er.reg(EntityBloomeryServer::new, EntityBloomeryClient::new,
+                EntityBloomeryServer.class, "vanilla.basics.entity.Bloomery");
+        er.reg(EntityChestServer::new, EntityChestClient::new,
                 EntityChestServer.class, "vanilla.basics.entity.Chest");
-        registry.registerEntity(EntityForgeServer::new, EntityForgeClient::new,
+        er.reg(EntityForgeServer::new, EntityForgeClient::new,
                 EntityForgeServer.class, "vanilla.basics.entity.Forge");
-        registry.registerEntity(EntityFurnaceServer::new,
-                EntityFurnaceClient::new, EntityFurnaceServer.class,
-                "vanilla.basics.entity.Furnace");
-        registry.registerEntity(EntityQuernServer::new, EntityQuernClient::new,
+        er.reg(EntityFurnaceServer::new, EntityFurnaceClient::new,
+                EntityFurnaceServer.class, "vanilla.basics.entity.Furnace");
+        er.reg(EntityQuernServer::new, EntityQuernClient::new,
                 EntityQuernServer.class, "vanilla.basics.entity.Quern");
-        registry.registerEntity(EntityResearchTableServer::new,
-                EntityResearchTableClient::new, EntityResearchTableServer.class,
+        er.reg(EntityResearchTableServer::new, EntityResearchTableClient::new,
+                EntityResearchTableServer.class,
                 "vanilla.basics.entity.ResearchTable");
-        registry.registerEntity(EntityFarmlandServer::new,
-                EntityFarmlandClient::new, EntityFarmlandServer.class,
-                "vanilla.basics.entity.Farmland");
+        er.reg(EntityFarmlandServer::new, EntityFarmlandClient::new,
+                EntityFarmlandServer.class, "vanilla.basics.entity.Farmland");
     }
 
     static void registerUpdates(GameRegistry registry) {
-        GameRegistry.SupplierRegistry<Update> ur =
+        GameRegistry.SupplierRegistry<GameRegistry, Update> ur =
                 registry.getSupplier("Core", "Update");
         ur.regS(UpdateWaterFlow::new, "vanilla.basics.update.WaterFlow");
         ur.regS(UpdateLavaFlow::new, "vanilla.basics.update.LavaFlow");
@@ -242,7 +245,7 @@ class VanillaBasicsRegisters {
     }
 
     static void registerPackets(GameRegistry registry) {
-        GameRegistry.SupplierRegistry<Packet> pr =
+        GameRegistry.SupplierRegistry<GameRegistry, Packet> pr =
                 registry.getSupplier("Core", "Packet");
         pr.regS(PacketDayTimeSync::new, "vanilla.basics.packet.DayTimeSync");
         pr.regS(PacketOpenCrafting::new, "vanilla.basics.packet.OpenCrafting");

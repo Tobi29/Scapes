@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.server.format;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.chunk.IDStorage;
-import org.tobi29.scapes.chunk.WorldEnvironment;
+import org.tobi29.scapes.chunk.EnvironmentServer;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteServer;
 import org.tobi29.scapes.engine.utils.graphics.Image;
@@ -38,6 +37,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 public class WorldFormat {
     private static final Logger LOGGER =
@@ -70,16 +70,17 @@ public class WorldFormat {
                 FileUtil.readReturn(path.resolve("Data.stag"),
                         TagStructureBinary::read);
         idStorage.load(tagStructure.getStructure("IDs"));
-        plugins = new Plugins(pluginFiles(), idStorage, path);
-        plugins.init();
-        plugins.initServer(server);
         seed = tagStructure.getLong("Seed");
         worldsTagStructure = tagStructure.getStructure("Worlds");
+        plugins = new Plugins(pluginFiles(), idStorage, path);
+        plugins.init();
         Iterator<Dimension> iterator = plugins.dimensions().iterator();
         while (iterator.hasNext()) {
             registerWorld(iterator.next());
         }
         defaultWorld = worlds.get(plugins.worldType().id());
+        plugins.plugins().forEach(plugin -> plugin.initServer(server));
+        plugins.plugins().forEach(plugin -> plugin.initServerEnd(server));
     }
 
     public static String filenameExtension() {
@@ -106,8 +107,8 @@ public class WorldFormat {
         return plugins;
     }
 
-    public WorldServer world(String name) {
-        return worlds.get(name);
+    public Optional<WorldServer> world(String name) {
+        return Optional.of(worlds.get(name));
     }
 
     public WorldServer defaultWorld() {
@@ -120,25 +121,23 @@ public class WorldFormat {
 
     public synchronized WorldServer registerWorld(Dimension dimension)
             throws IOException {
-        return registerWorld(dimension, dimension.id());
+        return registerWorld(dimension::createEnvironment, dimension.id());
     }
 
-    public synchronized WorldServer registerWorld(Dimension dimension,
-            String name) throws IOException {
-        Path worldDirectory = regionPath.resolve(name.toLowerCase());
+    public synchronized WorldServer registerWorld(
+            Function<WorldServer, EnvironmentServer> environmentSupplier,
+            String id) throws IOException {
+        Path worldDirectory = regionPath.resolve(id.toLowerCase());
         Files.createDirectories(worldDirectory);
-        WorldServer world =
-                new WorldServer(this, name, dimension.id(), server.connection(),
-                        server.taskExecutor(),
-                        newWorld -> new TerrainInfiniteServer(newWorld, 512,
-                                worldDirectory, server.taskExecutor(),
-                                plugins.registry().air()));
-        WorldEnvironment environment = dimension.createEnvironment(world);
-        LOGGER.info("Adding world: {} (Environment:{})", name, environment);
-        world.init(environment);
-        world.read(worldsTagStructure.getStructure(dimension.id()));
+        WorldServer world = new WorldServer(this, id, server.connection(),
+                server.taskExecutor(),
+                newWorld -> new TerrainInfiniteServer(newWorld, 512,
+                        worldDirectory, server.taskExecutor(),
+                        plugins.registry().air()), environmentSupplier);
+        LOGGER.info("Adding world: {}", id);
+        world.read(worldsTagStructure.getStructure(id));
         world.calculateSpawn();
-        worlds.put(dimension.id(), world);
+        worlds.put(id, world);
         world.start();
         return world;
     }
@@ -151,7 +150,7 @@ public class WorldFormat {
         LOGGER.info("Removing world: {}", name);
         world.stop();
         world.dispose();
-        worldsTagStructure.setStructure(world.name(), world.write());
+        worldsTagStructure.setStructure(world.id(), world.write());
     }
 
     public void save() throws IOException {

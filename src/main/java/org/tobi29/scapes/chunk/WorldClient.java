@@ -40,12 +40,12 @@ import org.tobi29.scapes.entity.model.EntityModel;
 import org.tobi29.scapes.entity.model.MobModel;
 import org.tobi29.scapes.entity.particle.ParticleManager;
 import org.tobi29.scapes.packets.Packet;
-import org.tobi29.scapes.plugins.Dimension;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -66,9 +66,11 @@ public class WorldClient extends World {
     private final Map<Integer, EntityModel> entityModels =
             new ConcurrentHashMap<>();
     private final ParticleManager particleManager = new ParticleManager(this);
+    private final EnvironmentClient environment;
 
     public WorldClient(ClientConnection connection, Cam cam, long seed,
-            String name, TerrainSupplier terrainSupplier,
+            Function<WorldClient, TerrainClient> terrainSupplier,
+            Function<WorldClient, EnvironmentClient> environmentSupplier,
             TagStructure playerTag, int playerID) {
         super(connection.plugins(), connection.game().engine().taskExecutor(),
                 connection.plugins().registry());
@@ -78,15 +80,14 @@ public class WorldClient extends World {
                 .newPlayer(this, Vector3d.ZERO, Vector3d.ZERO, 0.0, 0.0, "");
         player.read(playerTag);
         this.seed = seed;
-        environment =
-                ((Dimension) plugins.plugin(name)).createEnvironment(this);
         scene = new SceneScapesVoxelWorld(this, cam);
         playerModel = player.createModel().get();
         addEntity(player, playerID);
         LOGGER.info("Received player entity: {} with id: {}", player, playerID);
+        environment = environmentSupplier.apply(this);
         connection.plugins().plugins()
                 .forEach(plugin -> plugin.worldInit(this));
-        terrain = terrainSupplier.get(this);
+        terrain = terrainSupplier.apply(this);
     }
 
     public List<MobClient> entities(List<MobClient> exceptions,
@@ -273,6 +274,10 @@ public class WorldClient extends World {
         return particleManager;
     }
 
+    public EnvironmentClient environment() {
+        return environment;
+    }
+
     public void infoLayer(String name,
             Supplier<TerrainRenderInfo.InfoLayer> layer) {
         infoLayers.put(name, layer);
@@ -289,10 +294,5 @@ public class WorldClient extends World {
     @Override
     public void send(Packet packet) {
         connection.send(packet);
-    }
-
-    @FunctionalInterface
-    public interface TerrainSupplier {
-        TerrainClient get(WorldClient world);
     }
 }

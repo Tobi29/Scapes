@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.block.vegetation;
 
 import org.tobi29.scapes.block.*;
 import org.tobi29.scapes.block.models.BlockModel;
 import org.tobi29.scapes.block.models.BlockModelComplex;
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock;
+import org.tobi29.scapes.chunk.EnvironmentClient;
 import org.tobi29.scapes.chunk.data.ChunkMesh;
 import org.tobi29.scapes.chunk.terrain.Terrain;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
@@ -38,7 +38,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3i;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateInfoLayer;
-import org.tobi29.scapes.vanilla.basics.generator.WorldEnvironmentOverworld;
+import org.tobi29.scapes.vanilla.basics.generator.EnvironmentClimate;
 import org.tobi29.scapes.vanilla.basics.material.TreeType;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.block.CollisionLeaves;
@@ -118,61 +118,76 @@ public class BlockLeaves extends VanillaBlock {
     @Override
     public float particleColorR(Face face, TerrainClient terrain, int x, int y,
             int z) {
-        TreeType type = treeRegistry.get(terrain.data(x, y, z));
-        WorldEnvironmentOverworld environment =
-                (WorldEnvironmentOverworld) terrain.world().environment();
-        ClimateGenerator climateGenerator = environment.climate();
-        double temperature = climateGenerator.temperature(x, y, z);
-        double mix = FastMath.clamp(temperature / 30.0f, 0.0f, 1.0f);
-        Vector3 colorCold = type.colorCold();
-        Vector3 colorWarm = type.colorWarm();
-        double r = FastMath.mix(colorCold.floatX(), colorWarm.floatX(), mix);
-        if (!type.isEvergreen()) {
-            double autumn = climateGenerator.autumnLeaves(y);
-            Vector3 colorAutumn = type.colorAutumn();
-            r = FastMath.mix(r, colorAutumn.floatX(), autumn);
+        EnvironmentClient environment = terrain.world().environment();
+        if (environment instanceof EnvironmentClimate) {
+            EnvironmentClimate environmentClimate =
+                    (EnvironmentClimate) environment;
+            ClimateGenerator climateGenerator = environmentClimate.climate();
+            TreeType type = treeRegistry.get(terrain.data(x, y, z));
+            double temperature = climateGenerator.temperature(x, y, z);
+            double mix = FastMath.clamp(temperature / 30.0f, 0.0f, 1.0f);
+            Vector3 colorCold = type.colorCold();
+            Vector3 colorWarm = type.colorWarm();
+            double r =
+                    FastMath.mix(colorCold.floatX(), colorWarm.floatX(), mix);
+            if (!type.isEvergreen()) {
+                double autumn = climateGenerator.autumnLeaves(y);
+                Vector3 colorAutumn = type.colorAutumn();
+                r = FastMath.mix(r, colorAutumn.floatX(), autumn);
+            }
+            return (float) r;
         }
-        return (float) r;
+        return 1.0f;
     }
 
     @Override
     public float particleColorG(Face face, TerrainClient terrain, int x, int y,
             int z) {
-        TreeType type = treeRegistry.get(terrain.data(x, y, z));
-        WorldEnvironmentOverworld environment =
-                (WorldEnvironmentOverworld) terrain.world().environment();
-        ClimateGenerator climateGenerator = environment.climate();
-        double temperature = climateGenerator.temperature(x, y, z);
-        double mix = FastMath.clamp(temperature / 30.0f, 0.0f, 1.0f);
-        Vector3 colorCold = type.colorCold();
-        Vector3 colorWarm = type.colorWarm();
-        double g = FastMath.mix(colorCold.floatY(), colorWarm.floatY(), mix);
-        if (!type.isEvergreen()) {
-            double autumn = climateGenerator.autumnLeaves(y);
-            Vector3 colorAutumn = type.colorAutumn();
-            g = FastMath.mix(g, colorAutumn.floatY(), autumn);
+        EnvironmentClient environment = terrain.world().environment();
+        if (environment instanceof EnvironmentClimate) {
+            EnvironmentClimate environmentClimate =
+                    (EnvironmentClimate) environment;
+            ClimateGenerator climateGenerator = environmentClimate.climate();
+            TreeType type = treeRegistry.get(terrain.data(x, y, z));
+            double temperature = climateGenerator.temperature(x, y, z);
+            double mix = FastMath.clamp(temperature / 30.0f, 0.0f, 1.0f);
+            Vector3 colorCold = type.colorCold();
+            Vector3 colorWarm = type.colorWarm();
+            double g =
+                    FastMath.mix(colorCold.floatY(), colorWarm.floatY(), mix);
+            if (!type.isEvergreen()) {
+                double autumn = climateGenerator.autumnLeaves(y);
+                Vector3 colorAutumn = type.colorAutumn();
+                g = FastMath.mix(g, colorAutumn.floatY(), autumn);
+            }
+            return (float) g;
         }
-        return (float) g;
+        return 1.0f;
     }
 
     @Override
     public float particleColorB(Face face, TerrainClient terrain, int x, int y,
             int z) {
-        TreeType type = treeRegistry.get(terrain.data(x, y, z));
-        WorldEnvironmentOverworld environment =
-                (WorldEnvironmentOverworld) terrain.world().environment();
-        ClimateGenerator climateGenerator = environment.climate();
-        double temperature = climateGenerator.temperature(x, y, z);
-        double mix = FastMath.clamp(temperature / 30.0f, 0.0f, 1.0f);
-        Vector3 colorCold = type.colorCold();
-        Vector3 colorWarm = type.colorWarm();
-        double b = FastMath.mix(colorCold.floatZ(), colorWarm.floatZ(), mix);
-        if (!type.isEvergreen()) {
-            double autumn = climateGenerator.autumnLeaves(y);
-            Vector3 colorAutumn = type.colorAutumn();
-            b = FastMath.mix(b, colorAutumn.floatZ(), autumn);
+        EnvironmentClient environment = terrain.world().environment();
+        if (environment instanceof EnvironmentClimate) {
+            EnvironmentClimate environmentClimate =
+                    (EnvironmentClimate) environment;
+            ClimateGenerator climateGenerator = environmentClimate.climate();
+            TreeType type = treeRegistry.get(terrain.data(x, y, z));
+            double temperature = climateGenerator.temperature(x, y, z);
+            double mix = FastMath.clamp(temperature / 30.0f, 0.0f, 1.0f);
+            Vector3 colorCold = type.colorCold();
+            Vector3 colorWarm = type.colorWarm();
+            double b =
+                    FastMath.mix(colorCold.floatZ(), colorWarm.floatZ(), mix);
+            if (!type.isEvergreen()) {
+                double autumn = climateGenerator.autumnLeaves(y);
+                Vector3 colorAutumn = type.colorAutumn();
+                b = FastMath.mix(b, colorAutumn.floatZ(), autumn);
+            }
+            return (float) b;
         }
-        return (float) b;
+        return 1.0f;
     }
 
     @Override
@@ -215,15 +230,18 @@ public class BlockLeaves extends VanillaBlock {
             double b =
                     FastMath.mix(colorCold.floatZ(), colorWarm.floatZ(), mix);
             if (!type.isEvergreen()) {
-                WorldEnvironmentOverworld environment =
-                        (WorldEnvironmentOverworld) terrain.world()
-                                .environment();
-                ClimateGenerator climateGenerator = environment.climate();
-                double autumn = climateGenerator.autumnLeaves(y);
-                Vector3 colorAutumn = type.colorAutumn();
-                r = FastMath.mix(r, colorAutumn.floatX(), autumn);
-                g = FastMath.mix(g, colorAutumn.floatY(), autumn);
-                b = FastMath.mix(b, colorAutumn.floatZ(), autumn);
+                EnvironmentClient environment = terrain.world().environment();
+                if (environment instanceof EnvironmentClimate) {
+                    EnvironmentClimate environmentClimate =
+                            (EnvironmentClimate) environment;
+                    ClimateGenerator climateGenerator =
+                            environmentClimate.climate();
+                    double autumn = climateGenerator.autumnLeaves(y);
+                    Vector3 colorAutumn = type.colorAutumn();
+                    r = FastMath.mix(r, colorAutumn.floatX(), autumn);
+                    g = FastMath.mix(g, colorAutumn.floatY(), autumn);
+                    b = FastMath.mix(b, colorAutumn.floatZ(), autumn);
+                }
             }
             if (lod) {
                 modelsFancy[data]

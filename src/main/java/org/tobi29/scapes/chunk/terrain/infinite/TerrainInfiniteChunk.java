@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import org.tobi29.scapes.block.BlockType;
@@ -276,9 +275,9 @@ public abstract class TerrainInfiniteChunk {
     public int lightL(int x, int y, int z) {
         if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 &&
                 z < zSize) {
-            return (int) FastMath.max(bLight.getData(x, y, z, 1),
-                    bLight.getData(x, y, z, 0) - world.environment()
-                            .sunLightReduction(x + posBlock.intX(),
+            return FastMath.max(bLight.getData(x, y, z, 1),
+                    bLight.getData(x, y, z, 0) -
+                            terrain.sunLightReduction(x + posBlock.intX(),
                                     y + posBlock.intY()));
         }
         throw new ChunkMissException(

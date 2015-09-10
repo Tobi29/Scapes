@@ -28,7 +28,6 @@ public abstract class World implements PlayConnection {
     protected final Plugins plugins;
     protected final TaskExecutor taskExecutor;
     protected final GameRegistry registry;
-    protected WorldEnvironment environment;
     protected Vector3 spawn = new Vector3i(0, 0, 0);
     protected long seed, tick;
     @SuppressWarnings("CanBeFinal")
@@ -48,10 +47,6 @@ public abstract class World implements PlayConnection {
 
     public BlockType air() {
         return air;
-    }
-
-    public WorldEnvironment environment() {
-        return environment;
     }
 
     public long seed() {

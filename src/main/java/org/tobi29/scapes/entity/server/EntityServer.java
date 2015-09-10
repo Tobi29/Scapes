@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.entity.server;
 
 import org.tobi29.scapes.block.GameRegistry;
+import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.utils.io.tag.MultiTag;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
+import org.tobi29.scapes.entity.client.EntityClient;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,8 +44,9 @@ public class EntityServer implements MultiTag.ReadAndWrite {
     }
 
     public static EntityServer make(int id, WorldServer world) {
-        return world.registry().<Supplier>get("Core", "Entity").get(id)
-                .get(world);
+        return world.registry()
+                .<WorldServer, EntityServer, WorldClient, EntityClient>getAsymSupplier(
+                        "Core", "Entity").get(id).a.apply(world);
     }
 
     public int entityID() {
@@ -56,7 +58,7 @@ public class EntityServer implements MultiTag.ReadAndWrite {
     }
 
     public int id(GameRegistry registry) {
-        return registry.entityID(this);
+        return registry.getAsymSupplier("Core", "Entity").id(this);
     }
 
     public WorldServer world() {
