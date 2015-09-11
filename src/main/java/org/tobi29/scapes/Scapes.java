@@ -102,7 +102,7 @@ public class Scapes {
         options.addOption("m", "mode", true, "Specify which mode to run");
         options.addOption("d", "debug", false, "Run in debug mode");
         options.addOption("s", "skipintro", false, "Skip client intro");
-        Parser parser = new PosixParser();
+        DefaultParser parser = new DefaultParser();
         CommandLine commandLine;
         try {
             commandLine = parser.parse(options, args);

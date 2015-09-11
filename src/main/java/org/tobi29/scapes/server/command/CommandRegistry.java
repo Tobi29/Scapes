@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.server.command;
 
 import org.apache.commons.cli.*;
@@ -52,7 +51,7 @@ public class CommandRegistry {
             return new Command.Null(
                     new Command.Output(255, "Unknown command: " + commandName));
         }
-        CommandLineParser parser = new PosixParser();
+        DefaultParser parser = new DefaultParser();
         try {
             Command.requirePermission(executor, command.level);
             Options options = new Options();
