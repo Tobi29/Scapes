@@ -65,7 +65,7 @@ public class NewConnection {
     private State state = State.LOGIN_STEP_1;
 
     public NewConnection(ScapesEngine engine, SocketChannel channel,
-            Account account, int loadingDistance) throws IOException {
+            Account account, int loadingDistance) {
         this.engine = engine;
         this.loadingDistance = loadingDistance;
         loadingDistanceRequest = loadingDistance;

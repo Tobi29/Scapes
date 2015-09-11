@@ -55,7 +55,6 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
             Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final Collection<MobSpawner> spawners =
             Collections.newSetFromMap(new ConcurrentHashMap<>());
-    private final WorldFormat worldFormat;
     private final String id;
     private final List<ChunkPopulator> populators = new ArrayList<>();
     private final TerrainServer terrain;
@@ -75,7 +74,6 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                 worldFormat.plugins().registry());
         seed = worldFormat.seed();
         this.id = id;
-        this.worldFormat = worldFormat;
         this.connection = connection;
         environment = environmentSupplier.apply(this);
         terrain = terrainSupplier.apply(this);
@@ -412,10 +410,6 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
 
     public String id() {
         return id;
-    }
-
-    public Sync sync() {
-        return sync;
     }
 
     public void addPopulator(ChunkPopulator populator) {

@@ -263,7 +263,7 @@ public class WorldSkyboxOverworld implements WorldSkybox {
     }
 
     @Override
-    public void init(GL gl, Cam cam) {
+    public void init(GL gl) {
         ScapesEngine engine = world.game().engine();
         GuiWidgetDebugValues debugValues = engine.debugValues();
         temperatureDebug = debugValues.get("Vanilla-Environment-Temperature");
@@ -424,7 +424,7 @@ public class WorldSkyboxOverworld implements WorldSkybox {
     }
 
     @Override
-    public void dispose(GL gl, Cam cam) {
+    public void dispose(GL gl) {
         fbo.dispose(gl);
         rainAudio.dispose();
         windAudio.dispose();

@@ -22,13 +22,13 @@ import org.tobi29.scapes.engine.utils.graphics.Cam;
 public interface WorldSkybox {
     void update(double delta);
 
-    void init(GL gl, Cam cam);
+    void init(GL gl);
 
     void renderUpdate(Cam cam, double delta);
 
     void render(GL gl, Cam cam);
 
-    void dispose(GL gl, Cam cam);
+    void dispose(GL gl);
 
     float exposure();
 

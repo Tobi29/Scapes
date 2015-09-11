@@ -18,7 +18,6 @@ package org.tobi29.scapes.chunk.terrain.infinite;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderer;
-import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
@@ -137,7 +136,7 @@ public class TerrainInfiniteClient extends TerrainInfinite
     }
 
     @Override
-    public void dispose(GL gl) {
+    public void dispose() {
         lighting.dispose();
         chunkManager.iterator().forEach(this::removeChunk);
         renderer.dispose();

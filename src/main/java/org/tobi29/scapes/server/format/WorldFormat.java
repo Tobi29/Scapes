@@ -176,10 +176,6 @@ public class WorldFormat {
         }
     }
 
-    public Collection<WorldServer> worlds() {
-        return worlds.values();
-    }
-
     private List<PluginFile> pluginFiles() throws IOException {
         List<PluginFile> plugins = new ArrayList<>();
         for (Path file : Files.newDirectoryStream(path.resolve("plugins"))) {

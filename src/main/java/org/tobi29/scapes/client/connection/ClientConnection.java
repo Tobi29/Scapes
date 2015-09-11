@@ -17,7 +17,6 @@ package org.tobi29.scapes.client.connection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.chunk.IDStorage;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.client.states.GameStateServerDisconnect;

@@ -288,7 +288,7 @@ public class WorldClient extends World {
     }
 
     public void dispose(GL gl) {
-        terrain.dispose(gl);
+        terrain.dispose();
     }
 
     @Override

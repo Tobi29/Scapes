@@ -223,7 +223,7 @@ public class SceneScapesVoxelWorld extends Scene {
             information.supplyExternal("BLUR_LENGTH", BLUR_LENGTH);
         }
         skybox = world.environment().createSkybox(world, gl);
-        skybox.init(gl, cam);
+        skybox.init(gl);
     }
 
     @Override
@@ -369,7 +369,7 @@ public class SceneScapesVoxelWorld extends Scene {
         fbo.activate(gl);
         panorama = takePanorama(gl, fbo);
         fbo.deactivate(gl);
-        skybox.dispose(gl, cam);
+        skybox.dispose(gl);
         fbo.dispose(gl);
         skyboxFBO.dispose(gl);
         exposureFBO.dispose(gl);

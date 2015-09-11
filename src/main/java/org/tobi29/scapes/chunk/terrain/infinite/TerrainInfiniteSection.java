@@ -20,7 +20,6 @@ import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderer;
-import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.math.PointerPane;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
@@ -234,7 +233,7 @@ public class TerrainInfiniteSection implements TerrainClient {
     }
 
     @Override
-    public void dispose(GL gl) {
+    public void dispose() {
         throw new UnsupportedOperationException("Terrain not disposable");
     }
 }

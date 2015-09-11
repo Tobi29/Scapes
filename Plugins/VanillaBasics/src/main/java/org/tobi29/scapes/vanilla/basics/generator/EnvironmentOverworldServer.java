@@ -56,7 +56,6 @@ public class EnvironmentOverworldServer
     private final ChunkGeneratorOverworld gen;
     private final ChunkPopulatorOverworld pop;
     private final ClimateGenerator climateGenerator;
-    private final BiomeGenerator biomeGenerator;
     private long simulationCount;
     private double syncWait = 2.0, playerUpdateWait = 0.25, itemUpdateWait =
             1.0, tickWait = 0.05;
@@ -67,7 +66,7 @@ public class EnvironmentOverworldServer
         Random random = new Random(world.seed());
         TerrainGenerator terrainGenerator = new TerrainGenerator(random);
         climateGenerator = new ClimateGenerator(random, terrainGenerator);
-        biomeGenerator = new BiomeGenerator(climateGenerator);
+        BiomeGenerator biomeGenerator = new BiomeGenerator(climateGenerator);
         gen = new ChunkGeneratorOverworld(random, terrainGenerator,
                 plugin.getMaterials());
         pop = new ChunkPopulatorOverworld(world, plugin, biomeGenerator);
@@ -443,7 +442,7 @@ public class EnvironmentOverworldServer
         syncWait -= delta;
         while (syncWait <= 0.0) {
             syncWait += 4.0;
-            this.world.send(new PacketDayTimeSync(climateGenerator.dayTime(),
+            world.send(new PacketDayTimeSync(climateGenerator.dayTime(),
                     climateGenerator.day()));
         }
         tickWait -= delta;
@@ -468,7 +467,7 @@ public class EnvironmentOverworldServer
                 if (random.nextInt((int) (513 - weather * 512)) == 0 &&
                         random.nextInt(1000) == 0 &&
                         weather > 0.7f) {
-                    this.world.send(new PacketLightning(chunk.blockX() + x,
+                    world.send(new PacketLightning(chunk.blockX() + x,
                             chunk.blockY() + y,
                             chunk.highestTerrainBlockZAt(x, y)));
                 } else if (random.nextInt((int) (513 - weather * 512)) == 0 &&
