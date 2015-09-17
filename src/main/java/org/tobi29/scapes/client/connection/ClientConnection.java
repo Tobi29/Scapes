@@ -21,7 +21,6 @@ import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.client.states.GameStateServerDisconnect;
 import org.tobi29.scapes.connection.PlayConnection;
-import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
 import org.tobi29.scapes.engine.utils.io.PacketBundleChannel;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
@@ -46,7 +45,7 @@ public class ClientConnection
         implements TaskExecutor.ASyncTask, PlayConnection {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ClientConnection.class);
-    private final ScapesEngine engine;
+    private final GameStateGameMP game;
     private final PacketBundleChannel channel;
     private final Selector selector;
     private final GuiWidgetDebugValues.Element pingDebug, downloadDebug,
@@ -54,21 +53,20 @@ public class ClientConnection
     private final Queue<Packet> sendQueue = new ConcurrentLinkedQueue<>();
     private final int loadingDistance;
     private final Plugins plugins;
-    private GameStateGameMP game;
     private MobPlayerClientMain entity;
     private Joiner joiner;
     private State state = State.OPEN;
     private WorldClient world;
 
-    public ClientConnection(ScapesEngine engine, PacketBundleChannel channel,
+    public ClientConnection(GameStateGameMP game, PacketBundleChannel channel,
             Plugins plugins, int loadingDistance) throws IOException {
-        this.engine = engine;
+        this.game = game;
         this.channel = channel;
         this.plugins = plugins;
         this.loadingDistance = loadingDistance;
         selector = Selector.open();
         this.channel.register(selector, SelectionKey.OP_READ);
-        GuiWidgetDebugValues debugValues = engine.debugValues();
+        GuiWidgetDebugValues debugValues = game.engine().debugValues();
         pingDebug = debugValues.get("Connection-Ping");
         downloadDebug = debugValues.get("Connection-Down");
         uploadDebug = debugValues.get("Connection-Up");
@@ -109,8 +107,8 @@ public class ClientConnection
             }
         } catch (IOException e) {
             LOGGER.info("Lost connection: {}", e.toString());
-            engine.setState(new GameStateServerDisconnect(e.getMessage(),
-                    channel.getRemoteAddress(), engine));
+            game.engine().setState(new GameStateServerDisconnect(e.getMessage(),
+                    channel.getRemoteAddress(), game.engine()));
         }
         try {
             close();
@@ -138,10 +136,10 @@ public class ClientConnection
         return loadingDistance;
     }
 
-    public void start(GameStateGameMP game) {
-        this.game = game;
-        joiner = engine.taskExecutor().runTask(this, "Client-Connection");
-        engine.taskExecutor().addTask(() -> {
+    public void start() {
+        joiner =
+                game.engine().taskExecutor().runTask(this, "Client-Connection");
+        game.engine().taskExecutor().addTask(() -> {
             send(new PacketPingClient(System.currentTimeMillis()));
             downloadDebug.setValue(channel.getInputRate() / 128.0);
             uploadDebug.setValue(channel.getOutputRate() / 128.0);

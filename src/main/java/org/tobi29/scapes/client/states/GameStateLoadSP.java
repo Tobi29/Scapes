@@ -125,7 +125,6 @@ public class GameStateLoadSP extends GameState {
                     channel.write(headerBuffer);
                     if (!headerBuffer.hasRemaining()) {
                         step++;
-                        progress.setLabel("Logging in...");
                     }
                     break;
                 case 5:
@@ -139,7 +138,10 @@ public class GameStateLoadSP extends GameState {
                     step++;
                     break;
                 case 6:
-                    if (client.login()) {
+                    Optional<String> status = client.login();
+                    if (status.isPresent()) {
+                        progress.setLabel(status.get());
+                    } else {
                         step++;
                         progress.setLabel("Loading world...");
                     }

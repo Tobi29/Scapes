@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.Optional;
 
 public class GameStateLoadMP extends GameState {
     private static final Logger LOGGER =
@@ -95,7 +96,6 @@ public class GameStateLoadMP extends GameState {
                     channel.write(headerBuffer);
                     if (!headerBuffer.hasRemaining()) {
                         step++;
-                        progress.setLabel("Logging in...");
                     }
                     break;
                 case 3:
@@ -109,7 +109,10 @@ public class GameStateLoadMP extends GameState {
                     step++;
                     break;
                 case 4:
-                    if (client.login()) {
+                    Optional<String> status = client.login();
+                    if (status.isPresent()) {
+                        progress.setLabel(status.get());
+                    } else {
                         step++;
                         progress.setLabel("Loading world...");
                     }

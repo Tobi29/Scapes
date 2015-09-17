@@ -194,9 +194,6 @@ public class PlayerConnection
         while (pluginIterator.hasNext()) {
             sendPluginChecksum(pluginIterator.next(), output);
         }
-        TagStructureBinary
-                .write(server.server().worldFormat().idStorage().save(),
-                        output);
         channel.queueBundle();
         state = State.LOGIN_STEP_3;
     }
@@ -206,12 +203,6 @@ public class PlayerConnection
         byte[] challenge = new byte[this.challenge.length];
         input.get(challenge);
         nickname = input.getString(1 << 10);
-        loadingRadius = FastMath.clamp(input.getInt(), 10,
-                server.server().maxLoadingRadius());
-        ByteBuffer buffer = ByteBuffer.allocate(64 * 64 * 4);
-        input.get(buffer);
-        buffer.flip();
-        skin = new ServerSkin(new Image(64, 64, buffer));
         int length = input.getInt();
         List<Integer> requests = new ArrayList<>(length);
         while (length-- > 0) {
@@ -220,33 +211,48 @@ public class PlayerConnection
         WritableByteStream output = channel.getOutputStream();
         Optional<String> response =
                 generateResponse(Arrays.equals(challenge, this.challenge));
-        if (!response.isPresent()) {
-            response = start();
-        }
         if (response.isPresent()) {
             output.putBoolean(true);
             output.putString(response.get());
             channel.queueBundle();
             throw new ConnectionCloseException(response.get());
-        } else {
-            output.putBoolean(false);
-            output.putInt(loadingRadius);
-            channel.queueBundle();
-            for (int request : requests) {
-                sendPlugin(plugins.file(request).file(), output);
-            }
-            long currentTime = System.currentTimeMillis();
-            pingWait = currentTime + 1000;
-            pingTimeout = currentTime + 10000;
-            LOGGER.info("Client accepted: {} ({}) on {}", id, nickname,
-                    channel.toString());
         }
+        output.putBoolean(false);
+        channel.queueBundle();
+        for (int request : requests) {
+            sendPlugin(plugins.file(request).file(), output);
+        }
+        state = State.LOGIN_STEP_4;
     }
 
-    private Optional<String> start() {
+    private void loginStep4(ReadableByteStream input) throws IOException {
+        loadingRadius = FastMath.clamp(input.getInt(), 10,
+                server.server().maxLoadingRadius());
+        ByteBuffer buffer = ByteBuffer.allocate(64 * 64 * 4);
+        input.get(buffer);
+        buffer.flip();
+        skin = new ServerSkin(new Image(64, 64, buffer));
+        WritableByteStream output = channel.getOutputStream();
         setWorld();
+        Optional<String> response = server.addPlayer(this);
+        if (response.isPresent()) {
+            output.putBoolean(true);
+            output.putString(response.get());
+            channel.queueBundle();
+            throw new ConnectionCloseException(response.get());
+        }
+        output.putBoolean(false);
+        output.putInt(loadingRadius);
+        TagStructureBinary
+                .write(server.server().worldFormat().idStorage().save(),
+                        output);
+        channel.queueBundle();
+        long currentTime = System.currentTimeMillis();
+        pingWait = currentTime + 1000;
+        pingTimeout = currentTime + 10000;
+        LOGGER.info("Client accepted: {} ({}) on {}", id, nickname,
+                channel.toString());
         state = State.OPEN;
-        return server.addPlayer(this);
     }
 
     public synchronized void setWorld() {
@@ -459,6 +465,9 @@ public class PlayerConnection
                             case LOGIN_STEP_3:
                                 loginStep3(bundle.get());
                                 break;
+                            case LOGIN_STEP_4:
+                                loginStep4(bundle.get());
+                                break;
                         }
                     }
                     return channel.process();
@@ -537,6 +546,7 @@ public class PlayerConnection
         LOGIN_STEP_1,
         LOGIN_STEP_2,
         LOGIN_STEP_3,
+        LOGIN_STEP_4,
         OPEN,
         CLOSING,
         CLOSED

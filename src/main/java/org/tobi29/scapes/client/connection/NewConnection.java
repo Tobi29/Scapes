@@ -3,12 +3,12 @@ package org.tobi29.scapes.client.connection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.chunk.IDStorage;
+import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.server.ConnectionCloseException;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.MutableSingle;
-import org.tobi29.scapes.engine.utils.SleepUtil;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.graphics.PNG;
 import org.tobi29.scapes.engine.utils.io.*;
@@ -75,39 +75,36 @@ public class NewConnection {
     }
 
     private void loginStep1(ReadableByteStream input) throws IOException {
+        byte[] array = new byte[input.getInt()];
+        input.get(array);
+        int keyLength = input.getInt();
+        keyLength = FastMath.min(keyLength, AES_MAX_KEY_LENGTH);
+        if (keyLength < AES_MIN_KEY_LENGTH) {
+            throw new IOException("Key length too short: " + keyLength);
+        }
+        byte[] keyServer = new byte[keyLength];
+        byte[] keyClient = new byte[keyLength];
+        Random random = new SecureRandom();
+        random.nextBytes(keyServer);
+        random.nextBytes(keyClient);
+        WritableByteStream output = channel.getOutputStream();
+        output.putInt(keyLength);
         try {
-            byte[] array = new byte[input.getInt()];
-            input.get(array);
-            int keyLength = input.getInt();
-            keyLength = FastMath.min(keyLength, AES_MAX_KEY_LENGTH);
-            if (keyLength < AES_MIN_KEY_LENGTH) {
-                throw new IOException("Key length too short: " + keyLength);
-            }
-            byte[] keyServer = new byte[keyLength];
-            byte[] keyClient = new byte[keyLength];
-            Random random = new SecureRandom();
-            random.nextBytes(keyServer);
-            random.nextBytes(keyClient);
-            WritableByteStream output = channel.getOutputStream();
-            output.putInt(keyLength);
             PublicKey rsaKey = KeyFactory.getInstance("RSA")
                     .generatePublic(new X509EncodedKeySpec(array));
             Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.ENCRYPT_MODE, rsaKey);
             output.put(cipher.update(keyServer));
             output.put(cipher.doFinal(keyClient));
-            channel.queueBundle();
-            channel.setKey(keyClient, keyServer);
-            KeyPair keyPair = account.keyPair();
-            array = keyPair.getPublic().getEncoded();
-            output.put(array);
-            channel.queueBundle();
-            while (channel.process()) {
-                SleepUtil.sleep(10);
-            }
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidKeySpecException e) {
             throw new IOException(e);
         }
+        channel.queueBundle();
+        channel.setKey(keyClient, keyServer);
+        KeyPair keyPair = account.keyPair();
+        array = keyPair.getPublic().getEncoded();
+        output.put(array);
+        channel.queueBundle();
         state = State.LOGIN_STEP_2;
     }
 
@@ -131,20 +128,14 @@ public class NewConnection {
                 plugins.add(null);
             }
         }
-        readIDStorage(input);
         WritableByteStream output = channel.getOutputStream();
         output.put(challenge);
         output.putString(account.nickname());
-        output.putInt(loadingDistanceRequest);
-        sendSkin(output);
         output.putInt(pluginRequests.size());
         for (int i : pluginRequests) {
             output.putInt(i);
         }
         channel.queueBundle();
-        while (channel.process()) {
-            SleepUtil.sleep(10);
-        }
         state = State.LOGIN_STEP_3;
     }
 
@@ -152,10 +143,10 @@ public class NewConnection {
         if (input.getBoolean()) {
             throw new ConnectionCloseException(input.getString());
         }
-        loadingDistance = input.getInt();
-        state = State.LOGIN_STEP_4;
         if (pluginRequests.isEmpty()) {
-            state = State.OPEN;
+            loginStep5();
+        } else {
+            state = State.LOGIN_STEP_4;
         }
     }
 
@@ -173,14 +164,31 @@ public class NewConnection {
             plugins.set(request, new PluginFile(file.get()));
             pluginRequests.remove(0);
             if (pluginRequests.isEmpty()) {
-                state = State.OPEN;
+                loginStep5();
             }
         } else {
             ProcessStream.process(input, pluginStream::put);
         }
     }
 
-    public boolean login() throws IOException {
+    private void loginStep5() throws IOException {
+        WritableByteStream output = channel.getOutputStream();
+        output.putInt(loadingDistanceRequest);
+        sendSkin(output);
+        channel.queueBundle();
+        state = State.LOGIN_STEP_6;
+    }
+
+    private void loginStep6(ReadableByteStream input) throws IOException {
+        if (input.getBoolean()) {
+            throw new ConnectionCloseException(input.getString());
+        }
+        loadingDistance = input.getInt();
+        readIDStorage(input);
+        state = State.OPEN;
+    }
+
+    public Optional<String> login() throws IOException {
         Optional<ReadableByteStream> bundle = channel.fetch();
         if (bundle.isPresent()) {
             ReadableByteStream input = bundle.get();
@@ -197,12 +205,30 @@ public class NewConnection {
                 case LOGIN_STEP_4:
                     loginStep4(input);
                     break;
+                case LOGIN_STEP_6:
+                    loginStep6(input);
+                    break;
                 default:
                     throw new IllegalStateException(
                             "Invalid state for login: " + state);
             }
         }
-        return state == State.OPEN;
+        channel.process();
+        switch (state) {
+            case LOGIN_STEP_1:
+            case LOGIN_STEP_2:
+            case LOGIN_STEP_3:
+                return Optional.of("Logging in...");
+            case LOGIN_STEP_4:
+                return Optional.of("Downloading plugins...");
+            case LOGIN_STEP_6:
+                return Optional.of("Receiving server info...");
+            case OPEN:
+                return Optional.empty();
+            default:
+                throw new IllegalStateException(
+                        "Invalid state for login: " + state);
+        }
     }
 
     private void readIDStorage(ReadableByteStream stream) throws IOException {
@@ -243,9 +269,11 @@ public class NewConnection {
         output.put(skin);
     }
 
-    public ClientConnection finish() throws IOException {
+    public IOFunction<GameStateGameMP, ClientConnection> finish()
+            throws IOException {
         Plugins plugins = new Plugins(this.plugins, idStorage);
-        return new ClientConnection(engine, channel, plugins, loadingDistance);
+        return game -> new ClientConnection(game, channel, plugins,
+                loadingDistance);
     }
 
     enum State {
@@ -253,6 +281,7 @@ public class NewConnection {
         LOGIN_STEP_2,
         LOGIN_STEP_3,
         LOGIN_STEP_4,
+        LOGIN_STEP_6,
         OPEN
     }
 }
