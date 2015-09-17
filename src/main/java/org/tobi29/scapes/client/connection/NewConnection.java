@@ -62,7 +62,9 @@ public class NewConnection {
     private final ByteBufferStream pluginStream = new ByteBufferStream();
     private final Account account;
     private int loadingDistance;
-    private State state = State.LOGIN_STEP_1;
+    private IOFunction<ReadableByteStream, Optional<String>> state =
+            this::loginStep1;
+    private Optional<String> status = Optional.of("Logging in...");
 
     public NewConnection(ScapesEngine engine, SocketChannel channel,
             Account account, int loadingDistance) {
@@ -74,7 +76,8 @@ public class NewConnection {
         this.account = account;
     }
 
-    private void loginStep1(ReadableByteStream input) throws IOException {
+    private Optional<String> loginStep1(ReadableByteStream input)
+            throws IOException {
         byte[] array = new byte[input.getInt()];
         input.get(array);
         int keyLength = input.getInt();
@@ -105,10 +108,12 @@ public class NewConnection {
         array = keyPair.getPublic().getEncoded();
         output.put(array);
         channel.queueBundle();
-        state = State.LOGIN_STEP_2;
+        state = this::loginStep2;
+        return Optional.of("Logging in...");
     }
 
-    private void loginStep2(ReadableByteStream input) throws IOException {
+    private Optional<String> loginStep2(ReadableByteStream input)
+            throws IOException {
         byte[] challenge = new byte[512];
         input.get(challenge);
         try {
@@ -120,7 +125,11 @@ public class NewConnection {
         }
         int length = input.getInt();
         for (int i = 0; i < length; i++) {
-            Optional<Path> file = checkPlugin(input);
+            byte[] checksum = new byte[input.getInt()];
+            input.get(checksum);
+            FileCache.Location location =
+                    new FileCache.Location("plugins", checksum);
+            Optional<Path> file = cache.retrieve(location);
             if (file.isPresent()) {
                 plugins.add(new PluginFile(file.get()));
             } else {
@@ -136,21 +145,24 @@ public class NewConnection {
             output.putInt(i);
         }
         channel.queueBundle();
-        state = State.LOGIN_STEP_3;
+        state = this::loginStep3;
+        return Optional.of("Logging in...");
     }
 
-    private void loginStep3(ReadableByteStream input) throws IOException {
+    private Optional<String> loginStep3(ReadableByteStream input)
+            throws IOException {
         if (input.getBoolean()) {
             throw new ConnectionCloseException(input.getString());
         }
         if (pluginRequests.isEmpty()) {
-            loginStep5();
-        } else {
-            state = State.LOGIN_STEP_4;
+            return loginStep5();
         }
+        state = this::loginStep4;
+        return Optional.of("Downloading plugins...");
     }
 
-    private void loginStep4(ReadableByteStream input) throws IOException {
+    private Optional<String> loginStep4(ReadableByteStream input)
+            throws IOException {
         int request = pluginRequests.get(0);
         if (input.getBoolean()) {
             pluginStream.buffer().flip();
@@ -164,86 +176,33 @@ public class NewConnection {
             plugins.set(request, new PluginFile(file.get()));
             pluginRequests.remove(0);
             if (pluginRequests.isEmpty()) {
-                loginStep5();
+                return loginStep5();
             }
         } else {
             ProcessStream.process(input, pluginStream::put);
         }
+        return Optional.of("Downloading plugins...");
     }
 
-    private void loginStep5() throws IOException {
+    private Optional<String> loginStep5() throws IOException {
         WritableByteStream output = channel.getOutputStream();
         output.putInt(loadingDistanceRequest);
         sendSkin(output);
         channel.queueBundle();
-        state = State.LOGIN_STEP_6;
+        state = this::loginStep6;
+        return Optional.of("Receiving server info...");
     }
 
-    private void loginStep6(ReadableByteStream input) throws IOException {
+    private Optional<String> loginStep6(ReadableByteStream input)
+            throws IOException {
         if (input.getBoolean()) {
             throw new ConnectionCloseException(input.getString());
         }
         loadingDistance = input.getInt();
-        readIDStorage(input);
-        state = State.OPEN;
-    }
-
-    public Optional<String> login() throws IOException {
-        Optional<ReadableByteStream> bundle = channel.fetch();
-        if (bundle.isPresent()) {
-            ReadableByteStream input = bundle.get();
-            switch (state) {
-                case LOGIN_STEP_1:
-                    loginStep1(input);
-                    break;
-                case LOGIN_STEP_2:
-                    loginStep2(input);
-                    break;
-                case LOGIN_STEP_3:
-                    loginStep3(input);
-                    break;
-                case LOGIN_STEP_4:
-                    loginStep4(input);
-                    break;
-                case LOGIN_STEP_6:
-                    loginStep6(input);
-                    break;
-                default:
-                    throw new IllegalStateException(
-                            "Invalid state for login: " + state);
-            }
-        }
-        channel.process();
-        switch (state) {
-            case LOGIN_STEP_1:
-            case LOGIN_STEP_2:
-            case LOGIN_STEP_3:
-                return Optional.of("Logging in...");
-            case LOGIN_STEP_4:
-                return Optional.of("Downloading plugins...");
-            case LOGIN_STEP_6:
-                return Optional.of("Receiving server info...");
-            case OPEN:
-                return Optional.empty();
-            default:
-                throw new IllegalStateException(
-                        "Invalid state for login: " + state);
-        }
-    }
-
-    private void readIDStorage(ReadableByteStream stream) throws IOException {
         TagStructure idsTag = new TagStructure();
-        TagStructureBinary.read(idsTag, stream);
+        TagStructureBinary.read(idsTag, input);
         idStorage.load(idsTag);
-    }
-
-    private Optional<Path> checkPlugin(ReadableByteStream stream)
-            throws IOException {
-        byte[] checksum = new byte[stream.getInt()];
-        stream.get(checksum);
-        FileCache.Location location =
-                new FileCache.Location("plugins", checksum);
-        return cache.retrieve(location);
+        return Optional.empty();
     }
 
     private void sendSkin(WritableByteStream output) throws IOException {
@@ -269,19 +228,19 @@ public class NewConnection {
         output.put(skin);
     }
 
+    public Optional<String> login() throws IOException {
+        Optional<ReadableByteStream> bundle = channel.fetch();
+        if (bundle.isPresent()) {
+            status = state.apply(bundle.get());
+        }
+        channel.process();
+        return status;
+    }
+
     public IOFunction<GameStateGameMP, ClientConnection> finish()
             throws IOException {
         Plugins plugins = new Plugins(this.plugins, idStorage);
         return game -> new ClientConnection(game, channel, plugins,
                 loadingDistance);
-    }
-
-    enum State {
-        LOGIN_STEP_1,
-        LOGIN_STEP_2,
-        LOGIN_STEP_3,
-        LOGIN_STEP_4,
-        LOGIN_STEP_6,
-        OPEN
     }
 }
