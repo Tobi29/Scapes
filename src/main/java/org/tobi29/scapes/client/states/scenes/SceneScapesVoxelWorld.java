@@ -83,16 +83,16 @@ public class SceneScapesVoxelWorld extends Scene {
     private final ClientSkinStorage skinStorage;
     private final GuiWidgetDebugClient debugWidget;
     private final GuiWidgetPerformanceClient performanceWidget;
+    private final GuiHud hud = new GuiHud();
+    private final FBO skyboxFBO = new FBO(1, 1, 1, false, true, false),
+            exposureFBO = new FBO(1, 1, 1, false, true, false);
+    private final WorldSkybox skybox;
     private float brightness;
     private float renderDistance, fov;
     private int flashDir;
     private long flashTime, flashStart;
-    private boolean guiHide, mouseGrabbed, wireframe;
+    private boolean guiHide, mouseGrabbed, chunkGeometryDebug, wireframe;
     private Image[] panorama;
-    private FBO skyboxFBO, exposureFBO;
-    private GuiHud hud;
-    private WorldSkybox skybox;
-    private boolean chunkGeometryDebug;
 
     public SceneScapesVoxelWorld(WorldClient world, Cam cam) {
         this.world = world;
@@ -122,6 +122,7 @@ public class SceneScapesVoxelWorld extends Scene {
         animationDistance = scapesTag.getFloat("AnimationDistance");
         fxaa = scapesTag.getBoolean("FXAA");
         bloom = scapesTag.getBoolean("Bloom");
+        skybox = world.environment().createSkybox(world);
     }
 
     public float fogR() {
@@ -193,9 +194,6 @@ public class SceneScapesVoxelWorld extends Scene {
 
     @Override
     public void init(GL gl) {
-        skyboxFBO = new FBO(1, 1, 1, false, true, false, gl);
-        exposureFBO = new FBO(1, 1, 1, false, true, false, gl);
-        hud = new GuiHud();
         new GuiComponentChat(hud, world.game().chatHistory(), 8, 416, 0, 0);
         addGui(hud);
         ShaderManager shaderManager = gl.shaders();
@@ -222,7 +220,6 @@ public class SceneScapesVoxelWorld extends Scene {
             information.supplyExternal("BLUR_WEIGHT", BLUR_WEIGHT);
             information.supplyExternal("BLUR_LENGTH", BLUR_LENGTH);
         }
-        skybox = world.environment().createSkybox(world, gl);
         skybox.init(gl);
     }
 
@@ -264,7 +261,7 @@ public class SceneScapesVoxelWorld extends Scene {
 
     @Override
     public void postRender(GL gl, double delta) {
-        state.fboScene().texturesColor()[0].bind(gl);
+        state.fboScene().textureColor(0).bind(gl);
         exposureFBO.activate(gl);
         gl.viewport(0, 0, 1, 1);
         gl.setProjectionOrthogonal(0.0f, 0.0f, 1.0f, 1.0f);
@@ -327,7 +324,7 @@ public class SceneScapesVoxelWorld extends Scene {
             return shaderManager.get("Scapes:shader/Composite1", gl);
         } else {
             gl.activeTexture(3);
-            exposureFBO.texturesColor()[0].bind(gl);
+            exposureFBO.textureColor(0).bind(gl);
             gl.activeTexture(0);
             Shader shader = shaderManager.get("Scapes:shader/Composite2", gl);
             shader.setUniform1f(6, brightness);
@@ -365,14 +362,14 @@ public class SceneScapesVoxelWorld extends Scene {
 
     @Override
     public void dispose(GL gl) {
-        FBO fbo = new FBO(256, 256, 1, true, false, false, gl);
+        FBO fbo = new FBO(256, 256, 1, true, false, false);
         fbo.activate(gl);
         panorama = takePanorama(gl, fbo);
         fbo.deactivate(gl);
         skybox.dispose(gl);
-        fbo.dispose(gl);
-        skyboxFBO.dispose(gl);
-        exposureFBO.dispose(gl);
+        fbo.ensureDisposed(gl);
+        skyboxFBO.ensureDisposed(gl);
+        exposureFBO.ensureDisposed(gl);
         world.dispose(gl);
     }
 
@@ -399,7 +396,7 @@ public class SceneScapesVoxelWorld extends Scene {
                     yaw, 0.0f);
             gl.clearDepth();
             renderWorld(gl, cam, 256, 256);
-            gl.textures().bind(fbo.texturesColor()[0], gl);
+            gl.textures().bind(fbo.textureColor(0), gl);
             images[i] = gl.screenShotFBO(fbo);
         }
         guiHide = false;
@@ -412,7 +409,7 @@ public class SceneScapesVoxelWorld extends Scene {
 
     public void renderWorld(GL gl, Cam cam, int width, int height) {
         if (width != skyboxFBO.width() || height != skyboxFBO.height()) {
-            skyboxFBO.setSize(width, height, gl);
+            skyboxFBO.setSize(width, height);
         }
         MatrixStack matrixStack = gl.matrixStack();
         gl.viewport(0, 0, width, height);
@@ -426,14 +423,14 @@ public class SceneScapesVoxelWorld extends Scene {
         skyboxFBO.deactivate(gl);
         gl.viewport(0, 0, width, height);
         gl.setProjectionOrthogonal(0.0f, 0.0f, 1.0f, 1.0f);
-        gl.textures().bind(skyboxFBO.texturesColor()[0], gl);
+        gl.textures().bind(skyboxFBO.textureColor(0), gl);
         Shader shader = gl.shaders().get("Engine:shader/Textured", gl);
         vao.render(gl, shader);
         gl.setProjectionPerspective(width, height, cam);
         gl.enableDepthTest();
         gl.enableDepthMask();
         gl.activeTexture(1);
-        gl.textures().bind(skyboxFBO.texturesColor()[0], gl);
+        gl.textures().bind(skyboxFBO.textureColor(0), gl);
         gl.activeTexture(0);
         boolean wireframe = this.wireframe;
         if (wireframe) {

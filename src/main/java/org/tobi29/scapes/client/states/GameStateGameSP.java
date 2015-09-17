@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.states;
 
 import org.slf4j.Logger;
@@ -22,6 +21,7 @@ import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
+import org.tobi29.scapes.engine.utils.io.IOFunction;
 import org.tobi29.scapes.server.ScapesServer;
 
 import java.io.IOException;
@@ -31,9 +31,11 @@ public class GameStateGameSP extends GameStateGameMP {
             LoggerFactory.getLogger(GameStateGameSP.class);
     private final ScapesServer server;
 
-    public GameStateGameSP(ClientConnection client, ScapesServer server,
-            Scene scene, ScapesEngine engine) {
-        super(client, scene, engine);
+    public GameStateGameSP(
+            IOFunction<GameStateGameMP, ClientConnection> clientSupplier,
+            ScapesServer server, Scene scene, ScapesEngine engine)
+            throws IOException {
+        super(clientSupplier, scene, engine);
         this.server = server;
     }
 

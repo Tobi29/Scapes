@@ -31,10 +31,13 @@ import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
+import org.tobi29.scapes.engine.utils.io.IOFunction;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.particle.ParticleBlock;
 import org.tobi29.scapes.entity.skin.ClientSkinStorage;
 import org.tobi29.scapes.packets.PacketPingClient;
+
+import java.io.IOException;
 
 public class GameStateGameMP extends GameState {
     private static final Logger LOGGER =
@@ -47,12 +50,13 @@ public class GameStateGameMP extends GameState {
     private final ClientSkinStorage skinStorage;
     private double pingWait;
 
-    protected GameStateGameMP(ClientConnection client, Scene scene,
-            ScapesEngine engine) {
+    protected GameStateGameMP(
+            IOFunction<GameStateGameMP, ClientConnection> clientSupplier,
+            Scene scene, ScapesEngine engine) throws IOException {
         super(engine, scene);
         chatHistory = new ChatHistory();
         playlist = new Playlist(engine.sounds());
-        this.client = client;
+        client = clientSupplier.apply(this);
         tickDebug = engine.debugValues().get("Client-TPS");
         terrainTextureRegistry = new TerrainTextureRegistry(engine);
         skinStorage = new ClientSkinStorage(engine.graphics().textures()
@@ -100,7 +104,7 @@ public class GameStateGameMP extends GameState {
         }
         LOGGER.info("Loaded terrain models with {} textures in {} ms.", size,
                 time);
-        client.start(this);
+        client.start();
     }
 
     @Override

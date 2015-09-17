@@ -69,12 +69,12 @@ public class WorldSkyboxOverworld implements WorldSkybox {
     private float rainGain, fogR, fogG, fogB, fogDistance;
 
     public WorldSkyboxOverworld(ClimateGenerator climateGenerator,
-            BiomeGenerator biomeGenerator, WorldClient world, GL gl) {
+            BiomeGenerator biomeGenerator, WorldClient world) {
         this.climateGenerator = climateGenerator;
         this.biomeGenerator = biomeGenerator;
         this.world = world;
         long seed = world.seed();
-        fbo = new FBO(512, 512, 1, false, false, true, gl);
+        fbo = new FBO(512, 512, 1, false, false, true);
         billboardMesh = VAOUtility.createVTI(
                 new float[]{1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f,
                         -1.0f, 1.0f, 1.0f, -1.0f, 1.0f},
@@ -403,7 +403,7 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         gl.setBlending(BlendingMode.NORMAL);
         shader = shaderManager.get("VanillaBasics:shader/Skybox", gl);
         // Clouds
-        gl.textures().bind(fbo.texturesColor()[0], gl);
+        gl.textures().bind(fbo.textureColor(0), gl);
         cloudMesh.render(gl, shader);
         gl.textures().unbind(gl);
         // Bottom
@@ -425,7 +425,7 @@ public class WorldSkyboxOverworld implements WorldSkybox {
 
     @Override
     public void dispose(GL gl) {
-        fbo.dispose(gl);
+        fbo.ensureDisposed(gl);
         rainAudio.dispose();
         windAudio.dispose();
     }

@@ -18,7 +18,6 @@ package org.tobi29.scapes.vanilla.basics.generator;
 import org.tobi29.scapes.chunk.EnvironmentClient;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldSkybox;
-import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
@@ -82,8 +81,8 @@ public class EnvironmentOverworldClient
     }
 
     @Override
-    public WorldSkybox createSkybox(WorldClient world, GL gl) {
-        return new WorldSkyboxOverworld(climateGenerator, biomeGenerator, world,
-                gl);
+    public WorldSkybox createSkybox(WorldClient world) {
+        return new WorldSkyboxOverworld(climateGenerator, biomeGenerator,
+                world);
     }
 }

@@ -75,16 +75,16 @@ public class WorldClient extends World {
         super(connection.plugins(), connection.game().engine().taskExecutor(),
                 connection.plugins().registry());
         this.connection = connection;
+        this.seed = seed;
         game = connection.game();
+        environment = environmentSupplier.apply(this);
         player = connection.plugins().worldType()
                 .newPlayer(this, Vector3d.ZERO, Vector3d.ZERO, 0.0, 0.0, "");
         player.read(playerTag);
-        this.seed = seed;
         scene = new SceneScapesVoxelWorld(this, cam);
         playerModel = player.createModel().get();
         addEntity(player, playerID);
         LOGGER.info("Received player entity: {} with id: {}", player, playerID);
-        environment = environmentSupplier.apply(this);
         connection.plugins().plugins()
                 .forEach(plugin -> plugin.worldInit(this));
         terrain = terrainSupplier.apply(this);
