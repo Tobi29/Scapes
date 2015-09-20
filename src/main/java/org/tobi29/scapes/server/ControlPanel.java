@@ -29,7 +29,7 @@ public class ControlPanel implements Command.Executor {
                 connection.send("Ping:Pong", command[0]);
             }
         });
-        connection.addCommand("Scapes:Command", command -> {
+        connection.addCommand("Console:Command", command -> {
             if (command.length != 1) {
                 return;
             }
