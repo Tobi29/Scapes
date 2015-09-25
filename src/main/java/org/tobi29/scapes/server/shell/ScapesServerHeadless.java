@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.server.shell;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tobi29.scapes.server.MessageLevel;
 import org.tobi29.scapes.server.ScapesServer;
 
 import java.io.BufferedReader;
@@ -43,8 +43,8 @@ public class ScapesServerHeadless extends ScapesStandaloneServer {
                     String line = reader.readLine();
                     if (line != null) {
                         server.commandRegistry().get(line, this).execute()
-                                .forEach(output -> System.out
-                                        .println(output.toString()));
+                                .forEach(output -> message(output.toString(),
+                                        MessageLevel.FEEDBACK_ERROR));
                     }
                 }
             } catch (IOException e) {
@@ -55,7 +55,18 @@ public class ScapesServerHeadless extends ScapesStandaloneServer {
     }
 
     @Override
-    public void tell(String message) {
-        System.out.println(message);
+    public boolean message(String message, MessageLevel level) {
+        switch (level) {
+            case SERVER_ERROR:
+            case FEEDBACK_ERROR: {
+                LOGGER.error(message);
+                break;
+            }
+            default: {
+                LOGGER.info(message);
+                break;
+            }
+        }
+        return true;
     }
 }

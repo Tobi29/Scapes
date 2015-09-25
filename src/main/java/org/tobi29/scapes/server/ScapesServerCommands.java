@@ -31,6 +31,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 import org.tobi29.scapes.server.connection.ServerConnection;
 import org.tobi29.scapes.server.format.PlayerBans;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -66,13 +67,11 @@ final class ScapesServerCommands {
             });
         });
 
-        registry.register("clear", 8, options -> options
-                        .add("p", "player", true,
-                                "Player whose inventory will be cleared"),
-                (args, executor, commands) -> {
-                    String playerName =
-                            args.requireOption('p', executor.playerName());
-                    commands.add(() -> {
+        registry.register("clear", 8, options -> {
+        }, (args, executor, commands) -> {
+            String[] playerNames = args.args();
+            Arrays.stream(playerNames)
+                    .forEach(playerName -> commands.add(() -> {
                         PlayerConnection player =
                                 Command.require(connection::playerByName,
                                         playerName);
@@ -80,8 +79,8 @@ final class ScapesServerCommands {
                         player.mob().world()
                                 .send(new PacketUpdateInventory(player.mob(),
                                         "Container"));
-                    });
-                });
+                    }));
+        });
 
         registry.register("tp", 8, options -> {
             options.add("p", "player", true, "Player who will be teleported");
@@ -152,14 +151,14 @@ final class ScapesServerCommands {
             }
         });
 
-        registry.register("say", 0, options -> {
+        registry.register("say MESSAGE...", 0, options -> {
             options.add("n", "name", true, "Name used for prefix");
             options.add("r", "raw", false, "Disable prefix");
         }, (args, executor, commands) -> {
             String message;
             if (args.hasOption('r')) {
                 Command.requirePermission(executor, 8, 'r');
-                message = ArrayUtil.join(args.getArgs(), " ");
+                message = ArrayUtil.join(args.args(), " ");
             } else {
                 String name;
                 Optional<String> nameOption = args.option('n');
@@ -169,13 +168,13 @@ final class ScapesServerCommands {
                 } else {
                     name = executor.name();
                 }
-                message =
-                        '<' + name + "> " + ArrayUtil.join(args.getArgs(), " ");
+                message = '<' + name + "> " + ArrayUtil.join(args.args(), " ");
             }
-            commands.add(() -> server.connection().chat(message));
+            commands.add(() -> server.connection()
+                    .message(message, MessageLevel.CHAT));
         });
 
-        registry.register("tell", 0, options -> {
+        registry.register("tell MESSAGE...", 0, options -> {
             options.add("t", "target", true, "Target player");
             options.add("n", "name", true, "Name used for prefix");
             options.add("r", "raw", false, "Disable prefix");
@@ -184,7 +183,7 @@ final class ScapesServerCommands {
             String message;
             if (args.hasOption('r')) {
                 Command.requirePermission(executor, 8, 'r');
-                message = ArrayUtil.join(args.getArgs(), " ");
+                message = ArrayUtil.join(args.args(), " ");
             } else {
                 String name;
                 Optional<String> nameOption = args.option('n');
@@ -194,48 +193,72 @@ final class ScapesServerCommands {
                 } else {
                     name = executor.name();
                 }
-                message =
-                        '[' + name + "] " + ArrayUtil.join(args.getArgs(), " ");
+                message = '[' + name + "] " + ArrayUtil.join(args.args(), " ");
             }
             commands.add(() -> {
                 PlayerConnection target =
                         Command.require(connection::playerByName, targetName);
-                target.tell(message);
+                target.message(message, MessageLevel.CHAT);
             });
         });
 
-        registry.register("list", 9, options -> options
-                        .add("i", "id", true, "Wildcard match for nickname"),
-                (args, executor, commands) -> {
-                    String exp = args.option('i', "*");
-                    Pattern pattern = StringUtil.wildcard(exp);
-                    commands.add(() -> server.connection().players()
-                            .map(PlayerConnection::nickname)
-                            .filter(nickname -> pattern.matcher(nickname)
-                                    .matches()).forEach(executor::tell));
-                });
+        CommandRegistry playersGroup = registry.group("players");
 
-        registry.register("kick", 9, options -> options
-                        .add("p", "player", true, "Player to be kicked"),
-                (args, executor, commands) -> {
-                    String playerName =
-                            args.requireOption('p', executor.playerName());
-                    String message;
-                    String[] messageArray = args.getArgs();
-                    if (messageArray.length == 0) {
-                        message = "Kick by an Admin!";
-                    } else {
-                        message = ArrayUtil.join(messageArray, " ");
-                    }
-                    commands.add(() -> {
+        playersGroup.register("list [MATCH]", 9, options -> {
+        }, (args, executor, commands) -> {
+            String exp = args.arg(0).orElse("*");
+            Pattern pattern = StringUtil.wildcard(exp);
+            commands.add(() -> server.connection().players()
+                    .map(PlayerConnection::nickname)
+                    .filter(nickname -> pattern.matcher(nickname).matches())
+                    .forEach(message -> executor
+                            .message(message, MessageLevel.FEEDBACK_INFO)));
+        });
+
+        playersGroup.register("add PLAYER-ID...", 9, options -> {
+        }, (args, executor, commands) -> {
+            String[] ids = args.args();
+            Arrays.stream(ids).forEach(id -> commands
+                    .add(() -> server.worldFormat().playerData().add(id)));
+        });
+
+        playersGroup.register("remove PLAYER-ID...", 9, options -> {
+        }, (args, executor, commands) -> {
+            String[] ids = args.args();
+            Arrays.stream(ids).forEach(id -> commands
+                    .add(() -> server.worldFormat().playerData().remove(id)));
+        });
+
+        playersGroup.register("kick PLAYER-NAME...", 9, options -> {
+        }, (args, executor, commands) -> {
+            String[] playerNames = args.args();
+            String message = "Kick by an Admin!";
+            Arrays.stream(playerNames)
+                    .forEach(playerName -> commands.add(() -> {
                         PlayerConnection player =
                                 Command.require(connection::playerByName,
                                         playerName);
                         player.send(new PacketDisconnect(message));
-                    });
+                    }));
+        });
+
+        playersGroup.register("op -l LEVEL PLAYER-NAME...", 10, options -> options
+                .add("l", "level", true, "Permission level (0-10)"),
+                (args, executor, commands) -> {
+                    String[] playerNames = args.args();
+                    int permissionLevel =
+                            Command.getInt(args.requireOption('l'));
+                    Arrays.stream(playerNames)
+                            .forEach(playerName -> commands.add(() -> {
+                                PlayerConnection player = Command.require(
+                                        connection::playerByName, playerName);
+                                player.setPermissionLevel(permissionLevel);
+                            }));
                 });
 
-        registry.register("ban", 9, options -> {
+        CommandRegistry bansGroup = registry.group("bans");
+
+        bansGroup.register("add", 9, options -> {
             options.add("p", "player", true, "Player to be banned");
             options.add("i", "id", true, "ID of ban");
             options.add("k", "key", false, "Add key to ban entry");
@@ -243,29 +266,27 @@ final class ScapesServerCommands {
             options.add("n", "nickname", false, "Add nickname to ban entry");
         }, (args, executor, commands) -> {
             String playerName = args.requireOption('p', executor.playerName());
-            boolean key = args.hasOption('k');
+            boolean id = args.hasOption('k');
             boolean address = args.hasOption('a');
             boolean banNickname = args.hasOption('n');
-            boolean banKey, banAddress;
-            if (!key && !address && !banNickname) {
-                banKey = true;
+            boolean banID, banAddress;
+            if (!id && !address && !banNickname) {
+                banID = true;
                 banAddress = true;
             } else {
-                banKey = key;
+                banID = id;
                 banAddress = address;
             }
-            String id = args.option('i', playerName);
-            String reason = ArrayUtil.join(args.getArgs(), " ");
+            String reason = ArrayUtil.join(args.args(), "");
             commands.add(() -> {
                 PlayerConnection player =
                         Command.require(connection::playerByName, playerName);
                 server.worldFormat().playerBans()
-                        .ban(player, id, reason, banKey, banAddress,
-                                banNickname);
+                        .ban(player, reason, banID, banAddress, banNickname);
             });
         });
 
-        registry.register("unban", 9,
+        bansGroup.register("remove", 9,
                 options -> options.add("i", "id", true, "ID of ban"),
                 (args, executor, commands) -> {
                     String id = args.requireOption('i');
@@ -273,36 +294,24 @@ final class ScapesServerCommands {
                             () -> server.worldFormat().playerBans().unban(id));
                 });
 
-        registry.register("banlist", 9, options -> options
-                        .add("i", "id", true, "Wildcard match for ID"),
-                (args, executor, commands) -> {
-                    String exp = args.option('i', "*");
-                    Pattern pattern = StringUtil.wildcard(exp);
-                    commands.add(() -> server.worldFormat().playerBans()
-                            .matches(pattern).map(PlayerBans.Entry::toString)
-                            .forEach(executor::tell));
-                });
-
-        registry.register("op", 10, options -> {
-            options.add("p", "player", true,
-                    "Player whose hunger values will be changed");
-            options.add("l", "level", true, "Permission level (0-10)");
+        bansGroup.register("list", 9, options -> {
         }, (args, executor, commands) -> {
-            String playerName = args.requireOption('p', executor.playerName());
-            Command.require(args, 'l');
-            int permissionLevel = Command.getInt(args.requireOption('l'));
-            commands.add(() -> {
-                PlayerConnection player =
-                        Command.require(connection::playerByName, playerName);
-                player.setPermissionLevel(permissionLevel);
-            });
+            String exp = args.arg(0).orElse("*");
+            Pattern pattern = StringUtil.wildcard(exp);
+            commands.add(
+                    () -> server.worldFormat().playerBans().matchesID(pattern)
+                            .map(PlayerBans.Entry::toString).forEach(
+                                    message -> executor.message(message,
+                                            MessageLevel.FEEDBACK_INFO)));
         });
 
-        registry.register("stop", 10, options -> {
+        CommandRegistry serverGroup = registry.group("server");
+
+        serverGroup.register("stop", 10, options -> {
         }, (args, executor, commands) -> server
                 .scheduleStop(ScapesServer.ShutdownReason.STOP));
 
-        registry.register("reload", 10, options -> {
+        serverGroup.register("reload", 10, options -> {
         }, (args, executor, commands) -> server
                 .scheduleStop(ScapesServer.ShutdownReason.RELOAD));
     }

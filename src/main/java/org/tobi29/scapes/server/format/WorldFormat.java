@@ -108,7 +108,7 @@ public class WorldFormat {
     }
 
     public Optional<WorldServer> world(String name) {
-        return Optional.of(worlds.get(name));
+        return Optional.ofNullable(worlds.get(name));
     }
 
     public WorldServer defaultWorld() {

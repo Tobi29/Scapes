@@ -17,16 +17,12 @@ package org.tobi29.scapes.server.format;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.engine.utils.RSAUtil;
-import org.tobi29.scapes.engine.utils.io.ChecksumUtil;
 import org.tobi29.scapes.engine.utils.io.tag.MultiTag;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
@@ -50,25 +46,29 @@ public class PlayerBans implements MultiTag.Writeable {
     }
 
     public Optional<String> matches(PlayerConnection player) {
-        PublicKey key = player.key();
+        String id = player.id();
         Optional<InetAddress> address = player.address();
         String nickname = player.nickname();
         return entries.stream()
-                .map(entry -> entry.matches(key, address, nickname))
+                .map(entry -> entry.matches(id, address, nickname))
                 .filter(Optional::isPresent).map(Optional::get).findAny();
     }
 
-    public Stream<Entry> matches(Pattern pattern) {
-        return entries.stream().filter(entry -> entry.matches(pattern));
+    public Stream<Entry> matchesID(Pattern pattern) {
+        return entries.stream().filter(entry -> entry.matchesID(pattern));
     }
 
-    public void ban(PlayerConnection player, String id, String reason,
-            boolean banKey, boolean banAddress, boolean banNickname) {
-        Optional<PublicKey> key;
-        if (banKey) {
-            key = Optional.of(player.key());
+    public Stream<Entry> matchesNickname(Pattern pattern) {
+        return entries.stream().filter(entry -> entry.matchesNickname(pattern));
+    }
+
+    public void ban(PlayerConnection player, String reason, boolean banID,
+            boolean banAddress, boolean banNickname) {
+        Optional<String> id;
+        if (banID) {
+            id = Optional.of(player.id());
         } else {
-            key = Optional.empty();
+            id = Optional.empty();
         }
         Optional<String> address;
         if (banAddress) {
@@ -82,7 +82,7 @@ public class PlayerBans implements MultiTag.Writeable {
         } else {
             nickname = Optional.empty();
         }
-        entries.add(new Entry(key, address, nickname, id, reason));
+        entries.add(new Entry(id, address, nickname, reason));
     }
 
     public void unban(String id) {
@@ -103,28 +103,21 @@ public class PlayerBans implements MultiTag.Writeable {
     }
 
     public static class Entry implements MultiTag.Writeable {
-        private final Optional<PublicKey> key;
-        private final Optional<String> address, nickname;
-        private final String id, reason;
+        private final Optional<String> id, address, nickname;
+        private final String reason;
 
-        private Entry(Optional<PublicKey> key, Optional<String> address,
-                Optional<String> nickname, String id, String reason) {
-            this.key = key;
+        private Entry(Optional<String> id, Optional<String> address,
+                Optional<String> nickname, String reason) {
+            this.id = id;
             this.address = address;
             this.nickname = nickname;
-            this.id = id;
             this.reason = reason;
         }
 
         private static Entry read(TagStructure tagStructure) {
-            Optional<PublicKey> key = Optional.empty();
-            if (tagStructure.has("Key")) {
-                try {
-                    key = Optional.of(
-                            RSAUtil.readPublic(tagStructure.getString("Key")));
-                } catch (InvalidKeySpecException e) {
-                    LOGGER.warn("Failed to read key: {}", e.toString());
-                }
+            Optional<String> id = Optional.empty();
+            if (tagStructure.has("ID")) {
+                id = Optional.of(tagStructure.getString("ID"));
             }
             Optional<String> address = Optional.empty();
             if (tagStructure.has("Address")) {
@@ -134,14 +127,13 @@ public class PlayerBans implements MultiTag.Writeable {
             if (tagStructure.has("Nickname")) {
                 nickname = Optional.of(tagStructure.getString("Nickname"));
             }
-            String id = tagStructure.getString("ID");
             String reason = tagStructure.getString("Reason");
-            return new Entry(key, address, nickname, id, reason);
+            return new Entry(id, address, nickname, reason);
         }
 
-        public Optional<String> matches(PublicKey key,
+        public Optional<String> matches(String id,
                 Optional<InetAddress> address, String nickname) {
-            if (this.key.isPresent() && this.key.get().equals(key)) {
+            if (this.id.isPresent() && this.id.get().equals(id)) {
                 return Optional.of("Banned account: " + reason);
             }
             if (this.address.isPresent() && address.isPresent()) {
@@ -166,54 +158,39 @@ public class PlayerBans implements MultiTag.Writeable {
             return Optional.empty();
         }
 
-        public boolean matches(Pattern pattern) {
-            return pattern.matcher(id).matches();
+        public boolean matchesNickname(Pattern pattern) {
+            return nickname.isPresent() &&
+                    pattern.matcher(nickname.get()).matches();
+        }
+
+        public boolean matchesID(Pattern pattern) {
+            return id.isPresent() && pattern.matcher(id.get()).matches();
         }
 
         @Override
         public String toString() {
             StringBuilder str = new StringBuilder(24);
-            str.append(id).append(' ').append(reason).append(" (");
-            boolean space = false;
-            if (key.isPresent()) {
-                space = true;
-                str.append("Key: ").append(ChecksumUtil
-                        .getChecksum(key.get().getEncoded()));
+            if (id.isPresent()) {
+                str.append("ID: ").append(id.get()).append(' ');
             }
             if (address.isPresent()) {
-                if (space) {
-                    str.append(' ');
-                } else {
-                    space = true;
-                }
-                str.append("Address: ").append(address.get());
+                str.append("Address: ").append(address.get()).append(' ');
             }
             if (nickname.isPresent()) {
-                if (space) {
-                    str.append(' ');
-                }
-                str.append("Nickname: ").append(nickname.get());
+                str.append("Nickname: ").append(nickname.get()).append(' ');
             }
-            str.append(')');
+            str.append(' ').append(reason);
             return str.toString();
         }
 
         @Override
         public TagStructure write() {
             TagStructure tagStructure = new TagStructure();
-            if (key.isPresent()) {
-                try {
-                    tagStructure
-                            .setString("Key", RSAUtil.writePublic(key.get()));
-                } catch (InvalidKeySpecException e) {
-                    LOGGER.warn("Failed to store key: {}", e.toString());
-                }
-            }
+            id.ifPresent(id -> tagStructure.setString("ID", id));
             address.ifPresent(
                     address -> tagStructure.setString("Address", address));
             nickname.ifPresent(
-                    address -> tagStructure.setString("Nickname", address));
-            tagStructure.setString("ID", id);
+                    nickname -> tagStructure.setString("Nickname", nickname));
             tagStructure.setString("Reason", reason);
             return tagStructure;
         }

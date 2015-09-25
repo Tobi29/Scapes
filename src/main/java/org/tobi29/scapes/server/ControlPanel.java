@@ -19,8 +19,7 @@ public class ControlPanel implements Command.Executor {
         this.connection = connection;
         this.server = server;
         initCommands();
-        LOGGER.info("Control panel accepted from {}",
-                connection.toString());
+        LOGGER.info("Control panel accepted from {}", connection.toString());
     }
 
     private void initCommands() {
@@ -33,8 +32,9 @@ public class ControlPanel implements Command.Executor {
             if (command.length != 1) {
                 return;
             }
-            server.commandRegistry().get(command[0], this).execute()
-                    .forEach(output -> tell(output.toString()));
+            server.commandRegistry().get(command[0], this).execute().forEach(
+                    output -> message(output.toString(),
+                            MessageLevel.FEEDBACK_ERROR));
         });
         CPUUtil.Reader cpuReader = CPUUtil.reader();
         Runtime runtime = Runtime.getRuntime();
@@ -61,8 +61,23 @@ public class ControlPanel implements Command.Executor {
     }
 
     @Override
-    public void tell(String message) {
-        connection.send("Core:Message", message);
+    public boolean message(String message, MessageLevel level) {
+        String style;
+        switch (level) {
+            case SERVER_ERROR:
+            case FEEDBACK_ERROR: {
+                style = "color: red;";
+                break;
+            }
+            default: {
+                style = "";
+                break;
+            }
+        }
+        String html =
+                "<span style=\"" + style + "\">" + message + "</span>";
+        connection.send("Core:Message", html);
+        return true;
     }
 
     @Override

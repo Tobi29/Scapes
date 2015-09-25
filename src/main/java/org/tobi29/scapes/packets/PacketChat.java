@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import org.tobi29.scapes.chunk.WorldClient;
@@ -22,6 +21,7 @@ import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.server.InvalidPacketDataException;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
+import org.tobi29.scapes.server.MessageLevel;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
@@ -72,11 +72,12 @@ public class PacketChat extends Packet implements PacketServer, PacketClient {
         }
         if (text.charAt(0) == '/') {
             player.server().server().commandRegistry()
-                    .get(text.substring(1), player).execute()
-                    .forEach(output -> player.tell(output.toString()));
+                    .get(text.substring(1), player).execute().forEach(
+                    output -> player.message(output.toString(),
+                            MessageLevel.FEEDBACK_ERROR));
         } else {
-            player.server().chat('<' + player.mob().nickname() + "> " +
-                    text);
+            player.server().message('<' + player.mob().nickname() + "> " +
+                    text, MessageLevel.CHAT);
         }
     }
 }

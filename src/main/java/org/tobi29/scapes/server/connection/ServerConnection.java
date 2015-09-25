@@ -24,18 +24,17 @@ import org.tobi29.scapes.engine.utils.io.PacketBundleChannel;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.entity.skin.ServerSkin;
 import org.tobi29.scapes.packets.Packet;
-import org.tobi29.scapes.packets.PacketChat;
 import org.tobi29.scapes.server.ControlPanel;
+import org.tobi29.scapes.server.MessageLevel;
 import org.tobi29.scapes.server.ScapesServer;
+import org.tobi29.scapes.server.command.Command;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
@@ -50,6 +49,8 @@ public class ServerConnection extends AbstractServerConnection {
             new ConcurrentHashMap<>();
     private final Map<String, PlayerConnection> playerByName =
             new ConcurrentHashMap<>();
+    private final Set<Command.Executor> executors =
+            Collections.newSetFromMap(new ConcurrentHashMap<>());
     private boolean allowsJoin = true, allowsCreation = true;
 
     public ServerConnection(ScapesServer server, TagStructure tagStructure) {
@@ -116,31 +117,40 @@ public class ServerConnection extends AbstractServerConnection {
         return keyPair;
     }
 
-    protected Optional<String> addPlayer(PlayerConnection connection) {
+    public void addExecutor(Command.Executor executor) {
+        executors.add(executor);
+    }
+
+    public void removeExecutor(Command.Executor executor) {
+        executors.remove(executor);
+    }
+
+    protected Optional<String> addPlayer(PlayerConnection player) {
         synchronized (players) {
             if (players.size() >= mayPlayers) {
                 return Optional.of("Server full");
             }
-            if (players.containsKey(connection.id())) {
+            if (players.containsKey(player.id())) {
                 return Optional.of("User already online");
             }
-            if (playerByName.containsKey(connection.nickname())) {
+            if (playerByName.containsKey(player.nickname())) {
                 return Optional.of("User with same name online");
             }
-            players.put(connection.id(), connection);
-            playerByName.put(connection.nickname(), connection);
+            players.put(player.id(), player);
+            playerByName.put(player.nickname(), player);
+            addExecutor(player);
         }
         return Optional.empty();
     }
 
-    protected void removePlayer(PlayerConnection connection) {
-        players.remove(connection.id());
-        playerByName.remove(connection.nickname());
+    protected void removePlayer(PlayerConnection player) {
+        players.remove(player.id());
+        playerByName.remove(player.nickname());
+        removeExecutor(player);
     }
 
-    public void chat(String message) {
-        LOGGER.info("Chat (*): {}", message);
-        send(new PacketChat(message));
+    public void message(String message, MessageLevel level) {
+        executors.forEach(executor -> executor.message(message, level));
     }
 
     @Override
@@ -161,7 +171,10 @@ public class ServerConnection extends AbstractServerConnection {
                 ControlPanelProtocol controlChannel =
                         new ControlPanelProtocol(channel, controlPassword,
                                 keyPair);
-                new ControlPanel(controlChannel, server);
+                ControlPanel controlPanel =
+                        new ControlPanel(controlChannel, server);
+                addExecutor(controlPanel);
+                controlChannel.closeHook(() -> removeExecutor(controlPanel));
                 return Optional.of(controlChannel);
         }
         return Optional.empty();

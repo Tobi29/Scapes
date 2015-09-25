@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.server.command;
 
 import org.apache.commons.cli.CommandLine;
@@ -21,6 +20,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.tobi29.scapes.engine.utils.ArrayUtil;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
+import org.tobi29.scapes.server.MessageLevel;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -169,7 +169,7 @@ public interface Command {
 
         String name();
 
-        void tell(String message);
+        boolean message(String message, MessageLevel level);
 
         int permissionLevel();
     }
@@ -236,8 +236,16 @@ public interface Command {
             return commandLine.getOptionValue(option, def);
         }
 
-        public String[] getArgs() {
+        public String[] args() {
             return commandLine.getArgs();
+        }
+
+        public Optional<String> arg(int i) {
+            String[] args = commandLine.getArgs();
+            if (i < 0 || i >= args.length) {
+                return Optional.empty();
+            }
+            return Optional.of(args[i]);
         }
     }
 

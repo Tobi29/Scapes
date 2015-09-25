@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.server.format;
 
 import org.slf4j.Logger;
@@ -37,7 +36,7 @@ public class PlayerData {
         Files.createDirectories(path);
     }
 
-    public Optional<TagStructure> load(String id) {
+    public synchronized Optional<TagStructure> load(String id) {
         try {
             Path file = path.resolve(id + ".stag");
             if (Files.exists(file)) {
@@ -51,11 +50,30 @@ public class PlayerData {
         return Optional.empty();
     }
 
-    public void save(TagStructure tagStructure, String id) {
+    public synchronized void save(TagStructure tagStructure, String id) {
         try {
             Path file = path.resolve(id + ".stag");
             FileUtil.write(file,
                     stream -> TagStructureBinary.write(tagStructure, stream));
+        } catch (IOException e) {
+            LOGGER.error("Error writing player data: {}", e.toString());
+        }
+    }
+
+    public synchronized void add(String id) {
+        TagStructure tagStructure;
+        Optional<TagStructure> tag = load(id);
+        if (tag.isPresent()) {
+            tagStructure = tag.get();
+        } else {
+            tagStructure = new TagStructure();
+        }
+        save(tagStructure, id);
+    }
+
+    public synchronized void remove(String id) {
+        try {
+            Files.deleteIfExists(path.resolve(id + ".stag"));
         } catch (IOException e) {
             LOGGER.error("Error writing player data: {}", e.toString());
         }

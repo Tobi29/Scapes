@@ -18,8 +18,8 @@ package org.tobi29.scapes.vanilla.basics.generator;
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.Material;
-import org.tobi29.scapes.chunk.MobSpawner;
 import org.tobi29.scapes.chunk.EnvironmentServer;
+import org.tobi29.scapes.chunk.MobSpawner;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.generator.ChunkGenerator;
 import org.tobi29.scapes.chunk.generator.ChunkPopulator;
@@ -36,6 +36,7 @@ import org.tobi29.scapes.entity.WieldMode;
 import org.tobi29.scapes.entity.server.*;
 import org.tobi29.scapes.packets.PacketEntityMetaData;
 import org.tobi29.scapes.packets.PacketUpdateInventory;
+import org.tobi29.scapes.server.MessageLevel;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityTornadoServer;
 import org.tobi29.scapes.vanilla.basics.entity.server.MobPigServer;
@@ -237,7 +238,7 @@ public class EnvironmentOverworldServer
                             double stamina = conditionTag.getDouble("Stamina");
                             double bodyTemperature =
                                     conditionTag.getDouble("BodyTemperature");
-                            conditionTag.setDouble("Stamina", stamina - 0.1);
+                            conditionTag.setDouble("Stamina", stamina - 0.15);
                             conditionTag.setDouble("BodyTemperature",
                                     bodyTemperature + 0.1);
                         }
@@ -254,14 +255,15 @@ public class EnvironmentOverworldServer
                             double bodyTemperature =
                                     conditionTag.getDouble("BodyTemperature");
                             conditionTag.setDouble("Stamina",
-                                    stamina - 0.1 * strength);
+                                    stamina - 0.04 * strength);
                             conditionTag.setDouble("BodyTemperature",
-                                    bodyTemperature + 0.05 * strength);
+                                    bodyTemperature + 0.03 * strength);
                         }
                     });
             player.listener("VanillaBasics:DeathMessage",
                     (MobLivingServer.DeathListener) () -> world.connection()
-                            .chat(player.nickname() + " died!"));
+                            .message(player.nickname() + " died!",
+                                    MessageLevel.CHAT));
         });
     }
 

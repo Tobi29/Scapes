@@ -16,6 +16,7 @@
 package org.tobi29.scapes.server.command;
 
 import org.apache.commons.cli.*;
+import org.tobi29.scapes.engine.utils.Pair;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -28,69 +29,102 @@ import java.util.regex.Pattern;
 public class CommandRegistry {
     private static final String[] EMPTY_STRING = new String[0];
     private static final Pattern PATTERN =
-            Pattern.compile("[ ]+(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
-    private final Map<String, CommandParser> commands =
-            new ConcurrentHashMap<>();
+            Pattern.compile("[ ]+(?=([^\"]*\"[^\"]*\")*[^\"]*$)"), SPLIT =
+            Pattern.compile(" ");
+    private final Map<String, Compiler> commands = new ConcurrentHashMap<>();
+    private final String prefix;
 
-    public void register(String name, int level, Command.OptionSupplier options,
-            Command.Compiler command) {
-        commands.put(name, new CommandParser(command, options, level));
+    public CommandRegistry() {
+        this("");
+    }
+
+    public CommandRegistry(String prefix) {
+        this.prefix = prefix;
+    }
+
+    public void register(String usage, int level,
+            Command.OptionSupplier optionSupplier, Command.Compiler compiler) {
+        String[] split = SPLIT.split(usage, 2);
+        String name = split[0];
+        usage = prefix + usage;
+        commands.put(name, compiler(usage, level, optionSupplier, compiler));
+    }
+
+    public CommandRegistry group(String name) {
+        CommandRegistry registry = new CommandRegistry(prefix + name + ' ');
+        commands.put(name,
+                (args, executor) -> registry.get(args, name + ' ', executor));
+        return registry;
     }
 
     public Command.Compiled get(String line, Command.Executor executor) {
-        String[] split = PATTERN.split(line, 2);
-        String commandName = split[0];
-        String[] commandArgs;
-        if (split.length == 1) {
-            commandArgs = EMPTY_STRING;
-        } else {
-            commandArgs = PATTERN.split(split[1]);
-        }
-        CommandParser command = commands.get(commandName);
-        if (command == null) {
-            return new Command.Null(
-                    new Command.Output(255, "Unknown command: " + commandName));
-        }
-        DefaultParser parser = new DefaultParser();
-        try {
-            Command.requirePermission(executor, command.level);
-            Options options = new Options();
-            options.addOption("h", "help", false, "Display this help");
-            command.options.options(new Command.CommandOptions(options));
-            CommandLine args = parser.parse(options, commandArgs);
-            if (args.hasOption('h')) {
-                HelpFormatter helpFormatter = new HelpFormatter();
-                StringWriter writer = new StringWriter();
-                PrintWriter printWriter = new PrintWriter(writer);
-                helpFormatter
-                        .printHelp(printWriter, 74, commandName, null, options,
-                                1, 3, null, false);
-                String help = writer.toString();
-                return new Command.Null(new Command.Output(1, help));
-            } else {
-                Collection<Command> commands = new ArrayList<>();
-                command.command.compile(new Command.Arguments(args), executor,
-                        commands);
-                return new Command.Compiled(commands);
-            }
-        } catch (ParseException e) {
-            return new Command.Null(new Command.Output(254,
-                    e.getClass().getSimpleName() + ": " + e.getMessage()));
-        } catch (Command.CommandException e) {
-            return new Command.Null(new Command.Output(253, e.getMessage()));
-        }
+        String[] split = PATTERN.split(line);
+        return get(split, "", executor);
     }
 
-    private static class CommandParser {
-        private final Command.Compiler command;
-        private final Command.OptionSupplier options;
-        private final int level;
-
-        private CommandParser(Command.Compiler command,
-                Command.OptionSupplier options, int level) {
-            this.command = command;
-            this.options = options;
-            this.level = level;
+    private Command.Compiled get(String[] split, String prefix,
+            Command.Executor executor) {
+        Pair<String, String[]> pair = command(split);
+        Compiler compiler = commands.get(pair.a);
+        if (compiler == null) {
+            return new Command.Null(new Command.Output(255,
+                    "Unknown command: " + prefix + pair.a));
         }
+        return compiler.compile(pair.b, executor);
+    }
+
+    private Pair<String, String[]> command(String[] split) {
+        if (split.length == 0) {
+            return new Pair<>("", EMPTY_STRING);
+        }
+        String name = split[0];
+        String[] args;
+        if (split.length == 1) {
+            args = EMPTY_STRING;
+        } else {
+            args = new String[split.length - 1];
+            System.arraycopy(split, 1, args, 0, args.length);
+        }
+        return new Pair<>(name, args);
+    }
+
+    private Compiler compiler(String usage, int level,
+            Command.OptionSupplier optionSupplier, Command.Compiler compiler) {
+        return (args, executor) -> {
+            DefaultParser parser = new DefaultParser();
+            try {
+                Command.requirePermission(executor, level);
+                Options options = new Options();
+                options.addOption("h", "help", false, "Display this help");
+                optionSupplier.options(new Command.CommandOptions(options));
+                CommandLine commandLine = parser.parse(options, args);
+                if (commandLine.hasOption('h')) {
+                    HelpFormatter helpFormatter = new HelpFormatter();
+                    StringWriter writer = new StringWriter();
+                    PrintWriter printWriter = new PrintWriter(writer);
+                    helpFormatter
+                            .printHelp(printWriter, 74, usage, null, options, 1,
+                                    3, null, false);
+                    String help = writer.toString();
+                    return new Command.Null(new Command.Output(1, help));
+                } else {
+                    Collection<Command> commands = new ArrayList<>();
+                    compiler.compile(new Command.Arguments(commandLine),
+                            executor, commands);
+                    return new Command.Compiled(commands);
+                }
+            } catch (ParseException e) {
+                return new Command.Null(new Command.Output(254,
+                        e.getClass().getSimpleName() + ": " + e.getMessage()));
+            } catch (Command.CommandException e) {
+                return new Command.Null(
+                        new Command.Output(253, e.getMessage()));
+            }
+        };
+    }
+
+    @FunctionalInterface
+    private interface Compiler {
+        Command.Compiled compile(String[] args, Command.Executor executor);
     }
 }

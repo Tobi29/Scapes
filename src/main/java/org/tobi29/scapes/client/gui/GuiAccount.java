@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
+import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.io.ChecksumUtil;
 
@@ -42,8 +41,8 @@ public class GuiAccount extends GuiMenu {
     public GuiAccount(GameState state, Gui previous) {
         super(state, "Account", "Save");
         try {
-            Account account = Account
-                    .read(state.engine().home().resolve("Account.properties"));
+            Account account = Account.read(
+                    state.engine().home().resolve("Account.properties"));
             keyPair = account.keyPair();
             nickname = account.nickname();
         } catch (IOException e) {
@@ -51,15 +50,14 @@ public class GuiAccount extends GuiMenu {
         }
         new GuiComponentText(pane, 16, 80, 18, "Key:");
         GuiComponentButton keyCopy =
-                new GuiComponentTextButton(pane, 16, 100, 174, 30, 18, "Copy");
+                new GuiComponentTextButton(pane, 16, 100, 116, 30, 18, "Copy");
         GuiComponentButton keyPaste =
-                new GuiComponentTextButton(pane, 210, 100, 174, 30, 18,
+                new GuiComponentTextButton(pane, 142, 100, 116, 30, 18,
                         "Paste");
-        GuiComponentText hash = new GuiComponentText(pane, 16, 140, 12,
-                "Hash: " + ChecksumUtil
-                        .getChecksum(keyPair.getPrivate().getEncoded(),
-                                ChecksumUtil.Algorithm.SHA1));
-        GuiComponentText id = new GuiComponentText(pane, 16, 160, 12, "ID: " +
+        GuiComponentButton keyCopyID =
+                new GuiComponentTextButton(pane, 268, 100, 116, 30, 18,
+                        "Copy ID");
+        GuiComponentText id = new GuiComponentText(pane, 16, 150, 12, "ID: " +
                 ChecksumUtil.getChecksum(keyPair.getPublic().getEncoded(),
                         ChecksumUtil.Algorithm.SHA1));
         new GuiComponentText(pane, 16, 180, 18, "Nickname:");
@@ -75,19 +73,21 @@ public class GuiAccount extends GuiMenu {
         keyPaste.addLeftClick(event -> {
             String str = state.engine().controller().clipboardPaste();
             Optional<KeyPair> keyPair =
-                    Account
-                            .key(REPLACE.matcher(str).replaceAll(""));
+                    Account.key(REPLACE.matcher(str).replaceAll(""));
             if (keyPair.isPresent()) {
                 this.keyPair = keyPair.get();
-                hash.setText("Hash: " + ChecksumUtil
-                        .getChecksum(this.keyPair.getPrivate().getEncoded()));
                 id.setText("ID: " + ChecksumUtil
-                        .getChecksum(this.keyPair.getPublic().getEncoded()));
+                        .getChecksum(this.keyPair.getPublic().getEncoded(),
+                                ChecksumUtil.Algorithm.SHA1));
                 error.setText("");
             } else {
                 error.setText("Invalid key!");
             }
         });
+        keyCopyID.addLeftClick(event -> state.engine().controller()
+                .clipboardCopy(ChecksumUtil
+                        .getChecksum(keyPair.getPublic().getEncoded(),
+                                ChecksumUtil.Algorithm.SHA1)));
         skin.addLeftClick(event -> {
             try {
                 Path path = state.engine().home().resolve("Skin.png");
@@ -108,9 +108,8 @@ public class GuiAccount extends GuiMenu {
                 return;
             }
             try {
-                new Account(keyPair, this.nickname)
-                        .write(state.engine().home()
-                                .resolve("Account.properties"));
+                new Account(keyPair, this.nickname).write(state.engine().home()
+                        .resolve("Account.properties"));
             } catch (IOException e) {
                 LOGGER.error("Failed to write account file: {}", e.toString());
             }

@@ -35,6 +35,7 @@ import org.tobi29.scapes.entity.skin.ServerSkin;
 import org.tobi29.scapes.packets.*;
 import org.tobi29.scapes.plugins.PluginFile;
 import org.tobi29.scapes.plugins.Plugins;
+import org.tobi29.scapes.server.MessageLevel;
 import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.format.PlayerStatistics;
 import org.tobi29.scapes.server.format.WorldFormat;
@@ -46,7 +47,6 @@ import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Selector;
 import java.nio.file.Path;
@@ -250,8 +250,8 @@ public class PlayerConnection
         long currentTime = System.currentTimeMillis();
         pingWait = currentTime + 1000;
         pingTimeout = currentTime + 10000;
-        LOGGER.info("Client accepted: {} ({}) on {}", id, nickname,
-                channel.toString());
+        server.message("Player connected: " + id + " (" + nickname + ") on " +
+                channel.toString(), MessageLevel.SERVER_INFO);
         state = State.OPEN;
     }
 
@@ -264,35 +264,42 @@ public class PlayerConnection
     }
 
     public synchronized void setWorld(WorldServer world, Vector3 pos) {
-        if (entity != null) {
-            entity.world().deleteEntity(entity);
-            entity.world().removePlayer(entity);
-            TagStructure tagStructure = entity.write(false);
-            entity = server().server().worldFormat().plugins().worldType()
-                    .newPlayer(world, Vector3d.ZERO, Vector3d.ZERO, 0.0, 0.0,
-                            nickname, skin.checksum(), this);
-            entity.read(tagStructure);
-        } else {
+        if (entity == null) {
             WorldFormat worldFormat = server.server().worldFormat();
-            Optional<TagStructure> tag = worldFormat.playerData().load(id);
             statistics = new PlayerStatistics();
+            Optional<TagStructure> tag = worldFormat.playerData().load(id);
+            Optional<TagStructure> entityTag;
+            Optional<String> worldTag;
             if (tag.isPresent()) {
                 TagStructure tagStructure = tag.get();
-                if (world == null) {
-                    world = worldFormat.world(tagStructure.getString("World"))
-                            .orElseGet(worldFormat::defaultWorld);
+                if (tagStructure.has("Entity")) {
+                    entityTag =
+                            Optional.of(tagStructure.getStructure("Entity"));
+                } else {
+                    entityTag = Optional.empty();
                 }
+                worldTag = Optional.ofNullable(tagStructure.getString("World"));
+                statistics.load(server.server().worldFormat().plugins()
+                        .registry(), tagStructure.getList("Statistics"));
+                permissionLevel = tagStructure.getInteger("Permissions");
+            } else {
+                entityTag = Optional.empty();
+                worldTag = Optional.empty();
+            }
+            if (world == null) {
+                if (worldTag.isPresent()) {
+                    world = worldFormat.world(worldTag.get())
+                            .orElseGet(worldFormat::defaultWorld);
+                } else {
+                    world = worldFormat.defaultWorld();
+                }
+            }
+            if (entityTag.isPresent()) {
                 entity = server().server().worldFormat().plugins().worldType()
                         .newPlayer(world, Vector3d.ZERO, Vector3d.ZERO, 0.0,
                                 0.0, nickname, skin.checksum(), this);
-                entity.read(tagStructure.getStructure("Entity"));
-                statistics.load(world.registry(),
-                        tagStructure.getList("Statistics"));
-                permissionLevel = tagStructure.getInteger("Permissions");
+                entity.read(entityTag.get());
             } else {
-                if (world == null) {
-                    world = worldFormat.defaultWorld();
-                }
                 entity = server().server().worldFormat().plugins().worldType()
                         .newPlayer(world,
                                 new Vector3d(0.5, 0.5, 1.0).plus(world.spawn()),
@@ -300,6 +307,14 @@ public class PlayerConnection
                                 skin.checksum(), this);
                 entity.onSpawn();
             }
+        } else {
+            entity.world().deleteEntity(entity);
+            entity.world().removePlayer(entity);
+            TagStructure tagStructure = entity.write(false);
+            entity = server().server().worldFormat().plugins().worldType()
+                    .newPlayer(world, Vector3d.ZERO, Vector3d.ZERO, 0.0, 0.0,
+                            nickname, skin.checksum(), this);
+            entity.read(tagStructure);
         }
         if (pos != null) {
             entity.setPos(pos);
@@ -368,7 +383,7 @@ public class PlayerConnection
         channel.queueBundle();
     }
 
-    private void sendPacket(Packet packet) {
+    private void sendPacket(Packet packet) throws IOException {
         if (!packet.isVital() && sendQueueSize.get() > 256) {
             return;
         }
@@ -392,15 +407,10 @@ public class PlayerConnection
             }
         }
         if (flag) {
-            try {
-                WritableByteStream output = channel.getOutputStream();
-                output.putShort(packet.id(
-                        server.server().worldFormat().plugins().registry()));
-                ((PacketClient) packet).sendClient(this, output);
-            } catch (SocketException e) {
-            } catch (IOException e) {
-                LOGGER.error("Error in connection: {}", e.toString());
-            }
+            WritableByteStream output = channel.getOutputStream();
+            output.putShort(packet.id(
+                    server.server().worldFormat().plugins().registry()));
+            ((PacketClient) packet).sendClient(this, output);
         }
     }
 
@@ -473,10 +483,13 @@ public class PlayerConnection
                     return channel.process();
             }
         } catch (ConnectionCloseException | InvalidPacketDataException e) {
-            LOGGER.info("Disconnecting player: {}", e.toString());
+            server.message("Disconnecting player: " + nickname,
+                    MessageLevel.SERVER_INFO);
             state = State.CLOSING;
         } catch (IOException e) {
-            LOGGER.info("Player disconnected: {}", e.toString());
+            server.message(
+                    "Player disconnected: " + nickname + " (" + e.toString() +
+                            ')', MessageLevel.SERVER_INFO);
             state = State.CLOSED;
         }
         return false;
@@ -506,7 +519,6 @@ public class PlayerConnection
                         .save(tagStructure, id);
             }
         }
-        LOGGER.info("Client disconnected: {} ({})", id, nickname);
     }
 
     public void updatePing(long ping) {
@@ -525,9 +537,12 @@ public class PlayerConnection
     }
 
     @Override
-    public void tell(String message) {
-        LOGGER.info("Chat ({}): {}", nickname, message);
+    public boolean message(String message, MessageLevel level) {
+        if (level.level() < MessageLevel.CHAT.level()) {
+            return false;
+        }
         send(new PacketChat(message));
+        return true;
     }
 
     @Override

@@ -93,6 +93,7 @@ public abstract class ScapesStandaloneServer
                 new ScapesServer(path.resolve("data"), tagStructure, serverInfo,
                         this);
         ServerConnection connection = server.connection();
+        connection.addExecutor(this);
         connection.setAllowsCreation(
                 tagStructure.getBoolean("AllowAccountCreation"));
         server.connection().start(tagStructure.getInteger("ServerPort"));

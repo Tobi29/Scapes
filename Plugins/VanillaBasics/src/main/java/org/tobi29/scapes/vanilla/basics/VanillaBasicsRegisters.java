@@ -25,6 +25,7 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.packets.Packet;
+import org.tobi29.scapes.packets.PacketUpdateInventory;
 import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.command.CommandRegistry;
@@ -166,6 +167,9 @@ class VanillaBasicsRegisters {
                 ItemStack item = new ItemStack(materials.ingot, data, amount);
                 IngotUtil.createIngot(item, metalType, temperature);
                 player.mob().inventory("Container").add(item);
+                player.mob().world()
+                        .send(new PacketUpdateInventory(player.mob(),
+                                "Container"));
             });
         });
 
@@ -194,6 +198,9 @@ class VanillaBasicsRegisters {
                     Command.error("Unknown tool kind: " + kind);
                 }
                 player.mob().inventory("Container").add(item);
+                player.mob().world()
+                        .send(new PacketUpdateInventory(player.mob(),
+                                "Container"));
             });
         });
     }
