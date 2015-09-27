@@ -21,10 +21,10 @@ import org.tobi29.scapes.client.gui.GuiAccount;
 import org.tobi29.scapes.client.gui.GuiMainMenu;
 import org.tobi29.scapes.client.gui.GuiVersion;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
-import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.GL;
+import org.tobi29.scapes.engine.server.Account;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -32,9 +32,15 @@ import java.nio.file.Path;
 public class GameStateMenu extends GameState {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GameStateMenu.class);
+    private final SceneMenu scene;
 
     public GameStateMenu(ScapesEngine engine) {
-        super(engine, new SceneMenu());
+        this(engine, new SceneMenu());
+    }
+
+    private GameStateMenu(ScapesEngine engine, SceneMenu scene) {
+        super(engine, scene);
+        this.scene = scene;
     }
 
     @Override
@@ -46,17 +52,16 @@ public class GameStateMenu extends GameState {
     public void init(GL gl) {
         try {
             Path file = engine.home().resolve("Account.properties");
-            Account
-                    account = Account.read(file);
+            Account account = Account.read(file);
             if (account.valid()) {
-                add(new GuiMainMenu(this));
+                add(new GuiMainMenu(this, scene));
             } else {
                 account.write(file);
-                add(new GuiAccount(this, new GuiMainMenu(this)));
+                add(new GuiAccount(this, new GuiMainMenu(this, scene)));
             }
         } catch (IOException e) {
             LOGGER.error("Failed to read account file: {}", e.toString());
-            add(new GuiAccount(this, new GuiMainMenu(this)));
+            add(new GuiAccount(this, new GuiMainMenu(this, scene)));
         }
         add(new GuiVersion());
     }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.slf4j.Logger;
@@ -38,10 +37,12 @@ public class GuiSaveSelect extends GuiMenu {
             LoggerFactory.getLogger(GuiSaveSelect.class);
     private static final String NO_WORLD_TYPE =
             "No plugin found that that can\n" + "be used to create a save.";
+    private final SceneMenu scene;
     private final GuiComponentScrollPaneViewport scrollPane;
 
-    public GuiSaveSelect(GameState state, Gui previous) {
+    public GuiSaveSelect(GameState state, Gui previous, SceneMenu scene) {
         super(state, "Singleplayer", previous);
+        this.scene = scene;
         scrollPane = new GuiComponentScrollPaneList(pane, 16, 80, 368, 290, 70)
                 .viewport();
         GuiComponentTextButton create =
@@ -111,12 +112,15 @@ public class GuiSaveSelect extends GuiMenu {
             GuiComponentTextButton label =
                     new GuiComponentTextButton(this, 70, 20, 180, 30, 18,
                             filename.substring(0, filename.lastIndexOf('.')));
-            label.addLeftClick(event -> state.engine().setState(
-                    new GameStateLoadSP(path, state.engine(),
-                            (SceneMenu) state.scene())));
+            label.addLeftClick(event -> {
+                scene.setSpeed(0.0f);
+                state.engine().setState(
+                        new GameStateLoadSP(path, state.engine(),
+                                state.scene()));
+            });
             label.addHover(event -> {
                 if (event.state() == GuiComponentHoverEvent.State.ENTER) {
-                    ((SceneMenu) state.scene()).changeBackground(path);
+                    scene.changeBackground(path);
                 }
             });
             GuiComponentTextButton delete =

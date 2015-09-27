@@ -24,6 +24,7 @@ import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.GL;
+import org.tobi29.scapes.engine.opengl.scenes.Scene;
 import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.server.ServerInfo;
 import org.tobi29.scapes.engine.utils.BufferCreator;
@@ -51,10 +52,9 @@ public class GameStateLoadSP extends GameState {
     private NewConnection client;
     private GuiLoading progress;
 
-    public GameStateLoadSP(Path path, ScapesEngine engine, SceneMenu scene) {
+    public GameStateLoadSP(Path path, ScapesEngine engine, Scene scene) {
         super(engine, scene);
         this.path = path;
-        scene.setSpeed(0.0f);
     }
 
     @Override

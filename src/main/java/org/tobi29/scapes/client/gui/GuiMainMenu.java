@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
+import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiAlignment;
@@ -23,17 +23,17 @@ import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.engine.gui.GuiComponentVisiblePane;
 
 public class GuiMainMenu extends Gui {
-    public GuiMainMenu(GameState state) {
+    public GuiMainMenu(GameState state, SceneMenu scene) {
         super(GuiAlignment.LEFT);
         GuiComponentVisiblePane pane =
                 new GuiComponentVisiblePane(this, 0, 0, 144, 512);
-        GuiComponentLogo logo = new GuiComponentLogo(pane, 0, 4, 144, 80);
+        new GuiComponentLogo(pane, 0, 4, 144, 80);
         GuiComponentTextButton singlePlayer =
                 new GuiComponentTextButton(pane, 16, 120, 120, 30, 18,
                         "Singleplayer");
         singlePlayer.addLeftClick(event -> {
             state.remove(this);
-            state.add(new GuiSaveSelect(state, this));
+            state.add(new GuiSaveSelect(state, this, scene));
         });
         GuiComponentTextButton multiPlayer =
                 new GuiComponentTextButton(pane, 16, 160, 120, 30, 18,

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.states.scenes;
 
 import org.slf4j.Logger;
@@ -66,6 +65,7 @@ public class SceneMenu extends Scene {
     private float speed = 0.6f, yaw;
     private VAO vao;
     private Optional<Path[]> save = Optional.empty();
+    private boolean texturesLoaded;
 
     public SceneMenu() {
         cam = new Cam(0.4f, 2.0f);
@@ -167,6 +167,10 @@ public class SceneMenu extends Scene {
     }
 
     protected void loadTextures(GL gl) {
+        if (texturesLoaded) {
+            return;
+        }
+        texturesLoaded = true;
         List<Path[]> saves = new ArrayList<>();
         try {
             Path path = state.engine().home().resolve("saves");
