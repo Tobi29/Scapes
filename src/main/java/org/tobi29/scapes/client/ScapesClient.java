@@ -136,7 +136,7 @@ public class ScapesClient extends Game {
             TagStructure integratedServerTag =
                     scapesTag.getStructure("IntegratedServer");
             TagStructure serverTag = integratedServerTag.getStructure("Server");
-            serverTag.setInteger("MaxLoadingRadius", 256);
+            serverTag.setInteger("MaxLoadingRadius", 288);
             TagStructure socketTag = serverTag.getStructure("Socket");
             socketTag.setInteger("MaxPlayers", 5);
             socketTag.setInteger("WorkerCount", 1);
