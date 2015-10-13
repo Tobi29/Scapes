@@ -16,6 +16,7 @@
 package org.tobi29.scapes.vanilla.basics.entity.server;
 
 import org.tobi29.scapes.chunk.WorldServer;
+import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.Frustum;
@@ -96,5 +97,12 @@ public class MobPlayerServerVB extends MobPlayerServer {
     @Override
     public Vector3 viewOffset() {
         return new Vector3d(0.0, 0.0, 0.63);
+    }
+
+    @Override
+    public boolean isActive() {
+        TagStructure conditionTag =
+                metaData("Vanilla").getStructure("Condition");
+        return !conditionTag.getBoolean("Sleeping");
     }
 }

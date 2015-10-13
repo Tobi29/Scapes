@@ -58,8 +58,8 @@ public class WorldSkyboxOverworld implements WorldSkybox {
     private final BiomeGenerator biomeGenerator;
     private final WorldClient world;
     private GuiWidgetDebugValues.Element temperatureDebug, humidityDebug,
-            weatherDebug, biomeDebug, staminaDebug, hungerDebug, thirstDebug,
-            bodyTemperatureDebug, exposureDebug;
+            weatherDebug, biomeDebug, staminaDebug, wakeDebug, hungerDebug,
+            thirstDebug, bodyTemperatureDebug, sleepingDebug, exposureDebug;
     private StaticAudio rainAudio;
     private StaticAudio windAudio;
     private double rainGainWait;
@@ -255,10 +255,12 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         TagStructure conditionTag =
                 player.metaData("Vanilla").getStructure("Condition");
         staminaDebug.setValue(conditionTag.getDouble("Stamina"));
+        wakeDebug.setValue(conditionTag.getDouble("Wake"));
         hungerDebug.setValue(conditionTag.getDouble("Hunger"));
         thirstDebug.setValue(conditionTag.getDouble("Thirst"));
         bodyTemperatureDebug
                 .setValue(conditionTag.getDouble("BodyTemperature"));
+        sleepingDebug.setValue(conditionTag.getBoolean("Sleeping"));
         exposureDebug.setValue(exposure);
     }
 
@@ -271,10 +273,12 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         weatherDebug = debugValues.get("Vanilla-Environment-Weather");
         biomeDebug = debugValues.get("Vanilla-Environment-Biome");
         staminaDebug = debugValues.get("Vanilla-Condition-Stamina");
+        wakeDebug = debugValues.get("Vanilla-Condition-Wake");
         hungerDebug = debugValues.get("Vanilla-Condition-Hunger");
         thirstDebug = debugValues.get("Vanilla-Condition-Thirst");
         bodyTemperatureDebug =
                 debugValues.get("Vanilla-Condition-Body-Temperature");
+        sleepingDebug = debugValues.get("Vanilla-Condition-Sleeping");
         exposureDebug = debugValues.get("Vanilla-Exposure");
         rainAudio = engine.sounds().playStaticAudio(
                 "VanillaBasics:sound/entity/particle/rain/Rain1.ogg",

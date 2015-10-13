@@ -82,6 +82,8 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
         });
     }
 
+    public abstract boolean isActive();
+
     @Override
     public ItemStack leftWeapon() {
         return inventoryContainer.item(inventorySelectLeft);

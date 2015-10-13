@@ -225,6 +225,7 @@ public class EnvironmentOverworldServer
                                 .getStructure("Condition");
                         synchronized (conditionTag) {
                             conditionTag.setDouble("Stamina", 1.0);
+                            conditionTag.setDouble("Wake", 1.0);
                             conditionTag.setDouble("Hunger", 1.0);
                             conditionTag.setDouble("Thirst", 1.0);
                             conditionTag.setDouble("BodyTemperature", 37.0);
@@ -334,6 +335,7 @@ public class EnvironmentOverworldServer
         playerUpdateWait -= delta;
         while (playerUpdateWait <= 0.0) {
             playerUpdateWait += 0.25;
+            Random random = ThreadLocalRandom.current();
             world.players().forEach(player -> {
                 double health = player.health();
                 double maxHealth = player.maxHealth();
@@ -341,15 +343,19 @@ public class EnvironmentOverworldServer
                         player.metaData("Vanilla").getStructure("Condition");
                 synchronized (conditionTag) {
                     double stamina = conditionTag.getDouble("Stamina");
+                    double wake = conditionTag.getDouble("Wake");
                     double hunger = conditionTag.getDouble("Hunger");
                     double thirst = conditionTag.getDouble("Thirst");
                     double bodyTemperature =
                             conditionTag.getDouble("BodyTemperature");
+                    boolean sleeping = conditionTag.getBoolean("Sleeping");
                     boolean ground = player.isOnGround();
                     boolean inWater = player.isInWater();
                     Vector3 pos = player.pos();
                     double temperature = climateGenerator
                             .temperature(pos.intX(), pos.intY(), pos.intZ());
+                    double regenFactor = sleeping ? 1.5 : 1.0;
+                    double depleteFactor = sleeping ? 0.05 : 1.0;
                     if (stamina > 0.2 && health < maxHealth) {
                         double rate = stamina * 0.5;
                         player.heal(rate);
@@ -369,14 +375,16 @@ public class EnvironmentOverworldServer
                         stamina -= rate;
                         bodyTemperature += rate;
                     }
-                    stamina -= 0.00025;
+                    stamina -= depleteFactor * 0.00025;
                     if (inWater && thirst < 1.0) {
                         thirst += 0.025;
                     }
                     if (stamina < 1.0) {
-                        double rate = hunger * thirst * 0.05 * (1 - stamina);
+                        double rate = regenFactor * hunger * thirst * 0.05 *
+                                (1 - stamina);
                         stamina += rate;
-                        hunger -= rate * 0.004;
+                        wake -= rate * 0.005;
+                        hunger -= rate * 0.003;
                         thirst -= rate * 0.01;
                     }
                     bodyTemperature += (temperature - bodyTemperature) / 2000.0;
@@ -391,16 +399,31 @@ public class EnvironmentOverworldServer
                         bodyTemperature -= rate;
                         thirst -= rate * 0.05;
                     }
-                    hunger = FastMath.clamp(hunger, 0.0, 1.0);
-                    thirst = FastMath.clamp(thirst, 0.0, 1.0);
+                    if (sleeping) {
+                        wake += 0.0002;
+                        double wakeChance = 7.0 - wake * 7.0;
+                        if (random.nextDouble() > wakeChance) {
+                            sleeping = false;
+                        }
+                    } else {
+                        double sleepChance = wake * 10.0;
+                        if (random.nextDouble() > sleepChance) {
+                            sleeping = true;
+                        }
+                    }
                     stamina = FastMath.min(stamina, 1.0);
                     if (stamina <= 0.0) {
                         player.damage(5.0);
                     }
+                    wake = FastMath.clamp(wake, 0.0, 1.0);
+                    hunger = FastMath.clamp(hunger, 0.0, 1.0);
+                    thirst = FastMath.clamp(thirst, 0.0, 1.0);
                     conditionTag.setDouble("Stamina", stamina);
+                    conditionTag.setDouble("Wake", wake);
                     conditionTag.setDouble("Hunger", hunger);
                     conditionTag.setDouble("Thirst", thirst);
                     conditionTag.setDouble("BodyTemperature", bodyTemperature);
+                    conditionTag.setBoolean("Sleeping", sleeping);
                 }
                 player.connection()
                         .send(new PacketEntityMetaData(player, "Vanilla"));

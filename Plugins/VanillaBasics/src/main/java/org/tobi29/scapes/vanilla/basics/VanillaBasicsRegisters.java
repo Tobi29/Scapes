@@ -16,8 +16,8 @@
 package org.tobi29.scapes.vanilla.basics;
 
 import org.tobi29.scapes.block.*;
-import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.EnvironmentServer;
+import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.entity.client.EntityClient;
@@ -113,10 +113,25 @@ class VanillaBasicsRegisters {
         registry.register("hunger", 8, options -> {
             options.add("p", "player", true,
                     "Player whose hunger values will be changed");
-            options.add("s", "saturation", true, "Saturation value (0-1)");
-            options.add("t", "thirst", true, "Thirst value (0-1)");
+            options.add("w", "wake", true, "Wake value (0.0-1.0)");
+            options.add("s", "saturation", true, "Saturation value (0.0-1.0)");
+            options.add("t", "thirst", true, "Thirst value (0.0-1.0)");
         }, (args, executor, commands) -> {
             String playerName = args.requireOption('p', executor.playerName());
+            Optional<String> wakeOption = args.option('w');
+            if (wakeOption.isPresent()) {
+                double wake = Command.getDouble(wakeOption.get());
+                commands.add(() -> {
+                    PlayerConnection player =
+                            Command.require(connection::playerByName,
+                                    playerName);
+                    TagStructure conditionTag = player.mob().metaData("Vanilla")
+                            .getStructure("Condition");
+                    synchronized (conditionTag) {
+                        conditionTag.setDouble("Wake", wake);
+                    }
+                });
+            }
             Optional<String> saturationOption = args.option('s');
             if (saturationOption.isPresent()) {
                 double saturation = Command.getDouble(saturationOption.get());

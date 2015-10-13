@@ -495,8 +495,18 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
         joiner = taskExecutor.runTask(joiner -> {
             sync.init();
             while (!joiner.marked()) {
-                update(0.05);
-                sync.cap();
+                if (!players.isEmpty()) {
+                    update(0.05);
+                    if (players.values().stream()
+                            .filter(MobPlayerServer::isActive).findAny()
+                            .isPresent()) {
+                        sync.cap();
+                    } else {
+                        sync.tick();
+                    }
+                } else {
+                    sync.cap();
+                }
             }
         }, "Tick-" + id, TaskExecutor.Priority.MEDIUM);
     }
