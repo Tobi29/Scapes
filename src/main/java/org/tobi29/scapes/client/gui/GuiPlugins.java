@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.slf4j.Logger;
@@ -36,8 +35,8 @@ public class GuiPlugins extends GuiMenu {
     private final GuiComponentScrollPaneViewport scrollPane;
 
     @SuppressWarnings("unchecked")
-    public GuiPlugins(GameState state, Gui previous) {
-        super(state, "Plugins", previous);
+    public GuiPlugins(GameState state, Gui previous, GuiStyle style) {
+        super(state, "Plugins", previous, style);
         path = state.engine().home().resolve("plugins");
         scrollPane = new GuiComponentScrollPaneList(pane, 16, 80, 368, 290, 70)
                 .viewport();

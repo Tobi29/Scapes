@@ -13,19 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.client.ScapesClient;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.Gui;
+import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
 public class GuiControlsGamepad extends GuiControls {
     public GuiControlsGamepad(GameState state, Gui previous, ScapesClient game,
-            TagStructure tagStructure, ControllerJoystick controller) {
-        super(state, previous, game);
+            TagStructure tagStructure, ControllerJoystick controller,
+            GuiStyle style) {
+        super(state, previous, game, style);
         TagStructure movementTag = tagStructure.getStructure("Movement");
         addText("Movement");
         addAxis("Horizontal", "X", movementTag, controller);

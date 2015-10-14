@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.engine.gui.*;
 
 public class GuiOptionsInGame extends Gui {
-    public GuiOptionsInGame(GameStateGameMP state) {
-        super(GuiAlignment.CENTER);
+    public GuiOptionsInGame(GameStateGameMP state, GuiStyle style) {
+        super(style, GuiAlignment.CENTER);
         GuiComponentVisiblePane pane =
                 new GuiComponentVisiblePane(this, 200, 0, 400, 512);
         new GuiComponentText(pane, 16, 16, 32, "Options");
@@ -45,9 +44,9 @@ public class GuiOptionsInGame extends Gui {
                 new GuiComponentTextButton(pane, 112, 466, 176, 30, 18, "Back");
 
         musicVolume.addHover(event -> state.engine().config()
-                .setVolume("music", musicVolume.value));
+                .setVolume("music", musicVolume.value()));
         soundVolume.addHover(event -> state.engine().config()
-                .setVolume("sound", soundVolume.value));
+                .setVolume("sound", soundVolume.value()));
         fullscreen.addLeftClick(event -> {
             if (!state.engine().config().isFullscreen()) {
                 fullscreen.setText("Fullscreen: ON");

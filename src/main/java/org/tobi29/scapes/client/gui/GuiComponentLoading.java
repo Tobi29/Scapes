@@ -61,8 +61,7 @@ public class GuiComponentLoading extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, FontRenderer font,
-            double delta) {
+    public void renderComponent(GL gl, Shader shader, double delta) {
         gl.textures().unbind(gl);
         MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();

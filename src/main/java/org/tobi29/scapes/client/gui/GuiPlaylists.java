@@ -40,8 +40,8 @@ public class GuiPlaylists extends GuiMenu {
     private String playlist;
 
     @SuppressWarnings("unchecked")
-    public GuiPlaylists(GameState state, Gui previous) {
-        super(state, "Playlists", previous);
+    public GuiPlaylists(GameState state, Gui previous, GuiStyle style) {
+        super(state, "Playlists", previous, style);
         this.state = state;
         GuiComponentTextButton day =
                 new GuiComponentTextButton(pane, 16, 80, 80, 30, 18, "Day");
@@ -114,7 +114,8 @@ public class GuiPlaylists extends GuiMenu {
             play.addLeftClick(event -> {
                 GuiNotification message =
                         new GuiNotification(state.engine().globalGUI(), 500, 0,
-                                290, 60, GuiAlignment.RIGHT, 3.0);
+                                290, 60, state.engine().globalGUI().style(),
+                                GuiAlignment.RIGHT, 3.0);
                 new GuiComponentIcon(message, 10, 10, 40, 40,
                         state.engine().graphics().textures()
                                 .get("Scapes:image/gui/Playlist"));
@@ -122,7 +123,7 @@ public class GuiPlaylists extends GuiMenu {
                 state.engine().sounds().stop("music");
                 state.engine().sounds()
                         .playMusic(FileUtil.read(path), "music.Playlist", 1.0f,
-                                1.0f,true);
+                                1.0f, true);
             });
             new GuiComponentTextButton(this, 60, 2, 220, 15, 12, title);
             GuiComponentTextButton delete =

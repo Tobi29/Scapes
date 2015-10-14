@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.states;
 
 import org.tobi29.scapes.client.gui.GuiDisconnected;
@@ -43,7 +42,7 @@ public class GameStateServerDisconnect extends GameState {
             Optional<InetSocketAddress> address, ScapesEngine engine) {
         super(engine, new SceneError());
         this.address = address;
-        gui = new GuiDisconnected(this, message);
+        gui = new GuiDisconnected(this, message, engine.globalGUI().style());
         add(gui);
     }
 

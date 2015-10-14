@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiComponentSlider;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
+import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 public class GuiVideoSettings extends GuiMenu {
-    public GuiVideoSettings(GameState state, Gui previous) {
-        super(state, "Video Settings", previous);
+    public GuiVideoSettings(GameState state, Gui previous, GuiStyle style) {
+        super(state, "Video Settings", previous, style);
         TagStructure scapesTag =
                 state.engine().tagStructure().getStructure("Scapes");
         GuiComponentSlider viewDistance =
@@ -55,10 +55,10 @@ public class GuiVideoSettings extends GuiMenu {
                                 '%');
 
         viewDistance.addHover(event -> scapesTag.setDouble("RenderDistance",
-                10.0 + viewDistance.value * 246.0));
+                10.0 + viewDistance.value() * 246.0));
         shader.addLeftClick(event -> {
             state.remove(this);
-            state.add(new GuiShaderSettings(state, this));
+            state.add(new GuiShaderSettings(state, this, style));
         });
         fullscreen.addLeftClick(event -> {
             if (!state.engine().config().isFullscreen()) {
@@ -72,7 +72,7 @@ public class GuiVideoSettings extends GuiMenu {
         });
         resolutionMultiplier.addHover(event -> state.engine().config()
                 .setResolutionMultiplier(
-                        (float) resolution(resolutionMultiplier.value)));
+                        (float) resolution(resolutionMultiplier.value())));
     }
 
     private static double resolution(double value) {

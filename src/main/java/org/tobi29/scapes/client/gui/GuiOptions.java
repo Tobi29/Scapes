@@ -19,10 +19,11 @@ import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiComponentSlider;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
+import org.tobi29.scapes.engine.gui.GuiStyle;
 
 public class GuiOptions extends GuiMenu {
-    public GuiOptions(GameState state, Gui previous) {
-        super(state, "Options", previous);
+    public GuiOptions(GameState state, Gui previous, GuiStyle style) {
+        super(state, "Options", previous, style);
         GuiComponentSlider musicVolume =
                 new GuiComponentSlider(pane, 16, 80, 368, 30, 18, "Music",
                         state.engine().config().volume("music"));
@@ -40,20 +41,20 @@ public class GuiOptions extends GuiMenu {
                         "Account");
 
         musicVolume.addHover(event -> state.engine().config()
-                .setVolume("music", musicVolume.value));
+                .setVolume("music", musicVolume.value()));
         soundVolume.addHover(event -> state.engine().config()
-                .setVolume("sound", soundVolume.value));
+                .setVolume("sound", soundVolume.value()));
         controls.addLeftClick(event -> {
             state.remove(this);
-            state.add(new GuiControlsList(state, this));
+            state.add(new GuiControlsList(state, this, style));
         });
         graphics.addLeftClick(event -> {
             state.remove(this);
-            state.add(new GuiVideoSettings(state, this));
+            state.add(new GuiVideoSettings(state, this, style));
         });
         account.addLeftClick(event -> {
             state.remove(this);
-            state.add(new GuiAccount(state, this));
+            state.add(new GuiAccount(state, this, style));
         });
     }
 }

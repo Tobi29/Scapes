@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.client.ScapesClient;
@@ -21,13 +20,14 @@ import org.tobi29.scapes.client.input.InputMode;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
+import org.tobi29.scapes.engine.gui.GuiStyle;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class GuiControlsList extends GuiMenu {
-    public GuiControlsList(GameState state, Gui previous) {
-        super(state, "Controls", previous);
+    public GuiControlsList(GameState state, Gui previous, GuiStyle style) {
+        super(state, "Controls", previous, style);
         Map<String, InputMode> inputModes = new ConcurrentHashMap<>();
         ((ScapesClient) state.engine().game()).inputModes().forEach(
                 inputMode -> inputModes.put(inputMode.toString(), inputMode));

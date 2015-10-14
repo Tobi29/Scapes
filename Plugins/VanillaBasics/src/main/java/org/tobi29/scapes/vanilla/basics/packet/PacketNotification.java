@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.packet;
 
 import org.tobi29.scapes.chunk.WorldClient;
@@ -54,7 +53,7 @@ public class PacketNotification extends Packet implements PacketClient {
 
     @Override
     public void runClient(ClientConnection client, WorldClient world) {
-        client.entity()
-                .openGui(new GuiInGameMessage(client.game(), title, text));
+        client.entity().openGui(new GuiInGameMessage(client.game(), title, text,
+                client.game().engine().globalGUI().style()));
     }
 }

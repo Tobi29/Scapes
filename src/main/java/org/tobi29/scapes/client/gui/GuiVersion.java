@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.Scapes;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiAlignment;
 import org.tobi29.scapes.engine.gui.GuiComponentText;
+import org.tobi29.scapes.engine.gui.GuiStyle;
 
 public class GuiVersion extends Gui {
-    public GuiVersion() {
-        super(GuiAlignment.RIGHT);
+    public GuiVersion(GuiStyle style) {
+        super(style, GuiAlignment.RIGHT);
         new GuiComponentText(this, 710, 486, 16,
                 'v' + Scapes.VERSION.toString());
     }

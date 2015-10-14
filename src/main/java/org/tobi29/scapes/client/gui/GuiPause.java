@@ -23,8 +23,9 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.packets.PacketInteraction;
 
 public class GuiPause extends Gui {
-    public GuiPause(GameStateGameMP state, MobPlayerClientMain player) {
-        super(GuiAlignment.CENTER);
+    public GuiPause(GameStateGameMP state, MobPlayerClientMain player,
+            GuiStyle style) {
+        super(style, GuiAlignment.CENTER);
         GuiComponentVisiblePane pane =
                 new GuiComponentVisiblePane(this, 200, 0, 400, 512);
         new GuiComponentText(pane, 16, 16, 32, "Pause");
@@ -52,7 +53,7 @@ public class GuiPause extends Gui {
                 .send(new PacketInteraction(
                         PacketInteraction.OPEN_STATISTICS)));
         options.addLeftClick(
-                event -> player.openGui(new GuiOptionsInGame(state)));
+                event -> player.openGui(new GuiOptionsInGame(state, style)));
         disconnect.addLeftClick(event -> state.engine()
                 .setState(new GameStateMenu(state.engine())));
         back.addLeftClick(event -> player.closeGui());

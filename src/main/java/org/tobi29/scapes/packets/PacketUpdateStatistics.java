@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import org.tobi29.scapes.block.GameRegistry;
@@ -70,7 +69,8 @@ public class PacketUpdateStatistics extends Packet implements PacketClient {
 
     @Override
     public void runClient(ClientConnection client, WorldClient world) {
-        client.entity()
-                .openGui(new GuiStatistics(client.game(), statisticMaterials));
+        client.entity().openGui(
+                new GuiStatistics(client.game(), statisticMaterials,
+                        client.game().engine().globalGUI().style()));
     }
 }

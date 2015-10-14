@@ -136,7 +136,8 @@ public class InputModeGamepad implements InputMode {
     @Override
     public Gui createControlsGUI(GameState state, Gui prev) {
         return new GuiControlsGamepad(state, prev,
-                (ScapesClient) state.engine().game(), tagStructure, controller);
+                (ScapesClient) state.engine().game(), tagStructure, controller,
+                prev.style());
     }
 
     @Override

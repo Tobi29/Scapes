@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiComponentSlider;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
+import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
 public class GuiShaderSettings extends GuiMenu {
-    public GuiShaderSettings(GameState state, Gui previous) {
-        super(state, "Shader Settings", previous);
+    public GuiShaderSettings(GameState state, Gui previous, GuiStyle style) {
+        super(state, "Shader Settings", previous, style);
         TagStructure scapesTag =
                 state.engine().tagStructure().getStructure("Scapes");
         GuiComponentSlider animationDistance =
@@ -50,7 +50,7 @@ public class GuiShaderSettings extends GuiMenu {
 
         animationDistance.addHover(event -> scapesTag
                 .setFloat("AnimationDistance",
-                        (float) animationDistance.value));
+                        (float) animationDistance.value()));
         bloom.addLeftClick(event -> {
             if (!scapesTag.getBoolean("Bloom")) {
                 bloom.setText("Bloom: ON");

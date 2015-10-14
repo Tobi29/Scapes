@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.gui;
 
+import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -25,12 +25,11 @@ import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
 public class GuiForgeInventory extends GuiContainerInventory {
     private final EntityForgeClient container;
-    private FontRenderer.Text vaoTemperatureText;
-    private String currentText;
+    private FontRenderer.Text temperatureText = FontRenderer.EMPTY_TEXT;
 
     public GuiForgeInventory(EntityForgeClient container,
-            MobPlayerClientMainVB player) {
-        super("Forge", player, container);
+            MobPlayerClientMainVB player, GuiStyle style) {
+        super("Forge", player, container, style);
         this.container = container;
         buttonContainer(16, 210, 30, 30, 0);
         buttonContainer(56, 210, 30, 30, 1);
@@ -41,17 +40,22 @@ public class GuiForgeInventory extends GuiContainerInventory {
         buttonContainer(56, 120, 30, 30, 6);
         buttonContainer(96, 120, 30, 30, 7);
         buttonContainer(96, 80, 30, 30, 8);
+        updateTemperatureText();
     }
 
     @Override
-    public void renderOverlay(GL gl, Shader shader, FontRenderer font) {
-        super.renderOverlay(gl, shader, font);
+    public void renderOverlay(GL gl, Shader shader) {
+        super.renderOverlay(gl, shader);
+        updateTemperatureText();
+        temperatureText.render(gl, shader);
+    }
+
+    private void updateTemperatureText() {
+        FontRenderer font = gui.style().font();
         String text = FastMath.floor(container.temperature()) + "°C";
-        if (!text.equals(currentText) || vaoTemperatureText == null) {
-            currentText = text;
-            vaoTemperatureText =
+        if (!text.equals(temperatureText.text())) {
+            temperatureText =
                     font.render(text, 220, 170, 24, 1.0f, 1.0f, 1.0f, 1.0f);
         }
-        vaoTemperatureText.render(gl, shader);
     }
 }

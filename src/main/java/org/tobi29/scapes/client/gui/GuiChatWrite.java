@@ -19,6 +19,7 @@ import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiAlignment;
 import org.tobi29.scapes.engine.gui.GuiComponentTextField;
+import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.packets.PacketChat;
@@ -28,8 +29,9 @@ public class GuiChatWrite extends Gui {
     private final GameStateGameMP state;
     private final MobPlayerClientMain player;
 
-    public GuiChatWrite(GameStateGameMP state, MobPlayerClientMain player) {
-        super(GuiAlignment.LEFT);
+    public GuiChatWrite(GameStateGameMP state, MobPlayerClientMain player,
+            GuiStyle style) {
+        super(style, GuiAlignment.LEFT);
         this.state = state;
         this.player = player;
         write = new GuiComponentTextField(this, 12, 480, 600, 30, 16, "", 64,

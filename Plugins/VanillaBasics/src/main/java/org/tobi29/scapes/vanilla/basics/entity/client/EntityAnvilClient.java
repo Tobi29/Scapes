@@ -38,7 +38,8 @@ public class EntityAnvilClient extends EntityAbstractContainerClient {
     public Optional<Gui> gui(MobPlayerClientMain player) {
         if (player instanceof MobPlayerClientMainVB) {
             return Optional.of(new GuiAnvilInventory(this,
-                    (MobPlayerClientMainVB) player));
+                    (MobPlayerClientMainVB) player,
+                    player.game().engine().globalGUI().style()));
         }
         return Optional.empty();
     }

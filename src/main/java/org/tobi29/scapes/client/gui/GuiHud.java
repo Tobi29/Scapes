@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiAlignment;
+import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.opengl.*;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
@@ -34,13 +34,13 @@ public class GuiHud extends Gui {
             new float[]{0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f},
             new int[]{0, 1, 2, 0, 2, 3}, RenderType.TRIANGLES);
 
-    public GuiHud() {
-        super(GuiAlignment.LEFT);
+    public GuiHud(GuiStyle style) {
+        super(style, GuiAlignment.LEFT);
     }
 
     @Override
-    public void render(GL gl, Shader shader, FontRenderer font, double delta) {
-        super.render(gl, shader, font, delta);
+    public void render(GL gl, Shader shader, double delta) {
+        super.render(gl, shader, delta);
         if (visible) {
             MatrixStack matrixStack = gl.matrixStack();
             Matrix matrix = matrixStack.push();

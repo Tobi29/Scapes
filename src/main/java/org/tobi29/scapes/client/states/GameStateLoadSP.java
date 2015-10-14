@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.client.connection.NewConnection;
 import org.tobi29.scapes.client.gui.GuiLoading;
-import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
@@ -63,7 +62,7 @@ public class GameStateLoadSP extends GameState {
 
     @Override
     public void init(GL gl) {
-        progress = new GuiLoading();
+        progress = new GuiLoading(engine.globalGUI().style());
         add(progress);
         progress.setLabel("Creating server...");
     }

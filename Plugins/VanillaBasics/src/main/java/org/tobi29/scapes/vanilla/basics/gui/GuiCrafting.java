@@ -34,8 +34,9 @@ public class GuiCrafting extends GuiInventory {
     private int type = -1, example;
     private long nextExample;
 
-    public GuiCrafting(boolean table, MobPlayerClientMainVB player) {
-        super("Crafting" + (table ? " Table" : ""), player);
+    public GuiCrafting(boolean table, MobPlayerClientMainVB player,
+            GuiStyle style) {
+        super("Crafting" + (table ? " Table" : ""), player, style);
         this.table = table;
         scrollPaneTypes =
                 new GuiComponentScrollPaneList(pane, 16, 80, 90, 180, 20)

@@ -58,8 +58,7 @@ public class GuiComponentBar extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, FontRenderer font,
-            double delta) {
+    public void renderComponent(GL gl, Shader shader, double delta) {
         double factor = FastMath.min(1.0, delta);
         value += (FastMath.clamp(supplier.get(), 0.0, 1.0) - value) * factor;
         gl.textures().unbind(gl);

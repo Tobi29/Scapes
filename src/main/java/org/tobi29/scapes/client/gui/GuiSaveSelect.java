@@ -40,8 +40,9 @@ public class GuiSaveSelect extends GuiMenu {
     private final SceneMenu scene;
     private final GuiComponentScrollPaneViewport scrollPane;
 
-    public GuiSaveSelect(GameState state, Gui previous, SceneMenu scene) {
-        super(state, "Singleplayer", previous);
+    public GuiSaveSelect(GameState state, Gui previous, SceneMenu scene,
+            GuiStyle style) {
+        super(state, "Singleplayer", previous, style);
         this.scene = scene;
         scrollPane = new GuiComponentScrollPaneList(pane, 16, 80, 368, 290, 70)
                 .viewport();
@@ -67,12 +68,14 @@ public class GuiSaveSelect extends GuiMenu {
                 }
                 state.remove(this);
                 if (worldTypes.isEmpty()) {
-                    state.add(new GuiMessage(state, this, "Error",
-                            NO_WORLD_TYPE));
+                    state.add(
+                            new GuiMessage(state, this, "Error", NO_WORLD_TYPE,
+                                    style));
                 } else {
                     state.add(
                             new GuiCreateWorld(state, this, worldTypes, plugins,
-                                    state.engine().home().resolve("saves")));
+                                    state.engine().home().resolve("saves"),
+                                    style));
                 }
             } catch (IOException e) {
                 LOGGER.warn("Failed to read plugins: {}", e.toString());

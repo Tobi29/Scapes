@@ -59,7 +59,7 @@ public class GameStateLoadMP extends GameState {
 
     @Override
     public void init(GL gl) {
-        progress = new GuiLoading();
+        progress = new GuiLoading(engine.globalGUI().style());
         add(progress);
         progress.setLabel("Connecting to server...");
     }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.client.ChatHistory;
@@ -40,8 +39,7 @@ public class GuiComponentChat extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, FontRenderer font,
-            double delta) {
+    public void renderComponent(GL gl, Shader shader, double delta) {
         MatrixStack matrixStack = gl.matrixStack();
         int yy = -16;
         Iterator<String> iterator = chatHistory.lines().iterator();
@@ -49,8 +47,9 @@ public class GuiComponentChat extends GuiComponent {
             String line = iterator.next();
             FontRenderer.Text vao = cache.get(line);
             if (vao == null) {
-                vao = font.render(line, 0.0f, 0.0f, 16.0f, 1.0f, 1.0f, 1.0f,
-                        1.0f);
+                vao = gui.style().font()
+                        .render(line, 0.0f, 0.0f, 16.0f, 1.0f, 1.0f, 1.0f,
+                                1.0f);
             }
             swapCache.put(line, vao);
             Matrix matrix = matrixStack.push();

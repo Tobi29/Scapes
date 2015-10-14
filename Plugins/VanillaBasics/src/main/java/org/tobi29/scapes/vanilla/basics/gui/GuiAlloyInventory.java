@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.gui;
 
+import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -27,20 +27,26 @@ import java.util.Map;
 
 public class GuiAlloyInventory extends GuiContainerInventory {
     private final EntityAlloyClient container;
-    private FontRenderer.Text vaoInfoText;
-    private String currentText;
+    private FontRenderer.Text infoText;
 
     public GuiAlloyInventory(EntityAlloyClient container,
-            MobPlayerClientMainVB player) {
-        super("Alloy Mold", player, container);
+            MobPlayerClientMainVB player, GuiStyle style) {
+        super("Alloy Mold", player, container, style);
         this.container = container;
         buttonContainer(16, 120, 30, 30, 0);
         buttonContainer(16, 160, 30, 30, 1);
+        updateInfoText();
     }
 
     @Override
-    public void renderOverlay(GL gl, Shader shader, FontRenderer font) {
-        super.renderOverlay(gl, shader, font);
+    public void renderOverlay(GL gl, Shader shader) {
+        super.renderOverlay(gl, shader);
+        updateInfoText();
+        infoText.render(gl, shader);
+    }
+
+    private void updateInfoText() {
+        FontRenderer font = gui.style().font();
         StringBuilder textBuilder = new StringBuilder(64);
         textBuilder.append("Metal: ");
         String result = container.result();
@@ -59,11 +65,8 @@ public class GuiAlloyInventory extends GuiContainerInventory {
                     .append('%');
         }
         String text = textBuilder.toString();
-        if (!text.equals(currentText) || vaoInfoText == null) {
-            currentText = text;
-            vaoInfoText =
-                    font.render(text, 260, 160, 18, 1.0f, 1.0f, 1.0f, 1.0f);
+        if (!text.equals(infoText.text())) {
+            infoText = font.render(text, 220, 170, 24, 1.0f, 1.0f, 1.0f, 1.0f);
         }
-        vaoInfoText.render(gl, shader);
     }
 }

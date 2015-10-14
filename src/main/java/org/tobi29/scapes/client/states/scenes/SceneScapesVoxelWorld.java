@@ -23,8 +23,7 @@ import org.tobi29.scapes.chunk.WorldSkybox;
 import org.tobi29.scapes.client.gui.GuiComponentChat;
 import org.tobi29.scapes.client.gui.GuiComponentGraph;
 import org.tobi29.scapes.client.gui.GuiHud;
-import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
-import org.tobi29.scapes.engine.gui.GuiWidget;
+import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
 import org.tobi29.scapes.engine.opengl.*;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
@@ -83,7 +82,7 @@ public class SceneScapesVoxelWorld extends Scene {
     private final ClientSkinStorage skinStorage;
     private final GuiWidgetDebugClient debugWidget;
     private final GuiWidgetPerformanceClient performanceWidget;
-    private final GuiHud hud = new GuiHud();
+    private final GuiHud hud;
     private final FBO skyboxFBO = new FBO(1, 1, 1, false, true, false),
             exposureFBO = new FBO(1, 1, 1, false, true, false);
     private final WorldSkybox skybox;
@@ -97,6 +96,7 @@ public class SceneScapesVoxelWorld extends Scene {
     public SceneScapesVoxelWorld(WorldClient world, Cam cam) {
         this.world = world;
         this.cam = cam;
+        hud = new GuiHud(world.game().engine().globalGUI().style());
         terrainTextureRegistry = world.game().terrainTextureRegistry();
         skinStorage = world.game().skinStorage();
         GuiWidgetDebugValues debugValues = world.game().engine().debugValues();
@@ -106,11 +106,12 @@ public class SceneScapesVoxelWorld extends Scene {
         lightDebug = debugValues.get("Camera-Light");
         blockLightDebug = debugValues.get("Camera-Block-Light");
         sunLightDebug = debugValues.get("Camera-Sun-Light");
-        debugWidget = new GuiWidgetDebugClient();
-        addGui(debugWidget);
+        GuiStyle style = world.game().engine().globalGUI().style();
+        Gui debugLayer = new Gui(style, GuiAlignment.LEFT);
+        addGui(debugLayer);
+        debugWidget = new GuiWidgetDebugClient(debugLayer);
         debugWidget.setVisible(false);
-        performanceWidget = new GuiWidgetPerformanceClient();
-        addGui(performanceWidget);
+        performanceWidget = new GuiWidgetPerformanceClient(debugLayer);
         performanceWidget.setVisible(false);
         vao = VAOUtility.createVTI(
                 new float[]{0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
@@ -467,11 +468,11 @@ public class SceneScapesVoxelWorld extends Scene {
         return hud;
     }
 
-    private static class GuiWidgetPerformanceClient extends GuiWidget {
+    private static class GuiWidgetPerformanceClient extends GuiComponentWidget {
         private final GuiComponentGraph graphRender, graphUpdate;
 
-        private GuiWidgetPerformanceClient() {
-            super(32, 32, 240, 80, "Performance Graph");
+        private GuiWidgetPerformanceClient(GuiComponent parent) {
+            super(parent, 32, 32, 240, 80, "Performance Graph");
             graphRender =
                     new GuiComponentGraph(this, 0, 0, width, height, 0.0f, 1.0f,
                             0.0f, 1.0f);
@@ -481,9 +482,9 @@ public class SceneScapesVoxelWorld extends Scene {
         }
     }
 
-    private class GuiWidgetDebugClient extends GuiWidget {
-        private GuiWidgetDebugClient() {
-            super(32, 32, 160, 120, "Debug Values");
+    private class GuiWidgetDebugClient extends GuiComponentWidget {
+        private GuiWidgetDebugClient(GuiComponent parent) {
+            super(parent, 32, 32, 160, 120, "Debug Values");
             GuiComponentTextButton geometryButton =
                     new GuiComponentTextButton(this, 10, 10, 140, 15, 12,
                             "Geometry");

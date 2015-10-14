@@ -29,19 +29,16 @@ import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.packets.PacketInventoryInteraction;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
-import java.util.Objects;
-
 public class GuiInventory extends Gui {
     protected final GuiComponentVisiblePane pane, inventoryPane;
     protected final MobPlayerClientMainVB player;
-    private String hover, renderHover, currentHover;
-    private FontRenderer.Text vaoText;
-    private String currentName;
+    private String hover, hoverNew;
+    private FontRenderer.Text hoverName = FontRenderer.EMPTY_TEXT;
     private double cursorX, cursorY;
-    private FontRenderer font;
 
-    public GuiInventory(String name, MobPlayerClientMainVB player) {
-        super(GuiAlignment.CENTER);
+    public GuiInventory(String name, MobPlayerClientMainVB player,
+            GuiStyle style) {
+        super(style, GuiAlignment.CENTER);
         this.player = player;
         pane = new GuiComponentVisiblePane(this, 200, 0, 400, 512);
         new GuiComponentText(pane, 16, 16, 32, name);
@@ -90,29 +87,21 @@ public class GuiInventory extends Gui {
     }
 
     @Override
-    public void renderOverlay(GL gl, Shader shader, FontRenderer font) {
-        if (renderHover != null) {
+    public void renderOverlay(GL gl, Shader shader) {
+        FontRenderer font = gui.style().font();
+        String hover = this.hover;
+        if (hover != null) {
             MatrixStack matrixStack = gl.matrixStack();
-            if (!renderHover.equals(currentName) || this.font != font) {
-                this.font = font;
-                updateText(renderHover);
+            if (!hover.equals(hoverName.text())) {
+                updateText(hover, font);
             }
             Matrix matrix = matrixStack.push();
             matrix.translate((float) cursorX, (float) cursorY, 0.0f);
-            vaoText.render(gl, shader);
+            hoverName.render(gl, shader);
             matrixStack.pop();
         }
         GuiUtils.renderItem((float) cursorX, (float) cursorY, 30.0f, 30.0f,
                 player.inventory("Hold").item(0), gl, shader, font);
-    }
-
-    @Override
-    public void updateComponent() {
-        if (!Objects.equals(hover, currentHover)) {
-            renderHover = hover;
-            currentHover = hover;
-        }
-        hover = null;
     }
 
     @Override
@@ -121,6 +110,8 @@ public class GuiInventory extends Gui {
         super.update(mouseX, mouseY, mouseInside, engine);
         cursorX = alignedX(mouseX, engine);
         cursorY = mouseY;
+        hover = hoverNew;
+        hoverNew = null;
     }
 
     protected void setTooltip(ItemStack item) {
@@ -128,11 +119,10 @@ public class GuiInventory extends Gui {
     }
 
     protected void setTooltip(ItemStack item, String prefix) {
-        hover = prefix + item.material().name(item);
+        hoverNew = prefix + item.material().name(item);
     }
 
-    private void updateText(String text) {
-        currentName = text;
-        vaoText = font.render(text, 0, 0, 12, 1.0f, 1.0f, 1.0f, 1);
+    private void updateText(String text, FontRenderer font) {
+        hoverName = font.render(text, 0, 0, 12, 1.0f, 1.0f, 1.0f, 1);
     }
 }

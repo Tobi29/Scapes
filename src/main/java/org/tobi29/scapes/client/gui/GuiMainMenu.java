@@ -17,14 +17,11 @@ package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.Gui;
-import org.tobi29.scapes.engine.gui.GuiAlignment;
-import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
-import org.tobi29.scapes.engine.gui.GuiComponentVisiblePane;
+import org.tobi29.scapes.engine.gui.*;
 
 public class GuiMainMenu extends Gui {
-    public GuiMainMenu(GameState state, SceneMenu scene) {
-        super(GuiAlignment.LEFT);
+    public GuiMainMenu(GameState state, SceneMenu scene, GuiStyle style) {
+        super(style, GuiAlignment.LEFT);
         GuiComponentVisiblePane pane =
                 new GuiComponentVisiblePane(this, 0, 0, 144, 512);
         new GuiComponentLogo(pane, 0, 4, 144, 80);
@@ -33,49 +30,49 @@ public class GuiMainMenu extends Gui {
                         "Singleplayer");
         singlePlayer.addLeftClick(event -> {
             state.remove(this);
-            state.add(new GuiSaveSelect(state, this, scene));
+            state.add(new GuiSaveSelect(state, this, scene, style));
         });
         GuiComponentTextButton multiPlayer =
                 new GuiComponentTextButton(pane, 16, 160, 120, 30, 18,
                         "Multiplayer");
         multiPlayer.addLeftClick(event -> {
             state.remove(this);
-            state.add(new GuiServerSelect(state, this));
+            state.add(new GuiServerSelect(state, this, style));
         });
         GuiComponentTextButton options =
                 new GuiComponentTextButton(pane, 16, 200, 120, 30, 18,
                         "Options");
         options.addLeftClick(event -> {
             state.remove(this);
-            state.add(new GuiOptions(state, this));
+            state.add(new GuiOptions(state, this, style));
         });
         GuiComponentTextButton credits =
                 new GuiComponentTextButton(pane, 16, 240, 120, 30, 18,
                         "Credits");
         credits.addLeftClick(event -> {
             state.remove(this);
-            state.add(new GuiCredits(state, this));
+            state.add(new GuiCredits(state, this, style));
         });
         GuiComponentTextButton plugins =
                 new GuiComponentTextButton(pane, 16, 280, 120, 30, 18,
                         "Plugins");
         plugins.addLeftClick(event -> {
             state.remove(this);
-            state.add(new GuiPlugins(state, this));
+            state.add(new GuiPlugins(state, this, style));
         });
         GuiComponentTextButton playlists =
                 new GuiComponentTextButton(pane, 16, 320, 120, 30, 18,
                         "Playlists");
         playlists.addLeftClick(event -> {
             state.remove(this);
-            state.add(new GuiPlaylists(state, this));
+            state.add(new GuiPlaylists(state, this, style));
         });
         GuiComponentTextButton screenshots =
                 new GuiComponentTextButton(pane, 16, 360, 120, 30, 18,
                         "Screenshots");
         screenshots.addLeftClick(event -> {
             state.remove(this);
-            state.add(new GuiScreenshots(state, this));
+            state.add(new GuiScreenshots(state, this, style));
         });
         GuiComponentTextButton quit =
                 new GuiComponentTextButton(pane, 16, 400, 120, 30, 18, "Quit");

@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiAlignment;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
+import org.tobi29.scapes.engine.gui.GuiStyle;
 
 public class GuiLoading extends Gui {
     private final GuiComponentLoading progress;
     private final GuiComponentTextButton label;
 
-    public GuiLoading() {
-        super(GuiAlignment.CENTER);
+    public GuiLoading(GuiStyle style) {
+        super(style, GuiAlignment.CENTER);
         progress = new GuiComponentLoading(this, 300, 280, 200, 16);
         label = new GuiComponentTextButton(this, 300, 310, 200, 32, 18,
                 "Loading...");

@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiComponentIcon;
+import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 
 public class GuiScreenshot extends GuiMenu {
-    public GuiScreenshot(GameState state, Gui previous, Texture texture) {
-        super(state, "Screenshots", previous);
-        GuiComponentIcon image = new GuiComponentIcon(pane, 16, 80, 368,
+    public GuiScreenshot(GameState state, Gui previous, Texture texture,
+            GuiStyle style) {
+        super(state, "Screenshots", previous, style);
+        new GuiComponentIcon(pane, 16, 80, 368,
                 (int) ((double) texture.height() / texture.width() * 368),
                 texture);
     }

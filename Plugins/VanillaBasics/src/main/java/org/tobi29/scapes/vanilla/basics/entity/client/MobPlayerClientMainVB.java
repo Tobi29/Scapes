@@ -27,6 +27,7 @@ import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.input.ControllerDefault;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
+import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.Frustum;
@@ -65,6 +66,11 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain
     @Override
     public void update(double delta) {
         super.update(delta);
+        TagStructure conditionTag =
+                metaData("Vanilla").getStructure("Condition");
+        if (conditionTag.getBoolean("Sleeping")) {
+            return;
+        }
         Controller controller =
                 ((ScapesClient) game.engine().game()).inputMode()
                         .playerController();
@@ -81,14 +87,16 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain
         }
         if (controller.chat()) {
             if (!hasGui()) {
-                openGui(new GuiChatWrite(game, this));
+                openGui(new GuiChatWrite(game, this,
+                        game.engine().globalGUI().style()));
             }
         }
         if (controller.menu()) {
             if (hasGui()) {
                 closeGui();
             } else {
-                openGui(new GuiPause(game, this));
+                openGui(new GuiPause(game, this,
+                        game.engine().globalGUI().style()));
             }
         }
         if (currentGui == null) {
@@ -271,7 +279,8 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain
     public Optional<Gui> gui(MobPlayerClientMain player) {
         if (player instanceof MobPlayerClientMainVB) {
             return Optional
-                    .of(new GuiPlayerInventory((MobPlayerClientMainVB) player));
+                    .of(new GuiPlayerInventory((MobPlayerClientMainVB) player,
+                            player.game().engine().globalGUI().style()));
         }
         return Optional.empty();
     }

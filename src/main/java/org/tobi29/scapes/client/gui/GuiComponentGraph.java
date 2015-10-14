@@ -37,8 +37,7 @@ public class GuiComponentGraph extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, FontRenderer font,
-            double delta) {
+    public void renderComponent(GL gl, Shader shader, double delta) {
         if (data.length != width) {
             data = new float[width];
         }

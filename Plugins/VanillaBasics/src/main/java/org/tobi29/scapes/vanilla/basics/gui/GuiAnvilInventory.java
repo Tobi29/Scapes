@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.gui;
 
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.Material;
 import org.tobi29.scapes.client.gui.GuiComponentItemButton;
+import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityAnvilClient;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
@@ -29,8 +29,8 @@ public class GuiAnvilInventory extends GuiContainerInventory {
     private final EntityAnvilClient container;
 
     public GuiAnvilInventory(EntityAnvilClient container,
-            MobPlayerClientMainVB player) {
-        super("Anvil", player, container);
+            MobPlayerClientMainVB player, GuiStyle style) {
+        super("Anvil", player, container, style);
         this.container = container;
         VanillaBasics plugin = (VanillaBasics) player.connection().plugins()
                 .plugin("VanillaBasics");

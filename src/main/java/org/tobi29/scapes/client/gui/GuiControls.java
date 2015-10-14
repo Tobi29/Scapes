@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.client.ScapesClient;
@@ -27,8 +26,9 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 public abstract class GuiControls extends GuiMenu {
     protected final GuiComponentScrollPaneViewport scrollPane;
 
-    protected GuiControls(GameState state, Gui previous, ScapesClient game) {
-        super(state, "Controls", "Save", previous);
+    protected GuiControls(GameState state, Gui previous, ScapesClient game,
+            GuiStyle style) {
+        super(state, "Controls", "Save", previous, style);
         game.setFreezeInputMode(true);
         back.addLeftClick(event -> {
             game.setFreezeInputMode(false);
@@ -77,7 +77,7 @@ public abstract class GuiControls extends GuiMenu {
                         (text, value) -> text + ": " +
                                 FastMath.round(sensitivity(value) * 100.0) +
                                 '%');
-        slider.addHover(
-                event -> tagStructure.setDouble(id, sensitivity(slider.value)));
+        slider.addHover(event -> tagStructure
+                .setDouble(id, sensitivity(slider.value())));
     }
 }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.GameState;
@@ -24,13 +23,14 @@ public class GuiMenuDouble extends Gui {
     protected final GuiComponentVisiblePane pane;
     protected final GuiComponentTextButton back, save;
 
-    protected GuiMenuDouble(GameState state, String title, Gui previous) {
-        this(state, title, "Save", "Back", previous);
+    protected GuiMenuDouble(GameState state, String title, Gui previous,
+            GuiStyle style) {
+        this(state, title, "Save", "Back", previous, style);
     }
 
     protected GuiMenuDouble(GameState state, String title, String save,
-            String back, Gui previous) {
-        super(GuiAlignment.CENTER);
+            String back, Gui previous, GuiStyle style) {
+        super(style, GuiAlignment.CENTER);
         this.state = state;
         pane = new GuiComponentVisiblePane(this, 200, 0, 400, 512);
         new GuiComponentText(pane, 16, 16, 32, title);

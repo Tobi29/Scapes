@@ -18,6 +18,7 @@ package org.tobi29.scapes.client.gui;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.GuiComponent;
 import org.tobi29.scapes.engine.gui.GuiComponentEvent;
+import org.tobi29.scapes.engine.gui.GuiComponentText;
 import org.tobi29.scapes.engine.opengl.*;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 
@@ -37,23 +38,23 @@ public class GuiComponentLogo extends GuiComponent {
                     "Fatal\nerror!", "java.util.\nRandom\nfor ya",
                     "Java:\n" + System.getProperty("java.version"),
                     "Hello,\n" + System.getProperty("user.name")};
-    private final int textX, textY;
     private final VAO vao;
-    private String text;
-    private FontRenderer.Text vaoScapes, vaoSplash;
-    private FontRenderer font;
+    private final GuiComponentText splash;
 
     public GuiComponentLogo(GuiComponent parent, int x, int y, int width,
             int height) {
         super(parent, x, y, width, height);
-        text = splash();
-        textX = x + height - 8;
-        textY = y + 4;
+        int textX = x + height - 8;
+        int textY = y + 4;
         vao = VAOUtility.createVTI(
                 new float[]{x, y + height, 0.0f, x + height, y + height, 0.0f,
                         x, y, 0.0f, x + height, y, 0.0f},
                 new float[]{0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f},
                 new int[]{0, 1, 2, 3, 2, 1}, RenderType.TRIANGLES);
+        new GuiComponentText(this, textX, textY, 18, "Scapes", 1.0f, 1.0f, 1.0f,
+                1.0f);
+        splash = new GuiComponentText(this, textX, textY + 22, 12, splash(),
+                1.0f, 1.0f, 0.0f, 1.0f);
     }
 
     private static String splash() {
@@ -87,32 +88,13 @@ public class GuiComponentLogo extends GuiComponent {
         engine.sounds()
                 .playSound("Engine:sound/Click.ogg", "sound.GUI", 1.0f, 1.0f);
         super.clickLeft(event, engine);
-        text = splash();
-        updateText();
+        splash.setText(splash());
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, FontRenderer font,
-            double delta) {
+    public void renderComponent(GL gl, Shader shader, double delta) {
         gl.textures().bind("Scapes:image/Icon", gl);
         gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
         vao.render(gl, shader);
-        if (this.font != font) {
-            this.font = font;
-            updateText();
-        }
-        vaoScapes.render(gl, shader);
-        vaoSplash.render(gl, shader);
-    }
-
-    private void updateText() {
-        if (font != null) {
-            vaoScapes =
-                    font.render("Scapes", textX, textY, 18, 1.0f, 1.0f, 1.0f,
-                            1);
-            vaoSplash =
-                    font.render(text, textX, textY + 22, 12, 1.0f, 1.0f, 0.0f,
-                            1);
-        }
     }
 }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.slf4j.Logger;
@@ -39,8 +38,8 @@ public class GuiScreenshots extends GuiMenu {
     private final GuiComponentScrollPaneViewport scrollPane;
     private final Joiner joiner;
 
-    public GuiScreenshots(GameState state, Gui previous) {
-        super(state, "Screenshots", previous);
+    public GuiScreenshots(GameState state, Gui previous, GuiStyle style) {
+        super(state, "Screenshots", previous, style);
         this.state = state;
         scrollPane = new GuiComponentScrollPaneList(pane, 16, 80, 368, 350, 70)
                 .viewport();
@@ -83,7 +82,7 @@ public class GuiScreenshots extends GuiMenu {
                     new GuiComponentIcon(this, 15, 20, 40, 30, texture);
             icon.addLeftClick(event -> {
                 state.remove(gui);
-                state.add(new GuiScreenshot(state, gui, texture));
+                state.add(new GuiScreenshot(state, gui, texture, style));
             });
             GuiComponentTextButton label =
                     new GuiComponentTextButton(this, 70, 20, 100, 30, 18,

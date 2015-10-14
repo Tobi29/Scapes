@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client;
 
 import org.slf4j.Logger;
@@ -167,7 +166,8 @@ public class ScapesClient extends Game {
             engine.setGUIController(inputMode.guiController());
             GuiNotification message =
                     new GuiNotification(engine.globalGUI(), 500, 0, 290, 60,
-                            GuiAlignment.RIGHT, 3.0);
+                            engine.globalGUI().style(), GuiAlignment.RIGHT,
+                            3.0);
             new GuiComponentIcon(message, 10, 10, 40, 40,
                     engine.graphics().textures()
                             .get("Scapes:image/gui/input/Default"));

@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.engine.gui.GuiComponent;
 import org.tobi29.scapes.engine.gui.GuiComponentButton;
-import org.tobi29.scapes.engine.opengl.FontRenderer;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 
@@ -37,9 +35,9 @@ public class GuiComponentItemButton extends GuiComponentButton {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, FontRenderer font,
-            double delta) {
-        super.renderComponent(gl, shader, font, delta);
-        GuiUtils.renderItem(0.0f, 0.0f, width, height, item, gl, shader, font);
+    public void renderComponent(GL gl, Shader shader, double delta) {
+        super.renderComponent(gl, shader, delta);
+        GuiUtils.renderItem(0.0f, 0.0f, width, height, item, gl, shader,
+                gui.style().font());
     }
 }

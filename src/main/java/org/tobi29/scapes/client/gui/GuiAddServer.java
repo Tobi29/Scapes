@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.GuiComponentText;
 import org.tobi29.scapes.engine.gui.GuiComponentTextField;
+import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
 public class GuiAddServer extends GuiMenuDouble {
-    public GuiAddServer(GameState state, GuiServerSelect previous) {
-        super(state, "Add Server", previous);
+    public GuiAddServer(GameState state, GuiServerSelect previous,
+            GuiStyle style) {
+        super(state, "Add Server", previous, style);
         GuiComponentTextField ip =
                 new GuiComponentTextField(pane, 16, 110, 368, 30, 18, "");
         GuiComponentTextField port =

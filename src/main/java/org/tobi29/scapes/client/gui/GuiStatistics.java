@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.client.states.GameStateGameMP;
@@ -24,8 +23,9 @@ import java.util.List;
 
 public class GuiStatistics extends Gui {
     public GuiStatistics(GameStateGameMP state,
-            List<PlayerStatistics.StatisticMaterial> statisticMaterials) {
-        super(GuiAlignment.CENTER);
+            List<PlayerStatistics.StatisticMaterial> statisticMaterials,
+            GuiStyle style) {
+        super(style, GuiAlignment.CENTER);
         GuiComponentVisiblePane pane =
                 new GuiComponentVisiblePane(this, 200, 0, 400, 512);
         new GuiComponentText(pane, 16, 16, 32, "Statistics");

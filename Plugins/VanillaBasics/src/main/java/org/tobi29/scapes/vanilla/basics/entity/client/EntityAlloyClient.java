@@ -45,7 +45,8 @@ public class EntityAlloyClient extends EntityAbstractContainerClient {
     public Optional<Gui> gui(MobPlayerClientMain player) {
         if (player instanceof MobPlayerClientMainVB) {
             return Optional.of(new GuiAlloyInventory(this,
-                    (MobPlayerClientMainVB) player));
+                    (MobPlayerClientMainVB) player,
+                    player.game().engine().globalGUI().style()));
         }
         return Optional.empty();
     }

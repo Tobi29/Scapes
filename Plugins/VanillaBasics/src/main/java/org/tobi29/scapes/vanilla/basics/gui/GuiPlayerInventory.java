@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.gui;
 
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
+import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
 public class GuiPlayerInventory extends GuiInventory {
-    public GuiPlayerInventory(MobPlayerClientMainVB player) {
-        super("Inventory", player);
+    public GuiPlayerInventory(MobPlayerClientMainVB player, GuiStyle style) {
+        super("Inventory", player, style);
         if (!player.connection().plugins().registry().getCraftingRecipes()
                 .isEmpty()) {
             GuiComponentTextButton crafting =
                     new GuiComponentTextButton(pane, 16, 80, 368, 30, 18,
                             "Crafting");
-            crafting.addLeftClick(
-                    event -> player.openGui(new GuiCrafting(false, player)));
+            crafting.addLeftClick(event -> player.openGui(
+                    new GuiCrafting(false, player,
+                            player.game().engine().globalGUI().style())));
         }
     }
 }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.slf4j.Logger;
@@ -45,8 +44,9 @@ public class GuiCreateWorld extends GuiMenuDouble {
     private int environmentID;
 
     public GuiCreateWorld(GameState state, GuiSaveSelect previous,
-            List<PluginFile> worldTypes, List<PluginFile> plugins, Path path) {
-        super(state, "New World", previous);
+            List<PluginFile> worldTypes, List<PluginFile> plugins, Path path,
+            GuiStyle style) {
+        super(state, "New World", previous, style);
         new GuiComponentText(pane, 16, 80, 18, "Name:");
         GuiComponentTextField name =
                 new GuiComponentTextField(pane, 16, 100, 368, 30, 18,
@@ -73,7 +73,7 @@ public class GuiCreateWorld extends GuiMenuDouble {
         addonsButton.addLeftClick(event -> {
             state.remove(this);
             state.add(new GuiAddons(state, this,
-                    worldTypes.get(environmentID).name(), plugins));
+                    worldTypes.get(environmentID).name(), plugins, style));
         });
         save.addLeftClick(event -> {
             if (name.text().isEmpty()) {
@@ -84,8 +84,8 @@ public class GuiCreateWorld extends GuiMenuDouble {
                         name.text() + WorldFormat.filenameExtension());
                 if (Files.exists(save)) {
                     state.remove(this);
-                    state.add(
-                            new GuiMessage(state, this, "Error", SAVE_EXISTS));
+                    state.add(new GuiMessage(state, this, "Error", SAVE_EXISTS,
+                            style));
                     return;
                 }
                 Files.createDirectories(save);
@@ -124,8 +124,8 @@ public class GuiCreateWorld extends GuiMenuDouble {
 
     private class GuiAddons extends Gui {
         public GuiAddons(GameState state, GuiCreateWorld prev, String parent,
-                List<PluginFile> plugins) {
-            super(GuiAlignment.CENTER);
+                List<PluginFile> plugins, GuiStyle style) {
+            super(style, GuiAlignment.CENTER);
             new GuiComponentText(pane, 16, 16, 32, "Addons");
             new GuiComponentSeparator(pane, 24, 64, 352, 2);
             GuiComponentVisiblePane pane =

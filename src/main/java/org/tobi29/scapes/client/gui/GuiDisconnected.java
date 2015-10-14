@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.client.states.GameStateMenu;
@@ -24,8 +23,8 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 public class GuiDisconnected extends Gui {
     private final GuiComponentText reconnectTimer;
 
-    public GuiDisconnected(GameState state, String message) {
-        super(GuiAlignment.CENTER);
+    public GuiDisconnected(GameState state, String message, GuiStyle style) {
+        super(style, GuiAlignment.CENTER);
         GuiComponentVisiblePane pane =
                 new GuiComponentVisiblePane(this, 200, 0, 400, 512);
         new GuiComponentText(pane, 16, 16, 32, "Error");

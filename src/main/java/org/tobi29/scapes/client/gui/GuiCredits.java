@@ -18,10 +18,7 @@ package org.tobi29.scapes.client.gui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.Gui;
-import org.tobi29.scapes.engine.gui.GuiAlignment;
-import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
-import org.tobi29.scapes.engine.gui.GuiComponentVisiblePane;
+import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
@@ -34,12 +31,11 @@ import java.io.IOException;
 public class GuiCredits extends Gui {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GuiCredits.class);
-    private final String credits;
-    private FontRenderer.Text vaoText;
+    private final FontRenderer.Text vaoText;
     private double y = -512;
 
-    public GuiCredits(GameState state, Gui prev) {
-        super(GuiAlignment.RIGHT);
+    public GuiCredits(GameState state, Gui prev, GuiStyle style) {
+        super(style, GuiAlignment.RIGHT);
         GuiComponentVisiblePane pane =
                 new GuiComponentVisiblePane(this, 704, 0, 96, 512);
         GuiComponentTextButton back =
@@ -61,7 +57,8 @@ public class GuiCredits extends Gui {
         } catch (IOException e) {
             LOGGER.error("Error reading Readme.txt: {}", e.toString());
         }
-        this.credits = credits.toString();
+        vaoText =
+                style.font().render(credits.toString(), 20, 0, 18, 1, 1, 1, 1);
         back.addLeftClick(event -> {
             state.engine().sounds().stop("music.Credits");
             state.remove(this);
@@ -74,11 +71,7 @@ public class GuiCredits extends Gui {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, FontRenderer font,
-            double delta) {
-        if (vaoText == null) {
-            vaoText = gl.defaultFont().render(credits, 20, 0, 18, 1, 1, 1, 1);
-        }
+    public void renderComponent(GL gl, Shader shader, double delta) {
         y += 40.0 * delta;
         MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();

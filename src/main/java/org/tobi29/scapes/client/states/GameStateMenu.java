@@ -23,6 +23,7 @@ import org.tobi29.scapes.client.gui.GuiVersion;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.server.Account;
 
@@ -50,20 +51,23 @@ public class GameStateMenu extends GameState {
 
     @Override
     public void init(GL gl) {
+        GuiStyle style = engine.globalGUI().style();
         try {
             Path file = engine.home().resolve("Account.properties");
             Account account = Account.read(file);
             if (account.valid()) {
-                add(new GuiMainMenu(this, scene));
+                add(new GuiMainMenu(this, scene, style));
             } else {
                 account.write(file);
-                add(new GuiAccount(this, new GuiMainMenu(this, scene)));
+                add(new GuiAccount(this, new GuiMainMenu(this, scene, style),
+                        style));
             }
         } catch (IOException e) {
             LOGGER.error("Failed to read account file: {}", e.toString());
-            add(new GuiAccount(this, new GuiMainMenu(this, scene)));
+            add(new GuiAccount(this, new GuiMainMenu(this, scene, style),
+                    style));
         }
-        add(new GuiVersion());
+        add(new GuiVersion(style));
     }
 
     @Override

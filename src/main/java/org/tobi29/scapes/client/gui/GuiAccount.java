@@ -38,8 +38,8 @@ public class GuiAccount extends GuiMenu {
     private String nickname = "";
 
     @SuppressWarnings("unchecked")
-    public GuiAccount(GameState state, Gui previous) {
-        super(state, "Account", "Save");
+    public GuiAccount(GameState state, Gui previous, GuiStyle style) {
+        super(state, "Account", "Save", style);
         try {
             Account account = Account.read(
                     state.engine().home().resolve("Account.properties"));

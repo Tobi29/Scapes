@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiComponentText;
+import org.tobi29.scapes.engine.gui.GuiStyle;
 
 public class GuiMessage extends GuiMenu {
     public GuiMessage(GameState state, Gui previous, String title,
-            String message) {
-        super(state, title, previous);
+            String message, GuiStyle style) {
+        super(state, title, previous, style);
         new GuiComponentText(pane, 16, 80, 18, message);
     }
 }

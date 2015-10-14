@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.client.states.GameStateLoadMP;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
-import org.tobi29.scapes.engine.server.ConnectionInfo;
 import org.tobi29.scapes.connection.ConnectionType;
-import org.tobi29.scapes.engine.server.ServerInfo;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.*;
@@ -30,6 +27,8 @@ import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
 import org.tobi29.scapes.engine.opengl.texture.TextureFilter;
 import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
+import org.tobi29.scapes.engine.server.ConnectionInfo;
+import org.tobi29.scapes.engine.server.ServerInfo;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -49,8 +48,8 @@ public class GuiServerSelect extends GuiMenu {
     private final List<Element> elements = new ArrayList<>();
     private final GuiComponentScrollPaneViewport scrollPane;
 
-    public GuiServerSelect(GameState state, Gui previous) {
-        super(state, "Multiplayer", previous);
+    public GuiServerSelect(GameState state, Gui previous, GuiStyle style) {
+        super(state, "Multiplayer", previous, style);
         TagStructure scapesTag =
                 state.engine().tagStructure().getStructure("Scapes");
         if (scapesTag.has("Servers")) {
@@ -64,7 +63,7 @@ public class GuiServerSelect extends GuiMenu {
 
         add.addLeftClick(event -> {
             state.remove(this);
-            state.add(new GuiAddServer(state, this));
+            state.add(new GuiAddServer(state, this, style));
         });
         back.addLeftClick(event -> disposeServers());
     }
