@@ -39,14 +39,14 @@ dependencies {
 
     testCompile "junit:junit:4.12"
 
-    compile project(":ScapesEngine:Codecs:CodecOGG")
-    compile project(":ScapesEngine:Codecs:CodecMP3")
-    compile project(":ScapesEngine:Codecs:CodecWAV")
+    runtime project(":ScapesEngine:Codecs:CodecOGG")
+    runtime project(":ScapesEngine:Codecs:CodecMP3")
+    runtime project(":ScapesEngine:Codecs:CodecWAV")
     runtime "org.apache.logging.log4j:log4j-api:2.3"
     runtime "org.apache.logging.log4j:log4j-core:2.3"
     runtime "org.apache.logging.log4j:log4j-slf4j-impl:2.3"
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.5'
+    gradleVersion = '2.7'
 }
