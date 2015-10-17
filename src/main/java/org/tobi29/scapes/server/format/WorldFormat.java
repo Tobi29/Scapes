@@ -17,8 +17,8 @@ package org.tobi29.scapes.server.format;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.chunk.IDStorage;
 import org.tobi29.scapes.chunk.EnvironmentServer;
+import org.tobi29.scapes.chunk.IDStorage;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteServer;
 import org.tobi29.scapes.engine.utils.graphics.Image;
@@ -121,36 +121,48 @@ public class WorldFormat {
 
     public synchronized WorldServer registerWorld(Dimension dimension)
             throws IOException {
-        return registerWorld(dimension::createEnvironment, dimension.id());
+        return registerWorld(dimension::createEnvironment, dimension.id(),
+                seed);
     }
 
     public synchronized WorldServer registerWorld(
             Function<WorldServer, EnvironmentServer> environmentSupplier,
-            String id) throws IOException {
-        Path worldDirectory = regionPath.resolve(id.toLowerCase());
+            String name, long seed) throws IOException {
+        removeWorld(name);
+        Path worldDirectory = regionPath.resolve(name.toLowerCase());
         Files.createDirectories(worldDirectory);
-        WorldServer world = new WorldServer(this, id, server.connection(),
-                server.taskExecutor(),
-                newWorld -> new TerrainInfiniteServer(newWorld, 512,
-                        worldDirectory, server.taskExecutor(),
-                        plugins.registry().air()), environmentSupplier);
-        LOGGER.info("Adding world: {}", id);
-        world.read(worldsTagStructure.getStructure(id));
+        WorldServer world =
+                new WorldServer(this, name, seed, server.connection(),
+                        server.taskExecutor(),
+                        newWorld -> new TerrainInfiniteServer(newWorld, 512,
+                                worldDirectory, server.taskExecutor(),
+                                plugins.registry().air()), environmentSupplier);
+        LOGGER.info("Adding world: {}", name);
+        world.read(worldsTagStructure.getStructure(name));
         world.calculateSpawn();
-        worlds.put(id, world);
+        worlds.put(name, world);
         world.start();
         return world;
     }
 
-    public synchronized void removeWorld(String name) {
+    public synchronized boolean removeWorld(String name) {
         WorldServer world = worlds.remove(name);
         if (world == null) {
-            throw new IllegalArgumentException("Unknown world");
+            return false;
         }
         LOGGER.info("Removing world: {}", name);
-        world.stop();
+        world.stop(defaultWorld);
         world.dispose();
         worldsTagStructure.setStructure(world.id(), world.write());
+        return true;
+    }
+
+    public synchronized void deleteWorld(String name) throws IOException {
+        removeWorld(name);
+        Path worldDirectory = regionPath.resolve(name.toLowerCase());
+        if (Files.exists(worldDirectory)) {
+            FileUtil.deleteDir(worldDirectory);
+        }
     }
 
     public void save() throws IOException {

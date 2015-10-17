@@ -265,57 +265,45 @@ public class PlayerConnection
     }
 
     public synchronized void setWorld(WorldServer world, Vector3 pos) {
-        if (entity == null) {
-            WorldFormat worldFormat = server.server().worldFormat();
-            statistics = new PlayerStatistics();
-            Optional<TagStructure> tag = worldFormat.playerData().load(id);
-            Optional<TagStructure> entityTag;
-            Optional<String> worldTag;
-            if (tag.isPresent()) {
-                TagStructure tagStructure = tag.get();
-                if (tagStructure.has("Entity")) {
-                    entityTag =
-                            Optional.of(tagStructure.getStructure("Entity"));
-                } else {
-                    entityTag = Optional.empty();
-                }
-                worldTag = Optional.ofNullable(tagStructure.getString("World"));
-                statistics.load(server.server().worldFormat().plugins()
-                        .registry(), tagStructure.getList("Statistics"));
-                permissionLevel = tagStructure.getInteger("Permissions");
-            } else {
-                entityTag = Optional.empty();
-                worldTag = Optional.empty();
-            }
-            if (world == null) {
-                if (worldTag.isPresent()) {
-                    world = worldFormat.world(worldTag.get())
-                            .orElseGet(worldFormat::defaultWorld);
-                } else {
-                    world = worldFormat.defaultWorld();
-                }
-            }
-            if (entityTag.isPresent()) {
-                entity = server().server().worldFormat().plugins().worldType()
-                        .newPlayer(world, Vector3d.ZERO, Vector3d.ZERO, 0.0,
-                                0.0, nickname, skin.checksum(), this);
-                entity.read(entityTag.get());
-            } else {
-                entity = server().server().worldFormat().plugins().worldType()
-                        .newPlayer(world,
-                                new Vector3d(0.5, 0.5, 1.0).plus(world.spawn()),
-                                Vector3d.ZERO, 0.0, 0.0, nickname,
-                                skin.checksum(), this);
-                entity.onSpawn();
-            }
-        } else {
+        if (entity != null) {
             entity.world().deleteEntity(entity);
             entity.world().removePlayer(entity);
-            TagStructure tagStructure = entity.write(false);
+            save();
+        }
+        WorldFormat worldFormat = server.server().worldFormat();
+        statistics = new PlayerStatistics();
+        TagStructure tagStructure = worldFormat.playerData().load(id);
+        Optional<TagStructure> entityTag;
+        if (tagStructure.has("Entity")) {
+            entityTag = Optional.of(tagStructure.getStructure("Entity"));
+        } else {
+            entityTag = Optional.empty();
+        }
+        Optional<String> worldTag =
+                Optional.ofNullable(tagStructure.getString("World"));
+        statistics.load(server.server().worldFormat().plugins().registry(),
+                tagStructure.getList("Statistics"));
+        permissionLevel = tagStructure.getInteger("Permissions");
+        if (world == null) {
+            if (worldTag.isPresent()) {
+                world = worldFormat.world(worldTag.get())
+                        .orElseGet(worldFormat::defaultWorld);
+            } else {
+                world = worldFormat.defaultWorld();
+            }
+        }
+        if (entityTag.isPresent()) {
             entity = server().server().worldFormat().plugins().worldType()
                     .newPlayer(world, Vector3d.ZERO, Vector3d.ZERO, 0.0, 0.0,
                             nickname, skin.checksum(), this);
-            entity.read(tagStructure);
+            entity.read(entityTag.get());
+        } else {
+            entity = server().server().worldFormat().plugins().worldType()
+                    .newPlayer(world,
+                            new Vector3d(0.5, 0.5, 1.0).plus(world.spawn()),
+                            Vector3d.ZERO, 0.0, 0.0, nickname, skin.checksum(),
+                            this);
+            entity.onSpawn();
         }
         if (pos != null) {
             entity.setPos(pos);
@@ -324,6 +312,16 @@ public class PlayerConnection
         world.addPlayer(entity);
         sendQueueSize.incrementAndGet();
         sendQueue.add(new PacketSetWorld(world, entity));
+    }
+
+    private void save() {
+        WorldServer world = entity.world();
+        TagStructure tagStructure = new TagStructure();
+        tagStructure.setStructure("Entity", entity.write(false));
+        tagStructure.setString("World", world.id());
+        tagStructure.setList("Statistics", statistics.save());
+        tagStructure.setInteger("Permissions", permissionLevel);
+        server.server().worldFormat().playerData().save(tagStructure, id);
     }
 
     private Optional<String> generateResponse(boolean challengeMatch) {
@@ -505,20 +503,9 @@ public class PlayerConnection
     public void close() throws IOException {
         state = State.CLOSED;
         channel.close();
+        server.removePlayer(this);
         if (entity != null) {
-            server.removePlayer(this);
-            WorldServer world = entity.world();
-            if (world != null) {
-                world.deleteEntity(entity);
-                world.removePlayer(entity);
-                TagStructure tagStructure = new TagStructure();
-                tagStructure.setStructure("Entity", entity.write(false));
-                tagStructure.setString("World", world.id());
-                tagStructure.setList("Statistics", statistics.save());
-                tagStructure.setInteger("Permissions", permissionLevel);
-                server.server().worldFormat().playerData()
-                        .save(tagStructure, id);
-            }
+            save();
         }
     }
 

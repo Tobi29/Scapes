@@ -73,9 +73,8 @@ public class WorldClient extends World {
             Function<WorldClient, EnvironmentClient> environmentSupplier,
             TagStructure playerTag, int playerID) {
         super(connection.plugins(), connection.game().engine().taskExecutor(),
-                connection.plugins().registry());
+                connection.plugins().registry(), seed);
         this.connection = connection;
-        this.seed = seed;
         game = connection.game();
         environment = environmentSupplier.apply(this);
         player = connection.plugins().worldType()

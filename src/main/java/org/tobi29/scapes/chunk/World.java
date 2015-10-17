@@ -28,16 +28,18 @@ public abstract class World implements PlayConnection {
     protected final Plugins plugins;
     protected final TaskExecutor taskExecutor;
     protected final GameRegistry registry;
+    protected final long seed;
     protected Vector3 spawn = new Vector3i(0, 0, 0);
-    protected long seed, tick;
+    protected long tick;
     @SuppressWarnings("CanBeFinal")
     protected double gravity = 9.8;
 
     protected World(Plugins plugins, TaskExecutor taskExecutor,
-            GameRegistry registry) {
+            GameRegistry registry, long seed) {
         this.plugins = plugins;
         this.taskExecutor = taskExecutor;
         this.registry = registry;
+        this.seed = seed;
         air = registry.air();
     }
 

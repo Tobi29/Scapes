@@ -66,13 +66,12 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
     private final ChunkGenerator generator;
     private Joiner joiner;
 
-    public WorldServer(WorldFormat worldFormat, String id,
+    public WorldServer(WorldFormat worldFormat, String id, long seed,
             ServerConnection connection, TaskExecutor taskExecutor,
             Function<WorldServer, TerrainServer> terrainSupplier,
             Function<WorldServer, EnvironmentServer> environmentSupplier) {
         super(worldFormat.plugins(), taskExecutor,
-                worldFormat.plugins().registry());
-        seed = worldFormat.seed();
+                worldFormat.plugins().registry(), seed);
         this.id = id;
         this.connection = connection;
         environment = environmentSupplier.apply(this);
@@ -487,7 +486,13 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
         return entityListeners.stream();
     }
 
-    public void stop() {
+    public void stop(WorldServer dropWorld) {
+        if (dropWorld != this) {
+            while (!players.isEmpty()) {
+                players.values().forEach(
+                        player -> player.connection().setWorld(dropWorld));
+            }
+        }
         joiner.join();
     }
 

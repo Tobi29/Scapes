@@ -24,7 +24,6 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
 
 public class PlayerData {
     private static final Logger LOGGER =
@@ -36,18 +35,16 @@ public class PlayerData {
         Files.createDirectories(path);
     }
 
-    public synchronized Optional<TagStructure> load(String id) {
+    public synchronized TagStructure load(String id) {
         try {
             Path file = path.resolve(id + ".stag");
             if (Files.exists(file)) {
-                TagStructure tagStructure =
-                        FileUtil.readReturn(file, TagStructureBinary::read);
-                return Optional.of(tagStructure);
+                return FileUtil.readReturn(file, TagStructureBinary::read);
             }
         } catch (IOException e) {
             LOGGER.error("Error reading player data: {}", e.toString());
         }
-        return Optional.empty();
+        return new TagStructure();
     }
 
     public synchronized void save(TagStructure tagStructure, String id) {
@@ -61,14 +58,7 @@ public class PlayerData {
     }
 
     public synchronized void add(String id) {
-        TagStructure tagStructure;
-        Optional<TagStructure> tag = load(id);
-        if (tag.isPresent()) {
-            tagStructure = tag.get();
-        } else {
-            tagStructure = new TagStructure();
-        }
-        save(tagStructure, id);
+        save(load(id), id);
     }
 
     public synchronized void remove(String id) {
