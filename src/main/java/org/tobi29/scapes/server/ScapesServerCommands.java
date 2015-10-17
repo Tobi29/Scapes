@@ -86,7 +86,7 @@ final class ScapesServerCommands {
             options.add("p", "player", true, "Player who will be teleported");
             options.add("t", "target", true,
                     "Target that the player will be teleported to");
-            options.add("w", "world", 3,
+            options.add("w", "world", true,
                     "World that the player will be teleported to");
             options.add("l", "location", 3,
                     "Target that the player will be teleported to");
