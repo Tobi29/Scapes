@@ -58,8 +58,8 @@ public class GuiAccount extends GuiMenu {
                 new GuiComponentTextButton(pane, 268, 100, 116, 30, 18,
                         "Copy ID");
         GuiComponentText id = new GuiComponentText(pane, 16, 150, 12, "ID: " +
-                ChecksumUtil.getChecksum(keyPair.getPublic().getEncoded(),
-                        ChecksumUtil.Algorithm.SHA1));
+                ChecksumUtil.checksum(keyPair.getPublic().getEncoded(),
+                        ChecksumUtil.Algorithm.SHA1).toString());
         new GuiComponentText(pane, 16, 180, 18, "Nickname:");
         GuiComponentTextField nickname =
                 new GuiComponentTextField(pane, 16, 200, 368, 30, 18,
@@ -77,8 +77,8 @@ public class GuiAccount extends GuiMenu {
             if (keyPair.isPresent()) {
                 this.keyPair = keyPair.get();
                 id.setText("ID: " + ChecksumUtil
-                        .getChecksum(this.keyPair.getPublic().getEncoded(),
-                                ChecksumUtil.Algorithm.SHA1));
+                        .checksum(this.keyPair.getPublic().getEncoded(),
+                                ChecksumUtil.Algorithm.SHA1).toString());
                 error.setText("");
             } else {
                 error.setText("Invalid key!");
@@ -86,8 +86,8 @@ public class GuiAccount extends GuiMenu {
         });
         keyCopyID.addLeftClick(event -> state.engine().controller()
                 .clipboardCopy(ChecksumUtil
-                        .getChecksum(keyPair.getPublic().getEncoded(),
-                                ChecksumUtil.Algorithm.SHA1)));
+                        .checksum(keyPair.getPublic().getEncoded(),
+                                ChecksumUtil.Algorithm.SHA1).toString()));
         skin.addLeftClick(event -> {
             try {
                 Path path = state.engine().home().resolve("Skin.png");

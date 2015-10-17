@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.server.*;
+import org.tobi29.scapes.engine.utils.Checksum;
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
 import org.tobi29.scapes.engine.utils.io.PacketBundleChannel;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -34,7 +35,10 @@ import java.nio.channels.SocketChannel;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
@@ -76,9 +80,9 @@ public class ServerConnection extends AbstractServerConnection {
         return Optional.ofNullable(playerByName.get(name));
     }
 
-    public Optional<ServerSkin> skin(byte[] checksum) {
+    public Optional<ServerSkin> skin(Checksum checksum) {
         for (PlayerConnection player : playerByName.values()) {
-            if (Arrays.equals(player.skin().checksum(), checksum)) {
+            if (player.skin().checksum().equals(checksum)) {
                 return Optional.of(player.skin());
             }
         }

@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.entity.skin;
 
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.OpenGLFunction;
 import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
+import org.tobi29.scapes.engine.utils.Checksum;
 
 import java.nio.ByteBuffer;
 
 public class ClientSkin extends TextureCustom {
-    private final byte[] checksum;
+    private final Checksum checksum;
     private int unusedTicks;
 
-    public ClientSkin(ByteBuffer buffer, byte[] checksum) {
+    public ClientSkin(ByteBuffer buffer, Checksum checksum) {
         super(64, 64, buffer);
         this.checksum = checksum;
     }
@@ -43,7 +43,7 @@ public class ClientSkin extends TextureCustom {
         super.bind(gl);
     }
 
-    public byte[] checksum() {
+    public Checksum checksum() {
         return checksum;
     }
 

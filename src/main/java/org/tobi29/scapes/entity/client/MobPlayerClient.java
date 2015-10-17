@@ -2,6 +2,7 @@ package org.tobi29.scapes.entity.client;
 
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.chunk.WorldClient;
+import org.tobi29.scapes.engine.utils.Checksum;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.Frustum;
@@ -11,14 +12,13 @@ import org.tobi29.scapes.entity.CreatureType;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class MobPlayerClient extends MobLivingEquippedClient
-         {
+public abstract class MobPlayerClient extends MobLivingEquippedClient {
     protected final Inventory inventoryContainer, inventoryHold;
     protected final Map<String, Inventory> inventories =
             new ConcurrentHashMap<>();
     protected int inventorySelectLeft, inventorySelectRight = 9, healWait;
     protected String nickname;
-    protected byte[] skin;
+    protected Checksum skin;
 
     protected MobPlayerClient(WorldClient world, Vector3 pos, Vector3 speed,
             AABB aabb, double lives, double maxLives, Frustum viewField,
@@ -30,7 +30,6 @@ public abstract class MobPlayerClient extends MobLivingEquippedClient
         inventories.put("Container", inventoryContainer);
         inventories.put("Hold", inventoryHold);
     }
-
 
     public int inventorySelectLeft() {
         return inventorySelectLeft;
@@ -68,7 +67,7 @@ public abstract class MobPlayerClient extends MobLivingEquippedClient
             nickname = tagStructure.getString("Nickname");
         }
         if (tagStructure.has("SkinChecksum")) {
-            skin = tagStructure.getByteArray("SkinChecksum");
+            skin = new Checksum(tagStructure.getByteArray("SkinChecksum"));
         }
     }
 }

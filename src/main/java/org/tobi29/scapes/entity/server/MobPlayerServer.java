@@ -6,6 +6,7 @@ import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.connection.PlayConnection;
+import org.tobi29.scapes.engine.utils.Checksum;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -39,7 +40,7 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
     protected final Inventory inventoryContainer, inventoryHold;
     protected final Map<String, Inventory> inventories =
             new ConcurrentHashMap<>();
-    private final byte[] skin;
+    private final Checksum skin;
     private final Map<String, PunchListener> punchListeners =
             new ConcurrentHashMap<>();
     protected int inventorySelectLeft, inventorySelectRight = 9, healWait;
@@ -47,7 +48,7 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
 
     protected MobPlayerServer(WorldServer world, Vector3 pos, Vector3 speed,
             AABB aabb, double lives, double maxLives, Frustum viewField,
-            Frustum hitField, String nickname, byte[] skin,
+            Frustum hitField, String nickname, Checksum skin,
             PlayerConnection connection) {
         super(world, pos, speed, aabb, lives, maxLives, viewField, hitField);
         this.nickname = nickname;
@@ -317,7 +318,7 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
                 .setStructure(id, inventory.save()));
         if (packet) {
             tagStructure.setString("Nickname", nickname);
-            tagStructure.setByteArray("SkinChecksum", skin);
+            tagStructure.setByteArray("SkinChecksum", skin.array());
         }
         return tagStructure;
     }

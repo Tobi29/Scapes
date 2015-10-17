@@ -13,26 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.entity.skin;
 
+import org.tobi29.scapes.engine.utils.Checksum;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.ChecksumUtil;
 
 public class ServerSkin {
     private final Image image;
-    private final byte[] checksum;
+    private final Checksum checksum;
 
     public ServerSkin(Image image) {
         this.image = image;
-        checksum = ChecksumUtil.createChecksum(image.buffer());
+        checksum = ChecksumUtil.checksum(image.buffer());
     }
 
     public Image image() {
         return image;
     }
 
-    public byte[] checksum() {
+    public Checksum checksum() {
         return checksum;
     }
 }

@@ -17,11 +17,12 @@ package org.tobi29.scapes.vanilla.basics;
 
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.GameRegistry;
-import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.EnvironmentClient;
 import org.tobi29.scapes.chunk.EnvironmentServer;
+import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.states.GameStateGameMP;
+import org.tobi29.scapes.engine.utils.Checksum;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
@@ -234,7 +235,7 @@ public class VanillaBasics implements WorldType {
     @Override
     public MobPlayerServer newPlayer(WorldServer world, Vector3 pos,
             Vector3 speed, double xRot, double zRot, String nickname,
-            byte[] skin, PlayerConnection connection) {
+            Checksum skin, PlayerConnection connection) {
         return new MobPlayerServerVB(world, pos, speed, xRot, zRot, nickname,
                 skin, connection);
     }

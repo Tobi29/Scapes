@@ -175,7 +175,8 @@ public class PlayerConnection
     private void loginStep2(ReadableByteStream input) throws IOException {
         byte[] array = new byte[550];
         input.get(array);
-        id = ChecksumUtil.getChecksum(array, ChecksumUtil.Algorithm.SHA1);
+        id = ChecksumUtil.checksum(array, ChecksumUtil.Algorithm.SHA1)
+                .toString();
         challenge = new byte[501];
         new SecureRandom().nextBytes(challenge);
         WritableByteStream output = channel.getOutputStream();
@@ -367,7 +368,7 @@ public class PlayerConnection
 
     private void sendPluginChecksum(PluginFile plugin,
             WritableByteStream output) throws IOException {
-        byte[] checksum = plugin.checksum();
+        byte[] checksum = plugin.checksum().array();
         output.putInt(checksum.length);
         output.put(checksum);
     }

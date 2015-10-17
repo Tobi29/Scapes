@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import org.tobi29.scapes.chunk.WorldClient;
@@ -21,6 +20,7 @@ import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.server.ConnectionCloseException;
 import org.tobi29.scapes.engine.utils.BufferCreator;
+import org.tobi29.scapes.engine.utils.Checksum;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
@@ -65,7 +65,8 @@ public class PacketSkin extends Packet implements PacketServer, PacketClient {
     @Override
     public void runClient(ClientConnection client, WorldClient world)
             throws ConnectionCloseException {
-        client.world().scene().skinStorage().addSkin(checksum, image);
+        client.world().scene().skinStorage()
+                .addSkin(new Checksum(checksum), image);
     }
 
     @Override
@@ -82,7 +83,7 @@ public class PacketSkin extends Packet implements PacketServer, PacketClient {
 
     @Override
     public void runServer(PlayerConnection player, WorldServer world) {
-        player.server().skin(checksum).ifPresent(
+        player.server().skin(new Checksum(checksum)).ifPresent(
                 skin -> player.send(new PacketSkin(skin.image(), checksum)));
     }
 }

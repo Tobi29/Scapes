@@ -16,6 +16,7 @@
 package org.tobi29.scapes.vanilla.basics.entity.server;
 
 import org.tobi29.scapes.chunk.WorldServer;
+import org.tobi29.scapes.engine.utils.Checksum;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -32,7 +33,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class MobPlayerServerVB extends MobPlayerServer {
     public MobPlayerServerVB(WorldServer world, Vector3 pos, Vector3 speed,
-            double xRot, double zRot, String nickname, byte[] skin,
+            double xRot, double zRot, String nickname, Checksum skin,
             PlayerConnection connection) {
         super(world, pos, speed, new AABB(-0.4, -0.4, -1, 0.4, 0.4, 0.9), 100,
                 100, new Frustum(90, 1, 0.1, 24), new Frustum(50, 1, 0.1, 2),

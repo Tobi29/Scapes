@@ -17,6 +17,7 @@ package org.tobi29.scapes.plugins;
 
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
+import org.tobi29.scapes.engine.utils.Checksum;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
@@ -35,6 +36,6 @@ public interface WorldType extends Dimension {
             double xRot, double zRot, String nickname);
 
     MobPlayerServer newPlayer(WorldServer world, Vector3 pos, Vector3 speed,
-            double xRot, double zRot, String nickname, byte[] skin,
+            double xRot, double zRot, String nickname, Checksum skin,
             PlayerConnection connection);
 }
