@@ -63,7 +63,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
         format = new TerrainInfiniteFormat(path, this);
         chunkManager = (TerrainInfiniteChunkManagerServer) super.chunkManager;
         generatorOutput = new GeneratorOutput(zSize);
-        joiner = world.taskExecutor().runTask(joiner -> {
+        Joiner loadJoiner = world.taskExecutor().runTask(joiner -> {
             List<Vector2> requiredChunks = new ArrayList<>();
             List<Vector2> loadingChunks = new ArrayList<>();
             while (!joiner.marked()) {
@@ -140,6 +140,25 @@ public class TerrainInfiniteServer extends TerrainInfinite
                 }
             }
         }, "Chunk-Loading");
+        Joiner updateJoiner = world.taskExecutor().runTask(joiner -> {
+            while (!joiner.marked()) {
+                boolean idle = true;
+                while (!blockChanges.isEmpty()) {
+                    blockChanges.poll().run(this);
+                    idle = false;
+                }
+                while (!chunkUnloadQueue.isEmpty()) {
+                    synchronized (chunkUnloadQueue) {
+                        removeChunk(chunkUnloadQueue.poll());
+                    }
+                    idle = false;
+                }
+                if (idle) {
+                    SleepUtil.sleep(10);
+                }
+            }
+        }, "Chunk-Updating");
+        joiner = new Joiner(loadJoiner, updateJoiner);
     }
 
     @Override
@@ -198,54 +217,53 @@ public class TerrainInfiniteServer extends TerrainInfinite
 
     @Override
     public void update(double delta, Collection<MobSpawner> spawners) {
-        chunkManager.iterator().forEach(chunk -> chunk.updateServer(delta));
-        Random random = ThreadLocalRandom.current();
-        for (MobSpawner spawner : spawners) {
-            if (world.mobs(spawner.creatureType()) <
-                    chunkManager.chunks() * spawner.mobsPerChunk()) {
-                for (TerrainInfiniteChunkServer chunk : chunkManager
-                        .iterator()) {
-                    if (random.nextInt(spawner.chunkChance()) == 0 &&
-                            chunk.isLoaded()) {
-                        for (int i = 0; i < spawner.spawnAttempts(); i++) {
-                            int x = random.nextInt(16);
-                            int y = random.nextInt(16);
-                            int z = random.nextInt(chunk.zSize());
-                            int xx = x + chunk.blockX();
-                            int yy = y + chunk.blockY();
-                            if (spawner.creatureType().doesDespawn()) {
-                                MobPlayerServer player = world.nearestPlayer(
-                                        new Vector3d(xx, yy, z));
-                                if (player == null) {
-                                    continue;
-                                } else {
-                                    double distance =
-                                            FastMath.sqr(player.x() - xx) +
-                                                    FastMath.sqr(
-                                                            player.y() - yy) +
-                                                    FastMath.sqr(
-                                                            player.z() - z);
-                                    if (distance > 9216.0 || distance < 256.0) {
+        synchronized (chunkUnloadQueue) {
+            chunkManager.iterator().forEach(chunk -> chunk.updateServer(delta));
+            Random random = ThreadLocalRandom.current();
+            for (MobSpawner spawner : spawners) {
+                if (world.mobs(spawner.creatureType()) <
+                        chunkManager.chunks() * spawner.mobsPerChunk()) {
+                    for (TerrainInfiniteChunkServer chunk : chunkManager
+                            .iterator()) {
+                        if (random.nextInt(spawner.chunkChance()) == 0 &&
+                                chunk.isLoaded()) {
+                            for (int i = 0; i < spawner.spawnAttempts(); i++) {
+                                int x = random.nextInt(16);
+                                int y = random.nextInt(16);
+                                int z = random.nextInt(chunk.zSize());
+                                int xx = x + chunk.blockX();
+                                int yy = y + chunk.blockY();
+                                if (spawner.creatureType().doesDespawn()) {
+                                    MobPlayerServer player =
+                                            world.nearestPlayer(
+                                                    new Vector3d(xx, yy, z));
+                                    if (player == null) {
                                         continue;
+                                    } else {
+                                        double distance =
+                                                FastMath.sqr(player.x() - xx) +
+                                                        FastMath.sqr(
+                                                                player.y() -
+                                                                        yy) +
+                                                        FastMath.sqr(
+                                                                player.z() - z);
+                                        if (distance > 9216.0 ||
+                                                distance < 256.0) {
+                                            continue;
+                                        }
                                     }
                                 }
-                            }
-                            if (spawner.canSpawn(this, xx, yy, z)) {
-                                EntityServer entity =
-                                        spawner.spawn(this, xx, yy, z);
-                                entity.onSpawn();
-                                world.addEntity(entity);
+                                if (spawner.canSpawn(this, xx, yy, z)) {
+                                    EntityServer entity =
+                                            spawner.spawn(this, xx, yy, z);
+                                    entity.onSpawn();
+                                    world.addEntity(entity);
+                                }
                             }
                         }
                     }
                 }
             }
-        }
-        while (!blockChanges.isEmpty()) {
-            blockChanges.poll().run(this);
-        }
-        while (!chunkUnloadQueue.isEmpty()) {
-            removeChunk(chunkUnloadQueue.poll());
         }
     }
 

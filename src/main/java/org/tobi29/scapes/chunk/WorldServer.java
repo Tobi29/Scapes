@@ -45,6 +45,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -308,6 +309,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
     public void explosionBlockPush(double x, double y, double z, double size,
             double dropChance, double blockChance, double push, double damage) {
         terrain.queue(handler -> {
+            List<Supplier<EntityServer>> entities = new ArrayList<>();
             Random random = ThreadLocalRandom.current();
             double step = 360.0 / FastMath.TWO_PI / size;
             for (double pitch = 90.0; pitch >= -90.0; pitch -= step) {
@@ -345,8 +347,8 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                                                 random.nextDouble() <
                                                         blockChance) {
                                     int data = terrain.data(xxx, yyy, zzz);
-                                    EntityServer entity =
-                                            new MobFlyingBlockServer(this,
+                                    entities.add(
+                                            () -> new MobFlyingBlockServer(this,
                                                     new Vector3d(xxx + 0.5,
                                                             yyy + 0.5,
                                                             zzz + 0.5),
@@ -357,9 +359,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                                                                     0.1 - 0.05,
                                                             random.nextDouble() *
                                                                     1 + 2),
-                                                    type, data);
-                                    entity.onSpawn();
-                                    addEntity(entity);
+                                                    type, data));
                                 }
                             }
                             handler.typeData(xxx, yyy, zzz, air, 0);
@@ -367,7 +367,13 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                     }
                 }
             }
-            explosionEntities(x, y, z, size, push, damage);
+            taskExecutor.addTask(() -> {
+                entities.stream().map(Supplier::get).forEach(entity -> {
+                    entity.onSpawn();
+                    addEntity(entity);
+                });
+                explosionEntities(x, y, z, size, push, damage);
+            }, "Explosion-Entities");
         });
     }
 
