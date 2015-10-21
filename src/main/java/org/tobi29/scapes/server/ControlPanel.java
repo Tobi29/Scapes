@@ -4,14 +4,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.server.ControlPanelProtocol;
 import org.tobi29.scapes.engine.utils.CPUUtil;
+import org.tobi29.scapes.engine.utils.StringUtil;
 import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public class ControlPanel implements Command.Executor {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ControlPanel.class);
+    private static final Function<String, String> ESCAPE = StringUtil
+            .replace("&", "&amp", ">", "&gt", "<", "&lt", "'", "&apos", "\"",
+                    "&quot");
     private final ControlPanelProtocol connection;
     private final ScapesServer server;
 
@@ -74,8 +79,8 @@ public class ControlPanel implements Command.Executor {
                 break;
             }
         }
-        String html =
-                "<span style=\"" + style + "\">" + message + "</span>";
+        message = ESCAPE.apply(message);
+        String html = "<span style=\"" + style + "\">" + message + "</span>";
         connection.send("Core:Message", html);
         return true;
     }
