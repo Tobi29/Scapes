@@ -500,11 +500,13 @@ public class PlayerConnection
     }
 
     @Override
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
         state = State.CLOSED;
         channel.close();
         server.removePlayer(this);
         if (entity != null) {
+            entity.world().deleteEntity(entity);
+            entity.world().removePlayer(entity);
             save();
         }
     }
