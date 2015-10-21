@@ -15,8 +15,8 @@ public class ControlPanel implements Command.Executor {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ControlPanel.class);
     private static final Function<String, String> ESCAPE = StringUtil
-            .replace("&", "&amp", ">", "&gt", "<", "&lt", "'", "&apos", "\"",
-                    "&quot");
+            .replace("&", "&amp;", ">", "&gt;", "<", "&lt;", "'", "&apos;",
+                    "\"", "&quot;");
     private final ControlPanelProtocol connection;
     private final ScapesServer server;
 
