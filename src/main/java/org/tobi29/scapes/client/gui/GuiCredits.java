@@ -37,9 +37,9 @@ public class GuiCredits extends Gui {
     public GuiCredits(GameState state, Gui prev, GuiStyle style) {
         super(style, GuiAlignment.RIGHT);
         GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(this, 704, 0, 96, 512);
-        GuiComponentTextButton back =
-                new GuiComponentTextButton(pane, 13, 64, 70, 30, 18, "Back");
+                add(704, 0, p -> new GuiComponentVisiblePane(p, 96, 512));
+        GuiComponentTextButton back = pane.add(13, 64,
+                p -> new GuiComponentTextButton(p, 70, 30, 18, "Back"));
         StringBuilder credits = new StringBuilder(200);
         try (BufferedReader reader = state.engine().files()
                 .get("Scapes:Readme.txt").reader()) {

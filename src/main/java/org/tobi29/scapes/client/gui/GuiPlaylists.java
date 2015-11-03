@@ -43,16 +43,16 @@ public class GuiPlaylists extends GuiMenu {
     public GuiPlaylists(GameState state, Gui previous, GuiStyle style) {
         super(state, "Playlists", previous, style);
         this.state = state;
-        GuiComponentTextButton day =
-                new GuiComponentTextButton(pane, 16, 80, 80, 30, 18, "Day");
-        GuiComponentTextButton night =
-                new GuiComponentTextButton(pane, 106, 80, 80, 30, 18, "Night");
-        GuiComponentTextButton battle =
-                new GuiComponentTextButton(pane, 196, 80, 80, 30, 18, "Battle");
-        scrollPane = new GuiComponentScrollPaneList(pane, 16, 120, 368, 250, 20)
-                .viewport();
-        GuiComponentTextButton add =
-                new GuiComponentTextButton(pane, 112, 410, 176, 30, 18, "Add");
+        GuiComponentTextButton day = pane.addHori(16, 5, 5, 5,
+                p -> new GuiComponentTextButton(p, 80, 30, 18, "Day"));
+        GuiComponentTextButton night = pane.addHori(5, 5,
+                p -> new GuiComponentTextButton(p, 80, 30, 18, "Night"));
+        GuiComponentTextButton battle = pane.addHori(5, 5,
+                p -> new GuiComponentTextButton(p, 80, 30, 18, "Battle"));
+        scrollPane = pane.addVert(16, 5,
+                p -> new GuiComponentScrollPane(p, 368, 250, 20)).viewport();
+        GuiComponentTextButton add = pane.addVert(112, 5,
+                p -> new GuiComponentTextButton(p, 176, 30, 18, "Add"));
         updateTitles("day");
 
         day.addLeftClick(event -> updateTitles("day"));
@@ -96,9 +96,9 @@ public class GuiPlaylists extends GuiMenu {
             });
             for (Path title : titles) {
                 String fileName = title.getFileName().toString();
-                Element element = new Element(scrollPane,
+                Element element = scrollPane.addVert(0, 0, p -> new Element(p,
                         fileName.substring(0, fileName.lastIndexOf('.')),
-                        title);
+                        title));
                 elements.add(element);
             }
         } catch (IOException e) {
@@ -107,28 +107,28 @@ public class GuiPlaylists extends GuiMenu {
     }
 
     private class Element extends GuiComponentPane {
-        public Element(GuiComponent parent, String title, Path path) {
-            super(parent, 0, 0, 378, 20);
-            GuiComponentTextButton play =
-                    new GuiComponentTextButton(this, 15, 2, 35, 15, 12, "Play");
+        public Element(GuiLayoutData parent, String title, Path path) {
+            super(parent, 378, 20);
+            GuiComponentTextButton play = add(15, 2,
+                    p -> new GuiComponentTextButton(p, 35, 15, 12, "Play"));
             play.addLeftClick(event -> {
                 GuiNotification message =
                         new GuiNotification(state.engine().globalGUI(), 500, 0,
                                 290, 60, state.engine().globalGUI().style(),
                                 GuiAlignment.RIGHT, 3.0);
-                new GuiComponentIcon(message, 10, 10, 40, 40,
+                message.add(10, 10, p -> new GuiComponentIcon(p, 40, 40,
                         state.engine().graphics().textures()
-                                .get("Scapes:image/gui/Playlist"));
-                new GuiComponentText(message, 60, 23, 420, 16, title);
+                                .get("Scapes:image/gui/Playlist")));
+                message.add(60, 23,
+                        p -> new GuiComponentText(p, 420, 16, title));
                 state.engine().sounds().stop("music");
                 state.engine().sounds()
                         .playMusic(FileUtil.read(path), "music.Playlist", 1.0f,
                                 1.0f, true);
             });
-            new GuiComponentTextButton(this, 60, 2, 220, 15, 12, title);
-            GuiComponentTextButton delete =
-                    new GuiComponentTextButton(this, 290, 2, 60, 15, 12,
-                            "Delete");
+            add(60, 2, p -> new GuiComponentTextButton(p, 220, 15, 12, title));
+            GuiComponentTextButton delete = add(290, 2,
+                    p -> new GuiComponentTextButton(p, 60, 15, 12, "Delete"));
             delete.addLeftClick(event -> {
                 try {
                     Files.delete(path);

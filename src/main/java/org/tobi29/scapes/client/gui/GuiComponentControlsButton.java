@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.gui.GuiComponent;
 import org.tobi29.scapes.engine.gui.GuiComponentEvent;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
+import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.input.Controller;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -33,10 +32,10 @@ public class GuiComponentControlsButton extends GuiComponentTextButton {
     private byte editing;
     private ControllerKey key;
 
-    public GuiComponentControlsButton(GuiComponent parent, int x, int y,
-            int width, int height, int textSize, String name, String id,
+    public GuiComponentControlsButton(GuiLayoutData parent, int width,
+            int height, int textSize, String name, String id,
             TagStructure tagStructure, Controller controller) {
-        super(parent, x, y, width, height, textSize, "");
+        super(parent, width, height, textSize, "");
         this.name = name;
         this.id = id;
         this.tagStructure = tagStructure;

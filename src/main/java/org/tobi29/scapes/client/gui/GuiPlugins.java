@@ -38,10 +38,10 @@ public class GuiPlugins extends GuiMenu {
     public GuiPlugins(GameState state, Gui previous, GuiStyle style) {
         super(state, "Plugins", previous, style);
         path = state.engine().home().resolve("plugins");
-        scrollPane = new GuiComponentScrollPaneList(pane, 16, 80, 368, 290, 70)
-                .viewport();
-        GuiComponentTextButton add =
-                new GuiComponentTextButton(pane, 112, 410, 176, 30, 18, "Add");
+        scrollPane = pane.addVert(16, 5,
+                p -> new GuiComponentScrollPane(p, 368, 290, 70)).viewport();
+        GuiComponentTextButton add = pane.addVert(112, 5,
+                p -> new GuiComponentTextButton(p, 176, 30, 18, "Add"));
         add.addLeftClick(event -> {
             try {
                 Path[] imports = state.engine().container().openFileDialog(
@@ -63,7 +63,7 @@ public class GuiPlugins extends GuiMenu {
             scrollPane.removeAll();
             for (Path file : Files.newDirectoryStream(path)) {
                 if (Files.isRegularFile(file) && !Files.isHidden(file)) {
-                    new Element(scrollPane, file);
+                    scrollPane.addVert(0, 0, p -> new Element(p, file));
                 }
             }
         } catch (IOException e) {
@@ -74,22 +74,21 @@ public class GuiPlugins extends GuiMenu {
     private class Element extends GuiComponentPane {
         private Texture texture;
 
-        public Element(GuiComponent parent, Path path) throws IOException {
-            super(parent, 0, 0, 378, 70);
-            PluginFile plugin = new PluginFile(path);
+        public Element(GuiLayoutData parent, Path path) {
+            super(parent, 378, 70);
             try (ZipFile zip = new ZipFile(path.toFile())) {
                 texture = new TextureFile(
                         zip.getInputStream(zip.getEntry("Icon.png")), 0,
                         TextureFilter.LINEAR, TextureFilter.LINEAR,
                         TextureWrap.CLAMP, TextureWrap.CLAMP);
+                PluginFile plugin = new PluginFile(path);
+                add(70, 20, p -> new GuiComponentTextButton(p, 180, 30, 18,
+                        plugin.name()));
             } catch (IOException e) {
                 texture = new TextureCustom(1, 1);
             }
-            new GuiComponentTextButton(this, 70, 20, 180, 30, 18,
-                    plugin.name());
-            GuiComponentTextButton delete =
-                    new GuiComponentTextButton(this, 260, 20, 80, 30, 18,
-                            "Delete");
+            GuiComponentTextButton delete = add(260, 20,
+                    p -> new GuiComponentTextButton(p, 80, 30, 18, "Delete"));
             delete.addLeftClick(event -> {
                 try {
                     Files.delete(path);
@@ -98,7 +97,7 @@ public class GuiPlugins extends GuiMenu {
                     LOGGER.warn("Failed to delete plugin: {}", e.toString());
                 }
             });
-            new GuiComponentIcon(this, 15, 15, 40, 40, texture);
+            add(15, 15, p -> new GuiComponentIcon(p, 40, 40, texture));
         }
     }
 }

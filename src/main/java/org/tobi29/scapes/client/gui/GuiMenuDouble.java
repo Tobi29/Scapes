@@ -28,22 +28,30 @@ public class GuiMenuDouble extends Gui {
         this(state, title, "Save", "Back", previous, style);
     }
 
+    protected GuiMenuDouble(GameState state, String title, GuiStyle style) {
+        this(state, title, "Save", "Back", style);
+    }
+
     protected GuiMenuDouble(GameState state, String title, String save,
             String back, Gui previous, GuiStyle style) {
-        super(style, GuiAlignment.CENTER);
-        this.state = state;
-        pane = new GuiComponentVisiblePane(this, 200, 0, 400, 512);
-        new GuiComponentText(pane, 16, 16, 32, title);
-        new GuiComponentSeparator(pane, 24, 64, 352, 2);
-        new GuiComponentSeparator(pane, 24, 408, 352, 2);
-        this.save =
-                new GuiComponentTextButton(pane, 112, 426, 176, 30, 18, save);
-        this.back =
-                new GuiComponentTextButton(pane, 112, 466, 176, 30, 18, back);
-
+        this(state, title, save, back, style);
         this.back.addLeftClick(event -> {
             state.remove(this);
             state.add(previous);
         });
+    }
+
+    protected GuiMenuDouble(GameState state, String title, String save,
+            String back, GuiStyle style) {
+        super(style, GuiAlignment.CENTER);
+        this.state = state;
+        pane = add(200, 0, p -> new GuiComponentVisiblePane(p, 400, 512));
+        pane.addVert(16, 14, p -> new GuiComponentText(p, 32, title));
+        pane.addVert(24, 6, p -> new GuiComponentSeparator(p, 352, 2));
+        pane.add(24, 408, p -> new GuiComponentSeparator(p, 352, 2));
+        this.save = pane.add(112, 426,
+                p -> new GuiComponentTextButton(p, 176, 30, 18, save));
+        this.back = pane.add(112, 466,
+                p -> new GuiComponentTextButton(p, 176, 30, 18, back));
     }
 }

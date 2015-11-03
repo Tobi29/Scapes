@@ -26,14 +26,15 @@ public class GuiDisconnected extends Gui {
     public GuiDisconnected(GameState state, String message, GuiStyle style) {
         super(style, GuiAlignment.CENTER);
         GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(this, 200, 0, 400, 512);
-        new GuiComponentText(pane, 16, 16, 32, "Error");
-        new GuiComponentSeparator(pane, 24, 64, 352, 2);
-        new GuiComponentText(pane, 16, 80, 12, message);
-        reconnectTimer = new GuiComponentText(pane, 16, 400, 32, "");
-        new GuiComponentSeparator(pane, 24, 448, 352, 2);
-        GuiComponentTextButton back =
-                new GuiComponentTextButton(pane, 112, 466, 176, 30, 18, "Back");
+                add(200, 0, p -> new GuiComponentVisiblePane(p, 400, 512));
+        pane.add(16, 16, p -> new GuiComponentText(p, 32, "Error"));
+        pane.add(24, 64, p -> new GuiComponentSeparator(p, 352, 2));
+        pane.add(16, 80, p -> new GuiComponentText(p, 12, message));
+        reconnectTimer =
+                pane.add(16, 400, p -> new GuiComponentText(p, 32, ""));
+        pane.add(24, 448, p -> new GuiComponentSeparator(p, 352, 2));
+        GuiComponentTextButton back = pane.add(112, 466,
+                p -> new GuiComponentTextButton(p, 176, 30, 18, "Back"));
 
         back.addLeftClick(event -> state.engine()
                 .setState(new GameStateMenu(state.engine())));

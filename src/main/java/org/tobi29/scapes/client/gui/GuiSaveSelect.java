@@ -44,11 +44,11 @@ public class GuiSaveSelect extends GuiMenu {
             GuiStyle style) {
         super(state, "Singleplayer", previous, style);
         this.scene = scene;
-        scrollPane = new GuiComponentScrollPaneList(pane, 16, 80, 368, 290, 70)
+        scrollPane = pane.addVert(16, 5,
+                p -> new GuiComponentScrollPane(p, 368, 290, 70))
                 .viewport();
-        GuiComponentTextButton create =
-                new GuiComponentTextButton(pane, 112, 410, 176, 30, 18,
-                        "Create");
+        GuiComponentTextButton create = pane.addVert(112, 5,
+                p -> new GuiComponentTextButton(p, 176, 30, 18, "Create"));
         create.addLeftClick(event -> {
             try {
                 Path path = state.engine().home().resolve("plugins");
@@ -93,12 +93,7 @@ public class GuiSaveSelect extends GuiMenu {
                         !Files.isHidden(directory) &&
                         directory.getFileName().toString()
                                 .endsWith(WorldFormat.filenameExtension())) {
-                    try {
-                        new Element(scrollPane, directory);
-                    } catch (IOException e) {
-                        LOGGER.error("Error reading save info: {}",
-                                e.toString());
-                    }
+                    scrollPane.addVert(0, 0, p -> new Element(p, directory));
                 }
             }
         } catch (IOException e) {
@@ -109,12 +104,12 @@ public class GuiSaveSelect extends GuiMenu {
     private class Element extends GuiComponentPane {
         private final Texture texture;
 
-        public Element(GuiComponent parent, Path path) throws IOException {
-            super(parent, 0, 0, 378, 70);
+        public Element(GuiLayoutData parent, Path path) {
+            super(parent, 378, 70);
             String filename = path.getFileName().toString();
-            GuiComponentTextButton label =
-                    new GuiComponentTextButton(this, 70, 20, 180, 30, 18,
-                            filename.substring(0, filename.lastIndexOf('.')));
+            GuiComponentTextButton label = add(70, 20,
+                    p -> new GuiComponentTextButton(p, 180, 30, 18,
+                            filename.substring(0, filename.lastIndexOf('.'))));
             label.addLeftClick(event -> {
                 scene.setSpeed(0.0f);
                 state.engine().setState(
@@ -126,9 +121,8 @@ public class GuiSaveSelect extends GuiMenu {
                     scene.changeBackground(path);
                 }
             });
-            GuiComponentTextButton delete =
-                    new GuiComponentTextButton(this, 260, 20, 80, 30, 18,
-                            "Delete");
+            GuiComponentTextButton delete = add(260, 20,
+                    p -> new GuiComponentTextButton(p, 80, 30, 18, "Delete"));
             delete.addLeftClick(event -> {
                 try {
                     FileUtil.deleteDir(path);
@@ -138,15 +132,22 @@ public class GuiSaveSelect extends GuiMenu {
                 }
             });
             Path thumbnailPath = path.resolve("Panorama0.png");
+            Texture texture;
             if (Files.exists(thumbnailPath)) {
-                texture = FileUtil.readReturn(thumbnailPath,
-                        input -> new TextureFile(input, 0, TextureFilter.LINEAR,
-                                TextureFilter.LINEAR, TextureWrap.CLAMP,
-                                TextureWrap.CLAMP));
+                try {
+                    texture = FileUtil.readReturn(thumbnailPath,
+                            input -> new TextureFile(input, 0,
+                                    TextureFilter.LINEAR, TextureFilter.LINEAR,
+                                    TextureWrap.CLAMP, TextureWrap.CLAMP));
+                } catch (IOException e) {
+                    LOGGER.warn("Failed to load save icon", e);
+                    texture = new TextureCustom(1, 1);
+                }
             } else {
                 texture = new TextureCustom(1, 1);
             }
-            new GuiComponentIcon(this, 15, 15, 40, 40, texture);
+            this.texture = texture;
+            add(15, 15, p -> new GuiComponentIcon(p, 40, 40, this.texture));
         }
     }
 }

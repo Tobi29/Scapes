@@ -55,11 +55,12 @@ public class GuiServerSelect extends GuiMenu {
         if (scapesTag.has("Servers")) {
             servers.addAll(scapesTag.getList("Servers"));
         }
-        scrollPane = new GuiComponentScrollPaneList(pane, 16, 80, 368, 290, 70)
+        scrollPane = pane.add(16, 80,
+                p -> new GuiComponentScrollPane(p, 368, 290, 70))
                 .viewport();
         updateServers();
-        GuiComponentTextButton add =
-                new GuiComponentTextButton(pane, 112, 410, 176, 30, 18, "Add");
+        GuiComponentTextButton add = pane.add(112, 410,
+                p -> new GuiComponentTextButton(p, 176, 30, 18, "Add"));
 
         add.addLeftClick(event -> {
             state.remove(this);
@@ -92,7 +93,8 @@ public class GuiServerSelect extends GuiMenu {
     public void updateServers() {
         disposeServers();
         for (TagStructure tagStructure : servers) {
-            Element element = new Element(scrollPane, tagStructure);
+            Element element =
+                    scrollPane.addVert(0, 0, p -> new Element(p, tagStructure));
             elements.add(element);
         }
     }
@@ -119,20 +121,19 @@ public class GuiServerSelect extends GuiMenu {
         private int readState;
         private ByteBuffer buffer;
 
-        public Element(GuiComponent parent, TagStructure tagStructure) {
-            super(parent, 0, 0, 378, 70);
+        public Element(GuiLayoutData parent, TagStructure tagStructure) {
+            super(parent, 378, 70);
             String address = tagStructure.getString("Address");
             int port = tagStructure.getInteger("Port");
             InetSocketAddress socketAddress =
                     new InetSocketAddress(address, port);
-            label = new GuiComponentTextButton(this, 70, 20, 180, 30, 18,
-                    "Pinging...");
+            label = add(70, 20, p -> new GuiComponentTextButton(p, 180, 30, 18,
+                    "Pinging..."));
             label.addLeftClick(event -> state.engine().setState(
                     new GameStateLoadMP(socketAddress, state.engine(),
                             (SceneMenu) state.scene())));
-            GuiComponentTextButton delete =
-                    new GuiComponentTextButton(this, 260, 20, 80, 30, 18,
-                            "Delete");
+            GuiComponentTextButton delete = add(260, 20,
+                    p -> new GuiComponentTextButton(p, 80, 30, 18, "Delete"));
             delete.addLeftClick(event -> {
                 servers.remove(tagStructure);
                 TagStructure scapesTag =
@@ -204,7 +205,8 @@ public class GuiServerSelect extends GuiMenu {
                                     TextureFilter.NEAREST,
                                     TextureFilter.NEAREST, TextureWrap.CLAMP,
                                     TextureWrap.CLAMP);
-                            new GuiComponentIcon(this, 15, 15, 40, 40, texture);
+                            add(15, 15, p -> new GuiComponentIcon(p, 40, 40,
+                                    texture));
                             readState = -1;
                         } else if (read == -1) {
                             readState = -1;

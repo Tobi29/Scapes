@@ -16,6 +16,7 @@
 package org.tobi29.scapes.vanilla.basics.gui;
 
 import org.tobi29.scapes.engine.gui.GuiComponent;
+import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.gui.GuiUtils;
 import org.tobi29.scapes.engine.opengl.*;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
@@ -27,9 +28,9 @@ public class GuiComponentHotbar extends GuiComponent {
     private final MobPlayerClientMainVB player;
     private final VAO vao1, vao2, vao3;
 
-    public GuiComponentHotbar(GuiComponent parent, int x, int y, int width,
-            int height, MobPlayerClientMainVB player) {
-        super(parent, x, y, width, height);
+    public GuiComponentHotbar(GuiLayoutData parent, int width, int height,
+            MobPlayerClientMainVB player) {
+        super(parent, width, height);
         this.player = player;
         vao1 = VAOUtility.createVTI(
                 new float[]{0.0f, height - 32.0f, 0.0f, height, height - 32.0f,

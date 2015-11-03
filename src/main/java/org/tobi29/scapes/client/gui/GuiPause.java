@@ -18,43 +18,28 @@ package org.tobi29.scapes.client.gui;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.client.states.GameStateGameSP;
 import org.tobi29.scapes.client.states.GameStateMenu;
-import org.tobi29.scapes.engine.gui.*;
+import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
+import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.packets.PacketInteraction;
 
-public class GuiPause extends Gui {
+public class GuiPause extends GuiMenuDouble {
     public GuiPause(GameStateGameMP state, MobPlayerClientMain player,
             GuiStyle style) {
-        super(style, GuiAlignment.CENTER);
-        GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(this, 200, 0, 400, 512);
-        new GuiComponentText(pane, 16, 16, 32, "Pause");
-        new GuiComponentSeparator(pane, 24, 64, 352, 2);
-        GuiComponentTextButton achievements =
-                new GuiComponentTextButton(pane, 16, 120, 368, 30, 18,
-                        "Statistics");
-        GuiComponentTextButton options =
-                new GuiComponentTextButton(pane, 16, 160, 368, 30, 18,
-                        "Options");
-        String disconnectText;
-        if (state instanceof GameStateGameSP) {
-            disconnectText = "Save and quit";
-        } else {
-            disconnectText = "Disconnect";
-        }
-        GuiComponentTextButton disconnect =
-                new GuiComponentTextButton(pane, 16, 426, 368, 30, 18,
-                        disconnectText);
-        new GuiComponentSeparator(pane, 24, 408, 352, 2);
-        GuiComponentTextButton back =
-                new GuiComponentTextButton(pane, 16, 466, 368, 30, 18, "Back");
+        super(state, "Pause",
+                state instanceof GameStateGameSP ? "Save and quit" :
+                        "Disconnect", "Back", style);
+        GuiComponentTextButton achievements = pane.addVert(16, 5,
+                p -> new GuiComponentTextButton(p, 368, 30, 18, "Statistics"));
+        GuiComponentTextButton options = pane.addVert(16, 5,
+                p -> new GuiComponentTextButton(p, 368, 30, 18, "Options"));
 
         achievements.addLeftClick(event -> player.connection()
                 .send(new PacketInteraction(
                         PacketInteraction.OPEN_STATISTICS)));
         options.addLeftClick(
                 event -> player.openGui(new GuiOptionsInGame(state, style)));
-        disconnect.addLeftClick(event -> state.engine()
+        save.addLeftClick(event -> state.engine()
                 .setState(new GameStateMenu(state.engine())));
         back.addLeftClick(event -> player.closeGui());
     }

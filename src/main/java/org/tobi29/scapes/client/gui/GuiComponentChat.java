@@ -17,6 +17,7 @@ package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.client.ChatHistory;
 import org.tobi29.scapes.engine.gui.GuiComponent;
+import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
@@ -32,9 +33,9 @@ public class GuiComponentChat extends GuiComponent {
     private Map<String, FontRenderer.Text> cache = new ConcurrentHashMap<>(),
             swapCache = new ConcurrentHashMap<>();
 
-    public GuiComponentChat(GuiComponent parent, ChatHistory chatHistory, int x,
-            int y, int width, int height) {
-        super(parent, x, y, width, height);
+    public GuiComponentChat(GuiLayoutData parent, ChatHistory chatHistory,
+            int width, int height) {
+        super(parent, width, height);
         this.chatHistory = chatHistory;
     }
 

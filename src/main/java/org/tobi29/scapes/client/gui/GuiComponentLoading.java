@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.gui.GuiComponent;
-import org.tobi29.scapes.engine.opengl.*;
+import org.tobi29.scapes.engine.gui.GuiLayoutData;
+import org.tobi29.scapes.engine.opengl.GL;
+import org.tobi29.scapes.engine.opengl.RenderType;
+import org.tobi29.scapes.engine.opengl.VAO;
+import org.tobi29.scapes.engine.opengl.VAOUtility;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -27,14 +30,13 @@ public class GuiComponentLoading extends GuiComponent {
     private final VAO vao1, vao2;
     protected float value;
 
-    public GuiComponentLoading(GuiComponent parent, int x, int y, int width,
-            int height) {
-        this(parent, x, y, width, height, 0.0f, 1.0f, 0.0f, 1.0f);
+    public GuiComponentLoading(GuiLayoutData parent, int width, int height) {
+        this(parent, width, height, 0.0f, 1.0f, 0.0f, 1.0f);
     }
 
-    public GuiComponentLoading(GuiComponent parent, int x, int y, int width,
-            int height, float r, float g, float b, float a) {
-        super(parent, x, y, width, height);
+    public GuiComponentLoading(GuiLayoutData parent, int width, int height,
+            float r, float g, float b, float a) {
+        super(parent, width, height);
         float r2 = r * 0.5f;
         float g2 = g * 0.5f;
         float b2 = b * 0.5f;

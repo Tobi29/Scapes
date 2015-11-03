@@ -86,12 +86,12 @@ public class Playlist {
                     new GuiNotification(engine.globalGUI(), 500, 0, 290, 60,
                             engine.globalGUI().style(), GuiAlignment.RIGHT,
                             3.0);
-            new GuiComponentIcon(message, 10, 10, 40, 40,
+            message.add(10, 10, p -> new GuiComponentIcon(p, 40, 40,
                     engine.graphics().textures()
-                            .get("Scapes:image/gui/Playlist"));
-            String name = title.get().getFileName().toString();
-            name = name.substring(0, name.lastIndexOf('.'));
-            new GuiComponentText(message, 60, 23, 420, 16, name);
+                            .get("Scapes:image/gui/Playlist")));
+            String file = title.get().getFileName().toString();
+            String name = file.substring(0, file.lastIndexOf('.'));
+            message.add(60, 23, p -> new GuiComponentText(p, 420, 16, name));
         }
     }
 

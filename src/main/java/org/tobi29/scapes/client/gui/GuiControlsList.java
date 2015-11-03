@@ -33,9 +33,9 @@ public class GuiControlsList extends GuiMenu {
                 inputMode -> inputModes.put(inputMode.toString(), inputMode));
         int y = 80;
         for (InputMode inputMode : inputModes.values()) {
-            GuiComponentTextButton controls =
-                    new GuiComponentTextButton(pane, 16, y, 368, 30, 18,
-                            inputMode.toString());
+            GuiComponentTextButton controls = pane.add(16, y,
+                    p -> new GuiComponentTextButton(p, 368, 30, 18,
+                            inputMode.toString()));
             controls.addLeftClick(event -> {
                 state.remove(this);
                 state.add(inputMode.createControlsGUI(state, this));

@@ -45,11 +45,11 @@ public class GuiMenu extends Gui {
             GuiStyle style) {
         super(style, GuiAlignment.CENTER);
         this.state = state;
-        pane = new GuiComponentVisiblePane(this, 200, 0, 400, 512);
-        new GuiComponentText(pane, 16, 16, 32, title);
-        new GuiComponentSeparator(pane, 24, 64, 352, 2);
-        new GuiComponentSeparator(pane, 24, 448, 352, 2);
-        this.back =
-                new GuiComponentTextButton(pane, 112, 466, 176, 30, 18, back);
+        pane = add(200, 0, p -> new GuiComponentVisiblePane(p, 400, 512));
+        pane.addVert(16, 14, p -> new GuiComponentText(p, 32, title));
+        pane.addVert(24, 6, p -> new GuiComponentSeparator(p, 352, 2));
+        pane.add(24, 448, p -> new GuiComponentSeparator(p, 352, 2));
+        this.back = pane.add(112, 466,
+                p -> new GuiComponentTextButton(p, 176, 30, 18, back));
     }
 }

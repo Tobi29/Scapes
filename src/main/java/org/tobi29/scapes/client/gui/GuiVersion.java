@@ -24,7 +24,7 @@ import org.tobi29.scapes.engine.gui.GuiStyle;
 public class GuiVersion extends Gui {
     public GuiVersion(GuiStyle style) {
         super(style, GuiAlignment.RIGHT);
-        new GuiComponentText(this, 710, 486, 16,
-                'v' + Scapes.VERSION.toString());
+        add(710, 486, p -> new GuiComponentText(p, 16,
+                'v' + Scapes.VERSION.toString()));
     }
 }

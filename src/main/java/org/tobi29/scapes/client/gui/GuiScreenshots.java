@@ -41,7 +41,8 @@ public class GuiScreenshots extends GuiMenu {
     public GuiScreenshots(GameState state, Gui previous, GuiStyle style) {
         super(state, "Screenshots", previous, style);
         this.state = state;
-        scrollPane = new GuiComponentScrollPaneList(pane, 16, 80, 368, 350, 70)
+        scrollPane = pane.add(16, 80,
+                p -> new GuiComponentScrollPane(p, 368, 350, 70))
                 .viewport();
         joiner = state.engine().taskExecutor().runTask(joiner -> {
             try {
@@ -55,7 +56,8 @@ public class GuiScreenshots extends GuiMenu {
                 Collections
                         .sort(files, Comparator.comparing(Path::getFileName));
                 for (int i = 0; i < files.size() && !joiner.marked(); i++) {
-                    new Element(scrollPane, files.get(i), this);
+                    Path file = files.get(i);
+                    scrollPane.addVert(0, 0, p -> new Element(p, file, this));
                 }
             } catch (IOException e) {
                 LOGGER.warn("Failed to read screenshots: {}", e.toString());
@@ -67,8 +69,8 @@ public class GuiScreenshots extends GuiMenu {
 
     private class Element extends GuiComponentPane {
         @SuppressWarnings("unchecked")
-        public Element(GuiComponent parent, Path path, GuiScreenshots gui) {
-            super(parent, 0, 0, 378, 70);
+        public Element(GuiLayoutData parent, Path path, GuiScreenshots gui) {
+            super(parent, 378, 70);
             Texture textureLoad = null;
             try {
                 textureLoad = FileUtil.readReturn(path,
@@ -79,14 +81,13 @@ public class GuiScreenshots extends GuiMenu {
             }
             Texture texture = textureLoad;
             GuiComponentIcon icon =
-                    new GuiComponentIcon(this, 15, 20, 40, 30, texture);
+                    add(15, 20, p -> new GuiComponentIcon(p, 40, 30, texture));
             icon.addLeftClick(event -> {
                 state.remove(gui);
                 state.add(new GuiScreenshot(state, gui, texture, style));
             });
-            GuiComponentTextButton label =
-                    new GuiComponentTextButton(this, 70, 20, 100, 30, 18,
-                            "Save");
+            GuiComponentTextButton label = add(70, 20,
+                    p -> new GuiComponentTextButton(p, 100, 30, 18, "Save"));
             label.addLeftClick(event -> {
                 try {
                     Optional<Path> export = state.engine().container()
@@ -101,9 +102,8 @@ public class GuiScreenshots extends GuiMenu {
                             e.toString());
                 }
             });
-            GuiComponentTextButton edit =
-                    new GuiComponentTextButton(this, 180, 20, 100, 30, 18,
-                            "Delete");
+            GuiComponentTextButton edit = add(180, 20,
+                    p -> new GuiComponentTextButton(p, 100, 30, 18, "Delete"));
             edit.addLeftClick(event -> {
                 try {
                     Files.delete(path);

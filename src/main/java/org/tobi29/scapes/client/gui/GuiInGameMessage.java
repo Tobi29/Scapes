@@ -23,13 +23,13 @@ public class GuiInGameMessage extends Gui {
             GuiStyle style) {
         super(style, GuiAlignment.CENTER);
         GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(this, 200, 0, 400, 512);
-        new GuiComponentText(pane, 16, 16, 32, title);
-        new GuiComponentSeparator(pane, 24, 64, 352, 2);
-        new GuiComponentText(pane, 16, 80, 18, message);
-        new GuiComponentSeparator(pane, 24, 448, 352, 2);
-        GuiComponentTextButton back =
-                new GuiComponentTextButton(pane, 112, 466, 176, 30, 18, "Back");
+                add(200, 0, p -> new GuiComponentVisiblePane(p, 400, 512));
+        pane.add(16, 16, p -> new GuiComponentText(p, 32, title));
+        pane.add(24, 64, p -> new GuiComponentSeparator(p, 352, 2));
+        pane.add(16, 80, p -> new GuiComponentText(p, 18, message));
+        pane.add(24, 448, p -> new GuiComponentSeparator(p, 352, 2));
+        GuiComponentTextButton back = pane.add(112, 466,
+                p -> new GuiComponentTextButton(p, 176, 30, 18, "Back"));
 
         back.addLeftClick(event -> state.client().entity().closeGui());
     }

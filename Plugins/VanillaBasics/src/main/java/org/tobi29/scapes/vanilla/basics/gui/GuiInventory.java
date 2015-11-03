@@ -18,9 +18,11 @@ package org.tobi29.scapes.vanilla.basics.gui;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.client.gui.GuiComponentItemButton;
+import org.tobi29.scapes.client.gui.GuiMenu;
 import org.tobi29.scapes.client.gui.GuiUtils;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.gui.*;
+import org.tobi29.scapes.engine.gui.GuiComponentVisiblePane;
+import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
@@ -29,8 +31,8 @@ import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.packets.PacketInventoryInteraction;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
-public class GuiInventory extends Gui {
-    protected final GuiComponentVisiblePane pane, inventoryPane;
+public class GuiInventory extends GuiMenu {
+    protected final GuiComponentVisiblePane inventoryPane;
     protected final MobPlayerClientMainVB player;
     private String hover, hoverNew;
     private FontRenderer.Text hoverName = FontRenderer.EMPTY_TEXT;
@@ -38,12 +40,10 @@ public class GuiInventory extends Gui {
 
     public GuiInventory(String name, MobPlayerClientMainVB player,
             GuiStyle style) {
-        super(style, GuiAlignment.CENTER);
+        super(player.game(), name, style);
         this.player = player;
-        pane = new GuiComponentVisiblePane(this, 200, 0, 400, 512);
-        new GuiComponentText(pane, 16, 16, 32, name);
-        new GuiComponentSeparator(pane, 24, 64, 352, 2);
-        inventoryPane = new GuiComponentVisiblePane(pane, 16, 268, 368, 162);
+        inventoryPane = pane.add(16, 268,
+                p -> new GuiComponentVisiblePane(p, 368, 162));
         int i = 0;
         for (int x = 0; x < 10; x++) {
             int xx = x * 35 + 11;
@@ -58,7 +58,8 @@ public class GuiInventory extends Gui {
                 i++;
             }
         }
-        new GuiComponentSeparator(pane, 24, 448, 352, 2);
+
+        back.addLeftClick(event -> player.closeGui());
     }
 
     protected void button(int x, int y, int width, int height, int slot) {
@@ -68,9 +69,9 @@ public class GuiInventory extends Gui {
     protected void button(int x, int y, int width, int height, String id,
             int slot) {
         Inventory inventory = player.inventory(id);
-        GuiComponentItemButton button =
-                new GuiComponentItemButton(inventoryPane, x, y, width, height,
-                        inventory.item(slot));
+        GuiComponentItemButton button = inventoryPane.add(x, y,
+                p -> new GuiComponentItemButton(p, width, height,
+                        inventory.item(slot)));
         button.addLeftClick(event -> leftClick(id, slot));
         button.addRightClick(event -> rightClick(id, slot));
         button.addHover(event -> setTooltip(inventory.item(slot)));

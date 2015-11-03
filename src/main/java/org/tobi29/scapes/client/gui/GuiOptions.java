@@ -24,21 +24,19 @@ import org.tobi29.scapes.engine.gui.GuiStyle;
 public class GuiOptions extends GuiMenu {
     public GuiOptions(GameState state, Gui previous, GuiStyle style) {
         super(state, "Options", previous, style);
-        GuiComponentSlider musicVolume =
-                new GuiComponentSlider(pane, 16, 80, 368, 30, 18, "Music",
-                        state.engine().config().volume("music"));
-        GuiComponentSlider soundVolume =
-                new GuiComponentSlider(pane, 16, 120, 368, 30, 18, "Sound",
-                        state.engine().config().volume("sound"));
-        GuiComponentTextButton controls =
-                new GuiComponentTextButton(pane, 16, 160, 368, 30, 18,
-                        "Controls");
-        GuiComponentTextButton graphics =
-                new GuiComponentTextButton(pane, 16, 200, 368, 30, 18,
-                        "Video settings");
-        GuiComponentTextButton account =
-                new GuiComponentTextButton(pane, 16, 240, 368, 30, 18,
-                        "Account");
+        GuiComponentSlider musicVolume = pane.addVert(16, 5,
+                p -> new GuiComponentSlider(p, 368, 30, 18, "Music",
+                        state.engine().config().volume("music")));
+        GuiComponentSlider soundVolume = pane.addVert(16, 5,
+                p -> new GuiComponentSlider(p, 368, 30, 18, "Sound",
+                        state.engine().config().volume("sound")));
+        GuiComponentTextButton controls = pane.addVert(16, 5,
+                p -> new GuiComponentTextButton(p, 368, 30, 18, "Controls"));
+        GuiComponentTextButton graphics = pane.addVert(16, 5,
+                p -> new GuiComponentTextButton(p, 368, 30, 18,
+                        "Video settings"));
+        GuiComponentTextButton account = pane.addVert(16, 5,
+                p -> new GuiComponentTextButton(p, 368, 30, 18, "Account"));
 
         musicVolume.addHover(event -> state.engine().config()
                 .setVolume("music", musicVolume.value()));

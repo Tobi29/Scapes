@@ -38,12 +38,10 @@ public class GuiCrafting extends GuiInventory {
             GuiStyle style) {
         super("Crafting" + (table ? " Table" : ""), player, style);
         this.table = table;
-        scrollPaneTypes =
-                new GuiComponentScrollPaneList(pane, 16, 80, 90, 180, 20)
-                        .viewport();
-        scrollPaneRecipes =
-                new GuiComponentScrollPaneList(pane, 116, 80, 268, 180, 40)
-                        .viewport();
+        scrollPaneTypes = pane.add(16, 80,
+                p -> new GuiComponentScrollPane(p, 90, 180, 20)).viewport();
+        scrollPaneRecipes = pane.add(116, 80,
+                p -> new GuiComponentScrollPane(p, 268, 180, 40)).viewport();
         updateTypes();
         updateRecipes();
     }
@@ -62,7 +60,9 @@ public class GuiCrafting extends GuiInventory {
                     if (type < 0) {
                         type = id;
                     }
-                    new ElementType(scrollPaneTypes, recipeType, id, true);
+                    int i = id;
+                    scrollPaneTypes.addVert(0, 0,
+                            p -> new ElementType(p, recipeType, i, true));
                 } else {
                     tableOnly.add(new Pair<>(recipeType, id));
                 }
@@ -70,12 +70,12 @@ public class GuiCrafting extends GuiInventory {
             id++;
         }
         if (!tableOnly.isEmpty()) {
-            GuiComponentPane separator =
-                    new GuiComponentPane(scrollPaneTypes, 0, 0, 90, 30);
-            new GuiComponentText(separator, 5, 9, 12, "Table only:");
-            tableOnly.forEach(
-                    type -> new ElementType(scrollPaneTypes, type.a, type.b,
-                            false));
+            GuiComponentPane separator = scrollPaneTypes
+                    .addVert(0, 0, p -> new GuiComponentPane(p, 90, 30));
+            separator
+                    .add(5, 9, p -> new GuiComponentText(p, 12, "Table only:"));
+            tableOnly.forEach(type -> scrollPaneTypes.addVert(0, 0,
+                    p -> new ElementType(p, type.a, type.b, false)));
         }
     }
 
@@ -99,18 +99,20 @@ public class GuiCrafting extends GuiInventory {
                         .get(type);
         int id = 0;
         for (CraftingRecipe recipe : recipeType.recipes()) {
-            new Element(scrollPaneRecipes, recipe, type, id++);
+            int i = id++;
+            scrollPaneRecipes
+                    .addVert(0, 0, p -> new Element(p, recipe, type, i));
         }
         nextExample = System.currentTimeMillis() + 1000;
     }
 
     private class ElementType extends GuiComponentPane {
-        public ElementType(GuiComponent parent, CraftingRecipeType recipe,
+        public ElementType(GuiLayoutData parent, CraftingRecipeType recipe,
                 int id, boolean enabled) {
-            super(parent, 0, 0, 80, 40);
-            GuiComponentTextButton label =
-                    new GuiComponentTextButton(this, 5, 5, 70, 15, 12,
-                            recipe.name());
+            super(parent, 80, 20);
+            GuiComponentTextButton label = add(5, 2,
+                    p -> new GuiComponentTextButton(p, 70, 15, 12,
+                            recipe.name()));
             if (enabled) {
                 label.addLeftClick(event -> {
                     type = id;
@@ -122,17 +124,16 @@ public class GuiCrafting extends GuiInventory {
     }
 
     private class Element extends GuiComponentPane {
-        public Element(GuiComponent parent, CraftingRecipe recipe, int type,
+        public Element(GuiLayoutData parent, CraftingRecipe recipe, int type,
                 int id) {
-            super(parent, 0, 0, 268, 40);
-            GuiComponentItemButton result =
-                    new GuiComponentItemButton(this, 15, 5, 30, 30,
-                            recipe.result());
+            super(parent, 268, 40);
+            GuiComponentItemButton result = addHori(5, 5,
+                    p -> new GuiComponentItemButton(p, 30, 30,
+                            recipe.result()));
             result.addLeftClick(event -> player.connection()
                     .send(new PacketCrafting(type, id)));
             result.addHover(event -> setTooltip(result.item(), "Result:\n"));
-            new GuiComponentText(this, 47, 12, 16, "<=");
-            int x = 70;
+            addHori(5, 5, p -> new GuiComponentText(p, 16, "<="));
             Iterator<CraftingRecipe.Ingredient> ingredients =
                     recipe.ingredients().iterator();
             Iterator<CraftingRecipe.Ingredient> requirements =
@@ -140,24 +141,21 @@ public class GuiCrafting extends GuiInventory {
             if (ingredients.hasNext()) {
                 while (ingredients.hasNext()) {
                     CraftingRecipe.Ingredient ingredient = ingredients.next();
-                    GuiComponentItemButton b =
-                            new GuiComponentItemButton(this, x, 7, 25, 25,
-                                    ingredient.example(example));
+                    GuiComponentItemButton b = addHori(5, 5,
+                            p -> new GuiComponentItemButton(p, 25, 25,
+                                    ingredient.example(example)));
                     b.addHover(event -> setTooltip(b.item(), "Ingredient:\n"));
-                    x += 35;
                 }
                 if (requirements.hasNext()) {
-                    new GuiComponentText(this, x + 2, 12, 16, "+");
-                    x += 20;
+                    addHori(5, 5, p -> new GuiComponentText(p, 16, "+"));
                 }
             }
             while (requirements.hasNext()) {
                 CraftingRecipe.Ingredient requirement = requirements.next();
-                GuiComponentItemButton b =
-                        new GuiComponentItemButton(this, x, 7, 25, 25,
-                                requirement.example(example));
+                GuiComponentItemButton b = addHori(5, 5,
+                        p -> new GuiComponentItemButton(p, 25, 25,
+                                requirement.example(example)));
                 b.addHover(event -> setTooltip(b.item(), "Requirement:\n"));
-                x += 35;
             }
         }
     }

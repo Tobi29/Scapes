@@ -13,28 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.gui;
 
 import org.tobi29.scapes.client.gui.GuiComponentBar;
 import org.tobi29.scapes.engine.gui.GuiComponent;
+import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 
-public class GuiHudCondition extends GuiComponent {
+public class GuiComponentCondition extends GuiComponent {
     private final MobPlayerClientMain player;
 
-    public GuiHudCondition(GuiComponent parent, MobPlayerClientMain player) {
-        super(parent, 8, 418, 560, 24);
+    public GuiComponentCondition(GuiLayoutData parent,
+            MobPlayerClientMain player) {
+        super(parent, 560, 24);
         this.player = player;
-        new GuiComponentBar(this, 0, 8, 280, 16, 1.0f, 0.0f, 0.0f, 0.6f,
-                () -> player.health() / player.maxHealth());
-        new GuiComponentBar(this, 0, 0, 560, 8, 0.0f, 1.0f, 0.0f, 0.6f,
-                () -> value("Stamina"));
-        new GuiComponentBar(this, 280, 8, 280, 8, 1.0f, 0.5f, 0.0f, 0.6f,
-                () -> value("Hunger"));
-        new GuiComponentBar(this, 280, 16, 280, 8, 0.0f, 0.2f, 1.0f, 0.6f,
-                () -> value("Thirst"));
+        addSub(0, 8,
+                p -> new GuiComponentBar(p, 280, 16, 1.0f, 0.0f, 0.0f, 0.6f,
+                        () -> player.health() / player.maxHealth()));
+        addSub(0, 0, p -> new GuiComponentBar(p, 560, 8, 0.0f, 1.0f, 0.0f, 0.6f,
+                () -> value("Stamina")));
+        addSub(280, 8,
+                p -> new GuiComponentBar(p, 280, 8, 1.0f, 0.5f, 0.0f, 0.6f,
+                        () -> value("Hunger")));
+        addSub(280, 16,
+                p -> new GuiComponentBar(p, 280, 8, 0.0f, 0.2f, 1.0f, 0.6f,
+                        () -> value("Thirst")));
     }
 
     private double value(String name) {

@@ -16,17 +16,17 @@
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.block.ItemStack;
-import org.tobi29.scapes.engine.gui.GuiComponent;
 import org.tobi29.scapes.engine.gui.GuiComponentButton;
+import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 
 public class GuiComponentItemButton extends GuiComponentButton {
     private final ItemStack item;
 
-    public GuiComponentItemButton(GuiComponent parent, int x, int y, int width,
-            int height, ItemStack item) {
-        super(parent, x, y, width, height);
+    public GuiComponentItemButton(GuiLayoutData parent, int width, int height,
+            ItemStack item) {
+        super(parent, width, height);
         this.item = item;
     }
 

@@ -16,32 +16,29 @@
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.client.states.GameStateGameMP;
-import org.tobi29.scapes.engine.gui.*;
+import org.tobi29.scapes.engine.gui.GuiComponentSlider;
+import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
+import org.tobi29.scapes.engine.gui.GuiStyle;
 
-public class GuiOptionsInGame extends Gui {
+public class GuiOptionsInGame extends GuiMenu {
     public GuiOptionsInGame(GameStateGameMP state, GuiStyle style) {
-        super(style, GuiAlignment.CENTER);
-        GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(this, 200, 0, 400, 512);
-        new GuiComponentText(pane, 16, 16, 32, "Options");
-        new GuiComponentSeparator(pane, 24, 64, 352, 2);
-        GuiComponentSlider musicVolume =
-                new GuiComponentSlider(pane, 16, 80, 368, 30, 18, "Music",
-                        state.engine().config().volume("music"));
-        GuiComponentSlider soundVolume =
-                new GuiComponentSlider(pane, 16, 120, 368, 30, 18, "Sound",
-                        state.engine().config().volume("sound"));
+        super(state, "Options", style);
+        GuiComponentSlider musicVolume = pane.addVert(16, 5,
+                p -> new GuiComponentSlider(p, 368, 30, 18, "Music",
+                        state.engine().config().volume("music")));
+        GuiComponentSlider soundVolume = pane.addVert(16, 5,
+                p -> new GuiComponentSlider(p, 368, 30, 18, "Sound",
+                        state.engine().config().volume("sound")));
         GuiComponentTextButton fullscreen;
         if (state.engine().config().isFullscreen()) {
-            fullscreen = new GuiComponentTextButton(pane, 16, 160, 368, 30, 18,
-                    "Fullscreen: ON");
+            fullscreen = pane.addVert(16, 5,
+                    p -> new GuiComponentTextButton(p, 368, 30, 18,
+                            "Fullscreen: ON"));
         } else {
-            fullscreen = new GuiComponentTextButton(pane, 16, 160, 368, 30, 18,
-                    "Fullscreen: OFF");
+            fullscreen = pane.addVert(16, 5,
+                    p -> new GuiComponentTextButton(p, 368, 30, 18,
+                            "Fullscreen: OFF"));
         }
-        new GuiComponentSeparator(pane, 24, 448, 352, 2);
-        GuiComponentTextButton back =
-                new GuiComponentTextButton(pane, 112, 466, 176, 30, 18, "Back");
 
         musicVolume.addHover(event -> state.engine().config()
                 .setVolume("music", musicVolume.value()));

@@ -24,6 +24,6 @@ public class GuiMessage extends GuiMenu {
     public GuiMessage(GameState state, Gui previous, String title,
             String message, GuiStyle style) {
         super(state, title, previous, style);
-        new GuiComponentText(pane, 16, 80, 18, message);
+        add(16, 80, p -> new GuiComponentText(p, 18, message));
     }
 }

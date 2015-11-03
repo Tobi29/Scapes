@@ -47,19 +47,17 @@ public class GuiCreateWorld extends GuiMenuDouble {
             List<PluginFile> worldTypes, List<PluginFile> plugins, Path path,
             GuiStyle style) {
         super(state, "New World", previous, style);
-        new GuiComponentText(pane, 16, 80, 18, "Name:");
-        GuiComponentTextField name =
-                new GuiComponentTextField(pane, 16, 100, 368, 30, 18,
-                        "New World");
-        new GuiComponentText(pane, 16, 140, 18, "Seed:");
-        GuiComponentTextField seed =
-                new GuiComponentTextField(pane, 16, 160, 368, 30, 18, "");
-        GuiComponentTextButton environment =
-                new GuiComponentTextButton(pane, 16, 200, 368, 30, 18,
-                        "Generator: " + worldTypes.get(environmentID).name());
-        GuiComponentTextButton addonsButton =
-                new GuiComponentTextButton(pane, 16, 240, 368, 30, 18,
-                        "Addons");
+        pane.add(16, 80, p -> new GuiComponentText(p, 18, "Name:"));
+        GuiComponentTextField name = pane.add(16, 100,
+                p -> new GuiComponentTextField(p, 368, 30, 18, "New World"));
+        pane.add(16, 140, p -> new GuiComponentText(p, 18, "Seed:"));
+        GuiComponentTextField seed = pane.add(16, 160,
+                p -> new GuiComponentTextField(p, 368, 30, 18, ""));
+        GuiComponentTextButton environment = pane.add(16, 200,
+                p -> new GuiComponentTextButton(p, 368, 30, 18,
+                        "Generator: " + worldTypes.get(environmentID).name()));
+        GuiComponentTextButton addonsButton = pane.add(16, 240,
+                p -> new GuiComponentTextButton(p, 368, 30, 18, "Addons"));
 
         environment.addLeftClick(event -> {
             environmentID++;
@@ -126,19 +124,19 @@ public class GuiCreateWorld extends GuiMenuDouble {
         public GuiAddons(GameState state, GuiCreateWorld prev, String parent,
                 List<PluginFile> plugins, GuiStyle style) {
             super(style, GuiAlignment.CENTER);
-            new GuiComponentText(pane, 16, 16, 32, "Addons");
-            new GuiComponentSeparator(pane, 24, 64, 352, 2);
+            pane.add(16, 16, p -> new GuiComponentText(p, 32, "Addons"));
+            pane.add(24, 64, p -> new GuiComponentSeparator(p, 352, 2));
             GuiComponentVisiblePane pane =
-                    new GuiComponentVisiblePane(this, 200, 0, 400, 512);
-            GuiComponentScrollPaneViewport scrollPane =
-                    new GuiComponentScrollPaneList(pane, 16, 80, 368, 350, 70)
-                            .viewport();
-            GuiComponentTextButton back =
-                    new GuiComponentTextButton(pane, 112, 466, 176, 30, 18,
-                            "Back");
+                    add(200, 0, p -> new GuiComponentVisiblePane(p, 400, 512));
+            GuiComponentScrollPaneViewport scrollPane = pane.add(16, 80,
+                    p -> new GuiComponentScrollPane(p, 368, 350, 70))
+                    .viewport();
+            GuiComponentTextButton back = pane.add(112, 466,
+                    p -> new GuiComponentTextButton(p, 176, 30, 18, "Back"));
             plugins.stream().filter(plugin -> plugin.parent().equals(parent))
-                    .forEach(plugin -> new Element(scrollPane, plugin));
-            new GuiComponentSeparator(pane, 24, 448, 352, 2);
+                    .forEach(plugin -> scrollPane
+                            .addVert(0, 0, p -> new Element(p, plugin)));
+            pane.add(24, 448, p -> new GuiComponentSeparator(p, 352, 2));
 
             back.addLeftClick(event -> {
                 state.remove(this);
@@ -151,8 +149,8 @@ public class GuiCreateWorld extends GuiMenuDouble {
             private boolean active;
             private Texture texture;
 
-            public Element(GuiComponent parent, PluginFile addon) {
-                super(parent, 0, 0, 378, 70);
+            public Element(GuiLayoutData parent, PluginFile addon) {
+                super(parent, 378, 70);
                 try (ZipFile zip = new ZipFile(addon.file().toFile())) {
                     texture = new TextureFile(
                             zip.getInputStream(zip.getEntry("Icon.png")), 0,
@@ -161,12 +159,12 @@ public class GuiCreateWorld extends GuiMenuDouble {
                 } catch (IOException e) {
                     texture = new TextureCustom(1, 1);
                 }
-                new GuiComponentTextButton(this, 70, 20, 200, 30, 18,
-                        addon.name());
+                add(70, 20, p -> new GuiComponentTextButton(p, 200, 30, 18,
+                        addon.name()));
                 active = addons.contains(addon);
-                GuiComponentTextButton edit =
-                        new GuiComponentTextButton(this, 280, 20, 30, 30, 18,
-                                active ? "X" : "");
+                GuiComponentTextButton edit = add(280, 20,
+                        p -> new GuiComponentTextButton(p, 30, 30, 18,
+                                active ? "X" : ""));
                 edit.addLeftClick(event -> {
                     active = !active;
                     if (active) {
@@ -177,7 +175,7 @@ public class GuiCreateWorld extends GuiMenuDouble {
                         addons.remove(addon);
                     }
                 });
-                new GuiComponentIcon(this, 15, 15, 40, 40, texture);
+                add(15, 15, p -> new GuiComponentIcon(p, 40, 40, texture));
             }
         }
     }

@@ -39,9 +39,9 @@ public class GuiContainerInventory extends GuiInventory {
     protected void buttonContainer(int x, int y, int width, int height,
             String id, int slot) {
         Inventory inventory = container.inventory(id);
-        GuiComponentItemButton button =
-                new GuiComponentItemButton(pane, x, y, width, height,
-                        inventory.item(slot));
+        GuiComponentItemButton button = pane.add(x, y,
+                p -> new GuiComponentItemButton(p, width, height,
+                        inventory.item(slot)));
         button.addLeftClick(event -> leftClickContainer(id, slot));
         button.addRightClick(event -> rightClickContainer(id, slot));
         button.addHover(event -> setTooltip(inventory.item(slot)));

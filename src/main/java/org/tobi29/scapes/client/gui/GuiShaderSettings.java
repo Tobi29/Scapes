@@ -27,25 +27,29 @@ public class GuiShaderSettings extends GuiMenu {
         super(state, "Shader Settings", previous, style);
         TagStructure scapesTag =
                 state.engine().tagStructure().getStructure("Scapes");
-        GuiComponentSlider animationDistance =
-                new GuiComponentSlider(pane, 16, 80, 368, 30, 18,
+        GuiComponentSlider animationDistance = pane.addVert(16, 5,
+                p -> new GuiComponentSlider(p, 368, 30, 18,
                         "Animation Distance",
-                        scapesTag.getFloat("AnimationDistance"));
+                        scapesTag.getFloat("AnimationDistance")));
         GuiComponentTextButton bloom;
         if (scapesTag.getBoolean("Bloom")) {
-            bloom = new GuiComponentTextButton(pane, 16, 120, 368, 30, 18,
-                    "Bloom: ON");
+            bloom = pane.addVert(16, 5,
+                    p -> new GuiComponentTextButton(p, 368, 30, 18,
+                            "Bloom: ON"));
         } else {
-            bloom = new GuiComponentTextButton(pane, 16, 120, 368, 30, 18,
-                    "Bloom: OFF");
+            bloom = pane.addVert(16, 5,
+                    p -> new GuiComponentTextButton(p, 368, 30, 18,
+                            "Bloom: OFF"));
         }
         GuiComponentTextButton fxaa;
         if (scapesTag.getBoolean("FXAA")) {
-            fxaa = new GuiComponentTextButton(pane, 16, 160, 368, 30, 18,
-                    "FXAA: ON");
+            fxaa = pane.addVert(16, 5,
+                    p -> new GuiComponentTextButton(p, 368, 30, 18,
+                            "FXAA: ON"));
         } else {
-            fxaa = new GuiComponentTextButton(pane, 16, 160, 368, 30, 18,
-                    "FXAA: OFF");
+            fxaa = pane.addVert(16, 5,
+                    p -> new GuiComponentTextButton(p, 368, 30, 18,
+                            "FXAA: OFF"));
         }
 
         animationDistance.addHover(event -> scapesTag

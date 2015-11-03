@@ -19,6 +19,7 @@ import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.GuiComponent;
 import org.tobi29.scapes.engine.gui.GuiComponentEvent;
 import org.tobi29.scapes.engine.gui.GuiComponentText;
+import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.opengl.*;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 
@@ -41,20 +42,21 @@ public class GuiComponentLogo extends GuiComponent {
     private final VAO vao;
     private final GuiComponentText splash;
 
-    public GuiComponentLogo(GuiComponent parent, int x, int y, int width,
-            int height) {
-        super(parent, x, y, width, height);
-        int textX = x + height - 8;
-        int textY = y + 4;
+    public GuiComponentLogo(GuiLayoutData parent, int width, int height) {
+        super(parent, width, height);
+        int textX = height - 8;
+        int textY = 4;
         vao = VAOUtility.createVTI(
-                new float[]{x, y + height, 0.0f, x + height, y + height, 0.0f,
-                        x, y, 0.0f, x + height, y, 0.0f},
+                new float[]{0, height, 0.0f, height, height, 0.0f, 0, 0, 0.0f,
+                        height, 0, 0.0f},
                 new float[]{0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f},
                 new int[]{0, 1, 2, 3, 2, 1}, RenderType.TRIANGLES);
-        new GuiComponentText(this, textX, textY, 18, "Scapes", 1.0f, 1.0f, 1.0f,
-                1.0f);
-        splash = new GuiComponentText(this, textX, textY + 22, 12, splash(),
-                1.0f, 1.0f, 0.0f, 1.0f);
+        addSub(textX, textY,
+                p -> new GuiComponentText(p, 18, "Scapes", 1.0f, 1.0f, 1.0f,
+                        1.0f));
+        splash = addSub(textX, textY + 22,
+                p -> new GuiComponentText(p, 12, splash(), 1.0f, 1.0f, 0.0f,
+                        1.0f));
     }
 
     private static String splash() {

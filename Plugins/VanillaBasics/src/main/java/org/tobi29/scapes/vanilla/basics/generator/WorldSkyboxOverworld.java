@@ -38,7 +38,7 @@ import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleRaindrop;
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleSnowflake;
 import org.tobi29.scapes.vanilla.basics.gui.GuiComponentHotbar;
-import org.tobi29.scapes.vanilla.basics.gui.GuiHudCondition;
+import org.tobi29.scapes.vanilla.basics.gui.GuiComponentCondition;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -289,9 +289,10 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         MobPlayerClientMain player = world.player();
         if (player instanceof MobPlayerClientMainVB) {
             MobPlayerClientMainVB playerVB = (MobPlayerClientMainVB) player;
-            new GuiComponentHotbar(world.scene().hud(), 8, 464, 560, 40,
-                    playerVB);
-            new GuiHudCondition(world.scene().hud(), playerVB);
+            world.scene().hud().add(8, 464,
+                    p -> new GuiComponentHotbar(p, 560, 40, playerVB));
+            world.scene().hud()
+                    .add(8, 418, p -> new GuiComponentCondition(p, playerVB));
         }
     }
 

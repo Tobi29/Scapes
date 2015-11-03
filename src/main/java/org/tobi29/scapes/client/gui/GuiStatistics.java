@@ -21,39 +21,33 @@ import org.tobi29.scapes.server.format.PlayerStatistics;
 
 import java.util.List;
 
-public class GuiStatistics extends Gui {
+public class GuiStatistics extends GuiMenu {
     public GuiStatistics(GameStateGameMP state,
             List<PlayerStatistics.StatisticMaterial> statisticMaterials,
             GuiStyle style) {
-        super(style, GuiAlignment.CENTER);
-        GuiComponentVisiblePane pane =
-                new GuiComponentVisiblePane(this, 200, 0, 400, 512);
-        new GuiComponentText(pane, 16, 16, 32, "Statistics");
-        new GuiComponentSeparator(pane, 24, 64, 352, 2);
-        GuiComponentScrollPaneList scrollPane =
-                new GuiComponentScrollPaneList(pane, 16, 80, 368, 350, 70);
-        GuiComponentTextButton back =
-                new GuiComponentTextButton(pane, 112, 466, 176, 30, 18, "Back");
+        super(state, "Statistics", style);
+        GuiComponentScrollPane scrollPane = pane.addVert(16, 5,
+                p -> new GuiComponentScrollPane(p, 368, 350, 70));
         for (PlayerStatistics.StatisticMaterial statisticMaterial : statisticMaterials) {
-            new Element(scrollPane, statisticMaterial);
+            scrollPane.addVert(0, 0, p -> new Element(p, statisticMaterial));
         }
-        new GuiComponentSeparator(pane, 24, 448, 352, 2);
 
         back.addLeftClick(event -> state.client().entity().closeGui());
     }
 
     private static class Element extends GuiComponentPane {
-        public Element(GuiComponent parent,
+        public Element(GuiLayoutData parent,
                 PlayerStatistics.StatisticMaterial statisticMaterial) {
-            super(parent, 0, 0, 378, 70);
-            new GuiComponentTextButton(this, 70, 20, 50, 30, 18,
-                    String.valueOf(statisticMaterial.breakAmount()));
-            new GuiComponentTextButton(this, 130, 20, 50, 30, 18,
-                    String.valueOf(statisticMaterial.placeAmount()));
-            new GuiComponentTextButton(this, 190, 20, 50, 30, 18,
-                    String.valueOf(statisticMaterial.craftAmount()));
-            new GuiComponentItemButton(this, 15, 15, 40, 40,
-                    statisticMaterial.type().example(statisticMaterial.data()));
+            super(parent, 378, 70);
+            add(70, 20, p -> new GuiComponentTextButton(p, 50, 30, 18,
+                    String.valueOf(statisticMaterial.breakAmount())));
+            add(130, 20, p -> new GuiComponentTextButton(p, 50, 30, 18,
+                    String.valueOf(statisticMaterial.placeAmount())));
+            add(190, 20, p -> new GuiComponentTextButton(p, 50, 30, 18,
+                    String.valueOf(statisticMaterial.craftAmount())));
+            add(15, 15, p -> new GuiComponentItemButton(p, 40, 40,
+                    statisticMaterial.type()
+                            .example(statisticMaterial.data())));
         }
     }
 }

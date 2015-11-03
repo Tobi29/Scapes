@@ -168,11 +168,11 @@ public class ScapesClient extends Game {
                     new GuiNotification(engine.globalGUI(), 500, 0, 290, 60,
                             engine.globalGUI().style(), GuiAlignment.RIGHT,
                             3.0);
-            new GuiComponentIcon(message, 10, 10, 40, 40,
+            message.add(10, 10, p -> new GuiComponentIcon(p, 40, 40,
                     engine.graphics().textures()
-                            .get("Scapes:image/gui/input/Default"));
-            new GuiComponentText(message, 60, 25, 420, 10,
-                    inputMode.toString());
+                            .get("Scapes:image/gui/input/Default")));
+            message.add(60, 25, p -> new GuiComponentText(p, 420, 10,
+                    inputMode.toString()));
         }
     }
 

@@ -109,9 +109,10 @@ public class SceneScapesVoxelWorld extends Scene {
         GuiStyle style = world.game().engine().globalGUI().style();
         Gui debugLayer = new Gui(style, GuiAlignment.LEFT);
         addGui(debugLayer);
-        debugWidget = new GuiWidgetDebugClient(debugLayer);
+        debugWidget = debugLayer.add(32, 32, GuiWidgetDebugClient::new);
         debugWidget.setVisible(false);
-        performanceWidget = new GuiWidgetPerformanceClient(debugLayer);
+        performanceWidget =
+                debugLayer.add(32, 32, GuiWidgetPerformanceClient::new);
         performanceWidget.setVisible(false);
         vao = VAOUtility.createVTI(
                 new float[]{0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
@@ -195,7 +196,8 @@ public class SceneScapesVoxelWorld extends Scene {
 
     @Override
     public void init(GL gl) {
-        new GuiComponentChat(hud, world.game().chatHistory(), 8, 416, 0, 0);
+        hud.add(8, 416,
+                p -> new GuiComponentChat(p, world.game().chatHistory(), 0, 0));
         addGui(hud);
         ShaderManager shaderManager = gl.shaders();
         ShaderCompileInformation information =
@@ -471,42 +473,42 @@ public class SceneScapesVoxelWorld extends Scene {
     private static class GuiWidgetPerformanceClient extends GuiComponentWidget {
         private final GuiComponentGraph graphRender, graphUpdate;
 
-        private GuiWidgetPerformanceClient(GuiComponent parent) {
-            super(parent, 32, 32, 240, 80, "Performance Graph");
-            graphRender =
-                    new GuiComponentGraph(this, 0, 0, width, height, 0.0f, 1.0f,
-                            0.0f, 1.0f);
-            graphUpdate =
-                    new GuiComponentGraph(this, 0, 0, width, height, 0.0f, 0.0f,
-                            1.0f, 1.0f);
+        private GuiWidgetPerformanceClient(GuiLayoutData parent) {
+            super(parent, 240, 80, "Performance Graph");
+            graphRender = add(0, 0,
+                    p -> new GuiComponentGraph(p, width, height, 0.0f, 1.0f,
+                            0.0f, 1.0f));
+            graphUpdate = add(0, 0,
+                    p -> new GuiComponentGraph(p, width, height, 0.0f, 0.0f,
+                            1.0f, 1.0f));
         }
     }
 
     private class GuiWidgetDebugClient extends GuiComponentWidget {
-        private GuiWidgetDebugClient(GuiComponent parent) {
-            super(parent, 32, 32, 160, 120, "Debug Values");
-            GuiComponentTextButton geometryButton =
-                    new GuiComponentTextButton(this, 10, 10, 140, 15, 12,
-                            "Geometry");
+        private GuiWidgetDebugClient(GuiLayoutData parent) {
+            super(parent, 160, 120, "Debug Values");
+            GuiComponentTextButton geometryButton = add(10, 10,
+                    p -> new GuiComponentTextButton(p, 140, 15, 12,
+                            "Geometry"));
             geometryButton.addLeftClick(
                     event -> chunkGeometryDebug = !chunkGeometryDebug);
-            GuiComponentTextButton wireframeButton =
-                    new GuiComponentTextButton(this, 10, 30, 140, 15, 12,
-                            "Wireframe");
+            GuiComponentTextButton wireframeButton = add(10, 30,
+                    p -> new GuiComponentTextButton(p, 140, 15, 12,
+                            "Wireframe"));
             wireframeButton.addLeftClick(event -> wireframe = !wireframe);
-            GuiComponentTextButton distanceButton =
-                    new GuiComponentTextButton(this, 10, 50, 140, 15, 12,
-                            "Static Render Distance");
+            GuiComponentTextButton distanceButton = add(10, 50,
+                    p -> new GuiComponentTextButton(p, 140, 15, 12,
+                            "Static Render Distance"));
             distanceButton.addLeftClick(
                     event -> world.terrain().toggleStaticRenderDistance());
-            GuiComponentTextButton reloadGeometryButton =
-                    new GuiComponentTextButton(this, 10, 70, 140, 15, 12,
-                            "Reload Geometry");
+            GuiComponentTextButton reloadGeometryButton = add(10, 70,
+                    p -> new GuiComponentTextButton(p, 140, 15, 12,
+                            "Reload Geometry"));
             reloadGeometryButton
                     .addLeftClick(event -> world.terrain().reloadGeometry());
-            GuiComponentTextButton performanceButton =
-                    new GuiComponentTextButton(this, 10, 90, 140, 15, 12,
-                            "Performance");
+            GuiComponentTextButton performanceButton = add(10, 90,
+                    p -> new GuiComponentTextButton(p, 140, 15, 12,
+                            "Performance"));
             performanceButton.addLeftClick(event -> performanceWidget
                     .setVisible(!performanceWidget.isVisible()));
         }

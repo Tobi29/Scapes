@@ -34,9 +34,10 @@ public class GuiChatWrite extends Gui {
         super(style, GuiAlignment.LEFT);
         this.state = state;
         this.player = player;
-        write = new GuiComponentTextField(this, 12, 480, 600, 30, 16, "", 64,
-                false, true);
-        new GuiComponentChat(this, state.chatHistory(), 8, 416, 0, 0);
+        write = add(12, 480,
+                p -> new GuiComponentTextField(p, 600, 30, 16, "", 64, false,
+                        true));
+        add(8, 416, p -> new GuiComponentChat(p, state.chatHistory(), 0, 0));
     }
 
     @Override

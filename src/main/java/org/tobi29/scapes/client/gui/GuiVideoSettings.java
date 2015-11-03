@@ -28,31 +28,30 @@ public class GuiVideoSettings extends GuiMenu {
         super(state, "Video Settings", previous, style);
         TagStructure scapesTag =
                 state.engine().tagStructure().getStructure("Scapes");
-        GuiComponentSlider viewDistance =
-                new GuiComponentSlider(pane, 16, 80, 368, 30, 18,
-                        "View distance",
+        GuiComponentSlider viewDistance = pane.addVert(16, 5,
+                p -> new GuiComponentSlider(p, 368, 30, 18, "View distance",
                         (scapesTag.getDouble("RenderDistance") - 10.0) / 246.0,
                         (text, value) -> text + ": " +
-                                FastMath.round(10.0 + value * 246.0) +
-                                'm');
-        GuiComponentTextButton shader =
-                new GuiComponentTextButton(pane, 16, 120, 368, 30, 18,
-                        "Shaders");
+                                FastMath.round(10.0 + value * 246.0) + 'm'));
+        GuiComponentTextButton shader = pane.addVert(16, 5,
+                p -> new GuiComponentTextButton(p, 368, 30, 18, "Shaders"));
         GuiComponentTextButton fullscreen;
         if (state.engine().config().isFullscreen()) {
-            fullscreen = new GuiComponentTextButton(pane, 16, 160, 368, 30, 18,
-                    "Fullscreen: ON");
+            fullscreen = pane.addVert(16, 5,
+                    p -> new GuiComponentTextButton(p, 368, 30, 18,
+                            "Fullscreen: ON"));
         } else {
-            fullscreen = new GuiComponentTextButton(pane, 16, 160, 368, 30, 18,
-                    "Fullscreen: OFF");
+            fullscreen = pane.addVert(16, 5,
+                    p -> new GuiComponentTextButton(p, 368, 30, 18,
+                            "Fullscreen: OFF"));
         }
-        GuiComponentSlider resolutionMultiplier =
-                new GuiComponentSlider(pane, 16, 200, 368, 30, 18, "Resolution",
+        GuiComponentSlider resolutionMultiplier = pane.addVert(16, 5,
+                p -> new GuiComponentSlider(p, 368, 30, 18, "Resolution",
                         reverseResolution(
                                 state.engine().config().resolutionMultiplier()),
                         (text, value) -> text + ": " +
                                 FastMath.round(resolution(value) * 100.0) +
-                                '%');
+                                '%'));
 
         viewDistance.addHover(event -> scapesTag.setDouble("RenderDistance",
                 10.0 + viewDistance.value() * 246.0));

@@ -34,8 +34,8 @@ public abstract class GuiControls extends GuiMenu {
             game.setFreezeInputMode(false);
             game.loadInput();
         });
-        scrollPane = new GuiComponentScrollPaneList(pane, 16, 80, 368, 350, 40)
-                .viewport();
+        scrollPane = pane.add(16, 80,
+                p -> new GuiComponentScrollPane(p, 368, 350, 40)).viewport();
     }
 
     private static double sensitivity(double value) {
@@ -54,29 +54,32 @@ public abstract class GuiControls extends GuiMenu {
     }
 
     protected void addText(String text) {
-        new GuiComponentText(scrollPane, 40, 0, 18, text);
+        scrollPane
+                .addVert(40, 16, 40, 5, p -> new GuiComponentText(p, 18, text));
     }
 
     protected void addButton(String name, String id, TagStructure tagStructure,
             Controller controller) {
-        new GuiComponentControlsButton(scrollPane, 15, 0, 328, 30, 18, name, id,
-                tagStructure, controller);
+        scrollPane.addVert(16, 5,
+                p -> new GuiComponentControlsButton(p, 328, 30, 18, name, id,
+                        tagStructure, controller));
     }
 
     protected void addAxis(String name, String id, TagStructure tagStructure,
             ControllerJoystick controller) {
-        new GuiComponentControlsAxis(scrollPane, 15, 0, 328, 30, 18, name, id,
-                tagStructure, controller);
+        scrollPane.addVert(16, 5,
+                p -> new GuiComponentControlsAxis(p, 328, 30, 18, name, id,
+                        tagStructure, controller));
     }
 
     protected void addSlider(String name, String id,
             TagStructure tagStructure) {
-        GuiComponentSlider slider =
-                new GuiComponentSlider(scrollPane, 15, 0, 328, 30, 18, name,
+        GuiComponentSlider slider = scrollPane.addVert(16, 5,
+                p -> new GuiComponentSlider(p, 328, 30, 18, name,
                         reverseSensitivity(tagStructure.getDouble(id)),
                         (text, value) -> text + ": " +
                                 FastMath.round(sensitivity(value) * 100.0) +
-                                '%');
+                                '%'));
         slider.addHover(event -> tagStructure
                 .setDouble(id, sensitivity(slider.value())));
     }

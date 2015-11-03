@@ -26,8 +26,8 @@ public class GuiQuernInventory extends GuiContainerInventory {
             MobPlayerClientMainVB player, GuiStyle style) {
         super("Quern", player, container, style);
         buttonContainer(185, 90, 30, 30, 0);
-        GuiComponentTextButton quern =
-                new GuiComponentTextButton(pane, 27, 210, 120, 30, 18, "Quern");
+        GuiComponentTextButton quern = pane.add(27, 210,
+                p -> new GuiComponentTextButton(p, 120, 30, 18, "Quern"));
         quern.addLeftClick(
                 event -> player.connection().send(new PacketQuern(container)));
     }

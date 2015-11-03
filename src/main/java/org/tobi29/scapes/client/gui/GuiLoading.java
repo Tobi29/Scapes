@@ -26,9 +26,9 @@ public class GuiLoading extends Gui {
 
     public GuiLoading(GuiStyle style) {
         super(style, GuiAlignment.CENTER);
-        progress = new GuiComponentLoading(this, 300, 280, 200, 16);
-        label = new GuiComponentTextButton(this, 300, 310, 200, 32, 18,
-                "Loading...");
+        progress = add(300, 280, p -> new GuiComponentLoading(p, 200, 16));
+        label = add(300, 310,
+                p -> new GuiComponentTextButton(p, 200, 32, 18, "Loading..."));
     }
 
     public void setProgress(float value) {
