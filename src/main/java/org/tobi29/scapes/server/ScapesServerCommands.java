@@ -21,6 +21,9 @@ import org.tobi29.scapes.block.Material;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.engine.utils.ArrayUtil;
 import org.tobi29.scapes.engine.utils.StringUtil;
+import org.tobi29.scapes.engine.utils.io.ByteBufferStream;
+import org.tobi29.scapes.engine.utils.io.ProcessStream;
+import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.packets.PacketDisconnect;
@@ -31,6 +34,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 import org.tobi29.scapes.server.connection.ServerConnection;
 import org.tobi29.scapes.server.format.PlayerBans;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -242,8 +246,9 @@ final class ScapesServerCommands {
                     }));
         });
 
-        playersGroup.register("op -l LEVEL PLAYER-NAME...", 10, options -> options
-                .add("l", "level", true, "Permission level (0-10)"),
+        playersGroup.register("op -l LEVEL PLAYER-NAME...", 10,
+                options -> options
+                        .add("l", "level", true, "Permission level (0-10)"),
                 (args, executor, commands) -> {
                     String[] playerNames = args.args();
                     int permissionLevel =
@@ -314,5 +319,33 @@ final class ScapesServerCommands {
         serverGroup.register("reload", 10, options -> {
         }, (args, executor, commands) -> server
                 .scheduleStop(ScapesServer.ShutdownReason.RELOAD));
+
+        CommandRegistry debugGroup = registry.group("debug");
+
+        debugGroup.register("item", 8, options -> options
+                        .add("p", "player", true,
+                                "Player holding the item in the left hand to debug"),
+                (args, executor, commands) -> {
+                    String playerName =
+                            args.requireOption('p', executor.playerName());
+                    commands.add(() -> {
+                        PlayerConnection player =
+                                Command.require(connection::playerByName,
+                                        playerName);
+                        try {
+                            ByteBufferStream stream = new ByteBufferStream();
+                            TagStructureJSON
+                                    .write(player.mob().leftWeapon().save(),
+                                            stream);
+                            stream.buffer().flip();
+                            String str = ProcessStream
+                                    .process(stream, ProcessStream.asString());
+                            executor.message(str, MessageLevel.FEEDBACK_INFO);
+                        } catch (IOException e) {
+                            executor.message("Failed to serialize item",
+                                    MessageLevel.FEEDBACK_ERROR);
+                        }
+                    });
+                });
     }
 }
