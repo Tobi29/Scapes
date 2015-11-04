@@ -24,6 +24,7 @@ import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiController;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.input.ControllerKey;
+import org.tobi29.scapes.engine.input.ControllerKeyReference;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
@@ -43,10 +44,10 @@ public class InputModeGamepad implements InputMode {
         this.tagStructure = tagStructure.getStructure(id);
         defaultConfig(this.tagStructure);
         TagStructure guiTag = this.tagStructure.getStructure("GUI");
-        ControllerKey primaryButton =
-                ControllerKey.valueOf(guiTag.getString("Primary"));
-        ControllerKey secondaryButton =
-                ControllerKey.valueOf(guiTag.getString("Secondary"));
+        ControllerKeyReference primaryButton =
+                ControllerKeyReference.valueOf(guiTag.getString("Primary"));
+        ControllerKeyReference secondaryButton =
+                ControllerKeyReference.valueOf(guiTag.getString("Secondary"));
         TagStructure guiCursorTag = guiTag.getStructure("Cursor");
         int cursorXAxis = guiCursorTag.getInteger("X");
         int cursorYAxis = guiCursorTag.getInteger("Y");
@@ -152,15 +153,16 @@ public class InputModeGamepad implements InputMode {
 
     private class PlayerController implements MobPlayerClientMain.Controller {
         private final int axisWalkX, axisWalkY, axisCameraX, axisCameraY;
-        private final ControllerKey jump, inventory, menu, chat, left, right,
-                hotbarAdd, hotbarSubtract, hotbarLeft;
+        private final ControllerKeyReference jump, inventory, menu, chat, left,
+                right, hotbarAdd, hotbarSubtract, hotbarLeft;
         private final double cameraSensitivity;
 
         public PlayerController() {
             TagStructure movementTag = tagStructure.getStructure("Movement");
             axisWalkX = movementTag.getInteger("X");
             axisWalkY = movementTag.getInteger("Y");
-            jump = ControllerKey.valueOf(movementTag.getString("Jump"));
+            jump = ControllerKeyReference
+                    .valueOf(movementTag.getString("Jump"));
 
             TagStructure cameraTag = tagStructure.getStructure("Camera");
             axisCameraX = cameraTag.getInteger("X");
@@ -168,19 +170,23 @@ public class InputModeGamepad implements InputMode {
             cameraSensitivity = cameraTag.getDouble("Sensitivity") * 400.0;
 
             TagStructure menuTag = tagStructure.getStructure("Menu");
-            inventory = ControllerKey.valueOf(menuTag.getString("Inventory"));
-            menu = ControllerKey.valueOf(menuTag.getString("Menu"));
-            chat = ControllerKey.valueOf(menuTag.getString("Chat"));
+            inventory = ControllerKeyReference
+                    .valueOf(menuTag.getString("Inventory"));
+            menu = ControllerKeyReference.valueOf(menuTag.getString("Menu"));
+            chat = ControllerKeyReference.valueOf(menuTag.getString("Chat"));
 
             TagStructure actionTag = tagStructure.getStructure("Action");
-            left = ControllerKey.valueOf(actionTag.getString("Left"));
-            right = ControllerKey.valueOf(actionTag.getString("Right"));
+            left = ControllerKeyReference.valueOf(actionTag.getString("Left"));
+            right = ControllerKeyReference
+                    .valueOf(actionTag.getString("Right"));
 
             TagStructure hotbarTag = tagStructure.getStructure("Hotbar");
-            hotbarAdd = ControllerKey.valueOf(hotbarTag.getString("Add"));
-            hotbarSubtract =
-                    ControllerKey.valueOf(hotbarTag.getString("Subtract"));
-            hotbarLeft = ControllerKey.valueOf(hotbarTag.getString("Left"));
+            hotbarAdd =
+                    ControllerKeyReference.valueOf(hotbarTag.getString("Add"));
+            hotbarSubtract = ControllerKeyReference
+                    .valueOf(hotbarTag.getString("Subtract"));
+            hotbarLeft =
+                    ControllerKeyReference.valueOf(hotbarTag.getString("Left"));
         }
 
         @Override
@@ -202,41 +208,41 @@ public class InputModeGamepad implements InputMode {
 
         @Override
         public boolean left() {
-            return controller.isDown(left);
+            return left.isDown(controller);
         }
 
         @Override
         public boolean right() {
-            return controller.isDown(right);
+            return right.isDown(controller);
         }
 
         @Override
         public boolean jump() {
-            return controller.isDown(jump);
+            return jump.isDown(controller);
         }
 
         @Override
         public boolean inventory() {
-            return controller.isPressed(inventory);
+            return inventory.isPressed(controller);
         }
 
         @Override
         public boolean menu() {
-            return controller.isPressed(menu);
+            return menu.isPressed(controller);
         }
 
         @Override
         public boolean chat() {
-            return controller.isPressed(chat);
+            return chat.isPressed(controller);
         }
 
         @Override
         public int hotbarLeft(int previous) {
-            if (controller.isDown(hotbarLeft)) {
-                if (controller.isPressed(hotbarAdd)) {
+            if (hotbarLeft.isDown(controller)) {
+                if (hotbarAdd.isPressed(controller)) {
                     previous++;
                 }
-                if (controller.isPressed(hotbarSubtract)) {
+                if (hotbarSubtract.isPressed(controller)) {
                     previous--;
                 }
             }
@@ -249,11 +255,11 @@ public class InputModeGamepad implements InputMode {
 
         @Override
         public int hotbarRight(int previous) {
-            if (!controller.isDown(hotbarLeft)) {
-                if (controller.isPressed(hotbarAdd)) {
+            if (!hotbarLeft.isDown(controller)) {
+                if (hotbarAdd.isPressed(controller)) {
                     previous++;
                 }
-                if (controller.isPressed(hotbarSubtract)) {
+                if (hotbarSubtract.isPressed(controller)) {
                     previous--;
                 }
             }

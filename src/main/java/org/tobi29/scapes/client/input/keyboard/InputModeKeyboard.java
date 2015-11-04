@@ -25,10 +25,13 @@ import org.tobi29.scapes.engine.gui.GuiController;
 import org.tobi29.scapes.engine.gui.GuiControllerDefault;
 import org.tobi29.scapes.engine.input.ControllerDefault;
 import org.tobi29.scapes.engine.input.ControllerKey;
+import org.tobi29.scapes.engine.input.ControllerKeyReference;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
+
+import java.util.Optional;
 
 public class InputModeKeyboard implements InputMode {
     private final ControllerDefault controller;
@@ -74,6 +77,7 @@ public class InputModeKeyboard implements InputMode {
         check("Add", ControllerKey.SCROLL_DOWN, hotbarTag);
         check("Subtract", ControllerKey.SCROLL_UP, hotbarTag);
         check("Left", ControllerKey.KEY_LEFT_CONTROL, hotbarTag);
+        check("Both", ControllerKey.KEY_LEFT_ALT, hotbarTag);
         check("0", ControllerKey.KEY_1, hotbarTag);
         check("1", ControllerKey.KEY_2, hotbarTag);
         check("2", ControllerKey.KEY_3, hotbarTag);
@@ -133,70 +137,80 @@ public class InputModeKeyboard implements InputMode {
     }
 
     private class PlayerController implements MobPlayerClientMain.Controller {
-        private final ControllerKey walkForward, walkBackward, walkLeft,
-                walkRight, walkSprint, jump, inventory, menu, chat, left, right,
-                hotbarAdd, hotbarSubtract, hotbarLeft, hotbar0, hotbar1,
-                hotbar2, hotbar3, hotbar4, hotbar5, hotbar6, hotbar7, hotbar8,
-                hotbar9;
+        private final ControllerKeyReference walkForward, walkBackward,
+                walkLeft, walkRight, walkSprint, jump, inventory, menu, chat,
+                left, right, hotbarAdd, hotbarSubtract, hotbarLeft, hotbarBoth,
+                hotbar0, hotbar1, hotbar2, hotbar3, hotbar4, hotbar5, hotbar6,
+                hotbar7, hotbar8, hotbar9;
         private final double cameraSensitivity, scrollSensitivity;
 
         public PlayerController() {
             TagStructure movementTag = tagStructure.getStructure("Movement");
-            walkForward =
-                    ControllerKey.valueOf(movementTag.getString("Forward"));
-            walkBackward =
-                    ControllerKey.valueOf(movementTag.getString("Backward"));
-            walkLeft = ControllerKey.valueOf(movementTag.getString("Left"));
-            walkRight = ControllerKey.valueOf(movementTag.getString("Right"));
-            walkSprint = ControllerKey.valueOf(movementTag.getString("Sprint"));
-            jump = ControllerKey.valueOf(movementTag.getString("Jump"));
+            walkForward = ControllerKeyReference
+                    .valueOf(movementTag.getString("Forward"));
+            walkBackward = ControllerKeyReference
+                    .valueOf(movementTag.getString("Backward"));
+            walkLeft = ControllerKeyReference
+                    .valueOf(movementTag.getString("Left"));
+            walkRight = ControllerKeyReference
+                    .valueOf(movementTag.getString("Right"));
+            walkSprint = ControllerKeyReference
+                    .valueOf(movementTag.getString("Sprint"));
+            jump = ControllerKeyReference
+                    .valueOf(movementTag.getString("Jump"));
 
             TagStructure cameraTag = tagStructure.getStructure("Camera");
             cameraSensitivity = cameraTag.getDouble("Sensitivity");
 
             TagStructure actionTag = tagStructure.getStructure("Action");
-            left = ControllerKey.valueOf(actionTag.getString("Left"));
-            right = ControllerKey.valueOf(actionTag.getString("Right"));
+            left = ControllerKeyReference.valueOf(actionTag.getString("Left"));
+            right = ControllerKeyReference
+                    .valueOf(actionTag.getString("Right"));
 
             TagStructure menuTag = tagStructure.getStructure("Menu");
-            inventory = ControllerKey.valueOf(menuTag.getString("Inventory"));
-            menu = ControllerKey.valueOf(menuTag.getString("Menu"));
-            chat = ControllerKey.valueOf(menuTag.getString("Chat"));
+            inventory = ControllerKeyReference
+                    .valueOf(menuTag.getString("Inventory"));
+            menu = ControllerKeyReference.valueOf(menuTag.getString("Menu"));
+            chat = ControllerKeyReference.valueOf(menuTag.getString("Chat"));
 
             TagStructure hotbarTag = tagStructure.getStructure("Hotbar");
-            hotbarAdd = ControllerKey.valueOf(hotbarTag.getString("Add"));
-            hotbarSubtract =
-                    ControllerKey.valueOf(hotbarTag.getString("Subtract"));
-            hotbarLeft = ControllerKey.valueOf(hotbarTag.getString("Left"));
-            hotbar0 = ControllerKey.valueOf(hotbarTag.getString("0"));
-            hotbar1 = ControllerKey.valueOf(hotbarTag.getString("1"));
-            hotbar2 = ControllerKey.valueOf(hotbarTag.getString("2"));
-            hotbar3 = ControllerKey.valueOf(hotbarTag.getString("3"));
-            hotbar4 = ControllerKey.valueOf(hotbarTag.getString("4"));
-            hotbar5 = ControllerKey.valueOf(hotbarTag.getString("5"));
-            hotbar6 = ControllerKey.valueOf(hotbarTag.getString("6"));
-            hotbar7 = ControllerKey.valueOf(hotbarTag.getString("7"));
-            hotbar8 = ControllerKey.valueOf(hotbarTag.getString("8"));
-            hotbar9 = ControllerKey.valueOf(hotbarTag.getString("9"));
+            hotbarAdd =
+                    ControllerKeyReference.valueOf(hotbarTag.getString("Add"));
+            hotbarSubtract = ControllerKeyReference
+                    .valueOf(hotbarTag.getString("Subtract"));
+            hotbarLeft =
+                    ControllerKeyReference.valueOf(hotbarTag.getString("Left"));
+            hotbarBoth =
+                    ControllerKeyReference.valueOf(hotbarTag.getString("Both"));
+            hotbar0 = ControllerKeyReference.valueOf(hotbarTag.getString("0"));
+            hotbar1 = ControllerKeyReference.valueOf(hotbarTag.getString("1"));
+            hotbar2 = ControllerKeyReference.valueOf(hotbarTag.getString("2"));
+            hotbar3 = ControllerKeyReference.valueOf(hotbarTag.getString("3"));
+            hotbar4 = ControllerKeyReference.valueOf(hotbarTag.getString("4"));
+            hotbar5 = ControllerKeyReference.valueOf(hotbarTag.getString("5"));
+            hotbar6 = ControllerKeyReference.valueOf(hotbarTag.getString("6"));
+            hotbar7 = ControllerKeyReference.valueOf(hotbarTag.getString("7"));
+            hotbar8 = ControllerKeyReference.valueOf(hotbarTag.getString("8"));
+            hotbar9 = ControllerKeyReference.valueOf(hotbarTag.getString("9"));
             scrollSensitivity = hotbarTag.getDouble("Sensitivity");
         }
 
         @Override
         public Vector2 walk() {
             double x = 0.0, y = 0.0;
-            if (controller.isDown(walkForward)) {
+            if (walkForward.isDown(controller)) {
                 y += 1.0;
             }
-            if (controller.isDown(walkBackward)) {
+            if (walkBackward.isDown(controller)) {
                 y -= 1.0;
             }
-            if (controller.isDown(walkLeft)) {
+            if (walkLeft.isDown(controller)) {
                 x -= 1.0;
             }
-            if (controller.isDown(walkRight)) {
+            if (walkRight.isDown(controller)) {
                 x += 1.0;
             }
-            if (!controller.isDown(walkSprint)) {
+            if (!walkSprint.isDown(controller)) {
                 x *= 0.4;
                 y *= 0.4;
             }
@@ -212,63 +226,72 @@ public class InputModeKeyboard implements InputMode {
 
         @Override
         public boolean left() {
-            return controller.isDown(left);
+            return left.isDown(controller);
         }
 
         @Override
         public boolean right() {
-            return controller.isDown(right);
+            return right.isDown(controller);
         }
 
         @Override
         public boolean jump() {
-            return controller.isDown(jump);
+            return jump.isDown(controller);
         }
 
         @Override
         public boolean inventory() {
-            return controller.isPressed(inventory);
+            return inventory.isPressed(controller);
         }
 
         @Override
         public boolean menu() {
-            return controller.isPressed(menu);
+            return menu.isPressed(controller);
         }
 
         @Override
         public boolean chat() {
-            return controller.isPressed(chat);
+            return chat.isPressed(controller);
         }
 
         @Override
         public int hotbarLeft(int previous) {
-            if (controller.isDown(hotbarLeft)) {
-                if (controller.isPressed(hotbarAdd)) {
+            if (hotbarLeft.isDown(controller) ||
+                    hotbarBoth.isDown(controller)) {
+                if (hotbarAdd.isPressed(controller)) {
                     previous++;
                 }
-                if (controller.isPressed(hotbarSubtract)) {
+                if (hotbarSubtract.isPressed(controller)) {
                     previous--;
                 }
-                if (controller.isDown(hotbar0)) {
-                    previous = 0;
-                } else if (controller.isDown(hotbar1)) {
-                    previous = 1;
-                } else if (controller.isDown(hotbar2)) {
-                    previous = 2;
-                } else if (controller.isDown(hotbar3)) {
-                    previous = 3;
-                } else if (controller.isDown(hotbar4)) {
-                    previous = 4;
-                } else if (controller.isDown(hotbar5)) {
-                    previous = 5;
-                } else if (controller.isDown(hotbar6)) {
-                    previous = 6;
-                } else if (controller.isDown(hotbar7)) {
-                    previous = 7;
-                } else if (controller.isDown(hotbar8)) {
-                    previous = 8;
-                } else if (controller.isDown(hotbar9)) {
-                    previous = 9;
+                Optional<ControllerKeyReference> hotbarCheck =
+                        ControllerKeyReference
+                                .isDown(controller, hotbar0, hotbar1, hotbar2,
+                                        hotbar3, hotbar4, hotbar5, hotbar6,
+                                        hotbar7, hotbar8, hotbar9);
+                if (hotbarCheck.isPresent()) {
+                    ControllerKeyReference hotbar = hotbarCheck.get();
+                    if (hotbar == hotbar0) {
+                        previous = 0;
+                    } else if (hotbar == hotbar1) {
+                        previous = 1;
+                    } else if (hotbar == hotbar2) {
+                        previous = 2;
+                    } else if (hotbar == hotbar3) {
+                        previous = 3;
+                    } else if (hotbar == hotbar4) {
+                        previous = 4;
+                    } else if (hotbar == hotbar5) {
+                        previous = 5;
+                    } else if (hotbar == hotbar6) {
+                        previous = 6;
+                    } else if (hotbar == hotbar7) {
+                        previous = 7;
+                    } else if (hotbar == hotbar8) {
+                        previous = 8;
+                    } else if (hotbar == hotbar9) {
+                        previous = 9;
+                    }
                 }
             }
             previous %= 10;
@@ -280,33 +303,41 @@ public class InputModeKeyboard implements InputMode {
 
         @Override
         public int hotbarRight(int previous) {
-            if (!controller.isDown(hotbarLeft)) {
-                if (controller.isPressed(hotbarAdd)) {
+            if (!hotbarLeft.isDown(controller)) {
+                if (hotbarAdd.isPressed(controller)) {
                     previous++;
                 }
-                if (controller.isPressed(hotbarSubtract)) {
+                if (hotbarSubtract.isPressed(controller)) {
                     previous--;
                 }
-                if (controller.isDown(hotbar0)) {
-                    previous = 0;
-                } else if (controller.isDown(hotbar1)) {
-                    previous = 1;
-                } else if (controller.isDown(hotbar2)) {
-                    previous = 2;
-                } else if (controller.isDown(hotbar3)) {
-                    previous = 3;
-                } else if (controller.isDown(hotbar4)) {
-                    previous = 4;
-                } else if (controller.isDown(hotbar5)) {
-                    previous = 5;
-                } else if (controller.isDown(hotbar6)) {
-                    previous = 6;
-                } else if (controller.isDown(hotbar7)) {
-                    previous = 7;
-                } else if (controller.isDown(hotbar8)) {
-                    previous = 8;
-                } else if (controller.isDown(hotbar9)) {
-                    previous = 9;
+                Optional<ControllerKeyReference> hotbarCheck =
+                        ControllerKeyReference
+                                .isDown(controller, hotbar0, hotbar1, hotbar2,
+                                        hotbar3, hotbar4, hotbar5, hotbar6,
+                                        hotbar7, hotbar8, hotbar9);
+                if (hotbarCheck.isPresent()) {
+                    ControllerKeyReference hotbar = hotbarCheck.get();
+                    if (hotbar == hotbar0) {
+                        previous = 0;
+                    } else if (hotbar == hotbar1) {
+                        previous = 1;
+                    } else if (hotbar == hotbar2) {
+                        previous = 2;
+                    } else if (hotbar == hotbar3) {
+                        previous = 3;
+                    } else if (hotbar == hotbar4) {
+                        previous = 4;
+                    } else if (hotbar == hotbar5) {
+                        previous = 5;
+                    } else if (hotbar == hotbar6) {
+                        previous = 6;
+                    } else if (hotbar == hotbar7) {
+                        previous = 7;
+                    } else if (hotbar == hotbar8) {
+                        previous = 8;
+                    } else if (hotbar == hotbar9) {
+                        previous = 9;
+                    }
                 }
             }
             previous %= 10;

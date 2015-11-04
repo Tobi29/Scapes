@@ -56,6 +56,7 @@ public class GuiControlsDefault extends GuiControls {
         addButton("Right", "Add", hotbarTag, controller);
         addButton("Left", "Subtract", hotbarTag, controller);
         addButton("Left Hand", "Left", hotbarTag, controller);
+        addButton("Both Hands", "Both", hotbarTag, controller);
         addButton("Slot 1", "0", hotbarTag, controller);
         addButton("Slot 2", "1", hotbarTag, controller);
         addButton("Slot 3", "2", hotbarTag, controller);

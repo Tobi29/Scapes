@@ -13,29 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.input.gamepad;
 
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.GuiController;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
-import org.tobi29.scapes.engine.input.ControllerKey;
+import org.tobi29.scapes.engine.input.ControllerKeyReference;
 import org.tobi29.scapes.engine.opengl.Container;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 public class GuiControllerGamepad implements GuiController {
     private final ScapesEngine engine;
     private final ControllerJoystick controller;
-    private final ControllerKey primaryButton, secondaryButton;
+    private final ControllerKeyReference primaryButton, secondaryButton;
     private final int axisCursorX, axisCursorY, axisScroll;
     private final double cursorSensitivity, scrollSensitivity;
     private double cursorX, cursorY, scroll, guiCursorX, guiCursorY;
     private boolean cursorCentered;
 
     public GuiControllerGamepad(ScapesEngine engine,
-            ControllerJoystick controller, ControllerKey primaryButton,
-            ControllerKey secondaryButton, int axisCursorX, int axisCursorY,
-            int axisScroll, double cursorSensitivity,
+            ControllerJoystick controller, ControllerKeyReference primaryButton,
+            ControllerKeyReference secondaryButton, int axisCursorX,
+            int axisCursorY, int axisScroll, double cursorSensitivity,
             double scrollSensitivity) {
         this.engine = engine;
         this.controller = controller;
@@ -99,22 +98,22 @@ public class GuiControllerGamepad implements GuiController {
 
     @Override
     public boolean leftClick() {
-        return controller.isPressed(primaryButton);
+        return primaryButton.isPressed(controller);
     }
 
     @Override
     public boolean rightClick() {
-        return controller.isPressed(secondaryButton);
+        return secondaryButton.isPressed(controller);
     }
 
     @Override
     public boolean leftDrag() {
-        return controller.isDown(primaryButton);
+        return primaryButton.isDown(controller);
     }
 
     @Override
     public boolean rightDrag() {
-        return controller.isDown(secondaryButton);
+        return secondaryButton.isDown(controller);
     }
 
     @Override

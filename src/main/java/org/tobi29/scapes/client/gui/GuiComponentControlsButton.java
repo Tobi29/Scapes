@@ -21,8 +21,11 @@ import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.input.Controller;
 import org.tobi29.scapes.engine.input.ControllerKey;
+import org.tobi29.scapes.engine.input.ControllerKeyReference;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class GuiComponentControlsButton extends GuiComponentTextButton {
@@ -30,7 +33,8 @@ public class GuiComponentControlsButton extends GuiComponentTextButton {
     private final TagStructure tagStructure;
     private final Controller controller;
     private byte editing;
-    private ControllerKey key;
+    private ControllerKeyReference key;
+    private List<ControllerKey> keys = new ArrayList<>();
 
     public GuiComponentControlsButton(GuiLayoutData parent, int width,
             int height, int textSize, String name, String id,
@@ -40,7 +44,7 @@ public class GuiComponentControlsButton extends GuiComponentTextButton {
         this.id = id;
         this.tagStructure = tagStructure;
         this.controller = controller;
-        key = ControllerKey.valueOf(tagStructure.getString(id));
+        key = ControllerKeyReference.valueOf(tagStructure.getString(id));
         updateText();
     }
 
@@ -48,12 +52,18 @@ public class GuiComponentControlsButton extends GuiComponentTextButton {
         StringBuilder text = new StringBuilder(16);
         if (editing > 0) {
             text.append('<');
-        }
-        text.append(name);
-        text.append(": ");
-        text.append(key.humanName());
-        if (editing > 0) {
+            text.append(name);
+            text.append(": ");
+            if (!keys.isEmpty()) {
+                text.append(new ControllerKeyReference(keys).humanName());
+            } else {
+                text.append("...");
+            }
             text.append('>');
+        } else {
+            text.append(name);
+            text.append(": ");
+            text.append(key.humanName());
         }
         setText(text.toString());
     }
@@ -63,15 +73,19 @@ public class GuiComponentControlsButton extends GuiComponentTextButton {
             ScapesEngine engine) {
         super.update(mouseX, mouseY, mouseInside, engine);
         if (editing > 1) {
-            Optional<Controller.PressEvent> keyEvent = controller.pressEvents()
+            controller.pressEvents().filter(event -> event.state() ==
+                    Controller.PressState.PRESS).map(Controller.PressEvent::key)
+                    .forEach(keys::add);
+            Optional<Controller.PressEvent> keyEvent2 = controller.pressEvents()
                     .filter(event -> event.state() ==
-                            Controller.PressState.PRESS).findFirst();
-            if (keyEvent.isPresent()) {
-                key = keyEvent.get().key();
+                            Controller.PressState.RELEASE).findAny();
+            if (keyEvent2.isPresent() && !keys.isEmpty()) {
+                key = new ControllerKeyReference(keys);
                 tagStructure.setString(id, key.toString());
                 editing = 0;
-                updateText();
+                keys.clear();
             }
+            updateText();
         } else if (editing > 0) {
             editing = 2;
         }
