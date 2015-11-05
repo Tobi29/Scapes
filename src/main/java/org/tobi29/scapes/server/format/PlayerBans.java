@@ -86,7 +86,8 @@ public class PlayerBans implements MultiTag.Writeable {
     }
 
     public void unban(String id) {
-        entries.removeAll(entries.stream().filter(entry -> entry.id.equals(id))
+        entries.removeAll(entries.stream().filter(entry -> entry.id.isPresent())
+                .filter(entry -> entry.id.get().equals(id))
                 .collect(Collectors.toList()));
     }
 
