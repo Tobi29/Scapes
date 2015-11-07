@@ -48,23 +48,24 @@ public class GuiAccount extends GuiMenu {
         } catch (IOException e) {
             LOGGER.error("Failed to read account file: {}", e.toString());
         }
-        pane.add(16, 80, p -> new GuiComponentText(p, 18, "Key:"));
-        GuiComponentButton keyCopy = pane.add(16, 100,
+        pane.addVert(16, 5, p -> new GuiComponentText(p, 18, "Key:"));
+        GuiComponentButton keyCopy = pane.addHori(16, 5, 5, 5,
                 p -> new GuiComponentTextButton(p, 116, 30, 18, "Copy"));
-        GuiComponentButton keyPaste = pane.add(142, 100,
+        GuiComponentButton keyPaste = pane.addHori(5, 5,
                 p -> new GuiComponentTextButton(p, 116, 30, 18, "Paste"));
-        GuiComponentButton keyCopyID = pane.add(268, 100,
+        GuiComponentButton keyCopyID = pane.addHori(5, 5,
                 p -> new GuiComponentTextButton(p, 116, 30, 18, "Copy ID"));
-        GuiComponentText id = pane.add(16, 150, p -> new GuiComponentText(p, 12,
-                "ID: " + ChecksumUtil.checksum(keyPair.getPublic().getEncoded(),
-                        ChecksumUtil.Algorithm.SHA1).toString()));
-        pane.add(16, 180, p -> new GuiComponentText(p, 18, "Nickname:"));
-        GuiComponentTextField nickname = pane.add(16, 200,
+        GuiComponentText id = pane.addVert(16, 5,
+                p -> new GuiComponentText(p, 12, "ID: " + ChecksumUtil
+                        .checksum(keyPair.getPublic().getEncoded(),
+                                ChecksumUtil.Algorithm.SHA1).toString()));
+        pane.addVert(16, 5, p -> new GuiComponentText(p, 18, "Nickname:"));
+        GuiComponentTextField nickname = pane.addVert(16, 5,
                 p -> new GuiComponentTextField(p, 368, 30, 18, this.nickname));
-        GuiComponentTextButton skin = pane.add(112, 260,
+        GuiComponentTextButton skin = pane.addVert(112, 5,
                 p -> new GuiComponentTextButton(p, 176, 30, 18, "Skin"));
         GuiComponentText error =
-                pane.add(16, 320, p -> new GuiComponentText(p, 18, ""));
+                pane.addVert(16, 5, p -> new GuiComponentText(p, 18, ""));
 
         keyCopy.addLeftClick(event -> state.engine().controller()
                 .clipboardCopy(Account.key(keyPair)));

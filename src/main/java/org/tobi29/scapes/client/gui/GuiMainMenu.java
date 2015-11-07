@@ -24,52 +24,53 @@ public class GuiMainMenu extends Gui {
         super(style, GuiAlignment.LEFT);
         GuiComponentVisiblePane pane =
                 add(0, 0, p -> new GuiComponentVisiblePane(p, 144, 512));
-        pane.add(0, 4, p -> new GuiComponentLogo(p, 144, 80));
-        GuiComponentTextButton singlePlayer = pane.add(16, 120,
+        pane.addVert(0, 10, 5, 20, p -> new GuiComponentLogo(p, 144, 80));
+        GuiComponentTextButton singlePlayer = pane.addVert(16, 5,
                 p -> new GuiComponentTextButton(p, 120, 30, 18,
                         "Singleplayer"));
+        GuiComponentTextButton multiPlayer = pane.addVert(16, 5,
+                p -> new GuiComponentTextButton(p, 120, 30, 18, "Multiplayer"));
+        GuiComponentTextButton options = pane.addVert(16, 5,
+                p -> new GuiComponentTextButton(p, 120, 30, 18, "Options"));
+        GuiComponentTextButton credits = pane.addVert(16, 5,
+                p -> new GuiComponentTextButton(p, 120, 30, 18, "Credits"));
+        GuiComponentTextButton plugins = pane.addVert(16, 5,
+                p -> new GuiComponentTextButton(p, 120, 30, 18, "Plugins"));
+        GuiComponentTextButton playlists = pane.addVert(16, 5,
+                p -> new GuiComponentTextButton(p, 120, 30, 18, "Playlists"));
+        GuiComponentTextButton screenshots = pane.addVert(16, 5,
+                p -> new GuiComponentTextButton(p, 120, 30, 18, "Screenshots"));
+        GuiComponentTextButton quit = pane.addVert(16, 5,
+                p -> new GuiComponentTextButton(p, 120, 30, 18, "Quit"));
+
         singlePlayer.addLeftClick(event -> {
             state.remove(this);
             state.add(new GuiSaveSelect(state, this, scene, style));
         });
-        GuiComponentTextButton multiPlayer = pane.add(16, 160,
-                p -> new GuiComponentTextButton(p, 120, 30, 18, "Multiplayer"));
         multiPlayer.addLeftClick(event -> {
             state.remove(this);
             state.add(new GuiServerSelect(state, this, style));
         });
-        GuiComponentTextButton options = pane.add(16, 200,
-                p -> new GuiComponentTextButton(p, 120, 30, 18, "Options"));
         options.addLeftClick(event -> {
             state.remove(this);
             state.add(new GuiOptions(state, this, style));
         });
-        GuiComponentTextButton credits = pane.add(16, 240,
-                p -> new GuiComponentTextButton(p, 120, 30, 18, "Credits"));
         credits.addLeftClick(event -> {
             state.remove(this);
             state.add(new GuiCredits(state, this, style));
         });
-        GuiComponentTextButton plugins = pane.add(16, 280,
-                p -> new GuiComponentTextButton(p, 120, 30, 18, "Plugins"));
         plugins.addLeftClick(event -> {
             state.remove(this);
             state.add(new GuiPlugins(state, this, style));
         });
-        GuiComponentTextButton playlists = pane.add(16, 320,
-                p -> new GuiComponentTextButton(p, 120, 30, 18, "Playlists"));
         playlists.addLeftClick(event -> {
             state.remove(this);
             state.add(new GuiPlaylists(state, this, style));
         });
-        GuiComponentTextButton screenshots = pane.add(16, 360,
-                p -> new GuiComponentTextButton(p, 120, 30, 18, "Screenshots"));
         screenshots.addLeftClick(event -> {
             state.remove(this);
             state.add(new GuiScreenshots(state, this, style));
         });
-        GuiComponentTextButton quit = pane.add(16, 400,
-                p -> new GuiComponentTextButton(p, 120, 30, 18, "Quit"));
         quit.addLeftClick(event -> state.engine().stop());
     }
 }

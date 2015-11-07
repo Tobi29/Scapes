@@ -24,8 +24,13 @@ import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.plugins.PluginFile;
 
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipFile;
 
 public class GuiPlugins extends GuiMenu {
@@ -61,11 +66,19 @@ public class GuiPlugins extends GuiMenu {
     private void updatePlugins() {
         try {
             scrollPane.removeAll();
-            for (Path file : Files.newDirectoryStream(path)) {
-                if (Files.isRegularFile(file) && !Files.isHidden(file)) {
-                    scrollPane.addVert(0, 0, p -> new Element(p, file));
+            List<Path> files = new ArrayList<>();
+            Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file,
+                        BasicFileAttributes attrs) throws IOException {
+                    if (Files.isRegularFile(file) && !Files.isHidden(file)) {
+                        files.add(file);
+                    }
+                    return FileVisitResult.CONTINUE;
                 }
-            }
+            });
+            files.stream().sorted().forEach(file -> scrollPane
+                    .addVert(0, 0, p -> new Element(p, file)));
         } catch (IOException e) {
             LOGGER.warn("Failed to read plugins: {}", e.toString());
         }

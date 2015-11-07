@@ -34,7 +34,6 @@ import java.util.List;
 public class GuiPlaylists extends GuiMenu {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GuiPlaylists.class);
-    private final List<Element> elements = new ArrayList<>();
     private final GuiComponentScrollPaneViewport scrollPane;
     private final GameState state;
     private String playlist;
@@ -79,36 +78,34 @@ public class GuiPlaylists extends GuiMenu {
     }
 
     private void updateTitles(String playlist) {
-        elements.forEach(scrollPane::remove);
-        elements.clear();
+        scrollPane.removeAll();
         this.playlist = playlist;
         try {
             Path path = state.engine().home().resolve("playlists")
                     .resolve(playlist);
-            List<Path> titles = new ArrayList<>();
+            List<Path> files = new ArrayList<>();
             Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path file,
-                        BasicFileAttributes attrs) {
-                    titles.add(file);
+                        BasicFileAttributes attrs) throws IOException {
+                    if (Files.isRegularFile(file) && !Files.isHidden(file)) {
+                        files.add(file);
+                    }
                     return FileVisitResult.CONTINUE;
                 }
             });
-            for (Path title : titles) {
-                String fileName = title.getFileName().toString();
-                Element element = scrollPane.addVert(0, 0, p -> new Element(p,
-                        fileName.substring(0, fileName.lastIndexOf('.')),
-                        title));
-                elements.add(element);
-            }
+            files.stream().sorted().forEach(file -> scrollPane
+                    .addVert(0, 0, p -> new Element(p, file)));
         } catch (IOException e) {
             LOGGER.warn("Failed to load playlist: {}", e.toString());
         }
     }
 
     private class Element extends GuiComponentPane {
-        public Element(GuiLayoutData parent, String title, Path path) {
+        public Element(GuiLayoutData parent, Path path) {
             super(parent, 378, 20);
+            String fileName = String.valueOf(path.getFileName());
+            String title = fileName.substring(0, fileName.lastIndexOf('.'));
             GuiComponentTextButton play = add(15, 2,
                     p -> new GuiComponentTextButton(p, 35, 15, 12, "Play"));
             play.addLeftClick(event -> {

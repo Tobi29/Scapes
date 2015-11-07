@@ -25,10 +25,13 @@ public class GuiAddServer extends GuiMenuDouble {
     public GuiAddServer(GameState state, GuiServerSelect previous,
             GuiStyle style) {
         super(state, "Add Server", previous, style);
-        GuiComponentTextField ip = pane.add(16, 110,
+        pane.addVert(16, 5, p -> new GuiComponentText(p, 18, "IP:"));
+        GuiComponentTextField ip = pane.addVert(16, 5,
                 p -> new GuiComponentTextField(p, 368, 30, 18, ""));
-        GuiComponentTextField port = pane.add(16, 180,
+        pane.addVert(16, 5, p -> new GuiComponentText(p, 18, "Port:"));
+        GuiComponentTextField port = pane.addVert(16, 5,
                 p -> new GuiComponentTextField(p, 368, 30, 18, "12345"));
+
         save.addLeftClick(event -> {
             TagStructure tagStructure = new TagStructure();
             tagStructure.setString("Address", ip.text());
@@ -42,7 +45,5 @@ public class GuiAddServer extends GuiMenuDouble {
             previous.updateServers();
             state.add(previous);
         });
-        pane.add(16, 80, p -> new GuiComponentText(p, 18, "IP:"));
-        pane.add(16, 150, p -> new GuiComponentText(p, 18, "Port:"));
     }
 }

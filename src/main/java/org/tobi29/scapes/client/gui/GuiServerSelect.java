@@ -55,11 +55,11 @@ public class GuiServerSelect extends GuiMenu {
         if (scapesTag.has("Servers")) {
             servers.addAll(scapesTag.getList("Servers"));
         }
-        scrollPane = pane.add(16, 80,
+        scrollPane = pane.addVert(16, 5,
                 p -> new GuiComponentScrollPane(p, 368, 290, 70))
                 .viewport();
         updateServers();
-        GuiComponentTextButton add = pane.add(112, 410,
+        GuiComponentTextButton add = pane.addVert(112, 5,
                 p -> new GuiComponentTextButton(p, 176, 30, 18, "Add"));
 
         add.addLeftClick(event -> {

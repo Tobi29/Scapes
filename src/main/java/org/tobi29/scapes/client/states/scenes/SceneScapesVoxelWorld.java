@@ -487,28 +487,29 @@ public class SceneScapesVoxelWorld extends Scene {
     private class GuiWidgetDebugClient extends GuiComponentWidget {
         private GuiWidgetDebugClient(GuiLayoutData parent) {
             super(parent, 160, 120, "Debug Values");
-            GuiComponentTextButton geometryButton = add(10, 10,
+            GuiComponentTextButton geometryButton = addVert(10, 10, 10, 2,
                     p -> new GuiComponentTextButton(p, 140, 15, 12,
                             "Geometry"));
-            geometryButton.addLeftClick(
-                    event -> chunkGeometryDebug = !chunkGeometryDebug);
-            GuiComponentTextButton wireframeButton = add(10, 30,
+            GuiComponentTextButton wireframeButton = addVert(10, 2,
                     p -> new GuiComponentTextButton(p, 140, 15, 12,
                             "Wireframe"));
-            wireframeButton.addLeftClick(event -> wireframe = !wireframe);
-            GuiComponentTextButton distanceButton = add(10, 50,
+            GuiComponentTextButton distanceButton = addVert(10, 2,
                     p -> new GuiComponentTextButton(p, 140, 15, 12,
                             "Static Render Distance"));
-            distanceButton.addLeftClick(
-                    event -> world.terrain().toggleStaticRenderDistance());
-            GuiComponentTextButton reloadGeometryButton = add(10, 70,
+            GuiComponentTextButton reloadGeometryButton = addVert(10, 2,
                     p -> new GuiComponentTextButton(p, 140, 15, 12,
                             "Reload Geometry"));
-            reloadGeometryButton
-                    .addLeftClick(event -> world.terrain().reloadGeometry());
-            GuiComponentTextButton performanceButton = add(10, 90,
+            GuiComponentTextButton performanceButton = addVert(10, 2,
                     p -> new GuiComponentTextButton(p, 140, 15, 12,
                             "Performance"));
+
+            geometryButton.addLeftClick(
+                    event -> chunkGeometryDebug = !chunkGeometryDebug);
+            wireframeButton.addLeftClick(event -> wireframe = !wireframe);
+            distanceButton.addLeftClick(
+                    event -> world.terrain().toggleStaticRenderDistance());
+            reloadGeometryButton
+                    .addLeftClick(event -> world.terrain().reloadGeometry());
             performanceButton.addLeftClick(event -> performanceWidget
                     .setVisible(!performanceWidget.isVisible()));
         }

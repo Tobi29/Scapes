@@ -33,7 +33,6 @@ import org.tobi29.scapes.engine.utils.graphics.BlurOffset;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.math.FastMath;
-import org.tobi29.scapes.server.format.WorldFormat;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -176,9 +175,7 @@ public class SceneMenu extends Scene {
             Path path = state.engine().home().resolve("saves");
             for (Path directory : Files.newDirectoryStream(path)) {
                 if (Files.isDirectory(directory) &&
-                        !Files.isHidden(directory) &&
-                        directory.getFileName().toString()
-                                .endsWith(WorldFormat.filenameExtension())) {
+                        !Files.isHidden(directory)) {
                     saveBackground(directory).ifPresent(saves::add);
                 }
             }

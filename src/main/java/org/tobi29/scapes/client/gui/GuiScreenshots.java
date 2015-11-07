@@ -41,9 +41,8 @@ public class GuiScreenshots extends GuiMenu {
     public GuiScreenshots(GameState state, Gui previous, GuiStyle style) {
         super(state, "Screenshots", previous, style);
         this.state = state;
-        scrollPane = pane.add(16, 80,
-                p -> new GuiComponentScrollPane(p, 368, 350, 70))
-                .viewport();
+        scrollPane = pane.addVert(16, 5,
+                p -> new GuiComponentScrollPane(p, 368, 350, 70)).viewport();
         joiner = state.engine().taskExecutor().runTask(joiner -> {
             try {
                 Path path = state.engine().home().resolve("screenshots");

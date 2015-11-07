@@ -42,7 +42,6 @@ import java.util.function.Function;
 public class WorldFormat {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(WorldFormat.class);
-    private static final String FILENAME_EXTENSION = ".spkg";
     private final ScapesServer server;
     private final IDStorage idStorage = new IDStorage();
     private final Path path, regionPath;
@@ -81,10 +80,6 @@ public class WorldFormat {
         defaultWorld = worlds.get(plugins.worldType().id());
         plugins.plugins().forEach(plugin -> plugin.initServer(server));
         plugins.plugins().forEach(plugin -> plugin.initServerEnd(server));
-    }
-
-    public static String filenameExtension() {
-        return FILENAME_EXTENSION;
     }
 
     public IDStorage idStorage() {

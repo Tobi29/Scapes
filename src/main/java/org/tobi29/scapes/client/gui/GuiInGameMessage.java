@@ -16,20 +16,14 @@
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.client.states.GameStateGameMP;
-import org.tobi29.scapes.engine.gui.*;
+import org.tobi29.scapes.engine.gui.GuiComponentText;
+import org.tobi29.scapes.engine.gui.GuiStyle;
 
-public class GuiInGameMessage extends Gui {
+public class GuiInGameMessage extends GuiMenu {
     public GuiInGameMessage(GameStateGameMP state, String title, String message,
             GuiStyle style) {
-        super(style, GuiAlignment.CENTER);
-        GuiComponentVisiblePane pane =
-                add(200, 0, p -> new GuiComponentVisiblePane(p, 400, 512));
-        pane.add(16, 16, p -> new GuiComponentText(p, 32, title));
-        pane.add(24, 64, p -> new GuiComponentSeparator(p, 352, 2));
-        pane.add(16, 80, p -> new GuiComponentText(p, 18, message));
-        pane.add(24, 448, p -> new GuiComponentSeparator(p, 352, 2));
-        GuiComponentTextButton back = pane.add(112, 466,
-                p -> new GuiComponentTextButton(p, 176, 30, 18, "Back"));
+        super(state, title, style);
+        pane.addVert(16, 5, p -> new GuiComponentText(p, 18, message));
 
         back.addLeftClick(event -> state.client().entity().closeGui());
     }

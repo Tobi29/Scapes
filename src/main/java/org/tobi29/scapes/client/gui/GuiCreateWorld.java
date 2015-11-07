@@ -25,7 +25,6 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
 import org.tobi29.scapes.plugins.PluginFile;
-import org.tobi29.scapes.server.format.WorldFormat;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -47,16 +46,16 @@ public class GuiCreateWorld extends GuiMenuDouble {
             List<PluginFile> worldTypes, List<PluginFile> plugins, Path path,
             GuiStyle style) {
         super(state, "New World", previous, style);
-        pane.add(16, 80, p -> new GuiComponentText(p, 18, "Name:"));
-        GuiComponentTextField name = pane.add(16, 100,
+        pane.addVert(16, 5, p -> new GuiComponentText(p, 18, "Name:"));
+        GuiComponentTextField name = pane.addVert(16, 5,
                 p -> new GuiComponentTextField(p, 368, 30, 18, "New World"));
-        pane.add(16, 140, p -> new GuiComponentText(p, 18, "Seed:"));
-        GuiComponentTextField seed = pane.add(16, 160,
+        pane.addVert(16, 5, p -> new GuiComponentText(p, 18, "Seed:"));
+        GuiComponentTextField seed = pane.addVert(16, 5,
                 p -> new GuiComponentTextField(p, 368, 30, 18, ""));
-        GuiComponentTextButton environment = pane.add(16, 200,
+        GuiComponentTextButton environment = pane.addVert(16, 5,
                 p -> new GuiComponentTextButton(p, 368, 30, 18,
                         "Generator: " + worldTypes.get(environmentID).name()));
-        GuiComponentTextButton addonsButton = pane.add(16, 240,
+        GuiComponentTextButton addonsButton = pane.addVert(16, 5,
                 p -> new GuiComponentTextButton(p, 368, 30, 18, "Addons"));
 
         environment.addLeftClick(event -> {
@@ -78,8 +77,7 @@ public class GuiCreateWorld extends GuiMenuDouble {
                 name.setText("New World");
             }
             try {
-                Path save = path.resolve(
-                        name.text() + WorldFormat.filenameExtension());
+                Path save = path.resolve(name.text());
                 if (Files.exists(save)) {
                     state.remove(this);
                     state.add(new GuiMessage(state, this, "Error", SAVE_EXISTS,

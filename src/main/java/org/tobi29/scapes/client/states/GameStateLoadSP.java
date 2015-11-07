@@ -82,8 +82,7 @@ public class GameStateLoadSP extends GameState {
         try {
             switch (step) {
                 case 0:
-                    String filename = path.getFileName().toString();
-                    filename = filename.substring(0, filename.lastIndexOf('.'));
+                    String filename = String.valueOf(path.getFileName());
                     TagStructure tagStructure =
                             engine.tagStructure().getStructure("Scapes")
                                     .getStructure("IntegratedServer");

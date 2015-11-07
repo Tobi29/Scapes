@@ -24,7 +24,6 @@ import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.opengl.texture.*;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.plugins.PluginFile;
-import org.tobi29.scapes.server.format.WorldFormat;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -37,6 +36,7 @@ public class GuiSaveSelect extends GuiMenu {
             LoggerFactory.getLogger(GuiSaveSelect.class);
     private static final String NO_WORLD_TYPE =
             "No plugin found that that can\n" + "be used to create a save.";
+    private final Path path;
     private final SceneMenu scene;
     private final GuiComponentScrollPaneViewport scrollPane;
 
@@ -44,9 +44,9 @@ public class GuiSaveSelect extends GuiMenu {
             GuiStyle style) {
         super(state, "Singleplayer", previous, style);
         this.scene = scene;
+        path = state.engine().home().resolve("saves");
         scrollPane = pane.addVert(16, 5,
-                p -> new GuiComponentScrollPane(p, 368, 290, 70))
-                .viewport();
+                p -> new GuiComponentScrollPane(p, 368, 290, 70)).viewport();
         GuiComponentTextButton create = pane.addVert(112, 5,
                 p -> new GuiComponentTextButton(p, 176, 30, 18, "Create"));
         create.addLeftClick(event -> {
@@ -86,16 +86,15 @@ public class GuiSaveSelect extends GuiMenu {
 
     public void updateSaves() {
         try {
-            Path path = state.engine().home().resolve("saves");
             scrollPane.removeAll();
-            for (Path directory : Files.newDirectoryStream(path)) {
-                if (Files.isDirectory(directory) &&
-                        !Files.isHidden(directory) &&
-                        directory.getFileName().toString()
-                                .endsWith(WorldFormat.filenameExtension())) {
-                    scrollPane.addVert(0, 0, p -> new Element(p, directory));
+            List<Path> files = new ArrayList<>();
+            for (Path file : Files.newDirectoryStream(path)) {
+                if (Files.isDirectory(file) && !Files.isHidden(file)) {
+                    files.add(file);
                 }
             }
+            files.stream().sorted().forEach(file -> scrollPane
+                    .addVert(0, 0, p -> new Element(p, file)));
         } catch (IOException e) {
             LOGGER.warn("Failed to read saves: {}", e.toString());
         }
@@ -106,10 +105,9 @@ public class GuiSaveSelect extends GuiMenu {
 
         public Element(GuiLayoutData parent, Path path) {
             super(parent, 378, 70);
-            String filename = path.getFileName().toString();
+            String filename = String.valueOf(path.getFileName());
             GuiComponentTextButton label = add(70, 20,
-                    p -> new GuiComponentTextButton(p, 180, 30, 18,
-                            filename.substring(0, filename.lastIndexOf('.'))));
+                    p -> new GuiComponentTextButton(p, 180, 30, 18, filename));
             label.addLeftClick(event -> {
                 scene.setSpeed(0.0f);
                 state.engine().setState(
