@@ -32,9 +32,9 @@ public class GuiComponentControlsButton extends GuiComponentTextButton {
     private final String name, id;
     private final TagStructure tagStructure;
     private final Controller controller;
+    private final List<ControllerKey> keys = new ArrayList<>();
     private byte editing;
     private ControllerKeyReference key;
-    private List<ControllerKey> keys = new ArrayList<>();
 
     public GuiComponentControlsButton(GuiLayoutData parent, int width,
             int height, int textSize, String name, String id,

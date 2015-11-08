@@ -46,7 +46,7 @@ public class GuiAlloyInventory extends GuiContainerInventory {
     }
 
     private void updateInfoText() {
-        FontRenderer font = gui.style().font();
+        FontRenderer font = style.font();
         StringBuilder textBuilder = new StringBuilder(64);
         textBuilder.append("Metal: ");
         String result = container.result();

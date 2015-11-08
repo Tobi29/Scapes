@@ -252,7 +252,7 @@ public class PlayerConnection
         pingWait = currentTime + 1000;
         pingTimeout = currentTime + 10000;
         server.message("Player connected: " + id + " (" + nickname + ") on " +
-                channel.toString(), MessageLevel.SERVER_INFO);
+                channel, MessageLevel.SERVER_INFO);
         state = State.OPEN;
     }
 

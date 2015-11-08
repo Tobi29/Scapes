@@ -83,7 +83,8 @@ public class GuiScreenshots extends GuiMenu {
                     add(15, 20, p -> new GuiComponentIcon(p, 40, 30, texture));
             icon.addLeftClick(event -> {
                 state.remove(gui);
-                state.add(new GuiScreenshot(state, gui, texture, style));
+                state.add(new GuiScreenshot(state, gui, texture,
+                        gui.style()));
             });
             GuiComponentTextButton label = add(70, 20,
                     p -> new GuiComponentTextButton(p, 100, 30, 18, "Save"));

@@ -143,7 +143,6 @@ public class GuiCreateWorld extends GuiMenuDouble {
         }
 
         private class Element extends GuiComponentPane {
-            @SuppressWarnings("CanBeFinal")
             private boolean active;
             private Texture texture;
 

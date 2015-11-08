@@ -58,7 +58,7 @@ public class GuiAccount extends GuiMenu {
         GuiComponentText id = pane.addVert(16, 5,
                 p -> new GuiComponentText(p, 12, "ID: " + ChecksumUtil
                         .checksum(keyPair.getPublic().getEncoded(),
-                                ChecksumUtil.Algorithm.SHA1).toString()));
+                                ChecksumUtil.Algorithm.SHA1)));
         pane.addVert(16, 5, p -> new GuiComponentText(p, 18, "Nickname:"));
         GuiComponentTextField nickname = pane.addVert(16, 5,
                 p -> new GuiComponentTextField(p, 368, 30, 18, this.nickname));
@@ -77,7 +77,7 @@ public class GuiAccount extends GuiMenu {
                 this.keyPair = keyPair.get();
                 id.setText("ID: " + ChecksumUtil
                         .checksum(this.keyPair.getPublic().getEncoded(),
-                                ChecksumUtil.Algorithm.SHA1).toString());
+                                ChecksumUtil.Algorithm.SHA1));
                 error.setText("");
             } else {
                 error.setText("Invalid key!");

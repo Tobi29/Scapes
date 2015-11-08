@@ -16,6 +16,7 @@
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.block.ItemStack;
+import org.tobi29.scapes.engine.gui.GuiComponent;
 import org.tobi29.scapes.engine.gui.GuiComponentButton;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.opengl.GL;

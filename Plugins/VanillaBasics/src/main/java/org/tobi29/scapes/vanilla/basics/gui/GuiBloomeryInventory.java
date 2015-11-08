@@ -46,7 +46,7 @@ public class GuiBloomeryInventory extends GuiContainerInventory {
         buttonContainer(256, 120, 30, 30, 11);
         buttonContainer(296, 120, 30, 30, 12);
         buttonContainer(336, 120, 30, 30, 13);
-        FontRenderer font = gui.style().font();
+        FontRenderer font = style.font();
         vaoBellowsText =
                 font.render("No bellows attached!", 300, 170, 24, 1.0f, 1.0f,
                         1.0f, 1.0f);
@@ -64,7 +64,7 @@ public class GuiBloomeryInventory extends GuiContainerInventory {
     }
 
     private void updateTemperatureText() {
-        FontRenderer font = gui.style().font();
+        FontRenderer font = style.font();
         String text = FastMath.floor(container.temperature()) + "°C";
         if (!text.equals(temperatureText.text())) {
             temperatureText =

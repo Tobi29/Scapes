@@ -17,6 +17,7 @@ package org.tobi29.scapes.client.states;
 
 import org.tobi29.scapes.client.gui.GuiDisconnected;
 import org.tobi29.scapes.client.states.scenes.SceneError;
+import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.GL;
@@ -70,7 +71,7 @@ public class GameStateServerDisconnect extends GameState {
             reconnectTimer -= delta;
             if (reconnectTimer <= 0.0) {
                 engine.setState(new GameStateLoadMP(address, engine,
-                        (SceneError) scene));
+                        (SceneMenu) scene));
             } else {
                 gui.setReconnectTimer(reconnectTimer);
             }

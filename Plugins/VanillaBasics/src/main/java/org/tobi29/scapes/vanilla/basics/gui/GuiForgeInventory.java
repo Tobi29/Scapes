@@ -51,7 +51,7 @@ public class GuiForgeInventory extends GuiContainerInventory {
     }
 
     private void updateTemperatureText() {
-        FontRenderer font = gui.style().font();
+        FontRenderer font = style.font();
         String text = FastMath.floor(container.temperature()) + "°C";
         if (!text.equals(temperatureText.text())) {
             temperatureText =

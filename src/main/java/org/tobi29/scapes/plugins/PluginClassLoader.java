@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.plugins;
 
 import org.slf4j.Logger;
@@ -41,8 +40,7 @@ public class PluginClassLoader extends URLClassLoader {
             LOGGER.warn("No security manager installed!");
         }
         if (path != null) {
-            permissions.add(new FilePermission(
-                    path.toAbsolutePath().toString() + "/-",
+            permissions.add(new FilePermission(path.toAbsolutePath() + "/-",
                     "read,write,delete"));
         }
         permissions.add(new RuntimePermission("getClassLoader"));

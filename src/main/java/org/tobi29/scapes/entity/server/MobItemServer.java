@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.entity.server;
 
 import org.tobi29.scapes.block.ItemStack;
@@ -74,21 +73,19 @@ public class MobItemServer extends MobServer {
                                 this);
                         item.setAmount(item.amount() -
                                 entity.inventory("Container").add(item));
-                        world
-                                .send(new PacketUpdateInventory(entity,
-                                        "Container"));
+                        world.send(
+                                new PacketUpdateInventory(entity, "Container"));
                     });
             stackwait -= delta;
             if (stackwait <= 0) {
                 aabb.grow(0.0, 0.0, 0.4);
                 world.entities()
                         .filter(entity -> entity instanceof MobItemServer)
+                        .map(entity -> (MobItemServer) entity)
                         .forEach(entity -> {
-                            if (aabb.overlay(((MobItemServer) entity).aabb()) &&
-                                    entity != this) {
+                            if (aabb.overlay(entity.aabb()) && entity != this) {
                                 item.setAmount(item.amount() -
-                                        ((MobItemServer) entity).item
-                                                .stack(item));
+                                        entity.item.stack(item));
                             }
                         });
                 stackwait = 1.0;

@@ -89,7 +89,7 @@ public class GuiInventory extends GuiMenu {
 
     @Override
     public void renderOverlay(GL gl, Shader shader) {
-        FontRenderer font = gui.style().font();
+        FontRenderer font = style.font();
         String hover = this.hover;
         if (hover != null) {
             MatrixStack matrixStack = gl.matrixStack();

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.entity.server;
 
 import org.tobi29.scapes.block.Inventory;
@@ -51,15 +50,14 @@ public class EntityForgeServer extends EntityAbstractFurnaceServer {
                 if (item.amount() == 1) {
                     Material type = item.material();
                     if (type instanceof ItemIngot) {
-                        if (((ItemIngot) type).temperature(item) >=
-                                ((ItemIngot) type).meltingPoint(item) &&
-                                item.data() == 1) {
+                        ItemIngot ingot = (ItemIngot) type;
+                        if (ingot.temperature(item) >=
+                                ingot.meltingPoint(item) && item.data() == 1) {
                             if (inventory.item(8)
                                     .take(new ItemStack(materials.mold, 1)) !=
                                     null) {
                                 item.setData(0);
-                                world
-                                        .send(new PacketEntityChange(this));
+                                world.send(new PacketEntityChange(this));
                             }
                         }
                     }

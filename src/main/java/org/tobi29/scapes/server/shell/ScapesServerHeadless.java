@@ -58,14 +58,12 @@ public class ScapesServerHeadless extends ScapesStandaloneServer {
     public boolean message(String message, MessageLevel level) {
         switch (level) {
             case SERVER_ERROR:
-            case FEEDBACK_ERROR: {
+            case FEEDBACK_ERROR:
                 LOGGER.error(message);
                 break;
-            }
-            default: {
+            default:
                 LOGGER.info(message);
                 break;
-            }
         }
         return true;
     }

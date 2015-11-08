@@ -24,7 +24,7 @@ public class ControlPanel implements Command.Executor {
         this.connection = connection;
         this.server = server;
         initCommands();
-        LOGGER.info("Control panel accepted from {}", connection.toString());
+        LOGGER.info("Control panel accepted from {}", connection);
     }
 
     private void initCommands() {
@@ -70,14 +70,12 @@ public class ControlPanel implements Command.Executor {
         String style;
         switch (level) {
             case SERVER_ERROR:
-            case FEEDBACK_ERROR: {
+            case FEEDBACK_ERROR:
                 style = "color: red;";
                 break;
-            }
-            default: {
+            default:
                 style = "";
                 break;
-            }
         }
         message = ESCAPE.apply(message);
         String html = "<span style=\"" + style + "\">" + message + "</span>";
