@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.entity.server;
 
 import org.tobi29.scapes.block.GameRegistry;
@@ -74,6 +73,7 @@ public class EntityFarmlandServer extends EntityServer {
         stage = tagStructure.getByte("Stage");
         if (tagStructure.has("CropType")) {
             cropType = cropRegistry.get(tagStructure.getInteger("CropType"));
+            updateBlock = true;
         } else {
             cropType = null;
         }
@@ -88,11 +88,19 @@ public class EntityFarmlandServer extends EntityServer {
             GameRegistry.Registry<CropType> cropRegistry =
                     world.registry().<CropType>get("VanillaBasics", "CropType");
             VanillaMaterial materials = plugin.getMaterials();
-            world.getTerrain().queue(handler -> handler
-                    .typeData(pos.intX(), pos.intY(), pos.intZ() + 1,
-                            materials.crop,
-                            (short) (stage + (cropRegistry.get(cropType) << 3) -
-                                    1)));
+            CropType cropType = this.cropType;
+            if (cropType == null) {
+                world.getTerrain().queue(handler -> handler
+                        .typeData(pos.intX(), pos.intY(), pos.intZ() + 1,
+                                materials.air, 0));
+            } else {
+                int stage = this.stage;
+                world.getTerrain().queue(handler -> handler
+                        .typeData(pos.intX(), pos.intY(), pos.intZ() + 1,
+                                materials.crop,
+                                stage + (cropRegistry.get(cropType) << 3) - 1));
+            }
+            updateBlock = false;
         }
     }
 

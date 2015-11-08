@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.block.vegetation;
 
 import org.tobi29.scapes.block.*;
+import org.tobi29.scapes.block.models.BlockModel;
+import org.tobi29.scapes.block.models.BlockModelComplex;
 import org.tobi29.scapes.chunk.data.ChunkMesh;
 import org.tobi29.scapes.chunk.terrain.Terrain;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
@@ -41,6 +42,7 @@ public class BlockCrop extends VanillaBlock {
             new AABB(0.15, 0.15, 0, 0.85, 0.85, 0.95);
     private final GameRegistry.Registry<CropType> cropRegistry;
     private TerrainTexture[] textures;
+    private BlockModel[] models;
 
     public BlockCrop(VanillaMaterial materials,
             GameRegistry.Registry<CropType> cropRegistry) {
@@ -137,6 +139,9 @@ public class BlockCrop extends VanillaBlock {
     public void addToChunkMesh(ChunkMesh mesh, ChunkMesh meshAlpha, int data,
             TerrainClient terrain, TerrainRenderInfo info, int x, int y, int z,
             float xx, float yy, float zz, boolean lod) {
+        models[data]
+                .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz, 1.0f, 1.0f,
+                        1.0f, 1.0f, lod);
     }
 
     @Override
@@ -162,6 +167,17 @@ public class BlockCrop extends VanillaBlock {
 
     @Override
     public void createModels(TerrainTextureRegistry registry) {
+        models = new BlockModel[textures.length];
+        for (int i = 0; i < models.length; i++) {
+            List<BlockModelComplex.Shape> shapes = new ArrayList<>();
+            BlockModelComplex.Shape shape =
+                    new BlockModelComplex.ShapeBillboard(textures[i], -8.0f,
+                            -8.0f, -8.0f, 8.0f, 8.0f, 8.0f, 1.0f, 1.0f, 1.0f,
+                            1.0f);
+            shape.rotateZ(45.0f);
+            shapes.add(shape);
+            models[i] = new BlockModelComplex(registry, shapes, 0.0625f);
+        }
     }
 
     @Override
