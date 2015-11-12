@@ -37,6 +37,7 @@ import org.tobi29.scapes.plugins.PluginFile;
 import org.tobi29.scapes.plugins.Plugins;
 import org.tobi29.scapes.server.MessageLevel;
 import org.tobi29.scapes.server.command.Command;
+import org.tobi29.scapes.server.extension.event.PlayerAuthenticateEvent;
 import org.tobi29.scapes.server.format.PlayerStatistics;
 import org.tobi29.scapes.server.format.WorldFormat;
 
@@ -341,10 +342,10 @@ public class PlayerConnection
         if (nicknameCheck.isPresent()) {
             return nicknameCheck;
         }
-        Optional<String> banCheck =
-                server.server().worldFormat().playerBans().matches(this);
-        if (banCheck.isPresent()) {
-            return banCheck;
+        PlayerAuthenticateEvent event = new PlayerAuthenticateEvent(this);
+        server.server().extensions().fireEvent(event);
+        if (!event.success()) {
+            return Optional.of(event.reason());
         }
         return Optional.empty();
     }

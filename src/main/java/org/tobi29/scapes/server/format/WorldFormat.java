@@ -26,7 +26,6 @@ import org.tobi29.scapes.engine.utils.graphics.PNG;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
-import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
 import org.tobi29.scapes.plugins.Dimension;
 import org.tobi29.scapes.plugins.PluginFile;
 import org.tobi29.scapes.plugins.Plugins;
@@ -48,7 +47,6 @@ public class WorldFormat {
     private final Path path, regionPath;
     private final Plugins plugins;
     private final PlayerData playerData;
-    private final PlayerBans playerBans;
     private final TagStructure worldsTagStructure;
     private final Map<String, WorldServer> worlds = new ConcurrentHashMap<>();
     private final WorldServer defaultWorld;
@@ -59,13 +57,6 @@ public class WorldFormat {
         this.path = path;
         regionPath = path.resolve("region");
         playerData = new PlayerData(path.resolve("players"));
-        Path bansFile = path.resolve("Bans.json");
-        if (Files.exists(bansFile)) {
-            playerBans = new PlayerBans(
-                    FileUtil.readReturn(bansFile, TagStructureJSON::read));
-        } else {
-            playerBans = new PlayerBans();
-        }
         TagStructure tagStructure =
                 FileUtil.readReturn(path.resolve("Data.stag"),
                         TagStructureBinary::read);
@@ -89,10 +80,6 @@ public class WorldFormat {
 
     public PlayerData playerData() {
         return playerData;
-    }
-
-    public PlayerBans playerBans() {
-        return playerBans;
     }
 
     public long seed() {
@@ -169,8 +156,6 @@ public class WorldFormat {
         tagStructure.setStructure("Worlds", worldsTagStructure);
         FileUtil.write(path.resolve("Data.stag"),
                 streamOut -> TagStructureBinary.write(tagStructure, streamOut));
-        FileUtil.write(path.resolve("Bans.json"), streamOut -> TagStructureJSON
-                .write(playerBans.write(), streamOut));
     }
 
     public void savePanorama(Image[] images) throws IOException {

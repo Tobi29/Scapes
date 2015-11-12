@@ -32,7 +32,6 @@ import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.command.CommandRegistry;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 import org.tobi29.scapes.server.connection.ServerConnection;
-import org.tobi29.scapes.server.format.PlayerBans;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -260,55 +259,6 @@ final class ScapesServerCommands {
                                 player.setPermissionLevel(permissionLevel);
                             }));
                 });
-
-        CommandRegistry bansGroup = registry.group("bans");
-
-        bansGroup.register("add", 9, options -> {
-            options.add("p", "player", true, "Player to be banned");
-            options.add("i", "id", true, "ID of ban");
-            options.add("k", "key", false, "Add key to ban entry");
-            options.add("a", "address", false, "Add address to ban entry");
-            options.add("n", "nickname", false, "Add nickname to ban entry");
-        }, (args, executor, commands) -> {
-            String playerName = args.requireOption('p', executor.playerName());
-            boolean id = args.hasOption('k');
-            boolean address = args.hasOption('a');
-            boolean banNickname = args.hasOption('n');
-            boolean banID, banAddress;
-            if (!id && !address && !banNickname) {
-                banID = true;
-                banAddress = true;
-            } else {
-                banID = id;
-                banAddress = address;
-            }
-            String reason = ArrayUtil.join(args.args(), "");
-            commands.add(() -> {
-                PlayerConnection player =
-                        Command.require(connection::playerByName, playerName);
-                server.worldFormat().playerBans()
-                        .ban(player, reason, banID, banAddress, banNickname);
-            });
-        });
-
-        bansGroup.register("remove", 9,
-                options -> options.add("i", "id", true, "ID of ban"),
-                (args, executor, commands) -> {
-                    String id = args.requireOption('i');
-                    commands.add(
-                            () -> server.worldFormat().playerBans().unban(id));
-                });
-
-        bansGroup.register("list", 9, options -> {
-        }, (args, executor, commands) -> {
-            String exp = args.arg(0).orElse("*");
-            Pattern pattern = StringUtil.wildcard(exp);
-            commands.add(
-                    () -> server.worldFormat().playerBans().matchesID(pattern)
-                            .map(PlayerBans.Entry::toString).forEach(
-                                    message -> executor.message(message,
-                                            MessageLevel.FEEDBACK_INFO)));
-        });
 
         CommandRegistry serverGroup = registry.group("server");
 

@@ -21,12 +21,14 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 import org.tobi29.scapes.server.command.CommandRegistry;
 import org.tobi29.scapes.server.connection.ServerConnection;
+import org.tobi29.scapes.server.extension.ServerExtensions;
 import org.tobi29.scapes.server.format.WorldFormat;
 
 import java.io.IOException;
 import java.nio.file.Path;
 
 public class ScapesServer {
+    private final ServerExtensions extensions;
     private final TaskExecutor taskExecutor;
     private final ServerInfo serverInfo;
     private final ServerConnection serverConnection;
@@ -38,6 +40,8 @@ public class ScapesServer {
 
     public ScapesServer(Path path, TagStructure tagStructure,
             ServerInfo serverInfo, Crashable crashHandler) throws IOException {
+        extensions = new ServerExtensions(this);
+        extensions.loadExtensions();
         taskExecutor = new TaskExecutor(crashHandler, "Server");
         commandRegistry = new CommandRegistry();
         TagStructure serverTag = tagStructure.getStructure("Server");
@@ -46,6 +50,7 @@ public class ScapesServer {
         serverConnection =
                 new ServerConnection(this, serverTag.getStructure("Socket"));
         worldFormat = new WorldFormat(this, path);
+        extensions.init();
         ScapesServerCommands.register(commandRegistry, this);
     }
 
@@ -55,6 +60,10 @@ public class ScapesServer {
 
     public ServerConnection connection() {
         return serverConnection;
+    }
+
+    public ServerExtensions extensions() {
+        return extensions;
     }
 
     public WorldFormat worldFormat() {
