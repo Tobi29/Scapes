@@ -51,7 +51,6 @@ public class ScapesServer {
                 new ServerConnection(this, serverTag.getStructure("Socket"));
         worldFormat = new WorldFormat(this, path);
         extensions.init();
-        ScapesServerCommands.register(commandRegistry, this);
     }
 
     public ShutdownReason shutdownReason() {
