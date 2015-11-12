@@ -26,6 +26,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.plugins.PluginFile;
 
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -53,9 +54,13 @@ public class GuiSaveSelect extends GuiMenu {
             try {
                 Path path = state.engine().home().resolve("plugins");
                 List<Path> files = new ArrayList<>();
-                for (Path file : Files.newDirectoryStream(path)) {
-                    if (Files.isRegularFile(file) && !Files.isHidden(file)) {
-                        files.add(file);
+                try (DirectoryStream<Path> stream = Files
+                        .newDirectoryStream(path)) {
+                    for (Path file : stream) {
+                        if (Files.isRegularFile(file) &&
+                                !Files.isHidden(file)) {
+                            files.add(file);
+                        }
                     }
                 }
                 List<PluginFile> worldTypes = new ArrayList<>();
@@ -88,9 +93,12 @@ public class GuiSaveSelect extends GuiMenu {
         try {
             scrollPane.removeAll();
             List<Path> files = new ArrayList<>();
-            for (Path file : Files.newDirectoryStream(path)) {
-                if (Files.isDirectory(file) && !Files.isHidden(file)) {
-                    files.add(file);
+            try (DirectoryStream<Path> stream = Files
+                    .newDirectoryStream(path)) {
+                for (Path file : stream) {
+                    if (Files.isDirectory(file) && !Files.isHidden(file)) {
+                        files.add(file);
+                    }
                 }
             }
             files.stream().sorted().forEach(file -> scrollPane

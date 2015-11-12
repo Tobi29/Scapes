@@ -33,6 +33,7 @@ import org.tobi29.scapes.plugins.Plugins;
 import org.tobi29.scapes.server.ScapesServer;
 
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -185,9 +186,12 @@ public class WorldFormat {
 
     private List<PluginFile> pluginFiles() throws IOException {
         List<PluginFile> plugins = new ArrayList<>();
-        for (Path file : Files.newDirectoryStream(path.resolve("plugins"))) {
-            if (Files.isRegularFile(file) && !Files.isHidden(file)) {
-                plugins.add(new PluginFile(file));
+        Path path = this.path.resolve("plugins");
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
+            for (Path file : stream) {
+                if (Files.isRegularFile(file) && !Files.isHidden(file)) {
+                    plugins.add(new PluginFile(file));
+                }
             }
         }
         return plugins;

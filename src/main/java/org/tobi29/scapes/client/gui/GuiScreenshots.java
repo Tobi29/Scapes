@@ -27,6 +27,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -47,9 +48,13 @@ public class GuiScreenshots extends GuiMenu {
             try {
                 Path path = state.engine().home().resolve("screenshots");
                 List<Path> files = new ArrayList<>();
-                for (Path file : Files.newDirectoryStream(path)) {
-                    if (Files.isRegularFile(file) && !Files.isHidden(file)) {
-                        files.add(file);
+                try (DirectoryStream<Path> stream = Files
+                        .newDirectoryStream(path)) {
+                    for (Path file : stream) {
+                        if (Files.isRegularFile(file) &&
+                                !Files.isHidden(file)) {
+                            files.add(file);
+                        }
                     }
                 }
                 Collections
@@ -83,8 +88,7 @@ public class GuiScreenshots extends GuiMenu {
                     add(15, 20, p -> new GuiComponentIcon(p, 40, 30, texture));
             icon.addLeftClick(event -> {
                 state.remove(gui);
-                state.add(new GuiScreenshot(state, gui, texture,
-                        gui.style()));
+                state.add(new GuiScreenshot(state, gui, texture, gui.style()));
             });
             GuiComponentTextButton label = add(70, 20,
                     p -> new GuiComponentTextButton(p, 100, 30, 18, "Save"));

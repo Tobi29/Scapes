@@ -35,6 +35,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -173,10 +174,12 @@ public class SceneMenu extends Scene {
         List<Path[]> saves = new ArrayList<>();
         try {
             Path path = state.engine().home().resolve("saves");
-            for (Path directory : Files.newDirectoryStream(path)) {
-                if (Files.isDirectory(directory) &&
-                        !Files.isHidden(directory)) {
-                    saveBackground(directory).ifPresent(saves::add);
+            try (DirectoryStream<Path> stream = Files
+                    .newDirectoryStream(path)) {
+                for (Path file : stream) {
+                    if (Files.isDirectory(file) && !Files.isHidden(file)) {
+                        saveBackground(file).ifPresent(saves::add);
+                    }
                 }
             }
         } catch (IOException e) {
