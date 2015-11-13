@@ -1,75 +1,30 @@
-/*
- * Copyright 2012-2015 Tobi29
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.tobi29.scapes.server.format;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
-import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
+import org.tobi29.scapes.block.GameRegistry;
+import org.tobi29.scapes.chunk.WorldServer;
+import org.tobi29.scapes.entity.server.MobPlayerServer;
+import org.tobi29.scapes.server.connection.PlayerConnection;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.Optional;
 
-public class PlayerData {
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(PlayerData.class);
-    private final Path path;
+public interface PlayerData {
+    Player player(String id);
 
-    public PlayerData(Path path) throws IOException {
-        this.path = path;
-        Files.createDirectories(path);
-    }
+    void save(String id, MobPlayerServer entity, int permissions,
+            PlayerStatistics statistics);
 
-    public synchronized TagStructure load(String id) {
-        try {
-            Path file = path.resolve(id + ".stag");
-            if (Files.exists(file)) {
-                return FileUtil.readReturn(file, TagStructureBinary::read);
-            }
-        } catch (IOException e) {
-            LOGGER.error("Error reading player data: {}", e.toString());
-        }
-        return new TagStructure();
-    }
+    void add(String id);
 
-    public synchronized void save(TagStructure tagStructure, String id) {
-        try {
-            Path file = path.resolve(id + ".stag");
-            FileUtil.write(file,
-                    stream -> TagStructureBinary.write(tagStructure, stream));
-        } catch (IOException e) {
-            LOGGER.error("Error writing player data: {}", e.toString());
-        }
-    }
+    void remove(String id);
 
-    public synchronized void add(String id) {
-        save(load(id), id);
-    }
+    boolean playerExists(String id);
 
-    public synchronized void remove(String id) {
-        try {
-            Files.deleteIfExists(path.resolve(id + ".stag"));
-        } catch (IOException e) {
-            LOGGER.error("Error writing player data: {}", e.toString());
-        }
-    }
+    interface Player {
+        MobPlayerServer createEntity(PlayerConnection player,
+                Optional<WorldServer> overrideWorld);
 
-    public boolean playerExists(String id) {
-        return Files.exists(path.resolve(id + ".stag"));
+        int permissions();
+
+        PlayerStatistics statistics(GameRegistry registry);
     }
 }

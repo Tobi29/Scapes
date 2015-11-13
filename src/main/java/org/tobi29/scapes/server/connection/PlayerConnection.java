@@ -25,11 +25,9 @@ import org.tobi29.scapes.engine.server.*;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.*;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.entity.skin.ServerSkin;
 import org.tobi29.scapes.packets.*;
@@ -38,6 +36,7 @@ import org.tobi29.scapes.plugins.Plugins;
 import org.tobi29.scapes.server.MessageLevel;
 import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.extension.event.PlayerAuthenticateEvent;
+import org.tobi29.scapes.server.format.PlayerData;
 import org.tobi29.scapes.server.format.PlayerStatistics;
 import org.tobi29.scapes.server.format.WorldFormat;
 
@@ -272,57 +271,22 @@ public class PlayerConnection
             save();
         }
         WorldFormat worldFormat = server.server().worldFormat();
-        statistics = new PlayerStatistics();
-        TagStructure tagStructure = worldFormat.playerData().load(id);
-        Optional<TagStructure> entityTag;
-        if (tagStructure.has("Entity")) {
-            entityTag = Optional.of(tagStructure.getStructure("Entity"));
-        } else {
-            entityTag = Optional.empty();
-        }
-        Optional<String> worldTag =
-                Optional.ofNullable(tagStructure.getString("World"));
-        statistics.load(server.server().worldFormat().plugins().registry(),
-                tagStructure.getList("Statistics"));
-        permissionLevel = tagStructure.getInteger("Permissions");
-        if (world == null) {
-            if (worldTag.isPresent()) {
-                world = worldFormat.world(worldTag.get())
-                        .orElseGet(worldFormat::defaultWorld);
-            } else {
-                world = worldFormat.defaultWorld();
-            }
-        }
-        if (entityTag.isPresent()) {
-            entity = server().server().worldFormat().plugins().worldType()
-                    .newPlayer(world, Vector3d.ZERO, Vector3d.ZERO, 0.0, 0.0,
-                            nickname, skin.checksum(), this);
-            entity.read(entityTag.get());
-        } else {
-            entity = server().server().worldFormat().plugins().worldType()
-                    .newPlayer(world,
-                            new Vector3d(0.5, 0.5, 1.0).plus(world.spawn()),
-                            Vector3d.ZERO, 0.0, 0.0, nickname, skin.checksum(),
-                            this);
-            entity.onSpawn();
-        }
+        PlayerData.Player player = worldFormat.playerData().player(id);
+        statistics = player.statistics(registry);
+        permissionLevel = player.permissions();
+        entity = player.createEntity(this, Optional.ofNullable(world));
         if (pos != null) {
             entity.setPos(pos);
         }
-        world.addEntity(entity);
-        world.addPlayer(entity);
+        entity.world().addEntity(entity);
+        entity.world().addPlayer(entity);
         sendQueueSize.incrementAndGet();
-        sendQueue.add(new PacketSetWorld(world, entity));
+        sendQueue.add(new PacketSetWorld(entity.world(), entity));
     }
 
     private void save() {
-        WorldServer world = entity.world();
-        TagStructure tagStructure = new TagStructure();
-        tagStructure.setStructure("Entity", entity.write(false));
-        tagStructure.setString("World", world.id());
-        tagStructure.setList("Statistics", statistics.save());
-        tagStructure.setInteger("Permissions", permissionLevel);
-        server.server().worldFormat().playerData().save(tagStructure, id);
+        server.server().worldFormat().playerData()
+                .save(id, entity, permissionLevel, statistics);
     }
 
     private Optional<String> generateResponse(boolean challengeMatch) {

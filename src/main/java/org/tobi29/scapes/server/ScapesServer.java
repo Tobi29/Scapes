@@ -23,6 +23,7 @@ import org.tobi29.scapes.server.command.CommandRegistry;
 import org.tobi29.scapes.server.connection.ServerConnection;
 import org.tobi29.scapes.server.extension.ServerExtensions;
 import org.tobi29.scapes.server.format.WorldFormat;
+import org.tobi29.scapes.server.format.basic.BasicWorldFormat;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -49,7 +50,7 @@ public class ScapesServer {
         this.serverInfo = serverInfo;
         serverConnection =
                 new ServerConnection(this, serverTag.getStructure("Socket"));
-        worldFormat = new WorldFormat(this, path);
+        worldFormat = new BasicWorldFormat(this, path);
         extensions.init();
     }
 
