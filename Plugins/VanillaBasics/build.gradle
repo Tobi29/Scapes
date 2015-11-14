@@ -21,7 +21,7 @@ dependencies {
     compile rootProject
     compile project(":ScapesEngine")
     compile project(":ScapesEngine:Utils")
-    compile "org.slf4j:slf4j-api:1.7.12"
+    compile "org.slf4j:slf4j-api:1.7.13"
 
     testCompile "junit:junit:4.12"
 }
