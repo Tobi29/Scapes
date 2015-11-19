@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import org.tobi29.scapes.chunk.WorldServer;
@@ -54,9 +53,8 @@ public class PacketRequestEntity extends Packet implements PacketServer {
         }
         EntityServer entity = world.entity(entityId);
         if (entity != null) {
-            player.send(new PacketEntityAdd(entity,
-                    player.server().server().worldFormat().plugins()
-                            .registry()));
+            player.send(
+                    new PacketEntityAdd(entity, world.plugins().registry()));
         }
     }
 }

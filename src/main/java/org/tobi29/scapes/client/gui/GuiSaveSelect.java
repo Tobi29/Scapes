@@ -21,9 +21,15 @@ import org.tobi29.scapes.client.states.GameStateLoadSP;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
-import org.tobi29.scapes.engine.opengl.texture.*;
+import org.tobi29.scapes.engine.opengl.texture.Texture;
+import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
+import org.tobi29.scapes.engine.opengl.texture.TextureFilter;
+import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
+import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.plugins.PluginFile;
+import org.tobi29.scapes.server.format.WorldSource;
+import org.tobi29.scapes.server.format.basic.BasicWorldSource;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -31,6 +37,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class GuiSaveSelect extends GuiMenu {
     private static final Logger LOGGER =
@@ -137,19 +144,20 @@ public class GuiSaveSelect extends GuiMenu {
                     LOGGER.warn("Failed to delete save: {}", e.toString());
                 }
             });
-            Path thumbnailPath = path.resolve("Panorama0.png");
             Texture texture;
-            if (Files.exists(thumbnailPath)) {
-                try {
-                    texture = FileUtil.readReturn(thumbnailPath,
-                            input -> new TextureFile(input, 0,
-                                    TextureFilter.LINEAR, TextureFilter.LINEAR,
-                                    TextureWrap.CLAMP, TextureWrap.CLAMP));
-                } catch (IOException e) {
-                    LOGGER.warn("Failed to load save icon", e);
+            try (WorldSource source = new BasicWorldSource(path)) {
+                Optional<Image[]> panorama = source.panorama();
+                if (panorama.isPresent()) {
+                    Image image = panorama.get()[0];
+                    texture = new TextureCustom(image.width(), image.height(),
+                            image.buffer(), 4, TextureFilter.LINEAR,
+                            TextureFilter.LINEAR, TextureWrap.CLAMP,
+                            TextureWrap.CLAMP);
+                } else {
                     texture = new TextureCustom(1, 1);
                 }
-            } else {
+            } catch (IOException e) {
+                LOGGER.warn("Failed to load save icon", e);
                 texture = new TextureCustom(1, 1);
             }
             this.texture = texture;

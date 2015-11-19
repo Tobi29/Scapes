@@ -23,20 +23,23 @@ import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
 import org.tobi29.scapes.engine.utils.io.IOFunction;
 import org.tobi29.scapes.server.ScapesServer;
+import org.tobi29.scapes.server.format.WorldSource;
 
 import java.io.IOException;
 
 public class GameStateGameSP extends GameStateGameMP {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GameStateGameSP.class);
+    private final WorldSource source;
     private final ScapesServer server;
 
     public GameStateGameSP(
             IOFunction<GameStateGameMP, ClientConnection> clientSupplier,
-            ScapesServer server, Scene scene, ScapesEngine engine)
-            throws IOException {
+            WorldSource source, ScapesServer server, Scene scene,
+            ScapesEngine engine) throws IOException {
         super(clientSupplier, scene, engine);
         this.server = server;
+        this.source = source;
     }
 
     @Override
@@ -44,8 +47,7 @@ public class GameStateGameSP extends GameStateGameMP {
         super.dispose(gl);
         try {
             server.stop(ScapesServer.ShutdownReason.STOP);
-            server.worldFormat()
-                    .savePanorama(client.world().scene().panorama());
+            source.panorama(client.world().scene().panorama());
         } catch (IOException e) {
             LOGGER.error("Error stopping internal server: {}", e.toString());
         }

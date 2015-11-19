@@ -71,8 +71,7 @@ class VanillaBasicsRegisters {
                 long day = Command.getLong(dayOption.get());
                 commands.add(() -> {
                     WorldServer world =
-                            Command.require(server.worldFormat()::world,
-                                    worldName);
+                            Command.require(server::world, worldName);
                     EnvironmentServer environment = world.environment();
                     if (environment instanceof EnvironmentOverworldServer) {
                         EnvironmentOverworldServer environmentOverworld =
@@ -92,8 +91,7 @@ class VanillaBasicsRegisters {
                 float dayTime = Command.getFloat(dayTimeOption.get());
                 commands.add(() -> {
                     WorldServer world =
-                            Command.require(server.worldFormat()::world,
-                                    worldName);
+                            Command.require(server::world, worldName);
                     EnvironmentServer environment = world.environment();
                     if (environment instanceof EnvironmentOverworldServer) {
                         EnvironmentOverworldServer environmentOverworld =

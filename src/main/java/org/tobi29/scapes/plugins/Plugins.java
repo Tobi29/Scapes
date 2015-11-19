@@ -39,13 +39,8 @@ public class Plugins {
 
     public Plugins(List<PluginFile> files, IDStorage idStorage)
             throws IOException {
-        this(files, idStorage, null);
-    }
-
-    public Plugins(List<PluginFile> files, IDStorage idStorage, Path path)
-            throws IOException {
         this.files = files;
-        classLoader = new PluginClassLoader(files, path);
+        classLoader = new PluginClassLoader(files);
         for (PluginFile file : files) {
             Plugin plugin = file.plugin(classLoader);
             plugins.add(plugin);

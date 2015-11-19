@@ -1,7 +1,6 @@
 package org.tobi29.scapes.server.extension.base;
 
 import org.tobi29.scapes.engine.utils.StringUtil;
-import org.tobi29.scapes.packets.PacketDisconnect;
 import org.tobi29.scapes.server.MessageLevel;
 import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.command.Command;
@@ -38,15 +37,15 @@ public class PlayerCommandsExtension extends ServerExtension {
         group.register("add PLAYER-ID...", 9, options -> {
         }, (args, executor, commands) -> {
             String[] ids = args.args();
-            Arrays.stream(ids).forEach(id -> commands
-                    .add(() -> server.worldFormat().playerData().add(id)));
+            Arrays.stream(ids)
+                    .forEach(id -> commands.add(() -> server.add(id)));
         });
 
         group.register("remove PLAYER-ID...", 9, options -> {
         }, (args, executor, commands) -> {
             String[] ids = args.args();
-            Arrays.stream(ids).forEach(id -> commands
-                    .add(() -> server.worldFormat().playerData().remove(id)));
+            Arrays.stream(ids)
+                    .forEach(id -> commands.add(() -> server.remove(id)));
         });
 
         group.register("kick PLAYER-NAME...", 9, options -> {
@@ -58,7 +57,7 @@ public class PlayerCommandsExtension extends ServerExtension {
                         PlayerConnection player =
                                 Command.require(connection::playerByName,
                                         playerName);
-                        player.send(new PacketDisconnect(message));
+                        player.disconnect(message);
                     }));
         });
 

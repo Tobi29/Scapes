@@ -25,14 +25,16 @@ import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.opengl.shader.ShaderCompileInformation;
 import org.tobi29.scapes.engine.opengl.shader.ShaderManager;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
-import org.tobi29.scapes.engine.opengl.texture.TextureFile;
+import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
 import org.tobi29.scapes.engine.opengl.texture.TextureFilter;
 import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
 import org.tobi29.scapes.engine.utils.ArrayUtil;
 import org.tobi29.scapes.engine.utils.graphics.BlurOffset;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
-import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
+import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.math.FastMath;
+import org.tobi29.scapes.server.format.WorldSource;
+import org.tobi29.scapes.server.format.basic.BasicWorldSource;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -64,7 +66,7 @@ public class SceneMenu extends Scene {
     private final Cam cam;
     private float speed = 0.6f, yaw;
     private VAO vao;
-    private Optional<Path[]> save = Optional.empty();
+    private Optional<Image[]> save = Optional.empty();
     private boolean texturesLoaded;
 
     public SceneMenu() {
@@ -100,11 +102,7 @@ public class SceneMenu extends Scene {
     @Override
     public void renderScene(GL gl) {
         if (save.isPresent()) {
-            try {
-                changeBackground(save.get(), gl);
-            } catch (IOException e) {
-                LOGGER.warn("Failed to load background", e);
-            }
+            changeBackground(save.get(), gl);
             save = Optional.empty();
         }
         cam.setPerspective((float) gl.sceneWidth() / gl.sceneHeight(), 90.0f);
@@ -171,14 +169,14 @@ public class SceneMenu extends Scene {
             return;
         }
         texturesLoaded = true;
-        List<Path[]> saves = new ArrayList<>();
+        List<Path> saves = new ArrayList<>();
         try {
             Path path = state.engine().home().resolve("saves");
             try (DirectoryStream<Path> stream = Files
                     .newDirectoryStream(path)) {
                 for (Path file : stream) {
                     if (Files.isDirectory(file) && !Files.isHidden(file)) {
-                        saveBackground(file).ifPresent(saves::add);
+                        saves.add(file);
                     }
                 }
             }
@@ -187,16 +185,14 @@ public class SceneMenu extends Scene {
         }
         Random random = ThreadLocalRandom.current();
         if (saves.isEmpty()) {
-            int r = random.nextInt(2);
-            for (int i = 0; i < 6; i++) {
-                setBackground(gl.textures().get("Scapes:image/gui/panorama/" +
-                        r + "/Panorama" + i), i, gl);
-            }
+            defaultBackground(gl);
         } else {
-            try {
-                changeBackground(saves.get(random.nextInt(saves.size())), gl);
-            } catch (IOException e) {
-                LOGGER.warn("Failed to load save background: {}", e.toString());
+            Optional<Image[]> images =
+                    saveBackground(saves.get(random.nextInt(saves.size())));
+            if (images.isPresent()) {
+                changeBackground(images.get(), gl);
+            } else {
+                defaultBackground(gl);
             }
         }
     }
@@ -209,25 +205,31 @@ public class SceneMenu extends Scene {
         textures[i] = replace;
     }
 
-    private Optional<Path[]> saveBackground(Path path) {
-        Path[] save = new Path[6];
-        for (int i = 0; i < 6; i++) {
-            Path background = path.resolve("Panorama" + i + ".png");
-            if (Files.exists(background)) {
-                save[i] = background;
-            } else {
-                return Optional.empty();
-            }
+    private Optional<Image[]> saveBackground(Path path) {
+        try (WorldSource source = new BasicWorldSource(path)) {
+            return source.panorama();
+        } catch (IOException e) {
+            LOGGER.warn("Failed to load save background", e);
+            return Optional.empty();
         }
-        return Optional.of(save);
     }
 
-    private void changeBackground(Path[] save, GL gl) throws IOException {
+    private void changeBackground(Image[] images, GL gl) {
         for (int i = 0; i < 6; i++) {
-            setBackground(FileUtil.readReturn(save[i],
-                    input -> new TextureFile(input, 0, TextureFilter.LINEAR,
-                            TextureFilter.LINEAR, TextureWrap.CLAMP,
-                            TextureWrap.CLAMP)), i, gl);
+            Image image = images[i];
+            setBackground(new TextureCustom(image.width(), image.height(),
+                            image.buffer(), 0, TextureFilter.LINEAR,
+                            TextureFilter.LINEAR, TextureWrap.CLAMP, TextureWrap.CLAMP),
+                    i, gl);
+        }
+    }
+
+    private void defaultBackground(GL gl) {
+        Random random = ThreadLocalRandom.current();
+        int r = random.nextInt(2);
+        for (int i = 0; i < 6; i++) {
+            setBackground(gl.textures().get("Scapes:image/gui/panorama/" +
+                    r + "/Panorama" + i), i, gl);
         }
     }
 }

@@ -24,14 +24,17 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
+import org.tobi29.scapes.server.PlayerEntry;
+import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 import org.tobi29.scapes.server.format.PlayerData;
 import org.tobi29.scapes.server.format.PlayerStatistics;
-import org.tobi29.scapes.server.format.WorldFormat;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Optional;
 
 public class BasicPlayerData implements PlayerData {
@@ -40,17 +43,38 @@ public class BasicPlayerData implements PlayerData {
     private final Path path;
 
     public BasicPlayerData(Path path) throws IOException {
+        SecurityManager security = System.getSecurityManager();
+        if (security != null) {
+            security.checkPermission(
+                    new RuntimePermission("scapes.playerData"));
+        }
         this.path = path;
         Files.createDirectories(path);
     }
 
     @Override
-    public synchronized PlayerData.Player player(String id) {
+    public synchronized PlayerEntry player(String id) {
         TagStructure tagStructure = load(id);
-        return new PlayerData.Player() {
+        return new PlayerEntry() {
             @Override
-            public MobPlayerServer createEntity(PlayerConnection player,
-                    Optional<WorldServer> overrideWorld) {
+            public Optional<MobPlayerServer> createEntity(
+                    PlayerConnection player, Optional<WorldServer> spawnWorld) {
+                ScapesServer server = player.server().server();
+                if (!spawnWorld.isPresent()) {
+                    spawnWorld = server.world(tagStructure.getString("World"));
+                }
+                if (!spawnWorld.isPresent()) {
+                    spawnWorld = server.defaultWorld();
+                }
+                if (!spawnWorld.isPresent()) {
+                    return Optional.empty();
+                }
+                WorldServer world = spawnWorld.get();
+                MobPlayerServer entity = world.plugins().worldType()
+                        .newPlayer(world,
+                                new Vector3d(0.5, 0.5, 1.0).plus(world.spawn()),
+                                Vector3d.ZERO, 0.0, 0.0, player.nickname(),
+                                player.skin().checksum(), player);
                 Optional<TagStructure> entityTag;
                 if (tagStructure.has("Entity")) {
                     entityTag =
@@ -58,29 +82,12 @@ public class BasicPlayerData implements PlayerData {
                 } else {
                     entityTag = Optional.empty();
                 }
-                Optional<String> worldTag =
-                        Optional.ofNullable(tagStructure.getString("World"));
-                WorldFormat worldFormat =
-                        player.server().server().worldFormat();
-                WorldServer world = overrideWorld.orElseGet(() -> {
-                    if (worldTag.isPresent()) {
-                        return worldFormat.world(worldTag.get())
-                                .orElseGet(worldFormat::defaultWorld);
-                    } else {
-                        return worldFormat.defaultWorld();
-                    }
-                });
-                MobPlayerServer entity = world.plugins().worldType()
-                        .newPlayer(world,
-                                new Vector3d(0.5, 0.5, 1.0).plus(world.spawn()),
-                                Vector3d.ZERO, 0.0, 0.0, player.nickname(),
-                                player.skin().checksum(), player);
                 if (entityTag.isPresent()) {
                     entity.read(entityTag.get());
                 } else {
                     entity.onSpawn();
                 }
-                return entity;
+                return Optional.of(entity);
             }
 
             @Override
@@ -116,37 +123,50 @@ public class BasicPlayerData implements PlayerData {
 
     @Override
     public synchronized void remove(String id) {
-        try {
-            Files.deleteIfExists(path.resolve(id + ".stag"));
-        } catch (IOException e) {
-            LOGGER.error("Error writing player data: {}", e.toString());
-        }
+        AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+            try {
+                Files.deleteIfExists(path.resolve(id + ".stag"));
+            } catch (IOException e) {
+                LOGGER.error("Error writing player data: {}", e.toString());
+            }
+            return null;
+        });
     }
 
     @Override
     public boolean playerExists(String id) {
-        return Files.exists(path.resolve(id + ".stag"));
+        return AccessController.doPrivileged(
+                (PrivilegedAction<Boolean>) () -> Files
+                        .exists(path.resolve(id + ".stag")));
     }
 
     private synchronized TagStructure load(String id) {
-        try {
-            Path file = path.resolve(id + ".stag");
-            if (Files.exists(file)) {
-                return FileUtil.readReturn(file, TagStructureBinary::read);
-            }
-        } catch (IOException e) {
-            LOGGER.error("Error reading player data: {}", e.toString());
-        }
-        return new TagStructure();
+        return AccessController
+                .doPrivileged((PrivilegedAction<TagStructure>) () -> {
+                    try {
+                        Path file = path.resolve(id + ".stag");
+                        if (Files.exists(file)) {
+                            return FileUtil
+                                    .readReturn(file, TagStructureBinary::read);
+                        }
+                    } catch (IOException e) {
+                        LOGGER.error("Error reading player data: {}",
+                                e.toString());
+                    }
+                    return new TagStructure();
+                });
     }
 
     private synchronized void save(TagStructure tagStructure, String id) {
-        try {
-            Path file = path.resolve(id + ".stag");
-            FileUtil.write(file,
-                    stream -> TagStructureBinary.write(tagStructure, stream));
-        } catch (IOException e) {
-            LOGGER.error("Error writing player data: {}", e.toString());
-        }
+        AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+            try {
+                Path file = path.resolve(id + ".stag");
+                FileUtil.write(file, stream -> TagStructureBinary
+                        .write(tagStructure, stream));
+            } catch (IOException e) {
+                LOGGER.error("Error writing player data: {}", e.toString());
+            }
+            return null;
+        });
     }
 }

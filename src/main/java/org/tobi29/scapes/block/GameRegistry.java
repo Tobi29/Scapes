@@ -108,6 +108,10 @@ public class GameRegistry {
                 "core.update.BlockUpdateUpdateTile");
     }
 
+    public IDStorage idStorage() {
+        return idStorage;
+    }
+
     public void lock() {
         locked = true;
     }
@@ -228,8 +232,8 @@ public class GameRegistry {
             blocks[id] = (BlockType) material;
         }
         materialNames.put(nameID, material);
-        materialNames.put(
-                nameID.substring(nameID.lastIndexOf('.') + 1, nameID.length()),
+        materialNames.put(nameID
+                        .substring(nameID.lastIndexOf('.') + 1, nameID.length()),
                 material);
     }
 

@@ -21,10 +21,9 @@ import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.opengl.texture.*;
 import org.tobi29.scapes.engine.utils.StringUtil;
-import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
-import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
 import org.tobi29.scapes.plugins.PluginFile;
+import org.tobi29.scapes.server.format.WorldSource;
+import org.tobi29.scapes.server.format.basic.BasicWorldSource;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -84,9 +83,6 @@ public class GuiCreateWorld extends GuiMenuDouble {
                             style));
                     return;
                 }
-                Files.createDirectories(save);
-                Path data = save.resolve("Data.stag");
-                TagStructure tagStructure = new TagStructure();
                 long randomSeed;
                 if (seed.text().isEmpty()) {
                     randomSeed = new Random().nextLong();
@@ -97,17 +93,12 @@ public class GuiCreateWorld extends GuiMenuDouble {
                         randomSeed = StringUtil.hash(seed.text());
                     }
                 }
-                tagStructure.setLong("Seed", randomSeed);
-                FileUtil.write(data, stream -> TagStructureBinary
-                        .write(tagStructure, stream));
-                Path pluginsDir = save.resolve("plugins");
-                Files.createDirectories(pluginsDir);
+                List<Path> pluginFiles = new ArrayList<>();
                 PluginFile worldType = worldTypes.get(environmentID);
-                Files.copy(worldType.file(),
-                        pluginsDir.resolve(worldType.file().getFileName()));
-                for (PluginFile addon : addons) {
-                    Files.copy(addon.file(),
-                            pluginsDir.resolve(addon.file().getFileName()));
+                pluginFiles.add(worldType.file());
+                addons.stream().map(PluginFile::file).forEach(pluginFiles::add);
+                try (WorldSource source = new BasicWorldSource(save)) {
+                    source.init(randomSeed, pluginFiles);
                 }
                 state.remove(this);
                 previous.updateSaves();

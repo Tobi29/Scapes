@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk;
 
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -21,7 +20,11 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import java.util.Map;
 
 public class IDStorage {
-    private TagStructure tagStructure = new TagStructure();
+    private final TagStructure tagStructure;
+
+    public IDStorage(TagStructure tagStructure) {
+        this.tagStructure = tagStructure;
+    }
 
     public int get(String module, String type, String name) {
         return get(module, type, name, 0, Integer.MAX_VALUE);
@@ -63,10 +66,6 @@ public class IDStorage {
             int value) {
         tagStructure.getStructure(module).getStructure(type)
                 .setInteger(name, value);
-    }
-
-    public void load(TagStructure tagStructure) {
-        this.tagStructure = tagStructure;
     }
 
     public TagStructure save() {

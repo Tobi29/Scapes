@@ -23,6 +23,7 @@ import org.tobi29.scapes.chunk.MobSpawner;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.generator.GeneratorOutput;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
+import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.SleepUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -34,12 +35,13 @@ import org.tobi29.scapes.engine.utils.task.Joiner;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
+import org.tobi29.scapes.server.format.TerrainInfiniteFormat;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 public class TerrainInfiniteServer extends TerrainInfinite
         implements TerrainServer.TerrainMutable {
@@ -55,21 +57,22 @@ public class TerrainInfiniteServer extends TerrainInfinite
     private final GeneratorOutput generatorOutput;
     private final Joiner joiner;
 
-    public TerrainInfiniteServer(WorldServer world, int zSize, Path path,
-            TaskExecutor taskExecutor, BlockType voidBlock) {
+    public TerrainInfiniteServer(WorldServer world, int zSize,
+            TerrainInfiniteFormat format, TaskExecutor taskExecutor,
+            BlockType voidBlock) {
         super(zSize, new TerrainInfiniteChunkManagerServer(), taskExecutor,
                 voidBlock);
         this.world = world;
-        format = new TerrainInfiniteFormat(path, this);
+        this.format = format;
         chunkManager = (TerrainInfiniteChunkManagerServer) super.chunkManager;
         generatorOutput = new GeneratorOutput(zSize);
         Joiner loadJoiner = world.taskExecutor().runTask(joiner -> {
-            List<Vector2> requiredChunks = new ArrayList<>();
-            List<Vector2> loadingChunks = new ArrayList<>();
+            List<Vector2i> requiredChunks = new ArrayList<>();
+            List<Vector2i> loadingChunks = new ArrayList<>();
             while (!joiner.marked()) {
                 Collection<MobPlayerServer> players = world.players();
                 if (players.isEmpty()) {
-                    chunkManager.iterator().forEach(this::removeChunk);
+                    chunkManager.iterator().forEach(chunkUnloadQueue::add);
                     SleepUtil.sleep(100);
                 } else {
                     for (MobPlayerServer player : players) {
@@ -101,22 +104,24 @@ public class TerrainInfiniteServer extends TerrainInfinite
                                 .filter(pos -> !hasChunk(pos.intX(),
                                         pos.intY()))
                                 .forEach(loadingChunks::add);
+                        List<Vector2i> newChunks;
                         if (loadingChunks.size() > 64) {
-                            loadingChunks.stream().sorted((pos1, pos2) -> {
-                                double distance1 =
-                                        FastMath.pointDistanceSqr(loadArea,
-                                                pos1);
-                                double distance2 =
-                                        FastMath.pointDistanceSqr(loadArea,
-                                                pos2);
-                                return distance1 == distance2 ? 0 :
-                                        distance1 > distance2 ? 1 : -1;
-                            }).limit(32).forEach(
-                                    pos -> addChunk(pos.intX(), pos.intY()));
+                            newChunks = loadingChunks.stream()
+                                    .sorted((pos1, pos2) -> {
+                                        double distance1 =
+                                                FastMath.pointDistanceSqr(
+                                                        loadArea, pos1);
+                                        double distance2 =
+                                                FastMath.pointDistanceSqr(
+                                                        loadArea, pos2);
+                                        return distance1 == distance2 ? 0 :
+                                                distance1 > distance2 ? 1 : -1;
+                                    }).limit(32).collect(Collectors.toList());
                         } else {
-                            loadingChunks.stream().limit(32).forEach(
-                                    pos -> addChunk(pos.intX(), pos.intY()));
+                            newChunks = loadingChunks.stream().limit(32)
+                                    .collect(Collectors.toList());
                         }
+                        addChunks(newChunks);
                         Collection<TerrainInfiniteChunkServer> chunks =
                                 chunkManager.iterator();
                         chunks.stream()
@@ -147,12 +152,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
                     blockChanges.poll().run(this);
                     idle = false;
                 }
-                while (!chunkUnloadQueue.isEmpty()) {
-                    synchronized (chunkUnloadQueue) {
-                        removeChunk(chunkUnloadQueue.poll());
-                    }
-                    idle = false;
-                }
+                idle |= removeChunks();
                 if (idle) {
                     SleepUtil.sleep(10);
                 }
@@ -164,10 +164,6 @@ public class TerrainInfiniteServer extends TerrainInfinite
     @Override
     public int sunLightReduction(int x, int y) {
         return (int) world.environment().sunLightReduction(x, y);
-    }
-
-    public TerrainInfiniteFormat terrainFormat() {
-        return format;
     }
 
     @Override
@@ -185,29 +181,40 @@ public class TerrainInfiniteServer extends TerrainInfinite
     }
 
     public Optional<TerrainInfiniteChunkServer> addChunk(int x, int y) {
-        if (x < cxMin || x > cxMax || y < cyMin || y > cyMax) {
-            return Optional.empty();
-        }
-        Optional<TerrainInfiniteChunkServer> chunk;
-        synchronized (chunkManager) {
-            chunk = chunkManager.get(x, y);
-            if (!chunk.isPresent()) {
-                Optional<TagStructure> tagStructure = Optional.empty();
-                try {
-                    tagStructure = format.chunkTag(x, y);
-                } catch (IOException e) {
-                    LOGGER.error("Failed to load chunk:", e);
-                }
-                TerrainInfiniteChunkServer chunk2 =
-                        new TerrainInfiniteChunkServer(new Vector2i(x, y), this,
-                                zSize, tagStructure, world.generator(),
-                                generatorOutput);
-                chunkManager.add(chunk2);
-                updateAdjacent(chunk2.x(), chunk2.y());
-                chunk = chunk2.optional();
+        return addChunks(Collections.singletonList(new Vector2i(x, y))).get(0);
+    }
+
+    public List<Optional<TerrainInfiniteChunkServer>> addChunks(
+            List<Vector2i> positions) {
+        List<Optional<TerrainInfiniteChunkServer>> chunks =
+                new ArrayList<>(positions.size());
+        List<Optional<TagStructure>> tagStructures =
+                format.chunkTags(positions);
+        for (int i = 0; i < positions.size(); i++) {
+            Vector2i pos = positions.get(i);
+            int x = pos.intX();
+            int y = pos.intY();
+            if (x < cxMin || x > cxMax || y < cyMin || y > cyMax) {
+                chunks.add(Optional.empty());
+                continue;
             }
+            Optional<TerrainInfiniteChunkServer> chunk;
+            synchronized (chunkManager) {
+                chunk = chunkManager.get(x, y);
+                if (!chunk.isPresent()) {
+                    Optional<TagStructure> tagStructure = tagStructures.get(i);
+                    TerrainInfiniteChunkServer chunk2 =
+                            new TerrainInfiniteChunkServer(new Vector2i(x, y),
+                                    this, zSize, tagStructure,
+                                    world.generator(), generatorOutput);
+                    chunkManager.add(chunk2);
+                    updateAdjacent(chunk2.x(), chunk2.y());
+                    chunk = chunk2.optional();
+                }
+            }
+            chunks.add(chunk);
         }
-        return chunk;
+        return chunks;
     }
 
     @Override
@@ -318,7 +325,8 @@ public class TerrainInfiniteServer extends TerrainInfinite
     public void dispose() {
         joiner.join();
         lighting.dispose();
-        chunkManager.iterator().forEach(this::removeChunk);
+        chunkManager.iterator().forEach(chunkUnloadQueue::add);
+        removeChunks();
         format.dispose();
     }
 
@@ -396,17 +404,39 @@ public class TerrainInfiniteServer extends TerrainInfinite
         return true;
     }
 
-    private void removeChunk(TerrainInfiniteChunkServer chunk) {
+    private boolean removeChunks() {
+        List<Pair<Vector2i, TagStructure>> chunks = new ArrayList<>();
+        while (!chunkUnloadQueue.isEmpty()) {
+            synchronized (chunkUnloadQueue) {
+                removeChunk(chunkUnloadQueue.poll()).ifPresent(chunks::add);
+            }
+        }
+        if (chunks.isEmpty()) {
+            return true;
+        }
+        try {
+            format.putChunkTags(chunks);
+        } catch (IOException e) {
+            LOGGER.error("Failed to store chunks:", e);
+        }
+        return false;
+    }
+
+    private Optional<Pair<Vector2i, TagStructure>> removeChunk(
+            TerrainInfiniteChunkServer chunk) {
         int x = chunk.x();
         int y = chunk.y();
         chunkManager.remove(x, y);
         try {
-            chunk.dispose();
+            TagStructure tagStructure = chunk.dispose();
+            while (chunkUnloadQueue.remove(chunk)) {
+            }
+            updateAdjacent(chunk.x(), chunk.y());
+            return Optional.of(new Pair<>(new Vector2i(x, y), tagStructure));
         } catch (IOException e) {
             LOGGER.error("Failed to save chunk:", e);
         }
         updateAdjacent(chunk.x(), chunk.y());
-        while (chunkUnloadQueue.remove(chunk)) {
-        }
+        return Optional.empty();
     }
 }

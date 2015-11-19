@@ -30,7 +30,7 @@ public class DebugCommandsExtension extends ServerExtension {
 
     @Override
     public void init(ServerExtensions.Registrar registrar) {
-        GameRegistry gameRegistry = server.worldFormat().plugins().registry();
+        GameRegistry gameRegistry = server.plugins().registry();
         ServerConnection connection = server.connection();
         CommandRegistry group = server.commandRegistry().group("debug");
 
@@ -92,9 +92,8 @@ public class DebugCommandsExtension extends ServerExtension {
                         PlayerConnection player =
                                 Command.require(connection::playerByName,
                                         playerName);
-                        WorldServer world =
-                                Command.require(server.worldFormat()::world,
-                                        worldOption.get());
+                        WorldServer world = Command.require(server::world,
+                                worldOption.get());
                         player.setWorld(world, location);
                     });
                 } else {
@@ -116,9 +115,8 @@ public class DebugCommandsExtension extends ServerExtension {
                         PlayerConnection target =
                                 Command.require(connection::playerByName,
                                         targetName);
-                        WorldServer world =
-                                Command.require(server.worldFormat()::world,
-                                        worldOption.get());
+                        WorldServer world = Command.require(server::world,
+                                worldOption.get());
                         MobPlayerServer targetMob = target.mob();
                         player.setWorld(world, targetMob.pos());
                     });

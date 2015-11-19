@@ -30,6 +30,8 @@ import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.server.ScapesServer;
+import org.tobi29.scapes.server.format.WorldSource;
+import org.tobi29.scapes.server.format.basic.BasicWorldSource;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -46,6 +48,7 @@ public class GameStateLoadSP extends GameState {
             .wrap(new byte[]{'S', 'c', 'a', 'p', 'e', 's',
                     ConnectionType.PLAY.data()});
     private int step, port;
+    private WorldSource source;
     private ScapesServer server;
     private SocketChannel channel;
     private NewConnection client;
@@ -88,7 +91,8 @@ public class GameStateLoadSP extends GameState {
                                     .getStructure("IntegratedServer");
                     ServerInfo serverInfo = new ServerInfo(filename,
                             path.resolve("Panorama0.png"));
-                    server = new ScapesServer(path, tagStructure, serverInfo,
+                    source = new BasicWorldSource(path);
+                    server = new ScapesServer(source, tagStructure, serverInfo,
                             engine);
                     progress.setLabel("Starting server...");
                     step++;
@@ -147,8 +151,8 @@ public class GameStateLoadSP extends GameState {
                 case 7:
                     remove(progress);
                     GameStateGameSP game =
-                            new GameStateGameSP(client.finish(), server, scene,
-                                    engine);
+                            new GameStateGameSP(client.finish(), source, server,
+                                    scene, engine);
                     engine.setState(game);
                     break;
             }

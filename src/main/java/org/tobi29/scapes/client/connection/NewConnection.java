@@ -55,13 +55,13 @@ public class NewConnection {
     private final ScapesEngine engine;
     private final int loadingDistanceRequest;
     private final PacketBundleChannel channel;
-    private final IDStorage idStorage = new IDStorage();
     private final FileCache cache;
     private final List<Integer> pluginRequests = new ArrayList<>();
     private final List<PluginFile> plugins = new ArrayList<>();
     private final ByteBufferStream pluginStream = new ByteBufferStream();
     private final Account account;
     private int loadingDistance;
+    private IDStorage idStorage;
     private IOFunction<ReadableByteStream, Optional<String>> state =
             this::loginStep1;
     private Optional<String> status = Optional.of("Logging in...");
@@ -201,7 +201,7 @@ public class NewConnection {
         loadingDistance = input.getInt();
         TagStructure idsTag = new TagStructure();
         TagStructureBinary.read(idsTag, input);
-        idStorage.load(idsTag);
+        idStorage = new IDStorage(idsTag);
         return Optional.empty();
     }
 

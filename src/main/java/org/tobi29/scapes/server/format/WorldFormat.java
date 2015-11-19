@@ -4,12 +4,10 @@ import org.tobi29.scapes.chunk.EnvironmentServer;
 import org.tobi29.scapes.chunk.IDStorage;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.engine.utils.graphics.Image;
-import org.tobi29.scapes.plugins.Dimension;
 import org.tobi29.scapes.plugins.Plugins;
+import org.tobi29.scapes.server.ScapesServer;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Optional;
 import java.util.function.Function;
 
 public interface WorldFormat {
@@ -21,23 +19,13 @@ public interface WorldFormat {
 
     Plugins plugins();
 
-    Optional<WorldServer> world(String name);
-
-    WorldServer defaultWorld();
-
-    Collection<String> worldNames();
-
-    WorldServer registerWorld(Dimension dimension) throws IOException;
-
-    WorldServer registerWorld(
+    WorldServer registerWorld(ScapesServer server,
             Function<WorldServer, EnvironmentServer> environmentSupplier,
             String name, long seed) throws IOException;
 
-    boolean removeWorld(String name);
+    void removeWorld(WorldServer world);
 
-    void deleteWorld(String name) throws IOException;
+    boolean deleteWorld(String name);
 
-    void save() throws IOException;
-
-    void savePanorama(Image[] images) throws IOException;
+    void dispose() throws IOException;
 }

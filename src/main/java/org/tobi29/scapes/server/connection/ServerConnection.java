@@ -25,6 +25,7 @@ import org.tobi29.scapes.engine.utils.io.PacketBundleChannel;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.entity.skin.ServerSkin;
 import org.tobi29.scapes.packets.Packet;
+import org.tobi29.scapes.plugins.Plugins;
 import org.tobi29.scapes.server.ControlPanel;
 import org.tobi29.scapes.server.MessageLevel;
 import org.tobi29.scapes.server.ScapesServer;
@@ -48,6 +49,7 @@ public class ServerConnection extends AbstractServerConnection {
     private final int mayPlayers;
     private final String controlPassword;
     private final ScapesServer server;
+    private final Plugins plugins;
     private final KeyPair keyPair;
     private final Map<String, PlayerConnection> players =
             new ConcurrentHashMap<>();
@@ -59,6 +61,7 @@ public class ServerConnection extends AbstractServerConnection {
 
     public ServerConnection(ScapesServer server, TagStructure tagStructure) {
         super(server.taskExecutor(), ConnectionInfo.header(), tagStructure);
+        plugins = server.plugins();
         mayPlayers = tagStructure.getInteger("MaxPlayers");
         controlPassword = tagStructure.getString("ControlPassword");
         this.server = server;
@@ -91,6 +94,10 @@ public class ServerConnection extends AbstractServerConnection {
 
     public ScapesServer server() {
         return server;
+    }
+
+    public Plugins plugins() {
+        return plugins;
     }
 
     public Stream<PlayerConnection> players() {

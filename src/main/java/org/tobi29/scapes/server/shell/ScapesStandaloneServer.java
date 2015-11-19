@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.server.shell;
 
 import org.slf4j.Logger;
@@ -28,6 +27,8 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
 import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.connection.ServerConnection;
+import org.tobi29.scapes.server.format.WorldSource;
+import org.tobi29.scapes.server.format.basic.BasicWorldSource;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -89,9 +90,8 @@ public abstract class ScapesStandaloneServer
         ServerInfo serverInfo =
                 new ServerInfo(serverTag.getString("ServerName"),
                         path.resolve(serverTag.getString("ServerIcon")));
-        server =
-                new ScapesServer(path.resolve("data"), tagStructure, serverInfo,
-                        this);
+        WorldSource source = new BasicWorldSource(path.resolve("data"));
+        server = new ScapesServer(source, tagStructure, serverInfo, this);
         ServerConnection connection = server.connection();
         connection.addExecutor(this);
         connection.setAllowsCreation(

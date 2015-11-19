@@ -117,13 +117,12 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
         }
     }
 
-    public void dispose() throws IOException {
+    public TagStructure dispose() throws IOException {
         List<EntityServer> entities = entities();
         for (EntityServer entity : entities) {
             terrain.world().deleteEntity(entity);
         }
-        terrain.terrainFormat()
-                .putChunkTag(pos.intX(), pos.intY(), save(false, entities));
+        return save(false, entities);
     }
 
     public void addDelayedUpdate(Update update) {
@@ -166,10 +165,8 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
                         .send(new PacketBlockChangeAir(x + posBlock.intX(),
                                 y + posBlock.intY(), z));
             } else {
-                terrain.world()
-                        .send(new PacketBlockChange(x + posBlock.intX(),
-                                y + posBlock.intY(), z, type.id(),
-                                dataL(x, y, z)));
+                terrain.world().send(new PacketBlockChange(x + posBlock.intX(),
+                        y + posBlock.intY(), z, type.id(), dataL(x, y, z)));
             }
         }
         if (state.id >= State.LOADED.id) {

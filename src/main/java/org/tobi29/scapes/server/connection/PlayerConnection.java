@@ -34,11 +34,10 @@ import org.tobi29.scapes.packets.*;
 import org.tobi29.scapes.plugins.PluginFile;
 import org.tobi29.scapes.plugins.Plugins;
 import org.tobi29.scapes.server.MessageLevel;
+import org.tobi29.scapes.server.PlayerEntry;
 import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.extension.event.PlayerAuthenticateEvent;
-import org.tobi29.scapes.server.format.PlayerData;
 import org.tobi29.scapes.server.format.PlayerStatistics;
-import org.tobi29.scapes.server.format.WorldFormat;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -78,7 +77,7 @@ public class PlayerConnection
     private final ServerConnection server;
     private final PacketBundleChannel channel;
     private final GameRegistry registry;
-    private final Queue<Packet> sendQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<IORunnable> sendQueue = new ConcurrentLinkedQueue<>();
     private final AtomicInteger sendQueueSize = new AtomicInteger();
     private State state = State.LOGIN_STEP_1;
     private byte[] challenge;
@@ -94,7 +93,7 @@ public class PlayerConnection
             ServerConnection server) throws IOException {
         this.channel = channel;
         this.server = server;
-        registry = server.server().worldFormat().plugins().registry();
+        registry = server.plugins().registry();
         loginStep0();
     }
 
@@ -189,7 +188,7 @@ public class PlayerConnection
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidKeySpecException e) {
             throw new IOException(e);
         }
-        Plugins plugins = server.server().worldFormat().plugins();
+        Plugins plugins = server.plugins();
         output.putInt(plugins.fileCount());
         Iterator<PluginFile> pluginIterator = plugins.files().iterator();
         while (pluginIterator.hasNext()) {
@@ -200,7 +199,7 @@ public class PlayerConnection
     }
 
     private void loginStep3(ReadableByteStream input) throws IOException {
-        Plugins plugins = server.server().worldFormat().plugins();
+        Plugins plugins = server.plugins();
         byte[] challenge = new byte[this.challenge.length];
         input.get(challenge);
         nickname = input.getString(1 << 10);
@@ -245,7 +244,7 @@ public class PlayerConnection
         output.putBoolean(false);
         output.putInt(loadingRadius);
         TagStructureBinary
-                .write(server.server().worldFormat().idStorage().save(),
+                .write(server.server().plugins().registry().idStorage().save(),
                         output);
         channel.queueBundle();
         long currentTime = System.currentTimeMillis();
@@ -270,23 +269,27 @@ public class PlayerConnection
             entity.world().removePlayer(entity);
             save();
         }
-        WorldFormat worldFormat = server.server().worldFormat();
-        PlayerData.Player player = worldFormat.playerData().player(id);
+        PlayerEntry player = server.server().player(id);
         statistics = player.statistics(registry);
         permissionLevel = player.permissions();
-        entity = player.createEntity(this, Optional.ofNullable(world));
+        Optional<MobPlayerServer> newEntity =
+                player.createEntity(this, Optional.ofNullable(world));
+        if (!newEntity.isPresent()) {
+            disconnect("Unable to spawn in world");
+        }
+        entity = newEntity.get();
         if (pos != null) {
             entity.setPos(pos);
         }
         entity.world().addEntity(entity);
         entity.world().addPlayer(entity);
         sendQueueSize.incrementAndGet();
-        sendQueue.add(new PacketSetWorld(entity.world(), entity));
+        sendQueue.add(() -> sendPacket(
+                new PacketSetWorld(entity.world(), entity)));
     }
 
     private void save() {
-        server.server().worldFormat().playerData()
-                .save(id, entity, permissionLevel, statistics);
+        server.server().save(id, entity, permissionLevel, statistics);
     }
 
     private Optional<String> generateResponse(boolean challengeMatch) {
@@ -296,7 +299,7 @@ public class PlayerConnection
         if (!challengeMatch) {
             return Optional.of("Invalid private key!");
         }
-        if (!server.server().worldFormat().playerData().playerExists(id)) {
+        if (!server.server().playerExists(id)) {
             if (!server.doesAllowCreation()) {
                 return Optional
                         .of("This server does not allow account creation!");
@@ -322,7 +325,7 @@ public class PlayerConnection
             }
         }
         sendQueueSize.incrementAndGet();
-        sendQueue.add(packet);
+        sendQueue.add(() -> sendPacket(packet));
     }
 
     public int loadingRadius() {
@@ -372,8 +375,7 @@ public class PlayerConnection
         }
         if (flag) {
             WritableByteStream output = channel.getOutputStream();
-            output.putShort(packet.id(
-                    server.server().worldFormat().plugins().registry()));
+            output.putShort(packet.id(server.plugins().registry()));
             ((PacketClient) packet).sendClient(this, output);
         }
     }
@@ -398,8 +400,7 @@ public class PlayerConnection
                         sendPacket(new PacketPingServer(currentTime));
                     }
                     while (!sendQueue.isEmpty()) {
-                        Packet packet = sendQueue.poll();
-                        sendPacket(packet);
+                        sendQueue.poll().run();
                         sendQueueSize.decrementAndGet();
                         if (channel.bundleSize() > 1 << 10 << 4) {
                             break;
@@ -510,6 +511,13 @@ public class PlayerConnection
 
     public void setPermissionLevel(int permissionLevel) {
         this.permissionLevel = permissionLevel;
+    }
+
+    public void disconnect(String reason) {
+        sendQueue.add(() -> {
+            sendPacket(new PacketDisconnect(reason));
+            state = State.CLOSING;
+        });
     }
 
     enum State {
