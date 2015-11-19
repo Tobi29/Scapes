@@ -33,7 +33,7 @@ import java.util.stream.Stream;
  * <table summary="Standard return codes">
  * <thead>
  * <tr><th>Return Code</th><th>Description</th></tr>
- * <thead>
+ * </thead>
  * <tbody>
  * <tr><td>0</td><td>Successfully executed</td></tr>
  * <tr><td>245</td><td>Missing permissions</td></tr>
