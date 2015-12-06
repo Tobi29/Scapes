@@ -54,7 +54,7 @@ public class GameStateMenu extends GameState {
     @Override
     public void init(GL gl) {
         GuiStyle style = engine.guiStyle();
-        engine.guiStack().add("0-Version", new GuiVersion(this, style));
+        engine.guiStack().add("00-Version", new GuiVersion(this, style));
         boolean hasAccount = false;
         try {
             FilePath file = engine.home().resolve("Account.properties");
