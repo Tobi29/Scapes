@@ -101,7 +101,7 @@ public class GuiPlaylists extends GuiMenu {
             GuiComponentTextButton play =
                     add(15, 2, p -> button(p, 35, 15, 12, "Play"));
             play.onClickLeft(event -> {
-                GuiNotification message = new GuiNotification(500, 0, 290, 60,
+                GuiNotification message = new GuiNotification(660, 0, 290, 60,
                         state.engine().guiStyle(), GuiAlignment.RIGHT, 3.0);
                 message.add(10, 10, p -> new GuiComponentIcon(p, 40, 40,
                         state.engine().graphics().textures()

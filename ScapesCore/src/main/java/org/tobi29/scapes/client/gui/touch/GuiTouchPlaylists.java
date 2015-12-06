@@ -108,7 +108,7 @@ public class GuiTouchPlaylists extends GuiTouchMenuDouble {
                     addHori(10, 5, p -> button(p, 110, 30, 24, "Delete"));
 
             label.onClickLeft(event -> {
-                GuiNotification message = new GuiNotification(500, 0, 290, 60,
+                GuiNotification message = new GuiNotification(660, 0, 290, 60,
                         state.engine().guiStyle(), GuiAlignment.RIGHT, 3.0);
                 message.add(10, 10, p -> new GuiComponentIcon(p, 40, 40,
                         state.engine().graphics().textures()

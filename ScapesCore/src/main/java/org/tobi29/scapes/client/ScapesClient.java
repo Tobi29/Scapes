@@ -194,7 +194,7 @@ public class ScapesClient extends Game {
             inputMode = newInputMode;
             engine.setGUIController(inputMode.guiController());
             GuiNotification message =
-                    new GuiNotification(500, 0, 290, 60, engine.guiStyle(),
+                    new GuiNotification(660, 0, 290, 60, engine.guiStyle(),
                             GuiAlignment.RIGHT, 3.0);
             message.add(10, 10, p -> new GuiComponentIcon(p, 40, 40,
                     engine.graphics().textures()
