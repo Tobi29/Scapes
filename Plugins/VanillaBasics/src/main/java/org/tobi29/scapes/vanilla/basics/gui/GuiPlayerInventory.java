@@ -24,12 +24,11 @@ public class GuiPlayerInventory extends GuiInventory {
         super("Inventory", player, style);
         if (!player.connection().plugins().registry().getCraftingRecipes()
                 .isEmpty()) {
-            GuiComponentTextButton crafting = pane.addVert(16, 5,
-                    p -> new GuiComponentTextButton(p, 368, 30, 18,
-                            "Crafting"));
-            crafting.addLeftClick(event -> player.openGui(
+            GuiComponentTextButton crafting =
+                    pane.addVert(16, 5, p -> button(p, 368, "Crafting"));
+            crafting.onClickLeft(event -> player.openGui(
                     new GuiCrafting(false, player,
-                            player.game().engine().globalGUI().style())));
+                            player.game().engine().guiStyle())));
         }
     }
 }

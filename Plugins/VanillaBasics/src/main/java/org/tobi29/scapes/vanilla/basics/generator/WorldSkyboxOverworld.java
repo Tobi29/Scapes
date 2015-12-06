@@ -20,12 +20,12 @@ import org.tobi29.scapes.chunk.WorldSkybox;
 import org.tobi29.scapes.client.states.scenes.SceneScapesVoxelWorld;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
-import org.tobi29.scapes.engine.openal.StaticAudio;
 import org.tobi29.scapes.engine.opengl.*;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.opengl.shader.ShaderManager;
+import org.tobi29.scapes.engine.sound.StaticAudio;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -37,8 +37,8 @@ import org.tobi29.scapes.entity.particle.ParticleManager;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleRaindrop;
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleSnowflake;
-import org.tobi29.scapes.vanilla.basics.gui.GuiComponentHotbar;
 import org.tobi29.scapes.vanilla.basics.gui.GuiComponentCondition;
+import org.tobi29.scapes.vanilla.basics.gui.GuiComponentHotbar;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -60,8 +60,7 @@ public class WorldSkyboxOverworld implements WorldSkybox {
     private GuiWidgetDebugValues.Element temperatureDebug, humidityDebug,
             weatherDebug, biomeDebug, staminaDebug, wakeDebug, hungerDebug,
             thirstDebug, bodyTemperatureDebug, sleepingDebug, exposureDebug;
-    private StaticAudio rainAudio;
-    private StaticAudio windAudio;
+    private StaticAudio rainAudio, windAudio;
     private double rainGainWait;
     private int rainDrops;
     private double exposure = 0.3;
@@ -289,10 +288,10 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         MobPlayerClientMain player = world.player();
         if (player instanceof MobPlayerClientMainVB) {
             MobPlayerClientMainVB playerVB = (MobPlayerClientMainVB) player;
-            world.scene().hud().add(8, 464,
+            playerVB.game().hud().add(8, 492,
                     p -> new GuiComponentHotbar(p, 560, 40, playerVB));
-            world.scene().hud()
-                    .add(8, 418, p -> new GuiComponentCondition(p, playerVB));
+            playerVB.game().hud()
+                    .add(8, 446, p -> new GuiComponentCondition(p, playerVB));
         }
     }
 
@@ -312,9 +311,9 @@ public class WorldSkyboxOverworld implements WorldSkybox {
                         scene.cam().position.intY())) / 15.0f;
         if (player.isHeadInWater()) {
             float light = FastMath.clamp(world.terrain()
-                    .light(FastMath.floor(player.x()),
-                            FastMath.floor(player.y()),
-                            FastMath.floor(player.z() + 0.7)) * 0.09333f + 0.2f,
+                            .light(FastMath.floor(player.x()),
+                                    FastMath.floor(player.y()),
+                                    FastMath.floor(player.z() + 0.7)) * 0.09333f + 0.2f,
                     0.0f, 1.0f);
             fogR = 0.1f * light;
             fogG = 0.5f * light;

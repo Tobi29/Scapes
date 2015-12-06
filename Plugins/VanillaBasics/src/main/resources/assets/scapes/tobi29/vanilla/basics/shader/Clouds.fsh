@@ -1,4 +1,4 @@
-#version 150
+#version 330
 
 uniform float uniform_Time;
 uniform float uniform_Weather;
@@ -6,7 +6,7 @@ uniform vec2 uniform_CamPos;
 
 in vec2 varying_Texture;
 
-out vec4 out_Color;
+layout(location = 0) out vec4 out_Color;
 
 #define NORMALIZE_GRADIENTS
 #define COLLAPSE_SORTNET

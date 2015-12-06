@@ -52,7 +52,7 @@ public class GuiAnvilInventory extends GuiContainerInventory {
         icon.metaData("Vanilla").setString("MetalType", "Iron");
         GuiComponentItemButton item = pane.add(x, y,
                 p -> new GuiComponentItemButton(p, 30, 30, icon));
-        item.addLeftClick(event -> player.connection()
+        item.onClickLeft(event -> player.connection()
                 .send(new PacketAnvil(container, i)));
     }
 }

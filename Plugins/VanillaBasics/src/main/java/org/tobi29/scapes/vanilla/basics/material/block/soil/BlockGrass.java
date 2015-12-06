@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.vanilla.basics.material.block.soil;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.*;
 import org.tobi29.scapes.block.models.BlockModel;
 import org.tobi29.scapes.block.models.BlockModelComplex;
@@ -38,7 +39,10 @@ import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock;
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateGrassGrowth;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class BlockGrass extends VanillaBlock {
@@ -83,8 +87,8 @@ public class BlockGrass extends VanillaBlock {
                 Random random = ThreadLocalRandom.current();
                 if (random.nextInt(40) == 0) {
                     terrain.world().dropItem(new ItemStack(materials.seed,
-                                    (short) random.nextInt(
-                                            cropRegistry.values().size())), x,
+                                    (short) random
+                                            .nextInt(cropRegistry.values().size())), x,
                             y, z + 1);
                 }
             } else {

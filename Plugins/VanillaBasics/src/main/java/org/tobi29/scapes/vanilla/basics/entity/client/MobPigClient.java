@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
+import java8.util.Optional;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.utils.math.AABB;
@@ -26,8 +27,6 @@ import org.tobi29.scapes.entity.CreatureType;
 import org.tobi29.scapes.entity.client.MobLivingClient;
 import org.tobi29.scapes.entity.model.MobModel;
 import org.tobi29.scapes.vanilla.basics.entity.model.MobLivingModelPig;
-
-import java.util.Optional;
 
 public class MobPigClient extends MobLivingClient {
     public MobPigClient(WorldClient world) {

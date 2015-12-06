@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 apply from: "$rootDir/ScapesEngine/resources/scapesengineapplication.gradle"
 apply from: "$rootDir/ScapesEngine/Backends/glfw.gradle"
 
@@ -27,26 +26,21 @@ application {
     url = "https://github.com/Tobi29/Scapes"
     copyright = "© 2012-2015 Tobi29"
     uuid = "1861B0A8-3269-41D8-AD55-4A7DC0DF7190"
-    mainClass = "org.tobi29.scapes.Scapes"
+    mainClass = "org.tobi29.scapes.desktop.Scapes"
 }
 
 dependencies {
-    compile project(":ScapesEngine")
-    compile project(":ScapesEngine:Utils")
-    compile project(":ScapesEngine:Utils:ServerFramework")
-    compile "org.slf4j:slf4j-api:1.7.13"
-    compile "commons-cli:commons-cli:1.3.1"
+    compile project(":ScapesCore")
 
     testCompile "junit:junit:4.12"
 
+    runtime project(":ScapesEngine:Utils:NIOFileSystem")
+    runtime project(":ScapesEngine:Utils:MBeansCPUReader")
     runtime project(":ScapesEngine:Codecs:CodecOGG")
     runtime project(":ScapesEngine:Codecs:CodecMP3")
     runtime project(":ScapesEngine:Codecs:CodecWAV")
     runtime "org.apache.logging.log4j:log4j-api:2.4.1"
     runtime "org.apache.logging.log4j:log4j-core:2.4.1"
     runtime "org.apache.logging.log4j:log4j-slf4j-impl:2.4.1"
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.8'
+    nativesLinux64 "com.almworks.sqlite4java:libsqlite4java-linux-amd64:1.0.392"
 }

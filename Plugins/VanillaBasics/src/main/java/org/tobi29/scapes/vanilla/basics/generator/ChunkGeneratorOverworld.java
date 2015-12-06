@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.generator;
 
 import org.slf4j.Logger;
@@ -129,8 +128,7 @@ public class ChunkGeneratorOverworld implements ChunkGenerator {
         OreType type = null;
         int max = -1;
         Iterator<OreType> iterator = plugin.getOreTypes()
-                .filter(oreType -> oreType.stoneTypes().contains(stoneType))
-                .iterator();
+                .filter(ore -> ore.stoneTypes().contains(stoneType)).iterator();
         while (iterator.hasNext()) {
             OreType oreType = iterator.next();
             int check = random.nextInt(oreType.rarity());

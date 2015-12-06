@@ -16,6 +16,7 @@
 package org.tobi29.scapes.vanilla.basics.entity.server;
 
 import org.tobi29.scapes.chunk.WorldServer;
+import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
@@ -82,7 +83,7 @@ public class EntityTornadoServer extends EntityServer implements MobileEntity {
                 .submitUpdate(entityID, pos.now(), Vector3d.ZERO, Vector3d.ZERO,
                         false, false, false, false);
         Vector3 currentPos = pos.now();
-        world.entities(currentPos, 256.0).stream()
+        Streams.of(world.entities(currentPos, 256.0))
                 .filter(entity -> entity instanceof MobServer)
                 .forEach(entity -> {
                     Vector3 push = entity.pos().minus(currentPos);

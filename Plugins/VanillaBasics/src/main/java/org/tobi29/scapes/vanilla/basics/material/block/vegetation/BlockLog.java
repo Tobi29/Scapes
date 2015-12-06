@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.vegetation;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.*;
 import org.tobi29.scapes.block.models.BlockModel;
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock;
@@ -36,7 +37,6 @@ import org.tobi29.scapes.vanilla.basics.material.item.ItemFuel;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 public class BlockLog extends VanillaBlock implements ItemFuel {
     private final GameRegistry.Registry<TreeType> treeRegistry;

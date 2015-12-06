@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.vegetation;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.AABBElement;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.TerrainTexture;
@@ -40,7 +41,6 @@ import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 public class BlockBush extends VanillaBlock {
     private static final AABB SELECTION =

@@ -15,10 +15,9 @@
  */
 package org.tobi29.scapes.vanilla.basics.gui;
 
+import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.gui.GuiComponentText;
 import org.tobi29.scapes.engine.gui.GuiStyle;
-import org.tobi29.scapes.engine.opengl.FontRenderer;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityAlloyClient;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
@@ -27,7 +26,7 @@ import java.util.Map;
 
 public class GuiAlloyInventory extends GuiContainerInventory {
     private final EntityAlloyClient container;
-    private FontRenderer.Text infoText;
+    private final GuiComponentText infoText;
 
     public GuiAlloyInventory(EntityAlloyClient container,
             MobPlayerClientMainVB player, GuiStyle style) {
@@ -35,18 +34,17 @@ public class GuiAlloyInventory extends GuiContainerInventory {
         this.container = container;
         buttonContainer(16, 120, 30, 30, 0);
         buttonContainer(16, 160, 30, 30, 1);
+        infoText = add(220, 170, p -> new GuiComponentText(p, 24, ""));
         updateInfoText();
     }
 
     @Override
-    public void renderOverlay(GL gl, Shader shader) {
-        super.renderOverlay(gl, shader);
+    public void updateComponent(ScapesEngine engine) {
+        super.updateComponent(engine);
         updateInfoText();
-        infoText.render(gl, shader);
     }
 
     private void updateInfoText() {
-        FontRenderer font = style.font();
         StringBuilder textBuilder = new StringBuilder(64);
         textBuilder.append("Metal: ");
         String result = container.result();
@@ -64,9 +62,6 @@ public class GuiAlloyInventory extends GuiContainerInventory {
                     .append(FastMath.round(entry.getValue() / size * 100.0f))
                     .append('%');
         }
-        String text = textBuilder.toString();
-        if (!text.equals(infoText.text())) {
-            infoText = font.render(text, 220, 170, 24, 1.0f, 1.0f, 1.0f, 1.0f);
-        }
+        infoText.setText(textBuilder.toString());
     }
 }

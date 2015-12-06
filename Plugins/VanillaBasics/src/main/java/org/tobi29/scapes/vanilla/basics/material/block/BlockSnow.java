@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.*;
 import org.tobi29.scapes.block.models.BlockModel;
 import org.tobi29.scapes.block.models.BlockModelLiquid;
@@ -35,7 +36,6 @@ import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 public class BlockSnow extends VanillaBlock {
     private static final AABB SELECTION = new AABB(0, 0, 0, 1, 1, 0.5);

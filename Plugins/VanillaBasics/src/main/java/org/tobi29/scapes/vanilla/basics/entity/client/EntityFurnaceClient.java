@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.engine.gui.Gui;
@@ -22,8 +23,6 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.vanilla.basics.gui.GuiFurnaceInventory;
-
-import java.util.Optional;
 
 public class EntityFurnaceClient extends EntityAbstractFurnaceClient {
     public EntityFurnaceClient(WorldClient world) {
@@ -40,7 +39,7 @@ public class EntityFurnaceClient extends EntityAbstractFurnaceClient {
         if (player instanceof MobPlayerClientMainVB) {
             return Optional.of(new GuiFurnaceInventory(this,
                     (MobPlayerClientMainVB) player,
-                    player.game().engine().globalGUI().style()));
+                    player.game().engine().guiStyle()));
         }
         return Optional.empty();
     }

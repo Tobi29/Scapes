@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.device;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.AABBElement;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.TerrainTexture;
@@ -43,7 +44,6 @@ import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class BlockAnvil extends VanillaBlockContainer {
     private static final AABB SELECTION = new AABB(0.125, 0, 0, 0.875, 1, 1);

@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.entity.server;
 
+import java8.util.stream.Stream;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.utils.Pair;
+import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
@@ -31,7 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
 
 public abstract class EntityAbstractContainerServer extends EntityServer
         implements EntityContainerServer {
@@ -54,7 +54,7 @@ public abstract class EntityAbstractContainerServer extends EntityServer
 
     @Override
     public Stream<Pair<String, Inventory>> inventories() {
-        return inventories.entrySet().stream()
+        return Streams.of(inventories.entrySet())
                 .map(entry -> new Pair<>(entry.getKey(), entry.getValue()));
     }
 
@@ -67,7 +67,7 @@ public abstract class EntityAbstractContainerServer extends EntityServer
 
     @Override
     public Stream<MobPlayerServer> viewers() {
-        return viewers.stream();
+        return Streams.of(viewers);
     }
 
     @Override
@@ -79,8 +79,8 @@ public abstract class EntityAbstractContainerServer extends EntityServer
     public TagStructure write() {
         TagStructure tagStructure = super.write();
         TagStructure inventoryTag = tagStructure.getStructure("Inventory");
-        inventories.forEach((id, inventory) -> inventoryTag
-                .setStructure(id, inventory.save()));
+        Streams.of(inventories.entrySet()).forEach(entry -> inventoryTag
+                .setStructure(entry.getKey(), entry.getValue().save()));
         return tagStructure;
     }
 
@@ -88,8 +88,8 @@ public abstract class EntityAbstractContainerServer extends EntityServer
     public void read(TagStructure tagStructure) {
         super.read(tagStructure);
         TagStructure inventoryTag = tagStructure.getStructure("Inventory");
-        inventories.forEach((id, inventory) -> inventory
-                .load(inventoryTag.getStructure(id)));
+        Streams.of(inventories.entrySet()).forEach(entry -> entry.getValue()
+                .load(inventoryTag.getStructure(entry.getKey())));
     }
 
     @Override

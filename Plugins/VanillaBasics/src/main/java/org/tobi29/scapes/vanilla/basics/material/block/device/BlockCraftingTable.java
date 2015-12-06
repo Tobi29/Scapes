@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.device;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.TerrainTexture;
 import org.tobi29.scapes.block.TerrainTextureRegistry;
@@ -29,11 +30,9 @@ import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
-import org.tobi29.scapes.vanilla.basics.packet.PacketOpenCrafting;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock;
-
-import java.util.Optional;
+import org.tobi29.scapes.vanilla.basics.packet.PacketOpenCrafting;
 
 public class BlockCraftingTable extends VanillaBlock {
     private TerrainTexture textureTop, textureSide1, textureSide2,

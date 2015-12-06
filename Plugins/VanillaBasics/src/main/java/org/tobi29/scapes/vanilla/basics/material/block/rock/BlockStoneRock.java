@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.rock;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.*;
 import org.tobi29.scapes.block.models.BlockModel;
 import org.tobi29.scapes.block.models.BlockModelComplex;
@@ -39,7 +40,6 @@ import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 public class BlockStoneRock extends VanillaBlock {

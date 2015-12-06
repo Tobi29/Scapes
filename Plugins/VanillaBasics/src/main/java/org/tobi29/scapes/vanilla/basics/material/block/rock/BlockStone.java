@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.rock;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.TerrainTexture;
@@ -25,8 +26,6 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.vanilla.basics.material.StoneType;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.block.BlockSimpleData;
-
-import java.util.Optional;
 
 public abstract class BlockStone extends BlockSimpleData {
     protected final GameRegistry.Registry<StoneType> stoneRegistry;

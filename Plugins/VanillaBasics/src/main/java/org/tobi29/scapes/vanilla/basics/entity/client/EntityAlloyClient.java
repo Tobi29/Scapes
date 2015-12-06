@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.engine.gui.Gui;
@@ -25,7 +26,6 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.vanilla.basics.gui.GuiAlloyInventory;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EntityAlloyClient extends EntityAbstractContainerClient {
@@ -46,7 +46,7 @@ public class EntityAlloyClient extends EntityAbstractContainerClient {
         if (player instanceof MobPlayerClientMainVB) {
             return Optional.of(new GuiAlloyInventory(this,
                     (MobPlayerClientMainVB) player,
-                    player.game().engine().globalGUI().style()));
+                    player.game().engine().guiStyle()));
         }
         return Optional.empty();
     }

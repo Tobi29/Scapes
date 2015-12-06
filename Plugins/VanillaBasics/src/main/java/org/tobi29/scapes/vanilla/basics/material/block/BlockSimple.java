@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.TerrainTexture;
 import org.tobi29.scapes.block.TerrainTextureRegistry;
@@ -28,8 +29,6 @@ import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
-
-import java.util.Optional;
 
 public abstract class BlockSimple extends VanillaBlock {
     protected TerrainTexture texture;

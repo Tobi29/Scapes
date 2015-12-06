@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material;
 
-import java.util.Arrays;
-import java.util.stream.Stream;
+import java8.util.stream.Stream;
+import org.tobi29.scapes.engine.utils.Streams;
 
 public class ResearchRecipe {
     private final String[] items;
@@ -31,7 +30,7 @@ public class ResearchRecipe {
     }
 
     public Stream<String> items() {
-        return Arrays.stream(items);
+        return Streams.of(items);
     }
 
     public String name() {

@@ -18,6 +18,7 @@ package org.tobi29.scapes.vanilla.basics.entity.client;
 
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.chunk.WorldClient;
+import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.client.EntityClient;
@@ -48,7 +49,7 @@ public abstract class EntityAbstractContainerClient extends EntityClient
     public void read(TagStructure tagStructure) {
         super.read(tagStructure);
         TagStructure inventoryTag = tagStructure.getStructure("Inventory");
-        inventories.forEach((id, inventory) -> inventory
-                .load(inventoryTag.getStructure(id)));
+        Streams.of(inventories.entrySet()).forEach(entry -> entry.getValue()
+                .load(inventoryTag.getStructure(entry.getKey())));
     }
 }

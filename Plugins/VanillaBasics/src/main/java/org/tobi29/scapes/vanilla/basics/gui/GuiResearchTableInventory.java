@@ -26,9 +26,9 @@ public class GuiResearchTableInventory extends GuiContainerInventory {
             MobPlayerClientMainVB player, GuiStyle style) {
         super("Research Table", player, container, style);
         buttonContainer(185, 90, 30, 30, 0);
-        GuiComponentTextButton research = pane.add(27, 210,
-                p -> new GuiComponentTextButton(p, 120, 30, 18, "Research"));
-        research.addLeftClick(event -> player.connection()
+        GuiComponentTextButton research =
+                pane.add(27, 210, p -> button(p, 120, "Research"));
+        research.onClickLeft(event -> player.connection()
                 .send(new PacketResearch(container)));
     }
 }

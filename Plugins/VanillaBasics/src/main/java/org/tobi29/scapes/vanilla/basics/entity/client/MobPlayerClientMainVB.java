@@ -15,16 +15,16 @@
  */
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
-import org.tobi29.scapes.Scapes;
+import java8.util.Optional;
+import org.tobi29.scapes.Debug;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.Playlist;
 import org.tobi29.scapes.client.ScapesClient;
 import org.tobi29.scapes.client.gui.GuiChatWrite;
-import org.tobi29.scapes.client.gui.GuiPause;
+import org.tobi29.scapes.client.gui.desktop.GuiPause;
 import org.tobi29.scapes.engine.gui.Gui;
-import org.tobi29.scapes.engine.input.ControllerDefault;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -46,8 +46,6 @@ import org.tobi29.scapes.entity.model.MobModel;
 import org.tobi29.scapes.packets.PacketInteraction;
 import org.tobi29.scapes.packets.PacketItemUse;
 import org.tobi29.scapes.vanilla.basics.gui.GuiPlayerInventory;
-
-import java.util.Optional;
 
 public class MobPlayerClientMainVB extends MobPlayerClientMain
         implements EntityContainerClient {
@@ -85,18 +83,14 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain
                 }
             }
         }
-        if (controller.chat()) {
-            if (!hasGui()) {
-                openGui(new GuiChatWrite(game, this,
-                        game.engine().globalGUI().style()));
-            }
+        if (controller.chat() && !hasGui()) {
+            openGui(new GuiChatWrite(game, this, game.engine().guiStyle()));
         }
         if (controller.menu()) {
             if (hasGui()) {
                 closeGui();
             } else {
-                openGui(new GuiPause(game, this,
-                        game.engine().globalGUI().style()));
+                openGui(new GuiPause(game, this, game.engine().guiStyle()));
             }
         }
         if (currentGui == null) {
@@ -118,20 +112,20 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain
                         (byte) inventorySelectRight));
             }
             // Debug
-            if (Scapes.debug) {
-                ControllerDefault controllerDefault =
-                        game.engine().controller();
-                if (controllerDefault.isPressed(ControllerKey.KEY_F5)) {
-                    flying = !flying;
-                }
-                if (flying) {
-                    if (controllerDefault.isDown(ControllerKey.KEY_Q)) {
-                        speed.plusZ(1.0);
+            if (Debug.enabled()) {
+                game.engine().controller().ifPresent(controllerDefault -> {
+                    if (controllerDefault.isPressed(ControllerKey.KEY_F5)) {
+                        flying = !flying;
                     }
-                    if (controllerDefault.isDown(ControllerKey.KEY_C)) {
-                        speed.plusZ(-1.0);
+                    if (flying) {
+                        if (controllerDefault.isDown(ControllerKey.KEY_Q)) {
+                            speed.plusZ(1.0);
+                        }
+                        if (controllerDefault.isDown(ControllerKey.KEY_C)) {
+                            speed.plusZ(-1.0);
+                        }
                     }
-                }
+                });
             }
             // Movement
             if (controller.jump()) {
@@ -239,7 +233,7 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain
         if (notice instanceof MobLivingClient) {
             if (((MobLivingClient) notice).creatureType() ==
                     CreatureType.MONSTER) {
-                game.playlist().setMusic(Playlist.Music.BATTLE, this);
+                game.playlist().setMusic(Playlist.Music.BATTLE);
             }
         }
     }
@@ -280,7 +274,7 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain
         if (player instanceof MobPlayerClientMainVB) {
             return Optional
                     .of(new GuiPlayerInventory((MobPlayerClientMainVB) player,
-                            player.game().engine().globalGUI().style()));
+                            player.game().engine().guiStyle()));
         }
         return Optional.empty();
     }

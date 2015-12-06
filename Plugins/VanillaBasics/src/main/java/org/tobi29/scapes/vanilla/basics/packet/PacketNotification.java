@@ -17,7 +17,7 @@ package org.tobi29.scapes.vanilla.basics.packet;
 
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
-import org.tobi29.scapes.client.gui.GuiInGameMessage;
+import org.tobi29.scapes.client.gui.desktop.GuiInGameMessage;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.packets.Packet;
@@ -54,6 +54,6 @@ public class PacketNotification extends Packet implements PacketClient {
     @Override
     public void runClient(ClientConnection client, WorldClient world) {
         client.entity().openGui(new GuiInGameMessage(client.game(), title, text,
-                client.game().engine().globalGUI().style()));
+                client.game().engine().guiStyle()));
     }
 }

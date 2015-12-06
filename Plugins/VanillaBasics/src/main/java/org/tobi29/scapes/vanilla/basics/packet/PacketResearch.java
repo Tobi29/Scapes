@@ -33,7 +33,6 @@ import org.tobi29.scapes.vanilla.basics.entity.server.EntityResearchTableServer;
 import org.tobi29.scapes.vanilla.basics.material.item.ItemResearch;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 public class PacketResearch extends Packet implements PacketServer {
     private int entityID;
@@ -95,28 +94,20 @@ public class PacketResearch extends Packet implements PacketServer {
                                 .getStructure("Research")
                                 .getStructure("Finished")
                                 .getBoolean(recipe.name())) {
-                            boolean flag = true;
-                            Iterator<String> requirements =
-                                    recipe.items().iterator();
-                            while (requirements.hasNext()) {
-                                String requirement = requirements.next();
-                                if (!player.mob().metaData("Vanilla")
-                                        .getStructure("Research")
-                                        .getStructure("Items")
-                                        .getBoolean(requirement)) {
-                                    flag = false;
-                                    break;
-                                }
-                            }
-                            if (flag) {
+                            if (!recipe.items()
+                                    .filter(requirement -> !player.mob()
+                                            .metaData("Vanilla")
+                                            .getStructure("Research")
+                                            .getStructure("Items")
+                                            .getBoolean(requirement)).findAny()
+                                    .isPresent()) {
                                 player.mob().metaData("Vanilla")
                                         .getStructure("Research")
                                         .getStructure("Finished")
                                         .setBoolean(recipe.name(), true);
                                 player.mob().world()
                                         .send(new PacketEntityMetaData(
-                                                        player.mob(),
-                                                        "Vanilla"));
+                                                player.mob(), "Vanilla"));
                                 player.send(new PacketNotification("Research",
                                         recipe.text()));
                             }

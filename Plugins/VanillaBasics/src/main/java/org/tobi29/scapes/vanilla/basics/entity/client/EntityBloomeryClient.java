@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.engine.gui.Gui;
@@ -26,7 +27,6 @@ import org.tobi29.scapes.entity.particle.ParticleManager;
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleSmoke;
 import org.tobi29.scapes.vanilla.basics.gui.GuiBloomeryInventory;
 
-import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -67,7 +67,7 @@ public class EntityBloomeryClient extends EntityAbstractFurnaceClient {
         if (player instanceof MobPlayerClientMainVB) {
             return Optional.of(new GuiBloomeryInventory(this,
                     (MobPlayerClientMainVB) player,
-                    player.game().engine().globalGUI().style()));
+                    player.game().engine().guiStyle()));
         }
         return Optional.empty();
     }

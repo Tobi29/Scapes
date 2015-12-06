@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldClient;
@@ -30,8 +31,6 @@ import org.tobi29.scapes.entity.client.MobPlayerClient;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.model.MobLivingModelHuman;
 import org.tobi29.scapes.entity.model.MobModel;
-
-import java.util.Optional;
 
 public class MobPlayerClientVB extends MobPlayerClient
         implements EntityContainerClient {

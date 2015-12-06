@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.generator;
 
+import java8.util.stream.Stream;
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.chunk.World;
 import org.tobi29.scapes.chunk.generator.ChunkPopulator;
@@ -32,7 +32,6 @@ import org.tobi29.scapes.vanilla.basics.material.OreType;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 public class ChunkPopulatorOverworld implements ChunkPopulator {
     private final VanillaBasics plugin;
@@ -79,7 +78,7 @@ public class ChunkPopulatorOverworld implements ChunkPopulator {
             }
             int xx = x + (dx >> 1);
             int yy = y + (dy >> 1);
-            int zz = random.nextInt(terrain.highestTerrainBlockZAt(xx, yy));
+            int zz = random.nextInt(terrain.highestTerrainBlockZAt(xx, yy) + 1);
             int data = terrain.data(xx, yy, zz);
             if (gen.stoneType(xx + random.nextInt(21) - 10,
                     yy + random.nextInt(21) - 10, zz + random.nextInt(9) - 4) !=

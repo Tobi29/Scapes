@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.vanilla.basics.material.block.vegetation;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.*;
 import org.tobi29.scapes.block.models.BlockModel;
 import org.tobi29.scapes.block.models.BlockModelComplex;

@@ -15,17 +15,16 @@
  */
 package org.tobi29.scapes.vanilla.basics.gui;
 
+import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.gui.GuiComponentText;
 import org.tobi29.scapes.engine.gui.GuiStyle;
-import org.tobi29.scapes.engine.opengl.FontRenderer;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityFurnaceClient;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
 public class GuiFurnaceInventory extends GuiContainerInventory {
     private final EntityFurnaceClient container;
-    private FontRenderer.Text temperatureText = FontRenderer.EMPTY_TEXT;
+    private final GuiComponentText temperatureText;
 
     public GuiFurnaceInventory(EntityFurnaceClient container,
             MobPlayerClientMainVB player, GuiStyle style) {
@@ -39,22 +38,19 @@ public class GuiFurnaceInventory extends GuiContainerInventory {
         buttonContainer(16, 120, 30, 30, 5);
         buttonContainer(56, 120, 30, 30, 6);
         buttonContainer(96, 120, 30, 30, 7);
+        temperatureText = add(220, 170, p -> new GuiComponentText(p, 24, ""));
         updateTemperatureText();
     }
 
     @Override
-    public void renderOverlay(GL gl, Shader shader) {
-        super.renderOverlay(gl, shader);
+    public void updateComponent(ScapesEngine engine) {
+        super.updateComponent(engine);
         updateTemperatureText();
-        temperatureText.render(gl, shader);
     }
 
+
     private void updateTemperatureText() {
-        FontRenderer font = style.font();
         String text = FastMath.floor(container.temperature()) + "°C";
-        if (!text.equals(temperatureText.text())) {
-            temperatureText =
-                    font.render(text, 220, 170, 24, 1.0f, 1.0f, 1.0f, 1.0f);
-        }
+        temperatureText.setText(text);
     }
 }

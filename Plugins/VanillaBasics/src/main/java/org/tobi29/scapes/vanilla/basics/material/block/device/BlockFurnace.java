@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.device;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.TerrainTexture;
 import org.tobi29.scapes.block.TerrainTextureRegistry;
@@ -35,8 +36,6 @@ import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityFurnaceServer;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer;
-
-import java.util.Optional;
 
 public class BlockFurnace extends VanillaBlockContainer {
     private TerrainTexture textureTop, textureFront1, textureFront2,

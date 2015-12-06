@@ -52,7 +52,6 @@ public class LayerPatch implements BiomeDecorator.Layer {
         }
     }
 
-    @FunctionalInterface
     public interface GroundCheck {
         boolean canPlace(TerrainServer.TerrainMutable terrain, int x, int y,
                 int z);

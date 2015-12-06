@@ -18,13 +18,14 @@ package org.tobi29.scapes.vanilla.basics.gui;
 import org.tobi29.scapes.block.CraftingRecipe;
 import org.tobi29.scapes.block.CraftingRecipeType;
 import org.tobi29.scapes.client.gui.GuiComponentItemButton;
+import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.utils.Pair;
+import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.packets.PacketCrafting;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class GuiCrafting extends GuiInventory {
@@ -74,14 +75,14 @@ public class GuiCrafting extends GuiInventory {
                     .addVert(0, 0, p -> new GuiComponentPane(p, 90, 30));
             separator
                     .add(5, 9, p -> new GuiComponentText(p, 12, "Table only:"));
-            tableOnly.forEach(type -> scrollPaneTypes.addVert(0, 0,
+            Streams.of(tableOnly).forEach(type -> scrollPaneTypes.addVert(0, 0,
                     p -> new ElementType(p, type.a, type.b, false)));
         }
     }
 
     @Override
-    public void updateComponent() {
-        super.updateComponent();
+    public void updateComponent(ScapesEngine engine) {
+        super.updateComponent(engine);
         if (System.currentTimeMillis() > nextExample) {
             if (example == Integer.MAX_VALUE) {
                 example = 0;
@@ -110,11 +111,10 @@ public class GuiCrafting extends GuiInventory {
         public ElementType(GuiLayoutData parent, CraftingRecipeType recipe,
                 int id, boolean enabled) {
             super(parent, 80, 20);
-            GuiComponentTextButton label = add(5, 2,
-                    p -> new GuiComponentTextButton(p, 70, 15, 12,
-                            recipe.name()));
+            GuiComponentTextButton label =
+                    add(5, 2, p -> button(p, 70, 15, 12, recipe.name()));
             if (enabled) {
-                label.addLeftClick(event -> {
+                label.onClickLeft(event -> {
                     type = id;
                     example = 0;
                     updateRecipes();
@@ -130,33 +130,25 @@ public class GuiCrafting extends GuiInventory {
             GuiComponentItemButton result = addHori(5, 5,
                     p -> new GuiComponentItemButton(p, 30, 30,
                             recipe.result()));
-            result.addLeftClick(event -> player.connection()
+            result.onClickLeft(event -> player.connection()
                     .send(new PacketCrafting(type, id)));
-            result.addHover(event -> setTooltip(result.item(), "Result:\n"));
+            result.onHover(event -> setTooltip(result.item(), "Result:\n"));
             addHori(5, 5, p -> new GuiComponentText(p, 16, "<="));
-            Iterator<CraftingRecipe.Ingredient> ingredients =
-                    recipe.ingredients().iterator();
-            Iterator<CraftingRecipe.Ingredient> requirements =
-                    recipe.requirements().iterator();
-            if (ingredients.hasNext()) {
-                while (ingredients.hasNext()) {
-                    CraftingRecipe.Ingredient ingredient = ingredients.next();
-                    GuiComponentItemButton b = addHori(5, 5,
-                            p -> new GuiComponentItemButton(p, 25, 25,
-                                    ingredient.example(example)));
-                    b.addHover(event -> setTooltip(b.item(), "Ingredient:\n"));
-                }
-                if (requirements.hasNext()) {
-                    addHori(5, 5, p -> new GuiComponentText(p, 16, "+"));
-                }
+            recipe.ingredients().forEach(ingredient -> {
+                GuiComponentItemButton b = addHori(5, 5,
+                        p -> new GuiComponentItemButton(p, 25, 25,
+                                ingredient.example(example)));
+                b.onHover(event -> setTooltip(b.item(), "Ingredient:\n"));
+            });
+            if (recipe.ingredients().findAny().isPresent()) {
+                addHori(5, 5, p -> new GuiComponentText(p, 16, "+"));
             }
-            while (requirements.hasNext()) {
-                CraftingRecipe.Ingredient requirement = requirements.next();
+            recipe.ingredients().forEach(requirement -> {
                 GuiComponentItemButton b = addHori(5, 5,
                         p -> new GuiComponentItemButton(p, 25, 25,
                                 requirement.example(example)));
-                b.addHover(event -> setTooltip(b.item(), "Requirement:\n"));
-            }
+                b.onHover(event -> setTooltip(b.item(), "Requirement:\n"));
+            });
         }
     }
 }

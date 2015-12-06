@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.entity.server;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.Material;
@@ -32,7 +32,6 @@ import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.item.ItemIngot;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EntityAlloyServer extends EntityAbstractContainerServer {
@@ -157,7 +156,7 @@ public class EntityAlloyServer extends EntityAbstractContainerServer {
                 }
             }
             return flag;
-        }).findFirst();
+        }).findAny();
         if (result.isPresent()) {
             this.result = result.get().id();
         } else {

@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.vanilla.basics.material.block.soil;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.TerrainTexture;
 import org.tobi29.scapes.block.TerrainTextureRegistry;
@@ -35,8 +36,6 @@ import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateInfoLayer;
 import org.tobi29.scapes.vanilla.basics.generator.EnvironmentClimate;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
-
-import java.util.Optional;
 
 public class BlockDirt extends BlockSoil {
     private TerrainTexture textureDirt, textureSand;

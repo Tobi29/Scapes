@@ -15,6 +15,9 @@
  */
 package org.tobi29.scapes.vanilla.basics;
 
+import java8.util.stream.Collectors;
+import java8.util.stream.Stream;
+import java8.util.function.Consumer;
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.EnvironmentClient;
@@ -23,6 +26,7 @@ import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.engine.utils.Checksum;
+import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
@@ -40,11 +44,11 @@ import org.tobi29.scapes.vanilla.basics.generator.EnvironmentOverworldServer;
 import org.tobi29.scapes.vanilla.basics.generator.decorator.BiomeDecorator;
 import org.tobi29.scapes.vanilla.basics.material.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class VanillaBasics implements WorldType {
     public final Config c = new Config();
@@ -60,7 +64,7 @@ public class VanillaBasics implements WorldType {
     private boolean locked;
 
     public VanillaBasics() {
-        Arrays.stream(BiomeGenerator.Biome.values()).forEach(
+        Streams.of(BiomeGenerator.Biome.values()).forEach(
                 biome -> biomeDecorators.put(biome, new ConcurrentHashMap<>()));
     }
 
@@ -104,28 +108,32 @@ public class VanillaBasics implements WorldType {
         if (!locked) {
             throw new IllegalStateException("Initializing still running");
         }
-        return researchRecipes.stream();
+        return Streams.of(researchRecipes);
     }
 
     public MetalType getMetalType(String id) {
         if (!locked) {
             throw new IllegalStateException("Initializing still running");
         }
-        return metalTypes.getOrDefault(id, crapMetal);
+        MetalType type = metalTypes.get(id);
+        if (type == null) {
+            return crapMetal;
+        }
+        return type;
     }
 
     public Stream<MetalType> getMetalTypes() {
         if (!locked) {
             throw new IllegalStateException("Initializing still running");
         }
-        return metalTypes.values().stream();
+        return Streams.of(metalTypes.values());
     }
 
     public Stream<OreType> getOreTypes() {
         if (!locked) {
             throw new IllegalStateException("Initializing still running");
         }
-        return oreTypes.stream();
+        return Streams.of(oreTypes);
     }
 
     public Stream<BiomeDecorator> getBiomeDecorators(
@@ -133,7 +141,7 @@ public class VanillaBasics implements WorldType {
         if (!locked) {
             throw new IllegalStateException("Initializing still running");
         }
-        return biomeDecorators.get(biome).values().stream();
+        return Streams.of(biomeDecorators.get(biome).values());
     }
 
     @Override
@@ -166,8 +174,10 @@ public class VanillaBasics implements WorldType {
 
     @Override
     public void initEnd(GameRegistry registry) {
-        c.decoratorOverlays.values().forEach(config -> biomeDecorators.values()
-                .forEach(biome -> biome.values().forEach(config::accept)));
+        Streams.of(c.decoratorOverlays.values()).forEach(
+                config -> Streams.of(biomeDecorators.values()).forEach(
+                        biome -> Streams.of(biome.values())
+                                .forEach(config::accept)));
         locked = true;
         VanillaBasicsRegisters.registerRecipes(registry, materials);
     }
@@ -284,10 +294,11 @@ public class VanillaBasics implements WorldType {
 
         public void ore(BlockType type, int rarity, double size, int chance,
                 int rockChance, StoneType... stoneTypes) {
-            GameRegistry.Registry<StoneType> stoneRegistry = materials.registry
-                    .<StoneType>get("VanillaBasics", "StoneType");
+            GameRegistry.Registry<StoneType> stoneRegistry =
+                    materials.registry.<StoneType>get("VanillaBasics",
+                            "StoneType");
             List<Integer> stoneTypeList =
-                    Arrays.stream(stoneTypes).map(stoneRegistry::get)
+                    Streams.of(stoneTypes).map(stoneRegistry::get)
                             .collect(Collectors.toList());
             addOreType(new OreType(type, rarity, size, chance, rockChance,
                     stoneTypeList));

@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.block.device;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.TerrainTexture;
 import org.tobi29.scapes.block.TerrainTextureRegistry;
@@ -28,6 +28,7 @@ import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.server.EntityContainerServer;
@@ -37,7 +38,6 @@ import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class BlockBloomery extends VanillaBlockContainer {
     private TerrainTexture textureSide, textureInside;
@@ -100,7 +100,7 @@ public class BlockBloomery extends VanillaBlockContainer {
     @Override
     public void update(TerrainServer.TerrainMutable terrain, int x, int y,
             int z) {
-        terrain.world().entities(x, y, z).stream()
+        Streams.of(terrain.world().entities(x, y, z))
                 .filter(entity -> entity instanceof EntityBloomeryServer)
                 .forEach(entity -> ((EntityBloomeryServer) entity)
                         .updateBellows(terrain));

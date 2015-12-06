@@ -1,9 +1,9 @@
-#version 150
+#version 330
 
 in vec4 varying_Color;
 in vec2 varying_Texture;
 
-out vec4 out_Color;
+layout(location = 0) out vec4 out_Color;
 
 void main(void) {
     vec2 relative = varying_Texture - vec2(0.5);

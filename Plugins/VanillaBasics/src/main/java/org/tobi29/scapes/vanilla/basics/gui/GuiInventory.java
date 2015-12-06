@@ -15,13 +15,15 @@
  */
 package org.tobi29.scapes.vanilla.basics.gui;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.client.gui.GuiComponentItemButton;
-import org.tobi29.scapes.client.gui.GuiMenu;
 import org.tobi29.scapes.client.gui.GuiUtils;
+import org.tobi29.scapes.client.gui.desktop.GuiMenu;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.GuiComponentVisiblePane;
+import org.tobi29.scapes.engine.gui.GuiCursor;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
 import org.tobi29.scapes.engine.opengl.GL;
@@ -36,7 +38,7 @@ public class GuiInventory extends GuiMenu {
     protected final MobPlayerClientMainVB player;
     private String hover, hoverNew;
     private FontRenderer.Text hoverName = FontRenderer.EMPTY_TEXT;
-    private double cursorX, cursorY;
+    private double cursorX = Double.NaN, cursorY = Double.NaN;
 
     public GuiInventory(String name, MobPlayerClientMainVB player,
             GuiStyle style) {
@@ -59,7 +61,7 @@ public class GuiInventory extends GuiMenu {
             }
         }
 
-        back.addLeftClick(event -> player.closeGui());
+        back.onClickLeft(event -> player.closeGui());
     }
 
     protected void button(int x, int y, int width, int height, int slot) {
@@ -72,9 +74,9 @@ public class GuiInventory extends GuiMenu {
         GuiComponentItemButton button = inventoryPane.add(x, y,
                 p -> new GuiComponentItemButton(p, width, height,
                         inventory.item(slot)));
-        button.addLeftClick(event -> leftClick(id, slot));
-        button.addRightClick(event -> rightClick(id, slot));
-        button.addHover(event -> setTooltip(inventory.item(slot)));
+        button.onClickLeft(event -> leftClick(id, slot));
+        button.onClickRight(event -> rightClick(id, slot));
+        button.onHover(event -> setTooltip(inventory.item(slot)));
     }
 
     protected void leftClick(String id, int i) {
@@ -106,11 +108,15 @@ public class GuiInventory extends GuiMenu {
     }
 
     @Override
-    public void update(double mouseX, double mouseY, boolean mouseInside,
-            ScapesEngine engine) {
-        super.update(mouseX, mouseY, mouseInside, engine);
-        cursorX = alignedX(mouseX, engine);
-        cursorY = mouseY;
+    public void updateComponent(ScapesEngine engine) {
+        Optional<GuiCursor> cursor = engine.guiController().cursors().findAny();
+        if (cursor.isPresent()) {
+            cursorX = cursor.get().guiX();
+            cursorY = cursor.get().guiY();
+        } else {
+            cursorX = Double.NaN;
+            cursorY = Double.NaN;
+        }
         hover = hoverNew;
         hoverNew = null;
     }

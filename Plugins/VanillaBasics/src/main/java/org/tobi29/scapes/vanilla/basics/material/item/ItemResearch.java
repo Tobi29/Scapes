@@ -16,9 +16,8 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.ItemStack;
-
-import java.util.Optional;
 
 public interface ItemResearch {
     default Optional<String> infoText(ItemStack item) {

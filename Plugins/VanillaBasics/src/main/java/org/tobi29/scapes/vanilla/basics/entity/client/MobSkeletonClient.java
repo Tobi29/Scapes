@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
@@ -28,8 +29,6 @@ import org.tobi29.scapes.entity.client.MobLivingEquippedClient;
 import org.tobi29.scapes.entity.model.MobLivingModelHuman;
 import org.tobi29.scapes.entity.model.MobModel;
 import org.tobi29.scapes.entity.particle.ParticleManager;
-
-import java.util.Optional;
 
 public class MobSkeletonClient extends MobLivingEquippedClient {
     public MobSkeletonClient(WorldClient world) {

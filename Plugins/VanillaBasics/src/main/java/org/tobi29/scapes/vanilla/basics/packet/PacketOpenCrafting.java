@@ -44,7 +44,7 @@ public class PacketOpenCrafting extends Packet implements PacketClient {
         MobPlayerClientMain player = client.entity();
         if (player instanceof MobPlayerClientMainVB) {
             player.openGui(new GuiCrafting(true, (MobPlayerClientMainVB) player,
-                    player.game().engine().globalGUI().style()));
+                    player.game().engine().guiStyle()));
         }
     }
 }

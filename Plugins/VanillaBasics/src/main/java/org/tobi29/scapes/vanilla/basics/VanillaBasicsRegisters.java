@@ -15,10 +15,13 @@
  */
 package org.tobi29.scapes.vanilla.basics;
 
+import java8.util.stream.Collectors;
+import java8.util.Optional;
 import org.tobi29.scapes.block.*;
 import org.tobi29.scapes.chunk.EnvironmentServer;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
+import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
@@ -47,8 +50,10 @@ import org.tobi29.scapes.vanilla.basics.packet.*;
 import org.tobi29.scapes.vanilla.basics.util.IngotUtil;
 import org.tobi29.scapes.vanilla.basics.util.ToolUtil;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 class VanillaBasicsRegisters {
     static void registerCommands(ScapesServer server, VanillaBasics plugin) {
@@ -330,7 +335,7 @@ class VanillaBasicsRegisters {
         CraftingRecipe.Ingredient saw =
                 new CraftingRecipe.IngredientList(sawItem);
         CraftingRecipe.Ingredient plank = new CraftingRecipe.IngredientList(
-                treeRegistry.values().stream()
+                Streams.of(treeRegistry.values())
                         .map(tree -> new ItemStack(materials.wood,
                                 tree.data(registry)))
                         .collect(Collectors.toList()));

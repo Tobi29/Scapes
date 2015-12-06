@@ -26,6 +26,7 @@ import org.tobi29.scapes.chunk.generator.ChunkPopulator;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteChunk;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteServer;
+import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
@@ -288,20 +289,16 @@ public class EnvironmentOverworldServer
         int y = -22500;
         int x = -16;
         int z = 0;
-        while (z < 256) {
-            x += 16;
-            boolean flag = false;
-            while (!flag) {
-                double temperature = climateGenerator.temperature2(x, y);
-                if (temperature < 10.0 || temperature > 15.0 ||
-                        !gen.isValidSpawn(x, y)) {
-                    x += 512;
-                } else {
-                    flag = true;
-                }
+        while (true) {
+            double temperature = climateGenerator.temperature2(x, y);
+            if (temperature < 10.0 || temperature > 15.0 ||
+                    !gen.isValidSpawn(x, y)) {
+                x += 512;
+            } else {
+                break;
             }
-            z = terrain.highestTerrainBlockZAt(x, y);
         }
+        z = terrain.highestTerrainBlockZAt(x, y);
         return new Vector3i(x, y, z);
     }
 
@@ -336,7 +333,7 @@ public class EnvironmentOverworldServer
         while (playerUpdateWait <= 0.0) {
             playerUpdateWait += 0.25;
             Random random = ThreadLocalRandom.current();
-            world.players().forEach(player -> {
+            Streams.of(world.players()).forEach(player -> {
                 double health = player.health();
                 double maxHealth = player.maxHealth();
                 TagStructure conditionTag =

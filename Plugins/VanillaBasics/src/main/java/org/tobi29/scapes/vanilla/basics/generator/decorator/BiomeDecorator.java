@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.generator.decorator;
 
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
+import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
 import java.util.ArrayList;
@@ -45,11 +45,10 @@ public class BiomeDecorator {
 
     public void decorate(TerrainServer.TerrainMutable terrain, int x, int y,
             VanillaMaterial materials, Random random) {
-        layers.forEach(
+        Streams.of(layers).forEach(
                 layer -> layer.decorate(terrain, x, y, materials, random));
     }
 
-    @FunctionalInterface
     public interface Layer {
         void decorate(TerrainServer.TerrainMutable terrain, int x, int y,
                 VanillaMaterial materials, Random random);

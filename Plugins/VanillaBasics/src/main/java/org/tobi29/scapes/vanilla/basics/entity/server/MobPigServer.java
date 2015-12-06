@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.server;
 
+import java8.util.Optional;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
@@ -29,7 +30,6 @@ import org.tobi29.scapes.entity.server.MobLivingServer;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
-import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
