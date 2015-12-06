@@ -42,9 +42,9 @@ public class ItemModelSimple implements ItemModel {
 
     public VAO buildVAO(boolean inventory) {
         Mesh mesh = new Mesh(false);
-        float texMinX = texture.realX();
-        float texMinY = texture.realY();
-        float texSize = texture.realSize();
+        float texMinX = texture.x();
+        float texMinY = texture.y();
+        float texSize = texture.size();
         float texMaxX = texSize + texMinX;
         float texMaxY = texSize + texMinY;
         mesh.color(r, g, b, a);
