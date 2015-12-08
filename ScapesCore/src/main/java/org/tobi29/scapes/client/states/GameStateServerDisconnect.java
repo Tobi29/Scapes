@@ -44,12 +44,11 @@ public class GameStateServerDisconnect extends GameState {
         super(engine, new SceneError());
         this.address = address;
         gui = new GuiDisconnected(this, message, engine.guiStyle());
-        engine.guiStack()
-                .add("10-Menu", gui);
     }
 
     @Override
     public void init(GL gl) {
+        engine.guiStack().add("10-Menu", gui);
     }
 
     @Override
