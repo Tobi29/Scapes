@@ -102,7 +102,7 @@ public class NewConnection {
             System.arraycopy(keyServer, 0, pair, 0, keyLength);
             System.arraycopy(keyClient, 0, pair, keyLength, keyLength);
             byte[] cipherText = cipher.doFinal(pair);
-            output.put(cipherText);
+            output.putByteArrayLong(cipherText);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidKeySpecException e) {
             throw new IOException(e);
         }

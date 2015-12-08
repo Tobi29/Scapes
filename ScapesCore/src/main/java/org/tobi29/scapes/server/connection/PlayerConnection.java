@@ -86,6 +86,7 @@ public class PlayerConnection
     private ServerSkin skin;
     private PublicKey key;
     private String id, nickname = "_Error_";
+    private boolean added;
     private int loadingRadius, permissionLevel;
     private PlayerStatistics statistics;
     private long ping, pingTimeout, pingWait;
@@ -160,10 +161,10 @@ public class PlayerConnection
             KeyPair keyPair = server.keyPair();
             Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
-            byte[] array = new byte[128];
-            // TODO: Bugged on Android
-            // byte[] array = new byte[cipher.getOutputSize(keyLength << 1)];
-            input.get(array);
+            // getOutputSize bugged on android
+            // byte[] array = input.getByteArrayLong(
+            // cipher.getOutputSize(keyLength << 1));
+            byte[] array = input.getByteArrayLong(4096);
             array = cipher.doFinal(array);
             System.arraycopy(array, 0, keyServer, 0, keyLength);
             System.arraycopy(array, keyLength, keyClient, 0, keyLength);
@@ -244,6 +245,7 @@ public class PlayerConnection
             channel.queueBundle();
             throw new ConnectionCloseException(response.get());
         }
+        added = true;
         output.putBoolean(false);
         output.putInt(loadingRadius);
         TagStructureBinary
@@ -466,7 +468,10 @@ public class PlayerConnection
     public synchronized void close() throws IOException {
         state = State.CLOSED;
         channel.close();
-        server.removePlayer(this);
+        if (added) {
+            server.removePlayer(this);
+            added = false;
+        }
         removeEntity();
     }
 
