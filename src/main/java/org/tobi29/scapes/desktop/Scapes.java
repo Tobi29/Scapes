@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 public class Scapes {
     private static final Pattern HOME_PATH = Pattern.compile("\\$HOME");
 
-    @SuppressWarnings("CallToSystemExit")
+    @SuppressWarnings({"CallToSystemExit", "CallToPrintStackTrace"})
     public static void main(String[] args) {
         Options options = new Options();
         options.addOption("h", "help", false, "Print this text and exit");
@@ -92,7 +92,7 @@ public class Scapes {
                     server.dispose();
                     System.exit(exit);
                 } catch (IOException e) {
-                    System.err.println(e.getMessage());
+                    e.printStackTrace();
                     System.exit(200);
                     return;
                 }
