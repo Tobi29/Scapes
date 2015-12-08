@@ -26,6 +26,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
+import org.tobi29.scapes.engine.utils.task.Joiner;
 import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.connection.ServerConnection;
@@ -42,33 +43,30 @@ public abstract class ScapesStandaloneServer
             LoggerFactory.getLogger(ScapesStandaloneServer.class);
     private static final Runtime RUNTIME = Runtime.getRuntime();
     protected final FilePath path;
-    protected ScapesServer server;
+    private final Joiner.Joinable joinable = new Joiner.Joinable();
     private final Thread shutdownHook = new Thread(() -> {
-        try {
-            if (server == null) {
-                return;
-            }
-            server.stop(ScapesServer.ShutdownReason.STOP);
-        } catch (IOException e) {
-            LOGGER.error("Failed to terminate server: {}", e.toString());
-        }
+        joinable.joiner().join();
     });
+    protected ScapesServer server;
 
     protected ScapesStandaloneServer(FilePath path) {
         this.path = path;
-        RUNTIME.addShutdownHook(shutdownHook);
     }
 
     protected abstract Runnable loop();
 
-    public int run() throws IOException {
-        while (true) {
+    public void run() throws IOException {
+        RUNTIME.addShutdownHook(shutdownHook);
+        while (!joinable.joiner().marked()) {
             start();
             try {
                 Runnable loop = loop();
                 while (!server.shouldStop()) {
                     loop.run();
                     SleepUtil.sleep(100);
+                    if (joinable.joiner().marked()) {
+                        server.scheduleStop(ScapesServer.ShutdownReason.STOP);
+                    }
                 }
                 server.stop();
             } catch (IOException e) {
@@ -79,7 +77,11 @@ public abstract class ScapesStandaloneServer
                 break;
             }
         }
-        return 0;
+        try {
+            RUNTIME.removeShutdownHook(shutdownHook);
+        } catch (IllegalStateException e) {
+        }
+        joinable.join();
     }
 
     protected void start() throws IOException {
@@ -146,9 +148,5 @@ public abstract class ScapesStandaloneServer
     @Override
     public int permissionLevel() {
         return 10;
-    }
-
-    public void dispose() {
-        RUNTIME.removeShutdownHook(shutdownHook);
     }
 }

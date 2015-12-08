@@ -107,6 +107,10 @@ public class ScapesServer {
         return maxLoadingRadius;
     }
 
+    public long seed() {
+        return seed;
+    }
+
     public TaskExecutor taskExecutor() {
         return taskExecutor;
     }

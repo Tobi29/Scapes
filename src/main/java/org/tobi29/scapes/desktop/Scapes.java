@@ -88,9 +88,7 @@ public class Scapes {
                 try {
                     ScapesStandaloneServer server =
                             new ScapesServerHeadless(home);
-                    int exit = server.run();
-                    server.dispose();
-                    System.exit(exit);
+                    server.run();
                 } catch (IOException e) {
                     e.printStackTrace();
                     System.exit(200);
