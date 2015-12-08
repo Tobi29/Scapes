@@ -1,7 +1,11 @@
 package org.tobi29.scapes.plugins;
 
+import java8.util.Spliterators;
+import java8.util.concurrent.ThreadLocalRandom;
+
 import java.security.*;
 import java.util.Enumeration;
+import java.util.concurrent.ForkJoinPool;
 
 public class Sandbox {
     private static final String[] PACKAGE_WHITELIST =
@@ -15,6 +19,7 @@ public class Sandbox {
             return;
         }
         sandboxed = true;
+        preload();
         Policy.setPolicy(new Policy() {
             @Override
             public Permissions getPermissions(CodeSource codesource) {
@@ -59,5 +64,12 @@ public class Sandbox {
                 }
             }
         });
+    }
+
+    public static void preload() {
+        // Preload these to avoid permission errors when plugins trip into these
+        Spliterators.emptySpliterator();
+        ForkJoinPool.commonPool();
+        ThreadLocalRandom.current();
     }
 }
