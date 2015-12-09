@@ -26,7 +26,7 @@ import org.tobi29.scapes.engine.input.ControllerBasic;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.input.ControllerKeyReference;
-import org.tobi29.scapes.engine.opengl.Container;
+import org.tobi29.scapes.engine.Container;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.math.FastMath;
