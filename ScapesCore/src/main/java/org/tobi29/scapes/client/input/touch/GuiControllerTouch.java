@@ -119,15 +119,17 @@ public class GuiControllerTouch implements GuiController {
                     new GuiComponentEvent(finger.cursor.guiX(),
                             finger.cursor.guiY(), relativeX, relativeY),
                     component, component::dragLeft, engine);
+            Vector2 source = finger.source.div(screen);
             engine.guiStack().fireRecursiveEvent(
-                    new GuiComponentEvent(finger.cursor.guiX(),
-                            finger.cursor.guiY(), relativeX, relativeY),
-                    GuiComponent::scroll, engine);
+                    new GuiComponentEvent(source.doubleX(), source.doubleY(),
+                            relativeX, relativeY), GuiComponent::scroll,
+                    engine);
         }
     }
 
     private static class Finger {
         private final MutableVector2 tracker;
+        private final Vector2 source;
         private final long start;
         private final GuiCursor cursor = new GuiCursor(true);
         private Optional<GuiComponent> dragging = Optional.empty();
@@ -135,6 +137,7 @@ public class GuiControllerTouch implements GuiController {
 
         private Finger(MutableVector2 tracker) {
             this.tracker = tracker;
+            source = tracker.now();
             start = System.currentTimeMillis();
         }
 
