@@ -79,7 +79,7 @@ public class SceneScapesVoxelWorld extends Scene {
     private float renderDistance, fov;
     private int flashDir;
     private long flashTime, flashStart;
-    private boolean guiHide, mouseGrabbed, chunkGeometryDebug, wireframe;
+    private boolean mouseGrabbed, chunkGeometryDebug, wireframe;
     private Image[] panorama;
 
     public SceneScapesVoxelWorld(WorldClient world, Cam cam) {
@@ -127,10 +127,6 @@ public class SceneScapesVoxelWorld extends Scene {
         return renderDistance;
     }
 
-    public boolean isGuiHidden() {
-        return guiHide;
-    }
-
     public boolean isMouseGrabbed() {
         return mouseGrabbed;
     }
@@ -145,10 +141,6 @@ public class SceneScapesVoxelWorld extends Scene {
         flashStart = System.currentTimeMillis();
         Random random = ThreadLocalRandom.current();
         flashDir = 1 - (random.nextInt(2) << 1);
-    }
-
-    public void setGuiHide(boolean guiHide) {
-        this.guiHide = guiHide;
     }
 
     public MobPlayerClientMain player() {
@@ -352,7 +344,7 @@ public class SceneScapesVoxelWorld extends Scene {
     }
 
     public Image[] takePanorama(GL gl, FBO fbo) {
-        guiHide = true;
+        world.game().setHudVisible(false);
         Image[] images = new Image[6];
         Cam cam = new Cam(this.cam.near, this.cam.far);
         cam.setPerspective(1.0f, 90.0f);
@@ -377,7 +369,7 @@ public class SceneScapesVoxelWorld extends Scene {
             gl.textures().bind(fbo.textureColor(0), gl);
             images[i] = gl.screenShotFBO(fbo);
         }
-        guiHide = false;
+        world.game().setHudVisible(true);
         return images;
     }
 

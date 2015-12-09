@@ -162,7 +162,7 @@ public class GameStateGameMP extends GameState {
         SceneScapesVoxelWorld scene = (SceneScapesVoxelWorld) this.scene;
         engine.controller().ifPresent(controller -> {
             if (controller.isPressed(ControllerKey.KEY_F1)) {
-                scene.setGuiHide(!scene.isGuiHidden());
+                setHudVisible(!hud.isVisible());
             }
             if (Debug.enabled() && controller.isPressed(ControllerKey.KEY_F6)) {
                 debugWidget.setVisible(!debugWidget.isVisible());

@@ -15,11 +15,11 @@
  */
 package org.tobi29.scapes.chunk;
 
-import java8.util.stream.Collectors;
 import java8.util.Optional;
-import java8.util.stream.Stream;
 import java8.util.function.Function;
 import java8.util.function.Supplier;
+import java8.util.stream.Collectors;
+import java8.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
@@ -196,7 +196,7 @@ public class WorldClient extends World {
         scene.terrainTextureRegistry().texture().bind(gl);
         terrain.renderer().render(gl, shaderTerrain, cam, debug);
         gl.setBlending(BlendingMode.NORMAL);
-        if (!scene.isGuiHidden()) {
+        if (game.hud().isVisible()) {
             playerModel.render(gl, this, cam, shaderEntity);
         }
         AABB aabb = new AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
