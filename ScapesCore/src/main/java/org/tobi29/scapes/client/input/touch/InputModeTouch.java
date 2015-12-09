@@ -45,6 +45,7 @@ public class InputModeTouch implements InputMode {
     public boolean poll() {
         inventoryOpen = false;
         menuOpen = false;
+        controller.poll();
         return controller.isActive();
     }
 

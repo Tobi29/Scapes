@@ -110,6 +110,7 @@ public class InputModeKeyboard implements InputMode {
 
     @Override
     public boolean poll() {
+        controller.poll();
         return controller.isActive();
     }
 
