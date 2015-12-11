@@ -66,7 +66,7 @@ public class GameStateGameMP extends GameState {
     private double pingWait;
 
     protected GameStateGameMP(
-            IOFunction<GameStateGameMP, ClientConnection> clientSupplier,
+            IOFunction<GameStateGameMP, ? extends ClientConnection> clientSupplier,
             Scene scene, ScapesEngine engine) throws IOException {
         super(engine, scene);
         chatHistory = new ChatHistory();

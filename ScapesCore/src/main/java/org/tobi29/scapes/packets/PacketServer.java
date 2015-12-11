@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import org.tobi29.scapes.chunk.WorldServer;
@@ -31,6 +30,9 @@ public interface PacketServer {
 
     void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException;
+
+    default void localServer() {
+    }
 
     void runServer(PlayerConnection player, WorldServer world)
             throws ConnectionCloseException;

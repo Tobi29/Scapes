@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import java8.util.Optional;
@@ -32,7 +31,7 @@ import java.io.IOException;
 public class PacketEntityMetaData extends Packet implements PacketClient {
     private int entityID;
     private String category;
-    private TagStructure tagStructure;
+    private TagStructure tag;
 
     public PacketEntityMetaData() {
     }
@@ -41,7 +40,7 @@ public class PacketEntityMetaData extends Packet implements PacketClient {
         super(entity.pos());
         entityID = entity.entityID();
         this.category = category;
-        tagStructure = entity.metaData(category);
+        tag = entity.metaData(category);
     }
 
     @Override
@@ -49,7 +48,7 @@ public class PacketEntityMetaData extends Packet implements PacketClient {
             throws IOException {
         stream.putInt(entityID);
         stream.putString(category);
-        TagStructureBinary.write(tagStructure, stream);
+        TagStructureBinary.write(tag, stream);
     }
 
     @Override
@@ -57,8 +56,13 @@ public class PacketEntityMetaData extends Packet implements PacketClient {
             throws IOException {
         entityID = stream.getInt();
         category = stream.getString();
-        tagStructure = new TagStructure();
-        TagStructureBinary.read(tagStructure, stream);
+        tag = new TagStructure();
+        TagStructureBinary.read(tag, stream);
+    }
+
+    @Override
+    public void localClient() {
+        tag = tag.copy();
     }
 
     @Override
@@ -80,6 +84,6 @@ public class PacketEntityMetaData extends Packet implements PacketClient {
     }
 
     public TagStructure tagStructure() {
-        return tagStructure;
+        return tag;
     }
 }

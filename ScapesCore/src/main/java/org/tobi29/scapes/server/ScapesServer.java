@@ -71,16 +71,17 @@ public class ScapesServer {
         taskExecutor = new TaskExecutor(crashHandler, "Server");
         commandRegistry = new CommandRegistry();
         TagStructure serverTag = tagStructure.getStructure("Server");
+        TagStructure socketTag = serverTag.getStructure("Socket");
         maxLoadingRadius = serverTag.getInteger("MaxLoadingRadius");
         this.serverInfo = serverInfo;
-        serverConnection =
-                new ServerConnection(this, serverTag.getStructure("Socket"));
+        serverConnection = new ServerConnection(this, socketTag);
         extensions.init();
         format.plugins().init();
         format.plugins().plugins().forEach(plugin -> plugin.initServer(this));
         format.plugins().dimensions().forEach(this::registerWorld);
         format.plugins().plugins()
                 .forEach(plugin -> plugin.initServerEnd(this));
+        serverConnection.workers(socketTag.getInteger("WorkerCount"));
     }
 
     public ShutdownReason shutdownReason() {

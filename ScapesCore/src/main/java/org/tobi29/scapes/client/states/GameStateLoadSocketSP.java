@@ -18,32 +18,41 @@ package org.tobi29.scapes.client.states;
 import java8.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tobi29.scapes.client.connection.NewConnection;
 import org.tobi29.scapes.client.gui.GuiLoading;
+import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
 import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.server.ServerInfo;
+import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.server.ScapesServer;
-import org.tobi29.scapes.server.connection.LocalPlayerConnection;
-import org.tobi29.scapes.server.connection.ServerConnection;
 import org.tobi29.scapes.server.format.WorldSource;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 
-public class GameStateLoadSP extends GameState {
+public class GameStateLoadSocketSP extends GameState {
     private static final Logger LOGGER =
-            LoggerFactory.getLogger(GameStateLoadSP.class);
+            LoggerFactory.getLogger(GameStateLoadSocketSP.class);
+    private final ByteBuffer headerBuffer = BufferCreator
+            .wrap(new byte[]{'S', 'c', 'a', 'p', 'e', 's',
+                    ConnectionType.PLAY.data()});
     private final WorldSource source;
-    private int step;
+    private int step, port;
     private ScapesServer server;
+    private SocketChannel channel;
+    private NewConnection client;
     private GuiLoading progress;
 
-    public GameStateLoadSP(WorldSource source, ScapesEngine engine,
+    public GameStateLoadSocketSP(WorldSource source, ScapesEngine engine,
             Scene scene) {
         super(engine, scene);
         this.source = source;
@@ -88,16 +97,60 @@ public class GameStateLoadSP extends GameState {
                     step++;
                     break;
                 case 1:
+                    port = server.connection().start(0);
+                    if (port <= 0) {
+                        throw new IOException(
+                                "Unable to open server socket (Invalid port returned: " +
+                                        port + ')');
+                    }
+                    progress.setLabel("Connecting to server...");
+                    step++;
+                    break;
+                case 2:
+                    InetSocketAddress address =
+                            new InetSocketAddress("localhost", port);
+                    if (address.isUnresolved()) {
+                        throw new IOException("Could not resolve address");
+                    }
+                    channel = SocketChannel.open(address);
+                    channel.configureBlocking(false);
+                    step++;
+                    break;
+                case 3:
+                    if (channel.finishConnect()) {
+                        step++;
+                        progress.setLabel("Sending request...");
+                    }
+                    break;
+                case 4:
+                    channel.write(headerBuffer);
+                    if (!headerBuffer.hasRemaining()) {
+                        step++;
+                    }
+                    break;
+                case 5:
                     int loadingRadius = FastMath.round(
                             engine.tagStructure().getStructure("Scapes")
                                     .getDouble("RenderDistance")) + 32;
                     Account account = Account.read(
                             engine.home().resolve("Account.properties"));
-                    ServerConnection server = this.server.connection();
-                    GameStateGameSP game = new GameStateGameSP(
-                            g -> new LocalPlayerConnection(server, g,
-                                    loadingRadius, account).client(), source,
-                            this.server, scene, engine);
+                    client = new NewConnection(engine, channel, account,
+                            loadingRadius);
+                    step++;
+                    break;
+                case 6:
+                    Optional<String> status = client.login();
+                    if (status.isPresent()) {
+                        progress.setLabel(status.get());
+                    } else {
+                        step++;
+                        progress.setLabel("Loading world...");
+                    }
+                    break;
+                case 7:
+                    GameStateGameSP game =
+                            new GameStateGameSP(client.finish(), source, server,
+                                    scene, engine);
                     engine.setState(game);
                     break;
             }
@@ -120,6 +173,6 @@ public class GameStateLoadSP extends GameState {
             step = -1;
             return;
         }
-        progress.setProgress(step);
+        progress.setProgress(step / 7.0f);
     }
 }

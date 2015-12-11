@@ -67,6 +67,11 @@ public class PacketSendChunk extends Packet implements PacketClient {
     }
 
     @Override
+    public void localClient() {
+        tag = tag.copy();
+    }
+
+    @Override
     public void runClient(ClientConnection client, WorldClient world) {
         Terrain terrain = client.world().terrain();
         if (terrain instanceof TerrainInfiniteClient) {

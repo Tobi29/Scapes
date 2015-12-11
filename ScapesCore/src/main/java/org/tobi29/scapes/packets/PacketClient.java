@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import org.tobi29.scapes.chunk.WorldClient;
@@ -31,6 +30,9 @@ public interface PacketClient {
 
     void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException;
+
+    default void localClient() {
+    }
 
     void runClient(ClientConnection client, WorldClient world)
             throws ConnectionCloseException;

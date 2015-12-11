@@ -241,12 +241,12 @@ public class NewConnection {
         return status;
     }
 
-    public IOFunction<GameStateGameMP, ClientConnection> finish()
+    public IOFunction<GameStateGameMP, RemoteClientConnection> finish()
             throws IOException {
         ScapesClient game = (ScapesClient) engine.game();
         Plugins plugins = new Plugins(this.plugins, idStorage,
                 game.saves().loadClasses());
-        return state -> new ClientConnection(state, channel, plugins,
+        return state -> new RemoteClientConnection(state, channel, plugins,
                 loadingDistance);
     }
 }

@@ -34,7 +34,7 @@ public class GameStateGameSP extends GameStateGameMP {
     private final ScapesServer server;
 
     public GameStateGameSP(
-            IOFunction<GameStateGameMP, ClientConnection> clientSupplier,
+            IOFunction<GameStateGameMP, ? extends ClientConnection> clientSupplier,
             WorldSource source, ScapesServer server, Scene scene,
             ScapesEngine engine) throws IOException {
         super(clientSupplier, scene, engine);

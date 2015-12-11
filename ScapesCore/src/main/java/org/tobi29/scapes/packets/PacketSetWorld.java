@@ -68,6 +68,11 @@ public class PacketSetWorld extends Packet implements PacketClient {
     }
 
     @Override
+    public void localClient() {
+        tag = tag.copy();
+    }
+
+    @Override
     public void runClient(ClientConnection client, WorldClient world) {
         GameRegistry.AsymSupplierRegistry<WorldServer, EnvironmentServer, WorldClient, EnvironmentClient>
                 environmentRegistry = client.plugins().registry()

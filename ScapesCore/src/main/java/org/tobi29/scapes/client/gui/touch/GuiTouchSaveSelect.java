@@ -18,9 +18,11 @@ package org.tobi29.scapes.client.gui.touch;
 import java8.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tobi29.scapes.Debug;
 import org.tobi29.scapes.client.SaveStorage;
 import org.tobi29.scapes.client.ScapesClient;
 import org.tobi29.scapes.client.states.GameStateLoadSP;
+import org.tobi29.scapes.client.states.GameStateLoadSocketSP;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
@@ -78,9 +80,15 @@ public class GuiTouchSaveSelect extends GuiTouchMenuDouble {
             label.onClickLeft(event -> {
                 scene.setSpeed(0.0f);
                 try {
-                    state.engine().setState(
-                            new GameStateLoadSP(saves.get(name), state.engine(),
-                                    state.scene()));
+                    if (Debug.socketSingleplayer()) {
+                        state.engine().setState(
+                                new GameStateLoadSocketSP(saves.get(name),
+                                        state.engine(), state.scene()));
+                    } else {
+                        state.engine().setState(
+                                new GameStateLoadSP(saves.get(name),
+                                        state.engine(), state.scene()));
+                    }
                 } catch (IOException e) {
                     LOGGER.warn("Failed to open save: {}", e.toString());
                 }

@@ -60,7 +60,7 @@ public class ServerConnection extends AbstractServerConnection {
     private boolean allowsJoin = true, allowsCreation = true;
 
     public ServerConnection(ScapesServer server, TagStructure tagStructure) {
-        super(server.taskExecutor(), ConnectionInfo.header(), tagStructure);
+        super(server.taskExecutor(), ConnectionInfo.header());
         plugins = server.plugins();
         mayPlayers = tagStructure.getInteger("MaxPlayers");
         controlPassword = tagStructure.getString("ControlPassword");
@@ -105,7 +105,8 @@ public class ServerConnection extends AbstractServerConnection {
     }
 
     public void send(Packet packet) {
-        Streams.of(playerByName.values()).forEach(player -> player.send(packet));
+        Streams.of(playerByName.values())
+                .forEach(player -> player.send(packet));
     }
 
     public boolean doesAllowJoin() {
@@ -161,7 +162,8 @@ public class ServerConnection extends AbstractServerConnection {
     }
 
     public void message(String message, MessageLevel level) {
-        Streams.of(executors).forEach(executor -> executor.message(message, level));
+        Streams.of(executors)
+                .forEach(executor -> executor.message(message, level));
     }
 
     @Override
@@ -174,7 +176,8 @@ public class ServerConnection extends AbstractServerConnection {
             case PLAY:
                 PacketBundleChannel bundleChannel =
                         new PacketBundleChannel(channel);
-                return Optional.of(new PlayerConnection(bundleChannel, this));
+                return Optional
+                        .of(new RemotePlayerConnection(bundleChannel, this));
             case CONTROL:
                 if (controlPassword.isEmpty()) {
                     break;

@@ -41,6 +41,8 @@ public class Scapes {
         options.addOption("v", "version", false, "Print version and exit");
         options.addOption("m", "mode", true, "Specify which mode to run");
         options.addOption("d", "debug", false, "Run in debug mode");
+        options.addOption("r", "socketsp", false,
+                "Use network socket for singleplayer");
         options.addOption("s", "skipintro", false, "Skip client intro");
         DefaultParser parser = new DefaultParser();
         CommandLine commandLine;
@@ -65,6 +67,9 @@ public class Scapes {
         Sandbox.sandbox();
         if (commandLine.hasOption('d')) {
             Debug.enable();
+        }
+        if (commandLine.hasOption('r')) {
+            Debug.socketSingleplayer(true);
         }
         String[] cmdArgs = commandLine.getArgs();
         String mode = commandLine.getOptionValue('m', "client");

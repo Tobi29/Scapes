@@ -101,7 +101,7 @@ public class WorldClient extends World {
     }
 
     public void addEntity(EntityClient add, int id) {
-        if (id != player.entityID()) {
+        if (id != player.entityID() || add == player) {
             if (add != player) {
                 add.createModel()
                         .ifPresent(model -> entityModels.put(id, model));

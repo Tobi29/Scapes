@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import java8.util.Optional;
@@ -55,6 +54,11 @@ public class PacketEntityChange extends Packet implements PacketClient {
         entityID = stream.getInt();
         tag = new TagStructure();
         TagStructureBinary.read(tag, stream);
+    }
+
+    @Override
+    public void localClient() {
+        tag = tag.copy();
     }
 
     @Override

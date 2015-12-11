@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
+import org.tobi29.scapes.client.connection.RemoteClientConnection;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 public class PacketPingClient extends PacketPing {
@@ -36,6 +36,8 @@ public class PacketPingClient extends PacketPing {
 
     @Override
     public void runClient(ClientConnection client, WorldClient world) {
-        client.updatePing(timestamp);
+        if (client instanceof RemoteClientConnection) {
+            ((RemoteClientConnection) client).updatePing(timestamp);
+        }
     }
 }
