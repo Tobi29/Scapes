@@ -294,6 +294,9 @@ public class TerrainInfiniteServer extends TerrainInfinite
 
     @Override
     public boolean hasDelayedUpdate(int x, int y, int z) {
+        if (z < 0 || z >= zSize) {
+            return false;
+        }
         Optional<TerrainInfiniteChunkServer> chunk = chunk(x >> 4, y >> 4);
         return chunk.isPresent() && chunk.get().hasDelayedUpdate(x, y, z);
     }
@@ -336,6 +339,9 @@ public class TerrainInfiniteServer extends TerrainInfinite
 
     @Override
     public void type(int x, int y, int z, BlockType type) {
+        if (z < 0 || z >= zSize) {
+            return;
+        }
         Optional<TerrainInfiniteChunkServer> chunk = chunk(x >> 4, y >> 4);
         if (!chunk.isPresent()) {
             return;
@@ -346,6 +352,9 @@ public class TerrainInfiniteServer extends TerrainInfinite
 
     @Override
     public void data(int x, int y, int z, int data) {
+        if (z < 0 || z >= zSize) {
+            return;
+        }
         Optional<TerrainInfiniteChunkServer> chunk = chunk(x >> 4, y >> 4);
         if (!chunk.isPresent()) {
             return;
@@ -356,6 +365,9 @@ public class TerrainInfiniteServer extends TerrainInfinite
 
     @Override
     public void typeData(int x, int y, int z, BlockType block, int data) {
+        if (z < 0 || z >= zSize) {
+            return;
+        }
         Optional<TerrainInfiniteChunkServer> chunk = chunk(x >> 4, y >> 4);
         if (!chunk.isPresent()) {
             return;
