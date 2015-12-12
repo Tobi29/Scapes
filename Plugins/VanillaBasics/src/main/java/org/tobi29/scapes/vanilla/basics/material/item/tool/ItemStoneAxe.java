@@ -13,19 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.tobi29.scapes.vanilla.basics.material.item;
+package org.tobi29.scapes.vanilla.basics.material.item.tool;
 
 import org.tobi29.scapes.block.ItemStack;
-import org.tobi29.scapes.vanilla.basics.material.MetalType;
-import org.tobi29.scapes.vanilla.basics.util.MetalUtil;
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
-public interface ItemMetal extends ItemHeatable {
-    MetalUtil.Alloy alloy(ItemStack item);
-
-    void setAlloy(ItemStack item, MetalUtil.Alloy alloy);
+public class ItemStoneAxe extends ItemStoneTool {
+    public ItemStoneAxe(VanillaMaterial materials) {
+        super(materials, "vanilla.basics.item.StoneAxe");
+    }
 
     @Override
-    default float meltingPoint(ItemStack item) {
-        return (float) alloy(item).meltingPoint();
+    public boolean isWeapon(ItemStack item) {
+        return true;
+    }
+
+    @Override
+    public int hitWait(ItemStack item) {
+        return 2000;
+    }
+
+    @Override
+    public String type() {
+        return "Axe";
     }
 }

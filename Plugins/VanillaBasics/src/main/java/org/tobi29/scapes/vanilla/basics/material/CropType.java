@@ -24,7 +24,7 @@ public class CropType {
     private static final Pattern REPLACE = Pattern.compile(" ");
     private static final String ROOT = "VanillaBasics:image/terrain/crops";
     public static final CropType WHEAT =
-            new CropType("Wheat", "Bread", ROOT, 10000.0, 0);
+            new CropType("Wheat", "Bread", ROOT, 4000.0, 0);
     private final String name, bakedName, texture;
     private final double time;
     private final int nutrient;

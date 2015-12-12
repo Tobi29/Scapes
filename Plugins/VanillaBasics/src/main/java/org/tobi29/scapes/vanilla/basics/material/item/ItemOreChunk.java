@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.item;
 
 import org.tobi29.scapes.block.ItemStack;
@@ -25,7 +24,9 @@ import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.entity.server.MobItemServer;
+import org.tobi29.scapes.vanilla.basics.material.MetalType;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
+import org.tobi29.scapes.vanilla.basics.util.IngotUtil;
 
 public class ItemOreChunk extends VanillaItem
         implements ItemHeatable, ItemResearch {
@@ -150,12 +151,13 @@ public class ItemOreChunk extends VanillaItem
                     currentTemperature +
                             (temperature - currentTemperature) / 400.0f, 1.1f));
             if (currentTemperature >= meltingPoint(item)) {
-                String metal = metalName(item);
-                if ("Iron Bloom".equals(metal)) {
+                int data = item.data();
+                if (data == 4 || data == 5) {
                     item.setData(8);
                 } else {
+                    MetalType metal = metal(item);
                     item.setMaterial(materials.ingot, 1);
-                    item.metaData("Vanilla").setString("MetalType", metal);
+                    IngotUtil.createIngot(item, metal, temperature);
                 }
             }
         }
@@ -222,26 +224,22 @@ public class ItemOreChunk extends VanillaItem
         return item.metaData("Vanilla").getFloat("Temperature");
     }
 
-    public String metalName(ItemStack item) {
+    public MetalType metal(ItemStack item) {
         switch (item.data()) {
             case 0:
-                return "Bismuth";
+                return plugin.getMetalType("Bismuth");
             case 1:
-                return "Copper";
+                return plugin.getMetalType("Copper");
             case 2:
-                return "Tin";
+                return plugin.getMetalType("Tin");
             case 3:
-                return "Zinc";
-            case 4:
-                return "Iron Bloom";
-            case 5:
-                return "Iron Bloom";
+                return plugin.getMetalType("Zinc");
             case 6:
-                return "Silver";
+                return plugin.getMetalType("Silver");
             case 7:
-                return "Gold";
+                return plugin.getMetalType("Gold");
             case 9:
-                return "Iron";
+                return plugin.getMetalType("Iron");
             default:
                 throw new IllegalArgumentException(
                         "Unknown data: {}" + item.data());

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material;
 
 import org.tobi29.scapes.block.BlockType;
@@ -76,6 +75,13 @@ public class VanillaMaterial {
     public final BlockType leaves;
     public final BlockType log;
     public final Material meat;
+    public final ItemMetalTool metalAxe;
+    public final ItemMetalTool metalHammer;
+    public final ItemMetalTool metalHoe;
+    public final ItemMetalTool metalPickaxe;
+    public final ItemMetalTool metalSaw;
+    public final ItemMetalTool metalShovel;
+    public final ItemMetalTool metalSword;
     public final Material mold;
     public final BlockType oreBismuthinite;
     public final BlockType oreCassiterite;
@@ -94,18 +100,18 @@ public class VanillaMaterial {
     public final BlockType sapling;
     public final BlockType snow;
     public final Material stick;
+    public final ItemStoneTool stoneAxe;
+    public final ItemStoneTool stoneHammer;
+    public final ItemStoneTool stoneHoe;
+    public final ItemStoneTool stonePickaxe;
     public final BlockType stoneRaw;
+    public final ItemStoneTool stoneSaw;
+    public final ItemStoneTool stoneShovel;
+    public final ItemStoneTool stoneSword;
     public final BlockType stoneTotem;
     public final BlockType straw;
-    public final Material axe;
     public final BlockType stoneRock;
-    public final Material hammer;
-    public final Material hoe;
-    public final Material pickaxe;
-    public final Material saw;
     public final Material seed;
-    public final Material shovel;
-    public final Material sword;
     public final Material string;
     public final BlockType torch;
     public final BlockType water;
@@ -154,6 +160,13 @@ public class VanillaMaterial {
         leaves = register(new BlockLeaves(this, treeRegistry));
         log = register(new BlockLog(this, treeRegistry));
         meat = register(new ItemMeat(this));
+        metalAxe = register(new ItemMetalAxe(this));
+        metalHammer = register(new ItemMetalHammer(this));
+        metalHoe = register(new ItemMetalHoe(this));
+        metalPickaxe = register(new ItemMetalPickaxe(this));
+        metalSaw = register(new ItemMetalSaw(this));
+        metalShovel = register(new ItemMetalShovel(this));
+        metalSword = register(new ItemMetalSword(this));
         mold = register(new ItemMold(this));
         oreBismuthinite =
                 register(new BlockOreBismuthinite(this, stoneRegistry));
@@ -173,18 +186,18 @@ public class VanillaMaterial {
         sapling = register(new BlockSapling(this, treeRegistry));
         snow = register(new BlockSnow(this));
         stick = register(new ItemStick(this));
-        stoneRaw = register(new BlockStoneRaw(this, stoneRegistry));
-        stoneTotem = register(new BlockStoneTotem(this, stoneRegistry));
         straw = register(new BlockStraw(this));
-        axe = register(new ItemAxe(this));
+        stoneAxe = register(new ItemStoneAxe(this));
+        stoneHammer = register(new ItemStoneHammer(this));
+        stoneHoe = register(new ItemStoneHoe(this));
+        stonePickaxe = register(new ItemStonePickaxe(this));
+        stoneRaw = register(new BlockStoneRaw(this, stoneRegistry));
         stoneRock = register(new BlockStoneRock(this, stoneRegistry));
-        hammer = register(new ItemHammer(this));
-        hoe = register(new ItemHoe(this));
-        pickaxe = register(new ItemPickaxe(this));
-        saw = register(new ItemSaw(this));
+        stoneTotem = register(new BlockStoneTotem(this, stoneRegistry));
+        stoneSaw = register(new ItemStoneSaw(this));
+        stoneShovel = register(new ItemStoneShovel(this));
+        stoneSword = register(new ItemStoneSword(this));
         seed = register(new ItemSeed(this, cropRegistry));
-        shovel = register(new ItemShovel(this));
-        sword = register(new ItemSword(this));
         string = register(new ItemString(this));
         torch = register(new BlockTorch(this));
         water = register(new BlockWater(this));

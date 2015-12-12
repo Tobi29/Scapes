@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material;
 
 import org.tobi29.scapes.block.BlockType;
@@ -23,16 +22,17 @@ import java.util.List;
 public class OreType {
     private final BlockType type;
     private final List<Integer> stoneTypes;
-    private final int rarity, chance, rockChance;
+    private final int rarity, chance, rockChance, rockDistance;
     private final double size;
 
     public OreType(BlockType type, int rarity, double size, int chance,
-            int rockChance, List<Integer> stoneTypes) {
+            int rockChance, int rockDistance, List<Integer> stoneTypes) {
         this.type = type;
         this.rarity = rarity;
         this.size = size;
         this.chance = chance;
         this.rockChance = rockChance;
+        this.rockDistance = rockDistance;
         this.stoneTypes = stoneTypes;
     }
 
@@ -50,6 +50,10 @@ public class OreType {
 
     public int rockChance() {
         return rockChance;
+    }
+
+    public int rockDistance() {
+        return rockDistance;
     }
 
     public BlockType type() {

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material;
 
 import org.tobi29.scapes.block.GameRegistry;
@@ -25,6 +24,7 @@ public class StoneType {
     private static final String ROOT = "VanillaBasics:image/terrain/stone";
     public static final StoneType DIRT_STONE =
             new StoneType("Dirt Stone", ROOT, 0.1);
+    public static final StoneType FLINT = new StoneType("Flint", ROOT, 2.1);
     public static final StoneType CHALK = new StoneType("Chalk", ROOT, 0.4);
     public static final StoneType CHERT = new StoneType("Chert", ROOT, 0.4);
     public static final StoneType CLAYSTONE =

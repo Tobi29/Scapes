@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.util;
 
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.material.MetalType;
+import org.tobi29.scapes.vanilla.basics.material.item.ItemMetal;
 
 public class IngotUtil {
     public static void createIngot(VanillaBasics plugin, ItemStack item,
@@ -28,7 +28,9 @@ public class IngotUtil {
 
     public static void createIngot(ItemStack item, MetalType metalType,
             float temperature) {
-        item.metaData("Vanilla").setString("MetalType", metalType.id());
+        MetalUtil.Alloy alloy = new MetalUtil.Alloy();
+        alloy.add(metalType, 1.0);
+        ((ItemMetal) item.material()).setAlloy(item, alloy);
         item.metaData("Vanilla").setFloat("Temperature", temperature);
     }
 }

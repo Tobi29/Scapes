@@ -57,7 +57,9 @@ public class EnvironmentOverworldServer
     private final VanillaMaterial materials;
     private final ChunkGeneratorOverworld gen;
     private final ChunkPopulatorOverworld pop;
+    private final TerrainGenerator terrainGenerator;
     private final ClimateGenerator climateGenerator;
+    private final BiomeGenerator biomeGenerator;
     private long simulationCount;
     private double syncWait = 2.0, playerUpdateWait = 0.25, itemUpdateWait =
             1.0, tickWait = 0.05;
@@ -66,9 +68,9 @@ public class EnvironmentOverworldServer
         this.world = world;
         materials = plugin.getMaterials();
         Random random = new Random(world.seed());
-        TerrainGenerator terrainGenerator = new TerrainGenerator(random);
+        terrainGenerator = new TerrainGenerator(random);
         climateGenerator = new ClimateGenerator(random, terrainGenerator);
-        BiomeGenerator biomeGenerator = new BiomeGenerator(climateGenerator);
+        biomeGenerator = new BiomeGenerator(climateGenerator);
         gen = new ChunkGeneratorOverworld(random, terrainGenerator,
                 plugin.getMaterials());
         pop = new ChunkPopulatorOverworld(world, plugin, biomeGenerator);
@@ -286,19 +288,17 @@ public class EnvironmentOverworldServer
 
     @Override
     public Vector3 calculateSpawn(TerrainServer terrain) {
-        int y = -22500;
-        int x = -16;
-        int z = 0;
-        while (true) {
-            double temperature = climateGenerator.temperature2(x, y);
-            if (temperature < 10.0 || temperature > 15.0 ||
-                    !gen.isValidSpawn(x, y)) {
+        int x = 0, y = -22500;
+        boolean flag = false;
+        while (!flag) {
+            if (!terrainGenerator.isValidSpawn(x, y) ||
+                    !biomeGenerator.get(x, y).isValidSpawn()) {
                 x += 512;
             } else {
-                break;
+                flag = true;
             }
         }
-        z = terrain.highestTerrainBlockZAt(x, y);
+        int z = terrain.highestTerrainBlockZAt(x, y);
         return new Vector3i(x, y, z);
     }
 

@@ -15,8 +15,7 @@
  */
 package org.tobi29.scapes.vanilla.basics.generator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java8.util.Optional;
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.generator.ChunkGenerator;
@@ -33,8 +32,6 @@ import java.util.Iterator;
 import java.util.Random;
 
 public class ChunkGeneratorOverworld implements ChunkGenerator {
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(ChunkGeneratorOverworld.class);
     private final Random random = new Random();
     private final VanillaMaterial materials;
     private final RandomNoiseLayer sandLayer;
@@ -113,17 +110,7 @@ public class ChunkGeneratorOverworld implements ChunkGenerator {
                 new RandomNoiseNoiseLayer(sandstoneNoise, random.nextLong(), 3);
     }
 
-    public boolean isValidSpawn(int x, int y) {
-        TerrainGenerator.TerrainGeneratorLayer layer =
-                new TerrainGenerator.TerrainGeneratorLayer();
-        terrainGenerator.generate(x, y, layer);
-        TerrainGenerator.TerrainGeneratorOutput output =
-                new TerrainGenerator.TerrainGeneratorOutput();
-        terrainGenerator.generate(x, y, layer, output);
-        return output.height > output.waterHeight;
-    }
-
-    public OreType randomOreType(VanillaBasics plugin, int stoneType,
+    public Optional<OreType> randomOreType(VanillaBasics plugin, int stoneType,
             Random random) {
         OreType type = null;
         int max = -1;
@@ -144,7 +131,7 @@ public class ChunkGeneratorOverworld implements ChunkGenerator {
                 }
             }
         }
-        return type;
+        return Optional.ofNullable(type);
     }
 
     public short stoneType(int xxx, int yyy, int zzz) {
@@ -181,6 +168,8 @@ public class ChunkGeneratorOverworld implements ChunkGenerator {
                 random.nextInt(6) - (int) (generator.mountainFactor * 300);
         int lastFree = FastMath.clamp((int) generator.height,
                 (int) generator.waterHeight, dz - 1);
+        int waterLevel = (int) generator.waterHeight - 1;
+        int riverBedLevel = waterLevel - 14;
         int zzzShifted = lastFree + stoneTypeZShift;
         if (zzzShifted <= 96) {
             stoneType = stoneLayers[0].getInt(x, y);
@@ -195,7 +184,7 @@ public class ChunkGeneratorOverworld implements ChunkGenerator {
             output.type(zz, materials.air);
             output.data(zz, 0);
         }
-        for (int zz = lastFree; zz >= 0; zz--) {
+        for (int zz = lastFree; zz >= z; zz--) {
             zzzShifted = zz + stoneTypeZShift;
             if (zzzShifted == 240) {
                 stoneType = (short) stoneLayers[1].getInt(x, y);
@@ -209,19 +198,26 @@ public class ChunkGeneratorOverworld implements ChunkGenerator {
                     type = materials.bedrock;
                 } else if (zz < generator.magmaHeight) {
                     type = materials.lava;
+                } else if (generator.caveRiver >
+                        FastMath.abs(zz - generator.caveRiverHeight) / 16.0) {
+                    if (zz < generator.caveRiverHeight) {
+                        type = materials.water;
+                    } else {
+                        type = materials.air;
+                    }
+                } else if (generator.cave >
+                        FastMath.abs(zz - generator.caveHeight) / 8.0) {
+                    type = materials.air;
                 } else {
                     if (sandType < 3) {
-                        if (lastFree - zz < 9) {
-                            if (lastFree - zz < 5 + random.nextInt(3)) {
-                                type = materials.sand;
-                                data = sandType;
-                            } else {
-                                type = materials.stoneRaw;
-                            }
+                        if (lastFree - zz < 9 &&
+                                lastFree - zz < 5 + random.nextInt(3)) {
+                            type = materials.sand;
+                            data = sandType;
                         } else {
                             type = materials.stoneRaw;
                         }
-                    } else if (lastFree > 254) {
+                    } else if (lastFree >= waterLevel) {
                         if (zz == lastFree) {
                             if (generator.soiled) {
                                 type = materials.grass;
@@ -250,29 +246,21 @@ public class ChunkGeneratorOverworld implements ChunkGenerator {
                         } else {
                             type = materials.stoneRaw;
                         }
+                    } else if (lastFree > riverBedLevel && lastFree - zz < 9 &&
+                            generator.river < 0.9 &&
+                            lastFree - zz < 5 + random.nextInt(3)) {
+                        type = materials.sand;
+                        data = 2;
                     } else {
                         type = materials.stoneRaw;
                     }
                 }
                 if (type == materials.stoneRaw) {
-                    if (generator.caveRiver >
-                            FastMath.abs(zz - generator.caveRiverHeight) /
-                                    16.0) {
-                        if (zz < 128) {
-                            type = materials.water;
-                        } else {
-                            type = materials.air;
-                        }
-                    } else if (generator.cave >
-                            FastMath.abs(zz - generator.caveHeight) / 8.0) {
-                        type = materials.air;
+                    if (sandstone && zz > 240) {
+                        type = materials.sandstone;
+                        data = sandstoneLayers[zz];
                     } else {
-                        if (sandstone && zz > 240) {
-                            type = materials.sandstone;
-                            data = sandstoneLayers[zz];
-                        } else {
-                            data = stoneType;
-                        }
+                        data = stoneType;
                     }
                 }
             } else {

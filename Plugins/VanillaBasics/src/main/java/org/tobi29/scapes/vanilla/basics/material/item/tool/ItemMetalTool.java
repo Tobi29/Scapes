@@ -31,31 +31,31 @@ import org.tobi29.scapes.entity.server.MobItemServer;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.entity.server.MobServer;
 import org.tobi29.scapes.packets.PacketUpdateInventory;
-import org.tobi29.scapes.vanilla.basics.material.MetalType;
+import org.tobi29.scapes.vanilla.basics.material.AlloyType;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
-import org.tobi29.scapes.vanilla.basics.material.item.ItemHeatable;
 import org.tobi29.scapes.vanilla.basics.material.item.ItemMetal;
 import org.tobi29.scapes.vanilla.basics.material.item.VanillaItem;
+import org.tobi29.scapes.vanilla.basics.util.MetalUtil;
 import org.tobi29.scapes.vanilla.basics.util.ToolUtil;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class ItemTool extends VanillaItem
-        implements ItemHeatable, ItemMetal {
-    private final Map<MetalType, ItemModel> modelsHead =
+public abstract class ItemMetalTool extends VanillaItem implements ItemMetal {
+    private final Map<AlloyType, ItemModel> modelsHead =
             new ConcurrentHashMap<>();
-    private TerrainTexture textureHandle, textureHead;
+    private final Map<AlloyType, ItemModel> modelsBuilt =
+            new ConcurrentHashMap<>();
+    private TerrainTexture textureHead, textureBuilt, textureHandle;
     private ItemModel modelHandle;
 
-    protected ItemTool(VanillaMaterial materials, String nameID) {
+    protected ItemMetalTool(VanillaMaterial materials, String nameID) {
         super(materials, nameID);
     }
 
     @Override
     public ItemStack example(int data) {
-        ItemStack item = super.example((short) 1);
-        item.metaData("Vanilla").setString("MetalType", "Iron");
+        ItemStack item = materials.ingot.example(data);
         ToolUtil.createTool(plugin, item, type());
         return item;
     }
@@ -123,11 +123,14 @@ public abstract class ItemTool extends VanillaItem
 
     @Override
     public void registerTextures(TerrainTextureRegistry registry) {
-        textureHandle = registry.registerTexture(
-                "VanillaBasics:image/terrain/tools/handle/" +
-                        type() + ".png");
         textureHead = registry.registerTexture(
-                "VanillaBasics:image/terrain/tools/head/" +
+                "VanillaBasics:image/terrain/tools/head/metal/" +
+                        type() + ".png");
+        textureBuilt = registry.registerTexture(
+                "VanillaBasics:image/terrain/tools/built/metal/" +
+                        type() + ".png");
+        textureHandle = registry.registerTexture(
+                "VanillaBasics:image/terrain/tools/handle/metal/" +
                         type() + ".png");
     }
 
@@ -140,36 +143,33 @@ public abstract class ItemTool extends VanillaItem
     @Override
     public void render(ItemStack item, GL gl, Shader shader, float r, float g,
             float b, float a) {
+        AlloyType alloyType = alloy(item).type(plugin);
         if (item.data() > 0) {
             modelHandle.render(gl, shader);
+            modelBuilt(alloyType).render(gl, shader);
+        } else {
+            modelHead(alloyType).render(gl, shader);
         }
-        MetalType metal = plugin.getMetalType(
-                item.metaData("Vanilla").getString("MetalType"));
-        if (metal == null) {
-            metal = plugin.getMetalType("Iron");
-        }
-        modelHead(metal).render(gl, shader);
     }
 
     @Override
     public void renderInventory(ItemStack item, GL gl, Shader shader, float r,
             float g, float b, float a) {
+        AlloyType alloyType = alloy(item).type(plugin);
         if (item.data() > 0) {
             modelHandle.renderInventory(gl, shader);
+            modelBuilt(alloyType).renderInventory(gl, shader);
+        } else {
+            modelHead(alloyType).renderInventory(gl, shader);
         }
-        MetalType metal = plugin.getMetalType(
-                item.metaData("Vanilla").getString("MetalType"));
-        if (metal == null) {
-            metal = plugin.getMetalType("Iron");
-        }
-        modelHead(metal).renderInventory(gl, shader);
     }
 
     @Override
     public String name(ItemStack item) {
         StringBuilder name = new StringBuilder(100);
-        MetalType metalType = metalType(item);
-        name.append(metalType.name()).append(' ').append(type());
+        MetalUtil.Alloy alloy = alloy(item);
+        AlloyType alloyType = alloy.type(plugin);
+        name.append(alloyType.name()).append(' ').append(type());
         float temperature = temperature(item);
         if (temperature > 0.1f) {
             name.append("\nTemp.:").append(FastMath.floor(temperature))
@@ -237,29 +237,41 @@ public abstract class ItemTool extends VanillaItem
     }
 
     @Override
-    public float meltingPoint(ItemStack item) {
-        return materials.ingot.meltingPoint(item);
-    }
-
-    @Override
     public float temperature(ItemStack item) {
         return item.metaData("Vanilla").getFloat("Temperature");
     }
 
     @Override
-    public MetalType metalType(ItemStack item) {
-        return plugin
-                .getMetalType(item.metaData("Vanilla").getString("MetalType"));
+    public MetalUtil.Alloy alloy(ItemStack item) {
+        return MetalUtil
+                .read(plugin, item.metaData("Vanilla").getStructure("Alloy"));
     }
 
-    private ItemModel modelHead(MetalType metal) {
-        ItemModel model = modelsHead.get(metal);
+    @Override
+    public void setAlloy(ItemStack item, MetalUtil.Alloy alloy) {
+        item.metaData("Vanilla").setStructure("Alloy", MetalUtil.write(alloy));
+    }
+
+    private ItemModel modelHead(AlloyType alloyType) {
+        ItemModel model = modelsHead.get(alloyType);
         if (model == null) {
-            float r = metal.r();
-            float g = metal.g();
-            float b = metal.b();
+            float r = alloyType.r();
+            float g = alloyType.g();
+            float b = alloyType.b();
             model = new ItemModelSimple(textureHead, r, g, b, 1.0f);
-            modelsHead.put(metal, model);
+            modelsHead.put(alloyType, model);
+        }
+        return model;
+    }
+
+    private ItemModel modelBuilt(AlloyType alloyType) {
+        ItemModel model = modelsBuilt.get(alloyType);
+        if (model == null) {
+            float r = alloyType.r();
+            float g = alloyType.g();
+            float b = alloyType.b();
+            model = new ItemModelSimple(textureBuilt, r, g, b, 1.0f);
+            modelsBuilt.put(alloyType, model);
         }
         return model;
     }

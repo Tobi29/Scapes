@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.generator.structure;
 
 import org.tobi29.scapes.block.BlockType;
@@ -23,9 +22,10 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 import java.util.Random;
 
 public final class StructureOre {
-    public static void genOre(TerrainServer.TerrainMutable terrain, int x,
-            int y, int z, BlockType stone, BlockType ore, int sizeX, int sizeY,
+    public static int genOre(TerrainServer.TerrainMutable terrain, int x, int y,
+            int z, BlockType stone, BlockType ore, int sizeX, int sizeY,
             int sizeZ, int chance, Random random) {
+        int ores = 0;
         for (int xx = -sizeX; xx <= sizeX; xx++) {
             int xxx = x + xx;
             for (int yy = -sizeY; yy <= sizeY; yy++) {
@@ -39,11 +39,13 @@ public final class StructureOre {
                         if (random.nextInt(chance) == 0) {
                             if (terrain.type(xxx, yyy, zzz) == stone) {
                                 terrain.type(xxx, yyy, zzz, ore);
+                                ores++;
                             }
                         }
                     }
                 }
             }
         }
+        return ores;
     }
 }

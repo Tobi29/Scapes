@@ -15,11 +15,11 @@
  */
 package org.tobi29.scapes.vanilla.basics;
 
+import java8.util.Maps;
+import java8.util.function.Consumer;
 import java8.util.stream.Collectors;
 import java8.util.stream.Stream;
-import java8.util.function.Consumer;
-import org.tobi29.scapes.block.BlockType;
-import org.tobi29.scapes.block.GameRegistry;
+import org.tobi29.scapes.block.*;
 import org.tobi29.scapes.chunk.EnvironmentClient;
 import org.tobi29.scapes.chunk.EnvironmentServer;
 import org.tobi29.scapes.chunk.WorldClient;
@@ -44,19 +44,23 @@ import org.tobi29.scapes.vanilla.basics.generator.EnvironmentOverworldServer;
 import org.tobi29.scapes.vanilla.basics.generator.decorator.BiomeDecorator;
 import org.tobi29.scapes.vanilla.basics.material.*;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class VanillaBasics implements WorldType {
     public final Config c = new Config();
     private final List<ResearchRecipe> researchRecipes = new ArrayList<>();
-    private final Map<String, MetalType> metalTypes = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, MetalType> metalTypes =
+            new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, AlloyType> alloyTypes =
+            new ConcurrentHashMap<>();
     private final MetalType crapMetal =
-            new MetalType("Crap Metal", "Crap Metal", new ConcurrentHashMap<>(),
-                    0.17f, 0.12f, 0.1f, 200.0f, 0.0, 0.0, 0.0, 0);
+            new MetalType("CrapMetal", "Crap Metal", 200.0, 0.17f, 0.12f, 0.1f);
+    private final AlloyType crapAlloy =
+            new AlloyType("CrapMetal", "Crap Metal", "Crap Metal",
+                    Collections.singletonMap(crapMetal, 1.0), 0.17f, 0.12f,
+                    0.1f, 0.0, 0.0, 0.0, 0);
     private final List<OreType> oreTypes = new ArrayList<>();
     private final Map<BiomeGenerator.Biome, Map<String, BiomeDecorator>>
             biomeDecorators = new EnumMap<>(BiomeGenerator.Biome.class);
@@ -75,18 +79,25 @@ public class VanillaBasics implements WorldType {
         researchRecipes.add(recipe);
     }
 
-    public void addMetalType(MetalType recipe) {
+    public void addMetalType(MetalType metal) {
         if (locked) {
             throw new IllegalStateException("Initializing already ended");
         }
-        metalTypes.put(recipe.id(), recipe);
+        metalTypes.put(metal.id(), metal);
     }
 
-    public void addOreType(OreType oreType) {
+    public void addAlloyType(AlloyType alloy) {
         if (locked) {
             throw new IllegalStateException("Initializing already ended");
         }
-        oreTypes.add(oreType);
+        alloyTypes.put(alloy.id(), alloy);
+    }
+
+    public void addOreType(OreType ore) {
+        if (locked) {
+            throw new IllegalStateException("Initializing already ended");
+        }
+        oreTypes.add(ore);
     }
 
     public BiomeDecorator addBiomeDecorator(BiomeGenerator.Biome biome,
@@ -115,11 +126,14 @@ public class VanillaBasics implements WorldType {
         if (!locked) {
             throw new IllegalStateException("Initializing still running");
         }
-        MetalType type = metalTypes.get(id);
-        if (type == null) {
-            return crapMetal;
+        return Maps.getOrDefaultConcurrent(metalTypes, id, crapMetal);
+    }
+
+    public AlloyType getAlloyType(String id) {
+        if (!locked) {
+            throw new IllegalStateException("Initializing still running");
         }
-        return type;
+        return Maps.getOrDefaultConcurrent(alloyTypes, id, crapAlloy);
     }
 
     public Stream<MetalType> getMetalTypes() {
@@ -127,6 +141,13 @@ public class VanillaBasics implements WorldType {
             throw new IllegalStateException("Initializing still running");
         }
         return Streams.of(metalTypes.values());
+    }
+
+    public Stream<AlloyType> getAlloyTypes() {
+        if (!locked) {
+            throw new IllegalStateException("Initializing still running");
+        }
+        return Streams.of(alloyTypes.values());
     }
 
     public Stream<OreType> getOreTypes() {
@@ -179,7 +200,7 @@ public class VanillaBasics implements WorldType {
                         biome -> Streams.of(biome.values())
                                 .forEach(config::accept)));
         locked = true;
-        VanillaBasicsRegisters.registerRecipes(registry, materials);
+        VanillaBasicsRegisters.registerRecipes(this, registry);
     }
 
     @Override
@@ -272,36 +293,108 @@ public class VanillaBasics implements WorldType {
             config.accept(addBiomeDecorator(biome, name, weight));
         }
 
-        public void metal(String id, String name, float r, float g, float b,
-                float meltingPoint, double toolEfficiency, double toolStrength,
-                double toolDamage, int toolLevel,
-                Consumer<Map<String, Double>> config) {
-            metal(id, name, name, r, g, b, meltingPoint, toolEfficiency,
-                    toolStrength, toolDamage, toolLevel, config);
+        public void metal(Consumer<MetalTypeCreator> metal) {
+            MetalTypeCreator creator = new MetalTypeCreator();
+            metal.accept(creator);
+            MetalType metalType = new MetalType(creator.id, creator.name,
+                    creator.meltingPoint, creator.r, creator.g, creator.b);
+            addMetalType(metalType);
+            addAlloyType(
+                    new AlloyType(creator.id, creator.name, creator.ingotName,
+                            Collections.singletonMap(metalType, 1.0), creator.r,
+                            creator.g, creator.b, creator.toolEfficiency,
+                            creator.toolStrength, creator.toolDamage,
+                            creator.toolLevel));
         }
 
-        public void metal(String id, String name, String ingotName, float r,
-                float g, float b, float meltingPoint, double toolEfficiency,
-                double toolStrength, double toolDamage, int toolLevel,
-                Consumer<Map<String, Double>> config) {
-            Map<String, Double> ingredients = new ConcurrentHashMap<>();
-            config.accept(ingredients);
-            addMetalType(
-                    new MetalType(id, name, ingotName, ingredients, r, g, b,
-                            meltingPoint, toolEfficiency, toolStrength,
-                            toolDamage, toolLevel));
+        public void alloy(Consumer<AlloyTypeCreator> alloy) {
+            AlloyTypeCreator creator = new AlloyTypeCreator();
+            alloy.accept(creator);
+            Map<MetalType, Double> ingredients = new ConcurrentHashMap<>();
+            Streams.of(creator.ingredients.entrySet()).forEach(
+                    entry -> ingredients.put(metalTypes.get(entry.getKey()),
+                            entry.getValue()));
+            addAlloyType(
+                    new AlloyType(creator.id, creator.name, creator.ingotName,
+                            ingredients, creator.r, creator.g, creator.b,
+                            creator.toolEfficiency, creator.toolStrength,
+                            creator.toolDamage, creator.toolLevel));
         }
 
-        public void ore(BlockType type, int rarity, double size, int chance,
-                int rockChance, StoneType... stoneTypes) {
+        public void ore(Consumer<OreTypeCreator> ore) {
+            OreTypeCreator creator = new OreTypeCreator();
+            ore.accept(creator);
             GameRegistry.Registry<StoneType> stoneRegistry =
                     materials.registry.<StoneType>get("VanillaBasics",
                             "StoneType");
-            List<Integer> stoneTypeList =
-                    Streams.of(stoneTypes).map(stoneRegistry::get)
+            List<Integer> stoneTypes =
+                    Streams.of(creator.stoneTypes).map(stoneRegistry::get)
                             .collect(Collectors.toList());
-            addOreType(new OreType(type, rarity, size, chance, rockChance,
-                    stoneTypeList));
+            addOreType(new OreType(creator.type, creator.rarity, creator.size,
+                    creator.chance, creator.rockChance, creator.rockDistance,
+                    stoneTypes));
+        }
+
+        public void craftingRecipe(CraftingRecipeType recipeType,
+                Consumer<CraftingRecipeCreator> craftingRecipe) {
+            CraftingRecipeCreator creator = new CraftingRecipeCreator();
+            craftingRecipe.accept(creator);
+            GameRegistry.Registry<StoneType> stoneRegistry =
+                    materials.registry.<StoneType>get("VanillaBasics",
+                            "StoneType");
+            recipeType.recipes().add(new CraftingRecipe(creator.ingredients,
+                    creator.requirements, creator.result));
+        }
+
+        public class MetalTypeCreator {
+            public String id = "", name = "", ingotName = "";
+            public double meltingPoint;
+            public float r, g, b;
+            public double toolEfficiency, toolStrength, toolDamage;
+            public int toolLevel;
+        }
+
+        public class AlloyTypeCreator {
+            public final Map<String, Double> ingredients =
+                    new ConcurrentHashMap<>();
+            public String id = "", name = "", ingotName = "";
+            public float r, g, b;
+            public double toolEfficiency, toolStrength, toolDamage;
+            public int toolLevel;
+        }
+
+        public class OreTypeCreator {
+            public final List<StoneType> stoneTypes = new ArrayList<>();
+            public BlockType type = materials.stoneRaw;
+            public int rarity = 4, chance = 4, rockChance = 8, rockDistance =
+                    48;
+            public double size = 6.0;
+        }
+
+        public class CraftingRecipeCreator {
+            public final List<CraftingRecipe.Ingredient> ingredients =
+                    new ArrayList<>(), requirements = new ArrayList<>();
+            public ItemStack result;
+
+            public void ingredient(ItemStack item) {
+                ingredients.add(new CraftingRecipe.IngredientList(item));
+            }
+
+            public void requirement(ItemStack item) {
+                requirements.add(new CraftingRecipe.IngredientList(item));
+            }
+
+            public void ingredients(Consumer<List<ItemStack>> creator) {
+                List<ItemStack> items = new ArrayList<>();
+                creator.accept(items);
+                ingredients.add(new CraftingRecipe.IngredientList(items));
+            }
+
+            public void requirements(Consumer<List<ItemStack>> creator) {
+                List<ItemStack> items = new ArrayList<>();
+                creator.accept(items);
+                requirements.add(new CraftingRecipe.IngredientList(items));
+            }
         }
     }
 }

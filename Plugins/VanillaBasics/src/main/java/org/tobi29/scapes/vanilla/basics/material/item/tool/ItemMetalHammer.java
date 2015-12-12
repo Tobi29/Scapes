@@ -13,19 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.tobi29.scapes.vanilla.basics.material.item;
 
-import org.tobi29.scapes.block.ItemStack;
-import org.tobi29.scapes.vanilla.basics.material.MetalType;
-import org.tobi29.scapes.vanilla.basics.util.MetalUtil;
+package org.tobi29.scapes.vanilla.basics.material.item.tool;
 
-public interface ItemMetal extends ItemHeatable {
-    MetalUtil.Alloy alloy(ItemStack item);
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
-    void setAlloy(ItemStack item, MetalUtil.Alloy alloy);
+public class ItemMetalHammer extends ItemMetalTool {
+    public ItemMetalHammer(VanillaMaterial materials) {
+        super(materials, "vanilla.basics.item.MetalHammer");
+    }
 
     @Override
-    default float meltingPoint(ItemStack item) {
-        return (float) alloy(item).meltingPoint();
+    public String type() {
+        return "Hammer";
     }
 }

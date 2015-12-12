@@ -13,29 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.item.tool;
 
-import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
-public class ItemAxe extends ItemTool {
-    public ItemAxe(VanillaMaterial materials) {
-        super(materials, "vanilla.basics.item.Axe");
-    }
-
-    @Override
-    public boolean isWeapon(ItemStack item) {
-        return true;
-    }
-
-    @Override
-    public int hitWait(ItemStack item) {
-        return 2000;
+public class ItemStoneSaw extends ItemStoneTool {
+    public ItemStoneSaw(VanillaMaterial materials) {
+        super(materials, "vanilla.basics.item.StoneSaw");
     }
 
     @Override
     public String type() {
-        return "Axe";
+        return "Saw";
     }
 }

@@ -22,9 +22,9 @@ import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.packets.PacketUpdateInventory;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
-public class ItemPickaxe extends ItemTool {
-    public ItemPickaxe(VanillaMaterial materials) {
-        super(materials, "vanilla.basics.item.Pickaxe");
+public class ItemMetalPickaxe extends ItemMetalTool {
+    public ItemMetalPickaxe(VanillaMaterial materials) {
+        super(materials, "vanilla.basics.item.MetalPickaxe");
     }
 
     @Override

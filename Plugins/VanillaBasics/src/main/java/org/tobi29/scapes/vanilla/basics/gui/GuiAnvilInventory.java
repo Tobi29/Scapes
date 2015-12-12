@@ -38,18 +38,17 @@ public class GuiAnvilInventory extends GuiContainerInventory {
         buttonContainer(16, 120, 30, 30, 0);
         buttonContainer(16, 210, 30, 30, 1);
         addAction(66, 120, materials.ingot, 0);
-        addAction(106, 120, materials.pickaxe, 1);
-        addAction(106, 160, materials.axe, 2);
-        addAction(106, 200, materials.shovel, 3);
-        addAction(146, 120, materials.hammer, 4);
-        addAction(146, 160, materials.saw, 5);
-        addAction(146, 200, materials.hoe, 6);
-        addAction(186, 120, materials.sword, 7);
+        addAction(106, 120, materials.metalPickaxe, 1);
+        addAction(106, 160, materials.metalAxe, 2);
+        addAction(106, 200, materials.metalShovel, 3);
+        addAction(146, 120, materials.metalHammer, 4);
+        addAction(146, 160, materials.metalSaw, 5);
+        addAction(146, 200, materials.metalHoe, 6);
+        addAction(186, 120, materials.metalSword, 7);
     }
 
     private void addAction(int x, int y, Material material, int i) {
-        ItemStack icon = new ItemStack(material, 1);
-        icon.metaData("Vanilla").setString("MetalType", "Iron");
+        ItemStack icon = material.example(1);
         GuiComponentItemButton item = pane.add(x, y,
                 p -> new GuiComponentItemButton(p, 30, 30, icon));
         item.onClickLeft(event -> player.connection()

@@ -15,13 +15,14 @@
  */
 package org.tobi29.scapes.vanilla.basics;
 
-import java8.util.stream.Collectors;
 import java8.util.Optional;
+import java8.util.stream.Collectors;
 import org.tobi29.scapes.block.*;
 import org.tobi29.scapes.chunk.EnvironmentServer;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.engine.utils.Streams;
+import org.tobi29.scapes.engine.utils.StringUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
@@ -221,6 +222,32 @@ class VanillaBasicsRegisters {
                                 "Container"));
             });
         });
+
+        CommandRegistry worldGroup = registry.group("world");
+
+        worldGroup.register("new NAME", 9, options -> {
+        }, (args, executor, commands) -> {
+            String name = Command.require(args.arg(0), "name");
+            commands.add(() -> server.registerWorld(
+                    world -> new EnvironmentOverworldServer(world, plugin),
+                    name, StringUtil.hash(name, server.seed())));
+        });
+
+        worldGroup.register("remove NAME", 9, options -> {
+        }, (args, executor, commands) -> {
+            String name = Command.require(args.arg(0), "name");
+            commands.add(() -> {
+                if (!server.removeWorld(name)) {
+                    Command.error("World not loaded: " + name);
+                }
+            });
+        });
+
+        worldGroup.register("delete NAME", 9, options -> {
+        }, (args, executor, commands) -> {
+            String name = Command.require(args.arg(0), "name");
+            commands.add(() -> server.deleteWorld(name));
+        });
     }
 
     static void registerEntities(GameRegistry registry) {
@@ -281,25 +308,25 @@ class VanillaBasicsRegisters {
         pr.regS(PacketQuern::new, "vanilla.basics.packet.Quern");
     }
 
-    static void registerRecipes(GameRegistry registry,
-            VanillaMaterial materials) {
+    static void registerRecipes(VanillaBasics plugin, GameRegistry registry) {
         GameRegistry.Registry<CropType> cropRegistry =
                 registry.<CropType>get("VanillaBasics", "CropType");
         GameRegistry.Registry<TreeType> treeRegistry =
                 registry.<TreeType>get("VanillaBasics", "TreeType");
         GameRegistry.Registry<StoneType> stoneRegistry =
                 registry.<StoneType>get("VanillaBasics", "StoneType");
-        registerRecipesBasics(registry, materials, treeRegistry, stoneRegistry);
-        registerRecipesStone(registry, materials, stoneRegistry);
-        registerRecipesFood(registry, materials, cropRegistry, stoneRegistry);
-        registerRecipesMetal(registry, materials, stoneRegistry);
-        registerRecipesIron(registry, materials);
+        registerRecipesBasics(plugin, registry, treeRegistry, stoneRegistry);
+        registerRecipesStone(plugin, registry);
+        registerRecipesFood(registry, plugin.materials, cropRegistry,
+                stoneRegistry);
+        registerRecipesMetal(registry, plugin.materials, stoneRegistry);
+        registerRecipesIron(registry, plugin.materials);
     }
 
-    static void registerRecipesBasics(GameRegistry registry,
-            VanillaMaterial materials,
-            GameRegistry.Registry<TreeType> treeRegistry,
+    static void registerRecipesBasics(VanillaBasics plugin,
+            GameRegistry registry, GameRegistry.Registry<TreeType> treeRegistry,
             GameRegistry.Registry<StoneType> stoneRegistry) {
+        VanillaMaterial materials = plugin.materials;
         CraftingRecipeType recipeType = new CraftingRecipeType() {
             @Override
             public String name() {
@@ -321,38 +348,36 @@ class VanillaBasicsRegisters {
                 return true;
             }
         };
-        ItemStack ingotItem = new ItemStack(materials.ingot, (short) 1);
-        IngotUtil.createIngot(materials.plugin, ingotItem, "Stone", 0.0f);
-        ItemStack hammerItem = new ItemStack(ingotItem);
-        ToolUtil.createTool(materials.plugin, hammerItem, "Hammer");
-        hammerItem.setData(1);
-        CraftingRecipe.Ingredient hammer =
-                new CraftingRecipe.IngredientList(hammerItem);
-        ItemStack sawItem = new ItemStack(ingotItem);
-        ToolUtil.createTool(materials.plugin, sawItem, "Saw");
-        sawItem.setData(1);
-        List<StoneType> stoneTypes = stoneRegistry.values();
+        CraftingRecipe.Ingredient hammer = new CraftingRecipe.IngredientList(
+                materials.stoneHammer.example(1),
+                materials.metalHammer.example(1));
         CraftingRecipe.Ingredient saw =
-                new CraftingRecipe.IngredientList(sawItem);
+                new CraftingRecipe.IngredientList(materials.stoneSaw.example(1),
+                        materials.metalSaw.example(1));
         CraftingRecipe.Ingredient plank = new CraftingRecipe.IngredientList(
                 Streams.of(treeRegistry.values())
                         .map(tree -> new ItemStack(materials.wood,
                                 tree.data(registry)))
                         .collect(Collectors.toList()));
+        List<StoneType> stoneTypes = stoneRegistry.values();
 
-        recipeType.recipes()
-                .add(new CraftingRecipe(Collections.singletonList(plank),
-                        Arrays.asList(saw, hammer),
-                        new ItemStack(materials.craftingTable, (short) 0)));
-        recipeType.recipes()
-                .add(new CraftingRecipe(Collections.singletonList(plank),
-                        Collections.singletonList(saw),
-                        new ItemStack(materials.chest, (short) 0)));
-        recipeType.recipes().add(new CraftingRecipe(Arrays.asList(plank,
-                new CraftingRecipe.IngredientList(
-                        new ItemStack(materials.string, (short) 1))),
-                Collections.singletonList(saw),
-                new ItemStack(materials.researchTable, (short) 0)));
+        plugin.c.craftingRecipe(recipeType, c -> {
+            c.ingredients.add(plank);
+            c.ingredients.add(hammer);
+            c.requirements.add(saw);
+            c.result = new ItemStack(materials.craftingTable, 0);
+        });
+        plugin.c.craftingRecipe(recipeType, c -> {
+            c.ingredients.add(plank);
+            c.requirements.add(saw);
+            c.result = new ItemStack(materials.chest, 0);
+        });
+        plugin.c.craftingRecipe(recipeType, c -> {
+            c.ingredients.add(plank);
+            c.ingredient(new ItemStack(materials.string, 1));
+            c.requirements.add(saw);
+            c.result = new ItemStack(materials.researchTable, 0);
+        });
         for (StoneType stoneType : stoneTypes) {
             int data = stoneType.data(registry);
             recipeType.recipes().add(new CraftingRecipe(
@@ -370,9 +395,9 @@ class VanillaBasicsRegisters {
         registry.registerCraftingRecipe(recipeType);
     }
 
-    static void registerRecipesStone(GameRegistry registry,
-            VanillaMaterial materials,
-            GameRegistry.Registry<StoneType> stoneRegistry) {
+    static void registerRecipesStone(VanillaBasics plugin,
+            GameRegistry registry) {
+        VanillaMaterial materials = plugin.materials;
         CraftingRecipeType recipeType = new CraftingRecipeType() {
             @Override
             public String name() {
@@ -394,71 +419,100 @@ class VanillaBasicsRegisters {
                 return true;
             }
         };
-        ItemStack ingotItem = new ItemStack(materials.ingot, 1);
-        IngotUtil.createIngot(materials.plugin, ingotItem, "Stone", 0.0f);
-        CraftingRecipe.Ingredient ingot =
-                new CraftingRecipe.IngredientList(ingotItem);
-        List<StoneType> stoneTypes = stoneRegistry.values();
-        List<ItemStack> rockItems = new ArrayList<>();
-        for (int i = 0; i < stoneTypes.size(); i++) {
-            if (stoneTypes.get(i).resistance() > 0.1) {
-                rockItems.add(new ItemStack(materials.stoneRock, i, 2));
-            }
-        }
-        CraftingRecipe.Ingredient rocks =
-                new CraftingRecipe.IngredientList(rockItems);
-        recipeType.recipes().add(new CraftingRecipe(ingotItem, rocks));
-        ItemStack hoeItem = new ItemStack(ingotItem);
-        ToolUtil.createTool(materials.plugin, hoeItem, "Hoe");
+        ItemStack flint = new ItemStack(materials.stoneRock,
+                StoneType.FLINT.data(registry));
+        ItemStack hoeItem = new ItemStack(flint);
+        ToolUtil.createStoneTool(materials.plugin, hoeItem, "Hoe");
         ItemStack hoeHeadItem = new ItemStack(hoeItem).setData(0);
-        ItemStack hammerItem = new ItemStack(ingotItem);
-        ToolUtil.createTool(materials.plugin, hammerItem, "Hammer");
+        ItemStack hammerItem = new ItemStack(flint);
+        ToolUtil.createStoneTool(materials.plugin, hammerItem, "Hammer");
         ItemStack hammerHeadItem = new ItemStack(hammerItem).setData(0);
-        ItemStack sawItem = new ItemStack(ingotItem);
-        ToolUtil.createTool(materials.plugin, sawItem, "Saw");
+        ItemStack sawItem = new ItemStack(flint);
+        ToolUtil.createStoneTool(materials.plugin, sawItem, "Saw");
         ItemStack sawHeadItem = new ItemStack(sawItem).setData(0);
-        ItemStack axeItem = new ItemStack(ingotItem);
-        ToolUtil.createTool(materials.plugin, axeItem, "Axe");
+        ItemStack axeItem = new ItemStack(flint);
+        ToolUtil.createStoneTool(materials.plugin, axeItem, "Axe");
         ItemStack axeHeadItem = new ItemStack(axeItem).setData(0);
-        ItemStack shovelItem = new ItemStack(ingotItem);
-        ToolUtil.createTool(materials.plugin, shovelItem, "Shovel");
+        ItemStack shovelItem = new ItemStack(flint);
+        ToolUtil.createStoneTool(materials.plugin, shovelItem, "Shovel");
         ItemStack shovelHeadItem = new ItemStack(shovelItem).setData(0);
-        ItemStack pickaxeItem = new ItemStack(ingotItem);
-        ToolUtil.createTool(materials.plugin, pickaxeItem, "Pickaxe");
+        ItemStack pickaxeItem = new ItemStack(flint);
+        ToolUtil.createStoneTool(materials.plugin, pickaxeItem, "Pickaxe");
         ItemStack pickaxeHeadItem = new ItemStack(pickaxeItem).setData(0);
-        ItemStack swordItem = new ItemStack(ingotItem);
-        ToolUtil.createTool(materials.plugin, swordItem, "Sword");
+        ItemStack swordItem = new ItemStack(flint);
+        ToolUtil.createStoneTool(materials.plugin, swordItem, "Sword");
         ItemStack swordHeadItem = new ItemStack(swordItem).setData(0);
 
-        recipeType.recipes().add(new CraftingRecipe(hoeHeadItem, ingot));
-        recipeType.recipes().add(new CraftingRecipe(hammerHeadItem, ingot));
-        recipeType.recipes().add(new CraftingRecipe(sawHeadItem, ingot));
-        recipeType.recipes().add(new CraftingRecipe(axeHeadItem, ingot));
-        recipeType.recipes().add(new CraftingRecipe(shovelHeadItem, ingot));
-        recipeType.recipes().add(new CraftingRecipe(pickaxeHeadItem, ingot));
-        recipeType.recipes().add(new CraftingRecipe(swordHeadItem, ingot));
-        recipeType.recipes().add(new CraftingRecipe(Collections.singletonList(
-                new CraftingRecipe.IngredientList(hoeItem, hammerItem, sawItem,
-                        axeItem, shovelItem, pickaxeItem, swordItem,
-                        hoeHeadItem, hammerHeadItem, sawHeadItem, axeHeadItem,
-                        shovelHeadItem, pickaxeHeadItem, swordHeadItem)),
-                ingotItem));
-        recipeType.recipes().add(new CraftingRecipe(Collections.singletonList(
-                new CraftingRecipe.IngredientList(
-                        new ItemStack(materials.grassBundle, (short) 0, 2))),
-                new ItemStack(materials.string, (short) 0)));
-        recipeType.recipes().add(new CraftingRecipe(Collections.singletonList(
-                new CraftingRecipe.IngredientList(
-                        new ItemStack(materials.string, (short) 0, 8))),
-                new ItemStack(materials.string, (short) 1)));
-        recipeType.recipes().add(new CraftingRecipe(Collections.singletonList(
-                new CraftingRecipe.IngredientList(
-                        new ItemStack(materials.grassBundle, (short) 0, 2))),
-                new ItemStack(materials.straw, (short) 0)));
-        recipeType.recipes().add(new CraftingRecipe(Collections.singletonList(
-                new CraftingRecipe.IngredientList(
-                        new ItemStack(materials.grassBundle, (short) 1, 2))),
-                new ItemStack(materials.straw, (short) 1)));
+        plugin.c.craftingRecipe(recipeType, c -> {
+            c.ingredient(flint);
+            c.requirement(flint);
+            c.result = hoeHeadItem;
+        });
+        plugin.c.craftingRecipe(recipeType, c -> {
+            c.ingredient(flint);
+            c.requirement(flint);
+            c.result = hammerHeadItem;
+        });
+        plugin.c.craftingRecipe(recipeType, c -> {
+            c.ingredient(flint);
+            c.requirement(flint);
+            c.result = sawHeadItem;
+        });
+        plugin.c.craftingRecipe(recipeType, c -> {
+            c.ingredient(flint);
+            c.requirement(flint);
+            c.result = axeHeadItem;
+        });
+        plugin.c.craftingRecipe(recipeType, c -> {
+            c.ingredient(flint);
+            c.requirement(flint);
+            c.result = shovelHeadItem;
+        });
+        plugin.c.craftingRecipe(recipeType, c -> {
+            c.ingredient(flint);
+            c.requirement(flint);
+            c.result = pickaxeHeadItem;
+        });
+        plugin.c.craftingRecipe(recipeType, c -> {
+            c.ingredient(flint);
+            c.requirement(flint);
+            c.result = swordHeadItem;
+        });
+        plugin.c.craftingRecipe(recipeType, c -> {
+            c.ingredients(i -> {
+                i.add(hoeItem);
+                i.add(hoeHeadItem);
+                i.add(hammerItem);
+                i.add(hammerHeadItem);
+                i.add(sawItem);
+                i.add(sawHeadItem);
+                i.add(axeItem);
+                i.add(axeHeadItem);
+                i.add(shovelItem);
+                i.add(shovelHeadItem);
+                i.add(pickaxeItem);
+                i.add(pickaxeHeadItem);
+                i.add(swordItem);
+                i.add(swordHeadItem);
+            });
+            c.result = flint;
+        });
+        plugin.c.craftingRecipe(recipeType, c -> {
+            c.ingredient(new ItemStack(materials.grassBundle, 0, 2));
+            c.result = new ItemStack(materials.string, 0);
+        });
+        plugin.c.craftingRecipe(recipeType, c -> {
+            c.ingredient(new ItemStack(materials.string, 0, 8));
+            c.result = new ItemStack(materials.string, 1);
+        });
+        plugin.c.craftingRecipe(recipeType, c -> {
+            c.ingredient(new ItemStack(materials.grassBundle, 0, 2));
+            c.result = new ItemStack(materials.straw, 0);
+        });
+        plugin.c.craftingRecipe(recipeType, c -> {
+            c.ingredient(new ItemStack(materials.grassBundle, 1, 2));
+            c.result = new ItemStack(materials.straw, 1);
+        });
 
         registry.registerCraftingRecipe(recipeType);
     }
@@ -502,9 +556,9 @@ class VanillaBasicsRegisters {
         CraftingRecipe.Ingredient cobblestones =
                 new CraftingRecipe.IngredientList(cobblestoneItems);
         CraftingRecipe.Ingredient pickaxe = new CraftingRecipe.IngredientList(
-                new ItemStack(materials.pickaxe, (short) 1));
+                new ItemStack(materials.metalPickaxe, (short) 1));
         CraftingRecipe.Ingredient hammer = new CraftingRecipe.IngredientList(
-                new ItemStack(materials.hammer, (short) 1));
+                new ItemStack(materials.metalHammer, (short) 1));
 
         recipeType.recipes().add(new CraftingRecipe(Arrays.asList(cobblestones,
                 new CraftingRecipe.IngredientList(
@@ -564,7 +618,7 @@ class VanillaBasicsRegisters {
         CraftingRecipe.Ingredient ingot = new CraftingRecipe.IngredientList(
                 new ItemStack(materials.ingot, (short) 0, 5));
         CraftingRecipe.Ingredient pickaxe = new CraftingRecipe.IngredientList(
-                new ItemStack(materials.pickaxe, (short) 1));
+                new ItemStack(materials.metalPickaxe, (short) 1));
         recipeType.recipes().add(new CraftingRecipe(
                 new ItemStack(materials.mold, (short) 0),
                 new CraftingRecipe.IngredientList(
@@ -621,7 +675,7 @@ class VanillaBasicsRegisters {
                 new CraftingRecipe.IngredientList(
                         new ItemStack(materials.string, (short) 1, 4))),
                 Collections.singletonList(new CraftingRecipe.IngredientList(
-                        new ItemStack(materials.saw, (short) 1))),
+                        new ItemStack(materials.metalSaw, (short) 1))),
                 new ItemStack(materials.bellows, (short) 0)));
 
         registry.registerCraftingRecipe(recipeType);
@@ -669,6 +723,7 @@ class VanillaBasicsRegisters {
                 registry.add("VanillaBasics", "StoneType", 0, Short.MAX_VALUE);
         stoneRegistry
                 .reg(StoneType.DIRT_STONE, "vanilla.basics.stone.DirtStone");
+        stoneRegistry.reg(StoneType.FLINT, "vanilla.basics.stone.Flint");
         stoneRegistry.reg(StoneType.CHALK, "vanilla.basics.stone.Chalk");
         stoneRegistry.reg(StoneType.CHERT, "vanilla.basics.stone.Chert");
         stoneRegistry
@@ -688,78 +743,240 @@ class VanillaBasicsRegisters {
 
     static void registerOres(VanillaBasics plugin) {
         VanillaMaterial materials = plugin.getMaterials();
-        plugin.c.ore(materials.oreCoal, 8, 16.0, 3, 20, StoneType.DIRT_STONE);
-        plugin.c.ore(materials.oreCoal, 5, 12.0, 3, 20, StoneType.CHALK,
-                StoneType.CHERT, StoneType.CLAYSTONE, StoneType.CONGLOMERATE,
-                StoneType.MARBLE, StoneType.ANDESITE, StoneType.BASALT,
-                StoneType.DACITE, StoneType.RHYOLITE, StoneType.DIORITE,
-                StoneType.GABBRO, StoneType.GRANITE);
-        plugin.c.ore(materials.oreCassiterite, 3, 6.0, 4, 6, StoneType.ANDESITE,
-                StoneType.BASALT, StoneType.DACITE, StoneType.RHYOLITE,
-                StoneType.GRANITE);
-        plugin.c.ore(materials.oreSphalerite, 3, 6.0, 3, 4, StoneType.MARBLE);
-        plugin.c.ore(materials.oreBismuthinite, 2, 3.0, 8, 9, StoneType.CHALK,
-                StoneType.CHERT, StoneType.CLAYSTONE, StoneType.CONGLOMERATE,
-                StoneType.MARBLE, StoneType.DIORITE, StoneType.GABBRO,
-                StoneType.GRANITE);
-        plugin.c.ore(materials.oreChalcocite, 6, 8.0, 2, 1, StoneType.CHALK,
-                StoneType.CHERT, StoneType.CLAYSTONE, StoneType.CONGLOMERATE);
-        plugin.c.ore(materials.oreMagnetite, 4, 5.0, 9, 10, StoneType.CHALK,
-                StoneType.CHERT, StoneType.CLAYSTONE, StoneType.CONGLOMERATE);
-        plugin.c.ore(materials.orePyrite, 3, 4.0, 11, 13, StoneType.CHALK,
-                StoneType.CHERT, StoneType.CLAYSTONE, StoneType.CONGLOMERATE,
-                StoneType.MARBLE);
-        plugin.c.ore(materials.oreSilver, 2, 3.0, 4, 8, StoneType.GRANITE);
-        plugin.c.ore(materials.oreGold, 1, 2.0, 4, 32, StoneType.ANDESITE,
-                StoneType.BASALT, StoneType.DACITE, StoneType.RHYOLITE,
-                StoneType.DIORITE, StoneType.GABBRO, StoneType.GRANITE);
+        plugin.c.ore(o -> {
+            o.type = materials.oreCoal;
+            o.rarity = 9;
+            o.size = 16.0;
+            o.chance = 3;
+            o.rockChance = 20;
+            o.rockDistance = 16;
+            o.stoneTypes.add(StoneType.DIRT_STONE);
+        });
+        plugin.c.ore(o -> {
+            o.type = materials.oreCoal;
+            o.rarity = 3;
+            o.size = 12.0;
+            o.chance = 3;
+            o.rockChance = 20;
+            o.rockDistance = 32;
+            o.stoneTypes.add(StoneType.CHALK);
+            o.stoneTypes.add(StoneType.CHERT);
+            o.stoneTypes.add(StoneType.CLAYSTONE);
+            o.stoneTypes.add(StoneType.CONGLOMERATE);
+            o.stoneTypes.add(StoneType.MARBLE);
+            o.stoneTypes.add(StoneType.ANDESITE);
+            o.stoneTypes.add(StoneType.BASALT);
+            o.stoneTypes.add(StoneType.DACITE);
+            o.stoneTypes.add(StoneType.RHYOLITE);
+            o.stoneTypes.add(StoneType.DIORITE);
+            o.stoneTypes.add(StoneType.GABBRO);
+            o.stoneTypes.add(StoneType.GRANITE);
+        });
+        plugin.c.ore(o -> {
+            o.type = materials.oreCassiterite;
+            o.rarity = 2;
+            o.size = 24.0;
+            o.chance = 64;
+            o.rockChance = 12;
+            o.rockDistance = 32;
+            o.stoneTypes.add(StoneType.ANDESITE);
+            o.stoneTypes.add(StoneType.BASALT);
+            o.stoneTypes.add(StoneType.DACITE);
+            o.stoneTypes.add(StoneType.RHYOLITE);
+            o.stoneTypes.add(StoneType.GRANITE);
+        });
+        plugin.c.ore(o -> {
+            o.type = materials.oreSphalerite;
+            o.rarity = 6;
+            o.size = 6.0;
+            o.chance = 3;
+            o.rockChance = 4;
+            o.rockDistance = 16;
+            o.stoneTypes.add(StoneType.MARBLE);
+        });
+        plugin.c.ore(o -> {
+            o.type = materials.oreBismuthinite;
+            o.rarity = 2;
+            o.size = 3.0;
+            o.chance = 8;
+            o.rockChance = 9;
+            o.rockDistance = 128;
+            o.stoneTypes.add(StoneType.CHALK);
+            o.stoneTypes.add(StoneType.CHERT);
+            o.stoneTypes.add(StoneType.CLAYSTONE);
+            o.stoneTypes.add(StoneType.CONGLOMERATE);
+            o.stoneTypes.add(StoneType.MARBLE);
+            o.stoneTypes.add(StoneType.DIORITE);
+            o.stoneTypes.add(StoneType.GABBRO);
+            o.stoneTypes.add(StoneType.GRANITE);
+        });
+        plugin.c.ore(o -> {
+            o.type = materials.oreChalcocite;
+            o.rarity = 12;
+            o.size = 8.0;
+            o.chance = 2;
+            o.rockChance = 1;
+            o.rockDistance = 24;
+            o.stoneTypes.add(StoneType.CHALK);
+            o.stoneTypes.add(StoneType.CHERT);
+            o.stoneTypes.add(StoneType.CLAYSTONE);
+            o.stoneTypes.add(StoneType.CONGLOMERATE);
+        });
+        plugin.c.ore(o -> {
+            o.type = materials.oreMagnetite;
+            o.rarity = 4;
+            o.size = 64.0;
+            o.chance = 12;
+            o.rockChance = 10;
+            o.rockDistance = 96;
+            o.stoneTypes.add(StoneType.CHALK);
+            o.stoneTypes.add(StoneType.CHERT);
+            o.stoneTypes.add(StoneType.CLAYSTONE);
+            o.stoneTypes.add(StoneType.CONGLOMERATE);
+        });
+        plugin.c.ore(o -> {
+            o.type = materials.orePyrite;
+            o.rarity = 3;
+            o.size = 4.0;
+            o.chance = 11;
+            o.rockChance = 13;
+            o.rockDistance = 48;
+            o.stoneTypes.add(StoneType.CHALK);
+            o.stoneTypes.add(StoneType.CHERT);
+            o.stoneTypes.add(StoneType.CLAYSTONE);
+            o.stoneTypes.add(StoneType.CONGLOMERATE);
+            o.stoneTypes.add(StoneType.MARBLE);
+        });
+        plugin.c.ore(o -> {
+            o.type = materials.oreSilver;
+            o.rarity = 2;
+            o.size = 3.0;
+            o.chance = 4;
+            o.rockChance = 8;
+            o.rockDistance = 64;
+            o.stoneTypes.add(StoneType.GRANITE);
+        });
+        plugin.c.ore(o -> {
+            o.type = materials.oreGold;
+            o.rarity = 1;
+            o.size = 2.0;
+            o.chance = 4;
+            o.rockChance = 96;
+            o.rockDistance = 256;
+            o.stoneTypes.add(StoneType.ANDESITE);
+            o.stoneTypes.add(StoneType.BASALT);
+            o.stoneTypes.add(StoneType.DACITE);
+            o.stoneTypes.add(StoneType.RHYOLITE);
+            o.stoneTypes.add(StoneType.DIORITE);
+            o.stoneTypes.add(StoneType.GABBRO);
+            o.stoneTypes.add(StoneType.GRANITE);
+        });
     }
 
-    @SuppressWarnings("CodeBlock2Expr")
     static void registerMetals(VanillaBasics plugin) {
-        plugin.c.metal("Stone", "Stone", "Worked Stone", 0.5f, 0.5f, 0.5f,
-                1200.0f, 1.0, 4.0, 0.004, 10, i -> {
-                    i.put("Stone", 1.0);
-                });
-        plugin.c.metal("Tin", "Tin", 1.0f, 1.0f, 1.0f, 231.0f, 0.1, 2.0, 0.01,
-                0, i -> {
-                    i.put("Tin", 1.0);
-                });
-        plugin.c.metal("Zinc", "Zinc", 1.0f, 0.9f, 0.9f, 419.0f, 1.0, 4.0,
-                0.004, 10, i -> {
-                    i.put("Zinc", 1.0);
-                });
-        plugin.c.metal("Bismuth", "Bismuth", 0.8f, 0.9f, 0.9f, 271.0f, 1.0, 4.0,
-                0.004, 10, i -> {
-                    i.put("Bismuth", 1.0);
-                });
-        plugin.c.metal("Copper", "Copper", 0.8f, 0.2f, 0.0f, 1084.0f, 6.0, 8.0,
-                0.001, 20, i -> {
-                    i.put("Copper", 1.0);
-                });
-        plugin.c.metal("Iron", "Iron", 0.7f, 0.7f, 0.7f, 1538.0f, 30.0, 12.0,
-                0.0001, 40, i -> {
-                    i.put("Iron", 1.0);
-                });
-        plugin.c.metal("Silver", "Silver", 0.9f, 0.9f, 1.0f, 961.0f, 1.0, 4.0,
-                0.004, 10, i -> {
-                    i.put("Silver", 1.0);
-                });
-        plugin.c.metal("Gold", "Gold", 1.0f, 0.3f, 0.0f, 1064.0f, 0.1, 2.0,
-                0.01, 0, i -> {
-                    i.put("Gold", 1.0);
-                });
-        plugin.c.metal("Bronze", "Bronze", 0.6f, 0.4f, 0.0f, 800.0f, 10.0, 10.0,
-                0.0005, 30, i -> {
-                    i.put("Tin", 0.25);
-                    i.put("Copper", 0.75);
-                });
-        plugin.c.metal("BismuthBronze", "Bismuth Bronze", 1.0f, 0.8f, 0.8f,
-                800.0f, 10.0, 10.0, 0.0005, 30, i -> {
-                    i.put("Bismuth", 0.2);
-                    i.put("Zinc", 0.2);
-                    i.put("Copper", 0.6);
-                });
+        plugin.c.metal(m -> {
+            m.id = m.name = m.ingotName = "Tin";
+            m.meltingPoint = 231.0;
+            m.toolEfficiency = 0.1;
+            m.toolStrength = 2.0;
+            m.toolDamage = 0.01;
+            m.toolLevel = 10;
+            m.r = 1.0f;
+            m.g = 1.0f;
+            m.b = 1.0f;
+        });
+        plugin.c.metal(m -> {
+            m.id = m.name = m.ingotName = "Zinc";
+            m.meltingPoint = 419.0;
+            m.toolEfficiency = 1.0;
+            m.toolStrength = 4.0;
+            m.toolDamage = 0.004;
+            m.toolLevel = 10;
+            m.r = 1.0f;
+            m.g = 0.9f;
+            m.b = 0.9f;
+        });
+        plugin.c.metal(m -> {
+            m.id = m.name = m.ingotName = "Bismuth";
+            m.meltingPoint = 271.0;
+            m.toolEfficiency = 1.0;
+            m.toolStrength = 4.0;
+            m.toolDamage = 0.004;
+            m.toolLevel = 10;
+            m.r = 0.8f;
+            m.g = 0.9f;
+            m.b = 0.9f;
+        });
+        plugin.c.metal(m -> {
+            m.id = m.name = m.ingotName = "Copper";
+            m.meltingPoint = 1084.0;
+            m.toolEfficiency = 6.0;
+            m.toolStrength = 8.0;
+            m.toolDamage = 0.001;
+            m.toolLevel = 20;
+            m.r = 0.8f;
+            m.g = 0.2f;
+            m.b = 0.0f;
+        });
+        plugin.c.metal(m -> {
+            m.id = m.name = m.ingotName = "Iron";
+            m.meltingPoint = 1538.0;
+            m.toolEfficiency = 30.0;
+            m.toolStrength = 12.0;
+            m.toolDamage = 0.0001;
+            m.toolLevel = 40;
+            m.r = 0.7f;
+            m.g = 0.7f;
+            m.b = 0.7f;
+        });
+        plugin.c.metal(m -> {
+            m.id = m.name = m.ingotName = "Silver";
+            m.meltingPoint = 961.0;
+            m.toolEfficiency = 1.0;
+            m.toolStrength = 4.0;
+            m.toolDamage = 0.004;
+            m.toolLevel = 10;
+            m.r = 0.9f;
+            m.g = 0.9f;
+            m.b = 1.0f;
+        });
+        plugin.c.metal(m -> {
+            m.id = m.name = m.ingotName = "Gold";
+            m.meltingPoint = 1064.0;
+            m.toolEfficiency = 0.1;
+            m.toolStrength = 2.0;
+            m.toolDamage = 0.01;
+            m.toolLevel = 10;
+            m.r = 0.9f;
+            m.g = 0.9f;
+            m.b = 1.0f;
+        });
+        plugin.c.alloy(m -> {
+            m.id = m.name = m.ingotName = "Bronze";
+            m.toolEfficiency = 10.0;
+            m.toolStrength = 10.0;
+            m.toolDamage = 0.0005;
+            m.toolLevel = 20;
+            m.r = 0.6f;
+            m.g = 0.4f;
+            m.b = 0.0f;
+            m.ingredients.put("Tin", 0.25);
+            m.ingredients.put("Copper", 0.75);
+        });
+        plugin.c.alloy(m -> {
+            m.name = m.ingotName = "Bismuth Bronze";
+            m.id = "BismuthBronze";
+            m.toolEfficiency = 10.0;
+            m.toolStrength = 10.0;
+            m.toolDamage = 0.0005;
+            m.toolLevel = 20;
+            m.r = 0.6f;
+            m.g = 0.4f;
+            m.b = 0.0f;
+            m.ingredients.put("Bismuth", 0.2);
+            m.ingredients.put("Zinc", 0.2);
+            m.ingredients.put("Copper", 0.6);
+        });
     }
 
     @SuppressWarnings("CodeBlock2Expr")
@@ -768,6 +985,14 @@ class VanillaBasicsRegisters {
         // Overlays
         plugin.c.decorator("Rocks", d -> {
             d.addLayer(new LayerRock(m.stoneRock, m.stoneRaw, 256,
+                    (terrain, x, y, z) ->
+                            terrain.type(x, y, z - 1) == m.grass &&
+                                    terrain.type(x, y, z) == m.air));
+        });
+        plugin.c.decorator("Flint", d -> {
+            int data = StoneType.FLINT.data(m.registry);
+            d.addLayer(new LayerGround(m.stoneRock,
+                    (terrain, x, y, z, random) -> data, 1024,
                     (terrain, x, y, z) ->
                             terrain.type(x, y, z - 1) == m.grass &&
                                     terrain.type(x, y, z) == m.air));

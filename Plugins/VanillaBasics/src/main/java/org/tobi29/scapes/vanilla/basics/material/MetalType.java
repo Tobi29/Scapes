@@ -13,42 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material;
 
-import java.util.Map;
-
 public class MetalType {
-    private final Map<String, Double> ingredients;
-    private final String id, name, ingotName;
-    private final float meltingPoint, r, g, b;
-    private final double toolEfficiency, toolStrength, toolDamage;
-    private final int toolLevel;
+    private final String id, name;
+    private final double meltingPoint;
+    private final float r, g, b;
 
-    public MetalType(String id, String name, Map<String, Double> ingredients,
-            float r, float g, float b, float meltingPoint,
-            double toolEfficiency, double toolStrength, double toolDamage,
-            int toolLevel) {
-        this(id, name, name, ingredients, r, g, b, meltingPoint, toolEfficiency,
-                toolStrength, toolDamage, toolLevel);
-    }
-
-    public MetalType(String id, String name, String ingotName,
-            Map<String, Double> ingredients, float r, float g, float b,
-            float meltingPoint, double toolEfficiency, double toolStrength,
-            double toolDamage, int toolLevel) {
+    public MetalType(String id, String name, double meltingPoint, float r,
+            float g, float b) {
         this.id = id;
         this.name = name;
-        this.ingotName = ingotName;
-        this.ingredients = ingredients;
+        this.meltingPoint = meltingPoint;
         this.r = r;
         this.g = g;
         this.b = b;
-        this.meltingPoint = meltingPoint;
-        this.toolEfficiency = toolEfficiency;
-        this.toolStrength = toolStrength;
-        this.toolDamage = toolDamage;
-        this.toolLevel = toolLevel;
     }
 
     public String id() {
@@ -59,12 +38,8 @@ public class MetalType {
         return name;
     }
 
-    public String ingotName() {
-        return ingotName;
-    }
-
-    public Map<String, Double> ingredients() {
-        return ingredients;
+    public double meltingPoint() {
+        return meltingPoint;
     }
 
     public float r() {
@@ -77,25 +52,5 @@ public class MetalType {
 
     public float b() {
         return b;
-    }
-
-    public float meltingPoint() {
-        return meltingPoint;
-    }
-
-    public double baseToolEfficiency() {
-        return toolEfficiency;
-    }
-
-    public double baseToolStrength() {
-        return toolStrength;
-    }
-
-    public double baseToolDamage() {
-        return toolDamage;
-    }
-
-    public int baseToolLevel() {
-        return toolLevel;
     }
 }

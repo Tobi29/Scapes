@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.generator;
 
 public class BiomeGenerator {
@@ -68,24 +67,30 @@ public class BiomeGenerator {
     }
 
     public enum Biome {
-        POLAR(Zone.ARCTIC),
-        TUNDRA(Zone.ARCTIC),
-        TAIGA(Zone.ARCTIC),
-        WASTELAND(Zone.TEMPERATE),
-        STEPPE(Zone.TEMPERATE),
-        FOREST(Zone.TEMPERATE),
-        DESERT(Zone.SUBTROPIC),
-        SAVANNA(Zone.SUBTROPIC),
-        OASIS(Zone.SUBTROPIC),
-        RAINFOREST(Zone.TROPIC);
+        POLAR(Zone.ARCTIC, false),
+        TUNDRA(Zone.ARCTIC, false),
+        TAIGA(Zone.ARCTIC, false),
+        WASTELAND(Zone.TEMPERATE, false),
+        STEPPE(Zone.TEMPERATE, true),
+        FOREST(Zone.TEMPERATE, false),
+        DESERT(Zone.SUBTROPIC, false),
+        SAVANNA(Zone.SUBTROPIC, false),
+        OASIS(Zone.SUBTROPIC, true),
+        RAINFOREST(Zone.TROPIC, false);
         private final Zone zone;
+        private final boolean spawn;
 
-        Biome(Zone zone) {
+        Biome(Zone zone, boolean spawn) {
             this.zone = zone;
+            this.spawn = spawn;
         }
 
         public Zone zone() {
             return zone;
+        }
+
+        public boolean isValidSpawn() {
+            return spawn;
         }
     }
 }

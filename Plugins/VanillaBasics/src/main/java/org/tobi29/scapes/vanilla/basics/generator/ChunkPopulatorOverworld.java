@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.vanilla.basics.generator;
 
+import java8.util.Optional;
 import java8.util.stream.Stream;
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.chunk.World;
@@ -64,7 +65,7 @@ public class ChunkPopulatorOverworld implements ChunkPopulator {
         ChunkGeneratorOverworld gen =
                 (ChunkGeneratorOverworld) terrain.world().generator();
         VanillaMaterial materials = plugin.getMaterials();
-        int passes = dx * dy / 256;
+        int passes = dx * dy / 64;
         for (int i = 0; i < passes; i++) {
             if (random.nextInt(400) == 0) {
                 int xx = random.nextInt(dx) + x;
@@ -78,41 +79,47 @@ public class ChunkPopulatorOverworld implements ChunkPopulator {
             }
             int xx = x + (dx >> 1);
             int yy = y + (dy >> 1);
-            int zz = random.nextInt(terrain.highestTerrainBlockZAt(xx, yy) + 1);
+            int zz = random.nextInt(terrain.highestTerrainBlockZAt(xx, yy) - 8);
             int data = terrain.data(xx, yy, zz);
             if (gen.stoneType(xx + random.nextInt(21) - 10,
                     yy + random.nextInt(21) - 10, zz + random.nextInt(9) - 4) !=
                     data) {
-                OreType oreType = gen.randomOreType(plugin, data, random);
-                if (oreType != null) {
-                    StructureOre.genOre(terrain, xx, yy, zz, materials.stoneRaw,
-                            oreType.type(), (int) FastMath
-                                    .ceil(random.nextDouble() * oreType.size()),
-                            (int) FastMath
-                                    .ceil(random.nextDouble() * oreType.size()),
-                            (int) FastMath
-                                    .ceil(random.nextDouble() * oreType.size()),
-                            oreType.chance(), random);
-                    if (random.nextInt(oreType.rockChance()) == 0) {
+                Optional<OreType> ore = gen.randomOreType(plugin, data, random);
+                if (ore.isPresent()) {
+                    OreType oreType = ore.get();
+                    int ores = StructureOre
+                            .genOre(terrain, xx, yy, zz, materials.stoneRaw,
+                                    oreType.type(), (int) FastMath
+                                            .ceil(random.nextDouble() *
+                                                    oreType.size()),
+                                    (int) FastMath.ceil(random.nextDouble() *
+                                            oreType.size()), (int) FastMath
+                                            .ceil(random.nextDouble() *
+                                                    oreType.size()),
+                                    oreType.chance(), random);
+                    if (ores > 0 && random.nextInt(oreType.rockChance()) == 0) {
                         int xxx = xx + random.nextInt(21) - 10;
                         int yyy = yy + random.nextInt(21) - 10;
                         int zzz = terrain.highestTerrainBlockZAt(xxx, yyy) -
                                 random.nextInt(4);
-                        BlockType blockType = terrain.type(xxx, yyy, zzz);
-                        if (blockType == materials.grass ||
-                                blockType == materials.dirt ||
-                                blockType == materials.sand ||
-                                blockType == materials.stoneRaw) {
-                            double size;
-                            if (random.nextInt(30) == 0) {
-                                size = random.nextDouble() * 4.0 + 3.0;
-                            } else {
-                                size = random.nextDouble() * 2.0 + 2.0;
+                        if (FastMath.abs(zzz - zz) < oreType.rockDistance()) {
+                            BlockType blockType = terrain.type(xxx, yyy, zzz);
+                            if (blockType == materials.grass ||
+                                    blockType == materials.dirt ||
+                                    blockType == materials.sand ||
+                                    blockType == materials.stoneRaw) {
+                                double size;
+                                if (random.nextInt(30) == 0) {
+                                    size = random.nextDouble() * 4.0 + 3.0;
+                                } else {
+                                    size = random.nextDouble() * 2.0 + 2.0;
+                                }
+                                StructureRock.genOreRock(terrain, xxx, yyy, zzz,
+                                        materials.stoneRaw, oreType.type(),
+                                        gen.stoneType(xxx, yyy, zzz),
+                                        FastMath.clamp(64 - ores >> 2, 2, 10),
+                                        size, random);
                             }
-                            StructureRock.genOreRock(terrain, xxx, yyy, zzz,
-                                    materials.stoneRaw, oreType.type(),
-                                    gen.stoneType(xxx, yyy, zzz), 10, size,
-                                    random);
                         }
                     }
                 }

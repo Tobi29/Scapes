@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.item.tool;
 
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
-public class ItemSaw extends ItemTool {
-    public ItemSaw(VanillaMaterial materials) {
-        super(materials, "vanilla.basics.item.Saw");
+public class ItemStoneHoe extends ItemStoneTool {
+    public ItemStoneHoe(VanillaMaterial materials) {
+        super(materials, "vanilla.basics.item.StoneHoe");
     }
 
     @Override
     public String type() {
-        return "Saw";
+        return "Hoe";
     }
 }

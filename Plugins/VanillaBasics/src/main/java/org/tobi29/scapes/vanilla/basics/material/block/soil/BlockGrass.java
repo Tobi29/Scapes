@@ -85,7 +85,7 @@ public class BlockGrass extends VanillaBlock {
                     terrain.data(x, y, z, (short) (terrain.data(x, y, z) - 1));
                 }
                 Random random = ThreadLocalRandom.current();
-                if (random.nextInt(40) == 0) {
+                if (random.nextInt(20) == 0) {
                     terrain.world().dropItem(new ItemStack(materials.seed,
                                     (short) random
                                             .nextInt(cropRegistry.values().size())), x,

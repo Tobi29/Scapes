@@ -16,15 +16,21 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item.tool;
 
+import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
-public class ItemHammer extends ItemTool {
-    public ItemHammer(VanillaMaterial materials) {
-        super(materials, "vanilla.basics.item.Hammer");
+public class ItemMetalHoe extends ItemMetalTool {
+    public ItemMetalHoe(VanillaMaterial materials) {
+        super(materials, "vanilla.basics.item.MetalHoe");
+    }
+
+    @Override
+    public boolean isWeapon(ItemStack item) {
+        return true;
     }
 
     @Override
     public String type() {
-        return "Hammer";
+        return "Hoe";
     }
 }

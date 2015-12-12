@@ -23,15 +23,13 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
+import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.gui.GuiAlloyInventory;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import org.tobi29.scapes.vanilla.basics.util.MetalUtil;
 
 public class EntityAlloyClient extends EntityAbstractContainerClient {
-    protected final Map<String, Double> metals = new ConcurrentHashMap<>();
-    protected String result = "";
-    protected float temperature;
+    protected MetalUtil.Alloy alloy = new MetalUtil.Alloy();
+    protected double temperature;
 
     public EntityAlloyClient(WorldClient world) {
         this(world, Vector3d.ZERO);
@@ -54,20 +52,13 @@ public class EntityAlloyClient extends EntityAbstractContainerClient {
     @Override
     public void read(TagStructure tagStructure) {
         super.read(tagStructure);
-        metals.clear();
-        for (Map.Entry<String, Object> entry : tagStructure
-                .getStructure("Metals").getTagEntrySet()) {
-            metals.put(entry.getKey(), (Double) entry.getValue());
-        }
-        result = tagStructure.getString("Result");
-        temperature = tagStructure.getFloat("Temperature");
+        VanillaBasics plugin =
+                (VanillaBasics) world.plugins().plugin("VanillaBasics");
+        alloy = MetalUtil.read(plugin, tagStructure.getStructure("Alloy"));
+        temperature = tagStructure.getDouble("Temperature");
     }
 
-    public Map<String, Double> metals() {
-        return metals;
-    }
-
-    public String result() {
-        return result;
+    public MetalUtil.Alloy alloy() {
+        return alloy;
     }
 }

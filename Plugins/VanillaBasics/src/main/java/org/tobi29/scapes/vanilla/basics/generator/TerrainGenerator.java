@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.generator;
 
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -23,6 +22,7 @@ import org.tobi29.scapes.engine.utils.math.noise.value.ValueNoise;
 import java.util.Random;
 
 public class TerrainGenerator {
+    private static final double SEA_LEVEL = 256.0;
     private final ValueNoise terrainNoise, mountainNoise, mountainCarveNoise,
             mountainHeightNoise, volcanoNoise, volcanoHeightNoise, riverNoise,
             canyonNoise, canyonDepthNoise, caveRiverNoise, caveNoise,
@@ -46,7 +46,7 @@ public class TerrainGenerator {
 
     public void generate(double x, double y, TerrainGeneratorLayer output) {
         double terrainFactor = generateTerrainFactorLayer(x, y);
-        double terrainHeight = terrainFactor * 64.0 + 224.0;
+        double terrainHeight = terrainFactor * 64.0 + output.terrainBase;
         double mountainFactor = generateMountainFactorLayer(x, y);
         double mountain, mountainCarve, mountainHeight;
         if (mountainFactor > 0.0) {
@@ -92,10 +92,10 @@ public class TerrainGenerator {
             canyon = 0.0;
         }
         double groundHeight = terrainHeight + mountainHeight + volcanoHeight;
-        if (groundHeight > 244.0) {
-            groundHeight -= 244.0;
+        if (groundHeight > output.riverBottom) {
+            groundHeight -= output.riverBottom;
             groundHeight *= river;
-            groundHeight += 244.0;
+            groundHeight += output.riverBottom;
         }
         groundHeight -= canyon * 40.0;
         output.height = groundHeight;
@@ -113,8 +113,9 @@ public class TerrainGenerator {
         double cave = FastMath.clamp(FastMath.sqr(1.0 - FastMath.abs(
                 caveNoise.noiseOctave(x / 128.0, y / 128.0, 2, 8.0, 0.1))) *
                 8.0 - 6.0, 0.0, 1.0);
-        double caveHeight =
-                128.0 + caveHeightNoise.noise(x / 512.0, y / 512.0) * 96.0;
+        double caveHeight = output.caveAverageHeight +
+                caveHeightNoise.noise(x / 512.0, y / 512.0) *
+                        output.caveHeightVary;
         double caveRiver = FastMath.clamp(FastMath.sqr(1.0 - FastMath.abs(
                 caveRiverNoise
                         .noiseOctave(x / 512.0, y / 512.0, 2, 8.0, 0.1))) *
@@ -123,16 +124,15 @@ public class TerrainGenerator {
         output.height = layer.height;
         output.mountainFactor = layer.mountainFactor;
         output.volcanoFactor = layer.volcanoFactor;
-        output.waterHeight = 256.0;
         output.cave = cave;
         output.caveHeight = caveHeight;
         output.caveRiver = caveRiver;
-        output.caveRiverHeight = 128.0;
         output.magmaHeight = magmaHeight;
         output.river = layer.river;
         output.soiled = layer.mountain - layer.mountainCarve * 0.4 <
                 1.3 - layer.mountainFactor && layer.volcanoHeight < 18;
-        output.beach = layer.height > 250.0 && layer.height <= 259.0;
+        output.beach = layer.height > output.beachMinHeight &&
+                layer.height <= output.beachMaxHeight;
         output.lavaChance =
                 layer.volcano > 0.5 ? 10000 : layer.volcano > 0.2 ? 10000 : 0;
     }
@@ -143,8 +143,8 @@ public class TerrainGenerator {
 
     public double generateMountainFactorLayer(double x, double y) {
         return FastMath.sqr((1.0 - FastMath.clamp(FastMath.abs(
-                        mountainHeightNoise.noise(x / 8192.0, y / 8192.0)) *
-                        3.0 - 0.25, 0.0, 1.0)) *
+                mountainHeightNoise.noise(x / 8192.0, y / 8192.0)) * 3.0 - 0.25,
+                0.0, 1.0)) *
                 (mountainHeightNoise.noise(x / 4096.0, y / 4096.0) * 0.5 +
                         0.5));
     }
@@ -170,14 +170,34 @@ public class TerrainGenerator {
         }
     }
 
+    public boolean isValidSpawn(double x, double y) {
+        TerrainGeneratorLayer layer = new TerrainGeneratorLayer();
+        generate(x, y, layer);
+        if (layer.mountainFactor > 0.2) {
+            return false;
+        }
+        if (layer.volcanoFactor > 0.4) {
+            return false;
+        }
+        TerrainGeneratorOutput output = new TerrainGeneratorOutput();
+        generate(x, y, layer, output);
+        return output.height > output.waterHeight;
+    }
+
     public static class TerrainGeneratorLayer {
+        public final double terrainBase = SEA_LEVEL - 31, riverBottom =
+                terrainBase + 20.0;
         public double height, mountain, mountainCarve, mountainFactor, volcano,
                 volcanoHeight, volcanoFactor, river;
     }
 
     public static class TerrainGeneratorOutput {
-        public double height, mountainFactor, volcanoFactor, waterHeight, cave,
-                caveHeight, caveRiver, caveRiverHeight, magmaHeight, river;
+        public final double waterHeight = SEA_LEVEL, caveAverageHeight =
+                waterHeight * 0.5, caveHeightVary = caveAverageHeight * 0.75,
+                caveRiverHeight = waterHeight * 0.5, beachMinHeight =
+                SEA_LEVEL - 6.0, beachMaxHeight = SEA_LEVEL + 3.0;
+        public double height, mountainFactor, volcanoFactor, cave, caveHeight,
+                caveRiver, magmaHeight, river;
         public boolean soiled, beach;
         public int lavaChance;
     }

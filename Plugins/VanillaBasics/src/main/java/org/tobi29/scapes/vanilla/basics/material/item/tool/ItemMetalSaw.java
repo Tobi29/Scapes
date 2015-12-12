@@ -18,13 +18,13 @@ package org.tobi29.scapes.vanilla.basics.material.item.tool;
 
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
-public class ItemShovel extends ItemTool {
-    public ItemShovel(VanillaMaterial materials) {
-        super(materials, "vanilla.basics.item.Shovel");
+public class ItemMetalSaw extends ItemMetalTool {
+    public ItemMetalSaw(VanillaMaterial materials) {
+        super(materials, "vanilla.basics.item.MetalSaw");
     }
 
     @Override
     public String type() {
-        return "Shovel";
+        return "Saw";
     }
 }

@@ -15,14 +15,15 @@
  */
 package org.tobi29.scapes.vanilla.basics.gui;
 
-import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.GuiComponentText;
 import org.tobi29.scapes.engine.gui.GuiStyle;
+import org.tobi29.scapes.engine.opengl.GL;
+import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
+import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityAlloyClient;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
-
-import java.util.Map;
+import org.tobi29.scapes.vanilla.basics.util.MetalUtil;
 
 public class GuiAlloyInventory extends GuiContainerInventory {
     private final EntityAlloyClient container;
@@ -34,34 +35,30 @@ public class GuiAlloyInventory extends GuiContainerInventory {
         this.container = container;
         buttonContainer(16, 120, 30, 30, 0);
         buttonContainer(16, 160, 30, 30, 1);
-        infoText = add(220, 170, p -> new GuiComponentText(p, 24, ""));
+        infoText = pane.add(60, 80, p -> new GuiComponentText(p, 24, ""));
         updateInfoText();
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine) {
-        super.updateComponent(engine);
+    public void renderOverlay(GL gl, Shader shader) {
+        super.renderOverlay(gl, shader);
         updateInfoText();
     }
 
     private void updateInfoText() {
-        StringBuilder textBuilder = new StringBuilder(64);
-        textBuilder.append("Metal: ");
-        String result = container.result();
-        if (!result.isEmpty()) {
-            textBuilder.append(result);
+        StringBuilder text = new StringBuilder(64);
+        MetalUtil.Alloy alloy = container.alloy();
+        VanillaBasics plugin = (VanillaBasics) container.world().plugins()
+                .plugin("VanillaBasics");
+        if (alloy.metals().findAny().isPresent()) {
+            text.append("Metal: ").append(alloy.type(plugin).name());
+            alloy.metals().forEach(
+                    entry -> text.append('\n').append(entry.a.name())
+                            .append(" - ")
+                            .append(FastMath.round(entry.b * 100.0) / 100.0));
         } else {
-            textBuilder.append("Unknown");
+            text.append("Insert molten metal on top\nslot, extract below.");
         }
-        double size = 0.0f;
-        for (Double amount : container.metals().values()) {
-            size += amount;
-        }
-        for (Map.Entry<String, Double> entry : container.metals().entrySet()) {
-            textBuilder.append('\n').append(entry.getKey()).append(" - ")
-                    .append(FastMath.round(entry.getValue() / size * 100.0f))
-                    .append('%');
-        }
-        infoText.setText(textBuilder.toString());
+        infoText.setText(text.toString());
     }
 }
