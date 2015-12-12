@@ -44,7 +44,6 @@ public class GameStateGameSP extends GameStateGameMP {
 
     @Override
     public void dispose() {
-        super.dispose();
         try {
             server.stop(ScapesServer.ShutdownReason.STOP);
             Image[] panorama = client.world().scene().panorama();
@@ -60,6 +59,7 @@ public class GameStateGameSP extends GameStateGameMP {
             LOGGER.error("Error closing world source:", e);
         }
         LOGGER.info("Stopped internal server!");
+        super.dispose();
     }
 
     @Override

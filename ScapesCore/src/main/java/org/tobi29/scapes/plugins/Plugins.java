@@ -39,6 +39,7 @@ public class Plugins {
     private final GameRegistry registry;
     private final URLClassLoader classLoader;
     private WorldType worldType;
+    private boolean init;
 
     public Plugins(List<PluginFile> files, IDStorage idStorage,
             boolean loadClasses) throws IOException {
@@ -141,8 +142,11 @@ public class Plugins {
     }
 
     public void init() {
-        Streams.of(plugins).forEach(plugin -> plugin.init(registry));
-        Streams.of(plugins).forEach(plugin -> plugin.initEnd(registry));
-        registry.lock();
+        if (!init) {
+            Streams.of(plugins).forEach(plugin -> plugin.init(registry));
+            Streams.of(plugins).forEach(plugin -> plugin.initEnd(registry));
+            registry.lock();
+            init = true;
+        }
     }
 }

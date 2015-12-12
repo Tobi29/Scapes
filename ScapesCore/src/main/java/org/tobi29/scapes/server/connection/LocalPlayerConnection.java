@@ -16,10 +16,8 @@
 package org.tobi29.scapes.server.connection;
 
 import java8.util.Optional;
-import java8.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.client.ScapesClient;
 import org.tobi29.scapes.client.connection.LocalClientConnection;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.engine.server.AbstractServerConnection;
@@ -37,7 +35,6 @@ import org.tobi29.scapes.entity.skin.ServerSkin;
 import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketClient;
 import org.tobi29.scapes.packets.PacketServer;
-import org.tobi29.scapes.plugins.Plugins;
 import org.tobi29.scapes.server.MessageLevel;
 
 import java.io.IOException;
@@ -50,16 +47,11 @@ public class LocalPlayerConnection extends PlayerConnection {
     private State state = State.OPEN;
 
     public LocalPlayerConnection(ServerConnection server, GameStateGameMP game,
-            int loadingDistance, Account account) throws IOException {
+            int loadingDistance, Account account) {
         super(server);
-        ScapesClient scapes = (ScapesClient) game.engine().game();
-        Plugins plugins = new Plugins(
-                server.plugins().files().collect(Collectors.toList()),
-                server.server().plugins().registry().idStorage(),
-                scapes.saves().loadClasses());
         loadingRadius = loadingDistance;
-        client = new LocalClientConnection(game, this, plugins, loadingDistance,
-                account);
+        client = new LocalClientConnection(game, this, server.plugins(),
+                loadingDistance, account);
     }
 
     public Optional<String> start(Account account) throws IOException {
