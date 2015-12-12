@@ -116,7 +116,6 @@ public class GameStateGameMP extends GameState {
 
     @Override
     public void init(GL gl) {
-        hud.add(8, 434, p -> new GuiComponentChat(p, chatHistory, 0, 0));
         engine.guiStack().add("05-HUD", hud);
         engine.guiStack().add("99-SceneDebug", debug);
         client.plugins().addFileSystems(engine.files());

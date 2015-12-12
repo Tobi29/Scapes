@@ -194,37 +194,40 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
     }
 
     private void update(double delta) {
-        terrain.update(delta, spawners);
-        Streams.of(entities.values()).forEach(entity -> {
-            entity.update(delta);
-            if (entity instanceof MobServer) {
-                ((MobServer) entity).move(delta);
-            }
-            if (entity instanceof MobLivingServer) {
-                if (((MobLivingServer) entity).isDead()) {
-                    ((MobLivingServer) entity).onDeath();
-                    if (!(entity instanceof MobPlayerServer)) {
-                        deleteEntity(entity);
-                    }
-                } else {
-                    if (((MobLivingServer) entity).creatureType()
-                            .doesDespawn()) {
-                        MobPlayerServer player = nearestPlayer(entity.pos());
-                        if (player != null) {
-                            if (FastMath.pointDistanceSqr(entity.pos(),
-                                    player.pos()) > 16384.0) {
+        synchronized (terrain) {
+            terrain.update(delta, spawners);
+            Streams.of(entities.values()).forEach(entity -> {
+                entity.update(delta);
+                if (entity instanceof MobServer) {
+                    ((MobServer) entity).move(delta);
+                }
+                if (entity instanceof MobLivingServer) {
+                    if (((MobLivingServer) entity).isDead()) {
+                        ((MobLivingServer) entity).onDeath();
+                        if (!(entity instanceof MobPlayerServer)) {
+                            deleteEntity(entity);
+                        }
+                    } else {
+                        if (((MobLivingServer) entity).creatureType()
+                                .doesDespawn()) {
+                            MobPlayerServer player =
+                                    nearestPlayer(entity.pos());
+                            if (player != null) {
+                                if (FastMath.pointDistanceSqr(entity.pos(),
+                                        player.pos()) > 16384.0) {
+                                    deleteEntity(entity);
+                                }
+                            } else {
                                 deleteEntity(entity);
                             }
-                        } else {
-                            deleteEntity(entity);
                         }
                     }
                 }
-            }
-        });
-        environment.tick(delta);
-        taskExecutor.tick();
-        tick++;
+            });
+            environment.tick(delta);
+            taskExecutor.tick();
+            tick++;
+        }
     }
 
     public List<MobServer> damageEntities(List<MobServer> exceptions,

@@ -139,7 +139,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
                                 .forEach(chunkUnloadQueue::add);
                         Streams.of(chunks).forEach(
                                 TerrainInfiniteChunkServer::updateAdjacent);
-                        if (loadingChunks.isEmpty()) {
+                        if (removeChunks() && loadingChunks.isEmpty()) {
                             SleepUtil.sleep(100);
                         }
                         loadingChunks.clear();
@@ -155,7 +155,6 @@ public class TerrainInfiniteServer extends TerrainInfinite
                     blockChanges.poll().run(this);
                     idle = false;
                 }
-                idle |= removeChunks();
                 if (idle) {
                     SleepUtil.sleep(10);
                 }
@@ -227,49 +226,44 @@ public class TerrainInfiniteServer extends TerrainInfinite
 
     @Override
     public void update(double delta, Collection<MobSpawner> spawners) {
-        synchronized (chunkUnloadQueue) {
-            Streams.of(chunkManager.iterator())
-                    .forEach(chunk -> chunk.updateServer(delta));
-            Random random = ThreadLocalRandom.current();
-            for (MobSpawner spawner : spawners) {
-                if (world.mobs(spawner.creatureType()) <
-                        chunkManager.chunks() * spawner.mobsPerChunk()) {
-                    for (TerrainInfiniteChunkServer chunk : chunkManager
-                            .iterator()) {
-                        if (random.nextInt(spawner.chunkChance()) == 0 &&
-                                chunk.isLoaded()) {
-                            for (int i = 0; i < spawner.spawnAttempts(); i++) {
-                                int x = random.nextInt(16);
-                                int y = random.nextInt(16);
-                                int z = random.nextInt(chunk.zSize());
-                                int xx = x + chunk.blockX();
-                                int yy = y + chunk.blockY();
-                                if (spawner.creatureType().doesDespawn()) {
-                                    MobPlayerServer player =
-                                            world.nearestPlayer(
-                                                    new Vector3d(xx, yy, z));
-                                    if (player == null) {
+        Streams.of(chunkManager.iterator())
+                .forEach(chunk -> chunk.updateServer(delta));
+        Random random = ThreadLocalRandom.current();
+        for (MobSpawner spawner : spawners) {
+            if (world.mobs(spawner.creatureType()) <
+                    chunkManager.chunks() * spawner.mobsPerChunk()) {
+                for (TerrainInfiniteChunkServer chunk : chunkManager
+                        .iterator()) {
+                    if (random.nextInt(spawner.chunkChance()) == 0 &&
+                            chunk.isLoaded()) {
+                        for (int i = 0; i < spawner.spawnAttempts(); i++) {
+                            int x = random.nextInt(16);
+                            int y = random.nextInt(16);
+                            int z = random.nextInt(chunk.zSize());
+                            int xx = x + chunk.blockX();
+                            int yy = y + chunk.blockY();
+                            if (spawner.creatureType().doesDespawn()) {
+                                MobPlayerServer player = world.nearestPlayer(
+                                        new Vector3d(xx, yy, z));
+                                if (player == null) {
+                                    continue;
+                                } else {
+                                    double distance =
+                                            FastMath.sqr(player.x() - xx) +
+                                                    FastMath.sqr(
+                                                            player.y() - yy) +
+                                                    FastMath.sqr(
+                                                            player.z() - z);
+                                    if (distance > 9216.0 || distance < 256.0) {
                                         continue;
-                                    } else {
-                                        double distance =
-                                                FastMath.sqr(player.x() - xx) +
-                                                        FastMath.sqr(
-                                                                player.y() -
-                                                                        yy) +
-                                                        FastMath.sqr(
-                                                                player.z() - z);
-                                        if (distance > 9216.0 ||
-                                                distance < 256.0) {
-                                            continue;
-                                        }
                                     }
                                 }
-                                if (spawner.canSpawn(this, xx, yy, z)) {
-                                    EntityServer entity =
-                                            spawner.spawn(this, xx, yy, z);
-                                    entity.onSpawn();
-                                    world.addEntity(entity);
-                                }
+                            }
+                            if (spawner.canSpawn(this, xx, yy, z)) {
+                                EntityServer entity =
+                                        spawner.spawn(this, xx, yy, z);
+                                entity.onSpawn();
+                                world.addEntity(entity);
                             }
                         }
                     }
@@ -423,7 +417,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
     private boolean removeChunks() {
         List<Pair<Vector2i, TagStructure>> chunks = new ArrayList<>();
         while (!chunkUnloadQueue.isEmpty()) {
-            synchronized (chunkUnloadQueue) {
+            synchronized (this) {
                 removeChunk(chunkUnloadQueue.poll()).ifPresent(chunks::add);
             }
         }

@@ -18,6 +18,8 @@ package org.tobi29.scapes.client.states.scenes;
 import org.tobi29.scapes.block.TerrainTextureRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldSkybox;
+import org.tobi29.scapes.client.gui.GuiComponentChat;
+import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
 import org.tobi29.scapes.engine.opengl.*;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
@@ -161,6 +163,10 @@ public class SceneScapesVoxelWorld extends Scene {
 
     @Override
     public void init(GL gl) {
+        Gui hud = world.game().hud();
+        hud.removeAll();
+        hud.add(8, 434,
+                p -> new GuiComponentChat(p, world.game().chatHistory(), 0, 0));
         ShaderManager shaderManager = gl.shaders();
         ShaderCompileInformation information =
                 shaderManager.compileInformation("Scapes:shader/Terrain");

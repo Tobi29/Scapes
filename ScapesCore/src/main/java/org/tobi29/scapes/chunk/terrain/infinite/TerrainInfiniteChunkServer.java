@@ -31,7 +31,6 @@ import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.packets.PacketBlockChange;
 import org.tobi29.scapes.packets.PacketBlockChangeAir;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -121,7 +120,9 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
     public TagStructure dispose() {
         List<EntityServer> entities = entities();
         for (EntityServer entity : entities) {
-            terrain.world().deleteEntity(entity);
+            if (!(entity instanceof MobPlayerServer)) {
+                terrain.world().deleteEntity(entity);
+            }
         }
         return save(false, entities);
     }
