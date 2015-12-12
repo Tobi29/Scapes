@@ -267,7 +267,7 @@ public class SceneScapesVoxelWorld extends Scene {
         world.game().renderTimestamp(delta);
         world.updateRender(cam, delta);
         skybox.renderUpdate(cam, delta);
-        skinStorage.update(gl, player.game().client());
+        skinStorage.update(player.game().client());
     }
 
     @Override

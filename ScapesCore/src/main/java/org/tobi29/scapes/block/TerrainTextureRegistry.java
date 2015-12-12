@@ -273,7 +273,7 @@ public class TerrainTextureRegistry {
         }
     }
 
-    public void dispose(GL gl) {
+    public void dispose() {
         textures.clear();
         if (texture != null) {
             texture.markDisposed();

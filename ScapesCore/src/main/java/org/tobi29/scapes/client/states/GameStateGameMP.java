@@ -98,7 +98,7 @@ public class GameStateGameMP extends GameState {
 
     @Override
     public void dispose(GL gl) {
-        terrainTextureRegistry.dispose(gl);
+        terrainTextureRegistry.dispose();
     }
 
     @Override

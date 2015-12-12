@@ -41,7 +41,7 @@ public class ClientSkinStorage {
         defaultSkin = defaultTexture.buffer();
     }
 
-    public void update(GL gl, ClientConnection connection) {
+    public void update(ClientConnection connection) {
         List<ClientSkin> oldSkins = Streams.of(skins.values())
                 .filter(skin -> skin.increaseTicks() > 1200)
                 .collect(Collectors.toList());

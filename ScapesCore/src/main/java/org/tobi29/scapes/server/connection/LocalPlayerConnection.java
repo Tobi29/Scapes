@@ -62,9 +62,8 @@ public class LocalPlayerConnection extends PlayerConnection {
                     stream -> PNG.decode(stream, BufferCreator::bytes));
         } else {
             client.game().engine().files()
-                    .get("Scapes:image/entity/mob/Player.png").read(stream -> {
-                image.a = PNG.decode(stream, BufferCreator::bytes);
-            });
+                    .get("Scapes:image/entity/mob/Player.png").read(stream ->
+                    image.a = PNG.decode(stream, BufferCreator::bytes));
         }
         if (image.a.width() != 64 || image.a.height() != 64) {
             return Optional.of("Invalid skin!");

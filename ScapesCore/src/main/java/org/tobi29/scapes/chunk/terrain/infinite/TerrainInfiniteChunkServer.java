@@ -118,7 +118,7 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
         }
     }
 
-    public TagStructure dispose() throws IOException {
+    public TagStructure dispose() {
         List<EntityServer> entities = entities();
         for (EntityServer entity : entities) {
             terrain.world().deleteEntity(entity);

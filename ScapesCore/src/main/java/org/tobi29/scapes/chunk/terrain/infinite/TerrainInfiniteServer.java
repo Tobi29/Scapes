@@ -15,8 +15,8 @@
  */
 package org.tobi29.scapes.chunk.terrain.infinite;
 
-import java8.util.stream.Collectors;
 import java8.util.Optional;
+import java8.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.block.BlockType;
@@ -443,16 +443,10 @@ public class TerrainInfiniteServer extends TerrainInfinite
         int x = chunk.x();
         int y = chunk.y();
         chunkManager.remove(x, y);
-        try {
-            TagStructure tagStructure = chunk.dispose();
-            while (chunkUnloadQueue.remove(chunk)) {
-            }
-            updateAdjacent(chunk.x(), chunk.y());
-            return Optional.of(new Pair<>(new Vector2i(x, y), tagStructure));
-        } catch (IOException e) {
-            LOGGER.error("Failed to save chunk:", e);
+        TagStructure tagStructure = chunk.dispose();
+        while (chunkUnloadQueue.remove(chunk)) {
         }
         updateAdjacent(chunk.x(), chunk.y());
-        return Optional.empty();
+        return Optional.of(new Pair<>(new Vector2i(x, y), tagStructure));
     }
 }
