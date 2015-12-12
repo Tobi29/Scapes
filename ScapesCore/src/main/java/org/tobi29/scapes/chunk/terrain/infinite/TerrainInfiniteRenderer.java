@@ -520,8 +520,14 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                     ChunkMesh mesh = new ChunkMesh(arrays);
                     ChunkMesh meshAlpha = new ChunkMesh(arraysAlpha);
                     info.init(bx, by, bz, 16, 16, 16);
-                    boolean lod = chunk.lod(i);
-                    boolean needsLod = false;
+                    double relativeX =
+                            terrainChunk.blockX() - cam.position.doubleX();
+                    double relativeY =
+                            terrainChunk.blockY() - cam.position.doubleY();
+                    double relativeZ = (i << 4) - cam.position.doubleZ();
+                    boolean lod = FastMath.sqr(relativeX + 8) +
+                            FastMath.sqr(relativeY + 8) +
+                            FastMath.sqr(relativeZ + 8) < 9216;
                     for (int xxx = 0; xxx < 16; xxx++) {
                         int bxx = bx + xxx;
                         for (int yyy = 0; yyy < 16; yyy++) {
@@ -534,13 +540,9 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                                 type.addToChunkMesh(mesh, meshAlpha, data,
                                         section, info, bxx, byy, bzz, xxx, yyy,
                                         zzz, lod);
-                                if (type != air) {
-                                    needsLod = true;
-                                }
                             }
                         }
                     }
-                    chunk.setNeedsLod(i, needsLod);
                     if (mesh.size() > 0) {
                         vao = mesh.finish();
                         aabb = mesh.aabb();

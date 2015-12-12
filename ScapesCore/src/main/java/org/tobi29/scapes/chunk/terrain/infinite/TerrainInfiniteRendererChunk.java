@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import org.tobi29.scapes.engine.opengl.*;
@@ -52,7 +51,7 @@ public class TerrainInfiniteRendererChunk {
     private final boolean[] visible;
     private final boolean[] prepareVisible;
     private final boolean[] culled;
-    private final byte[] lod;
+    private final boolean[] lod;
 
     public TerrainInfiniteRendererChunk(TerrainInfiniteChunkClient chunk,
             TerrainInfiniteRenderer renderer) {
@@ -65,7 +64,7 @@ public class TerrainInfiniteRendererChunk {
         vaoAlpha = new VAO[zSections];
         aabb = new AABB[zSections];
         aabbAlpha = new AABB[zSections];
-        lod = new byte[zSections];
+        lod = new boolean[zSections];
         solid = new boolean[zSections];
         visible = new boolean[zSections];
         prepareVisible = new boolean[zSections];
@@ -83,10 +82,6 @@ public class TerrainInfiniteRendererChunk {
         return vao.length;
     }
 
-    public boolean lod(int i) {
-        return (lod[i] & 1) == 1;
-    }
-
     public boolean isGeometryDirty(int i) {
         return geometryDirty[i];
     }
@@ -97,20 +92,13 @@ public class TerrainInfiniteRendererChunk {
         MatrixStack matrixStack = gl.matrixStack();
         for (int i = 0; i < vao.length; i++) {
             double relativeZ = (i << 4) - cam.position.doubleZ();
-            boolean oldLod = (lod[i] & 1) == 1;
             boolean newLod = FastMath.sqr(relativeX + 8) +
                     FastMath.sqr(relativeY + 8) +
                     FastMath.sqr(relativeZ + 8) < 9216;
-            if (newLod != oldLod) {
-                if (newLod) {
-                    lod[i] |= 1;
-                } else {
-                    lod[i] &= ~1;
-                }
-                if ((lod[i] & 2) == 2) {
-                    geometryDirty[i] = true;
-                    renderer.addToLoadQueue(this);
-                }
+            if (lod[i] != newLod && !geometryDirty[i]) {
+                lod[i] = newLod;
+                geometryDirty[i] = true;
+                renderer.addToLoadQueue(this);
             }
             VAO vao = this.vao[i];
             AABB aabb = this.aabb[i];
@@ -236,14 +224,6 @@ public class TerrainInfiniteRendererChunk {
     public void setGeometryDirty(int i) {
         geometryDirty[i] = true;
         renderer.addToUpdateQueue(this);
-    }
-
-    public void setNeedsLod(int i, boolean value) {
-        if (value) {
-            lod[i] |= 2;
-        } else {
-            lod[i] &= ~2;
-        }
     }
 
     public void setSolid(int i, boolean value) {
