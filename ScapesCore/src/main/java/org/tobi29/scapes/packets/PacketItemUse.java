@@ -139,11 +139,6 @@ public class PacketItemUse extends Packet implements PacketServer {
                                                     type.drops(item, data);
                                             world.dropItems(drops, block.intX(),
                                                     block.intY(), block.intZ());
-                                            if (!drops.isEmpty()) {
-                                                player.statistics().blockBreak(
-                                                        drops.get(0).material(),
-                                                        drops.get(0).data());
-                                            }
                                             handler.typeData(block.intX(),
                                                     block.intY(), block.intZ(),
                                                     handler.world().air(), 0);

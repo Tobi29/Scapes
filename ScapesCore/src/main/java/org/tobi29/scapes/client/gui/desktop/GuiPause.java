@@ -29,14 +29,9 @@ public class GuiPause extends GuiMenuDouble {
         super(state, "Pause",
                 state instanceof GameStateGameSP ? "Save and quit" :
                         "Disconnect", "Back", style);
-        GuiComponentTextButton achievements = pane.addVert(16, 5,
-                p -> button(p, 368, "Statistics"));
         GuiComponentTextButton options = pane.addVert(16, 5,
                 p -> button(p, 368, "Options"));
 
-        achievements.onClickLeft(event -> player.connection()
-                .send(new PacketInteraction(
-                        PacketInteraction.OPEN_STATISTICS)));
         options.onClickLeft(
                 event -> player.openGui(new GuiOptionsInGame(state, style)));
         save.onClickLeft(event -> state.engine()

@@ -6,8 +6,7 @@ import org.tobi29.scapes.server.PlayerEntry;
 public interface PlayerData {
     PlayerEntry player(String id);
 
-    void save(String id, MobPlayerServer entity, int permissions,
-            PlayerStatistics statistics);
+    void save(String id, MobPlayerServer entity, int permissions);
 
     void add(String id);
 

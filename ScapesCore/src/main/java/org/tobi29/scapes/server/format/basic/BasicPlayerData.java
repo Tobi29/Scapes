@@ -18,7 +18,6 @@ package org.tobi29.scapes.server.format.basic;
 import java8.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
@@ -30,7 +29,6 @@ import org.tobi29.scapes.server.PlayerEntry;
 import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 import org.tobi29.scapes.server.format.PlayerData;
-import org.tobi29.scapes.server.format.PlayerStatistics;
 
 import java.io.IOException;
 import java.security.AccessController;
@@ -93,24 +91,16 @@ public class BasicPlayerData implements PlayerData {
             public int permissions() {
                 return tagStructure.getInteger("Permissions");
             }
-
-            @Override
-            public PlayerStatistics statistics(GameRegistry registry) {
-                PlayerStatistics statistics = new PlayerStatistics();
-                statistics.load(registry, tagStructure.getList("Statistics"));
-                return statistics;
-            }
         };
     }
 
     @Override
     public synchronized void save(String id, MobPlayerServer entity,
-            int permissions, PlayerStatistics statistics) {
+            int permissions) {
         WorldServer world = entity.world();
         TagStructure tagStructure = new TagStructure();
         tagStructure.setStructure("Entity", entity.write(false));
         tagStructure.setString("World", world.id());
-        tagStructure.setList("Statistics", statistics.save());
         tagStructure.setInteger("Permissions", permissions);
         save(tagStructure, id);
     }

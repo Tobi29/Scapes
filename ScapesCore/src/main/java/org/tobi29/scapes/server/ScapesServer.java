@@ -177,9 +177,8 @@ public class ScapesServer {
         return playerData.player(id);
     }
 
-    public void save(String id, MobPlayerServer entity, int permissions,
-            PlayerStatistics statistics) {
-        playerData.save(id, entity, permissions, statistics);
+    public void save(String id, MobPlayerServer entity, int permissions) {
+        playerData.save(id, entity, permissions);
     }
 
     public void add(String id) {

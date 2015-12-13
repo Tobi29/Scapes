@@ -53,7 +53,6 @@ public abstract class PlayerConnection
     protected String id, nickname = "_Error_";
     protected boolean added;
     protected int loadingRadius, permissionLevel;
-    protected PlayerStatistics statistics;
 
     protected PlayerConnection(ServerConnection server) {
         this.server = server;
@@ -80,10 +79,6 @@ public abstract class PlayerConnection
         return server;
     }
 
-    public PlayerStatistics statistics() {
-        return statistics;
-    }
-
     public synchronized void setWorld() {
         setWorld(null);
     }
@@ -95,7 +90,6 @@ public abstract class PlayerConnection
     public synchronized void setWorld(WorldServer world, Vector3 pos) {
         removeEntity();
         PlayerEntry player = server.server().player(id);
-        statistics = player.statistics(registry);
         permissionLevel = player.permissions();
         Optional<MobPlayerServer> newEntity =
                 player.createEntity(this, Optional.ofNullable(world));
@@ -113,7 +107,7 @@ public abstract class PlayerConnection
     }
 
     protected synchronized void save() {
-        server.server().save(id, entity, permissionLevel, statistics);
+        server.server().save(id, entity, permissionLevel);
     }
 
     protected Optional<String> generateResponse(boolean challengeMatch) {

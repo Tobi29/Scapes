@@ -12,6 +12,4 @@ public interface PlayerEntry {
             Optional<WorldServer> spawnWorld);
 
     int permissions();
-
-    PlayerStatistics statistics(GameRegistry registry);
 }

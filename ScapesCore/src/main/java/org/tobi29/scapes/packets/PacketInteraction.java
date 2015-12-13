@@ -31,8 +31,7 @@ import java.io.IOException;
 public class PacketInteraction extends Packet
         implements PacketClient, PacketServer {
     public static final byte INVENTORY_SLOT_LEFT = 0x00, INVENTORY_SLOT_RIGHT =
-            0x01, OPEN_INVENTORY = 0x10, CLOSE_INVENTORY = 0x11,
-            OPEN_STATISTICS = 0x20;
+            0x01, OPEN_INVENTORY = 0x10, CLOSE_INVENTORY = 0x11;
     private int entityID;
     private byte type, data;
 
@@ -120,9 +119,8 @@ public class PacketInteraction extends Packet
                             "Invalid slot change data!");
                 }
                 player.mob().setInventorySelectLeft(data);
-                world
-                        .send(new PacketInteraction(player.mob().entityID(),
-                                INVENTORY_SLOT_LEFT, data));
+                world.send(new PacketInteraction(player.mob().entityID(),
+                        INVENTORY_SLOT_LEFT, data));
                 break;
             case INVENTORY_SLOT_RIGHT:
                 if (data < 0 || data >= 10) {
@@ -130,9 +128,8 @@ public class PacketInteraction extends Packet
                             "Invalid slot change data!");
                 }
                 player.mob().setInventorySelectRight(data);
-                world
-                        .send(new PacketInteraction(player.mob().entityID(),
-                                INVENTORY_SLOT_RIGHT, data));
+                world.send(new PacketInteraction(player.mob().entityID(),
+                        INVENTORY_SLOT_RIGHT, data));
                 break;
             case OPEN_INVENTORY:
                 player.send(new PacketOpenGui(player.mob()));
@@ -141,13 +138,10 @@ public class PacketInteraction extends Packet
                 player.mob().inventory("Hold").item(0).take()
                         .ifPresent(drop -> {
                             player.mob().dropItem(drop);
-                            world.send(new PacketUpdateInventory(
-                                    player.mob(), "Hold"));
+                            world.send(new PacketUpdateInventory(player.mob(),
+                                    "Hold"));
                         });
                 player.send(new PacketCloseGui());
-                break;
-            case OPEN_STATISTICS:
-                player.send(new PacketUpdateStatistics(player.mob()));
                 break;
             default:
                 throw new InvalidPacketDataException(

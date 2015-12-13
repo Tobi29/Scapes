@@ -67,10 +67,6 @@ public class PacketCrafting extends Packet implements PacketServer {
             recipe.takes(inventory).ifPresent(takes -> {
                 takes.forEach(inventory::take);
                 inventory.add(result);
-                for (int i = 0; i < recipe.result().amount(); i++) {
-                    player.statistics()
-                            .blockCraft(result.material(), result.data());
-                }
                 player.send(
                         new PacketUpdateInventory(player.mob(), "Container"));
             });
