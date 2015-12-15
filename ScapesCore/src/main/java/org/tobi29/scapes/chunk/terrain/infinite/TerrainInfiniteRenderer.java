@@ -396,7 +396,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
         }
 
         @Override
-        public void run(Joiner joiner) {
+        public void run(Joiner.Joinable joiner) {
             while (!joiner.marked()) {
                 boolean idle = true;
                 while (!queue.isEmpty()) {
@@ -426,7 +426,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                     }
                 }
                 if (idle) {
-                    SleepUtil.sleep(10);
+                    joiner.sleep(10);
                 }
             }
         }

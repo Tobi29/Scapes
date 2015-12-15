@@ -15,14 +15,15 @@
  */
 package org.tobi29.scapes.chunk.terrain.infinite;
 
-import java8.util.stream.Collectors;
 import java8.util.Optional;
+import java8.util.stream.Collectors;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderer;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i;
+import org.tobi29.scapes.engine.utils.task.Joiner;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.packets.PacketBlockChange;
@@ -40,6 +41,7 @@ public class TerrainInfiniteClient extends TerrainInfinite
     private final MobPlayerClientMain player;
     private final TerrainInfiniteChunkManagerClient chunkManager;
     private final int loadingRadius, loadingRadiusSqr;
+    private final Joiner joiner;
     protected int requestedChunks;
 
     public TerrainInfiniteClient(WorldClient world, int loadingRadius,
@@ -70,6 +72,25 @@ public class TerrainInfiniteClient extends TerrainInfinite
         sortedLocations = Streams.of(locations).collect(Collectors.toList());
         renderer = new TerrainInfiniteRenderer(this, player, loadingRadius,
                 sortedLocations);
+        joiner = taskExecutor.runTask(joiner -> {
+            while (!joiner.marked()) {
+                boolean active = false;
+                int xx = FastMath.floor(player.x() / 16.0);
+                int yy = FastMath.floor(player.y() / 16.0);
+                for (Vector2i pos : sortedLocations) {
+                    Optional<TerrainInfiniteChunkClient> chunk =
+                            chunkManager.get(pos.intX() + xx, pos.intY() + yy);
+                    if (chunk.isPresent()) {
+                        active |= chunk.get().checkLoaded();
+                    }
+                }
+                if (active) {
+                    joiner.sleep(10);
+                } else {
+                    joiner.sleep(200);
+                }
+            }
+        }, "Chunk-Requests");
     }
 
     public int requestedChunks() {
@@ -94,13 +115,6 @@ public class TerrainInfiniteClient extends TerrainInfinite
     public void update(double delta) {
         int xx = FastMath.floor(player.x() / 16.0);
         int yy = FastMath.floor(player.y() / 16.0);
-        for (Vector2i pos : sortedLocations) {
-            Optional<TerrainInfiniteChunkClient> chunk =
-                    chunkManager.get(pos.intX() + xx, pos.intY() + yy);
-            if (chunk.isPresent()) {
-                chunk.get().updateClient();
-            }
-        }
         chunkManager.setCenter(xx, yy);
         for (int x = -loadingRadius; x <= loadingRadius; x++) {
             int xxx = x + xx;
@@ -142,6 +156,7 @@ public class TerrainInfiniteClient extends TerrainInfinite
 
     @Override
     public void dispose() {
+        joiner.join();
         lighting.dispose();
         Streams.of(chunkManager.iterator()).forEach(this::removeChunk);
         renderer.dispose();

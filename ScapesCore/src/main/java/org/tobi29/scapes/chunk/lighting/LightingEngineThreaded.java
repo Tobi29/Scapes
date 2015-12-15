@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.lighting;
 
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.chunk.terrain.Terrain;
 import org.tobi29.scapes.engine.utils.Pool;
-import org.tobi29.scapes.engine.utils.SleepUtil;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3;
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3i;
@@ -184,7 +182,7 @@ public class LightingEngineThreaded
     }
 
     @Override
-    public void run(Joiner joiner) {
+    public void run(Joiner.Joinable joiner) {
         while (!joiner.marked()) {
             Pool<MutableVector3> updates = new Pool<>(MutableVector3i::new);
             Pool<MutableVector3> newUpdates = new Pool<>(MutableVector3i::new);
@@ -197,7 +195,7 @@ public class LightingEngineThreaded
                             update.intY(), update.intZ());
                 }
             }
-            SleepUtil.sleep(10);
+            joiner.sleep(10);
         }
     }
 }

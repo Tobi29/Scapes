@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import java8.util.Optional;
@@ -41,7 +40,7 @@ public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
         return optional;
     }
 
-    public void updateClient() {
+    public boolean checkLoaded() {
         if (state.id < State.LOADED.id) {
             TerrainInfiniteClient terrainClient = terrain;
             if (!requested && terrainClient.requestedChunks() < 3) {
@@ -49,8 +48,10 @@ public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
                 terrainClient.changeRequestedChunks(1);
                 terrain.world()
                         .send(new PacketRequestChunk(pos.intX(), pos.intY()));
+                return true;
             }
         }
+        return false;
     }
 
     public void setLoaded() {

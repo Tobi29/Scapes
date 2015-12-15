@@ -26,7 +26,6 @@ import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.generator.GeneratorOutput;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.utils.Pair;
-import org.tobi29.scapes.engine.utils.SleepUtil;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -76,7 +75,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
                 if (players.isEmpty()) {
                     Streams.of(chunkManager.iterator())
                             .forEach(chunkUnloadQueue::add);
-                    SleepUtil.sleep(100);
+                    joiner.sleep(100);
                 } else {
                     for (MobPlayerServer player : players) {
                         int xx = FastMath.floor(player.x() / 16.0);
@@ -140,7 +139,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
                         Streams.of(chunks).forEach(
                                 TerrainInfiniteChunkServer::updateAdjacent);
                         if (removeChunks() && loadingChunks.isEmpty()) {
-                            SleepUtil.sleep(100);
+                            joiner.sleep(100);
                         }
                         loadingChunks.clear();
                     }
@@ -156,7 +155,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
                     idle = false;
                 }
                 if (idle) {
-                    SleepUtil.sleep(10);
+                    joiner.sleep(10);
                 }
             }
         }, "Chunk-Updating");

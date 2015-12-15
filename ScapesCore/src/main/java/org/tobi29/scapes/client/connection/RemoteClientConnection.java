@@ -59,7 +59,7 @@ public class RemoteClientConnection extends ClientConnection
     }
 
     @Override
-    public void run(Joiner joiner) {
+    public void run(Joiner.Joinable joiner) {
         try {
             while (!joiner.marked()) {
                 while (!sendQueue.isEmpty()) {

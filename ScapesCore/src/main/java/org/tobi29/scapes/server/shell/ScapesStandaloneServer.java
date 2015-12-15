@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.server.ServerInfo;
 import org.tobi29.scapes.engine.utils.Crashable;
-import org.tobi29.scapes.engine.utils.SleepUtil;
 import org.tobi29.scapes.engine.utils.io.filesystem.CrashReportFile;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
@@ -57,14 +56,14 @@ public abstract class ScapesStandaloneServer
 
     public void run() throws IOException {
         RUNTIME.addShutdownHook(shutdownHook);
-        while (!joinable.joiner().marked()) {
+        while (!joinable.marked()) {
             start();
             try {
                 Runnable loop = loop();
                 while (!server.shouldStop()) {
                     loop.run();
-                    SleepUtil.sleep(100);
-                    if (joinable.joiner().marked()) {
+                    joinable.sleep(100);
+                    if (joinable.marked()) {
                         server.scheduleStop(ScapesServer.ShutdownReason.STOP);
                     }
                 }
