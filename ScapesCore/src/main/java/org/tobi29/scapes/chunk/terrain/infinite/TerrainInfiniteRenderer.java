@@ -99,6 +99,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
             return;
         }
         updateThread.queue.add(chunk);
+        joiner.wake();
     }
 
     public void addToLoadQueue(TerrainInfiniteRendererChunk chunk) {
@@ -107,6 +108,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
             return;
         }
         loadThread.queue.add(chunk);
+        joiner.wake();
     }
 
     @Override
@@ -426,7 +428,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                     }
                 }
                 if (idle) {
-                    joiner.sleep(10);
+                    joiner.sleep();
                 }
             }
         }

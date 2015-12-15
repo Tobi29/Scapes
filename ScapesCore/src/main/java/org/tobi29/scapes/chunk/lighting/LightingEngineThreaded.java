@@ -43,6 +43,7 @@ public class LightingEngineThreaded
     @Override
     public void updateLight(int x, int y, int z) {
         updates.add(new Vector3i(x, y, z));
+        joiner.wake();
     }
 
     @Override
@@ -195,7 +196,7 @@ public class LightingEngineThreaded
                             update.intY(), update.intZ());
                 }
             }
-            joiner.sleep(10);
+            joiner.sleep();
         }
     }
 }

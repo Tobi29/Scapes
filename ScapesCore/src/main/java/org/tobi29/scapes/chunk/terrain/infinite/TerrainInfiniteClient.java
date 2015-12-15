@@ -87,7 +87,7 @@ public class TerrainInfiniteClient extends TerrainInfinite
                 if (active) {
                     joiner.sleep(10);
                 } else {
-                    joiner.sleep(200);
+                    joiner.sleep();
                 }
             }
         }, "Chunk-Requests");
@@ -115,21 +115,28 @@ public class TerrainInfiniteClient extends TerrainInfinite
     public void update(double delta) {
         int xx = FastMath.floor(player.x() / 16.0);
         int yy = FastMath.floor(player.y() / 16.0);
-        chunkManager.setCenter(xx, yy);
-        for (int x = -loadingRadius; x <= loadingRadius; x++) {
-            int xxx = x + xx;
-            for (int y = -loadingRadius; y <= loadingRadius; y++) {
-                int yyy = y + yy;
-                if (xxx >= cxMin && xxx <= cxMax && yyy >= cyMin &&
-                        yyy <= cyMax) {
-                    if (x * x + y * y < loadingRadiusSqr) {
-                        if (!chunkManager.get(xxx, yyy).isPresent()) {
-                            addChunk(xxx, yyy);
+        if (chunkManager.setCenter(xx, yy)) {
+            boolean active = false;
+            for (int x = -loadingRadius; x <= loadingRadius; x++) {
+                int xxx = x + xx;
+                for (int y = -loadingRadius; y <= loadingRadius; y++) {
+                    int yyy = y + yy;
+                    if (xxx >= cxMin && xxx <= cxMax && yyy >= cyMin &&
+                            yyy <= cyMax) {
+                        if (x * x + y * y < loadingRadiusSqr) {
+                            if (!chunkManager.get(xxx, yyy).isPresent()) {
+                                addChunk(xxx, yyy);
+                                active = true;
+                            }
+                        } else {
+                            chunkManager.get(xxx, yyy)
+                                    .ifPresent(this::removeChunk);
                         }
-                    } else {
-                        chunkManager.get(xxx, yyy).ifPresent(this::removeChunk);
                     }
                 }
+            }
+            if (active) {
+                joiner.wake();
             }
         }
     }

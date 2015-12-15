@@ -108,7 +108,7 @@ public class TerrainInfiniteChunkManagerClient
                 .collect(Collectors.toList());
     }
 
-    protected void setCenter(int x, int y) {
+    protected boolean setCenter(int x, int y) {
         x -= radius;
         y -= radius;
         if (x != this.x || y != this.y) {
@@ -148,7 +148,9 @@ public class TerrainInfiniteChunkManagerClient
                 }
                 lock.incrementAndGet();
             }
+            return true;
         }
+        return false;
     }
 
     private void clear() {

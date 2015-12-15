@@ -56,7 +56,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
             new ConcurrentLinkedQueue<>();
     private final TerrainInfiniteChunkManagerServer chunkManager;
     private final GeneratorOutput generatorOutput;
-    private final Joiner joiner;
+    private final Joiner updateJoiner, joiner;
 
     public TerrainInfiniteServer(WorldServer world, int zSize,
             TerrainInfiniteFormat format, TaskExecutor taskExecutor,
@@ -147,7 +147,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
                 }
             }
         }, "Chunk-Loading");
-        Joiner updateJoiner = world.taskExecutor().runTask(joiner -> {
+        updateJoiner = world.taskExecutor().runTask(joiner -> {
             while (!joiner.marked()) {
                 boolean idle = true;
                 while (!blockChanges.isEmpty()) {
@@ -155,7 +155,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
                     idle = false;
                 }
                 if (idle) {
-                    joiner.sleep(10);
+                    joiner.sleep();
                 }
             }
         }, "Chunk-Updating");
@@ -274,6 +274,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
     @Override
     public void queue(BlockChanges blockChanges) {
         this.blockChanges.add(blockChanges);
+        updateJoiner.wake();
     }
 
     @Override

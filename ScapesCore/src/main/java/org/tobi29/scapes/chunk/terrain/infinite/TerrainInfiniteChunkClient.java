@@ -48,8 +48,8 @@ public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
                 terrainClient.changeRequestedChunks(1);
                 terrain.world()
                         .send(new PacketRequestChunk(pos.intX(), pos.intY()));
-                return true;
             }
+            return true;
         }
         return false;
     }
