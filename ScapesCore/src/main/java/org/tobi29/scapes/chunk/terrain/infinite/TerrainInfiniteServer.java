@@ -75,6 +75,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
                 if (players.isEmpty()) {
                     Streams.of(chunkManager.iterator())
                             .forEach(chunkUnloadQueue::add);
+                    removeChunks();
                     joiner.sleep(100);
                 } else {
                     for (MobPlayerServer player : players) {
@@ -439,6 +440,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
         chunkManager.remove(x, y);
         TagStructure tagStructure = chunk.dispose();
         while (chunkUnloadQueue.remove(chunk)) {
+            LOGGER.warn("Chunk queued for unloading twice!");
         }
         updateAdjacent(chunk.x(), chunk.y());
         return Optional.of(new Pair<>(new Vector2i(x, y), tagStructure));
