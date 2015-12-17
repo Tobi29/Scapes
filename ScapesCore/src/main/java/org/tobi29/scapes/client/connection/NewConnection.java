@@ -96,13 +96,13 @@ public class NewConnection {
         try {
             PublicKey rsaKey = KeyFactory.getInstance("RSA")
                     .generatePublic(new X509EncodedKeySpec(array));
-            Cipher cipher = Cipher.getInstance("RSA");
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.ENCRYPT_MODE, rsaKey);
             byte[] pair = new byte[keyLength << 1];
             System.arraycopy(keyServer, 0, pair, 0, keyLength);
             System.arraycopy(keyClient, 0, pair, keyLength, keyLength);
             byte[] cipherText = cipher.doFinal(pair);
-            output.putByteArrayLong(cipherText);
+            output.put(cipherText);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidKeySpecException e) {
             throw new IOException(e);
         }
@@ -121,7 +121,7 @@ public class NewConnection {
         byte[] challenge = new byte[512];
         input.get(challenge);
         try {
-            Cipher cipher = Cipher.getInstance("RSA");
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.DECRYPT_MODE, account.keyPair().getPrivate());
             challenge = cipher.doFinal(challenge);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException e) {

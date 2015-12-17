@@ -112,12 +112,10 @@ public class RemotePlayerConnection extends PlayerConnection {
         byte[] keyClient = new byte[keyLength];
         try {
             KeyPair keyPair = server.keyPair();
-            Cipher cipher = Cipher.getInstance("RSA");
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
-            // getOutputSize bugged on android
-            // byte[] array = input.getByteArrayLong(
-            // cipher.getOutputSize(keyLength << 1));
-            byte[] array = input.getByteArrayLong(4096);
+            byte[] array = new byte[cipher.getOutputSize(keyLength << 1)];
+            input.get(array);
             array = cipher.doFinal(array);
             System.arraycopy(array, 0, keyServer, 0, keyLength);
             System.arraycopy(array, keyLength, keyClient, 0, keyLength);
@@ -139,7 +137,7 @@ public class RemotePlayerConnection extends PlayerConnection {
         try {
             PublicKey key = KeyFactory.getInstance("RSA")
                     .generatePublic(new X509EncodedKeySpec(array));
-            Cipher cipher = Cipher.getInstance("RSA");
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.ENCRYPT_MODE, key);
             output.put(cipher.doFinal(challenge));
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidKeySpecException e) {
