@@ -5,13 +5,13 @@ uniform 3 Texture2 uniform_Texture;
 uniform 4 Vector3 uniform_FogColor;
 uniform 5 Float uniform_FogEnd;
 uniform 6 Texture2 uniform_BackgroundTexture;
-uniform 7 Vector2 uniform_ScreenSize;
-uniform 8 Float uniform_Time;
-uniform 9 Float uniform_Sunlight;
-uniform 10 Vector3 uniform_SunlightNormal;
-uniform 11 Float uniform_CamLight;
+uniform 7 Float uniform_Time;
+uniform 8 Float uniform_Sunlight;
+uniform 9 Vector3 uniform_SunlightNormal;
+uniform 10 Float uniform_CamLight;
 
 const Vector3 BLOCKLIGHT_NORMAL = vector3(0.3, 0.1, 0.6);
+const Vector2 SCREEN_SIZE = vector2(float($SCENE_WIDTH), float($SCENE_HEIGHT));
 
 shader vertex(0 Vector4 attribute_Position,
               1 Vector4 attribute_Color,
@@ -55,7 +55,7 @@ shader fragment(Vector4 varying_Color,
     out_Color.rgb = mix(out_Color.rgb * varying_Color.rgb, uniform_FogColor, fog);
     Float fogBackground = mix(10.0, 0.0, fog);
     if (fogBackground < 1.0) {
-        Vector3 background = texture(uniform_BackgroundTexture, varying_Fragment.xy / uniform_ScreenSize).rgb;
+        Vector3 background = texture(uniform_BackgroundTexture, varying_Fragment.xy / SCREEN_SIZE).rgb;
         out_Color.rgb = mix(background, out_Color.rgb, fogBackground);
     }
 }

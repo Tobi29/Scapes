@@ -174,24 +174,22 @@ public class WorldClient extends World {
         shaderTerrain
                 .setUniform1f(5, scene.fogDistance() * scene.renderDistance());
         shaderTerrain.setUniform1i(6, 1);
-        shaderTerrain.setUniform2f(7, gl.sceneWidth(), gl.sceneHeight());
-        shaderTerrain.setUniform1f(8, time);
-        shaderTerrain.setUniform1f(9, sunLightReduction);
-        shaderTerrain.setUniform3f(10, sunlightNormal.floatX(),
+        shaderTerrain.setUniform1f(7, time);
+        shaderTerrain.setUniform1f(8, sunLightReduction);
+        shaderTerrain.setUniform3f(9, sunlightNormal.floatX(),
                 sunlightNormal.floatY(), sunlightNormal.floatZ());
-        shaderTerrain.setUniform1f(11, playerLight);
-        shaderTerrain.setUniform1f(12, animationDistance * cam.far);
+        shaderTerrain.setUniform1f(10, playerLight);
+        shaderTerrain.setUniform1f(11, animationDistance * cam.far);
         Shader shaderEntity = shaderManager.get("Scapes:shader/Entity", gl);
         shaderEntity.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB());
         shaderEntity
                 .setUniform1f(5, scene.fogDistance() * scene.renderDistance());
         shaderEntity.setUniform1i(6, 1);
-        shaderEntity.setUniform2f(7, gl.sceneWidth(), gl.sceneHeight());
-        shaderEntity.setUniform1f(8, time);
-        shaderEntity.setUniform1f(9, sunLightReduction);
-        shaderEntity.setUniform3f(10, sunlightNormal.floatX(),
+        shaderEntity.setUniform1f(7, time);
+        shaderEntity.setUniform1f(8, sunLightReduction);
+        shaderEntity.setUniform3f(9, sunlightNormal.floatX(),
                 sunlightNormal.floatY(), sunlightNormal.floatZ());
-        shaderEntity.setUniform1f(11, playerLight);
+        shaderEntity.setUniform1f(10, playerLight);
         gl.setBlending(BlendingMode.NONE);
         scene.terrainTextureRegistry().texture().bind(gl);
         terrain.renderer().render(gl, shaderTerrain, cam, debug);

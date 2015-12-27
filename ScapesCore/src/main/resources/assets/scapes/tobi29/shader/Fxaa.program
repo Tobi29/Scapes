@@ -1,9 +1,9 @@
 uniform 1 Matrix4 uniform_ModelViewProjectionMatrix;
 uniform 3 Texture2 uniform_Texture;
 uniform 4 Texture2 uniform_Noise;
-uniform 5 Vector2 uniform_ScreenSize;
 
 const Vector3 LUMA = vector3(0.299, 0.587, 0.114);
+const Vector2 SCREEN_SIZE = vector2(float($SCENE_WIDTH), float($SCENE_HEIGHT));
 const Float FXAA_REDUCE_MIN = 1.0 / 128.0;
 const Float FXAA_REDUCE_MUL = 0.25 / 8.0;
 const Float FXAA_SPAN_MAX = 8.0;
@@ -11,7 +11,7 @@ const Float FXAA_SPAN_MAX = 8.0;
 shader vertex(0 Vector4 attribute_Position,
               2 Vector2 attribute_Texture) {
     varying_Texture = attribute_Texture;
-    Vector2 rcpFrame = vector2(1.0) / uniform_ScreenSize;
+    Vector2 rcpFrame = vector2(1.0) / SCREEN_SIZE;
     varying_PosPos = attribute_Texture - rcpFrame * 0.75;
     out_Position = uniform_ModelViewProjectionMatrix * attribute_Position;
 }
@@ -20,7 +20,7 @@ shader fragment(Vector2 varying_Texture,
                 Vector2 varying_PosPos) {
     Vector2 uv = varying_Texture;
     Vector4 color = vector4(0.0);
-    Vector2 rcpFrame = vector2(1.0) / uniform_ScreenSize;
+    Vector2 rcpFrame = vector2(1.0) / SCREEN_SIZE;
 
     // FXAA
     Vector3 rgbNW = texture(uniform_Texture, varying_PosPos.xy).rgb;
@@ -61,7 +61,7 @@ shader fragment(Vector2 varying_Texture,
     }
 
     // Dither
-    Vector2 pixel = varying_Texture * uniform_ScreenSize / vector2(512.0);
+    Vector2 pixel = varying_Texture * SCREEN_SIZE / vector2(512.0);
     color.rgb += texture(uniform_Noise, pixel).rgb / 512.0 + 0.001953125;
 
     color.a = 1.0;

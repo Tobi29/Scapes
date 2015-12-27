@@ -292,7 +292,6 @@ public class SceneScapesVoxelWorld extends Scene {
                 gl.activeTexture(0);
                 Shader shader = shaderManager.get("Scapes:shader/Fxaa", gl);
                 shader.setUniform1i(4, 3);
-                shader.setUniform2f(5, gl.sceneWidth(), gl.sceneHeight());
                 return shader;
             } else {
                 pass--;
