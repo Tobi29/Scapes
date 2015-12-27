@@ -38,6 +38,12 @@ public class GuiShaderSettings extends GuiMenu {
         } else {
             bloom = pane.addVert(16, 5, p -> button(p, 368, "Bloom: OFF"));
         }
+        GuiComponentTextButton autoExposure;
+        if (scapesTag.getBoolean("AutoExposure")) {
+            autoExposure = pane.addVert(16, 5, p -> button(p, 368, "Auto Exposure: ON"));
+        } else {
+            autoExposure = pane.addVert(16, 5, p -> button(p, 368, "Auto Exposure: OFF"));
+        }
         GuiComponentTextButton fxaa;
         if (scapesTag.getBoolean("FXAA")) {
             fxaa = pane.addVert(16, 5, p -> button(p, 368, "FXAA: ON"));
@@ -55,6 +61,15 @@ public class GuiShaderSettings extends GuiMenu {
             } else {
                 bloom.setText("Bloom: OFF");
                 scapesTag.setBoolean("Bloom", false);
+            }
+        });
+        autoExposure.onClickLeft(event -> {
+            if (!scapesTag.getBoolean("AutoExposure")) {
+                autoExposure.setText("Auto Exposure: ON");
+                scapesTag.setBoolean("AutoExposure", true);
+            } else {
+                autoExposure.setText("Auto Exposure: OFF");
+                scapesTag.setBoolean("AutoExposure", false);
             }
         });
         fxaa.onClickLeft(event -> {

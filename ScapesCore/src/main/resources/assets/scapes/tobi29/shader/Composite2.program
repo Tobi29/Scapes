@@ -1,0 +1,64 @@
+uniform 1 Matrix4 uniform_ModelViewProjectionMatrix;
+uniform 3 Texture2 uniform_Texture;
+uniform 6 Float uniform_Brightness;
+uniform 7 Float uniform_Exposure;
+uniform 8 Texture2 uniform_Luminance;
+uniform 9 Texture2 uniform_AutoExposure;
+
+const Vector3 lumcoeff = vector3(0.299, 0.587, 0.114);
+const Float[] blurWeight = {$BLUR_WEIGHT};
+const Float[] blurOffset = {$BLUR_OFFSET};
+
+shader vertex(0 Vector4 attribute_Position,
+              2 Vector2 attribute_Texture) {
+    varying_Texture = attribute_Texture;
+    if ($ENABLE_BLOOM) {
+        for (i in 0 ... $BLUR_LENGTH) {
+            varying_TextureOffset[i] = vector2(attribute_Texture.x, attribute_Texture.y + blurOffset[i]);
+        }
+    }
+    if ($ENABLE_EXPOSURE) {
+        varying_AutoExposure = texture(uniform_AutoExposure, vector2(0.0)).r;
+    }
+    out_Position = uniform_ModelViewProjectionMatrix * attribute_Position;
+}
+
+shader fragment(Vector2 varying_Texture,
+                if ($ENABLE_EXPOSURE) Float varying_AutoExposure,
+                if ($ENABLE_BLOOM) Vector2[$BLUR_LENGTH] varying_TextureOffset) {
+    Vector3 color = texture(uniform_Texture, varying_Texture).rgb;
+    Float exposure;
+    if ($ENABLE_EXPOSURE) {
+        exposure = uniform_Exposure + varying_AutoExposure;
+    } else {
+        exposure = uniform_Exposure;
+    }
+
+    // Tone mapping
+    color *= vector3(exposure);
+    color = max(vector3(0.0), color - 0.004);
+    color = (color * (6.2 * color + 0.5)) / (color * (6.2 * color + 1.7) + 0.06);
+    color *= color;
+    Float luminance = dot(color, lumcoeff);
+    if ($ENABLE_BLOOM) {
+        Vector3 bloom = vector3(0.0);
+        for (i in 0 ... $BLUR_LENGTH) {
+            bloom += texture(uniform_Luminance, varying_TextureOffset[i]).rgb * blurWeight[i];
+        }
+        bloom *= vector3(exposure);
+        bloom = max(vector3(0.0), bloom - 0.004);
+        bloom = (bloom * (6.2 * bloom + 0.5)) / (bloom * (6.2 * bloom + 1.7) + 0.06);
+        bloom *= bloom;
+        Float luminanceBloom = dot(bloom, lumcoeff);
+        if (luminanceBloom > luminance) {
+            color += bloom * (luminanceBloom - luminance);
+        }
+    }
+    Float thresh = max((luminance - 0.5) * 80.0, 0.0);
+    color += color * vector3(thresh * 0.02);
+    color *= uniform_Brightness;
+    out_Color.rgb = color;
+    out_Color.a = 1.0;
+}
+
+outputs(0 Vector4 out_Color);

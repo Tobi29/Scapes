@@ -1,0 +1,27 @@
+uniform 1 Matrix4 uniform_ModelViewProjectionMatrix;
+uniform 3 Texture2 uniform_Texture;
+uniform 4 Vector4 uniform_Brightness;
+
+shader vertex(0 Vector4 attribute_Position,
+              1 Vector4 attribute_Color,
+              2 Vector2 attribute_Texture) {
+    varying_Texture = attribute_Texture;
+    varying_Color = attribute_Color;
+    out_Position = uniform_ModelViewProjectionMatrix * attribute_Position;
+}
+
+shader fragment(Vector4 varying_Color,
+                Vector2 varying_Texture) {
+    Vector2 relative = varying_Texture - vector2(0.5);
+    relative *= relative;
+    Float a = max(1.0 - (relative.x + relative.y) * 4.0, 0.0);
+    if (a <= 0.01) {
+        discard;
+    }
+    a *= a;
+    a *= a;
+    out_Color.rgb = varying_Color.rgb;
+    out_Color.a = a * a * varying_Color.a;
+}
+
+outputs(0 Vector4 out_Color);

@@ -66,9 +66,9 @@ public class SceneMenu extends Scene {
         int blurLength = blurOffsets.length;
         String blurOffset = ArrayUtil.join(blurOffsets);
         String blurWeight = ArrayUtil.join(blurWeights);
-        shader.supplyVariable("\\$BLUR_OFFSET", blurOffset);
-        shader.supplyVariable("\\$BLUR_WEIGHT", blurWeight);
-        shader.supplyVariable("\\$BLUR_LENGTH", blurLength);
+        shader.supplyProperty("BLUR_OFFSET", blurOffset);
+        shader.supplyProperty("BLUR_WEIGHT", blurWeight);
+        shader.supplyProperty("BLUR_LENGTH", blurLength);
     }
 
     public void changeBackground(WorldSource source) throws IOException {

@@ -1,0 +1,25 @@
+uniform 1 Matrix4 uniform_ModelViewProjectionMatrix;
+uniform 3 Texture2 uniform_Texture;
+
+const Float[] blurWeight = {$BLUR_WEIGHT};
+const Float[] blurOffset = {$BLUR_OFFSET};
+
+shader vertex(0 Vector4 attribute_Position,
+              2 Vector2 attribute_Texture) {
+    for (i in 0 ... $BLUR_LENGTH) {
+        varying_TextureOffset[i] = vector2(attribute_Texture.x + blurOffset[i], attribute_Texture.y);
+    }
+    out_Position = uniform_ModelViewProjectionMatrix * attribute_Position;
+}
+
+shader fragment(Vector2 varying_Texture,
+                Vector2[$BLUR_LENGTH] varying_TextureOffset) {
+    Vector3 color = vector3(0.0);
+    for (i in 0 ... $BLUR_LENGTH) {
+        color += texture(uniform_Texture, varying_TextureOffset[i]).rgb * blurWeight[i];
+    }
+    out_Color.rgb = color;
+    out_Color.a = 1.0;
+}
+
+outputs(0 Vector4 out_Color);

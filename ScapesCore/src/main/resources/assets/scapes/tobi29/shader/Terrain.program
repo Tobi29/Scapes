@@ -1,0 +1,103 @@
+uniform 0 Matrix4 uniform_ModelViewMatrix;
+uniform 1 Matrix4 uniform_ModelViewProjectionMatrix;
+uniform 2 Matrix3 uniform_NormalMatrix;
+uniform 3 Texture2 uniform_Texture;
+uniform 4 Vector3 uniform_FogColor;
+uniform 5 Float uniform_FogEnd;
+uniform 6 Texture2 uniform_BackgroundTexture;
+uniform 7 Vector2 uniform_ScreenSize;
+uniform 8 Float uniform_Time;
+uniform 9 Float uniform_Sunlight;
+uniform 10 Vector3 uniform_SunlightNormal;
+uniform 11 Float uniform_CamLight;
+uniform 12 Float uniform_AnimationDistance;
+
+const Float PI = 3.14159;
+const Float DEG2RAD = PI / 180.0;
+const Vector3 BLOCKLIGHT_NORMAL = vector3(0.3, 0.1, 0.6);
+const Float ANIMATION_NONE = 0.0;
+const Float ANIMATION_LEAVES = 1.5;
+const Float ANIMATION_WATER = 2.5;
+
+shader vertex(0 Vector4 attribute_Position,
+              1 Vector4 attribute_Color,
+              2 Vector2 attribute_Texture,
+              3 Vector3 attribute_Normal,
+              4 Vector2 attribute_Light,
+              5 Float attribute_Animation) {
+    varying_Texture = attribute_Texture;
+    varying_Color = attribute_Color;
+    Vector4 vertex = attribute_Position;
+    varying_Depth = length((uniform_ModelViewMatrix * vertex).xyz);
+    if ($ENABLE_ANIMATIONS) {
+        if (attribute_Animation > ANIMATION_NONE) {
+            if (varying_Depth < uniform_AnimationDistance) {
+                Vector3 animPos;
+                animPos.x = vertex.x * DEG2RAD;
+                animPos.y = vertex.y * DEG2RAD;
+                animPos.z = vertex.z * DEG2RAD;
+                if (attribute_Animation < ANIMATION_WATER) {
+                    // Water
+                    Float distance = 1.0 - min(varying_Depth / 32.0, 1.0);
+                    varying_Color.a = mix(1.0, varying_Color.a, distance * distance);
+                    vertex.z -= 0.06;
+                    vertex.z += sin((uniform_Time * 0.4 + (animPos.x + animPos.y) * 11.25) * 6.0) * 0.04;
+                    vertex.z += sin((uniform_Time * 0.8 + (animPos.x - animPos.y) * 22.5) * 6.0) * 0.02;
+                } else if (attribute_Animation < ANIMATION_LEAVES) {
+                    // Leaves
+                    vertex.x += sin((uniform_Time * 0.4 + (animPos.x + animPos.y) * 11.25) * 6.0) * 0.04;
+                    vertex.y += sin((uniform_Time * 0.3 + (animPos.x - animPos.y) * 11.25) * 6.0) * 0.04;
+                    vertex.z += sin((uniform_Time * 0.9 + (animPos.x - animPos.y) * 22.5) * 6.0) * 0.04;
+                }
+            } else if (attribute_Animation < ANIMATION_WATER) {
+                // Water Transparency
+                Float distance = 1.0 - min(varying_Depth / 32.0, 1.0);
+                varying_Color.a = mix(1.0, varying_Color.a, distance * distance);
+            }
+        }
+    } else {
+        if (attribute_Animation > ANIMATION_NONE && attribute_Animation < ANIMATION_WATER) {
+            // Water Transparency
+            Float distance = 1.0 - min(varying_Depth / 32.0, 1.0);
+            varying_Color.a = mix(1.0, varying_Color.a, distance * distance);
+        }
+    }
+    Float lightSunLevel = max(attribute_Light.y - uniform_Sunlight, 0.0);
+    Vector3 lightSun = vector3(lightSunLevel);
+    Vector3 lightBlock = vector3(attribute_Light.x);
+    lightBlock *= 0.5;
+    lightBlock.gb *= lightBlock.gb;
+    lightBlock.b *= lightBlock.b;
+    if (varying_Depth < 32.0 * uniform_CamLight) {
+        Vector3 realCamLight = vector3(clamp((1.0 - varying_Depth * 0.04) * uniform_CamLight, 0.0, 1.0));
+        realCamLight.gb *= realCamLight.gb;
+        realCamLight.b *= realCamLight.b;
+        varying_Color.rgb *= max(max(lightSun, lightBlock), realCamLight);
+    } else {
+        varying_Color.rgb *= max(lightSun, lightBlock);
+    }
+    Vector3 normal = uniform_NormalMatrix * attribute_Normal;
+    Float light = (mix(dot(normal, BLOCKLIGHT_NORMAL), dot(normal, uniform_SunlightNormal), lightSunLevel) + 1.2) / 2.2;
+    varying_Color.rgb *= light;
+    gl_Position = uniform_ModelViewProjectionMatrix * vertex;
+}
+
+shader fragment(Vector4 varying_Color,
+                Vector2 varying_Texture,
+                Float varying_Depth) {
+    out_Color = texture(uniform_Texture, varying_Texture);
+    out_Color.a *= varying_Color.a;
+    if (out_Color.a <= 0.01) {
+        discard;
+    }
+    Float fog = min(varying_Depth / uniform_FogEnd, 1.0);
+    fog *= fog;
+    out_Color.rgb = mix(out_Color.rgb * varying_Color.rgb, uniform_FogColor, fog);
+    Float fogBackground = mix(10.0, 0.0, fog);
+    if (fogBackground < 1.0) {
+        Vector3 background = texture(uniform_BackgroundTexture, varying_Fragment.xy / uniform_ScreenSize).rgb;
+        out_Color.rgb = mix(background, out_Color.rgb, fogBackground);
+    }
+}
+
+outputs(0 Vector4 out_Color);
