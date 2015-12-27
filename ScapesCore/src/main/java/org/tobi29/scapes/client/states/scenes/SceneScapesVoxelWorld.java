@@ -290,7 +290,7 @@ public class SceneScapesVoxelWorld extends Scene {
                 gl.activeTexture(3);
                 gl.textures().bind("Scapes:image/Noise", gl);
                 gl.activeTexture(0);
-                Shader shader = shaderManager.get("Scapes:shader/Fxaa", gl);
+                Shader shader = shaderManager.get("Scapes:shader/FXAA", gl);
                 shader.setUniform1i(4, 3);
                 return shader;
             } else {
