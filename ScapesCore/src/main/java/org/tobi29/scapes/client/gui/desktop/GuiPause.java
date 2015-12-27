@@ -21,7 +21,6 @@ import org.tobi29.scapes.client.states.GameStateMenu;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
-import org.tobi29.scapes.packets.PacketInteraction;
 
 public class GuiPause extends GuiMenuDouble {
     public GuiPause(GameStateGameMP state, MobPlayerClientMain player,

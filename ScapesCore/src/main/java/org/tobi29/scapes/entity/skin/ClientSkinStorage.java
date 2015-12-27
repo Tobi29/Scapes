@@ -17,7 +17,6 @@ package org.tobi29.scapes.entity.skin;
 
 import java8.util.stream.Collectors;
 import org.tobi29.scapes.client.connection.ClientConnection;
-import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.Checksum;

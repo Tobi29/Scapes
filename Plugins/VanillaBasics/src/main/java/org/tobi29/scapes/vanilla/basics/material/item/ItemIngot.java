@@ -27,7 +27,6 @@ import org.tobi29.scapes.entity.server.MobItemServer;
 import org.tobi29.scapes.vanilla.basics.material.AlloyType;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.util.MetalUtil;
-import org.tobi29.scapes.vanilla.basics.util.ToolUtil;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

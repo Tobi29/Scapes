@@ -16,7 +16,6 @@
 package org.tobi29.scapes.vanilla.basics.material.item;
 
 import org.tobi29.scapes.block.ItemStack;
-import org.tobi29.scapes.vanilla.basics.material.MetalType;
 import org.tobi29.scapes.vanilla.basics.util.MetalUtil;
 
 public interface ItemMetal extends ItemHeatable {

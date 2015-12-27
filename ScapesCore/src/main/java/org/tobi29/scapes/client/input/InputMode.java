@@ -17,9 +17,7 @@ package org.tobi29.scapes.client.input;
 
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.Gui;
-import org.tobi29.scapes.engine.gui.GuiAlignment;
 import org.tobi29.scapes.engine.gui.GuiController;
-import org.tobi29.scapes.engine.gui.GuiState;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 
 public interface InputMode {

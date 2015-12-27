@@ -38,7 +38,6 @@ import org.tobi29.scapes.server.MessageLevel;
 import org.tobi29.scapes.server.PlayerEntry;
 import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.extension.event.PlayerAuthenticateEvent;
-import org.tobi29.scapes.server.format.PlayerStatistics;
 
 import java.io.IOException;
 

@@ -20,6 +20,7 @@ import java8.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.block.*;
+import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.generator.ChunkGenerator;
 import org.tobi29.scapes.chunk.generator.GeneratorOutput;
 import org.tobi29.scapes.engine.utils.Streams;
@@ -119,11 +120,10 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
 
     public TagStructure dispose() {
         List<EntityServer> entities = entities();
-        for (EntityServer entity : entities) {
-            if (!(entity instanceof MobPlayerServer)) {
-                terrain.world().deleteEntity(entity);
-            }
-        }
+        WorldServer world = terrain.world();
+        Streams.of(entities)
+                .filter(entity -> !(entity instanceof MobPlayerServer))
+                .forEach(world::deleteEntity);
         return save(false, entities);
     }
 
