@@ -43,8 +43,6 @@ import java.io.IOException;
 
 public abstract class PlayerConnection
         implements Connection, PlayConnection, Command.Executor {
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(PlayerConnection.class);
     protected final ServerConnection server;
     protected final GameRegistry registry;
     protected MobPlayerServer entity;

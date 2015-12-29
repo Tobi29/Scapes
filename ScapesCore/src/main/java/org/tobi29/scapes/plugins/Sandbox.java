@@ -10,7 +10,6 @@ import java.util.concurrent.ForkJoinPool;
 public class Sandbox {
     private static final String[] PACKAGE_WHITELIST =
             {"java", "org.tobi29.scapes", "org.slf4j", "java8"};
-    public static boolean debug;
     private static boolean sandboxed;
 
     @SuppressWarnings("CustomSecurityManager")

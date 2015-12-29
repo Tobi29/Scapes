@@ -218,10 +218,6 @@ public class ScapesServer {
         return shutdownReason != ShutdownReason.RUNNING;
     }
 
-    public boolean hasStopped() {
-        return stopped;
-    }
-
     public enum ShutdownReason {
         RUNNING,
         STOP,

@@ -44,8 +44,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerConnection extends AbstractServerConnection {
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(ServerConnection.class);
     private final int mayPlayers;
     private final String controlPassword;
     private final ScapesServer server;

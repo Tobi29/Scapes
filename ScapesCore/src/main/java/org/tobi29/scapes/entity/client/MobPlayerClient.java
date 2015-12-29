@@ -17,7 +17,7 @@ public abstract class MobPlayerClient extends MobLivingEquippedClient {
     protected final Inventory inventoryContainer, inventoryHold;
     protected final Map<String, Inventory> inventories =
             new ConcurrentHashMap<>();
-    protected int inventorySelectLeft, inventorySelectRight = 9, healWait;
+    protected int inventorySelectLeft, inventorySelectRight = 9;
     protected String nickname;
     protected Checksum skin;
 
@@ -60,7 +60,6 @@ public abstract class MobPlayerClient extends MobLivingEquippedClient {
     @Override
     public void read(TagStructure tagStructure) {
         super.read(tagStructure);
-        healWait = tagStructure.getInteger("HealWait");
         TagStructure inventoryTag = tagStructure.getStructure("Inventory");
         Streams.of(inventories.entrySet()).forEach(entry -> entry.getValue()
                 .load(inventoryTag.getStructure(entry.getKey())));
