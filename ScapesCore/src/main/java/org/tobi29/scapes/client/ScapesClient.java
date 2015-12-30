@@ -41,6 +41,7 @@ import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.VersionUtil;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.graphics.PNG;
+import org.tobi29.scapes.engine.utils.io.IOFunction;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
@@ -56,20 +57,22 @@ import java.util.ServiceLoader;
 public class ScapesClient extends Game {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ScapesClient.class);
-    private final SaveStorage saves;
+    private final IOFunction<ScapesClient, SaveStorage> savesSupplier;
     private final List<InputMode> inputModes = new ArrayList<>();
     private final boolean skipIntro;
     private Image icon;
+    private SaveStorage saves;
     private InputMode inputMode;
     private boolean freezeInputMode;
 
-    public ScapesClient(SaveStorage saves) {
+    public ScapesClient(IOFunction<ScapesClient, SaveStorage> saves) {
         this(false, saves);
     }
 
-    public ScapesClient(boolean skipIntro, SaveStorage saves) {
+    public ScapesClient(boolean skipIntro,
+            IOFunction<ScapesClient, SaveStorage> saves) {
         this.skipIntro = skipIntro;
-        this.saves = saves;
+        savesSupplier = saves;
     }
 
     private static Optional<InputMode> loadService(ScapesEngine engine,
@@ -145,6 +148,7 @@ public class ScapesClient extends Game {
                             "assets/scapes/tobi29/"));
             icon = files.get("Scapes:image/Icon.png").readReturn(
                     stream -> PNG.decode(stream, BufferCreator::bytes));
+            saves = savesSupplier.apply(this);
         } catch (IOException e) {
             engine.crash(e);
         }
@@ -152,8 +156,9 @@ public class ScapesClient extends Game {
         if (!tagStructure.has("Scapes")) {
             TagStructure scapesTag = tagStructure.getStructure("Scapes");
             scapesTag.setFloat("AnimationDistance", 0.15f);
-            scapesTag.setBoolean("FXAA", true);
             scapesTag.setBoolean("Bloom", true);
+            scapesTag.setBoolean("AutoExposure", true);
+            scapesTag.setBoolean("FXAA", true);
             scapesTag.setDouble("RenderDistance", 128.0);
             TagStructure integratedServerTag =
                     scapesTag.getStructure("IntegratedServer");

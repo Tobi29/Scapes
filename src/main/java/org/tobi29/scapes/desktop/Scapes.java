@@ -22,6 +22,7 @@ import org.tobi29.scapes.client.BasicSaveStorage;
 import org.tobi29.scapes.client.SaveStorage;
 import org.tobi29.scapes.client.ScapesClient;
 import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.utils.io.IOFunction;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.plugins.Sandbox;
@@ -83,7 +84,8 @@ public class Scapes {
         }
         switch (mode) {
             case "client":
-                SaveStorage saves = new BasicSaveStorage(home.resolve("saves"));
+                IOFunction<ScapesClient, SaveStorage> saves =
+                        scapes -> new BasicSaveStorage(home.resolve("saves"));
                 ScapesEngine engine = new ScapesEngine(
                         new ScapesClient(commandLine.hasOption('s'), saves),
                         home, Debug.enabled());
