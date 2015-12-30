@@ -115,6 +115,10 @@ public class SceneScapesVoxelWorld extends Scene {
         }
     }
 
+    public float fov() {
+        return fov;
+    }
+
     public float fogR() {
         return skybox.fogR();
     }

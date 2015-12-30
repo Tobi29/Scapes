@@ -15,25 +15,31 @@
  */
 package org.tobi29.scapes.client.input.touch;
 
+import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.gui.desktop.GuiMessage;
 import org.tobi29.scapes.client.input.InputMode;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.input.ControllerTouch;
-import org.tobi29.scapes.engine.utils.math.vector.MutableVector2;
-import org.tobi29.scapes.engine.utils.math.vector.MutableVector2d;
-import org.tobi29.scapes.engine.utils.math.vector.Vector2;
-import org.tobi29.scapes.engine.utils.math.vector.Vector2d;
+import org.tobi29.scapes.engine.utils.BufferCreatorNative;
+import org.tobi29.scapes.engine.utils.graphics.Cam;
+import org.tobi29.scapes.engine.utils.math.FastMath;
+import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f;
+import org.tobi29.scapes.engine.utils.math.vector.*;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 
 public class InputModeTouch implements InputMode {
     private final ControllerTouch controller;
     private final GuiController guiController;
     private final PlayerController playerController;
-    private final MutableVector2 swipe = new MutableVector2d();
+    private final MutableVector2 swipe = new MutableVector2d(), direction =
+            new MutableVector2d();
+    private final Matrix4f matrix1 = new Matrix4f(BufferCreatorNative::floats),
+            matrix2 = new Matrix4f(BufferCreatorNative::floats);
     private boolean walkUp, walkDown, walkLeft, walkRight, inventoryOpen,
-            menuOpen;
+            menuOpen, leftHand, rightHand;
+    private long lastTouch;
 
     public InputModeTouch(ScapesEngine engine, ControllerTouch controller) {
         this.controller = controller;
@@ -56,9 +62,9 @@ public class InputModeTouch implements InputMode {
     }
 
     @Override
-    public void createInGameGUI(Gui gui) {
-        int size = 120, gap = 20;
-        GuiComponentGroup pad = gui.add(610, 270,
+    public void createInGameGUI(Gui gui, WorldClient world) {
+        int size = 100, gap = 20;
+        GuiComponentGroup pad = gui.add(610, 310,
                 p -> new GuiComponentGroup(p, size * 3 + (gap << 1),
                         (size << 1) + gap));
         GuiComponentButton padUp = pad.add(size + gap, 0,
@@ -111,6 +117,41 @@ public class InputModeTouch implements InputMode {
             menuOpen = true;
         });
         swipe.onDragLeft(this::swipe);
+        swipe.onPressLeft(event -> {
+            if (rightHand) {
+                rightHand = false;
+            } else if (System.currentTimeMillis() - lastTouch < 250) {
+                rightHand = true;
+            }
+            lastTouch = System.currentTimeMillis();
+        });
+        swipe.onDragLeft(event -> {
+            double x = event.x() / 480.0 - 1.0;
+            double y = 1.0 - event.y() / 270.0;
+            Cam cam = world.scene().cam();
+            matrix1.identity();
+            matrix1.perspective(cam.fov, 1920.0f / 1080.0f, cam.near, cam.far);
+            matrix1.rotate(-cam.tilt, 0.0f, 0.0f, 1.0f);
+            matrix1.rotate(-cam.pitch - 90.0f, 1.0f, 0.0f, 0.0f);
+            matrix1.rotate(-cam.yaw + 90.0f, 0.0f, 0.0f, 1.0f);
+            matrix1.invert(matrix1, matrix2);
+            Vector3 pos = matrix2.multiply(new Vector3d(x, y, 1.0));
+            x = FastMath.pointDirection(0.0, 0.0, pos.doubleX(), pos.doubleY());
+            y = FastMath.pointDirection(0.0, 0.0,
+                    FastMath.pointDistance(0.0, 0.0, pos.doubleX(),
+                            pos.doubleY()), pos.doubleZ());
+            x = FastMath.angleDiff(cam.yaw, x);
+            y -= cam.pitch;
+            direction.set(x, y);
+            if (!leftHand && !rightHand &&
+                    System.currentTimeMillis() - lastTouch >= 250) {
+                leftHand = true;
+            }
+        });
+        swipe.onDropLeft(event -> {
+            leftHand = false;
+            rightHand = false;
+        });
     }
 
     @Override
@@ -159,13 +200,20 @@ public class InputModeTouch implements InputMode {
         }
 
         @Override
+        public Vector2 hitDirection() {
+            return direction.now();
+        }
+
+        @Override
         public boolean left() {
-            return false;
+            assert !(leftHand && rightHand);
+            return leftHand;
         }
 
         @Override
         public boolean right() {
-            return false;
+            assert !(leftHand && rightHand);
+            return rightHand;
         }
 
         @Override
@@ -195,7 +243,7 @@ public class InputModeTouch implements InputMode {
 
         @Override
         public int hotbarRight(int previous) {
-            return 0;
+            return 9;
         }
     }
 }

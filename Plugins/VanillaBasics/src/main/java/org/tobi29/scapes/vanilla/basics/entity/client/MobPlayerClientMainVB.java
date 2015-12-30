@@ -167,11 +167,12 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain
                 }
             } else if (punchLeft != -1) {
                 updatePosition();
-                breakParticles(world.terrain(), 16);
-                world.send(new PacketItemUse(true, FastMath.min(
+                Vector2 direction = controller.hitDirection();
+                breakParticles(world.terrain(), 16, direction);
+                world.send(new PacketItemUse(FastMath.min(
                         (double) (System.currentTimeMillis() - punchLeft) /
                                 leftWeapon().material().hitWait(leftWeapon()),
-                        0.5) * 2.0));
+                        0.5) * 2.0, true, direction));
                 punchLeft = -1;
             }
             if (controller.right() && wieldMode() != WieldMode.LEFT) {
@@ -182,11 +183,12 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain
                 }
             } else if (punchRight != -1) {
                 updatePosition();
-                breakParticles(world.terrain(), 16);
-                world.send(new PacketItemUse(false, FastMath.min(
+                Vector2 direction = controller.hitDirection();
+                breakParticles(world.terrain(), 16, direction);
+                world.send(new PacketItemUse(FastMath.min(
                         (double) (System.currentTimeMillis() - punchRight) /
                                 rightWeapon().material().hitWait(rightWeapon()),
-                        0.5) * 2.0));
+                        0.5) * 2.0, false, direction));
                 punchRight = -1;
             }
             long time = System.currentTimeMillis();

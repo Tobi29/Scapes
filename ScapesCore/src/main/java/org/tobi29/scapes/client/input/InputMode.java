@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.client.input;
 
+import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiController;
@@ -25,7 +26,7 @@ public interface InputMode {
 
     Gui createControlsGUI(GameState state, Gui prev);
 
-    default void createInGameGUI(Gui gui) {
+    default void createInGameGUI(Gui gui, WorldClient world) {
     }
 
     MobPlayerClientMain.Controller playerController();

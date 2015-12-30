@@ -170,7 +170,7 @@ public class GameStateGameMP extends GameState {
         if (input != currentInput) {
             Gui gui =
                     new GuiState(this, engine.guiStyle(), GuiAlignment.STRETCH);
-            input.createInGameGUI(gui);
+            input.createInGameGUI(gui, scene.world());
             engine.guiStack().add("04-Input", gui);
             currentInput = input;
         }

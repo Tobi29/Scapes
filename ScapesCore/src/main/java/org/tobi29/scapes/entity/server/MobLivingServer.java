@@ -22,6 +22,7 @@ import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.*;
+import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.CreatureType;
@@ -87,16 +88,16 @@ public abstract class MobLivingServer extends MobServer {
         return mobs;
     }
 
-    public PointerPane block(double distance) {
+    public PointerPane block(double distance,Vector2 direction) {
         Pool<PointerPane> pointerPanes = world.getTerrain()
                 .pointerPanes(pos.intX(), pos.intY(), pos.intZ(),
                         (int) FastMath.ceil(distance));
-        double lookX = FastMath.cosTable(rot.doubleZ() * FastMath.PI / 180) *
-                FastMath.cosTable(rot.doubleX() * FastMath.PI / 180) * distance;
-        double lookY = FastMath.sinTable(rot.doubleZ() * FastMath.PI / 180) *
-                FastMath.cosTable(rot.doubleX() * FastMath.PI / 180) * distance;
-        double lookZ =
-                FastMath.sinTable(rot.doubleX() * FastMath.PI / 180) * distance;
+        double rotX = rot.doubleX() + direction.doubleY();
+        double rotZ = rot.doubleZ() + direction.doubleX();
+        double factor = FastMath.cosTable(rotX * FastMath.PI / 180) * 6;
+        double lookX = FastMath.cosTable(rotZ * FastMath.PI / 180) * factor;
+        double lookY = FastMath.sinTable(rotZ * FastMath.PI / 180) * factor;
+        double lookZ = FastMath.sinTable(rotX * FastMath.PI / 180) * 6;
         Vector3 viewOffset = viewOffset();
         Vector3 f = pos.now().plus(viewOffset);
         Vector3 t = f.plus(new Vector3d(lookX, lookY, lookZ));

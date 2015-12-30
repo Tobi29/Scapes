@@ -267,8 +267,9 @@ public abstract class MobPlayerClientMain extends MobPlayerClient {
         }
     }
 
-    protected void breakParticles(TerrainClient terrain, int amount) {
-        PointerPane pane = block(6);
+    protected void breakParticles(TerrainClient terrain, int amount,
+            Vector2 direction) {
+        PointerPane pane = block(6, direction);
         if (pane != null) {
             BlockType type = terrain.type(pane.x, pane.y, pane.z);
             Optional<TerrainTexture> tex =
@@ -329,6 +330,8 @@ public abstract class MobPlayerClientMain extends MobPlayerClient {
         Vector2 walk();
 
         Vector2 camera(double delta);
+
+        Vector2 hitDirection();
 
         boolean left();
 

@@ -225,6 +225,11 @@ public class InputModeKeyboard implements InputMode {
         }
 
         @Override
+        public Vector2 hitDirection() {
+            return Vector2d.ZERO;
+        }
+
+        @Override
         public boolean left() {
             return left.isDown(controller);
         }

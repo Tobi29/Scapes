@@ -44,21 +44,36 @@ public class GuiControllerTouch implements GuiController {
         Map<ControllerTouch.Tracker, Finger> newFingers =
                 new ConcurrentHashMap<>();
         controller.fingers().forEach(tracker -> {
-            Finger finger = fingers.get(tracker);
-            if (finger == null) {
-                finger = new Finger(tracker.pos());
-                fingers.put(tracker, finger);
+            Finger fetch = fingers.get(tracker);
+            if (fetch == null) {
+                fetch = new Finger(tracker.pos());
+                Finger finger = fetch;
                 handleFinger(finger, screen);
-                finger.dragging = engine.guiStack().fireEvent(
-                        new GuiComponentEvent(finger.cursor.guiX(),
-                                finger.cursor.guiY()), GuiComponent::pressLeft,
-                        engine);
                 finger.dragX = finger.cursor.guiX();
                 finger.dragY = finger.cursor.guiY();
+                engine.guiStack().fireEvent(
+                        new GuiComponentEvent(finger.cursor.guiX(),
+                                finger.cursor.guiY()),
+                        (component, event, engine) -> true, engine)
+                        .ifPresent(component -> {
+                            if (!Streams.of(fingers.values())
+                                    .filter(f -> f.dragging.isPresent())
+                                    .filter(f -> f.dragging.get() == component)
+                                    .findAny().isPresent()) {
+                                finger.dragging = Optional.of(component);
+                                component.gui().sendNewEvent(
+                                        new GuiComponentEvent(
+                                                finger.cursor.guiX(),
+                                                finger.cursor.guiY()),
+                                        component, component::pressLeft,
+                                        engine);
+                            }
+                        });
+                fingers.put(tracker, finger);
             } else {
-                handleFinger(finger, screen);
+                handleFinger(fetch, screen);
             }
-            newFingers.put(tracker, finger);
+            newFingers.put(tracker, fetch);
         });
         Streams.of(fingers.keySet())
                 .filter(tracker -> !newFingers.containsKey(tracker))

@@ -16,6 +16,7 @@ import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.Frustum;
 import org.tobi29.scapes.engine.utils.math.PointerPane;
+import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.CreatureType;
@@ -23,7 +24,6 @@ import org.tobi29.scapes.entity.MobPositionHandler;
 import org.tobi29.scapes.packets.PacketEntityChange;
 import org.tobi29.scapes.packets.PacketOpenGui;
 import org.tobi29.scapes.server.connection.PlayerConnection;
-import org.tobi29.scapes.server.connection.ServerConnection;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,7 +35,6 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
         implements EntityContainerServer {
     protected final MobPositionHandler sendPositionHandler;
     protected final PlayerConnection connection;
-    protected final ServerConnection serverConnection;
     protected final List<MobPlayerServer> viewers = new ArrayList<>();
     protected final String nickname;
     protected final Inventory inventoryContainer, inventoryHold;
@@ -59,7 +58,6 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
         inventories.put("Container", inventoryContainer);
         inventories.put("Hold", inventoryHold);
         this.connection = connection;
-        serverConnection = connection.server();
         viewers.add(this);
         List<PlayerConnection> exceptions =
                 Collections.singletonList(connection);
@@ -108,8 +106,8 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
         return nickname;
     }
 
-    public PointerPane selectedBlock() {
-        return block(6);
+    public PointerPane selectedBlock(Vector2 direction) {
+        return block(6, direction);
     }
 
     @Override
@@ -190,21 +188,22 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
         return connection;
     }
 
-    public List<MobServer> attackLeft(double strength) {
-        return attack(true, strength);
+    public List<MobServer> attackLeft(double strength, Vector2 direction) {
+        return attack(true, strength, direction);
     }
 
-    public List<MobServer> attackRight(double strength) {
-        return attack(false, strength);
+    public List<MobServer> attackRight(double strength, Vector2 direction) {
+        return attack(false, strength, direction);
     }
 
-    protected synchronized List<MobServer> attack(boolean side,
-            double strength) {
-        double lookX = FastMath.cosTable(rot.doubleZ() * FastMath.PI / 180) *
-                FastMath.cosTable(rot.doubleX() * FastMath.PI / 180) * 6;
-        double lookY = FastMath.sinTable(rot.doubleZ() * FastMath.PI / 180) *
-                FastMath.cosTable(rot.doubleX() * FastMath.PI / 180) * 6;
-        double lookZ = FastMath.sinTable(rot.doubleX() * FastMath.PI / 180) * 6;
+    protected synchronized List<MobServer> attack(boolean side, double strength,
+            Vector2 direction) {
+        double rotX = rot.doubleX() + direction.doubleY();
+        double rotZ = rot.doubleZ() + direction.doubleX();
+        double factor = FastMath.cosTable(rotX * FastMath.PI / 180) * 6;
+        double lookX = FastMath.cosTable(rotZ * FastMath.PI / 180) * factor;
+        double lookY = FastMath.sinTable(rotZ * FastMath.PI / 180) * factor;
+        double lookZ = FastMath.sinTable(rotX * FastMath.PI / 180) * 6;
         Vector3 viewOffset = viewOffset();
         hitField.setView(pos.doubleX() + viewOffset.doubleX(),
                 pos.doubleY() + viewOffset.doubleY(),
