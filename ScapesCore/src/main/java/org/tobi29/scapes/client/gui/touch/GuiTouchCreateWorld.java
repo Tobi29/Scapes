@@ -25,10 +25,13 @@ import org.tobi29.scapes.engine.gui.GuiComponentText;
 import org.tobi29.scapes.engine.gui.GuiComponentTextField;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.utils.StringUtil;
+import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
+import org.tobi29.scapes.plugins.PluginFile;
 import org.tobi29.scapes.server.format.WorldSource;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 public class GuiTouchCreateWorld extends GuiTouchMenuDouble {
@@ -38,7 +41,7 @@ public class GuiTouchCreateWorld extends GuiTouchMenuDouble {
             "This save already exists!\n" + "Please choose a different name.";
 
     public GuiTouchCreateWorld(GameState state, GuiTouchSaveSelect previous,
-            GuiStyle style) {
+            PluginFile worldType, GuiStyle style) {
         super(state, "New World", previous, style);
         ScapesClient game = (ScapesClient) state.engine().game();
         SaveStorage saves = game.saves();
@@ -71,8 +74,10 @@ public class GuiTouchCreateWorld extends GuiTouchMenuDouble {
                         randomSeed = StringUtil.hash(seed.text());
                     }
                 }
+                List<FilePath> pluginFiles =
+                        Collections.singletonList(worldType.file());
                 try (WorldSource source = saves.get(saveName)) {
-                    source.init(randomSeed, Collections.emptyList());
+                    source.init(randomSeed, pluginFiles);
                 }
                 previous.updateSaves();
                 state.engine().guiStack().add("10-Menu", previous);

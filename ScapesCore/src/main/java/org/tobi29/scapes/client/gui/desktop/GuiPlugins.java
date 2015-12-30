@@ -20,15 +20,18 @@ import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.input.FileType;
-import org.tobi29.scapes.engine.opengl.texture.*;
+import org.tobi29.scapes.engine.opengl.texture.Texture;
+import org.tobi29.scapes.engine.opengl.texture.TextureFile;
+import org.tobi29.scapes.engine.opengl.texture.TextureFilter;
+import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.io.ProcessStream;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.plugins.PluginFile;
+import org.tobi29.scapes.plugins.Plugins;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.zip.ZipFile;
 
 public class GuiPlugins extends GuiMenu {
@@ -64,18 +67,16 @@ public class GuiPlugins extends GuiMenu {
     private void updatePlugins() {
         try {
             scrollPane.removeAll();
-            List<FilePath> files =
-                    FileUtil.listRecursive(path, FileUtil::isRegularFile,
-                            FileUtil::isNotHidden);
-            Streams.of(files).sorted().forEach(file -> scrollPane
-                    .addVert(0, 0, p -> new Element(p, file)));
+            Streams.of(Plugins.installed(path)).sorted().forEach(
+                    file -> scrollPane
+                            .addVert(0, 0, p -> new Element(p, file)));
         } catch (IOException e) {
             LOGGER.warn("Failed to read plugins: {}", e.toString());
         }
     }
 
     private class Element extends GuiComponentPane {
-        public Element(GuiLayoutData parent, FilePath path) {
+        public Element(GuiLayoutData parent, PluginFile plugin) {
             super(parent, 378, 70);
             GuiComponentIcon icon =
                     add(15, 15, p -> new GuiComponentIcon(p, 40, 40));
@@ -84,25 +85,27 @@ public class GuiPlugins extends GuiMenu {
             GuiComponentTextButton delete =
                     add(260, 20, p -> button(p, 80, "Delete"));
 
-            delete.onClickLeft(event -> {
+            if (plugin.file() != null) {
+                delete.onClickLeft(event -> {
+                    try {
+                        FileUtil.delete(plugin.file());
+                        scrollPane.remove(this);
+                    } catch (IOException e) {
+                        LOGGER.warn("Failed to delete plugin: {}",
+                                e.toString());
+                    }
+                });
                 try {
-                    FileUtil.delete(path);
-                    scrollPane.remove(this);
+                    label.setText(plugin.name());
+                    try (ZipFile zip = FileUtil.zipFile(plugin.file())) {
+                        Texture texture = new TextureFile(
+                                zip.getInputStream(zip.getEntry("Icon.png")), 0,
+                                TextureFilter.LINEAR, TextureFilter.LINEAR,
+                                TextureWrap.CLAMP, TextureWrap.CLAMP);
+                        icon.setIcon(texture);
+                    }
                 } catch (IOException e) {
-                    LOGGER.warn("Failed to delete plugin: {}", e.toString());
                 }
-            });
-            try {
-                PluginFile plugin = new PluginFile(path);
-                label.setText(plugin.name());
-                try (ZipFile zip = FileUtil.zipFile(path)) {
-                    Texture texture = new TextureFile(
-                            zip.getInputStream(zip.getEntry("Icon.png")), 0,
-                            TextureFilter.LINEAR, TextureFilter.LINEAR,
-                            TextureWrap.CLAMP, TextureWrap.CLAMP);
-                    icon.setIcon(texture);
-                }
-            } catch (IOException e) {
             }
         }
     }

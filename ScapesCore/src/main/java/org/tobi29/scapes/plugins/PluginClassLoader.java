@@ -17,6 +17,7 @@ package org.tobi29.scapes.plugins;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 
 import java.io.IOException;
 import java.net.URL;
@@ -31,8 +32,8 @@ public class PluginClassLoader extends URLClassLoader {
             LoggerFactory.getLogger(PluginClassLoader.class);
     private final Permissions permissions = new Permissions();
 
-    public PluginClassLoader(List<PluginFile> files) throws IOException {
-        super(urls(files));
+    public PluginClassLoader(List<FilePath> path) throws IOException {
+        super(urls(path));
         if (System.getSecurityManager() == null) {
             LOGGER.warn("No security manager installed!");
         }
@@ -40,11 +41,11 @@ public class PluginClassLoader extends URLClassLoader {
         permissions.setReadOnly();
     }
 
-    private static URL[] urls(List<PluginFile> files) throws IOException {
-        URL[] urls = new URL[files.size()];
+    private static URL[] urls(List<FilePath> paths) throws IOException {
+        URL[] urls = new URL[paths.size()];
         int i = 0;
-        for (PluginFile file : files) {
-            urls[i] = file.file().toUri().toURL();
+        for (FilePath path : paths) {
+            urls[i] = path.toUri().toURL();
             i++;
         }
         return urls;

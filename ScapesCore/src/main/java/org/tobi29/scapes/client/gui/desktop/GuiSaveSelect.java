@@ -16,6 +16,7 @@
 package org.tobi29.scapes.client.gui.desktop;
 
 import java8.util.Optional;
+import java8.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.Debug;
@@ -30,14 +31,14 @@ import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
 import org.tobi29.scapes.engine.opengl.texture.TextureFilter;
 import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
+import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
-import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.plugins.PluginFile;
+import org.tobi29.scapes.plugins.Plugins;
 import org.tobi29.scapes.server.format.WorldSource;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class GuiSaveSelect extends GuiMenu {
@@ -55,24 +56,19 @@ public class GuiSaveSelect extends GuiMenu {
         this.scene = scene;
         ScapesClient game = (ScapesClient) state.engine().game();
         saves = game.saves();
+
         scrollPane = pane.addVert(16, 5,
                 p -> new GuiComponentScrollPane(p, 368, 340, 70)).viewport();
         GuiComponentTextButton create =
                 pane.addVert(112, 5, p -> button(p, 176, "Create"));
+
         create.onClickLeft(event -> {
             try {
                 FilePath path = state.engine().home().resolve("plugins");
-                List<FilePath> files =
-                        FileUtil.listRecursive(path, FileUtil::isRegularFile,
-                                FileUtil::isNotHidden);
-                List<PluginFile> worldTypes = new ArrayList<>();
-                List<PluginFile> plugins = new ArrayList<>();
-                for (FilePath file : files) {
-                    PluginFile plugin = new PluginFile(file);
-                    if ("WorldType".equals(plugin.parent())) {
-                        worldTypes.add(plugin);
-                    }
-                }
+                List<PluginFile> plugins = Plugins.installed(path);
+                List<PluginFile> worldTypes = Streams.of(plugins)
+                        .filter(plugin -> "WorldType".equals(plugin.parent()))
+                        .collect(Collectors.toList());
                 if (worldTypes.isEmpty()) {
                     state.engine().guiStack().add("10-Menu",
                             new GuiMessage(state, this, "Error", NO_WORLD_TYPE,
@@ -86,6 +82,7 @@ public class GuiSaveSelect extends GuiMenu {
                 LOGGER.warn("Failed to read plugins: {}", e.toString());
             }
         });
+
         updateSaves();
     }
 

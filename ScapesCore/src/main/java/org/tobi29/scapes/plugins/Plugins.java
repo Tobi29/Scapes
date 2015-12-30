@@ -15,20 +15,22 @@
  */
 package org.tobi29.scapes.plugins;
 
+import java8.util.stream.Collectors;
 import java8.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.IDStorage;
 import org.tobi29.scapes.engine.utils.Streams;
+import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
+import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath;
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathResource;
 
 import java.io.IOException;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class Plugins {
@@ -41,26 +43,44 @@ public class Plugins {
     private WorldType worldType;
     private boolean init;
 
-    public Plugins(List<PluginFile> files, IDStorage idStorage,
-            boolean loadClasses) throws IOException {
-        if (loadClasses) {
-            this.files = files;
-            classLoader = new PluginClassLoader(files);
-            for (PluginFile file : files) {
-                load(file.plugin(classLoader));
-            }
-        } else {
-            this.files = Collections.emptyList();
+    public Plugins(List<PluginFile> files, IDStorage idStorage)
+            throws IOException {
+        List<FilePath> paths =
+                Streams.of(files).filter(file -> file.file() != null)
+                        .map(PluginFile::file).collect(Collectors.toList());
+        this.files = files;
+        if (paths.isEmpty()) {
             classLoader = null;
-            ClassLoader classLoader = getClass().getClassLoader();
+            ClassLoader classLoader = Plugins.class.getClassLoader();
             PluginFile file = new PluginFile(
                     new ClasspathResource(classLoader, "Plugin.json"));
             load(file.plugin(classLoader));
+        } else {
+            classLoader = new PluginClassLoader(paths);
+            for (PluginFile file : files) {
+                load(file.plugin(classLoader));
+            }
         }
         if (worldType == null) {
             throw new IOException("No world type found");
         }
         registry = new GameRegistry(idStorage, this);
+    }
+
+    public static List<PluginFile> installed(FilePath path) throws IOException {
+        List<PluginFile> files = new ArrayList<>();
+        FileUtil.consumeRecursive(path, file -> {
+            if (FileUtil.isRegularFile(file) && FileUtil.isNotHidden(file)) {
+                files.add(new PluginFile(file));
+            }
+        });
+        ClasspathResource embedded =
+                new ClasspathResource(Plugins.class.getClassLoader(),
+                        "Plugin.json");
+        if (embedded.exists()) {
+            files.add(new PluginFile(embedded));
+        }
+        return files;
     }
 
     private void load(Plugin plugin) throws IOException {

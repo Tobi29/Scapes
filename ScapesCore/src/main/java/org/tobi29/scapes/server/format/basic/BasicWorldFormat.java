@@ -68,7 +68,7 @@ public class BasicWorldFormat implements WorldFormat {
     }
 
     protected Plugins createPlugins() throws IOException {
-        return new Plugins(pluginFiles(), idStorage, true);
+        return new Plugins(pluginFiles(), idStorage);
     }
 
     @Override

@@ -4,7 +4,6 @@ import java8.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.chunk.IDStorage;
-import org.tobi29.scapes.client.ScapesClient;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.server.Account;
@@ -243,9 +242,7 @@ public class NewConnection {
 
     public IOFunction<GameStateGameMP, RemoteClientConnection> finish()
             throws IOException {
-        ScapesClient game = (ScapesClient) engine.game();
-        Plugins plugins = new Plugins(this.plugins, idStorage,
-                game.saves().loadClasses());
+        Plugins plugins = new Plugins(this.plugins, idStorage);
         return state -> new RemoteClientConnection(state, channel, plugins,
                 loadingDistance);
     }

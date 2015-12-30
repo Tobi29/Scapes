@@ -16,11 +16,13 @@
 package org.tobi29.scapes.client.gui.touch;
 
 import java8.util.Optional;
+import java8.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.Debug;
 import org.tobi29.scapes.client.SaveStorage;
 import org.tobi29.scapes.client.ScapesClient;
+import org.tobi29.scapes.client.gui.desktop.GuiMessage;
 import org.tobi29.scapes.client.states.GameStateLoadSP;
 import org.tobi29.scapes.client.states.GameStateLoadSocketSP;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
@@ -30,14 +32,21 @@ import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
 import org.tobi29.scapes.engine.opengl.texture.TextureFilter;
 import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
+import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.graphics.Image;
+import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
+import org.tobi29.scapes.plugins.PluginFile;
+import org.tobi29.scapes.plugins.Plugins;
 import org.tobi29.scapes.server.format.WorldSource;
 
 import java.io.IOException;
+import java.util.List;
 
 public class GuiTouchSaveSelect extends GuiTouchMenuDouble {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GuiTouchSaveSelect.class);
+    private static final String NO_WORLD_TYPE =
+            "No plugin found that that can\n" + "be used to create a save.";
     private final SaveStorage saves;
     private final SceneMenu scene;
     private final GuiComponentScrollPaneViewport scrollPane;
@@ -51,8 +60,26 @@ public class GuiTouchSaveSelect extends GuiTouchMenuDouble {
         scrollPane = pane.addVert(112, 10,
                 p -> new GuiComponentScrollPane(p, 736, 320, 70)).viewport();
 
-        save.onClickLeft(event -> state.engine().guiStack()
-                .add("10-Menu", new GuiTouchCreateWorld(state, this, style)));
+        save.onClickLeft(event -> {
+            try {
+                FilePath path = state.engine().home().resolve("plugins");
+                List<PluginFile> plugins = Plugins.installed(path);
+                List<PluginFile> worldTypes = Streams.of(plugins)
+                        .filter(plugin -> "WorldType".equals(plugin.parent()))
+                        .collect(Collectors.toList());
+                if (worldTypes.isEmpty()) {
+                    state.engine().guiStack().add("10-Menu",
+                            new GuiMessage(state, this, "Error", NO_WORLD_TYPE,
+                                    style));
+                } else {
+                    state.engine().guiStack().add("10-Menu",
+                            new GuiTouchCreateWorld(state, this,
+                                    worldTypes.get(0), style));
+                }
+            } catch (IOException e) {
+                LOGGER.warn("Failed to read plugins: {}", e.toString());
+            }
+        });
 
         updateSaves();
     }
