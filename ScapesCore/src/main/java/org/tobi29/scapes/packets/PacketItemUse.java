@@ -76,7 +76,6 @@ public class PacketItemUse extends Packet implements PacketServer {
                 FastMath.abs(direction.doubleY()) > 90.0) {
             throw new InvalidPacketDataException("Invalid direction!");
         }
-        System.out.println(direction.doubleX() + "/" + direction.doubleY());
         ItemStack item;
         if (side) {
             player.mob().attackLeft(strength * strength, direction);
