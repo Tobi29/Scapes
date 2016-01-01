@@ -87,16 +87,17 @@ public abstract class ScapesStandaloneServer
                 try (WorldSource source = worldSourceProvider
                         .get(path, worldSourceConfig)) {
                     start(source, tagStructure);
-                }
-                Runnable loop = loop();
-                while (!server.shouldStop()) {
-                    loop.run();
-                    joinable.sleep(100);
-                    if (joinable.marked()) {
-                        server.scheduleStop(ScapesServer.ShutdownReason.STOP);
+                    Runnable loop = loop();
+                    while (!server.shouldStop()) {
+                        loop.run();
+                        joinable.sleep(100);
+                        if (joinable.marked()) {
+                            server.scheduleStop(
+                                    ScapesServer.ShutdownReason.STOP);
+                        }
                     }
+                    server.stop();
                 }
-                server.stop();
                 if (server.shutdownReason() !=
                         ScapesServer.ShutdownReason.RELOAD) {
                     break;

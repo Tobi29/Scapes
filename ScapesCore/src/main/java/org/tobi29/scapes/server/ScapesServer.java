@@ -47,7 +47,6 @@ public class ScapesServer {
     private final TaskExecutor taskExecutor;
     private final ServerInfo serverInfo;
     private final ServerConnection serverConnection;
-    private final WorldSource source;
     private final WorldFormat format;
     private final PlayerData playerData;
     private final Plugins plugins;
@@ -60,7 +59,6 @@ public class ScapesServer {
 
     public ScapesServer(WorldSource source, TagStructure tagStructure,
             ServerInfo serverInfo, Crashable crashHandler) throws IOException {
-        this.source = source;
         format = source.open(this);
         playerData = format.playerData();
         plugins = format.plugins();
@@ -211,7 +209,6 @@ public class ScapesServer {
         serverConnection.stop();
         taskExecutor.shutdown();
         format.dispose();
-        source.close();
     }
 
     public boolean shouldStop() {
