@@ -21,6 +21,7 @@ version = "0.0.0_1"
 dependencies {
     compile project(":ScapesEngine")
     compile project(":ScapesEngine:Utils:ServerFramework")
+    compile project(":ScapesEngine:Utils:SQLFramework")
     compile "commons-cli:commons-cli:1.3.1"
 
     testCompile "junit:junit:4.12"
