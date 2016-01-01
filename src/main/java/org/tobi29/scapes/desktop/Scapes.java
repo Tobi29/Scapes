@@ -46,7 +46,7 @@ public class Scapes {
         options.addOption("r", "socketsp", false,
                 "Use network socket for singleplayer");
         options.addOption("s", "skipintro", false, "Skip client intro");
-        options.addOption("c", "config", false, "Config directory for server");
+        options.addOption("c", "config", true, "Config directory for server");
         DefaultParser parser = new DefaultParser();
         CommandLine commandLine;
         try {
