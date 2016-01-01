@@ -26,6 +26,7 @@ import org.tobi29.scapes.engine.utils.io.IOFunction;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.plugins.Sandbox;
+import org.tobi29.scapes.server.format.basic.BasicWorldSource;
 import org.tobi29.scapes.server.shell.ScapesServerHeadless;
 import org.tobi29.scapes.server.shell.ScapesStandaloneServer;
 
@@ -45,6 +46,7 @@ public class Scapes {
         options.addOption("r", "socketsp", false,
                 "Use network socket for singleplayer");
         options.addOption("s", "skipintro", false, "Skip client intro");
+        options.addOption("c", "config", false, "Config directory for server");
         DefaultParser parser = new DefaultParser();
         CommandLine commandLine;
         try {
@@ -77,10 +79,12 @@ public class Scapes {
         FilePath home;
         if (cmdArgs.length > 0) {
             home = FileUtil.path(HOME_PATH.matcher(cmdArgs[0])
-                    .replaceAll(System.getProperty("user.home")));
+                    .replaceAll(System.getProperty("user.home")))
+                    .toAbsolutePath();
             System.setProperty("user.dir", home.toAbsolutePath().toString());
         } else {
-            home = FileUtil.path(System.getProperty("user.dir"));
+            home = FileUtil.path(System.getProperty("user.dir"))
+                    .toAbsolutePath();
         }
         switch (mode) {
             case "client":
@@ -92,10 +96,18 @@ public class Scapes {
                 System.exit(engine.run());
                 break;
             case "server":
+                FilePath config;
+                if (commandLine.hasOption('c')) {
+                    config = home.resolve(
+                            FileUtil.path(commandLine.getOptionValue('c')))
+                            .toAbsolutePath();
+                } else {
+                    config = home;
+                }
                 try {
                     ScapesStandaloneServer server =
-                            new ScapesServerHeadless(home);
-                    server.run();
+                            new ScapesServerHeadless(config);
+                    server.run(() -> new BasicWorldSource(home));
                 } catch (IOException e) {
                     e.printStackTrace();
                     System.exit(200);

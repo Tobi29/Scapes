@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.server.ServerInfo;
 import org.tobi29.scapes.engine.utils.Crashable;
+import org.tobi29.scapes.engine.utils.io.IOSupplier;
 import org.tobi29.scapes.engine.utils.io.filesystem.CrashReportFile;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
@@ -30,7 +31,6 @@ import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.connection.ServerConnection;
 import org.tobi29.scapes.server.format.WorldSource;
-import org.tobi29.scapes.server.format.basic.BasicWorldSource;
 
 import java.io.IOException;
 import java.util.Map;
@@ -41,56 +41,57 @@ public abstract class ScapesStandaloneServer
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ScapesStandaloneServer.class);
     private static final Runtime RUNTIME = Runtime.getRuntime();
-    protected final FilePath path;
+    protected final FilePath config;
     private final Joiner.Joinable joinable = new Joiner.Joinable();
     private final Thread shutdownHook = new Thread(() -> {
         joinable.joiner().join();
     });
     protected ScapesServer server;
 
-    protected ScapesStandaloneServer(FilePath path) {
-        this.path = path;
+    protected ScapesStandaloneServer(FilePath config) {
+        this.config = config;
     }
 
     protected abstract Runnable loop();
 
-    public void run() throws IOException {
+    public void run(IOSupplier<WorldSource> supplier) throws IOException {
         RUNTIME.addShutdownHook(shutdownHook);
-        while (!joinable.marked()) {
-            start();
-            try {
-                Runnable loop = loop();
-                while (!server.shouldStop()) {
-                    loop.run();
-                    joinable.sleep(100);
-                    if (joinable.marked()) {
-                        server.scheduleStop(ScapesServer.ShutdownReason.STOP);
-                    }
-                }
-                server.stop();
-            } catch (IOException e) {
-                LOGGER.error("Error reading console input: {}", e.toString());
-                server.stop(ScapesServer.ShutdownReason.ERROR);
-            }
-            if (server.shutdownReason() != ScapesServer.ShutdownReason.RELOAD) {
-                break;
-            }
-        }
         try {
-            RUNTIME.removeShutdownHook(shutdownHook);
-        } catch (IllegalStateException e) {
+            while (!joinable.marked()) {
+                try (WorldSource source = supplier.get()) {
+                    start(source);
+                    Runnable loop = loop();
+                    while (!server.shouldStop()) {
+                        loop.run();
+                        joinable.sleep(100);
+                        if (joinable.marked()) {
+                            server.scheduleStop(
+                                    ScapesServer.ShutdownReason.STOP);
+                        }
+                    }
+                    server.stop();
+                }
+                if (server.shutdownReason() !=
+                        ScapesServer.ShutdownReason.RELOAD) {
+                    break;
+                }
+            }
+        } finally {
+            try {
+                RUNTIME.removeShutdownHook(shutdownHook);
+            } catch (IllegalStateException e) {
+            }
+            joinable.join();
         }
-        joinable.join();
     }
 
-    protected void start() throws IOException {
+    protected void start(WorldSource source) throws IOException {
         TagStructure tagStructure;
-        tagStructure = loadConfig(path.resolve("Server.json"));
+        tagStructure = loadConfig(config.resolve("Server.json"));
         TagStructure serverTag = tagStructure.getStructure("Server");
         ServerInfo serverInfo =
                 new ServerInfo(serverTag.getString("ServerName"),
-                        path.resolve(serverTag.getString("ServerIcon")));
-        WorldSource source = new BasicWorldSource(path.resolve("data"));
+                        config.resolve(serverTag.getString("ServerIcon")));
         server = new ScapesServer(source, tagStructure, serverInfo, this);
         ServerConnection connection = server.connection();
         connection.addExecutor(this);
@@ -126,7 +127,7 @@ public abstract class ScapesStandaloneServer
         LOGGER.error("Stopping due to a crash", e);
         Map<String, String> debugValues = new ConcurrentHashMap<>();
         try {
-            CrashReportFile.writeCrashReport(e, CrashReportFile.file(path),
+            CrashReportFile.writeCrashReport(e, CrashReportFile.file(config),
                     "ScapesServer", debugValues);
         } catch (IOException e1) {
             LOGGER.warn("Failed to write crash report: {}", e1.toString());
