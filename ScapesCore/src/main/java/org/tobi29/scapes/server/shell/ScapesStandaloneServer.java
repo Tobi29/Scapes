@@ -18,9 +18,9 @@ package org.tobi29.scapes.server.shell;
 import java8.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tobi29.scapes.engine.ScapesEngineException;
 import org.tobi29.scapes.engine.server.ServerInfo;
 import org.tobi29.scapes.engine.utils.Crashable;
-import org.tobi29.scapes.engine.utils.io.IOSupplier;
 import org.tobi29.scapes.engine.utils.io.filesystem.CrashReportFile;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
@@ -31,9 +31,12 @@ import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.connection.ServerConnection;
 import org.tobi29.scapes.server.format.WorldSource;
+import org.tobi29.scapes.server.format.spi.WorldSourceProvider;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.ServiceConfigurationError;
+import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class ScapesStandaloneServer
@@ -52,25 +55,48 @@ public abstract class ScapesStandaloneServer
         this.config = config;
     }
 
+    private static WorldSourceProvider loadWorldSource(String id) {
+        for (WorldSourceProvider provider : ServiceLoader
+                .load(WorldSourceProvider.class)) {
+            try {
+                if (provider.available() && id.equals(provider.configID())) {
+                    LOGGER.debug("Loaded world source: {}",
+                            provider.getClass().getName());
+                    return provider;
+                }
+            } catch (ServiceConfigurationError e) {
+                LOGGER.warn("Unable to load world source provider: {}",
+                        e.toString());
+            }
+        }
+        throw new ScapesEngineException("No world source found for: " + id);
+    }
+
     protected abstract Runnable loop();
 
-    public void run(IOSupplier<WorldSource> supplier) throws IOException {
+    public void run(FilePath path) throws IOException {
         RUNTIME.addShutdownHook(shutdownHook);
         try {
             while (!joinable.marked()) {
-                try (WorldSource source = supplier.get()) {
-                    start(source);
-                    Runnable loop = loop();
-                    while (!server.shouldStop()) {
-                        loop.run();
-                        joinable.sleep(100);
-                        if (joinable.marked()) {
-                            server.scheduleStop(
-                                    ScapesServer.ShutdownReason.STOP);
-                        }
-                    }
-                    server.stop();
+                TagStructure tagStructure =
+                        loadConfig(config.resolve("Server.json"));
+                TagStructure worldSourceConfig =
+                        tagStructure.getStructure("WorldSource");
+                WorldSourceProvider worldSourceProvider =
+                        loadWorldSource(worldSourceConfig.getString("ID"));
+                try (WorldSource source = worldSourceProvider
+                        .get(path, worldSourceConfig)) {
+                    start(source, tagStructure);
                 }
+                Runnable loop = loop();
+                while (!server.shouldStop()) {
+                    loop.run();
+                    joinable.sleep(100);
+                    if (joinable.marked()) {
+                        server.scheduleStop(ScapesServer.ShutdownReason.STOP);
+                    }
+                }
+                server.stop();
                 if (server.shutdownReason() !=
                         ScapesServer.ShutdownReason.RELOAD) {
                     break;
@@ -85,9 +111,8 @@ public abstract class ScapesStandaloneServer
         }
     }
 
-    protected void start(WorldSource source) throws IOException {
-        TagStructure tagStructure;
-        tagStructure = loadConfig(config.resolve("Server.json"));
+    protected void start(WorldSource source, TagStructure tagStructure)
+            throws IOException {
         TagStructure serverTag = tagStructure.getStructure("Server");
         ServerInfo serverInfo =
                 new ServerInfo(serverTag.getString("ServerName"),
@@ -116,6 +141,8 @@ public abstract class ScapesStandaloneServer
         socketTag.setString("ControlPassword", "");
         socketTag.setInteger("WorkerCount", 2);
         socketTag.setInteger("RSASize", 2048);
+        TagStructure sourceTag = tagStructure.getStructure("WorldSource");
+        sourceTag.setString("ID", "Basic");
         FileUtil.write(path,
                 streamOut -> TagStructureJSON.write(tagStructure, streamOut));
         return tagStructure;

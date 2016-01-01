@@ -26,7 +26,6 @@ import org.tobi29.scapes.engine.utils.io.IOFunction;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.plugins.Sandbox;
-import org.tobi29.scapes.server.format.basic.BasicWorldSource;
 import org.tobi29.scapes.server.shell.ScapesServerHeadless;
 import org.tobi29.scapes.server.shell.ScapesStandaloneServer;
 
@@ -107,7 +106,7 @@ public class Scapes {
                 try {
                     ScapesStandaloneServer server =
                             new ScapesServerHeadless(config);
-                    server.run(() -> new BasicWorldSource(home));
+                    server.run(home);
                 } catch (IOException e) {
                     e.printStackTrace();
                     System.exit(200);
