@@ -15,7 +15,7 @@ public class MariaDBWorldSourceProvider implements WorldSourceProvider {
 
     @Override
     public String configID() {
-        return "Basic";
+        return "MariaDB";
     }
 
     @Override
