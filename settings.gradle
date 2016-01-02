@@ -30,4 +30,5 @@ apply from: "ScapesEngine/include.gradle"
 
 include "ScapesCore"
 include "MariaDBStorage"
+include "SQLiteStorage"
 include subProjects("Plugins")
