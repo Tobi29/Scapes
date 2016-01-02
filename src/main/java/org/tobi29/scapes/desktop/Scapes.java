@@ -18,7 +18,6 @@ package org.tobi29.scapes.desktop;
 import org.apache.commons.cli.*;
 import org.tobi29.scapes.Debug;
 import org.tobi29.scapes.Version;
-import org.tobi29.scapes.client.BasicSaveStorage;
 import org.tobi29.scapes.client.SaveStorage;
 import org.tobi29.scapes.client.ScapesClient;
 import org.tobi29.scapes.engine.ScapesEngine;
@@ -26,6 +25,7 @@ import org.tobi29.scapes.engine.utils.io.IOFunction;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.plugins.Sandbox;
+import org.tobi29.scapes.server.format.sqlite.SQLiteSaveStorage;
 import org.tobi29.scapes.server.shell.ScapesServerHeadless;
 import org.tobi29.scapes.server.shell.ScapesStandaloneServer;
 
@@ -88,7 +88,8 @@ public class Scapes {
         switch (mode) {
             case "client":
                 IOFunction<ScapesClient, SaveStorage> saves =
-                        scapes -> new BasicSaveStorage(home.resolve("saves"));
+                        scapes -> new SQLiteSaveStorage(home.resolve("saves"),
+                                scapes.engine().taskExecutor());
                 ScapesEngine engine = new ScapesEngine(
                         new ScapesClient(commandLine.hasOption('s'), saves),
                         home, Debug.enabled());
