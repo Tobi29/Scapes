@@ -35,6 +35,7 @@ application {
 
 dependencies {
     compile project(":ScapesCore")
+    compile project(":SQLiteStorage")
 
     testCompile "junit:junit:4.12"
 
@@ -46,5 +47,10 @@ dependencies {
     runtime "org.apache.logging.log4j:log4j-api:2.4.1"
     runtime "org.apache.logging.log4j:log4j-core:2.4.1"
     runtime "org.apache.logging.log4j:log4j-slf4j-impl:2.4.1"
+
+    nativesLinux32 "com.almworks.sqlite4java:libsqlite4java-linux-i386:1.0.392"
     nativesLinux64 "com.almworks.sqlite4java:libsqlite4java-linux-amd64:1.0.392"
+    nativesMacOSX "com.almworks.sqlite4java:libsqlite4java-osx:1.0.392"
+    nativesWindows32 "com.almworks.sqlite4java:sqlite4java-win32-x86:1.0.392"
+    nativesWindows64 "com.almworks.sqlite4java:sqlite4java-win32-x64:1.0.392"
 }
