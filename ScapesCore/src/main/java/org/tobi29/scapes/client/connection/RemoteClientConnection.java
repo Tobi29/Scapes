@@ -119,7 +119,7 @@ public class RemoteClientConnection extends ClientConnection
             downloadDebug.setValue(channel.getInputRate() / 128.0);
             uploadDebug.setValue(channel.getOutputRate() / 128.0);
             return state == State.CLOSED ? -1 : 1000;
-        }, "Connection-Rate", 1000, false);
+        }, "Connection-Rate", 1000);
     }
 
     @Override

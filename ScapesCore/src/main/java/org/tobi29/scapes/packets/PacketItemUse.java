@@ -148,8 +148,8 @@ public class PacketItemUse extends Packet implements PacketServer {
                                 }
                             });
                             return -1;
-                        }, "Block-Break", (long) (item.material().hitWait(item) * 0.23),
-                        false);
+                        }, "Block-Break",
+                        (long) (item.material().hitWait(item) * 0.23));
             }
         }
         world.send(new PacketUpdateInventory(player.mob(), "Container"));
