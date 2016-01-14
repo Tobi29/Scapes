@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain;
 
 import org.tobi29.scapes.block.BlockType;
@@ -33,7 +32,8 @@ public interface TerrainServer extends Terrain {
 
     void addDelayedUpdate(Update update);
 
-    boolean hasDelayedUpdate(int x, int y, int z);
+    boolean hasDelayedUpdate(int x, int y, int z,
+            Class<? extends Update> clazz);
 
     boolean isBlockSendable(MobPlayerServer player, int x, int y, int z,
             boolean chunkContent);

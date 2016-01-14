@@ -44,6 +44,7 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
             Optional.of(this);
     private final TerrainInfiniteServer terrain;
     private final List<Update> delayedUpdates = new ArrayList<>();
+    private long lastAccess = System.currentTimeMillis();
 
     public TerrainInfiniteChunkServer(Vector2i pos,
             TerrainInfiniteServer terrain, int zSize,
@@ -80,6 +81,14 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
             LOGGER.trace("Generated chunk in {} ms.",
                     System.currentTimeMillis() - time);
         }
+    }
+
+    protected void accessed() {
+        lastAccess = System.currentTimeMillis();
+    }
+
+    public long lastAccess() {
+        return lastAccess;
     }
 
     public Optional<TerrainInfiniteChunkServer> optional() {
@@ -133,7 +142,8 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
         }
     }
 
-    public boolean hasDelayedUpdate(int x, int y, int z) {
+    public boolean hasDelayedUpdate(int x, int y, int z,
+            Class<? extends Update> clazz) {
         synchronized (delayedUpdates) {
             for (Update update : delayedUpdates) {
                 if (update.x() == x && update.y() == y &&
@@ -141,7 +151,9 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
                     if (update.isValidOn(
                             typeG(update.x(), update.y(), update.z()),
                             terrain)) {
-                        return true;
+                        if (update.getClass() == clazz) {
+                            return true;
+                        }
                     } else {
                         update.markAsInvalid();
                     }

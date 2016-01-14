@@ -134,8 +134,11 @@ public class TerrainInfiniteServer extends TerrainInfinite
                         Streams.of(chunks)
                                 .filter(TerrainInfiniteChunkServer::shouldFinish)
                                 .forEach(TerrainInfiniteChunkServer::finish);
-                        Streams.of(chunks).filter(chunk -> !requiredChunks
-                                .contains(chunk.pos()))
+                        long time = System.currentTimeMillis() - 2000;
+                        Streams.of(chunks)
+                                .filter(chunk -> chunk.lastAccess() < time)
+                                .filter(chunk -> !requiredChunks
+                                        .contains(chunk.pos()))
                                 .forEach(chunkUnloadQueue::add);
                         Streams.of(chunks).forEach(
                                 TerrainInfiniteChunkServer::updateAdjacent);
@@ -177,6 +180,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
     public Optional<TerrainInfiniteChunkServer> chunk(int x, int y) {
         Optional<TerrainInfiniteChunkServer> chunk = chunkManager.get(x, y);
         if (chunk.isPresent()) {
+            chunk.get().accessed();
             return chunk;
         }
         return addChunk(x, y);
@@ -288,12 +292,14 @@ public class TerrainInfiniteServer extends TerrainInfinite
     }
 
     @Override
-    public boolean hasDelayedUpdate(int x, int y, int z) {
+    public boolean hasDelayedUpdate(int x, int y, int z,
+            Class<? extends Update> clazz) {
         if (z < 0 || z >= zSize) {
             return false;
         }
         Optional<TerrainInfiniteChunkServer> chunk = chunk(x >> 4, y >> 4);
-        return chunk.isPresent() && chunk.get().hasDelayedUpdate(x, y, z);
+        return chunk.isPresent() &&
+                chunk.get().hasDelayedUpdate(x, y, z, clazz);
     }
 
     @Override
