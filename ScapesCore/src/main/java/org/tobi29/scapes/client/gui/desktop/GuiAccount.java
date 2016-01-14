@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.tobi29.scapes.client.gui;
+package org.tobi29.scapes.client.gui.desktop;
 
 import java8.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.client.gui.desktop.GuiMenu;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.input.FileType;
@@ -49,24 +48,24 @@ public class GuiAccount extends GuiMenu {
         } catch (IOException e) {
             LOGGER.error("Failed to read account file: {}", e.toString());
         }
-        pane.addVert(16, 5, p -> new GuiComponentText(p, 18, "Key:"));
+        pane.addVert(16, 5, -1, 18, p -> new GuiComponentText(p, "Key:"));
+        GuiComponentGroupSlab slab = row(pane);
         GuiComponentButton keyCopy =
-                pane.addHori(16, 5, 5, 5, p -> button(p, 116, "Copy"));
+                slab.addHori(5, 5, -1, -1, p -> button(p, "Copy"));
         GuiComponentButton keyPaste =
-                pane.addHori(5, 5, p -> button(p, 116, "Paste"));
+                slab.addHori(5, 5, -1, -1, p -> button(p, "Paste"));
         GuiComponentButton keyCopyID =
-                pane.addHori(5, 5, p -> button(p, 116, "Copy ID"));
-        GuiComponentText id = pane.addVert(16, 5,
-                p -> new GuiComponentText(p, 12, "ID: " + ChecksumUtil
+                slab.addHori(5, 5, -1, -1, p -> button(p, "Copy ID"));
+        GuiComponentText id = pane.addVert(16, 5, -1, 12,
+                p -> new GuiComponentText(p, "ID: " + ChecksumUtil
                         .checksum(keyPair.getPublic().getEncoded(),
                                 ChecksumUtil.Algorithm.SHA1)));
-        pane.addVert(16, 5, p -> new GuiComponentText(p, 18, "Nickname:"));
-        GuiComponentTextField nickname = pane.addVert(16, 5,
-                p -> new GuiComponentTextField(p, 368, 30, 18, this.nickname));
-        GuiComponentTextButton skin =
-                pane.addVert(112, 5, p -> button(p, 176, "Skin"));
+        pane.addVert(16, 5, -1, 18, p -> new GuiComponentText(p, "Nickname:"));
+        GuiComponentTextField nickname =
+                row(pane, p -> new GuiComponentTextField(p, 18, this.nickname));
+        GuiComponentTextButton skin = rowCenter(pane, p -> button(p, "Skin"));
         GuiComponentText error =
-                pane.addVert(16, 5, p -> new GuiComponentText(p, 18, ""));
+                pane.addVert(16, 5, -1, 18, p -> new GuiComponentText(p, ""));
 
         keyCopy.onClickLeft(event -> state.engine().container()
                 .clipboardCopy(Account.key(keyPair)));

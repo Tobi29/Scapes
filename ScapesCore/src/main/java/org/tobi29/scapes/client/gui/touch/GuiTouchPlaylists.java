@@ -38,14 +38,15 @@ public class GuiTouchPlaylists extends GuiTouchMenuDouble {
     public GuiTouchPlaylists(GameState state, Gui previous, GuiStyle style) {
         super(state, "Playlists", "Add", "Back", previous, style);
         this.state = state;
+        GuiComponentGroupSlab slab = row(pane);
         GuiComponentTextButton day =
-                pane.addHori(112, 10, 10, 10, p -> button(p, 232, "Day"));
+                slab.addHori(10, 10, -1, -1, p -> button(p, "Day"));
         GuiComponentTextButton night =
-                pane.addHori(10, 10, p -> button(p, 232, "Night"));
+                slab.addHori(10, 10, -1, -1, p -> button(p, "Night"));
         GuiComponentTextButton battle =
-                pane.addHori(10, 10, 112, 10, p -> button(p, 232, "Battle"));
-        scrollPane = pane.addVert(112, 10,
-                p -> new GuiComponentScrollPane(p, 736, 250, 60)).viewport();
+                slab.addHori(10, 10, -1, -1, p -> button(p, "Battle"));
+        scrollPane = pane.addVert(112, 10, 736, 250,
+                p -> new GuiComponentScrollPane(p, 60)).viewport();
 
         day.onClickLeft(event -> updateTitles("day"));
         night.onClickLeft(event -> updateTitles("night"));
@@ -85,15 +86,15 @@ public class GuiTouchPlaylists extends GuiTouchMenuDouble {
                     FileUtil.listRecursive(path, FileUtil::isRegularFile,
                             FileUtil::isNotHidden);
             Streams.of(files).sorted().forEach(file -> scrollPane
-                    .addVert(0, 0, p -> new Element(p, file)));
+                    .addVert(0, 0, -1, 40, p -> new Element(p, file)));
         } catch (IOException e) {
             LOGGER.warn("Failed to load playlist: {}", e.toString());
         }
     }
 
-    private class Element extends GuiComponentPane {
+    private class Element extends GuiComponentGroupSlab {
         public Element(GuiLayoutData parent, FilePath path) {
-            super(parent, 736, 40);
+            super(parent);
             String fileName = String.valueOf(path.getFileName());
             int index = fileName.lastIndexOf('.');
             String name;
@@ -103,19 +104,16 @@ public class GuiTouchPlaylists extends GuiTouchMenuDouble {
                 name = fileName.substring(0, index);
             }
             GuiComponentTextButton label =
-                    addHori(10, 5, p -> button(p, 576, 30, 24, name));
+                    addHori(10, 5, -1, 30, p -> button(p, 24, name));
             GuiComponentTextButton delete =
-                    addHori(10, 5, p -> button(p, 110, 30, 24, "Delete"));
+                    addHori(10, 5, 110, 30, p -> button(p, 24, "Delete"));
 
             label.onClickLeft(event -> {
-                GuiNotification message = new GuiNotification(660, 0, 290, 60,
-                        state.engine().guiStyle(), GuiAlignment.RIGHT, 3.0);
-                message.add(10, 10, p -> new GuiComponentIcon(p, 40, 40,
-                        state.engine().graphics().textures()
-                                .get("Scapes:image/gui/Playlist")));
-                message.add(60, 23,
-                        p -> new GuiComponentText(p, 420, 16, name));
-                state.engine().guiStack().add("90-Notification", message);
+                state.engine().notifications()
+                        .add(p -> new GuiNotificationSimple(p,
+                                state.engine().graphics().textures()
+                                        .get("Scapes:image/gui/Playlist"),
+                                name));
                 state.engine().sounds().stop("music");
                 state.engine().sounds()
                         .playMusic(FileUtil.read(path), "music.Playlist", 1.0f,

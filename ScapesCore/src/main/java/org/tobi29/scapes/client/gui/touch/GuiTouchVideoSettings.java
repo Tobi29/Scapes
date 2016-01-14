@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.tobi29.scapes.client.gui.desktop;
+package org.tobi29.scapes.client.gui.touch;
 
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiComponentSlider;
-import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
-public class GuiVideoSettings extends GuiMenu {
-    public GuiVideoSettings(GameState state, Gui previous, GuiStyle style) {
+public class GuiTouchVideoSettings extends GuiTouchMenu {
+    public GuiTouchVideoSettings(GameState state, Gui previous,
+            GuiStyle style) {
         super(state, "Video Settings", previous, style);
         TagStructure scapesTag =
                 state.engine().tagStructure().getStructure("Scapes");
@@ -33,13 +33,9 @@ public class GuiVideoSettings extends GuiMenu {
                         (scapesTag.getDouble("RenderDistance") - 10.0) / 246.0,
                         (text, value) -> text + ": " +
                                 FastMath.round(10.0 + value * 246.0) + 'm'));
-        GuiComponentTextButton shader = row(pane, p -> button(p, "Shaders"));
-        GuiComponentTextButton fullscreen;
-        if (state.engine().config().isFullscreen()) {
-            fullscreen = row(pane, p -> button(p, "Fullscreen: ON"));
-        } else {
-            fullscreen = row(pane, p -> button(p, "Fullscreen: OFF"));
-        }
+        GuiComponentSlider animationDistance = row(pane,
+                p -> slider(p, "Animation Distance",
+                        scapesTag.getFloat("AnimationDistance")));
         GuiComponentSlider resolutionMultiplier = row(pane,
                 p -> slider(p, "Resolution", reverseResolution(
                         state.engine().config().resolutionMultiplier()),
@@ -49,20 +45,9 @@ public class GuiVideoSettings extends GuiMenu {
 
         viewDistance.onDragLeft(event -> scapesTag.setDouble("RenderDistance",
                 10.0 + viewDistance.value() * 246.0));
-        shader.onClickLeft(event -> {
-            state.engine().guiStack()
-                    .add("10-Menu", new GuiShaderSettings(state, this, style));
-        });
-        fullscreen.onClickLeft(event -> {
-            if (!state.engine().config().isFullscreen()) {
-                fullscreen.setText("Fullscreen: ON");
-                state.engine().config().setFullscreen(true);
-            } else {
-                fullscreen.setText("Fullscreen: OFF");
-                state.engine().config().setFullscreen(false);
-            }
-            state.engine().container().updateContainer();
-        });
+        animationDistance.onDragLeft(event -> scapesTag
+                .setFloat("AnimationDistance",
+                        (float) animationDistance.value()));
         resolutionMultiplier.onDragLeft(event -> state.engine().config()
                 .setResolutionMultiplier(
                         (float) resolution(resolutionMultiplier.value())));

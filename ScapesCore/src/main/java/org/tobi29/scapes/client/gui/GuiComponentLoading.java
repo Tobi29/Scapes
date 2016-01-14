@@ -28,7 +28,7 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 
 public class GuiComponentLoading extends GuiComponent {
     private final VAO vao1, vao2;
-    protected float value;
+    protected double value;
 
     public GuiComponentLoading(GuiLayoutData parent, int width, int height) {
         this(parent, width, height, 0.0f, 1.0f, 0.0f, 1.0f);
@@ -36,7 +36,7 @@ public class GuiComponentLoading extends GuiComponent {
 
     public GuiComponentLoading(GuiLayoutData parent, int width, int height,
             float r, float g, float b, float a) {
-        super(parent, width, height);
+        super(parent);
         float r2 = r * 0.5f;
         float g2 = g * 0.5f;
         float b2 = b * 0.5f;
@@ -63,16 +63,17 @@ public class GuiComponentLoading extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, double delta) {
+    public void renderComponent(GL gl, Shader shader, double delta,
+            double width, double height) {
         gl.textures().unbind(gl);
         MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
-        matrix.scale(value, 1.0f, 1.0f);
+        matrix.scale((float) value, 1.0f, 1.0f);
         vao1.render(gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
-        matrix.translate(value * width, 0.0f, 0.0f);
-        matrix.scale(1.0f - value, 1.0f, 1.0f);
+        matrix.translate((float) (value * width), 0.0f, 0.0f);
+        matrix.scale((float) (1.0 - value), 1.0f, 1.0f);
         vao2.render(gl, shader);
         matrixStack.pop();
     }

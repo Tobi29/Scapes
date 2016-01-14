@@ -4,6 +4,7 @@ import org.tobi29.scapes.client.connection.ConnectionProfiler;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
+import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
 public class GuiWidgetConnectionProfiler extends GuiWidgetDebugValues {
     private final ConnectionProfiler profiler;
@@ -15,8 +16,8 @@ public class GuiWidgetConnectionProfiler extends GuiWidgetDebugValues {
     }
 
     @Override
-    protected void updateComponent(ScapesEngine engine) {
-        super.updateComponent(engine);
+    protected void updateComponent(ScapesEngine engine, Vector2 size) {
+        super.updateComponent(engine, size);
         profiler.entries().forEach(
                 entry -> get(entry.a.getSimpleName()).setValue(entry.b));
     }

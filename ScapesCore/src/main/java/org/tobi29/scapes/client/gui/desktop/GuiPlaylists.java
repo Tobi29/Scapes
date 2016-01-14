@@ -38,16 +38,16 @@ public class GuiPlaylists extends GuiMenu {
     public GuiPlaylists(GameState state, Gui previous, GuiStyle style) {
         super(state, "Playlists", previous, style);
         this.state = state;
+        GuiComponentGroupSlab slab = row(pane);
         GuiComponentTextButton day =
-                pane.addHori(16, 5, 5, 5, p -> button(p, 80, "Day"));
+                slab.addHori(5, 5, -1, -1, p -> button(p, "Day"));
         GuiComponentTextButton night =
-                pane.addHori(5, 5, p -> button(p, 80, "Night"));
+                slab.addHori(5, 5, -1, -1, p -> button(p, "Night"));
         GuiComponentTextButton battle =
-                pane.addHori(5, 5, p -> button(p, 80, "Battle"));
-        scrollPane = pane.addVert(16, 5,
-                p -> new GuiComponentScrollPane(p, 368, 300, 70)).viewport();
-        GuiComponentTextButton add =
-                pane.addVert(112, 5, p -> button(p, 176, "Add"));
+                slab.addHori(5, 5, -1, -1, p -> button(p, "Battle"));
+        scrollPane = pane.addVert(16, 5, -1, 300,
+                p -> new GuiComponentScrollPane(p, 70)).viewport();
+        GuiComponentTextButton add = rowCenter(pane, p -> button(p, "Add"));
         updateTitles("day");
 
         day.onClickLeft(event -> updateTitles("day"));
@@ -81,15 +81,15 @@ public class GuiPlaylists extends GuiMenu {
                     FileUtil.listRecursive(path, FileUtil::isRegularFile,
                             FileUtil::isNotHidden);
             Streams.of(files).sorted().forEach(file -> scrollPane
-                    .addVert(0, 0, p -> new Element(p, file)));
+                    .addVert(0, 0, -1, 20, p -> new Element(p, file)));
         } catch (IOException e) {
             LOGGER.warn("Failed to load playlist: {}", e.toString());
         }
     }
 
-    private class Element extends GuiComponentPane {
+    private class Element extends GuiComponentGroupSlab {
         public Element(GuiLayoutData parent, FilePath path) {
-            super(parent, 378, 20);
+            super(parent);
             String fileName = String.valueOf(path.getFileName());
             int index = fileName.lastIndexOf('.');
             String name;
@@ -99,24 +99,20 @@ public class GuiPlaylists extends GuiMenu {
                 name = fileName.substring(0, index);
             }
             GuiComponentTextButton play =
-                    add(15, 2, p -> button(p, 35, 15, 12, "Play"));
+                    addHori(2, 2, -1, 15, p -> button(p, 12, name));
             play.onClickLeft(event -> {
-                GuiNotification message = new GuiNotification(660, 0, 290, 60,
-                        state.engine().guiStyle(), GuiAlignment.RIGHT, 3.0);
-                message.add(10, 10, p -> new GuiComponentIcon(p, 40, 40,
-                        state.engine().graphics().textures()
-                                .get("Scapes:image/gui/Playlist")));
-                message.add(60, 23,
-                        p -> new GuiComponentText(p, 420, 16, name));
-                state.engine().guiStack().add("90-Notification", message);
+                state.engine().notifications()
+                        .add(p -> new GuiNotificationSimple(p,
+                                state.engine().graphics().textures()
+                                        .get("Scapes:image/gui/Playlist"),
+                                name));
                 state.engine().sounds().stop("music");
                 state.engine().sounds()
                         .playMusic(FileUtil.read(path), "music.Playlist", 1.0f,
                                 1.0f, true);
             });
-            add(60, 2, p -> button(p, 220, 15, 12, name));
             GuiComponentTextButton delete =
-                    add(290, 2, p -> button(p, 60, 15, 12, "Delete"));
+                    addHori(2, 2, 60, 15, p -> button(p, 12, "Delete"));
             delete.onClickLeft(event -> {
                 try {
                     FileUtil.delete(path);

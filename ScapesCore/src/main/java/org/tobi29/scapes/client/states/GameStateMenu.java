@@ -17,9 +17,10 @@ package org.tobi29.scapes.client.states;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.client.gui.GuiAccount;
 import org.tobi29.scapes.client.gui.GuiVersion;
+import org.tobi29.scapes.client.gui.desktop.GuiAccount;
 import org.tobi29.scapes.client.gui.desktop.GuiMainMenu;
+import org.tobi29.scapes.client.gui.touch.GuiTouchAccount;
 import org.tobi29.scapes.client.gui.touch.GuiTouchMainMenu;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.engine.GameState;
@@ -69,16 +70,18 @@ public class GameStateMenu extends GameState {
         switch (engine().container().formFactor()) {
             case PHONE:
                 menu = new GuiTouchMainMenu(this, scene, style);
+                if (!hasAccount) {
+                    menu = new GuiTouchAccount(this, menu, style);
+                }
                 break;
             default:
                 menu = new GuiMainMenu(this, scene, style);
+                if (!hasAccount) {
+                    menu = new GuiAccount(this, menu, style);
+                }
                 break;
         }
-        if (hasAccount) {
-            engine.guiStack().add("10-Menu", menu);
-        } else {
-            engine.guiStack().add("10-Menu", new GuiAccount(this, menu, style));
-        }
+        engine.guiStack().add("10-Menu", menu);
     }
 
     @Override

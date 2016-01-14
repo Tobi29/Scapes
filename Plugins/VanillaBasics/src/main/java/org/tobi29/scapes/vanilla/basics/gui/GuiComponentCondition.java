@@ -26,17 +26,18 @@ public class GuiComponentCondition extends GuiComponent {
 
     public GuiComponentCondition(GuiLayoutData parent,
             MobPlayerClientMain player) {
-        super(parent, 560, 24);
+        super(parent);
         this.player = player;
-        addSub(0, 8,
+        addSub(0, 8, 280, 16,
                 p -> new GuiComponentBar(p, 280, 16, 1.0f, 0.0f, 0.0f, 0.6f,
                         () -> player.health() / player.maxHealth()));
-        addSub(0, 0, p -> new GuiComponentBar(p, 560, 8, 0.0f, 1.0f, 0.0f, 0.6f,
-                () -> value("Stamina")));
-        addSub(280, 8,
+        addSub(0, 0, 560, 8,
+                p -> new GuiComponentBar(p, 560, 8, 0.0f, 1.0f, 0.0f, 0.6f,
+                        () -> value("Stamina")));
+        addSub(280, 8, 280, 8,
                 p -> new GuiComponentBar(p, 280, 8, 1.0f, 0.5f, 0.0f, 0.6f,
                         () -> value("Hunger")));
-        addSub(280, 16,
+        addSub(280, 16, 280, 8,
                 p -> new GuiComponentBar(p, 280, 8, 0.0f, 0.2f, 1.0f, 0.6f,
                         () -> value("Thirst")));
     }

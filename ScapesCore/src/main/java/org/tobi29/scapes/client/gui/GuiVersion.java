@@ -17,15 +17,17 @@ package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.Version;
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.GuiAlignment;
-import org.tobi29.scapes.engine.gui.GuiComponentText;
-import org.tobi29.scapes.engine.gui.GuiState;
-import org.tobi29.scapes.engine.gui.GuiStyle;
+import org.tobi29.scapes.engine.gui.*;
 
 public class GuiVersion extends GuiState {
     public GuiVersion(GameState state, GuiStyle style) {
-        super(state, style, GuiAlignment.RIGHT);
-        add(880, 520, p -> new GuiComponentText(p, 16,
+        super(state, style);
+        GuiComponentPane pane = spacer();
+        pane.spacer();
+        GuiComponentGroupSlab slab =
+                pane.addVert(0, 0, -1, 26, GuiComponentGroupSlab::new);
+        slab.spacer();
+        slab.addHori(5, 5, -1, 16, p -> new GuiComponentFlowText(p,
                 'v' + Version.VERSION.toString()));
     }
 }

@@ -41,9 +41,8 @@ public class GuiComponentLogo extends GuiComponent {
     private final VAO vao;
     private final GuiComponentText splash;
 
-    public GuiComponentLogo(GuiLayoutData parent, int width, int height,
-            int textSize) {
-        super(parent, width, height);
+    public GuiComponentLogo(GuiLayoutData parent, int height, int textSize) {
+        super(parent);
         int textX = height - 8;
         int textY = textSize >> 2;
         vao = VAOUtility.createVTI(
@@ -51,11 +50,12 @@ public class GuiComponentLogo extends GuiComponent {
                         height, 0, 0.0f},
                 new float[]{0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f},
                 new int[]{0, 1, 2, 3, 2, 1}, RenderType.TRIANGLES);
-        addSub(textX, textY,
-                p -> new GuiComponentText(p, textSize, "Scapes", 1.0f, 1.0f,
+        addSub(textX, textY, -1, textSize,
+                p -> new GuiComponentText(p, "Scapes", 1.0f, 1.0f,
                         1.0f, 1.0f));
-        splash = addSub(textX, textY + FastMath.round(textSize * 1.2),
-                p -> new GuiComponentText(p, (textSize << 1) / 3, splash(),
+        splash = addSub(textX, textY + FastMath.round(textSize * 1.2), -1,
+                (textSize << 1) / 3,
+                p -> new GuiComponentText(p, splash(),
                         1.0f, 1.0f, 0.0f, 1.0f));
         onClick((event, engine) -> {
             engine.sounds()
@@ -92,7 +92,8 @@ public class GuiComponentLogo extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, double delta) {
+    public void renderComponent(GL gl, Shader shader, double delta,
+            double width, double height) {
         gl.textures().bind("Scapes:image/Icon", gl);
         gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
         vao.render(gl, shader);

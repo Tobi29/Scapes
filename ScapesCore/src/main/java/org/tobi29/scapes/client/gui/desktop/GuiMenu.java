@@ -41,11 +41,17 @@ public class GuiMenu extends GuiDesktop {
 
     protected GuiMenu(GameState state, String title, String back,
             GuiStyle style) {
-        super(state, style, GuiAlignment.CENTER);
-        pane = add(280, 0, p -> new GuiComponentVisiblePane(p, 400, 540));
-        pane.addVert(16, 14, p -> new GuiComponentText(p, 32, title));
-        pane.addVert(24, 6, p -> new GuiComponentSeparator(p, 352, 2));
-        pane.add(24, 486, p -> new GuiComponentSeparator(p, 352, 2));
-        this.back = pane.add(112, 504, p -> button(p, 176, back));
+        super(state, style);
+        spacer();
+        pane = addHori(0, 0, 400, -1, GuiComponentVisiblePane::new);
+        spacer();
+        pane.addVert(16, 14, -1, 32, p -> new GuiComponentText(p, title));
+        pane.addVert(24, 6, -1, 2, GuiComponentSeparator::new);
+        pane.addVert(0, 0, 0, 0, -1, -1, Long.MIN_VALUE,
+                GuiComponentGroup::new);
+        pane.addVert(24, 6, 24, 6, -1, 2, Long.MIN_VALUE,
+                GuiComponentSeparator::new);
+        this.back = pane.addVert(112, 12, 112, 12, 176, 30, Long.MIN_VALUE,
+                p -> button(p, back));
     }
 }

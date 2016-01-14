@@ -57,10 +57,10 @@ public class GuiSaveSelect extends GuiMenu {
         ScapesClient game = (ScapesClient) state.engine().game();
         saves = game.saves();
 
-        scrollPane = pane.addVert(16, 5,
-                p -> new GuiComponentScrollPane(p, 368, 340, 70)).viewport();
+        scrollPane = pane.addVert(16, 5, 368, 340,
+                p -> new GuiComponentScrollPane(p, 70)).viewport();
         GuiComponentTextButton create =
-                pane.addVert(112, 5, p -> button(p, 176, "Create"));
+                rowCenter(pane, p -> button(p, "Create"));
 
         create.onClickLeft(event -> {
             try {
@@ -90,21 +90,21 @@ public class GuiSaveSelect extends GuiMenu {
         try {
             scrollPane.removeAll();
             saves.list().sorted().forEach(file -> scrollPane
-                    .addVert(0, 0, p -> new Element(p, file)));
+                    .addVert(0, 0, -1, 70, p -> new Element(p, file)));
         } catch (IOException e) {
             LOGGER.warn("Failed to read saves: {}", e.toString());
         }
     }
 
-    private class Element extends GuiComponentPane {
+    private class Element extends GuiComponentGroupSlab {
         public Element(GuiLayoutData parent, String name) {
-            super(parent, 378, 70);
+            super(parent);
             GuiComponentIcon icon =
-                    add(15, 15, p -> new GuiComponentIcon(p, 40, 40));
+                    addHori(15, 15, 40, -1, GuiComponentIcon::new);
             GuiComponentTextButton label =
-                    add(70, 20, p -> button(p, 180, name));
+                    addHori(5, 20, -1, -1, p -> button(p, name));
             GuiComponentTextButton delete =
-                    add(260, 20, p -> button(p, 80, "Delete"));
+                    addHori(5, 20, 80, -1, p -> button(p, "Delete"));
 
             label.onClickLeft(event -> {
                 scene.setSpeed(0.0f);

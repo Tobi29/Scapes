@@ -15,30 +15,23 @@
  */
 package org.tobi29.scapes.client.gui.touch;
 
-import org.tobi29.scapes.client.gui.GuiAccount;
 import org.tobi29.scapes.client.gui.desktop.GuiControlsList;
-import org.tobi29.scapes.client.gui.desktop.GuiVideoSettings;
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.Gui;
-import org.tobi29.scapes.engine.gui.GuiComponentSlider;
-import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
-import org.tobi29.scapes.engine.gui.GuiStyle;
+import org.tobi29.scapes.engine.gui.*;
 
 public class GuiTouchOptions extends GuiTouchMenu {
     public GuiTouchOptions(GameState state, Gui previous, GuiStyle style) {
         super(state, "Options", previous, style);
-        GuiComponentSlider musicVolume = pane.addVert(112, 10,
-                p -> new GuiComponentSlider(p, 736, 60, 36, "Music",
-                        state.engine().config().volume("music")));
-        GuiComponentSlider soundVolume = pane.addVert(112, 10,
-                p -> new GuiComponentSlider(p, 736, 60, 36, "Sound",
-                        state.engine().config().volume("sound")));
+        GuiComponentSlider musicVolume = row(pane, p -> slider(p, "Music",
+                state.engine().config().volume("music")));
+        GuiComponentSlider soundVolume = row(pane, p -> slider(p, "Sound",
+                state.engine().config().volume("sound")));
+        GuiComponentGroupSlab slab = row(pane);
         GuiComponentTextButton controls =
-                pane.addHori(112, 10, 10, 10, p -> button(p, 358, "Controls"));
-        GuiComponentTextButton graphics = pane.addHori(10, 10, 112, 10,
-                p -> button(p, 358, "Video settings"));
-        GuiComponentTextButton account =
-                pane.addVert(112, 10, p -> button(p, 736, "Account"));
+                slab.addHori(10, 10, -1, -1, p -> button(p, "Controls"));
+        GuiComponentTextButton graphics =
+                slab.addHori(10, 10, -1, -1, p -> button(p, "Video settings"));
+        GuiComponentTextButton account = row(pane, p -> button(p, "Account"));
 
         musicVolume.onDragLeft(event -> state.engine().config()
                 .setVolume("music", musicVolume.value()));
@@ -49,12 +42,12 @@ public class GuiTouchOptions extends GuiTouchMenu {
                     .add("10-Menu", new GuiControlsList(state, this, style));
         });
         graphics.onClickLeft(event -> {
-            state.engine().guiStack()
-                    .add("10-Menu", new GuiVideoSettings(state, this, style));
+            state.engine().guiStack().add("10-Menu",
+                    new GuiTouchVideoSettings(state, this, style));
         });
         account.onClickLeft(event -> {
             state.engine().guiStack()
-                    .add("10-Menu", new GuiAccount(state, this, style));
+                    .add("10-Menu", new GuiTouchAccount(state, this, style));
         });
     }
 }

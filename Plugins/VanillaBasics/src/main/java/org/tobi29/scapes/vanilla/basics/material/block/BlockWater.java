@@ -128,7 +128,7 @@ public class BlockWater extends VanillaBlock {
     @Override
     public void update(TerrainServer.TerrainMutable terrain, int x, int y,
             int z) {
-        if (!terrain.hasDelayedUpdate(x, y, z)) {
+        if (!terrain.hasDelayedUpdate(x, y, z, UpdateWaterFlow.class)) {
             Random random = ThreadLocalRandom.current();
             terrain.addDelayedUpdate(new UpdateWaterFlow()
                     .set(x, y, z, random.nextDouble() * 0.2 + 0.1));

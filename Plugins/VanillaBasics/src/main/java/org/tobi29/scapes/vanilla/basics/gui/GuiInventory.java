@@ -30,6 +30,7 @@ import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.packets.PacketInventoryInteraction;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
@@ -44,8 +45,8 @@ public class GuiInventory extends GuiMenu {
             GuiStyle style) {
         super(player.game(), name, style);
         this.player = player;
-        inventoryPane = pane.add(16, 268,
-                p -> new GuiComponentVisiblePane(p, 368, 162));
+        inventoryPane =
+                pane.add(16, 268, 368, 162, GuiComponentVisiblePane::new);
         int i = 0;
         for (int x = 0; x < 10; x++) {
             int xx = x * 35 + 11;
@@ -71,9 +72,8 @@ public class GuiInventory extends GuiMenu {
     protected void button(int x, int y, int width, int height, String id,
             int slot) {
         Inventory inventory = player.inventory(id);
-        GuiComponentItemButton button = inventoryPane.add(x, y,
-                p -> new GuiComponentItemButton(p, width, height,
-                        inventory.item(slot)));
+        GuiComponentItemButton button = inventoryPane.add(x, y, width, height,
+                p -> new GuiComponentItemButton(p, inventory.item(slot)));
         button.onClickLeft(event -> leftClick(id, slot));
         button.onClickRight(event -> rightClick(id, slot));
         button.onHover(event -> setTooltip(inventory.item(slot)));
@@ -108,7 +108,7 @@ public class GuiInventory extends GuiMenu {
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine) {
+    public void updateComponent(ScapesEngine engine, Vector2 size) {
         Optional<GuiCursor> cursor = engine.guiController().cursors().findAny();
         if (cursor.isPresent()) {
             cursorX = cursor.get().guiX();

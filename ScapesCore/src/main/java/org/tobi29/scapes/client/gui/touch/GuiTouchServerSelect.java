@@ -33,6 +33,7 @@ import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
+import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -51,8 +52,8 @@ public class GuiTouchServerSelect extends GuiTouchMenuDouble {
 
     public GuiTouchServerSelect(GameState state, Gui previous, GuiStyle style) {
         super(state, "Multiplayer", previous, style);
-        scrollPane = pane.addVert(112, 10,
-                p -> new GuiComponentScrollPane(p, 736, 320, 70)).viewport();
+        scrollPane = pane.addVert(112, 10, 736, 320,
+                p -> new GuiComponentScrollPane(p, 70)).viewport();
 
         save.onClickLeft(event -> {
             /*state.engine().guiStack()
@@ -91,14 +92,14 @@ public class GuiTouchServerSelect extends GuiTouchMenuDouble {
     public void updateServers() {
         disposeServers();
         for (TagStructure tagStructure : servers) {
-            Element element =
-                    scrollPane.addVert(0, 0, p -> new Element(p, tagStructure));
+            Element element = scrollPane
+                    .addVert(0, 0, 378, 70, p -> new Element(p, tagStructure));
             elements.add(element);
         }
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine) {
+    public void updateComponent(ScapesEngine engine, Vector2 size) {
         Streams.of(elements).forEach(Element::checkConnection);
     }
 
@@ -109,7 +110,7 @@ public class GuiTouchServerSelect extends GuiTouchMenuDouble {
         scapesTag.setList("Servers", servers);
     }
 
-    private class Element extends GuiComponentPane {
+    private class Element extends GuiComponentGroupSlab {
         private final GuiComponentIcon icon;
         private final GuiComponentTextButton label;
         private final ByteBuffer outBuffer, headerBuffer =
@@ -119,11 +120,11 @@ public class GuiTouchServerSelect extends GuiTouchMenuDouble {
         private ByteBuffer buffer;
 
         public Element(GuiLayoutData parent, TagStructure tagStructure) {
-            super(parent, 378, 70);
-            icon = add(15, 15, p -> new GuiComponentIcon(p, 40, 40));
-            label = add(70, 20, p -> button(p, 180, "Pinging..."));
+            super(parent);
+            icon = addHori(10, 10, 60, -1, GuiComponentIcon::new);
+            label = addHori(10, 10, -1, -1, p -> button(p, "Pinging..."));
             GuiComponentTextButton delete =
-                    add(260, 20, p -> button(p, 80, "Delete"));
+                    addHori(10, 10, 160, -1, p -> button(p, "Delete"));
 
             String address = tagStructure.getString("Address");
             int port = tagStructure.getInteger("Port");

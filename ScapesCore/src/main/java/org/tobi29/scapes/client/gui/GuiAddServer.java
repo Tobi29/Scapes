@@ -27,12 +27,12 @@ public class GuiAddServer extends GuiMenuDouble {
     public GuiAddServer(GameState state, GuiServerSelect previous,
             GuiStyle style) {
         super(state, "Add Server", previous, style);
-        pane.addVert(16, 5, p -> new GuiComponentText(p, 18, "IP:"));
-        GuiComponentTextField ip = pane.addVert(16, 5,
-                p -> new GuiComponentTextField(p, 368, 30, 18, ""));
-        pane.addVert(16, 5, p -> new GuiComponentText(p, 18, "Port:"));
-        GuiComponentTextField port = pane.addVert(16, 5,
-                p -> new GuiComponentTextField(p, 368, 30, 18, "12345"));
+        pane.addVert(16, 5, -1, 18, p -> new GuiComponentText(p, "IP:"));
+        GuiComponentTextField ip =
+                row(pane, p -> new GuiComponentTextField(p, 18, ""));
+        pane.addVert(16, 5, -1, 18, p -> new GuiComponentText(p, "Port:"));
+        GuiComponentTextField port =
+                row(pane, p -> new GuiComponentTextField(p, 18, "12345"));
 
         save.onClickLeft(event -> {
             TagStructure tagStructure = new TagStructure();

@@ -21,7 +21,10 @@ import org.tobi29.scapes.client.SaveStorage;
 import org.tobi29.scapes.client.ScapesClient;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
-import org.tobi29.scapes.engine.opengl.texture.*;
+import org.tobi29.scapes.engine.opengl.texture.Texture;
+import org.tobi29.scapes.engine.opengl.texture.TextureFile;
+import org.tobi29.scapes.engine.opengl.texture.TextureFilter;
+import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.StringUtil;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
@@ -49,17 +52,16 @@ public class GuiCreateWorld extends GuiMenuDouble {
         super(state, "New World", previous, style);
         ScapesClient game = (ScapesClient) state.engine().game();
         SaveStorage saves = game.saves();
-        pane.addVert(16, 5, p -> new GuiComponentText(p, 18, "Name:"));
-        GuiComponentTextField name = pane.addVert(16, 5,
-                p -> new GuiComponentTextField(p, 368, 30, 18, "New World"));
-        pane.addVert(16, 5, p -> new GuiComponentText(p, 18, "Seed:"));
-        GuiComponentTextField seed = pane.addVert(16, 5,
-                p -> new GuiComponentTextField(p, 368, 30, 18, ""));
-        GuiComponentTextButton environment = pane.addVert(16, 5,
-                p -> button(p, 368,
-                        "Generator: " + worldTypes.get(environmentID).name()));
+        pane.addVert(16, 5, -1, 18, p -> new GuiComponentText(p, "Name:"));
+        GuiComponentTextField name =
+                row(pane, p -> new GuiComponentTextField(p, 18, "New World"));
+        pane.addVert(16, 5, -1, 18, p -> new GuiComponentText(p, "Seed:"));
+        GuiComponentTextField seed =
+                row(pane, p -> new GuiComponentTextField(p, 18, ""));
+        GuiComponentTextButton environment = row(pane, p -> button(p,
+                "Generator: " + worldTypes.get(environmentID).name()));
         GuiComponentTextButton addonsButton =
-                pane.addVert(16, 5, p -> button(p, 368, "Addons"));
+                row(pane, p -> button(p, "Addons"));
 
         environment.onClickLeft(event -> {
             environmentID++;
@@ -116,28 +118,26 @@ public class GuiCreateWorld extends GuiMenuDouble {
     private class GuiAddons extends GuiMenu {
         public GuiAddons(GameState state, GuiCreateWorld previous,
                 String parent, List<PluginFile> plugins, GuiStyle style) {
-            super(state, "Apply", previous, style);
-            pane.add(16, 16, p -> new GuiComponentText(p, 32, "Addons"));
-            pane.add(24, 64, p -> new GuiComponentSeparator(p, 352, 2));
-            GuiComponentScrollPaneViewport scrollPane = pane.add(16, 80,
-                    p -> new GuiComponentScrollPane(p, 368, 350, 70))
-                    .viewport();
+            super(state, "Addons", "Apply", previous, style);
+            GuiComponentScrollPaneViewport scrollPane =
+                    pane.addVert(16, 5, -1, 350,
+                            p -> new GuiComponentScrollPane(p, 70)).viewport();
             Streams.of(plugins).filter(plugin -> plugin.parent().equals(parent))
-                    .forEach(plugin -> scrollPane
-                            .addVert(0, 0, p -> new Element(p, plugin)));
+                    .forEach(plugin -> scrollPane.addVert(0, 0, -1, 70,
+                            p -> new Element(p, plugin)));
         }
 
-        private class Element extends GuiComponentPane {
+        private class Element extends GuiComponentGroupSlab {
             @SuppressWarnings("FieldMayBeFinal")
             private boolean active;
 
             public Element(GuiLayoutData parent, PluginFile addon) {
-                super(parent, 378, 70);
+                super(parent);
                 GuiComponentIcon icon =
-                        add(15, 15, p -> new GuiComponentIcon(p, 40, 40));
-                add(70, 20, p -> button(p, 200, addon.name()));
+                        addHori(15, 15, 40, -1, GuiComponentIcon::new);
+                add(5, 20, -1, 30, p -> button(p, addon.name()));
                 GuiComponentTextButton edit =
-                        add(280, 20, p -> button(p, 30, active ? "X" : ""));
+                        add(5, 20, 30, 30, p -> button(p, active ? "X" : ""));
 
                 active = addons.contains(addon);
                 edit.onClickLeft(event -> {

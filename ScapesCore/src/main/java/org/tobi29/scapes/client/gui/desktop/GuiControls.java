@@ -18,7 +18,6 @@ package org.tobi29.scapes.client.gui.desktop;
 import org.tobi29.scapes.client.ScapesClient;
 import org.tobi29.scapes.client.gui.GuiComponentControlsAxis;
 import org.tobi29.scapes.client.gui.GuiComponentControlsButton;
-import org.tobi29.scapes.client.gui.desktop.GuiMenu;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.input.ControllerBasic;
@@ -37,8 +36,8 @@ public abstract class GuiControls extends GuiMenu {
             game.setFreezeInputMode(false);
             game.loadInput();
         });
-        scrollPane = pane.add(16, 80,
-                p -> new GuiComponentScrollPane(p, 368, 390, 40)).viewport();
+        scrollPane = pane.add(16, 80, 368, 390,
+                p -> new GuiComponentScrollPane(p, 40)).viewport();
     }
 
     private static double sensitivity(double value) {
@@ -57,33 +56,31 @@ public abstract class GuiControls extends GuiMenu {
     }
 
     protected void addText(String text) {
-        scrollPane
-                .addVert(40, 16, 40, 5, p -> new GuiComponentText(p, 18, text));
+        scrollPane.addVert(40, 16, 40, 5, -1, 18,
+                p -> new GuiComponentText(p, text));
     }
 
     protected void addButton(String name, String id, TagStructure tagStructure,
             ControllerBasic controller) {
-        scrollPane.addVert(16, 5,
-                p -> new GuiComponentControlsButton(p, 328, 30, 18, name, id,
-                        tagStructure, controller));
+        row(scrollPane, p -> new GuiComponentControlsButton(p, 18, name, id,
+                tagStructure, controller));
     }
 
     protected void addAxis(String name, String id, TagStructure tagStructure,
             ControllerJoystick controller) {
-        scrollPane.addVert(16, 5,
-                p -> new GuiComponentControlsAxis(p, 328, 30, 18, name, id,
-                        tagStructure, controller));
+        row(scrollPane,
+                p -> new GuiComponentControlsAxis(p, 18, name, id, tagStructure,
+                        controller));
     }
 
     protected void addSlider(String name, String id,
             TagStructure tagStructure) {
-        GuiComponentSlider slider = scrollPane.addVert(16, 5,
-                p -> new GuiComponentSlider(p, 328, 30, 18, name,
-                        reverseSensitivity(tagStructure.getDouble(id)),
-                        (text, value) -> text + ": " +
-                                FastMath.round(sensitivity(value) * 100.0) +
-                                '%'));
-        slider.onHover(event -> tagStructure
+        GuiComponentSlider slider = row(scrollPane, p -> slider(p, name,
+                reverseSensitivity(tagStructure.getDouble(id)),
+                (text, value) -> text + ": " +
+                        FastMath.round(sensitivity(value) * 100.0) +
+                        '%'));
+        slider.onDragLeft(event -> tagStructure
                 .setDouble(id, sensitivity(slider.value())));
     }
 }

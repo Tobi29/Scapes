@@ -16,7 +16,6 @@
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.GuiAlignment;
 import org.tobi29.scapes.engine.gui.GuiState;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.opengl.*;
@@ -36,7 +35,7 @@ public class GuiHud extends GuiState {
             new int[]{0, 1, 2, 0, 2, 3}, RenderType.TRIANGLES);
 
     public GuiHud(GameState state, GuiStyle style) {
-        super(state, style, GuiAlignment.LEFT);
+        super(state, style);
     }
 
     @Override

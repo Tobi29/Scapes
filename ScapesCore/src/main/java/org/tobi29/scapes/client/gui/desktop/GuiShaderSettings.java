@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.client.gui.desktop;
 
-import org.tobi29.scapes.client.gui.desktop.GuiMenu;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiComponentSlider;
@@ -28,27 +27,26 @@ public class GuiShaderSettings extends GuiMenu {
         super(state, "Shader Settings", previous, style);
         TagStructure scapesTag =
                 state.engine().tagStructure().getStructure("Scapes");
-        GuiComponentSlider animationDistance = pane.addVert(16, 5,
-                p -> new GuiComponentSlider(p, 368, 30, 18,
-                        "Animation Distance",
+        GuiComponentSlider animationDistance = row(pane,
+                p -> slider(p, "Animation Distance",
                         scapesTag.getFloat("AnimationDistance")));
         GuiComponentTextButton bloom;
         if (scapesTag.getBoolean("Bloom")) {
-            bloom = pane.addVert(16, 5, p -> button(p, 368, "Bloom: ON"));
+            bloom = row(pane, p -> button(p, "Bloom: ON"));
         } else {
-            bloom = pane.addVert(16, 5, p -> button(p, 368, "Bloom: OFF"));
+            bloom = row(pane, p -> button(p, "Bloom: OFF"));
         }
         GuiComponentTextButton autoExposure;
         if (scapesTag.getBoolean("AutoExposure")) {
-            autoExposure = pane.addVert(16, 5, p -> button(p, 368, "Auto Exposure: ON"));
+            autoExposure = row(pane, p -> button(p, "Auto Exposure: ON"));
         } else {
-            autoExposure = pane.addVert(16, 5, p -> button(p, 368, "Auto Exposure: OFF"));
+            autoExposure = row(pane, p -> button(p, "Auto Exposure: OFF"));
         }
         GuiComponentTextButton fxaa;
         if (scapesTag.getBoolean("FXAA")) {
-            fxaa = pane.addVert(16, 5, p -> button(p, 368, "FXAA: ON"));
+            fxaa = row(pane, p -> button(p, "FXAA: ON"));
         } else {
-            fxaa = pane.addVert(16, 5, p -> button(p, 368, "FXAA: OFF"));
+            fxaa = row(pane, p -> button(p, "FXAA: OFF"));
         }
 
         animationDistance.onDragLeft(event -> scapesTag

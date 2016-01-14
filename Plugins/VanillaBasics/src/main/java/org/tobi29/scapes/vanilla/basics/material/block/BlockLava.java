@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.block;
 
 import java8.util.Optional;
@@ -131,7 +130,7 @@ public class BlockLava extends VanillaBlock {
     @Override
     public void update(TerrainServer.TerrainMutable terrain, int x, int y,
             int z) {
-        if (!terrain.hasDelayedUpdate(x, y, z)) {
+        if (!terrain.hasDelayedUpdate(x, y, z, UpdateLavaFlow.class)) {
             Random random = ThreadLocalRandom.current();
             terrain.addDelayedUpdate(new UpdateLavaFlow()
                     .set(x, y, z, random.nextDouble() * 0.3 + 0.2));

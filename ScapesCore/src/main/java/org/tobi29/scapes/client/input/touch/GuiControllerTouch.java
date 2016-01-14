@@ -13,7 +13,6 @@ import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector2;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
-import org.tobi29.scapes.engine.utils.math.vector.Vector2d;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,9 +35,7 @@ public class GuiControllerTouch implements GuiController {
 
     @Override
     public void update(double delta) {
-        Vector2 screen =
-                new Vector2d(engine.container().containerWidth() / 960.0,
-                        engine.container().containerHeight() / 540.0);
+        double ratio = 540.0 / engine.container().containerHeight();
         List<Pair<GuiCursor, ControllerBasic.PressEvent>> newClicks =
                 new ArrayList<>();
         Map<ControllerTouch.Tracker, Finger> newFingers =
@@ -48,7 +45,7 @@ public class GuiControllerTouch implements GuiController {
             if (fetch == null) {
                 fetch = new Finger(tracker.pos());
                 Finger finger = fetch;
-                handleFinger(finger, screen);
+                handleFinger(finger, ratio);
                 finger.dragX = finger.cursor.guiX();
                 finger.dragY = finger.cursor.guiY();
                 engine.guiStack().fireEvent(
@@ -71,7 +68,7 @@ public class GuiControllerTouch implements GuiController {
                         });
                 fingers.put(tracker, finger);
             } else {
-                handleFinger(fetch, screen);
+                handleFinger(fetch, ratio);
             }
             newFingers.put(tracker, fetch);
         });
@@ -121,9 +118,9 @@ public class GuiControllerTouch implements GuiController {
         return false;
     }
 
-    private void handleFinger(Finger finger, Vector2 screen) {
-        finger.cursor
-                .set(finger.tracker.now(), finger.tracker.now().div(screen));
+    private void handleFinger(Finger finger, double ratio) {
+        finger.cursor.set(finger.tracker.now(),
+                finger.tracker.now().multiply(ratio));
         if (finger.dragging.isPresent()) {
             GuiComponent component = finger.dragging.get();
             double relativeX = finger.cursor.guiX() - finger.dragX;
@@ -134,7 +131,7 @@ public class GuiControllerTouch implements GuiController {
                     new GuiComponentEvent(finger.cursor.guiX(),
                             finger.cursor.guiY(), relativeX, relativeY),
                     component, component::dragLeft, engine);
-            Vector2 source = finger.source.div(screen);
+            Vector2 source = finger.source.multiply(ratio);
             engine.guiStack().fireRecursiveEvent(
                     new GuiComponentEvent(source.doubleX(), source.doubleY(),
                             relativeX, relativeY), GuiComponent::scroll,

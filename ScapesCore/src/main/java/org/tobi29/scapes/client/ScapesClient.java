@@ -26,21 +26,16 @@ import org.tobi29.scapes.client.input.keyboard.InputModeKeyboard;
 import org.tobi29.scapes.client.input.spi.InputModeProvider;
 import org.tobi29.scapes.client.input.touch.InputModeTouch;
 import org.tobi29.scapes.client.states.GameStateMenu;
+import org.tobi29.scapes.engine.Container;
 import org.tobi29.scapes.engine.Game;
 import org.tobi29.scapes.engine.GameStateStartup;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.gui.GuiAlignment;
-import org.tobi29.scapes.engine.gui.GuiComponentIcon;
-import org.tobi29.scapes.engine.gui.GuiComponentText;
-import org.tobi29.scapes.engine.gui.GuiNotification;
+import org.tobi29.scapes.engine.gui.GuiNotificationSimple;
 import org.tobi29.scapes.engine.input.*;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.scenes.SceneEmpty;
-import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.VersionUtil;
-import org.tobi29.scapes.engine.utils.graphics.Image;
-import org.tobi29.scapes.engine.utils.graphics.PNG;
 import org.tobi29.scapes.engine.utils.io.IOFunction;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileSystemContainer;
@@ -60,7 +55,6 @@ public class ScapesClient extends Game {
     private final IOFunction<ScapesClient, SaveStorage> savesSupplier;
     private final List<InputMode> inputModes = new ArrayList<>();
     private final boolean skipIntro;
-    private Image icon;
     private SaveStorage saves;
     private InputMode inputMode;
     private boolean freezeInputMode;
@@ -129,11 +123,6 @@ public class ScapesClient extends Game {
     }
 
     @Override
-    public Image icon() {
-        return icon;
-    }
-
-    @Override
     public void init() {
         try {
             FilePath path = engine.home();
@@ -146,28 +135,9 @@ public class ScapesClient extends Game {
             files.registerFileSystem("Scapes",
                     new ClasspathPath(getClass().getClassLoader(),
                             "assets/scapes/tobi29/"));
-            icon = files.get("Scapes:image/Icon.png").readReturn(
-                    stream -> PNG.decode(stream, BufferCreator::bytes));
             saves = savesSupplier.apply(this);
         } catch (IOException e) {
             engine.crash(e);
-        }
-        TagStructure tagStructure = engine.tagStructure();
-        if (!tagStructure.has("Scapes")) {
-            TagStructure scapesTag = tagStructure.getStructure("Scapes");
-            scapesTag.setFloat("AnimationDistance", 0.15f);
-            scapesTag.setBoolean("Bloom", true);
-            scapesTag.setBoolean("AutoExposure", true);
-            scapesTag.setBoolean("FXAA", true);
-            scapesTag.setDouble("RenderDistance", 128.0);
-            TagStructure integratedServerTag =
-                    scapesTag.getStructure("IntegratedServer");
-            TagStructure serverTag = integratedServerTag.getStructure("Server");
-            serverTag.setInteger("MaxLoadingRadius", 288);
-            TagStructure socketTag = serverTag.getStructure("Socket");
-            socketTag.setInteger("MaxPlayers", 5);
-            socketTag.setInteger("WorkerCount", 1);
-            socketTag.setInteger("RSASize", 1024);
         }
         if (skipIntro) {
             engine.setState(new GameStateMenu(engine));
@@ -179,6 +149,33 @@ public class ScapesClient extends Game {
 
     @Override
     public void initLate(GL gl) {
+        TagStructure tagStructure = engine.tagStructure();
+        if (!tagStructure.has("Scapes")) {
+            boolean lightDefaults = engine.container().formFactor() ==
+                    Container.FormFactor.PHONE;
+            TagStructure scapesTag = tagStructure.getStructure("Scapes");
+            if (lightDefaults) {
+                scapesTag.setFloat("AnimationDistance", 0.0f);
+                scapesTag.setBoolean("Bloom", false);
+                scapesTag.setBoolean("AutoExposure", false);
+                scapesTag.setBoolean("FXAA", false);
+                scapesTag.setDouble("RenderDistance", 64.0);
+            } else {
+                scapesTag.setFloat("AnimationDistance", 0.15f);
+                scapesTag.setBoolean("Bloom", true);
+                scapesTag.setBoolean("AutoExposure", true);
+                scapesTag.setBoolean("FXAA", true);
+                scapesTag.setDouble("RenderDistance", 128.0);
+            }
+            TagStructure integratedServerTag =
+                    scapesTag.getStructure("IntegratedServer");
+            TagStructure serverTag = integratedServerTag.getStructure("Server");
+            serverTag.setInteger("MaxLoadingRadius", 288);
+            TagStructure socketTag = serverTag.getStructure("Socket");
+            socketTag.setInteger("MaxPlayers", 5);
+            socketTag.setInteger("WorkerCount", 1);
+            socketTag.setInteger("RSASize", 1024);
+        }
         loadInput();
     }
 
@@ -198,15 +195,10 @@ public class ScapesClient extends Game {
             LOGGER.info("Setting input mode to {}", newInputMode);
             inputMode = newInputMode;
             engine.setGUIController(inputMode.guiController());
-            GuiNotification message =
-                    new GuiNotification(660, 0, 290, 60, engine.guiStyle(),
-                            GuiAlignment.RIGHT, 3.0);
-            message.add(10, 10, p -> new GuiComponentIcon(p, 40, 40,
+            engine.notifications().add(p -> new GuiNotificationSimple(p,
                     engine.graphics().textures()
-                            .get("Scapes:image/gui/input/Default")));
-            message.add(60, 25, p -> new GuiComponentText(p, 420, 10,
+                            .get("Scapes:image/gui/Playlist"),
                     inputMode.toString()));
-            engine.guiStack().add("90-Notification", message);
         }
     }
 

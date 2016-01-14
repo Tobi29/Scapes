@@ -16,7 +16,6 @@
 package org.tobi29.scapes.client.gui.desktop;
 
 import org.tobi29.scapes.client.ScapesClient;
-import org.tobi29.scapes.client.gui.desktop.GuiMenu;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
@@ -27,8 +26,9 @@ public class GuiControlsList extends GuiMenu {
         super(state, "Controls", previous, style);
         ((ScapesClient) state.engine().game()).inputModes()
                 .forEach(inputMode -> {
-                    GuiComponentTextButton controls = pane.addVert(16, 5,
-                            p -> button(p, 368, inputMode.toString()));
+                    GuiComponentTextButton controls =
+                            pane.addVert(16, 5, 368, 30,
+                                    p -> button(p, inputMode.toString()));
                     controls.onClickLeft(event -> {
                         state.engine().guiStack().add("10-Menu",
                                 inputMode.createControlsGUI(state, this));

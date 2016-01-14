@@ -41,11 +41,15 @@ public class GuiTouchMenu extends GuiTouch {
 
     protected GuiTouchMenu(GameState state, String title, String back,
             GuiStyle style) {
-        super(state, style, GuiAlignment.CENTER);
-        pane = add(0, 0, p -> new GuiComponentVisiblePane(p, 960, 540));
-        pane.addVert(130, 14, p -> new GuiComponentText(p, 48, title));
-        pane.addVert(130, 6, p -> new GuiComponentSeparator(p, 700, 2));
-        pane.add(130, 458, p -> new GuiComponentSeparator(p, 700, 2));
-        this.back = pane.add(301, 470, p -> button(p, 358, back));
+        super(state, style);
+        pane = addHori(0, 0, -1, -1, GuiComponentVisiblePane::new);
+        pane.addVert(130, 14, -1, 48, p -> new GuiComponentText(p, title));
+        pane.addVert(130, 6, -1, 2, GuiComponentSeparator::new);
+        pane.addVert(0, 0, 0, 0, -1, -1, Long.MIN_VALUE,
+                GuiComponentGroup::new);
+        pane.addVert(130, 6, 130, 6, -1, 2, Long.MIN_VALUE,
+                GuiComponentSeparator::new);
+        this.back = pane.addVert(301, 4, 301, 28, -1, 60, Long.MIN_VALUE,
+                p -> button(p, back));
     }
 }

@@ -262,7 +262,7 @@ public class BlockGrass extends VanillaBlock {
             terrain.typeData(x, y, z, materials.dirt, (short) 0);
         }
         if (terrain.highestTerrainBlockZAt(x, y) > z + 1 &&
-                !terrain.hasDelayedUpdate(x, y, z)) {
+                !terrain.hasDelayedUpdate(x, y, z, UpdateGrassGrowth.class)) {
             Random random = ThreadLocalRandom.current();
             terrain.addDelayedUpdate(new UpdateGrassGrowth()
                     .set(x, y, z, random.nextDouble() * 400.0 + 1600.0));

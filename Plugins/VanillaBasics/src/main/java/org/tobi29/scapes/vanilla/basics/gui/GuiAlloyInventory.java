@@ -35,7 +35,8 @@ public class GuiAlloyInventory extends GuiContainerInventory {
         this.container = container;
         buttonContainer(16, 120, 30, 30, 0);
         buttonContainer(16, 160, 30, 30, 1);
-        infoText = pane.add(60, 80, p -> new GuiComponentText(p, 24, ""));
+        infoText =
+                pane.add(60, 80, -1, 24, p -> new GuiComponentText(p, ""));
         updateInfoText();
     }
 

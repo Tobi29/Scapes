@@ -35,11 +35,12 @@ public class GuiCredits extends GuiDesktop {
     private double y = -540;
 
     public GuiCredits(GameState state, Gui previous, GuiStyle style) {
-        super(state, style, GuiAlignment.RIGHT);
+        super(state, style);
+        spacer();
         GuiComponentVisiblePane pane =
-                add(864, 0, p -> new GuiComponentVisiblePane(p, 96, 540));
+                addHori(0, 0, 96, -1, GuiComponentVisiblePane::new);
         GuiComponentTextButton back =
-                pane.add(13, 64, p -> button(p, 70, "Back"));
+                pane.addVert(13, 64, -1, 30, p -> button(p, "Back"));
         StringBuilder credits = new StringBuilder(200);
         try (BufferedReader reader = state.engine().files()
                 .get("Scapes:Readme.txt").reader()) {
@@ -70,7 +71,8 @@ public class GuiCredits extends GuiDesktop {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, double delta) {
+    public void renderComponent(GL gl, Shader shader, double delta,
+            double width, double height) {
         y += 40.0 * delta;
         MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();

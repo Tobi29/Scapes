@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.client.gui.desktop;
 
-import org.tobi29.scapes.client.gui.desktop.GuiMenu;
 import org.tobi29.scapes.client.states.GameStateMenu;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.GuiComponentText;
@@ -27,9 +26,9 @@ public class GuiDisconnected extends GuiMenu {
 
     public GuiDisconnected(GameState state, String message, GuiStyle style) {
         super(state, "Error", style);
-        pane.addVert(16, 5, p -> new GuiComponentText(p, 12, message));
-        reconnectTimer =
-                pane.addVert(16, 320, p -> new GuiComponentText(p, 32, ""));
+        pane.addVert(16, 5, -1, 12, p -> new GuiComponentText(p, message));
+        reconnectTimer = pane.addVert(16, 320, -1, 32,
+                p -> new GuiComponentText(p, ""));
 
         back.onClickLeft(event -> state.engine()
                 .setState(new GameStateMenu(state.engine())));

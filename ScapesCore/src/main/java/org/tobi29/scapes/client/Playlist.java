@@ -19,10 +19,7 @@ import java8.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.gui.GuiAlignment;
-import org.tobi29.scapes.engine.gui.GuiComponentIcon;
-import org.tobi29.scapes.engine.gui.GuiComponentText;
-import org.tobi29.scapes.engine.gui.GuiNotification;
+import org.tobi29.scapes.engine.gui.GuiNotificationSimple;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -78,12 +75,6 @@ public class Playlist {
         Optional<FilePath> title = playMusic(
                 engine.home().resolve("playlists").resolve(music.dirName()));
         if (title.isPresent()) {
-            GuiNotification message =
-                    new GuiNotification(660, 0, 290, 60, engine.guiStyle(),
-                            GuiAlignment.RIGHT, 3.0);
-            message.add(10, 10, p -> new GuiComponentIcon(p, 40, 40,
-                    engine.graphics().textures()
-                            .get("Scapes:image/gui/Playlist")));
             String fileName = title.get().getFileName().toString();
             int index = fileName.lastIndexOf('.');
             String name;
@@ -92,8 +83,9 @@ public class Playlist {
             } else {
                 name = fileName.substring(0, index);
             }
-            message.add(60, 23, p -> new GuiComponentText(p, 420, 16, name));
-            engine.guiStack().add("90-Notification", message);
+            engine.notifications().add(p -> new GuiNotificationSimple(p,
+                    engine.graphics().textures()
+                            .get("Scapes:image/gui/Playlist"), name));
         }
     }
 

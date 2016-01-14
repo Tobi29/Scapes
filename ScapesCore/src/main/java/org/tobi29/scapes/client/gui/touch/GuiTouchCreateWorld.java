@@ -45,12 +45,12 @@ public class GuiTouchCreateWorld extends GuiTouchMenuDouble {
         super(state, "New World", previous, style);
         ScapesClient game = (ScapesClient) state.engine().game();
         SaveStorage saves = game.saves();
-        pane.addVert(112, 10, p -> new GuiComponentText(p, 36, "Name:"));
-        GuiComponentTextField name = pane.addVert(112, 10,
-                p -> new GuiComponentTextField(p, 736, 60, 36, "New World"));
-        pane.addVert(112, 10, p -> new GuiComponentText(p, 36, "Seed:"));
-        GuiComponentTextField seed = pane.addVert(112, 10,
-                p -> new GuiComponentTextField(p, 736, 60, 36, ""));
+        pane.addVert(112, 10, -1, 36, p -> new GuiComponentText(p, "Name:"));
+        GuiComponentTextField name =
+                row(pane, p -> new GuiComponentTextField(p, 36, "New World"));
+        pane.addVert(112, 10, -1, 36, p -> new GuiComponentText(p, "Seed:"));
+        GuiComponentTextField seed =
+                row(pane, p -> new GuiComponentTextField(p, 36, ""));
 
         save.onClickLeft(event -> {
             if (name.text().isEmpty()) {

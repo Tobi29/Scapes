@@ -17,8 +17,6 @@ package org.tobi29.scapes.server.connection;
 
 import java8.util.Optional;
 import java8.util.stream.Stream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.server.*;
 import org.tobi29.scapes.engine.utils.Checksum;

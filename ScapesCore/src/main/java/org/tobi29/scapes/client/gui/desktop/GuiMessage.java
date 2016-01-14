@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.client.gui.desktop;
 
-import org.tobi29.scapes.client.gui.desktop.GuiMenu;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiComponentText;
@@ -25,6 +24,6 @@ public class GuiMessage extends GuiMenu {
     public GuiMessage(GameState state, Gui previous, String title,
             String message, GuiStyle style) {
         super(state, title, previous, style);
-        pane.add(16, 80, p -> new GuiComponentText(p, 18, message));
+        pane.add(16, 80, -1, 18, p -> new GuiComponentText(p, message));
     }
 }

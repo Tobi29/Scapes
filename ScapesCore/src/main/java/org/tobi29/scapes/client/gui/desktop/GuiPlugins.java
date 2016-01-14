@@ -43,10 +43,9 @@ public class GuiPlugins extends GuiMenu {
     public GuiPlugins(GameState state, Gui previous, GuiStyle style) {
         super(state, "Plugins", previous, style);
         path = state.engine().home().resolve("plugins");
-        scrollPane = pane.addVert(16, 5,
-                p -> new GuiComponentScrollPane(p, 368, 340, 70)).viewport();
-        GuiComponentTextButton add =
-                pane.addVert(112, 5, p -> button(p, 176, "Add"));
+        scrollPane = pane.addVert(16, 5, -1, 340,
+                p -> new GuiComponentScrollPane(p, 70)).viewport();
+        GuiComponentTextButton add = rowCenter(pane, p -> button(p, "Add"));
         add.onClickLeft(event -> {
             try {
                 state.engine().container()
@@ -69,21 +68,21 @@ public class GuiPlugins extends GuiMenu {
             scrollPane.removeAll();
             Streams.of(Plugins.installed(path)).sorted().forEach(
                     file -> scrollPane
-                            .addVert(0, 0, p -> new Element(p, file)));
+                            .addVert(0, 0, -1, 70, p -> new Element(p, file)));
         } catch (IOException e) {
             LOGGER.warn("Failed to read plugins: {}", e.toString());
         }
     }
 
-    private class Element extends GuiComponentPane {
+    private class Element extends GuiComponentGroupSlab {
         public Element(GuiLayoutData parent, PluginFile plugin) {
-            super(parent, 378, 70);
+            super(parent);
             GuiComponentIcon icon =
-                    add(15, 15, p -> new GuiComponentIcon(p, 40, 40));
+                    addHori(15, 15, 40, -1, GuiComponentIcon::new);
             GuiComponentTextButton label =
-                    add(70, 20, p -> button(p, 180, "Invalid plugin"));
+                    addHori(5, 20, -1, -1, p -> button(p, "Invalid plugin"));
             GuiComponentTextButton delete =
-                    add(260, 20, p -> button(p, 80, "Delete"));
+                    addHori(5, 20, 80, -1, p -> button(p, "Delete"));
 
             if (plugin.file() != null) {
                 delete.onClickLeft(event -> {

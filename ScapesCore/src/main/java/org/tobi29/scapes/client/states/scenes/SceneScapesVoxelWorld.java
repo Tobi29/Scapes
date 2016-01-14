@@ -175,8 +175,8 @@ public class SceneScapesVoxelWorld extends Scene {
     public void init(GL gl) {
         Gui hud = world.game().hud();
         hud.removeAll();
-        hud.add(8, 434,
-                p -> new GuiComponentChat(p, world.game().chatHistory(), 0, 0));
+        hud.add(8, 434, -1, -1,
+                p -> new GuiComponentChat(p, world.game().chatHistory()));
         ShaderManager shaderManager = gl.shaders();
         ShaderCompileInformation information =
                 shaderManager.compileInformation("Scapes:shader/Terrain");

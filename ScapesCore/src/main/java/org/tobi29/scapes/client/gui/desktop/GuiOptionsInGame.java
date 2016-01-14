@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.client.gui.desktop;
 
-import org.tobi29.scapes.client.gui.desktop.GuiMenu;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.engine.gui.GuiComponentSlider;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
@@ -24,19 +23,15 @@ import org.tobi29.scapes.engine.gui.GuiStyle;
 public class GuiOptionsInGame extends GuiMenu {
     public GuiOptionsInGame(GameStateGameMP state, GuiStyle style) {
         super(state, "Options", style);
-        GuiComponentSlider musicVolume = pane.addVert(16, 5,
-                p -> new GuiComponentSlider(p, 368, 30, 18, "Music",
-                        state.engine().config().volume("music")));
-        GuiComponentSlider soundVolume = pane.addVert(16, 5,
-                p -> new GuiComponentSlider(p, 368, 30, 18, "Sound",
-                        state.engine().config().volume("sound")));
+        GuiComponentSlider musicVolume = row(pane, p -> slider(p, "Music",
+                state.engine().config().volume("music")));
+        GuiComponentSlider soundVolume = row(pane, p -> slider(p, "Sound",
+                state.engine().config().volume("sound")));
         GuiComponentTextButton fullscreen;
         if (state.engine().config().isFullscreen()) {
-            fullscreen =
-                    pane.addVert(16, 5, p -> button(p, 368, "Fullscreen: ON"));
+            fullscreen = row(pane, p -> button(p, "Fullscreen: ON"));
         } else {
-            fullscreen =
-                    pane.addVert(16, 5, p -> button(p, 368, "Fullscreen: OFF"));
+            fullscreen = row(pane, p -> button(p, "Fullscreen: OFF"));
         }
 
         musicVolume.onDragLeft(event -> state.engine().config()

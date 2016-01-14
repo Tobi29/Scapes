@@ -64,23 +64,23 @@ public class InputModeTouch implements InputMode {
     @Override
     public void createInGameGUI(Gui gui, WorldClient world) {
         int size = 100, gap = 20;
-        GuiComponentGroup pad = gui.add(610, 310,
-                p -> new GuiComponentGroup(p, size * 3 + (gap << 1),
-                        (size << 1) + gap));
-        GuiComponentButton padUp = pad.add(size + gap, 0,
-                p -> new GuiComponentButton(p, size, size));
-        GuiComponentButton padDown = pad.add(size + gap, size + gap,
-                p -> new GuiComponentButton(p, size, size));
-        GuiComponentButton padLeft = pad.add(0, size + gap,
-                p -> new GuiComponentButton(p, size, size));
-        GuiComponentButton padRight = pad.add(size + gap << 1, size + gap,
-                p -> new GuiComponentButton(p, size, size));
+        GuiComponentGroup pad =
+                gui.add(610, 310, size * 3 + (gap << 1), (size << 1) + gap,
+                        GuiComponentGroup::new);
+        GuiComponentButton padUp =
+                pad.add(size + gap, 0, size, size, GuiComponentButton::new);
+        GuiComponentButton padDown = pad.add(size + gap, size + gap, size, size,
+                GuiComponentButton::new);
+        GuiComponentButton padLeft =
+                pad.add(0, size + gap, size, size, GuiComponentButton::new);
+        GuiComponentButton padRight =
+                pad.add(size + gap << 1, size + gap, size, size,
+                        GuiComponentButton::new);
         GuiComponentButton inventory =
-                gui.add(0, 0, p -> new GuiComponentButton(p, 40, 40));
+                gui.add(0, 0, 40, 40, GuiComponentButton::new);
         GuiComponentButton menu =
-                gui.add(50, 0, p -> new GuiComponentButton(p, 40, 40));
-        GuiComponentPane swipe =
-                gui.add(0, 0, p -> new GuiComponentPane(p, 960, 540));
+                gui.add(50, 0, 40, 40, GuiComponentButton::new);
+        GuiComponentPane swipe = gui.add(0, 0, -1, -1, GuiComponentPane::new);
 
         padUp.onPressLeft(event -> {
             walkUp = true;

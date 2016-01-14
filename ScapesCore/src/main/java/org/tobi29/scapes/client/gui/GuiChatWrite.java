@@ -17,12 +17,12 @@ package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.gui.GuiAlignment;
 import org.tobi29.scapes.engine.gui.GuiComponentTextField;
 import org.tobi29.scapes.engine.gui.GuiState;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.input.ControllerDefault;
 import org.tobi29.scapes.engine.input.ControllerKey;
+import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.packets.PacketChat;
 
@@ -33,20 +33,21 @@ public class GuiChatWrite extends GuiState {
 
     public GuiChatWrite(GameStateGameMP state, MobPlayerClientMain player,
             GuiStyle style) {
-        super(state, style, GuiAlignment.LEFT);
+        super(state, style);
         this.state = state;
         this.player = player;
         // Workaround for typing right after opening chat write
         state.engine().controller()
                 .ifPresent(ControllerDefault::clearTypeEvents);
-        write = add(12, 480,
-                p -> new GuiComponentTextField(p, 600, 30, 16, "", 64, false,
+        write = add(12, 480, 600, 30,
+                p -> new GuiComponentTextField(p, 16, "", 64, false,
                         true));
-        add(8, 416, p -> new GuiComponentChat(p, state.chatHistory(), 0, 0));
+        add(8, 416, -1, -1,
+                p -> new GuiComponentChat(p, state.chatHistory()));
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine) {
+    public void updateComponent(ScapesEngine engine, Vector2 size) {
         engine.controller().ifPresent(controller -> {
             if (controller.isPressed(ControllerKey.KEY_ENTER)) {
                 String text = write.text();

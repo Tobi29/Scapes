@@ -19,6 +19,7 @@ import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.GuiComponentText;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.utils.math.FastMath;
+import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityFurnaceClient;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
@@ -38,16 +39,16 @@ public class GuiFurnaceInventory extends GuiContainerInventory {
         buttonContainer(16, 120, 30, 30, 5);
         buttonContainer(56, 120, 30, 30, 6);
         buttonContainer(96, 120, 30, 30, 7);
-        temperatureText = add(220, 170, p -> new GuiComponentText(p, 24, ""));
+        temperatureText =
+                add(220, 170, -1, 24, p -> new GuiComponentText(p, ""));
         updateTemperatureText();
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine) {
-        super.updateComponent(engine);
+    public void updateComponent(ScapesEngine engine, Vector2 size) {
+        super.updateComponent(engine, size);
         updateTemperatureText();
     }
-
 
     private void updateTemperatureText() {
         String text = FastMath.floor(container.temperature()) + "°C";

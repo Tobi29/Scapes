@@ -22,11 +22,10 @@ import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 
 public class GuiComponentItemButton extends GuiComponentButton {
-    private final ItemStack item;
+    private ItemStack item;
 
-    public GuiComponentItemButton(GuiLayoutData parent, int width, int height,
-            ItemStack item) {
-        super(parent, width, height);
+    public GuiComponentItemButton(GuiLayoutData parent, ItemStack item) {
+        super(parent);
         this.item = item;
     }
 
@@ -34,10 +33,15 @@ public class GuiComponentItemButton extends GuiComponentButton {
         return item;
     }
 
+    public void setItem(ItemStack item) {
+        this.item = item;
+    }
+
     @Override
-    public void renderComponent(GL gl, Shader shader, double delta) {
-        super.renderComponent(gl, shader, delta);
-        GuiUtils.renderItem(0.0f, 0.0f, width, height, item, gl, shader,
-                gui.style().font());
+    public void renderComponent(GL gl, Shader shader, double delta,
+            double width, double height) {
+        super.renderComponent(gl, shader, delta, width, height);
+        GuiUtils.renderItem(0.0f, 0.0f, (float) width, (float) height, item, gl,
+                shader, gui.style().font());
     }
 }

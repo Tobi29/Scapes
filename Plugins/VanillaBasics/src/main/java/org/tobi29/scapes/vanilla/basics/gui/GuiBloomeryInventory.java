@@ -19,6 +19,7 @@ import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.GuiComponentText;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.utils.math.FastMath;
+import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityBloomeryClient;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
@@ -44,15 +45,16 @@ public class GuiBloomeryInventory extends GuiContainerInventory {
         buttonContainer(256, 120, 30, 30, 11);
         buttonContainer(296, 120, 30, 30, 12);
         buttonContainer(336, 120, 30, 30, 13);
-        temperatureText = add(220, 170, p -> new GuiComponentText(p, 24, ""));
-        bellowsText = add(300, 170,
-                p -> new GuiComponentText(p, 24, "No bellows attached!"));
+        temperatureText =
+                add(220, 170, -1, 24, p -> new GuiComponentText(p, ""));
+        bellowsText = add(300, 170, -1, 24,
+                p -> new GuiComponentText(p, "No bellows attached!"));
         updateTemperatureText();
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine) {
-        super.updateComponent(engine);
+    public void updateComponent(ScapesEngine engine, Vector2 size) {
+        super.updateComponent(engine, size);
         updateTemperatureText();
         bellowsText.setVisible(!container.hasBellows());
     }

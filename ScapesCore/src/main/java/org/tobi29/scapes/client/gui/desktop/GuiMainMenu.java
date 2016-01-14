@@ -18,33 +18,33 @@ package org.tobi29.scapes.client.gui.desktop;
 import org.tobi29.scapes.client.gui.GuiComponentLogo;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.GuiAlignment;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.engine.gui.GuiComponentVisiblePane;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 
 public class GuiMainMenu extends GuiDesktop {
     public GuiMainMenu(GameState state, SceneMenu scene, GuiStyle style) {
-        super(state, style, GuiAlignment.LEFT);
+        super(state, style);
         GuiComponentVisiblePane pane =
-                add(0, 0, p -> new GuiComponentVisiblePane(p, 144, 540));
-        pane.addVert(0, 10, 5, 20, p -> new GuiComponentLogo(p, 144, 80, 18));
-        GuiComponentTextButton singlePlayer =
-                pane.addVert(16, 5, p -> button(p, 120, "Singleplayer"));
-        GuiComponentTextButton multiPlayer =
-                pane.addVert(16, 5, p -> button(p, 120, "Multiplayer"));
-        GuiComponentTextButton options =
-                pane.addVert(16, 5, p -> button(p, 120, "Options"));
-        GuiComponentTextButton credits =
-                pane.addVert(16, 5, p -> button(p, 120, "Credits"));
-        GuiComponentTextButton plugins =
-                pane.addVert(16, 5, p -> button(p, 120, "Plugins"));
-        GuiComponentTextButton playlists =
-                pane.addVert(16, 5, p -> button(p, 120, "Playlists"));
-        GuiComponentTextButton screenshots =
-                pane.addVert(16, 5, p -> button(p, 120, "Screenshots"));
+                add(0, 0, 150, 540, GuiComponentVisiblePane::new);
+        pane.addVert(0, 10, 5, 20, 144, 80,
+                p -> new GuiComponentLogo(p, 80, 18));
+        GuiComponentTextButton singlePlayer = pane.addVert(16, 5, 8, 5, -1, 30,
+                p -> button(p, "Singleplayer"));
+        GuiComponentTextButton multiPlayer = pane.addVert(16, 5, 8, 5, -1, 30,
+                p -> button(p, "Multiplayer"));
+        GuiComponentTextButton options = pane.addVert(16, 5, 8, 5, -1, 30,
+                p -> button(p, "Options"));
+        GuiComponentTextButton credits = pane.addVert(16, 5, 8, 5, -1, 30,
+                p -> button(p, "Credits"));
+        GuiComponentTextButton plugins = pane.addVert(16, 5, 8, 5, -1, 30,
+                p -> button(p, "Plugins"));
+        GuiComponentTextButton playlists = pane.addVert(16, 5, 8, 5, -1, 30,
+                p -> button(p, "Playlists"));
+        GuiComponentTextButton screenshots = pane.addVert(16, 5, 8, 5, -1, 30,
+                p -> button(p, "Screenshots"));
         GuiComponentTextButton quit =
-                pane.addVert(16, 5, p -> button(p, 120, "Quit"));
+                pane.addVert(16, 5, 8, 5, -1, 30, p -> button(p, "Quit"));
 
         singlePlayer.onClickLeft(event -> {
             state.engine().guiStack().add("10-Menu",

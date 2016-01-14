@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.client.gui.desktop;
 
-import org.tobi29.scapes.client.gui.desktop.GuiMenu;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.engine.gui.GuiComponentText;
 import org.tobi29.scapes.engine.gui.GuiStyle;
@@ -24,7 +23,7 @@ public class GuiInGameMessage extends GuiMenu {
     public GuiInGameMessage(GameStateGameMP state, String title, String message,
             GuiStyle style) {
         super(state, title, style);
-        pane.addVert(16, 5, p -> new GuiComponentText(p, 18, message));
+        pane.addVert(16, 5, -1, 18, p -> new GuiComponentText(p, message));
 
         back.onClickLeft(event -> state.client().entity().closeGui());
     }

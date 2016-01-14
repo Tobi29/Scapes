@@ -1,21 +1,44 @@
 package org.tobi29.scapes.client.gui.desktop;
 
+import java8.util.function.Function;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
 
 public class GuiDesktop extends GuiState {
-    public GuiDesktop(GameState state, GuiStyle style, GuiAlignment alignment) {
-        super(state, style, alignment);
+    public GuiDesktop(GameState state, GuiStyle style) {
+        super(state, style);
     }
 
-    protected GuiComponentTextButton button(GuiLayoutData parent, int width,
+    protected GuiComponentGroupSlab row(GuiComponentPane pane) {
+        return pane.addVert(11, 0, -1, 40, GuiComponentGroupSlab::new);
+    }
+
+    protected <T extends GuiComponent> T row(GuiComponentPane pane,
+            Function<GuiLayoutData, T> component) {
+        return pane.addVert(16, 5, -1, 30, component::apply);
+    }
+
+    protected <T extends GuiComponent> T rowCenter(GuiComponentPane pane,
+            Function<GuiLayoutData, T> component) {
+        return pane.addVert(112, 5, 176, 30, component::apply);
+    }
+
+    protected GuiComponentTextButton button(GuiLayoutData parent, String text) {
+        return button(parent, 18, text);
+    }
+
+    protected GuiComponentTextButton button(GuiLayoutData parent, int textSize,
             String text) {
-        return button(parent, width, 30, 18, text);
+        return new GuiComponentTextButton(parent, textSize, text);
     }
 
-    protected GuiComponentTextButton button(GuiLayoutData parent, int width,
-            int height, int textSize, String text) {
-        return new GuiComponentTextButton(parent, width, height, textSize,
-                text);
+    protected GuiComponentSlider slider(GuiLayoutData parent, String text,
+            double value) {
+        return new GuiComponentSlider(parent, 18, text, value);
+    }
+
+    protected GuiComponentSlider slider(GuiLayoutData parent, String text,
+            double value, GuiComponentSlider.TextFilter filter) {
+        return new GuiComponentSlider(parent, 18, text, value, filter);
     }
 }

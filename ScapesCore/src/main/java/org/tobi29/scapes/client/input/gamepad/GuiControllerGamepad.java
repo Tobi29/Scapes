@@ -17,6 +17,7 @@ package org.tobi29.scapes.client.input.gamepad;
 
 import java8.util.Optional;
 import java8.util.stream.Stream;
+import org.tobi29.scapes.engine.Container;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.GuiComponent;
 import org.tobi29.scapes.engine.gui.GuiComponentEvent;
@@ -26,7 +27,6 @@ import org.tobi29.scapes.engine.input.ControllerBasic;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.input.ControllerKeyReference;
-import org.tobi29.scapes.engine.Container;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -73,6 +73,7 @@ public class GuiControllerGamepad implements GuiController {
         Container container = engine.container();
         double width = container.containerWidth();
         double height = container.containerHeight();
+        double ratio = 540.0 / height;
         if (!cursorCentered) {
             cursorCentered = true;
             cursorX = width / 2.0;
@@ -82,8 +83,8 @@ public class GuiControllerGamepad implements GuiController {
         cursorY += controller.axis(axisCursorY) * cursorSensitivity * delta;
         cursorX = FastMath.clamp(cursorX, 0.0, width);
         cursorY = FastMath.clamp(cursorY, 0.0, height);
-        double guiCursorX = cursorX / width * 960.0;
-        double guiCursorY = cursorY / height * 540.0;
+        double guiCursorX = cursorX * ratio;
+        double guiCursorY = cursorY * ratio;
         cursor.set(new Vector2d(cursorX, cursorY),
                 new Vector2d(guiCursorX, guiCursorY));
         if (draggingLeft.isPresent()) {

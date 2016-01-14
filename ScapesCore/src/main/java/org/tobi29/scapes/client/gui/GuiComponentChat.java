@@ -33,14 +33,19 @@ public class GuiComponentChat extends GuiComponent {
     private Map<String, FontRenderer.Text> cache = new ConcurrentHashMap<>(),
             swapCache = new ConcurrentHashMap<>();
 
-    public GuiComponentChat(GuiLayoutData parent, ChatHistory chatHistory,
-            int width, int height) {
-        super(parent, width, height);
+    public GuiComponentChat(GuiLayoutData parent, ChatHistory chatHistory) {
+        super(parent);
         this.chatHistory = chatHistory;
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, double delta) {
+    public boolean ignoresEvents() {
+        return true;
+    }
+
+    @Override
+    public void renderComponent(GL gl, Shader shader, double delta,
+            double width, double height) {
         MatrixStack matrixStack = gl.matrixStack();
         int yy = -16;
         Iterator<String> iterator = chatHistory.lines().iterator();

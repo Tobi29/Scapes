@@ -17,7 +17,7 @@ package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.client.gui.desktop.GuiDesktop;
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.GuiAlignment;
+import org.tobi29.scapes.engine.gui.GuiComponentGroup;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 
@@ -26,9 +26,15 @@ public class GuiLoading extends GuiDesktop {
     private final GuiComponentTextButton label;
 
     public GuiLoading(GameState state, GuiStyle style) {
-        super(state, style, GuiAlignment.CENTER);
-        progress = add(380, 280, p -> new GuiComponentLoading(p, 200, 16));
-        label = add(380, 310, p -> button(p, 200, 32, 18, "Loading..."));
+        super(state, style);
+        spacer();
+        GuiComponentGroup pane = addHori(0, 0, 200, -1, GuiComponentGroup::new);
+        spacer();
+        pane.spacer();
+        progress = pane.addVert(0, 7, -1, 16,
+                p -> new GuiComponentLoading(p, 200, 16));
+        label = pane.addVert(0, 7, -1, 32, p -> button(p, 18, "Loading..."));
+        pane.spacer();
     }
 
     public void setProgress(float value) {

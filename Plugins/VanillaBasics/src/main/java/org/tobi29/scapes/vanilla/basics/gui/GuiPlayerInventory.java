@@ -24,8 +24,8 @@ public class GuiPlayerInventory extends GuiInventory {
         super("Inventory", player, style);
         if (!player.connection().plugins().registry().getCraftingRecipes()
                 .isEmpty()) {
-            GuiComponentTextButton crafting =
-                    pane.addVert(16, 5, p -> button(p, 368, "Crafting"));
+            GuiComponentTextButton crafting = pane.addVert(16, 5, 368, 30,
+                    p -> button(p, "Crafting"));
             crafting.onClickLeft(event -> player.openGui(
                     new GuiCrafting(false, player,
                             player.game().engine().guiStyle())));

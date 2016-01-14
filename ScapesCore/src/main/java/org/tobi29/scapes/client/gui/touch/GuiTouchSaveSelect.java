@@ -57,8 +57,8 @@ public class GuiTouchSaveSelect extends GuiTouchMenuDouble {
         this.scene = scene;
         ScapesClient game = (ScapesClient) state.engine().game();
         saves = game.saves();
-        scrollPane = pane.addVert(112, 10,
-                p -> new GuiComponentScrollPane(p, 736, 320, 70)).viewport();
+        scrollPane = pane.addVert(112, 10, 736, 320,
+                p -> new GuiComponentScrollPane(p, 70)).viewport();
 
         save.onClickLeft(event -> {
             try {
@@ -88,21 +88,21 @@ public class GuiTouchSaveSelect extends GuiTouchMenuDouble {
         try {
             scrollPane.removeAll();
             saves.list().sorted().forEach(file -> scrollPane
-                    .addVert(0, 0, p -> new Element(p, file)));
+                    .addVert(0, 0, -1, 80, p -> new Element(p, file)));
         } catch (IOException e) {
             LOGGER.warn("Failed to read saves: {}", e.toString());
         }
     }
 
-    private class Element extends GuiComponentPane {
+    private class Element extends GuiComponentGroupSlab {
         public Element(GuiLayoutData parent, String name) {
-            super(parent, 736, 80);
+            super(parent);
             GuiComponentIcon icon =
-                    addHori(10, 10, p -> new GuiComponentIcon(p, 60, 60));
+                    addHori(10, 10, 60, -1, GuiComponentIcon::new);
             GuiComponentTextButton label =
-                    addHori(10, 10, p -> button(p, 436, name));
+                    addHori(10, 10, -1, -1, p -> button(p, name));
             GuiComponentTextButton delete =
-                    addHori(10, 10, p -> button(p, 160, "Delete"));
+                    addHori(10, 10, 160, -1, p -> button(p, "Delete"));
 
             label.onClickLeft(event -> {
                 scene.setSpeed(0.0f);

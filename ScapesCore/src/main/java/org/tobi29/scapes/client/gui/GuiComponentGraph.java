@@ -25,49 +25,61 @@ import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 public class GuiComponentGraph extends GuiComponent {
-    private final float r, g, b, a;
-    private int i;
-    private float[] data;
+    private final float[] r, g, b, a;
+    private final int[] i;
+    private float[][] data;
 
-    public GuiComponentGraph(GuiLayoutData parent, int width, int height,
-            float r, float g, float b, float a) {
-        super(parent, width, height);
+    public GuiComponentGraph(GuiLayoutData parent, int graphs, float[] r,
+            float[] g, float[] b, float[] a) {
+        super(parent);
+        assert graphs > 0;
+        assert r.length == graphs;
+        assert g.length == graphs;
+        assert b.length == graphs;
+        assert a.length == graphs;
+        data = new float[graphs][0];
+        i = new int[graphs];
         this.r = r;
         this.g = g;
         this.b = b;
         this.a = a;
-        data = new float[width];
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, double delta) {
-        if (data.length != width) {
-            data = new float[width];
+    public void renderComponent(GL gl, Shader shader, double delta,
+            double width, double height) {
+        int w = (int) FastMath.ceil(width);
+        if (data[0].length != w) {
+            data = new float[data.length][w];
         }
-        float[] vertex = new float[data.length * 3];
-        float[] color = new float[data.length << 2];
-        int limit = data.length - 1;
+        float[] vertex = new float[data.length * w * 3];
+        float[] color = new float[w * (data.length << 2)];
+        int limit = w - 1;
+        int[] index = new int[w * (limit << 1)];
         for (int i = 0; i < data.length; i++) {
-            int x = i + this.i;
-            if (x >= data.length) {
-                x -= data.length;
+            int offset = i * w;
+            for (int j = 0; j < w; j++) {
+                int x = j + this.i[i];
+                if (x >= w) {
+                    x -= w;
+                }
+                x = FastMath.clamp(x, 0, limit);
+                int k = (offset + j) * 3;
+                vertex[k++] = j;
+                vertex[k++] = (float) (data[i][x] * height);
+                vertex[k] = 0.0f;
+                k = offset + j << 2;
+                color[k++] = r[i];
+                color[k++] = g[i];
+                color[k++] = b[i];
+                color[k] = a[i];
             }
-            x = FastMath.clamp(x, 0, limit);
-            int j = i * 3;
-            vertex[j++] = i;
-            vertex[j++] = data[x] * height;
-            vertex[j] = 0.0f;
-            j = i << 2;
-            color[j++] = r;
-            color[j++] = g;
-            color[j++] = b;
-            color[j] = a;
-        }
-        int[] index = new int[limit << 1];
-        for (int i = 0; i < limit; i++) {
-            int j = i << 1;
-            index[j++] = i;
-            index[j] = i + 1;
+            for (int j = 0; j < limit; j++) {
+                int k = offset + j;
+                int l = k << 1;
+                index[l++] = k;
+                index[l] = k + 1;
+            }
         }
         gl.textures().unbind(gl);
         VAO vao = VAOUtility.createVCI(vertex, color, index, RenderType.LINES);
@@ -75,13 +87,13 @@ public class GuiComponentGraph extends GuiComponent {
         vao.markAsDisposed();
     }
 
-    public void addStamp(double value) {
-        float[] data = this.data;
-        if (i < data.length) {
-            data[i++] = (float) (1.0 - FastMath.pow(value, 0.25));
+    public void addStamp(double value, int graph) {
+        float[] data = this.data[graph];
+        if (i[graph] < data.length) {
+            data[i[graph]++] = (float) (1.0 - FastMath.pow(value, 0.25));
         }
-        if (i >= data.length) {
-            i = 0;
+        if (i[graph] >= data.length) {
+            i[graph] = 0;
         }
     }
 }

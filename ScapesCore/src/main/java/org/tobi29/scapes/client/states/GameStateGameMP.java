@@ -77,17 +77,18 @@ public class GameStateGameMP extends GameState {
                 .get("Scapes:image/entity/mob/Player"));
         GuiStyle style = engine.guiStyle();
         hud = new GuiHud(this, style);
-        debug = new GuiState(this, style, GuiAlignment.LEFT);
-        debugWidget = debug.add(32, 32, GuiWidgetDebugClient::new);
+        debug = new GuiState(this, style);
+        debugWidget = debug.add(32, 32, 160, 200, GuiWidgetDebugClient::new);
         debugWidget.setVisible(false);
-        connectionSentProfiler = debug.add(32, 32,
+        connectionSentProfiler = debug.add(32, 32, 360, 256,
                 p -> new GuiWidgetConnectionProfiler(p, client.profilerSent()));
         connectionSentProfiler.setVisible(false);
-        connectionReceivedProfiler = debug.add(32, 32,
+        connectionReceivedProfiler = debug.add(32, 32, 360, 256,
                 p -> new GuiWidgetConnectionProfiler(p,
                         client.profilerReceived()));
         connectionReceivedProfiler.setVisible(false);
-        performanceWidget = debug.add(32, 32, GuiWidgetPerformanceClient::new);
+        performanceWidget =
+                debug.add(32, 32, 240, 96, GuiWidgetPerformanceClient::new);
         performanceWidget.setVisible(false);
     }
 
@@ -168,8 +169,7 @@ public class GameStateGameMP extends GameState {
         });
         InputMode input = ((ScapesClient) engine.game()).inputMode();
         if (input != currentInput) {
-            Gui gui =
-                    new GuiState(this, engine.guiStyle(), GuiAlignment.STRETCH);
+            Gui gui = new GuiState(this, engine.guiStyle());
             input.createInGameGUI(gui, scene.world());
             engine.guiStack().add("04-Input", gui);
             currentInput = input;
@@ -204,11 +204,11 @@ public class GameStateGameMP extends GameState {
     }
 
     public void updateTimestamp(double delta) {
-        performanceWidget.graphUpdate.addStamp(delta);
+        performanceWidget.graph.addStamp(delta, 1);
     }
 
     public void renderTimestamp(double delta) {
-        performanceWidget.graphRender.addStamp(delta);
+        performanceWidget.graph.addStamp(delta, 0);
     }
 
     public void setHudVisible(boolean visible) {
@@ -220,48 +220,39 @@ public class GameStateGameMP extends GameState {
     }
 
     private static class GuiWidgetPerformanceClient extends GuiComponentWidget {
-        private final GuiComponentGraph graphRender, graphUpdate;
+        private final GuiComponentGraph graph;
 
         private GuiWidgetPerformanceClient(GuiLayoutData parent) {
-            super(parent, 240, 96, "Performance Graph");
-            graphRender = add(0, 0,
-                    p -> new GuiComponentGraph(p, width, height, 0.0f, 1.0f,
-                            0.0f, 1.0f));
-            graphUpdate = add(0, 0,
-                    p -> new GuiComponentGraph(p, width, height, 0.0f, 0.0f,
-                            1.0f, 1.0f));
+            super(parent, "Performance Graph");
+            graph = addVert(0, 0, -1, -1,
+                    p -> new GuiComponentGraph(p, 2, new float[]{1.0f, 0.0f},
+                            new float[]{0.0f, 0.0f}, new float[]{0.0f, 1.0f},
+                            new float[]{1.0f, 1.0f}));
         }
     }
 
     private class GuiWidgetDebugClient extends GuiComponentWidget {
         private GuiWidgetDebugClient(GuiLayoutData parent) {
-            super(parent, 160, 200, "Debug Values");
-            GuiComponentTextButton geometry = addVert(10, 10, 10, 2,
-                    p -> new GuiComponentTextButton(p, 140, 15, 12,
-                            "Geometry"));
-            GuiComponentTextButton wireframe = addVert(10, 2,
-                    p -> new GuiComponentTextButton(p, 140, 15, 12,
-                            "Wireframe"));
-            GuiComponentTextButton distance = addVert(10, 2,
-                    p -> new GuiComponentTextButton(p, 140, 15, 12,
+            super(parent, "Debug Values");
+            GuiComponentTextButton geometry = addVert(10, 10, 10, 2, 140, 15,
+                    p -> new GuiComponentTextButton(p, 12, "Geometry"));
+            GuiComponentTextButton wireframe = addVert(10, 2, 140, 15,
+                    p -> new GuiComponentTextButton(p, 12, "Wireframe"));
+            GuiComponentTextButton distance = addVert(10, 2, 140, 15,
+                    p -> new GuiComponentTextButton(p, 12,
                             "Static Render Distance"));
-            GuiComponentTextButton reloadGeometry = addVert(10, 2,
-                    p -> new GuiComponentTextButton(p, 140, 15, 12,
-                            "Reload Geometry"));
-            GuiComponentTextButton performance = addVert(10, 2,
-                    p -> new GuiComponentTextButton(p, 140, 15, 12,
-                            "Performance"));
-            GuiComponentTextButton connSent = addVert(10, 2,
-                    p -> new GuiComponentTextButton(p, 140, 15, 12,
-                            "Conn. Sent"));
-            GuiComponentTextButton connSentReset = addVert(10, 2,
-                    p -> new GuiComponentTextButton(p, 140, 15, 12,
-                            "Conn. Sent Reset"));
-            GuiComponentTextButton connReceived = addVert(10, 2,
-                    p -> new GuiComponentTextButton(p, 140, 15, 12,
-                            "Conn. Received"));
-            GuiComponentTextButton connReceivedReset = addVert(10, 2,
-                    p -> new GuiComponentTextButton(p, 140, 15, 12,
+            GuiComponentTextButton reloadGeometry = addVert(10, 2, 140, 15,
+                    p -> new GuiComponentTextButton(p, 12, "Reload Geometry"));
+            GuiComponentTextButton performance = addVert(10, 2, 140, 15,
+                    p -> new GuiComponentTextButton(p, 12, "Performance"));
+            GuiComponentTextButton connSent = addVert(10, 2, 140, 15,
+                    p -> new GuiComponentTextButton(p, 12, "Conn. Sent"));
+            GuiComponentTextButton connSentReset = addVert(10, 2, 140, 15,
+                    p -> new GuiComponentTextButton(p, 12, "Conn. Sent Reset"));
+            GuiComponentTextButton connReceived = addVert(10, 2, 140, 15,
+                    p -> new GuiComponentTextButton(p, 12, "Conn. Received"));
+            GuiComponentTextButton connReceivedReset = addVert(10, 2, 140, 15,
+                    p -> new GuiComponentTextButton(p, 12,
                             "Conn. Received Reset"));
 
             geometry.onClickLeft(event -> {

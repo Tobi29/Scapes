@@ -49,8 +49,8 @@ public class GuiAnvilInventory extends GuiContainerInventory {
 
     private void addAction(int x, int y, Material material, int i) {
         ItemStack icon = material.example(1);
-        GuiComponentItemButton item = pane.add(x, y,
-                p -> new GuiComponentItemButton(p, 30, 30, icon));
+        GuiComponentItemButton item = pane.add(x, y, 30, 30,
+                p -> new GuiComponentItemButton(p, icon));
         item.onClickLeft(event -> player.connection()
                 .send(new PacketAnvil(container, i)));
     }

@@ -29,11 +29,11 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 public class GuiComponentBar extends GuiComponent {
     private final Supplier supplier;
     private final VAO vao1, vao2;
-    private float value;
+    private double value;
 
     public GuiComponentBar(GuiLayoutData parent, int width, int height, float r,
             float g, float b, float a, Supplier supplier) {
-        super(parent, width, height);
+        super(parent);
         this.supplier = supplier;
         float r2 = r * 0.5f;
         float g2 = g * 0.5f;
@@ -61,18 +61,19 @@ public class GuiComponentBar extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, double delta) {
+    public void renderComponent(GL gl, Shader shader, double delta,
+            double width, double height) {
         double factor = FastMath.min(1.0, delta);
         value += (FastMath.clamp(supplier.get(), 0.0, 1.0) - value) * factor;
         gl.textures().unbind(gl);
         MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
-        matrix.scale(value, 1.0f, 1.0f);
+        matrix.scale((float) value, 1.0f, 1.0f);
         vao1.render(gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
-        matrix.translate(value * width, 0.0f, 0.0f);
-        matrix.scale(1.0f - value, 1.0f, 1.0f);
+        matrix.translate((float) (value * width), 0.0f, 0.0f);
+        matrix.scale((float) (1.0 - value), 1.0f, 1.0f);
         vao2.render(gl, shader);
         matrixStack.pop();
     }
