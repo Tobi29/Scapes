@@ -31,6 +31,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathResource;
 import java.io.IOException;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Plugins {
@@ -74,13 +75,18 @@ public class Plugins {
                 files.add(new PluginFile(file));
             }
         });
+        files.addAll(embedded());
+        return files;
+    }
+
+    public static List<PluginFile> embedded() throws IOException {
         ClasspathResource embedded =
                 new ClasspathResource(Plugins.class.getClassLoader(),
                         "Plugin.json");
         if (embedded.exists()) {
-            files.add(new PluginFile(embedded));
+            return Collections.singletonList(new PluginFile(embedded));
         }
-        return files;
+        return Collections.emptyList();
     }
 
     private void load(Plugin plugin) throws IOException {

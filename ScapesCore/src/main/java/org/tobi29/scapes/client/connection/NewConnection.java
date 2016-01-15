@@ -11,6 +11,8 @@ import org.tobi29.scapes.engine.server.ConnectionCloseException;
 import org.tobi29.scapes.engine.server.PacketBundleChannel;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.MutableSingle;
+import org.tobi29.scapes.engine.utils.Streams;
+import org.tobi29.scapes.engine.utils.VersionUtil;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.graphics.PNG;
 import org.tobi29.scapes.engine.utils.io.*;
@@ -128,16 +130,36 @@ public class NewConnection {
         }
         int length = input.getInt();
         for (int i = 0; i < length; i++) {
-            byte[] checksum = new byte[input.getInt()];
-            input.get(checksum);
-            FileCache.Location location =
-                    new FileCache.Location("plugins", checksum);
-            Optional<FilePath> file = cache.retrieve(location);
-            if (file.isPresent()) {
-                plugins.add(new PluginFile(file.get()));
+            String name = input.getString();
+            VersionUtil.Version version, scapesVersion;
+            try {
+                version = VersionUtil.get(input.getString());
+                scapesVersion = VersionUtil.get(input.getString());
+            } catch (VersionUtil.VersionException e) {
+                throw new IOException(e);
+            }
+            byte[] checksum = input.getByteArray();
+            System.err.println(name);
+            Streams.of(Plugins.embedded()).forEach(System.out::println);
+            Optional<PluginFile> embedded = Streams.of(Plugins.embedded())
+                    .filter(plugin -> plugin.name().equals(name))
+                    .filter(plugin -> VersionUtil
+                            .compare(plugin.version(), version)
+                            .in(VersionUtil.Comparison.LOWER_BUILD,
+                                    VersionUtil.Comparison.HIGHER_MINOR))
+                    .findAny();
+            if (embedded.isPresent()) {
+                plugins.add(embedded.get());
             } else {
-                pluginRequests.add(i);
-                plugins.add(null);
+                FileCache.Location location =
+                        new FileCache.Location("plugins", checksum);
+                Optional<FilePath> file = cache.retrieve(location);
+                if (file.isPresent()) {
+                    plugins.add(new PluginFile(file.get()));
+                } else {
+                    pluginRequests.add(i);
+                    plugins.add(null);
+                }
             }
         }
         WritableByteStream output = channel.getOutputStream();

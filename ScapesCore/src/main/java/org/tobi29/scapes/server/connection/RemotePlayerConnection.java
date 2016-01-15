@@ -147,7 +147,7 @@ public class RemotePlayerConnection extends PlayerConnection {
         output.putInt(plugins.fileCount());
         Iterator<PluginFile> iterator = plugins.files().iterator();
         while (iterator.hasNext()) {
-            sendPluginChecksum(iterator.next(), output);
+            sendPluginMetaData(iterator.next(), output);
         }
         channel.queueBundle();
         state = State.LOGIN_STEP_3;
@@ -235,11 +235,13 @@ public class RemotePlayerConnection extends PlayerConnection {
         pingTimeout = ping + 10000;
     }
 
-    private void sendPluginChecksum(PluginFile plugin,
+    private void sendPluginMetaData(PluginFile plugin,
             WritableByteStream output) throws IOException {
         byte[] checksum = plugin.checksum().array();
-        output.putInt(checksum.length);
-        output.put(checksum);
+        output.putString(plugin.name());
+        output.putString(plugin.version().toString());
+        output.putString(plugin.scapesVersion().toString());
+        output.putByteArray(checksum);
     }
 
     private void sendPlugin(FilePath path, WritableByteStream output)
