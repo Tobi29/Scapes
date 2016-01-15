@@ -15,16 +15,17 @@
  */
 package org.tobi29.scapes.vanilla.basics.gui;
 
-import org.tobi29.scapes.block.CraftingRecipe;
-import org.tobi29.scapes.block.CraftingRecipeType;
 import org.tobi29.scapes.client.gui.GuiComponentItemButton;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
-import org.tobi29.scapes.packets.PacketCrafting;
+import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
+import org.tobi29.scapes.vanilla.basics.material.CraftingRecipe;
+import org.tobi29.scapes.vanilla.basics.material.CraftingRecipeType;
+import org.tobi29.scapes.vanilla.basics.packet.PacketCrafting;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,8 +54,9 @@ public class GuiCrafting extends GuiInventory {
     private void updateTypes() {
         scrollPaneTypes.removeAll();
         List<CraftingRecipeType> recipeTypes;
-        recipeTypes =
-                player.connection().plugins().registry().getCraftingRecipes();
+        VanillaBasics plugin = (VanillaBasics) player.connection().plugins()
+                .plugin("VanillaBasics");
+        recipeTypes = plugin.getCraftingRecipes();
         int id = 0;
         List<Pair<CraftingRecipeType, Integer>> tableOnly = new ArrayList<>();
         for (CraftingRecipeType recipeType : recipeTypes) {
@@ -101,9 +103,9 @@ public class GuiCrafting extends GuiInventory {
     private void updateRecipes() {
         List<Element> elements = new ArrayList<>();
         scrollPaneRecipes.removeAll();
-        CraftingRecipeType recipeType =
-                player.connection().plugins().registry().getCraftingRecipes()
-                        .get(type);
+        VanillaBasics plugin = (VanillaBasics) player.connection().plugins()
+                .plugin("VanillaBasics");
+        CraftingRecipeType recipeType = plugin.getCraftingRecipes().get(type);
         int id = 0;
         for (CraftingRecipe recipe : recipeType.recipes()) {
             int i = id++;

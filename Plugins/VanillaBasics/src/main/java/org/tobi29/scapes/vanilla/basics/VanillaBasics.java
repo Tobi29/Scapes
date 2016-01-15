@@ -50,6 +50,7 @@ import java.util.concurrent.ConcurrentMap;
 
 public class VanillaBasics implements WorldType {
     public final Config c = new Config();
+    private final List<CraftingRecipeType> craftingRecipes = new ArrayList<>();
     private final List<ResearchRecipe> researchRecipes = new ArrayList<>();
     private final ConcurrentMap<String, MetalType> metalTypes =
             new ConcurrentHashMap<>();
@@ -72,35 +73,35 @@ public class VanillaBasics implements WorldType {
                 biome -> biomeDecorators.put(biome, new ConcurrentHashMap<>()));
     }
 
-    public void addResearchRecipe(ResearchRecipe recipe) {
+    private void addResearchRecipe(ResearchRecipe recipe) {
         if (locked) {
             throw new IllegalStateException("Initializing already ended");
         }
         researchRecipes.add(recipe);
     }
 
-    public void addMetalType(MetalType metal) {
+    private void addMetalType(MetalType metal) {
         if (locked) {
             throw new IllegalStateException("Initializing already ended");
         }
         metalTypes.put(metal.id(), metal);
     }
 
-    public void addAlloyType(AlloyType alloy) {
+    private void addAlloyType(AlloyType alloy) {
         if (locked) {
             throw new IllegalStateException("Initializing already ended");
         }
         alloyTypes.put(alloy.id(), alloy);
     }
 
-    public void addOreType(OreType ore) {
+    private void addOreType(OreType ore) {
         if (locked) {
             throw new IllegalStateException("Initializing already ended");
         }
         oreTypes.add(ore);
     }
 
-    public BiomeDecorator addBiomeDecorator(BiomeGenerator.Biome biome,
+    private BiomeDecorator addBiomeDecorator(BiomeGenerator.Biome biome,
             String name, int weight) {
         if (locked) {
             throw new IllegalStateException("Initializing already ended");
@@ -115,42 +116,43 @@ public class VanillaBasics implements WorldType {
         return biomeDecorator;
     }
 
-    public Stream<ResearchRecipe> getResearchRecipes() {
+    public void registerCraftingRecipe(CraftingRecipeType recipe) {
+        craftingRecipes.add(recipe);
+    }
+
+    public List<CraftingRecipeType> getCraftingRecipes() {
+        return craftingRecipes;
+    }
+
+    public Stream<ResearchRecipe> researchRecipes() {
         if (!locked) {
             throw new IllegalStateException("Initializing still running");
         }
         return Streams.of(researchRecipes);
     }
 
-    public MetalType getMetalType(String id) {
+    public MetalType metalType(String id) {
         if (!locked) {
             throw new IllegalStateException("Initializing still running");
         }
         return Maps.getOrDefaultConcurrent(metalTypes, id, crapMetal);
     }
 
-    public AlloyType getAlloyType(String id) {
+    public AlloyType alloyType(String id) {
         if (!locked) {
             throw new IllegalStateException("Initializing still running");
         }
         return Maps.getOrDefaultConcurrent(alloyTypes, id, crapAlloy);
     }
 
-    public Stream<MetalType> getMetalTypes() {
-        if (!locked) {
-            throw new IllegalStateException("Initializing still running");
-        }
-        return Streams.of(metalTypes.values());
-    }
-
-    public Stream<AlloyType> getAlloyTypes() {
+    public Stream<AlloyType> alloyTypes() {
         if (!locked) {
             throw new IllegalStateException("Initializing still running");
         }
         return Streams.of(alloyTypes.values());
     }
 
-    public Stream<OreType> getOreTypes() {
+    public Stream<OreType> oreTypes() {
         if (!locked) {
             throw new IllegalStateException("Initializing still running");
         }
@@ -339,9 +341,6 @@ public class VanillaBasics implements WorldType {
                 Consumer<CraftingRecipeCreator> craftingRecipe) {
             CraftingRecipeCreator creator = new CraftingRecipeCreator();
             craftingRecipe.accept(creator);
-            GameRegistry.Registry<StoneType> stoneRegistry =
-                    materials.registry.<StoneType>get("VanillaBasics",
-                            "StoneType");
             recipeType.recipes().add(new CraftingRecipe(creator.ingredients,
                     creator.requirements, creator.result));
         }

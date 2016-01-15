@@ -16,6 +16,8 @@
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import java8.util.Optional;
+import java8.util.function.Consumer;
+import java8.util.function.Function;
 import java8.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,6 +187,19 @@ public class TerrainInfiniteServer extends TerrainInfinite
         }
         return addChunk(x, y);
     }
+    public void chunkS(int x, int y,
+            Consumer<TerrainInfiniteChunkServer> consumer) {
+        chunk(x, y).ifPresent(consumer::accept);
+    }
+
+    public <R> Optional<R> chunkReturnS(int x, int y,
+            Function<TerrainInfiniteChunkServer, R> consumer) {
+        Optional<TerrainInfiniteChunkServer> chunk = chunk(x, y);
+        if (chunk.isPresent()) {
+            return Optional.of(consumer.apply(chunk.get()));
+        }
+        return Optional.empty();
+    }
 
     public Optional<TerrainInfiniteChunkServer> addChunk(int x, int y) {
         return addChunks(Collections.singletonList(new Vector2i(x, y))).get(0);
@@ -284,11 +299,8 @@ public class TerrainInfiniteServer extends TerrainInfinite
 
     @Override
     public void addDelayedUpdate(Update update) {
-        Optional<TerrainInfiniteChunkServer> chunk =
-                chunk(update.x() >> 4, update.y() >> 4);
-        if (chunk.isPresent()) {
-            chunk.get().addDelayedUpdate(update);
-        }
+        chunkS(update.x() >> 4, update.y() >> 4,
+                chunk -> chunk.addDelayedUpdate(update));
     }
 
     @Override
@@ -297,9 +309,8 @@ public class TerrainInfiniteServer extends TerrainInfinite
         if (z < 0 || z >= zSize) {
             return false;
         }
-        Optional<TerrainInfiniteChunkServer> chunk = chunk(x >> 4, y >> 4);
-        return chunk.isPresent() &&
-                chunk.get().hasDelayedUpdate(x, y, z, clazz);
+        return chunkReturnS(x >> 4, y >> 4,
+                chunk -> chunk.hasDelayedUpdate(x, y, z, clazz)).orElse(false);
     }
 
     @Override
@@ -343,12 +354,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
         if (z < 0 || z >= zSize) {
             return;
         }
-        Optional<TerrainInfiniteChunkServer> chunk = chunk(x >> 4, y >> 4);
-        if (!chunk.isPresent()) {
-            return;
-        }
-        TerrainInfiniteChunk chunk2 = chunk.get();
-        chunk2.blockTypeG(x, y, z, type);
+        chunk(x >> 4, y >> 4, chunk -> chunk.blockTypeG(x, y, z, type));
     }
 
     @Override
@@ -356,12 +362,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
         if (z < 0 || z >= zSize) {
             return;
         }
-        Optional<TerrainInfiniteChunkServer> chunk = chunk(x >> 4, y >> 4);
-        if (!chunk.isPresent()) {
-            return;
-        }
-        TerrainInfiniteChunk chunk2 = chunk.get();
-        chunk2.dataG(x, y, z, data);
+        chunk(x >> 4, y >> 4, chunk -> chunk.dataG(x, y, z, data));
     }
 
     @Override
@@ -369,12 +370,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
         if (z < 0 || z >= zSize) {
             return;
         }
-        Optional<TerrainInfiniteChunkServer> chunk = chunk(x >> 4, y >> 4);
-        if (!chunk.isPresent()) {
-            return;
-        }
-        TerrainInfiniteChunk chunk2 = chunk.get();
-        chunk2.typeDataG(x, y, z, block, data);
+        chunk(x >> 4, y >> 4, chunk -> chunk.typeDataG(x, y, z, block, data));
     }
 
     public void updateAdjacent(int x, int y) {

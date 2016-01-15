@@ -89,7 +89,7 @@ public class PacketResearch extends Packet implements PacketServer {
                                         Integer.toHexString(material.itemID()),
                                         true);
                     }
-                    plugin.getResearchRecipes().forEach(recipe -> {
+                    plugin.researchRecipes().forEach(recipe -> {
                         if (!player.mob().metaData("Vanilla")
                                 .getStructure("Research")
                                 .getStructure("Finished")

@@ -16,6 +16,8 @@
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import java8.util.Optional;
+import java8.util.function.Consumer;
+import java8.util.function.Function;
 import java8.util.stream.Collectors;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
@@ -156,7 +158,7 @@ public class TerrainInfiniteClient extends TerrainInfinite
         int x = packet.x();
         int y = packet.y();
         int z = packet.z();
-        chunk(x >> 4, y >> 4).ifPresent(chunk -> chunk.typeDataG(x, y, z,
+        chunk(x >> 4, y >> 4, chunk -> chunk.typeDataG(x, y, z,
                 world.plugins().registry().block(packet.id())
                         .orElse(world.air()), packet.data()));
     }
@@ -182,6 +184,20 @@ public class TerrainInfiniteClient extends TerrainInfinite
     @Override
     public Collection<TerrainInfiniteChunkClient> loadedChunks() {
         return chunkManager.iterator();
+    }
+
+    public void chunkC(int x, int y,
+            Consumer<TerrainInfiniteChunkClient> consumer) {
+        chunk(x, y).ifPresent(consumer::accept);
+    }
+
+    public <R> Optional<R> chunkReturnC(int x, int y,
+            Function<TerrainInfiniteChunkClient, R> consumer) {
+        Optional<TerrainInfiniteChunkClient> chunk = chunk(x, y);
+        if (chunk.isPresent()) {
+            return Optional.of(consumer.apply(chunk.get()));
+        }
+        return Optional.empty();
     }
 
     public Optional<TerrainInfiniteChunkClient> addChunk(int x, int y) {

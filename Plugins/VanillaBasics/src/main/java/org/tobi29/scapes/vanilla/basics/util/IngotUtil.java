@@ -23,7 +23,7 @@ import org.tobi29.scapes.vanilla.basics.material.item.ItemMetal;
 public class IngotUtil {
     public static void createIngot(VanillaBasics plugin, ItemStack item,
             String metalType, float temperature) {
-        createIngot(item, plugin.getMetalType(metalType), temperature);
+        createIngot(item, plugin.metalType(metalType), temperature);
     }
 
     public static void createIngot(ItemStack item, MetalType metalType,

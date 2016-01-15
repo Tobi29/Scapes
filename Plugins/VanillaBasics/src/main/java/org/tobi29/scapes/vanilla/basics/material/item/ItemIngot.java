@@ -45,7 +45,7 @@ public class ItemIngot extends VanillaItem implements ItemMetal {
     public ItemStack example(int data) {
         ItemStack item = super.example(data);
         MetalUtil.Alloy alloy = new MetalUtil.Alloy();
-        alloy.add(plugin.getMetalType("Iron"), 1.0);
+        alloy.add(plugin.metalType("Iron"), 1.0);
         setAlloy(item, alloy);
         return item;
     }

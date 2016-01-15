@@ -206,7 +206,13 @@ public abstract class TerrainInfiniteChunk {
         return terrain;
     }
 
-    public int highestBlockZAt(int x, int y) {
+    public int highestBlockZAtG(int x, int y) {
+        x -= posBlock.intX();
+        y -= posBlock.intY();
+        return highestBlockZAtL(x, y);
+    }
+
+    public int highestBlockZAtL(int x, int y) {
         if (x >= 0 && x < 16 && y >= 0 && y < 16) {
             return heightMap[y << 4 | x] + 1;
         }
@@ -215,7 +221,13 @@ public abstract class TerrainInfiniteChunk {
                 ' ' + pos.intY());
     }
 
-    public int highestTerrainBlockZAt(int x, int y) {
+    public int highestTerrainBlockZAtG(int x, int y) {
+        x -= posBlock.intX();
+        y -= posBlock.intY();
+        return highestTerrainBlockZAtL(x, y);
+    }
+
+    public int highestTerrainBlockZAtL(int x, int y) {
         if (x >= 0 && x < 16 && y >= 0 && y < 16) {
             for (int z = heightMap[y << 4 | x]; z >= 0; z--) {
                 int id = bID.getData(x, y, z, 0);

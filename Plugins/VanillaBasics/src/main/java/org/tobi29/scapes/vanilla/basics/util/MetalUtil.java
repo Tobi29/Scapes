@@ -18,7 +18,7 @@ public class MetalUtil {
         Alloy alloy = new Alloy();
         Streams.of(tagStructure.getTagEntrySet())
                 .filter(entry -> entry.getValue() instanceof Number).forEach(
-                entry -> alloy.metals.put(plugin.getMetalType(entry.getKey()),
+                entry -> alloy.metals.put(plugin.metalType(entry.getKey()),
                         (double) entry.getValue()));
         return alloy;
     }
@@ -80,13 +80,13 @@ public class MetalUtil {
         }
 
         public AlloyType type(VanillaBasics plugin) {
-            AlloyType bestAlloyType = plugin.getAlloyType("");
+            AlloyType bestAlloyType = plugin.alloyType("");
             if (metals.isEmpty()) {
                 return bestAlloyType;
             }
             double amount = amount();
             double bestOffset = Double.POSITIVE_INFINITY;
-            Iterator<AlloyType> iterator = plugin.getAlloyTypes().iterator();
+            Iterator<AlloyType> iterator = plugin.alloyTypes().iterator();
             while (iterator.hasNext()) {
                 AlloyType alloyType = iterator.next();
                 double offset = 0.0;

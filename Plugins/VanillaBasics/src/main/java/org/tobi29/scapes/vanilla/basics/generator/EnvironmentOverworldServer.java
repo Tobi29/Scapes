@@ -491,13 +491,13 @@ public class EnvironmentOverworldServer
                         weather > 0.7f) {
                     world.send(new PacketLightning(chunk.blockX() + x,
                             chunk.blockY() + y,
-                            chunk.highestTerrainBlockZAt(x, y)));
+                            chunk.highestTerrainBlockZAtL(x, y)));
                 } else if (random.nextInt((int) (513 - weather * 512)) == 0 &&
                         random.nextInt(10000) == 0 &&
                         weather > 0.85f) {
                     EntityServer entity = new EntityTornadoServer(world,
                             new Vector3d(chunk.blockX() + x, chunk.blockY() + y,
-                                    chunk.highestTerrainBlockZAt(x, y)));
+                                    chunk.highestTerrainBlockZAtL(x, y)));
                     entity.onSpawn();
                     world.addEntity(entity);
                 }

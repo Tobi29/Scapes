@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.block;
 
 import java8.util.Optional;
@@ -31,6 +30,13 @@ public class Inventory {
         items = new ItemStack[size];
         for (int i = 0; i < items.length; i++) {
             items[i] = new ItemStack(registry);
+        }
+    }
+
+    public Inventory(Inventory inventory) {
+        this(inventory.registry, inventory.items.length);
+        for (int i = 0; i < items.length; i++) {
+            items[i] = new ItemStack(inventory.items[i]);
         }
     }
 

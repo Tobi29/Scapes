@@ -169,10 +169,8 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     public void blockChange(int x, int y, int z) {
         int xx = x >> 4;
         int yy = y >> 4;
-        Optional<TerrainInfiniteChunkClient> chunk = terrain.chunk(xx, yy);
-        if (chunk.isPresent()) {
-            TerrainInfiniteRendererChunk rendererChunk =
-                    chunk.get().rendererChunk();
+        terrain.chunkC(xx, yy, chunk -> {
+            TerrainInfiniteRendererChunk rendererChunk = chunk.rendererChunk();
             int zz = z >> 4;
             int xxx = x - (xx << 4);
             int yyy = y - (yy << 4);
@@ -213,7 +211,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                     setDirty(xx, yy + 1, zz - 1);
                 }
             }
-        }
+        });
     }
 
     @Override
@@ -354,8 +352,8 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     }
 
     private void setDirty(int x, int y, int z) {
-        terrain.chunk(x, y).map(TerrainInfiniteChunkClient::rendererChunk)
-                .ifPresent(chunk -> chunk.setGeometryDirty(z));
+        terrain.chunkC(x, y,
+                chunk -> chunk.rendererChunk().setGeometryDirty(z));
     }
 
     private static class VisibleUpdate {

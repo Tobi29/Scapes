@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.block;
+package org.tobi29.scapes.vanilla.basics.material;
 
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.server.MobPlayerServer;

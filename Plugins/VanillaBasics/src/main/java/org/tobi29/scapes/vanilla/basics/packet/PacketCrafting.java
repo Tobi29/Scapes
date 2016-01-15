@@ -13,17 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.tobi29.scapes.vanilla.basics.packet;
 
-package org.tobi29.scapes.packets;
-
-import org.tobi29.scapes.block.CraftingRecipe;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
+import org.tobi29.scapes.packets.Packet;
+import org.tobi29.scapes.packets.PacketServer;
+import org.tobi29.scapes.packets.PacketUpdateInventory;
 import org.tobi29.scapes.server.connection.PlayerConnection;
+import org.tobi29.scapes.vanilla.basics.VanillaBasics;
+import org.tobi29.scapes.vanilla.basics.material.CraftingRecipe;
 
 import java.io.IOException;
 
@@ -58,10 +61,11 @@ public class PacketCrafting extends Packet implements PacketServer {
             return;
         }
         // TODO: Check if table nearby
+        VanillaBasics plugin =
+                (VanillaBasics) world.plugins().plugin("VanillaBasics");
         Inventory inventory = player.mob().inventory("Container");
         CraftingRecipe recipe =
-                world.plugins().registry().getCraftingRecipes().get(type)
-                        .recipes().get(id);
+                plugin.getCraftingRecipes().get(type).recipes().get(id);
         ItemStack result = recipe.result();
         if (inventory.canAdd(result) >= result.amount()) {
             recipe.takes(inventory).ifPresent(takes -> {

@@ -16,6 +16,8 @@
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import java8.util.Optional;
+import java8.util.function.Consumer;
+import java8.util.function.Function;
 import org.tobi29.scapes.block.AABBElement;
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.chunk.lighting.LightingEngine;
@@ -66,16 +68,25 @@ public abstract class TerrainInfinite implements Terrain {
         return chunkManager.get(x, y);
     }
 
+    public void chunk(int x, int y, Consumer<TerrainInfiniteChunk> consumer) {
+        chunk(x, y).ifPresent(consumer::accept);
+    }
+
+    public <R> Optional<R> chunkReturn(int x, int y,
+            Function<TerrainInfiniteChunk, R> consumer) {
+        Optional<? extends TerrainInfiniteChunk> chunk = chunk(x, y);
+        if (chunk.isPresent()) {
+            return Optional.of(consumer.apply(chunk.get()));
+        }
+        return Optional.empty();
+    }
+
     @Override
     public void sunLight(int x, int y, int z, int light) {
         if (z < 0 || z >= zSize) {
             return;
         }
-        Optional<? extends TerrainInfiniteChunk> chunk = chunk(x >> 4, y >> 4);
-        if (chunk.isPresent()) {
-            TerrainInfiniteChunk chunk2 = chunk.get();
-            chunk2.sunLightG(x, y, z, light);
-        }
+        chunk(x >> 4, y >> 4, chunk -> chunk.sunLightG(x, y, z, light));
     }
 
     @Override
@@ -83,11 +94,7 @@ public abstract class TerrainInfinite implements Terrain {
         if (z < 0 || z >= zSize) {
             return;
         }
-        Optional<? extends TerrainInfiniteChunk> chunk = chunk(x >> 4, y >> 4);
-        if (chunk.isPresent()) {
-            TerrainInfiniteChunk chunk2 = chunk.get();
-            chunk2.blockLightG(x, y, z, light);
-        }
+        chunk(x >> 4, y >> 4, chunk -> chunk.blockLightG(x, y, z, light));
     }
 
     @Override
@@ -95,12 +102,8 @@ public abstract class TerrainInfinite implements Terrain {
         if (z < 0 || z >= zSize) {
             return voidBlock;
         }
-        Optional<? extends TerrainInfiniteChunk> chunk = chunk(x >> 4, y >> 4);
-        if (chunk.isPresent()) {
-            TerrainInfiniteChunk chunk2 = chunk.get();
-            return chunk2.typeG(x, y, z);
-        }
-        return voidBlock;
+        return chunkReturn(x >> 4, y >> 4, chunk -> chunk.typeG(x, y, z))
+                .orElse(voidBlock);
     }
 
     @Override
@@ -108,12 +111,8 @@ public abstract class TerrainInfinite implements Terrain {
         if (z < 0 || z >= zSize) {
             return 0;
         }
-        Optional<? extends TerrainInfiniteChunk> chunk = chunk(x >> 4, y >> 4);
-        if (chunk.isPresent()) {
-            TerrainInfiniteChunk chunk2 = chunk.get();
-            return chunk2.dataG(x, y, z);
-        }
-        return 0;
+        return chunkReturn(x >> 4, y >> 4, chunk -> chunk.dataG(x, y, z))
+                .orElse(0);
     }
 
     @Override
@@ -121,12 +120,8 @@ public abstract class TerrainInfinite implements Terrain {
         if (z < 0 || z >= zSize) {
             return 0;
         }
-        Optional<? extends TerrainInfiniteChunk> chunk = chunk(x >> 4, y >> 4);
-        if (chunk.isPresent()) {
-            TerrainInfiniteChunk chunk2 = chunk.get();
-            return chunk2.lightG(x, y, z);
-        }
-        return (byte) 0;
+        return chunkReturn(x >> 4, y >> 4, chunk -> chunk.lightG(x, y, z))
+                .orElse(0);
     }
 
     @Override
@@ -134,12 +129,8 @@ public abstract class TerrainInfinite implements Terrain {
         if (z < 0 || z >= zSize) {
             return 0;
         }
-        Optional<? extends TerrainInfiniteChunk> chunk = chunk(x >> 4, y >> 4);
-        if (chunk.isPresent()) {
-            TerrainInfiniteChunk chunk2 = chunk.get();
-            return chunk2.sunLightG(x, y, z);
-        }
-        return (byte) 0;
+        return chunkReturn(x >> 4, y >> 4, chunk -> chunk.sunLightG(x, y, z))
+                .orElse(0);
     }
 
     @Override
@@ -147,34 +138,20 @@ public abstract class TerrainInfinite implements Terrain {
         if (z < 0 || z >= zSize) {
             return 0;
         }
-        Optional<? extends TerrainInfiniteChunk> chunk = chunk(x >> 4, y >> 4);
-        if (chunk.isPresent()) {
-            TerrainInfiniteChunk chunk2 = chunk.get();
-            return chunk2.blockLightG(x, y, z);
-        }
-        return (byte) 0;
+        return chunkReturn(x >> 4, y >> 4, chunk -> chunk.blockLightG(x, y, z))
+                .orElse(0);
     }
 
     @Override
     public int highestBlockZAt(int x, int y) {
-        Optional<? extends TerrainInfiniteChunk> chunk = chunk(x >> 4, y >> 4);
-        if (chunk.isPresent()) {
-            TerrainInfiniteChunk chunk2 = chunk.get();
-            return chunk2
-                    .highestBlockZAt(x - chunk2.blockX(), y - chunk2.blockY());
-        }
-        return 1;
+        return chunkReturn(x >> 4, y >> 4,
+                chunk -> chunk.highestBlockZAtG(x, y)).orElse(1);
     }
 
     @Override
     public int highestTerrainBlockZAt(int x, int y) {
-        Optional<? extends TerrainInfiniteChunk> chunk = chunk(x >> 4, y >> 4);
-        if (chunk.isPresent()) {
-            TerrainInfiniteChunk chunk2 = chunk.get();
-            return chunk2.highestTerrainBlockZAt(x - chunk2.blockX(),
-                    y - chunk2.blockY());
-        }
-        return 1;
+        return chunkReturn(x >> 4, y >> 4,
+                chunk -> chunk.highestTerrainBlockZAtG(x, y)).orElse(1);
     }
 
     @Override
@@ -231,14 +208,11 @@ public abstract class TerrainInfinite implements Terrain {
                 for (int zz = -range; zz <= range; zz++) {
                     int zzz = z + zz;
                     if (zzz >= 0 && zzz < zSize) {
-                        Optional<? extends TerrainInfiniteChunk> chunk =
-                                chunk(xxx >> 4, yyy >> 4);
-                        if (chunk.isPresent()) {
-                            TerrainInfiniteChunk chunk2 = chunk.get();
-                            chunk2.typeG(xxx, yyy, zzz).addPointerCollision(
-                                    chunk2.dataG(xxx, yyy, zzz), pointerPanes,
-                                    xxx, yyy, zzz);
-                        }
+                        chunk(xxx >> 4, yyy >> 4,
+                                chunk -> chunk.typeG(xxx, yyy, zzz)
+                                        .addPointerCollision(
+                                                chunk.dataG(xxx, yyy, zzz),
+                                                pointerPanes, xxx, yyy, zzz));
                     }
                 }
             }

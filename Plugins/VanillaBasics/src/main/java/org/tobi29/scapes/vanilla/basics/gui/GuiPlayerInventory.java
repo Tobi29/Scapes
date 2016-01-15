@@ -17,15 +17,17 @@ package org.tobi29.scapes.vanilla.basics.gui;
 
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.engine.gui.GuiStyle;
+import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
 public class GuiPlayerInventory extends GuiInventory {
     public GuiPlayerInventory(MobPlayerClientMainVB player, GuiStyle style) {
         super("Inventory", player, style);
-        if (!player.connection().plugins().registry().getCraftingRecipes()
-                .isEmpty()) {
-            GuiComponentTextButton crafting = pane.addVert(16, 5, 368, 30,
-                    p -> button(p, "Crafting"));
+        VanillaBasics plugin = (VanillaBasics) player.connection().plugins()
+                .plugin("VanillaBasics");
+        if (!plugin.getCraftingRecipes().isEmpty()) {
+            GuiComponentTextButton crafting =
+                    pane.addVert(16, 5, 368, 30, p -> button(p, "Crafting"));
             crafting.onClickLeft(event -> player.openGui(
                     new GuiCrafting(false, player,
                             player.game().engine().guiStyle())));

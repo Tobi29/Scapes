@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.tobi29.scapes.block;
+package org.tobi29.scapes.vanilla.basics.material;
 
 import java8.util.Optional;
 import java8.util.stream.Stream;
+import org.tobi29.scapes.block.Inventory;
+import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.engine.utils.Streams;
 
 import java.util.ArrayList;
@@ -52,11 +54,13 @@ public class CraftingRecipe {
     }
 
     public Optional<Stream<ItemStack>> takes(Inventory inventory) {
+        inventory = new Inventory(inventory);
         List<ItemStack> takes = new ArrayList<>();
         for (Ingredient ingredient : ingredients) {
             Optional<ItemStack> take = ingredient.match(inventory);
             if (take.isPresent()) {
                 takes.add(take.get());
+                inventory.take(take.get());
             } else {
                 return Optional.empty();
             }

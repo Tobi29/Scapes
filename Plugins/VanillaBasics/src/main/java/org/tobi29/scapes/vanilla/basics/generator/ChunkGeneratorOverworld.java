@@ -114,7 +114,7 @@ public class ChunkGeneratorOverworld implements ChunkGenerator {
             Random random) {
         OreType type = null;
         int max = -1;
-        Iterator<OreType> iterator = plugin.getOreTypes()
+        Iterator<OreType> iterator = plugin.oreTypes()
                 .filter(ore -> ore.stoneTypes().contains(stoneType)).iterator();
         while (iterator.hasNext()) {
             OreType oreType = iterator.next();

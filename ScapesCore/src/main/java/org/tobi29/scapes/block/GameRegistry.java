@@ -43,7 +43,6 @@ public class GameRegistry {
             asymSupplierRegistries = new ConcurrentHashMap<>();
     private final Map<String, Material> materialNames =
             new ConcurrentHashMap<>();
-    private final List<CraftingRecipeType> craftingRecipes = new ArrayList<>();
     private final IDStorage idStorage;
     private final BlockType air;
     private BlockType[] blocks;
@@ -98,7 +97,6 @@ public class GameRegistry {
         pr.regS(PacketUpdateInventory::new, "core.packet.UpdateInventory");
         pr.regS(PacketChat::new, "core.packet.Chat");
         pr.regS(PacketItemUse::new, "core.packet.ItemUse");
-        pr.regS(PacketCrafting::new, "core.packet.Crafting");
         pr.regS(PacketDisconnect::new, "core.packet.Disconnect");
         pr.regS(PacketSetWorld::new, "core.packet.SetWorld");
         pr.regS(PacketPingClient::new, "core.packet.PingClient");
@@ -238,17 +236,6 @@ public class GameRegistry {
         materialNames.put(nameID
                         .substring(nameID.lastIndexOf('.') + 1, nameID.length()),
                 material);
-    }
-
-    public void registerCraftingRecipe(CraftingRecipeType recipe) {
-        if (locked) {
-            throw new IllegalStateException("Initializing already ended");
-        }
-        craftingRecipes.add(recipe);
-    }
-
-    public List<CraftingRecipeType> getCraftingRecipes() {
-        return craftingRecipes;
     }
 
     public class Registry<E> {

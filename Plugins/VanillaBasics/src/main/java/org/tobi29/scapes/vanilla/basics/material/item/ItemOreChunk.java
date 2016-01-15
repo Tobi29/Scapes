@@ -227,19 +227,19 @@ public class ItemOreChunk extends VanillaItem
     public MetalType metal(ItemStack item) {
         switch (item.data()) {
             case 0:
-                return plugin.getMetalType("Bismuth");
+                return plugin.metalType("Bismuth");
             case 1:
-                return plugin.getMetalType("Copper");
+                return plugin.metalType("Copper");
             case 2:
-                return plugin.getMetalType("Tin");
+                return plugin.metalType("Tin");
             case 3:
-                return plugin.getMetalType("Zinc");
+                return plugin.metalType("Zinc");
             case 6:
-                return plugin.getMetalType("Silver");
+                return plugin.metalType("Silver");
             case 7:
-                return plugin.getMetalType("Gold");
+                return plugin.metalType("Gold");
             case 9:
-                return plugin.getMetalType("Iron");
+                return plugin.metalType("Iron");
             default:
                 throw new IllegalArgumentException(
                         "Unknown data: {}" + item.data());

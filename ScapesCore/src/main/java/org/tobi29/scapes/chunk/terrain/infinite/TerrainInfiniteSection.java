@@ -154,8 +154,7 @@ public class TerrainInfiniteSection implements TerrainClient {
         Optional<? extends TerrainInfiniteChunk> chunk = get(x, y);
         if (chunk.isPresent()) {
             TerrainInfiniteChunk chunk2 = chunk.get();
-            return chunk2
-                    .highestBlockZAt(x - chunk2.blockX(), y - chunk2.blockY());
+            return chunk2.highestBlockZAtG(x, y);
         }
         return terrain.highestBlockZAt(x, y);
     }
@@ -165,8 +164,7 @@ public class TerrainInfiniteSection implements TerrainClient {
         Optional<? extends TerrainInfiniteChunk> chunk = get(x, y);
         if (chunk.isPresent()) {
             TerrainInfiniteChunk chunk2 = chunk.get();
-            return chunk2.highestTerrainBlockZAt(x - chunk2.blockX(),
-                    y - chunk2.blockY());
+            return chunk2.highestTerrainBlockZAtG(x, y);
         }
         return terrain.highestTerrainBlockZAt(x, y);
     }
