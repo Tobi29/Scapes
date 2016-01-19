@@ -24,9 +24,9 @@ extension {
 
 dependencies {
     compile project(":ScapesCore")
-    compile project(":ScapesEngine:Utils:SQLFramework:MariaDB")
+    compile project(":ScapesEngine:SQLFramework:MariaDB")
 
-    runtimeLinux64 project(":ScapesEngine:Utils:SQLFramework:MariaDB")
+    runtimeLinux64 project(":ScapesEngine:SQLFramework:MariaDB")
 
     testCompile "junit:junit:4.12"
 }

@@ -20,7 +20,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FileCache;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
-import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
+import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.plugins.PluginFile;
 import org.tobi29.scapes.plugins.Plugins;

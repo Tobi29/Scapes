@@ -8,7 +8,7 @@ import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream;
 import org.tobi29.scapes.engine.utils.io.ProcessStream;
-import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
+import org.tobi29.scapes.engine.utils.io.tag.json.TagStructureJSON;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.packets.PacketUpdateInventory;

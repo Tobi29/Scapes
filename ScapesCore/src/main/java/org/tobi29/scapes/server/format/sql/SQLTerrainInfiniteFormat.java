@@ -23,7 +23,7 @@ import org.tobi29.scapes.engine.sql.SQLQuery;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
-import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
+import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i;
 import org.tobi29.scapes.server.format.TerrainInfiniteFormat;
 

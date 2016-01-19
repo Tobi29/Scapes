@@ -7,7 +7,7 @@ import org.tobi29.scapes.engine.utils.graphics.PNG;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
-import org.tobi29.scapes.engine.utils.io.tag.TagStructureBinary;
+import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary;
 import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.format.WorldFormat;
 import org.tobi29.scapes.server.format.WorldSource;

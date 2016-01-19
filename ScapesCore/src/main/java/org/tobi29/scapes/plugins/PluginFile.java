@@ -23,7 +23,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.filesystem.ReadSource;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
-import org.tobi29.scapes.engine.utils.io.tag.TagStructureJSON;
+import org.tobi29.scapes.engine.utils.io.tag.json.TagStructureJSON;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
