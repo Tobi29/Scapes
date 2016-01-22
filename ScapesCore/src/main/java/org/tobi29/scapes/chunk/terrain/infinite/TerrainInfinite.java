@@ -24,6 +24,7 @@ import org.tobi29.scapes.chunk.lighting.LightingEngine;
 import org.tobi29.scapes.chunk.lighting.LightingEngineThreaded;
 import org.tobi29.scapes.chunk.terrain.Terrain;
 import org.tobi29.scapes.engine.utils.Pool;
+import org.tobi29.scapes.engine.utils.ThreadLocalUtil;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.PointerPane;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
@@ -32,19 +33,9 @@ import java.util.Collection;
 
 public abstract class TerrainInfinite implements Terrain {
     protected static final ThreadLocal<Pool<AABBElement>> AABBS =
-            new ThreadLocal<Pool<AABBElement>>() {
-                @Override
-                protected Pool<AABBElement> initialValue() {
-                    return new Pool<>(AABBElement::new);
-                }
-            };
+            ThreadLocalUtil.of(() -> new Pool<>(AABBElement::new));
     protected static final ThreadLocal<Pool<PointerPane>> POINTER_PANES =
-            new ThreadLocal<Pool<PointerPane>>() {
-                @Override
-                protected Pool<PointerPane> initialValue() {
-                    return new Pool<>(PointerPane::new);
-                }
-            };
+            ThreadLocalUtil.of(() -> new Pool<>(PointerPane::new));
     protected final int zSize, cxMin, cxMax, cyMin, cyMax;
     protected final BlockType voidBlock;
     protected final TerrainInfiniteChunkManager chunkManager;

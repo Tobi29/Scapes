@@ -22,20 +22,16 @@ import org.tobi29.scapes.chunk.data.ChunkArraySection2x4;
 import org.tobi29.scapes.chunk.data.ChunkData;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Pool;
+import org.tobi29.scapes.engine.utils.ThreadLocalUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i;
 
 public abstract class TerrainInfiniteChunk {
     private static final ThreadLocal<Pair<Pool<LightSpread>, Pool<LightSpread>>>
-            SPREAD_POOLS =
-            new ThreadLocal<Pair<Pool<LightSpread>, Pool<LightSpread>>>() {
-                @Override
-                protected Pair<Pool<LightSpread>, Pool<LightSpread>> initialValue() {
-                    return new Pair<>(new Pool<>(LightSpread::new),
-                            new Pool<>(LightSpread::new));
-                }
-            };
+            SPREAD_POOLS = ThreadLocalUtil
+            .of(() -> new Pair<>(new Pool<>(LightSpread::new),
+                    new Pool<>(LightSpread::new)));
     protected final ChunkData bID;
     protected final ChunkData bData;
     protected final ChunkData bLight;
