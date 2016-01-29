@@ -21,7 +21,6 @@ import org.tobi29.scapes.client.states.scenes.SceneError;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.opengl.GL;
 
 import java.net.InetSocketAddress;
 
@@ -47,17 +46,12 @@ public class GameStateServerDisconnect extends GameState {
     }
 
     @Override
-    public void init(GL gl) {
+    public void init() {
         engine.guiStack().add("10-Menu", gui);
     }
 
     @Override
     public boolean isMouseGrabbed() {
-        return false;
-    }
-
-    @Override
-    public boolean isThreaded() {
         return false;
     }
 

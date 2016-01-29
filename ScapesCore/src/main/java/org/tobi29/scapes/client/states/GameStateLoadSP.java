@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.client.gui.GuiLoading;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
 import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.server.ServerInfo;
@@ -38,8 +37,8 @@ import java.io.IOException;
 public class GameStateLoadSP extends GameState {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GameStateLoadSP.class);
-    private final WorldSource source;
     private int step;
+    private WorldSource source;
     private ScapesServer server;
     private GuiLoading progress;
 
@@ -50,10 +49,28 @@ public class GameStateLoadSP extends GameState {
     }
 
     @Override
-    public void init(GL gl) {
+    public void dispose() {
+        if (server != null) {
+            try {
+                server.stop(ScapesServer.ShutdownReason.ERROR);
+            } catch (IOException e) {
+                LOGGER.error(
+                        "Failed to stop internal server after login error:", e);
+            }
+        }
+        if (source != null) {
+            try {
+                source.close();
+            } catch (IOException e) {
+                LOGGER.error("Failed to close world source:", e);
+            }
+        }
+    }
+
+    @Override
+    public void init() {
         progress = new GuiLoading(this, engine.guiStyle());
         engine.guiStack().add("20-Progress", progress);
-        progress.setLabel("Creating server...");
     }
 
     @Override
@@ -62,15 +79,14 @@ public class GameStateLoadSP extends GameState {
     }
 
     @Override
-    public boolean isThreaded() {
-        return false;
-    }
-
-    @Override
     public void step(double delta) {
         try {
             switch (step) {
                 case 0:
+                    progress.setLabel("Creating server...");
+                    step++;
+                    break;
+                case 1:
                     TagStructure tagStructure =
                             engine.tagStructure().getStructure("Scapes")
                                     .getStructure("IntegratedServer");
@@ -87,7 +103,7 @@ public class GameStateLoadSP extends GameState {
                     progress.setLabel("Starting server...");
                     step++;
                     break;
-                case 1:
+                case 2:
                     int loadingRadius = FastMath.round(
                             engine.tagStructure().getStructure("Scapes")
                                     .getDouble("RenderDistance")) + 32;
@@ -98,28 +114,18 @@ public class GameStateLoadSP extends GameState {
                             g -> new LocalPlayerConnection(server, g,
                                     loadingRadius, account).client(), source,
                             this.server, scene, engine);
+                    this.server = null;
+                    source = null;
                     engine.setState(game);
                     break;
             }
         } catch (IOException e) {
             LOGGER.error("Failed to start internal server:", e);
-            try {
-                server.stop(ScapesServer.ShutdownReason.ERROR);
-            } catch (IOException e1) {
-                LOGGER.error(
-                        "Failed to stop internal server after login error:",
-                        e1);
-            }
-            try {
-                source.close();
-            } catch (IOException e1) {
-                LOGGER.error("Failed to close world source:", e1);
-            }
             engine.setState(new GameStateServerDisconnect(e.getMessage(),
                     Optional.empty(), engine));
             step = -1;
             return;
         }
-        progress.setProgress(step);
+        progress.setProgress(step / 2.0f);
     }
 }

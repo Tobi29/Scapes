@@ -36,7 +36,6 @@ import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
 import org.tobi29.scapes.engine.input.ControllerKey;
-import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
 import org.tobi29.scapes.engine.utils.io.IOFunction;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
@@ -97,13 +96,9 @@ public class GameStateGameMP extends GameState {
     }
 
     @Override
-    public void dispose(GL gl) {
-        terrainTextureRegistry.dispose();
-    }
-
-    @Override
     public void dispose() {
         client.stop();
+        terrainTextureRegistry.texture().markDisposed();
         skinStorage.dispose();
         engine.sounds().stop("music");
         ParticleBlock.clear();
@@ -115,7 +110,7 @@ public class GameStateGameMP extends GameState {
     }
 
     @Override
-    public void init(GL gl) {
+    public void init() {
         engine.guiStack().add("05-HUD", hud);
         engine.guiStack().add("99-SceneDebug", debug);
         client.plugins().addFileSystems(engine.files());
@@ -146,11 +141,6 @@ public class GameStateGameMP extends GameState {
     public boolean isMouseGrabbed() {
         return scene instanceof SceneScapesVoxelWorld &&
                 ((SceneScapesVoxelWorld) scene).isMouseGrabbed();
-    }
-
-    @Override
-    public boolean isThreaded() {
-        return scene instanceof SceneScapesVoxelWorld;
     }
 
     @Override

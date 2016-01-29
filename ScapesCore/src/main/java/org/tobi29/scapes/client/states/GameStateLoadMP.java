@@ -24,7 +24,6 @@ import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -54,10 +53,9 @@ public class GameStateLoadMP extends GameState {
     }
 
     @Override
-    public void init(GL gl) {
+    public void init() {
         progress = new GuiLoading(this, engine.guiStyle());
         engine.guiStack().add("20-Progress", progress);
-        progress.setLabel("Connecting to server...");
     }
 
     @Override
@@ -66,15 +64,14 @@ public class GameStateLoadMP extends GameState {
     }
 
     @Override
-    public boolean isThreaded() {
-        return false;
-    }
-
-    @Override
     public void step(double delta) {
         try {
             switch (step) {
                 case 0:
+                    progress.setLabel("Connecting to server...");
+                    step++;
+                    break;
+                case 1:
                     if (address.isUnresolved()) {
                         throw new IOException("Address unresolved");
                     }
@@ -82,19 +79,19 @@ public class GameStateLoadMP extends GameState {
                     channel.configureBlocking(false);
                     step++;
                     break;
-                case 1:
+                case 2:
                     if (channel.finishConnect()) {
                         step++;
                         progress.setLabel("Sending request...");
                     }
                     break;
-                case 2:
+                case 3:
                     channel.write(headerBuffer);
                     if (!headerBuffer.hasRemaining()) {
                         step++;
                     }
                     break;
-                case 3:
+                case 4:
                     int loadingRadius = FastMath.round(
                             engine.tagStructure().getStructure("Scapes")
                                     .getDouble("RenderDistance")) + 32;
@@ -104,7 +101,7 @@ public class GameStateLoadMP extends GameState {
                             loadingRadius);
                     step++;
                     break;
-                case 4:
+                case 5:
                     Optional<String> status = client.login();
                     if (status.isPresent()) {
                         progress.setLabel(status.get());
@@ -113,7 +110,7 @@ public class GameStateLoadMP extends GameState {
                         progress.setLabel("Loading world...");
                     }
                     break;
-                case 5:
+                case 6:
                     GameStateGameMP game =
                             new GameStateGameMP(client.finish(), scene, engine);
                     engine.setState(game);
@@ -127,6 +124,6 @@ public class GameStateLoadMP extends GameState {
             step = -1;
             return;
         }
-        progress.setProgress(step / 5.0f);
+        progress.setProgress(step / 6.0f);
     }
 }

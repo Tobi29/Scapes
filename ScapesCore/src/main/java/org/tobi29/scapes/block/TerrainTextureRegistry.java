@@ -273,13 +273,6 @@ public class TerrainTextureRegistry {
         }
     }
 
-    public void dispose() {
-        textures.clear();
-        if (texture != null) {
-            texture.markDisposed();
-        }
-    }
-
     public void update(double delta) {
         Streams.of(textures.values())
                 .forEach(texture -> texture.updateAnim(delta));

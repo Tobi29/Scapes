@@ -16,10 +16,13 @@
 package org.tobi29.scapes.client.states.scenes;
 
 import java8.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.block.TerrainTextureRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldSkybox;
 import org.tobi29.scapes.client.gui.GuiComponentChat;
+import org.tobi29.scapes.client.states.GameStateGameSP;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
 import org.tobi29.scapes.engine.opengl.*;
@@ -36,12 +39,16 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.model.MobModel;
+import org.tobi29.scapes.entity.particle.ParticleBlock;
 import org.tobi29.scapes.entity.skin.ClientSkinStorage;
 
+import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class SceneScapesVoxelWorld extends Scene {
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(SceneScapesVoxelWorld.class);
     private static final String BLUR_OFFSET, BLUR_WEIGHT, SAMPLE_OFFSET,
             SAMPLE_WEIGHT;
     private static final int BLUR_LENGTH, SAMPLE_LENGTH;
@@ -83,13 +90,14 @@ public class SceneScapesVoxelWorld extends Scene {
     private int flashDir;
     private long flashTime, flashStart;
     private boolean mouseGrabbed, chunkGeometryDebug, wireframe;
-    private Image[] panorama;
 
     public SceneScapesVoxelWorld(WorldClient world, Cam cam) {
         this.world = world;
         this.cam = cam;
         terrainTextureRegistry = world.game().terrainTextureRegistry();
-        skinStorage = world.game().skinStorage();
+        skinStorage = new ClientSkinStorage(
+                world.game().engine().graphics().textures()
+                        .get("Scapes:image/entity/mob/Player"));
         GuiWidgetDebugValues debugValues = world.game().engine().debugValues();
         cameraPositionXDebug = debugValues.get("Camera-Position-X");
         cameraPositionYDebug = debugValues.get("Camera-Position-Y");
@@ -141,10 +149,6 @@ public class SceneScapesVoxelWorld extends Scene {
 
     public boolean isMouseGrabbed() {
         return mouseGrabbed;
-    }
-
-    public Image[] panorama() {
-        return panorama;
     }
 
     public void damageShake(double damage) {
@@ -344,20 +348,25 @@ public class SceneScapesVoxelWorld extends Scene {
     }
 
     @Override
-    public void dispose(GL gl) {
-        FBO fbo = new FBO(256, 256, 1, true, false, false);
-        fbo.activate(gl);
-        panorama = takePanorama(gl, fbo);
-        fbo.deactivate(gl);
-        skybox.dispose(gl);
-        fbo.ensureDisposed(gl);
-        skyboxFBO.ensureDisposed(gl);
-        exposureFBO.ifPresent(f -> f.ensureDisposed(gl));
-    }
-
-    @Override
     public void dispose() {
         world.dispose();
+        skybox.dispose();
+        ParticleBlock.clear();
+    }
+
+    public void takePanorama(GL gl) {
+        FBO fbo = new FBO(256, 256, 1, true, false, false);
+        fbo.activate(gl);
+        Image[] panorama = takePanorama(gl, fbo);
+        fbo.deactivate(gl);
+        fbo.ensureDisposed(gl);
+        if (state instanceof GameStateGameSP) {
+            try {
+                ((GameStateGameSP) state).source().panorama(panorama);
+            } catch (IOException e) {
+                LOGGER.warn("Failed to save panorama", e);
+            }
+        }
     }
 
     public Image[] takePanorama(GL gl, FBO fbo) {

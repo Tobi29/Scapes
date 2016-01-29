@@ -42,14 +42,18 @@ public class GameStateGameSP extends GameStateGameMP {
         this.source = source;
     }
 
+    public WorldSource source() {
+        return source;
+    }
+
+    public ScapesServer server() {
+        return server;
+    }
+
     @Override
     public void dispose() {
         try {
             server.stop(ScapesServer.ShutdownReason.STOP);
-            Image[] panorama = client.world().scene().panorama();
-            if (panorama != null) {
-                source.panorama(panorama);
-            }
         } catch (IOException e) {
             LOGGER.error("Error stopping internal server:", e);
         }

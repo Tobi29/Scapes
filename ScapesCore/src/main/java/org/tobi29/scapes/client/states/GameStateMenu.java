@@ -27,7 +27,6 @@ import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiStyle;
-import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 
@@ -53,7 +52,7 @@ public class GameStateMenu extends GameState {
     }
 
     @Override
-    public void init(GL gl) {
+    public void init() {
         GuiStyle style = engine.guiStyle();
         engine.guiStack().add("00-Version", new GuiVersion(this, style));
         boolean hasAccount = false;
@@ -86,11 +85,6 @@ public class GameStateMenu extends GameState {
 
     @Override
     public boolean isMouseGrabbed() {
-        return false;
-    }
-
-    @Override
-    public boolean isThreaded() {
         return false;
     }
 

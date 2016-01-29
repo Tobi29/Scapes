@@ -23,7 +23,6 @@ import org.tobi29.scapes.client.gui.GuiLoading;
 import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
 import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.server.ServerInfo;
@@ -45,8 +44,8 @@ public class GameStateLoadSocketSP extends GameState {
     private final ByteBuffer headerBuffer = BufferCreator
             .wrap(new byte[]{'S', 'c', 'a', 'p', 'e', 's',
                     ConnectionType.PLAY.data()});
-    private final WorldSource source;
     private int step, port;
+    private WorldSource source;
     private ScapesServer server;
     private SocketChannel channel;
     private NewConnection client;
@@ -59,10 +58,28 @@ public class GameStateLoadSocketSP extends GameState {
     }
 
     @Override
-    public void init(GL gl) {
+    public void dispose() {
+        if (server != null) {
+            try {
+                server.stop(ScapesServer.ShutdownReason.ERROR);
+            } catch (IOException e) {
+                LOGGER.error(
+                        "Failed to stop internal server after login error:", e);
+            }
+        }
+        if (source != null) {
+            try {
+                source.close();
+            } catch (IOException e) {
+                LOGGER.error("Failed to close world source:", e);
+            }
+        }
+    }
+
+    @Override
+    public void init() {
         progress = new GuiLoading(this, engine.guiStyle());
         engine.guiStack().add("20-Progress", progress);
-        progress.setLabel("Creating server...");
     }
 
     @Override
@@ -71,15 +88,14 @@ public class GameStateLoadSocketSP extends GameState {
     }
 
     @Override
-    public boolean isThreaded() {
-        return false;
-    }
-
-    @Override
     public void step(double delta) {
         try {
             switch (step) {
                 case 0:
+                    progress.setLabel("Creating server...");
+                    step++;
+                    break;
+                case 1:
                     TagStructure tagStructure =
                             engine.tagStructure().getStructure("Scapes")
                                     .getStructure("IntegratedServer");
@@ -96,7 +112,7 @@ public class GameStateLoadSocketSP extends GameState {
                     progress.setLabel("Starting server...");
                     step++;
                     break;
-                case 1:
+                case 2:
                     port = server.connection().start(0);
                     if (port <= 0) {
                         throw new IOException(
@@ -106,7 +122,7 @@ public class GameStateLoadSocketSP extends GameState {
                     progress.setLabel("Connecting to server...");
                     step++;
                     break;
-                case 2:
+                case 3:
                     InetSocketAddress address =
                             new InetSocketAddress("localhost", port);
                     if (address.isUnresolved()) {
@@ -116,19 +132,19 @@ public class GameStateLoadSocketSP extends GameState {
                     channel.configureBlocking(false);
                     step++;
                     break;
-                case 3:
+                case 4:
                     if (channel.finishConnect()) {
                         step++;
                         progress.setLabel("Sending request...");
                     }
                     break;
-                case 4:
+                case 5:
                     channel.write(headerBuffer);
                     if (!headerBuffer.hasRemaining()) {
                         step++;
                     }
                     break;
-                case 5:
+                case 6:
                     int loadingRadius = FastMath.round(
                             engine.tagStructure().getStructure("Scapes")
                                     .getDouble("RenderDistance")) + 32;
@@ -138,7 +154,7 @@ public class GameStateLoadSocketSP extends GameState {
                             loadingRadius);
                     step++;
                     break;
-                case 6:
+                case 7:
                     Optional<String> status = client.login();
                     if (status.isPresent()) {
                         progress.setLabel(status.get());
@@ -147,7 +163,7 @@ public class GameStateLoadSocketSP extends GameState {
                         progress.setLabel("Loading world...");
                     }
                     break;
-                case 7:
+                case 8:
                     GameStateGameSP game =
                             new GameStateGameSP(client.finish(), source, server,
                                     scene, engine);
@@ -156,23 +172,11 @@ public class GameStateLoadSocketSP extends GameState {
             }
         } catch (IOException e) {
             LOGGER.error("Failed to start internal server:", e);
-            try {
-                server.stop(ScapesServer.ShutdownReason.ERROR);
-            } catch (IOException e1) {
-                LOGGER.error(
-                        "Failed to stop internal server after login error:",
-                        e1);
-            }
-            try {
-                source.close();
-            } catch (IOException e1) {
-                LOGGER.error("Failed to close world source:", e1);
-            }
             engine.setState(new GameStateServerDisconnect(e.getMessage(),
                     Optional.empty(), engine));
             step = -1;
             return;
         }
-        progress.setProgress(step / 7.0f);
+        progress.setProgress(step / 8.0f);
     }
 }
