@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
-import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.IOFunction;
 import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.format.WorldSource;

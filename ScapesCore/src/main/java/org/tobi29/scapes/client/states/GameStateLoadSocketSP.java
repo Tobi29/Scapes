@@ -44,8 +44,8 @@ public class GameStateLoadSocketSP extends GameState {
     private final ByteBuffer headerBuffer = BufferCreator
             .wrap(new byte[]{'S', 'c', 'a', 'p', 'e', 's',
                     ConnectionType.PLAY.data()});
+    private final WorldSource source;
     private int step, port;
-    private WorldSource source;
     private ScapesServer server;
     private SocketChannel channel;
     private NewConnection client;
