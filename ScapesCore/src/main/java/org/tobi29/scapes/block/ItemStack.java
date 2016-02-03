@@ -167,12 +167,19 @@ public class ItemStack {
 
     public int stack(ItemStack add) {
         Objects.requireNonNull(add);
-        return stack(add, FastMath.min(FastMath.min(material.maxStackSize(this),
-                add.material.maxStackSize(add)) - amount, add.amount));
+        int amount = FastMath.min(FastMath.min(material.maxStackSize(this),
+                add.material.maxStackSize(add)) - this.amount, add.amount);
+        if (amount > 0) {
+            return stack(add, amount);
+        }
+        return 0;
     }
 
     public int stack(ItemStack add, int amount) {
         Objects.requireNonNull(add);
+        if (amount < 0) {
+            throw new IllegalArgumentException("Negative amount: " + amount);
+        }
         if ((add.material != material || add.data != data ||
                 amount + this.amount > FastMath.min(material.maxStackSize(this),
                         add.material.maxStackSize(add))) &&
