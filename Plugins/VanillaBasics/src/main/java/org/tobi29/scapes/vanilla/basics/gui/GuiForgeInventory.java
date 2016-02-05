@@ -46,8 +46,8 @@ public class GuiForgeInventory extends GuiContainerInventory {
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine, Vector2 size) {
-        super.updateComponent(engine, size);
+    public void updateComponent(ScapesEngine engine, double delta, Vector2 size) {
+        super.updateComponent(engine, delta, size);
         updateTemperatureText();
     }
 

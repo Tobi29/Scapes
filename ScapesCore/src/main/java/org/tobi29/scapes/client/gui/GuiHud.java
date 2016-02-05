@@ -22,6 +22,7 @@ import org.tobi29.scapes.engine.opengl.*;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
 public class GuiHud extends GuiState {
     private static final float CROSS_SIZE = 8.0f;
@@ -39,14 +40,14 @@ public class GuiHud extends GuiState {
     }
 
     @Override
-    public void renderGUI(GL gl, Shader shader, double delta) {
-        super.renderGUI(gl, shader, delta);
+    public void render(GL gl, Shader shader, Vector2 size) {
+        super.render(gl, shader, size);
         if (visible) {
             MatrixStack matrixStack = gl.matrixStack();
             Matrix matrix = matrixStack.push();
             matrix.translate(480.0f, 270.0f, 0.0f);
-            float ratio = (float) gl.sceneHeight() / gl.sceneWidth() / 540 *
-                            960;
+            float ratio =
+                    (float) gl.sceneHeight() / gl.sceneWidth() / 540 * 960;
             matrix.scale(ratio, 1.0f, 1.0f);
             gl.textures().bind("Scapes:image/gui/Cross", gl);
             gl.setBlending(BlendingMode.INVERT);

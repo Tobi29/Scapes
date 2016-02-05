@@ -47,7 +47,7 @@ public class GuiChatWrite extends GuiState {
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine, Vector2 size) {
+    public void updateComponent(ScapesEngine engine, double delta, Vector2 size) {
         engine.controller().ifPresent(controller -> {
             if (controller.isPressed(ControllerKey.KEY_ENTER)) {
                 String text = write.text();

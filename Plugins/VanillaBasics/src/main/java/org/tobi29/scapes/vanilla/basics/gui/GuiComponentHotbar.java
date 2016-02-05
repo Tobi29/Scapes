@@ -36,8 +36,7 @@ public class GuiComponentHotbar extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, double delta,
-            double width, double height) {
+    public void renderComponent(GL gl, Shader shader, double width, double height) {
         MatrixStack matrixStack = gl.matrixStack();
         for (int i = 0; i < 10; i++) {
             if (i == player.inventorySelectLeft()) {

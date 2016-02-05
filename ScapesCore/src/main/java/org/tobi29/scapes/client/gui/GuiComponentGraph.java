@@ -46,8 +46,7 @@ public class GuiComponentGraph extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, double delta,
-            double width, double height) {
+    public void renderComponent(GL gl, Shader shader, double width, double height) {
         int w = (int) FastMath.ceil(width);
         if (data[0].length != w) {
             data = new float[data.length][w];

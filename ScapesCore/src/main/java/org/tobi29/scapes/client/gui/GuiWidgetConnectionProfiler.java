@@ -16,8 +16,8 @@ public class GuiWidgetConnectionProfiler extends GuiWidgetDebugValues {
     }
 
     @Override
-    protected void updateComponent(ScapesEngine engine, Vector2 size) {
-        super.updateComponent(engine, size);
+    protected void updateComponent(ScapesEngine engine, double delta, Vector2 size) {
+        super.updateComponent(engine, delta, size);
         profiler.entries().forEach(
                 entry -> get(entry.a.getSimpleName()).setValue(entry.b));
     }

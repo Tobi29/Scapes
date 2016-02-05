@@ -18,12 +18,17 @@ package org.tobi29.scapes.client.gui.desktop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.*;
+import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.gui.Gui;
+import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
+import org.tobi29.scapes.engine.gui.GuiComponentVisiblePane;
+import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -71,13 +76,17 @@ public class GuiCredits extends GuiDesktop {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, double delta,
-            double width, double height) {
-        y += 40.0 * delta;
+    public void renderComponent(GL gl, Shader shader, double width, double height) {
         MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(0, (float) -y, 0);
         vaoText.render(gl, shader);
         matrixStack.pop();
+    }
+
+    @Override
+    public void updateComponent(ScapesEngine engine, double delta,
+            Vector2 size) {
+        y += 40.0 * delta;
     }
 }

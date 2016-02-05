@@ -44,8 +44,7 @@ public class GuiComponentChat extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, double delta,
-            double width, double height) {
+    public void renderComponent(GL gl, Shader shader, double width, double height) {
         MatrixStack matrixStack = gl.matrixStack();
         int yy = -16;
         Iterator<String> iterator = chatHistory.lines().iterator();

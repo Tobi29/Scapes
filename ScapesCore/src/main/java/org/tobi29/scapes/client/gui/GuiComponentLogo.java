@@ -92,8 +92,7 @@ public class GuiComponentLogo extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, double delta,
-            double width, double height) {
+    public void renderComponent(GL gl, Shader shader, double width, double height) {
         gl.textures().bind("Scapes:image/Icon", gl);
         gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
         vao.render(gl, shader);

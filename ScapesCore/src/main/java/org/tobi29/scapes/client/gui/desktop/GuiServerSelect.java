@@ -102,7 +102,7 @@ public class GuiServerSelect extends GuiMenu {
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine, Vector2 size) {
+    public void updateComponent(ScapesEngine engine, double delta, Vector2 size) {
         Streams.of(elements).forEach(Element::checkConnection);
     }
 

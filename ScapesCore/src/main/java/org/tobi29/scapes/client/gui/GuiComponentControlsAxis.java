@@ -70,7 +70,7 @@ public class GuiComponentControlsAxis extends GuiComponentTextButton {
     }
 
     @Override
-    protected void updateComponent(ScapesEngine engine, Vector2 size) {
+    protected void updateComponent(ScapesEngine engine, double delta, Vector2 size) {
         if (editing > 1) {
             int axes = controller.axes();
             for (int i = 0; i < axes; i++) {

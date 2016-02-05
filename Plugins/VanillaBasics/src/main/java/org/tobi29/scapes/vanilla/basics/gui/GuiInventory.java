@@ -108,7 +108,7 @@ public class GuiInventory extends GuiMenu {
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine, Vector2 size) {
+    public void updateComponent(ScapesEngine engine, double delta, Vector2 size) {
         Optional<GuiCursor> cursor = engine.guiController().cursors().findAny();
         if (cursor.isPresent()) {
             cursorX = cursor.get().guiX();
