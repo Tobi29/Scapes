@@ -32,7 +32,6 @@ import org.tobi29.scapes.engine.GameStateStartup;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.GuiNotificationSimple;
 import org.tobi29.scapes.engine.input.*;
-import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.scenes.SceneEmpty;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.VersionUtil;
@@ -123,7 +122,7 @@ public class ScapesClient extends Game {
     }
 
     @Override
-    public void init() {
+    public void initEarly() {
         try {
             FilePath path = engine.home();
             FilePath playlistsPath = path.resolve("playlists");
@@ -148,7 +147,7 @@ public class ScapesClient extends Game {
     }
 
     @Override
-    public void initLate(GL gl) {
+    public void init() {
         TagStructure tagStructure = engine.tagStructure();
         if (!tagStructure.has("Scapes")) {
             boolean lightDefaults = engine.container().formFactor() ==
