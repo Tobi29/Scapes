@@ -126,9 +126,9 @@ public class ItemIngot extends VanillaItem implements ItemMetal {
         if (currentTemperature < 1 && temperature < currentTemperature) {
             item.metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
-            item.metaData("Vanilla").setFloat("Temperature", FastMath.max(
-                    currentTemperature +
-                            (temperature - currentTemperature) / 400.0f, 1.1f));
+            currentTemperature += (temperature - currentTemperature) / 400.0f;
+            item.metaData("Vanilla")
+                    .setFloat("Temperature", currentTemperature);
             if (currentTemperature >= meltingPoint(item) && item.data() == 1) {
                 item.setAmount(0);
             }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.item.food;
 
 import org.tobi29.scapes.block.GameRegistry;
@@ -101,9 +100,9 @@ public class ItemDough extends VanillaItem
         if (currentTemperature < 1 && temperature < currentTemperature) {
             item.metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
-            item.metaData("Vanilla").setFloat("Temperature", FastMath.max(
-                    currentTemperature +
-                            (temperature - currentTemperature) / 400.0f, 1.1f));
+            currentTemperature += (temperature - currentTemperature) / 400.0f;
+            item.metaData("Vanilla")
+                    .setFloat("Temperature", currentTemperature);
             if (currentTemperature >= meltingPoint(item)) {
                 item.setMaterial(materials.baked);
             }

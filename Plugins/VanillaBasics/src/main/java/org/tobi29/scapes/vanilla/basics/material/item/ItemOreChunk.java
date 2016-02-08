@@ -147,9 +147,9 @@ public class ItemOreChunk extends VanillaItem
         if (currentTemperature < 1 && temperature < currentTemperature) {
             item.metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
-            item.metaData("Vanilla").setFloat("Temperature", FastMath.max(
-                    currentTemperature +
-                            (temperature - currentTemperature) / 400.0f, 1.1f));
+            currentTemperature += (temperature - currentTemperature) / 400.0f;
+            item.metaData("Vanilla")
+                    .setFloat("Temperature", currentTemperature);
             if (currentTemperature >= meltingPoint(item)) {
                 int data = item.data();
                 if (data == 4 || data == 5) {
@@ -157,7 +157,7 @@ public class ItemOreChunk extends VanillaItem
                 } else {
                     MetalType metal = metal(item);
                     item.setMaterial(materials.ingot, 1);
-                    IngotUtil.createIngot(item, metal, temperature);
+                    IngotUtil.createIngot(item, metal, currentTemperature);
                 }
             }
         }

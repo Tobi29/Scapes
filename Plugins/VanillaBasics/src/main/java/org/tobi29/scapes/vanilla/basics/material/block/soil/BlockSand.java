@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.block.soil;
 
 import java8.util.Optional;
@@ -28,7 +27,6 @@ import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.Face;
-import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.entity.server.MobItemServer;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.item.ItemHeatable;
@@ -120,16 +118,16 @@ public class BlockSand extends BlockSoil implements ItemHeatable {
         if (currentTemperature < 1 && temperature < currentTemperature) {
             item.metaData("Vanilla").setFloat("Temperature", 0.0f);
         } else {
-            if (temperature >= meltingPoint(item)) {
+            currentTemperature += (temperature - currentTemperature) / 400.0f;
+            item.metaData("Vanilla")
+                    .setFloat("Temperature", currentTemperature);
+            if (currentTemperature >= meltingPoint(item)) {
                 if (item.data() == 0) {
                     item.setMaterial(materials.glass);
                 } else if (item.data() == 2) {
                     item.setMaterial(materials.brick);
                 }
             }
-            item.metaData("Vanilla").setFloat("Temperature", FastMath.max(
-                    currentTemperature +
-                            (temperature - currentTemperature) / 400.0f, 1.1f));
         }
     }
 
