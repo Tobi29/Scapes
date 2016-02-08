@@ -85,11 +85,14 @@ public class ItemMold extends VanillaItem implements ItemHeatable {
 
     @Override
     public int maxStackSize(ItemStack item) {
-        return 1;
+        return temperature(item) == 0 ? 64 : 1;
     }
 
     @Override
     public void heat(ItemStack item, float temperature) {
+        if (item.data() > 0) {
+            return;
+        }
         float currentTemperature = temperature(item);
         if (currentTemperature < 1 && temperature < currentTemperature) {
             item.metaData("Vanilla").setFloat("Temperature", 0.0f);
@@ -99,12 +102,16 @@ public class ItemMold extends VanillaItem implements ItemHeatable {
                     .setFloat("Temperature", currentTemperature);
             if (currentTemperature >= meltingPoint(item) && item.data() == 0) {
                 item.setData(1);
+                item.metaData("Vanilla").remove("Temperature");
             }
         }
     }
 
     @Override
     public void cool(ItemStack item) {
+        if (item.data() > 0) {
+            return;
+        }
         float currentTemperature = temperature(item);
         if (currentTemperature < 1) {
             item.metaData("Vanilla").setFloat("Temperature", 0.0f);
@@ -116,6 +123,9 @@ public class ItemMold extends VanillaItem implements ItemHeatable {
 
     @Override
     public void cool(MobItemServer item) {
+        if (item.item().data() > 0) {
+            return;
+        }
         float currentTemperature = temperature(item.item());
         if (currentTemperature < 1) {
             item.item().metaData("Vanilla").setFloat("Temperature", 0.0f);
