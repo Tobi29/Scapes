@@ -46,14 +46,15 @@ public class GuiBloomeryInventory extends GuiContainerInventory {
         buttonContainer(296, 120, 30, 30, 12);
         buttonContainer(336, 120, 30, 30, 13);
         temperatureText =
-                add(220, 170, -1, 24, p -> new GuiComponentText(p, ""));
-        bellowsText = add(300, 170, -1, 24,
+                pane.add(220, 170, -1, 24, p -> new GuiComponentText(p, ""));
+        bellowsText = pane.add(300, 170, -1, 24,
                 p -> new GuiComponentText(p, "No bellows attached!"));
         updateTemperatureText();
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine, double delta, Vector2 size) {
+    public void updateComponent(ScapesEngine engine, double delta,
+            Vector2 size) {
         super.updateComponent(engine, delta, size);
         updateTemperatureText();
         bellowsText.setVisible(!container.hasBellows());

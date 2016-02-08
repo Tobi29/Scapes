@@ -41,12 +41,13 @@ public class GuiForgeInventory extends GuiContainerInventory {
         buttonContainer(96, 120, 30, 30, 7);
         buttonContainer(96, 80, 30, 30, 8);
         temperatureText =
-                add(220, 170, -1, 24, p -> new GuiComponentText(p, ""));
+                pane.add(220, 170, -1, 24, p -> new GuiComponentText(p, ""));
         updateTemperatureText();
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine, double delta, Vector2 size) {
+    public void updateComponent(ScapesEngine engine, double delta,
+            Vector2 size) {
         super.updateComponent(engine, delta, size);
         updateTemperatureText();
     }
