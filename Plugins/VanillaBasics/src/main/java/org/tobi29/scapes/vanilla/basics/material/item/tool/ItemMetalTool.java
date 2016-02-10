@@ -24,6 +24,7 @@ import org.tobi29.scapes.block.models.ItemModelSimple;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.entity.WieldMode;
@@ -203,6 +204,12 @@ public abstract class ItemMetalTool extends VanillaItem implements ItemMetal {
             item.metaData("Vanilla")
                     .setFloat("Temperature", currentTemperature);
             if (currentTemperature >= meltingPoint(item)) {
+                TagStructure tag = item.metaData("Vanilla");
+                tag.remove("ToolEfficiency");
+                tag.remove("ToolStrength");
+                tag.remove("ToolDamage");
+                tag.remove("ToolDamageAdd");
+                tag.remove("ToolLevel");
                 item.setMaterial(materials.ingot);
                 item.setData(0);
             }
