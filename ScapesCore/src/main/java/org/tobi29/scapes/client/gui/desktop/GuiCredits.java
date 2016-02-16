@@ -54,12 +54,6 @@ public class GuiCredits extends GuiDesktop {
                 credits.append(line).append('\n');
                 line = reader.readLine();
             }
-            credits.append(
-                    "\n\n\n\n\n\n\n\n\n\nThanks for playing!\n\nHave a nice day!" +
-                            "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" +
-                            "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" +
-                            "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" +
-                            "Patience for the win!");
         } catch (IOException e) {
             LOGGER.error("Error reading Readme.txt: {}", e.toString());
         }
