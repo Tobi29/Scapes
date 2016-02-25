@@ -54,7 +54,7 @@ public class MobLivingModelHuman implements MobModel {
 
     private final MobLivingEquippedClient entity;
     private final Texture texture;
-    private final boolean culling;
+    private final boolean culling, precise;
     private final MutableVector3 pos;
     private final Box legLeft, legRight, armLeft, armRight;
     private double swing, lazyName, moveSpeedRender;
@@ -73,10 +73,16 @@ public class MobLivingModelHuman implements MobModel {
 
     public MobLivingModelHuman(MobLivingEquippedClient entity, Texture texture,
             boolean thin, boolean culling) {
+        this(entity, texture, thin, culling, false);
+    }
+
+    public MobLivingModelHuman(MobLivingEquippedClient entity, Texture texture,
+            boolean thin, boolean culling, boolean precise) {
         this.entity = entity;
         pos = new MutableVector3d(entity.pos());
         this.texture = texture;
         this.culling = culling;
+        this.precise = precise;
         if (thin) {
             legLeft = LEG_THIN_LEFT;
             legRight = LEG_THIN_RIGHT;
@@ -195,7 +201,12 @@ public class MobLivingModelHuman implements MobModel {
     @Override
     public void renderUpdate(double delta) {
         double factorPos = FastMath.min(1.0, delta * 20.0);
-        double factorRot = FastMath.min(1.0, delta * 40.0);
+        double factorRot;
+        if (precise) {
+            factorRot = 0.9;
+        } else {
+            factorRot = FastMath.min(1.0, delta * 40.0);
+        }
         double factorSpeed = FastMath.min(1.0, delta * 5.0);
         double moveSpeed = FastMath.min(
                 FastMath.sqrt(FastMath.length((Vector2) entity.speed())), 2.0);
@@ -280,10 +291,10 @@ public class MobLivingModelHuman implements MobModel {
         double lazyNameDir = (FastMath.cosTable(lazyName) * 0.5 + 0.5) *
                 (moveSpeedRender * 0.2 + 0.2);
         gl.setAttribute2f(4, world.terrain()
-                        .blockLight(FastMath.floor(entity.x()),
-                                FastMath.floor(entity.y()),
-                                FastMath.floor(entity.z())) / 15.0f,
-                world.terrain().sunLight(FastMath.floor(entity.x()),
+                .blockLight(FastMath.floor(entity.x()),
+                        FastMath.floor(entity.y()),
+                        FastMath.floor(entity.z())) / 15.0f, world.terrain()
+                .sunLight(FastMath.floor(entity.x()),
                         FastMath.floor(entity.y()),
                         FastMath.floor(entity.z())) / 15.0f);
         texture.bind(gl);

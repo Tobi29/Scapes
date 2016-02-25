@@ -289,6 +289,7 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain
     @Override
     public Optional<MobModel> createModel() {
         Texture texture = world.scene().skinStorage().get(skin);
-        return Optional.of(new MobLivingModelHuman(this, texture));
+        return Optional
+                .of(new MobLivingModelHuman(this, texture, false, true, true));
     }
 }

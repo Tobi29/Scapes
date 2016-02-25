@@ -37,7 +37,6 @@ import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
-import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.model.MobModel;
 import org.tobi29.scapes.entity.particle.ParticleBlock;
@@ -223,10 +222,9 @@ public class SceneScapesVoxelWorld extends Scene {
         brightness += (blackout - brightness) * 0.1;
         brightness = FastMath.clamp(brightness, 0, 1);
         mouseGrabbed = !player.hasGui();
-        Vector3 rot = player.rot();
-        float pitch = rot.floatX();
-        float tilt = rot.floatY();
-        float yaw = rot.floatZ();
+        float pitch = playerModel.pitch();
+        float tilt = 0.0f;
+        float yaw = playerModel.yaw();
         long flashDiff = flashTime - flashStart, flashPos =
                 System.currentTimeMillis() - flashStart;
         if (flashDiff > 0.0f && flashPos > 0.0f) {
