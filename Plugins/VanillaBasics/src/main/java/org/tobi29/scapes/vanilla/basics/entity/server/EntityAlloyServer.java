@@ -77,34 +77,37 @@ public class EntityAlloyServer extends EntityAbstractContainerServer {
                 (VanillaBasics) world.plugins().plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         temperature /= 1.002f;
-        ItemStack input = inventory.item(0);
-        Material inputType = input.material();
-        if (inputType instanceof ItemIngot) {
-            ItemIngot ingot = (ItemIngot) inputType;
-            MetalUtil.Alloy alloy = ingot.alloy(input);
-            double meltingPoint = alloy.meltingPoint();
-            if (ingot.temperature(input) >= meltingPoint) {
-                AlloyType alloyType = alloy.type(plugin);
-                for (Map.Entry<MetalType, Double> entry : alloyType
-                        .ingredients().entrySet()) {
-                    metals.add(entry.getKey(), entry.getValue());
+        inventories.access("Container", inventory -> {
+            ItemStack input = inventory.item(0);
+            Material inputType = input.material();
+            if (inputType instanceof ItemIngot) {
+                ItemIngot ingot = (ItemIngot) inputType;
+                MetalUtil.Alloy alloy = ingot.alloy(input);
+                double meltingPoint = alloy.meltingPoint();
+                if (ingot.temperature(input) >= meltingPoint) {
+                    AlloyType alloyType = alloy.type(plugin);
+                    for (Map.Entry<MetalType, Double> entry : alloyType
+                            .ingredients().entrySet()) {
+                        metals.add(entry.getKey(), entry.getValue());
+                    }
+                    temperature = FastMath.max(temperature,
+                            input.metaData("Vanilla").getDouble("Temperature"));
+                    input.clear();
+                    input.setMaterial(materials.mold, 1);
+                    world.send(new PacketEntityChange(this));
                 }
+            }
+            ItemStack output = inventory.item(1);
+            Material outputType = output.material();
+            if (outputType == materials.mold && output.data() == 1) {
                 temperature = FastMath.max(temperature,
-                        input.metaData("Vanilla").getDouble("Temperature"));
-                input.clear();
-                input.setMaterial(materials.mold, 1);
+                        input.metaData("Vanilla").getFloat("Temperature"));
+                output.setMaterial(materials.ingot, 0);
+                output.metaData("Vanilla")
+                        .setDouble("Temperature", temperature);
+                materials.ingot.setAlloy(output, metals.drain(1.0));
                 world.send(new PacketEntityChange(this));
             }
-        }
-        ItemStack output = inventory.item(1);
-        Material outputType = output.material();
-        if (outputType == materials.mold && output.data() == 1) {
-            temperature = FastMath.max(temperature,
-                    input.metaData("Vanilla").getFloat("Temperature"));
-            output.setMaterial(materials.ingot, 0);
-            output.metaData("Vanilla").setDouble("Temperature", temperature);
-            materials.ingot.setAlloy(output, metals.drain(1.0));
-            world.send(new PacketEntityChange(this));
-        }
+        });
     }
 }

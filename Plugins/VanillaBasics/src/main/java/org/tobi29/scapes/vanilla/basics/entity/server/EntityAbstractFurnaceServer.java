@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.entity.server;
 
 import org.tobi29.scapes.block.Inventory;
@@ -89,7 +88,7 @@ public abstract class EntityAbstractFurnaceServer
             heatWait += 0.05;
             temperature /= temperatureFalloff;
             temperature = FastMath.max(10, temperature);
-            synchronized (this) {
+            inventories.access("Container", inventory -> {
                 for (int i = 0; i < fuel.length; i++) {
                     if (fuel[i] > 0) {
                         temperature += fuelTemperature[i];
@@ -104,8 +103,7 @@ public abstract class EntityAbstractFurnaceServer
                                 fuelTemperature[i] =
                                         fuel.fuelTemperature(item) * fuelHeat;
                                 inventory.item(i).take(1);
-                                world
-                                        .send(new PacketEntityChange(this));
+                                world.send(new PacketEntityChange(this));
                             }
                         }
                     }
@@ -123,12 +121,11 @@ public abstract class EntityAbstractFurnaceServer
                         int j = i;
                         inventory.item(fuel.length).take(1).ifPresent(item -> {
                             inventory.item(j).stack(item);
-                            world
-                                    .send(new PacketEntityChange(this));
+                            world.send(new PacketEntityChange(this));
                         });
                     }
                 }
-            }
+            });
             if (temperature > maximumTemperature) {
                 world.getTerrain().queue(handler -> handler
                         .typeData(pos.intX(), pos.intY(), pos.intZ(),

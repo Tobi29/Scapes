@@ -16,13 +16,10 @@
 package org.tobi29.scapes.entity.server;
 
 import java8.util.stream.Stream;
-import org.tobi29.scapes.block.Inventory;
-import org.tobi29.scapes.engine.utils.Pair;
+import org.tobi29.scapes.block.InventoryContainer;
 
 public interface EntityContainerServer {
-    Inventory inventory(String id);
-
-    Stream<Pair<String, Inventory>> inventories();
+    InventoryContainer inventories();
 
     void addViewer(MobPlayerServer player);
 

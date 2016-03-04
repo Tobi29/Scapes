@@ -16,7 +16,6 @@
 package org.tobi29.scapes.packets;
 
 import java8.util.Optional;
-import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
@@ -78,34 +77,35 @@ public class PacketInventoryInteraction extends Packet implements PacketServer {
                 chestE.viewers().filter(check -> check == playerE).findAny()
                         .isPresent()) {
             synchronized (chestE) {
-                Inventory chestI = chestE.inventory(id);
-                ItemStack hold = playerE.inventory("Hold").item(0);
-                ItemStack item = chestI.item(slot);
-                switch (type) {
-                    case LEFT:
-                        if (hold.isEmpty()) {
-                            chestI.item(slot).take().ifPresent(hold::stack);
-                        } else {
-                            if (item.stack(hold) == 0) {
-                                Optional<ItemStack> swap = item.take();
-                                item.stack(hold);
-                                swap.ifPresent(hold::stack);
+                chestE.inventories().modify(id, chestI -> playerE.inventories()
+                        .modify("Hold", playerI -> {
+                            ItemStack hold = playerI.item(0);
+                            ItemStack item = chestI.item(slot);
+                            switch (type) {
+                                case LEFT:
+                                    if (hold.isEmpty()) {
+                                        chestI.item(slot).take()
+                                                .ifPresent(hold::stack);
+                                    } else {
+                                        if (item.stack(hold) == 0) {
+                                            Optional<ItemStack> swap =
+                                                    item.take();
+                                            item.stack(hold);
+                                            swap.ifPresent(hold::stack);
+                                        }
+                                    }
+                                    break;
+                                case RIGHT:
+                                    if (hold.isEmpty()) {
+                                        item.take((int) FastMath
+                                                .ceil(item.amount() / 2.0))
+                                                .ifPresent(hold::stack);
+                                    } else {
+                                        hold.take(1).ifPresent(item::stack);
+                                    }
+                                    break;
                             }
-                        }
-                        world.send(new PacketUpdateInventory(playerE, "Hold"));
-                        world.send(new PacketUpdateInventory(chestE, id));
-                        break;
-                    case RIGHT:
-                        if (hold.isEmpty()) {
-                            item.take((int) FastMath.ceil(item.amount() / 2.0))
-                                    .ifPresent(hold::stack);
-                        } else {
-                            hold.take(1).ifPresent(item::stack);
-                        }
-                        world.send(new PacketUpdateInventory(playerE, "Hold"));
-                        world.send(new PacketUpdateInventory(chestE, id));
-                        break;
-                }
+                        }));
             }
         }
     }

@@ -17,9 +17,9 @@ package org.tobi29.scapes.vanilla.basics.entity.server;
 
 import java8.util.stream.Stream;
 import org.tobi29.scapes.block.Inventory;
+import org.tobi29.scapes.block.InventoryContainer;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
-import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
@@ -27,35 +27,27 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.server.EntityContainerServer;
 import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
+import org.tobi29.scapes.packets.PacketUpdateInventory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class EntityAbstractContainerServer extends EntityServer
         implements EntityContainerServer {
-    protected final Inventory inventory;
-    protected final Map<String, Inventory> inventories =
-            new ConcurrentHashMap<>();
+    protected final InventoryContainer inventories;
     protected final List<MobPlayerServer> viewers = new ArrayList<>();
 
     protected EntityAbstractContainerServer(WorldServer world, Vector3 pos,
             Inventory inventory) {
         super(world, pos);
-        this.inventory = inventory;
-        inventories.put("Container", inventory);
+        inventories = new InventoryContainer(
+                id -> world.send(new PacketUpdateInventory(this, id)));
+        inventories.add("Container", inventory);
     }
 
     @Override
-    public Inventory inventory(String id) {
-        return inventories.get(id);
-    }
-
-    @Override
-    public Stream<Pair<String, Inventory>> inventories() {
-        return Streams.of(inventories.entrySet())
-                .map(entry -> new Pair<>(entry.getKey(), entry.getValue()));
+    public InventoryContainer inventories() {
+        return inventories;
     }
 
     @Override
@@ -79,8 +71,8 @@ public abstract class EntityAbstractContainerServer extends EntityServer
     public TagStructure write() {
         TagStructure tagStructure = super.write();
         TagStructure inventoryTag = tagStructure.getStructure("Inventory");
-        Streams.of(inventories.entrySet()).forEach(entry -> inventoryTag
-                .setStructure(entry.getKey(), entry.getValue().save()));
+        inventories.forEach((id, inventory) -> inventoryTag
+                .setStructure(id, inventory.save()));
         return tagStructure;
     }
 
@@ -88,20 +80,20 @@ public abstract class EntityAbstractContainerServer extends EntityServer
     public void read(TagStructure tagStructure) {
         super.read(tagStructure);
         TagStructure inventoryTag = tagStructure.getStructure("Inventory");
-        Streams.of(inventories.entrySet()).forEach(entry -> entry.getValue()
-                .load(inventoryTag.getStructure(entry.getKey())));
+        inventories.forEach((id, inventory) -> inventory
+                .load(inventoryTag.getStructure(id)));
     }
 
     @Override
     public void updateTile(TerrainServer terrain, int x, int y, int z) {
         WorldServer world = terrain.world();
         if (!isValidOn(terrain, x, y, z)) {
-            synchronized (this) {
+            inventories.forEach(inventory -> {
                 for (int i = 0; i < inventory.size(); i++) {
                     world.dropItem(inventory.item(i),
                             pos.now().plus(new Vector3d(0.5, 0.5, 0.5)));
                 }
-            }
+            });
             world.deleteEntity(this);
         }
     }

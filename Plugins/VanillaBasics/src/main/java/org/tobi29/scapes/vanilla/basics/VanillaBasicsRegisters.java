@@ -31,7 +31,6 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.packets.Packet;
-import org.tobi29.scapes.packets.PacketUpdateInventory;
 import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.command.CommandRegistry;
@@ -187,10 +186,8 @@ class VanillaBasicsRegisters {
                 MetalType metalType = plugin.metalType(metal);
                 ItemStack item = new ItemStack(materials.ingot, data, amount);
                 IngotUtil.createIngot(item, metalType, temperature);
-                player.mob().inventory("Container").add(item);
-                player.mob().world()
-                        .send(new PacketUpdateInventory(player.mob(),
-                                "Container"));
+                player.mob().inventories()
+                        .modify("Container", inventory -> inventory.add(item));
             });
         });
 
@@ -218,10 +215,8 @@ class VanillaBasicsRegisters {
                 if (!ToolUtil.createTool(plugin, item, kind)) {
                     Command.error("Unknown tool kind: " + kind);
                 }
-                player.mob().inventory("Container").add(item);
-                player.mob().world()
-                        .send(new PacketUpdateInventory(player.mob(),
-                                "Container"));
+                player.mob().inventories()
+                        .modify("Container", inventory -> inventory.add(item));
             });
         });
 
@@ -320,8 +315,7 @@ class VanillaBasicsRegisters {
                 registry.<StoneType>get("VanillaBasics", "StoneType");
         registerRecipesBasics(plugin, registry, treeRegistry, stoneRegistry);
         registerRecipesStone(plugin, registry);
-        registerRecipesFood(plugin, cropRegistry,
-                stoneRegistry);
+        registerRecipesFood(plugin, cropRegistry, stoneRegistry);
         registerRecipesMetal(plugin, stoneRegistry);
         registerRecipesIron(plugin);
     }
@@ -520,7 +514,8 @@ class VanillaBasicsRegisters {
         plugin.registerCraftingRecipe(recipeType);
     }
 
-    static void registerRecipesFood(VanillaBasics plugin, GameRegistry.Registry<CropType> cropRegistry,
+    static void registerRecipesFood(VanillaBasics plugin,
+            GameRegistry.Registry<CropType> cropRegistry,
             GameRegistry.Registry<StoneType> stoneRegistry) {
         VanillaMaterial materials = plugin.materials;
         CraftingRecipeType recipeType = new CraftingRecipeType() {
@@ -581,7 +576,8 @@ class VanillaBasicsRegisters {
         plugin.registerCraftingRecipe(recipeType);
     }
 
-    static void registerRecipesMetal(VanillaBasics plugin, GameRegistry.Registry<StoneType> stoneRegistry) {
+    static void registerRecipesMetal(VanillaBasics plugin,
+            GameRegistry.Registry<StoneType> stoneRegistry) {
         VanillaMaterial materials = plugin.materials;
         CraftingRecipeType recipeType = new CraftingRecipeType() {
             @Override

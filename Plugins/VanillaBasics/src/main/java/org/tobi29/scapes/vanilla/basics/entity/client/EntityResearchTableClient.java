@@ -17,6 +17,7 @@ package org.tobi29.scapes.vanilla.basics.entity.client;
 
 import java8.util.Optional;
 import org.tobi29.scapes.block.Inventory;
+import org.tobi29.scapes.block.InventoryContainer;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;

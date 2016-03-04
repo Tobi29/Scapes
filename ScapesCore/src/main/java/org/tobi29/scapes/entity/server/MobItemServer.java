@@ -22,7 +22,6 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
-import org.tobi29.scapes.packets.PacketUpdateInventory;
 
 public class MobItemServer extends MobServer {
     private final ItemStack item;
@@ -72,10 +71,9 @@ public class MobItemServer extends MobServer {
                     .forEach(entity -> {
                         world.playSound("Scapes:sound/entity/mob/Item.ogg",
                                 this);
-                        item.setAmount(item.amount() -
-                                entity.inventory("Container").add(item));
-                        world.send(
-                                new PacketUpdateInventory(entity, "Container"));
+                        entity.inventories().modify("Container",
+                                inventory -> item.setAmount(
+                                        item.amount() - inventory.add(item)));
                     });
             stackwait -= delta;
             if (stackwait <= 0) {

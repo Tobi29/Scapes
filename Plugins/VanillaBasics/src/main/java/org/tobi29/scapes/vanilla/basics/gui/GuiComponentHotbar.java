@@ -36,60 +36,63 @@ public class GuiComponentHotbar extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, double width, double height) {
+    public void renderComponent(GL gl, Shader shader, double width,
+            double height) {
         MatrixStack matrixStack = gl.matrixStack();
-        for (int i = 0; i < 10; i++) {
-            if (i == player.inventorySelectLeft()) {
-                gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, 0.0f, 0.0f,
-                        0.8f);
-                Matrix matrix = matrixStack.push();
-                matrix.translate((float) (i * (height + 10.0)), 0, 0.0f);
-                gl.textures().unbind(gl);
-                vao2.render(gl, shader);
-                vao3.render(gl, shader);
-                org.tobi29.scapes.client.gui.GuiUtils
-                        .renderItem(0.0f, 0.0f, (float) height, (float) height,
-                                player.inventory("Container").item(i), gl,
-                                shader, gui.style().font());
-                gl.textures().bind("Scapes:image/gui/HotbarLeft", gl);
-                gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
-                        1.0f);
-                vao1.render(gl, shader);
-                matrixStack.pop();
-            } else if (i == player.inventorySelectRight()) {
-                gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, 0.0f, 0.0f,
-                        0.8f);
-                Matrix matrix = matrixStack.push();
-                matrix.translate((float) (i * (height + 10.0)), 0.0f, 0.0f);
-                gl.textures().unbind(gl);
-                vao2.render(gl, shader);
-                vao3.render(gl, shader);
-                org.tobi29.scapes.client.gui.GuiUtils
-                        .renderItem(0.0f, 0.0f, (float) height, (float) height,
-                                player.inventory("Container").item(i), gl,
-                                shader, gui.style().font());
-                gl.textures().bind("Scapes:image/gui/HotbarRight", gl);
-                gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
-                        1.0f);
-                vao1.render(gl, shader);
-                matrixStack.pop();
-            } else {
-                gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, 0.0f, 0.0f,
-                        0.6f);
-                Matrix matrix = matrixStack.push();
-                matrix.translate((float) (i * (height + 10.0)), 0.0f, 0.0f);
-                gl.textures().unbind(gl);
-                vao2.render(gl, shader);
-                vao3.render(gl, shader);
-                gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
-                        1.0f);
-                org.tobi29.scapes.client.gui.GuiUtils
-                        .renderItem(0.0f, 0.0f, (float) height, (float) height,
-                                player.inventory("Container").item(i), gl,
-                                shader, gui.style().font());
-                matrixStack.pop();
+        player.inventories().access("Container", inventory -> {
+            for (int i = 0; i < 10; i++) {
+                if (i == player.inventorySelectLeft()) {
+                    gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, 0.0f, 0.0f,
+                            0.8f);
+                    Matrix matrix = matrixStack.push();
+                    matrix.translate((float) (i * (height + 10.0)), 0, 0.0f);
+                    gl.textures().unbind(gl);
+                    vao2.render(gl, shader);
+                    vao3.render(gl, shader);
+                    org.tobi29.scapes.client.gui.GuiUtils
+                            .renderItem(0.0f, 0.0f, (float) height,
+                                    (float) height, inventory.item(i), gl,
+                                    shader, gui.style().font());
+                    gl.textures().bind("Scapes:image/gui/HotbarLeft", gl);
+                    gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
+                            1.0f);
+                    vao1.render(gl, shader);
+                    matrixStack.pop();
+                } else if (i == player.inventorySelectRight()) {
+                    gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, 0.0f, 0.0f,
+                            0.8f);
+                    Matrix matrix = matrixStack.push();
+                    matrix.translate((float) (i * (height + 10.0)), 0.0f, 0.0f);
+                    gl.textures().unbind(gl);
+                    vao2.render(gl, shader);
+                    vao3.render(gl, shader);
+                    org.tobi29.scapes.client.gui.GuiUtils
+                            .renderItem(0.0f, 0.0f, (float) height,
+                                    (float) height, inventory.item(i), gl,
+                                    shader, gui.style().font());
+                    gl.textures().bind("Scapes:image/gui/HotbarRight", gl);
+                    gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
+                            1.0f);
+                    vao1.render(gl, shader);
+                    matrixStack.pop();
+                } else {
+                    gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, 0.0f, 0.0f,
+                            0.6f);
+                    Matrix matrix = matrixStack.push();
+                    matrix.translate((float) (i * (height + 10.0)), 0.0f, 0.0f);
+                    gl.textures().unbind(gl);
+                    vao2.render(gl, shader);
+                    vao3.render(gl, shader);
+                    gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
+                            1.0f);
+                    org.tobi29.scapes.client.gui.GuiUtils
+                            .renderItem(0.0f, 0.0f, (float) height,
+                                    (float) height, inventory.item(i), gl,
+                                    shader, gui.style().font());
+                    matrixStack.pop();
+                }
             }
-        }
+        });
     }
 
     @Override

@@ -43,7 +43,7 @@ public class EntityForgeServer extends EntityAbstractFurnaceServer {
         VanillaBasics plugin =
                 (VanillaBasics) world.plugins().plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
-        synchronized (this) {
+        inventories.access("Container", inventory -> {
             int max = items + fuel.length + 1;
             for (int i = fuel.length + 1; i < max; i++) {
                 ItemStack item = inventory.item(i);
@@ -63,7 +63,7 @@ public class EntityForgeServer extends EntityAbstractFurnaceServer {
                     }
                 }
             }
-        }
+        });
         int xx = pos.intX();
         int yy = pos.intY();
         int zz = pos.intZ();

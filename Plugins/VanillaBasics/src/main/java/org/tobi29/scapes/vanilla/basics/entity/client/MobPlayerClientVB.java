@@ -17,10 +17,12 @@ package org.tobi29.scapes.vanilla.basics.entity.client;
 
 import java8.util.Optional;
 import org.tobi29.scapes.block.Inventory;
+import org.tobi29.scapes.block.InventoryContainer;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
+import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.Frustum;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
@@ -34,6 +36,8 @@ import org.tobi29.scapes.entity.model.MobModel;
 
 public class MobPlayerClientVB extends MobPlayerClient
         implements EntityContainerClient {
+    protected final InventoryContainer inventories;
+
     public MobPlayerClientVB(WorldClient world) {
         this(world, Vector3d.ZERO, Vector3d.ZERO, 0.0, 0.0, "");
     }
@@ -43,18 +47,23 @@ public class MobPlayerClientVB extends MobPlayerClient
         super(world, pos, speed, new AABB(-0.4, -0.4, -1, 0.4, 0.4, 0.9), 100,
                 100, new Frustum(90, 1, 0.1, 24), new Frustum(50, 1, 0.1, 2),
                 nickname);
+        inventories = new InventoryContainer();
+        inventories.add("Container", new Inventory(registry, 40));
+        inventories.add("Hold", new Inventory(registry, 1));
         rot.setX(xRot);
         rot.setZ(zRot);
     }
 
     @Override
     public ItemStack leftWeapon() {
-        return inventoryContainer.item(inventorySelectLeft);
+        return inventories.accessReturn("Container",
+                inventory -> inventory.item(inventorySelectLeft));
     }
 
     @Override
     public ItemStack rightWeapon() {
-        return inventoryContainer.item(inventorySelectRight);
+        return inventories.accessReturn("Container",
+                inventory -> inventory.item(inventorySelectRight));
     }
 
     @Override
@@ -75,13 +84,21 @@ public class MobPlayerClientVB extends MobPlayerClient
     }
 
     @Override
-    public Inventory inventory(String id) {
-        return inventories.get(id);
+    public InventoryContainer inventories() {
+        return inventories;
     }
 
     @Override
     public Optional<MobModel> createModel() {
         Texture texture = world.scene().skinStorage().get(skin);
         return Optional.of(new MobLivingModelHuman(this, texture));
+    }
+
+    @Override
+    public void read(TagStructure tagStructure) {
+        super.read(tagStructure);
+        TagStructure inventoryTag = tagStructure.getStructure("Inventory");
+        inventories.forEach((id, inventory) -> inventory
+                .load(inventoryTag.getStructure(id)));
     }
 }

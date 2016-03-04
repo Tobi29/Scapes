@@ -2,6 +2,7 @@ package org.tobi29.scapes.server.extension.base;
 
 import java8.util.Optional;
 import org.tobi29.scapes.block.GameRegistry;
+import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.Material;
 import org.tobi29.scapes.chunk.WorldServer;
@@ -11,7 +12,6 @@ import org.tobi29.scapes.engine.utils.io.ProcessStream;
 import org.tobi29.scapes.engine.utils.io.tag.json.TagStructureJSON;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
-import org.tobi29.scapes.packets.PacketUpdateInventory;
 import org.tobi29.scapes.server.MessageLevel;
 import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.command.Command;
@@ -51,10 +51,8 @@ public class DebugCommandsExtension extends ServerExtension {
                 Material material =
                         Command.require(gameRegistry::material, materialName);
                 ItemStack item = new ItemStack(material, data, amount);
-                player.mob().inventory("Container").add(item);
-                player.mob().world()
-                        .send(new PacketUpdateInventory(player.mob(),
-                                "Container"));
+                player.mob().inventories()
+                        .modify("Container", inventory -> inventory.add(item));
             });
         });
 
@@ -64,10 +62,8 @@ public class DebugCommandsExtension extends ServerExtension {
             Streams.of(playerNames).forEach(playerName -> commands.add(() -> {
                 PlayerConnection player =
                         Command.require(connection::playerByName, playerName);
-                player.mob().inventory("Container").clear();
-                player.mob().world()
-                        .send(new PacketUpdateInventory(player.mob(),
-                                "Container"));
+                player.mob().inventories()
+                        .modify("Container", Inventory::clear);
             }));
         });
 

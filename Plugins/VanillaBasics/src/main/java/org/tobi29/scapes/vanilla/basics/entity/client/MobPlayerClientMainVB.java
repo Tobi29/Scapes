@@ -18,6 +18,7 @@ package org.tobi29.scapes.vanilla.basics.entity.client;
 import java8.util.Optional;
 import org.tobi29.scapes.Debug;
 import org.tobi29.scapes.block.Inventory;
+import org.tobi29.scapes.block.InventoryContainer;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.Playlist;
@@ -49,6 +50,7 @@ import org.tobi29.scapes.vanilla.basics.gui.GuiPlayerInventory;
 
 public class MobPlayerClientMainVB extends MobPlayerClientMain
         implements EntityContainerClient {
+    protected final InventoryContainer inventories;
     protected long punchLeft = -1, punchRight = -1;
     protected float chargeLeft, chargeRight;
 
@@ -57,6 +59,9 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain
         super(world, pos, speed, new AABB(-0.4, -0.4, -1, 0.4, 0.4, 0.9), 100,
                 100, new Frustum(90, 1, 0.1, 24), new Frustum(50, 1, 0.1, 2),
                 nickname);
+        inventories = new InventoryContainer();
+        inventories.add("Container", new Inventory(registry, 40));
+        inventories.add("Hold", new Inventory(registry, 1));
         rot.setX(xRot);
         rot.setZ(zRot);
     }
@@ -247,12 +252,14 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain
 
     @Override
     public ItemStack leftWeapon() {
-        return inventoryContainer.item(inventorySelectLeft);
+        return inventories.accessReturn("Container",
+                inventory -> inventory.item(inventorySelectLeft));
     }
 
     @Override
     public ItemStack rightWeapon() {
-        return inventoryContainer.item(inventorySelectRight);
+        return inventories.accessReturn("Container",
+                inventory -> inventory.item(inventorySelectRight));
     }
 
     @Override
@@ -282,8 +289,8 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain
     }
 
     @Override
-    public Inventory inventory(String id) {
-        return inventories.get(id);
+    public InventoryContainer inventories() {
+        return inventories;
     }
 
     @Override
@@ -291,5 +298,13 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain
         Texture texture = world.scene().skinStorage().get(skin);
         return Optional
                 .of(new MobLivingModelHuman(this, texture, false, true, true));
+    }
+
+    @Override
+    public void read(TagStructure tagStructure) {
+        super.read(tagStructure);
+        TagStructure inventoryTag = tagStructure.getStructure("Inventory");
+        inventories.forEach((id, inventory) -> inventory
+                .load(inventoryTag.getStructure(id)));
     }
 }

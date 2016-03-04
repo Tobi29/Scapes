@@ -29,7 +29,6 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.entity.server.MobServer;
-import org.tobi29.scapes.packets.PacketUpdateInventory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -82,16 +81,16 @@ public abstract class BlockType extends Material {
                     }
                 }
                 if (flag) {
-                    handler.data(place.intX(), place.intY(), place.intZ(),
-                            item.data());
-                    if (place(handler, place.intX(), place.intY(), place.intZ(),
-                            face, entity)) {
-                        handler.type(place.intX(), place.intY(), place.intZ(),
-                                this);
-                        item.setAmount(item.amount() - 1);
-                        handler.world().send(new PacketUpdateInventory(entity,
-                                "Container"));
-                    }
+                    entity.inventories().modify("Container", inventory -> {
+                        handler.data(place.intX(), place.intY(), place.intZ(),
+                                item.data());
+                        if (place(handler, place.intX(), place.intY(),
+                                place.intZ(), face, entity)) {
+                            handler.type(place.intX(), place.intY(),
+                                    place.intZ(), this);
+                            item.setAmount(item.amount() - 1);
+                        }
+                    });
                 }
             }
         });

@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.vanilla.basics.gui;
 
-import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityChestClient;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
@@ -24,16 +23,17 @@ public class GuiChestInventory extends GuiContainerInventory {
     public GuiChestInventory(EntityChestClient container,
             MobPlayerClientMainVB player, GuiStyle style) {
         super("Chest", player, container, style);
-        Inventory inventory = container.inventory("Container");
-        int x = -1, y = 0, xx, yy = 91;
-        for (int i = 0; i < inventory.size(); i++) {
-            if (++x >= 10) {
-                y++;
-                yy = y * 35 + 91;
-                x = 0;
+        container.inventories().access("Container", inventory -> {
+            int x = -1, y = 0, xx, yy = 91;
+            for (int i = 0; i < inventory.size(); i++) {
+                if (++x >= 10) {
+                    y++;
+                    yy = y * 35 + 91;
+                    x = 0;
+                }
+                xx = x * 35 + 27;
+                buttonContainer(xx, yy, 30, 30, i);
             }
-            xx = x * 35 + 27;
-            buttonContainer(xx, yy, 30, 30, i);
-        }
+        });
     }
 }

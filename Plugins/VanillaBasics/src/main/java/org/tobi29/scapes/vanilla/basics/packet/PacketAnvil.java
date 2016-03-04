@@ -25,7 +25,6 @@ import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketServer;
-import org.tobi29.scapes.packets.PacketUpdateInventory;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityAnvilClient;
@@ -75,15 +74,14 @@ public class PacketAnvil extends Packet implements PacketServer {
                     .isPresent()) {
                 VanillaBasics plugin =
                         (VanillaBasics) world.plugins().plugin("VanillaBasics");
-                synchronized (anvil) {
-                    if (!"Hammer".equals(anvil.inventory("Container").item(1)
-                            .material()
-                            .toolType(anvil.inventory("Container").item(1)))) {
+                anvil.inventories().modify("Container", anvilI -> {
+                    if (!"Hammer".equals(anvilI.item(1).material()
+                            .toolType(anvilI.item(1)))) {
                         return;
                     }
                     world.playSound("VanillaBasics:sound/blocks/Metal.ogg",
                             anvil);
-                    ItemStack ingredient = anvil.inventory("Container").item(0);
+                    ItemStack ingredient = anvilI.item(0);
                     Material type = ingredient.material();
                     if (type instanceof ItemIngot) {
                         float meltingPoint =
@@ -103,10 +101,6 @@ public class PacketAnvil extends Packet implements PacketServer {
                             ingredient.setData(0);
                             ToolUtil.createTool(plugin, ingredient, id);
                         }
-                        Packet packet =
-                                new PacketUpdateInventory(anvil, "Container");
-                        anvil.viewers().map(MobPlayerServer::connection)
-                                .forEach(connection -> connection.send(packet));
                     } else if (type instanceof ItemOreChunk) {
                         if (id == 0 && ingredient.data() == 8) {
                             float meltingPoint = ((ItemHeatable) type)
@@ -118,14 +112,9 @@ public class PacketAnvil extends Packet implements PacketServer {
                                 return;
                             }
                             ingredient.setData(9);
-                            Packet packet = new PacketUpdateInventory(anvil,
-                                    "Container");
-                            anvil.viewers().map(MobPlayerServer::connection)
-                                    .forEach(connection -> connection
-                                            .send(packet));
                         }
                     }
-                }
+                });
             }
         }
     }

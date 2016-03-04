@@ -135,12 +135,11 @@ public class PacketInteraction extends Packet
                 player.send(new PacketOpenGui(player.mob()));
                 break;
             case CLOSE_INVENTORY:
-                player.mob().inventory("Hold").item(0).take()
-                        .ifPresent(drop -> {
-                            player.mob().dropItem(drop);
-                            world.send(new PacketUpdateInventory(player.mob(),
-                                    "Hold"));
-                        });
+                player.mob().inventories().modify("Hold",
+                        inventory -> inventory.item(0).take()
+                                .ifPresent(drop -> {
+                                    player.mob().dropItem(drop);
+                                }));
                 player.send(new PacketCloseGui());
                 break;
             default:

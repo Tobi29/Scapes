@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.entity.client;
 
 import java8.util.Optional;
-import org.tobi29.scapes.block.Inventory;
+import org.tobi29.scapes.block.InventoryContainer;
 import org.tobi29.scapes.engine.gui.Gui;
 
 public interface EntityContainerClient {
     Optional<Gui> gui(MobPlayerClientMain player);
 
-    Inventory inventory(String id);
+    InventoryContainer inventories();
 }

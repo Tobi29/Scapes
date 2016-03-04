@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.vanilla.basics.packet;
 
-import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
@@ -25,7 +24,6 @@ import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketServer;
-import org.tobi29.scapes.packets.PacketUpdateInventory;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityQuernClient;
@@ -71,18 +69,13 @@ public class PacketQuern extends Packet implements PacketServer {
                 VanillaBasics plugin =
                         (VanillaBasics) world.plugins().plugin("VanillaBasics");
                 VanillaMaterial materials = plugin.getMaterials();
-                synchronized (quern) {
-                    Inventory inventory = quern.inventory("Container");
+                quern.inventories().modify("Container", inventory -> {
                     ItemStack item = inventory.item(0);
                     if (item.material() == materials.cropDrop) {
                         item.setMaterial(materials.grain);
                         item.setAmount(item.amount() << 2);
-                        Packet packet =
-                                new PacketUpdateInventory(quern, "Container");
-                        quern.viewers().map(MobPlayerServer::connection)
-                                .forEach(connection -> connection.send(packet));
                     }
-                }
+                });
             }
         }
     }

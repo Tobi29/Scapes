@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
 import org.tobi29.scapes.block.Inventory;
@@ -76,15 +75,17 @@ public abstract class EntityAbstractFurnaceClient
                 }
             }
             int max = items + fuel.length + 1;
-            for (int i = fuel.length + 1; i < max; i++) {
-                if (inventory.item(i).amount() == 1) {
-                    Material type = inventory.item(i).material();
-                    if (type instanceof ItemHeatable) {
-                        ((ItemHeatable) type)
-                                .heat(inventory.item(i), temperature);
+            inventories.access("Container", inventory -> {
+                for (int i = fuel.length + 1; i < max; i++) {
+                    if (inventory.item(i).amount() == 1) {
+                        Material type = inventory.item(i).material();
+                        if (type instanceof ItemHeatable) {
+                            ((ItemHeatable) type)
+                                    .heat(inventory.item(i), temperature);
+                        }
                     }
                 }
-            }
+            });
         }
     }
 }

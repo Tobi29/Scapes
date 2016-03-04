@@ -16,7 +16,7 @@
 package org.tobi29.scapes.vanilla.basics.generator;
 
 import org.tobi29.scapes.block.BlockType;
-import org.tobi29.scapes.block.Inventory;
+import org.tobi29.scapes.block.InventoryContainer;
 import org.tobi29.scapes.block.Material;
 import org.tobi29.scapes.chunk.EnvironmentServer;
 import org.tobi29.scapes.chunk.MobSpawner;
@@ -36,7 +36,6 @@ import org.tobi29.scapes.entity.CreatureType;
 import org.tobi29.scapes.entity.WieldMode;
 import org.tobi29.scapes.entity.server.*;
 import org.tobi29.scapes.packets.PacketEntityMetaData;
-import org.tobi29.scapes.packets.PacketUpdateInventory;
 import org.tobi29.scapes.server.MessageLevel;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityTornadoServer;
@@ -431,28 +430,19 @@ public class EnvironmentOverworldServer
             itemUpdateWait += 1.0;
             world.entities().forEach(entity -> {
                 if (entity instanceof EntityContainerServer) {
-                    ((EntityContainerServer) entity).inventories()
-                            .forEach(pair -> {
-                                Inventory inventory = pair.b;
-                                boolean flag = false;
-                                for (int i = 0; i < inventory.size(); i++) {
-                                    Material type =
-                                            inventory.item(i).material();
-                                    if (type instanceof ItemHeatable) {
-                                        ((ItemHeatable) type)
-                                                .cool(inventory.item(i));
-                                        flag = true;
-                                    }
-                                }
-                                if (flag) {
-                                    ((EntityContainerServer) entity).viewers()
-                                            .forEach(viewer -> viewer
-                                                    .connection()
-                                                    .send(new PacketUpdateInventory(
-                                                            (EntityContainerServer) entity,
-                                                            pair.a)));
-                                }
-                            });
+                    InventoryContainer inventories =
+                            ((EntityContainerServer) entity).inventories();
+                    inventories.forEachModify((id, inventory) -> {
+                        boolean flag = false;
+                        for (int i = 0; i < inventory.size(); i++) {
+                            Material type = inventory.item(i).material();
+                            if (type instanceof ItemHeatable) {
+                                ((ItemHeatable) type).cool(inventory.item(i));
+                                flag = true;
+                            }
+                        }
+                        return flag;
+                    });
                 } else if (entity instanceof MobItemServer) {
                     Material type = ((MobItemServer) entity).item().material();
                     if (type instanceof ItemHeatable) {

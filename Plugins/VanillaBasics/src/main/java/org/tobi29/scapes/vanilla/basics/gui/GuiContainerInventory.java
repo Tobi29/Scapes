@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.vanilla.basics.gui;
 
-import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.client.gui.GuiComponentItemButton;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.entity.client.EntityContainerClient;
@@ -38,12 +37,13 @@ public class GuiContainerInventory extends GuiInventory {
 
     protected void buttonContainer(int x, int y, int width, int height,
             String id, int slot) {
-        Inventory inventory = container.inventory(id);
-        GuiComponentItemButton button = pane.add(x, y, width, height,
-                p -> new GuiComponentItemButton(p, inventory.item(slot)));
-        button.onClickLeft(event -> leftClickContainer(id, slot));
-        button.onClickRight(event -> rightClickContainer(id, slot));
-        button.onHover(event -> setTooltip(inventory.item(slot)));
+        container.inventories().access(id, inventory -> {
+            GuiComponentItemButton button = pane.add(x, y, width, height,
+                    p -> new GuiComponentItemButton(p, inventory.item(slot)));
+            button.onClickLeft(event -> leftClickContainer(id, slot));
+            button.onClickRight(event -> rightClickContainer(id, slot));
+            button.onHover(event -> setTooltip(inventory.item(slot)));
+        });
     }
 
     protected void leftClickContainer(String id, int i) {

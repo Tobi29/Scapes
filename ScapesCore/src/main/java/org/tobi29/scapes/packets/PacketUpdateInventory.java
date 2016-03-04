@@ -16,6 +16,7 @@
 package org.tobi29.scapes.packets;
 
 import java8.util.Optional;
+import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
@@ -41,7 +42,7 @@ public class PacketUpdateInventory extends Packet implements PacketClient {
     public PacketUpdateInventory(EntityContainerServer entity, String id) {
         entityID = ((EntityServer) entity).entityID();
         this.id = id;
-        tag = entity.inventory(id).save();
+        tag = entity.inventories().accessReturn(id, Inventory::save);
     }
 
     @Override
@@ -77,7 +78,8 @@ public class PacketUpdateInventory extends Packet implements PacketClient {
             if (entity instanceof EntityContainerClient) {
                 EntityContainerClient entityContainer =
                         (EntityContainerClient) entity;
-                entityContainer.inventory(id).load(tag);
+                entityContainer.inventories()
+                        .access(id, inventory -> inventory.load(tag));
             }
         } else {
             client.send(new PacketRequestEntity(entityID));

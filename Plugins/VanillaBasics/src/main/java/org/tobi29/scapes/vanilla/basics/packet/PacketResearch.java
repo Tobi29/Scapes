@@ -70,50 +70,52 @@ public class PacketResearch extends Packet implements PacketServer {
                     .findAny().isPresent()) {
                 VanillaBasics plugin =
                         (VanillaBasics) world.plugins().plugin("VanillaBasics");
-                synchronized (researchTable) {
-                    ItemStack item =
-                            researchTable.inventory("Container").item(0);
-                    Material material = item.material();
-                    if (material instanceof ItemResearch) {
-                        for (String identifier : ((ItemResearch) material)
-                                .identifiers(item)) {
-                            player.mob().metaData("Vanilla")
-                                    .getStructure("Research")
-                                    .getStructure("Items")
-                                    .setBoolean(identifier, true);
-                        }
-                    } else {
-                        player.mob().metaData("Vanilla")
-                                .getStructure("Research").getStructure("Items")
-                                .setBoolean(
-                                        Integer.toHexString(material.itemID()),
-                                        true);
-                    }
-                    plugin.researchRecipes().forEach(recipe -> {
-                        if (!player.mob().metaData("Vanilla")
-                                .getStructure("Research")
-                                .getStructure("Finished")
-                                .getBoolean(recipe.name())) {
-                            if (!recipe.items()
-                                    .filter(requirement -> !player.mob()
-                                            .metaData("Vanilla")
+                researchTable.inventories()
+                        .access("Container", researchTableI -> {
+                            ItemStack item = researchTableI.item(0);
+                            Material material = item.material();
+                            if (material instanceof ItemResearch) {
+                                for (String identifier : ((ItemResearch) material)
+                                        .identifiers(item)) {
+                                    player.mob().metaData("Vanilla")
                                             .getStructure("Research")
                                             .getStructure("Items")
-                                            .getBoolean(requirement)).findAny()
-                                    .isPresent()) {
+                                            .setBoolean(identifier, true);
+                                }
+                            } else {
                                 player.mob().metaData("Vanilla")
                                         .getStructure("Research")
-                                        .getStructure("Finished")
-                                        .setBoolean(recipe.name(), true);
-                                player.mob().world()
-                                        .send(new PacketEntityMetaData(
-                                                player.mob(), "Vanilla"));
-                                player.send(new PacketNotification("Research",
-                                        recipe.text()));
+                                        .getStructure("Items").setBoolean(
+                                        Integer.toHexString(material.itemID()),
+                                        true);
                             }
-                        }
-                    });
-                }
+                            plugin.researchRecipes().forEach(recipe -> {
+                                if (!player.mob().metaData("Vanilla")
+                                        .getStructure("Research")
+                                        .getStructure("Finished")
+                                        .getBoolean(recipe.name())) {
+                                    if (!recipe.items()
+                                            .filter(requirement -> !player.mob()
+                                                    .metaData("Vanilla")
+                                                    .getStructure("Research")
+                                                    .getStructure("Items")
+                                                    .getBoolean(requirement))
+                                            .findAny().isPresent()) {
+                                        player.mob().metaData("Vanilla")
+                                                .getStructure("Research")
+                                                .getStructure("Finished")
+                                                .setBoolean(recipe.name(),
+                                                        true);
+                                        player.mob().world()
+                                                .send(new PacketEntityMetaData(
+                                                        player.mob(),
+                                                        "Vanilla"));
+                                        player.send(new PacketNotification(
+                                                "Research", recipe.text()));
+                                    }
+                                }
+                            });
+                        });
             }
         }
     }

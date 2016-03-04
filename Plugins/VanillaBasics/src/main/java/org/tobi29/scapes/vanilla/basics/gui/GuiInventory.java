@@ -16,7 +16,6 @@
 package org.tobi29.scapes.vanilla.basics.gui;
 
 import java8.util.Optional;
-import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.client.gui.GuiComponentItemButton;
 import org.tobi29.scapes.client.gui.GuiUtils;
@@ -71,12 +70,14 @@ public class GuiInventory extends GuiMenu {
 
     protected void button(int x, int y, int width, int height, String id,
             int slot) {
-        Inventory inventory = player.inventory(id);
-        GuiComponentItemButton button = inventoryPane.add(x, y, width, height,
-                p -> new GuiComponentItemButton(p, inventory.item(slot)));
-        button.onClickLeft(event -> leftClick(id, slot));
-        button.onClickRight(event -> rightClick(id, slot));
-        button.onHover(event -> setTooltip(inventory.item(slot)));
+        player.inventories().access(id, inventory -> {
+            GuiComponentItemButton button = inventoryPane
+                    .add(x, y, width, height, p -> new GuiComponentItemButton(p,
+                            inventory.item(slot)));
+            button.onClickLeft(event -> leftClick(id, slot));
+            button.onClickRight(event -> rightClick(id, slot));
+            button.onHover(event -> setTooltip(inventory.item(slot)));
+        });
     }
 
     protected void leftClick(String id, int i) {
@@ -103,12 +104,15 @@ public class GuiInventory extends GuiMenu {
             hoverName.render(gl, shader);
             matrixStack.pop();
         }
-        GuiUtils.renderItem((float) cursorX, (float) cursorY, 30.0f, 30.0f,
-                player.inventory("Hold").item(0), gl, shader, font);
+        player.inventories().access("Hold", inventory -> {
+            GuiUtils.renderItem((float) cursorX, (float) cursorY, 30.0f, 30.0f,
+                    inventory.item(0), gl, shader, font);
+        });
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine, double delta, Vector2 size) {
+    public void updateComponent(ScapesEngine engine, double delta,
+            Vector2 size) {
         Optional<GuiCursor> cursor = engine.guiController().cursors().findAny();
         if (cursor.isPresent()) {
             cursorX = cursor.get().guiX();
