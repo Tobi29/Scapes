@@ -37,7 +37,7 @@ public class ClientSkinStorage {
     private final ByteBuffer defaultSkin;
 
     public ClientSkinStorage(Texture defaultTexture) {
-        defaultSkin = defaultTexture.buffer();
+        defaultSkin = defaultTexture.buffer(0);
     }
 
     public void update(ClientConnection connection) {

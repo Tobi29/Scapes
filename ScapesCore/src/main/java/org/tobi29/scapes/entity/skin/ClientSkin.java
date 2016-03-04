@@ -32,7 +32,7 @@ public class ClientSkin extends TextureCustom {
     }
 
     public void setImage(ByteBuffer buffer) {
-        this.buffer = buffer;
+        setBuffer(buffer);
         markDisposed();
     }
 
