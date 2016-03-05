@@ -104,10 +104,9 @@ public class GuiInventory extends GuiMenu {
             hoverName.render(gl, shader);
             matrixStack.pop();
         }
-        player.inventories().access("Hold", inventory -> {
-            GuiUtils.renderItem((float) cursorX, (float) cursorY, 30.0f, 30.0f,
-                    inventory.item(0), gl, shader, font);
-        });
+        player.inventories().access("Hold", inventory -> GuiUtils
+                .renderItem((float) cursorX, (float) cursorY, 30.0f, 30.0f,
+                        inventory.item(0), gl, shader, font));
     }
 
     @Override
