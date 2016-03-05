@@ -531,6 +531,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                     sync.cap();
                 }
             }
+            thread = null;
         }, "Tick-" + id, TaskExecutor.Priority.MEDIUM);
     }
 
