@@ -30,7 +30,7 @@ import org.tobi29.scapes.entity.ai.AI;
 import org.tobi29.scapes.entity.ai.SimpleAI;
 import org.tobi29.scapes.packets.PacketMobDamage;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -65,7 +65,7 @@ public abstract class MobLivingServer extends MobServer {
         return new SimpleAI(this);
     }
 
-    public synchronized List<MobServer> attack(double damage) {
+    public synchronized List<MobLivingServer> attack(double damage) {
         double lookX = FastMath.cosTable(rot.doubleZ() * FastMath.PI / 180) *
                 FastMath.cosTable(rot.doubleX() * FastMath.PI / 180) * 6;
         double lookY = FastMath.sinTable(rot.doubleZ() * FastMath.PI / 180) *
@@ -76,10 +76,12 @@ public abstract class MobLivingServer extends MobServer {
                 pos.doubleY() + viewOffset.doubleY(),
                 pos.doubleZ() + viewOffset.doubleZ(), pos.doubleX() + lookX,
                 pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0, 0, 1);
-        List<MobServer> mobs = world.damageEntities(
-                Collections.singletonList((MobServer) this), hitField, damage);
-        Streams.of(mobs).filter(mob -> mob instanceof MobLivingServer)
+        List<MobLivingServer> mobs = new ArrayList<>();
+        world.entities(hitField)
+                .filter(mob -> mob instanceof MobLivingServer && mob != this)
                 .map(mob -> (MobLivingServer) mob).forEach(mob -> {
+            mobs.add(mob);
+            mob.damage(damage);
             mob.onNotice(this);
             double rad = rot.doubleZ() * FastMath.DEG_2_RAD;
             mob.push(FastMath.cosTable(rad) * 10.0,
@@ -88,7 +90,7 @@ public abstract class MobLivingServer extends MobServer {
         return mobs;
     }
 
-    public PointerPane block(double distance,Vector2 direction) {
+    public PointerPane block(double distance, Vector2 direction) {
         Pool<PointerPane> pointerPanes = world.getTerrain()
                 .pointerPanes(pos.intX(), pos.intY(), pos.intZ(),
                         (int) FastMath.ceil(distance));
@@ -206,17 +208,12 @@ public abstract class MobLivingServer extends MobServer {
                 pos.doubleY() + viewOffset.doubleY(),
                 pos.doubleZ() + viewOffset.doubleZ(), pos.doubleX() + lookX,
                 pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0, 0, 1);
-        world.entities().filter(entity -> entity instanceof MobServer)
-                .forEach(entity -> {
-                    MobServer mob = (MobServer) entity;
-                    if (viewField.inView(mob.aabb()) > 0) {
-                        if (!world.checkBlocked(pos.intX(), pos.intY(),
-                                pos.intZ(), mob.pos.intX(), mob.pos.intY(),
-                                mob.pos.intZ())) {
-                            onNotice(mob);
-                        }
-                    }
-                });
+        world.entities(viewField).forEach(entity -> {
+            if (!world.checkBlocked(pos.intX(), pos.intY(), pos.intZ(),
+                    entity.pos.intX(), entity.pos.intY(), entity.pos.intZ())) {
+                onNotice(entity);
+            }
+        });
         if (invincibleTicks >= 0.0) {
             invincibleTicks = FastMath.max(invincibleTicks - delta, 0.0);
         }

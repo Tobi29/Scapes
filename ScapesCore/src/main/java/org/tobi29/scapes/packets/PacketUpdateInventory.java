@@ -79,7 +79,7 @@ public class PacketUpdateInventory extends Packet implements PacketClient {
                 EntityContainerClient entityContainer =
                         (EntityContainerClient) entity;
                 entityContainer.inventories()
-                        .access(id, inventory -> inventory.load(tag));
+                        .modify(id, inventory -> inventory.load(tag));
             }
         } else {
             client.send(new PacketRequestEntity(entityID));

@@ -88,7 +88,7 @@ public abstract class EntityAbstractFurnaceServer
             heatWait += 0.05;
             temperature /= temperatureFalloff;
             temperature = FastMath.max(10, temperature);
-            inventories.access("Container", inventory -> {
+            inventories.modify("Container", inventory -> {
                 for (int i = 0; i < fuel.length; i++) {
                     if (fuel[i] > 0) {
                         temperature += fuelTemperature[i];

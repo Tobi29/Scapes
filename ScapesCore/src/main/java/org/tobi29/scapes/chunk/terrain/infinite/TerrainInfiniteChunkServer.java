@@ -16,11 +16,10 @@
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import java8.util.Optional;
-import java8.util.stream.Collectors;
+import java8.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.block.*;
-import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.generator.ChunkGenerator;
 import org.tobi29.scapes.chunk.generator.GeneratorOutput;
 import org.tobi29.scapes.engine.utils.Streams;
@@ -34,7 +33,9 @@ import org.tobi29.scapes.packets.PacketBlockChangeAir;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
@@ -43,6 +44,8 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
     private final Optional<TerrainInfiniteChunkServer> optional =
             Optional.of(this);
     private final TerrainInfiniteServer terrain;
+    private final Map<Integer, EntityServer> entities =
+            new ConcurrentHashMap<>();
     private final List<Update> delayedUpdates = new ArrayList<>();
     private long lastAccess = System.currentTimeMillis();
 
@@ -96,6 +99,21 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
     }
 
     public void updateServer(double delta) {
+        Streams.of(terrain.world().players()).forEach(entity -> {
+            int x = FastMath.floor(entity.x()) >> 4;
+            int y = FastMath.floor(entity.y()) >> 4;
+            if (x == pos.intX() && y == pos.intY()) {
+                addEntity(entity);
+            }
+        });
+        Streams.of(entities.values()).forEach(entity -> {
+            int x = FastMath.floor(entity.x()) >> 4;
+            int y = FastMath.floor(entity.y()) >> 4;
+            if (x != pos.intX() || y != pos.intY()) {
+                terrain.chunkS(x, y, chunk -> chunk.addEntity(entity));
+                removeEntity(entity);
+            }
+        });
         if (state.id >= State.LOADED.id) {
             synchronized (delayedUpdates) {
                 int i = 0;
@@ -128,12 +146,15 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
     }
 
     public TagStructure dispose() {
-        List<EntityServer> entities = entities();
-        WorldServer world = terrain.world();
-        Streams.of(entities)
-                .filter(entity -> !(entity instanceof MobPlayerServer))
-                .forEach(world::deleteEntity);
-        return save(false, entities);
+        return save(false);
+    }
+
+    public void addEntity(EntityServer entity) {
+        entities.put(entity.entityID(), entity);
+    }
+
+    public boolean removeEntity(EntityServer entity) {
+        return entities.remove(entity.entityID()) != null;
     }
 
     public void addDelayedUpdate(Update update) {
@@ -202,7 +223,10 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
             EntityServer entity =
                     EntityServer.make(tag.getInteger("ID"), terrain.world());
             entity.read(tag.getStructure("Data"));
-            terrain.world().addEntity(entity);
+            synchronized (terrain.entityLock) {
+                entity.setEntityID(terrain.freeEntityID());
+                addEntity(entity);
+            }
             long oldTick = tag.getLong("Tick");
             long newTick = terrain.world().tick();
             if (newTick > oldTick) {
@@ -227,10 +251,6 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
     }
 
     public TagStructure save(boolean packet) {
-        return save(packet, entities());
-    }
-
-    public TagStructure save(boolean packet, List<EntityServer> entities) {
         bID.compress();
         bData.compress();
         bLight.compress();
@@ -241,7 +261,7 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
         tagStructure.setList("BlockLight", bLight.save());
         List<TagStructure> entitiesTag = new ArrayList<>();
         GameRegistry registry = terrain.world().registry();
-        Streams.of(entities)
+        Streams.of(entities.values())
                 .filter(entity -> !(entity instanceof MobPlayerServer) ||
                         packet).forEach(entity -> {
             TagStructure entityTag = new TagStructure();
@@ -345,10 +365,11 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
         }
     }
 
-    private List<EntityServer> entities() {
-        return terrain.world().entities().filter(entity ->
-                FastMath.floor(entity.x() / 16.0) == pos.intX() &&
-                        FastMath.floor(entity.y() / 16.0) == pos.intY())
-                .collect(Collectors.toList());
+    public Stream<EntityServer> entities() {
+        return Streams.of(entities.values());
+    }
+
+    public Optional<EntityServer> entity(int id) {
+        return Optional.ofNullable(entities.get(id));
     }
 }

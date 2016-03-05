@@ -112,7 +112,7 @@ public class EntityFarmlandServer extends EntityServer {
         VanillaMaterial materials = plugin.getMaterials();
         if (terrain.type(pos.intX(), pos.intY(), pos.intZ()) !=
                 materials.farmland) {
-            world.deleteEntity(this);
+            world.removeEntity(this);
         } else if (stage > 0 &&
                 terrain.type(pos.intX(), pos.intY(), pos.intZ() + 1) !=
                         materials.crop) {

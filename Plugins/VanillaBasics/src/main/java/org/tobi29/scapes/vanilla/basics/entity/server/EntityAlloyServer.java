@@ -77,7 +77,7 @@ public class EntityAlloyServer extends EntityAbstractContainerServer {
                 (VanillaBasics) world.plugins().plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
         temperature /= 1.002f;
-        inventories.access("Container", inventory -> {
+        inventories.modify("Container", inventory -> {
             ItemStack input = inventory.item(0);
             Material inputType = input.material();
             if (inputType instanceof ItemIngot) {

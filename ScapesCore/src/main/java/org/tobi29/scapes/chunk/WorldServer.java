@@ -16,9 +16,8 @@
 package org.tobi29.scapes.chunk;
 
 import java8.util.Optional;
+import java8.util.function.Consumer;
 import java8.util.function.Function;
-import java8.util.function.Supplier;
-import java8.util.stream.Collectors;
 import java8.util.stream.Stream;
 import org.tobi29.scapes.block.BlockExplosive;
 import org.tobi29.scapes.block.BlockType;
@@ -28,6 +27,7 @@ import org.tobi29.scapes.chunk.generator.ChunkPopulator;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.Sync;
+import org.tobi29.scapes.engine.utils.ThreadLocalUtil;
 import org.tobi29.scapes.engine.utils.io.tag.MultiTag;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.AABB;
@@ -52,8 +52,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class WorldServer extends World implements MultiTag.ReadAndWrite {
-    private final Map<Integer, EntityServer> entities =
-            new ConcurrentHashMap<>();
+    protected static final ThreadLocal<Set<EntityServer>> ENTITY_SET =
+            ThreadLocalUtil.of(HashSet::new);
+    protected static final ThreadLocal<Set<MobServer>> MOB_SET =
+            ThreadLocalUtil.of(HashSet::new);
+    private static final int MAX_ENTITY_SIZE = 16;
     private final Collection<EntityListener> entityListeners =
             Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final Collection<MobSpawner> spawners =
@@ -107,96 +110,105 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
         spawn = environment.calculateSpawn(terrain);
     }
 
-    public List<MobServer> entities(List<MobServer> exceptions,
-            Frustum hitField) {
-        return Streams.of(entities.values())
-                .filter(entity -> entity instanceof MobServer)
-                .map(entity -> (MobServer) entity)
-                .filter(mob -> !exceptions.contains(mob) &&
-                        hitField.inView(mob.aabb()) > 0)
-                .collect(Collectors.toList());
-    }
-
-    public void addEntity(EntityServer add) {
-        synchronized (entities) {
-            addEntity(add, freeEntityID());
+    public void addEntity(EntityServer entity) {
+        terrain.addEntity(entity);
+        Streams.of(entityListeners)
+                .forEach(listener -> listener.listen(entity));
+        if (entity.id(plugins.registry()) >= 0) {
+            send(new PacketEntityAdd(entity, plugins.registry()));
         }
     }
 
-    public void addEntity(EntityServer add, int id) {
-        Streams.of(entityListeners).forEach(listener -> listener.listen(add));
-        add.setEntityID(id);
-        entities.put(id, add);
-        if (add.id(plugins.registry()) >= 0) {
-            send(new PacketEntityAdd(add, plugins.registry()));
+    public void removeEntity(EntityServer entity) {
+        if (entity != null) {
+            terrain.removeEntity(entity);
+            send(new PacketEntityDespawn(entity));
         }
     }
 
-    public void deleteEntity(EntityServer del) {
-        if (del != null) {
-            entities.remove(del.entityID());
-            send(new PacketEntityDespawn(del));
-        }
+    public Stream<MobServer> entities(Frustum frustum) {
+        double x = frustum.x();
+        double y = frustum.y();
+        double z = frustum.z();
+        double range = frustum.range();
+        int minX = FastMath.floor(x - range);
+        int minY = FastMath.floor(y - range);
+        int minZ = FastMath.floor(z - range);
+        int maxX = (int) FastMath.ceil(x + range);
+        int maxY = (int) FastMath.ceil(y + range);
+        int maxZ = (int) FastMath.ceil(z + range);
+        return mobs(entities -> terrain
+                .entitiesAtLeast(minX, minY, minZ, maxX, maxY, maxZ,
+                        stream -> stream
+                                .filter(entity -> entity instanceof MobServer)
+                                .map(entity -> (MobServer) entity)
+                                .filter(mob -> frustum.inView(mob.aabb()) > 0)
+                                .forEach(entities::add)));
     }
 
-    protected int freeEntityID() {
-        Random random = ThreadLocalRandom.current();
-        int out = 0;
-        while (out == 0) {
-            int i = random.nextInt(Integer.MAX_VALUE);
-            if (!entities.containsKey(i)) {
-                out = i;
-            }
-        }
-        return out;
+    public Stream<MobServer> entities(AABB aabb) {
+        int minX = FastMath.floor(aabb.minX) - MAX_ENTITY_SIZE;
+        int minY = FastMath.floor(aabb.minY) - MAX_ENTITY_SIZE;
+        int minZ = FastMath.floor(aabb.minZ) - MAX_ENTITY_SIZE;
+        int maxX = (int) FastMath.ceil(aabb.maxX) + MAX_ENTITY_SIZE;
+        int maxY = (int) FastMath.ceil(aabb.maxY) + MAX_ENTITY_SIZE;
+        int maxZ = (int) FastMath.ceil(aabb.maxZ) + MAX_ENTITY_SIZE;
+        return mobs(entities -> terrain
+                .entitiesAtLeast(minX, minY, minZ, maxX, maxY, maxZ,
+                        stream -> stream
+                                .filter(entity -> entity instanceof MobServer)
+                                .map(entity -> (MobServer) entity)
+                                .filter(mob -> aabb.inside(mob.pos()))
+                                .forEach(entities::add)));
     }
 
-    public List<MobServer> entities(AABB aabb) {
-        return Streams.of(entities.values())
-                .filter(entity -> entity instanceof MobServer)
-                .map(entity -> (MobServer) entity)
-                .filter(mob -> aabb.inside(mob.pos()))
-                .collect(Collectors.toList());
+    public Stream<EntityServer> entities(Vector3 pos, double range) {
+        int minX = FastMath.floor(pos.doubleX() - range);
+        int minY = FastMath.floor(pos.doubleY() - range);
+        int minZ = FastMath.floor(pos.doubleZ() - range);
+        int maxX = (int) FastMath.ceil(pos.doubleX() + range);
+        int maxY = (int) FastMath.ceil(pos.doubleY() + range);
+        int maxZ = (int) FastMath.ceil(pos.doubleZ() + range);
+        double rangeSqr = range * range;
+        return entities(entities -> terrain
+                .entitiesAtLeast(minX, minY, minZ, maxX, maxY, maxZ,
+                        stream -> stream.filter(entity ->
+                                FastMath.pointDistanceSqr(pos, entity.pos()) <=
+                                        rangeSqr).forEach(entities::add)));
     }
 
-    public List<EntityServer> entities(Vector3 pos, double rangeSqr) {
-        return Streams.of(entities.values()).filter(entity ->
-                FastMath.pointDistanceSqr(pos, entity.pos()) <= rangeSqr)
-                .collect(Collectors.toList());
+    public Stream<EntityServer> entities(int x, int y, int z) {
+        return entities(entities -> terrain
+                .entities(x, y, z, stream -> stream.forEach(entities::add)));
     }
 
-    public List<EntityServer> entities(int x, int y, int z) {
-        return Streams.of(entities.values())
-                .filter(entity -> FastMath.floor(entity.x()) == x &&
-                        FastMath.floor(entity.y()) == y &&
-                        FastMath.floor(entity.z()) == z)
-                .collect(Collectors.toList());
+    public Stream<EntityServer> entities(int minX, int minY, int minZ, int maxX,
+            int maxY, int maxZ) {
+        return entities(entities -> terrain
+                .entitiesAtLeast(minX, minY, minZ, maxX, maxY, maxZ,
+                        stream -> stream.forEach(entities::add)));
     }
 
-    public EntityServer entity(int i) {
-        return entities.get(i);
+    public Optional<EntityServer> entity(int i) {
+        return terrain.entity(i);
     }
 
     public Stream<EntityServer> entities() {
-        return Streams.of(entities.values());
+        return entities(entities -> terrain
+                .entities(stream -> stream.forEach(entities::add)));
     }
 
     public int mobs(CreatureType creatureType) {
-        int i = 0;
-        for (EntityServer entity : entities.values()) {
-            if (entity instanceof MobLivingServer) {
-                if (((MobLivingServer) entity).creatureType() == creatureType) {
-                    i++;
-                }
-            }
-        }
-        return i;
+        return (int) entities()
+                .filter(entity -> entity instanceof MobLivingServer)
+                .filter(entity -> ((MobLivingServer) entity).creatureType() ==
+                        creatureType).count();
     }
 
     private void update(double delta) {
         synchronized (terrain) {
             terrain.update(delta, spawners);
-            Streams.of(entities.values()).forEach(entity -> {
+            entities().forEach(entity -> {
                 entity.update(delta);
                 if (entity instanceof MobServer) {
                     ((MobServer) entity).move(delta);
@@ -205,7 +217,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                     if (((MobLivingServer) entity).isDead()) {
                         ((MobLivingServer) entity).onDeath();
                         if (!(entity instanceof MobPlayerServer)) {
-                            deleteEntity(entity);
+                            removeEntity(entity);
                         }
                     } else {
                         if (((MobLivingServer) entity).creatureType()
@@ -215,10 +227,10 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                             if (player != null) {
                                 if (FastMath.pointDistanceSqr(entity.pos(),
                                         player.pos()) > 16384.0) {
-                                    deleteEntity(entity);
+                                    removeEntity(entity);
                                 }
                             } else {
-                                deleteEntity(entity);
+                                removeEntity(entity);
                             }
                         }
                     }
@@ -228,14 +240,6 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
             taskExecutor.tick();
             tick++;
         }
-    }
-
-    public List<MobServer> damageEntities(List<MobServer> exceptions,
-            Frustum hitField, double damage) {
-        List<MobServer> entities = entities(exceptions, hitField);
-        Streams.of(entities).filter(entity -> entity instanceof MobLivingServer)
-                .forEach(entity -> ((MobLivingServer) entity).damage(damage));
-        return entities;
     }
 
     public void dropItems(List<ItemStack> items, int x, int y, int z) {
@@ -292,7 +296,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
 
     public void explosionEntities(double x, double y, double z, double radius,
             double push, double damage) {
-        Streams.of(entities.values())
+        entities(new Vector3d(x, y, z), radius)
                 .filter(entity -> entity instanceof MobServer)
                 .forEach(entity -> {
                     Vector3 relative =
@@ -315,7 +319,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
     public void explosionBlockPush(double x, double y, double z, double size,
             double dropChance, double blockChance, double push, double damage) {
         terrain.queue(handler -> {
-            List<Supplier<EntityServer>> entities = new ArrayList<>();
+            List<EntityServer> entities = new ArrayList<>();
             Random random = ThreadLocalRandom.current();
             double step = 360.0 / FastMath.TWO_PI / size;
             for (double pitch = 90.0; pitch >= -90.0; pitch -= step) {
@@ -353,19 +357,13 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                                                 random.nextDouble() <
                                                         blockChance) {
                                     int data = terrain.data(xxx, yyy, zzz);
-                                    entities.add(
-                                            () -> new MobFlyingBlockServer(this,
-                                                    new Vector3d(xxx + 0.5,
-                                                            yyy + 0.5,
-                                                            zzz + 0.5),
-                                                    new Vector3d(
-                                                            random.nextDouble() *
-                                                                    0.1 - 0.05,
-                                                            random.nextDouble() *
-                                                                    0.1 - 0.05,
-                                                            random.nextDouble() *
-                                                                    1 + 2),
-                                                    type, data));
+                                    entities.add(new MobFlyingBlockServer(this,
+                                            new Vector3d(xxx + 0.5, yyy + 0.5,
+                                                    zzz + 0.5), new Vector3d(
+                                            random.nextDouble() * 0.1 - 0.05,
+                                            random.nextDouble() * 0.1 - 0.05,
+                                            random.nextDouble() * 1 + 2), type,
+                                            data));
                                 }
                             }
                             handler.typeData(xxx, yyy, zzz, air, 0);
@@ -374,7 +372,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                 }
             }
             taskExecutor.addTask(() -> {
-                Streams.of(entities).map(Supplier::get).forEach(entity -> {
+                Streams.of(entities).forEach(entity -> {
                     entity.onSpawn();
                     addEntity(entity);
                 });
@@ -517,6 +515,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
 
     public void start() {
         joiner = taskExecutor.runTask(joiner -> {
+            thread = Thread.currentThread();
             sync.init();
             while (!joiner.marked()) {
                 if (!players.isEmpty()) {
@@ -545,6 +544,25 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
         Streams.of(players.values()).map(MobPlayerServer::connection)
                 .filter(player -> !exceptions.contains(player))
                 .forEach(player -> player.send(packet));
+    }
+
+    private Stream<EntityServer> entities(
+            Consumer<Set<EntityServer>> consumer) {
+        Set<EntityServer> entities = ENTITY_SET.get();
+        consumer.accept(entities);
+        Stream<EntityServer> stream =
+                Streams.of(entities.toArray(new EntityServer[entities.size()]));
+        entities.clear();
+        return stream;
+    }
+
+    private Stream<MobServer> mobs(Consumer<Set<MobServer>> consumer) {
+        Set<MobServer> entities = MOB_SET.get();
+        consumer.accept(entities);
+        Stream<MobServer> stream =
+                Streams.of(entities.toArray(new MobServer[entities.size()]));
+        entities.clear();
+        return stream;
     }
 
     public interface EntityListener {

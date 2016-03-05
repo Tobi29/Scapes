@@ -15,46 +15,42 @@
  */
 package org.tobi29.scapes.packets;
 
+import java8.util.function.Consumer;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
-import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
 public class PacketRequestEntity extends Packet implements PacketServer {
-    private int entityId;
+    private int entityID;
 
     public PacketRequestEntity() {
     }
 
-    public PacketRequestEntity(int entityId) {
-        this.entityId = entityId;
+    public PacketRequestEntity(int entityID) {
+        this.entityID = entityID;
     }
 
     @Override
     public void sendServer(ClientConnection client, WritableByteStream stream)
             throws IOException {
-        stream.putInt(entityId);
+        stream.putInt(entityID);
     }
 
     @Override
     public void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException {
-        entityId = stream.getInt();
+        entityID = stream.getInt();
     }
 
     @Override
-    public void runServer(PlayerConnection player, WorldServer world) {
-        if (world == null) {
-            return;
-        }
-        EntityServer entity = world.entity(entityId);
-        if (entity != null) {
-            player.send(
-                    new PacketEntityAdd(entity, world.plugins().registry()));
-        }
+    public void runServer(PlayerConnection player,
+            Consumer<Consumer<WorldServer>> worldAccess) {
+        worldAccess.accept(world -> world.entity(entityID).ifPresent(
+                entity -> player.send(new PacketEntityAdd(entity,
+                        world.plugins().registry()))));
     }
 }

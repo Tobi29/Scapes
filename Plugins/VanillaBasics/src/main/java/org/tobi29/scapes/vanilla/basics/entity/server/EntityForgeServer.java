@@ -43,7 +43,7 @@ public class EntityForgeServer extends EntityAbstractFurnaceServer {
         VanillaBasics plugin =
                 (VanillaBasics) world.plugins().plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
-        inventories.access("Container", inventory -> {
+        inventories.modify("Container", inventory -> {
             int max = items + fuel.length + 1;
             for (int i = fuel.length + 1; i < max; i++) {
                 ItemStack item = inventory.item(i);

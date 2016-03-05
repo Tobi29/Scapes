@@ -28,7 +28,6 @@ import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.server.EntityContainerServer;
@@ -100,7 +99,7 @@ public class BlockBloomery extends VanillaBlockContainer {
     @Override
     public void update(TerrainServer.TerrainMutable terrain, int x, int y,
             int z) {
-        Streams.of(terrain.world().entities(x, y, z))
+        terrain.world().entities(x, y, z)
                 .filter(entity -> entity instanceof EntityBloomeryServer)
                 .forEach(entity -> ((EntityBloomeryServer) entity)
                         .updateBellows(terrain));

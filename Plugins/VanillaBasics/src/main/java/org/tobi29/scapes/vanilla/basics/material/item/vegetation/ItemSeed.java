@@ -24,7 +24,6 @@ import org.tobi29.scapes.block.models.ItemModelSimple;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityFarmlandServer;
@@ -54,7 +53,7 @@ public class ItemSeed extends VanillaItem {
             item.setAmount(item.amount() - 1);
             Random random = ThreadLocalRandom.current();
             if (random.nextInt(1) == 0) {
-                Streams.of(terrain.world().entities(x, y, z))
+                terrain.world().entities(x, y, z)
                         .filter(farmland -> farmland instanceof EntityFarmlandServer)
                         .forEach(farmland -> ((EntityFarmlandServer) farmland)
                                 .seed(CropType.WHEAT));

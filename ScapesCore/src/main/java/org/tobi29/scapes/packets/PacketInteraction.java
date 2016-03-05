@@ -16,6 +16,7 @@
 package org.tobi29.scapes.packets;
 
 import java8.util.Optional;
+import java8.util.function.Consumer;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
@@ -108,43 +109,40 @@ public class PacketInteraction extends Packet
     }
 
     @Override
-    public void runServer(PlayerConnection player, WorldServer world) {
-        if (world == null) {
-            return;
-        }
-        switch (type) {
-            case INVENTORY_SLOT_LEFT:
-                if (data < 0 || data >= 10) {
+    public void runServer(PlayerConnection player, Consumer<Consumer<WorldServer>> worldAccess) {
+        worldAccess.accept(world -> {
+            switch (type) {
+                case INVENTORY_SLOT_LEFT:
+                    if (data < 0 || data >= 10) {
+                        throw new InvalidPacketDataException(
+                                "Invalid slot change data!");
+                    }
+                    player.mob().setInventorySelectLeft(data);
+                    world.send(new PacketInteraction(player.mob().entityID(),
+                            INVENTORY_SLOT_LEFT, data));
+                    break;
+                case INVENTORY_SLOT_RIGHT:
+                    if (data < 0 || data >= 10) {
+                        throw new InvalidPacketDataException(
+                                "Invalid slot change data!");
+                    }
+                    player.mob().setInventorySelectRight(data);
+                    world.send(new PacketInteraction(player.mob().entityID(),
+                            INVENTORY_SLOT_RIGHT, data));
+                    break;
+                case OPEN_INVENTORY:
+                    player.send(new PacketOpenGui(player.mob()));
+                    break;
+                case CLOSE_INVENTORY:
+                    player.mob().inventories().modify("Hold",
+                            inventory -> inventory.item(0).take().ifPresent(
+                                    drop -> player.mob().dropItem(drop)));
+                    player.send(new PacketCloseGui());
+                    break;
+                default:
                     throw new InvalidPacketDataException(
-                            "Invalid slot change data!");
-                }
-                player.mob().setInventorySelectLeft(data);
-                world.send(new PacketInteraction(player.mob().entityID(),
-                        INVENTORY_SLOT_LEFT, data));
-                break;
-            case INVENTORY_SLOT_RIGHT:
-                if (data < 0 || data >= 10) {
-                    throw new InvalidPacketDataException(
-                            "Invalid slot change data!");
-                }
-                player.mob().setInventorySelectRight(data);
-                world.send(new PacketInteraction(player.mob().entityID(),
-                        INVENTORY_SLOT_RIGHT, data));
-                break;
-            case OPEN_INVENTORY:
-                player.send(new PacketOpenGui(player.mob()));
-                break;
-            case CLOSE_INVENTORY:
-                player.mob().inventories().modify("Hold",
-                        inventory -> inventory.item(0).take()
-                                .ifPresent(drop -> {
-                                    player.mob().dropItem(drop);
-                                }));
-                player.send(new PacketCloseGui());
-                break;
-            default:
-                throw new InvalidPacketDataException(
-                        "Invalid interaction type!");
-        }
+                            "Invalid interaction type!");
+            }
+        });
     }
 }

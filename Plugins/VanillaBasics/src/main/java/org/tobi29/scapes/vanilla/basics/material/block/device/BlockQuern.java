@@ -27,7 +27,6 @@ import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.server.EntityContainerServer;
@@ -51,7 +50,7 @@ public class BlockQuern extends VanillaBlock {
     @Override
     public boolean click(TerrainServer terrain, int x, int y, int z, Face face,
             MobPlayerServer player) {
-        Streams.of(terrain.world().entities(x, y, z))
+        terrain.world().entities(x, y, z)
                 .filter(entity -> entity instanceof EntityQuernServer).forEach(
                 entity -> player.openGui((EntityContainerServer) entity));
         return true;

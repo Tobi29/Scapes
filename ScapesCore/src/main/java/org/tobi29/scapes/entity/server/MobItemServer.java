@@ -78,27 +78,24 @@ public class MobItemServer extends MobServer {
             stackwait -= delta;
             if (stackwait <= 0) {
                 aabb.grow(0.0, 0.0, 0.4);
-                world.entities()
-                        .filter(entity -> entity instanceof MobItemServer)
-                        .map(entity -> (MobItemServer) entity)
-                        .forEach(entity -> {
-                            if (aabb.overlay(entity.aabb()) && entity != this) {
-                                item.setAmount(item.amount() -
-                                        entity.item.stack(item));
-                            }
-                        });
+                world.entities(aabb)
+                        .filter(entity -> entity instanceof MobItemServer &&
+                                entity != this)
+                        .map(entity -> (MobItemServer) entity).forEach(
+                        entity -> item.setAmount(
+                                item.amount() - entity.item.stack(item)));
                 stackwait = 1.0;
             }
         } else {
             pickupwait -= delta;
         }
         if (item.amount() <= 0 || item.material() == registry.air()) {
-            world.deleteEntity(this);
+            world.removeEntity(this);
         }
         if (!Double.isNaN(despawntime)) {
             despawntime -= delta;
             if (despawntime <= 0) {
-                world.deleteEntity(this);
+                world.removeEntity(this);
             }
         }
     }

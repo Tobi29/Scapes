@@ -42,17 +42,9 @@ public class LocalClientConnection extends ClientConnection {
         this.account = account;
     }
 
-    public void receive(PacketClient packet) throws IOException {
-        synchronized (player) {
-            packet.localClient();
-            packet.runClient(this, world);
-        }
-    }
-
-    public void receive(IORunnable runnable) throws IOException {
-        synchronized (player) {
-            runnable.run();
-        }
+    public  void receive(PacketClient packet) throws IOException {
+        packet.localClient();
+        packet.runClient(this, world);
     }
 
     @Override

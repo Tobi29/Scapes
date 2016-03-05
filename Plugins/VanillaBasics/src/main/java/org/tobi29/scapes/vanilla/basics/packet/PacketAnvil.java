@@ -15,13 +15,13 @@
  */
 package org.tobi29.scapes.vanilla.basics.packet;
 
+import java8.util.function.Consumer;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.Material;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
-import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketServer;
@@ -62,60 +62,59 @@ public class PacketAnvil extends Packet implements PacketServer {
     }
 
     @Override
-    public void runServer(PlayerConnection player, WorldServer world) {
-        if (world == null) {
-            return;
-        }
-        EntityServer entity = world.entity(entityID);
-        if (entity instanceof EntityAnvilServer) {
-            EntityAnvilServer anvil = (EntityAnvilServer) entity;
-            MobPlayerServer playerE = player.mob();
-            if (anvil.viewers().filter(check -> check == playerE).findAny()
-                    .isPresent()) {
-                VanillaBasics plugin =
-                        (VanillaBasics) world.plugins().plugin("VanillaBasics");
-                anvil.inventories().modify("Container", anvilI -> {
-                    if (!"Hammer".equals(anvilI.item(1).material()
-                            .toolType(anvilI.item(1)))) {
-                        return;
-                    }
-                    world.playSound("VanillaBasics:sound/blocks/Metal.ogg",
-                            anvil);
-                    ItemStack ingredient = anvilI.item(0);
-                    Material type = ingredient.material();
-                    if (type instanceof ItemIngot) {
-                        float meltingPoint =
-                                ((ItemHeatable) type).meltingPoint(ingredient);
-                        float temperature =
-                                ((ItemHeatable) type).temperature(ingredient);
-                        if (temperature >= meltingPoint ||
-                                temperature < meltingPoint * 0.7f) {
-                            return;
-                        }
-                        if (id == 0) {
-                            ingredient.setData(1);
-                        } else {
-                            if (ingredient.data() == 0) {
+    public void runServer(PlayerConnection player,
+            Consumer<Consumer<WorldServer>> worldAccess) {
+        worldAccess.accept(world -> world.entity(entityID)
+                .filter(entity -> entity instanceof EntityAnvilServer)
+                .map(entity -> (EntityAnvilServer) entity).ifPresent(anvil -> {
+                    MobPlayerServer playerE = player.mob();
+                    if (anvil.viewers().filter(check -> check == playerE)
+                            .findAny().isPresent()) {
+                        VanillaBasics plugin = (VanillaBasics) world.plugins()
+                                .plugin("VanillaBasics");
+                        anvil.inventories().modify("Container", anvilI -> {
+                            if (!"Hammer".equals(anvilI.item(1).material()
+                                    .toolType(anvilI.item(1)))) {
                                 return;
                             }
-                            ingredient.setData(0);
-                            ToolUtil.createTool(plugin, ingredient, id);
-                        }
-                    } else if (type instanceof ItemOreChunk) {
-                        if (id == 0 && ingredient.data() == 8) {
-                            float meltingPoint = ((ItemHeatable) type)
-                                    .meltingPoint(ingredient);
-                            float temperature = ((ItemHeatable) type)
-                                    .temperature(ingredient);
-                            if (temperature >= meltingPoint ||
-                                    temperature < meltingPoint * 0.7f) {
-                                return;
+                            world.playSound(
+                                    "VanillaBasics:sound/blocks/Metal.ogg",
+                                    anvil);
+                            ItemStack ingredient = anvilI.item(0);
+                            Material type = ingredient.material();
+                            if (type instanceof ItemIngot) {
+                                float meltingPoint = ((ItemHeatable) type)
+                                        .meltingPoint(ingredient);
+                                float temperature = ((ItemHeatable) type)
+                                        .temperature(ingredient);
+                                if (temperature >= meltingPoint ||
+                                        temperature < meltingPoint * 0.7f) {
+                                    return;
+                                }
+                                if (id == 0) {
+                                    ingredient.setData(1);
+                                } else {
+                                    if (ingredient.data() == 0) {
+                                        return;
+                                    }
+                                    ingredient.setData(0);
+                                    ToolUtil.createTool(plugin, ingredient, id);
+                                }
+                            } else if (type instanceof ItemOreChunk) {
+                                if (id == 0 && ingredient.data() == 8) {
+                                    float meltingPoint = ((ItemHeatable) type)
+                                            .meltingPoint(ingredient);
+                                    float temperature = ((ItemHeatable) type)
+                                            .temperature(ingredient);
+                                    if (temperature >= meltingPoint ||
+                                            temperature < meltingPoint * 0.7f) {
+                                        return;
+                                    }
+                                    ingredient.setData(9);
+                                }
                             }
-                            ingredient.setData(9);
-                        }
+                        });
                     }
-                });
-            }
-        }
+                }));
     }
 }

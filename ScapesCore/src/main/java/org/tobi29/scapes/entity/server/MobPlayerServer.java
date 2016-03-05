@@ -67,14 +67,17 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
         }, (ground, slidingWall, inWater, swimming) -> {
         });
         listener((DeathListener) () -> {
-            inventories.access("Container", inventory -> {
-                for (int i = 0; i < inventory.size(); i++) {
-                    inventory.item(i).take().ifPresent(
-                            item -> world.dropItem(item, this.pos.now()));
-                }
-            });
-            inventories.access("Hold", inventory -> inventory.item(0).take()
-                    .ifPresent(item -> world.dropItem(item, this.pos.now())));
+            Streams.ofCollection(
+                    inventories.modifyReturn("Container", inventory -> {
+                        List<ItemStack> items = new ArrayList<>();
+                        for (int i = 0; i < inventory.size(); i++) {
+                            inventory.item(i).take().ifPresent(items::add);
+                        }
+                        return items;
+                    })).forEach(item -> world.dropItem(item, this.pos.now()));
+            inventories
+                    .modifyReturn("Hold", inventory -> inventory.item(0).take())
+                    .ifPresent(item -> world.dropItem(item, this.pos.now()));
             setSpeed(Vector3d.ZERO);
             setPos(new Vector3d(0.5, 0.5, 1.5).plus(world.spawn()));
             health = maxHealth;
@@ -185,16 +188,18 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
         return connection;
     }
 
-    public List<MobServer> attackLeft(double strength, Vector2 direction) {
+    public List<MobLivingServer> attackLeft(double strength,
+            Vector2 direction) {
         return attack(true, strength, direction);
     }
 
-    public List<MobServer> attackRight(double strength, Vector2 direction) {
+    public List<MobLivingServer> attackRight(double strength,
+            Vector2 direction) {
         return attack(false, strength, direction);
     }
 
-    protected synchronized List<MobServer> attack(boolean side, double strength,
-            Vector2 direction) {
+    protected synchronized List<MobLivingServer> attack(boolean side,
+            double strength, Vector2 direction) {
         double rotX = rot.doubleX() + direction.doubleY();
         double rotZ = rot.doubleZ() + direction.doubleX();
         double factor = FastMath.cosTable(rotX * FastMath.PI / 180) * 6;
@@ -213,11 +218,11 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
             range = rightWeapon().material().hitRange(rightWeapon());
         }
         hitField.setPerspective(100 / range, 1, 0.1, range);
-        List<MobServer> entities =
-                world.entities(Collections.singletonList((MobServer) this),
-                        hitField);
-        Streams.of(entities).filter(mob -> mob instanceof MobLivingServer)
+        List<MobLivingServer> mobs = new ArrayList<>();
+        world.entities(hitField)
+                .filter(mob -> mob instanceof MobLivingServer && mob != this)
                 .map(mob -> (MobLivingServer) mob).forEach(mob -> {
+            mobs.add(mob);
             if (side) {
                 mob.damage(
                         leftWeapon().material().click(this, leftWeapon(), mob) *
@@ -231,7 +236,7 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
             mob.push(FastMath.cosTable(rad) * 10.0,
                     FastMath.sinTable(rad) * 10.0, 2.0);
         });
-        return entities;
+        return mobs;
     }
 
     public boolean hasGui() {

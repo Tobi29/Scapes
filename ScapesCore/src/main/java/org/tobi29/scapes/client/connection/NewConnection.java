@@ -139,8 +139,6 @@ public class NewConnection {
                 throw new IOException(e);
             }
             byte[] checksum = input.getByteArray();
-            System.err.println(name);
-            Streams.of(Plugins.embedded()).forEach(System.out::println);
             Optional<PluginFile> embedded = Streams.of(Plugins.embedded())
                     .filter(plugin -> plugin.name().equals(name))
                     .filter(plugin -> VersionUtil

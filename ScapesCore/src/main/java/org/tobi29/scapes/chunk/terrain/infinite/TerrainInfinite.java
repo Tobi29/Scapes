@@ -59,8 +59,14 @@ public abstract class TerrainInfinite implements Terrain {
         return chunkManager.get(x, y);
     }
 
-    public void chunk(int x, int y, Consumer<TerrainInfiniteChunk> consumer) {
-        chunk(x, y).ifPresent(consumer::accept);
+    public boolean chunk(int x, int y,
+            Consumer<TerrainInfiniteChunk> consumer) {
+        Optional<? extends TerrainInfiniteChunk> chunk = chunk(x, y);
+        if (chunk.isPresent()) {
+            consumer.accept(chunk.get());
+            return true;
+        }
+        return false;
     }
 
     public <R> Optional<R> chunkReturn(int x, int y,

@@ -75,7 +75,7 @@ public abstract class EntityAbstractFurnaceClient
                 }
             }
             int max = items + fuel.length + 1;
-            inventories.access("Container", inventory -> {
+            inventories.modify("Container", inventory -> {
                 for (int i = fuel.length + 1; i < max; i++) {
                     if (inventory.item(i).amount() == 1) {
                         Material type = inventory.item(i).material();

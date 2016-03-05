@@ -61,7 +61,7 @@ public class MobBombServer extends MobServer {
         if (time <= 0.0) {
             world.playSound("Scapes:sound/entity/mob/Explosion1.ogg", this,
                     1.0f, 64.0f);
-            world.deleteEntity(this);
+            world.removeEntity(this);
             int x = pos.intX(), y = pos.intY(), z = pos.intZ();
             ((BlockExplosive) item.material())
                     .explode(world.getTerrain(), x, y, z);

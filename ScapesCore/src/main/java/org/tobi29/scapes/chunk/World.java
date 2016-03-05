@@ -29,6 +29,7 @@ public abstract class World implements PlayConnection {
     protected final TaskExecutor taskExecutor;
     protected final GameRegistry registry;
     protected final long seed;
+    protected Thread thread;
     protected Vector3 spawn = new Vector3i(0, 0, 0);
     protected long tick;
     @SuppressWarnings("CanBeFinal")
@@ -73,5 +74,9 @@ public abstract class World implements PlayConnection {
 
     public double gravity() {
         return gravity;
+    }
+
+    protected boolean checkThread() {
+        return Thread.currentThread() == thread;
     }
 }

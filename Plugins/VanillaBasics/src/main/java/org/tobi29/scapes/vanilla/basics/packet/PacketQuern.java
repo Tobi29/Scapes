@@ -15,12 +15,12 @@
  */
 package org.tobi29.scapes.vanilla.basics.packet;
 
+import java8.util.function.Consumer;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
-import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketServer;
@@ -56,27 +56,25 @@ public class PacketQuern extends Packet implements PacketServer {
     }
 
     @Override
-    public void runServer(PlayerConnection player, WorldServer world) {
-        if (world == null) {
-            return;
-        }
-        EntityServer entity = world.entity(entityID);
-        if (entity instanceof EntityQuernServer) {
-            EntityQuernServer quern = (EntityQuernServer) entity;
-            MobPlayerServer playerE = player.mob();
-            if (quern.viewers().filter(check -> check == playerE).findAny()
-                    .isPresent()) {
-                VanillaBasics plugin =
-                        (VanillaBasics) world.plugins().plugin("VanillaBasics");
-                VanillaMaterial materials = plugin.getMaterials();
-                quern.inventories().modify("Container", inventory -> {
-                    ItemStack item = inventory.item(0);
-                    if (item.material() == materials.cropDrop) {
-                        item.setMaterial(materials.grain);
-                        item.setAmount(item.amount() << 2);
+    public void runServer(PlayerConnection player,
+            Consumer<Consumer<WorldServer>> worldAccess) {
+        worldAccess.accept(world -> world.entity(entityID)
+                .filter(entity -> entity instanceof EntityQuernServer)
+                .map(entity -> (EntityQuernServer) entity).ifPresent(quern -> {
+                    MobPlayerServer playerE = player.mob();
+                    if (quern.viewers().filter(check -> check == playerE)
+                            .findAny().isPresent()) {
+                        VanillaBasics plugin = (VanillaBasics) world.plugins()
+                                .plugin("VanillaBasics");
+                        VanillaMaterial materials = plugin.getMaterials();
+                        quern.inventories().modify("Container", inventory -> {
+                            ItemStack item = inventory.item(0);
+                            if (item.material() == materials.cropDrop) {
+                                item.setMaterial(materials.grain);
+                                item.setAmount(item.amount() << 2);
+                            }
+                        });
                     }
-                });
-            }
-        }
+                }));
     }
 }

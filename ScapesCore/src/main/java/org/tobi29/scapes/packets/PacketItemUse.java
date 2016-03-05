@@ -15,6 +15,8 @@
  */
 package org.tobi29.scapes.packets;
 
+import java8.util.Optional;
+import java8.util.function.Consumer;
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldServer;
@@ -27,7 +29,6 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.PointerPane;
 import org.tobi29.scapes.engine.utils.math.vector.*;
 import org.tobi29.scapes.entity.server.EntityBlockBreakServer;
-import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
@@ -65,10 +66,8 @@ public class PacketItemUse extends Packet implements PacketServer {
     }
 
     @Override
-    public void runServer(PlayerConnection player, WorldServer world) {
-        if (world == null) {
-            return;
-        }
+    public void runServer(PlayerConnection player,
+            Consumer<Consumer<WorldServer>> worldAccess) {
         if (strength > 1.0 || strength < 0.0) {
             throw new InvalidPacketDataException("Invalid item use strength!");
         }
@@ -76,88 +75,101 @@ public class PacketItemUse extends Packet implements PacketServer {
                 FastMath.abs(direction.doubleY()) > 90.0) {
             throw new InvalidPacketDataException("Invalid direction!");
         }
-        player.mob().inventories().modify("Container", inventory -> {
-            ItemStack item;
-            if (side) {
-                player.mob().attackLeft(strength * strength, direction);
-                item = player.mob().leftWeapon();
-            } else {
-                player.mob().attackRight(strength * strength, direction);
-                item = player.mob().rightWeapon();
-            }
-            item.material().click(player.mob(), item);
-            player.mob().onPunch(strength);
-            PointerPane pane = player.mob().selectedBlock(direction);
-            if (pane != null) {
-                Vector3 block = new Vector3i(pane.x, pane.y, pane.z);
-                Face face = pane.face;
-                double br = item.material()
-                        .click(player.mob(), item, world.getTerrain(),
-                                block.intX(), block.intY(), block.intZ(), face);
-                boolean flag = false;
-                if (strength < 0.6) {
-                    flag = world.getTerrain()
-                            .type(block.intX(), block.intY(), block.intZ())
-                            .click(world.getTerrain(), block.intX(),
-                                    block.intY(), block.intZ(), face,
-                                    player.mob());
-                }
-                if (!flag && br > 0.0 && strength > 0.0) {
-                    world.taskExecutor().addTask(() -> {
-                                world.getTerrain().queue(handler -> {
-                                    BlockType type =
-                                            handler.type(block.intX(), block.intY(),
-                                                    block.intZ());
-                                    int data = handler.data(block.intX(), block.intY(),
-                                            block.intZ());
-                                    double punch = br / type.resistance(item, data) *
-                                            strength * strength;
-                                    if (punch > 0) {
-                                        world.playSound(type.breakSound(item, data),
-                                                new Vector3d(block.intX() + 0.5,
-                                                        block.intY() + 0.5,
-                                                        block.intZ() + 0.5),
-                                                Vector3d.ZERO);
-                                        EntityBlockBreakServer entityBreak = null;
-                                        for (EntityServer entity : world
-                                                .entities(block.intX(), block.intY(),
-                                                        block.intZ())) {
-                                            if (entity instanceof EntityBlockBreakServer) {
-                                                entityBreak =
-                                                        (EntityBlockBreakServer) entity;
-                                            }
-                                        }
-                                        if (entityBreak == null) {
-                                            entityBreak =
-                                                    new EntityBlockBreakServer(world,
-                                                            new Vector3d(
+        worldAccess.accept(world -> player.mob().inventories()
+                .modify("Container", inventory -> {
+                    ItemStack item;
+                    if (side) {
+                        player.mob().attackLeft(strength * strength, direction);
+                        item = player.mob().leftWeapon();
+                    } else {
+                        player.mob()
+                                .attackRight(strength * strength, direction);
+                        item = player.mob().rightWeapon();
+                    }
+                    item.material().click(player.mob(), item);
+                    player.mob().onPunch(strength);
+                    PointerPane pane = player.mob().selectedBlock(direction);
+                    if (pane != null) {
+                        Vector3 block = new Vector3i(pane.x, pane.y, pane.z);
+                        Face face = pane.face;
+                        double br = item.material()
+                                .click(player.mob(), item, world.getTerrain(),
+                                        block.intX(), block.intY(),
+                                        block.intZ(), face);
+                        boolean flag = false;
+                        if (strength < 0.6) {
+                            flag = world.getTerrain()
+                                    .type(block.intX(), block.intY(),
+                                            block.intZ())
+                                    .click(world.getTerrain(), block.intX(),
+                                            block.intY(), block.intZ(), face,
+                                            player.mob());
+                        }
+                        if (!flag && br > 0.0 && strength > 0.0) {
+                            world.taskExecutor().addTask(() -> {
+                                        world.getTerrain().queue(handler -> {
+                                            BlockType type = handler.type(block.intX(),
+                                                    block.intY(), block.intZ());
+                                            int data = handler.data(block.intX(),
+                                                    block.intY(), block.intZ());
+                                            double punch =
+                                                    br / type.resistance(item, data) *
+                                                            strength * strength;
+                                            if (punch > 0) {
+                                                world.playSound(
+                                                        type.breakSound(item, data),
+                                                        new Vector3d(block.intX() + 0.5,
+                                                                block.intY() + 0.5,
+                                                                block.intZ() + 0.5),
+                                                        Vector3d.ZERO);
+                                                EntityBlockBreakServer entityBreak =
+                                                        null;
+                                                Optional<EntityBlockBreakServer> fetch =
+                                                        world.entities(block.intX(),
+                                                                block.intY(),
+                                                                block.intZ())
+                                                                .filter(entity -> entity instanceof EntityBlockBreakServer)
+                                                                .map(entity -> (EntityBlockBreakServer) entity)
+                                                                .findAny();
+                                                if (fetch.isPresent()) {
+                                                    entityBreak = fetch.get();
+                                                } else {
+                                                    entityBreak =
+                                                            new EntityBlockBreakServer(
+                                                                    world, new Vector3d(
                                                                     block.intX() + 0.5,
                                                                     block.intY() + 0.5,
                                                                     block.intZ() +
                                                                             0.5));
-                                            entityBreak.onSpawn();
-                                            world.addEntity(entityBreak);
-                                        }
-                                        if (entityBreak.punch(world, punch)) {
-                                            if (type.destroy(handler, block.intX(),
-                                                    block.intY(), block.intZ(), face,
-                                                    player.mob(), item)) {
-                                                List<ItemStack> drops =
-                                                        type.drops(item, data);
-                                                world.dropItems(drops, block.intX(),
-                                                        block.intY(), block.intZ());
-                                                handler.typeData(block.intX(),
-                                                        block.intY(), block.intZ(),
-                                                        handler.world().air(), 0);
+                                                    entityBreak.onSpawn();
+                                                    world.addEntity(entityBreak);
+                                                }
+                                                if (entityBreak.punch(world, punch)) {
+                                                    if (type.destroy(handler,
+                                                            block.intX(), block.intY(),
+                                                            block.intZ(), face,
+                                                            player.mob(), item)) {
+                                                        List<ItemStack> drops =
+                                                                type.drops(item, data);
+                                                        world.dropItems(drops,
+                                                                block.intX(),
+                                                                block.intY(),
+                                                                block.intZ());
+                                                        handler.typeData(block.intX(),
+                                                                block.intY(),
+                                                                block.intZ(),
+                                                                handler.world().air(),
+                                                                0);
+                                                    }
+                                                }
                                             }
-                                        }
-                                    }
-                                });
-                                return -1;
-                            }, "Block-Break",
-                            (long) (item.material().hitWait(item) * 0.23));
-                }
-            }
-        });
+                                        });
+                                        return -1;
+                                    }, "Block-Break",
+                                    (long) (item.material().hitWait(item) *
+                                            0.23));
+                        }
+                    }
+                }));
     }
 }

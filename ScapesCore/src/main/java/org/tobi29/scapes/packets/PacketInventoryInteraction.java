@@ -16,6 +16,7 @@
 package org.tobi29.scapes.packets;
 
 import java8.util.Optional;
+import java8.util.function.Consumer;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
@@ -66,47 +67,66 @@ public class PacketInventoryInteraction extends Packet implements PacketServer {
     }
 
     @Override
-    public void runServer(PlayerConnection player, WorldServer world) {
-        if (world == null) {
-            return;
-        }
-        MobPlayerServer playerE = player.mob();
-        EntityContainerServer chestE =
-                (EntityContainerServer) world.entity(entityID);
-        if (chestE != null &&
-                chestE.viewers().filter(check -> check == playerE).findAny()
-                        .isPresent()) {
-            synchronized (chestE) {
-                chestE.inventories().modify(id, chestI -> playerE.inventories()
-                        .modify("Hold", playerI -> {
-                            ItemStack hold = playerI.item(0);
-                            ItemStack item = chestI.item(slot);
-                            switch (type) {
-                                case LEFT:
-                                    if (hold.isEmpty()) {
-                                        chestI.item(slot).take()
-                                                .ifPresent(hold::stack);
-                                    } else {
-                                        if (item.stack(hold) == 0) {
-                                            Optional<ItemStack> swap =
-                                                    item.take();
-                                            item.stack(hold);
-                                            swap.ifPresent(hold::stack);
-                                        }
-                                    }
-                                    break;
-                                case RIGHT:
-                                    if (hold.isEmpty()) {
-                                        item.take((int) FastMath
-                                                .ceil(item.amount() / 2.0))
-                                                .ifPresent(hold::stack);
-                                    } else {
-                                        hold.take(1).ifPresent(item::stack);
-                                    }
-                                    break;
+    public void runServer(PlayerConnection player,
+            Consumer<Consumer<WorldServer>> worldAccess) {
+        worldAccess.accept(world -> {
+            MobPlayerServer playerE = player.mob();
+            world.entity(entityID)
+                    .filter(entity -> entity instanceof EntityContainerServer)
+                    .map(entity -> (EntityContainerServer) entity)
+                    .ifPresent(chestE -> {
+                        if (chestE.viewers().filter(check -> check == playerE)
+                                .findAny().isPresent()) {
+                            synchronized (chestE) {
+                                chestE.inventories().modify(id,
+                                        chestI -> playerE.inventories()
+                                                .modify("Hold", playerI -> {
+                                                    ItemStack hold =
+                                                            playerI.item(0);
+                                                    ItemStack item =
+                                                            chestI.item(slot);
+                                                    switch (type) {
+                                                        case LEFT:
+                                                            if (hold.isEmpty()) {
+                                                                chestI.item(
+                                                                        slot)
+                                                                        .take()
+                                                                        .ifPresent(
+                                                                                hold::stack);
+                                                            } else {
+                                                                if (item.stack(
+                                                                        hold) ==
+                                                                        0) {
+                                                                    Optional<ItemStack>
+                                                                            swap =
+                                                                            item.take();
+                                                                    item.stack(
+                                                                            hold);
+                                                                    swap.ifPresent(
+                                                                            hold::stack);
+                                                                }
+                                                            }
+                                                            break;
+                                                        case RIGHT:
+                                                            if (hold.isEmpty()) {
+                                                                item.take(
+                                                                        (int) FastMath
+                                                                                .ceil(item
+                                                                                        .amount() /
+                                                                                        2.0))
+                                                                        .ifPresent(
+                                                                                hold::stack);
+                                                            } else {
+                                                                hold.take(1)
+                                                                        .ifPresent(
+                                                                                item::stack);
+                                                            }
+                                                            break;
+                                                    }
+                                                }));
                             }
-                        }));
-            }
-        }
+                        }
+                    });
+        });
     }
 }

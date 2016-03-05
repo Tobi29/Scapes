@@ -16,8 +16,10 @@
 package org.tobi29.scapes.server.connection;
 
 import java8.util.Optional;
+import java8.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.LocalClientConnection;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.engine.server.AbstractServerConnection;
@@ -28,12 +30,13 @@ import org.tobi29.scapes.engine.utils.MutableSingle;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.graphics.PNG;
 import org.tobi29.scapes.engine.utils.io.ChecksumUtil;
-import org.tobi29.scapes.engine.utils.io.IORunnable;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
+import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.entity.skin.ServerSkin;
 import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketClient;
+import org.tobi29.scapes.packets.PacketDisconnect;
 import org.tobi29.scapes.packets.PacketServer;
 import org.tobi29.scapes.server.MessageLevel;
 
@@ -62,8 +65,9 @@ public class LocalPlayerConnection extends PlayerConnection {
                     stream -> PNG.decode(stream, BufferCreator::bytes));
         } else {
             client.game().engine().files()
-                    .get("Scapes:image/entity/mob/Player.png").read(stream ->
-                    image.a = PNG.decode(stream, BufferCreator::bytes));
+                    .get("Scapes:image/entity/mob/Player.png")
+                    .read(stream -> image.a =
+                            PNG.decode(stream, BufferCreator::bytes));
         }
         if (image.a.width() != 64 || image.a.height() != 64) {
             return Optional.of("Invalid skin!");
@@ -82,16 +86,13 @@ public class LocalPlayerConnection extends PlayerConnection {
     }
 
     public void stop() {
-        task(() -> {
-            throw new ConnectionCloseException("Disconnected");
-        });
+        error(new ConnectionCloseException("Disconnected"));
     }
 
     public void error(Exception e) {
         server.message("Player disconnected: " + nickname + " (" + e +
                 ')', MessageLevel.SERVER_INFO);
         state = State.CLOSED;
-        client.stop();
     }
 
     public LocalClientConnection client() {
@@ -104,31 +105,29 @@ public class LocalPlayerConnection extends PlayerConnection {
         }
         try {
             packet.localServer();
-            packet.runServer(this, entity.world());
+            Consumer<Consumer<WorldServer>> worldAccess;
+            MobPlayerServer entity = this.entity;
+            if (entity == null) {
+                worldAccess = consumer -> {
+                };
+            } else {
+                worldAccess = consumer -> entity.world().taskExecutor()
+                        .addTask(() -> consumer.accept(entity.world()),
+                                "Packet-World-Access");
+            }
+            packet.runServer(this, worldAccess);
         } catch (ConnectionCloseException e) {
             error(e);
         }
     }
 
     @Override
-    public synchronized void send(Packet packet) {
+    public void send(Packet packet) {
         if (state == State.CLOSED) {
             return;
         }
         try {
             sendPacket(packet);
-        } catch (IOException e) {
-            error(e);
-        }
-    }
-
-    @Override
-    protected synchronized void task(IORunnable runnable) {
-        if (state == State.CLOSED) {
-            return;
-        }
-        try {
-            client.receive(runnable);
         } catch (IOException e) {
             error(e);
         }
@@ -150,6 +149,12 @@ public class LocalPlayerConnection extends PlayerConnection {
     public synchronized void close() throws IOException {
         super.close();
         state = State.CLOSED;
+    }
+
+    @Override
+    public void disconnect(String reason) {
+        transmit(new PacketDisconnect(reason));
+        error(new ConnectionCloseException(reason));
     }
 
     @Override

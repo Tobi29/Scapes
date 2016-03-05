@@ -186,9 +186,14 @@ public class TerrainInfiniteClient extends TerrainInfinite
         return chunkManager.iterator();
     }
 
-    public void chunkC(int x, int y,
+    public boolean chunkC(int x, int y,
             Consumer<TerrainInfiniteChunkClient> consumer) {
-        chunk(x, y).ifPresent(consumer::accept);
+        Optional<TerrainInfiniteChunkClient> chunk = chunk(x, y);
+        if (chunk.isPresent()) {
+            consumer.accept(chunk.get());
+            return true;
+        }
+        return false;
     }
 
     public <R> Optional<R> chunkReturnC(int x, int y,

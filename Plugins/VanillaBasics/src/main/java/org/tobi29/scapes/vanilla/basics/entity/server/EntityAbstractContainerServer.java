@@ -94,7 +94,7 @@ public abstract class EntityAbstractContainerServer extends EntityServer
                             pos.now().plus(new Vector3d(0.5, 0.5, 0.5)));
                 }
             });
-            world.deleteEntity(this);
+            world.removeEntity(this);
         }
     }
 

@@ -15,13 +15,13 @@
  */
 package org.tobi29.scapes.vanilla.basics.packet;
 
+import java8.util.function.Consumer;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.Material;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
-import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketEntityMetaData;
@@ -57,66 +57,76 @@ public class PacketResearch extends Packet implements PacketServer {
     }
 
     @Override
-    public void runServer(PlayerConnection player, WorldServer world) {
-        if (world == null) {
-            return;
-        }
-        EntityServer entity = world.entity(entityID);
-        if (entity instanceof EntityResearchTableServer) {
-            EntityResearchTableServer researchTable =
-                    (EntityResearchTableServer) entity;
-            MobPlayerServer playerE = player.mob();
-            if (researchTable.viewers().filter(check -> check == playerE)
-                    .findAny().isPresent()) {
-                VanillaBasics plugin =
-                        (VanillaBasics) world.plugins().plugin("VanillaBasics");
-                researchTable.inventories()
-                        .access("Container", researchTableI -> {
-                            ItemStack item = researchTableI.item(0);
-                            Material material = item.material();
-                            if (material instanceof ItemResearch) {
-                                for (String identifier : ((ItemResearch) material)
-                                        .identifiers(item)) {
-                                    player.mob().metaData("Vanilla")
-                                            .getStructure("Research")
-                                            .getStructure("Items")
-                                            .setBoolean(identifier, true);
-                                }
-                            } else {
-                                player.mob().metaData("Vanilla")
-                                        .getStructure("Research")
-                                        .getStructure("Items").setBoolean(
-                                        Integer.toHexString(material.itemID()),
-                                        true);
-                            }
-                            plugin.researchRecipes().forEach(recipe -> {
-                                if (!player.mob().metaData("Vanilla")
-                                        .getStructure("Research")
-                                        .getStructure("Finished")
-                                        .getBoolean(recipe.name())) {
-                                    if (!recipe.items()
-                                            .filter(requirement -> !player.mob()
-                                                    .metaData("Vanilla")
+    public void runServer(PlayerConnection player,
+            Consumer<Consumer<WorldServer>> worldAccess) {
+        worldAccess.accept(world -> world.entity(entityID)
+                .filter(entity -> entity instanceof EntityResearchTableServer)
+                .map(entity -> (EntityResearchTableServer) entity)
+                .ifPresent(researchTable -> {
+                    MobPlayerServer playerE = player.mob();
+                    if (researchTable.viewers()
+                            .filter(check -> check == playerE).findAny()
+                            .isPresent()) {
+                        VanillaBasics plugin = (VanillaBasics) world.plugins()
+                                .plugin("VanillaBasics");
+                        researchTable.inventories()
+                                .modify("Container", researchTableI -> {
+                                    ItemStack item = researchTableI.item(0);
+                                    Material material = item.material();
+                                    if (material instanceof ItemResearch) {
+                                        for (String identifier : ((ItemResearch) material)
+                                                .identifiers(item)) {
+                                            player.mob().metaData("Vanilla")
                                                     .getStructure("Research")
                                                     .getStructure("Items")
-                                                    .getBoolean(requirement))
-                                            .findAny().isPresent()) {
+                                                    .setBoolean(identifier,
+                                                            true);
+                                        }
+                                    } else {
                                         player.mob().metaData("Vanilla")
                                                 .getStructure("Research")
-                                                .getStructure("Finished")
-                                                .setBoolean(recipe.name(),
+                                                .getStructure("Items")
+                                                .setBoolean(Integer.toHexString(
+                                                        material.itemID()),
                                                         true);
-                                        player.mob().world()
-                                                .send(new PacketEntityMetaData(
-                                                        player.mob(),
-                                                        "Vanilla"));
-                                        player.send(new PacketNotification(
-                                                "Research", recipe.text()));
                                     }
-                                }
-                            });
-                        });
-            }
-        }
+                                    plugin.researchRecipes().forEach(recipe -> {
+                                        if (!player.mob().metaData("Vanilla")
+                                                .getStructure("Research")
+                                                .getStructure("Finished")
+                                                .getBoolean(recipe.name())) {
+                                            if (!recipe.items()
+                                                    .filter(requirement -> !player
+                                                            .mob()
+                                                            .metaData("Vanilla")
+                                                            .getStructure(
+                                                                    "Research")
+                                                            .getStructure(
+                                                                    "Items")
+                                                            .getBoolean(
+                                                                    requirement))
+                                                    .findAny().isPresent()) {
+                                                player.mob().metaData("Vanilla")
+                                                        .getStructure(
+                                                                "Research")
+                                                        .getStructure(
+                                                                "Finished")
+                                                        .setBoolean(
+                                                                recipe.name(),
+                                                                true);
+                                                player.mob().world()
+                                                        .send(new PacketEntityMetaData(
+                                                                player.mob(),
+                                                                "Vanilla"));
+                                                player.send(
+                                                        new PacketNotification(
+                                                                "Research",
+                                                                recipe.text()));
+                                            }
+                                        }
+                                    });
+                                });
+                    }
+                }));
     }
 }

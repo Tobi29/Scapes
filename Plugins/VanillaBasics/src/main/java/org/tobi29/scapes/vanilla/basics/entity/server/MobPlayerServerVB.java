@@ -25,7 +25,6 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.WieldMode;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
-import org.tobi29.scapes.entity.server.MobServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.util.Random;
@@ -60,18 +59,13 @@ public class MobPlayerServerVB extends MobPlayerServer {
                 pos.doubleY() + viewOffset.doubleY(),
                 pos.doubleZ() + viewOffset.doubleZ(), pos.doubleX() + lookX,
                 pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0, 0, 1);
-        world.entities().filter(entity -> entity instanceof MobServer)
-                .forEach(entity -> {
-                    MobServer mob = (MobServer) entity;
-                    if (viewField.inView(mob.aabb()) > 0) {
-                        Vector3 mobPos = mob.pos();
-                        if (!world.checkBlocked(pos.intX(), pos.intY(),
-                                pos.intZ(), mobPos.intX(), mobPos.intY(),
-                                mobPos.intZ())) {
-                            onNotice(mob);
-                        }
-                    }
-                });
+        world.entities(viewField).forEach(entity -> {
+            Vector3 mobPos = entity.pos();
+            if (!world.checkBlocked(pos.intX(), pos.intY(), pos.intZ(),
+                    mobPos.intX(), mobPos.intY(), mobPos.intZ())) {
+                onNotice(entity);
+            }
+        });
         if (pos.doubleZ() < -100.0) {
             damage(-pos.doubleZ() - 100.0);
         }

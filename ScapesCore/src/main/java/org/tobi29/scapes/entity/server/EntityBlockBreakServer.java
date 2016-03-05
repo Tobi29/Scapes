@@ -53,7 +53,7 @@ public class EntityBlockBreakServer extends EntityServer {
     public void update(double delta) {
         wait += delta;
         if (wait >= 6.0 || progress >= 1.0) {
-            world.deleteEntity(this);
+            world.removeEntity(this);
         }
     }
 

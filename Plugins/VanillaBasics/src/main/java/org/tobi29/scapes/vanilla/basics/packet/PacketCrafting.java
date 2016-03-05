@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.vanilla.basics.packet;
 
+import java8.util.function.Consumer;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
@@ -54,23 +55,22 @@ public class PacketCrafting extends Packet implements PacketServer {
     }
 
     @Override
-    public void runServer(PlayerConnection player, WorldServer world) {
-        if (world == null) {
-            return;
-        }
-        // TODO: Check if table nearby
-        VanillaBasics plugin =
-                (VanillaBasics) world.plugins().plugin("VanillaBasics");
-        player.mob().inventories().modify("Container", inventory -> {
-            CraftingRecipe recipe =
-                    plugin.getCraftingRecipes().get(type).recipes().get(id);
-            ItemStack result = recipe.result();
-            if (inventory.canAdd(result) >= result.amount()) {
-                recipe.takes(inventory).ifPresent(takes -> {
-                    takes.forEach(inventory::take);
-                    inventory.add(result);
-                });
-            }
+    public void runServer(PlayerConnection player, Consumer<Consumer<WorldServer>> worldAccess) {
+        worldAccess.accept(world -> {
+            // TODO: Check if table nearby
+            VanillaBasics plugin =
+                    (VanillaBasics) world.plugins().plugin("VanillaBasics");
+            player.mob().inventories().modify("Container", inventory -> {
+                CraftingRecipe recipe =
+                        plugin.getCraftingRecipes().get(type).recipes().get(id);
+                ItemStack result = recipe.result();
+                if (inventory.canAdd(result) >= result.amount()) {
+                    recipe.takes(inventory).ifPresent(takes -> {
+                        takes.forEach(inventory::take);
+                        inventory.add(result);
+                    });
+                }
+            });
         });
     }
 }

@@ -68,7 +68,7 @@ public class EntityBellowsServer extends EntityServer {
         VanillaMaterial materials = plugin.getMaterials();
         if (terrain.type(pos.intX(), pos.intY(), pos.intZ()) !=
                 materials.bellows) {
-            world.deleteEntity(this);
+            world.removeEntity(this);
         }
     }
 

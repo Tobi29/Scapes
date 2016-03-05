@@ -82,7 +82,7 @@ public class MobFlyingBlockServer extends MobServer {
                 world.getTerrain().queue(handler -> handler
                         .typeData(x, y, z, (BlockType) item.material(),
                                 item.data()));
-                world.deleteEntity(this);
+                world.removeEntity(this);
             }
         }
     }

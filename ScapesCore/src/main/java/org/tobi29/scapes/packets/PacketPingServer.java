@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.packets;
 
+import java8.util.function.Consumer;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
@@ -30,7 +31,7 @@ public class PacketPingServer extends PacketPing {
     }
 
     @Override
-    public void runServer(PlayerConnection player, WorldServer world) {
+    public void runServer(PlayerConnection player, Consumer<Consumer<WorldServer>> worldAccess) {
         if (player instanceof RemotePlayerConnection) {
             ((RemotePlayerConnection) player).updatePing(timestamp);
         }

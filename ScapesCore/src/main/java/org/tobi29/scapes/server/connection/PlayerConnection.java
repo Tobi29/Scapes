@@ -22,7 +22,6 @@ import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.server.Connection;
-import org.tobi29.scapes.engine.server.ConnectionCloseException;
 import org.tobi29.scapes.engine.utils.io.IORunnable;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
@@ -30,7 +29,6 @@ import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.entity.skin.ServerSkin;
 import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketChat;
-import org.tobi29.scapes.packets.PacketDisconnect;
 import org.tobi29.scapes.packets.PacketSetWorld;
 import org.tobi29.scapes.server.MessageLevel;
 import org.tobi29.scapes.server.PlayerEntry;
@@ -97,7 +95,7 @@ public abstract class PlayerConnection
         }
         this.entity = entity;
         entity.world().addEntity(entity);
-        task(() -> transmit(new PacketSetWorld(entity.world(), entity)));
+        send(new PacketSetWorld(entity.world(), entity));
         entity.world().addPlayer(entity);
     }
 
@@ -158,8 +156,6 @@ public abstract class PlayerConnection
         transmit(packet);
     }
 
-    protected abstract void task(IORunnable runnable);
-
     protected abstract void transmit(Packet packet) throws IOException;
 
     @Override
@@ -174,7 +170,6 @@ public abstract class PlayerConnection
     protected void removeEntity() {
         MobPlayerServer entity = this.entity;
         if (entity != null) {
-            entity.world().deleteEntity(entity);
             entity.world().removePlayer(entity);
             save();
         }
@@ -211,11 +206,5 @@ public abstract class PlayerConnection
         this.permissionLevel = permissionLevel;
     }
 
-    public void disconnect(String reason) {
-        task(() -> {
-            sendPacket(new PacketDisconnect(reason));
-            throw new ConnectionCloseException(reason);
-        });
-        removeEntity();
-    }
+    public abstract void disconnect(String reason);
 }

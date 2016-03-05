@@ -16,8 +16,10 @@
 package org.tobi29.scapes.server.connection;
 
 import java8.util.Optional;
+import java8.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.engine.server.AbstractServerConnection;
 import org.tobi29.scapes.engine.server.ConnectionCloseException;
 import org.tobi29.scapes.engine.server.InvalidPacketDataException;
@@ -28,11 +30,9 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary;
 import org.tobi29.scapes.engine.utils.math.FastMath;
+import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.entity.skin.ServerSkin;
-import org.tobi29.scapes.packets.Packet;
-import org.tobi29.scapes.packets.PacketClient;
-import org.tobi29.scapes.packets.PacketPingServer;
-import org.tobi29.scapes.packets.PacketServer;
+import org.tobi29.scapes.packets.*;
 import org.tobi29.scapes.plugins.PluginFile;
 import org.tobi29.scapes.plugins.Plugins;
 import org.tobi29.scapes.server.MessageLevel;
@@ -212,12 +212,6 @@ public class RemotePlayerConnection extends PlayerConnection {
     }
 
     @Override
-    protected void task(IORunnable runnable) {
-        sendQueueSize.incrementAndGet();
-        sendQueue.add(runnable);
-    }
-
-    @Override
     protected void transmit(Packet packet) throws IOException {
         WritableByteStream output = channel.getOutputStream();
         output.putShort(packet.id(server.plugins().registry()));
@@ -229,6 +223,14 @@ public class RemotePlayerConnection extends PlayerConnection {
         super.close();
         channel.close();
         state = State.CLOSED;
+    }
+
+    @Override
+    public void disconnect(String reason) {
+        task(() -> {
+            send(new PacketDisconnect(reason));
+            throw new ConnectionCloseException(reason);
+        });
     }
 
     public void updatePing(long ping) {
@@ -253,6 +255,11 @@ public class RemotePlayerConnection extends PlayerConnection {
         }, 1 << 10 << 10));
         output.putBoolean(true);
         channel.queueBundle();
+    }
+
+    private void task(IORunnable runnable) {
+        sendQueueSize.incrementAndGet();
+        sendQueue.add(runnable);
     }
 
     @Override
@@ -286,12 +293,21 @@ public class RemotePlayerConnection extends PlayerConnection {
                     }
                     Optional<RandomReadableByteStream> bundle = channel.fetch();
                     if (bundle.isPresent()) {
+                        Consumer<Consumer<WorldServer>> worldAccess;
+                        MobPlayerServer entity = this.entity;
+                        if (entity == null) {
+                            worldAccess = consumer -> {
+                            };
+                        } else {
+                            worldAccess =
+                                    consumer -> consumer.accept(entity.world());
+                        }
                         ReadableByteStream stream = bundle.get();
                         while (stream.hasRemaining()) {
                             PacketServer packet = (PacketServer) Packet
                                     .make(registry, stream.getShort());
                             packet.parseServer(this, stream);
-                            packet.runServer(this, entity.world());
+                            packet.runServer(this, worldAccess);
                         }
                     }
                     return channel.process();

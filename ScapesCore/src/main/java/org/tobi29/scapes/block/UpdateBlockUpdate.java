@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.block;
 
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
-import org.tobi29.scapes.entity.server.EntityServer;
 
 public class UpdateBlockUpdate extends Update {
     @Override
@@ -40,9 +38,8 @@ public class UpdateBlockUpdate extends Update {
             int y, int z, boolean updateTile) {
         BlockType type = terrain.type(x, y, z);
         if (updateTile || type.causesTileUpdate()) {
-            for (EntityServer entity : terrain.world().entities(x, y, z)) {
-                entity.updateTile(terrain, x, y, z);
-            }
+            terrain.world().entities(x, y, z)
+                    .forEach(entity -> entity.updateTile(terrain, x, y, z));
         }
         type.update(terrain, x, y, z);
     }
