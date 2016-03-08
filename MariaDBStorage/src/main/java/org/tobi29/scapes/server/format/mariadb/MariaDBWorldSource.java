@@ -21,9 +21,9 @@ public class MariaDBWorldSource implements WorldSource {
     private final Connection connection;
     private final MySQLDatabase database;
 
-    public MariaDBWorldSource(FilePath path, String address, int port,
-            String name, String user, String password) throws IOException {
-        this(path, openDatabase(address, port, name, user, password));
+    public MariaDBWorldSource(FilePath path, String url, String user,
+            String password) throws IOException {
+        this(path, openDatabase(url, user, password));
     }
 
     public MariaDBWorldSource(FilePath path, Connection connection) {
@@ -32,11 +32,10 @@ public class MariaDBWorldSource implements WorldSource {
         database = new MySQLDatabase(connection);
     }
 
-    public static Connection openDatabase(String address, int port, String name,
-            String user, String password) throws IOException {
+    public static Connection openDatabase(String url, String user,
+            String password) throws IOException {
         try {
-            MariaDbDataSource source =
-                    new MariaDbDataSource(address, port, name);
+            MariaDbDataSource source = new MariaDbDataSource(url);
             return source.getConnection(user, password);
         } catch (SQLException e) {
             throw new IOException(e);

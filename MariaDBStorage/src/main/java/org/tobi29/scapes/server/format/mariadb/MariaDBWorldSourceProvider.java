@@ -21,12 +21,9 @@ public class MariaDBWorldSourceProvider implements WorldSourceProvider {
     @Override
     public WorldSource get(FilePath path, TagStructure config)
             throws IOException {
-        String address = config.getString("Address");
-        int port = config.getInteger("Port");
-        String name = config.getString("Name");
+        String url = config.getString("URL");
         String user = config.getString("User");
         String password = config.getString("Password");
-        return new MariaDBWorldSource(path, address, port, name, user,
-                password);
+        return new MariaDBWorldSource(path, url, user, password);
     }
 }
