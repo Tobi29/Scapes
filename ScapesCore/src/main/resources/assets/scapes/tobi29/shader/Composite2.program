@@ -6,8 +6,8 @@ uniform 8 Texture2 uniform_Luminance;
 uniform 9 Texture2 uniform_AutoExposure;
 
 const Vector3 lumcoeff = vector3(0.299, 0.587, 0.114);
-const Float[] blurWeight = {$BLUR_WEIGHT};
-const Float[] blurOffset = {$BLUR_OFFSET};
+const Float[] blurWeight = $BLUR_WEIGHT;
+const Float[] blurOffset = $BLUR_OFFSET;
 
 shader vertex(0 Vector4 attribute_Position,
               2 Vector2 attribute_Texture) {
