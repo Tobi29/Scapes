@@ -15,11 +15,13 @@
  */
 package org.tobi29.scapes.vanilla.basics;
 
-import java8.util.Maps;
+import java8.util.concurrent.ConcurrentMaps;
 import java8.util.function.Consumer;
 import java8.util.stream.Collectors;
 import java8.util.stream.Stream;
-import org.tobi29.scapes.block.*;
+import org.tobi29.scapes.block.BlockType;
+import org.tobi29.scapes.block.GameRegistry;
+import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.EnvironmentClient;
 import org.tobi29.scapes.chunk.EnvironmentServer;
 import org.tobi29.scapes.chunk.WorldClient;
@@ -135,14 +137,14 @@ public class VanillaBasics implements WorldType {
         if (!locked) {
             throw new IllegalStateException("Initializing still running");
         }
-        return Maps.getOrDefaultConcurrent(metalTypes, id, crapMetal);
+        return ConcurrentMaps.getOrDefault(metalTypes, id, crapMetal);
     }
 
     public AlloyType alloyType(String id) {
         if (!locked) {
             throw new IllegalStateException("Initializing still running");
         }
-        return Maps.getOrDefaultConcurrent(alloyTypes, id, crapAlloy);
+        return ConcurrentMaps.getOrDefault(alloyTypes, id, crapAlloy);
     }
 
     public Stream<AlloyType> alloyTypes() {
