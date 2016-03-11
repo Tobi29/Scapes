@@ -1,6 +1,6 @@
 package org.tobi29.scapes.client.connection;
 
-import java8.util.Maps;
+import java8.util.concurrent.ConcurrentMaps;
 import java8.util.stream.Stream;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Streams;
@@ -14,7 +14,7 @@ public class ConnectionProfiler {
             new ConcurrentHashMap<>();
 
     public void packet(Object packet, long size) {
-        Maps.computeIfAbsentConcurrent(bytes, packet.getClass(),
+        ConcurrentMaps.computeIfAbsent(bytes, packet.getClass(),
                 key -> new AtomicLong()).addAndGet(size);
     }
 
