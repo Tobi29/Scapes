@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.entity.model;
 
 import org.tobi29.scapes.chunk.WorldClient;
+import org.tobi29.scapes.chunk.terrain.TerrainClient;
 import org.tobi29.scapes.engine.opengl.*;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -45,6 +46,7 @@ public class EntityModelBlockBreak implements EntityModel {
 
     private final MutableVector3 pos;
     private final EntityBlockBreakClient entity;
+    private final Pool<PointerPane> pointerPanes = new Pool<>(PointerPane::new);
 
     public EntityModelBlockBreak(EntityBlockBreakClient entity) {
         this.entity = entity;
@@ -70,6 +72,11 @@ public class EntityModelBlockBreak implements EntityModel {
     public void renderUpdate(double delta) {
         double factor = FastMath.min(1.0, delta * 5.0);
         pos.plus(entity.pos().minus(pos.now()).multiply(factor));
+        pointerPanes.reset();
+        TerrainClient terrain = entity.world().terrain();
+        terrain.type(pos.intX(), pos.intY(), pos.intZ()).addPointerCollision(
+                terrain.data(pos.intX(), pos.intY(), pos.intZ()), pointerPanes,
+                pos.intX(), pos.intY(), pos.intZ());
     }
 
     @Override
@@ -87,7 +94,7 @@ public class EntityModelBlockBreak implements EntityModel {
                 world.terrain().sunLight(pos.intX(), pos.intY(), pos.intZ()) /
                         15.0f);
         gl.textures().bind("Scapes:image/entity/Break" + i, gl);
-        for (PointerPane pane : entity.pointerPanes()) {
+        for (PointerPane pane : pointerPanes) {
             MatrixStack matrixStack = gl.matrixStack();
             Matrix matrix = matrixStack.push();
             matrix.translate((float) (posRenderX - 0.5 +
