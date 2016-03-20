@@ -28,7 +28,7 @@ public interface WorldSkybox {
 
     void render(GL gl, Cam cam);
 
-    void dispose();
+    void dispose(GL gl);
 
     float exposure();
 

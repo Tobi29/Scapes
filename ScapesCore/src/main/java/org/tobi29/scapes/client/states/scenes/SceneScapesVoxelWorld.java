@@ -348,9 +348,15 @@ public class SceneScapesVoxelWorld extends Scene {
     }
 
     @Override
+    public void dispose(GL gl) {
+        skybox.dispose(gl);
+        skyboxFBO.ensureDisposed(gl);
+        exposureFBO.ifPresent(fbo -> fbo.ensureDisposed(gl));
+    }
+
+    @Override
     public void dispose() {
         world.dispose();
-        skybox.dispose();
         ParticleBlock.clear();
     }
 
