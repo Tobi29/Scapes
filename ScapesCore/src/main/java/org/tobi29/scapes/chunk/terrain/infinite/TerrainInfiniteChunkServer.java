@@ -26,6 +26,7 @@ import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i;
+import org.tobi29.scapes.engine.utils.profiler.Profiler;
 import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.packets.PacketBlockChange;
@@ -51,38 +52,30 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
 
     public TerrainInfiniteChunkServer(Vector2i pos,
             TerrainInfiniteServer terrain, int zSize,
-            Optional<TagStructure> tagStructure, ChunkGenerator generator,
+            TagStructure tagStructure) {
+        super(pos, terrain, terrain.world(), zSize);
+        this.terrain = terrain;
+        try (Profiler.C ignored = Profiler.section("Load")) {
+            load(tagStructure);
+        }
+        try (Profiler.C ignored = Profiler.section("HeightMap")) {
+            initHeightMap();
+        }
+    }
+
+    public TerrainInfiniteChunkServer(Vector2i pos,
+            TerrainInfiniteServer terrain, int zSize, ChunkGenerator generator,
             GeneratorOutput output) {
         super(pos, terrain, terrain.world(), zSize);
         this.terrain = terrain;
-        if (tagStructure.isPresent()) {
-            load(tagStructure.get());
-        } else {
-            long time = System.currentTimeMillis();
-            generator.seed(posBlock.intX(), posBlock.intY());
-            for (int y = 0; y < 16; y++) {
-                int yy = posBlock.intY() + y;
-                for (int x = 0; x < 16; x++) {
-                    int xx = posBlock.intX() + x;
-                    generator.makeLand(xx, yy, 0, zSize, output);
-                    for (int z = 0; z < zSize; z++) {
-                        int type = output.type[z];
-                        if (type != 0) {
-                            bID.setDataUnsafe(x, y, z, 0, type);
-                            int data = output.data[z];
-                            if (data != 0) {
-                                bData.setDataUnsafe(x, y, z, 0, data);
-                            }
-                        }
-                    }
-                    Streams.of(output.updates).forEach(this::addDelayedUpdate);
-                    output.updates.clear();
-                }
-            }
+        try (Profiler.C ignored = Profiler.section("Generate")) {
+            generate(generator, output);
+        }
+        try (Profiler.C ignored = Profiler.section("Sunlight")) {
             initSunLight();
+        }
+        try (Profiler.C ignored = Profiler.section("HeightMap")) {
             initHeightMap();
-            LOGGER.trace("Generated chunk in {} ms.",
-                    System.currentTimeMillis() - time);
         }
     }
 
@@ -250,7 +243,6 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
             state = State.POPULATED;
         }
         metaData = tagStructure.getStructure("MetaData");
-        initHeightMap();
     }
 
     public TagStructure save(boolean packet) {
@@ -304,6 +296,29 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
                     .setBoolean("Populated", state.id >= State.POPULATED.id);
         }
         return tagStructure;
+    }
+
+    private void generate(ChunkGenerator generator, GeneratorOutput output) {
+        generator.seed(posBlock.intX(), posBlock.intY());
+        for (int y = 0; y < 16; y++) {
+            int yy = posBlock.intY() + y;
+            for (int x = 0; x < 16; x++) {
+                int xx = posBlock.intX() + x;
+                generator.makeLand(xx, yy, 0, zSize, output);
+                for (int z = 0; z < zSize; z++) {
+                    int type = output.type[z];
+                    if (type != 0) {
+                        bID.setDataUnsafe(x, y, z, 0, type);
+                        int data = output.data[z];
+                        if (data != 0) {
+                            bData.setDataUnsafe(x, y, z, 0, data);
+                        }
+                    }
+                }
+                Streams.of(output.updates).forEach(this::addDelayedUpdate);
+                output.updates.clear();
+            }
+        }
     }
 
     public void populate() {

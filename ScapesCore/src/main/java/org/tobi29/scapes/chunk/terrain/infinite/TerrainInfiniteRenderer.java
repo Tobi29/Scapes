@@ -33,6 +33,7 @@ import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
+import org.tobi29.scapes.engine.utils.profiler.Profiler;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
@@ -488,25 +489,28 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                 int by = terrainChunk.blockY();
                 int bz = i << 4;
                 boolean solid = true, empty = true;
-                for (int xxx = 0; xxx < 16; xxx++) {
-                    int bxx = bx + xxx;
-                    for (int yyy = 0; yyy < 16; yyy++) {
-                        int byy = by + yyy;
-                        for (int zzz = 0; zzz < 16; zzz++) {
-                            int bzz = bz + zzz;
-                            BlockType type = terrainChunk.typeL(xxx, yyy, bzz);
-                            if (type == air) {
-                                solid = false;
-                            } else {
-                                empty = false;
-                                if (solid &&
-                                        type.connectStage(section, bxx, byy,
-                                                bzz) < 4) {
+                try (Profiler.C ignored = Profiler.section("CheckSolid")) {
+                    for (int xxx = 0; xxx < 16; xxx++) {
+                        int bxx = bx + xxx;
+                        for (int yyy = 0; yyy < 16; yyy++) {
+                            int byy = by + yyy;
+                            for (int zzz = 0; zzz < 16; zzz++) {
+                                int bzz = bz + zzz;
+                                BlockType type =
+                                        terrainChunk.typeL(xxx, yyy, bzz);
+                                if (type == air) {
                                     solid = false;
+                                } else {
+                                    empty = false;
+                                    if (solid &&
+                                            type.connectStage(section, bxx, byy,
+                                                    bzz) < 4) {
+                                        solid = false;
+                                    }
                                 }
-                            }
-                            if (!solid && !empty) {
-                                break;
+                                if (!solid && !empty) {
+                                    break;
+                                }
                             }
                         }
                     }
@@ -527,28 +531,35 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                     boolean lod = FastMath.sqr(relativeX + 8) +
                             FastMath.sqr(relativeY + 8) +
                             FastMath.sqr(relativeZ + 8) < 9216;
-                    for (int xxx = 0; xxx < 16; xxx++) {
-                        int bxx = bx + xxx;
-                        for (int yyy = 0; yyy < 16; yyy++) {
-                            int byy = by + yyy;
-                            for (int zzz = 0; zzz < 16; zzz++) {
-                                int bzz = bz + zzz;
-                                BlockType type =
-                                        terrainChunk.typeL(xxx, yyy, bzz);
-                                int data = terrainChunk.dataL(xxx, yyy, bzz);
-                                type.addToChunkMesh(mesh, meshAlpha, data,
-                                        section, info, bxx, byy, bzz, xxx, yyy,
-                                        zzz, lod);
+                    try (Profiler.C ignored = Profiler
+                            .section("GenerateMesh")) {
+                        for (int xxx = 0; xxx < 16; xxx++) {
+                            int bxx = bx + xxx;
+                            for (int yyy = 0; yyy < 16; yyy++) {
+                                int byy = by + yyy;
+                                for (int zzz = 0; zzz < 16; zzz++) {
+                                    int bzz = bz + zzz;
+                                    BlockType type =
+                                            terrainChunk.typeL(xxx, yyy, bzz);
+                                    int data =
+                                            terrainChunk.dataL(xxx, yyy, bzz);
+                                    type.addToChunkMesh(mesh, meshAlpha, data,
+                                            section, info, bxx, byy, bzz, xxx,
+                                            yyy, zzz, lod);
+                                }
                             }
                         }
                     }
-                    if (mesh.size() > 0) {
-                        vao = mesh.finish();
-                        aabb = mesh.aabb();
-                    }
-                    if (meshAlpha.size() > 0) {
-                        vaoAlpha = meshAlpha.finish();
-                        aabbAlpha = meshAlpha.aabb();
+                    try (Profiler.C ignored = Profiler
+                            .section("AssembleMesh")) {
+                        if (mesh.size() > 0) {
+                            vao = mesh.finish();
+                            aabb = mesh.aabb();
+                        }
+                        if (meshAlpha.size() > 0) {
+                            vaoAlpha = meshAlpha.finish();
+                            aabbAlpha = meshAlpha.aabb();
+                        }
                     }
                 }
             }

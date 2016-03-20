@@ -135,7 +135,7 @@ public abstract class TerrainInfiniteChunk {
         }
     }
 
-    public void initSunLight() {
+    protected void initSunLight() {
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 16; y++) {
                 byte sunLight = 15;

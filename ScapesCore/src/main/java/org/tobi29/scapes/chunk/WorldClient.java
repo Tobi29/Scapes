@@ -39,9 +39,9 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.Frustum;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
+import org.tobi29.scapes.engine.utils.profiler.Profiler;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.MobClient;
-import org.tobi29.scapes.entity.client.MobPlayerClient;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.model.EntityModel;
 import org.tobi29.scapes.entity.model.MobModel;
@@ -128,26 +128,39 @@ public class WorldClient extends World {
     }
 
     public void update(double delta) {
-        Streams.of(entities.values()).forEach(entity -> {
-            if (terrain.isBlockTicking(FastMath.floor(entity.x()),
-                    FastMath.floor(entity.y()), FastMath.floor(entity.z()))) {
-                entity.update(delta);
-                if (entity instanceof MobClient) {
-                    ((MobClient) entity).move(delta);
-                }
-            } else {
-                if (entity == player) {
-                    player.updatePosition();
+        try (Profiler.C ignored = Profiler.section("Entities")) {
+            Streams.of(entities.values()).forEach(entity -> {
+                if (terrain.isBlockTicking(FastMath.floor(entity.x()),
+                        FastMath.floor(entity.y()),
+                        FastMath.floor(entity.z()))) {
+                    entity.update(delta);
+                    if (entity instanceof MobClient) {
+                        ((MobClient) entity).move(delta);
+                    }
                 } else {
-                    removeEntity(entity);
+                    if (entity == player) {
+                        player.updatePosition();
+                    } else {
+                        removeEntity(entity);
+                    }
                 }
-            }
-        });
-        terrain.update(delta);
-        particleManager.update(delta);
-        environment.tick(delta);
-        scene.terrainTextureRegistry().update(delta);
-        scene.skybox().update(delta);
+            });
+        }
+        try (Profiler.C ignored = Profiler.section("Terrain")) {
+            terrain.update(delta);
+        }
+        try (Profiler.C ignored = Profiler.section("Particles")) {
+            particleManager.update(delta);
+        }
+        try (Profiler.C ignored = Profiler.section("Environment")) {
+            environment.tick(delta);
+        }
+        try (Profiler.C ignored = Profiler.section("Textures")) {
+            scene.terrainTextureRegistry().update(delta);
+        }
+        try (Profiler.C ignored = Profiler.section("Skybox")) {
+            scene.skybox().update(delta);
+        }
         spawn = player.pos();
     }
 

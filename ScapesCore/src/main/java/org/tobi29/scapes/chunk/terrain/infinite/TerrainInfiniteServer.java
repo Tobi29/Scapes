@@ -36,6 +36,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
+import org.tobi29.scapes.engine.utils.profiler.Profiler;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 import org.tobi29.scapes.entity.server.EntityServer;
@@ -232,10 +233,21 @@ public class TerrainInfiniteServer extends TerrainInfinite
                 chunk = chunkManager.get(x, y);
                 if (!chunk.isPresent()) {
                     Optional<TagStructure> tagStructure = tagStructures.get(i);
-                    TerrainInfiniteChunkServer chunk2 =
-                            new TerrainInfiniteChunkServer(new Vector2i(x, y),
-                                    this, zSize, tagStructure,
+                    TerrainInfiniteChunkServer chunk2;
+                    if (tagStructure.isPresent()) {
+                        try (Profiler.C ignored = Profiler.section("Load")) {
+                            chunk2 = new TerrainInfiniteChunkServer(
+                                    new Vector2i(x, y), this, zSize,
+                                    tagStructure.get());
+                        }
+                    } else {
+                        try (Profiler.C ignored = Profiler
+                                .section("Generate")) {
+                            chunk2 = new TerrainInfiniteChunkServer(
+                                    new Vector2i(x, y), this, zSize,
                                     world.generator(), generatorOutput);
+                        }
+                    }
                     chunkManager.add(chunk2);
                     updateAdjacent(chunk2.x(), chunk2.y());
                     chunk = chunk2.optional();
@@ -253,44 +265,51 @@ public class TerrainInfiniteServer extends TerrainInfinite
 
     @Override
     public void update(double delta, Collection<MobSpawner> spawners) {
-        Streams.of(chunkManager.iterator())
-                .forEach(chunk -> chunk.updateServer(delta));
-        Random random = ThreadLocalRandom.current();
-        for (MobSpawner spawner : spawners) {
-            if (world.mobs(spawner.creatureType()) <
-                    chunkManager.chunks() * spawner.mobsPerChunk()) {
-                for (TerrainInfiniteChunkServer chunk : chunkManager
-                        .iterator()) {
-                    if (random.nextInt(spawner.chunkChance()) == 0 &&
-                            chunk.isLoaded()) {
-                        for (int i = 0; i < spawner.spawnAttempts(); i++) {
-                            int x = random.nextInt(16);
-                            int y = random.nextInt(16);
-                            int z = random.nextInt(chunk.zSize());
-                            int xx = x + chunk.blockX();
-                            int yy = y + chunk.blockY();
-                            if (spawner.creatureType().doesDespawn()) {
-                                MobPlayerServer player = world.nearestPlayer(
-                                        new Vector3d(xx, yy, z));
-                                if (player == null) {
-                                    continue;
-                                } else {
-                                    double distance =
-                                            FastMath.sqr(player.x() - xx) +
-                                                    FastMath.sqr(
-                                                            player.y() - yy) +
-                                                    FastMath.sqr(
-                                                            player.z() - z);
-                                    if (distance > 9216.0 || distance < 256.0) {
+        try (Profiler.C ignored = Profiler.section("Chunks")) {
+            Streams.of(chunkManager.iterator())
+                    .forEach(chunk -> chunk.updateServer(delta));
+        }
+        try (Profiler.C ignored = Profiler.section("Spawning")) {
+            Random random = ThreadLocalRandom.current();
+            for (MobSpawner spawner : spawners) {
+                if (world.mobs(spawner.creatureType()) <
+                        chunkManager.chunks() * spawner.mobsPerChunk()) {
+                    for (TerrainInfiniteChunkServer chunk : chunkManager
+                            .iterator()) {
+                        if (random.nextInt(spawner.chunkChance()) == 0 &&
+                                chunk.isLoaded()) {
+                            for (int i = 0; i < spawner.spawnAttempts(); i++) {
+                                int x = random.nextInt(16);
+                                int y = random.nextInt(16);
+                                int z = random.nextInt(chunk.zSize());
+                                int xx = x + chunk.blockX();
+                                int yy = y + chunk.blockY();
+                                if (spawner.creatureType().doesDespawn()) {
+                                    MobPlayerServer player =
+                                            world.nearestPlayer(
+                                                    new Vector3d(xx, yy, z));
+                                    if (player == null) {
                                         continue;
+                                    } else {
+                                        double distance =
+                                                FastMath.sqr(player.x() - xx) +
+                                                        FastMath.sqr(
+                                                                player.y() -
+                                                                        yy) +
+                                                        FastMath.sqr(
+                                                                player.z() - z);
+                                        if (distance > 9216.0 ||
+                                                distance < 256.0) {
+                                            continue;
+                                        }
                                     }
                                 }
-                            }
-                            if (spawner.canSpawn(this, xx, yy, z)) {
-                                EntityServer entity =
-                                        spawner.spawn(this, xx, yy, z);
-                                entity.onSpawn();
-                                world.addEntity(entity);
+                                if (spawner.canSpawn(this, xx, yy, z)) {
+                                    EntityServer entity =
+                                            spawner.spawn(this, xx, yy, z);
+                                    entity.onSpawn();
+                                    world.addEntity(entity);
+                                }
                             }
                         }
                     }

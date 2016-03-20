@@ -23,6 +23,7 @@ import org.tobi29.scapes.engine.utils.math.vector.MutableVector3;
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3i;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i;
+import org.tobi29.scapes.engine.utils.profiler.Profiler;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 
@@ -190,10 +191,14 @@ public class LightingEngineThreaded
             while (!this.updates.isEmpty()) {
                 Vector3 update = this.updates.poll();
                 if (update != null) {
-                    updateBlockLight(updates, newUpdates, update.intX(),
-                            update.intY(), update.intZ());
-                    updateSunLight(updates, newUpdates, update.intX(),
-                            update.intY(), update.intZ());
+                    try (Profiler.C ignored = Profiler.section("BlockLight")) {
+                        updateBlockLight(updates, newUpdates, update.intX(),
+                                update.intY(), update.intZ());
+                    }
+                    try (Profiler.C ignored = Profiler.section("SunLight")) {
+                        updateSunLight(updates, newUpdates, update.intX(),
+                                update.intY(), update.intZ());
+                    }
                 }
             }
             joiner.sleep();

@@ -35,6 +35,7 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.Frustum;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
+import org.tobi29.scapes.engine.utils.profiler.Profiler;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 import org.tobi29.scapes.entity.CreatureType;
@@ -207,37 +208,45 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
 
     private void update(double delta) {
         synchronized (terrain) {
-            terrain.update(delta, spawners);
-            entities().forEach(entity -> {
-                entity.update(delta);
-                if (entity instanceof MobServer) {
-                    ((MobServer) entity).move(delta);
-                }
-                if (entity instanceof MobLivingServer) {
-                    if (((MobLivingServer) entity).isDead()) {
-                        ((MobLivingServer) entity).onDeath();
-                        if (!(entity instanceof MobPlayerServer)) {
-                            removeEntity(entity);
-                        }
-                    } else {
-                        if (((MobLivingServer) entity).creatureType()
-                                .doesDespawn()) {
-                            MobPlayerServer player =
-                                    nearestPlayer(entity.pos());
-                            if (player != null) {
-                                if (FastMath.pointDistanceSqr(entity.pos(),
-                                        player.pos()) > 16384.0) {
+            try (Profiler.C ignored = Profiler.section("Terrain")) {
+                terrain.update(delta, spawners);
+            }
+            try (Profiler.C ignored = Profiler.section("Entities")) {
+                entities().forEach(entity -> {
+                    entity.update(delta);
+                    if (entity instanceof MobServer) {
+                        ((MobServer) entity).move(delta);
+                    }
+                    if (entity instanceof MobLivingServer) {
+                        if (((MobLivingServer) entity).isDead()) {
+                            ((MobLivingServer) entity).onDeath();
+                            if (!(entity instanceof MobPlayerServer)) {
+                                removeEntity(entity);
+                            }
+                        } else {
+                            if (((MobLivingServer) entity).creatureType()
+                                    .doesDespawn()) {
+                                MobPlayerServer player =
+                                        nearestPlayer(entity.pos());
+                                if (player != null) {
+                                    if (FastMath.pointDistanceSqr(entity.pos(),
+                                            player.pos()) > 16384.0) {
+                                        removeEntity(entity);
+                                    }
+                                } else {
                                     removeEntity(entity);
                                 }
-                            } else {
-                                removeEntity(entity);
                             }
                         }
                     }
-                }
-            });
-            environment.tick(delta);
-            taskExecutor.tick();
+                });
+            }
+            try (Profiler.C ignored = Profiler.section("Environment")) {
+                environment.tick(delta);
+            }
+            try (Profiler.C ignored = Profiler.section("Tasks")) {
+                taskExecutor.tick();
+            }
             tick++;
         }
     }
@@ -405,6 +414,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
 
     public synchronized void removePlayer(MobPlayerServer player) {
         players.remove(player.nickname());
+        player.dispose();
     }
 
     public void addSpawner(MobSpawner spawner) {
@@ -519,7 +529,9 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
             sync.init();
             while (!joiner.marked()) {
                 if (!players.isEmpty()) {
-                    update(0.05);
+                    try (Profiler.C ignored = Profiler.section("Tick")) {
+                        update(0.05);
+                    }
                     if (Streams.of(players.values())
                             .filter(MobPlayerServer::isActive).findAny()
                             .isPresent()) {
