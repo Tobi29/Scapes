@@ -44,6 +44,7 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
             new ConcurrentHashMap<>();
     protected int inventorySelectLeft, inventorySelectRight = 9, healWait;
     protected EntityContainerServer currentContainer;
+    private boolean disposed;
 
     protected MobPlayerServer(WorldServer world, Vector3 pos, Vector3 speed,
             AABB aabb, double lives, double maxLives, Frustum viewField,
@@ -328,6 +329,14 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
     public void onPunch(double strength) {
         Streams.of(punchListeners.values())
                 .forEach(listener -> listener.onPunch(strength));
+    }
+
+    public void dispose() {
+        disposed = true;
+    }
+
+    public boolean disposed() {
+        return disposed;
     }
 
     public interface PunchListener extends EntityServer.Listener {

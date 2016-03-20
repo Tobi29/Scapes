@@ -112,6 +112,9 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
             if (x != pos.intX() || y != pos.intY()) {
                 terrain.chunkS(x, y, chunk -> chunk.addEntity(entity));
                 removeEntity(entity);
+            } else if (entity instanceof MobPlayerServer &&
+                    ((MobPlayerServer) entity).disposed()) {
+                removeEntity(entity);
             }
         });
         if (state.id >= State.LOADED.id) {
