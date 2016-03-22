@@ -25,6 +25,7 @@ import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary;
+import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.server.PlayerEntry;
@@ -83,25 +84,30 @@ public class SQLPlayerData implements PlayerData {
         return new PlayerEntry() {
             @Override
             public Optional<MobPlayerServer> createEntity(
-                    PlayerConnection player, Optional<WorldServer> spawnWorld) {
+                    PlayerConnection player, Optional<WorldServer> world,
+                    Optional<Vector3> pos) {
                 ScapesServer server = player.server().server();
-                if (!spawnWorld.isPresent() && worldName.isPresent()) {
-                    spawnWorld = server.world(worldName.get());
+                if (!world.isPresent() && worldName.isPresent()) {
+                    world = server.world(worldName.get());
                 }
-                if (!spawnWorld.isPresent()) {
-                    spawnWorld = server.defaultWorld();
+                if (!world.isPresent()) {
+                    world = server.defaultWorld();
                 }
-                if (!spawnWorld.isPresent()) {
+                if (!world.isPresent()) {
                     return Optional.empty();
                 }
-                WorldServer world = spawnWorld.get();
-                MobPlayerServer entity = world.plugins().worldType()
-                        .newPlayer(world,
-                                new Vector3d(0.5, 0.5, 1.0).plus(world.spawn()),
-                                Vector3d.ZERO, 0.0, 0.0, player.nickname(),
-                                player.skin().checksum(), player);
+                WorldServer spawnWorld = world.get();
+                Vector3 spawnPos = new Vector3d(0.5, 0.5, 1.0)
+                        .plus(pos.orElseGet(spawnWorld::spawn));
+                MobPlayerServer entity = spawnWorld.plugins().worldType()
+                        .newPlayer(spawnWorld, spawnPos, Vector3d.ZERO, 0.0,
+                                0.0, player.name(), player.skin().checksum(),
+                                player);
                 if (entityTag.isPresent()) {
-                    entity.read(entityTag.get());
+                    TagStructure tagStructure = entityTag.get();
+                    pos.ifPresent(forcePos -> tagStructure
+                            .setMultiTag("Pos", forcePos));
+                    entity.read(tagStructure);
                 } else {
                     entity.onSpawn();
                 }

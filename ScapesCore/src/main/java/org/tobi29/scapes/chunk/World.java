@@ -76,7 +76,7 @@ public abstract class World implements PlayConnection {
         return gravity;
     }
 
-    protected boolean checkThread() {
+    public boolean checkThread() {
         return Thread.currentThread() == thread;
     }
 }

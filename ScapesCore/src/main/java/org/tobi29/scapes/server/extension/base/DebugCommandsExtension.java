@@ -11,7 +11,6 @@ import org.tobi29.scapes.engine.utils.io.ByteBufferStream;
 import org.tobi29.scapes.engine.utils.io.ProcessStream;
 import org.tobi29.scapes.engine.utils.io.tag.json.TagStructureJSON;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
-import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.server.MessageLevel;
 import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.command.Command;
@@ -51,8 +50,8 @@ public class DebugCommandsExtension extends ServerExtension {
                 Material material =
                         Command.require(gameRegistry::material, materialName);
                 ItemStack item = new ItemStack(material, data, amount);
-                player.mob().inventories()
-                        .modify("Container", inventory -> inventory.add(item));
+                player.mob(mob -> mob.inventories()
+                        .modify("Container", inventory -> inventory.add(item)));
             });
         });
 
@@ -62,8 +61,8 @@ public class DebugCommandsExtension extends ServerExtension {
             Streams.of(playerNames).forEach(playerName -> commands.add(() -> {
                 PlayerConnection player =
                         Command.require(connection::playerByName, playerName);
-                player.mob().inventories()
-                        .modify("Container", Inventory::clear);
+                player.mob(mob -> mob.inventories()
+                        .modify("Container", Inventory::clear));
             }));
         });
 
@@ -95,7 +94,7 @@ public class DebugCommandsExtension extends ServerExtension {
                         PlayerConnection player =
                                 Command.require(connection::playerByName,
                                         playerName);
-                        player.mob().setPos(location);
+                        player.mob(mob -> mob.setPos(location));
                     });
                 }
             } else {
@@ -111,8 +110,7 @@ public class DebugCommandsExtension extends ServerExtension {
                                         targetName);
                         WorldServer world = Command.require(server::world,
                                 worldOption.get());
-                        MobPlayerServer targetMob = target.mob();
-                        player.setWorld(world, targetMob.pos());
+                        target.mob(mob -> player.setWorld(world, mob.pos()));
                     });
                 } else {
                     commands.add(() -> {
@@ -122,13 +120,14 @@ public class DebugCommandsExtension extends ServerExtension {
                         PlayerConnection target =
                                 Command.require(connection::playerByName,
                                         targetName);
-                        MobPlayerServer playerMob = target.mob();
-                        MobPlayerServer targetMob = target.mob();
-                        if (playerMob.world() == targetMob.world()) {
-                            playerMob.setPos(targetMob.pos());
-                        } else {
-                            player.setWorld(targetMob.world(), targetMob.pos());
-                        }
+                        player.mob(mob -> target.mob(targetMob -> {
+                            if (mob.world() == targetMob.world()) {
+                                mob.setPos(targetMob.pos());
+                            } else {
+                                player.setWorld(targetMob.world(),
+                                        targetMob.pos());
+                            }
+                        }));
                     });
                 }
             }
@@ -143,19 +142,22 @@ public class DebugCommandsExtension extends ServerExtension {
                         PlayerConnection player =
                                 Command.require(connection::playerByName,
                                         playerName);
-                        try {
-                            ByteBufferStream stream = new ByteBufferStream();
-                            TagStructureJSON
-                                    .write(player.mob().leftWeapon().save(),
-                                            stream);
-                            stream.buffer().flip();
-                            String str = ProcessStream
-                                    .process(stream, ProcessStream.asString());
-                            executor.message(str, MessageLevel.FEEDBACK_INFO);
-                        } catch (IOException e) {
-                            executor.message("Failed to serialize item",
-                                    MessageLevel.FEEDBACK_ERROR);
-                        }
+                        player.mob(mob -> {
+                            try {
+                                ByteBufferStream stream =
+                                        new ByteBufferStream();
+                                TagStructureJSON
+                                        .write(mob.leftWeapon().save(), stream);
+                                stream.buffer().flip();
+                                String str = ProcessStream.process(stream,
+                                        ProcessStream.asString());
+                                executor.message(str,
+                                        MessageLevel.FEEDBACK_INFO);
+                            } catch (IOException e) {
+                                executor.message("Failed to serialize item",
+                                        MessageLevel.FEEDBACK_ERROR);
+                            }
+                        });
                     });
                 });
     }

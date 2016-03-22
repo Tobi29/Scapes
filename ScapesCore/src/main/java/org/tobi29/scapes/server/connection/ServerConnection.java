@@ -141,11 +141,11 @@ public class ServerConnection extends AbstractServerConnection {
             if (players.containsKey(player.id())) {
                 return Optional.of("User already online");
             }
-            if (playerByName.containsKey(player.nickname())) {
+            if (playerByName.containsKey(player.name())) {
                 return Optional.of("User with same name online");
             }
             players.put(player.id(), player);
-            playerByName.put(player.nickname(), player);
+            playerByName.put(player.name(), player);
             addExecutor(player);
         }
         return Optional.empty();
@@ -153,7 +153,7 @@ public class ServerConnection extends AbstractServerConnection {
 
     protected void removePlayer(PlayerConnection player) {
         players.remove(player.id());
-        playerByName.remove(player.nickname());
+        playerByName.remove(player.name());
         removeExecutor(player);
     }
 

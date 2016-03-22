@@ -28,7 +28,7 @@ public class PlayerCommandsExtension extends ServerExtension {
             String exp = args.arg(0).orElse("*");
             Pattern pattern = StringUtil.wildcard(exp);
             commands.add(() -> server.connection().players()
-                    .map(PlayerConnection::nickname)
+                    .map(PlayerConnection::name)
                     .filter(nickname -> pattern.matcher(nickname).matches())
                     .forEach(message -> executor
                             .message(message, MessageLevel.FEEDBACK_INFO)));

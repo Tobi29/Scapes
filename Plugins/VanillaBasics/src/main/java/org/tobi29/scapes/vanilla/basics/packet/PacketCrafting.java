@@ -15,9 +15,7 @@
  */
 package org.tobi29.scapes.vanilla.basics.packet;
 
-import java8.util.function.Consumer;
 import org.tobi29.scapes.block.ItemStack;
-import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
@@ -55,12 +53,12 @@ public class PacketCrafting extends Packet implements PacketServer {
     }
 
     @Override
-    public void runServer(PlayerConnection player, Consumer<Consumer<WorldServer>> worldAccess) {
-        worldAccess.accept(world -> {
+    public void runServer(PlayerConnection player) {
+        player.mob(mob -> {
             // TODO: Check if table nearby
-            VanillaBasics plugin =
-                    (VanillaBasics) world.plugins().plugin("VanillaBasics");
-            player.mob().inventories().modify("Container", inventory -> {
+            VanillaBasics plugin = (VanillaBasics) mob.world().plugins()
+                    .plugin("VanillaBasics");
+            mob.inventories().modify("Container", inventory -> {
                 CraftingRecipe recipe =
                         plugin.getCraftingRecipes().get(type).recipes().get(id);
                 ItemStack result = recipe.result();

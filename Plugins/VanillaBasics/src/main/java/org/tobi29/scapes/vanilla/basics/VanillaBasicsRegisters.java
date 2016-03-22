@@ -130,11 +130,13 @@ class VanillaBasicsRegisters {
                     PlayerConnection player =
                             Command.require(connection::playerByName,
                                     playerName);
-                    TagStructure conditionTag = player.mob().metaData("Vanilla")
-                            .getStructure("Condition");
-                    synchronized (conditionTag) {
-                        conditionTag.setDouble("Wake", wake);
-                    }
+                    player.mob(mob -> {
+                        TagStructure conditionTag = mob.metaData("Vanilla")
+                                .getStructure("Condition");
+                        synchronized (conditionTag) {
+                            conditionTag.setDouble("Wake", wake);
+                        }
+                    });
                 });
             }
             Optional<String> saturationOption = args.option('s');
@@ -144,11 +146,13 @@ class VanillaBasicsRegisters {
                     PlayerConnection player =
                             Command.require(connection::playerByName,
                                     playerName);
-                    TagStructure conditionTag = player.mob().metaData("Vanilla")
-                            .getStructure("Condition");
-                    synchronized (conditionTag) {
-                        conditionTag.setDouble("Hunger", saturation);
-                    }
+                    player.mob(mob -> {
+                        TagStructure conditionTag = mob.metaData("Vanilla")
+                                .getStructure("Condition");
+                        synchronized (conditionTag) {
+                            conditionTag.setDouble("Hunger", saturation);
+                        }
+                    });
                 });
             }
             Optional<String> thirstOption = args.option('t');
@@ -158,11 +162,13 @@ class VanillaBasicsRegisters {
                     PlayerConnection player =
                             Command.require(connection::playerByName,
                                     playerName);
-                    TagStructure conditionTag = player.mob().metaData("Vanilla")
-                            .getStructure("Condition");
-                    synchronized (conditionTag) {
-                        conditionTag.setDouble("Thirst", thirst);
-                    }
+                    player.mob(mob -> {
+                        TagStructure conditionTag = mob.metaData("Vanilla")
+                                .getStructure("Condition");
+                        synchronized (conditionTag) {
+                            conditionTag.setDouble("Thirst", thirst);
+                        }
+                    });
                 });
             }
         });
@@ -186,8 +192,8 @@ class VanillaBasicsRegisters {
                 MetalType metalType = plugin.metalType(metal);
                 ItemStack item = new ItemStack(materials.ingot, data, amount);
                 IngotUtil.createIngot(item, metalType, temperature);
-                player.mob().inventories()
-                        .modify("Container", inventory -> inventory.add(item));
+                player.mob(mob -> mob.inventories()
+                        .modify("Container", inventory -> inventory.add(item)));
             });
         });
 
@@ -215,8 +221,8 @@ class VanillaBasicsRegisters {
                 if (!ToolUtil.createTool(plugin, item, kind)) {
                     Command.error("Unknown tool kind: " + kind);
                 }
-                player.mob().inventories()
-                        .modify("Container", inventory -> inventory.add(item));
+                player.mob(mob -> mob.inventories()
+                        .modify("Container", inventory -> inventory.add(item)));
             });
         });
 

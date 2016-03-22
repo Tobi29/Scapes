@@ -16,10 +16,8 @@
 package org.tobi29.scapes.server.connection;
 
 import java8.util.Optional;
-import java8.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.LocalClientConnection;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.engine.server.AbstractServerConnection;
@@ -32,7 +30,6 @@ import org.tobi29.scapes.engine.utils.graphics.PNG;
 import org.tobi29.scapes.engine.utils.io.ChecksumUtil;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
-import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.entity.skin.ServerSkin;
 import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketClient;
@@ -105,17 +102,7 @@ public class LocalPlayerConnection extends PlayerConnection {
         }
         try {
             packet.localServer();
-            Consumer<Consumer<WorldServer>> worldAccess;
-            MobPlayerServer entity = this.entity;
-            if (entity == null) {
-                worldAccess = consumer -> {
-                };
-            } else {
-                worldAccess = consumer -> entity.world().taskExecutor()
-                        .addTask(() -> consumer.accept(entity.world()),
-                                "Packet-World-Access");
-            }
-            packet.runServer(this, worldAccess);
+            packet.runServer(this);
         } catch (ConnectionCloseException e) {
             error(e);
         }

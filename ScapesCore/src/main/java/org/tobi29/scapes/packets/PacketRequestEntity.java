@@ -15,8 +15,6 @@
  */
 package org.tobi29.scapes.packets;
 
-import java8.util.function.Consumer;
-import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
@@ -47,10 +45,9 @@ public class PacketRequestEntity extends Packet implements PacketServer {
     }
 
     @Override
-    public void runServer(PlayerConnection player,
-            Consumer<Consumer<WorldServer>> worldAccess) {
-        worldAccess.accept(world -> world.entity(entityID).ifPresent(
+    public void runServer(PlayerConnection player) {
+        player.mob(mob -> mob.world().entity(entityID).ifPresent(
                 entity -> player.send(new PacketEntityAdd(entity,
-                        world.plugins().registry()))));
+                        mob.world().plugins().registry()))));
     }
 }

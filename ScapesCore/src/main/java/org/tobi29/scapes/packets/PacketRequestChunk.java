@@ -16,9 +16,7 @@
 package org.tobi29.scapes.packets;
 
 import java8.util.Optional;
-import java8.util.function.Consumer;
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.terrain.Terrain;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteChunkClient;
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteChunkServer;
@@ -58,9 +56,9 @@ public class PacketRequestChunk extends Packet
     }
 
     @Override
-    public void runServer(PlayerConnection player, Consumer<Consumer<WorldServer>> worldAccess) {
-        worldAccess.accept(world -> {
-            Terrain terrain = world.getTerrain();
+    public void runServer(PlayerConnection player) {
+        player.mob(mob -> {
+            Terrain terrain = mob.world().getTerrain();
             if (terrain instanceof TerrainInfiniteServer) {
                 Optional<TerrainInfiniteChunkServer> chunk =
                         ((TerrainInfiniteServer) terrain).chunkNoLoad(x, y);

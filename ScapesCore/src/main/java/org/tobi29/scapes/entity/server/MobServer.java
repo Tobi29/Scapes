@@ -217,8 +217,6 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
     @Override
     public void read(TagStructure tagStructure) {
         super.read(tagStructure);
-        positionHandler.receiveMoveAbsolute(pos.doubleX(), pos.doubleY(),
-                pos.doubleZ());
         tagStructure.getMultiTag("Speed", speed);
         tagStructure.getMultiTag("Rot", rot);
     }
@@ -245,6 +243,7 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
     }
 
     public void setSpeed(Vector3 speed) {
+        assert world.checkThread();
         this.speed.set(speed);
     }
 
@@ -281,10 +280,12 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
     }
 
     public void push(double x, double y, double z) {
+        assert world.checkThread();
         speed.plusX(x).plusY(y).plusZ(z);
     }
 
     public void setPos(Vector3 pos) {
+        assert world.checkThread();
         synchronized (this.pos) {
             this.pos.set(pos);
         }

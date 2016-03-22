@@ -15,14 +15,11 @@
  */
 package org.tobi29.scapes.vanilla.basics.packet;
 
-import java8.util.function.Consumer;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.Material;
-import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
-import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
@@ -62,22 +59,21 @@ public class PacketAnvil extends Packet implements PacketServer {
     }
 
     @Override
-    public void runServer(PlayerConnection player,
-            Consumer<Consumer<WorldServer>> worldAccess) {
-        worldAccess.accept(world -> world.entity(entityID)
+    public void runServer(PlayerConnection player) {
+        player.mob(mob -> mob.world().entity(entityID)
                 .filter(entity -> entity instanceof EntityAnvilServer)
                 .map(entity -> (EntityAnvilServer) entity).ifPresent(anvil -> {
-                    MobPlayerServer playerE = player.mob();
-                    if (anvil.viewers().filter(check -> check == playerE)
-                            .findAny().isPresent()) {
-                        VanillaBasics plugin = (VanillaBasics) world.plugins()
-                                .plugin("VanillaBasics");
+                    if (anvil.viewers().filter(check -> check == mob).findAny()
+                            .isPresent()) {
+                        VanillaBasics plugin =
+                                (VanillaBasics) mob.world().plugins()
+                                        .plugin("VanillaBasics");
                         anvil.inventories().modify("Container", anvilI -> {
                             if (!"Hammer".equals(anvilI.item(1).material()
                                     .toolType(anvilI.item(1)))) {
                                 return;
                             }
-                            world.playSound(
+                            mob.world().playSound(
                                     "VanillaBasics:sound/blocks/Metal.ogg",
                                     anvil);
                             ItemStack ingredient = anvilI.item(0);

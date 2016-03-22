@@ -16,10 +16,8 @@
 package org.tobi29.scapes.server.connection;
 
 import java8.util.Optional;
-import java8.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.engine.server.AbstractServerConnection;
 import org.tobi29.scapes.engine.server.ConnectionCloseException;
 import org.tobi29.scapes.engine.server.InvalidPacketDataException;
@@ -30,7 +28,6 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary;
 import org.tobi29.scapes.engine.utils.math.FastMath;
-import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.entity.skin.ServerSkin;
 import org.tobi29.scapes.packets.*;
 import org.tobi29.scapes.plugins.PluginFile;
@@ -293,21 +290,12 @@ public class RemotePlayerConnection extends PlayerConnection {
                     }
                     Optional<RandomReadableByteStream> bundle = channel.fetch();
                     if (bundle.isPresent()) {
-                        Consumer<Consumer<WorldServer>> worldAccess;
-                        MobPlayerServer entity = this.entity;
-                        if (entity == null) {
-                            worldAccess = consumer -> {
-                            };
-                        } else {
-                            worldAccess =
-                                    consumer -> consumer.accept(entity.world());
-                        }
                         ReadableByteStream stream = bundle.get();
                         while (stream.hasRemaining()) {
                             PacketServer packet = (PacketServer) Packet
                                     .make(registry, stream.getShort());
                             packet.parseServer(this, stream);
-                            packet.runServer(this, worldAccess);
+                            packet.runServer(this);
                         }
                     }
                     return channel.process();

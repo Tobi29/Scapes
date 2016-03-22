@@ -15,9 +15,7 @@
  */
 package org.tobi29.scapes.packets;
 
-import java8.util.function.Consumer;
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.server.ConnectionCloseException;
 import org.tobi29.scapes.engine.utils.BufferCreator;
@@ -83,7 +81,7 @@ public class PacketSkin extends Packet implements PacketServer, PacketClient {
     }
 
     @Override
-    public void runServer(PlayerConnection player, Consumer<Consumer<WorldServer>> worldAccess) {
+    public void runServer(PlayerConnection player) {
         player.server().skin(new Checksum(checksum)).ifPresent(
                 skin -> player.send(new PacketSkin(skin.image(), checksum)));
     }

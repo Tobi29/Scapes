@@ -16,13 +16,13 @@
 package org.tobi29.scapes.server.connection;
 
 import java8.util.Optional;
+import java8.util.function.Consumer;
 import org.tobi29.scapes.Debug;
 import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.server.Connection;
-import org.tobi29.scapes.engine.utils.io.IORunnable;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
@@ -52,8 +52,10 @@ public abstract class PlayerConnection
         registry = server.plugins().registry();
     }
 
-    public MobPlayerServer mob() {
-        return entity;
+    public void mob(Consumer<MobPlayerServer> consumer) {
+        MobPlayerServer entity = this.entity;
+        entity.world().taskExecutor()
+                .addTask(() -> consumer.accept(entity), "Player-Mob");
     }
 
     public ServerSkin skin() {
@@ -62,10 +64,6 @@ public abstract class PlayerConnection
 
     public String id() {
         return id;
-    }
-
-    public String nickname() {
-        return nickname;
     }
 
     public ServerConnection server() {
@@ -85,14 +83,12 @@ public abstract class PlayerConnection
         PlayerEntry player = server.server().player(id);
         permissionLevel = player.permissions();
         Optional<MobPlayerServer> newEntity =
-                player.createEntity(this, Optional.ofNullable(world));
+                player.createEntity(this, Optional.ofNullable(world),
+                        Optional.ofNullable(pos));
         if (!newEntity.isPresent()) {
             disconnect("Unable to spawn in world");
         }
         MobPlayerServer entity = newEntity.get();
-        if (pos != null) {
-            entity.setPos(pos);
-        }
         this.entity = entity;
         entity.world().addEntity(entity);
         send(new PacketSetWorld(entity.world(), entity));

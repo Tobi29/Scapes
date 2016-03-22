@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import java8.util.Optional;
-import java8.util.function.Consumer;
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
@@ -99,7 +96,7 @@ public class PacketMobChangeRot extends Packet
     }
 
     @Override
-    public void runServer(PlayerConnection player, Consumer<Consumer<WorldServer>> worldAccess) {
-        player.mob().positionHandler().receiveRotation(x, y, z);
+    public void runServer(PlayerConnection player) {
+        player.mob(mob -> mob.positionHandler().receiveRotation(x, y, z));
     }
 }

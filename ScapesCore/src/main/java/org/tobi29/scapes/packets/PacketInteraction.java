@@ -16,9 +16,7 @@
 package org.tobi29.scapes.packets;
 
 import java8.util.Optional;
-import java8.util.function.Consumer;
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.server.InvalidPacketDataException;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
@@ -109,16 +107,16 @@ public class PacketInteraction extends Packet
     }
 
     @Override
-    public void runServer(PlayerConnection player, Consumer<Consumer<WorldServer>> worldAccess) {
-        worldAccess.accept(world -> {
+    public void runServer(PlayerConnection player) {
+        player.mob(mob -> {
             switch (type) {
                 case INVENTORY_SLOT_LEFT:
                     if (data < 0 || data >= 10) {
                         throw new InvalidPacketDataException(
                                 "Invalid slot change data!");
                     }
-                    player.mob().setInventorySelectLeft(data);
-                    world.send(new PacketInteraction(player.mob().entityID(),
+                    mob.setInventorySelectLeft(data);
+                    mob.world().send(new PacketInteraction(mob.entityID(),
                             INVENTORY_SLOT_LEFT, data));
                     break;
                 case INVENTORY_SLOT_RIGHT:
@@ -126,17 +124,17 @@ public class PacketInteraction extends Packet
                         throw new InvalidPacketDataException(
                                 "Invalid slot change data!");
                     }
-                    player.mob().setInventorySelectRight(data);
-                    world.send(new PacketInteraction(player.mob().entityID(),
+                    mob.setInventorySelectRight(data);
+                    mob.world().send(new PacketInteraction(mob.entityID(),
                             INVENTORY_SLOT_RIGHT, data));
                     break;
                 case OPEN_INVENTORY:
-                    player.send(new PacketOpenGui(player.mob()));
+                    player.send(new PacketOpenGui(mob));
                     break;
                 case CLOSE_INVENTORY:
-                    player.mob().inventories().modify("Hold",
-                            inventory -> inventory.item(0).take().ifPresent(
-                                    drop -> player.mob().dropItem(drop)));
+                    mob.inventories().modify("Hold",
+                            inventory -> inventory.item(0).take()
+                                    .ifPresent(mob::dropItem));
                     player.send(new PacketCloseGui());
                     break;
                 default:

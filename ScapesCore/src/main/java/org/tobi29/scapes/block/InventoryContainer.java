@@ -39,7 +39,6 @@ public class InventoryContainer {
         }
     }
 
-    @SuppressWarnings("ReturnOfNull")
     public void modify(String id, Consumer<Inventory> consumer) {
         access(id, consumer);
         update(id);

@@ -15,9 +15,7 @@
  */
 package org.tobi29.scapes.packets;
 
-import java8.util.function.Consumer;
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.server.InvalidPacketDataException;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
@@ -67,7 +65,7 @@ public class PacketChat extends Packet implements PacketServer, PacketClient {
     }
 
     @Override
-    public void runServer(PlayerConnection player, Consumer<Consumer<WorldServer>> worldAccess) {
+    public void runServer(PlayerConnection player) {
         if (text.isEmpty() || text.length() > 64) {
             throw new InvalidPacketDataException("Invalid chat text length!");
         }
@@ -77,7 +75,7 @@ public class PacketChat extends Packet implements PacketServer, PacketClient {
                     output -> player.message(output.toString(),
                             MessageLevel.FEEDBACK_ERROR));
         } else {
-            player.server().message('<' + player.mob().nickname() + "> " +
+            player.server().message('<' + player.name() + "> " +
                     text, MessageLevel.CHAT);
         }
     }

@@ -305,6 +305,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
 
     public void explosionEntities(double x, double y, double z, double radius,
             double push, double damage) {
+        assert checkThread();
         entities(new Vector3d(x, y, z), radius)
                 .filter(entity -> entity instanceof MobServer)
                 .forEach(entity -> {

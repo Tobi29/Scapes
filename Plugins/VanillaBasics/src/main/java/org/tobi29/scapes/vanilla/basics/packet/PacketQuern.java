@@ -15,13 +15,10 @@
  */
 package org.tobi29.scapes.vanilla.basics.packet;
 
-import java8.util.function.Consumer;
 import org.tobi29.scapes.block.ItemStack;
-import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
-import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
@@ -56,16 +53,15 @@ public class PacketQuern extends Packet implements PacketServer {
     }
 
     @Override
-    public void runServer(PlayerConnection player,
-            Consumer<Consumer<WorldServer>> worldAccess) {
-        worldAccess.accept(world -> world.entity(entityID)
+    public void runServer(PlayerConnection player) {
+        player.mob(mob -> mob.world().entity(entityID)
                 .filter(entity -> entity instanceof EntityQuernServer)
                 .map(entity -> (EntityQuernServer) entity).ifPresent(quern -> {
-                    MobPlayerServer playerE = player.mob();
-                    if (quern.viewers().filter(check -> check == playerE)
-                            .findAny().isPresent()) {
-                        VanillaBasics plugin = (VanillaBasics) world.plugins()
-                                .plugin("VanillaBasics");
+                    if (quern.viewers().filter(check -> check == mob).findAny()
+                            .isPresent()) {
+                        VanillaBasics plugin =
+                                (VanillaBasics) mob.world().plugins()
+                                        .plugin("VanillaBasics");
                         VanillaMaterial materials = plugin.getMaterials();
                         quern.inventories().modify("Container", inventory -> {
                             ItemStack item = inventory.item(0);

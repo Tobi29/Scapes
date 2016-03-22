@@ -15,14 +15,11 @@
  */
 package org.tobi29.scapes.vanilla.basics.packet;
 
-import java8.util.function.Consumer;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.Material;
-import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
-import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketEntityMetaData;
 import org.tobi29.scapes.packets.PacketServer;
@@ -57,18 +54,16 @@ public class PacketResearch extends Packet implements PacketServer {
     }
 
     @Override
-    public void runServer(PlayerConnection player,
-            Consumer<Consumer<WorldServer>> worldAccess) {
-        worldAccess.accept(world -> world.entity(entityID)
+    public void runServer(PlayerConnection player) {
+        player.mob(mob -> mob.world().entity(entityID)
                 .filter(entity -> entity instanceof EntityResearchTableServer)
                 .map(entity -> (EntityResearchTableServer) entity)
                 .ifPresent(researchTable -> {
-                    MobPlayerServer playerE = player.mob();
-                    if (researchTable.viewers()
-                            .filter(check -> check == playerE).findAny()
-                            .isPresent()) {
-                        VanillaBasics plugin = (VanillaBasics) world.plugins()
-                                .plugin("VanillaBasics");
+                    if (researchTable.viewers().filter(check -> check == mob)
+                            .findAny().isPresent()) {
+                        VanillaBasics plugin =
+                                (VanillaBasics) mob.world().plugins()
+                                        .plugin("VanillaBasics");
                         researchTable.inventories()
                                 .modify("Container", researchTableI -> {
                                     ItemStack item = researchTableI.item(0);
@@ -76,14 +71,14 @@ public class PacketResearch extends Packet implements PacketServer {
                                     if (material instanceof ItemResearch) {
                                         for (String identifier : ((ItemResearch) material)
                                                 .identifiers(item)) {
-                                            player.mob().metaData("Vanilla")
+                                            mob.metaData("Vanilla")
                                                     .getStructure("Research")
                                                     .getStructure("Items")
                                                     .setBoolean(identifier,
                                                             true);
                                         }
                                     } else {
-                                        player.mob().metaData("Vanilla")
+                                        mob.metaData("Vanilla")
                                                 .getStructure("Research")
                                                 .getStructure("Items")
                                                 .setBoolean(Integer.toHexString(
@@ -91,13 +86,12 @@ public class PacketResearch extends Packet implements PacketServer {
                                                         true);
                                     }
                                     plugin.researchRecipes().forEach(recipe -> {
-                                        if (!player.mob().metaData("Vanilla")
+                                        if (!mob.metaData("Vanilla")
                                                 .getStructure("Research")
                                                 .getStructure("Finished")
                                                 .getBoolean(recipe.name())) {
                                             if (!recipe.items()
-                                                    .filter(requirement -> !player
-                                                            .mob()
+                                                    .filter(requirement -> !mob
                                                             .metaData("Vanilla")
                                                             .getStructure(
                                                                     "Research")
@@ -106,7 +100,7 @@ public class PacketResearch extends Packet implements PacketServer {
                                                             .getBoolean(
                                                                     requirement))
                                                     .findAny().isPresent()) {
-                                                player.mob().metaData("Vanilla")
+                                                mob.metaData("Vanilla")
                                                         .getStructure(
                                                                 "Research")
                                                         .getStructure(
@@ -114,9 +108,9 @@ public class PacketResearch extends Packet implements PacketServer {
                                                         .setBoolean(
                                                                 recipe.name(),
                                                                 true);
-                                                player.mob().world()
+                                                mob.world()
                                                         .send(new PacketEntityMetaData(
-                                                                player.mob(),
+                                                                mob,
                                                                 "Vanilla"));
                                                 player.send(
                                                         new PacketNotification(

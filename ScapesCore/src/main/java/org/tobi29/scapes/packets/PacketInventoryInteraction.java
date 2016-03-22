@@ -16,7 +16,6 @@
 package org.tobi29.scapes.packets;
 
 import java8.util.Optional;
-import java8.util.function.Consumer;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.client.connection.ClientConnection;
@@ -26,7 +25,6 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.EntityContainerClient;
 import org.tobi29.scapes.entity.server.EntityContainerServer;
-import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
@@ -67,10 +65,9 @@ public class PacketInventoryInteraction extends Packet implements PacketServer {
     }
 
     @Override
-    public void runServer(PlayerConnection player,
-            Consumer<Consumer<WorldServer>> worldAccess) {
-        worldAccess.accept(world -> {
-            MobPlayerServer playerE = player.mob();
+    public void runServer(PlayerConnection player) {
+        player.mob(playerE -> {
+            WorldServer world = playerE.world();
             world.entity(entityID)
                     .filter(entity -> entity instanceof EntityContainerServer)
                     .map(entity -> (EntityContainerServer) entity)

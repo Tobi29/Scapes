@@ -61,7 +61,7 @@ public class ControlPanel implements Command.Executor {
         });
         connection.addCommand("Players:List", command -> {
             List<String> players = server.connection().players()
-                    .map(PlayerConnection::nickname)
+                    .map(PlayerConnection::name)
                     .collect(Collectors.toList());
             connection.send("Players:Send",
                     players.toArray(new String[players.size()]));

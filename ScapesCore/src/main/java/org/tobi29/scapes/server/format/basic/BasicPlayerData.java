@@ -23,6 +23,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary;
+import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.server.PlayerEntry;
@@ -55,23 +56,18 @@ public class BasicPlayerData implements PlayerData {
         return new PlayerEntry() {
             @Override
             public Optional<MobPlayerServer> createEntity(
-                    PlayerConnection player, Optional<WorldServer> spawnWorld) {
+                    PlayerConnection player, Optional<WorldServer> world,
+                    Optional<Vector3> pos) {
                 ScapesServer server = player.server().server();
-                if (!spawnWorld.isPresent()) {
-                    spawnWorld = server.world(tagStructure.getString("World"));
+                if (!world.isPresent()) {
+                    world = server.world(tagStructure.getString("World"));
                 }
-                if (!spawnWorld.isPresent()) {
-                    spawnWorld = server.defaultWorld();
+                if (!world.isPresent()) {
+                    world = server.defaultWorld();
                 }
-                if (!spawnWorld.isPresent()) {
+                if (!world.isPresent()) {
                     return Optional.empty();
                 }
-                WorldServer world = spawnWorld.get();
-                MobPlayerServer entity = world.plugins().worldType()
-                        .newPlayer(world,
-                                new Vector3d(0.5, 0.5, 1.0).plus(world.spawn()),
-                                Vector3d.ZERO, 0.0, 0.0, player.nickname(),
-                                player.skin().checksum(), player);
                 Optional<TagStructure> entityTag;
                 if (tagStructure.has("Entity")) {
                     entityTag =
@@ -79,8 +75,18 @@ public class BasicPlayerData implements PlayerData {
                 } else {
                     entityTag = Optional.empty();
                 }
+                WorldServer spawnWorld = world.get();
+                Vector3 spawnPos = new Vector3d(0.5, 0.5, 1.0)
+                        .plus(pos.orElseGet(spawnWorld::spawn));
+                MobPlayerServer entity = spawnWorld.plugins().worldType()
+                        .newPlayer(spawnWorld, spawnPos, Vector3d.ZERO, 0.0,
+                                0.0, player.name(), player.skin().checksum(),
+                                player);
                 if (entityTag.isPresent()) {
-                    entity.read(entityTag.get());
+                    TagStructure tagStructure = entityTag.get();
+                    pos.ifPresent(forcePos -> tagStructure
+                            .setMultiTag("Pos", forcePos));
+                    entity.read(tagStructure);
                 } else {
                     entity.onSpawn();
                 }
