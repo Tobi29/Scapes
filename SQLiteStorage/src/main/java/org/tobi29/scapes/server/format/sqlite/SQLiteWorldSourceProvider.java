@@ -1,4 +1,4 @@
-package org.tobi29.scapes.server.format.mariadb;
+package org.tobi29.scapes.server.format.sqlite;
 
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -8,7 +8,7 @@ import org.tobi29.scapes.server.format.spi.WorldSourceProvider;
 
 import java.io.IOException;
 
-public class MariaDBWorldSourceProvider implements WorldSourceProvider {
+public class SQLiteWorldSourceProvider implements WorldSourceProvider {
     @Override
     public boolean available() {
         return true;
@@ -16,15 +16,12 @@ public class MariaDBWorldSourceProvider implements WorldSourceProvider {
 
     @Override
     public String configID() {
-        return "MariaDB";
+        return "SQLite";
     }
 
     @Override
     public WorldSource get(FilePath path, TagStructure config,
             TaskExecutor taskExecutor) throws IOException {
-        String url = config.getString("URL");
-        String user = config.getString("User");
-        String password = config.getString("Password");
-        return new MariaDBWorldSource(path, url, user, password);
+        return new SQLiteWorldSource(path, taskExecutor);
     }
 }

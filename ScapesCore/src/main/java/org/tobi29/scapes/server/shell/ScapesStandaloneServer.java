@@ -27,6 +27,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.json.TagStructureJSON;
 import org.tobi29.scapes.engine.utils.task.Joiner;
+import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.connection.ServerConnection;
@@ -45,6 +46,8 @@ public abstract class ScapesStandaloneServer
             LoggerFactory.getLogger(ScapesStandaloneServer.class);
     private static final Runtime RUNTIME = Runtime.getRuntime();
     protected final FilePath config;
+    protected final TaskExecutor taskExecutor =
+            new TaskExecutor(this, "Server-Shell");
     private final Joiner.Joinable joinable = new Joiner.Joinable();
     private final Thread shutdownHook = new Thread(() -> {
         joinable.joiner().join();
@@ -85,7 +88,7 @@ public abstract class ScapesStandaloneServer
                 WorldSourceProvider worldSourceProvider =
                         loadWorldSource(worldSourceConfig.getString("ID"));
                 try (WorldSource source = worldSourceProvider
-                        .get(path, worldSourceConfig)) {
+                        .get(path, worldSourceConfig, taskExecutor)) {
                     start(source, tagStructure);
                     Runnable loop = loop();
                     while (!server.shouldStop()) {
@@ -103,6 +106,7 @@ public abstract class ScapesStandaloneServer
                     break;
                 }
             }
+            taskExecutor.shutdown();
         } finally {
             try {
                 RUNTIME.removeShutdownHook(shutdownHook);
