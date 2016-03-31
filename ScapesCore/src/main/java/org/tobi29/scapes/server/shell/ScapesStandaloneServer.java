@@ -113,7 +113,8 @@ public abstract class ScapesStandaloneServer
                 SSLContext context;
                 try {
                     context = SSLContext.getInstance("TLSv1.2");
-                    context.init(keyManagerProvider.get(path, keyManagerConfig),
+                    context.init(
+                            keyManagerProvider.get(config, keyManagerConfig),
                             null, new SecureRandom());
                 } catch (KeyManagementException | NoSuchAlgorithmException e) {
                     throw new IOException(e);
