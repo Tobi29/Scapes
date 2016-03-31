@@ -1,10 +1,9 @@
 package org.tobi29.scapes.client.connection;
 
 import java8.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.chunk.IDStorage;
 import org.tobi29.scapes.client.states.GameStateGameMP;
+import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.server.ConnectionCloseException;
@@ -21,7 +20,6 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary;
-import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.plugins.PluginFile;
 import org.tobi29.scapes.plugins.Plugins;
 
@@ -30,30 +28,13 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
-import java.nio.channels.SocketChannel;
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class NewConnection {
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(NewConnection.class);
-    private static final int AES_MIN_KEY_LENGTH, AES_MAX_KEY_LENGTH;
-
-    static {
-        int length = 16;
-        try {
-            length = Cipher.getMaxAllowedKeyLength("AES") >> 3;
-        } catch (NoSuchAlgorithmException e) {
-            LOGGER.warn("Failed to detect maximum key length", e);
-        }
-        AES_MAX_KEY_LENGTH = length;
-        AES_MIN_KEY_LENGTH = FastMath.min(16, length);
-    }
-
     private final ScapesEngine engine;
     private final int loadingDistanceRequest;
     private final PacketBundleChannel channel;
@@ -68,56 +49,31 @@ public class NewConnection {
             this::loginStep1;
     private Optional<String> status = Optional.of("Logging in...");
 
-    public NewConnection(ScapesEngine engine, SocketChannel channel,
-            Account account, int loadingDistance) {
+    public NewConnection(ScapesEngine engine, PacketBundleChannel channel,
+            Account account, int loadingDistance) throws IOException {
         this.engine = engine;
+        this.channel = channel;
         this.loadingDistance = loadingDistance;
         loadingDistanceRequest = loadingDistance;
-        this.channel = new PacketBundleChannel(channel);
         cache = engine.fileCache();
         this.account = account;
+        loginStep0();
     }
 
-    private Optional<String> loginStep1(ReadableByteStream input)
-            throws IOException {
-        byte[] array = new byte[input.getInt()];
-        input.get(array);
-        int keyLength = input.getInt();
-        keyLength = FastMath.min(keyLength, AES_MAX_KEY_LENGTH);
-        if (keyLength < AES_MIN_KEY_LENGTH) {
-            throw new IOException("Key length too short: " + keyLength);
-        }
-        byte[] keyServer = new byte[keyLength];
-        byte[] keyClient = new byte[keyLength];
-        Random random = new SecureRandom();
-        random.nextBytes(keyServer);
-        random.nextBytes(keyClient);
+    private Optional<String> loginStep0() throws IOException {
         WritableByteStream output = channel.getOutputStream();
-        output.putInt(keyLength);
-        try {
-            PublicKey rsaKey = KeyFactory.getInstance("RSA")
-                    .generatePublic(new X509EncodedKeySpec(array));
-            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, rsaKey);
-            byte[] pair = new byte[keyLength << 1];
-            System.arraycopy(keyServer, 0, pair, 0, keyLength);
-            System.arraycopy(keyClient, 0, pair, keyLength, keyLength);
-            byte[] cipherText = cipher.doFinal(pair);
-            output.put(cipherText);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidKeySpecException e) {
-            throw new IOException(e);
-        }
+        output.put(new byte[]{'S', 'c', 'a', 'p', 'e', 's',
+                ConnectionType.PLAY.data()});
         channel.queueBundle();
-        channel.setKey(keyClient, keyServer);
         KeyPair keyPair = account.keyPair();
-        array = keyPair.getPublic().getEncoded();
+        byte[] array = keyPair.getPublic().getEncoded();
         output.put(array);
         channel.queueBundle();
-        state = this::loginStep2;
+        state = this::loginStep1;
         return Optional.of("Logging in...");
     }
 
-    private Optional<String> loginStep2(ReadableByteStream input)
+    private Optional<String> loginStep1(ReadableByteStream input)
             throws IOException {
         byte[] challenge = new byte[512];
         input.get(challenge);
@@ -168,23 +124,23 @@ public class NewConnection {
             output.putInt(i);
         }
         channel.queueBundle();
-        state = this::loginStep3;
+        state = this::loginStep2;
         return Optional.of("Logging in...");
     }
 
-    private Optional<String> loginStep3(ReadableByteStream input)
+    private Optional<String> loginStep2(ReadableByteStream input)
             throws IOException {
         if (input.getBoolean()) {
             throw new ConnectionCloseException(input.getString());
         }
         if (pluginRequests.isEmpty()) {
-            return loginStep5();
+            return loginStep4();
         }
-        state = this::loginStep4;
+        state = this::loginStep3;
         return Optional.of("Downloading plugins...");
     }
 
-    private Optional<String> loginStep4(ReadableByteStream input)
+    private Optional<String> loginStep3(ReadableByteStream input)
             throws IOException {
         int request = pluginRequests.get(0);
         if (input.getBoolean()) {
@@ -199,7 +155,7 @@ public class NewConnection {
             plugins.set(request, new PluginFile(file.get()));
             pluginRequests.remove(0);
             if (pluginRequests.isEmpty()) {
-                return loginStep5();
+                return loginStep4();
             }
         } else {
             ProcessStream.process(input, pluginStream::put);
@@ -207,16 +163,16 @@ public class NewConnection {
         return Optional.of("Downloading plugins...");
     }
 
-    private Optional<String> loginStep5() throws IOException {
+    private Optional<String> loginStep4() throws IOException {
         WritableByteStream output = channel.getOutputStream();
         output.putInt(loadingDistanceRequest);
         sendSkin(output);
         channel.queueBundle();
-        state = this::loginStep6;
+        state = this::loginStep5;
         return Optional.of("Receiving server info...");
     }
 
-    private Optional<String> loginStep6(ReadableByteStream input)
+    private Optional<String> loginStep5(ReadableByteStream input)
             throws IOException {
         if (input.getBoolean()) {
             throw new ConnectionCloseException(input.getString());
@@ -256,7 +212,9 @@ public class NewConnection {
         if (bundle.isPresent()) {
             status = state.apply(bundle.get());
         }
-        channel.process();
+        if (channel.process()) {
+            throw new IOException("Connection closed before login");
+        }
         return status;
     }
 

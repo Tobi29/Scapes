@@ -61,7 +61,7 @@ public class RemoteClientConnection extends ClientConnection
     @Override
     public void run(Joiner.Joinable joiner) {
         try {
-            while (!joiner.marked()) {
+            while (state == State.OPEN) {
                 while (!sendQueue.isEmpty()) {
                     sendQueue.poll().run();
                 }
@@ -81,14 +81,15 @@ public class RemoteClientConnection extends ClientConnection
                         packet.runClient(this, world);
                     }
                 }
-                if (!channel.process() && !joiner.marked()) {
-                    try {
-                        selector.select(10);
-                        selector.selectedKeys().clear();
-                    } catch (IOException e) {
-                        LOGGER.warn("Error when waiting for events: {}",
-                                e.toString());
-                    }
+                if (channel.process()) {
+                    break;
+                }
+                try {
+                    selector.select(10);
+                    selector.selectedKeys().clear();
+                } catch (IOException e) {
+                    LOGGER.warn("Error when waiting for events: {}",
+                            e.toString());
                 }
             }
         } catch (IOException e) {
@@ -97,17 +98,14 @@ public class RemoteClientConnection extends ClientConnection
             game.engine().setState(new GameStateServerDisconnect(e.getMessage(),
                     Optional.ofNullable(address), game.engine()));
         }
+        state = State.CLOSED;
         try {
-            close();
+            channel.close();
+            selector.close();
         } catch (IOException e) {
             LOGGER.error("Error closing socket: {}", e.toString());
         }
         LOGGER.info("Closed client connection!");
-    }
-
-    private void close() throws IOException {
-        channel.close();
-        selector.close();
     }
 
     @Override
@@ -124,8 +122,8 @@ public class RemoteClientConnection extends ClientConnection
 
     @Override
     public void stop() {
+        channel.requestClose();
         joiner.join();
-        state = State.CLOSED;
     }
 
     @Override

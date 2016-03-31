@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.sql.SQLDatabase;
 import org.tobi29.scapes.engine.sql.SQLQuery;
+import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -35,7 +36,11 @@ import java.util.List;
 public class SQLTerrainInfiniteFormat implements TerrainInfiniteFormat {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(SQLTerrainInfiniteFormat.class);
-    private final ByteBufferStream stream = new ByteBufferStream();
+    private final ByteBufferStream stream =
+            new ByteBufferStream(BufferCreator::bytes,
+                    length -> length + 1048576), compressionStream =
+            new ByteBufferStream(BufferCreator::bytes,
+                    length -> length + 1048576);
     private final SQLDatabase database;
     private final String table;
     private final SQLQuery getChunk;
@@ -68,11 +73,11 @@ public class SQLTerrainInfiniteFormat implements TerrainInfiniteFormat {
         List<Object[]> values = new ArrayList<>(chunks.size());
         for (Pair<Vector2i, TagStructure> chunk : chunks) {
             long pos = pos(chunk.a.intX(), chunk.a.intY());
-            TagStructureBinary.write(chunk.b, stream, (byte) 1);
+            TagStructureBinary.write(chunk.b, stream, (byte) 1, true, stream,
+                    compressionStream);
             stream.buffer().flip();
             byte[] array = new byte[stream.buffer().remaining()];
             stream.buffer().get(array);
-            stream.buffer().clear();
             values.add(new Object[]{pos, array});
             if (values.size() >= 64) {
                 database.replace(table, new String[]{"Pos", "Data"}, values);
@@ -96,7 +101,9 @@ public class SQLTerrainInfiniteFormat implements TerrainInfiniteFormat {
             if (row[0] instanceof byte[]) {
                 byte[] array = (byte[]) row[0];
                 TagStructure tagStructure = TagStructureBinary
-                        .read(new ByteBufferStream(ByteBuffer.wrap(array)));
+                        .read(new TagStructure(),
+                                new ByteBufferStream(ByteBuffer.wrap(array)),
+                                compressionStream);
                 return Optional.of(tagStructure);
             }
         }

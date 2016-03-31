@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.client.gui.desktop;
 
+import java8.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.client.gui.GuiAddServer;
@@ -28,25 +29,32 @@ import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
 import org.tobi29.scapes.engine.opengl.texture.TextureFilter;
 import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
-import org.tobi29.scapes.engine.server.ConnectionInfo;
+import org.tobi29.scapes.engine.server.FeedbackExtendedTrustManager;
+import org.tobi29.scapes.engine.server.PacketBundleChannel;
 import org.tobi29.scapes.engine.server.ServerInfo;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.graphics.Image;
+import org.tobi29.scapes.engine.utils.io.RandomReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
+import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
 public class GuiServerSelect extends GuiMenu {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GuiServerSelect.class);
-    private static final byte[] CONNECTION_HEADER = ConnectionInfo.header();
     private final List<TagStructure> servers = new ArrayList<>();
     private final List<Element> elements = new ArrayList<>();
     private final GuiComponentScrollPaneViewport scrollPane;
@@ -102,7 +110,8 @@ public class GuiServerSelect extends GuiMenu {
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine, double delta, Vector2 size) {
+    public void updateComponent(ScapesEngine engine, double delta,
+            Vector2 size) {
         Streams.of(elements).forEach(Element::checkConnection);
     }
 
@@ -116,11 +125,9 @@ public class GuiServerSelect extends GuiMenu {
     private class Element extends GuiComponentGroupSlab {
         private final GuiComponentIcon icon;
         private final GuiComponentTextButton label;
-        private final ByteBuffer outBuffer, headerBuffer =
-                BufferCreator.bytes(4);
         private SocketChannel channel;
+        private PacketBundleChannel bundleChannel;
         private int readState;
-        private ByteBuffer buffer;
 
         public Element(GuiLayoutData parent, TagStructure tagStructure) {
             super(parent);
@@ -156,10 +163,6 @@ public class GuiServerSelect extends GuiMenu {
                 readState = -1;
                 label.setText(error(e));
             }
-            outBuffer = BufferCreator.bytes(CONNECTION_HEADER.length + 1);
-            outBuffer.put(CONNECTION_HEADER);
-            outBuffer.put(ConnectionType.GET_INFO.data());
-            outBuffer.rewind();
         }
 
         private void checkConnection() {
@@ -167,34 +170,43 @@ public class GuiServerSelect extends GuiMenu {
                 switch (readState) {
                     case 0:
                         if (channel.finishConnect()) {
+                            try {
+                                SSLContext context =
+                                        SSLContext.getInstance("TLSv1.2");
+                                // Ignore invalid certificates because worst case
+                                // server name and icon get faked
+                                context.init(null, FeedbackExtendedTrustManager
+                                                .defaultTrustManager(
+                                                        certificates -> true),
+                                        new SecureRandom());
+                                bundleChannel = new PacketBundleChannel(channel,
+                                        state.engine().taskExecutor(), context,
+                                        true);
+                                WritableByteStream output =
+                                        bundleChannel.getOutputStream();
+                                output.put(
+                                        new byte[]{'S', 'c', 'a', 'p', 'e', 's',
+                                                ConnectionType.GET_INFO.data()});
+                                bundleChannel.queueBundle();
+                            } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                                throw new IOException(e);
+                            }
                             readState++;
                         }
                         break;
                     case 1:
-                        int write = channel.write(outBuffer);
-                        if (!outBuffer.hasRemaining()) {
-                            readState++;
-                        } else if (write == -1) {
-                            readState = -1;
+                        if (bundleChannel.process()) {
+                            throw new IOException("Disconnected");
                         }
-                        break;
-                    case 2: {
-                        int read = channel.read(headerBuffer);
-                        if (!headerBuffer.hasRemaining()) {
-                            buffer = BufferCreator
-                                    .bytes(4 + headerBuffer.getInt(0));
-                            headerBuffer.rewind();
-                            buffer.put(headerBuffer);
-                            readState++;
-                        } else if (read == -1) {
-                            readState = -1;
-                        }
-                        break;
-                    }
-                    case 3:
-                        int read = channel.read(buffer);
-                        if (!buffer.hasRemaining()) {
-                            ServerInfo serverInfo = new ServerInfo(buffer);
+                        Optional<RandomReadableByteStream> bundle =
+                                bundleChannel.fetch();
+                        if (bundle.isPresent()) {
+                            ReadableByteStream input = bundle.get();
+                            ByteBuffer infoBuffer =
+                                    BufferCreator.bytes(input.remaining());
+                            input.get(infoBuffer);
+                            infoBuffer.flip();
+                            ServerInfo serverInfo = new ServerInfo(infoBuffer);
                             label.setText(serverInfo.getName());
                             Image image = serverInfo.getImage();
                             ByteBuffer imageBuffer = image.buffer();
@@ -208,11 +220,14 @@ public class GuiServerSelect extends GuiMenu {
                                     TextureFilter.NEAREST, TextureWrap.CLAMP,
                                     TextureWrap.CLAMP);
                             icon.setIcon(texture);
-                            readState = -1;
-                        } else if (read == -1) {
-                            readState = -1;
+                            bundleChannel.requestClose();
+                            readState++;
                         }
                         break;
+                    case 2:
+                        if (bundleChannel.process()) {
+                            readState = -1;
+                        }
                 }
             } catch (IOException e) {
                 LOGGER.info("Failed to fetch server info: {}", e.toString());

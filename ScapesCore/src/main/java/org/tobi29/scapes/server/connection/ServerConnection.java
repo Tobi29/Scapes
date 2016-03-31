@@ -21,7 +21,6 @@ import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.server.*;
 import org.tobi29.scapes.engine.utils.Checksum;
 import org.tobi29.scapes.engine.utils.Streams;
-import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.entity.skin.ServerSkin;
 import org.tobi29.scapes.packets.Packet;
@@ -31,11 +30,8 @@ import org.tobi29.scapes.server.MessageLevel;
 import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.command.Command;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.nio.channels.SocketChannel;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -46,7 +42,6 @@ public class ServerConnection extends AbstractServerConnection {
     private final String controlPassword;
     private final ScapesServer server;
     private final Plugins plugins;
-    private final KeyPair keyPair;
     private final Map<String, PlayerConnection> players =
             new ConcurrentHashMap<>();
     private final Map<String, PlayerConnection> playerByName =
@@ -55,20 +50,13 @@ public class ServerConnection extends AbstractServerConnection {
             Collections.newSetFromMap(new ConcurrentHashMap<>());
     private boolean allowsJoin = true, allowsCreation = true;
 
-    public ServerConnection(ScapesServer server, TagStructure tagStructure) {
-        super(server.taskExecutor(), ConnectionInfo.header());
+    public ServerConnection(ScapesServer server, TagStructure tagStructure,
+            SSLContext context) {
+        super(server.taskExecutor(), ConnectionInfo.header(), context);
         plugins = server.plugins();
         mayPlayers = tagStructure.getInteger("MaxPlayers");
         controlPassword = tagStructure.getString("ControlPassword");
         this.server = server;
-        try {
-            KeyPairGenerator keyPairGenerator =
-                    KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(tagStructure.getInteger("RSASize"));
-            keyPair = keyPairGenerator.genKeyPair();
-        } catch (NoSuchAlgorithmException e) {
-            throw new UnsupportedJVMException(e);
-        }
     }
 
     public Optional<PlayerConnection> player(String id) {
@@ -121,10 +109,6 @@ public class ServerConnection extends AbstractServerConnection {
         this.allowsCreation = allowsCreation;
     }
 
-    protected KeyPair keyPair() {
-        return keyPair;
-    }
-
     public void addExecutor(Command.Executor executor) {
         executors.add(executor);
     }
@@ -163,24 +147,21 @@ public class ServerConnection extends AbstractServerConnection {
     }
 
     @Override
-    protected Optional<Connection> newConnection(SocketChannel channel, byte id)
-            throws IOException {
+    protected Optional<Connection> newConnection(PacketBundleChannel channel,
+            byte id) throws IOException {
         switch (ConnectionType.get(id)) {
             case GET_INFO:
                 return Optional.of(new GetInfoConnection(channel,
                         server().serverInfo()));
             case PLAY:
-                PacketBundleChannel bundleChannel =
-                        new PacketBundleChannel(channel);
-                return Optional
-                        .of(new RemotePlayerConnection(bundleChannel, this));
+                return Optional.of(new RemotePlayerConnection(channel, this));
             case CONTROL:
                 if (controlPassword.isEmpty()) {
                     break;
                 }
                 ControlPanelProtocol controlChannel =
-                        new ControlPanelProtocol(channel, controlPassword,
-                                keyPair);
+                        new ControlPanelProtocol(channel, false,
+                                controlPassword);
                 ControlPanel controlPanel =
                         new ControlPanel(controlChannel, server);
                 addExecutor(controlPanel);

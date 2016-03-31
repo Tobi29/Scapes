@@ -20,33 +20,35 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.client.connection.NewConnection;
 import org.tobi29.scapes.client.gui.GuiLoading;
-import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
 import org.tobi29.scapes.engine.server.Account;
+import org.tobi29.scapes.engine.server.FeedbackExtendedTrustManager;
+import org.tobi29.scapes.engine.server.PacketBundleChannel;
 import org.tobi29.scapes.engine.server.ServerInfo;
-import org.tobi29.scapes.engine.utils.BufferCreator;
+import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.format.WorldSource;
+import org.tobi29.scapes.server.ssl.dummy.DummyKeyManagerProvider;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
 public class GameStateLoadSocketSP extends GameState {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GameStateLoadSocketSP.class);
-    private final ByteBuffer headerBuffer = BufferCreator
-            .wrap(new byte[]{'S', 'c', 'a', 'p', 'e', 's',
-                    ConnectionType.PLAY.data()});
-    private final WorldSource source;
     private int step, port;
     private ScapesServer server;
+    private WorldSource source;
     private SocketChannel channel;
     private NewConnection client;
     private GuiLoading progress;
@@ -107,8 +109,16 @@ public class GameStateLoadSocketSP extends GameState {
                     } else {
                         serverInfo = new ServerInfo("Local Server");
                     }
+                    SSLContext context;
+                    try {
+                        context = SSLContext.getInstance("TLSv1.2");
+                        context.init(DummyKeyManagerProvider.get(), null,
+                                new SecureRandom());
+                    } catch (KeyManagementException | NoSuchAlgorithmException | IOException e) {
+                        throw new UnsupportedJVMException(e);
+                    }
                     server = new ScapesServer(source, tagStructure, serverInfo,
-                            engine);
+                            context, engine);
                     progress.setLabel("Starting server...");
                     step++;
                     break;
@@ -139,22 +149,29 @@ public class GameStateLoadSocketSP extends GameState {
                     }
                     break;
                 case 5:
-                    channel.write(headerBuffer);
-                    if (!headerBuffer.hasRemaining()) {
-                        step++;
+                    PacketBundleChannel bundleChannel;
+                    try {
+                        context = SSLContext.getInstance("TLSv1.2");
+                        // Ignore invalid certificates because local server
+                        // cannot provide a valid one
+                        context.init(null, FeedbackExtendedTrustManager
+                                        .defaultTrustManager(certificates -> true),
+                                new SecureRandom());
+                        bundleChannel = new PacketBundleChannel(channel,
+                                engine.taskExecutor(), context, true);
+                    } catch (KeyManagementException | NoSuchAlgorithmException | IOException e) {
+                        throw new IOException(e);
                     }
-                    break;
-                case 6:
                     int loadingRadius = FastMath.round(
                             engine.tagStructure().getStructure("Scapes")
                                     .getDouble("RenderDistance")) + 32;
                     Account account = Account.read(
                             engine.home().resolve("Account.properties"));
-                    client = new NewConnection(engine, channel, account,
+                    client = new NewConnection(engine, bundleChannel, account,
                             loadingRadius);
                     step++;
                     break;
-                case 7:
+                case 6:
                     Optional<String> status = client.login();
                     if (status.isPresent()) {
                         progress.setLabel(status.get());
@@ -163,10 +180,12 @@ public class GameStateLoadSocketSP extends GameState {
                         progress.setLabel("Loading world...");
                     }
                     break;
-                case 8:
+                case 7:
                     GameStateGameSP game =
                             new GameStateGameSP(client.finish(), source, server,
                                     scene, engine);
+                    server = null;
+                    source = null;
                     engine.setState(game);
                     break;
             }
@@ -177,6 +196,6 @@ public class GameStateLoadSocketSP extends GameState {
             step = -1;
             return;
         }
-        progress.setProgress(step / 8.0f);
+        progress.setProgress(step / 7.0f);
     }
 }

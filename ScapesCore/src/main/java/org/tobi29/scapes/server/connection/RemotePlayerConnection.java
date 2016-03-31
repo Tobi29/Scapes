@@ -16,8 +16,6 @@
 package org.tobi29.scapes.server.connection;
 
 import java8.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.server.AbstractServerConnection;
 import org.tobi29.scapes.engine.server.ConnectionCloseException;
 import org.tobi29.scapes.engine.server.InvalidPacketDataException;
@@ -49,22 +47,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class RemotePlayerConnection extends PlayerConnection {
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(RemotePlayerConnection.class);
-    private static final int AES_MIN_KEY_LENGTH, AES_MAX_KEY_LENGTH;
-
-    static {
-        int length = 16;
-        try {
-            length = Cipher.getMaxAllowedKeyLength("AES") >> 3;
-        } catch (NoSuchAlgorithmException e) {
-            LOGGER.warn("Failed to detect maximum key length", e);
-        }
-        length = FastMath.min(length, 32);
-        AES_MAX_KEY_LENGTH = length;
-        AES_MIN_KEY_LENGTH = FastMath.min(16, length);
-    }
-
     private final PacketBundleChannel channel;
     private final Queue<IORunnable> sendQueue = new ConcurrentLinkedQueue<>();
     private final AtomicInteger sendQueueSize = new AtomicInteger();
@@ -73,10 +55,10 @@ public class RemotePlayerConnection extends PlayerConnection {
     private long pingTimeout, pingWait;
 
     public RemotePlayerConnection(PacketBundleChannel channel,
-            ServerConnection server) throws IOException {
+            ServerConnection server) {
         super(server);
         this.channel = channel;
-        loginStep0();
+        pingTimeout = System.currentTimeMillis() + 30000;
     }
 
     @Override
@@ -89,41 +71,7 @@ public class RemotePlayerConnection extends PlayerConnection {
         task(() -> sendPacket(packet));
     }
 
-    private void loginStep0() throws IOException {
-        WritableByteStream output = channel.getOutputStream();
-        KeyPair keyPair = server.keyPair();
-        byte[] array = keyPair.getPublic().getEncoded();
-        output.putInt(array.length);
-        output.put(array);
-        output.putInt(AES_MAX_KEY_LENGTH);
-        channel.queueBundle();
-    }
-
     private void loginStep1(ReadableByteStream input) throws IOException {
-        int keyLength = input.getInt();
-        keyLength = FastMath.min(keyLength, AES_MAX_KEY_LENGTH);
-        if (keyLength < AES_MIN_KEY_LENGTH) {
-            throw new IOException("Key length too short: " + keyLength);
-        }
-        byte[] keyServer = new byte[keyLength];
-        byte[] keyClient = new byte[keyLength];
-        try {
-            KeyPair keyPair = server.keyPair();
-            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-            cipher.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
-            byte[] array = new byte[cipher.getOutputSize(keyLength << 1)];
-            input.get(array);
-            array = cipher.doFinal(array);
-            System.arraycopy(array, 0, keyServer, 0, keyLength);
-            System.arraycopy(array, keyLength, keyClient, 0, keyLength);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
-            throw new IOException(e);
-        }
-        channel.setKey(keyServer, keyClient);
-        state = State.LOGIN_STEP_2;
-    }
-
-    private void loginStep2(ReadableByteStream input) throws IOException {
         byte[] array = new byte[550];
         input.get(array);
         id = ChecksumUtil.checksum(array, ChecksumUtil.Algorithm.SHA1)
@@ -147,10 +95,10 @@ public class RemotePlayerConnection extends PlayerConnection {
             sendPluginMetaData(iterator.next(), output);
         }
         channel.queueBundle();
-        state = State.LOGIN_STEP_3;
+        state = State.LOGIN_STEP_2;
     }
 
-    private void loginStep3(ReadableByteStream input) throws IOException {
+    private void loginStep2(ReadableByteStream input) throws IOException {
         Plugins plugins = server.plugins();
         byte[] challenge = new byte[this.challenge.length];
         input.get(challenge);
@@ -174,10 +122,10 @@ public class RemotePlayerConnection extends PlayerConnection {
         for (int request : requests) {
             sendPlugin(plugins.file(request).file(), output);
         }
-        state = State.LOGIN_STEP_4;
+        state = State.LOGIN_STEP_3;
     }
 
-    private void loginStep4(ReadableByteStream input) throws IOException {
+    private void loginStep3(ReadableByteStream input) throws IOException {
         loadingRadius = FastMath.clamp(input.getInt(), 10,
                 server.server().maxLoadingRadius());
         ByteBuffer buffer = ByteBuffer.allocate(64 * 64 * 4);
@@ -270,12 +218,8 @@ public class RemotePlayerConnection extends PlayerConnection {
             switch (state) {
                 case OPEN:
                     long currentTime = System.currentTimeMillis();
-                    if (pingTimeout < currentTime) {
-                        throw new ConnectionCloseException(
-                                "Connection timeout");
-                    }
                     if (pingWait < currentTime) {
-                        pingWait = System.currentTimeMillis() + 1000;
+                        pingWait = currentTime + 1000;
                         sendPacket(new PacketPingServer(currentTime));
                     }
                     while (!sendQueue.isEmpty()) {
@@ -298,12 +242,15 @@ public class RemotePlayerConnection extends PlayerConnection {
                             packet.runServer(this);
                         }
                     }
-                    return channel.process();
+                    if (channel.process()) {
+                        state = State.CLOSED;
+                        return false;
+                    }
+                    return false;
                 case CLOSING:
                     if (channel.process()) {
-                        return true;
-                    } else {
                         state = State.CLOSED;
+                        return false;
                     }
                     break;
                 default:
@@ -319,16 +266,18 @@ public class RemotePlayerConnection extends PlayerConnection {
                             case LOGIN_STEP_3:
                                 loginStep3(bundle.get());
                                 break;
-                            case LOGIN_STEP_4:
-                                loginStep4(bundle.get());
-                                break;
                         }
                     }
-                    return channel.process();
+                    if (channel.process()) {
+                        state = State.CLOSED;
+                        return false;
+                    }
+                    return false;
             }
         } catch (ConnectionCloseException | InvalidPacketDataException e) {
             server.message("Disconnecting player: " + nickname,
                     MessageLevel.SERVER_INFO);
+            channel.requestClose();
             state = State.CLOSING;
         } catch (IOException e) {
             server.message("Player disconnected: " + nickname + " (" + e +
@@ -340,14 +289,14 @@ public class RemotePlayerConnection extends PlayerConnection {
 
     @Override
     public boolean isClosed() {
-        return state == State.CLOSED;
+        return pingTimeout < System.currentTimeMillis() ||
+                state == State.CLOSED;
     }
 
     enum State {
         LOGIN_STEP_1,
         LOGIN_STEP_2,
         LOGIN_STEP_3,
-        LOGIN_STEP_4,
         OPEN,
         CLOSING,
         CLOSED

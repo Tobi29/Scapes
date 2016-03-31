@@ -18,7 +18,6 @@ package org.tobi29.scapes.server.shell;
 import java8.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.engine.ScapesEngineException;
 import org.tobi29.scapes.engine.server.ServerInfo;
 import org.tobi29.scapes.engine.utils.Crashable;
 import org.tobi29.scapes.engine.utils.io.filesystem.CrashReportFile;
@@ -33,8 +32,13 @@ import org.tobi29.scapes.server.command.Command;
 import org.tobi29.scapes.server.connection.ServerConnection;
 import org.tobi29.scapes.server.format.WorldSource;
 import org.tobi29.scapes.server.format.spi.WorldSourceProvider;
+import org.tobi29.scapes.server.ssl.spi.KeyManagerProvider;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Map;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
@@ -58,7 +62,8 @@ public abstract class ScapesStandaloneServer
         this.config = config;
     }
 
-    private static WorldSourceProvider loadWorldSource(String id) {
+    private static WorldSourceProvider loadWorldSource(String id)
+            throws IOException {
         for (WorldSourceProvider provider : ServiceLoader
                 .load(WorldSourceProvider.class)) {
             try {
@@ -72,7 +77,25 @@ public abstract class ScapesStandaloneServer
                         e.toString());
             }
         }
-        throw new ScapesEngineException("No world source found for: " + id);
+        throw new IOException("No world source found for: " + id);
+    }
+
+    private static KeyManagerProvider loadKeyManager(String id)
+            throws IOException {
+        for (KeyManagerProvider provider : ServiceLoader
+                .load(KeyManagerProvider.class)) {
+            try {
+                if (provider.available() && id.equals(provider.configID())) {
+                    LOGGER.debug("Loaded key manager: {}",
+                            provider.getClass().getName());
+                    return provider;
+                }
+            } catch (ServiceConfigurationError e) {
+                LOGGER.warn("Unable to load key manager provider: {}",
+                        e.toString());
+            }
+        }
+        throw new IOException("No key manager found for: " + id);
     }
 
     protected abstract Runnable loop();
@@ -83,13 +106,25 @@ public abstract class ScapesStandaloneServer
             while (!joinable.marked()) {
                 TagStructure tagStructure =
                         loadConfig(config.resolve("Server.json"));
+                TagStructure keyManagerConfig =
+                        tagStructure.getStructure("KeyManager");
+                KeyManagerProvider keyManagerProvider =
+                        loadKeyManager(keyManagerConfig.getString("ID"));
+                SSLContext context;
+                try {
+                    context = SSLContext.getInstance("TLSv1.2");
+                    context.init(keyManagerProvider.get(path, keyManagerConfig),
+                            null, new SecureRandom());
+                } catch (KeyManagementException | NoSuchAlgorithmException e) {
+                    throw new IOException(e);
+                }
                 TagStructure worldSourceConfig =
                         tagStructure.getStructure("WorldSource");
                 WorldSourceProvider worldSourceProvider =
                         loadWorldSource(worldSourceConfig.getString("ID"));
                 try (WorldSource source = worldSourceProvider
                         .get(path, worldSourceConfig, taskExecutor)) {
-                    start(source, tagStructure);
+                    start(source, tagStructure, context);
                     Runnable loop = loop();
                     while (!server.shouldStop()) {
                         loop.run();
@@ -116,13 +151,14 @@ public abstract class ScapesStandaloneServer
         }
     }
 
-    protected void start(WorldSource source, TagStructure tagStructure)
-            throws IOException {
+    protected void start(WorldSource source, TagStructure tagStructure,
+            SSLContext context) throws IOException {
         TagStructure serverTag = tagStructure.getStructure("Server");
         ServerInfo serverInfo =
                 new ServerInfo(serverTag.getString("ServerName"),
                         config.resolve(serverTag.getString("ServerIcon")));
-        server = new ScapesServer(source, tagStructure, serverInfo, this);
+        server = new ScapesServer(source, tagStructure, serverInfo, context,
+                this);
         ServerConnection connection = server.connection();
         connection.addExecutor(this);
         connection.setAllowsCreation(
@@ -145,9 +181,10 @@ public abstract class ScapesStandaloneServer
         socketTag.setInteger("MaxPlayers", 20);
         socketTag.setString("ControlPassword", "");
         socketTag.setInteger("WorkerCount", 2);
-        socketTag.setInteger("RSASize", 2048);
         TagStructure sourceTag = tagStructure.getStructure("WorldSource");
         sourceTag.setString("ID", "Basic");
+        TagStructure keyTag = tagStructure.getStructure("KeyManager");
+        keyTag.setString("ID", "Dummy");
         FileUtil.write(path,
                 streamOut -> TagStructureJSON.write(tagStructure, streamOut));
         return tagStructure;

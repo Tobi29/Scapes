@@ -20,26 +20,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.client.connection.NewConnection;
 import org.tobi29.scapes.client.gui.GuiLoading;
+import org.tobi29.scapes.client.gui.desktop.GuiCertificateWarning;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
-import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.server.Account;
-import org.tobi29.scapes.engine.utils.BufferCreator;
+import org.tobi29.scapes.engine.server.FeedbackExtendedTrustManager;
+import org.tobi29.scapes.engine.server.PacketBundleChannel;
+import org.tobi29.scapes.engine.utils.MutableSingle;
 import org.tobi29.scapes.engine.utils.math.FastMath;
+import org.tobi29.scapes.engine.utils.task.Joiner;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 
 public class GameStateLoadMP extends GameState {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GameStateLoadMP.class);
     private final InetSocketAddress address;
-    private final ByteBuffer headerBuffer = BufferCreator
-            .wrap(new byte[]{'S', 'c', 'a', 'p', 'e', 's',
-                    ConnectionType.PLAY.data()});
     private int step;
     private SocketChannel channel;
     private NewConnection client;
@@ -86,22 +90,57 @@ public class GameStateLoadMP extends GameState {
                     }
                     break;
                 case 3:
-                    channel.write(headerBuffer);
-                    if (!headerBuffer.hasRemaining()) {
-                        step++;
+                    PacketBundleChannel bundleChannel;
+                    try {
+                        SSLContext context = SSLContext.getInstance("TLSv1.2");
+                        context.init(null, FeedbackExtendedTrustManager
+                                .defaultTrustManager(certificates -> {
+                                    engine.guiStack().remove(progress);
+                                    try {
+                                        for (X509Certificate certificate : certificates) {
+                                            MutableSingle<Boolean> result =
+                                                    new MutableSingle<>(false);
+                                            Joiner.Joinable joinable =
+                                                    new Joiner.Joinable();
+                                            GuiCertificateWarning warning =
+                                                    new GuiCertificateWarning(
+                                                            this, certificate,
+                                                            value -> {
+                                                                result.a =
+                                                                        value;
+                                                                joinable.join();
+                                                            },
+                                                            progress.style());
+                                            engine.guiStack()
+                                                    .add("10-Menu", warning);
+                                            joinable.joiner()
+                                                    .join(warning::valid);
+                                            engine.guiStack().remove(warning);
+                                            if (!result.a) {
+                                                return false;
+                                            }
+                                        }
+                                        return true;
+                                    } finally {
+                                        engine.guiStack()
+                                                .add("20-Progress", progress);
+                                    }
+                                }), new SecureRandom());
+                        bundleChannel = new PacketBundleChannel(channel,
+                                engine.taskExecutor(), context, true);
+                    } catch (KeyManagementException | NoSuchAlgorithmException | IOException e) {
+                        throw new IOException(e);
                     }
-                    break;
-                case 4:
                     int loadingRadius = FastMath.round(
                             engine.tagStructure().getStructure("Scapes")
                                     .getDouble("RenderDistance")) + 32;
                     Account account = Account.read(
                             engine.home().resolve("Account.properties"));
-                    client = new NewConnection(engine, channel, account,
+                    client = new NewConnection(engine, bundleChannel, account,
                             loadingRadius);
                     step++;
                     break;
-                case 5:
+                case 4:
                     Optional<String> status = client.login();
                     if (status.isPresent()) {
                         progress.setLabel(status.get());
@@ -110,7 +149,7 @@ public class GameStateLoadMP extends GameState {
                         progress.setLabel("Loading world...");
                     }
                     break;
-                case 6:
+                case 5:
                     GameStateGameMP game =
                             new GameStateGameMP(client.finish(), scene, engine);
                     engine.setState(game);
@@ -124,6 +163,6 @@ public class GameStateLoadMP extends GameState {
             step = -1;
             return;
         }
-        progress.setProgress(step / 6.0f);
+        progress.setProgress(step / 5.0f);
     }
 }
