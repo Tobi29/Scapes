@@ -416,6 +416,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
     public synchronized void removePlayer(MobPlayerServer player) {
         players.remove(player.nickname());
         player.dispose();
+        removeEntity(player);
     }
 
     public void addSpawner(MobSpawner spawner) {
