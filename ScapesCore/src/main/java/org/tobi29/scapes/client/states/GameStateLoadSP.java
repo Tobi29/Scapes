@@ -23,6 +23,8 @@ import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
 import org.tobi29.scapes.engine.server.Account;
+import org.tobi29.scapes.engine.server.SSLHandle;
+import org.tobi29.scapes.engine.server.SSLProvider;
 import org.tobi29.scapes.engine.server.ServerInfo;
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
 import org.tobi29.scapes.engine.utils.graphics.Image;
@@ -34,11 +36,7 @@ import org.tobi29.scapes.server.connection.ServerConnection;
 import org.tobi29.scapes.server.format.WorldSource;
 import org.tobi29.scapes.server.ssl.dummy.DummyKeyManagerProvider;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 
 public class GameStateLoadSP extends GameState {
     private static final Logger LOGGER =
@@ -104,16 +102,15 @@ public class GameStateLoadSP extends GameState {
                     } else {
                         serverInfo = new ServerInfo("Local Server");
                     }
-                    SSLContext context;
+                    SSLHandle ssl;
                     try {
-                        context = SSLContext.getInstance("TLSv1.2");
-                        context.init(DummyKeyManagerProvider.get(), null,
-                                new SecureRandom());
-                    } catch (KeyManagementException | NoSuchAlgorithmException | IOException e) {
+                        ssl = SSLProvider
+                                .sslHandle(DummyKeyManagerProvider.get());
+                    } catch (IOException e) {
                         throw new UnsupportedJVMException(e);
                     }
                     server = new ScapesServer(source, tagStructure, serverInfo,
-                            context, engine);
+                            ssl, engine);
                     progress.setLabel("Starting server...");
                     step++;
                     break;

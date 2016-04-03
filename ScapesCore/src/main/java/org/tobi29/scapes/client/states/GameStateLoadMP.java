@@ -21,39 +21,32 @@ import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.client.connection.NewConnection;
 import org.tobi29.scapes.client.gui.GuiLoading;
 import org.tobi29.scapes.client.gui.desktop.GuiCertificateWarning;
-import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.server.Account;
-import org.tobi29.scapes.engine.server.FeedbackExtendedTrustManager;
-import org.tobi29.scapes.engine.server.PacketBundleChannel;
+import org.tobi29.scapes.engine.opengl.scenes.Scene;
+import org.tobi29.scapes.engine.server.*;
 import org.tobi29.scapes.engine.utils.MutableSingle;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 
 public class GameStateLoadMP extends GameState {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GameStateLoadMP.class);
-    private final InetSocketAddress address;
+    private final RemoteAddress address;
     private int step;
     private SocketChannel channel;
     private NewConnection client;
     private GuiLoading progress;
 
-    public GameStateLoadMP(InetSocketAddress address, ScapesEngine engine,
-            SceneMenu scene) {
+    public GameStateLoadMP(RemoteAddress address, ScapesEngine engine,
+            Scene scene) {
         super(engine, scene);
         this.address = address;
-        scene.setSpeed(0.0f);
     }
 
     @Override
@@ -76,12 +69,14 @@ public class GameStateLoadMP extends GameState {
                     step++;
                     break;
                 case 1:
-                    if (address.isUnresolved()) {
-                        throw new IOException("Address unresolved");
+                    Optional<InetSocketAddress> socketAddress = AddressResolver
+                            .resolve(address, engine.taskExecutor());
+                    if (socketAddress.isPresent()) {
+                        channel = SocketChannel.open();
+                        channel.configureBlocking(false);
+                        channel.connect(socketAddress.get());
+                        step++;
                     }
-                    channel = SocketChannel.open(address);
-                    channel.configureBlocking(false);
-                    step++;
                     break;
                 case 2:
                     if (channel.finishConnect()) {
@@ -91,46 +86,34 @@ public class GameStateLoadMP extends GameState {
                     break;
                 case 3:
                     PacketBundleChannel bundleChannel;
-                    try {
-                        SSLContext context = SSLContext.getInstance("TLSv1.2");
-                        context.init(null, FeedbackExtendedTrustManager
-                                .defaultTrustManager(certificates -> {
-                                    engine.guiStack().remove(progress);
-                                    try {
-                                        for (X509Certificate certificate : certificates) {
-                                            MutableSingle<Boolean> result =
-                                                    new MutableSingle<>(false);
-                                            Joiner.Joinable joinable =
-                                                    new Joiner.Joinable();
-                                            GuiCertificateWarning warning =
-                                                    new GuiCertificateWarning(
-                                                            this, certificate,
-                                                            value -> {
-                                                                result.a =
-                                                                        value;
-                                                                joinable.join();
-                                                            },
-                                                            progress.style());
-                                            engine.guiStack()
-                                                    .add("10-Menu", warning);
-                                            joinable.joiner()
-                                                    .join(warning::valid);
-                                            engine.guiStack().remove(warning);
-                                            if (!result.a) {
-                                                return false;
-                                            }
-                                        }
-                                        return true;
-                                    } finally {
-                                        engine.guiStack()
-                                                .add("20-Progress", progress);
-                                    }
-                                }), new SecureRandom());
-                        bundleChannel = new PacketBundleChannel(channel,
-                                engine.taskExecutor(), context, true);
-                    } catch (KeyManagementException | NoSuchAlgorithmException | IOException e) {
-                        throw new IOException(e);
-                    }
+                    SSLHandle ssl = SSLProvider.sslHandle(certificates -> {
+                        engine.guiStack().remove(progress);
+                        try {
+                            for (X509Certificate certificate : certificates) {
+                                MutableSingle<Boolean> result =
+                                        new MutableSingle<>(false);
+                                Joiner.Joinable joinable =
+                                        new Joiner.Joinable();
+                                GuiCertificateWarning warning =
+                                        new GuiCertificateWarning(this,
+                                                certificate, value -> {
+                                            result.a = value;
+                                            joinable.join();
+                                        }, progress.style());
+                                engine.guiStack().add("10-Menu", warning);
+                                joinable.joiner().join(warning::valid);
+                                engine.guiStack().remove(warning);
+                                if (!result.a) {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        } finally {
+                            engine.guiStack().add("20-Progress", progress);
+                        }
+                    });
+                    bundleChannel = new PacketBundleChannel(address, channel,
+                            engine.taskExecutor(), ssl, true);
                     int loadingRadius = FastMath.round(
                             engine.tagStructure().getStructure("Scapes")
                                     .getDouble("RenderDistance")) + 32;

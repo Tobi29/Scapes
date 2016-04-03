@@ -18,6 +18,8 @@ package org.tobi29.scapes.server.shell;
 import java8.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tobi29.scapes.engine.server.SSLHandle;
+import org.tobi29.scapes.engine.server.SSLProvider;
 import org.tobi29.scapes.engine.server.ServerInfo;
 import org.tobi29.scapes.engine.utils.Crashable;
 import org.tobi29.scapes.engine.utils.io.filesystem.CrashReportFile;
@@ -34,11 +36,7 @@ import org.tobi29.scapes.server.format.WorldSource;
 import org.tobi29.scapes.server.format.spi.WorldSourceProvider;
 import org.tobi29.scapes.server.ssl.spi.KeyManagerProvider;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.Map;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
@@ -110,22 +108,15 @@ public abstract class ScapesStandaloneServer
                         tagStructure.getStructure("KeyManager");
                 KeyManagerProvider keyManagerProvider =
                         loadKeyManager(keyManagerConfig.getString("ID"));
-                SSLContext context;
-                try {
-                    context = SSLContext.getInstance("TLSv1.2");
-                    context.init(
-                            keyManagerProvider.get(config, keyManagerConfig),
-                            null, new SecureRandom());
-                } catch (KeyManagementException | NoSuchAlgorithmException e) {
-                    throw new IOException(e);
-                }
+                SSLHandle ssl = SSLProvider.sslHandle(
+                        keyManagerProvider.get(config, keyManagerConfig));
                 TagStructure worldSourceConfig =
                         tagStructure.getStructure("WorldSource");
                 WorldSourceProvider worldSourceProvider =
                         loadWorldSource(worldSourceConfig.getString("ID"));
                 try (WorldSource source = worldSourceProvider
                         .get(path, worldSourceConfig, taskExecutor)) {
-                    start(source, tagStructure, context);
+                    start(source, tagStructure, ssl);
                     Runnable loop = loop();
                     while (!server.shouldStop()) {
                         loop.run();
@@ -153,13 +144,12 @@ public abstract class ScapesStandaloneServer
     }
 
     protected void start(WorldSource source, TagStructure tagStructure,
-            SSLContext context) throws IOException {
+            SSLHandle ssl) throws IOException {
         TagStructure serverTag = tagStructure.getStructure("Server");
         ServerInfo serverInfo =
                 new ServerInfo(serverTag.getString("ServerName"),
                         config.resolve(serverTag.getString("ServerIcon")));
-        server = new ScapesServer(source, tagStructure, serverInfo, context,
-                this);
+        server = new ScapesServer(source, tagStructure, serverInfo, ssl, this);
         ServerConnection connection = server.connection();
         connection.addExecutor(this);
         connection.setAllowsCreation(

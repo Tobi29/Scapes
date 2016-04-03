@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.client.states.GameStateServerDisconnect;
 import org.tobi29.scapes.engine.server.PacketBundleChannel;
+import org.tobi29.scapes.engine.server.RemoteAddress;
 import org.tobi29.scapes.engine.utils.io.IORunnable;
 import org.tobi29.scapes.engine.utils.io.RandomReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.RandomWritableByteStream;
@@ -33,7 +34,6 @@ import org.tobi29.scapes.packets.PacketServer;
 import org.tobi29.scapes.plugins.Plugins;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.Queue;
@@ -94,9 +94,11 @@ public class RemoteClientConnection extends ClientConnection
             }
         } catch (IOException e) {
             LOGGER.info("Lost connection: {}", e.toString());
-            InetSocketAddress address = channel.getRemoteAddress().orElse(null);
-            game.engine().setState(new GameStateServerDisconnect(e.getMessage(),
-                    Optional.ofNullable(address), game.engine()));
+            Optional<RemoteAddress> address =
+                    channel.getRemoteAddress().map(RemoteAddress::new);
+            game.engine().setState(
+                    new GameStateServerDisconnect(e.getMessage(), address,
+                            game.engine()));
         }
         state = State.CLOSED;
         try {

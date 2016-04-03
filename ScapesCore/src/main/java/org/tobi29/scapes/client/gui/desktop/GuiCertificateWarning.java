@@ -1,5 +1,6 @@
 package org.tobi29.scapes.client.gui.desktop;
 
+import java8.util.Maps;
 import java8.util.function.Consumer;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab;
@@ -25,20 +26,20 @@ public class GuiCertificateWarning extends GuiMenuDouble {
         pane.addVert(11, 5, -1, 18, p -> new GuiComponentText(p,
                 "would you like to connect anyways?"));
         pane.addVert(16, 5, -1, 12, p -> new GuiComponentText(p, "Subject"));
-        row("Common Name", subject.getOrDefault("CN", "???"));
-        row("Organization", subject.getOrDefault("O", "???"));
-        row("Organizational Unit", subject.getOrDefault("OU", "???"));
-        row("City", subject.getOrDefault("L", "???"));
-        row("State", subject.getOrDefault("ST", "???"));
-        row("Country", subject.getOrDefault("C", "???"));
+        row("Common Name", Maps.getOrDefault(subject, "CN", "???"));
+        row("Organization", Maps.getOrDefault(subject, "O", "???"));
+        row("Organizational Unit", Maps.getOrDefault(subject, "OU", "???"));
+        row("City", Maps.getOrDefault(subject, "L", "???"));
+        row("State", Maps.getOrDefault(subject, "ST", "???"));
+        row("Country", Maps.getOrDefault(subject, "C", "???"));
 
         pane.addVert(16, 5, -1, 12, p -> new GuiComponentText(p, "Issuer"));
-        row("Common Name", issuer.getOrDefault("CN", "???"));
-        row("Organization", issuer.getOrDefault("O", "???"));
-        row("Organizational Unit", issuer.getOrDefault("OU", "???"));
-        row("City", issuer.getOrDefault("L", "???"));
-        row("State", issuer.getOrDefault("ST", "???"));
-        row("Country", issuer.getOrDefault("C", "???"));
+        row("Common Name", Maps.getOrDefault(issuer, "CN", "???"));
+        row("Organization", Maps.getOrDefault(issuer, "O", "???"));
+        row("Organizational Unit", Maps.getOrDefault(issuer, "OU", "???"));
+        row("City", Maps.getOrDefault(issuer, "L", "???"));
+        row("State", Maps.getOrDefault(issuer, "ST", "???"));
+        row("Country", Maps.getOrDefault(issuer, "C", "???"));
 
         save.onClickLeft(event -> output.accept(true));
         back.onClickLeft(event -> output.accept(false));

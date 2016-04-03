@@ -23,10 +23,7 @@ import org.tobi29.scapes.client.gui.GuiLoading;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
-import org.tobi29.scapes.engine.server.Account;
-import org.tobi29.scapes.engine.server.FeedbackExtendedTrustManager;
-import org.tobi29.scapes.engine.server.PacketBundleChannel;
-import org.tobi29.scapes.engine.server.ServerInfo;
+import org.tobi29.scapes.engine.server.*;
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -35,13 +32,9 @@ import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.format.WorldSource;
 import org.tobi29.scapes.server.ssl.dummy.DummyKeyManagerProvider;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 
 public class GameStateLoadSocketSP extends GameState {
     private static final Logger LOGGER =
@@ -50,6 +43,7 @@ public class GameStateLoadSocketSP extends GameState {
     private ScapesServer server;
     private WorldSource source;
     private SocketChannel channel;
+    private InetSocketAddress address;
     private NewConnection client;
     private GuiLoading progress;
 
@@ -109,16 +103,15 @@ public class GameStateLoadSocketSP extends GameState {
                     } else {
                         serverInfo = new ServerInfo("Local Server");
                     }
-                    SSLContext context;
+                    SSLHandle ssl;
                     try {
-                        context = SSLContext.getInstance("TLSv1.2");
-                        context.init(DummyKeyManagerProvider.get(), null,
-                                new SecureRandom());
-                    } catch (KeyManagementException | NoSuchAlgorithmException | IOException e) {
+                        ssl = SSLProvider
+                                .sslHandle(DummyKeyManagerProvider.get());
+                    } catch (IOException e) {
                         throw new UnsupportedJVMException(e);
                     }
                     server = new ScapesServer(source, tagStructure, serverInfo,
-                            context, engine);
+                            ssl, engine);
                     progress.setLabel("Starting server...");
                     step++;
                     break;
@@ -133,11 +126,7 @@ public class GameStateLoadSocketSP extends GameState {
                     step++;
                     break;
                 case 3:
-                    InetSocketAddress address =
-                            new InetSocketAddress("localhost", port);
-                    if (address.isUnresolved()) {
-                        throw new IOException("Could not resolve address");
-                    }
+                    address = new InetSocketAddress(port);
                     channel = SocketChannel.open(address);
                     channel.configureBlocking(false);
                     step++;
@@ -150,18 +139,12 @@ public class GameStateLoadSocketSP extends GameState {
                     break;
                 case 5:
                     PacketBundleChannel bundleChannel;
-                    try {
-                        context = SSLContext.getInstance("TLSv1.2");
-                        // Ignore invalid certificates because local server
-                        // cannot provide a valid one
-                        context.init(null, FeedbackExtendedTrustManager
-                                        .defaultTrustManager(certificates -> true),
-                                new SecureRandom());
-                        bundleChannel = new PacketBundleChannel(channel,
-                                engine.taskExecutor(), context, true);
-                    } catch (KeyManagementException | NoSuchAlgorithmException | IOException e) {
-                        throw new IOException(e);
-                    }
+                    // Ignore invalid certificates because local server
+                    // cannot provide a valid one
+                    ssl = SSLProvider.sslHandle(certificates -> true);
+                    bundleChannel =
+                            new PacketBundleChannel(new RemoteAddress(address),
+                                    channel, engine.taskExecutor(), ssl, true);
                     int loadingRadius = FastMath.round(
                             engine.tagStructure().getStructure("Scapes")
                                     .getDouble("RenderDistance")) + 32;

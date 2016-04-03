@@ -15,9 +15,9 @@ import java.security.UnrecoverableKeyException;
 public class DummyKeyManagerProvider implements KeyManagerProvider {
     public static KeyManager[] get() throws IOException {
         try {
-            KeyStore keyStore = SSLUtil.keyStore("default.jks", "storepass",
+            KeyStore keyStore = SSLUtil.keyStore("default.p12", "storepass",
                     DummyKeyManagerProvider.class.getClassLoader());
-            return SSLUtil.keyManagers(keyStore, "keypass");
+            return SSLUtil.keyManagers(keyStore, "storepass");
         } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
             throw new IOException(e);
         }

@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.client.gui.GuiAddServer;
 import org.tobi29.scapes.client.states.GameStateLoadMP;
-import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
@@ -29,9 +28,7 @@ import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
 import org.tobi29.scapes.engine.opengl.texture.TextureFilter;
 import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
-import org.tobi29.scapes.engine.server.FeedbackExtendedTrustManager;
-import org.tobi29.scapes.engine.server.PacketBundleChannel;
-import org.tobi29.scapes.engine.server.ServerInfo;
+import org.tobi29.scapes.engine.server.*;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.graphics.Image;
@@ -41,14 +38,10 @@ import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,11 +82,13 @@ public class GuiServerSelect extends GuiMenu {
 
     private void disposeServers() {
         for (Element element : elements) {
-            try {
-                element.channel.close();
-            } catch (IOException e) {
-                LOGGER.warn("Failed to close server info socket: {}",
-                        e.toString());
+            if (element.channel != null) {
+                try {
+                    element.channel.close();
+                } catch (IOException e) {
+                    LOGGER.warn("Failed to close server info socket: {}",
+                            e.toString());
+                }
             }
             scrollPane.remove(element);
         }
@@ -125,6 +120,7 @@ public class GuiServerSelect extends GuiMenu {
     private class Element extends GuiComponentGroupSlab {
         private final GuiComponentIcon icon;
         private final GuiComponentTextButton label;
+        private final RemoteAddress address;
         private SocketChannel channel;
         private PacketBundleChannel bundleChannel;
         private int readState;
@@ -136,13 +132,10 @@ public class GuiServerSelect extends GuiMenu {
             GuiComponentTextButton delete =
                     addHori(5, 20, 80, -1, p -> button(p, "Delete"));
 
-            String address = tagStructure.getString("Address");
-            int port = tagStructure.getInteger("Port");
-            InetSocketAddress socketAddress =
-                    new InetSocketAddress(address, port);
+            address = new RemoteAddress(tagStructure);
             label.onClickLeft(event -> state.engine().setState(
-                    new GameStateLoadMP(socketAddress, state.engine(),
-                            (SceneMenu) state.scene())));
+                    new GameStateLoadMP(address, state.engine(),
+                            state.scene())));
             delete.onClickLeft(event -> {
                 servers.remove(tagStructure);
                 TagStructure scapesTag =
@@ -151,50 +144,41 @@ public class GuiServerSelect extends GuiMenu {
                 elements.remove(this);
                 scrollPane.remove(this);
             });
-            try {
-                channel = SocketChannel.open();
-                channel.configureBlocking(false);
-                if (socketAddress.isUnresolved()) {
-                    throw new IOException("Could not resolve address");
-                }
-                channel.connect(socketAddress);
-            } catch (IOException e) {
-                LOGGER.info("Failed connecting to server: {}", e.toString());
-                readState = -1;
-                label.setText(error(e));
-            }
         }
 
         private void checkConnection() {
             try {
                 switch (readState) {
                     case 0:
-                        if (channel.finishConnect()) {
-                            try {
-                                SSLContext context =
-                                        SSLContext.getInstance("TLSv1.2");
-                                // Ignore invalid certificates because worst case
-                                // server name and icon get faked
-                                context.init(null, FeedbackExtendedTrustManager
-                                                .defaultTrustManager(
-                                                        certificates -> true),
-                                        new SecureRandom());
-                                bundleChannel = new PacketBundleChannel(channel,
-                                        state.engine().taskExecutor(), context,
-                                        true);
-                                WritableByteStream output =
-                                        bundleChannel.getOutputStream();
-                                output.put(
-                                        new byte[]{'S', 'c', 'a', 'p', 'e', 's',
-                                                ConnectionType.GET_INFO.data()});
-                                bundleChannel.queueBundle();
-                            } catch (NoSuchAlgorithmException | KeyManagementException e) {
-                                throw new IOException(e);
-                            }
+                        Optional<InetSocketAddress> socketAddress =
+                                AddressResolver.resolve(address,
+                                        state.engine().taskExecutor());
+                        if (socketAddress.isPresent()) {
+                            channel = SocketChannel.open();
+                            channel.configureBlocking(false);
+                            channel.connect(socketAddress.get());
                             readState++;
                         }
                         break;
                     case 1:
+                        if (channel.finishConnect()) {
+                            // Ignore invalid certificates because worst case
+                            // server name and icon get faked
+                            SSLHandle ssl =
+                                    SSLProvider.sslHandle(certificates -> true);
+                            bundleChannel =
+                                    new PacketBundleChannel(address, channel,
+                                            state.engine().taskExecutor(), ssl,
+                                            true);
+                            WritableByteStream output =
+                                    bundleChannel.getOutputStream();
+                            output.put(new byte[]{'S', 'c', 'a', 'p', 'e', 's',
+                                    ConnectionType.GET_INFO.data()});
+                            bundleChannel.queueBundle();
+                            readState++;
+                        }
+                        break;
+                    case 2:
                         if (bundleChannel.process()) {
                             throw new IOException("Disconnected");
                         }
@@ -224,7 +208,7 @@ public class GuiServerSelect extends GuiMenu {
                             readState++;
                         }
                         break;
-                    case 2:
+                    case 3:
                         if (bundleChannel.process()) {
                             readState = -1;
                         }

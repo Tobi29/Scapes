@@ -18,14 +18,12 @@ package org.tobi29.scapes.client.states;
 import java8.util.Optional;
 import org.tobi29.scapes.client.gui.desktop.GuiDisconnected;
 import org.tobi29.scapes.client.states.scenes.SceneError;
-import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
-
-import java.net.InetSocketAddress;
+import org.tobi29.scapes.engine.server.RemoteAddress;
 
 public class GameStateServerDisconnect extends GameState {
-    private final Optional<InetSocketAddress> address;
+    private final Optional<RemoteAddress> address;
     private final GuiDisconnected gui;
     private double reconnectTimer = 5.0;
 
@@ -33,13 +31,13 @@ public class GameStateServerDisconnect extends GameState {
         this(message, Optional.empty(), engine);
     }
 
-    public GameStateServerDisconnect(String message, InetSocketAddress address,
+    public GameStateServerDisconnect(String message, RemoteAddress address,
             ScapesEngine engine) {
         this(message, Optional.of(address), engine);
     }
 
     public GameStateServerDisconnect(String message,
-            Optional<InetSocketAddress> address, ScapesEngine engine) {
+            Optional<RemoteAddress> address, ScapesEngine engine) {
         super(engine, new SceneError());
         this.address = address;
         gui = new GuiDisconnected(this, message, engine.guiStyle());
@@ -60,8 +58,7 @@ public class GameStateServerDisconnect extends GameState {
         address.ifPresent(address -> {
             reconnectTimer -= delta;
             if (reconnectTimer <= 0.0) {
-                engine.setState(new GameStateLoadMP(address, engine,
-                        (SceneMenu) scene));
+                engine.setState(new GameStateLoadMP(address, engine, scene));
             } else {
                 gui.setReconnectTimer(reconnectTimer);
             }

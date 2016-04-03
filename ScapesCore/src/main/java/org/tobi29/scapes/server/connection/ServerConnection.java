@@ -30,7 +30,6 @@ import org.tobi29.scapes.server.MessageLevel;
 import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.command.Command;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
@@ -51,8 +50,8 @@ public class ServerConnection extends AbstractServerConnection {
     private boolean allowsJoin = true, allowsCreation = true;
 
     public ServerConnection(ScapesServer server, TagStructure tagStructure,
-            SSLContext context) {
-        super(server.taskExecutor(), ConnectionInfo.header(), context);
+            SSLHandle ssl) {
+        super(server.taskExecutor(), ConnectionInfo.header(), ssl);
         plugins = server.plugins();
         mayPlayers = tagStructure.getInteger("MaxPlayers");
         controlPassword = tagStructure.getString("ControlPassword");

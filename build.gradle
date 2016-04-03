@@ -42,6 +42,7 @@ dependencies {
     testCompile "junit:junit:4.12"
 
     runtime project(":ScapesEngine:FileSystems:NIOFileSystem")
+    runtime project(":ScapesEngine:ServerFramework:JVMSSLProvider")
     runtime project(":ScapesEngine:Utils:MBeansCPUReader")
     runtime project(":ScapesEngine:Codecs:CodecOGG")
     runtime project(":ScapesEngine:Codecs:CodecMP3")

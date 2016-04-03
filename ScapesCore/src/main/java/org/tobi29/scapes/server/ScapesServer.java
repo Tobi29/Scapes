@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.chunk.EnvironmentServer;
 import org.tobi29.scapes.chunk.WorldServer;
+import org.tobi29.scapes.engine.server.SSLHandle;
 import org.tobi29.scapes.engine.server.ServerInfo;
 import org.tobi29.scapes.engine.utils.Crashable;
 import org.tobi29.scapes.engine.utils.Streams;
@@ -36,7 +37,6 @@ import org.tobi29.scapes.server.format.PlayerData;
 import org.tobi29.scapes.server.format.WorldFormat;
 import org.tobi29.scapes.server.format.WorldSource;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,7 +59,8 @@ public class ScapesServer {
     private ShutdownReason shutdownReason = ShutdownReason.RUNNING;
 
     public ScapesServer(WorldSource source, TagStructure tagStructure,
-            ServerInfo serverInfo,SSLContext context, Crashable crashHandler) throws IOException {
+            ServerInfo serverInfo, SSLHandle ssl, Crashable crashHandler)
+            throws IOException {
         format = source.open(this);
         playerData = format.playerData();
         plugins = format.plugins();
@@ -72,7 +73,7 @@ public class ScapesServer {
         TagStructure socketTag = serverTag.getStructure("Socket");
         maxLoadingRadius = serverTag.getInteger("MaxLoadingRadius");
         this.serverInfo = serverInfo;
-        serverConnection = new ServerConnection(this, socketTag,context);
+        serverConnection = new ServerConnection(this, socketTag, ssl);
         extensions.init();
         format.plugins().init();
         format.plugins().plugins().forEach(plugin -> plugin.initServer(this));
