@@ -38,8 +38,6 @@ public class SQLTerrainInfiniteFormat implements TerrainInfiniteFormat {
             LoggerFactory.getLogger(SQLTerrainInfiniteFormat.class);
     private final ByteBufferStream stream =
             new ByteBufferStream(BufferCreator::bytes,
-                    length -> length + 1048576), compressionStream =
-            new ByteBufferStream(BufferCreator::bytes,
                     length -> length + 1048576);
     private final SQLDatabase database;
     private final String table;
@@ -73,8 +71,8 @@ public class SQLTerrainInfiniteFormat implements TerrainInfiniteFormat {
         List<Object[]> values = new ArrayList<>(chunks.size());
         for (Pair<Vector2i, TagStructure> chunk : chunks) {
             long pos = pos(chunk.a.intX(), chunk.a.intY());
-            TagStructureBinary.write(chunk.b, stream, (byte) 1, true, stream,
-                    compressionStream);
+            stream.buffer().clear();
+            TagStructureBinary.write(chunk.b, stream, (byte) 1);
             stream.buffer().flip();
             byte[] array = new byte[stream.buffer().remaining()];
             stream.buffer().get(array);
@@ -102,8 +100,7 @@ public class SQLTerrainInfiniteFormat implements TerrainInfiniteFormat {
                 byte[] array = (byte[]) row[0];
                 TagStructure tagStructure = TagStructureBinary
                         .read(new TagStructure(),
-                                new ByteBufferStream(ByteBuffer.wrap(array)),
-                                compressionStream);
+                                new ByteBufferStream(ByteBuffer.wrap(array)));
                 return Optional.of(tagStructure);
             }
         }

@@ -25,21 +25,23 @@ import org.tobi29.scapes.engine.server.RemoteAddress;
 public class GameStateServerDisconnect extends GameState {
     private final Optional<RemoteAddress> address;
     private final GuiDisconnected gui;
-    private double reconnectTimer = 5.0;
+    private double reconnectTimer;
 
     public GameStateServerDisconnect(String message, ScapesEngine engine) {
-        this(message, Optional.empty(), engine);
+        this(message, Optional.empty(), engine, 0.0);
     }
 
     public GameStateServerDisconnect(String message, RemoteAddress address,
-            ScapesEngine engine) {
-        this(message, Optional.of(address), engine);
+            ScapesEngine engine, double reconnectTimer) {
+        this(message, Optional.of(address), engine, reconnectTimer);
     }
 
     public GameStateServerDisconnect(String message,
-            Optional<RemoteAddress> address, ScapesEngine engine) {
+            Optional<RemoteAddress> address, ScapesEngine engine,
+            double reconnectTimer) {
         super(engine, new SceneError());
         this.address = address;
+        this.reconnectTimer = reconnectTimer;
         gui = new GuiDisconnected(this, message, engine.guiStyle());
     }
 

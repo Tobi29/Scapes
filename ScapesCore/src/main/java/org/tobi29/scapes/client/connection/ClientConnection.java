@@ -15,12 +15,14 @@
  */
 package org.tobi29.scapes.client.connection;
 
+import java8.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
+import org.tobi29.scapes.engine.server.RemoteAddress;
 import org.tobi29.scapes.engine.utils.io.IORunnable;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.packets.Packet;
@@ -101,6 +103,8 @@ public abstract class ClientConnection implements PlayConnection {
     public ConnectionProfiler profilerReceived() {
         return profilerReceived;
     }
+
+    public abstract Optional<RemoteAddress> address();
 
     public void changeWorld(WorldClient world) {
         this.world = world;

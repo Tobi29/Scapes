@@ -141,8 +141,7 @@ public class GameStateLoadMP extends GameState {
         } catch (IOException e) {
             LOGGER.error("Failed to connect to server:", e);
             engine.setState(
-                    new GameStateServerDisconnect(e.getMessage(), address,
-                            engine));
+                    new GameStateServerDisconnect(e.getMessage(), engine));
             step = -1;
             return;
         }

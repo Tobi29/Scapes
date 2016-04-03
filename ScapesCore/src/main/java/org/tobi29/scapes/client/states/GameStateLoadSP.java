@@ -132,8 +132,8 @@ public class GameStateLoadSP extends GameState {
             }
         } catch (IOException e) {
             LOGGER.error("Failed to start internal server:", e);
-            engine.setState(new GameStateServerDisconnect(e.getMessage(),
-                    Optional.empty(), engine));
+            engine.setState(
+                    new GameStateServerDisconnect(e.getMessage(), engine));
             step = -1;
             return;
         }

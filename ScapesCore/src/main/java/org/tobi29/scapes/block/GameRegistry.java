@@ -289,7 +289,7 @@ public class GameRegistry {
         }
     }
 
-    public class SupplierRegistry<D, E>
+    public final class SupplierRegistry<D, E>
             extends Registry<Function<D, ? extends E>> {
         private final Map<Class<?>, Integer> suppliers =
                 new ConcurrentHashMap<>();
@@ -324,7 +324,7 @@ public class GameRegistry {
         }
     }
 
-    public class AsymSupplierRegistry<D, E, F, G> extends
+    public final class AsymSupplierRegistry<D, E, F, G> extends
             Registry<Pair<Function<D, ? extends E>, Function<F, ? extends G>>> {
         private final Map<Class<?>, Integer> suppliers =
                 new ConcurrentHashMap<>();

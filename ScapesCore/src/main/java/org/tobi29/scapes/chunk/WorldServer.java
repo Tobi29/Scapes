@@ -415,7 +415,6 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
 
     public synchronized void removePlayer(MobPlayerServer player) {
         players.remove(player.nickname());
-        player.dispose();
         removeEntity(player);
     }
 
@@ -519,7 +518,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
             while (!players.isEmpty()) {
                 Streams.of(players.values()).forEach(
                         player -> player.connection()
-                                .disconnect("World closed"));
+                                .disconnect("World closed", 5));
             }
         }
         joiner.join();

@@ -1,6 +1,6 @@
 package org.tobi29.scapes;
 
-public class Debug {
+public final class Debug {
     private static boolean enabled;
     private static boolean socketSingleplayer;
 

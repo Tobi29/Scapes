@@ -139,8 +139,8 @@ public class LocalPlayerConnection extends PlayerConnection {
     }
 
     @Override
-    public void disconnect(String reason) {
-        transmit(new PacketDisconnect(reason));
+    public void disconnect(String reason, double time) {
+        transmit(new PacketDisconnect(reason, time));
         error(new ConnectionCloseException(reason));
     }
 

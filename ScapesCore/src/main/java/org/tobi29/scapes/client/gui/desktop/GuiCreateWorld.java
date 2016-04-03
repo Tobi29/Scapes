@@ -128,7 +128,6 @@ public class GuiCreateWorld extends GuiMenuDouble {
         }
 
         private class Element extends GuiComponentGroupSlab {
-            @SuppressWarnings("FieldMayBeFinal")
             private boolean active;
 
             public Element(GuiLayoutData parent, PluginFile addon) {

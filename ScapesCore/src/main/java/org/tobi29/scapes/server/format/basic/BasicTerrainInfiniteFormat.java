@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Streams;
-import org.tobi29.scapes.engine.utils.io.ByteBufferStream;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -41,8 +40,6 @@ public class BasicTerrainInfiniteFormat implements TerrainInfiniteFormat {
             LoggerFactory.getLogger(BasicTerrainInfiniteFormat.class);
     private final FilePath path;
     private final Map<Vector2i, RegionFile> regions = new ConcurrentHashMap<>();
-    private final ByteBufferStream byteStream = new ByteBufferStream(),
-            compressionStream = new ByteBufferStream();
 
     public BasicTerrainInfiniteFormat(FilePath path) {
         SecurityManager security = System.getSecurityManager();
@@ -130,14 +127,14 @@ public class BasicTerrainInfiniteFormat implements TerrainInfiniteFormat {
         });
     }
 
-    private class RegionFile {
+    private static final class RegionFile {
         private final FilePath path;
         private final TagStructureArchive tag;
         private long lastUse;
 
         private RegionFile(FilePath path) {
             this.path = path;
-            tag = new TagStructureArchive(byteStream, compressionStream);
+            tag = new TagStructureArchive();
             if (FileUtil.exists(path)) {
                 try {
                     FileUtil.read(path, tag::read);

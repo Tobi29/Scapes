@@ -171,9 +171,9 @@ public class RemotePlayerConnection extends PlayerConnection {
     }
 
     @Override
-    public void disconnect(String reason) {
+    public void disconnect(String reason, double time) {
         task(() -> {
-            send(new PacketDisconnect(reason));
+            sendPacket(new PacketDisconnect(reason, time));
             throw new ConnectionCloseException(reason);
         });
     }
@@ -217,36 +217,43 @@ public class RemotePlayerConnection extends PlayerConnection {
         try {
             switch (state) {
                 case OPEN:
-                    long currentTime = System.currentTimeMillis();
-                    if (pingWait < currentTime) {
-                        pingWait = currentTime + 1000;
-                        sendPacket(new PacketPingServer(currentTime));
-                    }
-                    while (!sendQueue.isEmpty()) {
-                        sendQueue.poll().run();
-                        sendQueueSize.decrementAndGet();
-                        if (channel.bundleSize() > 1 << 10 << 4) {
-                            break;
+                    try {
+                        long currentTime = System.currentTimeMillis();
+                        if (pingWait < currentTime) {
+                            pingWait = currentTime + 1000;
+                            sendPacket(new PacketPingServer(currentTime));
                         }
-                    }
-                    if (channel.bundleSize() > 0) {
-                        channel.queueBundle();
-                    }
-                    Optional<RandomReadableByteStream> bundle = channel.fetch();
-                    if (bundle.isPresent()) {
-                        ReadableByteStream stream = bundle.get();
-                        while (stream.hasRemaining()) {
-                            PacketServer packet = (PacketServer) Packet
-                                    .make(registry, stream.getShort());
-                            packet.parseServer(this, stream);
-                            packet.runServer(this);
+                        while (!sendQueue.isEmpty()) {
+                            sendQueue.poll().run();
+                            sendQueueSize.decrementAndGet();
+                            if (channel.bundleSize() > 1 << 10 << 4) {
+                                break;
+                            }
                         }
-                    }
-                    if (channel.process()) {
-                        state = State.CLOSED;
+                        if (channel.bundleSize() > 0) {
+                            channel.queueBundle();
+                        }
+                        Optional<RandomReadableByteStream> bundle =
+                                channel.fetch();
+                        if (bundle.isPresent()) {
+                            ReadableByteStream stream = bundle.get();
+                            while (stream.hasRemaining()) {
+                                PacketServer packet = (PacketServer) Packet
+                                        .make(registry, stream.getShort());
+                                packet.parseServer(this, stream);
+                                packet.runServer(this);
+                            }
+                        }
+                        if (channel.process()) {
+                            state = State.CLOSED;
+                            return false;
+                        }
                         return false;
+                    } catch (ConnectionCloseException e) {
+                        if (channel.bundleSize() > 0) {
+                            channel.queueBundle();
+                        }
                     }
-                    return false;
                 case CLOSING:
                     if (channel.process()) {
                         state = State.CLOSED;
@@ -254,7 +261,7 @@ public class RemotePlayerConnection extends PlayerConnection {
                     }
                     break;
                 default:
-                    bundle = channel.fetch();
+                    Optional<RandomReadableByteStream> bundle = channel.fetch();
                     if (bundle.isPresent()) {
                         switch (state) {
                             case LOGIN_STEP_1:

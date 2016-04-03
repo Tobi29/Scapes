@@ -19,7 +19,9 @@ import java8.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.client.states.GameStateGameMP;
+import org.tobi29.scapes.client.states.GameStateMenu;
 import org.tobi29.scapes.client.states.GameStateServerDisconnect;
+import org.tobi29.scapes.engine.server.ConnectionEndException;
 import org.tobi29.scapes.engine.server.PacketBundleChannel;
 import org.tobi29.scapes.engine.server.RemoteAddress;
 import org.tobi29.scapes.engine.utils.io.IORunnable;
@@ -92,13 +94,14 @@ public class RemoteClientConnection extends ClientConnection
                             e.toString());
                 }
             }
+            LOGGER.info("Closed client connection!");
+            game.engine().setState(new GameStateMenu(game.engine()));
+        } catch (ConnectionEndException e) {
+            LOGGER.info("Closed client connection: {}", e.toString());
         } catch (IOException e) {
             LOGGER.info("Lost connection: {}", e.toString());
-            Optional<RemoteAddress> address =
-                    channel.getRemoteAddress().map(RemoteAddress::new);
-            game.engine().setState(
-                    new GameStateServerDisconnect(e.getMessage(), address,
-                            game.engine()));
+            game.engine().setState(new GameStateServerDisconnect(e.getMessage(),
+                    game.engine()));
         }
         state = State.CLOSED;
         try {
@@ -107,7 +110,6 @@ public class RemoteClientConnection extends ClientConnection
         } catch (IOException e) {
             LOGGER.error("Error closing socket: {}", e.toString());
         }
-        LOGGER.info("Closed client connection!");
     }
 
     @Override
@@ -141,6 +143,10 @@ public class RemoteClientConnection extends ClientConnection
         ((PacketServer) packet).sendServer(this, output);
         int size = output.position() - pos;
         profilerSent.packet(packet, size);
+    }
+
+    public Optional<RemoteAddress> address() {
+        return channel.getRemoteAddress().map(RemoteAddress::new);
     }
 
     public void updatePing(long ping) {

@@ -15,10 +15,11 @@
  */
 package org.tobi29.scapes.client.connection;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java8.util.Optional;
 import org.tobi29.scapes.client.states.GameStateGameMP;
+import org.tobi29.scapes.client.states.GameStateMenu;
 import org.tobi29.scapes.engine.server.Account;
+import org.tobi29.scapes.engine.server.RemoteAddress;
 import org.tobi29.scapes.engine.utils.io.IORunnable;
 import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketClient;
@@ -29,8 +30,6 @@ import org.tobi29.scapes.server.connection.LocalPlayerConnection;
 import java.io.IOException;
 
 public class LocalClientConnection extends ClientConnection {
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(LocalClientConnection.class);
     private final Account account;
     private final LocalPlayerConnection player;
 
@@ -42,7 +41,7 @@ public class LocalClientConnection extends ClientConnection {
         this.account = account;
     }
 
-    public  void receive(PacketClient packet) throws IOException {
+    public void receive(PacketClient packet) throws IOException {
         packet.localClient();
         packet.runClient(this, world);
     }
@@ -65,6 +64,7 @@ public class LocalClientConnection extends ClientConnection {
     @Override
     public void stop() {
         player.stop();
+        game.engine().setState(new GameStateMenu(game.engine()));
     }
 
     @Override
@@ -84,5 +84,10 @@ public class LocalClientConnection extends ClientConnection {
     @Override
     protected void transmit(Packet packet) throws IOException {
         player.receive((PacketServer) packet);
+    }
+
+    @Override
+    public Optional<RemoteAddress> address() {
+        return Optional.empty();
     }
 }

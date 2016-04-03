@@ -209,7 +209,7 @@ public class GameStateGameMP extends GameState {
         return hud;
     }
 
-    private static class GuiWidgetPerformanceClient extends GuiComponentWidget {
+    private static final class GuiWidgetPerformanceClient extends GuiComponentWidget {
         private final GuiComponentGraph graph;
 
         private GuiWidgetPerformanceClient(GuiLayoutData parent) {
@@ -221,7 +221,7 @@ public class GameStateGameMP extends GameState {
         }
     }
 
-    private class GuiWidgetDebugClient extends GuiComponentWidget {
+    private final class GuiWidgetDebugClient extends GuiComponentWidget {
         private GuiWidgetDebugClient(GuiLayoutData parent) {
             super(parent, "Debug Values");
             GuiComponentTextButton geometry = addVert(10, 10, 10, 2, 140, 15,

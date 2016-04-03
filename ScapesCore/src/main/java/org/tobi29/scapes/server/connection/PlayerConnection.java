@@ -202,5 +202,9 @@ public abstract class PlayerConnection
         this.permissionLevel = permissionLevel;
     }
 
-    public abstract void disconnect(String reason);
+    public void disconnect(String reason) {
+        disconnect(reason, -1);
+    }
+
+    public abstract void disconnect(String reason, double time);
 }

@@ -139,7 +139,7 @@ public class GuiControllerTouch implements GuiController {
         }
     }
 
-    private static class Finger {
+    private static final class Finger {
         private final MutableVector2 tracker;
         private final Vector2 source;
         private final long start;
