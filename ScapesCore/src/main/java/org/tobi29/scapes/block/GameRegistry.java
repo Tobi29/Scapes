@@ -245,7 +245,7 @@ public class GameRegistry {
         protected final Map<E, Integer> ids = new ConcurrentHashMap<>();
         protected final List<E> values = new ArrayList<>();
 
-        private Registry(String module, String type, int min, int max) {
+        protected Registry(String module, String type, int min, int max) {
             this.module = module;
             this.type = type;
             this.min = min;
@@ -289,12 +289,13 @@ public class GameRegistry {
         }
     }
 
-    public final class SupplierRegistry<D, E>
+    public class SupplierRegistry<D, E>
             extends Registry<Function<D, ? extends E>> {
         private final Map<Class<?>, Integer> suppliers =
                 new ConcurrentHashMap<>();
 
-        private SupplierRegistry(String module, String type, int min, int max) {
+        protected SupplierRegistry(String module, String type, int min,
+                int max) {
             super(module, type, min, max);
         }
 
@@ -324,12 +325,12 @@ public class GameRegistry {
         }
     }
 
-    public final class AsymSupplierRegistry<D, E, F, G> extends
+    public class AsymSupplierRegistry<D, E, F, G> extends
             Registry<Pair<Function<D, ? extends E>, Function<F, ? extends G>>> {
         private final Map<Class<?>, Integer> suppliers =
                 new ConcurrentHashMap<>();
 
-        private AsymSupplierRegistry(String module, String type, int min,
+        protected AsymSupplierRegistry(String module, String type, int min,
                 int max) {
             super(module, type, min, max);
         }

@@ -344,8 +344,7 @@ public class VanillaBasics implements WorldType {
             OreTypeCreator creator = new OreTypeCreator();
             ore.accept(creator);
             GameRegistry.Registry<StoneType> stoneRegistry =
-                    materials.registry.<StoneType>get("VanillaBasics",
-                            "StoneType");
+                    materials.registry.get("VanillaBasics", "StoneType");
             List<Integer> stoneTypes =
                     Streams.of(creator.stoneTypes).map(stoneRegistry::get)
                             .collect(Collectors.toList());

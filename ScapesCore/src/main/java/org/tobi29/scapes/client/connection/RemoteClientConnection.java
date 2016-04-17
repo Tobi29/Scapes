@@ -145,6 +145,7 @@ public class RemoteClientConnection extends ClientConnection
         profilerSent.packet(packet, size);
     }
 
+    @Override
     public Optional<RemoteAddress> address() {
         return channel.getRemoteAddress().map(RemoteAddress::new);
     }

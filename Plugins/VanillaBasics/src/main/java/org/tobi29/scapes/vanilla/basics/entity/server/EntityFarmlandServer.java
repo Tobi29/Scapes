@@ -49,7 +49,7 @@ public class EntityFarmlandServer extends EntityServer {
     public TagStructure write() {
         TagStructure tag = super.write();
         GameRegistry.Registry<CropType> cropRegistry =
-                registry.<CropType>get("VanillaBasics", "CropType");
+                registry.get("VanillaBasics", "CropType");
         tag.setFloat("NutrientA", nutrientA);
         tag.setFloat("NutrientB", nutrientB);
         tag.setFloat("NutrientC", nutrientC);
@@ -65,7 +65,7 @@ public class EntityFarmlandServer extends EntityServer {
     public void read(TagStructure tagStructure) {
         super.read(tagStructure);
         GameRegistry.Registry<CropType> cropRegistry =
-                registry.<CropType>get("VanillaBasics", "CropType");
+                registry.get("VanillaBasics", "CropType");
         nutrientA = tagStructure.getFloat("NutrientA");
         nutrientB = tagStructure.getFloat("NutrientB");
         nutrientC = tagStructure.getFloat("NutrientC");
@@ -86,7 +86,7 @@ public class EntityFarmlandServer extends EntityServer {
             VanillaBasics plugin =
                     (VanillaBasics) world.plugins().plugin("VanillaBasics");
             GameRegistry.Registry<CropType> cropRegistry =
-                    world.registry().<CropType>get("VanillaBasics", "CropType");
+                    world.registry().get("VanillaBasics", "CropType");
             VanillaMaterial materials = plugin.getMaterials();
             CropType cropType = this.cropType;
             if (cropType == null) {

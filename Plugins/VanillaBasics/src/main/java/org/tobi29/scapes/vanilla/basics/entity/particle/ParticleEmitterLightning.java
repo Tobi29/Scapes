@@ -25,13 +25,13 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class ParticleEmitterLightning
         extends ParticleEmitter<ParticleInstanceLightning> {
-    private final VAO[] VAOS;
+    private final VAO[] vaos;
 
     public ParticleEmitterLightning(ParticleSystem system) {
         super(system, new ParticleInstanceLightning[256],
                 ParticleInstanceLightning::new);
-        VAOS = new VAO[16];
-        for (int i = 0; i < VAOS.length; i++) {
+        vaos = new VAO[16];
+        for (int i = 0; i < vaos.length; i++) {
             List<Line> lines = createLighting();
             float[] vertex = new float[lines.size() * 6];
             float[] normal = new float[lines.size() * 6];
@@ -54,7 +54,7 @@ public class ParticleEmitterLightning
             for (j = 0; j < index.length; j++) {
                 index[j] = j;
             }
-            VAOS[i] = VAOUtility
+            vaos[i] = VAOUtility
                     .createVNI(vertex, normal, index, RenderType.LINES);
         }
     }
@@ -99,7 +99,7 @@ public class ParticleEmitterLightning
     }
 
     public int maxVAO() {
-        return VAOS.length;
+        return vaos.length;
     }
 
     @Override
@@ -149,7 +149,7 @@ public class ParticleEmitterLightning
                 MatrixStack matrixStack = gl.matrixStack();
                 Matrix matrix = matrixStack.push();
                 matrix.translate(posRenderX, posRenderY, posRenderZ);
-                VAOS[instance.vao].render(gl, shader);
+                vaos[instance.vao].render(gl, shader);
                 matrixStack.pop();
             }
         }

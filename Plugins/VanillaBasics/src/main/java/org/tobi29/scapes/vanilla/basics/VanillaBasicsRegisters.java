@@ -314,11 +314,11 @@ class VanillaBasicsRegisters {
 
     static void registerRecipes(VanillaBasics plugin, GameRegistry registry) {
         GameRegistry.Registry<CropType> cropRegistry =
-                registry.<CropType>get("VanillaBasics", "CropType");
+                registry.get("VanillaBasics", "CropType");
         GameRegistry.Registry<TreeType> treeRegistry =
-                registry.<TreeType>get("VanillaBasics", "TreeType");
+                registry.get("VanillaBasics", "TreeType");
         GameRegistry.Registry<StoneType> stoneRegistry =
-                registry.<StoneType>get("VanillaBasics", "StoneType");
+                registry.get("VanillaBasics", "StoneType");
         registerRecipesBasics(plugin, registry, treeRegistry, stoneRegistry);
         registerRecipesStone(plugin, registry);
         registerRecipesFood(plugin, cropRegistry, stoneRegistry);

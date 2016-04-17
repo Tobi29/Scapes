@@ -228,8 +228,8 @@ public class GameStateGameMP extends GameState {
         }
     }
 
-    private final class GuiWidgetDebugClient extends GuiComponentWidget {
-        private GuiWidgetDebugClient(GuiLayoutData parent) {
+    private class GuiWidgetDebugClient extends GuiComponentWidget {
+        protected GuiWidgetDebugClient(GuiLayoutData parent) {
             super(parent, "Debug Values");
             GuiComponentTextButton geometry = addVert(10, 10, 10, 2, 140, 15,
                     p -> new GuiComponentTextButton(p, 12, "Geometry"));
