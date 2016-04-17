@@ -38,6 +38,7 @@ import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientVB;
+import org.tobi29.scapes.vanilla.basics.entity.particle.*;
 import org.tobi29.scapes.vanilla.basics.entity.server.MobPlayerServerVB;
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator;
 import org.tobi29.scapes.vanilla.basics.generator.ClimateInfoLayer;
@@ -68,6 +69,7 @@ public class VanillaBasics implements WorldType {
     private final Map<BiomeGenerator.Biome, Map<String, BiomeDecorator>>
             biomeDecorators = new EnumMap<>(BiomeGenerator.Biome.class);
     public VanillaMaterial materials;
+    public VanillaParticle particles;
     private boolean locked;
 
     public VanillaBasics() {
@@ -218,6 +220,7 @@ public class VanillaBasics implements WorldType {
 
     @Override
     public void initClient(GameStateGameMP game) {
+        particles = new VanillaParticle(game.particleTransparentAtlas());
     }
 
     @Override
@@ -234,6 +237,18 @@ public class VanillaBasics implements WorldType {
                 (EnvironmentOverworldClient) world.environment();
         world.infoLayer("VanillaBasics:Climate",
                 () -> new ClimateInfoLayer(environment.climate()));
+        world.scene().particles().register(
+                new ParticleEmitterExplosion(world.scene().particles()));
+        world.scene().particles().register(
+                new ParticleEmitterRain(world.scene().particles(),
+                        world.game().engine().graphics().textures().empty()));
+        world.scene().particles().register(
+                new ParticleEmitterSnow(world.scene().particles(),
+                        world.game().engine().graphics().textures().empty()));
+        world.scene().particles().register(
+                new ParticleEmitterLightning(world.scene().particles()));
+        world.scene().particles().register(
+                new ParticleEmitterTornado(world.scene().particles()));
     }
 
     @Override

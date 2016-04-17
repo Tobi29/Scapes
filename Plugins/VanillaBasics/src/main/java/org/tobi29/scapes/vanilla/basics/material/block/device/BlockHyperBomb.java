@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.block.device;
 
 import org.tobi29.scapes.block.BlockExplosive;
@@ -22,16 +21,14 @@ import org.tobi29.scapes.block.TerrainTextureRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.utils.math.Face;
-import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
-import org.tobi29.scapes.entity.particle.ParticleManager;
 import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.entity.server.MobBombServer;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
-import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleExplosion;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.block.BlockSimple;
+import org.tobi29.scapes.vanilla.basics.util.ParticleUtil;
 
 import java.util.Collections;
 import java.util.List;
@@ -52,24 +49,7 @@ public class BlockHyperBomb extends BlockSimple implements BlockExplosive {
 
     @Override
     public void explodeClient(WorldClient world, Vector3 pos, Vector3 speed) {
-        Random random = new Random();
-        ParticleManager particleManager = world.particleManager();
-        for (int i = 0; i < 40; i++) {
-            double dirZ = random.nextDouble() * FastMath.TWO_PI;
-            double dirX = random.nextDouble() * FastMath.PI - FastMath.HALF_PI;
-            double dirSpeed = random.nextDouble() * 0.5 + 2.0;
-            double dirSpeedX =
-                    FastMath.cosTable(dirZ) * FastMath.cosTable(dirX) *
-                            dirSpeed;
-            double dirSpeedY =
-                    FastMath.sinTable(dirZ) * FastMath.cosTable(dirX) *
-                            dirSpeed;
-            double dirSpeedZ = FastMath.sinTable(dirX) * dirSpeed;
-            particleManager.add(new ParticleExplosion(particleManager,
-                    pos.plus(new Vector3d(dirSpeedX, dirSpeedY, dirSpeedZ)),
-                    speed.plus(new Vector3d(dirSpeedX, dirSpeedY, dirSpeedZ)),
-                    random.nextDouble() * 0.25 + 0.25));
-        }
+        ParticleUtil.explosion(world, pos, speed, 1.0);
     }
 
     @Override

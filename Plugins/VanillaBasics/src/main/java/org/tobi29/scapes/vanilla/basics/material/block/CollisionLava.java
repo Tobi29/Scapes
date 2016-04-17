@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.block;
 
 import org.tobi29.scapes.block.Collision;
-import org.tobi29.scapes.entity.particle.Particle;
+import org.tobi29.scapes.entity.particle.ParticleInstance;
 import org.tobi29.scapes.entity.server.MobLivingServer;
 import org.tobi29.scapes.entity.server.MobServer;
 
@@ -34,8 +33,8 @@ public class CollisionLava extends Collision {
     }
 
     @Override
-    public void inside(Particle particle, double delta) {
-        particle.setSpeed(particle.speed().div(1.0 + 1.2 * delta));
+    public void inside(ParticleInstance particle, double delta) {
+        particle.speed.div(1.0 + 1.2 * delta);
     }
 
     @Override

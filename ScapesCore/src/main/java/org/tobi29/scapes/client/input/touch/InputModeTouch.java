@@ -35,8 +35,8 @@ public class InputModeTouch implements InputMode {
     private final PlayerController playerController;
     private final MutableVector2 swipe = new MutableVector2d(), direction =
             new MutableVector2d();
-    private final Matrix4f matrix1 = new Matrix4f(BufferCreatorNative::floats),
-            matrix2 = new Matrix4f(BufferCreatorNative::floats);
+    private final Matrix4f matrix1 = new Matrix4f(BufferCreatorNative::bytes),
+            matrix2 = new Matrix4f(BufferCreatorNative::bytes);
     private boolean walkUp, walkDown, walkLeft, walkRight, inventoryOpen,
             menuOpen, leftHand, rightHand;
     private long lastTouch;

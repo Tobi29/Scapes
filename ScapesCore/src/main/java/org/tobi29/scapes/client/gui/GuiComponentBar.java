@@ -63,7 +63,8 @@ public class GuiComponentBar extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, double width, double height) {
+    public void renderComponent(GL gl, Shader shader, double width,
+            double height) {
         gl.textures().unbind(gl);
         MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();

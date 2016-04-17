@@ -1,0 +1,38 @@
+uniform 0 Matrix4 uniform_ModelViewMatrix;
+uniform 1 Matrix4 uniform_ModelViewProjectionMatrix;
+uniform 3 Texture2 uniform_Texture;
+uniform 4 Vector3 uniform_FogColor;
+uniform 5 Float uniform_FogEnd;
+uniform 6 Texture2 uniform_BackgroundTexture;
+
+const Vector2 SCREEN_SIZE = vector2(float($SCENE_WIDTH), float($SCENE_HEIGHT));
+
+shader vertex(0 Vector4 attribute_Position,
+              1 Vector4 attribute_Color,
+              2 Vector2 attribute_Texture) {
+    varying_Texture = attribute_Texture;
+    varying_Color = attribute_Color;
+    Vector4 vertex = attribute_Position;
+    varying_Depth = length(vector3(uniform_ModelViewMatrix * vertex));
+    out_Position = uniform_ModelViewProjectionMatrix * vertex;
+}
+
+shader fragment(Vector4 varying_Color,
+                Vector2 varying_Texture,
+                Float varying_Depth) {
+    out_Color = texture(uniform_Texture, varying_Texture);
+    out_Color.a *= varying_Color.a;
+    if (out_Color.a <= 0.01) {
+        discard;
+    }
+    Float fog = min(varying_Depth / uniform_FogEnd, 1.0);
+    fog *= fog;
+    out_Color.rgb = mix(out_Color.rgb * varying_Color.rgb, uniform_FogColor, fog);
+    Float fogBackground = mix(10.0, 0.0, fog);
+    if (fogBackground < 1.0) {
+        Vector3 background = texture(uniform_BackgroundTexture, varying_Fragment.xy / SCREEN_SIZE).rgb;
+        out_Color.rgb = mix(background, out_Color.rgb, fogBackground);
+    }
+}
+
+outputs(0 Vector4 out_Color);

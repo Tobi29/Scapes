@@ -45,7 +45,6 @@ import org.tobi29.scapes.entity.client.MobClient;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.model.EntityModel;
 import org.tobi29.scapes.entity.model.MobModel;
-import org.tobi29.scapes.entity.particle.ParticleManager;
 import org.tobi29.scapes.packets.Packet;
 
 import java.util.List;
@@ -67,7 +66,6 @@ public class WorldClient extends World {
     private final TerrainClient terrain;
     private final Map<Integer, EntityModel> entityModels =
             new ConcurrentHashMap<>();
-    private final ParticleManager particleManager = new ParticleManager(this);
     private final EnvironmentClient environment;
 
     public WorldClient(ClientConnection connection, Cam cam, long seed,
@@ -149,9 +147,6 @@ public class WorldClient extends World {
         try (Profiler.C ignored = Profiler.section("Terrain")) {
             terrain.update(delta);
         }
-        try (Profiler.C ignored = Profiler.section("Particles")) {
-            particleManager.update(delta);
-        }
         try (Profiler.C ignored = Profiler.section("Environment")) {
             environment.tick(delta);
         }
@@ -216,9 +211,9 @@ public class WorldClient extends World {
             model.shapeAABB(aabb);
             return cam.frustum.inView(aabb) != 0;
         }).forEach(model -> model.render(gl, this, cam, shaderEntity));
-        particleManager.render(gl, cam);
         scene.terrainTextureRegistry().texture().bind(gl);
         terrain.renderer().renderAlpha(gl, shaderTerrain, cam);
+        scene.particles().render(gl, cam);
     }
 
     public TerrainClient terrain() {
@@ -281,10 +276,6 @@ public class WorldClient extends World {
 
     public SceneScapesVoxelWorld scene() {
         return scene;
-    }
-
-    public ParticleManager particleManager() {
-        return particleManager;
     }
 
     public EnvironmentClient environment() {

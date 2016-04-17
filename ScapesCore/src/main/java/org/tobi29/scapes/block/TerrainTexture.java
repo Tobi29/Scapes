@@ -13,60 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.block;
 
 import org.tobi29.scapes.engine.opengl.GL;
 
 import java.nio.ByteBuffer;
 
-public class TerrainTexture {
-    protected final int tiles, resolution;
+public class TerrainTexture extends TextureAtlasEntry<TerrainTextureRegistry> {
     protected final ShaderAnimation shaderAnimation;
-    protected final TerrainTextureRegistry registry;
-    protected ByteBuffer buffer;
-    protected int tileX, tileY;
-    protected float x, y, size;
 
     public TerrainTexture(ByteBuffer buffer, int resolution,
             ShaderAnimation shaderAnimation, TerrainTextureRegistry registry) {
+        super(buffer, resolution, registry);
         this.shaderAnimation = shaderAnimation;
-        this.registry = registry;
-        this.buffer = buffer;
-        this.resolution = resolution;
-        tiles = resolution >> 4;
-    }
-
-    public float x() {
-        return x + size * 0.005f;
-    }
-
-    public float realX() {
-        return x;
-    }
-
-    public float y() {
-        return y + size * 0.005f;
-    }
-
-    public float realY() {
-        return y;
-    }
-
-    public float size() {
-        return size * 0.99f;
-    }
-
-    public float realSize() {
-        return size;
-    }
-
-    public int resolution() {
-        return resolution;
-    }
-
-    public TerrainTextureRegistry registry() {
-        return registry;
     }
 
     public ShaderAnimation shaderAnimation() {

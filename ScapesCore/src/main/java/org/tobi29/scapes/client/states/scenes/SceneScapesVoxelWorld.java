@@ -39,7 +39,7 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.model.MobModel;
-import org.tobi29.scapes.entity.particle.ParticleBlock;
+import org.tobi29.scapes.entity.particle.*;
 import org.tobi29.scapes.entity.skin.ClientSkinStorage;
 
 import java.io.IOException;
@@ -84,6 +84,7 @@ public class SceneScapesVoxelWorld extends Scene {
     private final ClientSkinStorage skinStorage;
     private final FBO skyboxFBO = new FBO(1, 1, 1, false, true, false);
     private final Optional<FBO> exposureFBO;
+    private final ParticleSystem particles;
     private final WorldSkybox skybox;
     private float brightness;
     private float renderDistance, fov;
@@ -94,6 +95,7 @@ public class SceneScapesVoxelWorld extends Scene {
     public SceneScapesVoxelWorld(WorldClient world, Cam cam) {
         this.world = world;
         this.cam = cam;
+        particles = new ParticleSystem(world, 60.0);
         terrainTextureRegistry = world.game().terrainTextureRegistry();
         skinStorage = new ClientSkinStorage(
                 world.game().engine().graphics().textures()
@@ -121,6 +123,13 @@ public class SceneScapesVoxelWorld extends Scene {
         } else {
             exposureFBO = Optional.empty();
         }
+        // TODO: Move somewhere better
+        particles.register(new ParticleEmitterBlock(particles,
+                terrainTextureRegistry.texture()));
+        particles.register(new ParticleEmitter3DBlock(particles));
+        particles.register(new ParticleEmitterFallenBodyPart(particles));
+        particles.register(new ParticleEmitterTransparent(particles,
+                world.game().particleTransparentAtlas().texture()));
     }
 
     public float fov() {
@@ -165,6 +174,10 @@ public class SceneScapesVoxelWorld extends Scene {
 
     public WorldClient world() {
         return world;
+    }
+
+    public ParticleSystem particles() {
+        return particles;
     }
 
     public Cam cam() {
@@ -357,7 +370,7 @@ public class SceneScapesVoxelWorld extends Scene {
     @Override
     public void dispose() {
         world.dispose();
-        ParticleBlock.clear();
+        particles.dispose();
     }
 
     public void takePanorama(GL gl) {

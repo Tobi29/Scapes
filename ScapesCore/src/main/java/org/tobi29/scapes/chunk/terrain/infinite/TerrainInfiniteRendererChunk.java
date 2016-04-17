@@ -41,17 +41,10 @@ public class TerrainInfiniteRendererChunk {
 
     private final TerrainInfiniteChunkClient chunk;
     private final TerrainInfiniteRenderer renderer;
-    private final VAO[] vao;
-    private final VAO[] vaoAlpha;
-    private final AABB[] aabb;
-    private final AABB[] aabbAlpha;
-    private final boolean[] geometryDirty;
-    private final boolean[] geometryInit;
-    private final boolean[] solid;
-    private final boolean[] visible;
-    private final boolean[] prepareVisible;
-    private final boolean[] culled;
-    private final boolean[] lod;
+    private final VAOStatic[] vao, vaoAlpha;
+    private final AABB[] aabb, aabbAlpha;
+    private final boolean[] geometryDirty, geometryInit, solid, visible,
+            prepareVisible, culled, lod;
 
     public TerrainInfiniteRendererChunk(TerrainInfiniteChunkClient chunk,
             TerrainInfiniteRenderer renderer) {
@@ -60,8 +53,8 @@ public class TerrainInfiniteRendererChunk {
         int zSections = chunk.zSize() >> 4;
         geometryDirty = new boolean[zSections];
         geometryInit = new boolean[zSections + 1];
-        vao = new VAO[zSections];
-        vaoAlpha = new VAO[zSections];
+        vao = new VAOStatic[zSections];
+        vaoAlpha = new VAOStatic[zSections];
         aabb = new AABB[zSections];
         aabbAlpha = new AABB[zSections];
         lod = new boolean[zSections];
@@ -100,7 +93,7 @@ public class TerrainInfiniteRendererChunk {
                 geometryDirty[i] = true;
                 renderer.addToLoadQueue(this);
             }
-            VAO vao = this.vao[i];
+            VAOStatic vao = this.vao[i];
             AABB aabb = this.aabb[i];
             if (vao != null && aabb != null) {
                 if (cam.frustum.inView(aabb) != 0) {
@@ -123,7 +116,7 @@ public class TerrainInfiniteRendererChunk {
         double relativeY = chunk.blockY() - cam.position.doubleY();
         MatrixStack matrixStack = gl.matrixStack();
         for (int i = 0; i < vao.length; i++) {
-            VAO vao = vaoAlpha[i];
+            VAOStatic vao = vaoAlpha[i];
             AABB aabb = aabbAlpha[i];
             if (vao != null && aabb != null) {
                 if (cam.frustum.inView(aabb) != 0) {
@@ -174,8 +167,8 @@ public class TerrainInfiniteRendererChunk {
         }
     }
 
-    public synchronized void replaceMesh(int i, VAO render, VAO renderAlpha,
-            AABB aabb, AABB aabbAlpha) {
+    public synchronized void replaceMesh(int i, VAOStatic render,
+            VAOStatic renderAlpha, AABB aabb, AABB aabbAlpha) {
         if (visible[i]) {
             if (render != null) {
                 render.setWeak(true);

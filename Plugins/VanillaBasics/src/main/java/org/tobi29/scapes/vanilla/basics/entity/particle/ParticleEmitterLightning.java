@@ -1,41 +1,35 @@
-/*
- * Copyright 2012-2015 Tobi29
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.tobi29.scapes.vanilla.basics.entity.particle;
 
-import org.tobi29.scapes.engine.opengl.*;
+import org.tobi29.scapes.block.BlockType;
+import org.tobi29.scapes.chunk.WorldClient;
+import org.tobi29.scapes.chunk.terrain.TerrainClient;
+import org.tobi29.scapes.engine.opengl.GL;
+import org.tobi29.scapes.engine.opengl.RenderType;
+import org.tobi29.scapes.engine.opengl.VAO;
+import org.tobi29.scapes.engine.opengl.VAOUtility;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.engine.utils.math.AABB;
+import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
-import org.tobi29.scapes.entity.particle.Particle;
-import org.tobi29.scapes.entity.particle.ParticleManager;
+import org.tobi29.scapes.entity.particle.ParticleEmitter;
+import org.tobi29.scapes.entity.particle.ParticleInstance;
+import org.tobi29.scapes.entity.particle.ParticleSystem;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class ParticleLightning extends Particle {
-    private static final VAO[] VAOS;
+public class ParticleEmitterLightning
+        extends ParticleEmitter<ParticleInstanceLightning> {
+    private final VAO[] VAOS;
 
-    static {
+    public ParticleEmitterLightning(ParticleSystem system) {
+        super(system, new ParticleInstanceLightning[256],
+                ParticleInstanceLightning::new);
         VAOS = new VAO[16];
         for (int i = 0; i < VAOS.length; i++) {
             List<Line> lines = createLighting();
@@ -63,16 +57,6 @@ public class ParticleLightning extends Particle {
             VAOS[i] = VAOUtility
                     .createVNI(vertex, normal, index, RenderType.LINES);
         }
-    }
-
-    private final VAO vao;
-    private double time;
-
-    public ParticleLightning(ParticleManager particleManager, Vector3 pos,
-            Vector3 speed) {
-        super(particleManager, pos, speed, new AABB(-5, -5, -5, 5, 5, 5));
-        Random random = ThreadLocalRandom.current();
-        vao = VAOS[random.nextInt(VAOS.length)];
     }
 
     private static List<Line> createLighting() {
@@ -114,30 +98,60 @@ public class ParticleLightning extends Particle {
         }
     }
 
-    @Override
-    public void move(double delta) {
-    }
-
-    @Override
-    public void renderParticle(float x, float y, float z, float r, float g,
-            float b, float a, GL gl, Shader shader) {
-        MatrixStack matrixStack = gl.matrixStack();
-        Matrix matrix = matrixStack.push();
-        matrix.translate(x, y, z);
-        gl.textures().unbind(gl);
-        gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, r * 0.2f, g * 0.7f, b * 1.0f,
-                a * 0.7f);
-        gl.setBlending(BlendingMode.ADD);
-        vao.render(gl, shader);
-        matrixStack.pop();
-        gl.setBlending(BlendingMode.NORMAL);
+    public int maxVAO() {
+        return VAOS.length;
     }
 
     @Override
     public void update(double delta) {
-        time += delta;
-        if (time >= 0.5) {
-            particleManager.delete(this);
+        if (!hasAlive) {
+            return;
+        }
+        boolean hasAlive = false;
+        for (ParticleInstanceLightning instance : instances) {
+            if (instance.state != ParticleInstance.State.ALIVE) {
+                continue;
+            }
+            hasAlive = true;
+            instance.time -= delta;
+            if (instance.time <= 0.0) {
+                instance.state = ParticleInstance.State.DEAD;
+            }
+        }
+        this.hasAlive = hasAlive;
+    }
+
+    @Override
+    public void render(GL gl, Cam cam) {
+        if (!hasAlive) {
+            return;
+        }
+        WorldClient world = system.world();
+        TerrainClient terrain = world.terrain();
+        Shader shader =
+                gl.shaders().get("VanillaBasics:shader/ParticleLightning", gl);
+        gl.textures().unbind(gl);
+        for (ParticleInstanceLightning instance : instances) {
+            if (instance.state != ParticleInstance.State.ALIVE) {
+                continue;
+            }
+            int x = instance.pos.intX(), y = instance.pos.intY(), z =
+                    instance.pos.intZ();
+            BlockType type = terrain.type(x, y, z);
+            if (!type.isSolid(world.terrain(), x, y, z) ||
+                    type.isTransparent(world.terrain(), x, y, z)) {
+                float posRenderX = (float) (instance.pos.doubleX() -
+                        cam.position.doubleX());
+                float posRenderY = (float) (instance.pos.doubleY() -
+                        cam.position.doubleY());
+                float posRenderZ = (float) (instance.pos.doubleZ() -
+                        cam.position.doubleZ());
+                MatrixStack matrixStack = gl.matrixStack();
+                Matrix matrix = matrixStack.push();
+                matrix.translate(posRenderX, posRenderY, posRenderZ);
+                VAOS[instance.vao].render(gl, shader);
+                matrixStack.pop();
+            }
         }
     }
 

@@ -16,10 +16,10 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.Frustum;
 import org.tobi29.scapes.engine.utils.math.PointerPane;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
+import org.tobi29.scapes.engine.utils.math.vector.Vector2f;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
-import org.tobi29.scapes.entity.particle.ParticleBlock;
-import org.tobi29.scapes.entity.particle.ParticleManager;
+import org.tobi29.scapes.entity.particle.ParticleEmitterBlock;
 
 import java.util.Iterator;
 import java.util.Random;
@@ -278,22 +278,40 @@ public abstract class MobPlayerClientMain extends MobPlayerClient {
             if (tex.isPresent()) {
                 TerrainTexture texture = tex.get();
                 Vector3 blockPos = new Vector3d(pane.x, pane.y, pane.z);
-                ParticleManager particleManager = world.particleManager();
-                Random random = ThreadLocalRandom.current();
+                ParticleEmitterBlock emitter = world.scene().particles()
+                        .emitter(ParticleEmitterBlock.class);
+                float r =
+                        type.particleColorR(pane.face, terrain, pane.x, pane.y,
+                                pane.z);
+                float g =
+                        type.particleColorG(pane.face, terrain, pane.x, pane.y,
+                                pane.z);
+                float b =
+                        type.particleColorB(pane.face, terrain, pane.x, pane.y,
+                                pane.z);
                 for (int i = 0; i < amount; i++) {
-                    particleManager.add(new ParticleBlock(particleManager,
-                            blockPos.plus(new Vector3d(random.nextDouble(),
-                                    random.nextDouble(), random.nextDouble())),
-                            new Vector3d(-1.0 + random.nextDouble() * 2.0,
-                                    -1.0 + random.nextDouble() * 2.0,
-                                    random.nextDouble() * 2.0 + 1.0), texture,
-                            random.nextFloat() * 360,
-                            type.particleColorR(pane.face, terrain, pane.x,
-                                    pane.y, pane.z),
-                            type.particleColorG(pane.face, terrain, pane.x,
-                                    pane.y, pane.z),
-                            type.particleColorB(pane.face, terrain, pane.x,
-                                    pane.y, pane.z), 1.0f));
+                    emitter.add(instance -> {
+                        Random random = ThreadLocalRandom.current();
+                        float size = texture.realSize() * 0.25f;
+                        float tx = (random.nextInt(3) + 0.005f) * size;
+                        float ty = (random.nextInt(3) + 0.005f) * size;
+                        size *= 0.99f;
+                        float time = 3.0f;
+                        instance.pos.set(blockPos);
+                        instance.pos.plus(new Vector3d(random.nextDouble(),
+                                random.nextDouble(), random.nextDouble()));
+                        instance.speed.set(-1.0f + random.nextFloat() * 2.0f,
+                                -1.0f + random.nextFloat() * 2.0f,
+                                random.nextFloat() * 2.0f + 1.0f);
+                        instance.time = time;
+                        instance.dir =
+                                random.nextFloat() * (float) FastMath.TWO_PI;
+                        instance.textureOffset
+                                .set(new Vector2f(texture.realX() + tx,
+                                        texture.realY() + ty));
+                        instance.textureSize.set(new Vector2f(size, size));
+                        instance.setColor(r, g, b, 1.0f);
+                    });
                 }
             }
         }

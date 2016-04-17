@@ -21,11 +21,11 @@ import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
-import org.tobi29.scapes.entity.particle.ParticleManager;
+import org.tobi29.scapes.engine.utils.math.vector.Vector3f;
 import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketClient;
 import org.tobi29.scapes.server.connection.PlayerConnection;
-import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleLightning;
+import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleEmitterLightning;
 
 import java.io.IOException;
 import java.util.Random;
@@ -69,9 +69,15 @@ public class PacketLightning extends Packet implements PacketClient {
             return;
         }
         Vector3 pos = new Vector3d(x, y, z);
-        ParticleManager particleManager = world.particleManager();
-        particleManager.add(new ParticleLightning(particleManager, pos,
-                Vector3d.ZERO));
+        ParticleEmitterLightning emitter = world.scene().particles()
+                .emitter(ParticleEmitterLightning.class);
+        emitter.add(instance -> {
+            Random random = ThreadLocalRandom.current();
+            instance.pos.set(pos);
+            instance.speed.set(Vector3f.ZERO);
+            instance.time = 0.5f;
+            instance.vao = random.nextInt(emitter.maxVAO());
+        });
         Random random = ThreadLocalRandom.current();
         world.playSound(SOUNDS[random.nextInt(3)], pos, Vector3d.ZERO, 1.0f,
                 64.0f);

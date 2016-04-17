@@ -51,12 +51,10 @@ public class GuiComponentLogo extends GuiComponent {
                 new float[]{0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f},
                 new int[]{0, 1, 2, 3, 2, 1}, RenderType.TRIANGLES);
         addSub(textX, textY, -1, textSize,
-                p -> new GuiComponentText(p, "Scapes", 1.0f, 1.0f,
-                        1.0f, 1.0f));
+                p -> new GuiComponentText(p, "Scapes", 1.0f, 1.0f, 1.0f, 1.0f));
         splash = addSub(textX, textY + FastMath.round(textSize * 1.2), -1,
                 (textSize << 1) / 3,
-                p -> new GuiComponentText(p, splash(),
-                        1.0f, 1.0f, 0.0f, 1.0f));
+                p -> new GuiComponentText(p, splash(), 1.0f, 1.0f, 0.0f, 1.0f));
         onClick((event, engine) -> {
             engine.sounds()
                     .playSound("Engine:sound/Click.ogg", "sound.GUI", 1.0f,
@@ -92,7 +90,8 @@ public class GuiComponentLogo extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, double width, double height) {
+    public void renderComponent(GL gl, Shader shader, double width,
+            double height) {
         gl.textures().bind("Scapes:image/Icon", gl);
         gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
         vao.render(gl, shader);

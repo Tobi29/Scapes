@@ -13,17 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.block;
 
-import org.tobi29.scapes.entity.particle.Particle;
+import org.tobi29.scapes.entity.particle.ParticleInstance;
 import org.tobi29.scapes.entity.server.MobServer;
 
 public class Collision {
     public void inside(MobServer mob, double delta) {
     }
 
-    public void inside(Particle particle, double delta) {
+    public void inside(ParticleInstance particle, double delta) {
     }
 
     public boolean isLiquid() {

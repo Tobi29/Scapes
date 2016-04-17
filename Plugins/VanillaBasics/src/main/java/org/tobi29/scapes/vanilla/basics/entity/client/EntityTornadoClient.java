@@ -15,23 +15,28 @@
  */
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
+import org.tobi29.scapes.block.BlockType;
+import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldClient;
+import org.tobi29.scapes.chunk.terrain.TerrainClient;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
+import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
+import org.tobi29.scapes.engine.utils.math.vector.Vector3f;
 import org.tobi29.scapes.entity.MobPositionHandler;
 import org.tobi29.scapes.entity.MobileEntity;
 import org.tobi29.scapes.entity.client.EntityClient;
-import org.tobi29.scapes.entity.particle.ParticleManager;
-import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleTornado;
-import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleTornadoBlock;
+import org.tobi29.scapes.entity.particle.ParticleEmitter3DBlock;
+import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleEmitterTornado;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class EntityTornadoClient extends EntityClient implements MobileEntity {
     private final MobPositionHandler positionHandler;
-    private double baseSpin;
+    private double puff;
+    private float baseSpin;
 
     public EntityTornadoClient(WorldClient world) {
         this(world, Vector3d.ZERO);
@@ -58,44 +63,79 @@ public class EntityTornadoClient extends EntityClient implements MobileEntity {
 
     @Override
     public void update(double delta) {
-        double spin = ThreadLocalRandom.current().nextDouble() * 360.0;
         baseSpin += 40.0 * delta;
         baseSpin %= 360.0;
-        Random random = ThreadLocalRandom.current();
-        ParticleManager particleManager = world.particleManager();
-        particleManager.add(new ParticleTornado(particleManager, pos.now(),
-                Vector3d.ZERO, random.nextFloat() * 360, 12.0, spin, baseSpin,
-                random.nextDouble() + 3));
-        if (random.nextInt(10) == 0) {
-            particleManager.add(new ParticleTornado(particleManager, pos.now(),
-                    Vector3d.ZERO, random.nextFloat() * 360, 12.0, spin,
-                    baseSpin, random.nextDouble() * 10 + 6));
-        }
-        if (random.nextInt(80) == 0) {
+        puff -= delta;
+        while (puff <= 0.0) {
+            puff += 0.05;
+            Random random = ThreadLocalRandom.current();
+            float spin = random.nextFloat() * 360.0f;
+            ParticleEmitterTornado emitter = world.scene().particles()
+                    .emitter(ParticleEmitterTornado.class);
+            emitter.add(instance -> {
+                instance.pos.set(pos.now());
+                instance.speed.set(Vector3f.ZERO);
+                instance.time = 12.0f;
+                instance.dir = random.nextFloat() * 360.0f;
+                instance.spin = spin;
+                instance.baseSpin = baseSpin * (float) FastMath.DEG_2_RAD;
+                instance.width = 0.0f;
+                instance.widthRandom = random.nextFloat() + 3.0f;
+            });
+            emitter.add(instance -> {
+                instance.pos.set(pos.now());
+                instance.speed.set(Vector3f.ZERO);
+                instance.time = 1.0f;
+                instance.dir = random.nextFloat() * 360.0f;
+                instance.spin = spin;
+                instance.baseSpin = baseSpin * (float) FastMath.DEG_2_RAD;
+                instance.width = 0.0f;
+                instance.widthRandom = random.nextFloat() * 20.0f + 20.0f;
+            });
+            if (random.nextInt(10) == 0) {
+                emitter.add(instance -> {
+                    instance.pos.set(pos.now());
+                    instance.speed.set(Vector3f.ZERO);
+                    instance.time = 12.0f;
+                    instance.dir = random.nextFloat() * 360.0f;
+                    instance.spin = spin;
+                    instance.baseSpin = baseSpin * (float) FastMath.DEG_2_RAD;
+                    instance.width = 0.0f;
+                    instance.widthRandom = random.nextFloat() * 10.0f + 6.0f;
+                });
+            }
+            TerrainClient terrain = world.terrain();
             int x = pos.intX() + random.nextInt(9) - 4;
             int y = pos.intY() + random.nextInt(9) - 4;
-            int z = world.terrain().highestTerrainBlockZAt(x, y) - 1;
-            particleManager
-                    .add(new ParticleTornadoBlock(particleManager, pos.now(),
-                            Vector3d.ZERO, random.nextFloat() * 360, 12.0, spin,
-                            baseSpin, random.nextDouble() * 10 + 6,
-                            world.terrain().type(x, y, z),
-                            world.terrain().data(x, y, z)));
+            int z = pos.intZ() + random.nextInt(7) - 3;
+            BlockType type = terrain.type(x, y, z);
+            if (type != world.air()) {
+                ParticleEmitter3DBlock emitter2 = world.scene().particles()
+                        .emitter(ParticleEmitter3DBlock.class);
+                emitter2.add(instance -> {
+                    Random random2 = ThreadLocalRandom.current();
+                    double dir = random2.nextDouble() * FastMath.TWO_PI;
+                    double dirSpeed = random2.nextDouble() * 12.0 + 20.0;
+                    double dirSpeedX =
+                            FastMath.cosTable(dir) * FastMath.cosTable(dir) *
+                                    dirSpeed;
+                    double dirSpeedY =
+                            FastMath.sinTable(dir) * FastMath.cosTable(dir) *
+                                    dirSpeed;
+                    double dirSpeedZ = random2.nextDouble() * 6.0 + 24.0;
+                    instance.pos.set(pos.now());
+                    instance.speed.set(dirSpeedX, dirSpeedY, dirSpeedZ);
+                    instance.time = 5.0f;
+                    instance.rotation.set(0.0f, 0.0f, 0.0f);
+                    instance.rotationSpeed.set(FastMath.normalizeSafe(
+                            new Vector3f(random2.nextFloat() - 0.5f,
+                                    random2.nextFloat() - 0.5f,
+                                    random2.nextFloat() - 0.5f))
+                            .multiply(480.0f));
+                    instance.item = new ItemStack(type, terrain.data(x, y, z));
+                });
+            }
         }
-        int x = pos.intX() + random.nextInt(9) - 4;
-        int y = pos.intY() + random.nextInt(9) - 4;
-        int z = pos.intZ() + random.nextInt(7) - 3;
-        if (world.terrain().type(x, y, z) != world.air()) {
-            particleManager
-                    .add(new ParticleTornadoBlock(particleManager, pos.now(),
-                            Vector3d.ZERO, random.nextFloat() * 360, 1.0, spin,
-                            baseSpin, random.nextDouble() * 20 + 20,
-                            world.terrain().type(x, y, z),
-                            world.terrain().data(x, y, z)));
-        }
-        particleManager.add(new ParticleTornado(particleManager, pos.now(),
-                Vector3d.ZERO, random.nextFloat() * 360, 1.0, spin, baseSpin,
-                random.nextDouble() * 20 + 20));
     }
 
     @Override

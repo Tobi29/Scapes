@@ -33,10 +33,9 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.client.MobPlayerClient;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
-import org.tobi29.scapes.entity.particle.ParticleManager;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
-import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleRaindrop;
-import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleSnowflake;
+import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleEmitterRain;
+import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleEmitterSnow;
 import org.tobi29.scapes.vanilla.basics.gui.GuiComponentCondition;
 import org.tobi29.scapes.vanilla.basics.gui.GuiComponentHotbar;
 
@@ -61,8 +60,7 @@ public class WorldSkyboxOverworld implements WorldSkybox {
             weatherDebug, biomeDebug, staminaDebug, wakeDebug, hungerDebug,
             thirstDebug, bodyTemperatureDebug, sleepingDebug, exposureDebug;
     private StaticAudio rainAudio, windAudio;
-    private double rainGainWait;
-    private int rainDrops;
+    private double rainGainWait, downfallWait;
     private double exposure = 0.3;
     private float fogBrightness;
     private float rainGain, fogR, fogG, fogB, fogDistance;
@@ -202,42 +200,59 @@ public class WorldSkyboxOverworld implements WorldSkybox {
                 FastMath.floor(player.y()));
         rainGainWait -= delta;
         if (rainGainWait <= 0.0) {
+            ParticleEmitterRain emitter = world.scene().particles()
+                    .emitter(ParticleEmitterRain.class);
+            int rainDrops = emitter.getAndResetRaindrops();
             rainGainWait += 0.05;
             rainGain += (rainDrops / 128.0f - rainGain) * 0.04f;
             rainGain = FastMath.clamp(rainGain, 0.0f, 1.0f);
-            rainDrops = 0;
             rainAudio.setGain(rainGain);
         }
         windAudio
                 .setGain((float) FastMath.clamp(weather * 8.0 - 6.0, 0.0, 1.0));
-        Vector3 weatherPos = player.pos()
-                .plus(new Vector3d(player.speedX(), player.speedY(),
-                        player.speedZ() + 16));
-        double temperature = climateGenerator
-                .temperature(weatherPos.intX(), weatherPos.intY(),
-                        weatherPos.intZ());
-        ParticleManager particleManager = world.particleManager();
-        double downfallIntensity = FastMath.max(weather * 2.0 - 1.0, 0.0);
-        Random random = ThreadLocalRandom.current();
-        if (temperature > 0) {
-            int amount = FastMath.round(downfallIntensity * 256.0 * delta);
-            for (int i = 0; i < amount; i++) {
-                particleManager.add(new ParticleRaindrop(particleManager,
-                        weatherPos.plus(new Vector3d(
-                                random.nextDouble() * 32 - 16,
-                                random.nextDouble() * 32 - 16, 0)),
-                        Vector3d.ZERO));
-            }
-        } else {
-            int amount = FastMath.round(downfallIntensity * 64.0 * delta);
-            for (int i = 0; i < amount; i++) {
-                particleManager.add(new ParticleSnowflake(particleManager,
-                        weatherPos.plus(new Vector3d(
-                                random.nextDouble() * 32 - 16,
-                                random.nextDouble() * 32 - 16, 0)),
-                        new Vector3d(random.nextDouble() - 0.5,
-                                random.nextDouble() - 0.5, 0),
-                        random.nextDouble() * 360.0));
+        downfallWait -= delta;
+        while (downfallWait <= 0.0) {
+            downfallWait += 0.05;
+            Vector3 weatherPos = player.pos()
+                    .plus(new Vector3d(player.speedX(), player.speedY(),
+                            player.speedZ() + 16));
+            double temperature = climateGenerator
+                    .temperature(weatherPos.intX(), weatherPos.intY(),
+                            weatherPos.intZ());
+            double downfallIntensity = FastMath.max(weather * 2.0 - 1.0, 0.0);
+            if (temperature > 0) {
+                int amount = FastMath.round(downfallIntensity * 32.0);
+                ParticleEmitterRain emitter = world.scene().particles()
+                        .emitter(ParticleEmitterRain.class);
+                for (int i = 0; i < amount; i++) {
+                    emitter.add(instance -> {
+                        Random random = ThreadLocalRandom.current();
+                        instance.pos.set(random.nextFloat() * 32.0f - 16.0f,
+                                random.nextFloat() * 32.0f - 16.0f, 0.0f);
+                        instance.pos.plus(weatherPos);
+                        // TODO: Wind speed
+                        instance.speed.set(random.nextFloat() * 0.5f - 0.25f,
+                                random.nextFloat() * 0.5f - 0.25f, -10.0f);
+                        instance.time = 4.0f;
+                    });
+                }
+            } else {
+                int amount = FastMath.round(downfallIntensity * 12.0);
+                ParticleEmitterSnow emitter = world.scene().particles()
+                        .emitter(ParticleEmitterSnow.class);
+                for (int i = 0; i < amount; i++) {
+                    emitter.add(instance -> {
+                        Random random = ThreadLocalRandom.current();
+                        instance.pos.set(random.nextFloat() * 32.0f - 16.0f,
+                                random.nextFloat() * 32.0f - 16.0f, 0.0f);
+                        instance.pos.plus(weatherPos);
+                        instance.speed.set(random.nextFloat() - 0.5f,
+                                random.nextFloat() - 0.5f, -8.0f);
+                        instance.time = 4.0f;
+                        instance.dir =
+                                random.nextFloat() * (float) FastMath.TWO_PI;
+                    });
+                }
             }
         }
         // Debug
@@ -457,9 +472,5 @@ public class WorldSkyboxOverworld implements WorldSkybox {
     @Override
     public float fogDistance() {
         return fogDistance;
-    }
-
-    public void addRaindrop() {
-        rainDrops++;
     }
 }

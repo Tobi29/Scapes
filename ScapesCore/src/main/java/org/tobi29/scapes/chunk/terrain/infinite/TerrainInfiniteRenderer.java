@@ -24,7 +24,7 @@ import org.tobi29.scapes.chunk.data.ChunkMesh;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderer;
 import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.VAO;
+import org.tobi29.scapes.engine.opengl.VAOStatic;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.Streams;
@@ -477,7 +477,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
         }
 
         private void process(TerrainInfiniteRendererChunk chunk, int i) {
-            VAO vao = null, vaoAlpha = null;
+            VAOStatic vao = null, vaoAlpha = null;
             AABB aabb = null, aabbAlpha = null;
             TerrainInfiniteChunk terrainChunk = chunk.chunk();
             if (terrainChunk.isEmpty(i)) {

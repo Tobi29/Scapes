@@ -19,17 +19,20 @@ import java8.util.Optional;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.engine.gui.Gui;
+import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
-import org.tobi29.scapes.entity.particle.ParticleManager;
-import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleSmoke;
+import org.tobi29.scapes.entity.particle.ParticleEmitterTransparent;
+import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.gui.GuiForgeInventory;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class EntityForgeClient extends EntityAbstractFurnaceClient {
+    private double particleWait = 0.1;
+
     public EntityForgeClient(WorldClient world) {
         this(world, Vector3d.ZERO);
     }
@@ -52,13 +55,36 @@ public class EntityForgeClient extends EntityAbstractFurnaceClient {
     @Override
     public void update(double delta) {
         super.update(delta);
+        VanillaBasics plugin =
+                (VanillaBasics) world.plugins().plugin("VanillaBasics");
         if (temperature > 10) {
-            Random random = ThreadLocalRandom.current();
-            ParticleManager particleManager = world.particleManager();
-            particleManager.add(new ParticleSmoke(particleManager, pos.now(),
-                    new Vector3d(random.nextDouble() * 0.1 - 0.05,
-                            random.nextDouble() * 0.1 - 0.05, 0.0),
-                    random.nextFloat() * 360.0f, 6.0));
+            particleWait -= delta;
+            while (particleWait < 0.0) {
+                particleWait += 0.1;
+                ParticleEmitterTransparent emitter = world.scene().particles()
+                        .emitter(ParticleEmitterTransparent.class);
+                emitter.add(instance -> {
+                    Random random = ThreadLocalRandom.current();
+                    instance.pos.set(pos.now());
+                    instance.speed
+                            .set(new Vector3d(random.nextDouble() * 0.4 - 0.2,
+                                    random.nextDouble() * 0.4 - 0.2, 0.0));
+                    instance.time = 12.0f;
+                    instance.setPhysics(-0.2f);
+                    instance.setTexture(plugin.particles.smoke);
+                    instance.rStart = 1.0f;
+                    instance.gStart = 1.0f;
+                    instance.bStart = 1.0f;
+                    instance.aStart = 1.0f;
+                    instance.rEnd = 0.3f;
+                    instance.gEnd = 0.3f;
+                    instance.bEnd = 0.3f;
+                    instance.aEnd = 0.0f;
+                    instance.sizeStart = 0.125f;
+                    instance.sizeEnd = 4.0f;
+                    instance.dir = random.nextFloat() * (float) FastMath.TWO_PI;
+                });
+            }
         }
     }
 }

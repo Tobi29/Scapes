@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.block.models;
 
 import org.tobi29.scapes.block.BlockType;
@@ -35,8 +34,7 @@ public class BlockModelSimpleBlock implements BlockModel {
     protected final float g;
     protected final float b;
     protected final float a;
-    protected final VAO vao;
-    protected final VAO vaoInventory;
+    protected final VAO vao, vaoInventory;
     private final TerrainTextureRegistry registry;
     private final TerrainTexture texTop, texBottom, texSide1, texSide2,
             texSide3, texSide4;

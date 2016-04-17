@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
 import java8.util.Optional;
@@ -28,7 +27,6 @@ import org.tobi29.scapes.entity.CreatureType;
 import org.tobi29.scapes.entity.client.MobLivingEquippedClient;
 import org.tobi29.scapes.entity.model.MobLivingModelHuman;
 import org.tobi29.scapes.entity.model.MobModel;
-import org.tobi29.scapes.entity.particle.ParticleManager;
 
 public class MobSkeletonClient extends MobLivingEquippedClient {
     public MobSkeletonClient(WorldClient world) {
@@ -48,10 +46,9 @@ public class MobSkeletonClient extends MobLivingEquippedClient {
     public void onDeath() {
         Texture texture = world.game().engine().graphics().textures()
                 .get("VanillaBasics:image/entity/mob/Skeleton");
-        ParticleManager particleManager = world.particleManager();
         MobLivingModelHuman
-                .particles(particleManager, pos.now(), speed.now(), rot.now(),
-                        texture, true, false);
+                .particles(world.scene().particles(), pos.now(), speed.now(),
+                        rot.now(), texture, true, false);
     }
 
     @Override

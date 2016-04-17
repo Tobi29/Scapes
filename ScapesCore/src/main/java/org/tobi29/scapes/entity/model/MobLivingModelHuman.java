@@ -28,8 +28,8 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.*;
 import org.tobi29.scapes.entity.WieldMode;
 import org.tobi29.scapes.entity.client.MobLivingEquippedClient;
-import org.tobi29.scapes.entity.particle.ParticleFallenBodyPart;
-import org.tobi29.scapes.entity.particle.ParticleManager;
+import org.tobi29.scapes.entity.particle.ParticleEmitterFallenBodyPart;
+import org.tobi29.scapes.entity.particle.ParticleSystem;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -37,7 +37,11 @@ import java.util.concurrent.ThreadLocalRandom;
 public class MobLivingModelHuman implements MobModel {
     private static final Box BODY, HEAD, LEG_NORMAL_LEFT, LEG_NORMAL_RIGHT,
             ARM_NORMAL_LEFT, ARM_NORMAL_RIGHT, LEG_THIN_LEFT, LEG_THIN_RIGHT,
-            ARM_THIN_LEFT, ARM_THIN_RIGHT;
+            ARM_THIN_LEFT, ARM_THIN_RIGHT, BODY_NO_CULL, HEAD_NO_CULL,
+            LEG_NORMAL_LEFT_NO_CULL, LEG_NORMAL_RIGHT_NO_CULL,
+            ARM_NORMAL_LEFT_NO_CULL, ARM_NORMAL_RIGHT_NO_CULL,
+            LEG_THIN_LEFT_NO_CULL, LEG_THIN_RIGHT_NO_CULL,
+            ARM_THIN_LEFT_NO_CULL, ARM_THIN_RIGHT_NO_CULL;
 
     static {
         BODY = new Box(0.015625f, -4, -2, -6, 4, 2, 6, 0, 0);
@@ -50,13 +54,31 @@ public class MobLivingModelHuman implements MobModel {
         LEG_THIN_RIGHT = new Box(0.015625f, -1, -1, -10, 1, 1, 2, 32, 0);
         ARM_THIN_LEFT = new Box(0.015625f, -2, -1, -10, 0, 1, 2, 24, 16);
         ARM_THIN_RIGHT = new Box(0.015625f, 0, -1, -10, 2, 1, 2, 32, 16);
+        BODY_NO_CULL = new Box(0.015625f, -4, -2, -6, 4, 2, 6, 0, 0, false);
+        HEAD_NO_CULL = new Box(0.015625f, -4, -4, 0, 4, 4, 8, 0, 32, false);
+        LEG_NORMAL_LEFT_NO_CULL =
+                new Box(0.015625f, -2, -2, -10, 2, 2, 2, 24, 0, false);
+        LEG_NORMAL_RIGHT_NO_CULL =
+                new Box(0.015625f, -2, -2, -10, 2, 2, 2, 40, 0, false);
+        ARM_NORMAL_LEFT_NO_CULL =
+                new Box(0.015625f, -4, -2, -10, 0, 2, 2, 24, 16, false);
+        ARM_NORMAL_RIGHT_NO_CULL =
+                new Box(0.015625f, 0, -2, -10, 4, 2, 2, 40, 16, false);
+        LEG_THIN_LEFT_NO_CULL =
+                new Box(0.015625f, -1, -1, -10, 1, 1, 2, 24, 0, false);
+        LEG_THIN_RIGHT_NO_CULL =
+                new Box(0.015625f, -1, -1, -10, 1, 1, 2, 32, 0, false);
+        ARM_THIN_LEFT_NO_CULL =
+                new Box(0.015625f, -2, -1, -10, 0, 1, 2, 24, 16, false);
+        ARM_THIN_RIGHT_NO_CULL =
+                new Box(0.015625f, 0, -1, -10, 2, 1, 2, 32, 16, false);
     }
 
     private final MobLivingEquippedClient entity;
     private final Texture texture;
-    private final boolean culling, precise;
+    private final boolean precise;
     private final MutableVector3 pos;
-    private final Box legLeft, legRight, armLeft, armRight;
+    private final Box body, head, legLeft, legRight, armLeft, armRight;
     private double swing, lazyName, moveSpeedRender;
     private float armDirLeft, armDirRight, armDirLeftRender, armDirRightRender,
             armDirLeft2, armDirRight2, pitch, yaw;
@@ -81,106 +103,182 @@ public class MobLivingModelHuman implements MobModel {
         this.entity = entity;
         pos = new MutableVector3d(entity.pos());
         this.texture = texture;
-        this.culling = culling;
         this.precise = precise;
-        if (thin) {
-            legLeft = LEG_THIN_LEFT;
-            legRight = LEG_THIN_RIGHT;
-            armLeft = ARM_THIN_LEFT;
-            armRight = ARM_THIN_RIGHT;
+        if (culling) {
+            body = BODY;
+            head = HEAD;
+            if (thin) {
+                legLeft = LEG_THIN_LEFT;
+                legRight = LEG_THIN_RIGHT;
+                armLeft = ARM_THIN_LEFT;
+                armRight = ARM_THIN_RIGHT;
+            } else {
+                legLeft = LEG_NORMAL_LEFT;
+                legRight = LEG_NORMAL_RIGHT;
+                armLeft = ARM_NORMAL_LEFT;
+                armRight = ARM_NORMAL_RIGHT;
+            }
         } else {
-            legLeft = LEG_NORMAL_LEFT;
-            legRight = LEG_NORMAL_RIGHT;
-            armLeft = ARM_NORMAL_LEFT;
-            armRight = ARM_NORMAL_RIGHT;
+            body = BODY_NO_CULL;
+            head = HEAD_NO_CULL;
+            if (thin) {
+                legLeft = LEG_THIN_LEFT_NO_CULL;
+                legRight = LEG_THIN_RIGHT_NO_CULL;
+                armLeft = ARM_THIN_LEFT_NO_CULL;
+                armRight = ARM_THIN_RIGHT_NO_CULL;
+            } else {
+                legLeft = LEG_NORMAL_LEFT_NO_CULL;
+                legRight = LEG_NORMAL_RIGHT_NO_CULL;
+                armLeft = ARM_NORMAL_LEFT_NO_CULL;
+                armRight = ARM_NORMAL_RIGHT_NO_CULL;
+            }
         }
     }
 
-    public static void particles(ParticleManager particleManager, Vector3 pos,
+    public static void particles(ParticleSystem particles, Vector3 pos,
             Vector3 speed, Vector3 rot, Texture texture) {
-        particles(particleManager, pos, speed, rot, texture, false);
+        particles(particles, pos, speed, rot, texture, false);
     }
 
-    public static void particles(ParticleManager particleManager, Vector3 pos,
+    public static void particles(ParticleSystem particles, Vector3 pos,
             Vector3 speed, Vector3 rot, Texture texture, boolean thin) {
-        particles(particleManager, pos, speed, rot, texture, thin, true);
+        particles(particles, pos, speed, rot, texture, thin, true);
     }
 
-    public static void particles(ParticleManager particleManager, Vector3 pos,
+    public static void particles(ParticleSystem particles, Vector3 pos,
             Vector3 speed, Vector3 rot, Texture texture, boolean thin,
             boolean culling) {
-        Box legLeft, legRight, armLeft, armRight;
-        if (thin) {
-            legLeft = LEG_THIN_LEFT;
-            legRight = LEG_THIN_RIGHT;
-            armLeft = ARM_THIN_LEFT;
-            armRight = ARM_THIN_RIGHT;
+        ParticleEmitterFallenBodyPart emitter =
+                particles.emitter(ParticleEmitterFallenBodyPart.class);
+        Box body, head, legLeft, legRight, armLeft, armRight;
+        if (culling) {
+            body = BODY;
+            head = HEAD;
+            if (thin) {
+                legLeft = LEG_THIN_LEFT;
+                legRight = LEG_THIN_RIGHT;
+                armLeft = ARM_THIN_LEFT;
+                armRight = ARM_THIN_RIGHT;
+            } else {
+                legLeft = LEG_NORMAL_LEFT;
+                legRight = LEG_NORMAL_RIGHT;
+                armLeft = ARM_NORMAL_LEFT;
+                armRight = ARM_NORMAL_RIGHT;
+            }
         } else {
-            legLeft = LEG_NORMAL_LEFT;
-            legRight = LEG_NORMAL_RIGHT;
-            armLeft = ARM_NORMAL_LEFT;
-            armRight = ARM_NORMAL_RIGHT;
+            body = BODY_NO_CULL;
+            head = HEAD_NO_CULL;
+            if (thin) {
+                legLeft = LEG_THIN_LEFT_NO_CULL;
+                legRight = LEG_THIN_RIGHT_NO_CULL;
+                armLeft = ARM_THIN_LEFT_NO_CULL;
+                armRight = ARM_THIN_RIGHT_NO_CULL;
+            } else {
+                legLeft = LEG_NORMAL_LEFT_NO_CULL;
+                legRight = LEG_NORMAL_RIGHT_NO_CULL;
+                armLeft = ARM_NORMAL_LEFT_NO_CULL;
+                armRight = ARM_NORMAL_RIGHT_NO_CULL;
+            }
         }
-        double z = rot.doubleZ() * FastMath.DEG_2_RAD;
+        Vector3 rotRender = rot.plus(new Vector3f(0.0f, 0.0f, -90.0f));
+        double z = rotRender.doubleZ() * FastMath.DEG_2_RAD;
         Random random = ThreadLocalRandom.current();
-        particleManager.add(new ParticleFallenBodyPart(particleManager,
-                pos.plus(new Vector3d(0, 0, 0.7)), speed.plus(
-                new Vector3d(random.nextDouble() * 0.4 - 0.2,
-                        random.nextDouble() * 0.4 - 0.2, random.nextDouble())),
-                HEAD, texture, FastMath.normalizeSafe(
-                new Vector3d(random.nextDouble() * 4 - 2,
-                        random.nextDouble() * 4 - 2,
-                        random.nextDouble() * 4 - 2)).multiply(8),
-                rot.doubleX(), rot.doubleZ(), culling));
-        particleManager.add(new ParticleFallenBodyPart(particleManager,
-                pos.plus(new Vector3d(0, 0, 0.125)), speed.plus(
-                new Vector3d(random.nextDouble() * 0.4 - 0.2,
-                        random.nextDouble() * 0.4 - 0.2,
-                        random.nextDouble() * 0.2)), BODY, texture,
-                FastMath.normalizeSafe(new Vector3d(random.nextDouble() * 2 - 1,
-                        random.nextDouble() * 2 - 1,
-                        random.nextDouble() * 2 - 1)).multiply(8), 0,
-                rot.doubleZ(), culling));
-        particleManager.add(new ParticleFallenBodyPart(particleManager,
-                pos.plus(new Vector3d(FastMath.cosTable(z) * 0.125,
-                        FastMath.cosTable(z) * 0.125, -0.375)), speed.plus(
-                new Vector3d(random.nextDouble() * 0.4 - 0.2,
-                        random.nextDouble() * 0.4 - 0.2,
-                        random.nextDouble() * 0.2)), legLeft, texture,
-                FastMath.normalizeSafe(new Vector3d(random.nextDouble() * 2 - 1,
-                        random.nextDouble() * 2 - 1,
-                        random.nextDouble() * 2 - 1)).multiply(8), 0,
-                rot.doubleZ(), culling));
-        particleManager.add(new ParticleFallenBodyPart(particleManager,
-                pos.plus(new Vector3d(FastMath.cosTable(z) * -0.125,
-                        FastMath.cosTable(z) * -0.125, -0.375)), speed.plus(
-                new Vector3d(random.nextDouble() * 0.4 - 0.2,
-                        random.nextDouble() * 0.4 - 0.2,
-                        random.nextDouble() * 0.2)), legRight, texture,
-                FastMath.normalizeSafe(new Vector3d(random.nextDouble() * 2 - 1,
-                        random.nextDouble() * 2 - 1,
-                        random.nextDouble() * 2 - 1)).multiply(8), 0,
-                rot.doubleZ(), culling));
-        particleManager.add(new ParticleFallenBodyPart(particleManager,
-                pos.plus(new Vector3d(FastMath.cosTable(z) * -0.375,
-                        FastMath.cosTable(z) * -0.375, 0.375)), speed.plus(
-                new Vector3d(random.nextDouble() * 0.4 - 0.2,
-                        random.nextDouble() * 0.4 - 0.2,
-                        random.nextDouble() * 0.2)), armLeft, texture,
-                FastMath.normalizeSafe(new Vector3d(random.nextDouble() * 2 - 1,
-                        random.nextDouble() * 2 - 1,
-                        random.nextDouble() * 2 - 1)).multiply(8), 0,
-                rot.doubleZ(), culling));
-        particleManager.add(new ParticleFallenBodyPart(particleManager,
-                pos.plus(new Vector3d(FastMath.cosTable(z) * 0.375,
-                        FastMath.cosTable(z) * 0.375, 0.375)), speed.plus(
-                new Vector3d(random.nextDouble() * 0.4 - 0.2,
-                        random.nextDouble() * 0.4 - 0.2,
-                        random.nextDouble() * 0.2)), armRight, texture,
-                FastMath.normalizeSafe(new Vector3d(random.nextDouble() * 2 - 1,
-                        random.nextDouble() * 2 - 1,
-                        random.nextDouble() * 2 - 1)).multiply(8), 0,
-                rot.doubleZ(), culling));
+        emitter.add(instance -> {
+            instance.pos.set(pos.plus(new Vector3d(0.0, 0.0, 0.125)));
+            instance.speed.set(speed
+                    .plus(new Vector3f(random.nextFloat() * 0.4f - 0.2f,
+                            random.nextFloat() * 0.4f - 0.2f,
+                            random.nextFloat())));
+            instance.box = body;
+            instance.texture = texture;
+            instance.rotation.set(rotRender);
+            instance.rotationSpeed.set(FastMath.normalizeSafe(
+                    new Vector3f(random.nextFloat() - 0.5f,
+                            random.nextFloat() - 0.5f,
+                            random.nextFloat() - 0.5f)).multiply(480.0f));
+            instance.time = 6.0f;
+        });
+        emitter.add(instance -> {
+            instance.pos.set(pos.plus(new Vector3d(0.0, 0.0, 0.7)));
+            instance.speed.set(speed
+                    .plus(new Vector3f(random.nextFloat() * 0.4f - 0.2f,
+                            random.nextFloat() * 0.4f - 0.2f,
+                            random.nextFloat())));
+            instance.box = head;
+            instance.texture = texture;
+            instance.rotation.set(rotRender);
+            instance.rotationSpeed.set(FastMath.normalizeSafe(
+                    new Vector3f(random.nextFloat() - 0.5f,
+                            random.nextFloat() - 0.5f,
+                            random.nextFloat() - 0.5f)).multiply(480.0f));
+            instance.time = 6.0f;
+        });
+        emitter.add(instance -> {
+            instance.pos.set(pos.plus(
+                    new Vector3d(FastMath.cosTable(z) * -0.375,
+                            FastMath.sinTable(z) * -0.375, 0.375)));
+            instance.speed.set(speed
+                    .plus(new Vector3f(random.nextFloat() * 0.4f - 0.2f,
+                            random.nextFloat() * 0.4f - 0.2f,
+                            random.nextFloat())));
+            instance.box = armLeft;
+            instance.texture = texture;
+            instance.rotation.set(rotRender);
+            instance.rotationSpeed.set(FastMath.normalizeSafe(
+                    new Vector3f(random.nextFloat() - 0.5f,
+                            random.nextFloat() - 0.5f,
+                            random.nextFloat() - 0.5f)).multiply(480.0f));
+            instance.time = 6.0f;
+        });
+        emitter.add(instance -> {
+            instance.pos.set(pos.plus(new Vector3d(FastMath.cosTable(z) * 0.375,
+                    FastMath.sinTable(z) * 0.375, 0.375)));
+            instance.speed.set(speed
+                    .plus(new Vector3f(random.nextFloat() * 0.4f - 0.2f,
+                            random.nextFloat() * 0.4f - 0.2f,
+                            random.nextFloat())));
+            instance.box = armRight;
+            instance.texture = texture;
+            instance.rotation.set(rotRender);
+            instance.rotationSpeed.set(FastMath.normalizeSafe(
+                    new Vector3f(random.nextFloat() - 0.5f,
+                            random.nextFloat() - 0.5f,
+                            random.nextFloat() - 0.5f)).multiply(480.0f));
+            instance.time = 6.0f;
+        });
+        emitter.add(instance -> {
+            instance.pos.set(pos.plus(new Vector3d(FastMath.cosTable(z) * 0.125,
+                    FastMath.sinTable(z) * 0.125, -0.375)));
+            instance.speed.set(speed
+                    .plus(new Vector3f(random.nextFloat() * 0.4f - 0.2f,
+                            random.nextFloat() * 0.4f - 0.2f,
+                            random.nextFloat())));
+            instance.box = legLeft;
+            instance.texture = texture;
+            instance.rotation.set(rotRender);
+            instance.rotationSpeed.set(FastMath.normalizeSafe(
+                    new Vector3f(random.nextFloat() - 0.5f,
+                            random.nextFloat() - 0.5f,
+                            random.nextFloat() - 0.5f)).multiply(480.0f));
+            instance.time = 6.0f;
+        });
+        emitter.add(instance -> {
+            instance.pos.set(pos.plus(
+                    new Vector3d(FastMath.cosTable(z) * -0.125,
+                            FastMath.sinTable(z) * -0.125, -0.375)));
+            instance.speed.set(speed
+                    .plus(new Vector3f(random.nextFloat() * 0.4f - 0.2f,
+                            random.nextFloat() * 0.4f - 0.2f,
+                            random.nextFloat())));
+            instance.box = legRight;
+            instance.texture = texture;
+            instance.rotation.set(rotRender);
+            instance.rotationSpeed.set(FastMath.normalizeSafe(
+                    new Vector3f(random.nextFloat() - 0.5f,
+                            random.nextFloat() - 0.5f,
+                            random.nextFloat() - 0.5f)).multiply(480.0f));
+            instance.time = 6.0f;
+        });
     }
 
     @Override
@@ -298,18 +396,15 @@ public class MobLivingModelHuman implements MobModel {
                         FastMath.floor(entity.y()),
                         FastMath.floor(entity.z())) / 15.0f);
         texture.bind(gl);
-        if (!culling) {
-            gl.disableCulling();
-        }
         MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(posRenderX, posRenderY, posRenderZ);
         matrix.rotate(yaw - 90.0f, 0.0f, 0.0f, 1.0f);
-        BODY.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
+        body.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrix = matrixStack.push();
         matrix.translate(0, 0, 0.375f);
         matrix.rotate(pitch, 1, 0, 0);
-        HEAD.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
+        head.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
         matrix.translate(-0.125f, 0, -0.5f);
@@ -393,15 +488,9 @@ public class MobLivingModelHuman implements MobModel {
             }
             matrix.rotate(120.0f, 0.0f, 0.0f, 1.0f);
             matrix.rotate(60.0f, 0.0f, 1.0f, 0.0f);
-            if (!culling) {
-                gl.enableCulling();
-            }
             item.material()
                     .render(item, gl, shader, 1.0f, damageColor, damageColor,
                             1.0f);
-            if (!culling) {
-                gl.disableCulling();
-            }
         }
         matrixStack.pop();
         matrix = matrixStack.push();
@@ -474,9 +563,6 @@ public class MobLivingModelHuman implements MobModel {
             }
             matrix.rotate(60.0f, 0.0f, 0.0f, 1.0f);
             matrix.rotate(60.0f, 0.0f, 1.0f, 0.0f);
-            if (!culling) {
-                gl.enableCulling();
-            }
             item.material()
                     .render(item, gl, shader, 1.0f, damageColor, damageColor,
                             1.0f);

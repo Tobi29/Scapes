@@ -36,7 +36,7 @@ public class DebugCommandsExtension extends ServerExtension {
         group.register("give", 8, options -> {
             options.add("p", "player", true,
                     "Player that the item will be given to");
-            options.add("m", "material", true, "Material of item");
+            options.add("m", "item", true, "Material of item");
             options.add("d", "data", true, "Data value of item");
             options.add("a", "amount", true, "Amount of item in stack");
         }, (args, executor, commands) -> {

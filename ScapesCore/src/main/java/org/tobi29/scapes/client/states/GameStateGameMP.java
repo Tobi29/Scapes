@@ -39,7 +39,7 @@ import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
 import org.tobi29.scapes.engine.utils.io.IOFunction;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
-import org.tobi29.scapes.entity.particle.ParticleBlock;
+import org.tobi29.scapes.entity.particle.ParticleTransparentAtlas;
 import org.tobi29.scapes.entity.skin.ClientSkinStorage;
 import org.tobi29.scapes.packets.PacketPingClient;
 
@@ -59,6 +59,7 @@ public class GameStateGameMP extends GameState {
     private final GuiWidgetDebugValues connectionSentProfiler,
             connectionReceivedProfiler;
     private final TerrainTextureRegistry terrainTextureRegistry;
+    private final ParticleTransparentAtlas particleTransparentAtlas;
     private final ClientSkinStorage skinStorage;
     private InputMode currentInput;
     private double pingWait;
@@ -72,6 +73,7 @@ public class GameStateGameMP extends GameState {
         client = clientSupplier.apply(this);
         tickDebug = engine.debugValues().get("Client-TPS");
         terrainTextureRegistry = new TerrainTextureRegistry(engine);
+        particleTransparentAtlas = new ParticleTransparentAtlas(engine);
         skinStorage = new ClientSkinStorage(engine.graphics().textures()
                 .get("Scapes:image/entity/mob/Player"));
         GuiStyle style = engine.guiStyle();
@@ -101,7 +103,6 @@ public class GameStateGameMP extends GameState {
         terrainTextureRegistry.texture().markDisposed();
         skinStorage.dispose();
         engine.sounds().stop("music");
-        ParticleBlock.clear();
         if (client.plugins() != null) {
             client.plugins().dispose();
             client.plugins().removeFileSystems(engine.files());
@@ -134,6 +135,7 @@ public class GameStateGameMP extends GameState {
         }
         LOGGER.info("Loaded terrain models with {} textures in {} ms.", size,
                 time);
+        particleTransparentAtlas.init();
         client.start();
     }
 
@@ -181,6 +183,10 @@ public class GameStateGameMP extends GameState {
         return terrainTextureRegistry;
     }
 
+    public ParticleTransparentAtlas particleTransparentAtlas() {
+        return particleTransparentAtlas;
+    }
+
     public ClientSkinStorage skinStorage() {
         return skinStorage;
     }
@@ -209,7 +215,8 @@ public class GameStateGameMP extends GameState {
         return hud;
     }
 
-    private static final class GuiWidgetPerformanceClient extends GuiComponentWidget {
+    private static final class GuiWidgetPerformanceClient
+            extends GuiComponentWidget {
         private final GuiComponentGraph graph;
 
         private GuiWidgetPerformanceClient(GuiLayoutData parent) {
