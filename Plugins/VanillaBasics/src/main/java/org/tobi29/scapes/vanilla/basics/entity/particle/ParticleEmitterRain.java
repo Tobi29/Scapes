@@ -5,10 +5,10 @@ import org.tobi29.scapes.chunk.EnvironmentClient;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
 import org.tobi29.scapes.client.states.scenes.SceneScapesVoxelWorld;
+import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.*;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
-import org.tobi29.scapes.engine.utils.BufferCreatorNative;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f;
@@ -29,12 +29,14 @@ public class ParticleEmitterRain
     private final AtomicInteger raindrops = new AtomicInteger();
 
     public ParticleEmitterRain(ParticleSystem system, Texture texture) {
-        super(system, texture, createVBO(), createVBOStream(), RenderType.LINES,
-                new ParticleInstance[10240], ParticleInstance::new);
-        matrix = new Matrix4f(BufferCreatorNative::bytes);
+        super(system, texture, createVBO(system.world().game().engine()),
+                createVBOStream(system.world().game().engine()),
+                RenderType.LINES, new ParticleInstance[10240],
+                ParticleInstance::new);
+        matrix = new Matrix4f(system.world().game().engine()::allocate);
     }
 
-    private static VBO createVBO() {
+    private static VBO createVBO(ScapesEngine engine) {
         List<VBO.VBOAttribute> vboAttributes = new ArrayList<>();
         vboAttributes.add(new VBO.VBOAttribute(OpenGL.VERTEX_ATTRIBUTE, 3,
                 new float[]{0.0f, 0.0f, 0.0f, -SIZE, -SIZE, -SIZE}, false, 0,
@@ -42,10 +44,10 @@ public class ParticleEmitterRain
         vboAttributes.add(new VBO.VBOAttribute(OpenGL.COLOR_ATTRIBUTE, 4,
                 new float[]{0.0f, 0.3f, 0.5f, 0.6f, 0.0f, 0.3f, 0.5f, 0.0f},
                 true, 0, VertexType.UNSIGNED_BYTE));
-        return new VBO(vboAttributes, 2);
+        return new VBO(engine, vboAttributes, 2);
     }
 
-    private static VBO createVBOStream() {
+    private static VBO createVBOStream(ScapesEngine engine) {
         List<VBO.VBOAttribute> vboAttributes = new ArrayList<>();
         vboAttributes.add(new VBO.VBOAttribute(4, 2, EMPTY_FLOAT, false, 1,
                 VertexType.FLOAT));
@@ -57,7 +59,7 @@ public class ParticleEmitterRain
                 VertexType.FLOAT));
         vboAttributes.add(new VBO.VBOAttribute(8, 4, EMPTY_FLOAT, false, 1,
                 VertexType.FLOAT));
-        return new VBO(vboAttributes, 0);
+        return new VBO(engine, vboAttributes, 0);
     }
 
     public int getAndResetRaindrops() {

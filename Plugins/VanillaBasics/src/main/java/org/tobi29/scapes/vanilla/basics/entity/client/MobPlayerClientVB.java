@@ -91,7 +91,9 @@ public class MobPlayerClientVB extends MobPlayerClient
     @Override
     public Optional<MobModel> createModel() {
         Texture texture = world.scene().skinStorage().get(skin);
-        return Optional.of(new MobLivingModelHuman(this, texture));
+        return Optional
+                .of(new MobLivingModelHuman(world.game().modelHumanShared(),
+                        this, texture));
     }
 
     @Override

@@ -35,45 +35,6 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class MobLivingModelHuman implements MobModel {
-    private static final Box BODY, HEAD, LEG_NORMAL_LEFT, LEG_NORMAL_RIGHT,
-            ARM_NORMAL_LEFT, ARM_NORMAL_RIGHT, LEG_THIN_LEFT, LEG_THIN_RIGHT,
-            ARM_THIN_LEFT, ARM_THIN_RIGHT, BODY_NO_CULL, HEAD_NO_CULL,
-            LEG_NORMAL_LEFT_NO_CULL, LEG_NORMAL_RIGHT_NO_CULL,
-            ARM_NORMAL_LEFT_NO_CULL, ARM_NORMAL_RIGHT_NO_CULL,
-            LEG_THIN_LEFT_NO_CULL, LEG_THIN_RIGHT_NO_CULL,
-            ARM_THIN_LEFT_NO_CULL, ARM_THIN_RIGHT_NO_CULL;
-
-    static {
-        BODY = new Box(0.015625f, -4, -2, -6, 4, 2, 6, 0, 0);
-        HEAD = new Box(0.015625f, -4, -4, 0, 4, 4, 8, 0, 32);
-        LEG_NORMAL_LEFT = new Box(0.015625f, -2, -2, -10, 2, 2, 2, 24, 0);
-        LEG_NORMAL_RIGHT = new Box(0.015625f, -2, -2, -10, 2, 2, 2, 40, 0);
-        ARM_NORMAL_LEFT = new Box(0.015625f, -4, -2, -10, 0, 2, 2, 24, 16);
-        ARM_NORMAL_RIGHT = new Box(0.015625f, 0, -2, -10, 4, 2, 2, 40, 16);
-        LEG_THIN_LEFT = new Box(0.015625f, -1, -1, -10, 1, 1, 2, 24, 0);
-        LEG_THIN_RIGHT = new Box(0.015625f, -1, -1, -10, 1, 1, 2, 32, 0);
-        ARM_THIN_LEFT = new Box(0.015625f, -2, -1, -10, 0, 1, 2, 24, 16);
-        ARM_THIN_RIGHT = new Box(0.015625f, 0, -1, -10, 2, 1, 2, 32, 16);
-        BODY_NO_CULL = new Box(0.015625f, -4, -2, -6, 4, 2, 6, 0, 0, false);
-        HEAD_NO_CULL = new Box(0.015625f, -4, -4, 0, 4, 4, 8, 0, 32, false);
-        LEG_NORMAL_LEFT_NO_CULL =
-                new Box(0.015625f, -2, -2, -10, 2, 2, 2, 24, 0, false);
-        LEG_NORMAL_RIGHT_NO_CULL =
-                new Box(0.015625f, -2, -2, -10, 2, 2, 2, 40, 0, false);
-        ARM_NORMAL_LEFT_NO_CULL =
-                new Box(0.015625f, -4, -2, -10, 0, 2, 2, 24, 16, false);
-        ARM_NORMAL_RIGHT_NO_CULL =
-                new Box(0.015625f, 0, -2, -10, 4, 2, 2, 40, 16, false);
-        LEG_THIN_LEFT_NO_CULL =
-                new Box(0.015625f, -1, -1, -10, 1, 1, 2, 24, 0, false);
-        LEG_THIN_RIGHT_NO_CULL =
-                new Box(0.015625f, -1, -1, -10, 1, 1, 2, 32, 0, false);
-        ARM_THIN_LEFT_NO_CULL =
-                new Box(0.015625f, -2, -1, -10, 0, 1, 2, 24, 16, false);
-        ARM_THIN_RIGHT_NO_CULL =
-                new Box(0.015625f, 0, -1, -10, 2, 1, 2, 32, 16, false);
-    }
-
     private final MobLivingEquippedClient entity;
     private final Texture texture;
     private final boolean precise;
@@ -83,101 +44,105 @@ public class MobLivingModelHuman implements MobModel {
     private float armDirLeft, armDirRight, armDirLeftRender, armDirRightRender,
             armDirLeft2, armDirRight2, pitch, yaw;
 
-    public MobLivingModelHuman(MobLivingEquippedClient entity,
-            Texture texture) {
-        this(entity, texture, false);
+    public MobLivingModelHuman(MobLivingModelHumanShared shared,
+            MobLivingEquippedClient entity, Texture texture) {
+        this(shared, entity, texture, false);
     }
 
-    public MobLivingModelHuman(MobLivingEquippedClient entity, Texture texture,
-            boolean thin) {
-        this(entity, texture, thin, true);
+    public MobLivingModelHuman(MobLivingModelHumanShared shared,
+            MobLivingEquippedClient entity, Texture texture, boolean thin) {
+        this(shared, entity, texture, thin, true);
     }
 
-    public MobLivingModelHuman(MobLivingEquippedClient entity, Texture texture,
-            boolean thin, boolean culling) {
-        this(entity, texture, thin, culling, false);
+    public MobLivingModelHuman(MobLivingModelHumanShared shared,
+            MobLivingEquippedClient entity, Texture texture, boolean thin,
+            boolean culling) {
+        this(shared, entity, texture, thin, culling, false);
     }
 
-    public MobLivingModelHuman(MobLivingEquippedClient entity, Texture texture,
-            boolean thin, boolean culling, boolean precise) {
+    public MobLivingModelHuman(MobLivingModelHumanShared shared,
+            MobLivingEquippedClient entity, Texture texture, boolean thin,
+            boolean culling, boolean precise) {
         this.entity = entity;
         pos = new MutableVector3d(entity.pos());
         this.texture = texture;
         this.precise = precise;
         if (culling) {
-            body = BODY;
-            head = HEAD;
+            body = shared.body;
+            head = shared.head;
             if (thin) {
-                legLeft = LEG_THIN_LEFT;
-                legRight = LEG_THIN_RIGHT;
-                armLeft = ARM_THIN_LEFT;
-                armRight = ARM_THIN_RIGHT;
+                legLeft = shared.legThinLeft;
+                legRight = shared.legThinRight;
+                armLeft = shared.armThinLeft;
+                armRight = shared.armThinRight;
             } else {
-                legLeft = LEG_NORMAL_LEFT;
-                legRight = LEG_NORMAL_RIGHT;
-                armLeft = ARM_NORMAL_LEFT;
-                armRight = ARM_NORMAL_RIGHT;
+                legLeft = shared.legNormalLeft;
+                legRight = shared.legNormalRight;
+                armLeft = shared.armNormalLeft;
+                armRight = shared.armNormalRight;
             }
         } else {
-            body = BODY_NO_CULL;
-            head = HEAD_NO_CULL;
+            body = shared.bodyNoCull;
+            head = shared.headNoCull;
             if (thin) {
-                legLeft = LEG_THIN_LEFT_NO_CULL;
-                legRight = LEG_THIN_RIGHT_NO_CULL;
-                armLeft = ARM_THIN_LEFT_NO_CULL;
-                armRight = ARM_THIN_RIGHT_NO_CULL;
+                legLeft = shared.legThinLeftNoCull;
+                legRight = shared.legThinRightNoCull;
+                armLeft = shared.armThinLeftNoCull;
+                armRight = shared.armThinRightNoCull;
             } else {
-                legLeft = LEG_NORMAL_LEFT_NO_CULL;
-                legRight = LEG_NORMAL_RIGHT_NO_CULL;
-                armLeft = ARM_NORMAL_LEFT_NO_CULL;
-                armRight = ARM_NORMAL_RIGHT_NO_CULL;
+                legLeft = shared.legNormalLeftNoCull;
+                legRight = shared.legNormalRightNoCull;
+                armLeft = shared.armNormalLeftNoCull;
+                armRight = shared.armNormalRightNoCull;
             }
         }
     }
 
-    public static void particles(ParticleSystem particles, Vector3 pos,
-            Vector3 speed, Vector3 rot, Texture texture) {
-        particles(particles, pos, speed, rot, texture, false);
+    public static void particles(MobLivingModelHumanShared shared,
+            ParticleSystem particles, Vector3 pos, Vector3 speed, Vector3 rot,
+            Texture texture) {
+        particles(shared, particles, pos, speed, rot, texture, false);
     }
 
-    public static void particles(ParticleSystem particles, Vector3 pos,
-            Vector3 speed, Vector3 rot, Texture texture, boolean thin) {
-        particles(particles, pos, speed, rot, texture, thin, true);
+    public static void particles(MobLivingModelHumanShared shared,
+            ParticleSystem particles, Vector3 pos, Vector3 speed, Vector3 rot,
+            Texture texture, boolean thin) {
+        particles(shared, particles, pos, speed, rot, texture, thin, true);
     }
 
-    public static void particles(ParticleSystem particles, Vector3 pos,
-            Vector3 speed, Vector3 rot, Texture texture, boolean thin,
-            boolean culling) {
+    public static void particles(MobLivingModelHumanShared shared,
+            ParticleSystem particles, Vector3 pos, Vector3 speed, Vector3 rot,
+            Texture texture, boolean thin, boolean culling) {
         ParticleEmitterFallenBodyPart emitter =
                 particles.emitter(ParticleEmitterFallenBodyPart.class);
         Box body, head, legLeft, legRight, armLeft, armRight;
         if (culling) {
-            body = BODY;
-            head = HEAD;
+            body = shared.body;
+            head = shared.head;
             if (thin) {
-                legLeft = LEG_THIN_LEFT;
-                legRight = LEG_THIN_RIGHT;
-                armLeft = ARM_THIN_LEFT;
-                armRight = ARM_THIN_RIGHT;
+                legLeft = shared.legThinLeft;
+                legRight = shared.legThinRight;
+                armLeft = shared.armThinLeft;
+                armRight = shared.armThinRight;
             } else {
-                legLeft = LEG_NORMAL_LEFT;
-                legRight = LEG_NORMAL_RIGHT;
-                armLeft = ARM_NORMAL_LEFT;
-                armRight = ARM_NORMAL_RIGHT;
+                legLeft = shared.legNormalLeft;
+                legRight = shared.legNormalRight;
+                armLeft = shared.armNormalLeft;
+                armRight = shared.armNormalRight;
             }
         } else {
-            body = BODY_NO_CULL;
-            head = HEAD_NO_CULL;
+            body = shared.bodyNoCull;
+            head = shared.headNoCull;
             if (thin) {
-                legLeft = LEG_THIN_LEFT_NO_CULL;
-                legRight = LEG_THIN_RIGHT_NO_CULL;
-                armLeft = ARM_THIN_LEFT_NO_CULL;
-                armRight = ARM_THIN_RIGHT_NO_CULL;
+                legLeft = shared.legThinLeftNoCull;
+                legRight = shared.legThinRightNoCull;
+                armLeft = shared.armThinLeftNoCull;
+                armRight = shared.armThinRightNoCull;
             } else {
-                legLeft = LEG_NORMAL_LEFT_NO_CULL;
-                legRight = LEG_NORMAL_RIGHT_NO_CULL;
-                armLeft = ARM_NORMAL_LEFT_NO_CULL;
-                armRight = ARM_NORMAL_RIGHT_NO_CULL;
+                legLeft = shared.legNormalLeftNoCull;
+                legRight = shared.legNormalRightNoCull;
+                armLeft = shared.armNormalLeftNoCull;
+                armRight = shared.armNormalRightNoCull;
             }
         }
         Vector3 rotRender = rot.plus(new Vector3f(0.0f, 0.0f, -90.0f));

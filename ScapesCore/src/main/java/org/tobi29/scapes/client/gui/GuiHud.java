@@ -26,17 +26,18 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
 public class GuiHud extends GuiState {
     private static final float CROSS_SIZE = 8.0f;
-    private static final VAO CROSS = VAOUtility.createVCTI(
-            new float[]{-CROSS_SIZE, -CROSS_SIZE, 0.0f, CROSS_SIZE, -CROSS_SIZE,
-                    0.0f, CROSS_SIZE, CROSS_SIZE, 0.0f, -CROSS_SIZE, CROSS_SIZE,
-                    0.0f},
-            new float[]{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-                    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
-            new float[]{0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f},
-            new int[]{0, 1, 2, 0, 2, 3}, RenderType.TRIANGLES);
+    private final VAO cross;
 
     public GuiHud(GameState state, GuiStyle style) {
         super(state, style);
+        cross = VAOUtility.createVCTI(state.engine(),
+                new float[]{-CROSS_SIZE, -CROSS_SIZE, 0.0f, CROSS_SIZE,
+                        -CROSS_SIZE, 0.0f, CROSS_SIZE, CROSS_SIZE, 0.0f,
+                        -CROSS_SIZE, CROSS_SIZE, 0.0f},
+                new float[]{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+                        1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+                new float[]{0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f},
+                new int[]{0, 1, 2, 0, 2, 3}, RenderType.TRIANGLES);
     }
 
     @Override
@@ -51,7 +52,7 @@ public class GuiHud extends GuiState {
             matrix.scale(ratio, 1.0f, 1.0f);
             gl.textures().bind("Scapes:image/gui/Cross", gl);
             gl.setBlending(BlendingMode.INVERT);
-            CROSS.render(gl, shader);
+            cross.render(gl, shader);
             gl.setBlending(BlendingMode.NORMAL);
             matrixStack.pop();
         }

@@ -81,7 +81,7 @@ public class BlockModelComplex implements BlockModel {
     protected VAO buildVAO(boolean inventory) {
         Mesh mesh = new Mesh(false);
         buildVAO(mesh, inventory);
-        return mesh.finish();
+        return mesh.finish(registry.engine());
     }
 
     protected void buildVAO(Mesh mesh, boolean inventory) {

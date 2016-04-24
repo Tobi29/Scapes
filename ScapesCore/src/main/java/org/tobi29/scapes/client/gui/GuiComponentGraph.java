@@ -82,7 +82,9 @@ public class GuiComponentGraph extends GuiComponent {
             }
         }
         gl.textures().unbind(gl);
-        VAO vao = VAOUtility.createVCI(vertex, color, index, RenderType.LINES);
+        VAO vao = VAOUtility
+                .createVCI(gui.style().engine(), vertex, color, index,
+                        RenderType.LINES);
         vao.render(gl, shader);
         vao.markAsDisposed();
     }

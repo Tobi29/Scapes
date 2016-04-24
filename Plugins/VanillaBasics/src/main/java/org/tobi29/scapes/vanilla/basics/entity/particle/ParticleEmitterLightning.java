@@ -55,7 +55,8 @@ public class ParticleEmitterLightning
                 index[j] = j;
             }
             vaos[i] = VAOUtility
-                    .createVNI(vertex, normal, index, RenderType.LINES);
+                    .createVNI(system.world().game().engine(), vertex, normal,
+                            index, RenderType.LINES);
         }
     }
 

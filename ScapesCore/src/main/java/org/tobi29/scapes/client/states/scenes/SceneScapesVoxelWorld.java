@@ -82,7 +82,7 @@ public class SceneScapesVoxelWorld extends Scene {
             blockLightDebug, sunLightDebug;
     private final TerrainTextureRegistry terrainTextureRegistry;
     private final ClientSkinStorage skinStorage;
-    private final FBO skyboxFBO = new FBO(1, 1, 1, false, true, false);
+    private final FBO skyboxFBO;
     private final Optional<FBO> exposureFBO;
     private final ParticleSystem particles;
     private final WorldSkybox skybox;
@@ -97,7 +97,7 @@ public class SceneScapesVoxelWorld extends Scene {
         this.cam = cam;
         particles = new ParticleSystem(world, 60.0);
         terrainTextureRegistry = world.game().terrainTextureRegistry();
-        skinStorage = new ClientSkinStorage(
+        skinStorage = new ClientSkinStorage(world.game().engine(),
                 world.game().engine().graphics().textures()
                         .get("Scapes:image/entity/mob/Player"));
         GuiWidgetDebugValues debugValues = world.game().engine().debugValues();
@@ -107,7 +107,7 @@ public class SceneScapesVoxelWorld extends Scene {
         lightDebug = debugValues.get("Camera-Light");
         blockLightDebug = debugValues.get("Camera-Block-Light");
         sunLightDebug = debugValues.get("Camera-Sun-Light");
-        vao = VAOUtility.createVTI(
+        vao = VAOUtility.createVTI(world.game().engine(),
                 new float[]{0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
                         0.0f, 1.0f, 0.0f, 0.0f},
                 new float[]{0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f},
@@ -118,8 +118,11 @@ public class SceneScapesVoxelWorld extends Scene {
         fxaa = scapesTag.getBoolean("FXAA");
         bloom = scapesTag.getBoolean("Bloom");
         skybox = world.environment().createSkybox(world);
+        skyboxFBO = new FBO(world.game().engine(), 1, 1, 1, false, true, false);
         if (scapesTag.getBoolean("AutoExposure")) {
-            exposureFBO = Optional.of(new FBO(1, 1, 1, false, true, false));
+            exposureFBO = Optional.of(
+                    new FBO(world.game().engine(), 1, 1, 1, false, true,
+                            false));
         } else {
             exposureFBO = Optional.empty();
         }
@@ -374,7 +377,7 @@ public class SceneScapesVoxelWorld extends Scene {
     }
 
     public void takePanorama(GL gl) {
-        FBO fbo = new FBO(256, 256, 1, true, false, false);
+        FBO fbo = new FBO(state.engine(), 256, 256, 1, true, false, false);
         fbo.activate(gl);
         Image[] panorama = takePanorama(gl, fbo);
         fbo.deactivate(gl);

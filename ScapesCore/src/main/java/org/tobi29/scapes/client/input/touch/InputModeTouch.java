@@ -22,7 +22,6 @@ import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.input.ControllerTouch;
-import org.tobi29.scapes.engine.utils.BufferCreatorNative;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f;
@@ -35,8 +34,7 @@ public class InputModeTouch implements InputMode {
     private final PlayerController playerController;
     private final MutableVector2 swipe = new MutableVector2d(), direction =
             new MutableVector2d();
-    private final Matrix4f matrix1 = new Matrix4f(BufferCreatorNative::bytes),
-            matrix2 = new Matrix4f(BufferCreatorNative::bytes);
+    private final Matrix4f matrix1, matrix2;
     private boolean walkUp, walkDown, walkLeft, walkRight, inventoryOpen,
             menuOpen, leftHand, rightHand;
     private long lastTouch;
@@ -45,6 +43,8 @@ public class InputModeTouch implements InputMode {
         this.controller = controller;
         guiController = new GuiControllerTouch(engine, controller);
         playerController = new PlayerController();
+        matrix1 = new Matrix4f(engine::allocate);
+        matrix2 = new Matrix4f(engine::allocate);
     }
 
     @Override

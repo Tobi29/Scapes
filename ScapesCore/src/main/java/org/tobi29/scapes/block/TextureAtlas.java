@@ -139,7 +139,7 @@ public abstract class TextureAtlas<T extends TextureAtlasEntry<?>> {
         return new Image(width, height, buffer);
     }
 
-    public int init() {
+    public int init(ScapesEngine engine) {
         List<T> textureList = Streams.of(textures.values())
                 .sorted((texture1, texture2) -> texture2.resolution() -
                         texture1.resolution()).collect(Collectors.toList());
@@ -220,9 +220,13 @@ public abstract class TextureAtlas<T extends TextureAtlasEntry<?>> {
             }
         }
         buffer.rewind();
-        texture = new TextureCustom(imageSize, imageSize, buffer, 4);
+        texture = new TextureCustom(engine, imageSize, imageSize, buffer, 4);
         sources.clear();
         return textures.size();
+    }
+
+    public ScapesEngine engine() {
+        return engine;
     }
 
     public Texture texture() {

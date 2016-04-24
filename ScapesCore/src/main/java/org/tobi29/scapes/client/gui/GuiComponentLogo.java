@@ -45,7 +45,7 @@ public class GuiComponentLogo extends GuiComponent {
         super(parent);
         int textX = height - 8;
         int textY = textSize >> 2;
-        vao = VAOUtility.createVTI(
+        vao = VAOUtility.createVTI(gui.style().engine(),
                 new float[]{0, height, 0.0f, height, height, 0.0f, 0, 0, 0.0f,
                         height, 0, 0.0f},
                 new float[]{0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f},

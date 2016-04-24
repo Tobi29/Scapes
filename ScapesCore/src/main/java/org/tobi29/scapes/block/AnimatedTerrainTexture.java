@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.block;
 
 import org.tobi29.scapes.engine.opengl.GL;
@@ -36,7 +35,8 @@ public class AnimatedTerrainTexture extends TerrainTexture {
         for (int i = 0; i < frames.length; i++) {
             buffer.position(i * frameSize);
             frames[i] = MipMapGenerator
-                    .generateMipMaps(buffer, width, width, 4, true);
+                    .generateMipMaps(buffer, registry.engine()::allocate, width,
+                            width, 4, true);
         }
     }
 

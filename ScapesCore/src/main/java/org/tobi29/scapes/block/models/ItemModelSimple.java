@@ -16,6 +16,7 @@
 package org.tobi29.scapes.block.models;
 
 import org.tobi29.scapes.block.TerrainTexture;
+import org.tobi29.scapes.block.TerrainTextureRegistry;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.Mesh;
 import org.tobi29.scapes.engine.opengl.VAO;
@@ -24,12 +25,14 @@ import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 
 public class ItemModelSimple implements ItemModel {
-    protected final float r, g, b, a;
-    protected final TerrainTexture texture;
+    private final float r, g, b, a;
+    private final TerrainTextureRegistry registry;
+    private final TerrainTexture texture;
     private final VAO vao, vaoInventory;
 
     public ItemModelSimple(TerrainTexture texture, float r, float g, float b,
             float a) {
+        registry = texture.registry();
         this.texture = texture;
         this.r = r;
         this.g = g;
@@ -128,7 +131,7 @@ public class ItemModelSimple implements ItemModel {
             mesh.texture(texMaxX, texMaxY);
             mesh.vertex(0.5f, -halfPixel, -0.5f);
         }
-        return mesh.finish();
+        return mesh.finish(registry.engine());
     }
 
     @Override

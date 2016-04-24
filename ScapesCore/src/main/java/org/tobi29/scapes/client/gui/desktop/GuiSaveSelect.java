@@ -143,10 +143,10 @@ public class GuiSaveSelect extends GuiMenu {
                 if (panorama.isPresent()) {
                     Image image = panorama.get()[0];
                     Texture texture =
-                            new TextureCustom(image.width(), image.height(),
-                                    image.buffer(), 4, TextureFilter.LINEAR,
-                                    TextureFilter.LINEAR, TextureWrap.CLAMP,
-                                    TextureWrap.CLAMP);
+                            new TextureCustom(state.engine(), image.width(),
+                                    image.height(), image.buffer(), 4,
+                                    TextureFilter.LINEAR, TextureFilter.LINEAR,
+                                    TextureWrap.CLAMP, TextureWrap.CLAMP);
                     icon.setIcon(texture);
                 }
             } catch (IOException e) {

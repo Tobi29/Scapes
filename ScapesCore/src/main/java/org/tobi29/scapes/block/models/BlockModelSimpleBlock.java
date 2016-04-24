@@ -226,7 +226,7 @@ public class BlockModelSimpleBlock implements BlockModel {
         Mesh mesh = new Mesh(false);
         buildVAO(mesh, inventory, texTop, texBottom, texSide1, texSide2,
                 texSide3, texSide4);
-        return mesh.finish();
+        return mesh.finish(registry.engine());
     }
 
     protected void buildVAO(Mesh mesh, boolean inventory, TerrainTexture texTop,

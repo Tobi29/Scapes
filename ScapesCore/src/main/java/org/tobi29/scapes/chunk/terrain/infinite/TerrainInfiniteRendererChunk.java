@@ -15,7 +15,10 @@
  */
 package org.tobi29.scapes.chunk.terrain.infinite;
 
-import org.tobi29.scapes.engine.opengl.*;
+import org.tobi29.scapes.engine.opengl.GL;
+import org.tobi29.scapes.engine.opengl.OpenGL;
+import org.tobi29.scapes.engine.opengl.VAO;
+import org.tobi29.scapes.engine.opengl.VAOStatic;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -26,19 +29,6 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 import java.util.Arrays;
 
 public class TerrainInfiniteRendererChunk {
-    private static final VAO FRAME;
-
-    static {
-        float min = 0.001f;
-        float max = 0.999f;
-        FRAME = VAOUtility.createVI(
-                new float[]{min, min, min, max, min, min, max, max, min, min,
-                        max, min, min, min, max, max, min, max, max, max, max,
-                        min, max, max},
-                new int[]{0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4,
-                        1, 5, 2, 6, 3, 7}, RenderType.LINES);
-    }
-
     private final TerrainInfiniteChunkClient chunk;
     private final TerrainInfiniteRenderer renderer;
     private final VAOStatic[] vao, vaoAlpha;
@@ -138,7 +128,7 @@ public class TerrainInfiniteRendererChunk {
         return geometryInit[0] && chunk.isLoaded();
     }
 
-    public void renderFrame(GL gl, Shader shader, Cam cam) {
+    public void renderFrame(GL gl, VAO frame, Shader shader, Cam cam) {
         MatrixStack matrixStack = gl.matrixStack();
         for (int i = 0; i < aabb.length; i++) {
             AABB aabb = this.aabb[i];
@@ -161,7 +151,7 @@ public class TerrainInfiniteRendererChunk {
                 matrix.scale((float) (aabb.maxX - aabb.minX),
                         (float) (aabb.maxY - aabb.minY),
                         (float) (aabb.maxZ - aabb.minZ));
-                FRAME.render(gl, shader);
+                frame.render(gl, shader);
                 matrixStack.pop();
             }
         }

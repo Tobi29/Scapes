@@ -97,13 +97,13 @@ public class GuiComponentHotbar extends GuiComponent {
 
     @Override
     public void updateMesh(Vector2 size) {
-        vao1 = VAOUtility.createVTI(
+        vao1 = VAOUtility.createVTI(gui.style().engine(),
                 new float[]{0.0f, (float) (size.doubleY() - 32.0), 0.0f,
                         size.floatY(), (float) (size.doubleY() - 32.0), 0.0f,
                         0.0f, -32.0f, 0.0f, size.floatY(), -32.0f, 0.0f},
                 new float[]{0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f},
                 new int[]{0, 1, 2, 3, 2, 1}, RenderType.TRIANGLES);
-        vao2 = VAOUtility.createVTI(
+        vao2 = VAOUtility.createVTI(gui.style().engine(),
                 new float[]{0.0f, size.floatY(), 0.0f, size.floatY(),
                         size.floatY(), 0.0f, 0.0f, 0.0f, 0.0f, size.floatY(),
                         0.0f, 0.0f},
@@ -112,6 +112,6 @@ public class GuiComponentHotbar extends GuiComponent {
         Mesh mesh = new Mesh(true);
         GuiUtils.renderShadow(mesh, 0.0f, 0.0f, size.floatY(), size.floatY(),
                 0.2f);
-        vao3 = mesh.finish();
+        vao3 = mesh.finish(gui.style().engine());
     }
 }

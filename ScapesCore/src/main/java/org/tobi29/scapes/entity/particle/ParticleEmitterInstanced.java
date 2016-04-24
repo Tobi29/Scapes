@@ -7,7 +7,6 @@ import org.tobi29.scapes.engine.opengl.VAOHybrid;
 import org.tobi29.scapes.engine.opengl.VBO;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
-import org.tobi29.scapes.engine.utils.BufferCreatorNative;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 
 import java.nio.ByteBuffer;
@@ -26,7 +25,8 @@ public abstract class ParticleEmitterInstanced<P extends ParticleInstance>
         this.texture = texture;
         this.vboStream = vboStream;
         vao = new VAOHybrid(vbo, vboStream, renderType);
-        buffer = BufferCreatorNative.bytes(vboStream.stride() * maxInstances);
+        buffer = system.world().game().engine()
+                .allocate(vboStream.stride() * maxInstances);
     }
 
     @Override

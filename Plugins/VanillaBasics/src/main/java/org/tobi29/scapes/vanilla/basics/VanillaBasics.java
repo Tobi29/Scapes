@@ -38,6 +38,8 @@ import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientVB;
+import org.tobi29.scapes.vanilla.basics.entity.model.EntityModelBellowsShared;
+import org.tobi29.scapes.vanilla.basics.entity.model.MobLivingModelPigShared;
 import org.tobi29.scapes.vanilla.basics.entity.particle.*;
 import org.tobi29.scapes.vanilla.basics.entity.server.MobPlayerServerVB;
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator;
@@ -70,6 +72,8 @@ public class VanillaBasics implements WorldType {
             biomeDecorators = new EnumMap<>(BiomeGenerator.Biome.class);
     public VanillaMaterial materials;
     public VanillaParticle particles;
+    private MobLivingModelPigShared modelPigShared;
+    private EntityModelBellowsShared modelBellowsShared;
     private boolean locked;
 
     public VanillaBasics() {
@@ -171,6 +175,20 @@ public class VanillaBasics implements WorldType {
         return Streams.of(biomeDecorators.get(biome).values());
     }
 
+    public MobLivingModelPigShared modelPigShared() {
+        if (modelPigShared == null) {
+            throw new IllegalStateException("Models not available");
+        }
+        return modelPigShared;
+    }
+
+    public EntityModelBellowsShared modelBellowsShared() {
+        if (modelBellowsShared == null) {
+            throw new IllegalStateException("Models not available");
+        }
+        return modelBellowsShared;
+    }
+
     @Override
     public void init(GameRegistry registry) {
         GameRegistry.AsymSupplierRegistry<WorldServer, EnvironmentServer, WorldClient, EnvironmentClient>
@@ -221,6 +239,8 @@ public class VanillaBasics implements WorldType {
     @Override
     public void initClient(GameStateGameMP game) {
         particles = new VanillaParticle(game.particleTransparentAtlas());
+        modelPigShared = new MobLivingModelPigShared(game.engine());
+        modelBellowsShared = new EntityModelBellowsShared(game.engine());
     }
 
     @Override

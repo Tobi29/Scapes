@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
 import java8.util.Optional;
@@ -26,6 +25,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.CreatureType;
 import org.tobi29.scapes.entity.client.MobLivingClient;
 import org.tobi29.scapes.entity.model.MobModel;
+import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.entity.model.MobLivingModelPig;
 
 public class MobPigClient extends MobLivingClient {
@@ -56,6 +56,9 @@ public class MobPigClient extends MobLivingClient {
     public Optional<MobModel> createModel() {
         Texture texture = world.game().engine().graphics().textures()
                 .get("VanillaBasics:image/entity/mob/Pig");
-        return Optional.of(new MobLivingModelPig(this, texture));
+        VanillaBasics plugin =
+                (VanillaBasics) world.plugins().plugin("VanillaBasics");
+        return Optional.of(new MobLivingModelPig(plugin.modelPigShared(), this,
+                texture));
     }
 }

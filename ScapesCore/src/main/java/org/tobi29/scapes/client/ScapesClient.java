@@ -138,6 +138,10 @@ public class ScapesClient extends Game {
         } catch (IOException e) {
             engine.crash(e);
         }
+    }
+
+    @Override
+    public void init() {
         if (skipIntro) {
             engine.setState(new GameStateMenu(engine));
         } else {
@@ -147,7 +151,7 @@ public class ScapesClient extends Game {
     }
 
     @Override
-    public void init() {
+    public void initLate() {
         TagStructure tagStructure = engine.tagStructure();
         if (!tagStructure.has("Scapes")) {
             boolean lightDefaults = engine.container().formFactor() ==

@@ -39,6 +39,8 @@ import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
 import org.tobi29.scapes.engine.utils.io.IOFunction;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
+import org.tobi29.scapes.entity.model.EntityModelBlockBreakShared;
+import org.tobi29.scapes.entity.model.MobLivingModelHumanShared;
 import org.tobi29.scapes.entity.particle.ParticleTransparentAtlas;
 import org.tobi29.scapes.entity.skin.ClientSkinStorage;
 import org.tobi29.scapes.packets.PacketPingClient;
@@ -61,6 +63,8 @@ public class GameStateGameMP extends GameState {
     private final TerrainTextureRegistry terrainTextureRegistry;
     private final ParticleTransparentAtlas particleTransparentAtlas;
     private final ClientSkinStorage skinStorage;
+    private final MobLivingModelHumanShared modelHumanShared;
+    private final EntityModelBlockBreakShared modelBlockBreakShared;
     private InputMode currentInput;
     private double pingWait;
 
@@ -74,8 +78,10 @@ public class GameStateGameMP extends GameState {
         tickDebug = engine.debugValues().get("Client-TPS");
         terrainTextureRegistry = new TerrainTextureRegistry(engine);
         particleTransparentAtlas = new ParticleTransparentAtlas(engine);
-        skinStorage = new ClientSkinStorage(engine.graphics().textures()
+        skinStorage = new ClientSkinStorage(engine, engine.graphics().textures()
                 .get("Scapes:image/entity/mob/Player"));
+        modelHumanShared = new MobLivingModelHumanShared(engine);
+        modelBlockBreakShared = new EntityModelBlockBreakShared(engine);
         GuiStyle style = engine.guiStyle();
         hud = new GuiHud(this, style);
         debug = new GuiState(this, style);
@@ -126,7 +132,7 @@ public class GameStateGameMP extends GameState {
                 type.registerTextures(terrainTextureRegistry);
             }
         }
-        int size = terrainTextureRegistry.init();
+        int size = terrainTextureRegistry.init(engine);
         time = System.currentTimeMillis() - time;
         for (Material type : registry.materials()) {
             if (type != null) {
@@ -135,7 +141,7 @@ public class GameStateGameMP extends GameState {
         }
         LOGGER.info("Loaded terrain models with {} textures in {} ms.", size,
                 time);
-        particleTransparentAtlas.init();
+        particleTransparentAtlas.init(engine);
         client.start();
     }
 
@@ -189,6 +195,14 @@ public class GameStateGameMP extends GameState {
 
     public ClientSkinStorage skinStorage() {
         return skinStorage;
+    }
+
+    public MobLivingModelHumanShared modelHumanShared() {
+        return modelHumanShared;
+    }
+
+    public EntityModelBlockBreakShared modelBlockBreakShared() {
+        return modelBlockBreakShared;
     }
 
     public ChatHistory chatHistory() {

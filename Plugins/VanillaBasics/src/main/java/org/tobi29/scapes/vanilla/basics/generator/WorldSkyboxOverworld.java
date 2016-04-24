@@ -71,13 +71,13 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         this.biomeGenerator = biomeGenerator;
         this.world = world;
         long seed = world.seed();
-        fbo = new FBO(512, 512, 1, false, false, true);
-        billboardMesh = VAOUtility.createVTI(
+        fbo = new FBO(world.game().engine(), 512, 512, 1, false, false, true);
+        billboardMesh = VAOUtility.createVTI(world.game().engine(),
                 new float[]{1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f,
                         -1.0f, 1.0f, 1.0f, -1.0f, 1.0f},
                 new float[]{0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f},
                 new int[]{0, 1, 2, 0, 2, 3}, RenderType.TRIANGLES);
-        cloudTextureMesh = VAOUtility.createVTI(
+        cloudTextureMesh = VAOUtility.createVTI(world.game().engine(),
                 new float[]{0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
                         0.0f, 0.0f, 1.0f, 0.0f},
                 new float[]{0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f},
@@ -98,7 +98,7 @@ public class WorldSkyboxOverworld implements WorldSkybox {
             lastX = x;
             lastY = y;
         }
-        this.cloudMesh = cloudMesh.finish();
+        this.cloudMesh = cloudMesh.finish(world.game().engine());
         lastX = 1.0f;
         lastY = 0.0f;
         Mesh skyboxMesh = new Mesh(true);
@@ -117,7 +117,7 @@ public class WorldSkyboxOverworld implements WorldSkybox {
             lastX = x;
             lastY = y;
         }
-        this.skyboxMesh = skyboxMesh.finish();
+        this.skyboxMesh = skyboxMesh.finish(world.game().engine());
         lastX = 1.0f;
         lastY = 0.0f;
         Mesh skyboxBottomMesh = new Mesh(true);
@@ -142,7 +142,7 @@ public class WorldSkyboxOverworld implements WorldSkybox {
             lastX = x;
             lastY = y;
         }
-        this.skyboxBottomMesh = skyboxBottomMesh.finish();
+        this.skyboxBottomMesh = skyboxBottomMesh.finish(world.game().engine());
         Mesh starMesh = new Mesh();
         Random random = new Random(seed);
         for (int i = 0; i < 1000; i++) {
@@ -152,7 +152,7 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         for (int i = 0; i < 10; i++) {
             addStar(0.01 + random.nextDouble() * 0.02, 0, starMesh, random);
         }
-        this.starMesh = starMesh.finish();
+        this.starMesh = starMesh.finish(world.game().engine());
     }
 
     private static void addStar(double size, int color, Mesh starMesh,

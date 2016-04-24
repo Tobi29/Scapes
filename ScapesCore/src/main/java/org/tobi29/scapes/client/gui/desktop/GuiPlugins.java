@@ -25,6 +25,7 @@ import org.tobi29.scapes.engine.opengl.texture.TextureFile;
 import org.tobi29.scapes.engine.opengl.texture.TextureFilter;
 import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
 import org.tobi29.scapes.engine.utils.Streams;
+import org.tobi29.scapes.engine.utils.io.BufferedReadChannelStream;
 import org.tobi29.scapes.engine.utils.io.ProcessStream;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
@@ -32,6 +33,7 @@ import org.tobi29.scapes.plugins.PluginFile;
 import org.tobi29.scapes.plugins.Plugins;
 
 import java.io.IOException;
+import java.nio.channels.Channels;
 import java.util.zip.ZipFile;
 
 public class GuiPlugins extends GuiMenu {
@@ -97,8 +99,10 @@ public class GuiPlugins extends GuiMenu {
                 try {
                     label.setText(plugin.name());
                     try (ZipFile zip = FileUtil.zipFile(plugin.file())) {
-                        Texture texture = new TextureFile(
-                                zip.getInputStream(zip.getEntry("Icon.png")), 0,
+                        Texture texture = new TextureFile(state.engine(),
+                                new BufferedReadChannelStream(
+                                        Channels.newChannel(zip.getInputStream(
+                                                zip.getEntry("Icon.png")))), 0,
                                 TextureFilter.LINEAR, TextureFilter.LINEAR,
                                 TextureWrap.CLAMP, TextureWrap.CLAMP);
                         icon.setIcon(texture);

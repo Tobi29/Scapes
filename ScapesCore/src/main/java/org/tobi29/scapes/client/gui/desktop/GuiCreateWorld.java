@@ -27,12 +27,14 @@ import org.tobi29.scapes.engine.opengl.texture.TextureFilter;
 import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.StringUtil;
+import org.tobi29.scapes.engine.utils.io.BufferedReadChannelStream;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.plugins.PluginFile;
 import org.tobi29.scapes.server.format.WorldSource;
 
 import java.io.IOException;
+import java.nio.channels.Channels;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -150,8 +152,10 @@ public class GuiCreateWorld extends GuiMenuDouble {
                     }
                 });
                 try (ZipFile zip = FileUtil.zipFile(addon.file())) {
-                    Texture texture = new TextureFile(
-                            zip.getInputStream(zip.getEntry("Icon.png")), 0,
+                    Texture texture = new TextureFile(state.engine(),
+                            new BufferedReadChannelStream(Channels.newChannel(
+                                    zip.getInputStream(
+                                            zip.getEntry("Icon.png")))), 0,
                             TextureFilter.LINEAR, TextureFilter.LINEAR,
                             TextureWrap.CLAMP, TextureWrap.CLAMP);
                     icon.setIcon(texture);

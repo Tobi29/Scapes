@@ -5,10 +5,10 @@ import org.tobi29.scapes.chunk.EnvironmentClient;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
 import org.tobi29.scapes.client.states.scenes.SceneScapesVoxelWorld;
+import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.*;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
-import org.tobi29.scapes.engine.utils.BufferCreatorNative;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -25,13 +25,14 @@ public class ParticleEmitterBlock
     private final Matrix4f matrix;
 
     public ParticleEmitterBlock(ParticleSystem system, Texture texture) {
-        super(system, texture, createVBO(), createVBOStream(),
+        super(system, texture, createVBO(system.world().game().engine()),
+                createVBOStream(system.world().game().engine()),
                 RenderType.TRIANGLES, new ParticleInstanceBlock[10240],
                 ParticleInstanceBlock::new);
-        matrix = new Matrix4f(BufferCreatorNative::bytes);
+        matrix = new Matrix4f(system.world().game().engine()::allocate);
     }
 
-    private static VBO createVBO() {
+    private static VBO createVBO(ScapesEngine engine) {
         List<VBO.VBOAttribute> vboAttributes = new ArrayList<>();
         vboAttributes.add(new VBO.VBOAttribute(OpenGL.VERTEX_ATTRIBUTE, 3,
                 new float[]{-SIZE, 0.0f, -SIZE, SIZE, 0.0f, -SIZE, SIZE, 0.0f,
@@ -40,10 +41,10 @@ public class ParticleEmitterBlock
         vboAttributes.add(new VBO.VBOAttribute(OpenGL.TEXTURE_ATTRIBUTE, 2,
                 new float[]{0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
                         0.0f, 0.0f, 1.0f, 1.0f}, false, 0, VertexType.FLOAT));
-        return new VBO(vboAttributes, 6);
+        return new VBO(engine, vboAttributes, 6);
     }
 
-    private static VBO createVBOStream() {
+    private static VBO createVBOStream(ScapesEngine engine) {
         List<VBO.VBOAttribute> vboAttributes = new ArrayList<>();
         vboAttributes.add(new VBO.VBOAttribute(OpenGL.COLOR_ATTRIBUTE, 4,
                 EMPTY_FLOAT, true, 1, VertexType.UNSIGNED_BYTE));
@@ -59,7 +60,7 @@ public class ParticleEmitterBlock
                 VertexType.FLOAT));
         vboAttributes.add(new VBO.VBOAttribute(9, 4, EMPTY_FLOAT, false, 1,
                 VertexType.FLOAT));
-        return new VBO(vboAttributes, 0);
+        return new VBO(engine, vboAttributes, 0);
     }
 
     @Override

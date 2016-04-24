@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.entity.client;
 
 import java8.util.Optional;
@@ -24,6 +23,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.model.EntityModel;
+import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.entity.model.EntityModelBellows;
 
 public class EntityBellowsClient extends EntityClient {
@@ -54,7 +54,10 @@ public class EntityBellowsClient extends EntityClient {
 
     @Override
     public Optional<EntityModel> createModel() {
-        return Optional.of(new EntityModelBellows(this));
+        VanillaBasics plugin =
+                (VanillaBasics) world.plugins().plugin("VanillaBasics");
+        return Optional
+                .of(new EntityModelBellows(plugin.modelBellowsShared(), this));
     }
 
     public float scale() {

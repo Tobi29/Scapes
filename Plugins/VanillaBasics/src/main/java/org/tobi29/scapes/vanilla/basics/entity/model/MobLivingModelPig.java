@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.entity.model;
 
 import org.tobi29.scapes.chunk.WorldClient;
@@ -34,28 +33,25 @@ import org.tobi29.scapes.entity.model.Box;
 import org.tobi29.scapes.entity.model.MobModel;
 
 public class MobLivingModelPig implements MobModel {
-    private static final Box BODY, HEAD, LEG_FRONT_LEFT, LEG_FRONT_RIGHT,
-            LEG_BACK_LEFT, LEG_BACK_RIGHT;
-
-    static {
-        BODY = new Box(0.015625f, -5, -6, -5, 5, 6, 5, 0, 0);
-        HEAD = new Box(0.015625f, -4, 0, -5, 4, 8, 4, 0, 22);
-        LEG_FRONT_LEFT = new Box(0.015625f, -2, -2, -6, 2, 2, 0, 44, 0);
-        LEG_FRONT_RIGHT = new Box(0.015625f, -2, -2, -6, 2, 2, 0, 44, 10);
-        LEG_BACK_LEFT = new Box(0.015625f, -2, -2, -6, 2, 2, 0, 44, 20);
-        LEG_BACK_RIGHT = new Box(0.015625f, -2, -2, -6, 2, 2, 0, 44, 30);
-    }
-
     private final MobLivingClient entity;
     private final Texture texture;
     private final MutableVector3 pos;
+    private final Box body, head, legFrontLeft, legFrontRight, legBackLeft,
+            legBackRight;
     private double swing, moveSpeedRender;
     private float xRotRender, zRotRender;
 
-    public MobLivingModelPig(MobLivingClient entity, Texture texture) {
+    public MobLivingModelPig(MobLivingModelPigShared shared,
+            MobLivingClient entity, Texture texture) {
         this.entity = entity;
         pos = new MutableVector3d(entity.pos());
         this.texture = texture;
+        body = shared.body;
+        head = shared.head;
+        legFrontLeft = shared.legFrontLeft;
+        legFrontRight = shared.legFrontRight;
+        legBackLeft = shared.legBackLeft;
+        legBackRight = shared.legBackRight;
     }
 
     @Override
@@ -107,32 +103,31 @@ public class MobLivingModelPig implements MobModel {
         Matrix matrix = matrixStack.push();
         matrix.translate(posRenderX, posRenderY, posRenderZ);
         matrix.rotate(zRotRender - 90, 0, 0, 1);
-        BODY.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
+        body.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrix = matrixStack.push();
         matrix.translate(0, 0.3125f, 0.0625f);
         matrix.rotate(xRotRender, 1, 0, 0);
-        HEAD.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
+        head.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
         matrix.translate(-0.125f, 0.1875f, -0.3125f);
         matrix.rotate((float) swingDir * 30, 1, 0, 0);
-        LEG_FRONT_LEFT.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
+        legFrontLeft.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
         matrix.translate(0.125f, 0.1875f, -0.3125f);
         matrix.rotate((float) -swingDir * 30, 1, 0, 0);
-        LEG_FRONT_RIGHT
-                .render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
+        legFrontRight.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
         matrix.translate(-0.125f, -0.1875f, -0.3125f);
         matrix.rotate((float) -swingDir * 30, 1, 0, 0);
-        LEG_BACK_LEFT.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
+        legBackLeft.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
         matrix.translate(0.125f, -0.1875f, -0.3125f);
         matrix.rotate((float) swingDir * 30, 1, 0, 0);
-        LEG_BACK_RIGHT.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
+        legBackRight.render(1.0f, damageColor, damageColor, 1.0f, gl, shader);
         matrixStack.pop();
         matrixStack.pop();
     }

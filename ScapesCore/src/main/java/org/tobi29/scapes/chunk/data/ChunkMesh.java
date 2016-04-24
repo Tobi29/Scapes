@@ -17,6 +17,7 @@ package org.tobi29.scapes.chunk.data;
 
 import org.tobi29.scapes.block.models.SmoothLight;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
+import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.RenderType;
 import org.tobi29.scapes.engine.opengl.VAOStatic;
 import org.tobi29.scapes.engine.opengl.VBO;
@@ -191,7 +192,7 @@ public class ChunkMesh {
         }
     }
 
-    public VAOStatic finish() {
+    public VAOStatic finish(ScapesEngine engine) {
         computeNormals();
         int[] indexArray = new int[pos * 3 / 2];
         int i = 0, p = 0;
@@ -223,7 +224,7 @@ public class ChunkMesh {
         vboAttributes
                 .add(new VBO.VBOAttribute(5, 1, arrays.animationArray, pos, 0,
                         VertexType.BYTE));
-        VBO vbo = new VBO(vboAttributes, pos);
+        VBO vbo = new VBO(engine, vboAttributes, pos);
         return new VAOStatic(vbo, indexArray, RenderType.TRIANGLES);
     }
 

@@ -78,7 +78,7 @@ public class GuiScreenshots extends GuiMenu {
             Texture textureLoad = state.engine().graphics().textures().empty();
             try {
                 textureLoad = FileUtil.readReturn(path,
-                        stream -> new TextureFile(stream, 0));
+                        stream -> new TextureFile(state.engine(), stream, 0));
             } catch (IOException e) {
                 LOGGER.warn("Failed to load screenshot: {}", e.toString());
             }

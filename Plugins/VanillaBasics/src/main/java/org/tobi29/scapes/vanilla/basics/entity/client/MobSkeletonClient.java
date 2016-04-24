@@ -46,9 +46,9 @@ public class MobSkeletonClient extends MobLivingEquippedClient {
     public void onDeath() {
         Texture texture = world.game().engine().graphics().textures()
                 .get("VanillaBasics:image/entity/mob/Skeleton");
-        MobLivingModelHuman
-                .particles(world.scene().particles(), pos.now(), speed.now(),
-                        rot.now(), texture, true, false);
+        MobLivingModelHuman.particles(world.game().modelHumanShared(),
+                world.scene().particles(), pos.now(), speed.now(), rot.now(),
+                texture, true, false);
     }
 
     @Override
@@ -65,7 +65,9 @@ public class MobSkeletonClient extends MobLivingEquippedClient {
     public Optional<MobModel> createModel() {
         Texture texture = world.game().engine().graphics().textures()
                 .get("VanillaBasics:image/entity/mob/Skeleton");
-        return Optional.of(new MobLivingModelHuman(this, texture, true, false));
+        return Optional
+                .of(new MobLivingModelHuman(world.game().modelHumanShared(),
+                        this, texture, true, false));
     }
 
     @Override

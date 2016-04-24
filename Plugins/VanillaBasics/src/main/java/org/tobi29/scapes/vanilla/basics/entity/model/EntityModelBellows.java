@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.entity.model;
 
 import org.tobi29.scapes.chunk.WorldClient;
@@ -32,21 +31,18 @@ import org.tobi29.scapes.entity.model.EntityModel;
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityBellowsClient;
 
 public class EntityModelBellows implements EntityModel {
-    private static final Box SIDE, MIDDLE, PIPE;
-
-    static {
-        SIDE = new Box(0.0625f, -7, -7, -1, 7, 7, 1, 0, 0);
-        MIDDLE = new Box(0.0625f, -6, -6, -7, 6, 6, 7, 0, 0);
-        PIPE = new Box(0.0625f, -2, -2, -16, 2, 2, 0, 0, 0);
-    }
-
     private final MutableVector3 pos;
     private final EntityBellowsClient entity;
+    private final Box side, middle, pipe;
     private float scale;
 
-    public EntityModelBellows(EntityBellowsClient entity) {
+    public EntityModelBellows(EntityModelBellowsShared shared,
+            EntityBellowsClient entity) {
         this.entity = entity;
         pos = new MutableVector3d(entity.pos());
+        side = shared.side;
+        middle = shared.middle;
+        pipe = shared.pipe;
     }
 
     @Override
@@ -91,18 +87,18 @@ public class EntityModelBellows implements EntityModel {
         matrix = matrixStack.push();
         matrix.scale(1.0f, 1.0f, scale);
         gl.textures().bind("VanillaBasics:image/terrain/tree/birch/Planks", gl);
-        MIDDLE.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
+        middle.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
         gl.textures().bind("VanillaBasics:image/terrain/tree/oak/Planks", gl);
         matrix.translate(0.0f, 0.0f, scale * 0.5f);
-        SIDE.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
+        side.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
         matrix.translate(0.0f, 0.0f, -scale * 0.5f);
-        SIDE.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
+        side.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
         matrixStack.pop();
-        SIDE.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
+        side.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
         matrix = matrixStack.push();
         switch (entity.face()) {
             case DOWN:
@@ -122,7 +118,7 @@ public class EntityModelBellows implements EntityModel {
                 break;
         }
         gl.textures().bind("VanillaBasics:image/terrain/device/Anvil", gl);
-        PIPE.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
+        pipe.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader);
         matrixStack.pop();
         matrixStack.pop();
     }

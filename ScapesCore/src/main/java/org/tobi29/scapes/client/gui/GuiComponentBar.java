@@ -40,7 +40,7 @@ public class GuiComponentBar extends GuiComponent {
         float r2 = r * 0.5f;
         float g2 = g * 0.5f;
         float b2 = b * 0.5f;
-        vao1 = VAOUtility.createVCTI(
+        vao1 = VAOUtility.createVCTI(gui.style().engine(),
                 new float[]{0.0f, height, 0.0f, width, height, 0.0f, 0.0f, 0.0f,
                         0.0f, width, 0.0f, 0.0f},
                 new float[]{r2, g2, b2, a, r2, g2, b2, a, r, g, b, a, r, g, b,
@@ -53,7 +53,7 @@ public class GuiComponentBar extends GuiComponent {
         r2 *= 0.4f;
         g2 *= 0.4f;
         b2 *= 0.4f;
-        vao2 = VAOUtility.createVCTI(
+        vao2 = VAOUtility.createVCTI(gui.style().engine(),
                 new float[]{0.0f, height, 0.0f, width, height, 0.0f, 0.0f, 0.0f,
                         0.0f, width, 0.0f, 0.0f},
                 new float[]{r2, g2, b2, a, r2, g2, b2, a, r, g, b, a, r, g, b,

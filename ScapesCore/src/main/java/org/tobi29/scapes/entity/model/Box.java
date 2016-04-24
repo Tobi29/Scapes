@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.entity.model;
 
+import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.*;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 
@@ -35,13 +36,15 @@ public class Box {
     public final float minX, minY, minZ, maxX, maxY, maxZ;
     private final VAO vao;
 
-    public Box(float tbs, float minX, float minY, float minZ, float maxX,
-            float maxY, float maxZ, float tX, float tY) {
-        this(tbs, minX, minY, minZ, maxX, maxY, maxZ, tX, tY, true);
+    public Box(ScapesEngine engine, float tbs, float minX, float minY,
+            float minZ, float maxX, float maxY, float maxZ, float tX,
+            float tY) {
+        this(engine, tbs, minX, minY, minZ, maxX, maxY, maxZ, tX, tY, true);
     }
 
-    public Box(float tbs, float minX, float minY, float minZ, float maxX,
-            float maxY, float maxZ, float tX, float tY, boolean culling) {
+    public Box(ScapesEngine engine, float tbs, float minX, float minY,
+            float minZ, float maxX, float maxY, float maxZ, float tX, float tY,
+            boolean culling) {
         tX *= tbs;
         tY *= tbs;
         float lX = (maxX - minX) * tbs;
@@ -59,7 +62,7 @@ public class Box {
         } else {
             indices = INDICES_NO_CULL;
         }
-        vao = VAOUtility.createVTNI(
+        vao = VAOUtility.createVTNI(engine,
                 new float[]{minX, maxY, maxZ, maxX, maxY, maxZ, maxX, maxY,
                         minZ, minX, maxY, minZ, minX, minY, maxZ, minX, minY,
                         minZ, maxX, minY, minZ, maxX, minY, maxZ, minX, minY,

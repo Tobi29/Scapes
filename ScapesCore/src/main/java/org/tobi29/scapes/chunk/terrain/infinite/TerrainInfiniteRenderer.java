@@ -23,8 +23,8 @@ import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.data.ChunkMesh;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderer;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.VAOStatic;
+import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.opengl.*;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.Streams;
@@ -48,6 +48,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     private final double chunkDistanceMax;
     private final List<TerrainInfiniteRendererChunk> chunks = new ArrayList<>();
     private final Joiner joiner;
+    private final VAO frame;
     private int playerX, playerY, playerZ;
     private double chunkDistance;
     private boolean disposed, staticRenderDistance, updateVisible;
@@ -62,6 +63,14 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
         this.sortedLocations = sortedLocations;
         WorldClient world = terrain.world();
         chunkDistanceMax = chunkDistance * 16.0 - 16.0;
+        float min = 0.001f;
+        float max = 0.999f;
+        frame = VAOUtility.createVI(player.game().engine(),
+                new float[]{min, min, min, max, min, min, max, max, min, min,
+                        max, min, min, min, max, max, min, max, max, max, max,
+                        min, max, max},
+                new int[]{0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4,
+                        1, 5, 2, 6, 3, 7}, RenderType.LINES);
         Queue<TerrainInfiniteRendererChunk> loadQueue =
                 new ConcurrentLinkedQueue<>();
         Queue<TerrainInfiniteRendererChunk> updateQueue =
@@ -149,8 +158,8 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
         Streams.of(chunks).forEach(chunk -> chunk.render(gl, shader, cam));
         if (debug) {
             gl.textures().unbind(gl);
-            Streams.of(chunks)
-                    .forEach(chunk -> chunk.renderFrame(gl, shader, cam));
+            Streams.of(chunks).forEach(
+                    chunk -> chunk.renderFrame(gl, frame, shader, cam));
         }
     }
 
@@ -552,12 +561,13 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                     }
                     try (Profiler.C ignored = Profiler
                             .section("AssembleMesh")) {
+                        ScapesEngine engine = terrain.world().game().engine();
                         if (mesh.size() > 0) {
-                            vao = mesh.finish();
+                            vao = mesh.finish(engine);
                             aabb = mesh.aabb();
                         }
                         if (meshAlpha.size() > 0) {
-                            vaoAlpha = meshAlpha.finish();
+                            vaoAlpha = meshAlpha.finish(engine);
                             aabbAlpha = meshAlpha.aabb();
                         }
                     }

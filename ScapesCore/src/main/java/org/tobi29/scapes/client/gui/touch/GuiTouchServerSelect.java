@@ -196,8 +196,8 @@ public class GuiTouchServerSelect extends GuiTouchMenuDouble {
                                     .bytes(imageBuffer.remaining());
                             buffer.put(imageBuffer);
                             buffer.rewind();
-                            Texture texture = new TextureCustom(image.width(),
-                                    image.height(), buffer, 0,
+                            Texture texture = new TextureCustom(state.engine(),
+                                    image.width(), image.height(), buffer, 0,
                                     TextureFilter.NEAREST,
                                     TextureFilter.NEAREST, TextureWrap.CLAMP,
                                     TextureWrap.CLAMP);

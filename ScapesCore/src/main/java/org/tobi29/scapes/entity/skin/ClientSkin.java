@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.entity.skin;
 
+import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.OpenGLFunction;
 import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
@@ -26,8 +27,9 @@ public class ClientSkin extends TextureCustom {
     private final Checksum checksum;
     private int unusedTicks;
 
-    public ClientSkin(ByteBuffer buffer, Checksum checksum) {
-        super(64, 64, buffer);
+    public ClientSkin(ScapesEngine engine, ByteBuffer buffer,
+            Checksum checksum) {
+        super(engine, 64, 64, buffer);
         this.checksum = checksum;
     }
 

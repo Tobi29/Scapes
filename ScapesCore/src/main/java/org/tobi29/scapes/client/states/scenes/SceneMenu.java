@@ -84,7 +84,7 @@ public class SceneMenu extends Scene {
         ShaderCompileInformation menu2 =
                 shaderManager.compileInformation("Scapes:shader/Menu2");
         menu2.supplyPreCompile("Blur", shader -> blur(gl, shader));
-        vao = VAOUtility.createVTI(
+        vao = VAOUtility.createVTI(state.engine(),
                 new float[]{-1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f, -1.0f,
                         -1.0f, 1.0f, -1.0f, -1.0f},
                 new float[]{1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f},
@@ -194,8 +194,8 @@ public class SceneMenu extends Scene {
     private void changeBackground(Image[] images) {
         for (int i = 0; i < 6; i++) {
             Image image = images[i];
-            setBackground(new TextureCustom(image.width(), image.height(),
-                            image.buffer(), 0, TextureFilter.LINEAR,
+            setBackground(new TextureCustom(state.engine(), image.width(),
+                            image.height(), image.buffer(), 0, TextureFilter.LINEAR,
                             TextureFilter.LINEAR, TextureWrap.CLAMP, TextureWrap.CLAMP),
                     i);
         }

@@ -17,6 +17,7 @@ package org.tobi29.scapes.entity.skin;
 
 import java8.util.stream.Collectors;
 import org.tobi29.scapes.client.connection.ClientConnection;
+import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.Checksum;
@@ -32,11 +33,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ClientSkinStorage {
+    private final ScapesEngine engine;
     private final Map<Checksum, ClientSkin> skins = new ConcurrentHashMap<>();
     private final Queue<Checksum> skinRequests = new ConcurrentLinkedQueue<>();
     private final ByteBuffer defaultSkin;
 
-    public ClientSkinStorage(Texture defaultTexture) {
+    public ClientSkinStorage(ScapesEngine engine, Texture defaultTexture) {
+        this.engine = engine;
         defaultSkin = defaultTexture.buffer(0);
     }
 
@@ -71,7 +74,7 @@ public class ClientSkinStorage {
     public Texture get(Checksum checksum) {
         ClientSkin skin = skins.get(checksum);
         if (skin == null) {
-            skin = new ClientSkin(defaultSkin, checksum);
+            skin = new ClientSkin(engine, defaultSkin, checksum);
             skins.put(checksum, skin);
             skinRequests.add(checksum);
         }

@@ -17,7 +17,9 @@ package org.tobi29.scapes.entity.model;
 
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
-import org.tobi29.scapes.engine.opengl.*;
+import org.tobi29.scapes.engine.opengl.GL;
+import org.tobi29.scapes.engine.opengl.OpenGL;
+import org.tobi29.scapes.engine.opengl.VAO;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -32,25 +34,16 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.client.EntityBlockBreakClient;
 
 public class EntityModelBlockBreak implements EntityModel {
-    private static final VAO VAO;
-
-    static {
-        VAO = VAOUtility.createVTNI(
-                new float[]{-0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 0.5f,
-                        0.5f, -0.5f, 0.5f, 0.5f},
-                new float[]{0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f},
-                new float[]{0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-                        1.0f, 0.0f, 0.0f, 1.0f}, new int[]{0, 1, 2, 0, 2, 3},
-                RenderType.TRIANGLES);
-    }
-
     private final MutableVector3 pos;
     private final EntityBlockBreakClient entity;
     private final Pool<PointerPane> pointerPanes = new Pool<>(PointerPane::new);
+    private final VAO vao;
 
-    public EntityModelBlockBreak(EntityBlockBreakClient entity) {
+    public EntityModelBlockBreak(EntityModelBlockBreakShared shared,
+            EntityBlockBreakClient entity) {
         this.entity = entity;
         pos = new MutableVector3d(entity.pos());
+        vao = shared.vao;
     }
 
     @Override
@@ -124,7 +117,7 @@ public class EntityModelBlockBreak implements EntityModel {
                     break;
             }
             gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.3f, 0.3f, 0.3f, 0.4f);
-            VAO.render(gl, shader);
+            vao.render(gl, shader);
             matrixStack.pop();
         }
     }

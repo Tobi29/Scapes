@@ -42,7 +42,8 @@ public class EntityBlockBreakClient extends EntityClient {
 
     @Override
     public Optional<EntityModel> createModel() {
-        return Optional.of(new EntityModelBlockBreak(this));
+        return Optional.of(new EntityModelBlockBreak(
+                world.game().modelBlockBreakShared(), this));
     }
 
     public double progress() {
