@@ -16,7 +16,7 @@
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.gui.GuiComponent;
+import org.tobi29.scapes.engine.gui.GuiComponentHeavy;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.RenderType;
@@ -28,7 +28,7 @@ import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
-public class GuiComponentBar extends GuiComponent {
+public class GuiComponentBar extends GuiComponentHeavy {
     private final Supplier supplier;
     private final VAO vao1, vao2;
     private double value;

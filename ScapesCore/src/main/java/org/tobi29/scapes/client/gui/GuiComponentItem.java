@@ -16,23 +16,32 @@
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.block.ItemStack;
-import org.tobi29.scapes.engine.gui.GuiComponentButton;
+import org.tobi29.scapes.engine.gui.GuiComponentHeavy;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
+import org.tobi29.scapes.engine.opengl.GL;
+import org.tobi29.scapes.engine.opengl.shader.Shader;
 
-public class GuiComponentItemButton extends GuiComponentButton {
-    private final GuiComponentItem item;
+public class GuiComponentItem extends GuiComponentHeavy {
+    private ItemStack item;
 
-    public GuiComponentItemButton(GuiLayoutData parent, ItemStack item) {
+    public GuiComponentItem(GuiLayoutData parent, ItemStack item) {
         super(parent);
-        this.item =
-                addSubHori(0, 0, -1, -1, p -> new GuiComponentItem(p, item));
+        this.item = item;
     }
 
     public ItemStack item() {
-        return item.item();
+        return item;
     }
 
     public void setItem(ItemStack item) {
-        this.item.setItem(item);
+        this.item = item;
+    }
+
+    @Override
+    public void renderComponent(GL gl, Shader shader, double width,
+            double height) {
+        super.renderComponent(gl, shader, width, height);
+        GuiUtils.items(0.0f, 0.0f, (float) width, (float) height, item, gl,
+                shader, gui.style().font());
     }
 }

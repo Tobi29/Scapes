@@ -13,30 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui;
 
+import java8.util.concurrent.ConcurrentMaps;
 import org.tobi29.scapes.block.ItemStack;
+import org.tobi29.scapes.engine.gui.GuiRenderBatch;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
 import org.tobi29.scapes.engine.opengl.GL;
+import org.tobi29.scapes.engine.opengl.VAO;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.opengl.texture.Texture;
+import org.tobi29.scapes.engine.utils.Pair;
+import org.tobi29.scapes.engine.utils.Streams;
 
-public class GuiUtils {
-    private static final FontRenderer.Text[] NUMBERS =
-            new FontRenderer.Text[257];
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-    public static void renderItem(float x, float y, float width, float height,
+public final class GuiUtils {
+    private static final ConcurrentMap<GL, ConcurrentMap<Integer, List<Pair<VAO, Texture>>>>
+            NUMBERS = new ConcurrentHashMap<>();
+
+    private GuiUtils() {
+    }
+
+    public static void items(float x, float y, float width, float height,
             ItemStack item, GL gl, Shader shader, FontRenderer font) {
         if (item == null) {
             return;
         }
-        renderItem(x, y, width, height, item, item.amount() > 1, gl, shader,
-                font);
+        items(x, y, width, height, item, item.amount() > 1, gl, shader, font);
     }
 
-    public static void renderItem(float x, float y, float width, float height,
+    public static void items(float x, float y, float width, float height,
             ItemStack item, boolean number, GL gl, Shader shader,
             FontRenderer font) {
         if (item == null) {
@@ -50,15 +61,23 @@ public class GuiUtils {
             item.material().renderInventory(item, gl, shader, 1, 1, 1, 1);
             matrixStack.pop();
             if (number) {
-                int i = item.amount();
-                if (NUMBERS[i] == null) {
-                    NUMBERS[i] =
-                            font.render(String.valueOf(i), 2.0f, -18.0f, 16.0f,
-                                    1, 1, 1, 1);
-                }
+                ConcurrentMap<Integer, List<Pair<VAO, Texture>>> numbers =
+                        ConcurrentMaps.computeIfAbsent(NUMBERS, gl,
+                                key -> new ConcurrentHashMap<>());
+                List<Pair<VAO, Texture>> text = ConcurrentMaps
+                        .computeIfAbsent(numbers, item.amount(), key -> {
+                            GuiRenderBatch batch = new GuiRenderBatch();
+                            font.render(FontRenderer
+                                    .to(batch, 2.0f, -18.0f, 1.0f, 1.0f, 1.0f,
+                                            1.0f), String.valueOf(key), 16.0f);
+                            return batch.finish();
+                        });
                 matrix = matrixStack.push();
                 matrix.translate(x, y + height, 0.0f);
-                NUMBERS[i].render(gl, shader);
+                Streams.of(text).forEach(mesh -> {
+                    mesh.b.bind(gl);
+                    mesh.a.render(gl, shader);
+                });
                 matrixStack.pop();
             }
         }

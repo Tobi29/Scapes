@@ -22,7 +22,7 @@ import org.tobi29.scapes.engine.gui.*;
 public class GuiVersion extends GuiState {
     public GuiVersion(GameState state, GuiStyle style) {
         super(state, style);
-        GuiComponentPane pane = spacer();
+        GuiComponentGroup pane = spacer();
         pane.spacer();
         GuiComponentGroupSlab slab =
                 pane.addVert(0, 0, -1, 26, GuiComponentGroupSlab::new);

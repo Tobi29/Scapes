@@ -23,21 +23,29 @@ import org.tobi29.scapes.client.gui.desktop.GuiMenu;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.GuiComponentVisiblePane;
 import org.tobi29.scapes.engine.gui.GuiCursor;
+import org.tobi29.scapes.engine.gui.GuiRenderBatch;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
 import org.tobi29.scapes.engine.opengl.GL;
+import org.tobi29.scapes.engine.opengl.VAO;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.opengl.texture.Texture;
+import org.tobi29.scapes.engine.utils.Pair;
+import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.packets.PacketInventoryInteraction;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
+import java.util.Collections;
+import java.util.List;
+
 public class GuiInventory extends GuiMenu {
     protected final GuiComponentVisiblePane inventoryPane;
     protected final MobPlayerClientMainVB player;
-    private String hover, hoverNew;
-    private FontRenderer.Text hoverName = FontRenderer.EMPTY_TEXT;
+    private String hover, hoverNew, hoverName;
+    private List<Pair<VAO, Texture>> hoverText = Collections.emptyList();
     private double cursorX = Double.NaN, cursorY = Double.NaN;
 
     public GuiInventory(String name, MobPlayerClientMainVB player,
@@ -96,16 +104,19 @@ public class GuiInventory extends GuiMenu {
         String hover = this.hover;
         if (hover != null) {
             MatrixStack matrixStack = gl.matrixStack();
-            if (!hover.equals(hoverName.text())) {
+            if (!hover.equals(hoverName)) {
                 updateText(hover, font);
             }
             Matrix matrix = matrixStack.push();
             matrix.translate((float) cursorX, (float) cursorY, 0.0f);
-            hoverName.render(gl, shader);
+            Streams.of(hoverText).forEach(mesh -> {
+                mesh.b.bind(gl);
+                mesh.a.render(gl, shader);
+            });
             matrixStack.pop();
         }
         player.inventories().access("Hold", inventory -> GuiUtils
-                .renderItem((float) cursorX, (float) cursorY, 30.0f, 30.0f,
+                .items((float) cursorX, (float) cursorY, 30.0f, 30.0f,
                         inventory.item(0), gl, shader, font));
     }
 
@@ -133,6 +144,10 @@ public class GuiInventory extends GuiMenu {
     }
 
     private void updateText(String text, FontRenderer font) {
-        hoverName = font.render(text, 0, 0, 12, 1.0f, 1.0f, 1.0f, 1);
+        hoverName = text;
+        GuiRenderBatch batch = new GuiRenderBatch();
+        font.render(FontRenderer.to(batch, 1.0f, 1.0f, 1.0f, 1.0f), text,
+                12.0f);
+        hoverText = batch.finish();
     }
 }

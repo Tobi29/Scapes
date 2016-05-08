@@ -9,18 +9,18 @@ public class GuiTouch extends GuiState {
         super(state, style);
     }
 
-    protected GuiComponentGroupSlab row(GuiComponentPane pane) {
+    protected GuiComponentGroupSlab row(GuiContainerRow pane) {
         return pane.addVert(102, 0, -1, 80, GuiComponentGroupSlab::new);
     }
 
-    protected <T extends GuiComponent> T row(GuiComponentPane pane,
-            Function<GuiLayoutData, T> component) {
-        return pane.addVert(112, 10, -1, 60, component::apply);
+    protected <T extends GuiComponent> T row(GuiContainerRow pane,
+            Function<GuiLayoutDataVertical, T> component) {
+        return pane.addVert(112, 10, -1, 60, component);
     }
 
-    protected <T extends GuiComponent> T rowCenter(GuiComponentPane pane,
-            Function<GuiLayoutData, T> component) {
-        return pane.addVert(301, 10, -1, 60, component::apply);
+    protected <T extends GuiComponent> T rowCenter(GuiContainerRow pane,
+            Function<GuiLayoutDataVertical, T> component) {
+        return pane.addVert(301, 10, -1, 60, component);
     }
 
     protected GuiComponentTextButton button(GuiLayoutData parent, String text) {

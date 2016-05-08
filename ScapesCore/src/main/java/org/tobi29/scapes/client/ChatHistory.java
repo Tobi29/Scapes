@@ -19,27 +19,40 @@ import java8.util.stream.Collectors;
 import java8.util.stream.Stream;
 import org.tobi29.scapes.engine.utils.Streams;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 public class ChatHistory {
-    private final List<ChatLine> lines = new CopyOnWriteArrayList<>();
+    private final List<ChatLine> lines = new ArrayList<>();
+    private final Map<Object, Runnable> changeListeners = new WeakHashMap<>();
 
-    public void addLine(String text) {
+    public synchronized void addLine(String text) {
         String[] lines = text.split("\n");
         for (String line : lines) {
             this.lines.add(0, new ChatLine(line));
         }
+        Streams.of(changeListeners.values()).forEach(Runnable::run);
     }
 
-    public void update() {
+    @SuppressWarnings("CallToNativeMethodWhileLocked")
+    public synchronized void update() {
         long time = System.currentTimeMillis();
-        lines.removeAll(
+        List<ChatLine> removals =
                 Streams.of(lines).filter(line -> time - line.time > 10000)
-                        .collect(Collectors.toList()));
+                        .collect(Collectors.toList());
+        if (!removals.isEmpty()) {
+            lines.removeAll(removals);
+            Streams.of(changeListeners.values()).forEach(Runnable::run);
+        }
     }
 
-    public Stream<String> lines() {
+    public synchronized void listener(Object owner, Runnable listener) {
+        changeListeners.put(owner, listener);
+    }
+
+    public synchronized Stream<String> lines() {
         return Streams.of(lines).map(line -> line.text);
     }
 

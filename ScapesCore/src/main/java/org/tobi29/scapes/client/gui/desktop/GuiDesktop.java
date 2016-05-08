@@ -9,18 +9,18 @@ public class GuiDesktop extends GuiState {
         super(state, style);
     }
 
-    protected GuiComponentGroupSlab row(GuiComponentPane pane) {
+    protected GuiComponentGroupSlab row(GuiContainerRow pane) {
         return pane.addVert(11, 0, -1, 40, GuiComponentGroupSlab::new);
     }
 
-    protected <T extends GuiComponent> T row(GuiComponentPane pane,
-            Function<GuiLayoutData, T> component) {
-        return pane.addVert(16, 5, -1, 30, component::apply);
+    protected <T extends GuiComponent> T row(GuiContainerRow pane,
+            Function<GuiLayoutDataVertical, T> component) {
+        return pane.addVert(16, 5, -1, 30, component);
     }
 
-    protected <T extends GuiComponent> T rowCenter(GuiComponentPane pane,
-            Function<GuiLayoutData, T> component) {
-        return pane.addVert(112, 5, 176, 30, component::apply);
+    protected <T extends GuiComponent> T rowCenter(GuiContainerRow pane,
+            Function<GuiLayoutDataVertical, T> component) {
+        return pane.addVert(112, 5, 176, 30, component);
     }
 
     protected GuiComponentTextButton button(GuiLayoutData parent, String text) {

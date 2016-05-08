@@ -17,7 +17,7 @@ package org.tobi29.scapes.client.gui;
 
 import org.threeten.bp.LocalDate;
 import org.threeten.bp.Month;
-import org.tobi29.scapes.engine.gui.GuiComponent;
+import org.tobi29.scapes.engine.gui.GuiComponentHeavy;
 import org.tobi29.scapes.engine.gui.GuiComponentText;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.opengl.*;
@@ -28,7 +28,7 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class GuiComponentLogo extends GuiComponent {
+public class GuiComponentLogo extends GuiComponentHeavy {
     private static final String[] SPLASHES =
             {"Hi!", "Shut up!", "<3", ";)", "9001", "Minecraft",
                     "Please\nstand back!", "You\nsuck!", "Crap!",

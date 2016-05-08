@@ -4,7 +4,6 @@ import java8.util.Maps;
 import java8.util.function.Consumer;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab;
-import org.tobi29.scapes.engine.gui.GuiComponentSlab;
 import org.tobi29.scapes.engine.gui.GuiComponentText;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.utils.SSLUtil;
@@ -46,7 +45,7 @@ public class GuiCertificateWarning extends GuiMenuDouble {
     }
 
     private void row(String label, String text) {
-        GuiComponentSlab row =
+        GuiComponentGroupSlab row =
                 pane.addVert(21, 0, -1, 20, GuiComponentGroupSlab::new);
         row.addHori(2, 2, -1, 12, p -> new GuiComponentText(p, label));
         row.addHori(2, 2, -1, -1, p -> button(p, 12, text));

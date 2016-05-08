@@ -16,12 +16,12 @@
 package org.tobi29.scapes.vanilla.basics.gui;
 
 import org.tobi29.scapes.client.gui.GuiComponentBar;
-import org.tobi29.scapes.engine.gui.GuiComponent;
+import org.tobi29.scapes.engine.gui.GuiComponentHeavy;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 
-public class GuiComponentCondition extends GuiComponent {
+public class GuiComponentCondition extends GuiComponentHeavy {
     private final MobPlayerClientMain player;
 
     public GuiComponentCondition(GuiLayoutData parent,

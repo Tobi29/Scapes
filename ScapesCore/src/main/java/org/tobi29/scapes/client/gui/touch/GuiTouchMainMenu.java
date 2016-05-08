@@ -11,7 +11,7 @@ public class GuiTouchMainMenu extends GuiTouch {
         super(state, style);
         GuiComponentPane pane =
                 addHori(0, 0, 288, -1, GuiComponentVisiblePane::new);
-        GuiComponentPane space = spacer();
+        GuiComponentGroup space = spacer();
         pane.addVert(0, 10, 5, 20, -1, 160,
                 p -> new GuiComponentLogo(p, 160, 36));
         GuiComponentTextButton singlePlayer = space.addVert(176, 10, -1, 80,

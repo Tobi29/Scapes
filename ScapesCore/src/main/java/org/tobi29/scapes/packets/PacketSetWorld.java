@@ -82,7 +82,6 @@ public class PacketSetWorld extends Packet implements PacketClient {
                         seed, newWorld -> new TerrainInfiniteClient(newWorld,
                         client.loadingRadius() >> 4, 512,
                         client.game().engine().taskExecutor()),
-                        environmentRegistry.get(environment).b::apply, tag,
-                        entityID));
+                        environmentRegistry.get(environment).b, tag, entityID));
     }
 }

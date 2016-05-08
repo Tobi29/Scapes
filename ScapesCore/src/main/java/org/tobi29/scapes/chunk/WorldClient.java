@@ -69,8 +69,8 @@ public class WorldClient extends World {
     private final EnvironmentClient environment;
 
     public WorldClient(ClientConnection connection, Cam cam, long seed,
-            Function<WorldClient, TerrainClient> terrainSupplier,
-            Function<WorldClient, EnvironmentClient> environmentSupplier,
+            Function<WorldClient, ? extends TerrainClient> terrainSupplier,
+            Function<WorldClient, ? extends EnvironmentClient> environmentSupplier,
             TagStructure playerTag, int playerID) {
         super(connection.plugins(), connection.game().engine().taskExecutor(),
                 connection.plugins().registry(), seed);

@@ -221,8 +221,7 @@ public class VanillaBasics implements WorldType {
     public void initEnd(GameRegistry registry) {
         Streams.of(c.decoratorOverlays.values()).forEach(
                 config -> Streams.of(biomeDecorators.values()).forEach(
-                        biome -> Streams.of(biome.values())
-                                .forEach(config::accept)));
+                        biome -> Streams.of(biome.values()).forEach(config)));
         locked = true;
         VanillaBasicsRegisters.registerRecipes(this, registry);
     }

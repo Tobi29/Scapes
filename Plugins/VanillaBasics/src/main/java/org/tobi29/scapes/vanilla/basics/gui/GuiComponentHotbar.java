@@ -15,19 +15,24 @@
  */
 package org.tobi29.scapes.vanilla.basics.gui;
 
-import org.tobi29.scapes.engine.gui.GuiComponent;
+import org.tobi29.scapes.client.gui.GuiUtils;
+import org.tobi29.scapes.engine.gui.GuiComponentHeavy;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
-import org.tobi29.scapes.engine.gui.GuiUtils;
-import org.tobi29.scapes.engine.opengl.*;
+import org.tobi29.scapes.engine.gui.GuiRenderer;
+import org.tobi29.scapes.engine.opengl.GL;
+import org.tobi29.scapes.engine.opengl.RenderType;
+import org.tobi29.scapes.engine.opengl.VAO;
+import org.tobi29.scapes.engine.opengl.VAOUtility;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
+import org.tobi29.scapes.engine.utils.math.vector.Vector2f;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
-public class GuiComponentHotbar extends GuiComponent {
+public class GuiComponentHotbar extends GuiComponentHeavy {
     private final MobPlayerClientMainVB player;
-    private VAO vao1, vao2, vao3;
+    private VAO vao;
 
     public GuiComponentHotbar(GuiLayoutData parent,
             MobPlayerClientMainVB player) {
@@ -41,77 +46,39 @@ public class GuiComponentHotbar extends GuiComponent {
         MatrixStack matrixStack = gl.matrixStack();
         player.inventories().access("Container", inventory -> {
             for (int i = 0; i < 10; i++) {
+                Matrix matrix = matrixStack.push();
+                matrix.translate((float) (i * (height + 10.0)), 0.0f, 0.0f);
                 if (i == player.inventorySelectLeft()) {
-                    gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, 0.0f, 0.0f,
-                            0.8f);
-                    Matrix matrix = matrixStack.push();
-                    matrix.translate((float) (i * (height + 10.0)), 0, 0.0f);
-                    gl.textures().unbind(gl);
-                    vao2.render(gl, shader);
-                    vao3.render(gl, shader);
-                    org.tobi29.scapes.client.gui.GuiUtils
-                            .renderItem(0.0f, 0.0f, (float) height,
-                                    (float) height, inventory.item(i), gl,
-                                    shader, gui.style().font());
                     gl.textures().bind("Scapes:image/gui/HotbarLeft", gl);
-                    gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
-                            1.0f);
-                    vao1.render(gl, shader);
-                    matrixStack.pop();
+                    vao.render(gl, shader);
                 } else if (i == player.inventorySelectRight()) {
-                    gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, 0.0f, 0.0f,
-                            0.8f);
-                    Matrix matrix = matrixStack.push();
-                    matrix.translate((float) (i * (height + 10.0)), 0.0f, 0.0f);
-                    gl.textures().unbind(gl);
-                    vao2.render(gl, shader);
-                    vao3.render(gl, shader);
-                    org.tobi29.scapes.client.gui.GuiUtils
-                            .renderItem(0.0f, 0.0f, (float) height,
-                                    (float) height, inventory.item(i), gl,
-                                    shader, gui.style().font());
                     gl.textures().bind("Scapes:image/gui/HotbarRight", gl);
-                    gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
-                            1.0f);
-                    vao1.render(gl, shader);
-                    matrixStack.pop();
-                } else {
-                    gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, 0.0f, 0.0f,
-                            0.6f);
-                    Matrix matrix = matrixStack.push();
-                    matrix.translate((float) (i * (height + 10.0)), 0.0f, 0.0f);
-                    gl.textures().unbind(gl);
-                    vao2.render(gl, shader);
-                    vao3.render(gl, shader);
-                    gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
-                            1.0f);
-                    org.tobi29.scapes.client.gui.GuiUtils
-                            .renderItem(0.0f, 0.0f, (float) height,
-                                    (float) height, inventory.item(i), gl,
-                                    shader, gui.style().font());
-                    matrixStack.pop();
+                    vao.render(gl, shader);
                 }
+                GuiUtils.items(0.0f, 0.0f, (float) height, (float) height,
+                        inventory.item(i), gl, shader, gui.style().font());
+                matrixStack.pop();
             }
         });
     }
 
     @Override
-    public void updateMesh(Vector2 size) {
-        vao1 = VAOUtility.createVTI(gui.style().engine(),
-                new float[]{0.0f, (float) (size.doubleY() - 32.0), 0.0f,
-                        size.floatY(), (float) (size.doubleY() - 32.0), 0.0f,
-                        0.0f, -32.0f, 0.0f, size.floatY(), -32.0f, 0.0f},
+    public void updateMesh(GuiRenderer renderer, Vector2 size) {
+        MatrixStack matrixStack = renderer.matrixStack();
+        for (int i = 0; i < 10; i++) {
+            Matrix matrix = matrixStack.push();
+            matrix.translate(i * (size.floatY() + 10.0f), 0.0f, 0.0f);
+            gui.style().button(renderer,
+                    new Vector2f(size.floatY(), size.floatY()), false);
+            matrixStack.pop();
+        }
+        vao = VAOUtility.createVCTI(gui.style().engine(),
+                new float[]{0.0f, size.floatY() - 32.0f, 0.0f, size.floatY(),
+                        size.floatY() - 32.0f, 0.0f, 0.0f, -32.0f, 0.0f,
+                        size.floatY(), -32.0f, 0.0f},
+                new float[]{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+                        1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
                 new float[]{0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f},
                 new int[]{0, 1, 2, 3, 2, 1}, RenderType.TRIANGLES);
-        vao2 = VAOUtility.createVTI(gui.style().engine(),
-                new float[]{0.0f, size.floatY(), 0.0f, size.floatY(),
-                        size.floatY(), 0.0f, 0.0f, 0.0f, 0.0f, size.floatY(),
-                        0.0f, 0.0f},
-                new float[]{0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f},
-                new int[]{0, 1, 2, 3, 2, 1}, RenderType.TRIANGLES);
-        Mesh mesh = new Mesh(true);
-        GuiUtils.renderShadow(mesh, 0.0f, 0.0f, size.floatY(), size.floatY(),
-                0.2f);
-        vao3 = mesh.finish(gui.style().engine());
     }
 }

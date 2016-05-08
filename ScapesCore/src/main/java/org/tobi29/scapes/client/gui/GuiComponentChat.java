@@ -18,24 +18,19 @@ package org.tobi29.scapes.client.gui;
 import org.tobi29.scapes.client.ChatHistory;
 import org.tobi29.scapes.engine.gui.GuiComponent;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
+import org.tobi29.scapes.engine.gui.GuiRenderer;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.matrix.Matrix;
-import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
 import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class GuiComponentChat extends GuiComponent {
     private final ChatHistory chatHistory;
-    private Map<String, FontRenderer.Text> cache = new ConcurrentHashMap<>(),
-            swapCache = new ConcurrentHashMap<>();
 
     public GuiComponentChat(GuiLayoutData parent, ChatHistory chatHistory) {
         super(parent);
         this.chatHistory = chatHistory;
+        chatHistory.listener(this, this::dirty);
     }
 
     @Override
@@ -44,28 +39,15 @@ public class GuiComponentChat extends GuiComponent {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, double width, double height) {
-        MatrixStack matrixStack = gl.matrixStack();
+    protected void updateMesh(GuiRenderer renderer, Vector2 size) {
         int yy = -16;
         Iterator<String> iterator = chatHistory.lines().iterator();
         while (iterator.hasNext()) {
             String line = iterator.next();
-            FontRenderer.Text vao = cache.get(line);
-            if (vao == null) {
-                vao = gui.style().font()
-                        .render(line, 0.0f, 0.0f, 16.0f, 1.0f, 1.0f, 1.0f,
-                                1.0f);
-            }
-            swapCache.put(line, vao);
-            Matrix matrix = matrixStack.push();
-            matrix.translate(0.0f, yy, 0.0f);
-            vao.render(gl, shader);
-            matrixStack.pop();
+            gui.style().font().render(FontRenderer
+                            .to(renderer, 0.0f, yy, 1.0f, 1.0f, 1.0f, 1.0f), line,
+                    16.0f);
             yy -= 20;
         }
-        Map<String, FontRenderer.Text> oldCache = cache;
-        cache = swapCache;
-        oldCache.clear();
-        swapCache = oldCache;
     }
 }
