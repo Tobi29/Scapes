@@ -25,7 +25,6 @@ import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
 import org.tobi29.scapes.engine.server.*;
-import org.tobi29.scapes.engine.utils.MutableSingle;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 
@@ -33,6 +32,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GameStateLoadMP extends GameState {
     private static final Logger LOGGER =
@@ -90,20 +90,19 @@ public class GameStateLoadMP extends GameState {
                         engine.guiStack().remove(progress);
                         try {
                             for (X509Certificate certificate : certificates) {
-                                MutableSingle<Boolean> result =
-                                        new MutableSingle<>(false);
+                                AtomicBoolean result = new AtomicBoolean();
                                 Joiner.Joinable joinable =
                                         new Joiner.Joinable();
                                 GuiCertificateWarning warning =
                                         new GuiCertificateWarning(this,
                                                 certificate, value -> {
-                                            result.a = value;
+                                            result.set(value);
                                             joinable.join();
                                         }, progress.style());
                                 engine.guiStack().add("10-Menu", warning);
                                 joinable.joiner().join(warning::valid);
                                 engine.guiStack().remove(warning);
-                                if (!result.a) {
+                                if (!result.get()) {
                                     return false;
                                 }
                             }

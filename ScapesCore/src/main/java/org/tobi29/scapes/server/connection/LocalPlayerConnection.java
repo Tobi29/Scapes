@@ -20,11 +20,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.client.connection.LocalClientConnection;
 import org.tobi29.scapes.client.states.GameStateGameMP;
+import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.server.AbstractServerConnection;
 import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.server.ConnectionCloseException;
 import org.tobi29.scapes.engine.utils.BufferCreator;
-import org.tobi29.scapes.engine.utils.MutableSingle;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.graphics.PNG;
 import org.tobi29.scapes.engine.utils.io.ChecksumUtil;
@@ -39,6 +39,7 @@ import org.tobi29.scapes.server.MessageLevel;
 
 import java.io.IOException;
 import java.nio.channels.Selector;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class LocalPlayerConnection extends PlayerConnection {
     private static final Logger LOGGER =
@@ -55,22 +56,27 @@ public class LocalPlayerConnection extends PlayerConnection {
     }
 
     public Optional<String> start(Account account) throws IOException {
-        MutableSingle<Image> image = new MutableSingle<>();
-        FilePath path = client.game().engine().home().resolve("Skin.png");
+        ScapesEngine engine = client.game().engine();
+        FilePath path = engine.home().resolve("Skin.png");
+        Image image;
         if (FileUtil.exists(path)) {
-            image.a = FileUtil.readReturn(path,
+            image = FileUtil.readReturn(path,
                     stream -> PNG.decode(stream, BufferCreator::bytes));
         } else {
-            client.game().engine().files()
-                    .get("Scapes:image/entity/mob/Player.png")
-                    .read(stream -> image.a =
-                            PNG.decode(stream, BufferCreator::bytes));
+            AtomicReference<Image> reference = new AtomicReference<>();
+            engine.files().get("Scapes:image/entity/mob/Player.png")
+                    .read(stream -> {
+                        Image defaultImage =
+                                PNG.decode(stream, BufferCreator::bytes);
+                        reference.set(defaultImage);
+                    });
+            image = reference.get();
         }
-        if (image.a.width() != 64 || image.a.height() != 64) {
-            return Optional.of("Invalid skin!");
+        if (image.width() != 64 || image.height() != 64) {
+            throw new ConnectionCloseException("Invalid skin!");
         }
         nickname = account.nickname();
-        skin = new ServerSkin(image.a);
+        skin = new ServerSkin(image);
         id = ChecksumUtil.checksum(account.keyPair().getPublic().getEncoded(),
                 ChecksumUtil.Algorithm.SHA1).toString();
         Optional<String> response = server.addPlayer(this);

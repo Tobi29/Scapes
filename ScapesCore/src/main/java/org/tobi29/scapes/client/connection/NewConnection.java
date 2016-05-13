@@ -9,7 +9,6 @@ import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.server.ConnectionCloseException;
 import org.tobi29.scapes.engine.server.PacketBundleChannel;
 import org.tobi29.scapes.engine.utils.BufferCreator;
-import org.tobi29.scapes.engine.utils.MutableSingle;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.VersionUtil;
 import org.tobi29.scapes.engine.utils.graphics.Image;
@@ -33,6 +32,7 @@ import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class NewConnection {
     private final ScapesEngine engine;
@@ -185,25 +185,26 @@ public class NewConnection {
     }
 
     private void sendSkin(WritableByteStream output) throws IOException {
-        MutableSingle<Image> image = new MutableSingle<>();
         FilePath path = engine.home().resolve("Skin.png");
+        Image image;
         if (FileUtil.exists(path)) {
-            image.a = FileUtil.readReturn(path,
+            image = FileUtil.readReturn(path,
                     stream -> PNG.decode(stream, BufferCreator::bytes));
-            if (image.a.width() != 64 || image.a.height() != 64) {
-                throw new ConnectionCloseException("Invalid skin!");
-            }
         } else {
+            AtomicReference<Image> reference = new AtomicReference<>();
             engine.files().get("Scapes:image/entity/mob/Player.png")
                     .read(stream -> {
-                        image.a = PNG.decode(stream, BufferCreator::bytes);
-                        if (image.a.width() != 64 || image.a.height() != 64) {
-                            throw new ConnectionCloseException("Invalid skin!");
-                        }
+                        Image defaultImage =
+                                PNG.decode(stream, BufferCreator::bytes);
+                        reference.set(defaultImage);
                     });
+            image = reference.get();
+        }
+        if (image.width() != 64 || image.height() != 64) {
+            throw new ConnectionCloseException("Invalid skin!");
         }
         byte[] skin = new byte[64 * 64 * 4];
-        image.a.buffer().get(skin);
+        image.buffer().get(skin);
         output.put(skin);
     }
 
