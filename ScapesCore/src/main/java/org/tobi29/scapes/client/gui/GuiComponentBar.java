@@ -26,7 +26,6 @@ import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
-import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
 public class GuiComponentBar extends GuiComponentHeavy {
     private final Supplier supplier;
@@ -79,8 +78,7 @@ public class GuiComponentBar extends GuiComponentHeavy {
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine, double delta,
-            Vector2 size) {
+    public void updateComponent(ScapesEngine engine, double delta) {
         double factor = FastMath.min(1.0, delta);
         value += (FastMath.clamp(supplier.get(), 0.0, 1.0) - value) * factor;
     }

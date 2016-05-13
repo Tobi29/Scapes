@@ -40,8 +40,7 @@ public class GuiComponentCredits extends GuiComponentHeavy {
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine, double delta,
-            Vector2 size) {
+    public void updateComponent(ScapesEngine engine, double delta) {
         y -= 40.0f * delta;
     }
 

@@ -21,7 +21,6 @@ import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
-import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
 public class GuiComponentControlsAxis extends GuiComponentTextButton {
     private final String name, id;
@@ -70,7 +69,7 @@ public class GuiComponentControlsAxis extends GuiComponentTextButton {
     }
 
     @Override
-    protected void updateComponent(ScapesEngine engine, double delta, Vector2 size) {
+    protected void updateComponent(ScapesEngine engine, double delta) {
         if (editing > 1) {
             int axes = controller.axes();
             for (int i = 0; i < axes; i++) {

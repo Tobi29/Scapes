@@ -36,7 +36,6 @@ import org.tobi29.scapes.engine.utils.io.RandomReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
-import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -105,8 +104,7 @@ public class GuiServerSelect extends GuiMenu {
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine, double delta,
-            Vector2 size) {
+    public void updateComponent(ScapesEngine engine, double delta) {
         Streams.of(elements).forEach(Element::checkConnection);
     }
 

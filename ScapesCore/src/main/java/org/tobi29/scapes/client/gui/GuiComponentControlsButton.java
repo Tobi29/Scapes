@@ -24,7 +24,6 @@ import org.tobi29.scapes.engine.input.ControllerBasic;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.input.ControllerKeyReference;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
-import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,7 +82,7 @@ public class GuiComponentControlsButton extends GuiComponentTextButton {
     }
 
     @Override
-    protected void updateComponent(ScapesEngine engine, double delta, Vector2 size) {
+    protected void updateComponent(ScapesEngine engine, double delta) {
         if (editing > 1) {
             controller.pressEvents().filter(event -> event.state() ==
                     ControllerBasic.PressState.PRESS)

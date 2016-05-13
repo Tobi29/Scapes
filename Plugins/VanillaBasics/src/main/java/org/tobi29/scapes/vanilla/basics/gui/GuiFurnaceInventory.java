@@ -19,7 +19,6 @@ import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.GuiComponentText;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.utils.math.FastMath;
-import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityFurnaceClient;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
@@ -45,9 +44,8 @@ public class GuiFurnaceInventory extends GuiContainerInventory {
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine, double delta,
-            Vector2 size) {
-        super.updateComponent(engine, delta, size);
+    public void updateComponent(ScapesEngine engine, double delta) {
+        super.updateComponent(engine, delta);
         updateTemperatureText();
     }
 

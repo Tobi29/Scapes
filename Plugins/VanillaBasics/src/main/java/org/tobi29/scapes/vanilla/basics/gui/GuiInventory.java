@@ -34,7 +34,6 @@ import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Streams;
-import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.packets.PacketInventoryInteraction;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
@@ -121,8 +120,7 @@ public class GuiInventory extends GuiMenu {
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine, double delta,
-            Vector2 size) {
+    public void updateComponent(ScapesEngine engine, double delta) {
         Optional<GuiCursor> cursor = engine.guiController().cursors().findAny();
         if (cursor.isPresent()) {
             cursorX = cursor.get().guiX();

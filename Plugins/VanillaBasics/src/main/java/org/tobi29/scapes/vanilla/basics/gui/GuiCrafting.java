@@ -20,7 +20,6 @@ import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Streams;
-import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 import org.tobi29.scapes.vanilla.basics.material.CraftingRecipe;
@@ -87,8 +86,8 @@ public class GuiCrafting extends GuiInventory {
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine, double delta, Vector2 size) {
-        super.updateComponent(engine, delta, size);
+    public void updateComponent(ScapesEngine engine, double delta) {
+        super.updateComponent(engine, delta);
         if (System.currentTimeMillis() > nextExample) {
             if (example == Integer.MAX_VALUE) {
                 example = 0;

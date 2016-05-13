@@ -22,7 +22,6 @@ import org.tobi29.scapes.engine.gui.GuiState;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.input.ControllerDefault;
 import org.tobi29.scapes.engine.input.ControllerKey;
-import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.packets.PacketChat;
 
@@ -47,7 +46,7 @@ public class GuiChatWrite extends GuiState {
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine, double delta, Vector2 size) {
+    public void updateComponent(ScapesEngine engine, double delta) {
         engine.controller().ifPresent(controller -> {
             if (controller.isPressed(ControllerKey.KEY_ENTER)) {
                 String text = write.text();
