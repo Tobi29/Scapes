@@ -63,8 +63,10 @@ public class LocalClientConnection extends ClientConnection {
 
     @Override
     public void stop() {
-        player.stop();
-        game.engine().setState(new GameStateMenu(game.engine()));
+        if (!player.isClosed()) {
+            player.stop();
+            game.engine().setState(new GameStateMenu(game.engine()));
+        }
     }
 
     @Override
