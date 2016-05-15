@@ -16,8 +16,8 @@
 package org.tobi29.scapes.server.command;
 
 import java8.util.Optional;
-import java8.util.stream.Stream;
 import java8.util.function.Function;
+import java8.util.stream.Stream;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -259,7 +259,7 @@ public interface Command {
 
         public Stream<Output> execute() {
             Collection<Output> outputs = new ArrayList<>(commands.size());
-            Streams.of(commands).forEach(command -> {
+            Streams.forEach(commands, command -> {
                 try {
                     command.execute();
                 } catch (CommandException e) {

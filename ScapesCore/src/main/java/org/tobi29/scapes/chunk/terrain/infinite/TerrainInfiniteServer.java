@@ -78,8 +78,8 @@ public class TerrainInfiniteServer extends TerrainInfinite
             while (!joiner.marked()) {
                 Collection<MobPlayerServer> players = world.players();
                 if (players.isEmpty()) {
-                    Streams.of(chunkManager.iterator())
-                            .forEach(chunkUnloadQueue::add);
+                    Streams.forEach(chunkManager.iterator(),
+                            chunkUnloadQueue::add);
                     removeChunks();
                     joiner.sleep(100);
                 } else {
@@ -108,10 +108,9 @@ public class TerrainInfiniteServer extends TerrainInfinite
                     for (MobPlayerServer player : players) {
                         Vector2 loadArea = new Vector2d(player.x() / 16.0,
                                 player.y() / 16.0);
-                        Streams.of(requiredChunks)
-                                .filter(pos -> !hasChunk(pos.intX(),
-                                        pos.intY()))
-                                .forEach(loadingChunks::add);
+                        Streams.forEach(requiredChunks,
+                                pos -> !hasChunk(pos.intX(), pos.intY()),
+                                loadingChunks::add);
                         List<Vector2i> newChunks;
                         if (loadingChunks.size() > 64) {
                             newChunks = Streams.of(loadingChunks)
@@ -136,16 +135,15 @@ public class TerrainInfiniteServer extends TerrainInfinite
                                 .filter(TerrainInfiniteChunkServer::shouldPopulate)
                                 .limit(32)
                                 .forEach(TerrainInfiniteChunkServer::populate);
-                        Streams.of(chunks)
-                                .filter(TerrainInfiniteChunkServer::shouldFinish)
-                                .forEach(TerrainInfiniteChunkServer::finish);
+                        Streams.forEach(chunks,
+                                TerrainInfiniteChunkServer::shouldFinish,
+                                TerrainInfiniteChunkServer::finish);
                         long time = System.currentTimeMillis() - 2000;
-                        Streams.of(chunks)
-                                .filter(chunk -> chunk.lastAccess() < time)
-                                .filter(chunk -> !requiredChunks
-                                        .contains(chunk.pos()))
-                                .forEach(chunkUnloadQueue::add);
-                        Streams.of(chunks).forEach(
+                        Streams.forEach(chunks,
+                                chunk -> chunk.lastAccess() < time &&
+                                        !requiredChunks.contains(chunk.pos()),
+                                chunkUnloadQueue::add);
+                        Streams.forEach(chunks,
                                 TerrainInfiniteChunkServer::updateAdjacent);
                         if (removeChunks() && loadingChunks.isEmpty()) {
                             joiner.sleep(100);
@@ -266,8 +264,8 @@ public class TerrainInfiniteServer extends TerrainInfinite
     @Override
     public void update(double delta, Collection<MobSpawner> spawners) {
         try (Profiler.C ignored = Profiler.section("Chunks")) {
-            Streams.of(chunkManager.iterator())
-                    .forEach(chunk -> chunk.updateServer(delta));
+            Streams.forEach(chunkManager.iterator(),
+                    chunk -> chunk.updateServer(delta));
         }
         try (Profiler.C ignored = Profiler.section("Spawning")) {
             Random random = ThreadLocalRandom.current();
@@ -447,7 +445,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
     public void dispose() {
         joiner.join();
         lighting.dispose();
-        Streams.of(chunkManager.iterator()).forEach(chunkUnloadQueue::add);
+        Streams.forEach(chunkManager.iterator(), chunkUnloadQueue::add);
         removeChunks();
         format.dispose();
     }

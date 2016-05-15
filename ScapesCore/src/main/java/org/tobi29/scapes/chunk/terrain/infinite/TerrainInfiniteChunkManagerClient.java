@@ -17,7 +17,6 @@ package org.tobi29.scapes.chunk.terrain.infinite;
 
 import java8.util.Objects;
 import java8.util.Optional;
-import java8.util.stream.Collectors;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
@@ -104,8 +103,7 @@ public class TerrainInfiniteChunkManagerClient
 
     @Override
     public Collection<TerrainInfiniteChunkClient> iterator() {
-        return Streams.of(array).filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        return Streams.collect(array, Objects::nonNull);
     }
 
     protected boolean setCenter(int x, int y) {

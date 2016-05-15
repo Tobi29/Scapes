@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.client;
 
-import java8.util.stream.Collectors;
 import java8.util.stream.Stream;
 import org.tobi29.scapes.engine.utils.Streams;
 
@@ -33,18 +32,17 @@ public class ChatHistory {
         for (String line : lines) {
             this.lines.add(0, new ChatLine(line));
         }
-        Streams.of(changeListeners.values()).forEach(Runnable::run);
+        Streams.forEach(changeListeners.values(), Runnable::run);
     }
 
     @SuppressWarnings("CallToNativeMethodWhileLocked")
     public synchronized void update() {
         long time = System.currentTimeMillis();
         List<ChatLine> removals =
-                Streams.of(lines).filter(line -> time - line.time > 10000)
-                        .collect(Collectors.toList());
+                Streams.collect(lines, line -> time - line.time > 10000);
         if (!removals.isEmpty()) {
             lines.removeAll(removals);
-            Streams.of(changeListeners.values()).forEach(Runnable::run);
+            Streams.forEach(changeListeners.values(), Runnable::run);
         }
     }
 

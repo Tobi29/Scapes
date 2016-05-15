@@ -37,20 +37,20 @@ public class PlayerCommandsExtension extends ServerExtension {
         group.register("add PLAYER-ID...", 9, options -> {
         }, (args, executor, commands) -> {
             String[] ids = args.args();
-            Streams.of(ids).forEach(id -> commands.add(() -> server.add(id)));
+            Streams.forEach(ids, id -> commands.add(() -> server.add(id)));
         });
 
         group.register("remove PLAYER-ID...", 9, options -> {
         }, (args, executor, commands) -> {
             String[] ids = args.args();
-            Streams.of(ids).forEach(id -> commands.add(() -> server.remove(id)));
+            Streams.forEach(ids, id -> commands.add(() -> server.remove(id)));
         });
 
         group.register("kick PLAYER-NAME...", 9, options -> {
         }, (args, executor, commands) -> {
             String[] playerNames = args.args();
             String message = "Kick by an Admin!";
-            Streams.of(playerNames).forEach(playerName -> commands.add(() -> {
+            Streams.forEach(playerNames, playerName -> commands.add(() -> {
                 PlayerConnection player =
                         Command.require(connection::playerByName, playerName);
                 player.disconnect(message);

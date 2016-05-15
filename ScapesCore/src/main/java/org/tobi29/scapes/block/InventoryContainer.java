@@ -51,7 +51,7 @@ public class InventoryContainer {
     }
 
     public void forEach(Consumer<Inventory> consumer) {
-        Streams.of(inventories.entrySet()).forEach(entry -> {
+        Streams.forEach(inventories.entrySet(), entry -> {
             Inventory inventory = entry.getValue();
             synchronized (inventory) {
                 consumer.accept(inventory);
@@ -60,7 +60,7 @@ public class InventoryContainer {
     }
 
     public void forEach(BiConsumer<String, Inventory> consumer) {
-        Streams.of(inventories.entrySet()).forEach(entry -> {
+        Streams.forEach(inventories.entrySet(), entry -> {
             String id = entry.getKey();
             Inventory inventory = entry.getValue();
             synchronized (inventory) {
@@ -70,7 +70,7 @@ public class InventoryContainer {
     }
 
     public void forEachModify(Predicate<Inventory> consumer) {
-        Streams.of(inventories.entrySet()).forEach(entry -> {
+        Streams.forEach(inventories.entrySet(), entry -> {
             String id = entry.getKey();
             Inventory inventory = entry.getValue();
             synchronized (inventory) {
@@ -82,7 +82,7 @@ public class InventoryContainer {
     }
 
     public void forEachModify(BiPredicate<String, Inventory> consumer) {
-        Streams.of(inventories.entrySet()).forEach(entry -> {
+        Streams.forEach(inventories.entrySet(), entry -> {
             String id = entry.getKey();
             Inventory inventory = entry.getValue();
             synchronized (inventory) {

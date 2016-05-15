@@ -44,14 +44,14 @@ public class ParticleSystem {
     }
 
     public void update(double delta) {
-        Streams.of(emitters.values()).forEach(emitter -> {
+        Streams.forEach(emitters.values(), emitter -> {
             emitter.poll();
             emitter.update(delta);
         });
     }
 
     public void render(GL gl, Cam cam) {
-        Streams.of(emitters.values()).forEach(emitter -> {
+        Streams.forEach(emitters.values(), emitter -> {
             emitter.pollRender();
             emitter.render(gl, cam);
         });

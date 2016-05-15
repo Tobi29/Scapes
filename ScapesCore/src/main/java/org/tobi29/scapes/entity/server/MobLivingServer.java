@@ -242,26 +242,26 @@ public abstract class MobLivingServer extends MobServer {
     }
 
     public void onNotice(MobServer mob) {
-        Streams.of(noticeListeners.values())
-                .forEach(listener -> listener.onNotice(mob));
+        Streams.forEach(noticeListeners.values(),
+                listener -> listener.onNotice(mob));
     }
 
     public void onJump() {
-        Streams.of(jumpListeners.values()).forEach(JumpListener::onJump);
+        Streams.forEach(jumpListeners.values(), JumpListener::onJump);
     }
 
     public void onHeal(double amount) {
-        Streams.of(healListeners.values())
-                .forEach(listener -> listener.onHeal(amount));
+        Streams.forEach(healListeners.values(),
+                listener -> listener.onHeal(amount));
     }
 
     public void onDamage(double amount) {
-        Streams.of(damageListeners.values())
-                .forEach(listener -> listener.onDamage(amount));
+        Streams.forEach(damageListeners.values(),
+                listener -> listener.onDamage(amount));
     }
 
     public void onDeath() {
-        Streams.of(deathListeners.values()).forEach(DeathListener::onDeath);
+        Streams.forEach(deathListeners.values(), DeathListener::onDeath);
     }
 
     public interface NoticeListener extends EntityServer.Listener {

@@ -46,10 +46,9 @@ public class GuiHud extends GuiState {
         if (visible) {
             MatrixStack matrixStack = gl.matrixStack();
             Matrix matrix = matrixStack.push();
-            matrix.translate(480.0f, 270.0f, 0.0f);
-            float ratio =
-                    (float) gl.sceneHeight() / gl.sceneWidth() / 540 * 960;
-            matrix.scale(ratio, 1.0f, 1.0f);
+            matrix.translate(
+                    (float) gl.sceneWidth() / gl.sceneHeight() * 270.0f, 270.0f,
+                    0.0f);
             gl.textures().bind("Scapes:image/gui/Cross", gl);
             gl.setBlending(BlendingMode.INVERT);
             cross.render(gl, shader);

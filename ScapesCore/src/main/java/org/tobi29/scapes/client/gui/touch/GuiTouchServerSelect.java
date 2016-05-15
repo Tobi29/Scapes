@@ -103,7 +103,7 @@ public class GuiTouchServerSelect extends GuiTouchMenuDouble {
 
     @Override
     public void updateComponent(ScapesEngine engine, double delta) {
-        Streams.of(elements).forEach(Element::checkConnection);
+        Streams.forEach(elements, Element::checkConnection);
     }
 
     public void addServer(TagStructure server) {

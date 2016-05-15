@@ -332,7 +332,7 @@ public class EnvironmentOverworldServer
         while (playerUpdateWait <= 0.0) {
             playerUpdateWait += 0.25;
             Random random = ThreadLocalRandom.current();
-            Streams.of(world.players()).forEach(player -> {
+            Streams.forEach(world.players(), player -> {
                 double health = player.health();
                 double maxHealth = player.maxHealth();
                 TagStructure conditionTag =

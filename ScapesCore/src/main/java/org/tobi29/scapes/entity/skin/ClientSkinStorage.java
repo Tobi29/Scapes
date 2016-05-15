@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.entity.skin;
 
-import java8.util.stream.Collectors;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
@@ -44,10 +43,9 @@ public class ClientSkinStorage {
     }
 
     public void update(ClientConnection connection) {
-        List<ClientSkin> oldSkins = Streams.of(skins.values())
-                .filter(skin -> skin.increaseTicks() > 1200)
-                .collect(Collectors.toList());
-        Streams.of(oldSkins).forEach(skin -> {
+        List<ClientSkin> oldSkins = Streams.collect(skins.values(),
+                skin -> skin.increaseTicks() > 1200);
+        Streams.forEach(oldSkins, skin -> {
             skins.remove(skin.checksum());
             skin.markDisposed();
         });
@@ -57,7 +55,7 @@ public class ClientSkinStorage {
     }
 
     public void dispose() {
-        Streams.of(skins.values()).forEach(Texture::markDisposed);
+        Streams.forEach(skins.values(), Texture::markDisposed);
     }
 
     public void addSkin(Checksum checksum, Image image) {

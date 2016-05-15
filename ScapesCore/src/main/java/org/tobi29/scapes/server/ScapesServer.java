@@ -207,7 +207,7 @@ public class ScapesServer {
         }
         assert shutdownReason != ShutdownReason.RUNNING;
         stopped = true;
-        Streams.of(worlds.values()).forEach(this::removeWorld);
+        Streams.forEach(worlds.values(), this::removeWorld);
         serverConnection.stop();
         taskExecutor.shutdown();
         format.dispose();

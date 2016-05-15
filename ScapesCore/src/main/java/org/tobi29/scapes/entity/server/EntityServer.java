@@ -121,7 +121,7 @@ public class EntityServer implements MultiTag.ReadAndWrite {
 
     public void onSpawn() {
         world.entityListeners().forEach(listener -> listener.listen(this));
-        Streams.of(spawnListeners.values()).forEach(SpawnListener::onSpawn);
+        Streams.forEach(spawnListeners.values(), SpawnListener::onSpawn);
     }
 
     public void onUnload() {

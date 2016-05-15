@@ -169,8 +169,8 @@ public class Plugins {
 
     public void init() {
         if (!init) {
-            Streams.of(plugins).forEach(plugin -> plugin.init(registry));
-            Streams.of(plugins).forEach(plugin -> plugin.initEnd(registry));
+            Streams.forEach(plugins, plugin -> plugin.init(registry));
+            Streams.forEach(plugins, plugin -> plugin.initEnd(registry));
             registry.lock();
             init = true;
         }

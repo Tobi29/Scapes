@@ -58,7 +58,7 @@ public class DebugCommandsExtension extends ServerExtension {
         group.register("clear", 8, options -> {
         }, (args, executor, commands) -> {
             String[] playerNames = args.args();
-            Streams.of(playerNames).forEach(playerName -> commands.add(() -> {
+            Streams.forEach(playerNames, playerName -> commands.add(() -> {
                 PlayerConnection player =
                         Command.require(connection::playerByName, playerName);
                 player.mob(mob -> mob.inventories()

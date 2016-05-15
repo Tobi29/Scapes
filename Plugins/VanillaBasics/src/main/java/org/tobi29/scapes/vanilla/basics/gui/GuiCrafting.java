@@ -79,7 +79,7 @@ public class GuiCrafting extends GuiInventory {
                     .addVert(0, 0, 90, 30, GuiComponentGroup::new);
             separator.add(5, 9, -1, 12,
                     p -> new GuiComponentText(p, "Table only:"));
-            Streams.of(tableOnly).forEach(type -> scrollPaneTypes
+            Streams.forEach(tableOnly, type -> scrollPaneTypes
                     .addVert(0, 0, -1, 20,
                             p -> new ElementType(p, type.a, type.b, false)));
         }
@@ -94,7 +94,7 @@ public class GuiCrafting extends GuiInventory {
             } else {
                 example++;
             }
-            Streams.of(elements).forEach(Element::examples);
+            Streams.forEach(elements, Element::examples);
             nextExample = System.currentTimeMillis() + 1000;
         }
     }
@@ -163,7 +163,7 @@ public class GuiCrafting extends GuiInventory {
         }
 
         public void examples() {
-            Streams.of(examples).forEach(Runnable::run);
+            Streams.forEach(examples, Runnable::run);
         }
     }
 }

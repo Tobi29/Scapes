@@ -66,9 +66,8 @@ public class MobItemServer extends MobServer {
     public void update(double delta) {
         if (pickupwait <= 0) {
             AABB aabb = aabb().grow(0.8, 0.8, 0.4);
-            Streams.of(world.players())
-                    .filter(entity -> aabb.overlay(entity.aabb()))
-                    .forEach(entity -> {
+            Streams.forEach(world.players(),
+                    entity -> aabb.overlay(entity.aabb()), entity -> {
                         world.playSound("Scapes:sound/entity/mob/Item.ogg",
                                 this);
                         entity.inventories().modify("Container",

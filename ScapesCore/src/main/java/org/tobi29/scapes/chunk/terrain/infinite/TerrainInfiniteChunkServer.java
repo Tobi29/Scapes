@@ -92,14 +92,14 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
     }
 
     public void updateServer(double delta) {
-        Streams.of(terrain.world().players()).forEach(entity -> {
+        Streams.forEach(terrain.world().players(), entity -> {
             int x = FastMath.floor(entity.x()) >> 4;
             int y = FastMath.floor(entity.y()) >> 4;
             if (x == pos.intX() && y == pos.intY()) {
                 addEntity(entity);
             }
         });
-        Streams.of(entities.values()).forEach(entity -> {
+        Streams.forEach(entities.values(), entity -> {
             int x = FastMath.floor(entity.x()) >> 4;
             int y = FastMath.floor(entity.y()) >> 4;
             if (x != pos.intX() || y != pos.intY()) {
@@ -253,27 +253,27 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
         tagStructure.setList("BlockLight", bLight.save());
         List<TagStructure> entitiesTag = new ArrayList<>();
         GameRegistry registry = terrain.world().registry();
-        Streams.of(entities.values())
-                .filter(entity -> !(entity instanceof MobPlayerServer) ||
-                        packet).forEach(entity -> {
-            TagStructure entityTag = new TagStructure();
-            if (packet) {
-                entityTag.setInteger("EntityID", entity.entityID());
-            } else {
-                entityTag.setLong("Tick", tick);
-            }
-            entityTag.setInteger("ID", entity.id(registry));
-            entityTag.setStructure("Data", entity.write());
-            entitiesTag.add(entityTag);
-        });
+        Streams.forEach(entities.values(),
+                entity -> !(entity instanceof MobPlayerServer) || packet,
+                entity -> {
+                    TagStructure entityTag = new TagStructure();
+                    if (packet) {
+                        entityTag.setInteger("EntityID", entity.entityID());
+                    } else {
+                        entityTag.setLong("Tick", tick);
+                    }
+                    entityTag.setInteger("ID", entity.id(registry));
+                    entityTag.setStructure("Data", entity.write());
+                    entitiesTag.add(entityTag);
+                });
         tagStructure.setList("Entities", entitiesTag);
         tagStructure.setStructure("MetaData", metaData);
         if (!packet) {
             List<TagStructure> updatesTag = new ArrayList<>();
             synchronized (delayedUpdates) {
-                Streams.of(delayedUpdates).filter(update -> update
+                Streams.forEach(delayedUpdates, update -> update
                         .isValidOn(typeG(update.x(), update.y(), update.z()),
-                                terrain)).forEach(update -> {
+                                terrain), update -> {
                     TagStructure updateTag = new TagStructure();
                     updateTag.setShort("ID", update.id(registry));
                     updateTag.setDouble("Delay", update.delay());
@@ -312,7 +312,7 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
                         }
                     }
                 }
-                Streams.of(output.updates).forEach(this::addDelayedUpdate);
+                Streams.forEach(output.updates, this::addDelayedUpdate);
                 output.updates.clear();
             }
         }

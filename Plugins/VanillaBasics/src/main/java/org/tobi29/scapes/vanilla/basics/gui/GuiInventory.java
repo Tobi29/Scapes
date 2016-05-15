@@ -108,7 +108,7 @@ public class GuiInventory extends GuiMenu {
             }
             Matrix matrix = matrixStack.push();
             matrix.translate((float) cursorX, (float) cursorY, 0.0f);
-            Streams.of(hoverText).forEach(mesh -> {
+            Streams.forEach(hoverText, mesh -> {
                 mesh.b.bind(gl);
                 mesh.a.render(gl, shader);
             });

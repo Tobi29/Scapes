@@ -105,7 +105,7 @@ public class GuiServerSelect extends GuiMenu {
 
     @Override
     public void updateComponent(ScapesEngine engine, double delta) {
-        Streams.of(elements).forEach(Element::checkConnection);
+        Streams.forEach(elements, Element::checkConnection);
     }
 
     public void addServer(TagStructure server) {

@@ -43,7 +43,7 @@ public class BlockModelComplex implements BlockModel {
             List<Shape> shapes, float scale) {
         this.registry = registry;
         this.shapes = shapes;
-        Streams.of(shapes).forEach(shape -> {
+        Streams.forEach(shapes, shape -> {
             shape.scale(scale);
             shape.center();
         });
@@ -55,7 +55,7 @@ public class BlockModelComplex implements BlockModel {
     public void addToChunkMesh(ChunkMesh mesh, TerrainClient terrain, int x,
             int y, int z, float xx, float yy, float zz, float r, float g,
             float b, float a, boolean lod) {
-        Streams.of(shapes).forEach(shape -> shape
+        Streams.forEach(shapes, shape -> shape
                 .addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz, r, g, b, a,
                         lod));
     }
@@ -85,7 +85,7 @@ public class BlockModelComplex implements BlockModel {
     }
 
     protected void buildVAO(Mesh mesh, boolean inventory) {
-        Streams.of(shapes).forEach(shape -> shape.addToMesh(mesh, inventory));
+        Streams.forEach(shapes, shape -> shape.addToMesh(mesh, inventory));
     }
 
     public abstract static class Shape {

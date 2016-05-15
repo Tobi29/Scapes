@@ -79,7 +79,7 @@ public class BasicTerrainInfiniteFormat implements TerrainInfiniteFormat {
 
     @Override
     public synchronized void dispose() {
-        Streams.of(regions.keySet()).forEach(this::removeRegion);
+        Streams.forEach(regions.keySet(), this::removeRegion);
     }
 
     private Optional<TagStructure> chunkTag(int x, int y) throws IOException {

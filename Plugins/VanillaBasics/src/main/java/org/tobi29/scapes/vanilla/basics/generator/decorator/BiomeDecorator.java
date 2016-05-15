@@ -45,7 +45,7 @@ public class BiomeDecorator {
 
     public void decorate(TerrainServer.TerrainMutable terrain, int x, int y,
             VanillaMaterial materials, Random random) {
-        Streams.of(layers).forEach(
+        Streams.forEach(layers,
                 layer -> layer.decorate(terrain, x, y, materials, random));
     }
 

@@ -93,8 +93,8 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     }
 
     public void reloadGeometry() {
-        Streams.of(terrain.loadedChunks())
-                .forEach(chunk -> chunk.rendererChunk().reset());
+        Streams.forEach(terrain.loadedChunks(),
+                chunk -> chunk.rendererChunk().reset());
     }
 
     public void dispose() {
@@ -155,10 +155,10 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
         if (disposed) {
             return;
         }
-        Streams.of(chunks).forEach(chunk -> chunk.render(gl, shader, cam));
+        Streams.forEach(chunks, chunk -> chunk.render(gl, shader, cam));
         if (debug) {
             gl.textures().unbind(gl);
-            Streams.of(chunks).forEach(
+            Streams.forEach(chunks,
                     chunk -> chunk.renderFrame(gl, frame, shader, cam));
         }
     }
@@ -233,8 +233,8 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     }
 
     private void updateVisible() {
-        Streams.of(terrain.loadedChunks())
-                .forEach(chunk -> chunk.rendererChunk().resetPrepareVisible());
+        Streams.forEach(terrain.loadedChunks(),
+                chunk -> chunk.rendererChunk().resetPrepareVisible());
         Optional<TerrainInfiniteChunkClient> startChunk =
                 terrain.chunkNoLoad(playerX, playerY);
         checkVisible(playerX, playerY, playerZ, startChunk);
@@ -273,16 +273,16 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                     .set(x - 1, y, z, chunk.get(), chunk.get().rendererChunk());
         }
         while (!cullingPool1.isEmpty()) {
-            Streams.of(cullingPool1)
-                    .filter(update -> !update.rendererChunk.isCulled(update.z))
-                    .forEach(update -> checkVisible(update, cullingPool2));
+            Streams.forEach(cullingPool1,
+                    update -> !update.rendererChunk.isCulled(update.z),
+                    update -> checkVisible(update, cullingPool2));
             Pool<VisibleUpdate> swap = cullingPool1;
             swap.reset();
             cullingPool1 = cullingPool2;
             cullingPool2 = swap;
         }
-        Streams.of(terrain.loadedChunks())
-                .forEach(visible -> visible.rendererChunk().setCulled(false));
+        Streams.forEach(terrain.loadedChunks(),
+                visible -> visible.rendererChunk().setCulled(false));
     }
 
     private void checkVisible(VisibleUpdate update, Pool<VisibleUpdate> pool) {

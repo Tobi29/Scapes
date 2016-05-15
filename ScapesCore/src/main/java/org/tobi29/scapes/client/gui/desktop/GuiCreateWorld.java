@@ -124,8 +124,8 @@ public class GuiCreateWorld extends GuiMenuDouble {
             GuiComponentScrollPaneViewport scrollPane =
                     pane.addVert(16, 5, -1, 350,
                             p -> new GuiComponentScrollPane(p, 70)).viewport();
-            Streams.of(plugins).filter(plugin -> plugin.parent().equals(parent))
-                    .forEach(plugin -> scrollPane.addVert(0, 0, -1, 70,
+            Streams.forEach(plugins, plugin -> plugin.parent().equals(parent),
+                    plugin -> scrollPane.addVert(0, 0, -1, 70,
                             p -> new Element(p, plugin)));
         }
 

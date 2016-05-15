@@ -127,7 +127,7 @@ public class WorldClient extends World {
 
     public void update(double delta) {
         try (Profiler.C ignored = Profiler.section("Entities")) {
-            Streams.of(entities.values()).forEach(entity -> {
+            Streams.forEach(entities.values(), entity -> {
                 if (terrain.isBlockTicking(FastMath.floor(entity.x()),
                         FastMath.floor(entity.y()),
                         FastMath.floor(entity.z()))) {
@@ -207,10 +207,10 @@ public class WorldClient extends World {
             playerModel.render(gl, this, cam, shaderEntity);
         }
         AABB aabb = new AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-        Streams.of(entityModels.values()).filter(model -> {
+        Streams.forEach(entityModels.values(), model -> {
             model.shapeAABB(aabb);
             return cam.frustum.inView(aabb) != 0;
-        }).forEach(model -> model.render(gl, this, cam, shaderEntity));
+        }, model -> model.render(gl, this, cam, shaderEntity));
         scene.terrainTextureRegistry().texture().bind(gl);
         terrain.renderer().renderAlpha(gl, shaderTerrain, cam);
         scene.particles().render(gl, cam);

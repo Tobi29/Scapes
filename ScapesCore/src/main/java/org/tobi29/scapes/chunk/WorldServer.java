@@ -113,8 +113,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
 
     public void addEntity(EntityServer entity) {
         terrain.addEntity(entity);
-        Streams.of(entityListeners)
-                .forEach(listener -> listener.listen(entity));
+        Streams.forEach(entityListeners, listener -> listener.listen(entity));
         if (entity.id(plugins.registry()) >= 0) {
             send(new PacketEntityAdd(entity, plugins.registry()));
         }
@@ -382,7 +381,7 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
                 }
             }
             taskExecutor.addTask(() -> {
-                Streams.of(entities).forEach(entity -> {
+                Streams.forEach(entities, entity -> {
                     entity.onSpawn();
                     addEntity(entity);
                 });
@@ -516,9 +515,8 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
             }
         } else {
             while (!players.isEmpty()) {
-                Streams.of(players.values()).forEach(
-                        player -> player.connection()
-                                .disconnect("World closed", 5));
+                Streams.forEach(players.values(), player -> player.connection()
+                        .disconnect("World closed", 5));
             }
         }
         joiner.join();
@@ -550,8 +548,8 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
 
     @Override
     public void send(Packet packet) {
-        Streams.of(players.values())
-                .forEach(player -> player.connection().send(packet));
+        Streams.forEach(players.values(),
+                player -> player.connection().send(packet));
     }
 
     public void send(Packet packet, List<PlayerConnection> exceptions) {

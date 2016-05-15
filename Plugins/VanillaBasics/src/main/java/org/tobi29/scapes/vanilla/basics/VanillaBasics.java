@@ -77,7 +77,7 @@ public class VanillaBasics implements WorldType {
     private boolean locked;
 
     public VanillaBasics() {
-        Streams.of(BiomeGenerator.Biome.values()).forEach(
+        Streams.forEach(BiomeGenerator.Biome.values(),
                 biome -> biomeDecorators.put(biome, new ConcurrentHashMap<>()));
     }
 
@@ -219,9 +219,9 @@ public class VanillaBasics implements WorldType {
 
     @Override
     public void initEnd(GameRegistry registry) {
-        Streams.of(c.decoratorOverlays.values()).forEach(
-                config -> Streams.of(biomeDecorators.values()).forEach(
-                        biome -> Streams.of(biome.values()).forEach(config)));
+        Streams.forEach(c.decoratorOverlays.values(), config -> Streams
+                .forEach(biomeDecorators.values(),
+                        biome -> Streams.forEach(biome.values(), config)));
         locked = true;
         VanillaBasicsRegisters.registerRecipes(this, registry);
     }
@@ -349,9 +349,8 @@ public class VanillaBasics implements WorldType {
             AlloyTypeCreator creator = new AlloyTypeCreator();
             alloy.accept(creator);
             Map<MetalType, Double> ingredients = new ConcurrentHashMap<>();
-            Streams.of(creator.ingredients.entrySet()).forEach(
-                    entry -> ingredients.put(metalTypes.get(entry.getKey()),
-                            entry.getValue()));
+            Streams.forEach(creator.ingredients.entrySet(), entry -> ingredients
+                    .put(metalTypes.get(entry.getKey()), entry.getValue()));
             addAlloyType(
                     new AlloyType(creator.id, creator.name, creator.ingotName,
                             ingredients, creator.r, creator.g, creator.b,

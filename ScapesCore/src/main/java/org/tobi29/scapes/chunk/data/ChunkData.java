@@ -138,7 +138,7 @@ public class ChunkData {
     }
 
     public void compress() {
-        Streams.of(data).forEach(ChunkArraySection::compress);
+        Streams.forEach(data, ChunkArraySection::compress);
     }
 
     public interface SectionSupplier {

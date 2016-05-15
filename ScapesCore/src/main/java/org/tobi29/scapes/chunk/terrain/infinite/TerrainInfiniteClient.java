@@ -167,7 +167,7 @@ public class TerrainInfiniteClient extends TerrainInfinite
     public void dispose() {
         joiner.join();
         lighting.dispose();
-        Streams.of(chunkManager.iterator()).forEach(this::removeChunk);
+        Streams.forEach(chunkManager.iterator(), this::removeChunk);
         renderer.dispose();
     }
 

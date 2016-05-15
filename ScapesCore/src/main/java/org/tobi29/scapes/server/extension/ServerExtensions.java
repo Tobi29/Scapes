@@ -22,8 +22,10 @@ public class ServerExtensions {
     }
 
     public void init() {
-        Streams.of(extensions).forEach(extension -> extension.init(this::listener));
-        Streams.of(extensions).forEach(extension -> extension.initLate(this::listener));
+        Streams.forEach(extensions,
+                extension -> extension.init(this::listener));
+        Streams.forEach(extensions,
+                extension -> extension.initLate(this::listener));
     }
 
     public void loadExtensions() {

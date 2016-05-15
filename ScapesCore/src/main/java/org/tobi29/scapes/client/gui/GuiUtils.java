@@ -74,7 +74,7 @@ public final class GuiUtils {
                         });
                 matrix = matrixStack.push();
                 matrix.translate(x, y + height, 0.0f);
-                Streams.of(text).forEach(mesh -> {
+                Streams.forEach(text, mesh -> {
                     mesh.b.bind(gl);
                     mesh.a.render(gl, shader);
                 });
