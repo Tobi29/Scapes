@@ -560,21 +560,28 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
 
     private Stream<EntityServer> entities(
             Consumer<Set<EntityServer>> consumer) {
+        return Streams.of(entityArray(consumer));
+    }
+
+    private EntityServer[] entityArray(Consumer<Set<EntityServer>> consumer) {
         Set<EntityServer> entities = ENTITY_SET.get();
         consumer.accept(entities);
-        Stream<EntityServer> stream =
-                Streams.of(entities.toArray(new EntityServer[entities.size()]));
+        EntityServer[] array =
+                entities.toArray(new EntityServer[entities.size()]);
         entities.clear();
-        return stream;
+        return array;
     }
 
     private Stream<MobServer> mobs(Consumer<Set<MobServer>> consumer) {
+        return Streams.of(mobArray(consumer));
+    }
+
+    private MobServer[] mobArray(Consumer<Set<MobServer>> consumer) {
         Set<MobServer> entities = MOB_SET.get();
         consumer.accept(entities);
-        Stream<MobServer> stream =
-                Streams.of(entities.toArray(new MobServer[entities.size()]));
+        MobServer[] array = entities.toArray(new MobServer[entities.size()]);
         entities.clear();
-        return stream;
+        return array;
     }
 
     public interface EntityListener {

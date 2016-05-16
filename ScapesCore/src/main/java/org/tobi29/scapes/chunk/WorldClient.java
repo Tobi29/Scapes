@@ -18,7 +18,6 @@ package org.tobi29.scapes.chunk;
 import java8.util.Optional;
 import java8.util.function.Function;
 import java8.util.function.Supplier;
-import java8.util.stream.Collectors;
 import java8.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +35,6 @@ import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
-import org.tobi29.scapes.engine.utils.math.Frustum;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.engine.utils.profiler.Profiler;
@@ -47,7 +45,6 @@ import org.tobi29.scapes.entity.model.EntityModel;
 import org.tobi29.scapes.entity.model.MobModel;
 import org.tobi29.scapes.packets.Packet;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -87,16 +84,6 @@ public class WorldClient extends World {
         connection.plugins().plugins()
                 .forEach(plugin -> plugin.worldInit(this));
         terrain = terrainSupplier.apply(this);
-    }
-
-    public List<MobClient> entities(List<MobClient> exceptions,
-            Frustum hitField) {
-        return Streams.of(entities.values())
-                .filter(entity -> entity instanceof MobClient)
-                .map(entity -> (MobClient) entity)
-                .filter(mob -> !exceptions.contains(mob) &&
-                        hitField.inView(mob.aabb()) > 0)
-                .collect(Collectors.toList());
     }
 
     public void addEntity(EntityClient add, int id) {
