@@ -57,7 +57,6 @@ public class ParticlePhysics {
                 }
             }
         }
-        aabbs.reset();
         instance.speed.plusZ(-gravitationMultiplier * delta *
                 gravitation);
         instance.speed.div(1.0 + airFriction * delta);

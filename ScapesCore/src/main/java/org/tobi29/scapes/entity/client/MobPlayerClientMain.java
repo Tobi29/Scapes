@@ -27,6 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class MobPlayerClientMain extends MobPlayerClient {
     protected final GameStateGameMP game;
+    private final Frustum viewField;
     protected Gui currentGui;
     protected boolean flying;
     protected int swim;
@@ -36,9 +37,9 @@ public abstract class MobPlayerClientMain extends MobPlayerClient {
 
     protected MobPlayerClientMain(WorldClient world, Vector3 pos, Vector3 speed,
             AABB aabb, double lives, double maxLives, Frustum viewField,
-            Frustum hitField, String nickname) {
-        super(world, pos, speed, aabb, lives, maxLives, viewField, hitField,
-                nickname);
+            String nickname) {
+        super(world, pos, speed, aabb, lives, maxLives, nickname);
+        this.viewField = viewField;
         game = world.game();
     }
 
@@ -183,6 +184,9 @@ public abstract class MobPlayerClientMain extends MobPlayerClient {
                         ground, slidingWall, inWater, swimming, true);
     }
 
+    public void onNotice(MobClient notice) {
+    }
+
     @Override
     public void onDamage(double damage) {
         game.client().world().scene().damageShake(damage);
@@ -212,7 +216,6 @@ public abstract class MobPlayerClientMain extends MobPlayerClient {
             headInWater = world.terrain().type(pos.intX(), pos.intY(),
                     FastMath.floor(pos.doubleZ() + 0.7)).isLiquid();
             collide(aabb, aabbs);
-            aabbs.reset();
         }
         positionHandler
                 .submitUpdate(entityID, pos.now(), speed.now(), rot.now(),

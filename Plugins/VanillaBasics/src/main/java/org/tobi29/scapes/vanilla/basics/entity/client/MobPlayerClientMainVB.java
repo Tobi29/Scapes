@@ -57,8 +57,7 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain
     public MobPlayerClientMainVB(WorldClient world, Vector3 pos, Vector3 speed,
             double xRot, double zRot, String nickname) {
         super(world, pos, speed, new AABB(-0.4, -0.4, -1, 0.4, 0.4, 0.9), 100,
-                100, new Frustum(90, 1, 0.1, 24), new Frustum(50, 1, 0.1, 2),
-                nickname);
+                100, new Frustum(90, 1, 0.1, 24), nickname);
         inventories = new InventoryContainer();
         inventories.add("Container", new Inventory(registry, 40));
         inventories.add("Hold", new Inventory(registry, 1));

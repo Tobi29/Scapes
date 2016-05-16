@@ -18,14 +18,12 @@ package org.tobi29.scapes.entity.client;
 
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.engine.utils.math.AABB;
-import org.tobi29.scapes.engine.utils.math.Frustum;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 
 public abstract class MobLivingEquippedClient extends MobLivingClient
         implements EntityEquippedClient {
     protected MobLivingEquippedClient(WorldClient world, Vector3 pos,
-            Vector3 speed, AABB aabb, double lives, double maxLives,
-            Frustum viewField, Frustum hitField) {
-        super(world, pos, speed, aabb, lives, maxLives, viewField, hitField);
+            Vector3 speed, AABB aabb, double lives, double maxLives) {
+        super(world, pos, speed, aabb, lives, maxLives);
     }
 }

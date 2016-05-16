@@ -19,7 +19,10 @@ import java8.util.Optional;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
-import org.tobi29.scapes.engine.utils.math.*;
+import org.tobi29.scapes.engine.utils.math.AABB;
+import org.tobi29.scapes.engine.utils.math.FastMath;
+import org.tobi29.scapes.engine.utils.math.Intersection;
+import org.tobi29.scapes.engine.utils.math.PointerPane;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
@@ -30,17 +33,13 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class MobLivingClient extends MobClient {
-    protected final Frustum viewField, hitField;
     protected double health, maxHealth, footStep, invincibleTicks;
 
     protected MobLivingClient(WorldClient world, Vector3 pos, Vector3 speed,
-            AABB aabb, double health, double maxHealth, Frustum viewField,
-            Frustum hitField) {
+            AABB aabb, double health, double maxHealth) {
         super(world, pos, speed, aabb);
         this.health = health;
         this.maxHealth = maxHealth;
-        this.viewField = viewField;
-        this.hitField = hitField;
     }
 
     public PointerPane block(double distance, Vector2 direction) {
@@ -72,9 +71,6 @@ public abstract class MobLivingClient extends MobClient {
         }
         pointerPanes.reset();
         return closest;
-    }
-
-    public void onNotice(MobClient notice) {
     }
 
     public void onHeal(double heal) {
@@ -110,27 +106,6 @@ public abstract class MobLivingClient extends MobClient {
     @Override
     public void move(double delta) {
         super.move(delta);
-        double lookX = FastMath.cosTable(rot.doubleZ() * FastMath.PI / 180) *
-                FastMath.cosTable(rot.doubleX() * FastMath.PI / 180) * 6;
-        double lookY = FastMath.sinTable(rot.doubleZ() * FastMath.PI / 180) *
-                FastMath.cosTable(rot.doubleX() * FastMath.PI / 180) * 6;
-        double lookZ = FastMath.sinTable(rot.doubleX() * FastMath.PI / 180) * 6;
-        Vector3 viewOffset = viewOffset();
-        viewField.setView(pos.doubleX() + viewOffset.doubleX(),
-                pos.doubleY() + viewOffset.doubleY(),
-                pos.doubleZ() + viewOffset.doubleZ(), pos.doubleX() + lookX,
-                pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0, 0, 1);
-        world.entities().filter(entity -> entity instanceof MobClient)
-                .forEach(entity -> {
-                    MobClient mob = (MobClient) entity;
-                    if (viewField.inView(mob.aabb()) > 0) {
-                        if (!world.checkBlocked(pos.intX(), pos.intY(),
-                                pos.intZ(), mob.pos.intX(), mob.pos.intY(),
-                                mob.pos.intZ())) {
-                            onNotice(mob);
-                        }
-                    }
-                });
         footStep -= delta;
         if (footStep <= 0.0) {
             footStep = 0.0;

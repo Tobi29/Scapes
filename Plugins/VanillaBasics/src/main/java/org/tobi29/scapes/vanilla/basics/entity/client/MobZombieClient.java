@@ -20,7 +20,6 @@ import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.utils.math.AABB;
-import org.tobi29.scapes.engine.utils.math.Frustum;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.CreatureType;
@@ -36,8 +35,7 @@ public class MobZombieClient extends MobLivingEquippedClient {
     public MobZombieClient(WorldClient world, Vector3 pos, Vector3 speed,
             double xRot, double zRot) {
         super(world, pos, speed, new AABB(-0.4, -0.4, -1, 0.4, 0.4, 0.9), 20.0,
-                30.0, new Frustum(90, 1, 0.1, 24),
-                new Frustum(20, 0.5, 0.1, 0.2));
+                30.0);
         rot.setX(xRot);
         rot.setZ(zRot);
     }

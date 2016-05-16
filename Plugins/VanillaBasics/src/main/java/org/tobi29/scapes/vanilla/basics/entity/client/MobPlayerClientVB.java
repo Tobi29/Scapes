@@ -24,7 +24,6 @@ import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.AABB;
-import org.tobi29.scapes.engine.utils.math.Frustum;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.WieldMode;
@@ -45,8 +44,7 @@ public class MobPlayerClientVB extends MobPlayerClient
     public MobPlayerClientVB(WorldClient world, Vector3 pos, Vector3 speed,
             double xRot, double zRot, String nickname) {
         super(world, pos, speed, new AABB(-0.4, -0.4, -1, 0.4, 0.4, 0.9), 100,
-                100, new Frustum(90, 1, 0.1, 24), new Frustum(50, 1, 0.1, 2),
-                nickname);
+                100, nickname);
         inventories = new InventoryContainer();
         inventories.add("Container", new Inventory(registry, 40));
         inventories.add("Hold", new Inventory(registry, 1));

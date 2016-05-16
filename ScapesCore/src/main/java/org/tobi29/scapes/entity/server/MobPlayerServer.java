@@ -293,7 +293,6 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
                         FastMath.floor(aabb.maxX), FastMath.floor(aabb.maxY),
                         FastMath.floor(aabb.maxZ));
         collide(aabb, aabbs, delta);
-        aabbs.reset();
         sendPositionHandler
                 .submitUpdate(entityID, pos.now(), speed.now(), rot.now(),
                         ground, slidingWall, inWater, swimming);

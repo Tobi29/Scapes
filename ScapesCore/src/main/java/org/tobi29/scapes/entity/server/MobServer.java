@@ -331,6 +331,12 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
                         FastMath.floor(aabb.maxY + FastMath.max(goY, 0.0)),
                         FastMath.floor(
                                 aabb.maxZ + FastMath.max(goZ, stepHeight)));
+        if (aabbs.size() > 70) {
+            System.out.println(
+                    FastMath.floor(aabb.minZ + FastMath.min(goZ, 0.0)) + "/" +
+                            FastMath.floor(
+                                    aabb.maxZ + FastMath.max(goZ, stepHeight)));
+        }
         move(aabb, aabbs, goX, goY, goZ);
         if (ground) {
             speed.setZ(speed.doubleZ() / (1.0 + 4.0 * delta));
@@ -338,7 +344,6 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
         headInWater = world.getTerrain().type(pos.intX(), pos.intY(),
                 FastMath.floor(pos.doubleZ() + 0.7)).isLiquid();
         collide(aabb, aabbs, delta);
-        aabbs.reset();
         positionHandler
                 .submitUpdate(entityID, pos.now(), speed.now(), rot.now(),
                         ground, slidingWall, inWater, swimming);
