@@ -172,8 +172,9 @@ public abstract class TerrainInfinite implements Terrain {
     public Pool<AABBElement> collisions(int minX, int minY, int minZ, int maxX,
             int maxY, int maxZ) {
         Pool<AABBElement> aabbs = AABBS.get();
-        minZ = FastMath.max(minZ, 0);
-        maxZ = FastMath.max(maxZ, zSize);
+        aabbs.reset();
+        minZ = FastMath.clamp(minZ, 0, zSize);
+        maxZ = FastMath.clamp(maxZ, 0, zSize);
         for (int x = minX; x <= maxX; x++) {
             for (int y = minY; y <= maxY; y++) {
                 Optional<? extends TerrainInfiniteChunk> chunk =
