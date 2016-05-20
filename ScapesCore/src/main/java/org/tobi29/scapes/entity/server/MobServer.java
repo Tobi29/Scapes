@@ -331,12 +331,6 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
                         FastMath.floor(aabb.maxY + FastMath.max(goY, 0.0)),
                         FastMath.floor(
                                 aabb.maxZ + FastMath.max(goZ, stepHeight)));
-        if (aabbs.size() > 70) {
-            System.out.println(
-                    FastMath.floor(aabb.minZ + FastMath.min(goZ, 0.0)) + "/" +
-                            FastMath.floor(
-                                    aabb.maxZ + FastMath.max(goZ, stepHeight)));
-        }
         move(aabb, aabbs, goX, goY, goZ);
         if (ground) {
             speed.setZ(speed.doubleZ() / (1.0 + 4.0 * delta));
