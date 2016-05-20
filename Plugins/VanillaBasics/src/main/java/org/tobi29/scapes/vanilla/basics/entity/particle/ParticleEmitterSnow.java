@@ -26,14 +26,13 @@ public class ParticleEmitterSnow
         extends ParticleEmitterInstanced<ParticleInstanceSnow> {
     private static final float[] EMPTY_FLOAT = {};
     private static final float SIZE = 0.075f;
-    private final Matrix4f matrix;
+    private final Matrix4f matrix = new Matrix4f();
 
     public ParticleEmitterSnow(ParticleSystem system, Texture texture) {
         super(system, texture, createVBO(system.world().game().engine()),
                 createVBOStream(system.world().game().engine()),
                 RenderType.TRIANGLES, new ParticleInstanceSnow[4096],
                 ParticleInstanceSnow::new);
-        matrix = new Matrix4f(system.world().game().engine()::allocate);
     }
 
     private static VBO createVBO(ScapesEngine engine) {
@@ -153,7 +152,7 @@ public class ParticleEmitterSnow
                 matrix.rotateRad(yaw + instance.dir, 0, 1, 0);
                 buffer.putFloat(terrain.blockLight(x, y, z) / 15.0f);
                 buffer.putFloat(terrain.sunLight(x, y, z) / 15.0f);
-                buffer.put(matrix.getByteBuffer());
+                matrix.putInto(buffer);
                 count++;
             }
         }

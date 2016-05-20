@@ -25,14 +25,13 @@ public class ParticleEmitterTransparent
         extends ParticleEmitterInstanced<ParticleInstanceTransparent> {
     private static final float[] EMPTY_FLOAT = {};
     private final ParticleInstanceTransparent[] instancesSorted;
-    private final Matrix4f matrix;
+    private final Matrix4f matrix = new Matrix4f();
 
     public ParticleEmitterTransparent(ParticleSystem system, Texture texture) {
         super(system, texture, createVBO(system.world().game().engine()),
                 createVBOStream(system.world().game().engine()),
                 RenderType.TRIANGLES, new ParticleInstanceTransparent[10240],
                 ParticleInstanceTransparent::new);
-        matrix = new Matrix4f(system.world().game().engine()::allocate);
         instancesSorted = new ParticleInstanceTransparent[maxInstances];
         System.arraycopy(instances, 0, instancesSorted, 0, maxInstances);
     }
@@ -151,7 +150,7 @@ public class ParticleEmitterTransparent
                 buffer.putShort(FastMath.convertFloatToHalf(a));
                 buffer.putFloat(terrain.blockLight(x, y, z) / 15.0f);
                 buffer.putFloat(terrain.sunLight(x, y, z) / 15.0f);
-                buffer.put(matrix.getByteBuffer());
+                matrix.putInto(buffer);
                 buffer.putFloat(instance.textureOffset.floatX());
                 buffer.putFloat(instance.textureOffset.floatY());
                 buffer.putFloat(instance.textureSize.floatX());

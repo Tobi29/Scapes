@@ -22,14 +22,13 @@ public class ParticleEmitterBlock
         extends ParticleEmitterInstanced<ParticleInstanceBlock> {
     private static final float[] EMPTY_FLOAT = {};
     private static final float SIZE = 0.125f;
-    private final Matrix4f matrix;
+    private final Matrix4f matrix = new Matrix4f();
 
     public ParticleEmitterBlock(ParticleSystem system, Texture texture) {
         super(system, texture, createVBO(system.world().game().engine()),
                 createVBOStream(system.world().game().engine()),
                 RenderType.TRIANGLES, new ParticleInstanceBlock[10240],
                 ParticleInstanceBlock::new);
-        matrix = new Matrix4f(system.world().game().engine()::allocate);
     }
 
     private static VBO createVBO(ScapesEngine engine) {
@@ -151,7 +150,7 @@ public class ParticleEmitterBlock
                 buffer.put(instance.a);
                 buffer.putFloat(terrain.blockLight(x, y, z) / 15.0f);
                 buffer.putFloat(terrain.sunLight(x, y, z) / 15.0f);
-                buffer.put(matrix.getByteBuffer());
+                matrix.putInto(buffer);
                 buffer.putFloat(instance.textureOffset.floatX());
                 buffer.putFloat(instance.textureOffset.floatY());
                 buffer.putFloat(instance.textureSize.floatX());

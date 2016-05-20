@@ -25,7 +25,7 @@ public class ParticleEmitterRain
         extends ParticleEmitterInstanced<ParticleInstance> {
     private static final float[] EMPTY_FLOAT = {};
     private static final float SIZE = 0.25f;
-    private final Matrix4f matrix;
+    private final Matrix4f matrix = new Matrix4f();
     private final AtomicInteger raindrops = new AtomicInteger();
 
     public ParticleEmitterRain(ParticleSystem system, Texture texture) {
@@ -33,7 +33,6 @@ public class ParticleEmitterRain
                 createVBOStream(system.world().game().engine()),
                 RenderType.LINES, new ParticleInstance[10240],
                 ParticleInstance::new);
-        matrix = new Matrix4f(system.world().game().engine()::allocate);
     }
 
     private static VBO createVBO(ScapesEngine engine) {
@@ -147,7 +146,7 @@ public class ParticleEmitterRain
                         instance.speed.floatZ());
                 buffer.putFloat(terrain.blockLight(x, y, z) / 15.0f);
                 buffer.putFloat(terrain.sunLight(x, y, z) / 15.0f);
-                buffer.put(matrix.getByteBuffer());
+                matrix.putInto(buffer);
                 count++;
             }
         }
