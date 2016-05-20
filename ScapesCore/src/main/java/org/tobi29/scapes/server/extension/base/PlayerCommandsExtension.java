@@ -63,8 +63,8 @@ public class PlayerCommandsExtension extends ServerExtension {
                     String[] playerNames = args.args();
                     int permissionLevel =
                             Command.getInt(args.requireOption('l'));
-                    Streams.of(playerNames)
-                            .forEach(playerName -> commands.add(() -> {
+                    Streams.forEach(playerNames,
+                            playerName -> commands.add(() -> {
                                 PlayerConnection player = Command.require(
                                         connection::playerByName, playerName);
                                 player.setPermissionLevel(permissionLevel);

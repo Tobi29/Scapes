@@ -67,14 +67,14 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
         }, (ground, slidingWall, inWater, swimming) -> {
         });
         listener((DeathListener) () -> {
-            Streams.ofCollection(
+            Streams.forEachIterable(
                     inventories.modifyReturn("Container", inventory -> {
                         List<ItemStack> items = new ArrayList<>();
                         for (int i = 0; i < inventory.size(); i++) {
                             inventory.item(i).take().ifPresent(items::add);
                         }
                         return items;
-                    })).forEach(item -> world.dropItem(item, this.pos.now()));
+                    }), item -> world.dropItem(item, this.pos.now()));
             inventories
                     .modifyReturn("Hold", inventory -> inventory.item(0).take())
                     .ifPresent(item -> world.dropItem(item, this.pos.now()));
@@ -325,8 +325,8 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
     }
 
     public void onPunch(double strength) {
-        Streams.of(punchListeners.values())
-                .forEach(listener -> listener.onPunch(strength));
+        Streams.forEach(punchListeners.values(),
+                listener -> listener.onPunch(strength));
     }
 
     public interface PunchListener extends EntityServer.Listener {

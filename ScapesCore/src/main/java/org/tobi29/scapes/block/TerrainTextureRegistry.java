@@ -82,7 +82,7 @@ public class TerrainTextureRegistry extends TextureAtlas<TerrainTexture> {
     }
 
     public void update(double delta) {
-        Streams.of(textures.values())
-                .forEach(texture -> texture.updateAnim(delta));
+        Streams.forEach(textures.values(),
+                texture -> texture.updateAnim(delta));
     }
 }

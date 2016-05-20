@@ -88,8 +88,7 @@ public class ServerConnection extends AbstractServerConnection {
     }
 
     public void send(Packet packet) {
-        Streams.of(playerByName.values())
-                .forEach(player -> player.send(packet));
+        Streams.forEach(playerByName.values(), player -> player.send(packet));
     }
 
     public boolean doesAllowJoin() {
@@ -141,8 +140,8 @@ public class ServerConnection extends AbstractServerConnection {
     }
 
     public void message(String message, MessageLevel level) {
-        Streams.of(executors)
-                .forEach(executor -> executor.message(message, level));
+        Streams.forEach(executors,
+                executor -> executor.message(message, level));
     }
 
     @Override

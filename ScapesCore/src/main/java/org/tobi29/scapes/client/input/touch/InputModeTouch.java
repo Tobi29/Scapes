@@ -34,7 +34,7 @@ public class InputModeTouch implements InputMode {
     private final PlayerController playerController;
     private final MutableVector2 swipe = new MutableVector2d(), direction =
             new MutableVector2d();
-    private final Matrix4f matrix1, matrix2;
+    private final Matrix4f matrix1 = new Matrix4f(), matrix2 = new Matrix4f();
     private boolean walkUp, walkDown, walkLeft, walkRight, inventoryOpen,
             menuOpen, leftHand, rightHand;
     private long lastTouch;
@@ -43,8 +43,6 @@ public class InputModeTouch implements InputMode {
         this.controller = controller;
         guiController = new GuiControllerTouch(engine, controller);
         playerController = new PlayerController();
-        matrix1 = new Matrix4f(engine::allocate);
-        matrix2 = new Matrix4f(engine::allocate);
     }
 
     @Override

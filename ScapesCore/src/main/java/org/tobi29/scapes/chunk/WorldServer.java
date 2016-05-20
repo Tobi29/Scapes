@@ -510,8 +510,8 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
         if (dropWorld.isPresent() && dropWorld.get() != this) {
             WorldServer world = dropWorld.get();
             while (!players.isEmpty()) {
-                Streams.of(players.values())
-                        .forEach(player -> player.connection().setWorld(world));
+                Streams.forEach(players.values(),
+                        player -> player.connection().setWorld(world));
             }
         } else {
             while (!players.isEmpty()) {

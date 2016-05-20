@@ -148,8 +148,8 @@ public class WorldClient extends World {
 
     public void updateRender(Cam cam, double delta) {
         playerModel.renderUpdate(delta);
-        Streams.of(entityModels.values())
-                .forEach(model -> model.renderUpdate(delta));
+        Streams.forEach(entityModels.values(),
+                model -> model.renderUpdate(delta));
         terrain.renderer().renderUpdate(cam);
     }
 

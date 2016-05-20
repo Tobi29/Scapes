@@ -32,8 +32,8 @@ public class TerrainRenderInfo {
     }
 
     public void init(int x, int y, int z, int xSize, int ySize, int zSize) {
-        Streams.of(layers.values())
-                .forEach(layer -> layer.init(x, y, z, xSize, ySize, zSize));
+        Streams.forEach(layers.values(),
+                layer -> layer.init(x, y, z, xSize, ySize, zSize));
     }
 
     @SuppressWarnings("unchecked")
