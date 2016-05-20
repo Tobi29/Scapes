@@ -366,17 +366,13 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
                     state = State.SENDABLE;
                     terrain.updateAdjacent(pos.intX(), pos.intY());
                 }
-            } else {
-                if (state == State.SENDABLE) {
-                    state = State.LOADED;
-                    terrain.updateAdjacent(pos.intX(), pos.intY());
-                }
-            }
-        } else {
-            if (state.id >= State.LOADED.id) {
-                state = State.BORDER;
+            } else if (state == State.SENDABLE) {
+                state = State.LOADED;
                 terrain.updateAdjacent(pos.intX(), pos.intY());
             }
+        } else if (state.id >= State.LOADED.id) {
+            state = State.BORDER;
+            terrain.updateAdjacent(pos.intX(), pos.intY());
         }
     }
 

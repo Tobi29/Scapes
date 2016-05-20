@@ -147,7 +147,7 @@ public class GameStateLoadSocketSP extends GameState {
                                     channel, engine.taskExecutor(), ssl, true);
                     int loadingRadius = FastMath.round(
                             engine.tagStructure().getStructure("Scapes")
-                                    .getDouble("RenderDistance")) + 32;
+                                    .getDouble("RenderDistance")) + 16;
                     Account account = Account.read(
                             engine.home().resolve("Account.properties"));
                     client = new NewConnection(engine, bundleChannel, account,

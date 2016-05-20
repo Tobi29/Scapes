@@ -117,7 +117,7 @@ public class GameStateLoadSP extends GameState {
                 case 2:
                     int loadingRadius = FastMath.round(
                             engine.tagStructure().getStructure("Scapes")
-                                    .getDouble("RenderDistance")) + 32;
+                                    .getDouble("RenderDistance")) + 16;
                     Account account = Account.read(
                             engine.home().resolve("Account.properties"));
                     ServerConnection server = this.server.connection();

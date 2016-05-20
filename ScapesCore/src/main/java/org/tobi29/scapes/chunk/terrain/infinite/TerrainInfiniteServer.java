@@ -87,17 +87,19 @@ public class TerrainInfiniteServer extends TerrainInfinite
                         int xx = FastMath.floor(player.x() / 16.0);
                         int yy = FastMath.floor(player.y() / 16.0);
                         int loadingRadius =
-                                (player.connection().loadingRadius() >> 4) + 3;
-                        int loadingRadiusSqr = loadingRadius * loadingRadius;
+                                (player.connection().loadingRadius() >> 4) + 2;
+                        // Add 32 to provide circular sendable area
+                        // Note: 32 was found to be just enough to avoid request spam
+                        int loadingRadiusSqr =
+                                loadingRadius * loadingRadius + 32;
                         for (int x = -loadingRadius; x <= loadingRadius; x++) {
                             int xxx = x + xx;
                             for (int y = -loadingRadius; y <= loadingRadius;
                                     y++) {
                                 int yyy = y + yy;
                                 if (xxx >= cxMin && xxx <= cxMax &&
-                                        yyy >= cyMin &&
-                                        yyy <= cyMax) {
-                                    if (x * x + y * y < loadingRadiusSqr) {
+                                        yyy >= cyMin && yyy <= cyMax) {
+                                    if (x * x + y * y <= loadingRadiusSqr) {
                                         requiredChunks.add(new Vector2i(x + xx,
                                                 y + yy));
                                     }
@@ -212,6 +214,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
         return addChunks(Collections.singletonList(new Vector2i(x, y))).get(0);
     }
 
+    @SuppressWarnings("CallToNativeMethodWhileLocked")
     public List<Optional<TerrainInfiniteChunkServer>> addChunks(
             List<Vector2i> positions) {
         List<Optional<TerrainInfiniteChunkServer>> chunks =
@@ -234,16 +237,22 @@ public class TerrainInfiniteServer extends TerrainInfinite
                     TerrainInfiniteChunkServer chunk2;
                     if (tagStructure.isPresent()) {
                         try (Profiler.C ignored = Profiler.section("Load")) {
+                            long time = System.currentTimeMillis();
                             chunk2 = new TerrainInfiniteChunkServer(
                                     new Vector2i(x, y), this, zSize,
                                     tagStructure.get());
+                            time = System.currentTimeMillis() - time;
+                            LOGGER.debug("Chunk loaded in {}ms", time);
                         }
                     } else {
                         try (Profiler.C ignored = Profiler
                                 .section("Generate")) {
+                            long time = System.currentTimeMillis();
                             chunk2 = new TerrainInfiniteChunkServer(
                                     new Vector2i(x, y), this, zSize,
                                     world.generator(), generatorOutput);
+                            time = System.currentTimeMillis() - time;
+                            LOGGER.debug("Chunk generated in {}ms", time);
                         }
                     }
                     chunkManager.add(chunk2);
