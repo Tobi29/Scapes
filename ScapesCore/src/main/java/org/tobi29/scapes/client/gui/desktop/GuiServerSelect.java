@@ -116,7 +116,7 @@ public class GuiServerSelect extends GuiMenu {
     }
 
     private class Element extends GuiComponentGroupSlab {
-        private final GuiComponentIcon icon;
+        private final GuiComponentImage icon;
         private final GuiComponentTextButton label;
         private final RemoteAddress address;
         private SocketChannel channel;
@@ -125,7 +125,7 @@ public class GuiServerSelect extends GuiMenu {
 
         public Element(GuiLayoutData parent, TagStructure tagStructure) {
             super(parent);
-            icon = addHori(15, 15, 40, -1, GuiComponentIcon::new);
+            icon = addHori(15, 15, 40, -1, GuiComponentImage::new);
             label = addHori(5, 20, -1, -1, p -> button(p, "Pinging..."));
             GuiComponentTextButton delete =
                     addHori(5, 20, 80, -1, p -> button(p, "Delete"));

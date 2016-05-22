@@ -97,8 +97,8 @@ public class GuiTouchSaveSelect extends GuiTouchMenuDouble {
     private class Element extends GuiComponentGroupSlab {
         public Element(GuiLayoutData parent, String name) {
             super(parent);
-            GuiComponentIcon icon =
-                    addHori(10, 10, 60, -1, GuiComponentIcon::new);
+            GuiComponentImage icon =
+                    addHori(10, 10, 60, -1, GuiComponentImage::new);
             GuiComponentTextButton label =
                     addHori(10, 10, -1, -1, p -> button(p, name));
             GuiComponentTextButton delete =

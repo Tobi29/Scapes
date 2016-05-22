@@ -17,18 +17,17 @@ package org.tobi29.scapes.client.gui;
 
 import org.threeten.bp.LocalDate;
 import org.threeten.bp.Month;
-import org.tobi29.scapes.engine.gui.GuiComponentHeavy;
+import org.tobi29.scapes.engine.gui.GuiComponent;
+import org.tobi29.scapes.engine.gui.GuiComponentIcon;
 import org.tobi29.scapes.engine.gui.GuiComponentText;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
-import org.tobi29.scapes.engine.opengl.*;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class GuiComponentLogo extends GuiComponentHeavy {
+public class GuiComponentLogo extends GuiComponent {
     private static final String[] SPLASHES =
             {"Hi!", "Shut up!", "<3", ";)", "9001", "Minecraft",
                     "Please\nstand back!", "You\nsuck!", "Crap!",
@@ -38,18 +37,14 @@ public class GuiComponentLogo extends GuiComponentHeavy {
                     "Fatal\nerror!", "java.util.\nRandom\nfor ya",
                     "Java:\n" + System.getProperty("java.version"),
                     "Hello,\n" + System.getProperty("user.name")};
-    private final VAO vao;
     private final GuiComponentText splash;
 
     public GuiComponentLogo(GuiLayoutData parent, int height, int textSize) {
         super(parent);
         int textX = height - 8;
         int textY = textSize >> 2;
-        vao = VAOUtility.createVTI(gui.style().engine(),
-                new float[]{0, height, 0.0f, height, height, 0.0f, 0, 0, 0.0f,
-                        height, 0, 0.0f},
-                new float[]{0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f},
-                new int[]{0, 1, 2, 3, 2, 1}, RenderType.TRIANGLES);
+        addSub(0, 0, height, height,
+                p -> new GuiComponentIcon(p, "Scapes:image/Icon"));
         addSub(textX, textY, -1, textSize,
                 p -> new GuiComponentText(p, "Scapes", 1.0f, 1.0f, 1.0f, 1.0f));
         splash = addSub(textX, textY + FastMath.round(textSize * 1.2), -1,
@@ -87,13 +82,5 @@ public class GuiComponentLogo extends GuiComponentHeavy {
             text = SPLASHES[random.nextInt(SPLASHES.length)];
         }
         return text;
-    }
-
-    @Override
-    public void renderComponent(GL gl, Shader shader, double width,
-            double height) {
-        gl.textures().bind("Scapes:image/Icon", gl);
-        gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
-        vao.render(gl, shader);
     }
 }

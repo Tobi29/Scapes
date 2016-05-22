@@ -68,8 +68,8 @@ public class GuiScreenshots extends GuiMenu {
         public Element(GuiLayoutData parent, FilePath path,
                 GuiScreenshots gui) {
             super(parent);
-            GuiComponentIcon icon =
-                    addHori(15, 20, 40, -1, GuiComponentIcon::new);
+            GuiComponentImage icon =
+                    addHori(15, 20, 40, -1, GuiComponentImage::new);
             GuiComponentTextButton save =
                     addHori(5, 20, -1, -1, p -> button(p, "Save"));
             GuiComponentTextButton delete =

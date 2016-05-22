@@ -114,7 +114,7 @@ public class GuiTouchServerSelect extends GuiTouchMenuDouble {
     }
 
     private class Element extends GuiComponentGroupSlab {
-        private final GuiComponentIcon icon;
+        private final GuiComponentImage icon;
         private final GuiComponentTextButton label;
         private final RemoteAddress address;
         private SocketChannel channel;
@@ -123,7 +123,7 @@ public class GuiTouchServerSelect extends GuiTouchMenuDouble {
 
         public Element(GuiLayoutData parent, TagStructure tagStructure) {
             super(parent);
-            icon = addHori(10, 10, 60, -1, GuiComponentIcon::new);
+            icon = addHori(10, 10, 60, -1, GuiComponentImage::new);
             label = addHori(10, 10, -1, -1, p -> button(p, "Pinging..."));
             GuiComponentTextButton delete =
                     addHori(10, 10, 160, -1, p -> button(p, "Delete"));

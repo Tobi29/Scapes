@@ -99,8 +99,8 @@ public class GuiSaveSelect extends GuiMenu {
     private class Element extends GuiComponentGroupSlab {
         public Element(GuiLayoutData parent, String name) {
             super(parent);
-            GuiComponentIcon icon =
-                    addHori(15, 15, 40, -1, GuiComponentIcon::new);
+            GuiComponentImage icon =
+                    addHori(15, 15, 40, -1, GuiComponentImage::new);
             GuiComponentTextButton label =
                     addHori(5, 20, -1, -1, p -> button(p, name));
             GuiComponentTextButton delete =

@@ -134,8 +134,8 @@ public class GuiCreateWorld extends GuiMenuDouble {
 
             public Element(GuiLayoutData parent, PluginFile addon) {
                 super(parent);
-                GuiComponentIcon icon =
-                        addHori(15, 15, 40, -1, GuiComponentIcon::new);
+                GuiComponentImage icon =
+                        addHori(15, 15, 40, -1, GuiComponentImage::new);
                 add(5, 20, -1, 30, p -> button(p, addon.name()));
                 GuiComponentTextButton edit =
                         add(5, 20, 30, 30, p -> button(p, active ? "X" : ""));
