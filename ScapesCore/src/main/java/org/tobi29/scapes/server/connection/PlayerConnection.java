@@ -155,6 +155,11 @@ public abstract class PlayerConnection
     protected abstract void transmit(Packet packet) throws IOException;
 
     @Override
+    public void requestClose() {
+        disconnect("Server closed", 5);
+    }
+
+    @Override
     public synchronized void close() throws IOException {
         if (added) {
             server.removePlayer(this);
