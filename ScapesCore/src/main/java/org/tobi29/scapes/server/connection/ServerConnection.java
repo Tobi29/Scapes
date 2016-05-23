@@ -29,8 +29,10 @@ import org.tobi29.scapes.server.ControlPanel;
 import org.tobi29.scapes.server.MessageLevel;
 import org.tobi29.scapes.server.ScapesServer;
 import org.tobi29.scapes.server.command.Command;
+import org.tobi29.scapes.server.extension.event.NewConnectionEvent;
 
 import java.io.IOException;
+import java.nio.channels.SocketChannel;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -142,6 +144,16 @@ public class ServerConnection extends AbstractServerConnection {
     public void message(String message, MessageLevel level) {
         Streams.forEach(executors,
                 executor -> executor.message(message, level));
+    }
+
+    @Override
+    protected Optional<String> accept(SocketChannel channel) {
+        NewConnectionEvent event = new NewConnectionEvent(channel);
+        server.extensions().fireEvent(event);
+        if (!event.success()) {
+            return Optional.of(event.reason());
+        }
+        return Optional.empty();
     }
 
     @Override
