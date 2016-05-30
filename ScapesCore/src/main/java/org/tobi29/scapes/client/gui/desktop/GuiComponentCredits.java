@@ -15,12 +15,13 @@
  */
 package org.tobi29.scapes.client.gui.desktop;
 
-import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.GuiComponentHeavy;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.gui.GuiRenderer;
 import org.tobi29.scapes.engine.opengl.FontRenderer;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
+import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
 public class GuiComponentCredits extends GuiComponentHeavy {
@@ -40,12 +41,13 @@ public class GuiComponentCredits extends GuiComponentHeavy {
     }
 
     @Override
-    public void updateComponent(ScapesEngine engine, double delta) {
-        y -= 40.0f * delta;
+    protected void transform(Matrix matrix, Vector2 size) {
+        matrix.translate(0, y, 0);
     }
 
     @Override
-    protected void transform(Matrix matrix, Vector2 size) {
-        matrix.translate(0, y, 0);
+    public void renderComponent(GL gl, Shader shader, Vector2 size,
+            double delta) {
+        y -= 40.0f * delta;
     }
 }

@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.client.gui;
 
-import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.GuiComponentHeavy;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.opengl.GL;
@@ -26,6 +25,7 @@ import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
+import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
 public class GuiComponentBar extends GuiComponentHeavy {
     private final Supplier supplier;
@@ -62,8 +62,10 @@ public class GuiComponentBar extends GuiComponentHeavy {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, double width,
-            double height) {
+    public void renderComponent(GL gl, Shader shader, Vector2 size,
+            double delta) {
+        double factor = FastMath.min(1.0, delta);
+        value += (FastMath.clamp(supplier.get(), 0.0, 1.0) - value) * factor;
         gl.textures().unbind(gl);
         MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
@@ -71,16 +73,10 @@ public class GuiComponentBar extends GuiComponentHeavy {
         vao1.render(gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
-        matrix.translate((float) (value * width), 0.0f, 0.0f);
+        matrix.translate((float) (value * size.doubleX()), 0.0f, 0.0f);
         matrix.scale((float) (1.0 - value), 1.0f, 1.0f);
         vao2.render(gl, shader);
         matrixStack.pop();
-    }
-
-    @Override
-    public void updateComponent(ScapesEngine engine, double delta) {
-        double factor = FastMath.min(1.0, delta);
-        value += (FastMath.clamp(supplier.get(), 0.0, 1.0) - value) * factor;
     }
 
     public interface Supplier {

@@ -16,13 +16,15 @@
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.gui.GuiComponentButtonHeavy;
 import org.tobi29.scapes.engine.gui.GuiComponentHoverEvent;
-import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
+import org.tobi29.scapes.engine.gui.GuiComponentText;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
-public class GuiComponentControlsAxis extends GuiComponentTextButton {
+public class GuiComponentControlsAxis extends GuiComponentButtonHeavy {
+    private final GuiComponentText text;
     private final String name, id;
     private final TagStructure tagStructure;
     private final ControllerJoystick controller;
@@ -32,7 +34,8 @@ public class GuiComponentControlsAxis extends GuiComponentTextButton {
     public GuiComponentControlsAxis(GuiLayoutData parent, int textSize,
             String name, String id, TagStructure tagStructure,
             ControllerJoystick controller) {
-        super(parent, textSize, "");
+        super(parent);
+        text = addSubHori(4, 0, -1, textSize, p -> new GuiComponentText(p, ""));
         this.name = name;
         this.id = id;
         this.tagStructure = tagStructure;
@@ -65,7 +68,7 @@ public class GuiComponentControlsAxis extends GuiComponentTextButton {
         if (editing > 0) {
             text.append('>');
         }
-        setText(text.toString());
+        this.text.setText(text.toString());
     }
 
     @Override

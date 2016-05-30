@@ -17,8 +17,9 @@ package org.tobi29.scapes.client.gui;
 
 import java8.util.Optional;
 import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.gui.GuiComponentButtonHeavy;
 import org.tobi29.scapes.engine.gui.GuiComponentHoverEvent;
-import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
+import org.tobi29.scapes.engine.gui.GuiComponentText;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.input.ControllerBasic;
 import org.tobi29.scapes.engine.input.ControllerKey;
@@ -28,7 +29,8 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GuiComponentControlsButton extends GuiComponentTextButton {
+public class GuiComponentControlsButton extends GuiComponentButtonHeavy {
+    private final GuiComponentText text;
     private final String name, id;
     private final TagStructure tagStructure;
     private final ControllerBasic controller;
@@ -39,7 +41,8 @@ public class GuiComponentControlsButton extends GuiComponentTextButton {
     public GuiComponentControlsButton(GuiLayoutData parent, int textSize,
             String name, String id, TagStructure tagStructure,
             ControllerBasic controller) {
-        super(parent, textSize, "");
+        super(parent);
+        text = addSubHori(4, 0, -1, textSize, p -> new GuiComponentText(p, ""));
         this.name = name;
         this.id = id;
         this.tagStructure = tagStructure;
@@ -78,7 +81,7 @@ public class GuiComponentControlsButton extends GuiComponentTextButton {
             text.append(": ");
             text.append(key.humanName());
         }
-        setText(text.toString());
+        this.text.setText(text.toString());
     }
 
     @Override

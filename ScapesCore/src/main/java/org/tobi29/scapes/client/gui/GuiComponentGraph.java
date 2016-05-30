@@ -23,6 +23,7 @@ import org.tobi29.scapes.engine.opengl.VAO;
 import org.tobi29.scapes.engine.opengl.VAOUtility;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
+import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
 public class GuiComponentGraph extends GuiComponentHeavy {
     private final float[] r, g, b, a;
@@ -46,9 +47,9 @@ public class GuiComponentGraph extends GuiComponentHeavy {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, double width,
-            double height) {
-        int w = (int) FastMath.ceil(width);
+    public void renderComponent(GL gl, Shader shader, Vector2 size,
+            double delta) {
+        int w = (int) FastMath.ceil(size.doubleX());
         if (data[0].length != w) {
             data = new float[data.length][w];
         }
@@ -66,7 +67,7 @@ public class GuiComponentGraph extends GuiComponentHeavy {
                 x = FastMath.clamp(x, 0, limit);
                 int k = (offset + j) * 3;
                 vertex[k++] = j;
-                vertex[k++] = (float) (data[i][x] * height);
+                vertex[k++] = (float) (data[i][x] * size.doubleY());
                 vertex[k] = 0.0f;
                 k = offset + j << 2;
                 color[k++] = r[i];

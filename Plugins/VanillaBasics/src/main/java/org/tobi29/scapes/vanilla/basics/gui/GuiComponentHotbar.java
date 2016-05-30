@@ -41,13 +41,14 @@ public class GuiComponentHotbar extends GuiComponentHeavy {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, double width,
-            double height) {
+    public void renderComponent(GL gl, Shader shader, Vector2 size,
+            double delta) {
         MatrixStack matrixStack = gl.matrixStack();
         player.inventories().access("Container", inventory -> {
             for (int i = 0; i < 10; i++) {
                 Matrix matrix = matrixStack.push();
-                matrix.translate((float) (i * (height + 10.0)), 0.0f, 0.0f);
+                matrix.translate((float) (i * (size.doubleY() + 10.0)), 0.0f,
+                        0.0f);
                 if (i == player.inventorySelectLeft()) {
                     gl.textures().bind("Scapes:image/gui/HotbarLeft", gl);
                     vao.render(gl, shader);
@@ -55,7 +56,7 @@ public class GuiComponentHotbar extends GuiComponentHeavy {
                     gl.textures().bind("Scapes:image/gui/HotbarRight", gl);
                     vao.render(gl, shader);
                 }
-                GuiUtils.items(0.0f, 0.0f, (float) height, (float) height,
+                GuiUtils.items(0.0f, 0.0f, size.floatY(), size.floatY(),
                         inventory.item(i), gl, shader, gui.style().font());
                 matrixStack.pop();
             }

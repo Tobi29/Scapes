@@ -41,8 +41,8 @@ public class GuiHud extends GuiState {
     }
 
     @Override
-    public void render(GL gl, Shader shader, Vector2 size) {
-        super.render(gl, shader, size);
+    public void render(GL gl, Shader shader, Vector2 size, double delta) {
+        super.render(gl, shader, size, delta);
         if (visible) {
             MatrixStack matrixStack = gl.matrixStack();
             Matrix matrix = matrixStack.push();

@@ -20,6 +20,7 @@ import org.tobi29.scapes.engine.gui.GuiComponentHeavy;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
 public class GuiComponentItem extends GuiComponentHeavy {
     private ItemStack item;
@@ -38,10 +39,10 @@ public class GuiComponentItem extends GuiComponentHeavy {
     }
 
     @Override
-    public void renderComponent(GL gl, Shader shader, double width,
-            double height) {
-        super.renderComponent(gl, shader, width, height);
-        GuiUtils.items(0.0f, 0.0f, (float) width, (float) height, item, gl,
+    public void renderComponent(GL gl, Shader shader, Vector2 size,
+            double delta) {
+        super.renderComponent(gl, shader, size, delta);
+        GuiUtils.items(0.0f, 0.0f, size.floatX(), size.floatY(), item, gl,
                 shader, gui.style().font());
     }
 }
