@@ -23,12 +23,11 @@ import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.opengl.texture.TextureFile;
 import org.tobi29.scapes.engine.utils.Pair;
+import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
-import org.tobi29.scapes.engine.utils.task.Joiner;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 public class GuiScreenshots extends GuiMenu {
@@ -36,57 +35,54 @@ public class GuiScreenshots extends GuiMenu {
             LoggerFactory.getLogger(GuiScreenshots.class);
     private final GameState state;
     private final GuiComponentScrollPaneViewport scrollPane;
-    private final Joiner joiner;
 
     public GuiScreenshots(GameState state, Gui previous, GuiStyle style) {
         super(state, "Screenshots", previous, style);
         this.state = state;
         scrollPane = pane.addVert(16, 5, 368, 390,
                 p -> new GuiComponentScrollPane(p, 70)).viewport();
-        joiner = state.engine().taskExecutor().runTask(joiner -> {
-            try {
-                FilePath path = state.engine().home().resolve("screenshots");
-                List<FilePath> files =
-                        FileUtil.listRecursive(path, FileUtil::isRegularFile,
-                                FileUtil::isNotHidden);
-                Collections.sort(files);
-                for (int i = 0; i < files.size() && !joiner.marked(); i++) {
-                    FilePath file = files.get(i);
-                    scrollPane.addVert(0, 0, -1, 70,
-                            p -> new Element(p, file, this));
-                }
-            } catch (IOException e) {
-                LOGGER.warn("Failed to read screenshots: {}", e.toString());
-            }
-        }, "Load-Screenshots");
-
-        back.onClickLeft(event -> joiner.join());
+        try {
+            FilePath path = state.engine().home().resolve("screenshots");
+            List<FilePath> files =
+                    FileUtil.listRecursive(path, FileUtil::isRegularFile,
+                            FileUtil::isNotHidden);
+            Streams.of(files).sorted().forEach(file -> {
+                Element element = scrollPane
+                        .addVert(0, 0, -1, 70, p -> new Element(p, file, this));
+                state.engine().taskExecutor().runTask(() -> {
+                    try {
+                        Texture texture = FileUtil.readReturn(file,
+                                stream -> new TextureFile(state.engine(),
+                                        stream, 0));
+                        element.icon.setIcon(texture);
+                    } catch (IOException e) {
+                        LOGGER.warn("Failed to load screenshot: {}",
+                                e.toString());
+                    }
+                }, "Load-Screenshot");
+            });
+        } catch (IOException e) {
+            LOGGER.warn("Failed to read screenshots: {}", e.toString());
+        }
     }
 
     private class Element extends GuiComponentGroupSlab {
+        private final GuiComponentImage icon;
+
         @SuppressWarnings("unchecked")
         public Element(GuiLayoutData parent, FilePath path,
                 GuiScreenshots gui) {
             super(parent);
-            GuiComponentImage icon =
-                    addHori(15, 20, 40, -1, GuiComponentImage::new);
+            icon = addHori(15, 20, 40, -1, GuiComponentImage::new);
             GuiComponentTextButton save =
                     addHori(5, 20, -1, -1, p -> button(p, "Save"));
             GuiComponentTextButton delete =
                     addHori(5, 20, 100, -1, p -> button(p, "Delete"));
 
-            Texture textureLoad = state.engine().graphics().textures().empty();
-            try {
-                textureLoad = FileUtil.readReturn(path,
-                        stream -> new TextureFile(state.engine(), stream, 0));
-            } catch (IOException e) {
-                LOGGER.warn("Failed to load screenshot: {}", e.toString());
-            }
-            Texture texture = textureLoad;
-            icon.setIcon(texture);
             icon.onClickLeft(event -> {
-                state.engine().guiStack().add("10-Menu",
-                        new GuiScreenshot(state, gui, texture, gui.style()));
+                icon.texture().ifPresent(texture -> state.engine().guiStack()
+                        .add("10-Menu", new GuiScreenshot(state, gui, texture,
+                                gui.style())));
             });
             save.onClickLeft(event -> {
                 try {
