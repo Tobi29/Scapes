@@ -139,6 +139,16 @@ public class SceneMenu extends Scene {
     }
 
     @Override
+    public int width(int width) {
+        return width >> 2;
+    }
+
+    @Override
+    public int height(int height) {
+        return height >> 2;
+    }
+
+    @Override
     public int renderPasses() {
         return 2;
     }
