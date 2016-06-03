@@ -18,6 +18,9 @@ package org.tobi29.scapes.entity.model;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.opengl.*;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.opengl.vao.RenderType;
+import org.tobi29.scapes.engine.opengl.vao.VAO;
+import org.tobi29.scapes.engine.opengl.vao.VAOUtility;
 
 public class Box {
     private static final int[] INDICES, INDICES_NO_CULL;

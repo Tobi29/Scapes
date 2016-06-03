@@ -51,14 +51,13 @@ public class GuiTouchServerSelect extends GuiTouchMenuDouble {
     private final GuiComponentScrollPaneViewport scrollPane;
 
     public GuiTouchServerSelect(GameState state, Gui previous, GuiStyle style) {
-        super(state, "Multiplayer", "Back", "Add", previous, style);
+        super(state, "Multiplayer", "Add", "Back", previous, style);
         scrollPane = pane.addVert(112, 10, 736, 320,
                 p -> new GuiComponentScrollPane(p, 70)).viewport();
 
         save.onClickLeft(event -> {
-            // TODO: Implement server add touch UI
-            /*state.engine().guiStack()
-                    .add("10-Menu", new GuiAddServer(state, this, style));*/
+            state.engine().guiStack()
+                    .add("10-Menu", new GuiTouchAddServer(state, this, style));
         });
         TagStructure scapesTag =
                 state.engine().tagStructure().getStructure("Scapes");
@@ -96,7 +95,7 @@ public class GuiTouchServerSelect extends GuiTouchMenuDouble {
         disposeServers();
         for (TagStructure tagStructure : servers) {
             Element element = scrollPane
-                    .addVert(0, 0, 378, 70, p -> new Element(p, tagStructure));
+                    .addVert(0, 0, -1, 80, p -> new Element(p, tagStructure));
             elements.add(element);
         }
     }

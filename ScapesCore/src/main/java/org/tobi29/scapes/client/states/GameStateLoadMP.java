@@ -16,13 +16,17 @@
 package org.tobi29.scapes.client.states;
 
 import java8.util.Optional;
+import java8.util.function.Consumer;
+import java8.util.function.DoubleSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.client.connection.NewConnection;
-import org.tobi29.scapes.client.gui.GuiLoading;
 import org.tobi29.scapes.client.gui.desktop.GuiCertificateWarning;
+import org.tobi29.scapes.client.gui.desktop.GuiLoading;
+import org.tobi29.scapes.client.gui.touch.GuiTouchLoading;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
 import org.tobi29.scapes.engine.server.*;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -41,7 +45,8 @@ public class GameStateLoadMP extends GameState {
     private int step;
     private SocketChannel channel;
     private NewConnection client;
-    private GuiLoading progress;
+    private Consumer<String> progress;
+    private Gui gui;
 
     public GameStateLoadMP(RemoteAddress address, ScapesEngine engine,
             Scene scene) {
@@ -51,8 +56,26 @@ public class GameStateLoadMP extends GameState {
 
     @Override
     public void init() {
-        progress = new GuiLoading(this, engine.guiStyle());
-        engine.guiStack().add("20-Progress", progress);
+        DoubleSupplier valueSupplier =
+                () -> step < 0 ? Double.NEGATIVE_INFINITY :
+                        step >= 5 ? Double.POSITIVE_INFINITY : step / 5.0;
+        switch (engine.container().formFactor()) {
+            case PHONE: {
+                GuiTouchLoading progress =
+                        new GuiTouchLoading(this, valueSupplier,
+                                engine.guiStyle());
+                this.progress = progress::setLabel;
+                gui = progress;
+                break;
+            }
+            default:
+                GuiLoading progress =
+                        new GuiLoading(this, valueSupplier, engine.guiStyle());
+                this.progress = progress::setLabel;
+                gui = progress;
+                break;
+        }
+        engine.guiStack().add("20-Progress", gui);
     }
 
     @Override
@@ -65,8 +88,8 @@ public class GameStateLoadMP extends GameState {
         try {
             switch (step) {
                 case 0:
-                    progress.setLabel("Connecting to server...");
                     step++;
+                    progress.accept("Connecting to server...");
                     break;
                 case 1:
                     Optional<InetSocketAddress> socketAddress = AddressResolver
@@ -81,13 +104,13 @@ public class GameStateLoadMP extends GameState {
                 case 2:
                     if (channel.finishConnect()) {
                         step++;
-                        progress.setLabel("Sending request...");
+                        progress.accept("Sending request...");
                     }
                     break;
                 case 3:
                     PacketBundleChannel bundleChannel;
                     SSLHandle ssl = SSLProvider.sslHandle(certificates -> {
-                        engine.guiStack().remove(progress);
+                        engine.guiStack().remove(gui);
                         try {
                             for (X509Certificate certificate : certificates) {
                                 AtomicBoolean result = new AtomicBoolean();
@@ -98,7 +121,7 @@ public class GameStateLoadMP extends GameState {
                                                 certificate, value -> {
                                             result.set(value);
                                             joinable.join();
-                                        }, progress.style());
+                                        }, gui.style());
                                 engine.guiStack().add("10-Menu", warning);
                                 joinable.joiner().join(warning::valid);
                                 engine.guiStack().remove(warning);
@@ -108,7 +131,7 @@ public class GameStateLoadMP extends GameState {
                             }
                             return true;
                         } finally {
-                            engine.guiStack().add("20-Progress", progress);
+                            engine.guiStack().add("20-Progress", gui);
                         }
                     });
                     bundleChannel = new PacketBundleChannel(address, channel,
@@ -116,7 +139,7 @@ public class GameStateLoadMP extends GameState {
                     int loadingRadius = FastMath.round(
                             engine.tagStructure().getStructure("Scapes")
                                     .getDouble("RenderDistance")) + 16;
-                    Account account = Account.read(
+                    Account account = Account.get(
                             engine.home().resolve("Account.properties"));
                     client = new NewConnection(engine, bundleChannel, account,
                             loadingRadius);
@@ -125,10 +148,10 @@ public class GameStateLoadMP extends GameState {
                 case 4:
                     Optional<String> status = client.login();
                     if (status.isPresent()) {
-                        progress.setLabel(status.get());
+                        progress.accept(status.get());
                     } else {
                         step++;
-                        progress.setLabel("Loading world...");
+                        progress.accept("Loading world...");
                     }
                     break;
                 case 5:
@@ -142,8 +165,6 @@ public class GameStateLoadMP extends GameState {
             engine.setState(
                     new GameStateServerDisconnect(e.getMessage(), engine));
             step = -1;
-            return;
         }
-        progress.setProgress(step / 5.0f);
     }
 }

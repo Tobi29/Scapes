@@ -15,13 +15,21 @@
  */
 package org.tobi29.scapes.client.gui.desktop;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiComponentSlider;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.engine.gui.GuiStyle;
+import org.tobi29.scapes.engine.server.Account;
+
+import java.io.IOException;
 
 public class GuiOptions extends GuiMenu {
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(GuiOptions.class);
+
     public GuiOptions(GameState state, Gui previous, GuiStyle style) {
         super(state, "Options", previous, style);
         GuiComponentSlider musicVolume = row(pane, p -> slider(p, "Music",
@@ -46,8 +54,14 @@ public class GuiOptions extends GuiMenu {
                     .add("10-Menu", new GuiVideoSettings(state, this, style));
         });
         account.onClickLeft(event -> {
-            state.engine().guiStack()
-                    .add("10-Menu", new GuiAccount(state, this, style));
+            try {
+                Account account1 = Account.get(
+                        state.engine().home().resolve("Account.properties"));
+                state.engine().guiStack().add("10-Menu",
+                        new GuiAccount(state, this, account1, style));
+            } catch (IOException e) {
+                LOGGER.error("Failed to read account file: {}", e.toString());
+            }
         });
     }
 }

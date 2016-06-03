@@ -17,8 +17,8 @@ package org.tobi29.scapes.chunk.terrain.infinite;
 
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.OpenGL;
-import org.tobi29.scapes.engine.opengl.VAO;
-import org.tobi29.scapes.engine.opengl.VAOStatic;
+import org.tobi29.scapes.engine.opengl.vao.VAO;
+import org.tobi29.scapes.engine.opengl.vao.VAOStatic;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;

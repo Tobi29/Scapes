@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.tobi29.scapes.client.gui;
+package org.tobi29.scapes.client.gui.desktop;
 
 import org.tobi29.scapes.client.gui.desktop.GuiMenuDouble;
 import org.tobi29.scapes.client.gui.desktop.GuiServerSelect;

@@ -38,16 +38,11 @@ public class GuiTouchAccount extends GuiTouchMenu {
     private KeyPair keyPair;
     private String nickname = "";
 
-    public GuiTouchAccount(GameState state, Gui previous, GuiStyle style) {
+    public GuiTouchAccount(GameState state, Gui previous, Account account,
+            GuiStyle style) {
         super(state, "Account", "Save", style);
-        try {
-            Account account = Account.read(
-                    state.engine().home().resolve("Account.properties"));
-            keyPair = account.keyPair();
-            nickname = account.nickname();
-        } catch (IOException e) {
-            LOGGER.error("Failed to read account file: {}", e.toString());
-        }
+        keyPair = account.keyPair();
+        nickname = account.nickname();
         GuiComponentGroupSlab slab = row(pane);
         slab.addHori(10, 10, -1, 36, p -> new GuiComponentFlowText(p, "Key:"));
         GuiComponentButton keyCopy =

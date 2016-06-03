@@ -29,16 +29,16 @@ public class GuiComponentCondition extends GuiComponentHeavy {
         super(parent);
         this.player = player;
         addSub(0, 8, 280, 16,
-                p -> new GuiComponentBar(p, 280, 16, 1.0f, 0.0f, 0.0f, 0.6f,
+                p -> new GuiComponentBar(p, 1.0f, 0.0f, 0.0f, 0.6f, 1.0,
                         () -> player.health() / player.maxHealth()));
         addSub(0, 0, 560, 8,
-                p -> new GuiComponentBar(p, 560, 8, 0.0f, 1.0f, 0.0f, 0.6f,
+                p -> new GuiComponentBar(p, 0.0f, 1.0f, 0.0f, 0.6f, 1.0,
                         () -> value("Stamina")));
         addSub(280, 8, 280, 8,
-                p -> new GuiComponentBar(p, 280, 8, 1.0f, 0.5f, 0.0f, 0.6f,
+                p -> new GuiComponentBar(p, 1.0f, 0.5f, 0.0f, 0.6f, 1.0,
                         () -> value("Hunger")));
         addSub(280, 16, 280, 8,
-                p -> new GuiComponentBar(p, 280, 8, 0.0f, 0.2f, 1.0f, 0.6f,
+                p -> new GuiComponentBar(p, 0.0f, 0.2f, 1.0f, 0.6f, 1.0,
                         () -> value("Thirst")));
     }
 

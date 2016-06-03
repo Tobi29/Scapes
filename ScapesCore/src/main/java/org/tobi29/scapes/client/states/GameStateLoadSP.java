@@ -16,11 +16,15 @@
 package org.tobi29.scapes.client.states;
 
 import java8.util.Optional;
+import java8.util.function.Consumer;
+import java8.util.function.DoubleSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.client.gui.GuiLoading;
+import org.tobi29.scapes.client.gui.desktop.GuiLoading;
+import org.tobi29.scapes.client.gui.touch.GuiTouchLoading;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
 import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.server.SSLHandle;
@@ -44,7 +48,7 @@ public class GameStateLoadSP extends GameState {
     private int step;
     private WorldSource source;
     private ScapesServer server;
-    private GuiLoading progress;
+    private Consumer<String> progress;
 
     public GameStateLoadSP(WorldSource source, ScapesEngine engine,
             Scene scene) {
@@ -73,8 +77,27 @@ public class GameStateLoadSP extends GameState {
 
     @Override
     public void init() {
-        progress = new GuiLoading(this, engine.guiStyle());
-        engine.guiStack().add("20-Progress", progress);
+        Gui gui;
+        DoubleSupplier valueSupplier =
+                () -> step < 0 ? Double.NEGATIVE_INFINITY :
+                        step >= 2 ? Double.POSITIVE_INFINITY : step / 2.0;
+        switch (engine.container().formFactor()) {
+            case PHONE: {
+                GuiTouchLoading progress =
+                        new GuiTouchLoading(this, valueSupplier,
+                                engine.guiStyle());
+                this.progress = progress::setLabel;
+                gui = progress;
+                break;
+            }
+            default:
+                GuiLoading progress =
+                        new GuiLoading(this, valueSupplier, engine.guiStyle());
+                this.progress = progress::setLabel;
+                gui = progress;
+                break;
+        }
+        engine.guiStack().add("20-Progress", gui);
     }
 
     @Override
@@ -87,8 +110,8 @@ public class GameStateLoadSP extends GameState {
         try {
             switch (step) {
                 case 0:
-                    progress.setLabel("Creating server...");
                     step++;
+                    progress.accept("Creating server...");
                     break;
                 case 1:
                     TagStructure tagStructure =
@@ -111,14 +134,14 @@ public class GameStateLoadSP extends GameState {
                     }
                     server = new ScapesServer(source, tagStructure, serverInfo,
                             ssl, engine);
-                    progress.setLabel("Starting server...");
                     step++;
+                    progress.accept("Starting server...");
                     break;
                 case 2:
                     int loadingRadius = FastMath.round(
                             engine.tagStructure().getStructure("Scapes")
                                     .getDouble("RenderDistance")) + 16;
-                    Account account = Account.read(
+                    Account account = Account.get(
                             engine.home().resolve("Account.properties"));
                     ServerConnection server = this.server.connection();
                     GameStateGameSP game = new GameStateGameSP(
@@ -135,8 +158,6 @@ public class GameStateLoadSP extends GameState {
             engine.setState(
                     new GameStateServerDisconnect(e.getMessage(), engine));
             step = -1;
-            return;
         }
-        progress.setProgress(step / 2.0f);
     }
 }

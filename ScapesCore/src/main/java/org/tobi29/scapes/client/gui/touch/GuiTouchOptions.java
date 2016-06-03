@@ -15,11 +15,20 @@
  */
 package org.tobi29.scapes.client.gui.touch;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.tobi29.scapes.client.gui.desktop.GuiAccount;
 import org.tobi29.scapes.client.gui.desktop.GuiControlsList;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
+import org.tobi29.scapes.engine.server.Account;
+
+import java.io.IOException;
 
 public class GuiTouchOptions extends GuiTouchMenu {
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(GuiTouchOptions.class);
+
     public GuiTouchOptions(GameState state, Gui previous, GuiStyle style) {
         super(state, "Options", previous, style);
         GuiComponentSlider musicVolume = row(pane, p -> slider(p, "Music",
@@ -46,8 +55,14 @@ public class GuiTouchOptions extends GuiTouchMenu {
                     new GuiTouchVideoSettings(state, this, style));
         });
         account.onClickLeft(event -> {
-            state.engine().guiStack()
-                    .add("10-Menu", new GuiTouchAccount(state, this, style));
+            try {
+                Account account1 = Account.get(
+                        state.engine().home().resolve("Account.properties"));
+                state.engine().guiStack().add("10-Menu",
+                        new GuiTouchAccount(state, this, account1, style));
+            } catch (IOException e) {
+                LOGGER.error("Failed to read account file: {}", e.toString());
+            }
         });
     }
 }

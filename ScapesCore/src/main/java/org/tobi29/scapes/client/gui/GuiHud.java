@@ -22,6 +22,9 @@ import org.tobi29.scapes.engine.opengl.*;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.opengl.vao.RenderType;
+import org.tobi29.scapes.engine.opengl.vao.VAO;
+import org.tobi29.scapes.engine.opengl.vao.VAOUtility;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
 public class GuiHud extends GuiState {
@@ -41,8 +44,9 @@ public class GuiHud extends GuiState {
     }
 
     @Override
-    public void render(GL gl, Shader shader, Vector2 size, double delta) {
-        super.render(gl, shader, size, delta);
+    public void render(GL gl, Shader shader, Vector2 size, Vector2 pixelSize,
+            double delta) {
+        super.render(gl, shader, size, pixelSize, delta);
         if (visible) {
             MatrixStack matrixStack = gl.matrixStack();
             Matrix matrix = matrixStack.push();

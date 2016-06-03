@@ -16,12 +16,16 @@
 package org.tobi29.scapes.client.states;
 
 import java8.util.Optional;
+import java8.util.function.Consumer;
+import java8.util.function.DoubleSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.client.connection.NewConnection;
-import org.tobi29.scapes.client.gui.GuiLoading;
+import org.tobi29.scapes.client.gui.desktop.GuiLoading;
+import org.tobi29.scapes.client.gui.touch.GuiTouchLoading;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.opengl.scenes.Scene;
 import org.tobi29.scapes.engine.server.*;
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException;
@@ -45,7 +49,7 @@ public class GameStateLoadSocketSP extends GameState {
     private SocketChannel channel;
     private InetSocketAddress address;
     private NewConnection client;
-    private GuiLoading progress;
+    private Consumer<String> progress;
 
     public GameStateLoadSocketSP(WorldSource source, ScapesEngine engine,
             Scene scene) {
@@ -74,8 +78,27 @@ public class GameStateLoadSocketSP extends GameState {
 
     @Override
     public void init() {
-        progress = new GuiLoading(this, engine.guiStyle());
-        engine.guiStack().add("20-Progress", progress);
+        Gui gui;
+        DoubleSupplier valueSupplier =
+                () -> step < 0 ? Double.NEGATIVE_INFINITY :
+                        step >= 6 ? Double.POSITIVE_INFINITY : step / 6.0;
+        switch (engine.container().formFactor()) {
+            case PHONE: {
+                GuiTouchLoading progress =
+                        new GuiTouchLoading(this, valueSupplier,
+                                engine.guiStyle());
+                this.progress = progress::setLabel;
+                gui = progress;
+                break;
+            }
+            default:
+                GuiLoading progress =
+                        new GuiLoading(this, valueSupplier, engine.guiStyle());
+                this.progress = progress::setLabel;
+                gui = progress;
+                break;
+        }
+        engine.guiStack().add("20-Progress", gui);
     }
 
     @Override
@@ -88,8 +111,8 @@ public class GameStateLoadSocketSP extends GameState {
         try {
             switch (step) {
                 case 0:
-                    progress.setLabel("Creating server...");
                     step++;
+                    progress.accept("Creating server...");
                     break;
                 case 1:
                     TagStructure tagStructure =
@@ -112,8 +135,8 @@ public class GameStateLoadSocketSP extends GameState {
                     }
                     server = new ScapesServer(source, tagStructure, serverInfo,
                             ssl, engine);
-                    progress.setLabel("Starting server...");
                     step++;
+                    progress.accept("Starting server...");
                     break;
                 case 2:
                     port = server.connection().start(0);
@@ -122,22 +145,19 @@ public class GameStateLoadSocketSP extends GameState {
                                 "Unable to open server socket (Invalid port returned: " +
                                         port + ')');
                     }
-                    progress.setLabel("Connecting to server...");
-                    step++;
-                    break;
-                case 3:
                     address = new InetSocketAddress(port);
                     channel = SocketChannel.open(address);
                     channel.configureBlocking(false);
                     step++;
+                    progress.accept("Connecting to server...");
                     break;
-                case 4:
+                case 3:
                     if (channel.finishConnect()) {
                         step++;
-                        progress.setLabel("Sending request...");
+                        progress.accept("Sending request...");
                     }
                     break;
-                case 5:
+                case 4:
                     PacketBundleChannel bundleChannel;
                     // Ignore invalid certificates because local server
                     // cannot provide a valid one
@@ -148,22 +168,22 @@ public class GameStateLoadSocketSP extends GameState {
                     int loadingRadius = FastMath.round(
                             engine.tagStructure().getStructure("Scapes")
                                     .getDouble("RenderDistance")) + 16;
-                    Account account = Account.read(
+                    Account account = Account.get(
                             engine.home().resolve("Account.properties"));
                     client = new NewConnection(engine, bundleChannel, account,
                             loadingRadius);
                     step++;
                     break;
-                case 6:
+                case 5:
                     Optional<String> status = client.login();
                     if (status.isPresent()) {
-                        progress.setLabel(status.get());
+                        progress.accept(status.get());
                     } else {
                         step++;
-                        progress.setLabel("Loading world...");
+                        progress.accept("Loading world...");
                     }
                     break;
-                case 7:
+                case 6:
                     GameStateGameSP game =
                             new GameStateGameSP(client.finish(), source, server,
                                     scene, engine);
@@ -177,8 +197,6 @@ public class GameStateLoadSocketSP extends GameState {
             engine.setState(
                     new GameStateServerDisconnect(e.getMessage(), engine));
             step = -1;
-            return;
         }
-        progress.setProgress(step / 7.0f);
     }
 }

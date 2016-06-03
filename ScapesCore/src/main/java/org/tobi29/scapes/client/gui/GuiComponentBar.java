@@ -15,12 +15,14 @@
  */
 package org.tobi29.scapes.client.gui;
 
+import java8.util.function.DoubleSupplier;
 import org.tobi29.scapes.engine.gui.GuiComponentHeavy;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
+import org.tobi29.scapes.engine.gui.GuiRenderer;
 import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.RenderType;
-import org.tobi29.scapes.engine.opengl.VAO;
-import org.tobi29.scapes.engine.opengl.VAOUtility;
+import org.tobi29.scapes.engine.opengl.vao.RenderType;
+import org.tobi29.scapes.engine.opengl.vao.VAO;
+import org.tobi29.scapes.engine.opengl.vao.VAOUtility;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
@@ -28,44 +30,40 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
 public class GuiComponentBar extends GuiComponentHeavy {
-    private final Supplier supplier;
-    private final VAO vao1, vao2;
+    private final float r, g, b, a;
+    private final double updateFactor;
+    private final DoubleSupplier supplier;
+    private VAO vao1, vao2;
     private double value;
 
-    public GuiComponentBar(GuiLayoutData parent, int width, int height, float r,
-            float g, float b, float a, Supplier supplier) {
+    public GuiComponentBar(GuiLayoutData parent, float r, float g, float b,
+            float a, DoubleSupplier supplier) {
+        this(parent, r, g, b, a, 10.0, supplier);
+    }
+
+    public GuiComponentBar(GuiLayoutData parent, float r, float g, float b,
+            float a, double updateFactor, DoubleSupplier supplier) {
         super(parent);
+        this.r = r;
+        this.g = g;
+        this.b = b;
+        this.a = a;
+        this.updateFactor = updateFactor;
         this.supplier = supplier;
-        float r2 = r * 0.5f;
-        float g2 = g * 0.5f;
-        float b2 = b * 0.5f;
-        vao1 = VAOUtility.createVCTI(gui.style().engine(),
-                new float[]{0.0f, height, 0.0f, width, height, 0.0f, 0.0f, 0.0f,
-                        0.0f, width, 0.0f, 0.0f},
-                new float[]{r2, g2, b2, a, r2, g2, b2, a, r, g, b, a, r, g, b,
-                        a},
-                new float[]{0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f},
-                new int[]{0, 1, 2, 3, 2, 1}, RenderType.TRIANGLES);
-        r *= 0.4f;
-        g *= 0.4f;
-        b *= 0.4f;
-        r2 *= 0.4f;
-        g2 *= 0.4f;
-        b2 *= 0.4f;
-        vao2 = VAOUtility.createVCTI(gui.style().engine(),
-                new float[]{0.0f, height, 0.0f, width, height, 0.0f, 0.0f, 0.0f,
-                        0.0f, width, 0.0f, 0.0f},
-                new float[]{r2, g2, b2, a, r2, g2, b2, a, r, g, b, a, r, g, b,
-                        a},
-                new float[]{0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f},
-                new int[]{0, 1, 2, 3, 2, 1}, RenderType.TRIANGLES);
     }
 
     @Override
     public void renderComponent(GL gl, Shader shader, Vector2 size,
             double delta) {
-        double factor = FastMath.min(1.0, delta);
-        value += (FastMath.clamp(supplier.get(), 0.0, 1.0) - value) * factor;
+        double factor = FastMath.min(1.0, delta * updateFactor);
+        double newValue = supplier.getAsDouble();
+        if (newValue == Double.NEGATIVE_INFINITY) {
+            value = 0.0;
+        } else if (newValue == Double.POSITIVE_INFINITY) {
+            value = 1.0;
+        } else {
+            value += (FastMath.clamp(newValue, 0.0, 1.0) - value) * factor;
+        }
         gl.textures().unbind(gl);
         MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
@@ -79,7 +77,35 @@ public class GuiComponentBar extends GuiComponentHeavy {
         matrixStack.pop();
     }
 
-    public interface Supplier {
-        double get();
+    @Override
+    protected void updateMesh(GuiRenderer renderer, Vector2 size) {
+        float r1 = r;
+        float g1 = g;
+        float b1 = b;
+        float r2 = r1 * 0.5f;
+        float g2 = g1 * 0.5f;
+        float b2 = b1 * 0.5f;
+        vao1 = VAOUtility.createVCTI(gui.style().engine(),
+                new float[]{0.0f, size.floatY(), 0.0f, size.floatX(),
+                        size.floatY(), 0.0f, 0.0f, 0.0f, 0.0f, size.floatX(),
+                        0.0f, 0.0f},
+                new float[]{r2, g2, b2, a, r2, g2, b2, a, r1, g1, b1, a, r1, g1,
+                        b1, a},
+                new float[]{0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f},
+                new int[]{0, 1, 2, 3, 2, 1}, RenderType.TRIANGLES);
+        r1 *= 0.4f;
+        g1 *= 0.4f;
+        b1 *= 0.4f;
+        r2 *= 0.4f;
+        g2 *= 0.4f;
+        b2 *= 0.4f;
+        vao2 = VAOUtility.createVCTI(gui.style().engine(),
+                new float[]{0.0f, size.floatY(), 0.0f, size.floatX(),
+                        size.floatY(), 0.0f, 0.0f, 0.0f, 0.0f, size.floatX(),
+                        0.0f, 0.0f},
+                new float[]{r2, g2, b2, a, r2, g2, b2, a, r1, g1, b1, a, r1, g1,
+                        b1, a},
+                new float[]{0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f},
+                new int[]{0, 1, 2, 3, 2, 1}, RenderType.TRIANGLES);
     }
 }

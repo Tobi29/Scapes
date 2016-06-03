@@ -2,9 +2,9 @@ package org.tobi29.scapes.entity.particle;
 
 import java8.util.function.Supplier;
 import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.RenderType;
-import org.tobi29.scapes.engine.opengl.VAOHybrid;
-import org.tobi29.scapes.engine.opengl.VBO;
+import org.tobi29.scapes.engine.opengl.vao.RenderType;
+import org.tobi29.scapes.engine.opengl.vao.VAOHybrid;
+import org.tobi29.scapes.engine.opengl.vao.VBO;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.utils.graphics.Cam;

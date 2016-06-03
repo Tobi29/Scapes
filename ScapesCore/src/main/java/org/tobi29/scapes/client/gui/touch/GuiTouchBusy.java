@@ -13,32 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.tobi29.scapes.client.gui;
+package org.tobi29.scapes.client.gui.touch;
 
-import org.tobi29.scapes.client.gui.desktop.GuiDesktop;
+import org.tobi29.scapes.client.gui.GuiComponentBusy;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.GuiComponentGroup;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 
-public class GuiLoading extends GuiDesktop {
-    private final GuiComponentLoading progress;
+public class GuiTouchBusy extends GuiTouch {
+    private final GuiComponentBusy busy;
     private final GuiComponentTextButton label;
 
-    public GuiLoading(GameState state, GuiStyle style) {
+    public GuiTouchBusy(GameState state, GuiStyle style) {
         super(state, style);
         spacer();
-        GuiComponentGroup pane = addHori(0, 0, 200, -1, GuiComponentGroup::new);
+        GuiComponentGroup pane = addHori(0, 0, 600, -1, GuiComponentGroup::new);
         spacer();
         pane.spacer();
-        progress = pane.addVert(0, 7, -1, 16,
-                p -> new GuiComponentLoading(p, 200, 16));
-        label = pane.addVert(0, 7, -1, 32, p -> button(p, 18, "Loading..."));
+        busy = pane.addVert(0, 10, 32, 32, GuiComponentBusy::new);
+        label = row(pane, p -> button(p, "Loading..."));
         pane.spacer();
     }
 
-    public void setProgress(float value) {
-        progress.setProgress(value);
+    public void setColor(float r, float g, float b, float a) {
+        busy.setColor(r, g, b, a);
     }
 
     public void setLabel(String label) {

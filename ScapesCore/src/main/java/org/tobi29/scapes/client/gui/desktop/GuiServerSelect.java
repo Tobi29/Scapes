@@ -18,7 +18,6 @@ package org.tobi29.scapes.client.gui.desktop;
 import java8.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.client.gui.GuiAddServer;
 import org.tobi29.scapes.client.states.GameStateLoadMP;
 import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.GameState;

@@ -38,16 +38,11 @@ public class GuiAccount extends GuiMenu {
     private KeyPair keyPair;
     private String nickname = "";
 
-    public GuiAccount(GameState state, Gui previous, GuiStyle style) {
+    public GuiAccount(GameState state, Gui previous, Account account,
+            GuiStyle style) {
         super(state, "Account", "Save", style);
-        try {
-            Account account = Account.read(
-                    state.engine().home().resolve("Account.properties"));
-            keyPair = account.keyPair();
-            nickname = account.nickname();
-        } catch (IOException e) {
-            LOGGER.error("Failed to read account file: {}", e.toString());
-        }
+        keyPair = account.keyPair();
+        nickname = account.nickname();
         pane.addVert(16, 5, -1, 18, p -> new GuiComponentText(p, "Key:"));
         GuiComponentGroupSlab slab = row(pane);
         GuiComponentButton keyCopy =

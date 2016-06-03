@@ -15,14 +15,18 @@
  */
 package org.tobi29.scapes.client.states;
 
+import java8.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.client.gui.GuiVersion;
 import org.tobi29.scapes.client.gui.desktop.GuiAccount;
+import org.tobi29.scapes.client.gui.desktop.GuiGenerateAccount;
 import org.tobi29.scapes.client.gui.desktop.GuiMainMenu;
 import org.tobi29.scapes.client.gui.touch.GuiTouchAccount;
+import org.tobi29.scapes.client.gui.touch.GuiTouchGenerateAccount;
 import org.tobi29.scapes.client.gui.touch.GuiTouchMainMenu;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
+import org.tobi29.scapes.engine.Container;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.Gui;
@@ -55,32 +59,17 @@ public class GameStateMenu extends GameState {
     public void init() {
         GuiStyle style = engine.guiStyle();
         engine.guiStack().add("00-Version", new GuiVersion(this, style));
-        boolean hasAccount = false;
+        Optional<Account> account;
+        FilePath file = engine.home().resolve("Account.properties");
         try {
-            FilePath file = engine.home().resolve("Account.properties");
-            Account account = Account.read(file);
-            if (account.valid()) {
-                hasAccount = true;
-            }
+            account = Account.read(file);
         } catch (IOException e) {
             LOGGER.error("Failed to read account file: {}", e.toString());
+            account = Optional.empty();
         }
-        Gui menu;
-        switch (engine().container().formFactor()) {
-            case PHONE:
-                menu = new GuiTouchMainMenu(this, scene, style);
-                if (!hasAccount) {
-                    menu = new GuiTouchAccount(this, menu, style);
-                }
-                break;
-            default:
-                menu = new GuiMainMenu(this, scene, style);
-                if (!hasAccount) {
-                    menu = new GuiAccount(this, menu, style);
-                }
-                break;
-        }
-        engine.guiStack().add("10-Menu", menu);
+        Container.FormFactor formFactor = engine.container().formFactor();
+        engine.guiStack()
+                .add("10-Menu", menu(account, file, style, formFactor));
     }
 
     @Override
@@ -90,5 +79,46 @@ public class GameStateMenu extends GameState {
 
     @Override
     public void step(double delta) {
+    }
+
+    private Gui menu(Optional<Account> account, FilePath path, GuiStyle style,
+            Container.FormFactor formFactor) {
+        if (!account.isPresent()) {
+            switch (formFactor) {
+                case PHONE:
+                    return new GuiTouchGenerateAccount(this, path,
+                            newAccount -> menu(newAccount, style, formFactor),
+                            style);
+                default:
+                    return new GuiGenerateAccount(this, path,
+                            newAccount -> menu(newAccount, style, formFactor),
+                            style);
+            }
+        }
+        return menu(account.get(), style, formFactor);
+    }
+
+    private Gui menu(Account account, GuiStyle style,
+            Container.FormFactor formFactor) {
+        if (!account.valid()) {
+            switch (formFactor) {
+                case PHONE:
+                    return new GuiTouchAccount(this, menu(style, formFactor),
+                            account, style);
+                default:
+                    return new GuiAccount(this, menu(style, formFactor),
+                            account, style);
+            }
+        }
+        return menu(style, formFactor);
+    }
+
+    private Gui menu(GuiStyle style, Container.FormFactor formFactor) {
+        switch (formFactor) {
+            case PHONE:
+                return new GuiTouchMainMenu(this, scene, style);
+            default:
+                return new GuiMainMenu(this, scene, style);
+        }
     }
 }

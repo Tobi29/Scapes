@@ -16,9 +16,9 @@
 package org.tobi29.scapes.entity.model;
 
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.opengl.RenderType;
-import org.tobi29.scapes.engine.opengl.VAO;
-import org.tobi29.scapes.engine.opengl.VAOUtility;
+import org.tobi29.scapes.engine.opengl.vao.RenderType;
+import org.tobi29.scapes.engine.opengl.vao.VAO;
+import org.tobi29.scapes.engine.opengl.vao.VAOUtility;
 
 public class EntityModelBlockBreakShared {
     public final VAO vao;
