@@ -43,7 +43,7 @@ import java.nio.channels.SocketChannel;
 public class GameStateLoadSocketSP extends GameState {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GameStateLoadSocketSP.class);
-    private int step, port;
+    private int step;
     private ScapesServer server;
     private WorldSource source;
     private SocketChannel channel;
@@ -139,7 +139,7 @@ public class GameStateLoadSocketSP extends GameState {
                     progress.accept("Starting server...");
                     break;
                 case 2:
-                    port = server.connection().start(0);
+                    int port = server.connection().start(0);
                     if (port <= 0) {
                         throw new IOException(
                                 "Unable to open server socket (Invalid port returned: " +

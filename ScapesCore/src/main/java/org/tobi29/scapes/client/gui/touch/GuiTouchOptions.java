@@ -17,7 +17,6 @@ package org.tobi29.scapes.client.gui.touch;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tobi29.scapes.client.gui.desktop.GuiAccount;
 import org.tobi29.scapes.client.gui.desktop.GuiControlsList;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.*;
