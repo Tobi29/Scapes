@@ -26,7 +26,7 @@ public class SQLiteSaveStorage implements SaveStorage {
         }
         return Streams.of(FileUtil
                 .list(path, FileUtil::isDirectory, FileUtil::isNotHidden))
-                .map(FilePath::getFileName).map(FilePath::toString);
+                .map(FilePath::getFileName).map(String::valueOf);
     }
 
     @Override

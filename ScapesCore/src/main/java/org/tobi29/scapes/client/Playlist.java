@@ -75,7 +75,7 @@ public class Playlist {
         Optional<FilePath> title = playMusic(
                 engine.home().resolve("playlists").resolve(music.dirName()));
         if (title.isPresent()) {
-            String fileName = title.get().getFileName().toString();
+            String fileName = String.valueOf(title.get().getFileName());
             int index = fileName.lastIndexOf('.');
             String name;
             if (index == -1) {
