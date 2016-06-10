@@ -32,7 +32,7 @@ import java.util.List;
 public class ChunkMesh {
     private static final float[] EMPTY_FLOAT = new float[0];
     private static final byte[] EMPTY_BYTE = new byte[0];
-    private static final int BATCH_SIZE = 6 * 6000;
+    private static final int START_SIZE = 6 * 6000;
     private final SmoothLight.FloatTriple triple =
             new SmoothLight.FloatTriple();
     private final AABB aabb =
@@ -73,8 +73,14 @@ public class ChunkMesh {
             sunLight = terrain.sunLight(xxx, yyy, zzz) / 15.0f;
         }
         if (remaining <= 0) {
-            changeArraySize(pos + BATCH_SIZE);
-            remaining += BATCH_SIZE;
+            int growth;
+            if (pos == 0) {
+                growth = START_SIZE;
+            } else {
+                growth = pos;
+            }
+            changeArraySize(pos + growth);
+            remaining += growth;
         }
         int i = pos * 3;
         arrays.vertexArray[i++] = xx;
