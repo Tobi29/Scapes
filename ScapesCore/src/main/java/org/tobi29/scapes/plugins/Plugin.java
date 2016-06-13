@@ -25,6 +25,8 @@ import org.tobi29.scapes.server.ScapesServer;
  * Basic interface for generic plugins
  */
 public interface Plugin {
+    void initEarly(GameRegistry registry);
+
     void init(GameRegistry registry);
 
     void initEnd(GameRegistry registry);

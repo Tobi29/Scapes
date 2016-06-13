@@ -17,7 +17,6 @@ package org.tobi29.scapes.vanilla.basics.generator;
 
 import java8.util.Optional;
 import org.tobi29.scapes.block.BlockType;
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.generator.ChunkGenerator;
 import org.tobi29.scapes.chunk.generator.GeneratorOutput;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -48,29 +47,29 @@ public class ChunkGeneratorOverworld implements ChunkGenerator {
     public ChunkGeneratorOverworld(Random random,
             TerrainGenerator terrainGenerator, VanillaMaterial materials) {
         this.materials = materials;
-        GameRegistry.Registry<StoneType> stoneRegistry =
-                materials.registry.get("VanillaBasics", "StoneType");
-        int[][] stoneTypes = {new int[]{stoneRegistry.get(StoneType.GRANITE),
-                stoneRegistry.get(StoneType.GABBRO),
-                stoneRegistry.get(StoneType.DIORITE)},
-                new int[]{stoneRegistry.get(StoneType.ANDESITE),
-                        stoneRegistry.get(StoneType.BASALT),
-                        stoneRegistry.get(StoneType.DACITE),
-                        stoneRegistry.get(StoneType.RHYOLITE),
-                        stoneRegistry.get(StoneType.MARBLE),
-                        stoneRegistry.get(StoneType.GRANITE),
-                        stoneRegistry.get(StoneType.GABBRO),
-                        stoneRegistry.get(StoneType.DIORITE)},
-                new int[]{stoneRegistry.get(StoneType.ANDESITE),
-                        stoneRegistry.get(StoneType.BASALT),
-                        stoneRegistry.get(StoneType.DACITE),
-                        stoneRegistry.get(StoneType.RHYOLITE),
-                        stoneRegistry.get(StoneType.DIRT_STONE)},
-                new int[]{stoneRegistry.get(StoneType.DIRT_STONE),
-                        stoneRegistry.get(StoneType.CHALK),
-                        stoneRegistry.get(StoneType.CLAYSTONE),
-                        stoneRegistry.get(StoneType.CHERT),
-                        stoneRegistry.get(StoneType.CONGLOMERATE)}};
+        int[][] stoneTypes =
+                {new int[]{StoneType.GRANITE.data(materials.registry),
+                        StoneType.GABBRO.data(materials.registry),
+                        StoneType.DIORITE.data(materials.registry)},
+                        new int[]{StoneType.ANDESITE.data(materials.registry),
+                                StoneType.BASALT.data(materials.registry),
+                                StoneType.DACITE.data(materials.registry),
+                                StoneType.RHYOLITE.data(materials.registry),
+                                StoneType.MARBLE.data(materials.registry),
+                                StoneType.GRANITE.data(materials.registry),
+                                StoneType.GABBRO.data(materials.registry),
+                                StoneType.DIORITE.data(materials.registry)},
+                        new int[]{StoneType.ANDESITE.data(materials.registry),
+                                StoneType.BASALT.data(materials.registry),
+                                StoneType.DACITE.data(materials.registry),
+                                StoneType.RHYOLITE.data(materials.registry),
+                                StoneType.DIRT_STONE.data(materials.registry)},
+                        new int[]{StoneType.DIRT_STONE.data(materials.registry),
+                                StoneType.CHALK.data(materials.registry),
+                                StoneType.CLAYSTONE.data(materials.registry),
+                                StoneType.CHERT.data(materials.registry),
+                                StoneType.CONGLOMERATE.data(
+                                        materials.registry)}};
         seedInt = (long) random.nextInt() << 32;
         this.terrainGenerator = terrainGenerator;
         sandstoneLayers = new short[512];

@@ -17,32 +17,29 @@ package org.tobi29.scapes.vanilla.basics.material;
 
 import java8.util.Optional;
 import java8.util.stream.Stream;
+import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.engine.utils.Streams;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class CraftingRecipe {
     private final List<Ingredient> ingredients, requirements;
     private final ItemStack result;
 
-    public CraftingRecipe(ItemStack result, Ingredient... ingredients) {
-        this(Arrays.asList(ingredients), result);
-    }
-
-    public CraftingRecipe(List<Ingredient> ingredients, ItemStack result) {
-        this(ingredients, Collections.emptyList(), result);
-    }
-
     public CraftingRecipe(List<Ingredient> ingredients,
             List<Ingredient> requirements, ItemStack result) {
         this.ingredients = ingredients;
         this.requirements = requirements;
         this.result = result;
+    }
+
+    public static CraftingRecipe get(GameRegistry registry, int data) {
+        return registry.<CraftingRecipe>get("VanillaBasics", "CraftingRecipe")
+                .get(data);
     }
 
     public Stream<Ingredient> ingredients() {
@@ -76,6 +73,10 @@ public class CraftingRecipe {
 
     public ItemStack result() {
         return new ItemStack(result);
+    }
+
+    public int data(GameRegistry registry) {
+        return registry.get("VanillaBasics", "CraftingRecipe").get(this);
     }
 
     public interface Ingredient {

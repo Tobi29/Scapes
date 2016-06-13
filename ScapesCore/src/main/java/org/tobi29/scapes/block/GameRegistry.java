@@ -25,7 +25,6 @@ import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.entity.client.*;
 import org.tobi29.scapes.entity.server.*;
 import org.tobi29.scapes.packets.*;
-import org.tobi29.scapes.plugins.Plugins;
 import org.tobi29.scapes.plugins.WorldType;
 
 import java.util.ArrayList;
@@ -47,9 +46,9 @@ public class GameRegistry {
     private final BlockType air;
     private BlockType[] blocks;
     private Material[] materials;
-    private boolean locked;
+    private boolean lockedTypes, locked;
 
-    public GameRegistry(IDStorage idStorage, Plugins plugins) {
+    public GameRegistry(IDStorage idStorage) {
         this.idStorage = idStorage;
         materials = new Material[1];
         air = new BlockAir(this);
@@ -57,10 +56,22 @@ public class GameRegistry {
         materials[0] = air;
         blocks[0] = air;
         air.id = 0;
+    }
+
+    public void initEarly() {
+        addAsymSupplier("Core", "Entity", 0, Integer.MAX_VALUE);
+        addAsymSupplier("Core", "Environment", 0, Integer.MAX_VALUE);
+        addSupplier("Core", "Packet", 0, Short.MAX_VALUE);
+        addSupplier("Core", "Update", 0, Short.MAX_VALUE);
+    }
+
+    public void init(WorldType worldType) {
         AsymSupplierRegistry<WorldServer, EntityServer, WorldClient, EntityClient>
-                er = addAsymSupplier("Core", "Entity", 1, Integer.MAX_VALUE);
-        addAsymSupplier("Core", "Environment", 1, Integer.MAX_VALUE);
-        WorldType worldType = plugins.worldType();
+                er = getAsymSupplier("Core", "Entity");
+        SupplierRegistry<GameRegistry, Packet> pr =
+                getSupplier("Core", "Packet");
+        SupplierRegistry<GameRegistry, Update> ur =
+                getSupplier("Core", "Update");
         er.reg(null, worldType.playerSupplier()::get, worldType.playerClass(),
                 "core.mob.Player");
         er.reg(EntityBlockBreakServer::new, EntityBlockBreakClient::new,
@@ -71,8 +82,6 @@ public class GameRegistry {
                 MobFlyingBlockServer.class, "core.mob.FlyingBlock");
         er.reg(MobBombServer::new, MobBombClient::new, MobBombServer.class,
                 "core.mob.Bomb");
-        SupplierRegistry<GameRegistry, Packet> pr =
-                addSupplier("Core", "Packet", 1, Short.MAX_VALUE);
         pr.regS(PacketRequestChunk::new, "core.packet.RequestChunk");
         pr.regS(PacketRequestEntity::new, "core.packet.RequestEntity");
         pr.regS(PacketSendChunk::new, "core.packet.SendChunk");
@@ -102,8 +111,6 @@ public class GameRegistry {
         pr.regS(PacketPingClient::new, "core.packet.PingClient");
         pr.regS(PacketPingServer::new, "core.packet.PingServer");
         pr.regS(PacketSkin::new, "core.packet.Skin");
-        SupplierRegistry<GameRegistry, Update> ur =
-                addSupplier("Core", "Update", 1, Short.MAX_VALUE);
         ur.regS(UpdateBlockUpdate::new, "core.update.BlockUpdate");
         ur.regS(UpdateBlockUpdateUpdateTile::new,
                 "core.update.BlockUpdateUpdateTile");
@@ -113,15 +120,18 @@ public class GameRegistry {
         return idStorage;
     }
 
+    public void lockTypes() {
+        lockedTypes = true;
+    }
+
     public void lock() {
         locked = true;
     }
 
     @SuppressWarnings("unchecked")
-    public synchronized <E> Registry<E> add(String module, String type, int min,
-            int max) {
-        if (locked) {
-            throw new IllegalStateException("Initializing already ended");
+    public synchronized void add(String module, String type, int min, int max) {
+        if (lockedTypes) {
+            throw new IllegalStateException("Early initializing already ended");
         }
         Pair<String, String> pair = new Pair<>(module, type);
         Registry<?> registry = registries.get(pair);
@@ -129,14 +139,13 @@ public class GameRegistry {
             registry = new Registry<>(module, type, min, max);
             registries.put(pair, registry);
         }
-        return (Registry<E>) registry;
     }
 
     @SuppressWarnings("unchecked")
-    public synchronized <D, E> SupplierRegistry<D, E> addSupplier(String module,
-            String type, int min, int max) {
-        if (locked) {
-            throw new IllegalStateException("Initializing already ended");
+    public synchronized void addSupplier(String module, String type, int min,
+            int max) {
+        if (lockedTypes) {
+            throw new IllegalStateException("Early initializing already ended");
         }
         Pair<String, String> pair = new Pair<>(module, type);
         SupplierRegistry<?, ?> registry = supplierRegistries.get(pair);
@@ -145,14 +154,13 @@ public class GameRegistry {
             registries.put(pair, registry);
             supplierRegistries.put(pair, registry);
         }
-        return (SupplierRegistry<D, E>) registry;
     }
 
     @SuppressWarnings("unchecked")
-    public synchronized <D, E, F, G> AsymSupplierRegistry<D, E, F, G> addAsymSupplier(
-            String module, String type, int min, int max) {
-        if (locked) {
-            throw new IllegalStateException("Initializing already ended");
+    public synchronized void addAsymSupplier(String module, String type,
+            int min, int max) {
+        if (lockedTypes) {
+            throw new IllegalStateException("Early initializing already ended");
         }
         Pair<String, String> pair = new Pair<>(module, type);
         AsymSupplierRegistry<?, ?, ?, ?> registry =
@@ -162,17 +170,22 @@ public class GameRegistry {
             registries.put(pair, registry);
             asymSupplierRegistries.put(pair, registry);
         }
-        return (AsymSupplierRegistry<D, E, F, G>) registry;
     }
 
     @SuppressWarnings("unchecked")
     public <E> Registry<E> get(String module, String type) {
+        if (!lockedTypes) {
+            throw new IllegalStateException("Early initializing not finished");
+        }
         return (Registry<E>) registries.get(new Pair<>(module, type));
     }
 
     @SuppressWarnings("unchecked")
     public <D, E> SupplierRegistry<D, E> getSupplier(String module,
             String type) {
+        if (!lockedTypes) {
+            throw new IllegalStateException("Early initializing not finished");
+        }
         return (SupplierRegistry<D, E>) supplierRegistries
                 .get(new Pair<>(module, type));
     }
@@ -180,6 +193,9 @@ public class GameRegistry {
     @SuppressWarnings("unchecked")
     public <D, E, F, G> AsymSupplierRegistry<D, E, F, G> getAsymSupplier(
             String module, String type) {
+        if (!lockedTypes) {
+            throw new IllegalStateException("Early initializing not finished");
+        }
         return (AsymSupplierRegistry<D, E, F, G>) asymSupplierRegistries
                 .get(new Pair<>(module, type));
     }
@@ -209,6 +225,9 @@ public class GameRegistry {
     }
 
     public void registerMaterial(Material material) {
+        if (!lockedTypes) {
+            throw new IllegalStateException("Early initializing not finished");
+        }
         if (locked) {
             throw new IllegalStateException("Initializing already ended");
         }
@@ -257,23 +276,13 @@ public class GameRegistry {
                 throw new IllegalStateException("Initializing already ended");
             }
             int id = idStorage.get(module, type, name, min, max);
-            register(element, id);
-            return id;
-        }
-
-        public void register(E element, int id) {
-            if (locked) {
-                throw new IllegalStateException("Initializing already ended");
-            }
-            if (element == null) {
-                return;
-            }
             objects.put(id, element);
             ids.put(element, id);
             while (values.size() <= id) {
                 values.add(null);
             }
             values.set(id, element);
+            return id;
         }
 
         public List<E> values() {
@@ -281,7 +290,11 @@ public class GameRegistry {
         }
 
         public E get(int id) {
-            return objects.get(id);
+            E object = objects.get(id);
+            if (object == null) {
+                throw new IllegalArgumentException("Invalid id");
+            }
+            return object;
         }
 
         public int get(E object) {

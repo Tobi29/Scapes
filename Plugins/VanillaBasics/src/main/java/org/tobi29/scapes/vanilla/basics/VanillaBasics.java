@@ -81,6 +81,10 @@ public class VanillaBasics implements WorldType {
                 biome -> biomeDecorators.put(biome, new ConcurrentHashMap<>()));
     }
 
+    public void addCraftingRecipe(CraftingRecipeType recipe) {
+        craftingRecipes.add(recipe);
+    }
+
     private void addResearchRecipe(ResearchRecipe recipe) {
         if (locked) {
             throw new IllegalStateException("Initializing already ended");
@@ -124,12 +128,8 @@ public class VanillaBasics implements WorldType {
         return biomeDecorator;
     }
 
-    public void registerCraftingRecipe(CraftingRecipeType recipe) {
-        craftingRecipes.add(recipe);
-    }
-
-    public List<CraftingRecipeType> getCraftingRecipes() {
-        return craftingRecipes;
+    public Stream<CraftingRecipeType> craftingRecipes() {
+        return Streams.of(craftingRecipes);
     }
 
     public Stream<ResearchRecipe> researchRecipes() {
@@ -167,8 +167,7 @@ public class VanillaBasics implements WorldType {
         return Streams.of(oreTypes);
     }
 
-    public Stream<BiomeDecorator> getBiomeDecorators(
-            BiomeGenerator.Biome biome) {
+    public Stream<BiomeDecorator> biomeDecorators(BiomeGenerator.Biome biome) {
         if (!locked) {
             throw new IllegalStateException("Initializing still running");
         }
@@ -190,6 +189,14 @@ public class VanillaBasics implements WorldType {
     }
 
     @Override
+    public void initEarly(GameRegistry registry) {
+        registry.add("VanillaBasics", "TreeType", 0, Short.MAX_VALUE);
+        registry.add("VanillaBasics", "CropType", 0, Short.MAX_VALUE);
+        registry.add("VanillaBasics", "StoneType", 0, Short.MAX_VALUE);
+        registry.add("VanillaBasics", "CraftingRecipe", 0, Integer.MAX_VALUE);
+    }
+
+    @Override
     public void init(GameRegistry registry) {
         GameRegistry.AsymSupplierRegistry<WorldServer, EnvironmentServer, WorldClient, EnvironmentClient>
                 environmentRegistry =
@@ -200,21 +207,21 @@ public class VanillaBasics implements WorldType {
                         EnvironmentOverworldServer.class,
                         "vanilla.basics.Overworld");
         GameRegistry.Registry<TreeType> treeRegistry =
-                VanillaBasicsRegisters.registerTreeTypes(registry);
+                VanillaBasicsTrees.registerTreeTypes(registry);
         GameRegistry.Registry<CropType> cropRegistry =
-                VanillaBasicsRegisters.registerCropTypes(registry);
+                VanillaBasicsCrops.registerCropTypes(registry);
         GameRegistry.Registry<StoneType> stoneRegistry =
-                VanillaBasicsRegisters.registerStoneTypes(registry);
+                VanillaBasicsStones.registerStoneTypes(registry);
         materials =
                 new VanillaMaterial(this, registry, treeRegistry, cropRegistry,
                         stoneRegistry);
-        VanillaBasicsRegisters.registerEntities(registry);
-        VanillaBasicsRegisters.registerUpdates(registry);
-        VanillaBasicsRegisters.registerPackets(registry);
-        VanillaBasicsRegisters.registerOres(this);
-        VanillaBasicsRegisters.registerResearch(this);
-        VanillaBasicsRegisters.registerMetals(this);
-        VanillaBasicsRegisters.registerVegetation(this);
+        VanillaBasicsEntities.registerEntities(registry);
+        VanillaBasicsUpdates.registerUpdates(registry);
+        VanillaBasicsPackets.registerPackets(registry);
+        VanillaBasicsOres.registerOres(this);
+        VanillaBasicsResearch.registerResearch(this);
+        VanillaBasicsMetals.registerMetals(this);
+        VanillaBasicsDecorators.registerDecorators(this);
     }
 
     @Override
@@ -223,7 +230,7 @@ public class VanillaBasics implements WorldType {
                 .forEach(biomeDecorators.values(),
                         biome -> Streams.forEach(biome.values(), config)));
         locked = true;
-        VanillaBasicsRegisters.registerRecipes(this, registry);
+        VanillaBasicsCrafting.registerRecipes(this, registry);
     }
 
     @Override
@@ -314,6 +321,22 @@ public class VanillaBasics implements WorldType {
         return new EnvironmentOverworldServer(world, this);
     }
 
+    public static class RecipeList {
+        private final List<CraftingRecipe.Ingredient> list = new ArrayList<>();
+
+        public void add(CraftingRecipe.Ingredient ingredient) {
+            list.add(ingredient);
+        }
+
+        public void add(ItemStack item) {
+            add(new CraftingRecipe.IngredientList(item));
+        }
+
+        public void add(List<ItemStack> item) {
+            add(new CraftingRecipe.IngredientList(item));
+        }
+    }
+
     public class Config {
         private final Map<String, Consumer<BiomeDecorator>> decoratorOverlays =
                 new ConcurrentHashMap<>();
@@ -361,22 +384,24 @@ public class VanillaBasics implements WorldType {
         public void ore(Consumer<OreTypeCreator> ore) {
             OreTypeCreator creator = new OreTypeCreator();
             ore.accept(creator);
-            GameRegistry.Registry<StoneType> stoneRegistry =
-                    materials.registry.get("VanillaBasics", "StoneType");
-            List<Integer> stoneTypes =
-                    Streams.of(creator.stoneTypes).map(stoneRegistry::get)
-                            .collect(Collectors.toList());
+            List<Integer> stoneTypes = Streams.of(creator.stoneTypes)
+                    .map(stoneType -> stoneType.data(materials.registry))
+                    .collect(Collectors.toList());
             addOreType(new OreType(creator.type, creator.rarity, creator.size,
                     creator.chance, creator.rockChance, creator.rockDistance,
                     stoneTypes));
         }
 
         public void craftingRecipe(CraftingRecipeType recipeType,
-                Consumer<CraftingRecipeCreator> craftingRecipe) {
+                Consumer<CraftingRecipeCreator> craftingRecipe, String id) {
+            GameRegistry.Registry<CraftingRecipe> craftingRegistry =
+                    materials.registry.get("VanillaBasics", "CraftingRecipe");
             CraftingRecipeCreator creator = new CraftingRecipeCreator();
             craftingRecipe.accept(creator);
-            recipeType.recipes().add(new CraftingRecipe(creator.ingredients,
-                    creator.requirements, creator.result));
+            CraftingRecipe recipe = new CraftingRecipe(creator.ingredients.list,
+                    creator.requirements.list, creator.result);
+            craftingRegistry.reg(recipe, id);
+            recipeType.add(recipe);
         }
 
         public class MetalTypeCreator {
@@ -405,29 +430,9 @@ public class VanillaBasics implements WorldType {
         }
 
         public class CraftingRecipeCreator {
-            public final List<CraftingRecipe.Ingredient> ingredients =
-                    new ArrayList<>(), requirements = new ArrayList<>();
+            public final RecipeList ingredients = new RecipeList(),
+                    requirements = new RecipeList();
             public ItemStack result;
-
-            public void ingredient(ItemStack item) {
-                ingredients.add(new CraftingRecipe.IngredientList(item));
-            }
-
-            public void requirement(ItemStack item) {
-                requirements.add(new CraftingRecipe.IngredientList(item));
-            }
-
-            public void ingredients(Consumer<List<ItemStack>> creator) {
-                List<ItemStack> items = new ArrayList<>();
-                creator.accept(items);
-                ingredients.add(new CraftingRecipe.IngredientList(items));
-            }
-
-            public void requirements(Consumer<List<ItemStack>> creator) {
-                List<ItemStack> items = new ArrayList<>();
-                creator.accept(items);
-                requirements.add(new CraftingRecipe.IngredientList(items));
-            }
         }
     }
 }

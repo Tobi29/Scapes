@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.vanilla.basics.entity.server;
 
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -48,15 +47,13 @@ public class EntityFarmlandServer extends EntityServer {
     @Override
     public TagStructure write() {
         TagStructure tag = super.write();
-        GameRegistry.Registry<CropType> cropRegistry =
-                registry.get("VanillaBasics", "CropType");
         tag.setFloat("NutrientA", nutrientA);
         tag.setFloat("NutrientB", nutrientB);
         tag.setFloat("NutrientC", nutrientC);
         tag.setFloat("Time", time);
         tag.setByte("Stage", stage);
         if (cropType != null) {
-            tag.setInteger("CropType", cropRegistry.get(cropType));
+            tag.setInteger("CropType", cropType.data(registry));
         }
         return tag;
     }
@@ -64,15 +61,14 @@ public class EntityFarmlandServer extends EntityServer {
     @Override
     public void read(TagStructure tagStructure) {
         super.read(tagStructure);
-        GameRegistry.Registry<CropType> cropRegistry =
-                registry.get("VanillaBasics", "CropType");
         nutrientA = tagStructure.getFloat("NutrientA");
         nutrientB = tagStructure.getFloat("NutrientB");
         nutrientC = tagStructure.getFloat("NutrientC");
         time = tagStructure.getFloat("Time");
         stage = tagStructure.getByte("Stage");
         if (tagStructure.has("CropType")) {
-            cropType = cropRegistry.get(tagStructure.getInteger("CropType"));
+            cropType =
+                    CropType.get(registry, tagStructure.getInteger("CropType"));
             updateBlock = true;
         } else {
             cropType = null;
@@ -85,8 +81,6 @@ public class EntityFarmlandServer extends EntityServer {
         if (updateBlock) {
             VanillaBasics plugin =
                     (VanillaBasics) world.plugins().plugin("VanillaBasics");
-            GameRegistry.Registry<CropType> cropRegistry =
-                    world.registry().get("VanillaBasics", "CropType");
             VanillaMaterial materials = plugin.getMaterials();
             CropType cropType = this.cropType;
             if (cropType == null) {
@@ -98,7 +92,7 @@ public class EntityFarmlandServer extends EntityServer {
                 world.getTerrain().queue(handler -> handler
                         .typeData(pos.intX(), pos.intY(), pos.intZ() + 1,
                                 materials.crop,
-                                stage + (cropRegistry.get(cropType) << 3) - 1));
+                                stage + (cropType.data(registry) << 3) - 1));
             }
             updateBlock = false;
         }

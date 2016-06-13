@@ -17,50 +17,51 @@ package org.tobi29.scapes.vanilla.basics.packet;
 
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.client.connection.ClientConnection;
+import org.tobi29.scapes.engine.server.InvalidPacketDataException;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
-import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.material.CraftingRecipe;
 
 import java.io.IOException;
 
 public class PacketCrafting extends Packet implements PacketServer {
-    private int type, id;
+    private int id;
 
     public PacketCrafting() {
     }
 
-    public PacketCrafting(int type, int id) {
-        this.type = type;
+    public PacketCrafting(int id) {
         this.id = id;
     }
 
     @Override
     public void sendServer(ClientConnection client, WritableByteStream stream)
             throws IOException {
-        stream.putInt(type);
         stream.putInt(id);
     }
 
     @Override
     public void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException {
-        type = stream.getInt();
         id = stream.getInt();
     }
 
     @Override
     public void runServer(PlayerConnection player) {
+        CraftingRecipe recipe;
+        try {
+            recipe = CraftingRecipe
+                    .get(player.server().plugins().registry(), id);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidPacketDataException(
+                    "Invalid crafting recipe id: " + id);
+        }
         player.mob(mob -> {
             // TODO: Check if table nearby
-            VanillaBasics plugin = (VanillaBasics) mob.world().plugins()
-                    .plugin("VanillaBasics");
             mob.inventories().modify("Container", inventory -> {
-                CraftingRecipe recipe =
-                        plugin.getCraftingRecipes().get(type).recipes().get(id);
                 ItemStack result = recipe.result();
                 if (inventory.canAdd(result) >= result.amount()) {
                     recipe.takes(inventory).ifPresent(takes -> {

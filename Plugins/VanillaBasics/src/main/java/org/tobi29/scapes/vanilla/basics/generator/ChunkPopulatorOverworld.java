@@ -49,7 +49,7 @@ public class ChunkPopulatorOverworld implements ChunkPopulator {
         seedInt = (long) random.nextInt() << 32;
         for (BiomeGenerator.Biome biome : BiomeGenerator.Biome.values()) {
             BiomeDecoratorChooser chooser =
-                    new BiomeDecoratorChooser(plugin.getBiomeDecorators(biome),
+                    new BiomeDecoratorChooser(plugin.biomeDecorators(biome),
                             random);
             biomes.put(biome, chooser);
         }

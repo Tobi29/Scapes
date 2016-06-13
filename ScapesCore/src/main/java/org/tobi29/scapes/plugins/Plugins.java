@@ -65,7 +65,7 @@ public class Plugins {
         if (worldType == null) {
             throw new IOException("No world type found");
         }
-        registry = new GameRegistry(idStorage, this);
+        registry = new GameRegistry(idStorage);
     }
 
     public static List<PluginFile> installed(FilePath path) throws IOException {
@@ -169,6 +169,10 @@ public class Plugins {
 
     public void init() {
         if (!init) {
+            registry.initEarly();
+            Streams.forEach(plugins, plugin -> plugin.initEarly(registry));
+            registry.lockTypes();
+            registry.init(worldType);
             Streams.forEach(plugins, plugin -> plugin.init(registry));
             Streams.forEach(plugins, plugin -> plugin.initEnd(registry));
             registry.lock();

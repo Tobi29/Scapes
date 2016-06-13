@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material;
 
 import org.tobi29.scapes.block.GameRegistry;
@@ -37,6 +36,10 @@ public class CropType {
                 REPLACE.matcher(name).replaceAll("").toLowerCase();
         this.time = time;
         this.nutrient = nutrient;
+    }
+
+    public static CropType get(GameRegistry registry, int data) {
+        return registry.<CropType>get("VanillaBasics", "CropType").get(data);
     }
 
     public String name() {

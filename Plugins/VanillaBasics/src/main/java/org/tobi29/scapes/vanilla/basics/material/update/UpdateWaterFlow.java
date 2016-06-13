@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.update;
 
 import org.tobi29.scapes.block.BlockType;
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.block.Update;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -27,8 +25,7 @@ import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
 public class UpdateWaterFlow extends Update {
     private static boolean flow(TerrainServer.TerrainMutable terrain, int x,
-            int y, int z, VanillaMaterial materials,
-            GameRegistry.Registry<StoneType> stoneRegistry) {
+            int y, int z, VanillaMaterial materials) {
         BlockType type = terrain.type(x, y, z);
         if (type.isReplaceable(terrain, x, y, z)) {
             int dataHas = terrain.data(x, y, z);
@@ -47,7 +44,7 @@ public class UpdateWaterFlow extends Update {
                     if (dataNeed != dataHas || type != materials.water) {
                         if (terrain.type(x, y, z) == materials.lava) {
                             terrain.typeData(x, y, z, materials.cobblestone,
-                                    stoneRegistry.get(StoneType.BASALT));
+                                    StoneType.BASALT.data(materials.registry));
                         } else {
                             terrain.typeData(x, y, z, materials.water,
                                     dataNeed);
@@ -78,15 +75,13 @@ public class UpdateWaterFlow extends Update {
     public void run(TerrainServer.TerrainMutable terrain) {
         VanillaBasics plugin = (VanillaBasics) terrain.world().plugins()
                 .plugin("VanillaBasics");
-        GameRegistry.Registry<StoneType> stoneRegistry =
-                terrain.world().registry().get("VanillaBasics", "StoneType");
         VanillaMaterial materials = plugin.getMaterials();
-        flow(terrain, x, y, z, materials, stoneRegistry);
-        if (flow(terrain, x, y, z - 1, materials, stoneRegistry)) {
-            flow(terrain, x - 1, y, z, materials, stoneRegistry);
-            flow(terrain, x + 1, y, z, materials, stoneRegistry);
-            flow(terrain, x, y - 1, z, materials, stoneRegistry);
-            flow(terrain, x, y + 1, z, materials, stoneRegistry);
+        flow(terrain, x, y, z, materials);
+        if (flow(terrain, x, y, z - 1, materials)) {
+            flow(terrain, x - 1, y, z, materials);
+            flow(terrain, x + 1, y, z, materials);
+            flow(terrain, x, y - 1, z, materials);
+            flow(terrain, x, y + 1, z, materials);
         }
     }
 

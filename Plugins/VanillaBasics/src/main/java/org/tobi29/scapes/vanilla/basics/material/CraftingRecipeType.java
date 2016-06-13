@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material;
 
+import java8.util.stream.Stream;
+import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 
@@ -33,7 +34,11 @@ public abstract class CraftingRecipeType {
 
     public abstract boolean availableFor(MobPlayerClientMain player);
 
-    public List<CraftingRecipe> recipes() {
-        return recipes;
+    public void add(CraftingRecipe recipe) {
+        recipes.add(recipe);
+    }
+
+    public Stream<CraftingRecipe> recipes() {
+        return Streams.of(recipes);
     }
 }

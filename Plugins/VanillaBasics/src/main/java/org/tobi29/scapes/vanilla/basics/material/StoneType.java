@@ -51,6 +51,10 @@ public class StoneType {
         this.resistance = resistance;
     }
 
+    public static StoneType get(GameRegistry registry, int data) {
+        return registry.<StoneType>get("VanillaBasics", "StoneType").get(data);
+    }
+
     public String name() {
         return name;
     }

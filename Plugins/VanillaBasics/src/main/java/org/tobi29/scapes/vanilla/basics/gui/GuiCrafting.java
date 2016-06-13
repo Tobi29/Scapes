@@ -15,10 +15,10 @@
  */
 package org.tobi29.scapes.vanilla.basics.gui;
 
+import java8.util.Optional;
 import org.tobi29.scapes.client.gui.GuiComponentItemButton;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.*;
-import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
@@ -28,6 +28,7 @@ import org.tobi29.scapes.vanilla.basics.packet.PacketCrafting;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 public class GuiCrafting extends GuiInventory {
@@ -35,7 +36,8 @@ public class GuiCrafting extends GuiInventory {
             scrollPaneRecipes;
     private final boolean table;
     private List<Element> elements = Collections.emptyList();
-    private int type = -1, example;
+    private Optional<CraftingRecipeType> currentType = Optional.empty();
+    private int example;
     private long nextExample;
 
     public GuiCrafting(boolean table, MobPlayerClientMainVB player,
@@ -51,28 +53,27 @@ public class GuiCrafting extends GuiInventory {
     }
 
     private void updateTypes() {
+        currentType = Optional.empty();
         scrollPaneTypes.removeAll();
-        List<CraftingRecipeType> recipeTypes;
         VanillaBasics plugin = (VanillaBasics) player.connection().plugins()
                 .plugin("VanillaBasics");
-        recipeTypes = plugin.getCraftingRecipes();
-        int id = 0;
-        List<Pair<CraftingRecipeType, Integer>> tableOnly = new ArrayList<>();
-        for (CraftingRecipeType recipeType : recipeTypes) {
+        List<CraftingRecipeType> tableOnly = new ArrayList<>();
+        Iterator<CraftingRecipeType> iterator =
+                plugin.craftingRecipes().iterator();
+        while (iterator.hasNext()) {
+            CraftingRecipeType recipeType = iterator.next();
             if (recipeType.availableFor(player)) {
                 boolean enabled = table || !recipeType.table();
                 if (enabled) {
-                    if (type < 0) {
-                        type = id;
+                    if (!currentType.isPresent()) {
+                        currentType = Optional.of(recipeType);
                     }
-                    int i = id;
                     scrollPaneTypes.addVert(0, 0, -1, 20,
-                            p -> new ElementType(p, recipeType, i, true));
+                            p -> new ElementType(p, recipeType, true));
                 } else {
-                    tableOnly.add(new Pair<>(recipeType, id));
+                    tableOnly.add(recipeType);
                 }
             }
-            id++;
         }
         if (!tableOnly.isEmpty()) {
             GuiComponentGroup separator = scrollPaneTypes
@@ -81,7 +82,7 @@ public class GuiCrafting extends GuiInventory {
                     p -> new GuiComponentText(p, "Table only:"));
             Streams.forEach(tableOnly, type -> scrollPaneTypes
                     .addVert(0, 0, -1, 20,
-                            p -> new ElementType(p, type.a, type.b, false)));
+                            p -> new ElementType(p, type, false)));
         }
     }
 
@@ -102,28 +103,24 @@ public class GuiCrafting extends GuiInventory {
     private void updateRecipes() {
         List<Element> elements = new ArrayList<>();
         scrollPaneRecipes.removeAll();
-        VanillaBasics plugin = (VanillaBasics) player.connection().plugins()
-                .plugin("VanillaBasics");
-        CraftingRecipeType recipeType = plugin.getCraftingRecipes().get(type);
-        int id = 0;
-        for (CraftingRecipe recipe : recipeType.recipes()) {
-            int i = id++;
-            elements.add(scrollPaneRecipes.addVert(0, 0, 268, 40,
-                    p -> new Element(p, recipe, type, i)));
-        }
-        this.elements = elements;
-        nextExample = System.currentTimeMillis() + 1000;
+        currentType.ifPresent(recipeType -> {
+            recipeType.recipes().forEach(recipe -> elements
+                    .add(scrollPaneRecipes.addVert(0, 0, 268, 40,
+                            p -> new Element(p, recipe))));
+            this.elements = elements;
+            nextExample = System.currentTimeMillis() + 1000;
+        });
     }
 
     private class ElementType extends GuiComponentGroupSlab {
-        public ElementType(GuiLayoutData parent, CraftingRecipeType recipe,
-                int id, boolean enabled) {
+        public ElementType(GuiLayoutData parent, CraftingRecipeType recipeType,
+                boolean enabled) {
             super(parent);
-            GuiComponentTextButton label =
-                    addHori(5, 2, -1, -1, p -> button(p, 12, recipe.name()));
+            GuiComponentTextButton label = addHori(5, 2, -1, -1,
+                    p -> button(p, 12, recipeType.name()));
             if (enabled) {
                 label.onClickLeft(event -> {
-                    type = id;
+                    currentType = Optional.of(recipeType);
                     example = 0;
                     updateRecipes();
                 });
@@ -134,13 +131,13 @@ public class GuiCrafting extends GuiInventory {
     private class Element extends GuiComponentGroupSlab {
         private final List<Runnable> examples = new ArrayList<>();
 
-        public Element(GuiLayoutData parent, CraftingRecipe recipe, int type,
-                int id) {
+        public Element(GuiLayoutData parent, CraftingRecipe recipe) {
             super(parent);
             GuiComponentItemButton result = addHori(5, 5, 30, 30,
                     p -> new GuiComponentItemButton(p, recipe.result()));
             result.onClickLeft(event -> player.connection()
-                    .send(new PacketCrafting(type, id)));
+                    .send(new PacketCrafting(recipe.data(
+                            player.connection().plugins().registry()))));
             result.onHover(event -> setTooltip(result.item(), "Result:\n"));
             addHori(5, 5, -1, 16, p -> new GuiComponentFlowText(p, "<="));
             recipe.ingredients().forEach(ingredient -> {

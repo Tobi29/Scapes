@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.update;
 
 import org.tobi29.scapes.block.BlockType;
-import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.block.Update;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
@@ -34,9 +32,7 @@ public class UpdateSaplingGrowth extends Update {
         VanillaMaterial materials = plugin.getMaterials();
         int data = terrain.data(x, y, z);
         terrain.typeData(x, y, z, materials.air, (short) 0);
-        GameRegistry.Registry<TreeType> treeRegistry =
-                terrain.world().registry().get("VanillaBasics", "TreeType");
-        treeRegistry.get(data).generator()
+        TreeType.get(materials.registry, data).generator()
                 .gen(terrain, x, y, z, materials, new Random());
     }
 
