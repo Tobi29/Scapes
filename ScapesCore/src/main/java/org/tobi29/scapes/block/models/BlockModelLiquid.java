@@ -16,17 +16,18 @@
 package org.tobi29.scapes.block.models;
 
 import org.tobi29.scapes.block.BlockType;
+import org.tobi29.scapes.block.ShaderAnimation;
 import org.tobi29.scapes.block.TerrainTexture;
 import org.tobi29.scapes.block.TerrainTextureRegistry;
 import org.tobi29.scapes.chunk.data.ChunkMesh;
 import org.tobi29.scapes.chunk.terrain.Terrain;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
 import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.vao.Mesh;
-import org.tobi29.scapes.engine.opengl.vao.VAO;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.opengl.vao.Mesh;
+import org.tobi29.scapes.engine.opengl.vao.VAO;
 import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
@@ -72,24 +73,40 @@ public class BlockModelLiquid implements BlockModel {
                 terrain.type(x - 1, y, z + 1) == block ||
                 terrain.type(x - 1, y - 1, z + 1) == block ||
                 terrain.type(x, y - 1, z + 1) == block) {
-            return 1.0f;
+            return 3.0f;
+        }
+        boolean other1 = terrain.type(x, y, z) == block;
+        boolean other2 = terrain.type(x - 1, y, z) == block;
+        boolean other3 = terrain.type(x - 1, y - 1, z) == block;
+        boolean other4 = terrain.type(x, y - 1, z) == block;
+        if (!other1 || !other2 || !other3 || !other4) {
+            boolean bottom1 = terrain.type(x, y, z - 1) == block;
+            boolean bottom2 = terrain.type(x - 1, y, z - 1) == block;
+            boolean bottom3 = terrain.type(x - 1, y - 1, z - 1) == block;
+            boolean bottom4 = terrain.type(x, y - 1, z - 1) == block;
+            if (bottom1 && !other1 ||
+                    bottom2 && !other2 ||
+                    bottom3 && !other3 ||
+                    bottom4 && !other4) {
+                return 2.0f;
+            }
         }
         float height = 0;
         int heights = 0;
-        if (terrain.type(x, y, z) == block) {
+        if (other1) {
             height += 1 - FastMath.max(0, terrain.data(x, y, z) - 1) / 7.0f;
             heights++;
         }
-        if (terrain.type(x - 1, y, z) == block) {
+        if (other2) {
             height += 1 - FastMath.max(0, terrain.data(x - 1, y, z) - 1) / 7.0f;
             heights++;
         }
-        if (terrain.type(x - 1, y - 1, z) == block) {
+        if (other3) {
             height += 1 -
                     FastMath.max(0, terrain.data(x - 1, y - 1, z) - 1) / 7.0f;
             heights++;
         }
-        if (terrain.type(x, y - 1, z) == block) {
+        if (other4) {
             height += 1 - FastMath.max(0, terrain.data(x, y - 1, z) - 1) / 7.0f;
             heights++;
         }
@@ -110,12 +127,30 @@ public class BlockModelLiquid implements BlockModel {
         int connectStage = block.connectStage(terrain, x, y, z);
         BlockType top = terrain.type(x, y, z + 1);
         float height00, height01, height11, height10;
+        boolean static00, static01, static11, static10;
         boolean flag = top != block;
+        byte noAnim = ShaderAnimation.NONE.id();
         if (flag) {
             height00 = calcHeight(x, y, z, terrain, block) * diff + min;
             height01 = calcHeight(x, y + 1, z, terrain, block) * diff + min;
             height11 = calcHeight(x + 1, y + 1, z, terrain, block) * diff + min;
             height10 = calcHeight(x + 1, y, z, terrain, block) * diff + min;
+            static00 = height00 > 1.5f;
+            static01 = height01 > 1.5f;
+            static11 = height11 > 1.5f;
+            static10 = height10 > 1.5f;
+            if (static00) {
+                height00 -= 2.0f;
+            }
+            if (static01) {
+                height01 -= 2.0f;
+            }
+            if (static11) {
+                height11 -= 2.0f;
+            }
+            if (static10) {
+                height10 -= 2.0f;
+            }
             if (height00 >= 1.0f && height01 >= 1.0f && height11 >= 1.0f &&
                     height10 >= 1.0f) {
                 flag = top.connectStage(terrain, x, y, z + 1) < connectStage;
@@ -126,17 +161,19 @@ public class BlockModelLiquid implements BlockModel {
                     byte anim = texTop.shaderAnimation().id();
                     mesh.addVertex(terrain, Face.UP, x, y, z + height00, xx, yy,
                             zz + height00, texTop.x(), texTop.y(), r, g, b, a,
-                            lod, anim);
+                            lod, static00 ? noAnim : anim);
                     mesh.addVertex(terrain, Face.UP, x + 1, y, z + height10,
                             xx + 1, yy, zz + height10, texTop.x() + terrainTile,
-                            texTop.y(), r, g, b, a, lod, anim);
+                            texTop.y(), r, g, b, a, lod,
+                            static10 ? noAnim : anim);
                     mesh.addVertex(terrain, Face.UP, x + 1, y + 1, z + height11,
                             xx + 1, yy + 1, zz + height11,
                             texTop.x() + terrainTile, texTop.y() + terrainTile,
-                            r, g, b, a, lod, anim);
+                            r, g, b, a, lod, static11 ? noAnim : anim);
                     mesh.addVertex(terrain, Face.UP, x, y + 1, z + height01, xx,
                             yy + 1, zz + height01, texTop.x(),
-                            texTop.y() + terrainTile, r, g, b, a, lod, anim);
+                            texTop.y() + terrainTile, r, g, b, a, lod,
+                            static01 ? noAnim : anim);
                 }
             }
         } else {
@@ -144,6 +181,10 @@ public class BlockModelLiquid implements BlockModel {
             height10 = height00;
             height11 = height00;
             height01 = height00;
+            static00 = true;
+            static10 = true;
+            static11 = true;
+            static01 = true;
         }
         BlockType other;
         other = terrain.type(x, y, z - 1);
@@ -151,18 +192,17 @@ public class BlockModelLiquid implements BlockModel {
                 other.connectStage(terrain, x, y, z - 1) <= connectStage) {
             if (texBottom != null) {
                 float terrainTile = texBottom.size();
-                byte anim = texBottom.shaderAnimation().id();
                 mesh.addVertex(terrain, Face.DOWN, x, y + 1, z, xx, yy + 1, zz,
                         texBottom.x(), texBottom.y() + terrainTile, r, g, b, a,
-                        lod, anim);
+                        lod, noAnim);
                 mesh.addVertex(terrain, Face.DOWN, x + 1, y + 1, z, xx + 1,
                         yy + 1, zz, texBottom.x() + terrainTile,
-                        texBottom.y() + terrainTile, r, g, b, a, lod, anim);
+                        texBottom.y() + terrainTile, r, g, b, a, lod, noAnim);
                 mesh.addVertex(terrain, Face.DOWN, x + 1, y, z, xx + 1, yy, zz,
                         texBottom.x() + terrainTile, texBottom.y(), r, g, b, a,
-                        lod, anim);
+                        lod, noAnim);
                 mesh.addVertex(terrain, Face.DOWN, x, y, z, xx, yy, zz,
-                        texBottom.x(), texBottom.y(), r, g, b, a, lod, anim);
+                        texBottom.x(), texBottom.y(), r, g, b, a, lod, noAnim);
             }
         }
         other = terrain.type(x, y - 1, z);
@@ -177,16 +217,18 @@ public class BlockModelLiquid implements BlockModel {
                         FastMath.max(1.0f - height10, 0.0f) * terrainTile;
                 mesh.addVertex(terrain, Face.NORTH, x + 1, y, z + height10,
                         xx + 1, yy, zz + height10, texSide1.x() + terrainTile,
-                        texSide1.y() + textureHeight10, r, g, b, a, lod, anim);
+                        texSide1.y() + textureHeight10, r, g, b, a, lod,
+                        static10 ? noAnim : anim);
                 mesh.addVertex(terrain, Face.NORTH, x, y, z + height00, xx, yy,
                         zz + height00, texSide1.x(),
-                        texSide1.y() + textureHeight00, r, g, b, a, lod, anim);
+                        texSide1.y() + textureHeight00, r, g, b, a, lod,
+                        static00 ? noAnim : anim);
                 mesh.addVertex(terrain, Face.NORTH, x, y, z, xx, yy, zz,
                         texSide1.x(), texSide1.y() + terrainTile, r, g, b, a,
-                        lod, anim);
+                        lod, noAnim);
                 mesh.addVertex(terrain, Face.NORTH, x + 1, y, z, xx + 1, yy, zz,
                         texSide1.x() + terrainTile, texSide1.y() + terrainTile,
-                        r, g, b, a, lod, anim);
+                        r, g, b, a, lod, noAnim);
             }
         }
         other = terrain.type(x + 1, y, z);
@@ -202,16 +244,18 @@ public class BlockModelLiquid implements BlockModel {
                 mesh.addVertex(terrain, Face.EAST, x + 1, y + 1, z + height11,
                         xx + 1, yy + 1, zz + height11,
                         texSide2.x() + terrainTile,
-                        texSide2.y() + textureHeight11, r, g, b, a, lod, anim);
+                        texSide2.y() + textureHeight11, r, g, b, a, lod,
+                        static11 ? noAnim : anim);
                 mesh.addVertex(terrain, Face.EAST, x + 1, y, z + height10,
                         xx + 1, yy, zz + height10, texSide2.x(),
-                        texSide2.y() + textureHeight10, r, g, b, a, lod, anim);
+                        texSide2.y() + textureHeight10, r, g, b, a, lod,
+                        static10 ? noAnim : anim);
                 mesh.addVertex(terrain, Face.EAST, x + 1, y, z, xx + 1, yy, zz,
                         texSide2.x(), texSide2.y() + terrainTile, r, g, b, a,
-                        lod, anim);
+                        lod, noAnim);
                 mesh.addVertex(terrain, Face.EAST, x + 1, y + 1, z, xx + 1,
                         yy + 1, zz, texSide2.x() + terrainTile,
-                        texSide2.y() + terrainTile, r, g, b, a, lod, anim);
+                        texSide2.y() + terrainTile, r, g, b, a, lod, noAnim);
             }
         }
         other = terrain.type(x, y + 1, z);
@@ -226,16 +270,18 @@ public class BlockModelLiquid implements BlockModel {
                         FastMath.max(1.0f - height11, 0.0f) * terrainTile;
                 mesh.addVertex(terrain, Face.SOUTH, x + 1, y + 1, z, xx + 1,
                         yy + 1, zz, texSide3.x(), texSide3.y() + terrainTile, r,
-                        g, b, a, lod, anim);
+                        g, b, a, lod, noAnim);
                 mesh.addVertex(terrain, Face.SOUTH, x, y + 1, z, xx, yy + 1, zz,
                         texSide3.x() + terrainTile, texSide3.y() + terrainTile,
-                        r, g, b, a, lod, anim);
+                        r, g, b, a, lod, noAnim);
                 mesh.addVertex(terrain, Face.SOUTH, x, y + 1, z + height01, xx,
                         yy + 1, zz + height01, texSide3.x() + terrainTile,
-                        texSide3.y() + textureHeight01, r, g, b, a, lod, anim);
+                        texSide3.y() + textureHeight01, r, g, b, a, lod,
+                        static01 ? noAnim : anim);
                 mesh.addVertex(terrain, Face.SOUTH, x + 1, y + 1, z + height11,
                         xx + 1, yy + 1, zz + height11, texSide3.x(),
-                        texSide3.y() + textureHeight11, r, g, b, a, lod, anim);
+                        texSide3.y() + textureHeight11, r, g, b, a, lod,
+                        static11 ? noAnim : anim);
             }
         }
         other = terrain.type(x - 1, y, z);
@@ -250,16 +296,18 @@ public class BlockModelLiquid implements BlockModel {
                         FastMath.max(1.0f - height01, 0.0f) * terrainTile;
                 mesh.addVertex(terrain, Face.WEST, x, y + 1, z, xx, yy + 1, zz,
                         texSide4.x(), texSide4.y() + terrainTile, r, g, b, a,
-                        lod, anim);
+                        lod, noAnim);
                 mesh.addVertex(terrain, Face.WEST, x, y, z, xx, yy, zz,
                         texSide4.x() + terrainTile, texSide4.y() + terrainTile,
-                        r, g, b, a, lod, anim);
+                        r, g, b, a, lod, noAnim);
                 mesh.addVertex(terrain, Face.WEST, x, y, z + height00, xx, yy,
                         zz + height00, texSide4.x() + terrainTile,
-                        texSide4.y() + textureHeight00, r, g, b, a, lod, anim);
+                        texSide4.y() + textureHeight00, r, g, b, a, lod,
+                        static00 ? noAnim : anim);
                 mesh.addVertex(terrain, Face.WEST, x, y + 1, z + height01, xx,
                         yy + 1, zz + height01, texSide4.x(),
-                        texSide4.y() + textureHeight01, r, g, b, a, lod, anim);
+                        texSide4.y() + textureHeight01, r, g, b, a, lod,
+                        static01 ? noAnim : anim);
             }
         }
     }
