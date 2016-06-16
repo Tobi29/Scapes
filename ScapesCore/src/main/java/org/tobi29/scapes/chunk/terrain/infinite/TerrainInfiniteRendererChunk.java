@@ -17,31 +17,36 @@ package org.tobi29.scapes.chunk.terrain.infinite;
 
 import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.OpenGL;
-import org.tobi29.scapes.engine.opengl.vao.VAO;
-import org.tobi29.scapes.engine.opengl.vao.VAOStatic;
 import org.tobi29.scapes.engine.opengl.matrix.Matrix;
 import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.opengl.vao.VAO;
+import org.tobi29.scapes.engine.opengl.vao.VAOStatic;
+import org.tobi29.scapes.engine.utils.ArrayUtil;
+import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TerrainInfiniteRendererChunk {
     private final TerrainInfiniteChunkClient chunk;
     private final TerrainInfiniteRenderer renderer;
     private final VAOStatic[] vao, vaoAlpha;
     private final AABB[] aabb, aabbAlpha;
-    private final boolean[] geometryDirty, geometryInit, solid, visible,
-            prepareVisible, culled, lod;
+    private final AtomicBoolean[] geometryDirty;
+    private final boolean[] geometryInit, solid, visible, prepareVisible,
+            culled, lod;
 
     public TerrainInfiniteRendererChunk(TerrainInfiniteChunkClient chunk,
             TerrainInfiniteRenderer renderer) {
         this.chunk = chunk;
         this.renderer = renderer;
         int zSections = chunk.zSize() >> 4;
-        geometryDirty = new boolean[zSections];
+        geometryDirty = new AtomicBoolean[zSections];
+        ArrayUtil.fill(geometryDirty, () -> new AtomicBoolean(true));
         geometryInit = new boolean[zSections + 1];
         vao = new VAOStatic[zSections];
         vaoAlpha = new VAOStatic[zSections];
@@ -53,8 +58,7 @@ public class TerrainInfiniteRendererChunk {
         prepareVisible = new boolean[zSections];
         culled = new boolean[zSections];
         Arrays.fill(solid, true);
-        Arrays.fill(geometryDirty, true);
-        renderer.addToLoadQueue(this);
+        renderer.addToQueue(this);
     }
 
     public TerrainInfiniteChunkClient chunk() {
@@ -63,10 +67,6 @@ public class TerrainInfiniteRendererChunk {
 
     public int zSections() {
         return vao.length;
-    }
-
-    public boolean isGeometryDirty(int i) {
-        return geometryDirty[i];
     }
 
     public void render(GL gl, Shader shader, Cam cam) {
@@ -78,10 +78,9 @@ public class TerrainInfiniteRendererChunk {
             boolean newLod = FastMath.sqr(relativeX + 8) +
                     FastMath.sqr(relativeY + 8) +
                     FastMath.sqr(relativeZ + 8) < 9216;
-            if (lod[i] != newLod && !geometryDirty[i]) {
+            if (lod[i] != newLod) {
                 lod[i] = newLod;
-                geometryDirty[i] = true;
-                renderer.addToLoadQueue(this);
+                setGeometryDirty(i);
             }
             VAOStatic vao = this.vao[i];
             AABB aabb = this.aabb[i];
@@ -138,7 +137,7 @@ public class TerrainInfiniteRendererChunk {
                 if (!chunk.isLoaded()) {
                     gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 0.0f, 0.0f,
                             1.0f);
-                } else if (geometryDirty[i]) {
+                } else if (geometryDirty[i].get()) {
                     gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 0.0f,
                             1.0f);
                 } else {
@@ -199,14 +198,15 @@ public class TerrainInfiniteRendererChunk {
 
     public void setGeometryDirty() {
         for (int i = 0; i < vao.length; i++) {
-            geometryDirty[i] = true;
+            geometryDirty[i].set(true);
         }
-        renderer.addToLoadQueue(this);
+        renderer.addToQueue(this);
     }
 
     public void setGeometryDirty(int i) {
-        geometryDirty[i] = true;
-        renderer.addToUpdateQueue(this);
+        if (!geometryDirty[i].getAndSet(true)) {
+            renderer.addToQueue(this, i);
+        }
     }
 
     public void setSolid(int i, boolean value) {
@@ -252,8 +252,8 @@ public class TerrainInfiniteRendererChunk {
         return false;
     }
 
-    public void unsetGeometryDirty(int i) {
-        geometryDirty[i] = false;
+    public boolean unsetGeometryDirty(int i) {
+        return geometryDirty[i].getAndSet(false);
     }
 
     public boolean isSolid(int i) {
@@ -272,9 +272,9 @@ public class TerrainInfiniteRendererChunk {
         Arrays.fill(vao, null);
         Arrays.fill(vaoAlpha, null);
         Arrays.fill(solid, true);
-        Arrays.fill(geometryDirty, true);
+        Streams.forEach(geometryDirty, value -> value.set(true));
         Arrays.fill(geometryInit, false);
         Arrays.fill(culled, false);
-        renderer.addToLoadQueue(this);
+        renderer.addToQueue(this);
     }
 }

@@ -24,7 +24,7 @@ import org.tobi29.scapes.chunk.data.ChunkMesh;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderer;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.opengl.*;
+import org.tobi29.scapes.engine.opengl.GL;
 import org.tobi29.scapes.engine.opengl.shader.Shader;
 import org.tobi29.scapes.engine.opengl.vao.RenderType;
 import org.tobi29.scapes.engine.opengl.vao.VAO;
@@ -32,30 +32,36 @@ import org.tobi29.scapes.engine.opengl.vao.VAOStatic;
 import org.tobi29.scapes.engine.opengl.vao.VAOUtility;
 import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.Streams;
+import org.tobi29.scapes.engine.utils.ThreadLocalUtil;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.profiler.Profiler;
-import org.tobi29.scapes.engine.utils.task.Joiner;
-import org.tobi29.scapes.engine.utils.task.TaskExecutor;
+import org.tobi29.scapes.engine.utils.task.TaskLock;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TerrainInfiniteRenderer implements TerrainRenderer {
+    @SuppressWarnings("ThreadLocalNotStaticFinal")
+    private final ThreadLocal<ThreadLocalData> threadData;
     private final List<Vector2i> sortedLocations;
-    private final TerrainInfiniteRendererThread updateThread, loadThread;
     private final TerrainInfiniteClient terrain;
     private final double chunkDistanceMax;
     private final List<TerrainInfiniteRendererChunk> chunks = new ArrayList<>();
-    private final Joiner joiner;
     private final VAO frame;
+    private final TaskLock taskLock = new TaskLock();
+    private final AtomicBoolean updateVisible = new AtomicBoolean(),
+            updatingVisible = new AtomicBoolean();
     private int playerX, playerY, playerZ;
     private double chunkDistance;
-    private boolean disposed, staticRenderDistance, updateVisible;
+    private boolean disposed, staticRenderDistance;
     private Cam cam;
     private Pool<VisibleUpdate> cullingPool1 = new Pool<>(VisibleUpdate::new),
             cullingPool2 = new Pool<>(VisibleUpdate::new);
@@ -75,21 +81,8 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                         min, max, max},
                 new int[]{0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4,
                         1, 5, 2, 6, 3, 7}, RenderType.LINES);
-        Queue<TerrainInfiniteRendererChunk> loadQueue =
-                new ConcurrentLinkedQueue<>();
-        Queue<TerrainInfiniteRendererChunk> updateQueue =
-                new ConcurrentLinkedQueue<>();
-        updateThread =
-                new TerrainInfiniteRendererThread(updateQueue, loadQueue, true,
-                        world.infoLayers());
-        loadThread =
-                new TerrainInfiniteRendererThread(loadQueue, updateQueue, false,
-                        world.infoLayers());
-        Joiner updateJoiner = player.game().engine().taskExecutor()
-                .runTask(updateThread, "TerrainInfiniteChunk-Geometry-Update");
-        Joiner loadJoiner = player.game().engine().taskExecutor()
-                .runTask(loadThread, "TerrainInfiniteChunk-Geometry-Load");
-        joiner = new Joiner(updateJoiner, loadJoiner);
+        threadData = ThreadLocalUtil
+                .of(() -> new ThreadLocalData(world.infoLayers()));
     }
 
     public void toggleStaticRenderDistance() {
@@ -102,26 +95,71 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     }
 
     public void dispose() {
-        joiner.join();
+        taskLock.lock();
         disposed = true;
     }
 
-    public void addToUpdateQueue(TerrainInfiniteRendererChunk chunk) {
+    public void addToQueue(TerrainInfiniteRendererChunk chunk, int i) {
         if (chunk == null || !chunk.chunk().isLoaded() ||
                 disposed) {
             return;
         }
-        updateThread.queue.add(chunk);
-        joiner.wake();
+        if (!checkLoaded(chunk)) {
+            return;
+        }
+        terrain.world().game().engine().taskExecutor().runTask(() -> {
+            ThreadLocalData threadData = this.threadData.get();
+            threadData.process(chunk, i);
+        }, taskLock, "Update-Chunk-Geometry");
     }
 
-    public void addToLoadQueue(TerrainInfiniteRendererChunk chunk) {
+    public void addToQueue(TerrainInfiniteRendererChunk chunk) {
         if (chunk == null || !chunk.chunk().isLoaded() ||
                 disposed) {
             return;
         }
-        loadThread.queue.add(chunk);
-        joiner.wake();
+        if (!checkLoaded(chunk)) {
+            return;
+        }
+        terrain.world().game().engine().taskExecutor().runTask(() -> {
+            ThreadLocalData threadData = this.threadData.get();
+            for (int i = 0; i < chunk.zSections(); i++) {
+                threadData.process(chunk, i);
+            }
+        }, taskLock, "Update-Chunk-Geometry");
+    }
+
+    @SuppressWarnings("RedundantIfStatement")
+    private boolean checkLoaded(TerrainInfiniteRendererChunk chunk) {
+        TerrainInfiniteChunkClient terrainChunk = chunk.chunk();
+        int x = terrainChunk.x();
+        int y = terrainChunk.y();
+        TerrainInfinite terrain = terrainChunk.terrain();
+        if (!checkLoaded(terrain, x - 1, y - 1)) {
+            return false;
+        }
+        if (!checkLoaded(terrain, x, y - 1)) {
+            return false;
+        }
+        if (!checkLoaded(terrain, x - 1, y - 1)) {
+            return false;
+        }
+        if (!checkLoaded(terrain, x - 1, y)) {
+            return false;
+        }
+        if (!checkLoaded(terrain, x - 1, y)) {
+            return false;
+        }
+        if (!checkLoaded(terrain, x - 1, y + 1)) {
+            return false;
+        }
+        if (!checkLoaded(terrain, x, y + 1)) {
+            return false;
+        }
+        if (!checkLoaded(terrain, x - 1, y + 1)) {
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -131,6 +169,22 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
         }
         this.cam = cam;
         Vector3 camPos = cam.position.now().div(16.0);
+        int newPlayerX = camPos.intX();
+        int newPlayerY = camPos.intY();
+        int newPlayerZ = camPos.intZ();
+        if (!updatingVisible.get() &&
+                (updateVisible.getAndSet(false) || playerX != newPlayerX ||
+                        playerY != newPlayerY ||
+                        playerZ != newPlayerZ)) {
+            updatingVisible.set(true);
+            playerX = newPlayerX;
+            playerY = newPlayerY;
+            playerZ = newPlayerZ;
+            terrain.world().game().engine().taskExecutor().runTask(() -> {
+                updateVisible();
+                updatingVisible.set(false);
+            }, taskLock, "Update-Visible-Chunks");
+        }
         int camX = camPos.intX();
         int camY = camPos.intY();
         double offsetX = camX - camPos.doubleX();
@@ -370,6 +424,12 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                 chunk -> chunk.rendererChunk().setGeometryDirty(z));
     }
 
+    private boolean checkLoaded(TerrainInfinite terrain, int x, int y) {
+        Optional<? extends TerrainInfiniteChunk> chunk =
+                terrain.chunkNoLoad(x, y);
+        return chunk.isPresent() && chunk.get().isLoaded();
+    }
+
     private static class VisibleUpdate {
         private int x, y, z;
         private TerrainInfiniteChunkClient chunk;
@@ -385,22 +445,13 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
         }
     }
 
-    protected class TerrainInfiniteRendererThread
-            implements TaskExecutor.ASyncTask {
-        private final Queue<TerrainInfiniteRendererChunk> queue, idleQueue;
+    private final class ThreadLocalData {
         private final ChunkMesh.VertexArrays arrays, arraysAlpha;
         private final TerrainRenderInfo info;
         private final TerrainInfiniteSection section;
-        private final boolean visibleUpdater;
 
-        public TerrainInfiniteRendererThread(
-                Queue<TerrainInfiniteRendererChunk> queue,
-                Queue<TerrainInfiniteRendererChunk> idleQueue,
-                boolean visibleUpdater,
+        private ThreadLocalData(
                 Stream<Map.Entry<String, Supplier<TerrainRenderInfo.InfoLayer>>> infoLayers) {
-            this.queue = queue;
-            this.idleQueue = idleQueue;
-            this.visibleUpdater = visibleUpdater;
             arrays = new ChunkMesh.VertexArrays();
             arraysAlpha = new ChunkMesh.VertexArrays();
             info = new TerrainRenderInfo(infoLayers);
@@ -408,88 +459,10 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                     terrain.world().air());
         }
 
-        @Override
-        public void run(Joiner.Joinable joiner) {
-            while (!joiner.marked()) {
-                boolean idle = true;
-                while (!queue.isEmpty()) {
-                    process(queue.poll());
-                    idle = false;
-                }
-                if (!idleQueue.isEmpty()) {
-                    process(idleQueue.poll());
-                    idle = false;
-                }
-                if (visibleUpdater && cam != null) {
-                    int newPlayerX =
-                            FastMath.floor(cam.position.doubleX() / 16.0);
-                    int newPlayerY =
-                            FastMath.floor(cam.position.doubleY() / 16.0);
-                    int newPlayerZ =
-                            FastMath.floor(cam.position.doubleZ() / 16.0);
-                    if (updateVisible || playerX != newPlayerX ||
-                            playerY != newPlayerY ||
-                            playerZ != newPlayerZ) {
-                        updateVisible = false;
-                        playerX = newPlayerX;
-                        playerY = newPlayerY;
-                        playerZ = newPlayerZ;
-                        updateVisible();
-                        idle = false;
-                    }
-                }
-                if (idle) {
-                    joiner.sleep();
-                }
-            }
-        }
-
-        private void process(TerrainInfiniteRendererChunk chunk) {
-            if (chunk != null) {
-                TerrainInfiniteChunkClient terrainChunk = chunk.chunk();
-                int x = terrainChunk.x();
-                int y = terrainChunk.y();
-                TerrainInfinite terrain = terrainChunk.terrain();
-                if (!checkLoaded(terrain, x - 1, y - 1)) {
-                    return;
-                }
-                if (!checkLoaded(terrain, x, y - 1)) {
-                    return;
-                }
-                if (!checkLoaded(terrain, x - 1, y - 1)) {
-                    return;
-                }
-                if (!checkLoaded(terrain, x - 1, y)) {
-                    return;
-                }
-                if (!checkLoaded(terrain, x - 1, y)) {
-                    return;
-                }
-                if (!checkLoaded(terrain, x - 1, y + 1)) {
-                    return;
-                }
-                if (!checkLoaded(terrain, x, y + 1)) {
-                    return;
-                }
-                if (!checkLoaded(terrain, x - 1, y + 1)) {
-                    return;
-                }
-                for (int i = 0; i < chunk.zSections(); i++) {
-                    if (chunk.isGeometryDirty(i)) {
-                        chunk.unsetGeometryDirty(i);
-                        process(chunk, i);
-                    }
-                }
-            }
-        }
-
-        private boolean checkLoaded(TerrainInfinite terrain, int x, int y) {
-            Optional<? extends TerrainInfiniteChunk> chunk =
-                    terrain.chunkNoLoad(x, y);
-            return chunk.isPresent() && chunk.get().isLoaded();
-        }
-
         private void process(TerrainInfiniteRendererChunk chunk, int i) {
+            if (!chunk.unsetGeometryDirty(i)) {
+                return;
+            }
             VAOStatic vao = null, vaoAlpha = null;
             AABB aabb = null, aabbAlpha = null;
             TerrainInfiniteChunk terrainChunk = chunk.chunk();
@@ -530,7 +503,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                 }
                 if (chunk.isSolid(i) != solid || !chunk.isLoaded()) {
                     chunk.setSolid(i, solid);
-                    updateVisible = true;
+                    updateVisible.set(true);
                 }
                 if (!empty && chunk.isVisible(i)) {
                     ChunkMesh mesh = new ChunkMesh(arrays);
