@@ -31,6 +31,7 @@ public abstract class MobPlayerClientMain extends MobPlayerClient {
     protected Gui currentGui;
     protected boolean flying;
     protected int swim;
+    @SuppressWarnings("CanBeFinal")
     protected double gravitationMultiplier = 1.0, airFriction = 0.2,
             groundFriction = 1.6, wallFriction = 2.0, waterFriction = 8.0,
             stepHeight = 1.0;

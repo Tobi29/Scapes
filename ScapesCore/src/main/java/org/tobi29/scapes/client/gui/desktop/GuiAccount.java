@@ -35,6 +35,7 @@ public class GuiAccount extends GuiMenu {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(GuiAccount.class);
     private static final Pattern REPLACE = Pattern.compile("[^A-Za-z0-9+/= ]");
+    @SuppressWarnings("CanBeFinal")
     private KeyPair keyPair;
     private String nickname = "";
 

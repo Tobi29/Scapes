@@ -38,6 +38,7 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
     protected final MobPositionHandler positionHandler;
     protected boolean ground, inWater, swimming, headInWater, slidingWall;
     protected int swim;
+    @SuppressWarnings("CanBeFinal")
     protected double gravitationMultiplier = 1.0, airFriction = 0.2,
             groundFriction = 1.6, wallFriction = 2.0, waterFriction = 8.0,
             stepHeight = 1.0;
