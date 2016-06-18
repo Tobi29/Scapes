@@ -128,7 +128,6 @@ public class GameRegistry {
         locked = true;
     }
 
-    @SuppressWarnings("unchecked")
     public synchronized void add(String module, String type, int min, int max) {
         if (lockedTypes) {
             throw new IllegalStateException("Early initializing already ended");
@@ -141,7 +140,6 @@ public class GameRegistry {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public synchronized void addSupplier(String module, String type, int min,
             int max) {
         if (lockedTypes) {
@@ -156,7 +154,6 @@ public class GameRegistry {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public synchronized void addAsymSupplier(String module, String type,
             int min, int max) {
         if (lockedTypes) {
