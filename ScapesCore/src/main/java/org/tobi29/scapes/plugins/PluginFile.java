@@ -33,7 +33,7 @@ import java.util.zip.ZipFile;
 public class PluginFile {
     private final FilePath path;
     private final Checksum checksum;
-    private final String name, parent, mainClass;
+    private final String id, name, parent, mainClass;
     private final VersionUtil.Version version, scapesVersion;
 
     public PluginFile(FilePath path) throws IOException {
@@ -43,6 +43,7 @@ public class PluginFile {
             TagStructure tagStructure = TagStructureJSON
                     .read(new BufferedReadChannelStream(Channels.newChannel(
                             zip.getInputStream(zip.getEntry("Plugin.json")))));
+            id = tagStructure.getString("ID");
             name = tagStructure.getString("Name");
             parent = tagStructure.getString("Parent");
             version = VersionUtil.get(tagStructure.getString("Version"));
@@ -59,6 +60,7 @@ public class PluginFile {
         try {
             path = null;
             checksum = new Checksum(new byte[20]);
+            id = tagStructure.getString("ID");
             name = tagStructure.getString("Name");
             parent = tagStructure.getString("Parent");
             version = VersionUtil.get(tagStructure.getString("Version"));
@@ -80,6 +82,10 @@ public class PluginFile {
 
     public FilePath file() {
         return path;
+    }
+
+    public String id() {
+        return id;
     }
 
     public String name() {

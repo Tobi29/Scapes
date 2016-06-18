@@ -86,7 +86,7 @@ public class NewConnection {
         }
         int length = input.getInt();
         for (int i = 0; i < length; i++) {
-            String name = input.getString();
+            String id = input.getString();
             VersionUtil.Version version, scapesVersion;
             try {
                 version = VersionUtil.get(input.getString());
@@ -96,7 +96,7 @@ public class NewConnection {
             }
             byte[] checksum = input.getByteArray();
             Optional<PluginFile> embedded = Streams.of(Plugins.embedded())
-                    .filter(plugin -> plugin.name().equals(name))
+                    .filter(plugin -> plugin.id().equals(id))
                     .filter(plugin -> VersionUtil
                             .compare(plugin.version(), version)
                             .in(VersionUtil.Comparison.LOWER_BUILD,

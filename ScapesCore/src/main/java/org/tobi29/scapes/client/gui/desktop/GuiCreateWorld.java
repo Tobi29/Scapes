@@ -76,7 +76,7 @@ public class GuiCreateWorld extends GuiMenuDouble {
         });
         addonsButton.onClickLeft(event -> {
             state.engine().guiStack().add("10-Menu", new GuiAddons(state, this,
-                    worldTypes.get(environmentID).name(), plugins, style));
+                    worldTypes.get(environmentID).id(), plugins, style));
         });
         save.onClickLeft(event -> {
             if (name.text().isEmpty()) {

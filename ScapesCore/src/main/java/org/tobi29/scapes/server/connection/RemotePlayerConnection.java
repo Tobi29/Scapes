@@ -185,7 +185,7 @@ public class RemotePlayerConnection extends PlayerConnection {
     private void sendPluginMetaData(PluginFile plugin,
             WritableByteStream output) throws IOException {
         byte[] checksum = plugin.checksum().array();
-        output.putString(plugin.name());
+        output.putString(plugin.id());
         output.putString(plugin.version().toString());
         output.putString(plugin.scapesVersion().toString());
         output.putByteArray(checksum);

@@ -52,12 +52,17 @@ public class GuiPlugins extends GuiMenu {
             try {
                 state.engine().container()
                         .openFileDialog(new FileType("*.jar", "Jar Archive"),
-                                "Import plugin", true, (name, input) -> FileUtil
-                                        .write(path.resolve(name),
-                                                output -> ProcessStream
-                                                        .process(input,
-                                                                output::put)));
-                updatePlugins();
+                                "Import plugin", true, (name, input) -> {
+                                    FilePath temp =
+                                            FileUtil.createTempFile("Plugin",
+                                                    ".jar");
+                                    FileUtil.write(temp, output -> ProcessStream
+                                            .process(input, output::put));
+                                    PluginFile newPlugin = new PluginFile(temp);
+                                    FileUtil.move(temp, path.resolve(
+                                            newPlugin.id() + ".jar"));
+                                    updatePlugins();
+                                });
             } catch (IOException e) {
                 LOGGER.warn("Failed to import plugin: {}", e.toString());
             }
@@ -68,7 +73,9 @@ public class GuiPlugins extends GuiMenu {
     private void updatePlugins() {
         try {
             scrollPane.removeAll();
-            Streams.of(Plugins.installed(path)).sorted().forEach(
+            Streams.of(Plugins.installed(path))
+                    .sorted((plugin1, plugin2) -> plugin1.name()
+                            .compareTo(plugin2.name())).forEach(
                     file -> scrollPane
                             .addVert(0, 0, -1, 70, p -> new Element(p, file)));
         } catch (IOException e) {
