@@ -1,10 +1,7 @@
 package org.tobi29.scapes.vanilla.basics;
 
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator;
-import org.tobi29.scapes.vanilla.basics.generator.decorator.LayerGround;
-import org.tobi29.scapes.vanilla.basics.generator.decorator.LayerPatch;
-import org.tobi29.scapes.vanilla.basics.generator.decorator.LayerRock;
-import org.tobi29.scapes.vanilla.basics.generator.decorator.LayerTree;
+import org.tobi29.scapes.vanilla.basics.generator.decorator.*;
 import org.tobi29.scapes.vanilla.basics.generator.tree.*;
 import org.tobi29.scapes.vanilla.basics.material.StoneType;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
@@ -54,126 +51,165 @@ class VanillaBasicsDecorators {
         // Tundra
         plugin.c.decorator(BiomeGenerator.Biome.TUNDRA, "Waste", 10, d -> {
         });
-        plugin.c.decorator(BiomeGenerator.Biome.TUNDRA, "Spruce", 1, d -> {
-            d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 256));
-        });
+        plugin.c.decorator(BiomeGenerator.Biome.TUNDRA, "SprucePlains", 1,
+                d -> {
+                    d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 256));
+                });
 
         // Taiga
-        plugin.c.decorator(BiomeGenerator.Biome.TAIGA, "Spruce", 10, d -> {
-            d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 32));
-        });
-        plugin.c.decorator(BiomeGenerator.Biome.TAIGA, "Sequoia", 2, d -> {
-            d.addLayer(new LayerTree(TreeSequoia.INSTANCE, 256));
-            d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 128));
-        });
+        plugin.c.decorator(BiomeGenerator.Biome.TAIGA, "SprucePlains", 10,
+                d -> {
+                    d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 64));
+                });
+        plugin.c.decorator(BiomeGenerator.Biome.TAIGA, "SpruceForest", 10,
+                d -> {
+                    d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 16));
+                });
+        plugin.c.decorator(BiomeGenerator.Biome.TAIGA, "SequoiaForest", 2,
+                d -> {
+                    d.addLayer(new LayerTree(TreeSequoia.INSTANCE, 256));
+                    d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 128));
+                });
 
         // Wasteland
         plugin.c.decorator(BiomeGenerator.Biome.WASTELAND, "Waste", 10, d -> {
         });
+        plugin.c.decorator(BiomeGenerator.Biome.WASTELAND, "Shrubland", 4,
+                d -> {
+                    shrubs(d, m, 64);
+                });
 
         // Steppe
-        plugin.c.decorator(BiomeGenerator.Biome.STEPPE, "Waste", 10, d -> {
+        plugin.c.decorator(BiomeGenerator.Biome.STEPPE, "Waste", 3, d -> {
         });
-        plugin.c.decorator(BiomeGenerator.Biome.STEPPE, "Birch", 5, d -> {
+        plugin.c.decorator(BiomeGenerator.Biome.STEPPE, "BirchPlains", 5, d -> {
+            d.addLayer(new LayerTree(TreeBirch.INSTANCE, 4096));
+            shrubs(d, m, 128);
+        });
+        plugin.c.decorator(BiomeGenerator.Biome.STEPPE, "SprucePlains", 10,
+                d -> {
+                    d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 2048));
+                    shrubs(d, m, 128);
+                });
+
+        // Plains
+        plugin.c.decorator(BiomeGenerator.Biome.PLAINS, "Waste", 1, d -> {
+        });
+        plugin.c.decorator(BiomeGenerator.Biome.PLAINS, "Plains", 10, d -> {
+            d.addLayer(new LayerTree(TreeOak.INSTANCE, 8192));
+            d.addLayer(new LayerTree(TreeBirch.INSTANCE, 8192));
+            d.addLayer(new LayerTree(TreeMaple.INSTANCE, 8192));
+            shrubs(d, m, 256);
+        });
+        plugin.c.decorator(BiomeGenerator.Biome.PLAINS, "BirchPlains", 5, d -> {
             d.addLayer(new LayerTree(TreeBirch.INSTANCE, 1024));
-            d.addLayer(new LayerPatch(m.bush, 0, 16, 64, 1 << 16,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
+            shrubs(d, m, 256);
         });
-        plugin.c.decorator(BiomeGenerator.Biome.STEPPE, "Spruce", 10, d -> {
-            d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 512));
-            d.addLayer(new LayerPatch(m.bush, 0, 16, 64, 1 << 17,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
-        });
+        plugin.c.decorator(BiomeGenerator.Biome.PLAINS, "SprucePlains", 10,
+                d -> {
+                    d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 512));
+                    shrubs(d, m, 256);
+                });
+        plugin.c.decorator(BiomeGenerator.Biome.PLAINS, "DeciduousForest", 4,
+                d -> {
+                    d.addLayer(new LayerTree(TreeOak.INSTANCE, 256));
+                    d.addLayer(new LayerTree(TreeBirch.INSTANCE, 512));
+                    d.addLayer(new LayerTree(TreeMaple.INSTANCE, 512));
+                    shrubs(d, m, 256);
+                });
 
         // Forest
-        plugin.c.decorator(BiomeGenerator.Biome.FOREST, "Deciduous", 10, d -> {
-            d.addLayer(new LayerTree(TreeOak.INSTANCE, 64));
-            d.addLayer(new LayerTree(TreeBirch.INSTANCE, 128));
-            d.addLayer(new LayerTree(TreeMaple.INSTANCE, 32));
-            for (int i = 0; i < 20; i++) {
-                d.addLayer(new LayerPatch(m.flower, i, 16, 24, 1 << 14,
-                        (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                                m.grass));
-            }
-            d.addLayer(new LayerPatch(m.bush, 0, 6, 8, 2048,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
-        });
-        plugin.c.decorator(BiomeGenerator.Biome.FOREST, "Birch", 10, d -> {
-            d.addLayer(new LayerTree(TreeBirch.INSTANCE, 64));
-            for (int i = 0; i < 20; i++) {
-                d.addLayer(new LayerPatch(m.flower, i, 16, 24, 1 << 15,
-                        (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                                m.grass));
-            }
-            d.addLayer(new LayerPatch(m.bush, 0, 16, 64, 1 << 13,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
-        });
-        plugin.c.decorator(BiomeGenerator.Biome.FOREST, "Spruce", 10, d -> {
-            d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 32));
-            for (int i = 0; i < 20; i++) {
-                d.addLayer(new LayerPatch(m.flower, i, 16, 24, 1 << 14,
-                        (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                                m.grass));
-            }
-            d.addLayer(new LayerPatch(m.bush, 0, 4, 8, 4096,
-                    (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                            m.grass));
-        });
-        plugin.c.decorator(BiomeGenerator.Biome.FOREST, "Willow", 10, d -> {
-            d.addLayer(new LayerTree(TreeWillow.INSTANCE, 64));
-            for (int i = 0; i < 20; i++) {
-                d.addLayer(new LayerPatch(m.flower, i, 16, 24, 1 << 14,
-                        (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                                m.grass));
-            }
-        });
-        plugin.c.decorator(BiomeGenerator.Biome.FOREST, "Sequoia", 2, d -> {
-            d.addLayer(new LayerTree(TreeSequoia.INSTANCE, 256));
-        });
+        plugin.c.decorator(BiomeGenerator.Biome.FOREST, "DeciduousForest", 10,
+                d -> {
+                    d.addLayer(new LayerTree(TreeOak.INSTANCE, 96));
+                    d.addLayer(new LayerTree(TreeBirch.INSTANCE, 128));
+                    d.addLayer(new LayerTree(TreeMaple.INSTANCE, 96));
+                    shrubs(d, m, 128);
+                });
+        plugin.c.decorator(BiomeGenerator.Biome.FOREST, "BirchForest", 10,
+                d -> {
+                    d.addLayer(new LayerTree(TreeBirch.INSTANCE, 48));
+                    shrubs(d, m, 128);
+                });
+        plugin.c.decorator(BiomeGenerator.Biome.FOREST, "SpruceForest", 10,
+                d -> {
+                    d.addLayer(new LayerTree(TreeSpruce.INSTANCE, 16));
+                    shrubs(d, m, 128);
+                });
+        plugin.c.decorator(BiomeGenerator.Biome.FOREST, "WillowForest", 10,
+                d -> {
+                    d.addLayer(new LayerTree(TreeWillow.INSTANCE, 64));
+                    shrubs(d, m, 128);
+                });
+        plugin.c.decorator(BiomeGenerator.Biome.FOREST, "SequoiaForest", 2,
+                d -> {
+                    d.addLayer(new LayerTree(TreeSequoia.INSTANCE, 256));
+                    shrubs(d, m, 64);
+                });
 
         // Desert
         plugin.c.decorator(BiomeGenerator.Biome.DESERT, "Waste", 10, d -> {
         });
 
-        // Waste
-        plugin.c.decorator(BiomeGenerator.Biome.SAVANNA, "Waste", 10, d -> {
+        // Xeric Shrubland
+        plugin.c.decorator(BiomeGenerator.Biome.XERIC_SHRUBLAND, "Waste", 4,
+                d -> {
+                });
+        plugin.c.decorator(BiomeGenerator.Biome.XERIC_SHRUBLAND, "Shrubland",
+                10, d -> {
+                    shrubs(d, m, 64);
+                });
+
+        // Dry Savanna
+        plugin.c.decorator(BiomeGenerator.Biome.DRY_SAVANNA, "Waste", 1, d -> {
         });
+        plugin.c.decorator(BiomeGenerator.Biome.DRY_SAVANNA, "Shrubland", 10,
+                d -> {
+                    shrubs(d, m, 256);
+                });
+
+        // Wet Savanna
+        plugin.c.decorator(BiomeGenerator.Biome.WET_SAVANNA, "DeciduousForest",
+                10, d -> {
+                    d.addLayer(new LayerTree(TreeOak.INSTANCE, 256));
+                    d.addLayer(new LayerTree(TreeBirch.INSTANCE, 512));
+                    d.addLayer(new LayerTree(TreePalm.INSTANCE, 512));
+                    shrubs(d, m, 128);
+                });
 
         // Oasis
-        plugin.c.decorator(BiomeGenerator.Biome.OASIS, "Palm", 10, d -> {
+        plugin.c.decorator(BiomeGenerator.Biome.OASIS, "PalmForest", 10, d -> {
             d.addLayer(new LayerTree(TreePalm.INSTANCE, 128));
+            shrubs(d, m, 512);
         });
 
         // Rainforest
-        plugin.c.decorator(BiomeGenerator.Biome.RAINFOREST, "Deciduous", 10,
-                d -> {
-                    d.addLayer(new LayerTree(TreeOak.INSTANCE, 64));
+        plugin.c.decorator(BiomeGenerator.Biome.RAINFOREST, "DeciduousForest",
+                10, d -> {
+                    d.addLayer(new LayerTree(TreeOak.INSTANCE, 48));
                     d.addLayer(new LayerTree(TreeBirch.INSTANCE, 96));
-                    d.addLayer(new LayerTree(TreePalm.INSTANCE, 256));
-                    d.addLayer(new LayerTree(TreeMaple.INSTANCE, 32));
-                    for (int i = 0; i < 20; i++) {
-                        d.addLayer(new LayerPatch(m.flower, i, 16, 24, 1 << 13,
-                                (terrain, x, y, z) ->
-                                        terrain.type(x, y, z - 1) == m.grass));
-                    }
-                    d.addLayer(new LayerPatch(m.bush, 0, 4, 8, 1024,
-                            (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                                    m.grass));
+                    d.addLayer(new LayerTree(TreePalm.INSTANCE, 128));
+                    shrubs(d, m, 256);
                 });
-        plugin.c.decorator(BiomeGenerator.Biome.RAINFOREST, "Willow", 4, d -> {
-            d.addLayer(new LayerTree(TreeWillow.INSTANCE, 48));
-            for (int i = 0; i < 20; i++) {
-                d.addLayer(new LayerPatch(m.flower, i, 16, 24, 1 << 13,
-                        (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
-                                m.grass));
-            }
-            d.addLayer(new LayerPatch(m.bush, 0, 4, 8, 1024,
+        plugin.c.decorator(BiomeGenerator.Biome.RAINFOREST, "WillowForest", 4,
+                d -> {
+                    d.addLayer(new LayerTree(TreeWillow.INSTANCE, 24));
+                    d.addLayer(new LayerTree(TreePalm.INSTANCE, 256));
+                    shrubs(d, m, 256);
+                });
+    }
+
+    public static void shrubs(BiomeDecorator d, VanillaMaterial m,
+            int density) {
+        for (int i = 0; i < 20; i++) {
+            d.addLayer(new LayerPatch(m.flower, i, 16, density >> 4,
+                    (1 << 23) / density,
                     (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
                             m.grass));
-        });
+        }
+        d.addLayer(
+                new LayerPatch(m.bush, 0, 16, density >> 3, (1 << 18) / density,
+                        (terrain, x, y, z) -> terrain.type(x, y, z - 1) ==
+                                m.grass));
     }
 }

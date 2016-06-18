@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.generator;
 
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -23,7 +22,7 @@ import org.tobi29.scapes.engine.utils.math.noise.value.ValueNoise;
 import java.util.Random;
 
 public class ClimateGenerator {
-    private static final double SCALE = 100000;
+    private static final double SCALE = 50000.0;
     private final TerrainGenerator terrainGenerator;
     private final ValueNoise temperatureNoise, humidityNoise, weatherNoise;
     private long day;
@@ -171,9 +170,11 @@ public class ClimateGenerator {
     }
 
     public double weatherD(double x, double y, double humidity3) {
+        x /= SCALE;
+        y /= SCALE;
         double weather =
-                weatherNoise.noise(day + dayTime, x / 16000.0, y / 16000.0) *
-                        0.5 + 0.5;
+                weatherNoise.noise(day + dayTime, x / 0.16, y / 0.16) * 0.5 +
+                        0.5;
         double rainfall = 4.0 - humidity3 * 3.4;
         rainfall *= 1.0 - FastMath.sinTable(dayTime * FastMath.PI) * 0.5;
         rainfall = FastMath.max(rainfall, 0.1);
@@ -213,16 +214,18 @@ public class ClimateGenerator {
 
     public double temperature2D(double x, double y, double humidity3,
             double sunIntensity) {
+        x /= SCALE;
+        y /= SCALE;
         double temperature =
                 FastMath.mix(sunIntensity, sunIntensity * sunIntensity, 0.5) *
                         80.0 - 10.0;
-        double noiseGlobal = temperatureNoise
-                .noise(x / 100000.0, y / 100000.0, (day + dayTime) / 100.0);
+        double noiseGlobal =
+                temperatureNoise.noise(x, y, (day + dayTime) / 100.0);
         double noiseLocal = temperatureNoise
-                .noiseOctave(x / 20000.0, y / 20000.0, (day + dayTime) / 20.0,
-                        2, 4.0, 0.5);
+                .noiseOctave(x / 0.2, y / 0.2, (day + dayTime) / 20.0, 2, 4.0,
+                        0.5);
         double noiseExtreme = temperatureNoise
-                .noise(x / 400000.0, y / 400000.0, (day + dayTime) / 40.0);
+                .noise(x / 4.0, y / 4.0, (day + dayTime) / 40.0);
         temperature += noiseGlobal * 40.0;
         temperature += noiseLocal * 10.0;
         temperature += FastMath.max(noiseExtreme - 0.3, 0.0) * 160.0;
@@ -265,18 +268,22 @@ public class ClimateGenerator {
 
     public double humidity3(double x, double y) {
         double intensity = sunIntensity(y, 0.4);
+        x /= SCALE;
+        y /= SCALE;
         double rain = 0.8f - intensity;
         if (rain < 0.0) {
             rain *= -8.0;
         }
         return FastMath.clamp(humidityNoise
-                .noiseOctave(x / 50000.0, y / 50000.0, 2, 8.0, 0.5) * 0.4f +
-                rain, 0.0, 1.0);
+                        .noiseOctave(x / 0.5, y / 0.5, 2, 8.0, 0.5) * 0.4 + rain, 0.0,
+                1.0);
     }
 
     public double riverHumidity(double x, double y) {
-        return (1.0 - terrainGenerator.generateRiverLayer(x, y,
-                terrainGenerator.generateMountainFactorLayer(x, y), 4.0)) * 0.5;
+        double terrainFactor =
+                terrainGenerator.generateTerrainFactorLayer(x, y);
+        return (1.0 - terrainGenerator.generateRiverLayer(x, y, terrainGenerator
+                .generateMountainFactorLayer(x, y, terrainFactor), 4.0)) * 0.5;
     }
 
     public double sunLightReduction(double x, double y) {
@@ -302,8 +309,8 @@ public class ClimateGenerator {
                     .clamp(-FastMath.cosTable(season() * FastMath.TWO_PI) * 20 -
                             18, 0, 1) * factor;
         } else {
-            return FastMath.clamp(-FastMath.cosTable(
-                            (season() + 0.5) * FastMath.TWO_PI) * 20 - 18, 0,
+            return FastMath.clamp(-FastMath
+                            .cosTable((season() + 0.5) * FastMath.TWO_PI) * 20 - 18, 0,
                     1) * factor;
         }
     }

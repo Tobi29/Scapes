@@ -134,8 +134,10 @@ public class ChunkGeneratorOverworld implements ChunkGenerator {
     }
 
     public short stoneType(int xxx, int yyy, int zzz) {
-        zzz += (int) (terrainGenerator.generateMountainFactorLayer(xxx, yyy) *
-                300);
+        double terrainFactor =
+                terrainGenerator.generateTerrainFactorLayer(xxx, yyy);
+        zzz += (int) (terrainGenerator
+                .generateMountainFactorLayer(xxx, yyy, terrainFactor) * 300);
         if (zzz <= 96) {
             return (short) stoneLayers[0].getInt(xxx, yyy);
         } else if (zzz <= 240) {

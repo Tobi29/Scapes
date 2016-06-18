@@ -169,10 +169,10 @@ public class ChunkPopulatorOverworld implements ChunkPopulator {
             RandomNoiseLayer base =
                     new RandomNoiseRandomLayer(random.nextLong(),
                             decorators.size());
-            RandomNoiseLayer zoom = new RandomNoiseZoomLayer(base, 2048);
+            RandomNoiseLayer zoom = new RandomNoiseZoomLayer(base, 1024);
             RandomNoiseLayer noise =
                     new RandomNoiseSimplexNoiseLayer(zoom, random.nextLong(),
-                            1024);
+                            512);
             this.noise = new RandomNoiseNoiseLayer(noise, random.nextLong(), 3);
         }
     }

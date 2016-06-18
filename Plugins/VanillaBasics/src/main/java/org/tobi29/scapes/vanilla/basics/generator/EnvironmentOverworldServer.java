@@ -69,7 +69,7 @@ public class EnvironmentOverworldServer
         Random random = new Random(world.seed());
         terrainGenerator = new TerrainGenerator(random);
         climateGenerator = new ClimateGenerator(random, terrainGenerator);
-        biomeGenerator = new BiomeGenerator(climateGenerator);
+        biomeGenerator = new BiomeGenerator(climateGenerator, terrainGenerator);
         gen = new ChunkGeneratorOverworld(random, terrainGenerator,
                 plugin.getMaterials());
         pop = new ChunkPopulatorOverworld(world, plugin, biomeGenerator);
@@ -287,7 +287,7 @@ public class EnvironmentOverworldServer
 
     @Override
     public Vector3 calculateSpawn(TerrainServer terrain) {
-        int x = 0, y = -22500;
+        int x = 0, y = -11250;
         boolean flag = false;
         while (!flag) {
             if (!terrainGenerator.isValidSpawn(x, y) ||

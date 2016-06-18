@@ -34,7 +34,7 @@ public class EnvironmentOverworldClient
         Random random = new Random(world.seed());
         TerrainGenerator terrainGenerator = new TerrainGenerator(random);
         climateGenerator = new ClimateGenerator(random, terrainGenerator);
-        biomeGenerator = new BiomeGenerator(climateGenerator);
+        biomeGenerator = new BiomeGenerator(climateGenerator, terrainGenerator);
     }
 
     @Override
