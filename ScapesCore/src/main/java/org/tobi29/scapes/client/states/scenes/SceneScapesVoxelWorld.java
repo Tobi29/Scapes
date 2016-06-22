@@ -272,7 +272,7 @@ public class SceneScapesVoxelWorld extends Scene {
     public void postRender(GL gl, double delta) {
         if (exposureFBO.isPresent()) {
             FBO exposureFBO = this.exposureFBO.get();
-            state.fboScene().textureColor(0).bind(gl);
+            state.fbo(0).textureColor(0).bind(gl);
             exposureFBO.activate(gl);
             gl.viewport(0, 0, 1, 1);
             gl.setProjectionOrthogonal(0.0f, 0.0f, 1.0f, 1.0f);
@@ -370,8 +370,6 @@ public class SceneScapesVoxelWorld extends Scene {
     @Override
     public void dispose(GL gl) {
         skybox.dispose(gl);
-        skyboxFBO.ensureDisposed(gl);
-        exposureFBO.ifPresent(fbo -> fbo.ensureDisposed(gl));
     }
 
     @Override
@@ -385,7 +383,6 @@ public class SceneScapesVoxelWorld extends Scene {
         fbo.activate(gl);
         Image[] panorama = takePanorama(gl, fbo);
         fbo.deactivate(gl);
-        fbo.ensureDisposed(gl);
         if (state instanceof GameStateGameSP) {
             try {
                 ((GameStateGameSP) state).source().panorama(panorama);

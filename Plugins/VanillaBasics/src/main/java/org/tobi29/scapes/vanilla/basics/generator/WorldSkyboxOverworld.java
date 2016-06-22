@@ -451,7 +451,6 @@ public class WorldSkyboxOverworld implements WorldSkybox {
     public void dispose(GL gl) {
         rainAudio.dispose();
         windAudio.dispose();
-        fbo.ensureDisposed(gl);
     }
 
     @Override
