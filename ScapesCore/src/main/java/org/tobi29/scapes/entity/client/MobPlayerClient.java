@@ -50,7 +50,7 @@ public abstract class MobPlayerClient extends MobLivingEquippedClient {
             nickname = tagStructure.getString("Nickname");
         }
         if (tagStructure.has("SkinChecksum")) {
-            skin = new Checksum(tagStructure.getByteArray("SkinChecksum"));
+            skin = new Checksum(tagStructure.getStructure("SkinChecksum"));
         }
     }
 }

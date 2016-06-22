@@ -21,6 +21,7 @@ import org.tobi29.scapes.engine.server.ConnectionCloseException;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.Checksum;
 import org.tobi29.scapes.engine.utils.graphics.Image;
+import org.tobi29.scapes.engine.utils.io.ChecksumUtil;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.server.connection.PlayerConnection;
@@ -30,16 +31,16 @@ import java.nio.ByteBuffer;
 
 public class PacketSkin extends Packet implements PacketServer, PacketClient {
     private Image image;
-    private byte[] checksum;
+    private Checksum checksum;
 
     public PacketSkin() {
     }
 
-    public PacketSkin(byte[] checksum) {
+    public PacketSkin(Checksum checksum) {
         this.checksum = checksum;
     }
 
-    public PacketSkin(Image image, byte[] checksum) {
+    public PacketSkin(Image image, Checksum checksum) {
         this.image = image;
         this.checksum = checksum;
     }
@@ -48,7 +49,8 @@ public class PacketSkin extends Packet implements PacketServer, PacketClient {
     public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
         stream.put(image.buffer());
-        stream.putByteArray(checksum);
+        stream.putString(checksum.algorithm().name());
+        stream.put(checksum.array());
     }
 
     @Override
@@ -58,31 +60,47 @@ public class PacketSkin extends Packet implements PacketServer, PacketClient {
         stream.get(buffer);
         buffer.flip();
         image = new Image(64, 64, buffer);
-        checksum = stream.getByteArray();
+        ChecksumUtil.Algorithm algorithm;
+        try {
+            algorithm = ChecksumUtil.Algorithm.valueOf(stream.getString(16));
+        } catch (IllegalArgumentException e) {
+            throw new IOException(e);
+        }
+        byte[] array = new byte[algorithm.bytes()];
+        stream.get(array);
+        checksum = new Checksum(algorithm, array);
     }
 
     @Override
     public void runClient(ClientConnection client, WorldClient world)
             throws ConnectionCloseException {
-        client.world().scene().skinStorage()
-                .addSkin(new Checksum(checksum), image);
+        client.world().scene().skinStorage().addSkin(checksum, image);
     }
 
     @Override
     public void sendServer(ClientConnection client, WritableByteStream stream)
             throws IOException {
-        stream.putByteArray(checksum);
+        stream.putString(checksum.algorithm().name());
+        stream.put(checksum.array());
     }
 
     @Override
     public void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException {
-        checksum = stream.getByteArray(1 << 10);
+        ChecksumUtil.Algorithm algorithm;
+        try {
+            algorithm = ChecksumUtil.Algorithm.valueOf(stream.getString(16));
+        } catch (IllegalArgumentException e) {
+            throw new IOException(e);
+        }
+        byte[] array = new byte[algorithm.bytes()];
+        stream.get(array);
+        checksum = new Checksum(algorithm, array);
     }
 
     @Override
     public void runServer(PlayerConnection player) {
-        player.server().skin(new Checksum(checksum)).ifPresent(
+        player.server().skin(checksum).ifPresent(
                 skin -> player.send(new PacketSkin(skin.image(), checksum)));
     }
 }

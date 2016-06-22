@@ -31,6 +31,7 @@ import java.nio.channels.Channels;
 import java.util.zip.ZipFile;
 
 public class PluginFile {
+    public static final byte[] EMPTY_BYTE = {};
     private final FilePath path;
     private final Checksum checksum;
     private final String id, name, parent, mainClass;
@@ -59,7 +60,7 @@ public class PluginFile {
         TagStructure tagStructure = metaData.readReturn(TagStructureJSON::read);
         try {
             path = null;
-            checksum = new Checksum(new byte[20]);
+            checksum = new Checksum(ChecksumUtil.Algorithm.UNKNOWN, EMPTY_BYTE);
             id = tagStructure.getString("ID");
             name = tagStructure.getString("Name");
             parent = tagStructure.getString("Parent");

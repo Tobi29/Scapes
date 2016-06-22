@@ -50,7 +50,7 @@ public class ClientSkinStorage {
             skin.markDisposed();
         });
         while (!skinRequests.isEmpty()) {
-            connection.send(new PacketSkin(skinRequests.poll().array()));
+            connection.send(new PacketSkin(skinRequests.poll()));
         }
     }
 
