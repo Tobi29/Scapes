@@ -91,32 +91,32 @@ public class ToolUtil {
         int level = 10;
         switch (id) {
             case 1:
-                item.setMaterial(materials.stonePickaxe);
+                item.setMaterial(materials.flintPickaxe);
                 strength *= 0.1;
                 break;
             case 2:
-                item.setMaterial(materials.stoneAxe);
+                item.setMaterial(materials.flintAxe);
                 strength *= 1.5;
                 break;
             case 3:
-                item.setMaterial(materials.stoneShovel);
+                item.setMaterial(materials.flintShovel);
                 strength *= 0.1;
                 break;
             case 4:
-                item.setMaterial(materials.stoneHammer);
+                item.setMaterial(materials.flintHammer);
                 efficiency = 0.0;
                 strength *= 0.4;
                 break;
             case 5:
-                item.setMaterial(materials.stoneSaw);
+                item.setMaterial(materials.flintSaw);
                 strength *= 0.1;
                 break;
             case 6:
-                item.setMaterial(materials.stoneHoe);
+                item.setMaterial(materials.flintHoe);
                 strength *= 0.1;
                 break;
             case 7:
-                item.setMaterial(materials.stoneSword);
+                item.setMaterial(materials.flintSword);
                 efficiency = 0.0;
                 break;
             default:

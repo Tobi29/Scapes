@@ -168,6 +168,9 @@ public abstract class ItemMetalTool extends VanillaItem implements ItemMetal {
         MetalUtil.Alloy alloy = alloy(item);
         AlloyType alloyType = alloy.type(plugin);
         name.append(alloyType.name()).append(' ').append(type());
+        if (item.data() == 0) {
+            name.append(" Head");
+        }
         float temperature = temperature(item);
         if (temperature > 0.1f) {
             name.append("\nTemp.:").append(FastMath.floor(temperature))

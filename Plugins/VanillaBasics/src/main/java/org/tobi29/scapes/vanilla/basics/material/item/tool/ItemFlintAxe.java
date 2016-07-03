@@ -15,15 +15,26 @@
  */
 package org.tobi29.scapes.vanilla.basics.material.item.tool;
 
+import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
-public class ItemStoneShovel extends ItemStoneTool {
-    public ItemStoneShovel(VanillaMaterial materials) {
-        super(materials, "vanilla.basics.item.StoneShovel");
+public class ItemFlintAxe extends ItemFlintTool {
+    public ItemFlintAxe(VanillaMaterial materials) {
+        super(materials, "vanilla.basics.item.FlintAxe");
+    }
+
+    @Override
+    public boolean isWeapon(ItemStack item) {
+        return true;
+    }
+
+    @Override
+    public int hitWait(ItemStack item) {
+        return 2000;
     }
 
     @Override
     public String type() {
-        return "Shovel";
+        return "Axe";
     }
 }

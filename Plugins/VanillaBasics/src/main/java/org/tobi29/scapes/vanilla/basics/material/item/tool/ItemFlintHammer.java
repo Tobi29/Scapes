@@ -19,9 +19,9 @@ import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
-public class ItemStoneHammer extends ItemStoneTool {
-    public ItemStoneHammer(VanillaMaterial materials) {
-        super(materials, "vanilla.basics.item.StoneHammer");
+public class ItemFlintHammer extends ItemFlintTool {
+    public ItemFlintHammer(VanillaMaterial materials) {
+        super(materials, "vanilla.basics.item.FlintHammer");
     }
 
     @Override

@@ -32,11 +32,11 @@ import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.item.VanillaItem;
 import org.tobi29.scapes.vanilla.basics.util.ToolUtil;
 
-public abstract class ItemStoneTool extends VanillaItem {
+public abstract class ItemFlintTool extends VanillaItem {
     private TerrainTexture textureHead, textureBuilt;
     private ItemModel modelHead, modelBuilt;
 
-    protected ItemStoneTool(VanillaMaterial materials, String nameID) {
+    protected ItemFlintTool(VanillaMaterial materials, String nameID) {
         super(materials, nameID);
     }
 
@@ -146,7 +146,10 @@ public abstract class ItemStoneTool extends VanillaItem {
     @Override
     public String name(ItemStack item) {
         StringBuilder name = new StringBuilder(100);
-        name.append("Stone ").append(type());
+        name.append("Flint ").append(type());
+        if (item.data() == 0) {
+            name.append(" Head");
+        }
         double damage = (1.0 - FastMath.tanh(
                 item.metaData("Vanilla").getDouble("ToolDamage"))) * 100.0;
         if (damage > 0.1) {

@@ -19,9 +19,9 @@ import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
-public class ItemStonePickaxe extends ItemStoneTool {
-    public ItemStonePickaxe(VanillaMaterial materials) {
-        super(materials, "vanilla.basics.item.StonePickaxe");
+public class ItemFlintPickaxe extends ItemFlintTool {
+    public ItemFlintPickaxe(VanillaMaterial materials) {
+        super(materials, "vanilla.basics.item.FlintPickaxe");
     }
 
     @Override

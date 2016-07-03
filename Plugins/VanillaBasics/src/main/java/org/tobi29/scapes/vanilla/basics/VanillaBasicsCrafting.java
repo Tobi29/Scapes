@@ -52,9 +52,9 @@ class VanillaBasicsCrafting {
                 return true;
             }
         };
-        List<ItemStack> hammer = Arrays.asList(materials.stoneHammer.example(1),
+        List<ItemStack> hammer = Arrays.asList(materials.flintHammer.example(1),
                 materials.metalHammer.example(1));
-        List<ItemStack> saw = Arrays.asList(materials.stoneSaw.example(1),
+        List<ItemStack> saw = Arrays.asList(materials.flintSaw.example(1),
                 materials.metalSaw.example(1));
         List<ItemStack> plank = Streams.of(treeRegistry.values())
                 .map(tree -> new ItemStack(materials.wood, tree.data(registry)))
@@ -178,20 +178,10 @@ class VanillaBasicsCrafting {
             c.result = swordHead;
         }, "vanilla.basics.crafting.stone.SwordHead");
         plugin.c.craftingRecipe(recipeType, c -> {
-            c.ingredients.add(hoe);
-            c.ingredients.add(hoeHead);
-            c.ingredients.add(hammer);
-            c.ingredients.add(hammerHead);
-            c.ingredients.add(saw);
-            c.ingredients.add(sawHead);
-            c.ingredients.add(axe);
-            c.ingredients.add(axeHead);
-            c.ingredients.add(shovel);
-            c.ingredients.add(shovelHead);
-            c.ingredients.add(pickaxe);
-            c.ingredients.add(pickaxeHead);
-            c.ingredients.add(sword);
-            c.ingredients.add(swordHead);
+            c.ingredients.add(Arrays
+                    .asList(hoe, hoeHead, hammer, hammerHead, saw, sawHead, axe,
+                            axeHead, shovel, shovelHead, pickaxe, pickaxeHead,
+                            sword, swordHead));
             c.result = flint;
         }, "vanilla.basics.crafting.stone.BreakTool");
         plugin.c.craftingRecipe(recipeType, c -> {
@@ -247,9 +237,9 @@ class VanillaBasicsCrafting {
                 .mapToObj(data -> new ItemStack(materials.cobblestone, data, 2))
                 .collect(Collectors.toList());
         List<ItemStack> pickaxe =
-                Arrays.asList(materials.stonePickaxe.example(1),
+                Arrays.asList(materials.flintPickaxe.example(1),
                         materials.metalPickaxe.example(1));
-        List<ItemStack> hammer = Arrays.asList(materials.stoneHammer.example(1),
+        List<ItemStack> hammer = Arrays.asList(materials.flintHammer.example(1),
                 materials.metalHammer.example(1));
 
         // TODO: Replace with oven
