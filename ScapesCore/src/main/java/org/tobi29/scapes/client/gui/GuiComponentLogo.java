@@ -15,12 +15,11 @@
  */
 package org.tobi29.scapes.client.gui;
 
+import java8.util.function.BiConsumer;
 import org.threeten.bp.LocalDate;
 import org.threeten.bp.Month;
-import org.tobi29.scapes.engine.gui.GuiComponent;
-import org.tobi29.scapes.engine.gui.GuiComponentIcon;
-import org.tobi29.scapes.engine.gui.GuiComponentText;
-import org.tobi29.scapes.engine.gui.GuiLayoutData;
+import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import java.util.Arrays;
@@ -50,12 +49,13 @@ public class GuiComponentLogo extends GuiComponent {
         splash = addSub(textX, textY + FastMath.round(textSize * 1.2), -1,
                 (textSize << 1) / 3,
                 p -> new GuiComponentText(p, splash(), 1.0f, 1.0f, 0.0f, 1.0f));
-        onClick((event, engine) -> {
+        BiConsumer<GuiComponentEvent,ScapesEngine> add = (event, engine) -> {
             engine.sounds()
                     .playSound("Engine:sound/Click.ogg", "sound.GUI", 1.0f,
                             1.0f);
             splash.setText(splash());
-        });
+        };
+        on(GuiEvent.CLICK_LEFT, add);
     }
 
     private static String splash() {

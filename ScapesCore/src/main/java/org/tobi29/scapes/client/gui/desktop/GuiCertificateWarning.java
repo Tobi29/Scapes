@@ -3,9 +3,7 @@ package org.tobi29.scapes.client.gui.desktop;
 import java8.util.Maps;
 import java8.util.function.Consumer;
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab;
-import org.tobi29.scapes.engine.gui.GuiComponentText;
-import org.tobi29.scapes.engine.gui.GuiStyle;
+import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.utils.SSLUtil;
 
 import java.security.cert.X509Certificate;
@@ -40,8 +38,8 @@ public class GuiCertificateWarning extends GuiMenuDouble {
         row("State", Maps.getOrDefault(issuer, "ST", "???"));
         row("Country", Maps.getOrDefault(issuer, "C", "???"));
 
-        save.onClickLeft(event -> output.accept(true));
-        back.onClickLeft(event -> output.accept(false));
+        save.on(GuiEvent.CLICK_LEFT, event -> output.accept(true));
+        on(GuiAction.BACK, () -> output.accept(false));
     }
 
     private void row(String label, String text) {

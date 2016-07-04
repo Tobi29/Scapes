@@ -34,8 +34,8 @@ public class GuiTouchMenu extends GuiTouch {
     protected GuiTouchMenu(GameState state, String title, String back,
             Gui previous, GuiStyle style) {
         this(state, title, back, style);
-        this.back.onClickLeft(event -> {
-            state.engine().guiStack().add("10-Menu", previous);
+        on(GuiAction.BACK, () -> {
+            state.engine().guiStack().swap(this, previous);
         });
     }
 
@@ -51,5 +51,10 @@ public class GuiTouchMenu extends GuiTouch {
                 GuiComponentSeparator::new);
         this.back = pane.addVert(301, 4, 301, 28, -1, 60, Long.MIN_VALUE,
                 p -> button(p, back));
+
+        selection(this.back);
+
+        this.back.on(GuiEvent.CLICK_LEFT,
+                (event, engine) -> fireAction(GuiAction.BACK, engine));
     }
 }

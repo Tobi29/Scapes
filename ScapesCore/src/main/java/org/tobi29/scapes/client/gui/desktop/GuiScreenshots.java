@@ -67,24 +67,25 @@ public class GuiScreenshots extends GuiMenu {
     }
 
     private class Element extends GuiComponentGroupSlab {
-        private final GuiComponentImage icon;
+        private final GuiComponentIcon icon;
 
         @SuppressWarnings("unchecked")
         public Element(GuiLayoutData parent, FilePath path,
                 GuiScreenshots gui) {
             super(parent);
-            icon = addHori(15, 20, 40, -1, GuiComponentImage::new);
+            icon = addHori(15, 20, 40, -1, GuiComponentIcon::new);
             GuiComponentTextButton save =
                     addHori(5, 20, -1, -1, p -> button(p, "Save"));
             GuiComponentTextButton delete =
                     addHori(5, 20, 100, -1, p -> button(p, "Delete"));
+            selection(save, delete);
 
-            icon.onClickLeft(event -> {
+            icon.on(GuiEvent.CLICK_LEFT, event -> {
                 icon.texture().ifPresent(texture -> state.engine().guiStack()
                         .add("10-Menu", new GuiScreenshot(state, gui, texture,
                                 gui.style())));
             });
-            save.onClickLeft(event -> {
+            save.on(GuiEvent.CLICK_LEFT, event -> {
                 try {
                     Optional<FilePath> export = state.engine().container()
                             .saveFileDialog(new Pair[]{
@@ -98,7 +99,7 @@ public class GuiScreenshots extends GuiMenu {
                             e.toString());
                 }
             });
-            delete.onClickLeft(event -> {
+            delete.on(GuiEvent.CLICK_LEFT, event -> {
                 try {
                     FileUtil.delete(path);
                     scrollPane.remove(this);

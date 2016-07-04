@@ -48,10 +48,10 @@ public class GuiTouchPlaylists extends GuiTouchMenuDouble {
         scrollPane = pane.addVert(112, 10, 736, 250,
                 p -> new GuiComponentScrollPane(p, 60)).viewport();
 
-        day.onClickLeft(event -> updateTitles("day"));
-        night.onClickLeft(event -> updateTitles("night"));
-        battle.onClickLeft(event -> updateTitles("battle"));
-        save.onClickLeft(event -> {
+        day.on(GuiEvent.CLICK_LEFT, event -> updateTitles("day"));
+        night.on(GuiEvent.CLICK_LEFT, event -> updateTitles("night"));
+        battle.on(GuiEvent.CLICK_LEFT, event -> updateTitles("battle"));
+        save.on(GuiEvent.CLICK_LEFT, event -> {
             try {
                 FilePath directory = state.engine().home().resolve("playlists")
                         .resolve(playlist);
@@ -108,7 +108,7 @@ public class GuiTouchPlaylists extends GuiTouchMenuDouble {
             GuiComponentTextButton delete =
                     addHori(10, 5, 110, 30, p -> button(p, 24, "Delete"));
 
-            label.onClickLeft(event -> {
+            label.on(GuiEvent.CLICK_LEFT, event -> {
                 state.engine().notifications()
                         .add(p -> new GuiNotificationSimple(p,
                                 state.engine().graphics().textures()
@@ -119,7 +119,7 @@ public class GuiTouchPlaylists extends GuiTouchMenuDouble {
                         .playMusic(FileUtil.read(path), "music.Playlist", 1.0f,
                                 1.0f, true);
             });
-            delete.onClickLeft(event -> {
+            delete.on(GuiEvent.CLICK_LEFT, event -> {
                 try {
                     FileUtil.delete(path);
                     scrollPane.remove(this);

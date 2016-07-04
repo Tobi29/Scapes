@@ -58,7 +58,7 @@ public class GameStateMenu extends GameState {
     @Override
     public void init() {
         GuiStyle style = engine.guiStyle();
-        engine.guiStack().add("00-Version", new GuiVersion(this, style));
+        engine.guiStack().addUnfocused("00-Version", new GuiVersion(this, style));
         Optional<Account> account;
         FilePath file = engine.home().resolve("Account.properties");
         try {

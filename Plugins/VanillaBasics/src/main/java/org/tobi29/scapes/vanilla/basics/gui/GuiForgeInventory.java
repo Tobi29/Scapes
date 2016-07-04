@@ -30,15 +30,15 @@ public class GuiForgeInventory extends GuiContainerInventory {
             MobPlayerClientMainVB player, GuiStyle style) {
         super("Forge", player, container, style);
         this.container = container;
-        buttonContainer(16, 210, 30, 30, 0);
-        buttonContainer(56, 210, 30, 30, 1);
-        buttonContainer(96, 210, 30, 30, 2);
-        buttonContainer(136, 210, 30, 30, 3);
-        buttonContainer(16, 80, 30, 30, 4);
-        buttonContainer(16, 120, 30, 30, 5);
-        buttonContainer(56, 120, 30, 30, 6);
-        buttonContainer(96, 120, 30, 30, 7);
-        buttonContainer(96, 80, 30, 30, 8);
+        selection(buttonContainer(16, 210, 30, 30, 0));
+        selection(buttonContainer(56, 210, 30, 30, 1));
+        selection(buttonContainer(96, 210, 30, 30, 2));
+        selection(buttonContainer(136, 210, 30, 30, 3));
+        selection(buttonContainer(16, 80, 30, 30, 4));
+        selection(buttonContainer(16, 120, 30, 30, 5));
+        selection(buttonContainer(56, 120, 30, 30, 6));
+        selection(buttonContainer(96, 120, 30, 30, 7));
+        selection(buttonContainer(96, 80, 30, 30, 8));
         temperatureText =
                 pane.add(220, 170, -1, 24, p -> new GuiComponentText(p, ""));
         updateTemperatureText();

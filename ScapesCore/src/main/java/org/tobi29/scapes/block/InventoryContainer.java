@@ -24,6 +24,10 @@ public class InventoryContainer {
         inventories.put(id, inventory);
     }
 
+    public Inventory accessUnsafe(String id) {
+        return inventories.get(id);
+    }
+
     @SuppressWarnings("ReturnOfNull")
     public void access(String id, Consumer<Inventory> consumer) {
         accessReturn(id, inventory -> {

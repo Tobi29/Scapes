@@ -1,12 +1,15 @@
 package org.tobi29.scapes.entity.client;
 
 import java8.util.Optional;
+import java8.util.function.Consumer;
 import org.tobi29.scapes.block.AABBElement;
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.TerrainTexture;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
+import org.tobi29.scapes.client.ScapesClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
+import org.tobi29.scapes.client.input.InputMode;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.utils.Pool;
@@ -20,6 +23,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector2f;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.particle.ParticleEmitterBlock;
+import org.tobi29.scapes.packets.PacketInteraction;
 
 import java.util.Iterator;
 import java.util.Random;
@@ -28,7 +32,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public abstract class MobPlayerClientMain extends MobPlayerClient {
     protected final GameStateGameMP game;
     private final Frustum viewField;
-    protected Gui currentGui;
+    protected Controller controller;
     protected boolean flying;
     protected int swim;
     @SuppressWarnings("CanBeFinal")
@@ -42,6 +46,15 @@ public abstract class MobPlayerClientMain extends MobPlayerClient {
         super(world, pos, speed, aabb, lives, maxLives, nickname);
         this.viewField = viewField;
         game = world.game();
+        ScapesClient game = (ScapesClient) this.game.engine().game();
+        Consumer<InputMode> inputChange = inputMode -> {
+            Gui inputGui = this.game.input();
+            inputGui.removeAll();
+            inputMode.createInGameGUI(inputGui, world);
+            controller = inputMode.playerController(this);
+        };
+        game.onInputMode(this, inputChange);
+        inputChange.accept(game.inputMode());
     }
 
     protected static Iterator<AABB> collisions(Pool<AABBElement> aabbs) {
@@ -322,22 +335,26 @@ public abstract class MobPlayerClientMain extends MobPlayerClient {
     }
 
     public synchronized void openGui(Gui gui) {
-        closeGui();
         game.engine().guiStack().add("10-Menu", gui);
-        currentGui = gui;
         game.setHudVisible(false);
     }
 
-    public boolean hasGui() {
-        return currentGui != null;
+    public Optional<Gui> currentGui() {
+        return game.engine().guiStack().get("10-Menu");
     }
 
-    public synchronized void closeGui() {
-        if (currentGui != null) {
-            game.engine().guiStack().remove(currentGui);
-            currentGui = null;
+    public boolean hasGui() {
+        return game.engine().guiStack().has("10-Menu");
+    }
+
+    public synchronized boolean closeGui() {
+        if (game.engine().guiStack().remove("10-Menu").isPresent()) {
             game.setHudVisible(true);
+            world.send(
+                    new PacketInteraction(PacketInteraction.CLOSE_INVENTORY));
+            return true;
         }
+        return false;
     }
 
     public GameStateGameMP game() {
@@ -360,12 +377,6 @@ public abstract class MobPlayerClientMain extends MobPlayerClient {
         boolean right();
 
         boolean jump();
-
-        boolean inventory();
-
-        boolean menu();
-
-        boolean chat();
 
         int hotbarLeft(int previous);
 

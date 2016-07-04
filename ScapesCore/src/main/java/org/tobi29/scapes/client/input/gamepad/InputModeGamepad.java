@@ -16,7 +16,9 @@
 package org.tobi29.scapes.client.input.gamepad;
 
 import org.tobi29.scapes.client.ScapesClient;
+import org.tobi29.scapes.client.gui.GuiChatWrite;
 import org.tobi29.scapes.client.gui.desktop.GuiControlsGamepad;
+import org.tobi29.scapes.client.gui.desktop.GuiPause;
 import org.tobi29.scapes.client.input.InputMode;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
@@ -30,12 +32,12 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
+import org.tobi29.scapes.packets.PacketInteraction;
 
 public class InputModeGamepad implements InputMode {
     private final ControllerJoystick controller;
     private final TagStructure tagStructure;
     private final GuiController guiController;
-    private final PlayerController playerController;
 
     public InputModeGamepad(ScapesEngine engine, ControllerJoystick controller,
             TagStructure tagStructure) {
@@ -48,21 +50,18 @@ public class InputModeGamepad implements InputMode {
                 ControllerKeyReference.valueOf(guiTag.getString("Primary"));
         ControllerKeyReference secondaryButton =
                 ControllerKeyReference.valueOf(guiTag.getString("Secondary"));
-        TagStructure guiCursorTag = guiTag.getStructure("Cursor");
-        int cursorXAxis = guiCursorTag.getInteger("X");
-        int cursorYAxis = guiCursorTag.getInteger("Y");
-        double cursorSensitivity =
-                guiCursorTag.getDouble("Sensitivity") * 1000.0;
-        TagStructure guiScrollTag = guiTag.getStructure("Scroll");
-        int scrollAxisX = guiScrollTag.getInteger("X");
-        int scrollAxisY = guiScrollTag.getInteger("Y");
-        double scrollSensitivity =
-                guiScrollTag.getDouble("Sensitivity") * 100.0;
+        ControllerKeyReference upButton =
+                ControllerKeyReference.valueOf(guiTag.getString("Up"));
+        ControllerKeyReference downButton =
+                ControllerKeyReference.valueOf(guiTag.getString("Down"));
+        ControllerKeyReference leftButton =
+                ControllerKeyReference.valueOf(guiTag.getString("Left"));
+        ControllerKeyReference rightButton =
+                ControllerKeyReference.valueOf(guiTag.getString("Right"));
         guiController =
                 new GuiControllerGamepad(engine, controller, primaryButton,
-                        secondaryButton, cursorXAxis, cursorYAxis, scrollAxisX,
-                        scrollAxisY, cursorSensitivity, scrollSensitivity);
-        playerController = new PlayerController();
+                        secondaryButton, upButton, downButton, leftButton,
+                        rightButton);
     }
 
     private static void defaultConfig(TagStructure tagStructure) {
@@ -79,16 +78,10 @@ public class InputModeGamepad implements InputMode {
         TagStructure guiTag = tagStructure.getStructure("GUI");
         check("Primary", ControllerKey.BUTTON_0, guiTag);
         check("Secondary", ControllerKey.BUTTON_1, guiTag);
-
-        TagStructure guiCursorTag = guiTag.getStructure("Cursor");
-        check("X", 0, guiCursorTag);
-        check("Y", 1, guiCursorTag);
-        check("Sensitivity", 1.0, guiCursorTag);
-
-        TagStructure guiScrollTag = guiTag.getStructure("Scroll");
-        check("X", 3, guiScrollTag);
-        check("Y", 4, guiScrollTag);
-        check("Sensitivity", 1.0, guiScrollTag);
+        check("Up", ControllerKey.AXIS_NEG_1, guiTag);
+        check("Down", ControllerKey.AXIS_1, guiTag);
+        check("Left", ControllerKey.AXIS_NEG_0, guiTag);
+        check("Right", ControllerKey.AXIS_0, guiTag);
 
         TagStructure actionTag = tagStructure.getStructure("Action");
         check("Left", ControllerKey.AXIS_2, actionTag);
@@ -144,8 +137,9 @@ public class InputModeGamepad implements InputMode {
     }
 
     @Override
-    public MobPlayerClientMain.Controller playerController() {
-        return playerController;
+    public MobPlayerClientMain.Controller playerController(
+            MobPlayerClientMain player) {
+        return new PlayerController(player);
     }
 
     @Override
@@ -159,7 +153,7 @@ public class InputModeGamepad implements InputMode {
                 right, hotbarAdd, hotbarSubtract, hotbarLeft;
         private final double cameraSensitivity;
 
-        public PlayerController() {
+        public PlayerController(MobPlayerClientMain player) {
             TagStructure movementTag = tagStructure.getStructure("Movement");
             axisWalkX = movementTag.getInteger("X");
             axisWalkY = movementTag.getInteger("Y");
@@ -189,6 +183,37 @@ public class InputModeGamepad implements InputMode {
                     .valueOf(hotbarTag.getString("Subtract"));
             hotbarLeft =
                     ControllerKeyReference.valueOf(hotbarTag.getString("Left"));
+
+            guiController.onPress(player, key -> {
+                if (!player.currentGui()
+                        .filter(gui -> gui instanceof GuiChatWrite)
+                        .isPresent() && menu.isPressed(key, controller)) {
+                    if (!player.closeGui()) {
+                        player.openGui(new GuiPause(player.game(), player,
+                                player.game().engine().guiStyle()));
+                    }
+                    return true;
+                }
+                if (!player.currentGui()
+                        .filter(gui -> gui instanceof GuiChatWrite)
+                        .isPresent() && inventory.isPressed(key, controller)) {
+                    if (!player.closeGui()) {
+                        player.world().send(new PacketInteraction(
+                                PacketInteraction.OPEN_INVENTORY));
+                    }
+                    return true;
+                }
+                if (!player.currentGui()
+                        .filter(gui -> gui instanceof GuiChatWrite)
+                        .isPresent() && chat.isPressed(key, controller)) {
+                    if (!player.hasGui()) {
+                        player.openGui(new GuiChatWrite(player.game(), player,
+                                player.game().engine().guiStyle()));
+                        return true;
+                    }
+                }
+                return false;
+            });
         }
 
         @Override
@@ -226,21 +251,6 @@ public class InputModeGamepad implements InputMode {
         @Override
         public boolean jump() {
             return jump.isDown(controller);
-        }
-
-        @Override
-        public boolean inventory() {
-            return inventory.isPressed(controller);
-        }
-
-        @Override
-        public boolean menu() {
-            return menu.isPressed(controller);
-        }
-
-        @Override
-        public boolean chat() {
-            return chat.isPressed(controller);
         }
 
         @Override

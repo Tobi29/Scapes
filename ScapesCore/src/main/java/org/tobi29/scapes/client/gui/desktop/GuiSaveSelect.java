@@ -61,8 +61,11 @@ public class GuiSaveSelect extends GuiMenu {
                 p -> new GuiComponentScrollPane(p, 70)).viewport();
         GuiComponentTextButton create =
                 rowCenter(pane, p -> button(p, "Create"));
+        updateSaves();
 
-        create.onClickLeft(event -> {
+        selection(-1, create);
+
+        create.on(GuiEvent.CLICK_LEFT, event -> {
             try {
                 FilePath path = state.engine().home().resolve("plugins");
                 List<PluginFile> plugins = Plugins.installed(path);
@@ -70,11 +73,11 @@ public class GuiSaveSelect extends GuiMenu {
                         .filter(plugin -> "WorldType".equals(plugin.parent()))
                         .collect(Collectors.toList());
                 if (worldTypes.isEmpty()) {
-                    state.engine().guiStack().add("10-Menu",
+                    state.engine().guiStack().swap(this,
                             new GuiMessage(state, this, "Error", NO_WORLD_TYPE,
                                     style));
                 } else {
-                    state.engine().guiStack().add("10-Menu",
+                    state.engine().guiStack().swap(this,
                             new GuiCreateWorld(state, this, worldTypes, plugins,
                                     style));
                 }
@@ -82,8 +85,6 @@ public class GuiSaveSelect extends GuiMenu {
                 LOGGER.warn("Failed to read plugins: {}", e.toString());
             }
         });
-
-        updateSaves();
     }
 
     public void updateSaves() {
@@ -99,14 +100,15 @@ public class GuiSaveSelect extends GuiMenu {
     private class Element extends GuiComponentGroupSlab {
         public Element(GuiLayoutData parent, String name) {
             super(parent);
-            GuiComponentImage icon =
-                    addHori(15, 15, 40, -1, GuiComponentImage::new);
+            GuiComponentIcon icon =
+                    addHori(15, 15, 40, -1, GuiComponentIcon::new);
             GuiComponentTextButton label =
                     addHori(5, 20, -1, -1, p -> button(p, name));
             GuiComponentTextButton delete =
                     addHori(5, 20, 80, -1, p -> button(p, "Delete"));
+            selection(label, delete);
 
-            label.onClickLeft(event -> {
+            label.on(GuiEvent.CLICK_LEFT, event -> {
                 scene.setSpeed(0.0f);
                 try {
                     if (Debug.socketSingleplayer()) {
@@ -122,15 +124,13 @@ public class GuiSaveSelect extends GuiMenu {
                     LOGGER.warn("Failed to open save: {}", e.toString());
                 }
             });
-            label.onHover(event -> {
-                if (event.state() == GuiComponentHoverEvent.State.ENTER) {
-                    try (WorldSource source = saves.get(name)) {
-                        scene.changeBackground(source);
-                    } catch (IOException e) {
-                    }
+            label.on(GuiEvent.HOVER_ENTER, event -> {
+                try (WorldSource source = saves.get(name)) {
+                    scene.changeBackground(source);
+                } catch (IOException e) {
                 }
             });
-            delete.onClickLeft(event -> {
+            delete.on(GuiEvent.CLICK_LEFT, event -> {
                 try {
                     saves.delete(name);
                     scrollPane.remove(this);

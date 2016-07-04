@@ -45,15 +45,18 @@ public class GuiPlaylists extends GuiMenu {
                 slab.addHori(5, 5, -1, -1, p -> button(p, "Night"));
         GuiComponentTextButton battle =
                 slab.addHori(5, 5, -1, -1, p -> button(p, "Battle"));
+        selection(day, night, battle);
         scrollPane = pane.addVert(16, 5, -1, 300,
                 p -> new GuiComponentScrollPane(p, 70)).viewport();
         GuiComponentTextButton add = rowCenter(pane, p -> button(p, "Add"));
         updateTitles("day");
 
-        day.onClickLeft(event -> updateTitles("day"));
-        night.onClickLeft(event -> updateTitles("night"));
-        battle.onClickLeft(event -> updateTitles("battle"));
-        add.onClickLeft(event -> {
+        selection(-1, add);
+
+        day.on(GuiEvent.CLICK_LEFT, event -> updateTitles("day"));
+        night.on(GuiEvent.CLICK_LEFT, event -> updateTitles("night"));
+        battle.on(GuiEvent.CLICK_LEFT, event -> updateTitles("battle"));
+        add.on(GuiEvent.CLICK_LEFT, event -> {
             try {
                 FilePath directory = state.engine().home().resolve("playlists")
                         .resolve(playlist);
@@ -100,7 +103,11 @@ public class GuiPlaylists extends GuiMenu {
             }
             GuiComponentTextButton play =
                     addHori(2, 2, -1, 15, p -> button(p, 12, name));
-            play.onClickLeft(event -> {
+            GuiComponentTextButton delete =
+                    addHori(2, 2, 60, 15, p -> button(p, 12, "Delete"));
+            selection(play, delete);
+
+            play.on(GuiEvent.CLICK_LEFT, event -> {
                 state.engine().notifications()
                         .add(p -> new GuiNotificationSimple(p,
                                 state.engine().graphics().textures()
@@ -111,9 +118,7 @@ public class GuiPlaylists extends GuiMenu {
                         .playMusic(FileUtil.read(path), "music.Playlist", 1.0f,
                                 1.0f, true);
             });
-            GuiComponentTextButton delete =
-                    addHori(2, 2, 60, 15, p -> button(p, 12, "Delete"));
-            delete.onClickLeft(event -> {
+            delete.on(GuiEvent.CLICK_LEFT, event -> {
                 try {
                     FileUtil.delete(path);
                     scrollPane.remove(this);

@@ -17,17 +17,21 @@ package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.GuiComponentButtonHeavy;
-import org.tobi29.scapes.engine.gui.GuiComponentHoverEvent;
 import org.tobi29.scapes.engine.gui.GuiComponentText;
+import org.tobi29.scapes.engine.gui.GuiEvent;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.input.ControllerJoystick;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GuiComponentControlsAxis extends GuiComponentButtonHeavy {
     private final GuiComponentText text;
     private final String name, id;
     private final TagStructure tagStructure;
     private final ControllerJoystick controller;
+    private final List<Integer> blacklist = new ArrayList<>();
     private byte editing;
     private int axis;
 
@@ -41,15 +45,21 @@ public class GuiComponentControlsAxis extends GuiComponentButtonHeavy {
         this.tagStructure = tagStructure;
         this.controller = controller;
         axis = tagStructure.getInteger(id);
-        onClickLeft(event -> {
+        on(GuiEvent.CLICK_LEFT, event -> {
             if (editing == 0) {
+                blacklist.clear();
+                int axes = controller.axes();
+                for (int i = 0; i < axes; i++) {
+                    if (controller.axis(i) > 0.5) {
+                        blacklist.add(i);
+                    }
+                }
                 editing = 1;
                 updateText();
             }
         });
-        onHover(event -> {
-            if (event.state() == GuiComponentHoverEvent.State.LEAVE &&
-                    editing > 1) {
+        on(GuiEvent.HOVER_LEAVE, event -> {
+            if (editing > 1) {
                 editing = 0;
                 updateText();
             }
@@ -76,12 +86,17 @@ public class GuiComponentControlsAxis extends GuiComponentButtonHeavy {
         if (editing > 1) {
             int axes = controller.axes();
             for (int i = 0; i < axes; i++) {
+                boolean blacklisted = blacklist.contains(i);
                 if (controller.axis(i) > 0.5) {
-                    axis = i;
-                    tagStructure.setInteger(id, axis);
-                    editing = 0;
-                    updateText();
-                    break;
+                    if (!blacklisted) {
+                        axis = i;
+                        tagStructure.setInteger(id, axis);
+                        editing = 0;
+                        updateText();
+                        break;
+                    }
+                } else if (blacklisted) {
+                    blacklist.remove(i);
                 }
             }
         } else if (editing > 0) {

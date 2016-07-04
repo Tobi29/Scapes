@@ -47,10 +47,16 @@ public class GuiCredits extends GuiDesktop {
                 addHori(0, 0, 96, -1, GuiComponentVisiblePane::new);
         GuiComponentTextButton back =
                 pane.addVert(13, 64, -1, 30, p -> button(p, "Back"));
-        back.onClickLeft(event -> {
+
+        selection(back);
+
+        on(GuiAction.BACK, event -> {
             state.engine().sounds().stop("music.Credits");
-            state.engine().guiStack().add("10-Menu", previous);
+            state.engine().guiStack().swap(this, previous);
         });
+        back.on(GuiEvent.CLICK_LEFT,
+                (event, engine) -> fireAction(GuiAction.BACK, engine));
+
         state.engine().sounds().stop("music");
         state.engine().sounds()
                 .playMusic("Scapes:sound/Credits.ogg", "music.Credits", 1.0f,

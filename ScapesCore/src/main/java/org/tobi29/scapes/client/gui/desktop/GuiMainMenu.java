@@ -20,6 +20,7 @@ import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
 import org.tobi29.scapes.engine.gui.GuiComponentVisiblePane;
+import org.tobi29.scapes.engine.gui.GuiEvent;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 
 public class GuiMainMenu extends GuiDesktop {
@@ -33,47 +34,42 @@ public class GuiMainMenu extends GuiDesktop {
                 p -> button(p, "Singleplayer"));
         GuiComponentTextButton multiPlayer = pane.addVert(16, 5, 8, 5, -1, 30,
                 p -> button(p, "Multiplayer"));
-        GuiComponentTextButton options = pane.addVert(16, 5, 8, 5, -1, 30,
-                p -> button(p, "Options"));
-        GuiComponentTextButton credits = pane.addVert(16, 5, 8, 5, -1, 30,
-                p -> button(p, "Credits"));
-        GuiComponentTextButton plugins = pane.addVert(16, 5, 8, 5, -1, 30,
-                p -> button(p, "Plugins"));
-        GuiComponentTextButton playlists = pane.addVert(16, 5, 8, 5, -1, 30,
-                p -> button(p, "Playlists"));
+        GuiComponentTextButton options =
+                pane.addVert(16, 5, 8, 5, -1, 30, p -> button(p, "Options"));
+        GuiComponentTextButton credits =
+                pane.addVert(16, 5, 8, 5, -1, 30, p -> button(p, "Credits"));
+        GuiComponentTextButton plugins =
+                pane.addVert(16, 5, 8, 5, -1, 30, p -> button(p, "Plugins"));
+        GuiComponentTextButton playlists =
+                pane.addVert(16, 5, 8, 5, -1, 30, p -> button(p, "Playlists"));
         GuiComponentTextButton screenshots = pane.addVert(16, 5, 8, 5, -1, 30,
                 p -> button(p, "Screenshots"));
         GuiComponentTextButton quit =
                 pane.addVert(16, 5, 8, 5, -1, 30, p -> button(p, "Quit"));
 
-        singlePlayer.onClickLeft(event -> {
-            state.engine().guiStack().add("10-Menu",
-                    new GuiSaveSelect(state, this, scene, style));
-        });
-        multiPlayer.onClickLeft(event -> {
-            state.engine().guiStack()
-                    .add("10-Menu", new GuiServerSelect(state, this, style));
-        });
-        options.onClickLeft(event -> {
-            state.engine().guiStack()
-                    .add("10-Menu", new GuiOptions(state, this, style));
-        });
-        credits.onClickLeft(event -> {
-            state.engine().guiStack()
-                    .add("10-Menu", new GuiCredits(state, this, style));
-        });
-        plugins.onClickLeft(event -> {
-            state.engine().guiStack()
-                    .add("10-Menu", new GuiPlugins(state, this, style));
-        });
-        playlists.onClickLeft(event -> {
-            state.engine().guiStack()
-                    .add("10-Menu", new GuiPlaylists(state, this, style));
-        });
-        screenshots.onClickLeft(event -> {
-            state.engine().guiStack()
-                    .add("10-Menu", new GuiScreenshots(state, this, style));
-        });
-        quit.onClickLeft(event -> state.engine().stop());
+        selection(singlePlayer);
+        selection(multiPlayer);
+        selection(options);
+        selection(credits);
+        selection(plugins);
+        selection(playlists);
+        selection(screenshots);
+        selection(quit);
+
+        singlePlayer.on(GuiEvent.CLICK_LEFT, event -> state.engine().guiStack()
+                .swap(this, new GuiSaveSelect(state, this, scene, style)));
+        multiPlayer.on(GuiEvent.CLICK_LEFT, event -> state.engine().guiStack()
+                .add("10-Menu", new GuiServerSelect(state, this, style)));
+        options.on(GuiEvent.CLICK_LEFT, event -> state.engine().guiStack()
+                .add("10-Menu", new GuiOptions(state, this, style)));
+        credits.on(GuiEvent.CLICK_LEFT, event -> state.engine().guiStack()
+                .add("10-Menu", new GuiCredits(state, this, style)));
+        plugins.on(GuiEvent.CLICK_LEFT, event -> state.engine().guiStack()
+                .add("10-Menu", new GuiPlugins(state, this, style)));
+        playlists.on(GuiEvent.CLICK_LEFT, event -> state.engine().guiStack()
+                .add("10-Menu", new GuiPlaylists(state, this, style)));
+        screenshots.on(GuiEvent.CLICK_LEFT, event -> state.engine().guiStack()
+                .add("10-Menu", new GuiScreenshots(state, this, style)));
+        quit.on(GuiEvent.CLICK_LEFT, event -> state.engine().stop());
     }
 }

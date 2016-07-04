@@ -16,6 +16,7 @@
 package org.tobi29.scapes.client;
 
 import java8.util.stream.Stream;
+import org.tobi29.scapes.engine.gui.ListenerOwner;
 import org.tobi29.scapes.engine.utils.Streams;
 
 import java.util.ArrayList;
@@ -25,7 +26,8 @@ import java.util.WeakHashMap;
 
 public class ChatHistory {
     private final List<ChatLine> lines = new ArrayList<>();
-    private final Map<Object, Runnable> changeListeners = new WeakHashMap<>();
+    private final Map<ListenerOwner, Runnable> changeListeners =
+            new WeakHashMap<>();
 
     public synchronized void addLine(String text) {
         String[] lines = text.split("\n");
@@ -42,11 +44,13 @@ public class ChatHistory {
                 Streams.collect(lines, line -> time - line.time > 10000);
         if (!removals.isEmpty()) {
             lines.removeAll(removals);
-            Streams.forEach(changeListeners.values(), Runnable::run);
+            Streams.forEach(changeListeners.entrySet(),
+                    entry -> entry.getKey().validOwner(),
+                    entry -> entry.getValue().run());
         }
     }
 
-    public synchronized void listener(Object owner, Runnable listener) {
+    public synchronized void onUpdate(ListenerOwner owner, Runnable listener) {
         changeListeners.put(owner, listener);
     }
 

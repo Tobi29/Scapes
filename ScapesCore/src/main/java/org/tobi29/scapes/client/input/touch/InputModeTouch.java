@@ -17,6 +17,7 @@ package org.tobi29.scapes.client.input.touch;
 
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.gui.desktop.GuiMessage;
+import org.tobi29.scapes.client.gui.desktop.GuiPause;
 import org.tobi29.scapes.client.input.InputMode;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
@@ -27,28 +28,24 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f;
 import org.tobi29.scapes.engine.utils.math.vector.*;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
+import org.tobi29.scapes.packets.PacketInteraction;
 
 public class InputModeTouch implements InputMode {
     private final ControllerTouch controller;
     private final GuiController guiController;
-    private final PlayerController playerController;
     private final MutableVector2 swipe = new MutableVector2d(), direction =
             new MutableVector2d();
     private final Matrix4f matrix1 = new Matrix4f(), matrix2 = new Matrix4f();
-    private boolean walkUp, walkDown, walkLeft, walkRight, inventoryOpen,
-            menuOpen, leftHand, rightHand;
+    private boolean walkUp, walkDown, walkLeft, walkRight, leftHand, rightHand;
     private long lastTouch;
 
     public InputModeTouch(ScapesEngine engine, ControllerTouch controller) {
         this.controller = controller;
         guiController = new GuiControllerTouch(engine, controller);
-        playerController = new PlayerController();
     }
 
     @Override
     public boolean poll() {
-        inventoryOpen = false;
-        menuOpen = false;
         controller.poll();
         return controller.isActive();
     }
@@ -80,42 +77,33 @@ public class InputModeTouch implements InputMode {
                 gui.add(50, 0, 40, 40, GuiComponentButton::new);
         GuiComponentPane swipe = gui.add(0, 0, -1, -1, GuiComponentPane::new);
 
-        padUp.onPressLeft(event -> {
-            walkUp = true;
+        padUp.on(GuiEvent.PRESS_LEFT, event -> walkUp = true);
+        padUp.on(GuiEvent.DROP_LEFT, event -> walkUp = false);
+        padUp.on(GuiEvent.DRAG_LEFT, this::swipe);
+        padDown.on(GuiEvent.PRESS_LEFT, event -> walkDown = true);
+        padDown.on(GuiEvent.DROP_LEFT, event -> walkDown = false);
+        padDown.on(GuiEvent.DRAG_LEFT, this::swipe);
+        padLeft.on(GuiEvent.PRESS_LEFT, event -> walkLeft = true);
+        padLeft.on(GuiEvent.DROP_LEFT, event -> walkLeft = false);
+        padLeft.on(GuiEvent.DRAG_LEFT, this::swipe);
+        padRight.on(GuiEvent.PRESS_LEFT, event -> walkRight = true);
+        padRight.on(GuiEvent.DROP_LEFT, event -> walkRight = false);
+        padRight.on(GuiEvent.DRAG_LEFT, this::swipe);
+        inventory.on(GuiEvent.CLICK_LEFT, event -> {
+            if (!world.player().closeGui()) {
+                world.send(new PacketInteraction(
+                        PacketInteraction.OPEN_INVENTORY));
+            }
         });
-        padUp.onDropLeft(event -> {
-            walkUp = false;
+        menu.on(GuiEvent.CLICK_LEFT, event -> {
+            if (!world.player().closeGui()) {
+                world.player().openGui(
+                        new GuiPause(world.game(), world.player(),
+                                world.game().engine().guiStyle()));
+            }
         });
-        padUp.onDragLeft(this::swipe);
-        padDown.onPressLeft(event -> {
-            walkDown = true;
-        });
-        padDown.onDropLeft(event -> {
-            walkDown = false;
-        });
-        padDown.onDragLeft(this::swipe);
-        padLeft.onPressLeft(event -> {
-            walkLeft = true;
-        });
-        padLeft.onDropLeft(event -> {
-            walkLeft = false;
-        });
-        padLeft.onDragLeft(this::swipe);
-        padRight.onPressLeft(event -> {
-            walkRight = true;
-        });
-        padRight.onDropLeft(event -> {
-            walkRight = false;
-        });
-        padRight.onDragLeft(this::swipe);
-        inventory.onClickLeft(event -> {
-            inventoryOpen = true;
-        });
-        menu.onClickLeft(event -> {
-            menuOpen = true;
-        });
-        swipe.onDragLeft(this::swipe);
-        swipe.onPressLeft(event -> {
+        swipe.on(GuiEvent.DRAG_LEFT, this::swipe);
+        swipe.on(GuiEvent.PRESS_LEFT, event -> {
             if (rightHand) {
                 rightHand = false;
             } else if (System.currentTimeMillis() - lastTouch < 250) {
@@ -123,7 +111,7 @@ public class InputModeTouch implements InputMode {
             }
             lastTouch = System.currentTimeMillis();
         });
-        swipe.onDragLeft(event -> {
+        swipe.on(GuiEvent.DRAG_LEFT, event -> {
             double x = event.x() / 480.0 - 1.0;
             double y = 1.0 - event.y() / 270.0;
             Cam cam = world.scene().cam();
@@ -146,15 +134,16 @@ public class InputModeTouch implements InputMode {
                 leftHand = true;
             }
         });
-        swipe.onDropLeft(event -> {
+        swipe.on(GuiEvent.DROP_LEFT, event -> {
             leftHand = false;
             rightHand = false;
         });
     }
 
     @Override
-    public MobPlayerClientMain.Controller playerController() {
-        return playerController;
+    public MobPlayerClientMain.Controller playerController(
+            MobPlayerClientMain player) {
+        return new PlayerController(player);
     }
 
     @Override
@@ -172,6 +161,9 @@ public class InputModeTouch implements InputMode {
     }
 
     private class PlayerController implements MobPlayerClientMain.Controller {
+        public PlayerController(MobPlayerClientMain player) {
+        }
+
         @Override
         public Vector2 walk() {
             double x = 0.0, y = 0.0;
@@ -204,33 +196,16 @@ public class InputModeTouch implements InputMode {
 
         @Override
         public boolean left() {
-            assert !(leftHand && rightHand);
             return leftHand;
         }
 
         @Override
         public boolean right() {
-            assert !(leftHand && rightHand);
             return rightHand;
         }
 
         @Override
         public boolean jump() {
-            return false;
-        }
-
-        @Override
-        public boolean inventory() {
-            return inventoryOpen;
-        }
-
-        @Override
-        public boolean menu() {
-            return menuOpen;
-        }
-
-        @Override
-        public boolean chat() {
             return false;
         }
 

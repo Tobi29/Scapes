@@ -16,6 +16,7 @@
 package org.tobi29.scapes.vanilla.basics.gui;
 
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
+import org.tobi29.scapes.engine.gui.GuiEvent;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
@@ -24,7 +25,10 @@ public class GuiPlayerInventory extends GuiInventory {
         super("Inventory", player, style);
         GuiComponentTextButton crafting =
                 pane.addVert(16, 5, 368, 30, p -> button(p, "Crafting"));
-        crafting.onClickLeft(event -> player.openGui(
+
+        selection(crafting);
+
+        crafting.on(GuiEvent.CLICK_LEFT, event -> player.openGui(
                 new GuiCrafting(false, player,
                         player.game().engine().guiStyle())));
     }

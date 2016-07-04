@@ -18,6 +18,7 @@ package org.tobi29.scapes.vanilla.basics.gui;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.Material;
 import org.tobi29.scapes.client.gui.GuiComponentItemButton;
+import org.tobi29.scapes.engine.gui.GuiEvent;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityAnvilClient;
@@ -35,23 +36,24 @@ public class GuiAnvilInventory extends GuiContainerInventory {
         VanillaBasics plugin = (VanillaBasics) player.connection().plugins()
                 .plugin("VanillaBasics");
         VanillaMaterial materials = plugin.getMaterials();
-        buttonContainer(16, 120, 30, 30, 0);
-        buttonContainer(16, 210, 30, 30, 1);
-        addAction(66, 120, materials.ingot, 0);
-        addAction(106, 120, materials.metalPickaxe, 1);
-        addAction(106, 160, materials.metalAxe, 2);
-        addAction(106, 200, materials.metalShovel, 3);
-        addAction(146, 120, materials.metalHammer, 4);
-        addAction(146, 160, materials.metalSaw, 5);
-        addAction(146, 200, materials.metalHoe, 6);
-        addAction(186, 120, materials.metalSword, 7);
+        selection(buttonContainer(16, 120, 30, 30, 0));
+        selection(buttonContainer(16, 210, 30, 30, 1));
+        selection(addAction(66, 120, materials.ingot, 0));
+        selection(addAction(106, 120, materials.metalPickaxe, 1));
+        selection(addAction(106, 160, materials.metalAxe, 2));
+        selection(addAction(106, 200, materials.metalShovel, 3));
+        selection(addAction(146, 120, materials.metalHammer, 4));
+        selection(addAction(146, 160, materials.metalSaw, 5));
+        selection(addAction(146, 200, materials.metalHoe, 6));
+        selection(addAction(186, 120, materials.metalSword, 7));
     }
 
-    private void addAction(int x, int y, Material material, int i) {
+    private GuiComponentItemButton addAction(int x, int y, Material material, int i) {
         ItemStack icon = material.example(1);
         GuiComponentItemButton item = pane.add(x, y, 30, 30,
                 p -> new GuiComponentItemButton(p, icon));
-        item.onClickLeft(event -> player.connection()
+        item.on(GuiEvent.CLICK_LEFT, event -> player.connection()
                 .send(new PacketAnvil(container, i)));
+        return item;
     }
 }

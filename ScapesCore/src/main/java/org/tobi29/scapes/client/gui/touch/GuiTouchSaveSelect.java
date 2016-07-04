@@ -60,7 +60,7 @@ public class GuiTouchSaveSelect extends GuiTouchMenuDouble {
         scrollPane = pane.addVert(112, 10, 736, 320,
                 p -> new GuiComponentScrollPane(p, 70)).viewport();
 
-        save.onClickLeft(event -> {
+        save.on(GuiEvent.CLICK_LEFT, event -> {
             try {
                 FilePath path = state.engine().home().resolve("plugins");
                 List<PluginFile> plugins = Plugins.installed(path);
@@ -68,11 +68,11 @@ public class GuiTouchSaveSelect extends GuiTouchMenuDouble {
                         .filter(plugin -> "WorldType".equals(plugin.parent()))
                         .collect(Collectors.toList());
                 if (worldTypes.isEmpty()) {
-                    state.engine().guiStack().add("10-Menu",
+                    state.engine().guiStack().swap(this,
                             new GuiMessage(state, this, "Error", NO_WORLD_TYPE,
                                     style));
                 } else {
-                    state.engine().guiStack().add("10-Menu",
+                    state.engine().guiStack().swap(this,
                             new GuiTouchCreateWorld(state, this,
                                     worldTypes.get(0), style));
                 }
@@ -97,14 +97,16 @@ public class GuiTouchSaveSelect extends GuiTouchMenuDouble {
     private class Element extends GuiComponentGroupSlab {
         public Element(GuiLayoutData parent, String name) {
             super(parent);
-            GuiComponentImage icon =
-                    addHori(10, 10, 60, -1, GuiComponentImage::new);
+            GuiComponentIcon icon =
+                    addHori(10, 10, 60, -1, GuiComponentIcon::new);
             GuiComponentTextButton label =
                     addHori(10, 10, -1, -1, p -> button(p, name));
             GuiComponentTextButton delete =
                     addHori(10, 10, 160, -1, p -> button(p, "Delete"));
 
-            label.onClickLeft(event -> {
+            selection(label, delete);
+
+            label.on(GuiEvent.CLICK_LEFT, event -> {
                 scene.setSpeed(0.0f);
                 try {
                     if (Debug.socketSingleplayer()) {
@@ -120,15 +122,13 @@ public class GuiTouchSaveSelect extends GuiTouchMenuDouble {
                     LOGGER.warn("Failed to open save: {}", e.toString());
                 }
             });
-            label.onHover(event -> {
-                if (event.state() == GuiComponentHoverEvent.State.ENTER) {
-                    try (WorldSource source = saves.get(name)) {
-                        scene.changeBackground(source);
-                    } catch (IOException e) {
-                    }
+            label.on(GuiEvent.HOVER_ENTER, event -> {
+                try (WorldSource source = saves.get(name)) {
+                    scene.changeBackground(source);
+                } catch (IOException e) {
                 }
             });
-            delete.onClickLeft(event -> {
+            delete.on(GuiEvent.CLICK_LEFT, event -> {
                 try {
                     saves.delete(name);
                     scrollPane.remove(this);

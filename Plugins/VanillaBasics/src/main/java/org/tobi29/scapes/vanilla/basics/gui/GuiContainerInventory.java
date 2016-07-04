@@ -15,7 +15,9 @@
  */
 package org.tobi29.scapes.vanilla.basics.gui;
 
+import org.tobi29.scapes.block.Inventory;
 import org.tobi29.scapes.client.gui.GuiComponentItemButton;
+import org.tobi29.scapes.engine.gui.GuiEvent;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.entity.client.EntityContainerClient;
 import org.tobi29.scapes.packets.PacketInventoryInteraction;
@@ -30,20 +32,20 @@ public class GuiContainerInventory extends GuiInventory {
         this.container = container;
     }
 
-    protected void buttonContainer(int x, int y, int width, int height,
-            int slot) {
-        buttonContainer(x, y, width, height, "Container", slot);
+    protected GuiComponentItemButton buttonContainer(int x, int y, int width,
+            int height, int slot) {
+        return buttonContainer(x, y, width, height, "Container", slot);
     }
 
-    protected void buttonContainer(int x, int y, int width, int height,
-            String id, int slot) {
-        container.inventories().access(id, inventory -> {
-            GuiComponentItemButton button = pane.add(x, y, width, height,
-                    p -> new GuiComponentItemButton(p, inventory.item(slot)));
-            button.onClickLeft(event -> leftClickContainer(id, slot));
-            button.onClickRight(event -> rightClickContainer(id, slot));
-            button.onHover(event -> setTooltip(inventory.item(slot)));
-        });
+    protected GuiComponentItemButton buttonContainer(int x, int y, int width,
+            int height, String id, int slot) {
+        Inventory inventory = container.inventories().accessUnsafe(id);
+        GuiComponentItemButton button = pane.add(x, y, width, height,
+                p -> new GuiComponentItemButton(p, inventory.item(slot)));
+        button.on(GuiEvent.CLICK_LEFT, event -> leftClickContainer(id, slot));
+        button.on(GuiEvent.CLICK_RIGHT, event -> rightClickContainer(id, slot));
+        button.on(GuiEvent.HOVER, event -> setTooltip(inventory.item(slot)));
+        return button;
     }
 
     protected void leftClickContainer(String id, int i) {

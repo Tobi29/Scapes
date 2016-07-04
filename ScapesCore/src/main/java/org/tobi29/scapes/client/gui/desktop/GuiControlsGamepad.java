@@ -40,17 +40,13 @@ public class GuiControlsGamepad extends GuiControls {
         addSlider("Sensitivity", "Sensitivity", cameraTag);
 
         TagStructure guiTag = tagStructure.getStructure("GUI");
-        TagStructure guiCursorTag = guiTag.getStructure("Cursor");
-        TagStructure guiScrollTag = guiTag.getStructure("Scroll");
         addText("Cursor");
-        addAxis("Horizontal", "X", guiCursorTag, controller);
-        addAxis("Vertical", "Y", guiCursorTag, controller);
-        addSlider("Sensitivity", "Sensitivity", guiCursorTag);
         addButton("Primary", "Primary", guiTag, controller);
         addButton("Secondary", "Secondary", guiTag, controller);
-        addAxis("Scroll Horizontal", "X", guiScrollTag, controller);
-        addAxis("Scroll Vertical", "Y", guiScrollTag, controller);
-        addSlider("Scroll Sensitivity", "Sensitivity", guiScrollTag);
+        addButton("Select Up", "Up", guiTag, controller);
+        addButton("Select Down", "Down", guiTag, controller);
+        addButton("Select Left", "Left", guiTag, controller);
+        addButton("Select Right", "Right", guiTag, controller);
 
         TagStructure actionTag = tagStructure.getStructure("Action");
         addText("Action");

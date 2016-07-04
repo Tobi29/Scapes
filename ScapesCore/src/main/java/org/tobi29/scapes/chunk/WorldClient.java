@@ -64,6 +64,7 @@ public class WorldClient extends World {
     private final Map<Integer, EntityModel> entityModels =
             new ConcurrentHashMap<>();
     private final EnvironmentClient environment;
+    private boolean disposed;
 
     public WorldClient(ClientConnection connection, Cam cam, long seed,
             Function<WorldClient, ? extends TerrainClient> terrainSupplier,
@@ -86,22 +87,20 @@ public class WorldClient extends World {
         terrain = terrainSupplier.apply(this);
     }
 
-    public void addEntity(EntityClient add, int id) {
-        if (id != player.entityID() || add == player) {
-            if (add != player) {
-                add.createModel()
+    public void addEntity(EntityClient entity, int id) {
+        if (id != player.entityID() || entity == player) {
+            if (entity != player) {
+                entity.createModel()
                         .ifPresent(model -> entityModels.put(id, model));
             }
-            add.setEntityID(id);
-            entities.put(id, add);
+            entity.setEntityID(id);
+            entities.put(id, entity);
         }
     }
 
-    public void removeEntity(EntityClient del) {
-        if (del != null) {
-            entities.remove(del.entityID());
-            entityModels.remove(del.entityID());
-        }
+    public void removeEntity(EntityClient entity) {
+        entities.remove(entity.entityID());
+        entityModels.remove(entity.entityID());
     }
 
     public Stream<EntityClient> entities() {
@@ -110,6 +109,10 @@ public class WorldClient extends World {
 
     public Optional<EntityClient> entity(int i) {
         return Optional.ofNullable(entities.get(i));
+    }
+
+    public boolean hasEntity(EntityClient entity) {
+        return entities.containsValue(entity);
     }
 
     public void update(double delta) {
@@ -278,8 +281,13 @@ public class WorldClient extends World {
         return Streams.of(infoLayers.entrySet());
     }
 
+    public boolean disposed() {
+        return disposed;
+    }
+
     public void dispose() {
         terrain.dispose();
+        disposed = true;
     }
 
     @Override

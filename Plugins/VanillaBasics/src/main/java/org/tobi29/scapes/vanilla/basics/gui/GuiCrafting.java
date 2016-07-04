@@ -119,7 +119,9 @@ public class GuiCrafting extends GuiInventory {
             GuiComponentTextButton label = addHori(5, 2, -1, -1,
                     p -> button(p, 12, recipeType.name()));
             if (enabled) {
-                label.onClickLeft(event -> {
+                selection(1, label);
+
+                label.on(GuiEvent.CLICK_LEFT, event -> {
                     currentType = Optional.of(recipeType);
                     example = 0;
                     updateRecipes();
@@ -135,16 +137,13 @@ public class GuiCrafting extends GuiInventory {
             super(parent);
             GuiComponentItemButton result = addHori(5, 5, 30, 30,
                     p -> new GuiComponentItemButton(p, recipe.result()));
-            result.onClickLeft(event -> player.connection()
-                    .send(new PacketCrafting(recipe.data(
-                            player.connection().plugins().registry()))));
-            result.onHover(event -> setTooltip(result.item(), "Result:\n"));
             addHori(5, 5, -1, 16, p -> new GuiComponentFlowText(p, "<="));
             recipe.ingredients().forEach(ingredient -> {
                 GuiComponentItemButton b = addHori(5, 5, 25, 25,
                         p -> new GuiComponentItemButton(p,
                                 ingredient.example(example)));
-                b.onHover(event -> setTooltip(b.item(), "Ingredient:\n"));
+                b.on(GuiEvent.HOVER,
+                        event -> setTooltip(b.item(), "Ingredient:\n"));
                 examples.add(() -> b.setItem(ingredient.example(example)));
             });
             if (recipe.requirements().findAny().isPresent()) {
@@ -154,9 +153,18 @@ public class GuiCrafting extends GuiInventory {
                 GuiComponentItemButton b = addHori(5, 5, 25, 25,
                         p -> new GuiComponentItemButton(p,
                                 requirement.example(example)));
-                b.onHover(event -> setTooltip(b.item(), "Requirement:\n"));
+                b.on(GuiEvent.HOVER,
+                        event -> setTooltip(b.item(), "Requirement:\n"));
                 examples.add(() -> b.setItem(requirement.example(example)));
             });
+
+            selection(result);
+
+            result.on(GuiEvent.CLICK_LEFT, event -> player.connection()
+                    .send(new PacketCrafting(recipe.data(
+                            player.connection().plugins().registry()))));
+            result.on(GuiEvent.HOVER,
+                    event -> setTooltip(result.item(), "Result:\n"));
         }
 
         public void examples() {

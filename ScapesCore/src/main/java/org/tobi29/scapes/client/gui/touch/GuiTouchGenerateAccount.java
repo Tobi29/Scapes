@@ -29,7 +29,7 @@ public class GuiTouchGenerateAccount extends GuiTouchBusy {
         setLabel("Creating account...");
         state.engine().taskExecutor().runTask(joiner -> {
             Account account = Account.generate(path);
-            state.engine().guiStack().add("10-Menu", next.apply(account));
+            state.engine().guiStack().swap(this, next.apply(account));
         }, "Generate-Account");
     }
 }

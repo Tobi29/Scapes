@@ -17,6 +17,7 @@ package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.gui.GuiAction;
 import org.tobi29.scapes.engine.gui.GuiComponentTextField;
 import org.tobi29.scapes.engine.gui.GuiState;
 import org.tobi29.scapes.engine.gui.GuiStyle;
@@ -43,6 +44,8 @@ public class GuiChatWrite extends GuiState {
                         true));
         add(8, 416, -1, -1,
                 p -> new GuiComponentChat(p, state.chatHistory()));
+
+        on(GuiAction.BACK, player::closeGui);
     }
 
     @Override

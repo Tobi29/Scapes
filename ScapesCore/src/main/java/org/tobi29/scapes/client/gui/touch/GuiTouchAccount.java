@@ -65,9 +65,13 @@ public class GuiTouchAccount extends GuiTouchMenu {
         GuiComponentText error =
                 pane.addVert(112, 10, -1, 36, p -> new GuiComponentText(p, ""));
 
-        keyCopy.onClickLeft(event -> state.engine().container()
+        selection(keyCopy, keyPaste, keyCopyID);
+        selection(nickname);
+        selection(skin);
+
+        keyCopy.on(GuiEvent.CLICK_LEFT, event -> state.engine().container()
                 .clipboardCopy(Account.key(keyPair)));
-        keyPaste.onClickLeft(event -> {
+        keyPaste.on(GuiEvent.CLICK_LEFT, event -> {
             String str = state.engine().container().clipboardPaste();
             Optional<KeyPair> keyPair =
                     Account.key(REPLACE.matcher(str).replaceAll(""));
@@ -81,10 +85,11 @@ public class GuiTouchAccount extends GuiTouchMenu {
                 error.setText("Invalid key!");
             }
         });
-        keyCopyID.onClickLeft(event -> state.engine().container().clipboardCopy(
-                ChecksumUtil.checksum(keyPair.getPublic().getEncoded(),
-                        ChecksumUtil.Algorithm.SHA1).toString()));
-        skin.onClickLeft(event -> {
+        keyCopyID.on(GuiEvent.CLICK_LEFT, event -> state.engine().container()
+                .clipboardCopy(ChecksumUtil
+                        .checksum(keyPair.getPublic().getEncoded(),
+                                ChecksumUtil.Algorithm.SHA1).toString()));
+        skin.on(GuiEvent.CLICK_LEFT, event -> {
             try {
                 FilePath path = state.engine().home().resolve("Skin.png");
                 state.engine().container()
@@ -96,7 +101,7 @@ public class GuiTouchAccount extends GuiTouchMenu {
                 LOGGER.warn("Failed to import skin: {}", e.toString());
             }
         });
-        back.onClickLeft(event -> {
+        on(GuiAction.BACK, () -> {
             this.nickname = nickname.text();
             if (!Account.valid(this.nickname)) {
                 error.setText("Invalid Nickname!");
@@ -108,7 +113,7 @@ public class GuiTouchAccount extends GuiTouchMenu {
             } catch (IOException e) {
                 LOGGER.error("Failed to write account file: {}", e.toString());
             }
-            state.engine().guiStack().add("10-Menu", previous);
+            state.engine().guiStack().swap(this, previous);
         });
     }
 }

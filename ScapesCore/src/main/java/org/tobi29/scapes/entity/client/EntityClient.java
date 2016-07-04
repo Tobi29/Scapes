@@ -19,6 +19,7 @@ import java8.util.Optional;
 import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
+import org.tobi29.scapes.engine.gui.ListenerOwner;
 import org.tobi29.scapes.engine.utils.io.tag.MultiTag;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d;
@@ -27,7 +28,7 @@ import org.tobi29.scapes.entity.model.EntityModel;
 import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.packets.PacketEntityMetaData;
 
-public class EntityClient implements MultiTag.Readable {
+public class EntityClient implements MultiTag.Readable, ListenerOwner {
     protected final WorldClient world;
     protected final GameRegistry registry;
     protected final MutableVector3d pos;
@@ -41,8 +42,8 @@ public class EntityClient implements MultiTag.Readable {
     }
 
     public static EntityClient make(int id, WorldClient world) {
-        return world.registry()
-                .<WorldServer, EntityServer, WorldClient, EntityClient>getAsymSupplier(
+        return world
+                .registry().<WorldServer, EntityServer, WorldClient, EntityClient>getAsymSupplier(
                         "Core", "Entity").get(id).b.apply(world);
     }
 
@@ -93,6 +94,11 @@ public class EntityClient implements MultiTag.Readable {
 
     public void processPacket(PacketEntityMetaData packet) {
         metaData.setStructure(packet.category(), packet.tagStructure());
+    }
+
+    @Override
+    public boolean validOwner() {
+        return !world.disposed() && world.hasEntity(this);
     }
 
     public interface Supplier {

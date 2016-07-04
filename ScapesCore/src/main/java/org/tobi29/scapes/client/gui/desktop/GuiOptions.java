@@ -18,10 +18,7 @@ package org.tobi29.scapes.client.gui.desktop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.Gui;
-import org.tobi29.scapes.engine.gui.GuiComponentSlider;
-import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
-import org.tobi29.scapes.engine.gui.GuiStyle;
+import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.server.Account;
 
 import java.io.IOException;
@@ -41,23 +38,25 @@ public class GuiOptions extends GuiMenu {
                 row(pane, p -> button(p, "Video settings"));
         GuiComponentTextButton account = row(pane, p -> button(p, "Account"));
 
-        musicVolume.onDragLeft(event -> state.engine().config()
+        selection(musicVolume);
+        selection(soundVolume);
+        selection(controls);
+        selection(graphics);
+        selection(account);
+
+        musicVolume.on(GuiEvent.CHANGE, event -> state.engine().config()
                 .setVolume("music", musicVolume.value()));
-        soundVolume.onDragLeft(event -> state.engine().config()
+        soundVolume.on(GuiEvent.CHANGE, event -> state.engine().config()
                 .setVolume("sound", soundVolume.value()));
-        controls.onClickLeft(event -> {
-            state.engine().guiStack()
-                    .add("10-Menu", new GuiControlsList(state, this, style));
-        });
-        graphics.onClickLeft(event -> {
-            state.engine().guiStack()
-                    .add("10-Menu", new GuiVideoSettings(state, this, style));
-        });
-        account.onClickLeft(event -> {
+        controls.on(GuiEvent.CLICK_LEFT, event -> state.engine().guiStack()
+                .add("10-Menu", new GuiControlsList(state, this, style)));
+        graphics.on(GuiEvent.CLICK_LEFT, event -> state.engine().guiStack()
+                .add("10-Menu", new GuiVideoSettings(state, this, style)));
+        account.on(GuiEvent.CLICK_LEFT, event -> {
             try {
                 Account account1 = Account.get(
                         state.engine().home().resolve("Account.properties"));
-                state.engine().guiStack().add("10-Menu",
+                state.engine().guiStack().swap(this,
                         new GuiAccount(state, this, account1, style));
             } catch (IOException e) {
                 LOGGER.error("Failed to read account file: {}", e.toString());

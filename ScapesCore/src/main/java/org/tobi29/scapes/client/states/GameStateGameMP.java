@@ -24,12 +24,10 @@ import org.tobi29.scapes.block.TerrainTextureRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.ChatHistory;
 import org.tobi29.scapes.client.Playlist;
-import org.tobi29.scapes.client.ScapesClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.client.gui.GuiComponentGraph;
 import org.tobi29.scapes.client.gui.GuiHud;
 import org.tobi29.scapes.client.gui.GuiWidgetConnectionProfiler;
-import org.tobi29.scapes.client.input.InputMode;
 import org.tobi29.scapes.client.states.scenes.SceneScapesVoxelWorld;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
@@ -42,7 +40,6 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.model.EntityModelBlockBreakShared;
 import org.tobi29.scapes.entity.model.MobLivingModelHumanShared;
 import org.tobi29.scapes.entity.particle.ParticleTransparentAtlas;
-import org.tobi29.scapes.entity.skin.ClientSkinStorage;
 import org.tobi29.scapes.packets.PacketPingClient;
 
 import java.io.IOException;
@@ -53,7 +50,7 @@ public class GameStateGameMP extends GameState {
     protected final ClientConnection client;
     private final ChatHistory chatHistory;
     private final GuiHud hud;
-    private final Gui debug;
+    private final Gui inputGui, debug;
     private final GuiWidgetPerformanceClient performanceWidget;
     private final Playlist playlist;
     private final GuiWidgetDebugValues.Element tickDebug;
@@ -62,10 +59,8 @@ public class GameStateGameMP extends GameState {
             connectionReceivedProfiler;
     private final TerrainTextureRegistry terrainTextureRegistry;
     private final ParticleTransparentAtlas particleTransparentAtlas;
-    private final ClientSkinStorage skinStorage;
     private final MobLivingModelHumanShared modelHumanShared;
     private final EntityModelBlockBreakShared modelBlockBreakShared;
-    private InputMode currentInput;
     private double pingWait;
 
     protected GameStateGameMP(
@@ -78,12 +73,11 @@ public class GameStateGameMP extends GameState {
         tickDebug = engine.debugValues().get("Client-TPS");
         terrainTextureRegistry = new TerrainTextureRegistry(engine);
         particleTransparentAtlas = new ParticleTransparentAtlas(engine);
-        skinStorage = new ClientSkinStorage(engine, engine.graphics().textures()
-                .get("Scapes:image/entity/mob/Player"));
         modelHumanShared = new MobLivingModelHumanShared(engine);
         modelBlockBreakShared = new EntityModelBlockBreakShared(engine);
         GuiStyle style = engine.guiStyle();
         hud = new GuiHud(this, style);
+        inputGui = new GuiState(this, style);
         debug = new GuiState(this, style);
         debugWidget = debug.add(32, 32, 160, 200, GuiWidgetDebugClient::new);
         debugWidget.setVisible(false);
@@ -107,7 +101,6 @@ public class GameStateGameMP extends GameState {
     public void dispose() {
         client.stop();
         terrainTextureRegistry.texture().markDisposed();
-        skinStorage.dispose();
         engine.sounds().stop("music");
         if (client.plugins() != null) {
             client.plugins().dispose();
@@ -118,8 +111,9 @@ public class GameStateGameMP extends GameState {
 
     @Override
     public void init() {
-        engine.guiStack().add("05-HUD", hud);
-        engine.guiStack().add("99-SceneDebug", debug);
+        engine.guiStack().addUnfocused("04-Input", inputGui);
+        engine.guiStack().addUnfocused("05-HUD", hud);
+        engine.guiStack().addUnfocused("99-SceneDebug", debug);
         client.plugins().addFileSystems(engine.files());
         client.plugins().init();
         client.plugins().plugins().forEach(plugin -> plugin.initClient(this));
@@ -165,13 +159,6 @@ public class GameStateGameMP extends GameState {
                 debugWidget.setVisible(!debugWidget.isVisible());
             }
         });
-        InputMode input = ((ScapesClient) engine.game()).inputMode();
-        if (input != currentInput) {
-            Gui gui = new GuiState(this, engine.guiStyle());
-            input.createInGameGUI(gui, scene.world());
-            engine.guiStack().add("04-Input", gui);
-            currentInput = input;
-        }
         MobPlayerClientMain player = scene.player();
         chatHistory.update();
         playlist.update(player, delta);
@@ -191,10 +178,6 @@ public class GameStateGameMP extends GameState {
 
     public ParticleTransparentAtlas particleTransparentAtlas() {
         return particleTransparentAtlas;
-    }
-
-    public ClientSkinStorage skinStorage() {
-        return skinStorage;
     }
 
     public MobLivingModelHumanShared modelHumanShared() {
@@ -223,10 +206,15 @@ public class GameStateGameMP extends GameState {
 
     public void setHudVisible(boolean visible) {
         hud.setVisible(visible);
+        inputGui.setVisible(visible);
     }
 
     public GuiHud hud() {
         return hud;
+    }
+
+    public Gui input() {
+        return inputGui;
     }
 
     private static final class GuiWidgetPerformanceClient
@@ -266,41 +254,42 @@ public class GameStateGameMP extends GameState {
                     p -> new GuiComponentTextButton(p, 12,
                             "Conn. Received Reset"));
 
-            geometry.onClickLeft(event -> {
+            geometry.on(GuiEvent.CLICK_LEFT, event -> {
                 Scene scene = GameStateGameMP.this.scene;
                 if (scene instanceof SceneScapesVoxelWorld) {
                     ((SceneScapesVoxelWorld) scene).toggleChunkDebug();
                 }
             });
-            wireframe.onClickLeft(event -> {
+            wireframe.on(GuiEvent.CLICK_LEFT, event -> {
                 Scene scene = GameStateGameMP.this.scene;
                 if (scene instanceof SceneScapesVoxelWorld) {
                     ((SceneScapesVoxelWorld) scene).toggleWireframe();
                 }
             });
-            distance.onClickLeft(event -> {
+            distance.on(GuiEvent.CLICK_LEFT, event -> {
                 WorldClient world = client.world();
                 if (world != null) {
                     world.terrain().toggleStaticRenderDistance();
                 }
             });
-            reloadGeometry.onClickLeft(event -> {
+            reloadGeometry.on(GuiEvent.CLICK_LEFT, event -> {
                 WorldClient world = client.world();
                 if (world != null) {
                     world.terrain().reloadGeometry();
                 }
             });
-            performance.onClickLeft(event -> performanceWidget
+            performance.on(GuiEvent.CLICK_LEFT, event -> performanceWidget
                     .setVisible(!performanceWidget.isVisible()));
-            connSent.onClickLeft(event -> connectionSentProfiler
+            connSent.on(GuiEvent.CLICK_LEFT, event -> connectionSentProfiler
                     .setVisible(!connectionSentProfiler.isVisible()));
-            connSentReset.onClickLeft(event -> {
+            connSentReset.on(GuiEvent.CLICK_LEFT, event -> {
                 client.profilerSent().clear();
                 connectionSentProfiler.clear();
             });
-            connReceived.onClickLeft(event -> connectionReceivedProfiler
-                    .setVisible(!connectionReceivedProfiler.isVisible()));
-            connReceivedReset.onClickLeft(event -> {
+            connReceived.on(GuiEvent.CLICK_LEFT,
+                    event -> connectionReceivedProfiler.setVisible(
+                            !connectionReceivedProfiler.isVisible()));
+            connReceivedReset.on(GuiEvent.CLICK_LEFT, event -> {
                 client.profilerReceived().clear();
                 connectionReceivedProfiler.clear();
             });

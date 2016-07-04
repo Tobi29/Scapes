@@ -15,11 +15,13 @@
  */
 package org.tobi29.scapes.desktop;
 
+import java8.util.function.Function;
 import org.apache.commons.cli.*;
 import org.tobi29.scapes.Debug;
 import org.tobi29.scapes.Version;
 import org.tobi29.scapes.client.SaveStorage;
 import org.tobi29.scapes.client.ScapesClient;
+import org.tobi29.scapes.engine.Container;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.utils.io.IOFunction;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
@@ -44,6 +46,7 @@ public class Scapes {
         options.addOption("d", "debug", false, "Run in debug mode");
         options.addOption("r", "socketsp", false,
                 "Use network socket for singleplayer");
+        options.addOption("t", "touch", false, "Emulate touch interface");
         options.addOption("s", "skipintro", false, "Skip client intro");
         options.addOption("c", "config", true, "Config directory for server");
         DefaultParser parser = new DefaultParser();
@@ -90,9 +93,14 @@ public class Scapes {
                 IOFunction<ScapesClient, SaveStorage> saves =
                         scapes -> new SQLiteSaveStorage(home.resolve("saves"),
                                 scapes.engine().taskExecutor());
+                Function<ScapesEngine, Container> backend =
+                        ScapesEngine.loadBackend();
+                if (commandLine.hasOption('t')) {
+                    backend = ScapesEngine.emulateTouch(backend);
+                }
                 ScapesEngine engine = new ScapesEngine(
                         new ScapesClient(commandLine.hasOption('s'), saves),
-                        home, Debug.enabled());
+                        backend, home, Debug.enabled());
                 System.exit(engine.run());
                 break;
             case "server":

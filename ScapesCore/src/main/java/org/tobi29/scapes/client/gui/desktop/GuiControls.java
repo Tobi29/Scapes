@@ -30,11 +30,13 @@ public abstract class GuiControls extends GuiMenu {
 
     protected GuiControls(GameState state, Gui previous, ScapesClient game,
             GuiStyle style) {
-        super(state, "Controls", "Save", previous, style);
+        super(state, "Controls", "Save", style);
         game.setFreezeInputMode(true);
-        back.onClickLeft(event -> {
+        // This intentionally disable the back action to allow binding ESC
+        back.on(GuiEvent.CLICK_LEFT, (event, engine) -> {
             game.setFreezeInputMode(false);
             game.loadInput();
+            state.engine().guiStack().swap(this, previous);
         });
         scrollPane = pane.add(16, 80, 368, 390,
                 p -> new GuiComponentScrollPane(p, 40)).viewport();
@@ -62,15 +64,18 @@ public abstract class GuiControls extends GuiMenu {
 
     protected void addButton(String name, String id, TagStructure tagStructure,
             ControllerBasic controller) {
-        row(scrollPane, p -> new GuiComponentControlsButton(p, 18, name, id,
-                tagStructure, controller));
+        GuiComponentControlsButton button = row(scrollPane,
+                p -> new GuiComponentControlsButton(p, 18, name, id,
+                        tagStructure, controller));
+        selection(button);
     }
 
     protected void addAxis(String name, String id, TagStructure tagStructure,
             ControllerJoystick controller) {
-        row(scrollPane,
+        GuiComponentControlsAxis axis = row(scrollPane,
                 p -> new GuiComponentControlsAxis(p, 18, name, id, tagStructure,
                         controller));
+        selection(axis);
     }
 
     protected void addSlider(String name, String id,
@@ -80,7 +85,8 @@ public abstract class GuiControls extends GuiMenu {
                 (text, value) -> text + ": " +
                         FastMath.round(sensitivity(value) * 100.0) +
                         '%'));
-        slider.onDragLeft(event -> tagStructure
+        selection(slider);
+        slider.on(GuiEvent.CHANGE, event -> tagStructure
                 .setDouble(id, sensitivity(slider.value())));
     }
 }

@@ -18,6 +18,7 @@ package org.tobi29.scapes.client.gui.touch;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiComponentSlider;
+import org.tobi29.scapes.engine.gui.GuiEvent;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -43,13 +44,18 @@ public class GuiTouchVideoSettings extends GuiTouchMenu {
                                 FastMath.round(resolution(value) * 100.0) +
                                 '%'));
 
-        viewDistance.onDragLeft(event -> scapesTag.setDouble("RenderDistance",
-                10.0 + viewDistance.value() * 246.0));
-        animationDistance.onDragLeft(event -> scapesTag
+        selection(viewDistance);
+        selection(animationDistance);
+        selection(resolutionMultiplier);
+
+        viewDistance.on(GuiEvent.CHANGE, event -> scapesTag
+                .setDouble("RenderDistance",
+                        10.0 + viewDistance.value() * 246.0));
+        animationDistance.on(GuiEvent.CHANGE, event -> scapesTag
                 .setFloat("AnimationDistance",
                         (float) animationDistance.value()));
-        resolutionMultiplier.onDragLeft(event -> state.engine().config()
-                .setResolutionMultiplier(
+        resolutionMultiplier.on(GuiEvent.CHANGE,
+                event -> state.engine().config().setResolutionMultiplier(
                         (float) resolution(resolutionMultiplier.value())));
     }
 

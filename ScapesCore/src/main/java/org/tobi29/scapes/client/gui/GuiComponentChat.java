@@ -30,7 +30,7 @@ public class GuiComponentChat extends GuiComponent {
     public GuiComponentChat(GuiLayoutData parent, ChatHistory chatHistory) {
         super(parent);
         this.chatHistory = chatHistory;
-        chatHistory.listener(this, this::dirty);
+        chatHistory.onUpdate(this, this::dirty);
     }
 
     @Override

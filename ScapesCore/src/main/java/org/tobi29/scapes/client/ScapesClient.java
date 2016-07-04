@@ -16,6 +16,7 @@
 package org.tobi29.scapes.client;
 
 import java8.util.Optional;
+import java8.util.function.Consumer;
 import java8.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,7 @@ import org.tobi29.scapes.engine.Game;
 import org.tobi29.scapes.engine.GameStateStartup;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.GuiNotificationSimple;
+import org.tobi29.scapes.engine.gui.ListenerOwner;
 import org.tobi29.scapes.engine.input.*;
 import org.tobi29.scapes.engine.opengl.scenes.SceneEmpty;
 import org.tobi29.scapes.engine.utils.Streams;
@@ -43,16 +45,15 @@ import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ServiceConfigurationError;
-import java.util.ServiceLoader;
+import java.util.*;
 
 public class ScapesClient extends Game {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ScapesClient.class);
     private final IOFunction<ScapesClient, SaveStorage> savesSupplier;
     private final List<InputMode> inputModes = new ArrayList<>();
+    private final Map<ListenerOwner, Consumer<InputMode>> inputModeListeners =
+            new WeakHashMap<>();
     private final boolean skipIntro;
     private SaveStorage saves;
     private InputMode inputMode;
@@ -196,8 +197,7 @@ public class ScapesClient extends Game {
         if (newInputMode != null && inputMode != newInputMode &&
                 !freezeInputMode) {
             LOGGER.info("Setting input mode to {}", newInputMode);
-            inputMode = newInputMode;
-            engine.setGUIController(inputMode.guiController());
+            changeInput(newInputMode);
             engine.notifications().add(p -> new GuiNotificationSimple(p,
                     engine.graphics().textures()
                             .get("Scapes:image/gui/Playlist"),
@@ -232,8 +232,17 @@ public class ScapesClient extends Game {
         if (inputModes.isEmpty()) {
             throw new InputException("No input mode available");
         }
-        inputMode = inputModes.get(0);
+        changeInput(inputModes.get(0));
+    }
+
+    private void changeInput(InputMode inputMode) {
+        this.inputMode = inputMode;
         engine.setGUIController(inputMode.guiController());
+        synchronized (inputModeListeners) {
+            Streams.forEach(inputModeListeners.entrySet(),
+                    entry -> entry.getKey().validOwner(),
+                    entry -> entry.getValue().accept(inputMode));
+        }
     }
 
     public void setFreezeInputMode(boolean freezeInputMode) {
@@ -242,5 +251,11 @@ public class ScapesClient extends Game {
 
     public Stream<InputMode> inputModes() {
         return Streams.of(inputModes);
+    }
+
+    public void onInputMode(ListenerOwner owner, Consumer<InputMode> listener) {
+        synchronized (inputModeListeners) {
+            inputModeListeners.put(owner, listener);
+        }
     }
 }

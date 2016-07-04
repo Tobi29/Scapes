@@ -17,7 +17,9 @@ package org.tobi29.scapes.client.gui.desktop;
 
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.client.states.GameStateGameSP;
+import org.tobi29.scapes.engine.gui.GuiAction;
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
+import org.tobi29.scapes.engine.gui.GuiEvent;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 
@@ -27,11 +29,14 @@ public class GuiPause extends GuiMenuDouble {
         super(state, "Pause",
                 state instanceof GameStateGameSP ? "Save and quit" :
                         "Disconnect", "Back", style);
-        GuiComponentTextButton options = row(pane, p -> button(p, "Options"));
+        GuiComponentTextButton options =
+                row(pane, p -> button(p, "Options"));
 
-        options.onClickLeft(
+        selection(options);
+
+        options.on(GuiEvent.CLICK_LEFT,
                 event -> player.openGui(new GuiOptionsInGame(state, style)));
-        save.onClickLeft(event -> player.connection().stop());
-        back.onClickLeft(event -> player.closeGui());
+        save.on(GuiEvent.CLICK_LEFT, event -> player.connection().stop());
+        on(GuiAction.BACK, player::closeGui);
     }
 }

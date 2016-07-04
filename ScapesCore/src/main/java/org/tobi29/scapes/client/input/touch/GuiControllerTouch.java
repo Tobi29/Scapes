@@ -3,10 +3,7 @@ package org.tobi29.scapes.client.input.touch;
 import java8.util.Optional;
 import java8.util.stream.Stream;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.gui.GuiComponent;
-import org.tobi29.scapes.engine.gui.GuiComponentEvent;
-import org.tobi29.scapes.engine.gui.GuiController;
-import org.tobi29.scapes.engine.gui.GuiCursor;
+import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.input.ControllerBasic;
 import org.tobi29.scapes.engine.input.ControllerTouch;
 import org.tobi29.scapes.engine.utils.Pair;
@@ -20,8 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class GuiControllerTouch implements GuiController {
-    private final ScapesEngine engine;
+public class GuiControllerTouch extends GuiController {
     private final ControllerTouch controller;
     private final Map<ControllerTouch.Tracker, Finger> fingers =
             new ConcurrentHashMap<>();
@@ -29,7 +25,7 @@ public class GuiControllerTouch implements GuiController {
             Collections.emptyList();
 
     public GuiControllerTouch(ScapesEngine engine, ControllerTouch controller) {
-        this.engine = engine;
+        super(engine);
         this.controller = controller;
     }
 
@@ -58,12 +54,12 @@ public class GuiControllerTouch implements GuiController {
                                     .filter(f -> f.dragging.get() == component)
                                     .findAny().isPresent()) {
                                 finger.dragging = Optional.of(component);
-                                component.gui().sendNewEvent(
-                                        new GuiComponentEvent(
-                                                finger.cursor.guiX(),
-                                                finger.cursor.guiY()),
-                                        component, component::pressLeft,
-                                        engine);
+                                component.gui()
+                                        .sendNewEvent(GuiEvent.PRESS_LEFT,
+                                                new GuiComponentEvent(
+                                                        finger.cursor.guiX(),
+                                                        finger.cursor.guiY()),
+                                                component, engine);
                             }
                         });
                 fingers.put(tracker, finger);
@@ -79,15 +75,15 @@ public class GuiControllerTouch implements GuiController {
                     if (finger.dragging.isPresent()) {
                         GuiComponent component = finger.dragging.get();
                         if (System.currentTimeMillis() - finger.start < 250) {
-                            component.gui().sendNewEvent(
+                            component.gui().sendNewEvent(GuiEvent.CLICK_LEFT,
                                     new GuiComponentEvent(finger.cursor.guiX(),
                                             finger.cursor.guiY()), component,
-                                    component::clickLeft, engine);
+                                    engine);
                         }
-                        component.gui().sendNewEvent(
+                        component.gui().sendNewEvent(GuiEvent.DROP_LEFT,
                                 new GuiComponentEvent(finger.cursor.guiX(),
                                         finger.cursor.guiY()), component,
-                                component::dropLeft, engine);
+                                engine);
                     }
                 });
         clicks = newClicks;
@@ -127,15 +123,14 @@ public class GuiControllerTouch implements GuiController {
             double relativeY = finger.cursor.guiY() - finger.dragY;
             finger.dragX = finger.cursor.guiX();
             finger.dragY = finger.cursor.guiY();
-            component.gui().sendNewEvent(
+            component.gui().sendNewEvent(GuiEvent.DRAG_LEFT,
                     new GuiComponentEvent(finger.cursor.guiX(),
                             finger.cursor.guiY(), relativeX, relativeY),
-                    component, component::dragLeft, engine);
+                    component, engine);
             Vector2 source = finger.source.multiply(ratio);
-            engine.guiStack().fireRecursiveEvent(
+            engine.guiStack().fireRecursiveEvent(GuiEvent.SCROLL,
                     new GuiComponentEvent(source.doubleX(), source.doubleY(),
-                            relativeX, relativeY), GuiComponent::scroll,
-                    engine);
+                            relativeX, relativeY), engine);
         }
     }
 

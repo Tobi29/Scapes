@@ -17,10 +17,7 @@ package org.tobi29.scapes.client.gui;
 
 import java8.util.Optional;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.gui.GuiComponentButtonHeavy;
-import org.tobi29.scapes.engine.gui.GuiComponentHoverEvent;
-import org.tobi29.scapes.engine.gui.GuiComponentText;
-import org.tobi29.scapes.engine.gui.GuiLayoutData;
+import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.input.ControllerBasic;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.input.ControllerKeyReference;
@@ -48,15 +45,14 @@ public class GuiComponentControlsButton extends GuiComponentButtonHeavy {
         this.tagStructure = tagStructure;
         this.controller = controller;
         key = ControllerKeyReference.valueOf(tagStructure.getString(id));
-        onClickLeft(event -> {
+        on(GuiEvent.CLICK_LEFT, event -> {
             if (editing == 0) {
                 editing = 1;
                 updateText();
             }
         });
-        onHover(event -> {
-            if (event.state() == GuiComponentHoverEvent.State.LEAVE &&
-                    editing > 1) {
+        on(GuiEvent.HOVER_LEAVE, event -> {
+            if (editing > 1) {
                 editing = 0;
                 updateText();
             }

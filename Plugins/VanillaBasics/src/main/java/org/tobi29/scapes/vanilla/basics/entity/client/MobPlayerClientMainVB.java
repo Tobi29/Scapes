@@ -22,9 +22,6 @@ import org.tobi29.scapes.block.InventoryContainer;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.Playlist;
-import org.tobi29.scapes.client.ScapesClient;
-import org.tobi29.scapes.client.gui.GuiChatWrite;
-import org.tobi29.scapes.client.gui.desktop.GuiPause;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.input.ControllerKey;
 import org.tobi29.scapes.engine.opengl.texture.Texture;
@@ -73,31 +70,7 @@ public class MobPlayerClientMainVB extends MobPlayerClientMain
         if (conditionTag.getBoolean("Sleeping")) {
             return;
         }
-        Controller controller =
-                ((ScapesClient) game.engine().game()).inputMode()
-                        .playerController();
-        if (controller.inventory()) {
-            if (!(currentGui instanceof GuiChatWrite)) {
-                if (hasGui()) {
-                    world.send(new PacketInteraction(
-                            PacketInteraction.CLOSE_INVENTORY));
-                } else {
-                    world.send(new PacketInteraction(
-                            PacketInteraction.OPEN_INVENTORY));
-                }
-            }
-        }
-        if (controller.chat() && !hasGui()) {
-            openGui(new GuiChatWrite(game, this, game.engine().guiStyle()));
-        }
-        if (controller.menu()) {
-            if (hasGui()) {
-                closeGui();
-            } else {
-                openGui(new GuiPause(game, this, game.engine().guiStyle()));
-            }
-        }
-        if (currentGui == null) {
+        if (!hasGui()) {
             // Inventory
             int previous = inventorySelectLeft;
             int hotbar = controller.hotbarLeft(previous);

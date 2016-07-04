@@ -16,9 +16,7 @@
 package org.tobi29.scapes.client.gui.desktop;
 
 import org.tobi29.scapes.client.states.GameStateGameMP;
-import org.tobi29.scapes.engine.gui.GuiComponentSlider;
-import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
-import org.tobi29.scapes.engine.gui.GuiStyle;
+import org.tobi29.scapes.engine.gui.*;
 
 public class GuiOptionsInGame extends GuiMenu {
     public GuiOptionsInGame(GameStateGameMP state, GuiStyle style) {
@@ -34,11 +32,15 @@ public class GuiOptionsInGame extends GuiMenu {
             fullscreen = row(pane, p -> button(p, "Fullscreen: OFF"));
         }
 
-        musicVolume.onDragLeft(event -> state.engine().config()
+        selection(musicVolume);
+        selection(soundVolume);
+        selection(fullscreen);
+
+        musicVolume.on(GuiEvent.CHANGE, event -> state.engine().config()
                 .setVolume("music", musicVolume.value()));
-        soundVolume.onDragLeft(event -> state.engine().config()
+        soundVolume.on(GuiEvent.CHANGE, event -> state.engine().config()
                 .setVolume("sound", soundVolume.value()));
-        fullscreen.onClickLeft(event -> {
+        fullscreen.on(GuiEvent.CLICK_LEFT, event -> {
             if (!state.engine().config().isFullscreen()) {
                 fullscreen.setText("Fullscreen: ON");
                 state.engine().config().setFullscreen(true);
@@ -48,6 +50,6 @@ public class GuiOptionsInGame extends GuiMenu {
             }
             state.engine().container().updateContainer();
         });
-        back.onClickLeft(event -> state.client().entity().closeGui());
+        on(GuiAction.BACK, () -> state.client().entity().closeGui());
     }
 }

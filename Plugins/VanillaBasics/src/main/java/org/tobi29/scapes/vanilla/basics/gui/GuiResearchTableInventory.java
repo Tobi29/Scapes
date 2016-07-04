@@ -16,6 +16,7 @@
 package org.tobi29.scapes.vanilla.basics.gui;
 
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
+import org.tobi29.scapes.engine.gui.GuiEvent;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityResearchTableClient;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
@@ -25,10 +26,13 @@ public class GuiResearchTableInventory extends GuiContainerInventory {
     public GuiResearchTableInventory(EntityResearchTableClient container,
             MobPlayerClientMainVB player, GuiStyle style) {
         super("Research Table", player, container, style);
-        buttonContainer(185, 90, 30, 30, 0);
+        selection(buttonContainer(185, 90, 30, 30, 0));
         GuiComponentTextButton research =
                 pane.add(27, 210, 120, 30, p -> button(p, "Research"));
-        research.onClickLeft(event -> player.connection()
+
+        selection(research);
+
+        research.on(GuiEvent.CLICK_LEFT, event -> player.connection()
                 .send(new PacketResearch(container)));
     }
 }

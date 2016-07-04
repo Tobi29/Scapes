@@ -35,8 +35,8 @@ public class GuiTouchMenuDouble extends GuiTouch {
     protected GuiTouchMenuDouble(GameState state, String title, String save,
             String back, Gui previous, GuiStyle style) {
         this(state, title, save, back, style);
-        this.back.onClickLeft(event -> {
-            state.engine().guiStack().add("10-Menu", previous);
+        on(GuiAction.BACK, () -> {
+            state.engine().guiStack().swap(this, previous);
         });
     }
 
@@ -55,5 +55,11 @@ public class GuiTouchMenuDouble extends GuiTouch {
                         GuiComponentGroupSlab::new);
         this.back = bottom.addHori(0, 0, 10, 0, -1, -1, p -> button(p, back));
         this.save = bottom.addHori(10, 0, 0, 0, -1, -1, p -> button(p, save));
+
+        selection(this.back);
+        selection(this.save);
+
+        this.back.on(GuiEvent.CLICK_LEFT,
+                (event, engine) -> fireAction(GuiAction.BACK, engine));
     }
 }

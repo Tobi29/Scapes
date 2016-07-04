@@ -65,7 +65,12 @@ public class GuiCreateWorld extends GuiMenuDouble {
         GuiComponentTextButton addonsButton =
                 row(pane, p -> button(p, "Addons"));
 
-        environment.onClickLeft(event -> {
+        selection(name);
+        selection(seed);
+        selection(environment);
+        selection(addonsButton);
+
+        environment.on(GuiEvent.CLICK_LEFT, event -> {
             environmentID++;
             if (environmentID >= worldTypes.size()) {
                 environmentID = 0;
@@ -74,18 +79,18 @@ public class GuiCreateWorld extends GuiMenuDouble {
             environment.setText(
                     "Generator: " + worldTypes.get(environmentID).name());
         });
-        addonsButton.onClickLeft(event -> {
-            state.engine().guiStack().add("10-Menu", new GuiAddons(state, this,
+        addonsButton.on(GuiEvent.CLICK_LEFT, event -> {
+            state.engine().guiStack().swap(this, new GuiAddons(state, this,
                     worldTypes.get(environmentID).id(), plugins, style));
         });
-        save.onClickLeft(event -> {
+        save.on(GuiEvent.CLICK_LEFT, event -> {
             if (name.text().isEmpty()) {
                 name.setText("New World");
             }
             try {
                 String saveName = name.text();
                 if (saves.exists(saveName)) {
-                    state.engine().guiStack().add("10-Menu",
+                    state.engine().guiStack().swap(this,
                             new GuiMessage(state, this, "Error", SAVE_EXISTS,
                                     style));
                     return;
@@ -109,7 +114,7 @@ public class GuiCreateWorld extends GuiMenuDouble {
                     source.init(randomSeed, pluginFiles);
                 }
                 previous.updateSaves();
-                state.engine().guiStack().add("10-Menu", previous);
+                state.engine().guiStack().swap(this, previous);
             } catch (IOException e) {
                 LOGGER.error("Failed to create world: {}", e.toString());
             }
@@ -134,14 +139,14 @@ public class GuiCreateWorld extends GuiMenuDouble {
 
             public Element(GuiLayoutData parent, PluginFile addon) {
                 super(parent);
-                GuiComponentImage icon =
-                        addHori(15, 15, 40, -1, GuiComponentImage::new);
+                GuiComponentIcon icon =
+                        addHori(15, 15, 40, -1, GuiComponentIcon::new);
                 add(5, 20, -1, 30, p -> button(p, addon.name()));
                 GuiComponentTextButton edit =
                         add(5, 20, 30, 30, p -> button(p, active ? "X" : ""));
 
                 active = addons.contains(addon);
-                edit.onClickLeft(event -> {
+                edit.on(GuiEvent.CLICK_LEFT, event -> {
                     active = !active;
                     if (active) {
                         edit.setText("X");

@@ -48,7 +48,11 @@ public class GuiPlugins extends GuiMenu {
         scrollPane = pane.addVert(16, 5, -1, 340,
                 p -> new GuiComponentScrollPane(p, 70)).viewport();
         GuiComponentTextButton add = rowCenter(pane, p -> button(p, "Add"));
-        add.onClickLeft(event -> {
+        updatePlugins();
+
+        selection(-1, add);
+
+        add.on(GuiEvent.CLICK_LEFT, event -> {
             try {
                 state.engine().container()
                         .openFileDialog(new FileType("*.jar", "Jar Archive"),
@@ -67,7 +71,6 @@ public class GuiPlugins extends GuiMenu {
                 LOGGER.warn("Failed to import plugin: {}", e.toString());
             }
         });
-        updatePlugins();
     }
 
     private void updatePlugins() {
@@ -86,15 +89,17 @@ public class GuiPlugins extends GuiMenu {
     private class Element extends GuiComponentGroupSlab {
         public Element(GuiLayoutData parent, PluginFile plugin) {
             super(parent);
-            GuiComponentImage icon =
-                    addHori(15, 15, 40, -1, GuiComponentImage::new);
+            GuiComponentIcon icon =
+                    addHori(15, 15, 40, -1, GuiComponentIcon::new);
             GuiComponentTextButton label =
                     addHori(5, 20, -1, -1, p -> button(p, "Invalid plugin"));
             GuiComponentTextButton delete =
                     addHori(5, 20, 80, -1, p -> button(p, "Delete"));
 
+            selection(delete);
+
             if (plugin.file() != null) {
-                delete.onClickLeft(event -> {
+                delete.on(GuiEvent.CLICK_LEFT, event -> {
                     try {
                         FileUtil.delete(plugin.file());
                         scrollPane.remove(this);

@@ -22,21 +22,18 @@ public class GuiTouchMainMenu extends GuiTouch {
         GuiComponentTextButton playlists =
                 space.addVert(10, 10, 320, 80, p -> button(p, 48, "Playlists"));
 
-        singlePlayer.onClickLeft(event -> {
-            state.engine().guiStack().add("10-Menu",
-                    new GuiTouchSaveSelect(state, this, scene, style));
-        });
-        multiPlayer.onClickLeft(event -> {
-            state.engine().guiStack().add("10-Menu",
-                    new GuiTouchServerSelect(state, this, style));
-        });
-        options.onClickLeft(event -> {
-            state.engine().guiStack()
-                    .add("10-Menu", new GuiTouchOptions(state, this, style));
-        });
-        playlists.onClickLeft(event -> {
-            state.engine().guiStack()
-                    .add("10-Menu", new GuiTouchPlaylists(state, this, style));
-        });
+        selection(singlePlayer);
+        selection(multiPlayer);
+        selection(options);
+        selection(playlists);
+
+        singlePlayer.on(GuiEvent.CLICK_LEFT, event -> state.engine().guiStack()
+                .swap(this, new GuiTouchSaveSelect(state, this, scene, style)));
+        multiPlayer.on(GuiEvent.CLICK_LEFT, event -> state.engine().guiStack()
+                .swap(this, new GuiTouchServerSelect(state, this, style)));
+        options.on(GuiEvent.CLICK_LEFT, event -> state.engine().guiStack()
+                .add("10-Menu", new GuiTouchOptions(state, this, style)));
+        playlists.on(GuiEvent.CLICK_LEFT, event -> state.engine().guiStack()
+                .add("10-Menu", new GuiTouchPlaylists(state, this, style)));
     }
 }

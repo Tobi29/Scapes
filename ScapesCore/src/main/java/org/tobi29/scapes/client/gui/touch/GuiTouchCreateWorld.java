@@ -23,6 +23,7 @@ import org.tobi29.scapes.client.gui.desktop.GuiMessage;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.GuiComponentText;
 import org.tobi29.scapes.engine.gui.GuiComponentTextField;
+import org.tobi29.scapes.engine.gui.GuiEvent;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.utils.StringUtil;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
@@ -52,14 +53,17 @@ public class GuiTouchCreateWorld extends GuiTouchMenuDouble {
         GuiComponentTextField seed =
                 row(pane, p -> new GuiComponentTextField(p, 36, ""));
 
-        save.onClickLeft(event -> {
+        selection(name);
+        selection(seed);
+
+        save.on(GuiEvent.CLICK_LEFT, event -> {
             if (name.text().isEmpty()) {
                 name.setText("New World");
             }
             try {
                 String saveName = name.text();
                 if (saves.exists(saveName)) {
-                    state.engine().guiStack().add("10-Menu",
+                    state.engine().guiStack().swap(this,
                             new GuiMessage(state, this, "Error", SAVE_EXISTS,
                                     style));
                     return;
@@ -80,7 +84,7 @@ public class GuiTouchCreateWorld extends GuiTouchMenuDouble {
                     source.init(randomSeed, pluginFiles);
                 }
                 previous.updateSaves();
-                state.engine().guiStack().add("10-Menu", previous);
+                state.engine().guiStack().swap(this, previous);
             } catch (IOException e) {
                 LOGGER.error("Failed to create world: {}", e.toString());
             }

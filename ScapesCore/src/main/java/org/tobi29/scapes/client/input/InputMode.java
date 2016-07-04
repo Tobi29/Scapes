@@ -29,7 +29,7 @@ public interface InputMode {
     default void createInGameGUI(Gui gui, WorldClient world) {
     }
 
-    MobPlayerClientMain.Controller playerController();
+    MobPlayerClientMain.Controller playerController(MobPlayerClientMain player);
 
     GuiController guiController();
 }

@@ -18,6 +18,7 @@ package org.tobi29.scapes.client.gui.touch;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.gui.GuiComponentText;
 import org.tobi29.scapes.engine.gui.GuiComponentTextField;
+import org.tobi29.scapes.engine.gui.GuiEvent;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
@@ -32,7 +33,10 @@ public class GuiTouchAddServer extends GuiTouchMenuDouble {
         GuiComponentTextField port =
                 row(pane, p -> new GuiComponentTextField(p, 36, "12345"));
 
-        save.onClickLeft(event -> {
+        selection(ip);
+        selection(port);
+
+        save.on(GuiEvent.CLICK_LEFT, event -> {
             TagStructure tagStructure = new TagStructure();
             tagStructure.setString("Address", ip.text());
             try {
@@ -42,7 +46,7 @@ public class GuiTouchAddServer extends GuiTouchMenuDouble {
             }
             previous.addServer(tagStructure);
             previous.updateServers();
-            state.engine().guiStack().add("10-Menu", previous);
+            state.engine().guiStack().swap(this, previous);
         });
     }
 }

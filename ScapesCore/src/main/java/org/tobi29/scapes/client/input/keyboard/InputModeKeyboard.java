@@ -17,7 +17,9 @@ package org.tobi29.scapes.client.input.keyboard;
 
 import java8.util.Optional;
 import org.tobi29.scapes.client.ScapesClient;
+import org.tobi29.scapes.client.gui.GuiChatWrite;
 import org.tobi29.scapes.client.gui.desktop.GuiControlsDefault;
+import org.tobi29.scapes.client.gui.desktop.GuiPause;
 import org.tobi29.scapes.client.input.InputMode;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
@@ -31,12 +33,12 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
+import org.tobi29.scapes.packets.PacketInteraction;
 
 public class InputModeKeyboard implements InputMode {
     private final ControllerDefault controller;
     private final TagStructure tagStructure;
-    private final GuiController guiController;
-    private final PlayerController playerController;
+    private final GuiControllerMouse guiController;
 
     public InputModeKeyboard(ScapesEngine engine, ControllerDefault controller,
             TagStructure tagStructure) {
@@ -48,7 +50,6 @@ public class InputModeKeyboard implements InputMode {
         double scrollSensitivity = miscScrollTag.getDouble("Sensitivity");
         guiController =
                 new GuiControllerMouse(engine, controller, scrollSensitivity);
-        playerController = new PlayerController();
     }
 
     private static void defaultConfig(TagStructure tagStructure) {
@@ -122,8 +123,9 @@ public class InputModeKeyboard implements InputMode {
     }
 
     @Override
-    public MobPlayerClientMain.Controller playerController() {
-        return playerController;
+    public MobPlayerClientMain.Controller playerController(
+            MobPlayerClientMain player) {
+        return new PlayerController(player);
     }
 
     @Override
@@ -144,7 +146,7 @@ public class InputModeKeyboard implements InputMode {
                 hotbar7, hotbar8, hotbar9;
         private final double cameraSensitivity, scrollSensitivity;
 
-        public PlayerController() {
+        public PlayerController(MobPlayerClientMain player) {
             TagStructure movementTag = tagStructure.getStructure("Movement");
             walkForward = ControllerKeyReference
                     .valueOf(movementTag.getString("Forward"));
@@ -193,6 +195,37 @@ public class InputModeKeyboard implements InputMode {
             hotbar8 = ControllerKeyReference.valueOf(hotbarTag.getString("8"));
             hotbar9 = ControllerKeyReference.valueOf(hotbarTag.getString("9"));
             scrollSensitivity = hotbarTag.getDouble("Sensitivity");
+
+            guiController.onPress(player, key -> {
+                if (!player.currentGui()
+                        .filter(gui -> gui instanceof GuiChatWrite)
+                        .isPresent() && menu.isPressed(key, controller)) {
+                    if (!player.closeGui()) {
+                        player.openGui(new GuiPause(player.game(), player,
+                                player.game().engine().guiStyle()));
+                    }
+                    return true;
+                }
+                if (!player.currentGui()
+                        .filter(gui -> gui instanceof GuiChatWrite)
+                        .isPresent() && inventory.isPressed(key, controller)) {
+                    if (!player.closeGui()) {
+                        player.world().send(new PacketInteraction(
+                                PacketInteraction.OPEN_INVENTORY));
+                    }
+                    return true;
+                }
+                if (!player.currentGui()
+                        .filter(gui -> gui instanceof GuiChatWrite)
+                        .isPresent() && chat.isPressed(key, controller)) {
+                    if (!player.hasGui()) {
+                        player.openGui(new GuiChatWrite(player.game(), player,
+                                player.game().engine().guiStyle()));
+                        return true;
+                    }
+                }
+                return false;
+            });
         }
 
         @Override
@@ -242,21 +275,6 @@ public class InputModeKeyboard implements InputMode {
         @Override
         public boolean jump() {
             return jump.isDown(controller);
-        }
-
-        @Override
-        public boolean inventory() {
-            return inventory.isPressed(controller);
-        }
-
-        @Override
-        public boolean menu() {
-            return menu.isPressed(controller);
-        }
-
-        @Override
-        public boolean chat() {
-            return chat.isPressed(controller);
         }
 
         @Override

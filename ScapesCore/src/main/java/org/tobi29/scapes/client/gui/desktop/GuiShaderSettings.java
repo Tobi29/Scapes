@@ -16,10 +16,7 @@
 package org.tobi29.scapes.client.gui.desktop;
 
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.Gui;
-import org.tobi29.scapes.engine.gui.GuiComponentSlider;
-import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
-import org.tobi29.scapes.engine.gui.GuiStyle;
+import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
 public class GuiShaderSettings extends GuiMenu {
@@ -49,10 +46,15 @@ public class GuiShaderSettings extends GuiMenu {
             fxaa = row(pane, p -> button(p, "FXAA: OFF"));
         }
 
-        animationDistance.onDragLeft(event -> scapesTag
+        selection(animationDistance);
+        selection(bloom);
+        selection(autoExposure);
+        selection(fxaa);
+
+        animationDistance.on(GuiEvent.CHANGE, event -> scapesTag
                 .setFloat("AnimationDistance",
                         (float) animationDistance.value()));
-        bloom.onClickLeft(event -> {
+        bloom.on(GuiEvent.CLICK_LEFT, event -> {
             if (!scapesTag.getBoolean("Bloom")) {
                 bloom.setText("Bloom: ON");
                 scapesTag.setBoolean("Bloom", true);
@@ -61,7 +63,7 @@ public class GuiShaderSettings extends GuiMenu {
                 scapesTag.setBoolean("Bloom", false);
             }
         });
-        autoExposure.onClickLeft(event -> {
+        autoExposure.on(GuiEvent.CLICK_LEFT, event -> {
             if (!scapesTag.getBoolean("AutoExposure")) {
                 autoExposure.setText("Auto Exposure: ON");
                 scapesTag.setBoolean("AutoExposure", true);
@@ -70,7 +72,7 @@ public class GuiShaderSettings extends GuiMenu {
                 scapesTag.setBoolean("AutoExposure", false);
             }
         });
-        fxaa.onClickLeft(event -> {
+        fxaa.on(GuiEvent.CLICK_LEFT, event -> {
             if (!scapesTag.getBoolean("FXAA")) {
                 fxaa.setText("FXAA: ON");
                 scapesTag.setBoolean("FXAA", true);

@@ -59,15 +59,15 @@ public class GuiServerSelect extends GuiMenu {
         }
         scrollPane = pane.addVert(16, 5, 368, 340,
                 p -> new GuiComponentScrollPane(p, 70)).viewport();
-        updateServers();
         GuiComponentTextButton add =
                 pane.addVert(112, 5, 176, 30, p -> button(p, "Add"));
+        updateServers();
 
-        add.onClickLeft(event -> {
-            state.engine().guiStack()
-                    .add("10-Menu", new GuiAddServer(state, this, style));
-        });
-        back.onClickLeft(event -> disposeServers());
+        selection(-1, add);
+
+        add.on(GuiEvent.CLICK_LEFT, event -> state.engine().guiStack()
+                .add("10-Menu", new GuiAddServer(state, this, style)));
+        on(GuiAction.BACK, this::disposeServers);
     }
 
     private static String error(Throwable e) {
@@ -115,7 +115,7 @@ public class GuiServerSelect extends GuiMenu {
     }
 
     private class Element extends GuiComponentGroupSlab {
-        private final GuiComponentImage icon;
+        private final GuiComponentIcon icon;
         private final GuiComponentTextButton label;
         private final RemoteAddress address;
         private SocketChannel channel;
@@ -124,16 +124,18 @@ public class GuiServerSelect extends GuiMenu {
 
         public Element(GuiLayoutData parent, TagStructure tagStructure) {
             super(parent);
-            icon = addHori(15, 15, 40, -1, GuiComponentImage::new);
+            icon = addHori(15, 15, 40, -1, GuiComponentIcon::new);
             label = addHori(5, 20, -1, -1, p -> button(p, "Pinging..."));
             GuiComponentTextButton delete =
                     addHori(5, 20, 80, -1, p -> button(p, "Delete"));
 
+            selection(label, delete);
+
             address = new RemoteAddress(tagStructure);
-            label.onClickLeft(event -> state.engine().setState(
+            label.on(GuiEvent.CLICK_LEFT, event -> state.engine().setState(
                     new GameStateLoadMP(address, state.engine(),
                             state.scene())));
-            delete.onClickLeft(event -> {
+            delete.on(GuiEvent.CLICK_LEFT, event -> {
                 servers.remove(tagStructure);
                 TagStructure scapesTag =
                         state.engine().tagStructure().getStructure("Scapes");

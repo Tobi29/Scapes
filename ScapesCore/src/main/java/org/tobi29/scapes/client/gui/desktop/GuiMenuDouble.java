@@ -34,8 +34,8 @@ public class GuiMenuDouble extends GuiDesktop {
     protected GuiMenuDouble(GameState state, String title, String save,
             String back, Gui previous, GuiStyle style) {
         this(state, title, save, back, style);
-        this.back.onClickLeft(event -> {
-            state.engine().guiStack().add("10-Menu", previous);
+        on(GuiAction.BACK, () -> {
+            state.engine().guiStack().swap(this, previous);
         });
     }
 
@@ -55,5 +55,11 @@ public class GuiMenuDouble extends GuiDesktop {
                 p -> button(p, save));
         this.back = pane.addVert(112, 5, 112, 12, 176, 30, Long.MIN_VALUE,
                 p -> button(p, back));
+
+        selection(this.save);
+        selection(this.back);
+
+        this.back.on(GuiEvent.CLICK_LEFT,
+                (event, engine) -> fireAction(GuiAction.BACK, engine));
     }
 }

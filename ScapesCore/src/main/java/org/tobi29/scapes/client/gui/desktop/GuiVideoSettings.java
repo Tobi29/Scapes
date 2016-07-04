@@ -16,10 +16,7 @@
 package org.tobi29.scapes.client.gui.desktop;
 
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.Gui;
-import org.tobi29.scapes.engine.gui.GuiComponentSlider;
-import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
-import org.tobi29.scapes.engine.gui.GuiStyle;
+import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
@@ -47,13 +44,17 @@ public class GuiVideoSettings extends GuiMenu {
                                 FastMath.round(resolution(value) * 100.0) +
                                 '%'));
 
-        viewDistance.onDragLeft(event -> scapesTag.setDouble("RenderDistance",
-                10.0 + viewDistance.value() * 246.0));
-        shader.onClickLeft(event -> {
-            state.engine().guiStack()
-                    .add("10-Menu", new GuiShaderSettings(state, this, style));
-        });
-        fullscreen.onClickLeft(event -> {
+        selection(viewDistance);
+        selection(shader);
+        selection(fullscreen);
+        selection(resolutionMultiplier);
+
+        viewDistance.on(GuiEvent.CHANGE, event -> scapesTag
+                .setDouble("RenderDistance",
+                        10.0 + viewDistance.value() * 246.0));
+        shader.on(GuiEvent.CLICK_LEFT, event -> state.engine().guiStack()
+                .add("10-Menu", new GuiShaderSettings(state, this, style)));
+        fullscreen.on(GuiEvent.CLICK_LEFT, event -> {
             if (!state.engine().config().isFullscreen()) {
                 fullscreen.setText("Fullscreen: ON");
                 state.engine().config().setFullscreen(true);
@@ -63,8 +64,8 @@ public class GuiVideoSettings extends GuiMenu {
             }
             state.engine().container().updateContainer();
         });
-        resolutionMultiplier.onDragLeft(event -> state.engine().config()
-                .setResolutionMultiplier(
+        resolutionMultiplier.on(GuiEvent.CHANGE,
+                event -> state.engine().config().setResolutionMultiplier(
                         (float) resolution(resolutionMultiplier.value())));
     }
 
