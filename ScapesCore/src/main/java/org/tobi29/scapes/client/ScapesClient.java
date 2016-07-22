@@ -31,10 +31,11 @@ import org.tobi29.scapes.engine.Container;
 import org.tobi29.scapes.engine.Game;
 import org.tobi29.scapes.engine.GameStateStartup;
 import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.graphics.SceneEmpty;
 import org.tobi29.scapes.engine.gui.GuiNotificationSimple;
-import org.tobi29.scapes.engine.gui.ListenerOwner;
 import org.tobi29.scapes.engine.input.*;
-import org.tobi29.scapes.engine.opengl.scenes.SceneEmpty;
+import org.tobi29.scapes.engine.utils.ListenerManager;
+import org.tobi29.scapes.engine.utils.ListenerOwner;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.VersionUtil;
 import org.tobi29.scapes.engine.utils.io.IOFunction;
@@ -45,15 +46,18 @@ import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ServiceConfigurationError;
+import java.util.ServiceLoader;
 
 public class ScapesClient extends Game {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ScapesClient.class);
     private final IOFunction<ScapesClient, SaveStorage> savesSupplier;
     private final List<InputMode> inputModes = new ArrayList<>();
-    private final Map<ListenerOwner, Consumer<InputMode>> inputModeListeners =
-            new WeakHashMap<>();
+    private final ListenerManager<Consumer<InputMode>> inputModeListeners =
+            new ListenerManager<>();
     private final boolean skipIntro;
     private SaveStorage saves;
     private InputMode inputMode;
@@ -238,11 +242,7 @@ public class ScapesClient extends Game {
     private void changeInput(InputMode inputMode) {
         this.inputMode = inputMode;
         engine.setGUIController(inputMode.guiController());
-        synchronized (inputModeListeners) {
-            Streams.forEach(inputModeListeners.entrySet(),
-                    entry -> entry.getKey().validOwner(),
-                    entry -> entry.getValue().accept(inputMode));
-        }
+        inputModeListeners.fire(listener -> listener.accept(inputMode));
     }
 
     public void setFreezeInputMode(boolean freezeInputMode) {
@@ -254,8 +254,6 @@ public class ScapesClient extends Game {
     }
 
     public void onInputMode(ListenerOwner owner, Consumer<InputMode> listener) {
-        synchronized (inputModeListeners) {
-            inputModeListeners.put(owner, listener);
-        }
+        inputModeListeners.add(owner, listener);
     }
 }

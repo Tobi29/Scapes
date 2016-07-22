@@ -16,25 +16,24 @@
 package org.tobi29.scapes.client;
 
 import java8.util.stream.Stream;
-import org.tobi29.scapes.engine.gui.ListenerOwner;
+import org.tobi29.scapes.engine.utils.ListenerManager;
+import org.tobi29.scapes.engine.utils.ListenerOwner;
 import org.tobi29.scapes.engine.utils.Streams;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 public class ChatHistory {
     private final List<ChatLine> lines = new ArrayList<>();
-    private final Map<ListenerOwner, Runnable> changeListeners =
-            new WeakHashMap<>();
+    private final ListenerManager<Runnable> changeListeners =
+            new ListenerManager<>();
 
     public synchronized void addLine(String text) {
         String[] lines = text.split("\n");
         for (String line : lines) {
             this.lines.add(0, new ChatLine(line));
         }
-        Streams.forEach(changeListeners.values(), Runnable::run);
+        changeListeners.fire(Runnable::run);
     }
 
     @SuppressWarnings("CallToNativeMethodWhileLocked")
@@ -44,14 +43,12 @@ public class ChatHistory {
                 Streams.collect(lines, line -> time - line.time > 10000);
         if (!removals.isEmpty()) {
             lines.removeAll(removals);
-            Streams.forEach(changeListeners.entrySet(),
-                    entry -> entry.getKey().validOwner(),
-                    entry -> entry.getValue().run());
+            changeListeners.fire(Runnable::run);
         }
     }
 
     public synchronized void onUpdate(ListenerOwner owner, Runnable listener) {
-        changeListeners.put(owner, listener);
+        changeListeners.add(owner, listener);
     }
 
     public synchronized Stream<String> lines() {

@@ -19,7 +19,8 @@ import java8.util.Optional;
 import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
-import org.tobi29.scapes.engine.gui.ListenerOwner;
+import org.tobi29.scapes.engine.utils.ListenerOwner;
+import org.tobi29.scapes.engine.utils.ListenerOwnerHandle;
 import org.tobi29.scapes.engine.utils.io.tag.MultiTag;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d;
@@ -32,6 +33,7 @@ public class EntityClient implements MultiTag.Readable, ListenerOwner {
     protected final WorldClient world;
     protected final GameRegistry registry;
     protected final MutableVector3d pos;
+    private final ListenerOwnerHandle listenerOwner;
     protected int entityID;
     protected TagStructure metaData = new TagStructure();
 
@@ -39,6 +41,8 @@ public class EntityClient implements MultiTag.Readable, ListenerOwner {
         this.world = world;
         registry = world.registry();
         this.pos = new MutableVector3d(pos);
+        listenerOwner = new ListenerOwnerHandle(
+                () -> !world.disposed() && world.hasEntity(this));
     }
 
     public static EntityClient make(int id, WorldClient world) {
@@ -97,8 +101,8 @@ public class EntityClient implements MultiTag.Readable, ListenerOwner {
     }
 
     @Override
-    public boolean validOwner() {
-        return !world.disposed() && world.hasEntity(this);
+    public ListenerOwnerHandle owner() {
+        return listenerOwner;
     }
 
     public interface Supplier {
