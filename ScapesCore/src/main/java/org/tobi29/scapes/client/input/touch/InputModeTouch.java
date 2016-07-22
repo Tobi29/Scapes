@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.client.input.touch;
 
+import java8.util.Optional;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.gui.desktop.GuiMessage;
 import org.tobi29.scapes.client.gui.desktop.GuiPause;
@@ -36,6 +37,7 @@ public class InputModeTouch implements InputMode {
     private final MutableVector2 swipe = new MutableVector2d(), direction =
             new MutableVector2d();
     private final Matrix4f matrix1 = new Matrix4f(), matrix2 = new Matrix4f();
+    private Optional<Vector2> swipeStart;
     private boolean walkUp, walkDown, walkLeft, walkRight, leftHand, rightHand;
     private long lastTouch;
 
@@ -104,6 +106,7 @@ public class InputModeTouch implements InputMode {
         });
         swipe.on(GuiEvent.DRAG_LEFT, this::swipe);
         swipe.on(GuiEvent.PRESS_LEFT, event -> {
+            swipeStart = Optional.of(new Vector2d(event.x(), event.y()));
             if (rightHand) {
                 rightHand = false;
             } else if (System.currentTimeMillis() - lastTouch < 250) {
@@ -129,14 +132,21 @@ public class InputModeTouch implements InputMode {
             x = FastMath.angleDiff(cam.yaw, x);
             y -= cam.pitch;
             direction.set(x, y);
-            if (!leftHand && !rightHand &&
-                    System.currentTimeMillis() - lastTouch >= 250) {
-                leftHand = true;
+            if (swipeStart.isPresent()) {
+                if (!leftHand && !rightHand &&
+                        System.currentTimeMillis() - lastTouch >= 250) {
+                    leftHand = true;
+                }
+                if (FastMath.pointDistance(swipeStart.get(),
+                        new Vector2d(event.x(), event.y())) > 10.0) {
+                    swipeStart = Optional.empty();
+                }
             }
         });
         swipe.on(GuiEvent.DROP_LEFT, event -> {
             leftHand = false;
             rightHand = false;
+            swipeStart = Optional.empty();
         });
     }
 
