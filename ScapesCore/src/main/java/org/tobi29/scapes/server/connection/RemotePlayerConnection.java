@@ -71,7 +71,7 @@ public class RemotePlayerConnection extends PlayerConnection {
         task(() -> sendPacket(packet));
     }
 
-    private void loginStep1(ReadableByteStream input) throws IOException {
+    private void loginStep1(RandomReadableByteStream input) throws IOException {
         byte[] array = new byte[550];
         input.get(array);
         id = ChecksumUtil.checksum(array, ChecksumUtil.Algorithm.SHA1)
@@ -98,7 +98,7 @@ public class RemotePlayerConnection extends PlayerConnection {
         state = State.LOGIN_STEP_2;
     }
 
-    private void loginStep2(ReadableByteStream input) throws IOException {
+    private void loginStep2(RandomReadableByteStream input) throws IOException {
         Plugins plugins = server.plugins();
         byte[] challenge = new byte[this.challenge.length];
         input.get(challenge);
@@ -125,7 +125,7 @@ public class RemotePlayerConnection extends PlayerConnection {
         state = State.LOGIN_STEP_3;
     }
 
-    private void loginStep3(ReadableByteStream input) throws IOException {
+    private void loginStep3(RandomReadableByteStream input) throws IOException {
         loadingRadius = FastMath.clamp(input.getInt(), 10,
                 server.server().maxLoadingRadius());
         ByteBuffer buffer = ByteBuffer.allocate(64 * 64 * 4);
@@ -151,8 +151,9 @@ public class RemotePlayerConnection extends PlayerConnection {
         long currentTime = System.currentTimeMillis();
         pingWait = currentTime + 1000;
         pingTimeout = currentTime + 10000;
-        server.message("Player connected: " + id + " (" + nickname + ") on " +
-                channel, MessageLevel.SERVER_INFO);
+        server.message(
+                "Player connected: " + id + " (" + nickname + ") on " + channel,
+                MessageLevel.SERVER_INFO);
         state = State.OPEN;
     }
 
@@ -236,7 +237,7 @@ public class RemotePlayerConnection extends PlayerConnection {
                         Optional<RandomReadableByteStream> bundle =
                                 channel.fetch();
                         if (bundle.isPresent()) {
-                            ReadableByteStream stream = bundle.get();
+                            RandomReadableByteStream stream = bundle.get();
                             while (stream.hasRemaining()) {
                                 PacketServer packet = (PacketServer) Packet
                                         .make(registry, stream.getShort());
@@ -287,8 +288,8 @@ public class RemotePlayerConnection extends PlayerConnection {
             channel.requestClose();
             state = State.CLOSING;
         } catch (IOException e) {
-            server.message("Player disconnected: " + nickname + " (" + e +
-                    ')', MessageLevel.SERVER_INFO);
+            server.message("Player disconnected: " + nickname + " (" + e + ')',
+                    MessageLevel.SERVER_INFO);
             state = State.CLOSED;
         }
         return false;

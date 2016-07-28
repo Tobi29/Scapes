@@ -45,7 +45,7 @@ public class NewConnection {
     private final Account account;
     private int loadingDistance;
     private IDStorage idStorage;
-    private IOFunction<ReadableByteStream, Optional<String>> state =
+    private IOFunction<RandomReadableByteStream, Optional<String>> state =
             this::loginStep1;
     private Optional<String> status = Optional.of("Logging in...");
 
@@ -73,7 +73,7 @@ public class NewConnection {
         return Optional.of("Logging in...");
     }
 
-    private Optional<String> loginStep1(ReadableByteStream input)
+    private Optional<String> loginStep1(RandomReadableByteStream input)
             throws IOException {
         byte[] challenge = new byte[512];
         input.get(challenge);
@@ -128,7 +128,7 @@ public class NewConnection {
         return Optional.of("Logging in...");
     }
 
-    private Optional<String> loginStep2(ReadableByteStream input)
+    private Optional<String> loginStep2(RandomReadableByteStream input)
             throws IOException {
         if (input.getBoolean()) {
             throw new ConnectionCloseException(input.getString());
@@ -140,7 +140,7 @@ public class NewConnection {
         return Optional.of("Downloading plugins...");
     }
 
-    private Optional<String> loginStep3(ReadableByteStream input)
+    private Optional<String> loginStep3(RandomReadableByteStream input)
             throws IOException {
         int request = pluginRequests.get(0);
         if (input.getBoolean()) {
