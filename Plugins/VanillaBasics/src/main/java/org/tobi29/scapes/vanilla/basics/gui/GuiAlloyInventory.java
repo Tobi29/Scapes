@@ -20,6 +20,7 @@ import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.graphics.GL;
 import org.tobi29.scapes.engine.graphics.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
+import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityAlloyClient;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
@@ -41,8 +42,8 @@ public class GuiAlloyInventory extends GuiContainerInventory {
     }
 
     @Override
-    public void renderOverlay(GL gl, Shader shader) {
-        super.renderOverlay(gl, shader);
+    public void renderOverlay(GL gl, Shader shader, Vector2 pixelSize) {
+        super.renderOverlay(gl, shader, pixelSize);
         updateInfoText();
     }
 

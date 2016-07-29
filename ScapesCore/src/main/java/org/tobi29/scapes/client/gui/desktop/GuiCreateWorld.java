@@ -81,10 +81,9 @@ public class GuiCreateWorld extends GuiMenuDouble {
             environment.setText(
                     "Generator: " + worldTypes.get(environmentID).name());
         });
-        addonsButton.on(GuiEvent.CLICK_LEFT, event -> {
-            state.engine().guiStack().swap(this, new GuiAddons(state, this,
-                    worldTypes.get(environmentID).id(), plugins, style));
-        });
+        addonsButton.on(GuiEvent.CLICK_LEFT, event -> state.engine().guiStack()
+                .swap(this, new GuiAddons(state, this,
+                        worldTypes.get(environmentID).id(), plugins, style)));
         save.on(GuiEvent.CLICK_LEFT, event -> {
             if (name.text().isEmpty()) {
                 name.setText("New World");

@@ -44,9 +44,7 @@ public class ClientSkinStorage {
     public void update(ClientConnection connection) {
         List<ClientSkin> oldSkins = Streams.collect(skins.values(),
                 skin -> skin.increaseTicks() > 1200);
-        Streams.forEach(oldSkins, skin -> {
-            skins.remove(skin.checksum());
-        });
+        Streams.forEach(oldSkins, skin -> skins.remove(skin.checksum()));
         while (!skinRequests.isEmpty()) {
             connection.send(new PacketSkin(skinRequests.poll()));
         }

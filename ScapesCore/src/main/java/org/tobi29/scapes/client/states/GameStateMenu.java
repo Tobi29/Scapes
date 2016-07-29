@@ -32,7 +32,6 @@ import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.server.Account;
-import org.tobi29.scapes.engine.utils.SleepUtil;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 
 import java.io.IOException;

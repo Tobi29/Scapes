@@ -51,9 +51,8 @@ public abstract class ScapesStandaloneServer
     protected final TaskExecutor taskExecutor =
             new TaskExecutor(this, "Server-Shell");
     private final Joiner.Joinable joinable = new Joiner.Joinable();
-    private final Thread shutdownHook = new Thread(() -> {
-        joinable.joiner().join();
-    });
+    private final Thread shutdownHook =
+            new Thread(() -> joinable.joiner().join());
     protected ScapesServer server;
 
     protected ScapesStandaloneServer(FilePath config) {

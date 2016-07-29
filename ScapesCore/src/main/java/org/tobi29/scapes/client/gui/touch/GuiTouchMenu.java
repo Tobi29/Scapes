@@ -34,9 +34,8 @@ public class GuiTouchMenu extends GuiTouch {
     protected GuiTouchMenu(GameState state, String title, String back,
             Gui previous, GuiStyle style) {
         this(state, title, back, style);
-        on(GuiAction.BACK, () -> {
-            state.engine().guiStack().swap(this, previous);
-        });
+        on(GuiAction.BACK,
+                () -> state.engine().guiStack().swap(this, previous));
     }
 
     protected GuiTouchMenu(GameState state, String title, String back,

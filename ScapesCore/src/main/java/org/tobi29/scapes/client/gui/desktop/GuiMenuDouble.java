@@ -34,9 +34,8 @@ public class GuiMenuDouble extends GuiDesktop {
     protected GuiMenuDouble(GameState state, String title, String save,
             String back, Gui previous, GuiStyle style) {
         this(state, title, save, back, style);
-        on(GuiAction.BACK, () -> {
-            state.engine().guiStack().swap(this, previous);
-        });
+        on(GuiAction.BACK,
+                () -> state.engine().guiStack().swap(this, previous));
     }
 
     protected GuiMenuDouble(GameState state, String title, String save,

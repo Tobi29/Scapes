@@ -26,6 +26,7 @@ import org.tobi29.scapes.engine.graphics.*;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Streams;
+import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.packets.PacketInventoryInteraction;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
@@ -110,13 +111,13 @@ public class GuiInventory extends GuiMenu {
     }
 
     @Override
-    public void renderOverlay(GL gl, Shader shader) {
+    public void renderOverlay(GL gl, Shader shader, Vector2 pixelSize) {
         FontRenderer font = style.font();
         String hover = this.hover;
         if (hover != null) {
             MatrixStack matrixStack = gl.matrixStack();
             if (!hover.equals(hoverName)) {
-                updateText(hover, font);
+                updateText(hover, font, pixelSize);
             }
             Matrix matrix = matrixStack.push();
             matrix.translate((float) cursorX, (float) cursorY, 0.0f);
@@ -139,9 +140,9 @@ public class GuiInventory extends GuiMenu {
         hoverNew = prefix + item.material().name(item);
     }
 
-    private void updateText(String text, FontRenderer font) {
+    private void updateText(String text, FontRenderer font, Vector2 pixelSize) {
         hoverName = text;
-        GuiRenderBatch batch = new GuiRenderBatch();
+        GuiRenderBatch batch = new GuiRenderBatch(pixelSize);
         font.render(FontRenderer.to(batch, 1.0f, 1.0f, 1.0f, 1.0f), text,
                 12.0f);
         hoverText = batch.finish();

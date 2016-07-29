@@ -84,11 +84,10 @@ public class GuiScreenshots extends GuiMenu {
                     addHori(5, 20, 100, -1, p -> button(p, "Delete"));
             selection(save, delete);
 
-            icon.on(GuiEvent.CLICK_LEFT, event -> {
-                icon.texture().ifPresent(texture -> state.engine().guiStack()
-                        .add("10-Menu", new GuiScreenshot(state, gui, texture,
-                                gui.style())));
-            });
+            icon.on(GuiEvent.CLICK_LEFT, event -> icon.texture().ifPresent(
+                    texture -> state.engine().guiStack().add("10-Menu",
+                            new GuiScreenshot(state, gui, texture,
+                                    gui.style()))));
             save.on(GuiEvent.CLICK_LEFT, event -> {
                 try {
                     Optional<FilePath> export = state.engine().container()
