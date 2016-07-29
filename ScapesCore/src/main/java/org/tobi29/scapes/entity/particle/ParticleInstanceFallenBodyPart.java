@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.entity.particle;
 
-import org.tobi29.scapes.engine.opengl.texture.Texture;
+import org.tobi29.scapes.engine.graphics.Texture;
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3;
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3f;
 import org.tobi29.scapes.entity.model.Box;

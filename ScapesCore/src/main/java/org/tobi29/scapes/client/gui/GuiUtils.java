@@ -17,14 +17,8 @@ package org.tobi29.scapes.client.gui;
 
 import java8.util.concurrent.ConcurrentMaps;
 import org.tobi29.scapes.block.ItemStack;
+import org.tobi29.scapes.engine.graphics.*;
 import org.tobi29.scapes.engine.gui.GuiRenderBatch;
-import org.tobi29.scapes.engine.opengl.FontRenderer;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.vao.VAO;
-import org.tobi29.scapes.engine.opengl.matrix.Matrix;
-import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.engine.opengl.texture.Texture;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Streams;
 
@@ -33,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public final class GuiUtils {
-    private static final ConcurrentMap<GL, ConcurrentMap<Integer, List<Pair<VAO, Texture>>>>
+    private static final ConcurrentMap<GL, ConcurrentMap<Integer, List<Pair<Model, Texture>>>>
             NUMBERS = new ConcurrentHashMap<>();
 
     private GuiUtils() {
@@ -61,10 +55,10 @@ public final class GuiUtils {
             item.material().renderInventory(item, gl, shader, 1, 1, 1, 1);
             matrixStack.pop();
             if (number) {
-                ConcurrentMap<Integer, List<Pair<VAO, Texture>>> numbers =
+                ConcurrentMap<Integer, List<Pair<Model, Texture>>> numbers =
                         ConcurrentMaps.computeIfAbsent(NUMBERS, gl,
                                 key -> new ConcurrentHashMap<>());
-                List<Pair<VAO, Texture>> text = ConcurrentMaps
+                List<Pair<Model, Texture>> text = ConcurrentMaps
                         .computeIfAbsent(numbers, item.amount(), key -> {
                             GuiRenderBatch batch = new GuiRenderBatch();
                             font.render(FontRenderer

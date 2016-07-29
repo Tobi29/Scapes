@@ -22,12 +22,12 @@ import org.tobi29.scapes.block.TerrainTextureRegistry;
 import org.tobi29.scapes.chunk.data.ChunkMesh;
 import org.tobi29.scapes.chunk.terrain.Terrain;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.matrix.Matrix;
-import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.engine.opengl.vao.Mesh;
-import org.tobi29.scapes.engine.opengl.vao.VAO;
+import org.tobi29.scapes.engine.graphics.GL;
+import org.tobi29.scapes.engine.graphics.Matrix;
+import org.tobi29.scapes.engine.graphics.MatrixStack;
+import org.tobi29.scapes.engine.graphics.Shader;
+import org.tobi29.scapes.engine.graphics.Mesh;
+import org.tobi29.scapes.engine.graphics.Model;
 import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
@@ -42,7 +42,7 @@ public class BlockModelLiquid implements BlockModel {
     private final TerrainTextureRegistry registry;
     private final TerrainTexture texTop, texBottom, texSide1, texSide2,
             texSide3, texSide4;
-    private final VAO vao, vaoInventory;
+    private final Model model, modelInventory;
 
     public BlockModelLiquid(BlockType block, TerrainTextureRegistry registry,
             TerrainTexture texTop, TerrainTexture texBottom,
@@ -63,8 +63,8 @@ public class BlockModelLiquid implements BlockModel {
         this.a = a;
         this.min = min;
         diff = max - min;
-        vao = buildVAO(false);
-        vaoInventory = buildVAO(true);
+        model = buildVAO(false);
+        modelInventory = buildVAO(true);
     }
 
     protected static float calcHeight(int x, int y, int z, Terrain terrain,
@@ -315,7 +315,7 @@ public class BlockModelLiquid implements BlockModel {
     @Override
     public void render(GL gl, Shader shader) {
         registry.texture().bind(gl);
-        vao.render(gl, shader);
+        model.render(gl, shader);
     }
 
     @Override
@@ -326,11 +326,11 @@ public class BlockModelLiquid implements BlockModel {
         matrix.translate(0.5f, 0.5f, 0.5f);
         matrix.rotate(57.5f, 1, 0, 0);
         matrix.rotate(45, 0, 0, 1);
-        vaoInventory.render(gl, shader);
+        modelInventory.render(gl, shader);
         matrixStack.pop();
     }
 
-    protected VAO buildVAO(boolean inventory) {
+    protected Model buildVAO(boolean inventory) {
         Mesh mesh = new Mesh(false);
         buildVAO(mesh, inventory);
         return mesh.finish(registry.engine());

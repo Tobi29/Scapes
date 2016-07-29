@@ -1,32 +1,29 @@
 package org.tobi29.scapes.entity.particle;
 
 import java8.util.function.Supplier;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.vao.RenderType;
-import org.tobi29.scapes.engine.opengl.vao.VAOHybrid;
-import org.tobi29.scapes.engine.opengl.vao.VBO;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.engine.opengl.texture.Texture;
+import org.tobi29.scapes.engine.graphics.*;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 
 public abstract class ParticleEmitterInstanced<P extends ParticleInstance>
         extends ParticleEmitter<P> {
-    protected final VAOHybrid vao;
-    protected final VBO vboStream;
+    protected final ModelHybrid vao;
     protected final Texture texture;
     protected final ByteBuffer buffer;
 
     protected ParticleEmitterInstanced(ParticleSystem system, Texture texture,
-            VBO vbo, VBO vboStream, RenderType renderType, P[] instances,
-            Supplier<P> instanceSupplier) {
+            List<ModelAttribute> attributes, int length,
+            List<ModelAttribute> attributesStream, RenderType renderType,
+            P[] instances, Supplier<P> instanceSupplier) {
         super(system, instances, instanceSupplier);
         this.texture = texture;
-        this.vboStream = vboStream;
-        vao = new VAOHybrid(vbo, vboStream, renderType);
+        vao = system.world().game().engine().graphics()
+                .createModelHybrid(attributes, length, attributesStream, 0,
+                        renderType);
         buffer = system.world().game().engine()
-                .allocate(vboStream.stride() * maxInstances);
+                .allocate(vao.strideStream() * maxInstances);
     }
 
     @Override
@@ -41,7 +38,7 @@ public abstract class ParticleEmitterInstanced<P extends ParticleInstance>
         int count = prepareBuffer(cam);
         if (count > 0) {
             buffer.flip();
-            vboStream.replaceBuffer(gl, buffer);
+            vao.bufferStream(gl, buffer);
             vao.renderInstanced(gl, shader, 6, count);
         }
     }

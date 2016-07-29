@@ -16,7 +16,7 @@
 package org.tobi29.scapes.block;
 
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.opengl.GL;
+import org.tobi29.scapes.engine.graphics.GL;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 

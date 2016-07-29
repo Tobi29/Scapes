@@ -26,11 +26,10 @@ import org.tobi29.scapes.client.states.GameStateLoadSP;
 import org.tobi29.scapes.client.states.GameStateLoadSocketSP;
 import org.tobi29.scapes.client.states.scenes.SceneMenu;
 import org.tobi29.scapes.engine.GameState;
+import org.tobi29.scapes.engine.graphics.Texture;
+import org.tobi29.scapes.engine.graphics.TextureFilter;
+import org.tobi29.scapes.engine.graphics.TextureWrap;
 import org.tobi29.scapes.engine.gui.*;
-import org.tobi29.scapes.engine.opengl.texture.Texture;
-import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
-import org.tobi29.scapes.engine.opengl.texture.TextureFilter;
-import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
@@ -142,11 +141,10 @@ public class GuiSaveSelect extends GuiMenu {
                 Optional<Image[]> panorama = source.panorama();
                 if (panorama.isPresent()) {
                     Image image = panorama.get()[0];
-                    Texture texture =
-                            new TextureCustom(state.engine(), image.width(),
-                                    image.height(), image.buffer(), 4,
-                                    TextureFilter.LINEAR, TextureFilter.LINEAR,
-                                    TextureWrap.CLAMP, TextureWrap.CLAMP);
+                    Texture texture = state.engine().graphics()
+                            .createTexture(image, 4, TextureFilter.LINEAR,
+                                    TextureFilter.LINEAR, TextureWrap.CLAMP,
+                                    TextureWrap.CLAMP);
                     icon.setIcon(texture);
                 }
             } catch (IOException e) {

@@ -22,17 +22,15 @@ import org.tobi29.scapes.client.states.GameStateLoadMP;
 import org.tobi29.scapes.connection.ConnectionType;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.graphics.Texture;
+import org.tobi29.scapes.engine.graphics.TextureFilter;
+import org.tobi29.scapes.engine.graphics.TextureWrap;
 import org.tobi29.scapes.engine.gui.*;
-import org.tobi29.scapes.engine.opengl.texture.Texture;
-import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
-import org.tobi29.scapes.engine.opengl.texture.TextureFilter;
-import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
 import org.tobi29.scapes.engine.server.*;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.RandomReadableByteStream;
-import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
@@ -184,7 +182,7 @@ public class GuiServerSelect extends GuiMenu {
                         Optional<RandomReadableByteStream> bundle =
                                 bundleChannel.fetch();
                         if (bundle.isPresent()) {
-                            ReadableByteStream input = bundle.get();
+                            RandomReadableByteStream input = bundle.get();
                             ByteBuffer infoBuffer =
                                     BufferCreator.bytes(input.remaining());
                             input.get(infoBuffer);
@@ -192,16 +190,12 @@ public class GuiServerSelect extends GuiMenu {
                             ServerInfo serverInfo = new ServerInfo(infoBuffer);
                             label.setText(serverInfo.getName());
                             Image image = serverInfo.getImage();
-                            ByteBuffer imageBuffer = image.buffer();
-                            ByteBuffer buffer = BufferCreator
-                                    .bytes(imageBuffer.remaining());
-                            buffer.put(imageBuffer);
-                            buffer.rewind();
-                            Texture texture = new TextureCustom(state.engine(),
-                                    image.width(), image.height(), buffer, 0,
-                                    TextureFilter.NEAREST,
-                                    TextureFilter.NEAREST, TextureWrap.CLAMP,
-                                    TextureWrap.CLAMP);
+                            Texture texture = state.engine().graphics()
+                                    .createTexture(image, 0,
+                                            TextureFilter.NEAREST,
+                                            TextureFilter.NEAREST,
+                                            TextureWrap.CLAMP,
+                                            TextureWrap.CLAMP);
                             icon.setIcon(texture);
                             bundleChannel.requestClose();
                             readState++;

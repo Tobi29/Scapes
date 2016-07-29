@@ -17,11 +17,11 @@ package org.tobi29.scapes.entity.model;
 
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.matrix.Matrix;
-import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.engine.opengl.texture.Texture;
+import org.tobi29.scapes.engine.graphics.GL;
+import org.tobi29.scapes.engine.graphics.Matrix;
+import org.tobi29.scapes.engine.graphics.MatrixStack;
+import org.tobi29.scapes.engine.graphics.Texture;
+import org.tobi29.scapes.engine.graphics.Shader;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -418,13 +418,14 @@ public class MobLivingModelHuman implements MobModel {
                 }
                 matrix.rotate(rot * -60.0f, 0.0f, 0.0f, 1.0f);
                 matrix.rotate(rot * -60.0f, 0.0f, 1.0f, 0.0f);
-                matrix.rotate(rot * 10.0f + 40.0f + charge2 * 45.0f +
-                        pitch * charge2, 1.0f, 0.0f, 0.0f);
+                matrix.rotate(
+                        rot * 10.0f + 40.0f + charge2 * 45.0f + pitch * charge2,
+                        1.0f, 0.0f, 0.0f);
             } else {
                 rot = (float) FastMath.sinTable(charge * FastMath.PI);
                 matrix.rotate(charge2 * -20, 0, 0, 1);
-                matrix.rotate(rot * 50 + 40 + charge2 * 45 +
-                        pitch * charge2, 1, 0, 0);
+                matrix.rotate(rot * 50 + 40 + charge2 * 45 + pitch * charge2, 1,
+                        0, 0);
                 if (charge > -1.5f && charge < -0.5f) {
                     float center =
                             (float) FastMath.cosTable(charge * FastMath.PI);
@@ -492,13 +493,14 @@ public class MobLivingModelHuman implements MobModel {
                 }
                 matrix.rotate(rot * 60.0f, 0.0f, 0.0f, 1.0f);
                 matrix.rotate(rot * 60.0f, 0.0f, 1.0f, 0.0f);
-                matrix.rotate(rot * 10.0f + 40.0f + charge2 * 45.0f +
-                        pitch * charge2, 1.0f, 0.0f, 0.0f);
+                matrix.rotate(
+                        rot * 10.0f + 40.0f + charge2 * 45.0f + pitch * charge2,
+                        1.0f, 0.0f, 0.0f);
             } else {
                 rot = (float) FastMath.sinTable(charge * FastMath.PI);
                 matrix.rotate(charge2 * -20, 0, 0, 1);
-                matrix.rotate(rot * 50 + 40 + charge2 * 45 +
-                        pitch * charge2, 1, 0, 0);
+                matrix.rotate(rot * 50 + 40 + charge2 * 45 + pitch * charge2, 1,
+                        0, 0);
                 if (charge > -1.5f && charge < -0.5f) {
                     float center =
                             (float) FastMath.cosTable(charge * FastMath.PI);

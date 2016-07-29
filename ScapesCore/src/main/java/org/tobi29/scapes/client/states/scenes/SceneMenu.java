@@ -19,21 +19,8 @@ import java8.util.Optional;
 import java8.util.stream.Collectors;
 import org.tobi29.scapes.client.SaveStorage;
 import org.tobi29.scapes.client.ScapesClient;
-import org.tobi29.scapes.engine.opengl.*;
-import org.tobi29.scapes.engine.opengl.matrix.Matrix;
-import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
-import org.tobi29.scapes.engine.opengl.scenes.Scene;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.engine.opengl.shader.ShaderCompileInformation;
-import org.tobi29.scapes.engine.opengl.shader.ShaderManager;
-import org.tobi29.scapes.engine.opengl.shader.ShaderPreprocessor;
-import org.tobi29.scapes.engine.opengl.texture.Texture;
-import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
-import org.tobi29.scapes.engine.opengl.texture.TextureFilter;
-import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
-import org.tobi29.scapes.engine.opengl.vao.RenderType;
-import org.tobi29.scapes.engine.opengl.vao.VAO;
-import org.tobi29.scapes.engine.opengl.vao.VAOUtility;
+import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.graphics.*;
 import org.tobi29.scapes.engine.utils.ArrayUtil;
 import org.tobi29.scapes.engine.utils.graphics.BlurOffset;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
@@ -49,18 +36,25 @@ import java.util.concurrent.ThreadLocalRandom;
 public class SceneMenu extends Scene {
     private final Texture[] textures = new Texture[6];
     private final Cam cam;
+    private final Shader shaderBlur1, shaderBlur2, shaderTextured;
     private float speed = 0.6f, yaw;
-    private VAO vao;
+    private Model model;
     private Optional<Image[]> save = Optional.empty();
     private boolean texturesLoaded;
 
-    public SceneMenu() {
+    public SceneMenu(ScapesEngine engine) {
         cam = new Cam(0.4f, 2.0f);
         Random random = ThreadLocalRandom.current();
         yaw = random.nextFloat() * 360.0f;
+        GraphicsSystem graphics = engine.graphics();
+        shaderBlur1 = graphics.createShader("Scapes:shader/Menu1",
+                information -> information.supplyPreCompile(SceneMenu::blur));
+        shaderBlur2 = graphics.createShader("Scapes:shader/Menu2",
+                information -> information.supplyPreCompile(SceneMenu::blur));
+        shaderTextured = graphics.createShader("Engine:shader/Textured");
     }
 
-    private static void blur(GL gl, ShaderPreprocessor shader) {
+    private static void blur(GL gl, ShaderPreprocessor processor) {
         double space = gl.sceneSpace();
         int samples = FastMath.round(space * 8.0) + 8;
         float[] blurOffsets = BlurOffset.gaussianBlurOffset(samples, 0.04f);
@@ -69,9 +63,9 @@ public class SceneMenu extends Scene {
         int blurLength = blurOffsets.length;
         String blurOffset = ArrayUtil.join(blurOffsets);
         String blurWeight = ArrayUtil.join(blurWeights);
-        shader.supplyProperty("BLUR_OFFSET", blurOffset);
-        shader.supplyProperty("BLUR_WEIGHT", blurWeight);
-        shader.supplyProperty("BLUR_LENGTH", blurLength);
+        processor.supplyProperty("BLUR_OFFSET", blurOffset);
+        processor.supplyProperty("BLUR_WEIGHT", blurWeight);
+        processor.supplyProperty("BLUR_LENGTH", blurLength);
     }
 
     public void changeBackground(WorldSource source) throws IOException {
@@ -80,14 +74,7 @@ public class SceneMenu extends Scene {
 
     @Override
     public void init(GL gl) {
-        ShaderManager shaderManager = gl.shaders();
-        ShaderCompileInformation menu1 =
-                shaderManager.compileInformation("Scapes:shader/Menu1");
-        menu1.supplyPreCompile("Blur", shader -> blur(gl, shader));
-        ShaderCompileInformation menu2 =
-                shaderManager.compileInformation("Scapes:shader/Menu2");
-        menu2.supplyPreCompile("Blur", shader -> blur(gl, shader));
-        vao = VAOUtility.createVTI(state.engine(),
+        model = VAOUtility.createVTI(state.engine(),
                 new float[]{-1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f, -1.0f,
                         -1.0f, 1.0f, -1.0f, -1.0f},
                 new float[]{1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f},
@@ -104,7 +91,6 @@ public class SceneMenu extends Scene {
         cam.setPerspective((float) gl.sceneWidth() / gl.sceneHeight(), 90.0f);
         cam.setView(0.0f, yaw, 0.0f);
         gl.setProjectionPerspective(gl.sceneWidth(), gl.sceneHeight(), cam);
-        Shader shader = gl.shaders().get("Engine:shader/Textured", gl);
         MatrixStack matrixStack = gl.matrixStack();
         for (int i = 0; i < 6; i++) {
             Texture texture = textures[i];
@@ -122,9 +108,8 @@ public class SceneMenu extends Scene {
                     matrix.rotate(-90.0f, 1.0f, 0.0f, 0.0f);
                 }
                 texture.bind(gl);
-                gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
-                        1.0f);
-                vao.render(gl, shader);
+                gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
+                model.render(gl, shaderTextured);
                 matrixStack.pop();
             }
         }
@@ -138,7 +123,13 @@ public class SceneMenu extends Scene {
 
     @Override
     public Shader postProcessing(GL gl, int pass) {
-        return gl.shaders().get("Scapes:shader/Menu" + (pass + 1), gl);
+        switch (pass) {
+            case 0:
+                return shaderBlur1;
+            case 1:
+                return shaderBlur2;
+        }
+        return null;
     }
 
     @Override
@@ -207,10 +198,10 @@ public class SceneMenu extends Scene {
     private void changeBackground(Image[] images) {
         for (int i = 0; i < 6; i++) {
             Image image = images[i];
-            setBackground(new TextureCustom(state.engine(), image.width(),
-                            image.height(), image.buffer(), 0, TextureFilter.LINEAR,
-                            TextureFilter.LINEAR, TextureWrap.CLAMP, TextureWrap.CLAMP),
-                    i);
+            setBackground(state.engine().graphics()
+                    .createTexture(image, 0, TextureFilter.LINEAR,
+                            TextureFilter.LINEAR, TextureWrap.CLAMP,
+                            TextureWrap.CLAMP), i);
         }
     }
 
@@ -219,8 +210,8 @@ public class SceneMenu extends Scene {
         int r = random.nextInt(2);
         for (int i = 0; i < 6; i++) {
             setBackground(state.engine().graphics().textures()
-                    .get("Scapes:image/gui/panorama/" +
-                            r + "/Panorama" + i), i);
+                            .get("Scapes:image/gui/panorama/" + r + "/Panorama" + i),
+                    i);
         }
     }
 }

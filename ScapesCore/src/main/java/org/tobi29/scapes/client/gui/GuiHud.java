@@ -16,20 +16,14 @@
 package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.GameState;
+import org.tobi29.scapes.engine.graphics.*;
 import org.tobi29.scapes.engine.gui.GuiState;
 import org.tobi29.scapes.engine.gui.GuiStyle;
-import org.tobi29.scapes.engine.opengl.*;
-import org.tobi29.scapes.engine.opengl.matrix.Matrix;
-import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.engine.opengl.vao.RenderType;
-import org.tobi29.scapes.engine.opengl.vao.VAO;
-import org.tobi29.scapes.engine.opengl.vao.VAOUtility;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
 public class GuiHud extends GuiState {
     private static final float CROSS_SIZE = 8.0f;
-    private final VAO cross;
+    private final Model cross;
 
     public GuiHud(GameState state, GuiStyle style) {
         super(state, style);

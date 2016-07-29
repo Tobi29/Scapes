@@ -19,8 +19,7 @@ import java8.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.opengl.texture.Texture;
-import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
+import org.tobi29.scapes.engine.graphics.Texture;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.graphics.Image;
@@ -220,7 +219,8 @@ public abstract class TextureAtlas<T extends TextureAtlasEntry<?>> {
             }
         }
         buffer.rewind();
-        texture = new TextureCustom(engine, imageSize, imageSize, buffer, 4);
+        texture = engine.graphics()
+                .createTexture(imageSize, imageSize, buffer, 4);
         sources.clear();
         return textures.size();
     }

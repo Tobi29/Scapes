@@ -138,7 +138,7 @@ public class GuiControllerTouch extends GuiController {
         private final MutableVector2 tracker;
         private final Vector2 source;
         private final long start;
-        private final GuiCursor cursor = new GuiCursor(false);
+        private final GuiCursor cursor = new GuiCursor();
         private Optional<GuiComponent> dragging = Optional.empty();
         private double dragX, dragY;
 

@@ -22,14 +22,8 @@ import org.tobi29.scapes.client.gui.GuiComponentItemButton;
 import org.tobi29.scapes.client.gui.GuiUtils;
 import org.tobi29.scapes.client.gui.desktop.GuiMenu;
 import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.graphics.*;
 import org.tobi29.scapes.engine.gui.*;
-import org.tobi29.scapes.engine.opengl.FontRenderer;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.matrix.Matrix;
-import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.engine.opengl.texture.Texture;
-import org.tobi29.scapes.engine.opengl.vao.VAO;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.packets.PacketInventoryInteraction;
@@ -43,7 +37,7 @@ public class GuiInventory extends GuiMenu {
     protected final GuiComponentVisiblePane inventoryPane;
     protected final MobPlayerClientMainVB player;
     private String hover, hoverNew, hoverName;
-    private List<Pair<VAO, Texture>> hoverText = Collections.emptyList();
+    private List<Pair<Model, Texture>> hoverText = Collections.emptyList();
     private double cursorX = Double.NaN, cursorY = Double.NaN;
 
     public GuiInventory(String name, MobPlayerClientMainVB player,

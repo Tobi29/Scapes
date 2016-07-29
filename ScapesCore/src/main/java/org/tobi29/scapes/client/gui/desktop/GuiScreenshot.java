@@ -16,10 +16,10 @@
 package org.tobi29.scapes.client.gui.desktop;
 
 import org.tobi29.scapes.engine.GameState;
+import org.tobi29.scapes.engine.graphics.Texture;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiComponentImage;
 import org.tobi29.scapes.engine.gui.GuiStyle;
-import org.tobi29.scapes.engine.opengl.texture.Texture;
 
 public class GuiScreenshot extends GuiMenu {
     public GuiScreenshot(GameState state, Gui previous, Texture texture,

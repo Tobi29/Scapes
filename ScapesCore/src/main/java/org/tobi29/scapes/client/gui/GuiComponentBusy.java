@@ -18,18 +18,18 @@ package org.tobi29.scapes.client.gui;
 import org.tobi29.scapes.engine.gui.GuiComponentHeavy;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.gui.GuiRenderer;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.vao.Mesh;
-import org.tobi29.scapes.engine.opengl.vao.VAO;
-import org.tobi29.scapes.engine.opengl.matrix.Matrix;
-import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.graphics.GL;
+import org.tobi29.scapes.engine.graphics.Mesh;
+import org.tobi29.scapes.engine.graphics.Model;
+import org.tobi29.scapes.engine.graphics.Matrix;
+import org.tobi29.scapes.engine.graphics.MatrixStack;
+import org.tobi29.scapes.engine.graphics.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
 public class GuiComponentBusy extends GuiComponentHeavy {
     private float r = 1.0f, g = 1.0f, b = 1.0f, a = 1.0f;
-    private VAO vao;
+    private Model model;
     private double value;
 
     public GuiComponentBusy(GuiLayoutData parent) {
@@ -56,7 +56,7 @@ public class GuiComponentBusy extends GuiComponentHeavy {
         Matrix matrix = matrixStack.push();
         matrix.translate(size.floatX() * 0.5f, size.floatY() * 0.5f, 0.0f);
         matrix.rotate((float) value, 0.0f, 0.0f, 1.0f);
-        vao.render(gl, shader);
+        model.render(gl, shader);
         matrixStack.pop();
     }
 
@@ -75,7 +75,7 @@ public class GuiComponentBusy extends GuiComponentHeavy {
         int section = 5;
         renderPart(mesh, 40, 140, section, w1, h1, w2, h2, w3, h3, w4, h4);
         renderPart(mesh, 220, 320, section, w1, h1, w2, h2, w3, h3, w4, h4);
-        vao = mesh.finish(gui.style().engine());
+        model = mesh.finish(gui.style().engine());
     }
 
     private void renderPart(Mesh mesh, int start, int end, int section,

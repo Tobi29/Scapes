@@ -34,7 +34,7 @@ import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
 import org.tobi29.scapes.engine.input.ControllerKey;
-import org.tobi29.scapes.engine.opengl.scenes.Scene;
+import org.tobi29.scapes.engine.graphics.Scene;
 import org.tobi29.scapes.engine.utils.io.IOFunction;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.model.EntityModelBlockBreakShared;

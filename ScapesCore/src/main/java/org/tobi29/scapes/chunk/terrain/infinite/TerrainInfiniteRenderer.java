@@ -16,20 +16,12 @@
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import java8.util.Optional;
-import java8.util.function.Supplier;
-import java8.util.stream.Stream;
 import org.tobi29.scapes.block.BlockType;
-import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.data.ChunkMesh;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderer;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.engine.opengl.vao.RenderType;
-import org.tobi29.scapes.engine.opengl.vao.VAO;
-import org.tobi29.scapes.engine.opengl.vao.VAOStatic;
-import org.tobi29.scapes.engine.opengl.vao.VAOUtility;
+import org.tobi29.scapes.engine.graphics.*;
 import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.ThreadLocalUtil;
@@ -45,17 +37,16 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TerrainInfiniteRenderer implements TerrainRenderer {
-    @SuppressWarnings("ThreadLocalNotStaticFinal")
-    private final ThreadLocal<ThreadLocalData> threadData;
+    private static final ThreadLocal<ThreadLocalData> THREAD_DATA =
+            ThreadLocalUtil.of(ThreadLocalData::new);
     private final List<Vector2i> sortedLocations;
     private final TerrainInfiniteClient terrain;
     private final double chunkDistanceMax;
     private final List<TerrainInfiniteRendererChunk> chunks = new ArrayList<>();
-    private final VAO frame;
+    private final Model frame;
     private final TaskLock taskLock = new TaskLock();
     private final AtomicBoolean updateVisible = new AtomicBoolean(),
             updatingVisible = new AtomicBoolean();
@@ -71,7 +62,6 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
             List<Vector2i> sortedLocations) {
         this.terrain = terrain;
         this.sortedLocations = sortedLocations;
-        WorldClient world = terrain.world();
         chunkDistanceMax = chunkDistance * 16.0 - 16.0;
         float min = 0.001f;
         float max = 0.999f;
@@ -81,8 +71,6 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                         min, max, max},
                 new int[]{0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4,
                         1, 5, 2, 6, 3, 7}, RenderType.LINES);
-        threadData = ThreadLocalUtil
-                .of(() -> new ThreadLocalData(world.infoLayers()));
     }
 
     public void toggleStaticRenderDistance() {
@@ -100,31 +88,29 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     }
 
     public void addToQueue(TerrainInfiniteRendererChunk chunk, int i) {
-        if (chunk == null || !chunk.chunk().isLoaded() ||
-                disposed) {
+        if (chunk == null || !chunk.chunk().isLoaded() || disposed) {
             return;
         }
         if (!checkLoaded(chunk)) {
             return;
         }
         terrain.world().game().engine().taskExecutor().runTask(() -> {
-            ThreadLocalData threadData = this.threadData.get();
-            threadData.process(chunk, i);
+            ThreadLocalData threadData = THREAD_DATA.get();
+            threadData.process(chunk, i, this);
         }, taskLock, "Update-Chunk-Geometry");
     }
 
     public void addToQueue(TerrainInfiniteRendererChunk chunk) {
-        if (chunk == null || !chunk.chunk().isLoaded() ||
-                disposed) {
+        if (chunk == null || !chunk.chunk().isLoaded() || disposed) {
             return;
         }
         if (!checkLoaded(chunk)) {
             return;
         }
         terrain.world().game().engine().taskExecutor().runTask(() -> {
-            ThreadLocalData threadData = this.threadData.get();
+            ThreadLocalData threadData = THREAD_DATA.get();
             for (int i = 0; i < chunk.zSections(); i++) {
-                threadData.process(chunk, i);
+                threadData.process(chunk, i, this);
             }
         }, taskLock, "Update-Chunk-Geometry");
     }
@@ -174,8 +160,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
         int newPlayerZ = camPos.intZ();
         if (!updatingVisible.get() &&
                 (updateVisible.getAndSet(false) || playerX != newPlayerX ||
-                        playerY != newPlayerY ||
-                        playerZ != newPlayerZ)) {
+                        playerY != newPlayerY || playerZ != newPlayerZ)) {
             updatingVisible.set(true);
             playerX = newPlayerX;
             playerY = newPlayerY;
@@ -445,32 +430,27 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
         }
     }
 
-    private final class ThreadLocalData {
-        private final ChunkMesh.VertexArrays arrays, arraysAlpha;
-        private final TerrainRenderInfo info;
-        private final TerrainInfiniteSection section;
+    private static final class ThreadLocalData {
+        private final ChunkMesh.VertexArrays arrays =
+                new ChunkMesh.VertexArrays(), arraysAlpha =
+                new ChunkMesh.VertexArrays();
+        private final TerrainInfiniteSection section =
+                new TerrainInfiniteSection();
 
-        private ThreadLocalData(
-                Stream<Map.Entry<String, Supplier<TerrainRenderInfo.InfoLayer>>> infoLayers) {
-            arrays = new ChunkMesh.VertexArrays();
-            arraysAlpha = new ChunkMesh.VertexArrays();
-            info = new TerrainRenderInfo(infoLayers);
-            section = new TerrainInfiniteSection(terrain, terrain.zSize,
-                    terrain.world().air());
-        }
-
-        private void process(TerrainInfiniteRendererChunk chunk, int i) {
+        private void process(TerrainInfiniteRendererChunk chunk, int i,
+                TerrainInfiniteRenderer renderer) {
             if (!chunk.unsetGeometryDirty(i)) {
                 return;
             }
-            VAOStatic vao = null, vaoAlpha = null;
+            Model vao = null, vaoAlpha = null;
             AABB aabb = null, aabbAlpha = null;
             TerrainInfiniteChunk terrainChunk = chunk.chunk();
             if (terrainChunk.isEmpty(i)) {
                 chunk.setSolid(i, false);
             } else {
+                TerrainInfiniteClient terrain = chunk.chunk().terrain();
                 BlockType air = terrain.world().air();
-                section.init(terrainChunk.pos());
+                section.init(terrain, terrainChunk.pos());
                 int bx = terrainChunk.blockX();
                 int by = terrainChunk.blockY();
                 int bz = i << 4;
@@ -503,17 +483,20 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                 }
                 if (chunk.isSolid(i) != solid || !chunk.isLoaded()) {
                     chunk.setSolid(i, solid);
-                    updateVisible.set(true);
+                    renderer.updateVisible.set(true);
                 }
                 if (!empty && chunk.isVisible(i)) {
                     ChunkMesh mesh = new ChunkMesh(arrays);
                     ChunkMesh meshAlpha = new ChunkMesh(arraysAlpha);
+                    TerrainRenderInfo info =
+                            new TerrainRenderInfo(terrain.world().infoLayers());
                     info.init(bx, by, bz, 16, 16, 16);
-                    double relativeX =
-                            terrainChunk.blockX() - cam.position.doubleX();
-                    double relativeY =
-                            terrainChunk.blockY() - cam.position.doubleY();
-                    double relativeZ = (i << 4) - cam.position.doubleZ();
+                    double relativeX = terrainChunk.blockX() -
+                            renderer.cam.position.doubleX();
+                    double relativeY = terrainChunk.blockY() -
+                            renderer.cam.position.doubleY();
+                    double relativeZ =
+                            (i << 4) - renderer.cam.position.doubleZ();
                     boolean lod = FastMath.sqr(relativeX + 8) +
                             FastMath.sqr(relativeY + 8) +
                             FastMath.sqr(relativeZ + 8) < 9216;
@@ -549,6 +532,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                         }
                     }
                 }
+                section.clear();
             }
             chunk.replaceMesh(i, vao, vaoAlpha, aabb, aabbAlpha);
         }

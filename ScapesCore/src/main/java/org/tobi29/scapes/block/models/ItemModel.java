@@ -16,8 +16,8 @@
 
 package org.tobi29.scapes.block.models;
 
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.graphics.GL;
+import org.tobi29.scapes.engine.graphics.Shader;
 
 public interface ItemModel {
     void render(GL gl, Shader shader);

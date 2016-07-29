@@ -15,10 +15,12 @@
  */
 package org.tobi29.scapes.client.states.scenes;
 
-import org.tobi29.scapes.engine.opengl.GL;
+import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.graphics.GL;
 
 public class SceneError extends SceneMenu {
-    public SceneError() {
+    public SceneError(ScapesEngine engine) {
+        super(engine);
         setSpeed(0.0f);
     }
 

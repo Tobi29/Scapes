@@ -16,11 +16,11 @@
 package org.tobi29.scapes.entity.model;
 
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.opengl.*;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.engine.opengl.vao.RenderType;
-import org.tobi29.scapes.engine.opengl.vao.VAO;
-import org.tobi29.scapes.engine.opengl.vao.VAOUtility;
+import org.tobi29.scapes.engine.graphics.GL;
+import org.tobi29.scapes.engine.graphics.Shader;
+import org.tobi29.scapes.engine.graphics.RenderType;
+import org.tobi29.scapes.engine.graphics.Model;
+import org.tobi29.scapes.engine.graphics.VAOUtility;
 
 public class Box {
     private static final int[] INDICES, INDICES_NO_CULL;
@@ -37,7 +37,7 @@ public class Box {
     }
 
     public final float minX, minY, minZ, maxX, maxY, maxZ;
-    private final VAO vao;
+    private final Model model;
 
     public Box(ScapesEngine engine, float tbs, float minX, float minY,
             float minZ, float maxX, float maxY, float maxZ, float tX,
@@ -65,7 +65,7 @@ public class Box {
         } else {
             indices = INDICES_NO_CULL;
         }
-        vao = VAOUtility.createVTNI(engine,
+        model = VAOUtility.createVTNI(engine,
                 new float[]{minX, maxY, maxZ, maxX, maxY, maxZ, maxX, maxY,
                         minZ, minX, maxY, minZ, minX, minY, maxZ, minX, minY,
                         minZ, maxX, minY, minZ, maxX, minY, maxZ, minX, minY,
@@ -105,7 +105,7 @@ public class Box {
 
     public void render(float r, float g, float b, float a, GL gl,
             Shader shader) {
-        gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, r, g, b, a);
-        vao.render(gl, shader);
+        gl.setAttribute4f(GL.COLOR_ATTRIBUTE, r, g, b, a);
+        model.render(gl, shader);
     }
 }

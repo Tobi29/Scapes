@@ -16,10 +16,7 @@
 package org.tobi29.scapes.client.gui.touch;
 
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.Gui;
-import org.tobi29.scapes.engine.gui.GuiComponentSlider;
-import org.tobi29.scapes.engine.gui.GuiEvent;
-import org.tobi29.scapes.engine.gui.GuiStyle;
+import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
@@ -34,9 +31,13 @@ public class GuiTouchVideoSettings extends GuiTouchMenu {
                         (scapesTag.getDouble("RenderDistance") - 10.0) / 246.0,
                         (text, value) -> text + ": " +
                                 FastMath.round(10.0 + value * 246.0) + 'm'));
-        GuiComponentSlider animationDistance = row(pane,
-                p -> slider(p, "Animation Distance",
-                        scapesTag.getFloat("AnimationDistance")));
+        GuiComponentTextButton shader = row(pane, p -> button(p, "Shaders"));
+        GuiComponentTextButton fullscreen;
+        if (state.engine().config().isFullscreen()) {
+            fullscreen = row(pane, p -> button(p, "Fullscreen: ON"));
+        } else {
+            fullscreen = row(pane, p -> button(p, "Fullscreen: OFF"));
+        }
         GuiComponentSlider resolutionMultiplier = row(pane,
                 p -> slider(p, "Resolution", reverseResolution(
                         state.engine().config().resolutionMultiplier()),
@@ -45,15 +46,26 @@ public class GuiTouchVideoSettings extends GuiTouchMenu {
                                 '%'));
 
         selection(viewDistance);
-        selection(animationDistance);
+        selection(shader);
+        selection(fullscreen);
         selection(resolutionMultiplier);
 
         viewDistance.on(GuiEvent.CHANGE, event -> scapesTag
                 .setDouble("RenderDistance",
                         10.0 + viewDistance.value() * 246.0));
-        animationDistance.on(GuiEvent.CHANGE, event -> scapesTag
-                .setFloat("AnimationDistance",
-                        (float) animationDistance.value()));
+        shader.on(GuiEvent.CLICK_LEFT, event -> state.engine().guiStack()
+                .add("10-Menu",
+                        new GuiTouchShaderSettings(state, this, style)));
+        fullscreen.on(GuiEvent.CLICK_LEFT, event -> {
+            if (!state.engine().config().isFullscreen()) {
+                fullscreen.setText("Fullscreen: ON");
+                state.engine().config().setFullscreen(true);
+            } else {
+                fullscreen.setText("Fullscreen: OFF");
+                state.engine().config().setFullscreen(false);
+            }
+            state.engine().container().updateContainer();
+        });
         resolutionMultiplier.on(GuiEvent.CHANGE,
                 event -> state.engine().config().setResolutionMultiplier(
                         (float) resolution(resolutionMultiplier.value())));

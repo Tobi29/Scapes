@@ -16,33 +16,34 @@
 package org.tobi29.scapes.entity.skin;
 
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.OpenGLFunction;
-import org.tobi29.scapes.engine.opengl.texture.TextureCustom;
+import org.tobi29.scapes.engine.graphics.GL;
+import org.tobi29.scapes.engine.graphics.Texture;
 import org.tobi29.scapes.engine.utils.Checksum;
 
 import java.nio.ByteBuffer;
 
-public class ClientSkin extends TextureCustom {
+public class ClientSkin {
+    private final Texture texture;
     private final Checksum checksum;
     private int unusedTicks;
 
     public ClientSkin(ScapesEngine engine, ByteBuffer buffer,
             Checksum checksum) {
-        super(engine, 64, 64, buffer);
+        texture = engine.graphics().createTexture(64, 64, buffer);
         this.checksum = checksum;
     }
 
     public void setImage(ByteBuffer buffer) {
-        setBuffer(buffer);
-        markDisposed();
+        texture.setBuffer(buffer);
     }
 
-    @OpenGLFunction
-    @Override
     public void bind(GL gl) {
         unusedTicks = 0;
-        super.bind(gl);
+        texture.bind(gl);
+    }
+
+    public Texture texture() {
+        return texture;
     }
 
     public Checksum checksum() {

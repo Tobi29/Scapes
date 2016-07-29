@@ -39,7 +39,7 @@ public class GameStateServerDisconnect extends GameState {
     public GameStateServerDisconnect(String message,
             Optional<RemoteAddress> address, ScapesEngine engine,
             double reconnectTimer) {
-        super(engine, new SceneError());
+        super(engine, new SceneError(engine));
         this.address = address;
         this.reconnectTimer = reconnectTimer;
         gui = new GuiDisconnected(this, message, engine.guiStyle());

@@ -15,13 +15,7 @@
  */
 package org.tobi29.scapes.chunk.terrain.infinite;
 
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.OpenGL;
-import org.tobi29.scapes.engine.opengl.matrix.Matrix;
-import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.engine.opengl.vao.VAO;
-import org.tobi29.scapes.engine.opengl.vao.VAOStatic;
+import org.tobi29.scapes.engine.graphics.*;
 import org.tobi29.scapes.engine.utils.ArrayUtil;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
@@ -34,7 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TerrainInfiniteRendererChunk {
     private final TerrainInfiniteChunkClient chunk;
     private final TerrainInfiniteRenderer renderer;
-    private final VAOStatic[] vao, vaoAlpha;
+    private final Model[] vao, vaoAlpha;
     private final AABB[] aabb, aabbAlpha;
     private final AtomicBoolean[] geometryDirty;
     private final boolean[] geometryInit, solid, visible, prepareVisible,
@@ -48,8 +42,8 @@ public class TerrainInfiniteRendererChunk {
         geometryDirty = new AtomicBoolean[zSections];
         ArrayUtil.fill(geometryDirty, () -> new AtomicBoolean(true));
         geometryInit = new boolean[zSections + 1];
-        vao = new VAOStatic[zSections];
-        vaoAlpha = new VAOStatic[zSections];
+        vao = new Model[zSections];
+        vaoAlpha = new Model[zSections];
         aabb = new AABB[zSections];
         aabbAlpha = new AABB[zSections];
         lod = new boolean[zSections];
@@ -75,14 +69,14 @@ public class TerrainInfiniteRendererChunk {
         MatrixStack matrixStack = gl.matrixStack();
         for (int i = 0; i < vao.length; i++) {
             double relativeZ = (i << 4) - cam.position.doubleZ();
-            boolean newLod = FastMath.sqr(relativeX + 8) +
-                    FastMath.sqr(relativeY + 8) +
-                    FastMath.sqr(relativeZ + 8) < 9216;
+            boolean newLod =
+                    FastMath.sqr(relativeX + 8) + FastMath.sqr(relativeY + 8) +
+                            FastMath.sqr(relativeZ + 8) < 9216;
             if (lod[i] != newLod) {
                 lod[i] = newLod;
                 setGeometryDirty(i);
             }
-            VAOStatic vao = this.vao[i];
+            Model vao = this.vao[i];
             AABB aabb = this.aabb[i];
             if (vao != null && aabb != null) {
                 if (cam.frustum.inView(aabb) != 0) {
@@ -105,7 +99,7 @@ public class TerrainInfiniteRendererChunk {
         double relativeY = chunk.blockY() - cam.position.doubleY();
         MatrixStack matrixStack = gl.matrixStack();
         for (int i = 0; i < vao.length; i++) {
-            VAOStatic vao = vaoAlpha[i];
+            Model vao = vaoAlpha[i];
             AABB aabb = aabbAlpha[i];
             if (vao != null && aabb != null) {
                 if (cam.frustum.inView(aabb) != 0) {
@@ -127,7 +121,7 @@ public class TerrainInfiniteRendererChunk {
         return geometryInit[0] && chunk.isLoaded();
     }
 
-    public void renderFrame(GL gl, VAO frame, Shader shader, Cam cam) {
+    public void renderFrame(GL gl, Model frame, Shader shader, Cam cam) {
         MatrixStack matrixStack = gl.matrixStack();
         for (int i = 0; i < aabb.length; i++) {
             AABB aabb = this.aabb[i];
@@ -135,13 +129,13 @@ public class TerrainInfiniteRendererChunk {
                 Matrix matrix = matrixStack.push();
                 gl.setAttribute2f(4, 1.0f, 1.0f);
                 if (!chunk.isLoaded()) {
-                    gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 0.0f, 0.0f,
+                    gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 0.0f, 0.0f,
                             1.0f);
                 } else if (geometryDirty[i].get()) {
-                    gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 0.0f,
+                    gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 0.0f,
                             1.0f);
                 } else {
-                    gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.0f, 1.0f, 0.0f,
+                    gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 0.0f, 1.0f, 0.0f,
                             1.0f);
                 }
                 matrix.translate((float) (aabb.minX - cam.position.doubleX()),
@@ -156,8 +150,8 @@ public class TerrainInfiniteRendererChunk {
         }
     }
 
-    public synchronized void replaceMesh(int i, VAOStatic render,
-            VAOStatic renderAlpha, AABB aabb, AABB aabbAlpha) {
+    public synchronized void replaceMesh(int i, Model render, Model renderAlpha,
+            AABB aabb, AABB aabbAlpha) {
         if (visible[i]) {
             if (render != null) {
                 render.setWeak(true);

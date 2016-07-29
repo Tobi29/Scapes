@@ -19,17 +19,8 @@ import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldSkybox;
 import org.tobi29.scapes.client.states.scenes.SceneScapesVoxelWorld;
 import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.graphics.*;
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
-import org.tobi29.scapes.engine.opengl.*;
-import org.tobi29.scapes.engine.opengl.fbo.FBO;
-import org.tobi29.scapes.engine.opengl.matrix.Matrix;
-import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.engine.opengl.shader.ShaderManager;
-import org.tobi29.scapes.engine.opengl.vao.Mesh;
-import org.tobi29.scapes.engine.opengl.vao.RenderType;
-import org.tobi29.scapes.engine.opengl.vao.VAO;
-import org.tobi29.scapes.engine.opengl.vao.VAOUtility;
 import org.tobi29.scapes.engine.sound.StaticAudio;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -55,12 +46,13 @@ public class WorldSkyboxOverworld implements WorldSkybox {
                     new float[]{0.5f, 0.5f, 0.8f}};
     private static final float[][] COLORS =
             {{0.0f, 0.3f, 0.8f}, {0.2f, 0.7f, 1.0f}};
-    private final FBO fbo;
-    private final VAO billboardMesh, cloudTextureMesh, cloudMesh, skyboxMesh,
+    private final Framebuffer fbo;
+    private final Model billboardMesh, cloudTextureMesh, cloudMesh, skyboxMesh,
             skyboxBottomMesh, starMesh;
     private final ClimateGenerator climateGenerator;
     private final BiomeGenerator biomeGenerator;
     private final WorldClient world;
+    private final Shader shaderSkybox, shaderGlow, shaderClouds, shaderTextured;
     private GuiWidgetDebugValues.Element temperatureDebug, humidityDebug,
             weatherDebug, biomeDebug, staminaDebug, wakeDebug, hungerDebug,
             thirstDebug, bodyTemperatureDebug, sleepingDebug, exposureDebug;
@@ -76,7 +68,9 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         this.biomeGenerator = biomeGenerator;
         this.world = world;
         long seed = world.seed();
-        fbo = new FBO(world.game().engine(), 512, 512, 1, false, false, true);
+        fbo = world.game().engine().graphics()
+                .createFramebuffer(512, 512, 1, false, false,
+                        true);
         billboardMesh = VAOUtility.createVTI(world.game().engine(),
                 new float[]{1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f,
                         -1.0f, 1.0f, 1.0f, -1.0f, 1.0f},
@@ -158,6 +152,11 @@ public class WorldSkyboxOverworld implements WorldSkybox {
             addStar(0.01 + random.nextDouble() * 0.02, 0, starMesh, random);
         }
         this.starMesh = starMesh.finish(world.game().engine());
+        GraphicsSystem graphics = world.game().engine().graphics();
+        shaderSkybox = graphics.createShader("VanillaBasics:shader/Skybox");
+        shaderGlow = graphics.createShader("VanillaBasics:shader/Glow");
+        shaderClouds = graphics.createShader("VanillaBasics:shader/Clouds");
+        shaderTextured = graphics.createShader("Engine:shader/Textured");
     }
 
     private static void addStar(double size, int color, Mesh starMesh,
@@ -378,27 +377,25 @@ public class WorldSkyboxOverworld implements WorldSkybox {
                 FastMath.RAD_2_DEG);
         // Sky
         gl.textures().unbind(gl);
-        gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
-        ShaderManager shaderManager = gl.shaders();
-        Shader shader = shaderManager.get("VanillaBasics:shader/Skybox", gl);
-        shader.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB());
-        shader.setUniform1f(5, scene.fogDistance());
-        shader.setUniform4f(6, skyboxLight * skyboxLight, skyboxLight,
+        gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f);
+        shaderSkybox.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB());
+        shaderSkybox.setUniform1f(5, scene.fogDistance());
+        shaderSkybox.setUniform4f(6, skyboxLight * skyboxLight, skyboxLight,
                 skyboxLight, 1.0f);
-        skyboxMesh.render(gl, shader);
+        skyboxMesh.render(gl, shaderSkybox);
         // Stars
         if (skyLight < 1.0f) {
             Random random = ThreadLocalRandom.current();
             gl.setBlending(BlendingMode.ADD);
-            shader = shaderManager.get("VanillaBasics:shader/Glow", gl);
             float brightness =
                     FastMath.max(1.0f - skyLight - random.nextFloat() * 0.1f,
                             0.0f);
-            shader.setUniform4f(4, brightness, brightness, brightness, 1.0f);
+            shaderGlow
+                    .setUniform4f(4, brightness, brightness, brightness, 1.0f);
             Matrix matrix = matrixStack.push();
             matrix.rotate(sunAzimuth + 180.0f, 0.0f, 0.0f, 1.0f);
             matrix.rotate(-sunElevation, 1.0f, 0.0f, 0.0f);
-            starMesh.render(gl, shader);
+            starMesh.render(gl, shaderGlow);
             matrixStack.pop();
         } else {
             gl.setBlending(BlendingMode.ADD);
@@ -408,42 +405,38 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         matrix.rotate(sunAzimuth + 180.0f, 0.0f, 0.0f, 1.0f);
         matrix.rotate(-sunElevation, 1.0f, 0.0f, 0.0f);
         matrix.scale(1.0f, 1.0f, 1.0f);
-        shader = shaderManager.get("VanillaBasics:shader/Glow", gl);
-        shader.setUniform4f(4, fogR * 1.0f, fogG * 1.1f, fogB * 1.1f, 1.0f);
-        billboardMesh.render(gl, shader);
+        shaderGlow.setUniform4f(4, fogR * 1.0f, fogG * 1.1f, fogB * 1.1f, 1.0f);
+        billboardMesh.render(gl, shaderGlow);
         matrix.scale(0.2f, 1.0f, 0.2f);
-        shader.setUniform4f(4, fogR * 1.6f, fogG * 1.6f, fogB * 1.3f, 1.0f);
-        billboardMesh.render(gl, shader);
+        shaderGlow.setUniform4f(4, fogR * 1.6f, fogG * 1.6f, fogB * 1.3f, 1.0f);
+        billboardMesh.render(gl, shaderGlow);
         matrixStack.pop();
         // Moon
-        shader = shaderManager.get("Engine:shader/Textured", gl);
         gl.textures().bind("VanillaBasics:image/Moon", gl);
         matrix = matrixStack.push();
         matrix.rotate(sunAzimuth, 0.0f, 0.0f, 1.0f);
         matrix.rotate(sunElevation, 1.0f, 0.0f, 0.0f);
         matrix.scale(0.1f, 1.0f, 0.1f);
-        billboardMesh.render(gl, shader);
+        billboardMesh.render(gl, shaderTextured);
         matrixStack.pop();
         gl.setBlending(BlendingMode.NORMAL);
-        shader = shaderManager.get("VanillaBasics:shader/Skybox", gl);
         // Clouds
         gl.textures().bind(fbo.textureColor(0), gl);
-        cloudMesh.render(gl, shader);
+        cloudMesh.render(gl, shaderSkybox);
         gl.textures().unbind(gl);
         // Bottom
-        skyboxBottomMesh.render(gl, shader);
+        skyboxBottomMesh.render(gl, shaderSkybox);
         float cloudTime = (System.currentTimeMillis() % 1000000) / 1000000.0f;
         fbo.activate(gl);
         gl.viewport(0, 0, fbo.width(), fbo.height());
         gl.clear(0.0f, 0.0f, 0.0f, 0.0f);
         gl.setProjectionOrthogonal(0, 0, 1, 1);
-        shader = shaderManager.get("VanillaBasics:shader/Clouds", gl);
-        shader.setUniform1f(4, cloudTime);
-        shader.setUniform1f(5, weather);
-        shader.setUniform2f(6,
+        shaderClouds.setUniform1f(4, cloudTime);
+        shaderClouds.setUniform1f(5, weather);
+        shaderClouds.setUniform2f(6,
                 (float) (scene.cam().position.doubleX() / 2048.0 % 1024.0),
                 (float) (scene.cam().position.doubleY() / 2048.0 % 1024.0));
-        cloudTextureMesh.render(gl, shader);
+        cloudTextureMesh.render(gl, shaderClouds);
         fbo.deactivate(gl);
     }
 

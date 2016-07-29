@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.block;
 
-import org.tobi29.scapes.engine.opengl.GL;
+import org.tobi29.scapes.engine.graphics.GL;
 
 import java.nio.ByteBuffer;
 

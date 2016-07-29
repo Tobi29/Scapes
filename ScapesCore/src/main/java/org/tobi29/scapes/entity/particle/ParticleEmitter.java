@@ -2,7 +2,7 @@ package org.tobi29.scapes.entity.particle;
 
 import java8.util.function.Consumer;
 import java8.util.function.Supplier;
-import org.tobi29.scapes.engine.opengl.GL;
+import org.tobi29.scapes.engine.graphics.GL;
 import org.tobi29.scapes.engine.utils.ArrayUtil;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 

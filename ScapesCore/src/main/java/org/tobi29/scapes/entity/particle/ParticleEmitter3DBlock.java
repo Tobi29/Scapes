@@ -3,20 +3,20 @@ package org.tobi29.scapes.entity.particle;
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.matrix.Matrix;
-import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.graphics.*;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.math.AABB;
 
 public class ParticleEmitter3DBlock
         extends ParticleEmitter<ParticleInstance3DBlock> {
     private static final float SIZE = 0.5f;
+    private final Shader shader;
 
     public ParticleEmitter3DBlock(ParticleSystem system) {
         super(system, new ParticleInstance3DBlock[256],
                 ParticleInstance3DBlock::new);
+        GraphicsSystem graphics = system.world().game().engine().graphics();
+        shader = graphics.createShader("Scapes:shader/Entity");
     }
 
     @Override
@@ -62,7 +62,6 @@ public class ParticleEmitter3DBlock
         }
         WorldClient world = system.world();
         TerrainClient terrain = world.terrain();
-        Shader shader = gl.shaders().get("Scapes:shader/Entity", gl);
         for (ParticleInstance3DBlock instance : instances) {
             if (instance.state != ParticleInstance.State.ALIVE) {
                 continue;

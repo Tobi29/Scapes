@@ -26,10 +26,10 @@ import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.client.states.scenes.SceneScapesVoxelWorld;
-import org.tobi29.scapes.engine.opengl.BlendingMode;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.engine.opengl.shader.ShaderManager;
+import org.tobi29.scapes.engine.graphics.BlendingMode;
+import org.tobi29.scapes.engine.graphics.GL;
+import org.tobi29.scapes.engine.graphics.GraphicsSystem;
+import org.tobi29.scapes.engine.graphics.Shader;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
@@ -61,6 +61,7 @@ public class WorldClient extends World {
     private final ClientConnection connection;
     private final GameStateGameMP game;
     private final TerrainClient terrain;
+    private final Shader shaderTerrain, shaderEntity;
     private final Map<Integer, EntityModel> entityModels =
             new ConcurrentHashMap<>();
     private final EnvironmentClient environment;
@@ -85,6 +86,15 @@ public class WorldClient extends World {
         connection.plugins().plugins()
                 .forEach(plugin -> plugin.worldInit(this));
         terrain = terrainSupplier.apply(this);
+        TagStructure scapesTag =
+                game.engine().tagStructure().getStructure("Scapes");
+        float animationDistance = scapesTag.getFloat("AnimationDistance");
+        GraphicsSystem graphics = connection.game().engine().graphics();
+        shaderTerrain = graphics.createShader("Scapes:shader/Terrain",
+                information -> information.supplyPreCompile(shader -> shader
+                        .supplyProperty("ENABLE_ANIMATIONS",
+                                animationDistance > 0.0f)));
+        shaderEntity = graphics.createShader("Scapes:shader/Entity");
     }
 
     public void addEntity(EntityClient entity, int id) {
@@ -167,8 +177,6 @@ public class WorldClient extends World {
                         .playerLight(player.rightWeapon()));
         Vector3 sunlightNormal = environment
                 .sunLightNormal(cam.position.doubleX(), cam.position.doubleY());
-        ShaderManager shaderManager = gl.shaders();
-        Shader shaderTerrain = shaderManager.get("Scapes:shader/Terrain", gl);
         shaderTerrain.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB());
         shaderTerrain
                 .setUniform1f(5, scene.fogDistance() * scene.renderDistance());
@@ -179,7 +187,6 @@ public class WorldClient extends World {
                 sunlightNormal.floatY(), sunlightNormal.floatZ());
         shaderTerrain.setUniform1f(10, playerLight);
         shaderTerrain.setUniform1f(11, animationDistance * cam.far);
-        Shader shaderEntity = shaderManager.get("Scapes:shader/Entity", gl);
         shaderEntity.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB());
         shaderEntity
                 .setUniform1f(5, scene.fogDistance() * scene.renderDistance());

@@ -17,12 +17,11 @@ package org.tobi29.scapes.entity.model;
 
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.OpenGL;
-import org.tobi29.scapes.engine.opengl.vao.VAO;
-import org.tobi29.scapes.engine.opengl.matrix.Matrix;
-import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.graphics.GL;
+import org.tobi29.scapes.engine.graphics.Matrix;
+import org.tobi29.scapes.engine.graphics.MatrixStack;
+import org.tobi29.scapes.engine.graphics.Shader;
+import org.tobi29.scapes.engine.graphics.Model;
 import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.math.AABB;
@@ -37,13 +36,13 @@ public class EntityModelBlockBreak implements EntityModel {
     private final MutableVector3 pos;
     private final EntityBlockBreakClient entity;
     private final Pool<PointerPane> pointerPanes = new Pool<>(PointerPane::new);
-    private final VAO vao;
+    private final Model model;
 
     public EntityModelBlockBreak(EntityModelBlockBreakShared shared,
             EntityBlockBreakClient entity) {
         this.entity = entity;
         pos = new MutableVector3d(entity.pos());
-        vao = shared.vao;
+        model = shared.model;
     }
 
     @Override
@@ -116,8 +115,8 @@ public class EntityModelBlockBreak implements EntityModel {
                     matrix.rotate(270, 0, 1, 0);
                     break;
             }
-            gl.setAttribute4f(OpenGL.COLOR_ATTRIBUTE, 0.3f, 0.3f, 0.3f, 0.4f);
-            vao.render(gl, shader);
+            gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 0.3f, 0.3f, 0.3f, 0.4f);
+            model.render(gl, shader);
             matrixStack.pop();
         }
     }

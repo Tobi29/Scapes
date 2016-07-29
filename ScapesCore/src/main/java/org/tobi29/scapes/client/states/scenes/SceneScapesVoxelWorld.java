@@ -23,18 +23,9 @@ import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldSkybox;
 import org.tobi29.scapes.client.gui.GuiComponentChat;
 import org.tobi29.scapes.client.states.GameStateGameSP;
+import org.tobi29.scapes.engine.graphics.*;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
-import org.tobi29.scapes.engine.opengl.*;
-import org.tobi29.scapes.engine.opengl.fbo.FBO;
-import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
-import org.tobi29.scapes.engine.opengl.scenes.Scene;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.engine.opengl.shader.ShaderCompileInformation;
-import org.tobi29.scapes.engine.opengl.shader.ShaderManager;
-import org.tobi29.scapes.engine.opengl.vao.RenderType;
-import org.tobi29.scapes.engine.opengl.vao.VAO;
-import org.tobi29.scapes.engine.opengl.vao.VAOUtility;
 import org.tobi29.scapes.engine.utils.ArrayUtil;
 import org.tobi29.scapes.engine.utils.graphics.BlurOffset;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
@@ -78,7 +69,7 @@ public class SceneScapesVoxelWorld extends Scene {
 
     public final float animationDistance;
     public final boolean fxaa, bloom;
-    private final VAO vao;
+    private final Model model;
     private final WorldClient world;
     private final Cam cam;
     private final GuiWidgetDebugValues.Element cameraPositionXDebug,
@@ -86,10 +77,12 @@ public class SceneScapesVoxelWorld extends Scene {
             blockLightDebug, sunLightDebug;
     private final TerrainTextureRegistry terrainTextureRegistry;
     private final ClientSkinStorage skinStorage;
-    private final FBO skyboxFBO;
-    private final Optional<FBO> exposureFBO;
+    private final Framebuffer skyboxFBO;
+    private final Optional<Framebuffer> exposureFBO;
     private final ParticleSystem particles;
     private final WorldSkybox skybox;
+    private final Shader shaderExposure, shaderFXAA, shaderComposite1,
+            shaderComposite2, shaderTextured;
     private float brightness;
     private float renderDistance, fov;
     private int flashDir;
@@ -111,7 +104,7 @@ public class SceneScapesVoxelWorld extends Scene {
         lightDebug = debugValues.get("Camera-Light");
         blockLightDebug = debugValues.get("Camera-Block-Light");
         sunLightDebug = debugValues.get("Camera-Sun-Light");
-        vao = VAOUtility.createVTI(world.game().engine(),
+        model = VAOUtility.createVTI(world.game().engine(),
                 new float[]{0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
                         0.0f, 1.0f, 0.0f, 0.0f},
                 new float[]{0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f},
@@ -122,14 +115,38 @@ public class SceneScapesVoxelWorld extends Scene {
         fxaa = scapesTag.getBoolean("FXAA");
         bloom = scapesTag.getBoolean("Bloom");
         skybox = world.environment().createSkybox(world);
-        skyboxFBO = new FBO(world.game().engine(), 1, 1, 1, false, true, false);
+        skyboxFBO = world.game().engine().graphics()
+                .createFramebuffer(1, 1, 1, false, true, false);
         if (scapesTag.getBoolean("AutoExposure")) {
-            exposureFBO = Optional.of(
-                    new FBO(world.game().engine(), 1, 1, 1, false, true,
-                            false));
+            exposureFBO = Optional.of(world.game().engine().graphics()
+                    .createFramebuffer(1, 1, 1, false, true, false));
         } else {
             exposureFBO = Optional.empty();
         }
+        GraphicsSystem graphics = world.game().engine().graphics();
+        shaderExposure = graphics.createShader("Scapes:shader/Exposure",
+                information -> information.supplyPreCompile(shader -> {
+                    shader.supplyProperty("BLUR_OFFSET", SAMPLE_OFFSET);
+                    shader.supplyProperty("BLUR_WEIGHT", SAMPLE_WEIGHT);
+                    shader.supplyProperty("BLUR_LENGTH", SAMPLE_LENGTH);
+                }));
+        shaderFXAA = graphics.createShader("Scapes:shader/FXAA");
+        shaderComposite1 = graphics.createShader("Scapes:shader/Composite1",
+                information -> information.supplyPreCompile(shader -> {
+                    shader.supplyProperty("BLUR_OFFSET", BLUR_OFFSET);
+                    shader.supplyProperty("BLUR_WEIGHT", BLUR_WEIGHT);
+                    shader.supplyProperty("BLUR_LENGTH", BLUR_LENGTH);
+                }));
+        shaderComposite2 = graphics.createShader("Scapes:shader/Composite2",
+                information -> information.supplyPreCompile(shader -> {
+                    shader.supplyProperty("ENABLE_BLOOM", bloom);
+                    shader.supplyProperty("ENABLE_EXPOSURE",
+                            exposureFBO.isPresent());
+                    shader.supplyProperty("BLUR_OFFSET", BLUR_OFFSET);
+                    shader.supplyProperty("BLUR_WEIGHT", BLUR_WEIGHT);
+                    shader.supplyProperty("BLUR_LENGTH", BLUR_LENGTH);
+                }));
+        shaderTextured = graphics.createShader("Engine:shader/Textured");
         // TODO: Move somewhere better
         particles.register(new ParticleEmitterBlock(particles,
                 terrainTextureRegistry.texture()));
@@ -168,8 +185,9 @@ public class SceneScapesVoxelWorld extends Scene {
     }
 
     public void damageShake(double damage) {
-        flashTime = System.currentTimeMillis() +
-                (int) FastMath.ceil(damage) * 10 + 100;
+        flashTime =
+                System.currentTimeMillis() + (int) FastMath.ceil(damage) * 10 +
+                        100;
         flashStart = System.currentTimeMillis();
         Random random = ThreadLocalRandom.current();
         flashDir = 1 - (random.nextInt(2) << 1);
@@ -201,34 +219,6 @@ public class SceneScapesVoxelWorld extends Scene {
         hud.removeAll();
         hud.add(8, 434, -1, -1,
                 p -> new GuiComponentChat(p, world.game().chatHistory()));
-        ShaderManager shaderManager = gl.shaders();
-        ShaderCompileInformation information =
-                shaderManager.compileInformation("Scapes:shader/Terrain");
-        information.supplyPreCompile(shader -> shader
-                .supplyProperty("ENABLE_ANIMATIONS", animationDistance > 0.0f));
-        information =
-                shaderManager.compileInformation("Scapes:shader/Exposure");
-        information.supplyPreCompile(shader -> {
-            shader.supplyProperty("BLUR_OFFSET", SAMPLE_OFFSET);
-            shader.supplyProperty("BLUR_WEIGHT", SAMPLE_WEIGHT);
-            shader.supplyProperty("BLUR_LENGTH", SAMPLE_LENGTH);
-        });
-        information =
-                shaderManager.compileInformation("Scapes:shader/Composite1");
-        information.supplyPreCompile(shader -> {
-            shader.supplyProperty("BLUR_OFFSET", BLUR_OFFSET);
-            shader.supplyProperty("BLUR_WEIGHT", BLUR_WEIGHT);
-            shader.supplyProperty("BLUR_LENGTH", BLUR_LENGTH);
-        });
-        information =
-                shaderManager.compileInformation("Scapes:shader/Composite2");
-        information.supplyPreCompile(shader -> {
-            shader.supplyProperty("ENABLE_BLOOM", bloom);
-            shader.supplyProperty("ENABLE_EXPOSURE", exposureFBO.isPresent());
-            shader.supplyProperty("BLUR_OFFSET", BLUR_OFFSET);
-            shader.supplyProperty("BLUR_WEIGHT", BLUR_WEIGHT);
-            shader.supplyProperty("BLUR_LENGTH", BLUR_LENGTH);
-        });
         skybox.init(gl);
     }
 
@@ -251,11 +241,9 @@ public class SceneScapesVoxelWorld extends Scene {
             double flashDiv = (double) flashPos / flashDiff;
             if (flashDiv < 1.0f) {
                 if ((double) flashPos / flashDiff > 0.5f) {
-                    tilt += (1 - flashDiv) * flashDir *
-                            flashDiff * 0.1f;
+                    tilt += (1 - flashDiv) * flashDir * flashDiff * 0.1f;
                 } else {
-                    tilt += flashDiv * flashDir * flashDiff *
-                            0.1f;
+                    tilt += flashDiv * flashDir * flashDiff * 0.1f;
                 }
             }
         }
@@ -271,14 +259,14 @@ public class SceneScapesVoxelWorld extends Scene {
     @Override
     public void postRender(GL gl, double delta) {
         if (exposureFBO.isPresent()) {
-            FBO exposureFBO = this.exposureFBO.get();
+            Framebuffer exposureFBO = this.exposureFBO.get();
             state.fbo(0).textureColor(0).bind(gl);
             exposureFBO.activate(gl);
             gl.viewport(0, 0, 1, 1);
             gl.setProjectionOrthogonal(0.0f, 0.0f, 1.0f, 1.0f);
-            Shader shader = gl.shaders().get("Scapes:shader/Exposure", gl);
-            shader.setUniform1f(4, (float) FastMath.min(1.0, delta * 0.5));
-            vao.render(gl, shader);
+            shaderExposure
+                    .setUniform1f(4, (float) FastMath.min(1.0, delta * 0.5));
+            model.render(gl, shaderExposure);
             exposureFBO.deactivate(gl);
         }
         MobPlayerClientMain player = world.player();
@@ -312,34 +300,31 @@ public class SceneScapesVoxelWorld extends Scene {
 
     @Override
     public Shader postProcessing(GL gl, int pass) {
-        ShaderManager shaderManager = gl.shaders();
         if (fxaa) {
             if (pass == 0) {
                 gl.activeTexture(3);
                 gl.textures().bind("Scapes:image/Noise", gl);
                 gl.activeTexture(0);
-                Shader shader = shaderManager.get("Scapes:shader/FXAA", gl);
-                shader.setUniform1i(4, 3);
-                return shader;
+                shaderFXAA.setUniform1i(4, 3);
+                return shaderFXAA;
             } else {
                 pass--;
             }
         }
         if (pass == 0 && bloom) {
-            return shaderManager.get("Scapes:shader/Composite1", gl);
+            return shaderComposite1;
         } else {
             if (exposureFBO.isPresent()) {
                 gl.activeTexture(3);
                 exposureFBO.get().textureColor(0).bind(gl);
                 gl.activeTexture(0);
             }
-            Shader shader = shaderManager.get("Scapes:shader/Composite2", gl);
-            shader.setUniform1f(6, brightness);
-            shader.setUniform1f(7,
+            shaderComposite2.setUniform1f(6, brightness);
+            shaderComposite2.setUniform1f(7,
                     (float) FastMath.pow(2.0, skybox.exposure()));
-            shader.setUniform1i(8, 2);
-            shader.setUniform1i(9, 3);
-            return shader;
+            shaderComposite2.setUniform1i(8, 2);
+            shaderComposite2.setUniform1i(9, 3);
+            return shaderComposite2;
         }
     }
 
@@ -379,7 +364,8 @@ public class SceneScapesVoxelWorld extends Scene {
     }
 
     public void takePanorama(GL gl) {
-        FBO fbo = new FBO(state.engine(), 256, 256, 1, true, false, false);
+        Framebuffer fbo = state.engine().graphics()
+                .createFramebuffer(256, 256, 1, true, false, false);
         fbo.activate(gl);
         Image[] panorama = takePanorama(gl, fbo);
         fbo.deactivate(gl);
@@ -392,7 +378,7 @@ public class SceneScapesVoxelWorld extends Scene {
         }
     }
 
-    public Image[] takePanorama(GL gl, FBO fbo) {
+    public Image[] takePanorama(GL gl, Framebuffer fbo) {
         world.game().setHudVisible(false);
         Image[] images = new Image[6];
         Cam cam = new Cam(this.cam.near, this.cam.far);
@@ -443,8 +429,7 @@ public class SceneScapesVoxelWorld extends Scene {
         gl.viewport(0, 0, width, height);
         gl.setProjectionOrthogonal(0.0f, 0.0f, 1.0f, 1.0f);
         gl.textures().bind(skyboxFBO.textureColor(0), gl);
-        Shader shader = gl.shaders().get("Engine:shader/Textured", gl);
-        vao.render(gl, shader);
+        model.render(gl, shaderTextured);
         gl.setProjectionPerspective(width, height, cam);
         gl.enableDepthTest();
         gl.enableDepthMask();

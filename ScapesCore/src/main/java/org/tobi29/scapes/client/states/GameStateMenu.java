@@ -32,6 +32,7 @@ import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.server.Account;
+import org.tobi29.scapes.engine.utils.SleepUtil;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 
 import java.io.IOException;
@@ -42,7 +43,7 @@ public class GameStateMenu extends GameState {
     private final SceneMenu scene;
 
     public GameStateMenu(ScapesEngine engine) {
-        this(engine, new SceneMenu());
+        this(engine, new SceneMenu(engine));
     }
 
     private GameStateMenu(ScapesEngine engine, SceneMenu scene) {
@@ -58,7 +59,8 @@ public class GameStateMenu extends GameState {
     @Override
     public void init() {
         GuiStyle style = engine.guiStyle();
-        engine.guiStack().addUnfocused("00-Version", new GuiVersion(this, style));
+        engine.guiStack()
+                .addUnfocused("00-Version", new GuiVersion(this, style));
         Optional<Account> account;
         FilePath file = engine.home().resolve("Account.properties");
         try {

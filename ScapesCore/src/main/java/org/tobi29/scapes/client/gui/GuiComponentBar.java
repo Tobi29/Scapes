@@ -19,13 +19,13 @@ import java8.util.function.DoubleSupplier;
 import org.tobi29.scapes.engine.gui.GuiComponentHeavy;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.gui.GuiRenderer;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.vao.RenderType;
-import org.tobi29.scapes.engine.opengl.vao.VAO;
-import org.tobi29.scapes.engine.opengl.vao.VAOUtility;
-import org.tobi29.scapes.engine.opengl.matrix.Matrix;
-import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.graphics.GL;
+import org.tobi29.scapes.engine.graphics.RenderType;
+import org.tobi29.scapes.engine.graphics.Model;
+import org.tobi29.scapes.engine.graphics.VAOUtility;
+import org.tobi29.scapes.engine.graphics.Matrix;
+import org.tobi29.scapes.engine.graphics.MatrixStack;
+import org.tobi29.scapes.engine.graphics.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
@@ -33,7 +33,7 @@ public class GuiComponentBar extends GuiComponentHeavy {
     private final float r, g, b, a;
     private final double updateFactor;
     private final DoubleSupplier supplier;
-    private VAO vao1, vao2;
+    private Model model1, model2;
     private double value;
 
     public GuiComponentBar(GuiLayoutData parent, float r, float g, float b,
@@ -68,12 +68,12 @@ public class GuiComponentBar extends GuiComponentHeavy {
         MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.scale((float) value, 1.0f, 1.0f);
-        vao1.render(gl, shader);
+        model1.render(gl, shader);
         matrixStack.pop();
         matrix = matrixStack.push();
         matrix.translate((float) (value * size.doubleX()), 0.0f, 0.0f);
         matrix.scale((float) (1.0 - value), 1.0f, 1.0f);
-        vao2.render(gl, shader);
+        model2.render(gl, shader);
         matrixStack.pop();
     }
 
@@ -85,7 +85,7 @@ public class GuiComponentBar extends GuiComponentHeavy {
         float r2 = r1 * 0.5f;
         float g2 = g1 * 0.5f;
         float b2 = b1 * 0.5f;
-        vao1 = VAOUtility.createVCTI(gui.style().engine(),
+        model1 = VAOUtility.createVCTI(gui.style().engine(),
                 new float[]{0.0f, size.floatY(), 0.0f, size.floatX(),
                         size.floatY(), 0.0f, 0.0f, 0.0f, 0.0f, size.floatX(),
                         0.0f, 0.0f},
@@ -99,7 +99,7 @@ public class GuiComponentBar extends GuiComponentHeavy {
         r2 *= 0.4f;
         g2 *= 0.4f;
         b2 *= 0.4f;
-        vao2 = VAOUtility.createVCTI(gui.style().engine(),
+        model2 = VAOUtility.createVCTI(gui.style().engine(),
                 new float[]{0.0f, size.floatY(), 0.0f, size.floatX(),
                         size.floatY(), 0.0f, 0.0f, 0.0f, 0.0f, size.floatX(),
                         0.0f, 0.0f},

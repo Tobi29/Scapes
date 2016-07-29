@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.chunk;
 
-import org.tobi29.scapes.engine.opengl.GL;
+import org.tobi29.scapes.engine.graphics.GL;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 
 public interface WorldSkybox {

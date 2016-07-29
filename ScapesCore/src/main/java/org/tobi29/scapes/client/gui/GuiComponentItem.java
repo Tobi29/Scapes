@@ -18,8 +18,8 @@ package org.tobi29.scapes.client.gui;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.engine.gui.GuiComponentHeavy;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.graphics.GL;
+import org.tobi29.scapes.engine.graphics.Shader;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
 public class GuiComponentItem extends GuiComponentHeavy {

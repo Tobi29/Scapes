@@ -16,15 +16,15 @@
 package org.tobi29.scapes.entity.model;
 
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.opengl.vao.RenderType;
-import org.tobi29.scapes.engine.opengl.vao.VAO;
-import org.tobi29.scapes.engine.opengl.vao.VAOUtility;
+import org.tobi29.scapes.engine.graphics.RenderType;
+import org.tobi29.scapes.engine.graphics.Model;
+import org.tobi29.scapes.engine.graphics.VAOUtility;
 
 public class EntityModelBlockBreakShared {
-    public final VAO vao;
+    public final Model model;
 
     public EntityModelBlockBreakShared(ScapesEngine engine) {
-        vao = VAOUtility.createVTNI(engine,
+        model = VAOUtility.createVTNI(engine,
                 new float[]{-0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 0.5f,
                         0.5f, -0.5f, 0.5f, 0.5f},
                 new float[]{0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f},

@@ -17,8 +17,8 @@
 package org.tobi29.scapes.block;
 
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.graphics.GL;
+import org.tobi29.scapes.engine.graphics.Shader;
 import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.entity.server.MobServer;

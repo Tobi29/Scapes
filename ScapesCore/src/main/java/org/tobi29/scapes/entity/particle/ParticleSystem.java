@@ -1,7 +1,7 @@
 package org.tobi29.scapes.entity.particle;
 
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.engine.opengl.GL;
+import org.tobi29.scapes.engine.graphics.GL;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.Sync;
 import org.tobi29.scapes.engine.utils.graphics.Cam;

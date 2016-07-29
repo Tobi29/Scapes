@@ -56,7 +56,7 @@ shader vertex(0 Vector4 attribute_Position,
             }
         }
     } else {
-        if (attribute_Animation > ANIMATION_NONE && attribute_Animation < ANIMATION_WATER) {
+        if (attribute_Animation > ANIMATION_LEAVES && attribute_Animation < ANIMATION_WATER) {
             // Water Transparency
             Float distance = 1.0 - min(varying_Depth / 32.0, 1.0);
             varying_Color.a = mix(1.0, varying_Color.a, distance * distance);
@@ -91,9 +91,12 @@ shader fragment(Vector4 varying_Color,
         discard;
     }
     Float fog = min(varying_Depth / uniform_FogEnd, 1.0);
+    Float fogBackground = mix(10.0, 0.0, fog);
+    if (fogBackground <= 0.01) {
+        discard;
+    }
     fog *= fog;
     out_Color.rgb = mix(out_Color.rgb * varying_Color.rgb, uniform_FogColor, fog);
-    Float fogBackground = mix(10.0, 0.0, fog);
     if (fogBackground < 1.0) {
         Vector3 background = texture(uniform_BackgroundTexture, varying_Fragment.xy / SCREEN_SIZE).rgb;
         out_Color.rgb = mix(background, out_Color.rgb, fogBackground);

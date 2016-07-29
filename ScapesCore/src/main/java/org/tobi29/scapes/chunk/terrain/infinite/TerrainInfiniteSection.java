@@ -26,23 +26,21 @@ import org.tobi29.scapes.engine.utils.math.PointerPane;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.packets.PacketBlockChange;
 
+import java.util.Arrays;
+
 public class TerrainInfiniteSection implements TerrainClient {
-    private final TerrainInfiniteClient terrain;
-    private final int zSize;
-    private final BlockType air;
     @SuppressWarnings("unchecked")
     private final Optional<? extends TerrainInfiniteChunk>[] chunks =
             new Optional[9];
+    private TerrainInfiniteClient terrain;
+    private BlockType air;
+    private int zSize;
     private int x, y;
 
-    public TerrainInfiniteSection(TerrainInfiniteClient terrain, int zSize,
-            BlockType air) {
+    public void init(TerrainInfiniteClient terrain, Vector2 pos) {
         this.terrain = terrain;
-        this.zSize = zSize;
-        this.air = air;
-    }
-
-    public void init(Vector2 pos) {
+        air = terrain.world().air();
+        zSize = terrain.zSize;
         x = pos.intX() - 1;
         y = pos.intY() - 1;
         chunks[0] = terrain.chunk(x, y);
@@ -54,6 +52,15 @@ public class TerrainInfiniteSection implements TerrainClient {
         chunks[6] = terrain.chunk(x, y + 2);
         chunks[7] = terrain.chunk(x + 1, y + 2);
         chunks[8] = terrain.chunk(x + 2, y + 2);
+    }
+
+    public void clear() {
+        terrain = null;
+        air = null;
+        zSize = 0;
+        x = 0;
+        y = 0;
+        Arrays.fill(chunks, null);
     }
 
     @Override

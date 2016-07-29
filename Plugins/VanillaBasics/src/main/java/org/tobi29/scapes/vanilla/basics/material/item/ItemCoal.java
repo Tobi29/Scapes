@@ -21,8 +21,8 @@ import org.tobi29.scapes.block.TerrainTexture;
 import org.tobi29.scapes.block.TerrainTextureRegistry;
 import org.tobi29.scapes.block.models.ItemModel;
 import org.tobi29.scapes.block.models.ItemModelSimple;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.graphics.GL;
+import org.tobi29.scapes.engine.graphics.Shader;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
 public class ItemCoal extends VanillaItem implements ItemFuel {

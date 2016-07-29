@@ -5,13 +5,7 @@ import org.tobi29.scapes.chunk.EnvironmentClient;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
 import org.tobi29.scapes.client.states.scenes.SceneScapesVoxelWorld;
-import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.opengl.*;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
-import org.tobi29.scapes.engine.opengl.texture.Texture;
-import org.tobi29.scapes.engine.opengl.vao.RenderType;
-import org.tobi29.scapes.engine.opengl.vao.VBO;
-import org.tobi29.scapes.engine.opengl.vao.VertexType;
+import org.tobi29.scapes.engine.graphics.*;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -29,45 +23,47 @@ public class ParticleEmitterSnow
         extends ParticleEmitterInstanced<ParticleInstanceSnow> {
     private static final float[] EMPTY_FLOAT = {};
     private static final float SIZE = 0.075f;
+    private final Shader shader;
     private final Matrix4f matrix = new Matrix4f();
 
     public ParticleEmitterSnow(ParticleSystem system, Texture texture) {
-        super(system, texture, createVBO(system.world().game().engine()),
-                createVBOStream(system.world().game().engine()),
+        super(system, texture, createAttributes(), 6, createAttributesStream(),
                 RenderType.TRIANGLES, new ParticleInstanceSnow[4096],
                 ParticleInstanceSnow::new);
+        GraphicsSystem graphics = system.world().game().engine().graphics();
+        shader = graphics.createShader("VanillaBasics:shader/ParticleSnow");
     }
 
-    private static VBO createVBO(ScapesEngine engine) {
-        List<VBO.VBOAttribute> vboAttributes = new ArrayList<>();
-        vboAttributes.add(new VBO.VBOAttribute(OpenGL.VERTEX_ATTRIBUTE, 3,
+    private static List<ModelAttribute> createAttributes() {
+        List<ModelAttribute> attributes = new ArrayList<>();
+        attributes.add(new ModelAttribute(GL.VERTEX_ATTRIBUTE, 3,
                 new float[]{-SIZE, 0.0f, -SIZE, SIZE, 0.0f, -SIZE, SIZE, 0.0f,
                         SIZE, -SIZE, 0.0f, SIZE, -SIZE, 0.0f, -SIZE, SIZE, 0.0f,
                         SIZE}, false, 0, VertexType.HALF_FLOAT));
-        vboAttributes.add(new VBO.VBOAttribute(OpenGL.COLOR_ATTRIBUTE, 4,
+        attributes.add(new ModelAttribute(GL.COLOR_ATTRIBUTE, 4,
                 new float[]{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
                         1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
                         1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}, true, 0,
                 VertexType.UNSIGNED_BYTE));
-        vboAttributes.add(new VBO.VBOAttribute(OpenGL.TEXTURE_ATTRIBUTE, 2,
+        attributes.add(new ModelAttribute(GL.TEXTURE_ATTRIBUTE, 2,
                 new float[]{0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
                         0.0f, 0.0f, 1.0f, 1.0f}, false, 0, VertexType.FLOAT));
-        return new VBO(engine, vboAttributes, 6);
+        return attributes;
     }
 
-    private static VBO createVBOStream(ScapesEngine engine) {
-        List<VBO.VBOAttribute> vboAttributes = new ArrayList<>();
-        vboAttributes.add(new VBO.VBOAttribute(4, 2, EMPTY_FLOAT, false, 1,
+    private static List<ModelAttribute> createAttributesStream() {
+        List<ModelAttribute> attributes = new ArrayList<>();
+        attributes.add(new ModelAttribute(4, 2, EMPTY_FLOAT, false, 1,
                 VertexType.FLOAT));
-        vboAttributes.add(new VBO.VBOAttribute(5, 4, EMPTY_FLOAT, false, 1,
+        attributes.add(new ModelAttribute(5, 4, EMPTY_FLOAT, false, 1,
                 VertexType.FLOAT));
-        vboAttributes.add(new VBO.VBOAttribute(6, 4, EMPTY_FLOAT, false, 1,
+        attributes.add(new ModelAttribute(6, 4, EMPTY_FLOAT, false, 1,
                 VertexType.FLOAT));
-        vboAttributes.add(new VBO.VBOAttribute(7, 4, EMPTY_FLOAT, false, 1,
+        attributes.add(new ModelAttribute(7, 4, EMPTY_FLOAT, false, 1,
                 VertexType.FLOAT));
-        vboAttributes.add(new VBO.VBOAttribute(8, 4, EMPTY_FLOAT, false, 1,
+        attributes.add(new ModelAttribute(8, 4, EMPTY_FLOAT, false, 1,
                 VertexType.FLOAT));
-        return new VBO(engine, vboAttributes, 0);
+        return attributes;
     }
 
     @Override
@@ -115,8 +111,6 @@ public class ParticleEmitterSnow
                 player.leftWeapon().material().playerLight(player.leftWeapon()),
                 player.rightWeapon().material()
                         .playerLight(player.rightWeapon()));
-        Shader shader =
-                gl.shaders().get("VanillaBasics:shader/ParticleSnow", gl);
         shader.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB());
         shader.setUniform1f(5, scene.fogDistance() * scene.renderDistance());
         shader.setUniform1i(6, 1);

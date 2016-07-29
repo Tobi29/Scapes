@@ -19,20 +19,20 @@ import org.tobi29.scapes.client.gui.GuiUtils;
 import org.tobi29.scapes.engine.gui.GuiComponentHeavy;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.gui.GuiRenderer;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.vao.RenderType;
-import org.tobi29.scapes.engine.opengl.vao.VAO;
-import org.tobi29.scapes.engine.opengl.vao.VAOUtility;
-import org.tobi29.scapes.engine.opengl.matrix.Matrix;
-import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.graphics.GL;
+import org.tobi29.scapes.engine.graphics.RenderType;
+import org.tobi29.scapes.engine.graphics.Model;
+import org.tobi29.scapes.engine.graphics.VAOUtility;
+import org.tobi29.scapes.engine.graphics.Matrix;
+import org.tobi29.scapes.engine.graphics.MatrixStack;
+import org.tobi29.scapes.engine.graphics.Shader;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2f;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
 
 public class GuiComponentHotbar extends GuiComponentHeavy {
     private final MobPlayerClientMainVB player;
-    private VAO vao;
+    private Model model;
 
     public GuiComponentHotbar(GuiLayoutData parent,
             MobPlayerClientMainVB player) {
@@ -51,10 +51,10 @@ public class GuiComponentHotbar extends GuiComponentHeavy {
                         0.0f);
                 if (i == player.inventorySelectLeft()) {
                     gl.textures().bind("Scapes:image/gui/HotbarLeft", gl);
-                    vao.render(gl, shader);
+                    model.render(gl, shader);
                 } else if (i == player.inventorySelectRight()) {
                     gl.textures().bind("Scapes:image/gui/HotbarRight", gl);
-                    vao.render(gl, shader);
+                    model.render(gl, shader);
                 }
                 GuiUtils.items(0.0f, 0.0f, size.floatY(), size.floatY(),
                         inventory.item(i), gl, shader, gui.style().font());
@@ -73,7 +73,7 @@ public class GuiComponentHotbar extends GuiComponentHeavy {
                     new Vector2f(size.floatY(), size.floatY()), false);
             matrixStack.pop();
         }
-        vao = VAOUtility.createVCTI(gui.style().engine(),
+        model = VAOUtility.createVCTI(gui.style().engine(),
                 new float[]{0.0f, size.floatY() - 32.0f, 0.0f, size.floatY(),
                         size.floatY() - 32.0f, 0.0f, 0.0f, -32.0f, 0.0f,
                         size.floatY(), -32.0f, 0.0f},

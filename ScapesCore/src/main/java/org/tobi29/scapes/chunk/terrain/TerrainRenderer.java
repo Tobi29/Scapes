@@ -16,8 +16,8 @@
 
 package org.tobi29.scapes.chunk.terrain;
 
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.graphics.GL;
+import org.tobi29.scapes.engine.graphics.Shader;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
 
 public interface TerrainRenderer {

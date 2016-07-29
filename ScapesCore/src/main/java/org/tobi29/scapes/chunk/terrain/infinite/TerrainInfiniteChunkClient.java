@@ -74,6 +74,11 @@ public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
                 .blockChange(x + posBlock.intX(), y + posBlock.intY(), z);
     }
 
+    @Override
+    public TerrainInfiniteClient terrain() {
+        return terrain;
+    }
+
     public TerrainInfiniteRendererChunk rendererChunk() {
         return rendererChunk;
     }

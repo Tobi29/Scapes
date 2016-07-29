@@ -25,7 +25,7 @@ import org.tobi29.scapes.client.gui.touch.GuiTouchLoading;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.gui.Gui;
-import org.tobi29.scapes.engine.opengl.scenes.Scene;
+import org.tobi29.scapes.engine.graphics.Scene;
 import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.server.SSLHandle;
 import org.tobi29.scapes.engine.server.SSLProvider;

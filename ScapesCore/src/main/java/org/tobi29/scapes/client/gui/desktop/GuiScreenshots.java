@@ -19,11 +19,12 @@ import java8.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.GameState;
+import org.tobi29.scapes.engine.graphics.Texture;
 import org.tobi29.scapes.engine.gui.*;
-import org.tobi29.scapes.engine.opengl.texture.Texture;
-import org.tobi29.scapes.engine.opengl.texture.TextureFile;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Streams;
+import org.tobi29.scapes.engine.utils.graphics.Image;
+import org.tobi29.scapes.engine.utils.graphics.PNG;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 
@@ -51,9 +52,12 @@ public class GuiScreenshots extends GuiMenu {
                         .addVert(0, 0, -1, 70, p -> new Element(p, file, this));
                 state.engine().taskExecutor().runTask(() -> {
                     try {
-                        Texture texture = FileUtil.readReturn(file,
-                                stream -> new TextureFile(state.engine(),
-                                        stream, 0));
+                        Texture texture = FileUtil.readReturn(file, stream -> {
+                            Image image = PNG.decode(stream,
+                                    state.engine()::allocate);
+                            return state.engine().graphics()
+                                    .createTexture(image, 0);
+                        });
                         element.icon.setIcon(texture);
                     } catch (IOException e) {
                         LOGGER.warn("Failed to load screenshot: {}",
@@ -66,7 +70,7 @@ public class GuiScreenshots extends GuiMenu {
         }
     }
 
-    private class Element extends GuiComponentGroupSlab {
+    private class Element extends GuiComponentGroupSlabHeavy {
         private final GuiComponentIcon icon;
 
         @SuppressWarnings("unchecked")

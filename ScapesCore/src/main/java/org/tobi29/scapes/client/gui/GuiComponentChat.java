@@ -19,7 +19,7 @@ import org.tobi29.scapes.client.ChatHistory;
 import org.tobi29.scapes.engine.gui.GuiComponent;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.gui.GuiRenderer;
-import org.tobi29.scapes.engine.opengl.FontRenderer;
+import org.tobi29.scapes.engine.graphics.FontRenderer;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
 import java.util.Iterator;

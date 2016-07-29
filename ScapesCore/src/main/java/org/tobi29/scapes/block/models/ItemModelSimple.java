@@ -17,18 +17,18 @@ package org.tobi29.scapes.block.models;
 
 import org.tobi29.scapes.block.TerrainTexture;
 import org.tobi29.scapes.block.TerrainTextureRegistry;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.vao.Mesh;
-import org.tobi29.scapes.engine.opengl.vao.VAO;
-import org.tobi29.scapes.engine.opengl.matrix.Matrix;
-import org.tobi29.scapes.engine.opengl.matrix.MatrixStack;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.graphics.GL;
+import org.tobi29.scapes.engine.graphics.Mesh;
+import org.tobi29.scapes.engine.graphics.Model;
+import org.tobi29.scapes.engine.graphics.Matrix;
+import org.tobi29.scapes.engine.graphics.MatrixStack;
+import org.tobi29.scapes.engine.graphics.Shader;
 
 public class ItemModelSimple implements ItemModel {
     private final float r, g, b, a;
     private final TerrainTextureRegistry registry;
     private final TerrainTexture texture;
-    private final VAO vao, vaoInventory;
+    private final Model model, modelInventory;
 
     public ItemModelSimple(TerrainTexture texture, float r, float g, float b,
             float a) {
@@ -38,11 +38,11 @@ public class ItemModelSimple implements ItemModel {
         this.g = g;
         this.b = b;
         this.a = a;
-        vao = buildVAO(false);
-        vaoInventory = buildVAO(true);
+        model = buildVAO(false);
+        modelInventory = buildVAO(true);
     }
 
-    public VAO buildVAO(boolean inventory) {
+    public Model buildVAO(boolean inventory) {
         Mesh mesh = new Mesh(false);
         float texMinX = texture.x();
         float texMinY = texture.y();
@@ -140,13 +140,13 @@ public class ItemModelSimple implements ItemModel {
         MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.rotate(315.0f, 0.0f, 1.0f, 0.0f);
-        vao.render(gl, shader);
+        model.render(gl, shader);
         matrixStack.pop();
     }
 
     @Override
     public void renderInventory(GL gl, Shader shader) {
         texture.registry().texture().bind(gl);
-        vaoInventory.render(gl, shader);
+        modelInventory.render(gl, shader);
     }
 }

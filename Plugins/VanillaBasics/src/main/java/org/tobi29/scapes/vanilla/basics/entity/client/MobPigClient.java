@@ -17,7 +17,7 @@ package org.tobi29.scapes.vanilla.basics.entity.client;
 
 import java8.util.Optional;
 import org.tobi29.scapes.chunk.WorldClient;
-import org.tobi29.scapes.engine.opengl.texture.Texture;
+import org.tobi29.scapes.engine.graphics.Texture;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;

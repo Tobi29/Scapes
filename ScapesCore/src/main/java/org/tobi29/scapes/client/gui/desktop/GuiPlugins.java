@@ -18,15 +18,17 @@ package org.tobi29.scapes.client.gui.desktop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.engine.GameState;
+import org.tobi29.scapes.engine.graphics.Texture;
+import org.tobi29.scapes.engine.graphics.TextureFilter;
+import org.tobi29.scapes.engine.graphics.TextureWrap;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.input.FileType;
-import org.tobi29.scapes.engine.opengl.texture.Texture;
-import org.tobi29.scapes.engine.opengl.texture.TextureFile;
-import org.tobi29.scapes.engine.opengl.texture.TextureFilter;
-import org.tobi29.scapes.engine.opengl.texture.TextureWrap;
 import org.tobi29.scapes.engine.utils.Streams;
+import org.tobi29.scapes.engine.utils.graphics.Image;
+import org.tobi29.scapes.engine.utils.graphics.PNG;
 import org.tobi29.scapes.engine.utils.io.BufferedReadChannelStream;
 import org.tobi29.scapes.engine.utils.io.ProcessStream;
+import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.plugins.PluginFile;
@@ -111,12 +113,16 @@ public class GuiPlugins extends GuiMenu {
                 try {
                     label.setText(plugin.name());
                     try (ZipFile zip = FileUtil.zipFile(plugin.file())) {
-                        Texture texture = new TextureFile(state.engine(),
+                        ReadableByteStream stream =
                                 new BufferedReadChannelStream(
                                         Channels.newChannel(zip.getInputStream(
-                                                zip.getEntry("Icon.png")))), 0,
-                                TextureFilter.LINEAR, TextureFilter.LINEAR,
-                                TextureWrap.CLAMP, TextureWrap.CLAMP);
+                                                zip.getEntry("Icon.png"))));
+                        Image image =
+                                PNG.decode(stream, state.engine()::allocate);
+                        Texture texture = state.engine().graphics()
+                                .createTexture(image, 0, TextureFilter.LINEAR,
+                                        TextureFilter.LINEAR, TextureWrap.CLAMP,
+                                        TextureWrap.CLAMP);
                         icon.setIcon(texture);
                     }
                 } catch (IOException e) {

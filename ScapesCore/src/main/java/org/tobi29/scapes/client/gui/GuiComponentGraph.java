@@ -17,11 +17,11 @@ package org.tobi29.scapes.client.gui;
 
 import org.tobi29.scapes.engine.gui.GuiComponentHeavy;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
-import org.tobi29.scapes.engine.opengl.GL;
-import org.tobi29.scapes.engine.opengl.vao.RenderType;
-import org.tobi29.scapes.engine.opengl.vao.VAO;
-import org.tobi29.scapes.engine.opengl.vao.VAOUtility;
-import org.tobi29.scapes.engine.opengl.shader.Shader;
+import org.tobi29.scapes.engine.graphics.GL;
+import org.tobi29.scapes.engine.graphics.RenderType;
+import org.tobi29.scapes.engine.graphics.Model;
+import org.tobi29.scapes.engine.graphics.VAOUtility;
+import org.tobi29.scapes.engine.graphics.Shader;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
@@ -83,11 +83,11 @@ public class GuiComponentGraph extends GuiComponentHeavy {
             }
         }
         gl.textures().unbind(gl);
-        VAO vao = VAOUtility
+        Model model = VAOUtility
                 .createVCI(gui.style().engine(), vertex, color, index,
                         RenderType.LINES);
-        vao.render(gl, shader);
-        vao.markAsDisposed();
+        model.render(gl, shader);
+        model.markAsDisposed();
     }
 
     public void addStamp(double value, int graph) {

@@ -18,10 +18,10 @@ package org.tobi29.scapes.chunk.data;
 import org.tobi29.scapes.block.models.SmoothLight;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
 import org.tobi29.scapes.engine.ScapesEngine;
-import org.tobi29.scapes.engine.opengl.vao.RenderType;
-import org.tobi29.scapes.engine.opengl.vao.VAOStatic;
-import org.tobi29.scapes.engine.opengl.vao.VBO;
-import org.tobi29.scapes.engine.opengl.vao.VertexType;
+import org.tobi29.scapes.engine.graphics.Model;
+import org.tobi29.scapes.engine.graphics.ModelAttribute;
+import org.tobi29.scapes.engine.graphics.RenderType;
+import org.tobi29.scapes.engine.graphics.VertexType;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -198,7 +198,7 @@ public class ChunkMesh {
         }
     }
 
-    public VAOStatic finish(ScapesEngine engine) {
+    public Model finish(ScapesEngine engine) {
         computeNormals();
         int[] indexArray = new int[pos * 3 / 2];
         int i = 0, p = 0;
@@ -211,27 +211,24 @@ public class ChunkMesh {
             indexArray[i++] = p + 3;
             p += 4;
         }
-        List<VBO.VBOAttribute> vboAttributes = new ArrayList<>(6);
-        vboAttributes
-                .add(new VBO.VBOAttribute(0, 3, arrays.vertexArray, pos * 3,
-                        false, 0, VertexType.HALF_FLOAT));
-        vboAttributes
-                .add(new VBO.VBOAttribute(1, 4, arrays.colorArray, pos << 2,
-                        true, 0, VertexType.UNSIGNED_BYTE));
-        vboAttributes
-                .add(new VBO.VBOAttribute(2, 2, arrays.textureArray, pos << 1,
-                        true, 0, VertexType.UNSIGNED_SHORT));
-        vboAttributes
-                .add(new VBO.VBOAttribute(3, 3, arrays.normalArray, pos * 3,
-                        true, 0, VertexType.BYTE));
-        vboAttributes
-                .add(new VBO.VBOAttribute(4, 2, arrays.lightArray, pos << 1,
-                        true, 0, VertexType.UNSIGNED_BYTE));
-        vboAttributes
-                .add(new VBO.VBOAttribute(5, 1, arrays.animationArray, pos, 0,
-                        VertexType.BYTE));
-        VBO vbo = new VBO(engine, vboAttributes, pos);
-        return new VAOStatic(vbo, indexArray, RenderType.TRIANGLES);
+        List<ModelAttribute> attributes = new ArrayList<>(6);
+        attributes.add(new ModelAttribute(0, 3, arrays.vertexArray, pos * 3,
+                false, 0, VertexType.HALF_FLOAT));
+        attributes
+                .add(new ModelAttribute(1, 4, arrays.colorArray, pos << 2, true,
+                        0, VertexType.UNSIGNED_BYTE));
+        attributes.add(new ModelAttribute(2, 2, arrays.textureArray, pos << 1,
+                true, 0, VertexType.UNSIGNED_SHORT));
+        attributes
+                .add(new ModelAttribute(3, 3, arrays.normalArray, pos * 3, true,
+                        0, VertexType.BYTE));
+        attributes
+                .add(new ModelAttribute(4, 2, arrays.lightArray, pos << 1, true,
+                        0, VertexType.UNSIGNED_BYTE));
+        attributes.add(new ModelAttribute(5, 1, arrays.animationArray, pos, 0,
+                VertexType.BYTE));
+        return engine.graphics().createModelStatic(attributes, pos, indexArray,
+                RenderType.TRIANGLES);
     }
 
     public int size() {
