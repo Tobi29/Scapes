@@ -20,6 +20,7 @@ import org.tobi29.scapes.engine.server.AbstractServerConnection;
 import org.tobi29.scapes.engine.server.ConnectionCloseException;
 import org.tobi29.scapes.engine.server.InvalidPacketDataException;
 import org.tobi29.scapes.engine.server.PacketBundleChannel;
+import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.graphics.Image;
 import org.tobi29.scapes.engine.utils.io.*;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
@@ -128,7 +129,7 @@ public class RemotePlayerConnection extends PlayerConnection {
     private void loginStep3(RandomReadableByteStream input) throws IOException {
         loadingRadius = FastMath.clamp(input.getInt(), 10,
                 server.server().maxLoadingRadius());
-        ByteBuffer buffer = ByteBuffer.allocate(64 * 64 * 4);
+        ByteBuffer buffer = BufferCreator.bytes(64 * 64 * 4);
         input.get(buffer);
         buffer.flip();
         skin = new ServerSkin(new Image(64, 64, buffer));
