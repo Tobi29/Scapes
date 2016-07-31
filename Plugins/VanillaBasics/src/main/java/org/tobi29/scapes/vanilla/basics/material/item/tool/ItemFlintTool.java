@@ -124,8 +124,7 @@ public abstract class ItemFlintTool extends VanillaItem {
     }
 
     @Override
-    public void render(ItemStack item, GL gl, Shader shader, float r, float g,
-            float b, float a) {
+    public void render(ItemStack item, GL gl, Shader shader) {
         if (item.data() > 0) {
             modelBuilt.render(gl, shader);
         } else {
@@ -134,8 +133,7 @@ public abstract class ItemFlintTool extends VanillaItem {
     }
 
     @Override
-    public void renderInventory(ItemStack item, GL gl, Shader shader, float r,
-            float g, float b, float a) {
+    public void renderInventory(ItemStack item, GL gl, Shader shader) {
         if (item.data() > 0) {
             modelBuilt.renderInventory(gl, shader);
         } else {

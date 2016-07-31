@@ -15,35 +15,32 @@
  */
 package org.tobi29.scapes.client.gui;
 
-import java8.util.concurrent.ConcurrentMaps;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.engine.graphics.*;
 import org.tobi29.scapes.engine.gui.GuiRenderBatch;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Streams;
+import org.tobi29.scapes.engine.utils.math.vector.Vector2;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 public final class GuiUtils {
-    private static final ConcurrentMap<GL, ConcurrentMap<Integer, List<Pair<Model, Texture>>>>
-            NUMBERS = new ConcurrentHashMap<>();
-
     private GuiUtils() {
     }
 
     public static void items(float x, float y, float width, float height,
-            ItemStack item, GL gl, Shader shader, FontRenderer font) {
+            ItemStack item, GL gl, Shader shader, FontRenderer font,
+            Vector2 pixelSize) {
         if (item == null) {
             return;
         }
-        items(x, y, width, height, item, item.amount() > 1, gl, shader, font);
+        items(x, y, width, height, item, item.amount() > 1, gl, shader, font,
+                pixelSize);
     }
 
     public static void items(float x, float y, float width, float height,
             ItemStack item, boolean number, GL gl, Shader shader,
-            FontRenderer font) {
+            FontRenderer font, Vector2 pixelSize) {
         if (item == null) {
             return;
         }
@@ -52,20 +49,14 @@ public final class GuiUtils {
             Matrix matrix = matrixStack.push();
             matrix.translate(x + width / 4.0f, y + height / 4.0f, 4);
             matrix.scale(width / 2.0f, height / 2.0f, 4);
-            item.material().renderInventory(item, gl, shader, 1, 1, 1, 1);
+            item.material().renderInventory(item, gl, shader);
             matrixStack.pop();
             if (number) {
-                ConcurrentMap<Integer, List<Pair<Model, Texture>>> numbers =
-                        ConcurrentMaps.computeIfAbsent(NUMBERS, gl,
-                                key -> new ConcurrentHashMap<>());
-                List<Pair<Model, Texture>> text = ConcurrentMaps
-                        .computeIfAbsent(numbers, item.amount(), key -> {
-                            GuiRenderBatch batch = new GuiRenderBatch();
-                            font.render(FontRenderer
-                                    .to(batch, 2.0f, -18.0f, 1.0f, 1.0f, 1.0f,
-                                            1.0f), String.valueOf(key), 16.0f);
-                            return batch.finish();
-                        });
+                GuiRenderBatch batch = new GuiRenderBatch(pixelSize);
+                font.render(FontRenderer
+                                .to(batch, 2.0f, -18.0f, 1.0f, 1.0f, 1.0f, 1.0f),
+                        String.valueOf(item.amount()), 16.0f);
+                List<Pair<Model, Texture>> text = batch.finish();
                 matrix = matrixStack.push();
                 matrix.translate(x, y + height, 0.0f);
                 Streams.forEach(text, mesh -> {

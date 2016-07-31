@@ -16,28 +16,33 @@
 package org.tobi29.scapes.vanilla.basics.gui;
 
 import org.tobi29.scapes.client.gui.GuiComponentBar;
-import org.tobi29.scapes.engine.gui.GuiComponentHeavy;
+import org.tobi29.scapes.engine.gui.GuiComponentGroup;
+import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab;
 import org.tobi29.scapes.engine.gui.GuiLayoutData;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 
-public class GuiComponentCondition extends GuiComponentHeavy {
+public class GuiComponentCondition extends GuiComponentGroup {
     private final MobPlayerClientMain player;
 
     public GuiComponentCondition(GuiLayoutData parent,
             MobPlayerClientMain player) {
         super(parent);
         this.player = player;
-        addSub(0, 8, 280, 16,
-                p -> new GuiComponentBar(p, 1.0f, 0.0f, 0.0f, 0.6f, 1.0,
-                        () -> player.health() / player.maxHealth()));
-        addSub(0, 0, 560, 8,
+        addVert(0, 0, -1, -1,
                 p -> new GuiComponentBar(p, 0.0f, 1.0f, 0.0f, 0.6f, 1.0,
                         () -> value("Stamina")));
-        addSub(280, 8, 280, 8,
+        GuiComponentGroupSlab bottom =
+                addVert(0, 0, -1, -2, GuiComponentGroupSlab::new);
+        bottom.addHori(0, 0, -1, -1,
+                p -> new GuiComponentBar(p, 1.0f, 0.0f, 0.0f, 0.6f, 1.0,
+                        () -> player.health() / player.maxHealth()));
+        GuiComponentGroup bottomRight =
+                bottom.addHori(0, 0, -1, -1, GuiComponentGroup::new);
+        bottomRight.addVert(0, 0, -1, -1,
                 p -> new GuiComponentBar(p, 1.0f, 0.5f, 0.0f, 0.6f, 1.0,
                         () -> value("Hunger")));
-        addSub(280, 16, 280, 8,
+        bottomRight.addVert(0, 0, -1, -1,
                 p -> new GuiComponentBar(p, 0.0f, 0.2f, 1.0f, 0.6f, 1.0,
                         () -> value("Thirst")));
     }

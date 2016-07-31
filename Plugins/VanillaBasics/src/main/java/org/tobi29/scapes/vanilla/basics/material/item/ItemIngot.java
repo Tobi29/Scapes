@@ -66,8 +66,7 @@ public class ItemIngot extends VanillaItem implements ItemMetal {
     }
 
     @Override
-    public void render(ItemStack item, GL gl, Shader shader, float r, float g,
-            float b, float a) {
+    public void render(ItemStack item, GL gl, Shader shader) {
         AlloyType alloyType = alloy(item).type(plugin);
         switch (item.data()) {
             case 1:
@@ -81,8 +80,7 @@ public class ItemIngot extends VanillaItem implements ItemMetal {
     }
 
     @Override
-    public void renderInventory(ItemStack item, GL gl, Shader shader, float r,
-            float g, float b, float a) {
+    public void renderInventory(ItemStack item, GL gl, Shader shader) {
         AlloyType alloyType = alloy(item).type(plugin);
         switch (item.data()) {
             case 1:

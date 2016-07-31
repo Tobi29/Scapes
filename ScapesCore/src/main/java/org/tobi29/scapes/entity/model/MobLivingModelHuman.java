@@ -455,8 +455,7 @@ public class MobLivingModelHuman implements MobModel {
             matrix.rotate(120.0f, 0.0f, 0.0f, 1.0f);
             matrix.rotate(60.0f, 0.0f, 1.0f, 0.0f);
             item.material()
-                    .render(item, gl, shader, 1.0f, damageColor, damageColor,
-                            1.0f);
+                    .render(item, gl, shader);
         }
         matrixStack.pop();
         matrix = matrixStack.push();
@@ -531,8 +530,7 @@ public class MobLivingModelHuman implements MobModel {
             matrix.rotate(60.0f, 0.0f, 0.0f, 1.0f);
             matrix.rotate(60.0f, 0.0f, 1.0f, 0.0f);
             item.material()
-                    .render(item, gl, shader, 1.0f, damageColor, damageColor,
-                            1.0f);
+                    .render(item, gl, shader);
         }
         matrixStack.pop();
         matrixStack.pop();

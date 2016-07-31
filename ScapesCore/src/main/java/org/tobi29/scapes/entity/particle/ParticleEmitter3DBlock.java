@@ -86,8 +86,7 @@ public class ParticleEmitter3DBlock
                         world.terrain().blockLight(x, y, z) / 15.0f,
                         world.terrain().sunLight(x, y, z) / 15.0f);
                 instance.item.material()
-                        .render(instance.item, gl, shader, 1.0f, 1.0f, 1.0f,
-                                1.0f);
+                        .render(instance.item, gl, shader);
                 matrixStack.pop();
             }
         }

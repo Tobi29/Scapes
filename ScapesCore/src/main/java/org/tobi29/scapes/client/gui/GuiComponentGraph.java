@@ -48,7 +48,7 @@ public class GuiComponentGraph extends GuiComponentHeavy {
 
     @Override
     public void renderComponent(GL gl, Shader shader, Vector2 size,
-            double delta) {
+            Vector2 pixelSize, double delta) {
         int w = (int) FastMath.ceil(size.doubleX());
         if (data[0].length != w) {
             data = new float[data.length][w];

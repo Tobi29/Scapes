@@ -46,7 +46,7 @@ public class GuiComponentBusy extends GuiComponentHeavy {
 
     @Override
     public void renderComponent(GL gl, Shader shader, Vector2 size,
-            double delta) {
+            Vector2 pixelSize, double delta) {
         value += delta * 300.0;
         while (value > 180.0) {
             value -= 360.0;

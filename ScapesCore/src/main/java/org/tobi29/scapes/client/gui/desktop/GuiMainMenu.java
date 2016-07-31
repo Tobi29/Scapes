@@ -27,7 +27,7 @@ public class GuiMainMenu extends GuiDesktop {
     public GuiMainMenu(GameState state, SceneMenu scene, GuiStyle style) {
         super(state, style);
         GuiComponentVisiblePane pane =
-                add(0, 0, 150, 540, GuiComponentVisiblePane::new);
+                addHori(0, 0, 150, -1, GuiComponentVisiblePane::new);
         pane.addVert(0, 10, 5, 20, 144, 80,
                 p -> new GuiComponentLogo(p, 80, 18));
         GuiComponentTextButton singlePlayer = pane.addVert(16, 5, 8, 5, -1, 30,

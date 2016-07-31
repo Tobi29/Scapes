@@ -92,7 +92,7 @@ public class MobModelItem implements MobModel {
         matrix.translate(posRenderX, posRenderY, posRenderZ);
         matrix.scale(0.4f, 0.4f, 0.4f);
         matrix.rotate(dir, 0.0f, 0.0f, 1.0f);
-        item.material().render(item, gl, shader, 1.0f, 1.0f, 1.0f, 1.0f);
+        item.material().render(item, gl, shader);
         matrixStack.pop();
     }
 }

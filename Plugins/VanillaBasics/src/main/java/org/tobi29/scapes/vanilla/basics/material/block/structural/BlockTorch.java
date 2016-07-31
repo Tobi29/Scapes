@@ -234,14 +234,12 @@ public class BlockTorch extends VanillaBlock {
     }
 
     @Override
-    public void render(ItemStack item, GL gl, Shader shader, float r, float g,
-            float b, float a) {
+    public void render(ItemStack item, GL gl, Shader shader) {
         models[item.data()].render(gl, shader);
     }
 
     @Override
-    public void renderInventory(ItemStack item, GL gl, Shader shader, float r,
-            float g, float b, float a) {
+    public void renderInventory(ItemStack item, GL gl, Shader shader) {
         models[item.data()].renderInventory(gl, shader);
     }
 

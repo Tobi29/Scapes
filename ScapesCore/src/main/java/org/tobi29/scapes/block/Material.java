@@ -89,11 +89,9 @@ public abstract class Material {
 
     public abstract void createModels(TerrainTextureRegistry registry);
 
-    public abstract void render(ItemStack item, GL gl, Shader shader, float r,
-            float g, float b, float a);
+    public abstract void render(ItemStack item, GL gl, Shader shader);
 
-    public abstract void renderInventory(ItemStack item, GL gl, Shader shader,
-            float r, float g, float b, float a);
+    public abstract void renderInventory(ItemStack item, GL gl, Shader shader);
 
     public float playerLight(ItemStack item) {
         return 0;

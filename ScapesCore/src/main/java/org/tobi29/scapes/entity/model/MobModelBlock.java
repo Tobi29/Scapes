@@ -85,7 +85,7 @@ public class MobModelBlock implements MobModel {
         MatrixStack matrixStack = gl.matrixStack();
         Matrix matrix = matrixStack.push();
         matrix.translate(posRenderX, posRenderY, posRenderZ);
-        item.material().render(item, gl, shader, 1.0f, 1.0f, 1.0f, 1.0f);
+        item.material().render(item, gl, shader);
         matrixStack.pop();
     }
 }

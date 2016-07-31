@@ -54,7 +54,7 @@ public class GuiComponentBar extends GuiComponentHeavy {
 
     @Override
     public void renderComponent(GL gl, Shader shader, Vector2 size,
-            double delta) {
+            Vector2 pixelSize, double delta) {
         double factor = FastMath.min(1.0, delta * updateFactor);
         double newValue = supplier.getAsDouble();
         if (newValue == Double.NEGATIVE_INFINITY) {

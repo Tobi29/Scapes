@@ -47,7 +47,7 @@ public class GuiComponentCredits extends GuiComponentHeavy {
 
     @Override
     public void renderComponent(GL gl, Shader shader, Vector2 size,
-            double delta) {
+            Vector2 pixelSize, double delta) {
         y -= 40.0f * delta;
     }
 }

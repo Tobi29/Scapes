@@ -307,9 +307,9 @@ public class WorldSkyboxOverworld implements WorldSkybox {
         MobPlayerClientMain player = world.player();
         if (player instanceof MobPlayerClientMainVB) {
             MobPlayerClientMainVB playerVB = (MobPlayerClientMainVB) player;
-            playerVB.game().hud().add(8, 492, 560, 40,
+            playerVB.game().hud().add(8, 490, 500, 50,
                     p -> new GuiComponentHotbar(p, playerVB));
-            playerVB.game().hud().add(8, 446, 560, 24,
+            playerVB.game().hud().add(8, 456, 500, 24,
                     p -> new GuiComponentCondition(p, playerVB));
         }
     }

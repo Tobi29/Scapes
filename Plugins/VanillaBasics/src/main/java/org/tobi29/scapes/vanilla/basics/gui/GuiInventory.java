@@ -129,7 +129,7 @@ public class GuiInventory extends GuiMenu {
         }
         player.inventories().access("Hold", inventory -> GuiUtils
                 .items((float) cursorX, (float) cursorY, 30.0f, 30.0f,
-                        inventory.item(0), gl, shader, font));
+                        inventory.item(0), gl, shader, font, pixelSize));
     }
 
     protected void setTooltip(ItemStack item) {
