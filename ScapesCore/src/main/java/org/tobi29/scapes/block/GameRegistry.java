@@ -16,6 +16,7 @@
 package org.tobi29.scapes.block;
 
 import java8.util.Optional;
+import java8.util.function.Consumer;
 import java8.util.function.Function;
 import java8.util.function.Supplier;
 import org.tobi29.scapes.chunk.IDStorage;
@@ -58,11 +59,17 @@ public class GameRegistry {
         air.id = 0;
     }
 
-    public void initEarly() {
-        addAsymSupplier("Core", "Entity", 0, Integer.MAX_VALUE);
-        addAsymSupplier("Core", "Environment", 0, Integer.MAX_VALUE);
-        addSupplier("Core", "Packet", 0, Short.MAX_VALUE);
-        addSupplier("Core", "Update", 0, Short.MAX_VALUE);
+    public void registryTypes(Consumer<RegistryAdder> consumer) {
+        if (lockedTypes) {
+            throw new IllegalStateException("Early initializing already ended");
+        }
+        RegistryAdder registry = new RegistryAdder();
+        registry.addAsymSupplier("Core", "Entity", 0, Integer.MAX_VALUE);
+        registry.addAsymSupplier("Core", "Environment", 0, Integer.MAX_VALUE);
+        registry.addSupplier("Core", "Packet", 0, Short.MAX_VALUE);
+        registry.addSupplier("Core", "Update", 0, Short.MAX_VALUE);
+        consumer.accept(registry);
+        lockedTypes = true;
     }
 
     public void init(WorldType worldType) {
@@ -120,53 +127,8 @@ public class GameRegistry {
         return idStorage;
     }
 
-    public void lockTypes() {
-        lockedTypes = true;
-    }
-
     public void lock() {
         locked = true;
-    }
-
-    public synchronized void add(String module, String type, int min, int max) {
-        if (lockedTypes) {
-            throw new IllegalStateException("Early initializing already ended");
-        }
-        Pair<String, String> pair = new Pair<>(module, type);
-        Registry<?> registry = registries.get(pair);
-        if (registry == null) {
-            registry = new Registry<>(module, type, min, max);
-            registries.put(pair, registry);
-        }
-    }
-
-    public synchronized void addSupplier(String module, String type, int min,
-            int max) {
-        if (lockedTypes) {
-            throw new IllegalStateException("Early initializing already ended");
-        }
-        Pair<String, String> pair = new Pair<>(module, type);
-        SupplierRegistry<?, ?> registry = supplierRegistries.get(pair);
-        if (registry == null) {
-            registry = new SupplierRegistry<>(module, type, min, max);
-            registries.put(pair, registry);
-            supplierRegistries.put(pair, registry);
-        }
-    }
-
-    public synchronized void addAsymSupplier(String module, String type,
-            int min, int max) {
-        if (lockedTypes) {
-            throw new IllegalStateException("Early initializing already ended");
-        }
-        Pair<String, String> pair = new Pair<>(module, type);
-        AsymSupplierRegistry<?, ?, ?, ?> registry =
-                asymSupplierRegistries.get(pair);
-        if (registry == null) {
-            registry = new AsymSupplierRegistry<>(module, type, min, max);
-            registries.put(pair, registry);
-            asymSupplierRegistries.put(pair, registry);
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -379,6 +341,53 @@ public class GameRegistry {
             return reg(element,
                     (Class<? extends E>) element.a.apply(null).getClass(),
                     name);
+        }
+    }
+
+    public class RegistryAdder {
+        public synchronized void add(String module, String type, int min,
+                int max) {
+            if (lockedTypes) {
+                throw new IllegalStateException(
+                        "Early initializing already ended");
+            }
+            Pair<String, String> pair = new Pair<>(module, type);
+            Registry<?> registry = registries.get(pair);
+            if (registry == null) {
+                registry = new Registry<>(module, type, min, max);
+                registries.put(pair, registry);
+            }
+        }
+
+        public synchronized void addSupplier(String module, String type,
+                int min, int max) {
+            if (lockedTypes) {
+                throw new IllegalStateException(
+                        "Early initializing already ended");
+            }
+            Pair<String, String> pair = new Pair<>(module, type);
+            SupplierRegistry<?, ?> registry = supplierRegistries.get(pair);
+            if (registry == null) {
+                registry = new SupplierRegistry<>(module, type, min, max);
+                registries.put(pair, registry);
+                supplierRegistries.put(pair, registry);
+            }
+        }
+
+        public synchronized void addAsymSupplier(String module, String type,
+                int min, int max) {
+            if (lockedTypes) {
+                throw new IllegalStateException(
+                        "Early initializing already ended");
+            }
+            Pair<String, String> pair = new Pair<>(module, type);
+            AsymSupplierRegistry<?, ?, ?, ?> registry =
+                    asymSupplierRegistries.get(pair);
+            if (registry == null) {
+                registry = new AsymSupplierRegistry<>(module, type, min, max);
+                registries.put(pair, registry);
+                asymSupplierRegistries.put(pair, registry);
+            }
         }
     }
 }

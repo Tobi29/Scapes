@@ -78,8 +78,6 @@ public class ScapesServer {
         format.plugins().init();
         format.plugins().plugins().forEach(plugin -> plugin.initServer(this));
         format.plugins().dimensions().forEach(this::registerWorld);
-        format.plugins().plugins()
-                .forEach(plugin -> plugin.initServerEnd(this));
         serverConnection.workers(socketTag.getInteger("WorkerCount"));
     }
 

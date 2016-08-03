@@ -169,12 +169,11 @@ public class Plugins {
 
     public void init() {
         if (!init) {
-            registry.initEarly();
-            Streams.forEach(plugins, plugin -> plugin.initEarly(registry));
-            registry.lockTypes();
+            registry.registryTypes(registry -> Streams
+                    .forEach(plugins, plugin -> plugin.registryType(registry)));
             registry.init(worldType);
+            Streams.forEach(plugins, plugin -> plugin.register(registry));
             Streams.forEach(plugins, plugin -> plugin.init(registry));
-            Streams.forEach(plugins, plugin -> plugin.initEnd(registry));
             registry.lock();
             init = true;
         }

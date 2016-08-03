@@ -117,8 +117,6 @@ public class GameStateGameMP extends GameState {
         client.plugins().addFileSystems(engine.files());
         client.plugins().init();
         client.plugins().plugins().forEach(plugin -> plugin.initClient(this));
-        client.plugins().plugins()
-                .forEach(plugin -> plugin.initClientEnd(this));
         long time = System.currentTimeMillis();
         GameRegistry registry = client.plugins().registry();
         for (Material type : registry.materials()) {

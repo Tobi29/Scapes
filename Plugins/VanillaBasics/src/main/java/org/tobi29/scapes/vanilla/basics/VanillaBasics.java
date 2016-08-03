@@ -189,7 +189,7 @@ public class VanillaBasics implements WorldType {
     }
 
     @Override
-    public void initEarly(GameRegistry registry) {
+    public void registryType(GameRegistry.RegistryAdder registry) {
         registry.add("VanillaBasics", "TreeType", 0, Short.MAX_VALUE);
         registry.add("VanillaBasics", "CropType", 0, Short.MAX_VALUE);
         registry.add("VanillaBasics", "StoneType", 0, Short.MAX_VALUE);
@@ -197,7 +197,7 @@ public class VanillaBasics implements WorldType {
     }
 
     @Override
-    public void init(GameRegistry registry) {
+    public void register(GameRegistry registry) {
         GameRegistry.AsymSupplierRegistry<WorldServer, EnvironmentServer, WorldClient, EnvironmentClient>
                 environmentRegistry =
                 registry.getAsymSupplier("Core", "Environment");
@@ -225,7 +225,7 @@ public class VanillaBasics implements WorldType {
     }
 
     @Override
-    public void initEnd(GameRegistry registry) {
+    public void init(GameRegistry registry) {
         Streams.forEach(c.decoratorOverlays.values(), config -> Streams
                 .forEach(biomeDecorators.values(),
                         biome -> Streams.forEach(biome.values(), config)));
@@ -239,18 +239,10 @@ public class VanillaBasics implements WorldType {
     }
 
     @Override
-    public void initServerEnd(ScapesServer server) {
-    }
-
-    @Override
     public void initClient(GameStateGameMP game) {
         particles = new VanillaParticle(game.particleTransparentAtlas());
         modelPigShared = new MobLivingModelPigShared(game.engine());
         modelBellowsShared = new EntityModelBellowsShared(game.engine());
-    }
-
-    @Override
-    public void initClientEnd(GameStateGameMP game) {
     }
 
     @Override
