@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.block.vegetation;
 
 import java8.util.Optional;
@@ -39,7 +38,6 @@ import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class BlockBush extends VanillaBlock {
@@ -88,11 +86,6 @@ public class BlockBush extends VanillaBlock {
     @Override
     public double resistance(ItemStack item, int data) {
         return 0;
-    }
-
-    @Override
-    public List<ItemStack> drops(ItemStack item, int data) {
-        return Collections.singletonList(new ItemStack(this, data));
     }
 
     @Override

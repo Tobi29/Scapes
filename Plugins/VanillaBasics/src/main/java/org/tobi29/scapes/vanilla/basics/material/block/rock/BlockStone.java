@@ -13,15 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.block.rock;
 
-import java8.util.Optional;
 import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.block.ItemStack;
-import org.tobi29.scapes.block.TerrainTexture;
-import org.tobi29.scapes.chunk.terrain.TerrainClient;
-import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.vanilla.basics.material.StoneType;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
@@ -39,12 +34,6 @@ public abstract class BlockStone extends BlockSimpleData {
     @Override
     protected int types() {
         return stoneRegistry.values().size();
-    }
-
-    @Override
-    public Optional<TerrainTexture> particleTexture(Face face,
-            TerrainClient terrain, int x, int y, int z) {
-        return Optional.of(textures[terrain.data(x, y, z)]);
     }
 
     @Override

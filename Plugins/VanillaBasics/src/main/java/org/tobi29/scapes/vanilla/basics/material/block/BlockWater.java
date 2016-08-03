@@ -34,7 +34,6 @@ import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateWaterFlow;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -74,11 +73,6 @@ public class BlockWater extends VanillaBlock {
     @Override
     public double resistance(ItemStack item, int data) {
         return -1;
-    }
-
-    @Override
-    public List<ItemStack> drops(ItemStack item, int data) {
-        return Collections.singletonList(new ItemStack(this, data));
     }
 
     @Override

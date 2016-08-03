@@ -39,7 +39,6 @@ import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock;
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateSaplingGrowth;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -94,11 +93,6 @@ public class BlockSapling extends VanillaBlock {
     @Override
     public double resistance(ItemStack item, int data) {
         return 0;
-    }
-
-    @Override
-    public List<ItemStack> drops(ItemStack item, int data) {
-        return Collections.singletonList(new ItemStack(this, data));
     }
 
     @Override

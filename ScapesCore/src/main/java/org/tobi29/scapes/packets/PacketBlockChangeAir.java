@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
-import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
@@ -46,13 +44,5 @@ public class PacketBlockChangeAir extends PacketBlockChange {
         x = stream.getInt();
         y = stream.getInt();
         z = stream.getInt();
-    }
-
-    @Override
-    public void runClient(ClientConnection client, WorldClient world) {
-        if (world == null) {
-            return;
-        }
-        world.terrain().process(this);
     }
 }
