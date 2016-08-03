@@ -26,6 +26,7 @@ import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.client.states.scenes.SceneScapesVoxelWorld;
+import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.graphics.BlendingMode;
 import org.tobi29.scapes.engine.graphics.GL;
 import org.tobi29.scapes.engine.graphics.GraphicsSystem;
@@ -43,12 +44,12 @@ import org.tobi29.scapes.entity.client.MobClient;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.model.EntityModel;
 import org.tobi29.scapes.entity.model.MobModel;
-import org.tobi29.scapes.packets.Packet;
+import org.tobi29.scapes.packets.PacketServer;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class WorldClient extends World {
+public class WorldClient extends World implements PlayConnection<PacketServer> {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(WorldClient.class);
     private final Map<Integer, EntityClient> entities =
@@ -298,7 +299,7 @@ public class WorldClient extends World {
     }
 
     @Override
-    public void send(Packet packet) {
+    public void send(PacketServer packet) {
         connection.send(packet);
     }
 }

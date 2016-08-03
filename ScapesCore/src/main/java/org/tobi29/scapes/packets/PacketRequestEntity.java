@@ -22,7 +22,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketRequestEntity extends Packet implements PacketServer {
+public class PacketRequestEntity extends PacketAbstract implements PacketServer {
     private int entityID;
 
     public PacketRequestEntity() {

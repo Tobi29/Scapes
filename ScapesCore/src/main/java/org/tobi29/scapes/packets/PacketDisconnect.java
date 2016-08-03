@@ -28,7 +28,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketDisconnect extends Packet implements PacketClient {
+public class PacketDisconnect extends PacketAbstract implements PacketClient {
     private String reason;
     private double time;
 

@@ -23,7 +23,7 @@ import org.tobi29.scapes.engine.utils.Checksum;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.entity.skin.ServerSkin;
-import org.tobi29.scapes.packets.Packet;
+import org.tobi29.scapes.packets.PacketClient;
 import org.tobi29.scapes.plugins.Plugins;
 import org.tobi29.scapes.server.ControlPanel;
 import org.tobi29.scapes.server.MessageLevel;
@@ -89,7 +89,7 @@ public class ServerConnection extends AbstractServerConnection {
         return Streams.of(playerByName.values());
     }
 
-    public void send(Packet packet) {
+    public void send(PacketClient packet) {
         Streams.forEach(playerByName.values(), player -> player.send(packet));
     }
 

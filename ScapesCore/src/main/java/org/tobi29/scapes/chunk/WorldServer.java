@@ -25,6 +25,7 @@ import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.generator.ChunkGenerator;
 import org.tobi29.scapes.chunk.generator.ChunkPopulator;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
+import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.Sync;
 import org.tobi29.scapes.engine.utils.ThreadLocalUtil;
@@ -40,7 +41,7 @@ import org.tobi29.scapes.engine.utils.task.Joiner;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 import org.tobi29.scapes.entity.CreatureType;
 import org.tobi29.scapes.entity.server.*;
-import org.tobi29.scapes.packets.Packet;
+import org.tobi29.scapes.packets.PacketClient;
 import org.tobi29.scapes.packets.PacketEntityAdd;
 import org.tobi29.scapes.packets.PacketEntityDespawn;
 import org.tobi29.scapes.packets.PacketSoundEffect;
@@ -52,7 +53,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class WorldServer extends World implements MultiTag.ReadAndWrite {
+public class WorldServer extends World
+        implements MultiTag.ReadAndWrite, PlayConnection<PacketClient> {
     protected static final ThreadLocal<Set<EntityServer>> ENTITY_SET =
             ThreadLocalUtil.of(HashSet::new);
     protected static final ThreadLocal<Set<MobServer>> MOB_SET =
@@ -547,12 +549,12 @@ public class WorldServer extends World implements MultiTag.ReadAndWrite {
     }
 
     @Override
-    public void send(Packet packet) {
+    public void send(PacketClient packet) {
         Streams.forEach(players.values(),
                 player -> player.connection().send(packet));
     }
 
-    public void send(Packet packet, List<PlayerConnection> exceptions) {
+    public void send(PacketClient packet, List<PlayerConnection> exceptions) {
         Streams.of(players.values()).map(MobPlayerServer::connection)
                 .filter(player -> !exceptions.contains(player))
                 .forEach(player -> player.send(packet));

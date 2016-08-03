@@ -25,13 +25,12 @@ import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
 import org.tobi29.scapes.engine.server.RemoteAddress;
 import org.tobi29.scapes.engine.utils.io.IORunnable;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
-import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketServer;
 import org.tobi29.scapes.plugins.Plugins;
 
 import java.io.IOException;
 
-public abstract class ClientConnection implements PlayConnection {
+public abstract class ClientConnection implements PlayConnection<PacketServer> {
     protected static final Logger LOGGER =
             LoggerFactory.getLogger(ClientConnection.class);
     protected final GameStateGameMP game;
@@ -56,15 +55,11 @@ public abstract class ClientConnection implements PlayConnection {
     }
 
     @Override
-    public void send(Packet packet) {
-        if (!(packet instanceof PacketServer)) {
-            throw new IllegalArgumentException(
-                    "Packet is not a to-server packet!");
-        }
+    public void send(PacketServer packet) {
         task(() -> sendPacket(packet));
     }
 
-    protected void sendPacket(Packet packet) throws IOException {
+    protected void sendPacket(PacketServer packet) throws IOException {
         transmit(packet);
     }
 
@@ -74,7 +69,7 @@ public abstract class ClientConnection implements PlayConnection {
 
     protected abstract void task(IORunnable runnable);
 
-    protected abstract void transmit(Packet packet) throws IOException;
+    protected abstract void transmit(PacketServer packet) throws IOException;
 
     public int loadingRadius() {
         return loadingDistance;

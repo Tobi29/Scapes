@@ -34,7 +34,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 import java.io.IOException;
 import java.util.List;
 
-public class PacketItemUse extends Packet implements PacketServer {
+public class PacketItemUse extends PacketAbstract implements PacketServer {
     private double strength;
     private boolean side;
     private Vector2 direction;

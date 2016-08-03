@@ -21,7 +21,6 @@ import org.tobi29.scapes.client.states.GameStateMenu;
 import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.server.RemoteAddress;
 import org.tobi29.scapes.engine.utils.io.IORunnable;
-import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketClient;
 import org.tobi29.scapes.packets.PacketServer;
 import org.tobi29.scapes.plugins.Plugins;
@@ -84,8 +83,8 @@ public class LocalClientConnection extends ClientConnection {
     }
 
     @Override
-    protected void transmit(Packet packet) throws IOException {
-        player.receive((PacketServer) packet);
+    protected void transmit(PacketServer packet) throws IOException {
+        player.receive(packet);
     }
 
     @Override

@@ -24,7 +24,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketCloseGui extends Packet implements PacketClient {
+public class PacketCloseGui extends PacketAbstract implements PacketClient {
     @Override
     public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {

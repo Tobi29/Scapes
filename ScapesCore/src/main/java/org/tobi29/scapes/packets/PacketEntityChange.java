@@ -28,7 +28,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketEntityChange extends Packet implements PacketClient {
+public class PacketEntityChange extends PacketAbstract implements PacketClient {
     private int entityID;
     private TagStructure tag;
 

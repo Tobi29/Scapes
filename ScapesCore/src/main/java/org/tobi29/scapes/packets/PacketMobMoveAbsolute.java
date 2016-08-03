@@ -28,8 +28,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketMobMoveAbsolute extends Packet
-        implements PacketServer, PacketClient {
+public class PacketMobMoveAbsolute extends PacketAbstract implements PacketBoth {
     private int entityID;
     private double x, y, z;
 

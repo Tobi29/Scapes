@@ -20,11 +20,12 @@ import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.server.ConnectionCloseException;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
+import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public interface PacketClient {
+public interface PacketClient extends Packet {
     void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException;
 
@@ -36,4 +37,12 @@ public interface PacketClient {
 
     void runClient(ClientConnection client, WorldClient world)
             throws ConnectionCloseException;
+
+    Vector3 pos();
+
+    double range();
+
+    boolean isChunkContent();
+
+    boolean isVital();
 }

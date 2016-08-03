@@ -1,12 +1,12 @@
 package org.tobi29.scapes.vanilla.basics;
 
 import org.tobi29.scapes.block.GameRegistry;
-import org.tobi29.scapes.packets.Packet;
+import org.tobi29.scapes.packets.PacketAbstract;
 import org.tobi29.scapes.vanilla.basics.packet.*;
 
 class VanillaBasicsPackets {
     static void registerPackets(GameRegistry registry) {
-        GameRegistry.SupplierRegistry<GameRegistry, Packet> r =
+        GameRegistry.SupplierRegistry<GameRegistry, PacketAbstract> r =
                 registry.getSupplier("Core", "Packet");
         r.regS(PacketDayTimeSync::new, "vanilla.basics.packet.DayTimeSync");
         r.regS(PacketCrafting::new, "vanilla.basics.packet.Crafting");

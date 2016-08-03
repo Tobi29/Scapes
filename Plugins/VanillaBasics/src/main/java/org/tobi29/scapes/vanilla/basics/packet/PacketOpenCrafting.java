@@ -20,7 +20,7 @@ import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
-import org.tobi29.scapes.packets.Packet;
+import org.tobi29.scapes.packets.PacketAbstract;
 import org.tobi29.scapes.packets.PacketClient;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB;
@@ -28,7 +28,7 @@ import org.tobi29.scapes.vanilla.basics.gui.GuiCrafting;
 
 import java.io.IOException;
 
-public class PacketOpenCrafting extends Packet implements PacketClient {
+public class PacketOpenCrafting extends PacketAbstract implements PacketClient {
     @Override
     public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {

@@ -27,7 +27,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketInteraction extends Packet
+public class PacketInteraction extends PacketAbstract
         implements PacketClient, PacketServer {
     public static final byte INVENTORY_SLOT_LEFT = 0x00, INVENTORY_SLOT_RIGHT =
             0x01, OPEN_INVENTORY = 0x10, CLOSE_INVENTORY = 0x11;

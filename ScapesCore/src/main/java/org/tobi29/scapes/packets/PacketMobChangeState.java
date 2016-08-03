@@ -27,8 +27,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketMobChangeState extends Packet
-        implements PacketServer, PacketClient {
+public class PacketMobChangeState extends PacketAbstract implements PacketBoth {
     private int entityID;
     private boolean ground, slidingWall, inWater, swimming;
 

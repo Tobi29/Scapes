@@ -27,7 +27,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketEntityDespawn extends Packet implements PacketClient {
+public class PacketEntityDespawn extends PacketAbstract implements PacketClient {
     private int entityID;
     private boolean dead;
 

@@ -25,7 +25,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketChat extends Packet implements PacketServer, PacketClient {
+public class PacketChat extends PacketAbstract implements PacketBoth {
     private String text;
 
     public PacketChat() {
@@ -75,8 +75,8 @@ public class PacketChat extends Packet implements PacketServer, PacketClient {
                     output -> player.message(output.toString(),
                             MessageLevel.FEEDBACK_ERROR));
         } else {
-            player.server().message('<' + player.name() + "> " +
-                    text, MessageLevel.CHAT);
+            player.server().message('<' + player.name() + "> " + text,
+                    MessageLevel.CHAT);
         }
     }
 }

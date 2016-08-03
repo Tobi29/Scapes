@@ -20,13 +20,13 @@ import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.client.gui.desktop.GuiInGameMessage;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
-import org.tobi29.scapes.packets.Packet;
+import org.tobi29.scapes.packets.PacketAbstract;
 import org.tobi29.scapes.packets.PacketClient;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketNotification extends Packet implements PacketClient {
+public class PacketNotification extends PacketAbstract implements PacketClient {
     private String title, text;
 
     public PacketNotification() {

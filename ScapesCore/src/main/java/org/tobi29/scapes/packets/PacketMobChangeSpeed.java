@@ -28,8 +28,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketMobChangeSpeed extends Packet
-        implements PacketServer, PacketClient {
+public class PacketMobChangeSpeed extends PacketAbstract implements PacketBoth {
     private int entityID;
     private short x, y, z;
 

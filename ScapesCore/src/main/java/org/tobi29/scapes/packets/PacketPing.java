@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import org.tobi29.scapes.client.connection.ClientConnection;
@@ -23,8 +22,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public abstract class PacketPing extends Packet
-        implements PacketServer, PacketClient {
+public abstract class PacketPing extends PacketAbstract implements PacketBoth {
     protected long timestamp;
 
     protected PacketPing() {

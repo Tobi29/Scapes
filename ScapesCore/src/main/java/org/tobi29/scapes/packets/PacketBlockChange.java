@@ -25,7 +25,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketBlockChange extends Packet implements PacketClient {
+public class PacketBlockChange extends PacketAbstract implements PacketClient {
     protected int x, y, z, id, data;
 
     public PacketBlockChange() {

@@ -75,7 +75,7 @@ public class GameRegistry {
     public void init(WorldType worldType) {
         AsymSupplierRegistry<WorldServer, EntityServer, WorldClient, EntityClient>
                 er = getAsymSupplier("Core", "Entity");
-        SupplierRegistry<GameRegistry, Packet> pr =
+        SupplierRegistry<GameRegistry, PacketAbstract> pr =
                 getSupplier("Core", "Packet");
         SupplierRegistry<GameRegistry, Update> ur =
                 getSupplier("Core", "Update");

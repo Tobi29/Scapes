@@ -29,7 +29,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketInventoryInteraction extends Packet implements PacketServer {
+public class PacketInventoryInteraction extends PacketAbstract implements PacketServer {
     public static final byte LEFT = 0, RIGHT = 1;
     private int entityID, slot;
     private String id;

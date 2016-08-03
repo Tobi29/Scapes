@@ -31,7 +31,6 @@ import org.tobi29.scapes.engine.utils.io.ChecksumUtil;
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath;
 import org.tobi29.scapes.engine.utils.io.filesystem.FileUtil;
 import org.tobi29.scapes.entity.skin.ServerSkin;
-import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketClient;
 import org.tobi29.scapes.packets.PacketDisconnect;
 import org.tobi29.scapes.packets.PacketServer;
@@ -93,8 +92,8 @@ public class LocalPlayerConnection extends PlayerConnection {
     }
 
     public void error(Exception e) {
-        server.message("Player disconnected: " + nickname + " (" + e +
-                ')', MessageLevel.SERVER_INFO);
+        server.message("Player disconnected: " + nickname + " (" + e + ')',
+                MessageLevel.SERVER_INFO);
         state = State.CLOSED;
     }
 
@@ -115,7 +114,7 @@ public class LocalPlayerConnection extends PlayerConnection {
     }
 
     @Override
-    public void send(Packet packet) {
+    public void send(PacketClient packet) {
         if (state == State.CLOSED) {
             return;
         }
@@ -127,7 +126,7 @@ public class LocalPlayerConnection extends PlayerConnection {
     }
 
     @Override
-    protected synchronized void transmit(Packet packet) {
+    protected synchronized void transmit(PacketClient packet) {
         if (state == State.CLOSED) {
             return;
         }

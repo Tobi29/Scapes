@@ -29,7 +29,7 @@ import org.tobi29.scapes.engine.utils.io.RandomReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.RandomWritableByteStream;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
-import org.tobi29.scapes.packets.Packet;
+import org.tobi29.scapes.packets.PacketAbstract;
 import org.tobi29.scapes.packets.PacketClient;
 import org.tobi29.scapes.packets.PacketPingClient;
 import org.tobi29.scapes.packets.PacketServer;
@@ -74,7 +74,7 @@ public class RemoteClientConnection extends ClientConnection
                 if (bundle.isPresent()) {
                     RandomReadableByteStream input = bundle.get();
                     while (input.hasRemaining()) {
-                        PacketClient packet = (PacketClient) Packet
+                        PacketClient packet = (PacketClient) PacketAbstract
                                 .make(plugins.registry(), input.getShort());
                         int pos = input.position();
                         packet.parseClient(this, input);
@@ -136,11 +136,11 @@ public class RemoteClientConnection extends ClientConnection
     }
 
     @Override
-    protected void transmit(Packet packet) throws IOException {
+    protected void transmit(PacketServer packet) throws IOException {
         RandomWritableByteStream output = channel.getOutputStream();
         int pos = output.position();
         output.putShort(packet.id(plugins.registry()));
-        ((PacketServer) packet).sendServer(this, output);
+        packet.sendServer(this, output);
         int size = output.position() - pos;
         profilerSent.packet(packet, size);
     }

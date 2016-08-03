@@ -28,7 +28,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketMobDamage extends Packet implements PacketClient {
+public class PacketMobDamage extends PacketAbstract implements PacketClient {
     private int entityID;
     private double health, maxHealth;
 

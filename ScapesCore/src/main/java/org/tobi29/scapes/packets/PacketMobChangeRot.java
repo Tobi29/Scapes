@@ -27,8 +27,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketMobChangeRot extends Packet
-        implements PacketServer, PacketClient {
+public class PacketMobChangeRot extends PacketAbstract implements PacketBoth {
     private int entityID;
     private float x, y, z;
 

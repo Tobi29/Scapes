@@ -17,6 +17,6 @@ package org.tobi29.scapes.connection;
 
 import org.tobi29.scapes.packets.Packet;
 
-public interface PlayConnection {
-    void send(Packet packet);
+public interface PlayConnection<P extends Packet> {
+    void send(P packet);
 }

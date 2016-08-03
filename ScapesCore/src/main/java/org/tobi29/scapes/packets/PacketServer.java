@@ -23,7 +23,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public interface PacketServer {
+public interface PacketServer extends Packet {
     void sendServer(ClientConnection client, WritableByteStream stream)
             throws IOException;
 

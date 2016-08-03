@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import java8.util.Optional;
@@ -28,8 +27,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketMobMoveRelative extends Packet
-        implements PacketServer, PacketClient {
+public class PacketMobMoveRelative extends PacketAbstract implements PacketBoth {
     private int entityID;
     private byte x, y, z;
 
@@ -98,6 +96,6 @@ public class PacketMobMoveRelative extends Packet
 
     @Override
     public void runServer(PlayerConnection player) {
-        player.mob(mob->mob.positionHandler().receiveMoveRelative(x, y, z));
+        player.mob(mob -> mob.positionHandler().receiveMoveRelative(x, y, z));
     }
 }

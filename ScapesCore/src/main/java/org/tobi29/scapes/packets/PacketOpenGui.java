@@ -29,7 +29,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketOpenGui extends Packet implements PacketClient {
+public class PacketOpenGui extends PacketAbstract implements PacketClient {
     private int entityID;
 
     public PacketOpenGui() {

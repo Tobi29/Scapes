@@ -26,7 +26,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketSoundEffect extends Packet implements PacketClient {
+public class PacketSoundEffect extends PacketAbstract implements PacketClient {
     private String audio;
     private Vector3 position, velocity;
     private float pitch, gain;

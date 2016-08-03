@@ -33,7 +33,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketSendChunk extends Packet implements PacketClient {
+public class PacketSendChunk extends PacketAbstract implements PacketClient {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(PacketSendChunk.class);
     private int x, y;

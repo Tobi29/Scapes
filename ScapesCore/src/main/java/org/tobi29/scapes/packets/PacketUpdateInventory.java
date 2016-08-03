@@ -31,7 +31,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketUpdateInventory extends Packet implements PacketClient {
+public class PacketUpdateInventory extends PacketAbstract implements PacketClient {
     private int entityID;
     private String id;
     private TagStructure tag;

@@ -20,7 +20,7 @@ import org.tobi29.scapes.block.Material;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
-import org.tobi29.scapes.packets.Packet;
+import org.tobi29.scapes.packets.PacketAbstract;
 import org.tobi29.scapes.packets.PacketEntityMetaData;
 import org.tobi29.scapes.packets.PacketServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
@@ -31,7 +31,7 @@ import org.tobi29.scapes.vanilla.basics.material.item.ItemResearch;
 
 import java.io.IOException;
 
-public class PacketResearch extends Packet implements PacketServer {
+public class PacketResearch extends PacketAbstract implements PacketServer {
     private int entityID;
 
     public PacketResearch() {

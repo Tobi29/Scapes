@@ -19,7 +19,7 @@ import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
-import org.tobi29.scapes.packets.Packet;
+import org.tobi29.scapes.packets.PacketAbstract;
 import org.tobi29.scapes.packets.PacketServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
@@ -29,7 +29,7 @@ import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
 import java.io.IOException;
 
-public class PacketQuern extends Packet implements PacketServer {
+public class PacketQuern extends PacketAbstract implements PacketServer {
     private int entityID;
 
     public PacketQuern() {

@@ -32,7 +32,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketSetWorld extends Packet implements PacketClient {
+public class PacketSetWorld extends PacketAbstract implements PacketClient {
     private TagStructure tag;
     private long seed;
     private int entityID, environment;

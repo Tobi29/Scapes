@@ -29,7 +29,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class PacketSkin extends Packet implements PacketServer, PacketClient {
+public class PacketSkin extends PacketAbstract implements PacketBoth {
     private Image image;
     private Checksum checksum;
 

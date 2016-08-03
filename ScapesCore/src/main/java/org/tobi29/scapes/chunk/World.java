@@ -21,9 +21,10 @@ import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
+import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.plugins.Plugins;
 
-public abstract class World implements PlayConnection {
+public abstract class World {
     protected final BlockType air;
     protected final Plugins plugins;
     protected final TaskExecutor taskExecutor;

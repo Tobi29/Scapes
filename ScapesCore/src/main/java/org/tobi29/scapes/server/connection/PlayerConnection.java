@@ -27,8 +27,8 @@ import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.entity.skin.ServerSkin;
-import org.tobi29.scapes.packets.Packet;
 import org.tobi29.scapes.packets.PacketChat;
+import org.tobi29.scapes.packets.PacketClient;
 import org.tobi29.scapes.packets.PacketSetWorld;
 import org.tobi29.scapes.server.MessageLevel;
 import org.tobi29.scapes.server.PlayerEntry;
@@ -38,7 +38,7 @@ import org.tobi29.scapes.server.extension.event.PlayerAuthenticateEvent;
 import java.io.IOException;
 
 public abstract class PlayerConnection
-        implements Connection, PlayConnection, Command.Executor {
+        implements Connection, PlayConnection<PacketClient>, Command.Executor {
     protected final ServerConnection server;
     protected final GameRegistry registry;
     protected MobPlayerServer entity;
@@ -128,7 +128,7 @@ public abstract class PlayerConnection
         return loadingRadius;
     }
 
-    protected void sendPacket(Packet packet) throws IOException {
+    protected void sendPacket(PacketClient packet) throws IOException {
         MobPlayerServer entity = this.entity;
         if (entity == null) {
             return;
@@ -152,7 +152,7 @@ public abstract class PlayerConnection
         transmit(packet);
     }
 
-    protected abstract void transmit(Packet packet) throws IOException;
+    protected abstract void transmit(PacketClient packet) throws IOException;
 
     @Override
     public void requestClose() {

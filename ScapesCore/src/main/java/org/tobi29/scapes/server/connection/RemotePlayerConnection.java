@@ -63,7 +63,7 @@ public class RemotePlayerConnection extends PlayerConnection {
     }
 
     @Override
-    public void send(Packet packet) {
+    public void send(PacketClient packet) {
         if (sendQueueSize.get() > 128) {
             if (!packet.isVital()) {
                 return;
@@ -159,10 +159,10 @@ public class RemotePlayerConnection extends PlayerConnection {
     }
 
     @Override
-    protected void transmit(Packet packet) throws IOException {
+    protected void transmit(PacketClient packet) throws IOException {
         WritableByteStream output = channel.getOutputStream();
         output.putShort(packet.id(server.plugins().registry()));
-        ((PacketClient) packet).sendClient(this, output);
+        packet.sendClient(this, output);
     }
 
     @Override
@@ -240,7 +240,7 @@ public class RemotePlayerConnection extends PlayerConnection {
                         if (bundle.isPresent()) {
                             RandomReadableByteStream stream = bundle.get();
                             while (stream.hasRemaining()) {
-                                PacketServer packet = (PacketServer) Packet
+                                PacketServer packet = (PacketServer) PacketAbstract
                                         .make(registry, stream.getShort());
                                 packet.parseServer(this, stream);
                                 packet.runServer(this);

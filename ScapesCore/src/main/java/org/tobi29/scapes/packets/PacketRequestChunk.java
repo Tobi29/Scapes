@@ -29,8 +29,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
 
-public class PacketRequestChunk extends Packet
-        implements PacketServer, PacketClient {
+public class PacketRequestChunk extends PacketAbstract implements PacketBoth {
     private int x, y;
 
     public PacketRequestChunk() {

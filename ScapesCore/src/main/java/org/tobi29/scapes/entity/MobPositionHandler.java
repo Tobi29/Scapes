@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.entity;
 
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -118,11 +117,11 @@ public class MobPositionHandler {
             }
             if (forced || FastMath.abs(
                     FastMath.angleDiff(sentRot.doubleX(), rot.doubleX())) >
-                    DIRECTION_SEND_OFFSET ||
-                    FastMath.abs(FastMath.angleDiff(sentRot.doubleY(),
-                            rot.doubleY())) > DIRECTION_SEND_OFFSET ||
-                    FastMath.abs(FastMath.angleDiff(sentRot.doubleZ(),
-                            rot.doubleZ())) > DIRECTION_SEND_OFFSET) {
+                    DIRECTION_SEND_OFFSET || FastMath.abs(
+                    FastMath.angleDiff(sentRot.doubleY(), rot.doubleY())) >
+                    DIRECTION_SEND_OFFSET || FastMath.abs(
+                    FastMath.angleDiff(sentRot.doubleZ(), rot.doubleZ())) >
+                    DIRECTION_SEND_OFFSET) {
                 sendRotation(entityID, rot, forced);
             }
             if (forced || this.ground != ground ||
@@ -226,7 +225,7 @@ public class MobPositionHandler {
     }
 
     public interface PacketHandler {
-        void sendPacket(Packet packet);
+        void sendPacket(PacketBoth packet);
     }
 
     public interface PositionListener {

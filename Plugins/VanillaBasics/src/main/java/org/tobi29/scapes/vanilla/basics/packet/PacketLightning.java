@@ -22,7 +22,7 @@ import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3f;
-import org.tobi29.scapes.packets.Packet;
+import org.tobi29.scapes.packets.PacketAbstract;
 import org.tobi29.scapes.packets.PacketClient;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleEmitterLightning;
@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class PacketLightning extends Packet implements PacketClient {
+public class PacketLightning extends PacketAbstract implements PacketClient {
     private static final String[] SOUNDS =
             {"VanillaBasics:sound/entity/particle/thunder/Close1.ogg",
                     "VanillaBasics:sound/entity/particle/thunder/Close2.ogg",
