@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.entity.server;
+package org.tobi29.scapes.vanilla.basics.entity.server;
 
-import org.tobi29.scapes.block.BlockExplosive;
+import org.tobi29.scapes.vanilla.basics.material.block.BlockExplosive;
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldServer;
@@ -24,6 +24,7 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
+import org.tobi29.scapes.entity.server.MobServer;
 
 public class MobBombServer extends MobServer {
     private final ItemStack item;

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.entity.client;
+package org.tobi29.scapes.vanilla.basics.entity.client;
 
 import java8.util.Optional;
-import org.tobi29.scapes.block.BlockExplosive;
+import org.tobi29.scapes.vanilla.basics.material.block.BlockExplosive;
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldClient;
@@ -25,6 +25,7 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
+import org.tobi29.scapes.entity.client.MobClient;
 import org.tobi29.scapes.entity.model.MobModel;
 import org.tobi29.scapes.entity.model.MobModelBlock;
 

@@ -20,7 +20,9 @@ import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.entity.client.EntityClient;
+import org.tobi29.scapes.vanilla.basics.entity.client.MobBombClient;
 import org.tobi29.scapes.entity.server.EntityServer;
+import org.tobi29.scapes.vanilla.basics.entity.server.MobBombServer;
 import org.tobi29.scapes.vanilla.basics.entity.client.*;
 import org.tobi29.scapes.vanilla.basics.entity.server.*;
 
@@ -34,6 +36,8 @@ class VanillaBasicsEntities {
                 "vanilla.basics.mob.Zombie");
         r.reg(MobSkeletonServer::new, MobSkeletonClient::new,
                 MobSkeletonServer.class, "vanilla.basics.mob.Skeleton");
+        r.reg(MobBombServer::new, MobBombClient::new, MobBombServer.class,
+                "vanilla.basics.mob.Bomb");
         r.reg(EntityTornadoServer::new, EntityTornadoClient::new,
                 EntityTornadoServer.class, "vanilla.basics.entity.Tornado");
         r.reg(EntityAlloyServer::new, EntityAlloyClient::new,

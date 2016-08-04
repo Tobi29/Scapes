@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.block.device;
 
-import org.tobi29.scapes.block.BlockExplosive;
+import org.tobi29.scapes.vanilla.basics.material.block.BlockExplosive;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.block.TerrainTextureRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
@@ -25,10 +24,11 @@ import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.server.EntityServer;
-import org.tobi29.scapes.entity.server.MobBombServer;
+import org.tobi29.scapes.vanilla.basics.entity.server.MobBombServer;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 import org.tobi29.scapes.vanilla.basics.material.block.BlockSimple;
+import org.tobi29.scapes.vanilla.basics.util.ExplosionUtil;
 import org.tobi29.scapes.vanilla.basics.util.ParticleUtil;
 
 import java.util.Collections;
@@ -43,9 +43,9 @@ public class BlockHyperBomb extends BlockSimple implements BlockExplosive {
 
     @Override
     public void explode(TerrainServer terrain, int x, int y, int z) {
-        terrain.world()
-                .explosionBlockPush(x + 0.5, y + 0.5, z + 0.5, 8.0, 0.2, 0.1,
-                        64.0, 48.0);
+        terrain.queue(handle -> ExplosionUtil
+                .explosionBlockPush(handle, x + 0.5, y + 0.5, z + 0.5, 8.0, 0.2,
+                        0.1, 64.0, 48.0));
     }
 
     @Override

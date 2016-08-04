@@ -88,8 +88,6 @@ public class GameRegistry {
                 "core.mob.Item");
         er.reg(MobFlyingBlockServer::new, MobFlyingBlockClient::new,
                 MobFlyingBlockServer.class, "core.mob.FlyingBlock");
-        er.reg(MobBombServer::new, MobBombClient::new, MobBombServer.class,
-                "core.mob.Bomb");
         pr.regS(PacketRequestChunk::new, "core.packet.RequestChunk");
         pr.regS(PacketRequestEntity::new, "core.packet.RequestEntity");
         pr.regS(PacketSendChunk::new, "core.packet.SendChunk");
