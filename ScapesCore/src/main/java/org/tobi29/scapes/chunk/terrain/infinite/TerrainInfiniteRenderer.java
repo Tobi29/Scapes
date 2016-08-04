@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import java8.util.Optional;
@@ -195,27 +194,29 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
     }
 
     @Override
-    public void render(GL gl, Shader shader, Cam cam, boolean debug) {
+    public void render(GL gl, Shader shader1, Shader shader2, Cam cam,
+            boolean debug) {
         if (disposed) {
             return;
         }
-        Streams.forEach(chunks, chunk -> chunk.render(gl, shader, cam));
+        Streams.forEach(chunks,
+                chunk -> chunk.render(gl, shader1, shader2, cam));
         if (debug) {
             gl.textures().unbind(gl);
             Streams.forEach(chunks,
-                    chunk -> chunk.renderFrame(gl, frame, shader, cam));
+                    chunk -> chunk.renderFrame(gl, frame, shader1, cam));
         }
     }
 
     @Override
-    public void renderAlpha(GL gl, Shader shader, Cam cam) {
+    public void renderAlpha(GL gl, Shader shader1, Shader shader2, Cam cam) {
         if (disposed) {
             return;
         }
         ListIterator<TerrainInfiniteRendererChunk> iterator =
                 chunks.listIterator(chunks.size());
         while (iterator.hasPrevious()) {
-            iterator.previous().renderAlpha(gl, shader, cam);
+            iterator.previous().renderAlpha(gl, shader1, shader2, cam);
         }
     }
 
@@ -443,8 +444,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
             if (!chunk.unsetGeometryDirty(i)) {
                 return;
             }
-            Model vao = null, vaoAlpha = null;
-            AABB aabb = null, aabbAlpha = null;
+            TerrainInfiniteChunkModel model = null;
             TerrainInfiniteChunk terrainChunk = chunk.chunk();
             if (terrainChunk.isEmpty(i)) {
                 chunk.setSolid(i, false);
@@ -487,11 +487,6 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                     renderer.updateVisible.set(true);
                 }
                 if (!empty && chunk.isVisible(i)) {
-                    ChunkMesh mesh = new ChunkMesh(arrays);
-                    ChunkMesh meshAlpha = new ChunkMesh(arraysAlpha);
-                    TerrainRenderInfo info =
-                            new TerrainRenderInfo(terrain.world().infoLayers());
-                    info.init(bx, by, bz, 16, 16, 16);
                     double relativeX = terrainChunk.blockX() -
                             renderer.cam.position.doubleX();
                     double relativeY = terrainChunk.blockY() -
@@ -501,6 +496,11 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                     boolean lod = FastMath.sqr(relativeX + 8) +
                             FastMath.sqr(relativeY + 8) +
                             FastMath.sqr(relativeZ + 8) < 9216;
+                    ChunkMesh mesh = new ChunkMesh(arrays);
+                    ChunkMesh meshAlpha = new ChunkMesh(arraysAlpha);
+                    TerrainRenderInfo info =
+                            new TerrainRenderInfo(terrain.world().infoLayers());
+                    info.init(bx, by, bz, 16, 16, 16);
                     try (Profiler.C ignored = Profiler
                             .section("GenerateMesh")) {
                         for (int xxx = 0; xxx < 16; xxx++) {
@@ -523,19 +523,17 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                     try (Profiler.C ignored = Profiler
                             .section("AssembleMesh")) {
                         ScapesEngine engine = terrain.world().game().engine();
-                        if (mesh.size() > 0) {
-                            vao = mesh.finish(engine);
-                            aabb = mesh.aabb();
-                        }
-                        if (meshAlpha.size() > 0) {
-                            vaoAlpha = meshAlpha.finish(engine);
-                            aabbAlpha = meshAlpha.aabb();
-                        }
+                        Model vao = mesh.finish(engine);
+                        AABB aabb = mesh.aabb();
+                        Model vaoAlpha = meshAlpha.finish(engine);
+                        AABB aabbAlpha = meshAlpha.aabb();
+                        model = new TerrainInfiniteChunkModel(vao, vaoAlpha,
+                                aabb, aabbAlpha, lod);
                     }
                 }
                 section.clear();
             }
-            chunk.replaceMesh(i, vao, vaoAlpha, aabb, aabbAlpha);
+            chunk.replaceMesh(i, model);
         }
     }
 }

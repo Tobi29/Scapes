@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.states.scenes;
 
 import java8.util.Optional;
@@ -68,7 +67,6 @@ public class SceneScapesVoxelWorld extends Scene {
         SAMPLE_WEIGHT = ArrayUtil.join(sampleWeight);
     }
 
-    public final float animationDistance;
     public final boolean fxaa, bloom;
     private final Model model;
     private final WorldClient world;
@@ -112,7 +110,6 @@ public class SceneScapesVoxelWorld extends Scene {
                 new int[]{0, 1, 2, 3, 2, 1}, RenderType.TRIANGLES);
         TagStructure scapesTag =
                 world.game().engine().tagStructure().getStructure("Scapes");
-        animationDistance = scapesTag.getFloat("AnimationDistance");
         fxaa = scapesTag.getBoolean("FXAA");
         bloom = scapesTag.getBoolean("Bloom");
         skybox = world.environment().createSkybox(world);
@@ -441,7 +438,7 @@ public class SceneScapesVoxelWorld extends Scene {
         if (wireframe) {
             gl.enableWireframe();
         }
-        world.render(gl, cam, animationDistance, chunkGeometryDebug);
+        world.render(gl, cam, chunkGeometryDebug);
         if (wireframe) {
             gl.disableWireframe();
         }

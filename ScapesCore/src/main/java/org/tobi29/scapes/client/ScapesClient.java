@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client;
 
 import java8.util.Optional;
@@ -164,13 +163,13 @@ public class ScapesClient extends Game {
                     Container.FormFactor.PHONE;
             TagStructure scapesTag = tagStructure.getStructure("Scapes");
             if (lightDefaults) {
-                scapesTag.setFloat("AnimationDistance", 0.0f);
+                scapesTag.setBoolean("Animations", false);
                 scapesTag.setBoolean("Bloom", false);
                 scapesTag.setBoolean("AutoExposure", false);
                 scapesTag.setBoolean("FXAA", false);
                 scapesTag.setDouble("RenderDistance", 64.0);
             } else {
-                scapesTag.setFloat("AnimationDistance", 0.15f);
+                scapesTag.setBoolean("Animations", true);
                 scapesTag.setBoolean("Bloom", true);
                 scapesTag.setBoolean("AutoExposure", true);
                 scapesTag.setBoolean("FXAA", true);

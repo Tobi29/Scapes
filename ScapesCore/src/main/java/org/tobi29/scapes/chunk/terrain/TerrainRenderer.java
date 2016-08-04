@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain;
 
 import org.tobi29.scapes.engine.graphics.GL;
@@ -23,9 +22,9 @@ import org.tobi29.scapes.engine.utils.graphics.Cam;
 public interface TerrainRenderer {
     void renderUpdate(Cam cam);
 
-    void render(GL gl, Shader shader, Cam cam, boolean debug);
+    void render(GL gl, Shader shader1, Shader shader2, Cam cam, boolean debug);
 
-    void renderAlpha(GL gl, Shader shader, Cam cam);
+    void renderAlpha(GL gl, Shader shader1, Shader shader2, Cam cam);
 
     void blockChange(int x, int y, int z);
 

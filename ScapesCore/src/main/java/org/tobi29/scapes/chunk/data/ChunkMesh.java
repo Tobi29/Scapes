@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.data;
 
 import org.tobi29.scapes.block.models.SmoothLight;
@@ -31,8 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChunkMesh {
-    private static final float[] EMPTY_FLOAT = new float[0];
-    private static final byte[] EMPTY_BYTE = new byte[0];
+    private static final float[] EMPTY_FLOAT = {};
+    private static final int[] EMPTY_INT = {};
     private static final int START_SIZE = 6 * 6000;
     private final SmoothLight.FloatTriple triple =
             new SmoothLight.FloatTriple();
@@ -118,7 +117,7 @@ public class ChunkMesh {
         float[] newTextureArray = new float[size << 1];
         float[] newNormalArray = new float[size * 3];
         float[] newLightArray = new float[size << 1];
-        byte[] newAnimationArray = new byte[size];
+        int[] newAnimationArray = new int[size];
         System.arraycopy(arrays.vertexArray, 0, newVertexArray, 0,
                 FastMath.min(arrays.vertexArray.length, newVertexArray.length));
         System.arraycopy(arrays.colorArray, 0, newColorArray, 0,
@@ -227,7 +226,7 @@ public class ChunkMesh {
                 .add(new ModelAttribute(4, 2, arrays.lightArray, pos << 1, true,
                         0, VertexType.UNSIGNED_BYTE));
         attributes.add(new ModelAttribute(5, 1, arrays.animationArray, pos, 0,
-                VertexType.BYTE));
+                VertexType.UNSIGNED_BYTE));
         return engine.graphics().createModelStatic(attributes, pos, indexArray,
                 RenderType.TRIANGLES);
     }
@@ -246,6 +245,6 @@ public class ChunkMesh {
         public float[] textureArray = EMPTY_FLOAT;
         public float[] normalArray = EMPTY_FLOAT;
         public float[] lightArray = EMPTY_FLOAT;
-        public byte[] animationArray = EMPTY_BYTE;
+        public int[] animationArray = EMPTY_INT;
     }
 }

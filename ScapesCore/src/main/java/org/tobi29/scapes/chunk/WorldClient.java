@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk;
 
 import java8.util.Optional;
@@ -63,7 +62,7 @@ public class WorldClient extends World implements PlayConnection<PacketServer> {
     private final ClientConnection connection;
     private final GameStateGameMP game;
     private final TerrainClient terrain;
-    private final Shader shaderTerrain, shaderEntity;
+    private final Shader shaderTerrain1, shaderTerrain2, shaderEntity;
     private final Map<Integer, EntityModel> entityModels =
             new ConcurrentHashMap<>();
     private final EnvironmentClient environment;
@@ -90,12 +89,20 @@ public class WorldClient extends World implements PlayConnection<PacketServer> {
         terrain = terrainSupplier.apply(this);
         TagStructure scapesTag =
                 game.engine().tagStructure().getStructure("Scapes");
-        float animationDistance = scapesTag.getFloat("AnimationDistance");
         GraphicsSystem graphics = connection.game().engine().graphics();
-        shaderTerrain = graphics.createShader("Scapes:shader/Terrain",
-                information -> information.supplyPreCompile(shader -> shader
-                        .supplyProperty("ENABLE_ANIMATIONS",
-                                animationDistance > 0.0f)));
+        shaderTerrain1 = graphics.createShader("Scapes:shader/Terrain",
+                information -> information.supplyPreCompile(shader -> {
+                    shader.supplyProperty("ENABLE_ANIMATIONS",
+                            scapesTag.getBoolean("Animations"));
+                    shader.supplyProperty("LOD_LOW", false);
+                    shader.supplyProperty("LOD_HIGH", true);
+                }));
+        shaderTerrain2 = graphics.createShader("Scapes:shader/Terrain",
+                information -> information.supplyPreCompile(shader -> {
+                    shader.supplyProperty("ENABLE_ANIMATIONS", false);
+                    shader.supplyProperty("LOD_LOW", true);
+                    shader.supplyProperty("LOD_HIGH", false);
+                }));
         shaderEntity = graphics.createShader("Scapes:shader/Entity");
     }
 
@@ -168,7 +175,7 @@ public class WorldClient extends World implements PlayConnection<PacketServer> {
         terrain.renderer().renderUpdate(cam);
     }
 
-    public void render(GL gl, Cam cam, float animationDistance, boolean debug) {
+    public void render(GL gl, Cam cam, boolean debug) {
         float time = (System.currentTimeMillis() % 10000000) / 1000.0f;
         float sunLightReduction = environment
                 .sunLightReduction(cam.position.doubleX(),
@@ -179,16 +186,26 @@ public class WorldClient extends World implements PlayConnection<PacketServer> {
                         .playerLight(player.rightWeapon()));
         Vector3 sunlightNormal = environment
                 .sunLightNormal(cam.position.doubleX(), cam.position.doubleY());
-        shaderTerrain.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB());
-        shaderTerrain
+        shaderTerrain1
+                .setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB());
+        shaderTerrain1
                 .setUniform1f(5, scene.fogDistance() * scene.renderDistance());
-        shaderTerrain.setUniform1i(6, 1);
-        shaderTerrain.setUniform1f(7, time);
-        shaderTerrain.setUniform1f(8, sunLightReduction);
-        shaderTerrain.setUniform3f(9, sunlightNormal.floatX(),
+        shaderTerrain1.setUniform1i(6, 1);
+        shaderTerrain1.setUniform1f(7, time);
+        shaderTerrain1.setUniform1f(8, sunLightReduction);
+        shaderTerrain1.setUniform3f(9, sunlightNormal.floatX(),
                 sunlightNormal.floatY(), sunlightNormal.floatZ());
-        shaderTerrain.setUniform1f(10, playerLight);
-        shaderTerrain.setUniform1f(11, animationDistance * cam.far);
+        shaderTerrain1.setUniform1f(10, playerLight);
+        shaderTerrain2
+                .setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB());
+        shaderTerrain2
+                .setUniform1f(5, scene.fogDistance() * scene.renderDistance());
+        shaderTerrain2.setUniform1i(6, 1);
+        shaderTerrain2.setUniform1f(7, time);
+        shaderTerrain2.setUniform1f(8, sunLightReduction);
+        shaderTerrain2.setUniform3f(9, sunlightNormal.floatX(),
+                sunlightNormal.floatY(), sunlightNormal.floatZ());
+        shaderTerrain2.setUniform1f(10, playerLight);
         shaderEntity.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB());
         shaderEntity
                 .setUniform1f(5, scene.fogDistance() * scene.renderDistance());
@@ -200,7 +217,8 @@ public class WorldClient extends World implements PlayConnection<PacketServer> {
         shaderEntity.setUniform1f(10, playerLight);
         gl.setBlending(BlendingMode.NONE);
         scene.terrainTextureRegistry().texture().bind(gl);
-        terrain.renderer().render(gl, shaderTerrain, cam, debug);
+        terrain.renderer()
+                .render(gl, shaderTerrain1, shaderTerrain2, cam, debug);
         gl.setBlending(BlendingMode.NORMAL);
         if (game.hud().isVisible()) {
             playerModel.render(gl, this, cam, shaderEntity);
@@ -211,7 +229,7 @@ public class WorldClient extends World implements PlayConnection<PacketServer> {
             return cam.frustum.inView(aabb) != 0;
         }, model -> model.render(gl, this, cam, shaderEntity));
         scene.terrainTextureRegistry().texture().bind(gl);
-        terrain.renderer().renderAlpha(gl, shaderTerrain, cam);
+        terrain.renderer().renderAlpha(gl, shaderTerrain1, shaderTerrain2, cam);
         scene.particles().render(gl, cam);
     }
 

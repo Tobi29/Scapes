@@ -9,57 +9,70 @@ uniform 7 Float uniform_Time;
 uniform 8 Float uniform_Sunlight;
 uniform 9 Vector3 uniform_SunlightNormal;
 uniform 10 Float uniform_CamLight;
-uniform 11 Float uniform_AnimationDistance;
 
 const Float PI = 3.14159;
 const Float DEG2RAD = PI / 180.0;
 const Vector3 BLOCKLIGHT_NORMAL = vector3(0.3, 0.1, 0.6);
 const Vector2 SCREEN_SIZE = vector2(float($SCENE_WIDTH), float($SCENE_HEIGHT));
-const Float ANIMATION_NONE = 0.0;
-const Float ANIMATION_LEAVES = 1.5;
-const Float ANIMATION_WATER = 2.5;
+const Float ANIMATION_DISTANCE = 80.0;
+const Int ANIMATION_NONE = 0;
+const Int ANIMATION_LEAVES = 1;
+const Int ANIMATION_TALL_GRASS = 2;
+const Int ANIMATION_WATER = 3;
 
 shader vertex(0 Vector4 attribute_Position,
               1 Vector4 attribute_Color,
               2 Vector2 attribute_Texture,
               3 Vector3 attribute_Normal,
               4 Vector2 attribute_Light,
-              5 Float attribute_Animation) {
+              5 Int attribute_Animation) {
     varying_Texture = attribute_Texture;
     varying_Color = attribute_Color;
     Vector4 vertex = attribute_Position;
     varying_Depth = length((uniform_ModelViewMatrix * vertex).xyz);
-    if ($ENABLE_ANIMATIONS) {
-        if (attribute_Animation > ANIMATION_NONE) {
-            if (varying_Depth < uniform_AnimationDistance) {
-                Vector3 animPos;
-                animPos.x = vertex.x * DEG2RAD;
-                animPos.y = vertex.y * DEG2RAD;
-                animPos.z = vertex.z * DEG2RAD;
-                if (attribute_Animation < ANIMATION_WATER) {
-                    // Water
-                    Float distance = 1.0 - min(varying_Depth / 32.0, 1.0);
-                    varying_Color.a = mix(1.0, varying_Color.a, distance * distance);
-                    vertex.z -= 0.06;
-                    vertex.z += sin((uniform_Time * 0.4 + (animPos.x + animPos.y) * 11.25) * 6.0) * 0.04;
-                    vertex.z += sin((uniform_Time * 0.8 + (animPos.x - animPos.y) * 22.5) * 6.0) * 0.02;
-                } else if (attribute_Animation < ANIMATION_LEAVES) {
-                    // Leaves
-                    vertex.x += sin((uniform_Time * 0.4 + (animPos.x + animPos.y) * 11.25) * 6.0) * 0.04;
-                    vertex.y += sin((uniform_Time * 0.3 + (animPos.x - animPos.y) * 11.25) * 6.0) * 0.04;
-                    vertex.z += sin((uniform_Time * 0.9 + (animPos.x - animPos.y) * 22.5) * 6.0) * 0.04;
+    if ($LOD_HIGH) {
+        if ($ENABLE_ANIMATIONS) {
+            if (attribute_Animation != ANIMATION_NONE) {
+                if (varying_Depth < ANIMATION_DISTANCE) {
+                    Vector3 animPos;
+                    animPos.x = vertex.x * DEG2RAD;
+                    animPos.y = vertex.y * DEG2RAD;
+                    animPos.z = vertex.z * DEG2RAD;
+                    if (attribute_Animation == ANIMATION_WATER) {
+                        // Water Transparency
+                        Float distance = 1.0 - min(varying_Depth / 32.0, 1.0);
+                        varying_Color.a = mix(1.0, varying_Color.a, distance * distance);
+                        vertex.z -= 0.06;
+                        vertex.z += sin((uniform_Time * 0.4 + (animPos.x + animPos.y) * 11.25) * 6.0) * 0.04;
+                        vertex.z += sin((uniform_Time * 0.8 + (animPos.x - animPos.y) * 22.5) * 6.0) * 0.02;
+                    } else if (attribute_Animation == ANIMATION_LEAVES) {
+                        // Leaves
+                        vertex.x += sin((uniform_Time * 0.2 + (animPos.x + animPos.y) * 11.25) * 6.0) * 0.04;
+                        vertex.y += sin((uniform_Time * 0.1 + (animPos.x - animPos.y) * 11.25) * 6.0) * 0.04;
+                        vertex.z += sin((uniform_Time * 0.3 + (animPos.x - animPos.y) * 22.5) * 6.0) * 0.04;
+                    } else if (attribute_Animation == ANIMATION_TALL_GRASS) {
+                        // Tall Grass
+                        vertex.x += sin((uniform_Time * 0.3 + (animPos.x + animPos.y) * 11.25) * 6.0) * 0.1;
+                        vertex.y += sin((uniform_Time * 0.2 + (animPos.x - animPos.y) * 11.25) * 6.0) * 0.2;
+                        vertex.z += sin((uniform_Time * 0.1 + (animPos.x - animPos.y) * 11.25) * 6.0) * 0.02;
+                    }
+                } else if (attribute_Animation == ANIMATION_WATER) {
+                    // Water Transparency
+                    varying_Color.a = 1.0;
                 }
-            } else if (attribute_Animation < ANIMATION_WATER) {
+            }
+        } else {
+            if (attribute_Animation == ANIMATION_WATER) {
                 // Water Transparency
                 Float distance = 1.0 - min(varying_Depth / 32.0, 1.0);
                 varying_Color.a = mix(1.0, varying_Color.a, distance * distance);
             }
         }
-    } else {
-        if (attribute_Animation > ANIMATION_LEAVES && attribute_Animation < ANIMATION_WATER) {
+    }
+    if ($LOD_LOW) {
+        if (attribute_Animation == ANIMATION_WATER) {
             // Water Transparency
-            Float distance = 1.0 - min(varying_Depth / 32.0, 1.0);
-            varying_Color.a = mix(1.0, varying_Color.a, distance * distance);
+            varying_Color.a = 1.0;
         }
     }
     Float lightSunLevel = max(attribute_Light.y - uniform_Sunlight, 0.0);

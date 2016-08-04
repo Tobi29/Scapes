@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import org.tobi29.scapes.engine.graphics.*;
 import org.tobi29.scapes.engine.utils.ArrayUtil;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
-import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import java.util.Arrays;
@@ -29,8 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TerrainInfiniteRendererChunk {
     private final TerrainInfiniteChunkClient chunk;
     private final TerrainInfiniteRenderer renderer;
-    private final Model[] vao, vaoAlpha;
-    private final AABB[] aabb, aabbAlpha;
+    private final TerrainInfiniteChunkModel[] vao;
     private final AtomicBoolean[] geometryDirty;
     private final boolean[] geometryInit, solid, visible, prepareVisible,
             culled, lod;
@@ -43,10 +40,7 @@ public class TerrainInfiniteRendererChunk {
         geometryDirty = new AtomicBoolean[zSections];
         ArrayUtil.fill(geometryDirty, () -> new AtomicBoolean(true));
         geometryInit = new boolean[zSections + 1];
-        vao = new Model[zSections];
-        vaoAlpha = new Model[zSections];
-        aabb = new AABB[zSections];
-        aabbAlpha = new AABB[zSections];
+        vao = new TerrainInfiniteChunkModel[zSections];
         lod = new boolean[zSections];
         solid = new boolean[zSections];
         visible = new boolean[zSections];
@@ -64,7 +58,7 @@ public class TerrainInfiniteRendererChunk {
         return vao.length;
     }
 
-    public void render(GL gl, Shader shader, Cam cam) {
+    public void render(GL gl, Shader shader1, Shader shader2, Cam cam) {
         double relativeX = chunk.blockX() - cam.position.doubleX();
         double relativeY = chunk.blockY() - cam.position.doubleY();
         MatrixStack matrixStack = gl.matrixStack();
@@ -73,46 +67,44 @@ public class TerrainInfiniteRendererChunk {
             boolean newLod =
                     FastMath.sqr(relativeX + 8) + FastMath.sqr(relativeY + 8) +
                             FastMath.sqr(relativeZ + 8) < 9216;
-            if (lod[i] != newLod) {
-                lod[i] = newLod;
-                setGeometryDirty(i);
-            }
-            Model vao = this.vao[i];
-            AABB aabb = this.aabb[i];
-            if (vao != null && aabb != null) {
-                if (cam.frustum.inView(aabb) != 0) {
+            TerrainInfiniteChunkModel vao = this.vao[i];
+            if (vao != null) {
+                if (vao.lod != newLod) {
+                    setGeometryDirty(i);
+                }
+                if (cam.frustum.inView(vao.aabb) != 0) {
                     Matrix matrix = matrixStack.push();
                     matrix.translate((float) relativeX, (float) relativeY,
                             (float) relativeZ);
-                    if (!vao.render(gl, shader)) {
+                    if (!vao.model.render(gl, vao.lod ? shader1 : shader2)) {
                         setGeometryDirty(i);
                     }
                     matrixStack.pop();
                 } else {
-                    vao.ensureStored(gl);
+                    vao.model.ensureStored(gl);
                 }
             }
         }
     }
 
-    public void renderAlpha(GL gl, Shader shader, Cam cam) {
+    public void renderAlpha(GL gl, Shader shader1, Shader shader2, Cam cam) {
         double relativeX = chunk.blockX() - cam.position.doubleX();
         double relativeY = chunk.blockY() - cam.position.doubleY();
         MatrixStack matrixStack = gl.matrixStack();
         for (int i = 0; i < vao.length; i++) {
-            Model vao = vaoAlpha[i];
-            AABB aabb = aabbAlpha[i];
-            if (vao != null && aabb != null) {
-                if (cam.frustum.inView(aabb) != 0) {
+            TerrainInfiniteChunkModel vao = this.vao[i];
+            if (vao != null) {
+                if (cam.frustum.inView(vao.aabbAlpha) != 0) {
                     Matrix matrix = matrixStack.push();
                     matrix.translate((float) relativeX, (float) relativeY,
                             (float) ((i << 4) - cam.position.doubleZ()));
-                    if (!vao.render(gl, shader)) {
+                    if (!vao.modelAlpha
+                            .render(gl, vao.lod ? shader1 : shader2)) {
                         setGeometryDirty(i);
                     }
                     matrixStack.pop();
                 } else {
-                    vao.ensureStored(gl);
+                    vao.modelAlpha.ensureStored(gl);
                 }
             }
         }
@@ -124,9 +116,9 @@ public class TerrainInfiniteRendererChunk {
 
     public void renderFrame(GL gl, Model frame, Shader shader, Cam cam) {
         MatrixStack matrixStack = gl.matrixStack();
-        for (int i = 0; i < aabb.length; i++) {
-            AABB aabb = this.aabb[i];
-            if (aabb != null) {
+        for (int i = 0; i < vao.length; i++) {
+            TerrainInfiniteChunkModel vao = this.vao[i];
+            if (vao != null) {
                 Matrix matrix = matrixStack.push();
                 gl.setAttribute2f(4, 1.0f, 1.0f);
                 if (!chunk.isLoaded()) {
@@ -139,42 +131,29 @@ public class TerrainInfiniteRendererChunk {
                     gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 0.0f, 1.0f, 0.0f,
                             1.0f);
                 }
-                matrix.translate((float) (aabb.minX - cam.position.doubleX()),
-                        (float) (aabb.minY - cam.position.doubleY()),
-                        (float) (aabb.minZ - cam.position.doubleZ()));
-                matrix.scale((float) (aabb.maxX - aabb.minX),
-                        (float) (aabb.maxY - aabb.minY),
-                        (float) (aabb.maxZ - aabb.minZ));
+                matrix.translate(
+                        (float) (vao.aabb.minX - cam.position.doubleX()),
+                        (float) (vao.aabb.minY - cam.position.doubleY()),
+                        (float) (vao.aabb.minZ - cam.position.doubleZ()));
+                matrix.scale((float) (vao.aabb.maxX - vao.aabb.minX),
+                        (float) (vao.aabb.maxY - vao.aabb.minY),
+                        (float) (vao.aabb.maxZ - vao.aabb.minZ));
                 frame.render(gl, shader);
                 matrixStack.pop();
             }
         }
     }
 
-    public synchronized void replaceMesh(int i, Model render, Model renderAlpha,
-            AABB aabb, AABB aabbAlpha) {
-        if (visible[i]) {
-            if (render != null) {
-                render.setWeak(true);
-            }
-            if (renderAlpha != null) {
-                renderAlpha.setWeak(true);
-            }
-            vao[i] = render;
-            vaoAlpha[i] = renderAlpha;
-            if (aabb != null) {
-                aabb.add(chunk.blockX(), chunk.blockY(), i << 4);
-            }
-            if (aabbAlpha != null) {
-                aabbAlpha.add(chunk.blockX(), chunk.blockY(), i << 4);
-            }
-            this.aabb[i] = aabb;
-            this.aabbAlpha[i] = aabbAlpha;
+    public synchronized void replaceMesh(int i,
+            TerrainInfiniteChunkModel model) {
+        if (visible[i] && model != null) {
+            model.model.setWeak(true);
+            model.modelAlpha.setWeak(true);
+            vao[i] = model;
+            model.aabb.add(chunk.blockX(), chunk.blockY(), i << 4);
+            model.aabbAlpha.add(chunk.blockX(), chunk.blockY(), i << 4);
         } else {
             vao[i] = null;
-            vaoAlpha[i] = null;
-            this.aabb[i] = null;
-            this.aabbAlpha[i] = null;
         }
         if (!geometryInit[0]) {
             geometryInit[i + 1] = true;
@@ -229,7 +208,6 @@ public class TerrainInfiniteRendererChunk {
             } else if (!prepareVisible[i] && oldVisible) {
                 visible[i] = false;
                 vao[i] = null;
-                vaoAlpha[i] = null;
             }
         }
     }
@@ -265,7 +243,6 @@ public class TerrainInfiniteRendererChunk {
 
     public void reset() {
         Arrays.fill(vao, null);
-        Arrays.fill(vaoAlpha, null);
         Arrays.fill(solid, true);
         Streams.forEach(geometryDirty, value -> value.set(true));
         Arrays.fill(geometryInit, false);

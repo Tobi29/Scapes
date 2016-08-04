@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui.touch;
 
 import org.tobi29.scapes.engine.GameState;
-import org.tobi29.scapes.engine.gui.*;
+import org.tobi29.scapes.engine.gui.Gui;
+import org.tobi29.scapes.engine.gui.GuiComponentTextButton;
+import org.tobi29.scapes.engine.gui.GuiEvent;
+import org.tobi29.scapes.engine.gui.GuiStyle;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
 public class GuiTouchShaderSettings extends GuiTouchMenu {
@@ -26,9 +28,12 @@ public class GuiTouchShaderSettings extends GuiTouchMenu {
         super(state, "Shader Settings", previous, style);
         TagStructure scapesTag =
                 state.engine().tagStructure().getStructure("Scapes");
-        GuiComponentSlider animationDistance = row(pane,
-                p -> slider(p, "Animation Distance",
-                        scapesTag.getFloat("AnimationDistance")));
+        GuiComponentTextButton animations;
+        if (scapesTag.getBoolean("Animations")) {
+            animations = row(pane, p -> button(p, "Animations: ON"));
+        } else {
+            animations = row(pane, p -> button(p, "Animations: OFF"));
+        }
         GuiComponentTextButton bloom;
         if (scapesTag.getBoolean("Bloom")) {
             bloom = row(pane, p -> button(p, "Bloom: ON"));
@@ -48,14 +53,20 @@ public class GuiTouchShaderSettings extends GuiTouchMenu {
             fxaa = row(pane, p -> button(p, "FXAA: OFF"));
         }
 
-        selection(animationDistance);
+        selection(animations);
         selection(bloom);
         selection(autoExposure);
         selection(fxaa);
 
-        animationDistance.on(GuiEvent.CHANGE, event -> scapesTag
-                .setFloat("AnimationDistance",
-                        (float) animationDistance.value()));
+        animations.on(GuiEvent.CLICK_LEFT, event -> {
+            if (!scapesTag.getBoolean("Animations")) {
+                animations.setText("Animations: ON");
+                scapesTag.setBoolean("Animations", true);
+            } else {
+                animations.setText("Animations: OFF");
+                scapesTag.setBoolean("Animations", false);
+            }
+        });
         bloom.on(GuiEvent.CLICK_LEFT, event -> {
             if (!scapesTag.getBoolean("Bloom")) {
                 bloom.setText("Bloom: ON");

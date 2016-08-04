@@ -13,21 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.tobi29.scapes.chunk.terrain.infinite;
 
-package org.tobi29.scapes.block;
+import org.tobi29.scapes.engine.graphics.Model;
+import org.tobi29.scapes.engine.utils.math.AABB;
 
-public enum ShaderAnimation {
-    NONE((byte) 0),
-    LEAVES((byte) 1),
-    TALL_GRASS((byte) 2),
-    WATER((byte) 3);
-    private final byte id;
+public class TerrainInfiniteChunkModel {
+    public final Model model, modelAlpha;
+    public final AABB aabb, aabbAlpha;
+    public final boolean lod;
 
-    ShaderAnimation(byte id) {
-        this.id = id;
-    }
-
-    public byte id() {
-        return id;
+    public TerrainInfiniteChunkModel(Model model, Model modelAlpha, AABB aabb,
+            AABB aabbAlpha, boolean lod) {
+        this.model = model;
+        this.modelAlpha = modelAlpha;
+        this.aabb = aabb;
+        this.aabbAlpha = aabbAlpha;
+        this.lod = lod;
     }
 }
