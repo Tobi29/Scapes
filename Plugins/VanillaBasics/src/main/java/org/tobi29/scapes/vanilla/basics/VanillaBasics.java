@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics;
 
 import java8.util.concurrent.ConcurrentMaps;
@@ -84,49 +83,6 @@ public class VanillaBasics implements WorldType {
 
     public void addCraftingRecipe(CraftingRecipeType recipe) {
         craftingRecipes.add(recipe);
-    }
-
-    private void addResearchRecipe(ResearchRecipe recipe) {
-        if (locked) {
-            throw new IllegalStateException("Initializing already ended");
-        }
-        researchRecipes.add(recipe);
-    }
-
-    private void addMetalType(MetalType metal) {
-        if (locked) {
-            throw new IllegalStateException("Initializing already ended");
-        }
-        metalTypes.put(metal.id(), metal);
-    }
-
-    private void addAlloyType(AlloyType alloy) {
-        if (locked) {
-            throw new IllegalStateException("Initializing already ended");
-        }
-        alloyTypes.put(alloy.id(), alloy);
-    }
-
-    private void addOreType(OreType ore) {
-        if (locked) {
-            throw new IllegalStateException("Initializing already ended");
-        }
-        oreTypes.add(ore);
-    }
-
-    private BiomeDecorator addBiomeDecorator(BiomeGenerator.Biome biome,
-            String name, int weight) {
-        if (locked) {
-            throw new IllegalStateException("Initializing already ended");
-        }
-        Map<String, BiomeDecorator> biomeMap = biomeDecorators.get(biome);
-        BiomeDecorator biomeDecorator = biomeMap.get(name);
-        if (biomeDecorator == null) {
-            biomeDecorator = new BiomeDecorator();
-            biomeMap.put(name, biomeDecorator);
-        }
-        biomeDecorator.addWeight(weight);
-        return biomeDecorator;
     }
 
     public Stream<CraftingRecipeType> craftingRecipes() {
@@ -335,7 +291,12 @@ public class VanillaBasics implements WorldType {
                 new ConcurrentHashMap<>();
 
         public void research(String name, String text, String... items) {
-            addResearchRecipe(new ResearchRecipe(name, text, items));
+            if (locked) {
+                throw new IllegalStateException("Initializing already ended");
+            }
+            ResearchRecipe researchRecipe =
+                    new ResearchRecipe(name, text, items);
+            researchRecipes.add(researchRecipe);
         }
 
         public void decorator(String name, Consumer<BiomeDecorator> config) {
@@ -344,45 +305,68 @@ public class VanillaBasics implements WorldType {
 
         public void decorator(BiomeGenerator.Biome biome, String name,
                 int weight, Consumer<BiomeDecorator> config) {
-            config.accept(addBiomeDecorator(biome, name, weight));
+            if (locked) {
+                throw new IllegalStateException("Initializing already ended");
+            }
+            Map<String, BiomeDecorator> biomeMap = biomeDecorators.get(biome);
+            BiomeDecorator biomeDecorator = biomeMap.get(name);
+            if (biomeDecorator == null) {
+                biomeDecorator = new BiomeDecorator();
+                biomeMap.put(name, biomeDecorator);
+            }
+            biomeDecorator.addWeight(weight);
+            config.accept(biomeDecorator);
         }
 
         public void metal(Consumer<MetalTypeCreator> metal) {
+            if (locked) {
+                throw new IllegalStateException("Initializing already ended");
+            }
             MetalTypeCreator creator = new MetalTypeCreator();
             metal.accept(creator);
             MetalType metalType = new MetalType(creator.id, creator.name,
                     creator.meltingPoint, creator.r, creator.g, creator.b);
-            addMetalType(metalType);
-            addAlloyType(
+            AlloyType alloyType =
                     new AlloyType(creator.id, creator.name, creator.ingotName,
                             Collections.singletonMap(metalType, 1.0), creator.r,
                             creator.g, creator.b, creator.toolEfficiency,
                             creator.toolStrength, creator.toolDamage,
-                            creator.toolLevel));
+                            creator.toolLevel);
+            metalTypes.put(metalType.id(), metalType);
+            alloyTypes.put(alloyType.id(), alloyType);
         }
 
         public void alloy(Consumer<AlloyTypeCreator> alloy) {
+            if (locked) {
+                throw new IllegalStateException("Initializing already ended");
+            }
             AlloyTypeCreator creator = new AlloyTypeCreator();
             alloy.accept(creator);
             Map<MetalType, Double> ingredients = new ConcurrentHashMap<>();
             Streams.forEach(creator.ingredients.entrySet(), entry -> ingredients
                     .put(metalTypes.get(entry.getKey()), entry.getValue()));
-            addAlloyType(
+            AlloyType alloyType =
                     new AlloyType(creator.id, creator.name, creator.ingotName,
                             ingredients, creator.r, creator.g, creator.b,
                             creator.toolEfficiency, creator.toolStrength,
-                            creator.toolDamage, creator.toolLevel));
+                            creator.toolDamage, creator.toolLevel);
+            alloyTypes.put(alloyType.id(), alloyType);
         }
 
         public void ore(Consumer<OreTypeCreator> ore) {
+            if (locked) {
+                throw new IllegalStateException("Initializing already ended");
+            }
             OreTypeCreator creator = new OreTypeCreator();
             ore.accept(creator);
             List<Integer> stoneTypes = Streams.of(creator.stoneTypes)
                     .map(stoneType -> stoneType.data(materials.registry))
                     .collect(Collectors.toList());
-            addOreType(new OreType(creator.type, creator.rarity, creator.size,
-                    creator.chance, creator.rockChance, creator.rockDistance,
-                    stoneTypes));
+            OreType oreType =
+                    new OreType(creator.type, creator.rarity, creator.size,
+                            creator.chance, creator.rockChance,
+                            creator.rockDistance, stoneTypes);
+            oreTypes.add(oreType);
         }
 
         public void craftingRecipe(CraftingRecipeType recipeType,
