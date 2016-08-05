@@ -14,7 +14,7 @@ const Float PI = 3.14159;
 const Float DEG2RAD = PI / 180.0;
 const Vector3 BLOCKLIGHT_NORMAL = vector3(0.3, 0.1, 0.6);
 const Vector2 SCREEN_SIZE = vector2(float($SCENE_WIDTH), float($SCENE_HEIGHT));
-const Float ANIMATION_DISTANCE = 80.0;
+const Float ANIMATION_DISTANCE = 32.0;
 const Int ANIMATION_NONE = 0;
 const Int ANIMATION_LEAVES = 1;
 const Int ANIMATION_TALL_GRASS = 2;
@@ -40,7 +40,7 @@ shader vertex(0 Vector4 attribute_Position,
                     animPos.z = vertex.z * DEG2RAD;
                     if (attribute_Animation == ANIMATION_WATER) {
                         // Water Transparency
-                        Float distance = 1.0 - min(varying_Depth / 32.0, 1.0);
+                        Float distance = 1.0 - min(varying_Depth / ANIMATION_DISTANCE, 1.0);
                         varying_Color.a = mix(1.0, varying_Color.a, distance * distance);
                         vertex.z -= 0.06;
                         vertex.z += sin((uniform_Time * 0.4 + (animPos.x + animPos.y) * 11.25) * 6.0) * 0.04;
@@ -64,7 +64,7 @@ shader vertex(0 Vector4 attribute_Position,
         } else {
             if (attribute_Animation == ANIMATION_WATER) {
                 // Water Transparency
-                Float distance = 1.0 - min(varying_Depth / 32.0, 1.0);
+                Float distance = 1.0 - min(varying_Depth / ANIMATION_DISTANCE, 1.0);
                 varying_Color.a = mix(1.0, varying_Color.a, distance * distance);
             }
         }

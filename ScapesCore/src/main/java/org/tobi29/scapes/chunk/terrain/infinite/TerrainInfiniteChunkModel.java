@@ -15,20 +15,19 @@
  */
 package org.tobi29.scapes.chunk.terrain.infinite;
 
+import java8.util.Optional;
 import org.tobi29.scapes.engine.graphics.Model;
+import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.math.AABB;
 
 public class TerrainInfiniteChunkModel {
-    public final Model model, modelAlpha;
-    public final AABB aabb, aabbAlpha;
+    public final Optional<Pair<Model, AABB>> model, modelAlpha;
     public final boolean lod;
 
-    public TerrainInfiniteChunkModel(Model model, Model modelAlpha, AABB aabb,
-            AABB aabbAlpha, boolean lod) {
+    public TerrainInfiniteChunkModel(Optional<Pair<Model, AABB>> model,
+            Optional<Pair<Model, AABB>> modelAlpha, boolean lod) {
         this.model = model;
         this.modelAlpha = modelAlpha;
-        this.aabb = aabb;
-        this.aabbAlpha = aabbAlpha;
         this.lod = lod;
     }
 }

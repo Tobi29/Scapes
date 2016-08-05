@@ -17,8 +17,10 @@ package org.tobi29.scapes.chunk.terrain.infinite;
 
 import org.tobi29.scapes.engine.graphics.*;
 import org.tobi29.scapes.engine.utils.ArrayUtil;
+import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.graphics.Cam;
+import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 
 import java.util.Arrays;
@@ -64,24 +66,27 @@ public class TerrainInfiniteRendererChunk {
         MatrixStack matrixStack = gl.matrixStack();
         for (int i = 0; i < vao.length; i++) {
             double relativeZ = (i << 4) - cam.position.doubleZ();
-            boolean newLod =
+            double distance =
                     FastMath.sqr(relativeX + 8) + FastMath.sqr(relativeY + 8) +
-                            FastMath.sqr(relativeZ + 8) < 9216;
+                            FastMath.sqr(relativeZ + 8);
+            boolean newLod = distance < 9216;
             TerrainInfiniteChunkModel vao = this.vao[i];
-            if (vao != null) {
+            if (vao != null && vao.model.isPresent()) {
+                Pair<Model, AABB> m = vao.model.get();
                 if (vao.lod != newLod) {
                     setGeometryDirty(i);
                 }
-                if (cam.frustum.inView(vao.aabb) != 0) {
+                if (cam.frustum.inView(m.b) != 0) {
+                    boolean animated = distance < 2304;
                     Matrix matrix = matrixStack.push();
                     matrix.translate((float) relativeX, (float) relativeY,
                             (float) relativeZ);
-                    if (!vao.model.render(gl, vao.lod ? shader1 : shader2)) {
+                    if (!m.a.render(gl, animated ? shader1 : shader2)) {
                         setGeometryDirty(i);
                     }
                     matrixStack.pop();
                 } else {
-                    vao.model.ensureStored(gl);
+                    m.a.ensureStored(gl);
                 }
             }
         }
@@ -93,18 +98,23 @@ public class TerrainInfiniteRendererChunk {
         MatrixStack matrixStack = gl.matrixStack();
         for (int i = 0; i < vao.length; i++) {
             TerrainInfiniteChunkModel vao = this.vao[i];
-            if (vao != null) {
-                if (cam.frustum.inView(vao.aabbAlpha) != 0) {
+            if (vao != null && vao.modelAlpha.isPresent()) {
+                Pair<Model, AABB> m = vao.modelAlpha.get();
+                if (cam.frustum.inView(m.b) != 0) {
+                    double relativeZ = (i << 4) - cam.position.doubleZ();
+                    double distance = FastMath.sqr(relativeX + 8) +
+                            FastMath.sqr(relativeY + 8) +
+                            FastMath.sqr(relativeZ + 8);
+                    boolean animated = distance < 2304;
                     Matrix matrix = matrixStack.push();
                     matrix.translate((float) relativeX, (float) relativeY,
-                            (float) ((i << 4) - cam.position.doubleZ()));
-                    if (!vao.modelAlpha
-                            .render(gl, vao.lod ? shader1 : shader2)) {
+                            (float) relativeZ);
+                    if (!m.a.render(gl, animated ? shader1 : shader2)) {
                         setGeometryDirty(i);
                     }
                     matrixStack.pop();
                 } else {
-                    vao.modelAlpha.ensureStored(gl);
+                    m.a.ensureStored(gl);
                 }
             }
         }
@@ -118,7 +128,8 @@ public class TerrainInfiniteRendererChunk {
         MatrixStack matrixStack = gl.matrixStack();
         for (int i = 0; i < vao.length; i++) {
             TerrainInfiniteChunkModel vao = this.vao[i];
-            if (vao != null) {
+            if (vao != null && vao.model.isPresent()) {
+                AABB aabb = vao.model.get().b;
                 Matrix matrix = matrixStack.push();
                 gl.setAttribute2f(4, 1.0f, 1.0f);
                 if (!chunk.isLoaded()) {
@@ -131,13 +142,12 @@ public class TerrainInfiniteRendererChunk {
                     gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 0.0f, 1.0f, 0.0f,
                             1.0f);
                 }
-                matrix.translate(
-                        (float) (vao.aabb.minX - cam.position.doubleX()),
-                        (float) (vao.aabb.minY - cam.position.doubleY()),
-                        (float) (vao.aabb.minZ - cam.position.doubleZ()));
-                matrix.scale((float) (vao.aabb.maxX - vao.aabb.minX),
-                        (float) (vao.aabb.maxY - vao.aabb.minY),
-                        (float) (vao.aabb.maxZ - vao.aabb.minZ));
+                matrix.translate((float) (aabb.minX - cam.position.doubleX()),
+                        (float) (aabb.minY - cam.position.doubleY()),
+                        (float) (aabb.minZ - cam.position.doubleZ()));
+                matrix.scale((float) (aabb.maxX - aabb.minX),
+                        (float) (aabb.maxY - aabb.minY),
+                        (float) (aabb.maxZ - aabb.minZ));
                 frame.render(gl, shader);
                 matrixStack.pop();
             }
@@ -147,11 +157,13 @@ public class TerrainInfiniteRendererChunk {
     public synchronized void replaceMesh(int i,
             TerrainInfiniteChunkModel model) {
         if (visible[i] && model != null) {
-            model.model.setWeak(true);
-            model.modelAlpha.setWeak(true);
+            model.model.ifPresent(m -> m.a.setWeak(true));
+            model.modelAlpha.ifPresent(m -> m.a.setWeak(true));
+            model.model.ifPresent(
+                    m -> m.b.add(chunk.blockX(), chunk.blockY(), i << 4));
+            model.modelAlpha.ifPresent(
+                    m -> m.b.add(chunk.blockX(), chunk.blockY(), i << 4));
             vao[i] = model;
-            model.aabb.add(chunk.blockX(), chunk.blockY(), i << 4);
-            model.aabbAlpha.add(chunk.blockX(), chunk.blockY(), i << 4);
         } else {
             vao[i] = null;
         }

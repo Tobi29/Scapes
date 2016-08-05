@@ -22,6 +22,7 @@ import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderer;
 import org.tobi29.scapes.engine.ScapesEngine;
 import org.tobi29.scapes.engine.graphics.*;
+import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.ThreadLocalUtil;
@@ -523,12 +524,22 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                     try (Profiler.C ignored = Profiler
                             .section("AssembleMesh")) {
                         ScapesEngine engine = terrain.world().game().engine();
-                        Model vao = mesh.finish(engine);
-                        AABB aabb = mesh.aabb();
-                        Model vaoAlpha = meshAlpha.finish(engine);
-                        AABB aabbAlpha = meshAlpha.aabb();
+                        Optional<Pair<Model, AABB>> vao, vaoAlpha;
+                        if (mesh.size() > 0) {
+                            vao = Optional.of(new Pair<>(mesh.finish(engine),
+                                    mesh.aabb()));
+                        } else {
+                            vao = Optional.empty();
+                        }
+                        if (meshAlpha.size() > 0) {
+                            vaoAlpha = Optional.of(
+                                    new Pair<>(meshAlpha.finish(engine),
+                                            meshAlpha.aabb()));
+                        } else {
+                            vaoAlpha = Optional.empty();
+                        }
                         model = new TerrainInfiniteChunkModel(vao, vaoAlpha,
-                                aabb, aabbAlpha, lod);
+                                lod);
                     }
                 }
                 section.clear();
