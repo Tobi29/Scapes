@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.generator;
 
 import org.tobi29.scapes.block.BlockType;
@@ -23,10 +22,9 @@ import org.tobi29.scapes.chunk.EnvironmentServer;
 import org.tobi29.scapes.chunk.MobSpawner;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.generator.ChunkGenerator;
-import org.tobi29.scapes.chunk.generator.ChunkPopulator;
+import org.tobi29.scapes.chunk.generator.ChunkPopulator2D;
+import org.tobi29.scapes.chunk.terrain.TerrainChunk2D;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
-import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteChunk;
-import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteServer;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -282,7 +280,7 @@ public class EnvironmentOverworldServer
     }
 
     @Override
-    public ChunkPopulator populator() {
+    public ChunkPopulator2D populator() {
         return pop;
     }
 
@@ -465,34 +463,26 @@ public class EnvironmentOverworldServer
             if (simulationCount >= Long.MAX_VALUE - 10) {
                 simulationCount = 0;
             }
-            TerrainInfiniteServer terrain =
-                    (TerrainInfiniteServer) world.getTerrain();
-            for (TerrainInfiniteChunk chunk : terrain.loadedChunks()) {
-                Random random = ThreadLocalRandom.current();
-                if (chunk.isLoaded()) {
-                    simulateSeason(terrain, chunk.blockX(), chunk.blockY(), 16,
-                            16, chunk.metaData("Vanilla"));
-                }
-                int x = random.nextInt(16);
-                int y = random.nextInt(16);
-                double weather = climateGenerator
-                        .weather(x + chunk.blockX(), y + chunk.blockY());
+            Random random = ThreadLocalRandom.current();
+            TerrainServer terrain = world.getTerrain();
+            world.getTerrain().chunks2D(chunk -> {
+                simulateSeason(terrain, chunk);
+                int x = chunk.blockX() + random.nextInt(16);
+                int y = chunk.blockY() + random.nextInt(16);
+                double weather = climateGenerator.weather(x, y);
                 if (random.nextInt((int) (513 - weather * 512)) == 0 &&
-                        random.nextInt(1000) == 0 &&
-                        weather > 0.7f) {
-                    world.send(new PacketLightning(chunk.blockX() + x,
-                            chunk.blockY() + y,
-                            chunk.highestTerrainBlockZAtL(x, y)));
+                        random.nextInt(1000) == 0 && weather > 0.7f) {
+                    world.send(new PacketLightning(x, y,
+                            terrain.highestTerrainBlockZAt(x, y)));
                 } else if (random.nextInt((int) (513 - weather * 512)) == 0 &&
-                        random.nextInt(10000) == 0 &&
-                        weather > 0.85f) {
+                        random.nextInt(10000) == 0 && weather > 0.85f) {
                     EntityServer entity = new EntityTornadoServer(world,
-                            new Vector3d(chunk.blockX() + x, chunk.blockY() + y,
-                                    chunk.highestTerrainBlockZAtL(x, y)));
+                            new Vector3d(x, y,
+                                    terrain.highestTerrainBlockZAt(x, y)));
                     entity.onSpawn();
                     world.addEntity(entity);
                 }
-            }
+            });
         }
     }
 
@@ -515,8 +505,8 @@ public class EnvironmentOverworldServer
         return FastMath.normalizeSafe(new Vector3d(rx, ry, rz)).multiply(mix);
     }
 
-    public void simulateSeason(TerrainServer.TerrainMutable terrain, int x,
-            int y, int dx, int dy, TagStructure tagStructure) {
+    public void simulateSeason(TerrainServer terrain, TerrainChunk2D chunk) {
+        TagStructure tagStructure = chunk.metaData("Vanilla");
         long chunkSimulationCount = tagStructure.getLong("SimulationCount");
         int count;
         if (chunkSimulationCount <= 0) {
@@ -530,7 +520,8 @@ public class EnvironmentOverworldServer
             count = FastMath.max(10240 / (int) delta, 1);
         }
         tagStructure.setLong("SimulationCount", simulationCount);
-        simulateSeason(terrain, x, y, dx, dy, count);
+        terrain.queue(handler -> simulateSeason(handler, chunk.blockX(),
+                chunk.blockY(), chunk.blockDX(), chunk.blockDY(), count));
     }
 
     private void simulateSeason(TerrainServer.TerrainMutable chunk, int x,

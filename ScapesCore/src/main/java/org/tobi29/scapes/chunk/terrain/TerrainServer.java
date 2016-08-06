@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain;
 
 import java8.util.Optional;
@@ -44,9 +43,13 @@ public interface TerrainServer extends Terrain {
     boolean isBlockSendable(MobPlayerServer player, int x, int y, int z,
             boolean chunkContent);
 
-    boolean addEntity(EntityServer entity);
+    void chunks2D(Consumer<TerrainChunk2D> consumer);
 
-    void addPlayer(MobPlayerServer player);
+    default void chunks3D(Consumer<TerrainChunk3D> consumer) {
+        chunks2D(consumer::accept);
+    }
+
+    boolean addEntity(EntityServer entity);
 
     boolean removeEntity(EntityServer entity);
 

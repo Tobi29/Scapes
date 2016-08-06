@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import java8.util.Optional;
@@ -161,8 +160,7 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
             Class<? extends Update> clazz) {
         synchronized (delayedUpdates) {
             for (Update update : delayedUpdates) {
-                if (update.x() == x && update.y() == y &&
-                        update.z() == z) {
+                if (update.x() == x && update.y() == y && update.z() == z) {
                     if (update.isValidOn(
                             typeG(update.x(), update.y(), update.z()),
                             terrain)) {
@@ -322,9 +320,8 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
     public void populate() {
         state = State.POPULATING;
         terrain.queue(handle -> {
-            terrain.world().populators().forEach(pop -> pop
-                    .populate(handle, posBlock.intX(), posBlock.intY(), 16,
-                            16));
+            terrain.world().populators()
+                    .forEach(pop -> pop.populate(handle, this));
             updateSunLight();
             bID.compress();
             bData.compress();
@@ -335,8 +332,7 @@ public class TerrainInfiniteChunkServer extends TerrainInfiniteChunk {
 
     public void finish() {
         terrain.queue(handle -> {
-            terrain.world().populators().forEach(pop -> pop
-                    .load(handle, posBlock.intX(), posBlock.intY(), 16, 16));
+            terrain.world().populators().forEach(pop -> pop.load(handle, this));
             state = State.BORDER;
             terrain.updateAdjacent(pos.intX(), pos.intY());
         });

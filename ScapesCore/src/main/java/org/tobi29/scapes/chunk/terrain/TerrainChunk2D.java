@@ -13,15 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.tobi29.scapes.chunk.terrain;
 
-package org.tobi29.scapes.chunk.generator;
+public interface TerrainChunk2D extends TerrainChunk3D {
+    @Override
+    default int blockZ() {
+        return 0;
+    }
 
-import org.tobi29.scapes.chunk.terrain.TerrainServer;
+    @Override
+    default int blockDZ() {
+        return zSize();
+    }
 
-public interface ChunkPopulator {
-    void populate(TerrainServer.TerrainMutable terrain, int x, int y, int dx,
-            int dy);
-
-    void load(TerrainServer.TerrainMutable terrain, int x, int y, int dx,
-            int dy);
+    int zSize();
 }

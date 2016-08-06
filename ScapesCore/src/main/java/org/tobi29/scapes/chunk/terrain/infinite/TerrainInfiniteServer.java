@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import java8.util.Optional;
@@ -28,6 +27,7 @@ import org.tobi29.scapes.block.Update;
 import org.tobi29.scapes.chunk.MobSpawner;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.generator.GeneratorOutput;
+import org.tobi29.scapes.chunk.terrain.TerrainChunk2D;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Streams;
@@ -376,17 +376,14 @@ public class TerrainInfiniteServer extends TerrainInfinite
     }
 
     @Override
-    public boolean addEntity(EntityServer entity) {
-        synchronized (entityLock) {
-            return addEntity(entity, freeEntityID());
-        }
+    public void chunks2D(Consumer<TerrainChunk2D> consumer) {
+        Streams.forEach(chunkManager.iterator(), consumer::accept);
     }
 
     @Override
-    public void addPlayer(MobPlayerServer player) {
+    public boolean addEntity(EntityServer entity) {
         synchronized (entityLock) {
-            player.setEntityID(freeEntityID());
-            world.addPlayer(player);
+            return addEntity(entity, freeEntityID());
         }
     }
 

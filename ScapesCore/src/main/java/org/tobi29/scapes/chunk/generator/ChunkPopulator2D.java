@@ -13,29 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.tobi29.scapes.chunk.generator;
 
-package org.tobi29.scapes.chunk;
-
-import org.tobi29.scapes.chunk.generator.ChunkGenerator;
-import org.tobi29.scapes.chunk.generator.ChunkPopulator2D;
+import org.tobi29.scapes.chunk.terrain.TerrainChunk2D;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
-import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 
-public interface EnvironmentServer {
-    ChunkGenerator generator();
+public interface ChunkPopulator2D {
+    void populate(TerrainServer.TerrainMutable terrain, TerrainChunk2D chunk);
 
-    ChunkPopulator2D populator();
-
-    Vector3 calculateSpawn(TerrainServer terrain);
-
-    void load(TagStructure tagStructure);
-
-    TagStructure save();
-
-    void tick(double delta);
-
-    float sunLightReduction(double x, double y);
-
-    Vector3 sunLightNormal(double x, double y);
+    void load(TerrainServer.TerrainMutable terrain, TerrainChunk2D chunk);
 }

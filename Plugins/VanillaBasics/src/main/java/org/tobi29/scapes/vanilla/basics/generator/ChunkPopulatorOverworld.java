@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.generator;
 
 import java8.util.Optional;
 import java8.util.stream.Stream;
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.chunk.World;
-import org.tobi29.scapes.chunk.generator.ChunkPopulator;
+import org.tobi29.scapes.chunk.generator.ChunkPopulator2D;
+import org.tobi29.scapes.chunk.terrain.TerrainChunk2D;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
-import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfinite;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.noise.layer.*;
 import org.tobi29.scapes.vanilla.basics.VanillaBasics;
@@ -35,7 +34,7 @@ import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
 import java.util.*;
 
-public class ChunkPopulatorOverworld implements ChunkPopulator {
+public class ChunkPopulatorOverworld implements ChunkPopulator2D {
     private final VanillaBasics plugin;
     private final long seedInt;
     private final Map<BiomeGenerator.Biome, BiomeDecoratorChooser> biomes =
@@ -57,8 +56,12 @@ public class ChunkPopulatorOverworld implements ChunkPopulator {
     }
 
     @Override
-    public void populate(TerrainServer.TerrainMutable terrain, int x, int y,
-            int dx, int dy) {
+    public void populate(TerrainServer.TerrainMutable terrain,
+            TerrainChunk2D chunk) {
+        int x = chunk.blockX();
+        int y = chunk.blockY();
+        int dx = chunk.blockDX();
+        int dy = chunk.blockDY();
         int hash = 17;
         hash = 31 * hash + x;
         hash = 31 * hash + y;
@@ -142,15 +145,10 @@ public class ChunkPopulatorOverworld implements ChunkPopulator {
     }
 
     @Override
-    public void load(TerrainServer.TerrainMutable terrain, int x, int y, int dx,
-            int dy) {
-        if (terrain instanceof TerrainInfinite) {
-            ((TerrainInfinite) terrain).chunk(x >> 4, y >> 4,
-                    chunk -> ((EnvironmentOverworldServer) terrain.world()
-                            .environment())
-                            .simulateSeason(terrain, x, y, dx, dy,
-                                    chunk.metaData("Vanilla")));
-        }
+    public void load(TerrainServer.TerrainMutable terrain,
+            TerrainChunk2D chunk) {
+        ((EnvironmentOverworldServer) terrain.world().environment())
+                .simulateSeason(terrain, chunk);
     }
 
     private static class BiomeDecoratorChooser {

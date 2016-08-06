@@ -21,7 +21,7 @@ import java8.util.function.Function;
 import java8.util.stream.Stream;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.generator.ChunkGenerator;
-import org.tobi29.scapes.chunk.generator.ChunkPopulator;
+import org.tobi29.scapes.chunk.generator.ChunkPopulator2D;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.utils.Streams;
@@ -63,7 +63,7 @@ public class WorldServer extends World
     private final Collection<MobSpawner> spawners =
             Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final String id;
-    private final List<ChunkPopulator> populators = new ArrayList<>();
+    private final List<ChunkPopulator2D> populators = new ArrayList<>();
     private final TerrainServer terrain;
     private final ServerConnection connection;
     private final Sync sync = new Sync(20, 5000000000L, true, "Server-Update");
@@ -343,7 +343,7 @@ public class WorldServer extends World
         return id;
     }
 
-    public void addPopulator(ChunkPopulator populator) {
+    public void addPopulator(ChunkPopulator2D populator) {
         populators.add(populator);
     }
 
@@ -351,7 +351,7 @@ public class WorldServer extends World
         return generator;
     }
 
-    public Stream<ChunkPopulator> populators() {
+    public Stream<ChunkPopulator2D> populators() {
         return Streams.of(populators);
     }
 
