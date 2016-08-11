@@ -63,10 +63,6 @@ public abstract class PacketAbstract implements Packet {
                 "Packet").get(id).apply(registry);
     }
 
-    public short id(GameRegistry registry) {
-        return (short) registry.getSupplier("Core", "Packet").id(this);
-    }
-
     public Vector3 pos() {
         return pos;
     }

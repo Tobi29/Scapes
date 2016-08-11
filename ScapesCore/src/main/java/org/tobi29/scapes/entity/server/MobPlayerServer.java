@@ -36,6 +36,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.CreatureType;
 import org.tobi29.scapes.entity.MobPositionHandler;
+import org.tobi29.scapes.packets.PacketClient;
 import org.tobi29.scapes.packets.PacketEntityChange;
 import org.tobi29.scapes.packets.PacketOpenGui;
 import org.tobi29.scapes.packets.PacketUpdateInventory;
@@ -155,7 +156,7 @@ public abstract class MobPlayerServer extends MobLivingEquippedServer
 
     @Override
     protected MobPositionHandler createPositionHandler(
-            PlayConnection connection) {
+            PlayConnection<PacketClient> connection) {
         return new MobPositionHandler(pos.now(), packet -> {
         }, super::setPos, super::setSpeed, super::setRot,
                 (ground, slidingWall, inWater, swimming) -> {

@@ -86,6 +86,7 @@ public class EntityServer implements Entity, MultiTag.ReadAndWrite {
         return world;
     }
 
+    @Override
     public Vector3 pos() {
         return pos.now();
     }

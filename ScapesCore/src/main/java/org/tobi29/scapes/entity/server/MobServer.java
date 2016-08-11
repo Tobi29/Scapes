@@ -199,6 +199,7 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
         world.addEntityNew(entity);
     }
 
+    @Override
     public AABB aabb() {
         AABB aabb = new AABB(collision);
         aabb.add(pos.doubleX(), pos.doubleY(), pos.doubleZ());

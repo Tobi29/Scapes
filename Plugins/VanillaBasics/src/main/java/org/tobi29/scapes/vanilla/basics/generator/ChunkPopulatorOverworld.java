@@ -18,7 +18,7 @@ package org.tobi29.scapes.vanilla.basics.generator;
 import java8.util.Optional;
 import java8.util.stream.Stream;
 import org.tobi29.scapes.block.BlockType;
-import org.tobi29.scapes.chunk.World;
+import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.chunk.generator.ChunkPopulator2D;
 import org.tobi29.scapes.chunk.terrain.TerrainChunk2D;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
@@ -41,7 +41,7 @@ public class ChunkPopulatorOverworld implements ChunkPopulator2D {
             new EnumMap<>(BiomeGenerator.Biome.class);
     private final BiomeGenerator biomeGenerator;
 
-    public ChunkPopulatorOverworld(World world, VanillaBasics plugin,
+    public ChunkPopulatorOverworld(WorldServer world, VanillaBasics plugin,
             BiomeGenerator biomeGenerator) {
         this.plugin = plugin;
         this.biomeGenerator = biomeGenerator;

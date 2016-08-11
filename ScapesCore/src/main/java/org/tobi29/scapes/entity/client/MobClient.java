@@ -42,6 +42,7 @@ public abstract class MobClient extends EntityClient implements MobileEntity {
         positionHandler = createPositionHandler(world);
     }
 
+    @Override
     public AABB aabb() {
         AABB aabb = new AABB(collision);
         aabb.add(pos.doubleX(), pos.doubleY(), pos.doubleZ());

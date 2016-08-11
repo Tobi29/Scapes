@@ -26,9 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Created by tobias on 8/10/16.
- */
 public class EntityCollector {
     private static final ThreadLocal<Set<Object>> ENTITY_SET =
             ThreadLocalUtil.of(HashSet::new);

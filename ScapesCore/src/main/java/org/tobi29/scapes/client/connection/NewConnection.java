@@ -24,7 +24,6 @@ import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.server.ConnectionCloseException;
 import org.tobi29.scapes.engine.server.PacketBundleChannel;
 import org.tobi29.scapes.engine.utils.BufferCreator;
-import org.tobi29.scapes.engine.utils.SleepUtil;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.VersionUtil;
 import org.tobi29.scapes.engine.utils.graphics.Image;

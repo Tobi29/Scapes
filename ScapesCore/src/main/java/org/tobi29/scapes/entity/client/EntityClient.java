@@ -59,6 +59,7 @@ public class EntityClient implements Entity, MultiTag.Readable, ListenerOwner {
         return uuid;
     }
 
+    @Override
     public Vector3 pos() {
         return pos.now();
     }
