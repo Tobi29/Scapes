@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import java8.util.Optional;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i;
+import org.tobi29.scapes.entity.server.EntityServer;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TerrainInfiniteChunkManagerServer
-        implements TerrainInfiniteChunkManager {
+        implements TerrainInfiniteChunkManager<EntityServer> {
     private final Map<Vector2i, TerrainInfiniteChunkServer> chunks =
             new ConcurrentHashMap<>();
     private TerrainInfiniteChunkServer lastLookup;

@@ -20,9 +20,7 @@ import org.tobi29.scapes.block.GameRegistry;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.WorldServer;
 import org.tobi29.scapes.entity.client.EntityClient;
-import org.tobi29.scapes.vanilla.basics.entity.client.MobBombClient;
 import org.tobi29.scapes.entity.server.EntityServer;
-import org.tobi29.scapes.vanilla.basics.entity.server.MobBombServer;
 import org.tobi29.scapes.vanilla.basics.entity.client.*;
 import org.tobi29.scapes.vanilla.basics.entity.server.*;
 

@@ -130,7 +130,7 @@ public abstract class MobLivingClient extends MobClient {
                 }
             }
         }
-        if (invincibleTicks >= 0.0) {
+        if (invincibleTicks > 0.0) {
             invincibleTicks = FastMath.max(invincibleTicks - delta, 0.0);
         }
     }

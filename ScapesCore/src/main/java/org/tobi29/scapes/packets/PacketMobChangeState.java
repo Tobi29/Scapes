@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import java8.util.Optional;
@@ -27,18 +26,19 @@ import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class PacketMobChangeState extends PacketAbstract implements PacketBoth {
-    private int entityID;
+    private UUID uuid;
     private boolean ground, slidingWall, inWater, swimming;
 
     public PacketMobChangeState() {
     }
 
-    public PacketMobChangeState(int entityID, Vector3 pos, boolean ground,
+    public PacketMobChangeState(UUID uuid, Vector3 pos, boolean ground,
             boolean slidingWall, boolean inWater, boolean swimming) {
         super(pos, 32.0, false, false);
-        this.entityID = entityID;
+        this.uuid = uuid;
         this.ground = ground;
         this.slidingWall = slidingWall;
         this.inWater = inWater;
@@ -48,7 +48,8 @@ public class PacketMobChangeState extends PacketAbstract implements PacketBoth {
     @Override
     public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        stream.putInt(entityID);
+        stream.putLong(uuid.getMostSignificantBits());
+        stream.putLong(uuid.getLeastSignificantBits());
         int b = (ground ? 1 : 0) | (slidingWall ? 2 : 0) | (inWater ? 4 : 0) |
                 (swimming ? 8 : 0);
         stream.put(b);
@@ -57,7 +58,7 @@ public class PacketMobChangeState extends PacketAbstract implements PacketBoth {
     @Override
     public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        entityID = stream.getInt();
+        uuid = new UUID(stream.getLong(), stream.getLong());
         byte value = stream.get();
         ground = (value & 1) == 1;
         slidingWall = (value & 2) == 2;
@@ -70,7 +71,7 @@ public class PacketMobChangeState extends PacketAbstract implements PacketBoth {
         if (world == null) {
             return;
         }
-        Optional<EntityClient> fetch = world.entity(entityID);
+        Optional<EntityClient> fetch = world.entity(uuid);
         if (fetch.isPresent()) {
             EntityClient entity = fetch.get();
             if (entity instanceof MobileEntity) {
@@ -78,7 +79,7 @@ public class PacketMobChangeState extends PacketAbstract implements PacketBoth {
                         .receiveState(ground, slidingWall, inWater, swimming);
             }
         } else {
-            client.send(new PacketRequestEntity(entityID));
+            client.send(new PacketRequestEntity(uuid));
         }
     }
 

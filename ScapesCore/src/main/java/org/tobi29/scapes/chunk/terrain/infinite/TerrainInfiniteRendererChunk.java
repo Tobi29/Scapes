@@ -32,7 +32,7 @@ public class TerrainInfiniteRendererChunk {
     private final TerrainInfiniteChunkModel[] vao;
     private final AtomicBoolean[] geometryDirty;
     private final boolean[] geometryInit, solid, visible, prepareVisible,
-            culled, lod;
+            culled;
 
     public TerrainInfiniteRendererChunk(TerrainInfiniteChunkClient chunk,
             TerrainInfiniteRenderer renderer) {
@@ -43,7 +43,6 @@ public class TerrainInfiniteRendererChunk {
         ArrayUtil.fill(geometryDirty, () -> new AtomicBoolean(true));
         geometryInit = new boolean[zSections + 1];
         vao = new TerrainInfiniteChunkModel[zSections];
-        lod = new boolean[zSections];
         solid = new boolean[zSections];
         visible = new boolean[zSections];
         prepareVisible = new boolean[zSections];

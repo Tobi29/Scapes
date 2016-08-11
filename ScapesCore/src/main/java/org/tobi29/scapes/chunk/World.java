@@ -13,19 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk;
 
+import java8.util.stream.Stream;
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.GameRegistry;
-import org.tobi29.scapes.connection.PlayConnection;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
-import org.tobi29.scapes.packets.Packet;
+import org.tobi29.scapes.entity.Entity;
 import org.tobi29.scapes.plugins.Plugins;
 
-public abstract class World {
+public abstract class World<E extends Entity> {
     protected final BlockType air;
     protected final Plugins plugins;
     protected final TaskExecutor taskExecutor;
@@ -81,4 +80,6 @@ public abstract class World {
     public boolean checkThread() {
         return Thread.currentThread() == thread;
     }
+
+    protected abstract Stream<? extends E> worldEntities();
 }

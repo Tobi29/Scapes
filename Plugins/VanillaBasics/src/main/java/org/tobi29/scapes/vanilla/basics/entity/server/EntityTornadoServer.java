@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.entity.server;
 
 import org.tobi29.scapes.chunk.WorldServer;
@@ -80,19 +79,21 @@ public class EntityTornadoServer extends EntityServer implements MobileEntity {
         pos.setZ(world.getTerrain()
                 .highestTerrainBlockZAt(pos.intX(), pos.intY()) + 0.5);
         positionHandler
-                .submitUpdate(entityID, pos.now(), Vector3d.ZERO, Vector3d.ZERO,
+                .submitUpdate(uuid, pos.now(), Vector3d.ZERO, Vector3d.ZERO,
                         false, false, false, false);
         Vector3 currentPos = pos.now();
-        world.entities(currentPos, 16.0)
-                .filter(entity -> entity instanceof MobServer)
-                .forEach(entity -> {
-                    Vector3 push = entity.pos().minus(currentPos);
-                    double s = FastMath.max(0.0,
-                            320.0 - FastMath.length(push) * 8.0) * delta;
-                    Vector3 force = FastMath.normalizeSafe(push).multiply(-s);
-                    ((MobServer) entity)
-                            .push(force.doubleX(), force.doubleY(), s);
-                });
+        world.entities(currentPos, 16.0,
+                stream -> stream.filter(entity -> entity instanceof MobServer)
+                        .forEach(entity -> {
+                            Vector3 push = entity.pos().minus(currentPos);
+                            double s = FastMath.max(0.0,
+                                    320.0 - FastMath.length(push) * 8.0) *
+                                    delta;
+                            Vector3 force =
+                                    FastMath.normalizeSafe(push).multiply(-s);
+                            ((MobServer) entity)
+                                    .push(force.doubleX(), force.doubleY(), s);
+                        }));
         time -= delta;
         if (time <= 0.0) {
             world.removeEntity(this);

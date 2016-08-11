@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.block.device;
 
 import java8.util.Optional;
@@ -52,8 +51,7 @@ public class BlockBloomery extends VanillaBlockContainer {
             int y, int z) {
         EntityBloomeryServer entity = new EntityBloomeryServer(terrain.world(),
                 new Vector3d(x + 0.5, y + 0.5, z + 0.5));
-        entity.onSpawn();
-        terrain.world().addEntity(entity);
+        terrain.world().addEntityNew(entity);
         entity.updateBellows(terrain);
         return entity;
     }
@@ -100,10 +98,10 @@ public class BlockBloomery extends VanillaBlockContainer {
     @Override
     public void update(TerrainServer.TerrainMutable terrain, int x, int y,
             int z) {
-        terrain.world().entities(x, y, z)
+        terrain.entities(x, y, z, stream -> stream
                 .filter(entity -> entity instanceof EntityBloomeryServer)
                 .forEach(entity -> ((EntityBloomeryServer) entity)
-                        .updateBellows(terrain));
+                        .updateBellows(terrain)));
     }
 
     @Override

@@ -25,6 +25,7 @@ import org.tobi29.scapes.chunk.generator.ChunkGenerator;
 import org.tobi29.scapes.chunk.generator.ChunkPopulator2D;
 import org.tobi29.scapes.chunk.terrain.TerrainChunk2D;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
+import org.tobi29.scapes.engine.utils.MutableDouble;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
@@ -59,8 +60,7 @@ public class EnvironmentOverworldServer
     private final ClimateGenerator climateGenerator;
     private final BiomeGenerator biomeGenerator;
     private long simulationCount;
-    private double syncWait = 2.0, playerUpdateWait = 0.25, itemUpdateWait =
-            1.0, tickWait = 0.05;
+    private double syncWait = 2.0, playerUpdateWait = 0.25, tickWait = 0.05;
 
     public EnvironmentOverworldServer(WorldServer world, VanillaBasics plugin) {
         this.world = world;
@@ -213,6 +213,50 @@ public class EnvironmentOverworldServer
             @Override
             public CreatureType creatureType() {
                 return CreatureType.CREATURE;
+            }
+        });
+        world.entityListener(entity -> {
+            if (entity instanceof EntityContainerServer) {
+                EntityContainerServer container =
+                        (EntityContainerServer) entity;
+                MutableDouble itemUpdateWait = new MutableDouble(1.0);
+                entity.listener("VanillaBasics:Items",
+                        (EntityServer.UpdateListener) delta -> {
+                            itemUpdateWait.a -= delta;
+                            while (itemUpdateWait.a <= 0.0) {
+                                itemUpdateWait.a += 1.0;
+                                InventoryContainer inventories =
+                                        container.inventories();
+                                inventories.forEachModify((id, inventory) -> {
+                                    boolean flag = false;
+                                    for (int i = 0; i < inventory.size(); i++) {
+                                        Material type =
+                                                inventory.item(i).material();
+                                        if (type instanceof ItemHeatable) {
+                                            ((ItemHeatable) type)
+                                                    .cool(inventory.item(i));
+                                            flag = true;
+                                        }
+                                    }
+                                    return flag;
+                                });
+                            }
+                        });
+            }
+            if (entity instanceof MobItemServer) {
+                MobItemServer item = (MobItemServer) entity;
+                MutableDouble itemUpdateWait = new MutableDouble(1.0);
+                entity.listener("VanillaBasics:Items",
+                        (EntityServer.UpdateListener) delta -> {
+                            itemUpdateWait.a -= delta;
+                            while (itemUpdateWait.a <= 0.0) {
+                                itemUpdateWait.a += 1.0;
+                                Material type = item.item().material();
+                                if (type instanceof ItemHeatable) {
+                                    ((ItemHeatable) type).cool(item);
+                                }
+                            }
+                        });
             }
         });
         world.entityListener(entity -> {
@@ -424,32 +468,6 @@ public class EnvironmentOverworldServer
                         .send(new PacketEntityMetaData(player, "Vanilla"));
             });
         }
-        itemUpdateWait -= delta;
-        while (itemUpdateWait <= 0.0) {
-            itemUpdateWait += 1.0;
-            world.entities().forEach(entity -> {
-                if (entity instanceof EntityContainerServer) {
-                    InventoryContainer inventories =
-                            ((EntityContainerServer) entity).inventories();
-                    inventories.forEachModify((id, inventory) -> {
-                        boolean flag = false;
-                        for (int i = 0; i < inventory.size(); i++) {
-                            Material type = inventory.item(i).material();
-                            if (type instanceof ItemHeatable) {
-                                ((ItemHeatable) type).cool(inventory.item(i));
-                                flag = true;
-                            }
-                        }
-                        return flag;
-                    });
-                } else if (entity instanceof MobItemServer) {
-                    Material type = ((MobItemServer) entity).item().material();
-                    if (type instanceof ItemHeatable) {
-                        ((ItemHeatable) type).cool((MobItemServer) entity);
-                    }
-                }
-            });
-        }
         syncWait -= delta;
         while (syncWait <= 0.0) {
             syncWait += 4.0;
@@ -479,8 +497,7 @@ public class EnvironmentOverworldServer
                     EntityServer entity = new EntityTornadoServer(world,
                             new Vector3d(x, y,
                                     terrain.highestTerrainBlockZAt(x, y)));
-                    entity.onSpawn();
-                    world.addEntity(entity);
+                    world.addEntityNew(entity);
                 }
             });
         }

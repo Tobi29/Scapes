@@ -127,8 +127,7 @@ public class BlockAnvil extends VanillaBlockContainer {
             EntityServer entity = new MobFlyingBlockServer(terrain.world(),
                     new Vector3d(x + 0.5, y + 0.5, z + 0.5), Vector3d.ZERO,
                     this, terrain.data(x, y, z));
-            entity.onSpawn();
-            terrain.world().addEntity(entity);
+            terrain.world().addEntityNew(entity);
             terrain.typeData(x, y, z, terrain.world().air(), (short) 0);
         }
     }
@@ -138,8 +137,7 @@ public class BlockAnvil extends VanillaBlockContainer {
             int y, int z) {
         EntityAnvilServer entity = new EntityAnvilServer(terrain.world(),
                 new Vector3d(x + 0.5, y + 0.5, z + 0.5));
-        entity.onSpawn();
-        terrain.world().addEntity(entity);
+        terrain.world().addEntityNew(entity);
         return entity;
     }
 

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import java8.util.Optional;
@@ -28,9 +27,10 @@ import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class PacketEntityChange extends PacketAbstract implements PacketClient {
-    private int entityID;
+    private UUID uuid;
     private TagStructure tag;
 
     public PacketEntityChange() {
@@ -38,21 +38,22 @@ public class PacketEntityChange extends PacketAbstract implements PacketClient {
 
     public PacketEntityChange(EntityServer entity) {
         super(entity.pos());
-        entityID = entity.entityID();
+        uuid = entity.uuid();
         tag = entity.write();
     }
 
     @Override
     public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        stream.putInt(entityID);
+        stream.putLong(uuid.getMostSignificantBits());
+        stream.putLong(uuid.getLeastSignificantBits());
         TagStructureBinary.write(tag, stream);
     }
 
     @Override
     public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        entityID = stream.getInt();
+        uuid = new UUID(stream.getLong(), stream.getLong());
         tag = new TagStructure();
         TagStructureBinary.read(tag, stream);
     }
@@ -67,12 +68,12 @@ public class PacketEntityChange extends PacketAbstract implements PacketClient {
         if (world == null) {
             return;
         }
-        Optional<EntityClient> fetch = world.entity(entityID);
+        Optional<EntityClient> fetch = world.entity(uuid);
         if (fetch.isPresent()) {
             EntityClient entity = fetch.get();
             entity.read(tag);
         } else {
-            client.send(new PacketRequestEntity(entityID));
+            client.send(new PacketRequestEntity(uuid));
         }
     }
 }

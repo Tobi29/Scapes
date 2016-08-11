@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain;
 
 import org.tobi29.scapes.block.AABBElement;
@@ -50,4 +49,6 @@ public interface Terrain {
             int maxY, int maxZ);
 
     Pool<PointerPane> pointerPanes(int x, int y, int z, int range);
+
+    BlockType air();
 }

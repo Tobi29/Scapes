@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import java8.util.Optional;
@@ -27,9 +26,10 @@ import org.tobi29.scapes.entity.server.MobLivingServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class PacketMobDamage extends PacketAbstract implements PacketClient {
-    private int entityID;
+    private UUID uuid;
     private double health, maxHealth;
 
     public PacketMobDamage() {
@@ -37,7 +37,7 @@ public class PacketMobDamage extends PacketAbstract implements PacketClient {
 
     public PacketMobDamage(MobLivingServer entity) {
         super(entity.pos());
-        entityID = entity.entityID();
+        uuid = entity.uuid();
         health = entity.health();
         maxHealth = entity.maxHealth();
     }
@@ -53,7 +53,8 @@ public class PacketMobDamage extends PacketAbstract implements PacketClient {
     @Override
     public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        stream.putInt(entityID);
+        stream.putLong(uuid.getMostSignificantBits());
+        stream.putLong(uuid.getLeastSignificantBits());
         stream.putDouble(health);
         stream.putDouble(maxHealth);
     }
@@ -61,7 +62,7 @@ public class PacketMobDamage extends PacketAbstract implements PacketClient {
     @Override
     public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        entityID = stream.getInt();
+        uuid = new UUID(stream.getLong(), stream.getLong());
         health = stream.getDouble();
         maxHealth = stream.getDouble();
     }
@@ -71,14 +72,14 @@ public class PacketMobDamage extends PacketAbstract implements PacketClient {
         if (world == null) {
             return;
         }
-        Optional<EntityClient> fetch = world.entity(entityID);
+        Optional<EntityClient> fetch = world.entity(uuid);
         if (fetch.isPresent()) {
             EntityClient entity = fetch.get();
             if (entity instanceof MobLivingClient) {
                 ((MobLivingClient) entity).processPacket(this);
             }
         } else {
-            client.send(new PacketRequestEntity(entityID));
+            client.send(new PacketRequestEntity(uuid));
         }
     }
 }

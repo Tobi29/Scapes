@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import java8.util.Optional;
@@ -23,16 +22,18 @@ import org.tobi29.scapes.client.connection.ClientConnection;
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.math.FastMath;
-import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.EntityContainerClient;
 import org.tobi29.scapes.entity.server.EntityContainerServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
+import java.util.UUID;
 
-public class PacketInventoryInteraction extends PacketAbstract implements PacketServer {
+public class PacketInventoryInteraction extends PacketAbstract
+        implements PacketServer {
     public static final byte LEFT = 0, RIGHT = 1;
-    private int entityID, slot;
+    private UUID uuid;
+    private int slot;
     private String id;
     private byte type;
 
@@ -41,7 +42,7 @@ public class PacketInventoryInteraction extends PacketAbstract implements Packet
 
     public PacketInventoryInteraction(EntityContainerClient chest, byte type,
             String id, int slot) {
-        entityID = ((EntityClient) chest).entityID();
+        uuid = chest.uuid();
         this.type = type;
         this.id = id;
         this.slot = slot;
@@ -50,7 +51,8 @@ public class PacketInventoryInteraction extends PacketAbstract implements Packet
     @Override
     public void sendServer(ClientConnection client, WritableByteStream stream)
             throws IOException {
-        stream.putInt(entityID);
+        stream.putLong(uuid.getMostSignificantBits());
+        stream.putLong(uuid.getLeastSignificantBits());
         stream.put(type);
         stream.putString(id);
         stream.putInt(slot);
@@ -59,7 +61,7 @@ public class PacketInventoryInteraction extends PacketAbstract implements Packet
     @Override
     public void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException {
-        entityID = stream.getInt();
+        uuid = new UUID(stream.getLong(), stream.getLong());
         type = stream.get();
         id = stream.getString();
         slot = stream.getInt();
@@ -69,7 +71,7 @@ public class PacketInventoryInteraction extends PacketAbstract implements Packet
     public void runServer(PlayerConnection player) {
         player.mob(playerE -> {
             WorldServer world = playerE.world();
-            world.entity(entityID)
+            world.entity(uuid)
                     .filter(entity -> entity instanceof EntityContainerServer)
                     .map(entity -> (EntityContainerServer) entity)
                     .ifPresent(chestE -> {

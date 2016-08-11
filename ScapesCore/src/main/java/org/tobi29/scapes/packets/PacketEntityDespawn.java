@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import org.tobi29.scapes.chunk.WorldClient;
@@ -26,16 +25,18 @@ import org.tobi29.scapes.entity.server.MobLivingServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
+import java.util.UUID;
 
-public class PacketEntityDespawn extends PacketAbstract implements PacketClient {
-    private int entityID;
+public class PacketEntityDespawn extends PacketAbstract
+        implements PacketClient {
+    private UUID uuid;
     private boolean dead;
 
     public PacketEntityDespawn() {
     }
 
     public PacketEntityDespawn(EntityServer entity) {
-        entityID = entity.entityID();
+        uuid = entity.uuid();
         if (entity instanceof MobLivingServer) {
             dead = ((MobLivingServer) entity).isDead();
         }
@@ -44,14 +45,15 @@ public class PacketEntityDespawn extends PacketAbstract implements PacketClient 
     @Override
     public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        stream.putInt(entityID);
+        stream.putLong(uuid.getMostSignificantBits());
+        stream.putLong(uuid.getLeastSignificantBits());
         stream.putBoolean(dead);
     }
 
     @Override
     public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        entityID = stream.getInt();
+        uuid = new UUID(stream.getLong(), stream.getLong());
         dead = stream.getBoolean();
     }
 
@@ -60,13 +62,13 @@ public class PacketEntityDespawn extends PacketAbstract implements PacketClient 
         if (world == null) {
             return;
         }
-        world.entity(entityID).ifPresent(entity -> {
+        world.entity(uuid).ifPresent(entity -> {
             if (dead) {
                 if (entity instanceof MobLivingClient) {
                     ((MobLivingClient) entity).onDeath();
                 }
             }
-            world.removeEntity(entity);
+            world.terrain().removeEntity(entity);
         });
     }
 }

@@ -16,6 +16,7 @@
 package org.tobi29.scapes.chunk;
 
 import java8.util.Optional;
+import java8.util.function.Consumer;
 import java8.util.function.Function;
 import java8.util.function.Supplier;
 import java8.util.stream.Stream;
@@ -36,9 +37,12 @@ import org.tobi29.scapes.engine.utils.graphics.Cam;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
+import org.tobi29.scapes.engine.utils.math.Frustum;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.engine.utils.profiler.Profiler;
+import org.tobi29.scapes.entity.EntityCollector;
+import org.tobi29.scapes.entity.EntityContainer;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.MobClient;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
@@ -47,13 +51,13 @@ import org.tobi29.scapes.entity.model.MobModel;
 import org.tobi29.scapes.packets.PacketServer;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class WorldClient extends World implements PlayConnection<PacketServer> {
+public class WorldClient extends World<EntityClient>
+        implements EntityContainer<EntityClient>, PlayConnection<PacketServer> {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(WorldClient.class);
-    private final Map<Integer, EntityClient> entities =
-            new ConcurrentHashMap<>();
     private final Map<String, Supplier<TerrainRenderInfo.InfoLayer>>
             infoLayers = new ConcurrentHashMap<>();
     private final SceneScapesVoxelWorld scene;
@@ -63,7 +67,7 @@ public class WorldClient extends World implements PlayConnection<PacketServer> {
     private final GameStateGameMP game;
     private final TerrainClient terrain;
     private final Shader shaderTerrain1, shaderTerrain2, shaderEntity;
-    private final Map<Integer, EntityModel> entityModels =
+    private final Map<UUID, EntityModel> entityModels =
             new ConcurrentHashMap<>();
     private final EnvironmentClient environment;
     private boolean disposed;
@@ -71,7 +75,7 @@ public class WorldClient extends World implements PlayConnection<PacketServer> {
     public WorldClient(ClientConnection connection, Cam cam, long seed,
             Function<WorldClient, ? extends TerrainClient> terrainSupplier,
             Function<WorldClient, ? extends EnvironmentClient> environmentSupplier,
-            TagStructure playerTag, int playerID) {
+            TagStructure playerTag, UUID playerID) {
         super(connection.plugins(), connection.game().engine().taskExecutor(),
                 connection.plugins().registry(), seed);
         this.connection = connection;
@@ -79,14 +83,14 @@ public class WorldClient extends World implements PlayConnection<PacketServer> {
         environment = environmentSupplier.apply(this);
         player = connection.plugins().worldType()
                 .newPlayer(this, Vector3d.ZERO, Vector3d.ZERO, 0.0, 0.0, "");
+        player.setEntityID(playerID);
         player.read(playerTag);
         scene = new SceneScapesVoxelWorld(this, cam);
         playerModel = player.createModel().get();
-        addEntity(player, playerID);
-        LOGGER.info("Received player entity: {} with id: {}", player, playerID);
         connection.plugins().plugins()
                 .forEach(plugin -> plugin.worldInit(this));
         terrain = terrainSupplier.apply(this);
+        LOGGER.info("Received player entity: {} with id: {}", player, playerID);
         TagStructure scapesTag =
                 game.engine().tagStructure().getStructure("Scapes");
         GraphicsSystem graphics = connection.game().engine().graphics();
@@ -106,52 +110,81 @@ public class WorldClient extends World implements PlayConnection<PacketServer> {
         shaderEntity = graphics.createShader("Scapes:shader/Entity");
     }
 
-    public void addEntity(EntityClient entity, int id) {
-        if (id != player.entityID() || entity == player) {
-            if (entity != player) {
-                entity.createModel()
-                        .ifPresent(model -> entityModels.put(id, model));
-            }
-            entity.setEntityID(id);
-            entities.put(id, entity);
-        }
+    public void addEntityModel(EntityClient entity) {
+        entity.createModel()
+                .ifPresent(model -> entityModels.put(entity.uuid(), model));
     }
 
-    public void removeEntity(EntityClient entity) {
-        entities.remove(entity.entityID());
-        entityModels.remove(entity.entityID());
+    public void removeEntityModel(EntityClient entity) {
+        entityModels.remove(entity.uuid());
     }
 
-    public Stream<EntityClient> entities() {
-        return Streams.of(entities.values());
+    @Override
+    public boolean addEntity(EntityClient entity) {
+        return terrain.addEntity(entity);
     }
 
-    public Optional<EntityClient> entity(int i) {
-        return Optional.ofNullable(entities.get(i));
+    @Override
+    public boolean removeEntity(EntityClient entity) {
+        return terrain.removeEntity(entity);
     }
 
+    @Override
     public boolean hasEntity(EntityClient entity) {
-        return entities.containsValue(entity);
+        return player == entity || terrain.hasEntity(entity);
+    }
+
+    @Override
+    public Optional<EntityClient> entity(UUID uuid) {
+        if (player.uuid().equals(uuid)) {
+            return Optional.of(player);
+        }
+        return terrain.entity(uuid);
+    }
+
+    @Override
+    public void entities(Consumer<Stream<? extends EntityClient>> consumer) {
+        terrain.entities(consumer);
+        consumer.accept(Streams.of(player));
+    }
+
+    @Override
+    public void entities(int x, int y, int z,
+            Consumer<Stream<? extends EntityClient>> consumer) {
+        terrain.entities(x, y, z, consumer);
+        consumer.accept(Streams.of(player)
+                .filter(entity -> FastMath.floor(entity.x()) == x)
+                .filter(entity -> FastMath.floor(entity.y()) == y)
+                .filter(entity -> FastMath.floor(entity.z()) == z));
+    }
+
+    @Override
+    public void entitiesAtLeast(int minX, int minY, int minZ, int maxX,
+            int maxY, int maxZ,
+            Consumer<Stream<? extends EntityClient>> consumer) {
+        terrain.entities(minX, minY, minZ, maxX, maxY, maxZ, consumer);
+        consumer.accept(Streams.of(player));
+    }
+
+    @Override
+    public void entityAdded(EntityClient entity) {
+        addEntityModel(entity);
+    }
+
+    @Override
+    public void entityRemoved(EntityClient entity) {
+        removeEntityModel(entity);
     }
 
     public void update(double delta) {
         try (Profiler.C ignored = Profiler.section("Entities")) {
-            Streams.forEach(entities.values(), entity -> {
-                if (terrain.isBlockTicking(FastMath.floor(entity.x()),
-                        FastMath.floor(entity.y()),
-                        FastMath.floor(entity.z()))) {
-                    entity.update(delta);
-                    if (entity instanceof MobClient) {
-                        ((MobClient) entity).move(delta);
-                    }
-                } else {
-                    if (entity == player) {
-                        player.updatePosition();
-                    } else {
-                        removeEntity(entity);
-                    }
-                }
-            });
+            if (terrain.isBlockTicking(FastMath.floor(player.x()),
+                    FastMath.floor(player.y()), FastMath.floor(player.z()))) {
+                player.update(delta);
+                player.move(delta);
+            } else {
+                player.updatePosition();
+            }
         }
         try (Profiler.C ignored = Profiler.section("Terrain")) {
             terrain.update(delta);
@@ -320,5 +353,10 @@ public class WorldClient extends World implements PlayConnection<PacketServer> {
     @Override
     public void send(PacketServer packet) {
         connection.send(packet);
+    }
+
+    @Override
+    protected Stream<MobPlayerClientMain> worldEntities() {
+        return Streams.of(player);
     }
 }

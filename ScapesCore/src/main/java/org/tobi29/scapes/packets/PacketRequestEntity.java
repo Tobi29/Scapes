@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import org.tobi29.scapes.client.connection.ClientConnection;
@@ -22,33 +21,36 @@ import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
+import java.util.UUID;
 
-public class PacketRequestEntity extends PacketAbstract implements PacketServer {
-    private int entityID;
+public class PacketRequestEntity extends PacketAbstract
+        implements PacketServer {
+    private UUID uuid;
 
     public PacketRequestEntity() {
     }
 
-    public PacketRequestEntity(int entityID) {
-        this.entityID = entityID;
+    public PacketRequestEntity(UUID uuid) {
+        this.uuid = uuid;
     }
 
     @Override
     public void sendServer(ClientConnection client, WritableByteStream stream)
             throws IOException {
-        stream.putInt(entityID);
+        stream.putLong(uuid.getMostSignificantBits());
+        stream.putLong(uuid.getLeastSignificantBits());
     }
 
     @Override
     public void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException {
-        entityID = stream.getInt();
+        uuid = new UUID(stream.getLong(), stream.getLong());
     }
 
     @Override
     public void runServer(PlayerConnection player) {
-        player.mob(mob -> mob.world().entity(entityID).ifPresent(
-                entity -> player.send(new PacketEntityAdd(entity,
+        player.mob(mob -> mob.world().entity(uuid).ifPresent(entity -> player
+                .send(new PacketEntityAdd(entity,
                         mob.world().plugins().registry()))));
     }
 }

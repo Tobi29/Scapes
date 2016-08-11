@@ -13,15 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.tobi29.scapes.entity.client;
+package org.tobi29.scapes.chunk.terrain;
 
-import java8.util.Optional;
-import org.tobi29.scapes.block.InventoryContainer;
-import org.tobi29.scapes.engine.gui.Gui;
 import org.tobi29.scapes.entity.Entity;
+import org.tobi29.scapes.entity.EntityContainer;
 
-public interface EntityContainerClient extends Entity {
-    Optional<Gui> gui(MobPlayerClientMain player);
-
-    InventoryContainer inventories();
+public interface TerrainEntity<E extends Entity>
+        extends Terrain, EntityContainer<E> {
 }

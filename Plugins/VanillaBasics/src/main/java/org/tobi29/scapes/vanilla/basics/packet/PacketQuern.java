@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.packet;
 
 import org.tobi29.scapes.block.ItemStack;
@@ -29,33 +28,34 @@ import org.tobi29.scapes.vanilla.basics.entity.server.EntityQuernServer;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class PacketQuern extends PacketAbstract implements PacketServer {
-    private int entityID;
+    private UUID uuid;
 
     public PacketQuern() {
     }
 
     public PacketQuern(EntityQuernClient quern) {
-        entityID = quern.entityID();
-        entityID = 0;
+        uuid = quern.uuid();
     }
 
     @Override
     public void sendServer(ClientConnection client, WritableByteStream stream)
             throws IOException {
-        stream.putInt(entityID);
+        stream.putLong(uuid.getMostSignificantBits());
+        stream.putLong(uuid.getLeastSignificantBits());
     }
 
     @Override
     public void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException {
-        entityID = stream.getInt();
+        uuid = new UUID(stream.getLong(), stream.getLong());
     }
 
     @Override
     public void runServer(PlayerConnection player) {
-        player.mob(mob -> mob.world().entity(entityID)
+        player.mob(mob -> mob.world().entity(uuid)
                 .filter(entity -> entity instanceof EntityQuernServer)
                 .map(entity -> (EntityQuernServer) entity).ifPresent(quern -> {
                     if (quern.viewers().filter(check -> check == mob).findAny()

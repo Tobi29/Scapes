@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.packet;
 
 import org.tobi29.scapes.block.ItemStack;
@@ -33,35 +32,38 @@ import org.tobi29.scapes.vanilla.basics.material.item.ItemOreChunk;
 import org.tobi29.scapes.vanilla.basics.util.ToolUtil;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class PacketAnvil extends PacketAbstract implements PacketServer {
-    private int entityID, id;
+    private UUID uuid;
+    private int id;
 
     public PacketAnvil() {
     }
 
     public PacketAnvil(EntityAnvilClient anvil, int id) {
-        entityID = anvil.entityID();
+        uuid = anvil.uuid();
         this.id = id;
     }
 
     @Override
     public void sendServer(ClientConnection client, WritableByteStream stream)
             throws IOException {
-        stream.putInt(entityID);
+        stream.putLong(uuid.getMostSignificantBits());
+        stream.putLong(uuid.getLeastSignificantBits());
         stream.putInt(id);
     }
 
     @Override
     public void parseServer(PlayerConnection player, ReadableByteStream stream)
             throws IOException {
-        entityID = stream.getInt();
+        uuid = new UUID(stream.getLong(), stream.getLong());
         id = stream.getInt();
     }
 
     @Override
     public void runServer(PlayerConnection player) {
-        player.mob(mob -> mob.world().entity(entityID)
+        player.mob(mob -> mob.world().entity(uuid)
                 .filter(entity -> entity instanceof EntityAnvilServer)
                 .map(entity -> (EntityAnvilServer) entity).ifPresent(anvil -> {
                     if (anvil.viewers().filter(check -> check == mob).findAny()

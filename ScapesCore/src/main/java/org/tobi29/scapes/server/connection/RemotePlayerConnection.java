@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.server.connection;
 
 import java8.util.Optional;
@@ -52,15 +51,19 @@ public class RemotePlayerConnection extends PlayerConnection {
     private final PacketBundleChannel channel;
     private final Queue<IORunnable> sendQueue = new ConcurrentLinkedQueue<>();
     private final AtomicInteger sendQueueSize = new AtomicInteger();
-    private State state = State.LOGIN_STEP_1;
+    private State state = State.LOGIN;
+    private Optional<IOConsumer<RandomReadableByteStream>> loginState =
+            Optional.empty();
     private byte[] challenge;
     private long pingTimeout, pingWait;
+    private Optional<Selector> selector = Optional.empty();
 
     public RemotePlayerConnection(PacketBundleChannel channel,
             ServerConnection server) {
         super(server);
         this.channel = channel;
         pingTimeout = System.currentTimeMillis() + 30000;
+        loginState = Optional.of(this::loginStep1);
     }
 
     @Override
@@ -71,6 +74,9 @@ public class RemotePlayerConnection extends PlayerConnection {
             }
         }
         task(() -> sendPacket(packet));
+        if (packet.isImmediate()) {
+            selector.ifPresent(Selector::wakeup);
+        }
     }
 
     private void loginStep1(RandomReadableByteStream input) throws IOException {
@@ -97,7 +103,7 @@ public class RemotePlayerConnection extends PlayerConnection {
             sendPluginMetaData(iterator.next(), output);
         }
         channel.queueBundle();
-        state = State.LOGIN_STEP_2;
+        loginState = Optional.of(this::loginStep2);
     }
 
     private void loginStep2(RandomReadableByteStream input) throws IOException {
@@ -124,7 +130,7 @@ public class RemotePlayerConnection extends PlayerConnection {
         for (int request : requests) {
             sendPlugin(plugins.file(request).file(), output);
         }
-        state = State.LOGIN_STEP_3;
+        loginState = Optional.of(this::loginStep3);
     }
 
     private void loginStep3(RandomReadableByteStream input) throws IOException {
@@ -156,6 +162,7 @@ public class RemotePlayerConnection extends PlayerConnection {
         server.message(
                 "Player connected: " + id + " (" + nickname + ") on " + channel,
                 MessageLevel.SERVER_INFO);
+        loginState = Optional.empty();
         state = State.OPEN;
     }
 
@@ -170,11 +177,13 @@ public class RemotePlayerConnection extends PlayerConnection {
     public synchronized void close() throws IOException {
         super.close();
         channel.close();
+        selector = Optional.empty();
         state = State.CLOSED;
     }
 
     @Override
     public void disconnect(String reason, double time) {
+        removeEntity();
         task(() -> {
             sendPacket(new PacketDisconnect(reason, time));
             throw new ConnectionCloseException(reason);
@@ -213,12 +222,16 @@ public class RemotePlayerConnection extends PlayerConnection {
     @Override
     public void register(Selector selector, int opt) throws IOException {
         channel.register(selector, opt);
+        this.selector = Optional.of(selector);
     }
 
     @Override
     public boolean tick(AbstractServerConnection.NetWorkerThread worker) {
         try {
             switch (state) {
+                case LOGIN:
+                    channel.process(() -> loginState, IOConsumer::accept);
+                    break;
                 case OPEN:
                     try {
                         long currentTime = System.currentTimeMillis();
@@ -236,18 +249,17 @@ public class RemotePlayerConnection extends PlayerConnection {
                         if (channel.bundleSize() > 0) {
                             channel.queueBundle();
                         }
-                        Optional<RandomReadableByteStream> bundle =
-                                channel.fetch();
-                        if (bundle.isPresent()) {
-                            RandomReadableByteStream stream = bundle.get();
-                            while (stream.hasRemaining()) {
-                                PacketServer packet = (PacketServer) PacketAbstract
-                                        .make(registry, stream.getShort());
-                                packet.parseServer(this, stream);
+                        if (channel.process(bundle -> {
+                            while (bundle.hasRemaining()) {
+                                PacketServer packet =
+                                        (PacketServer) PacketAbstract
+                                                .make(registry,
+                                                        bundle.getShort());
+                                packet.parseServer(this, bundle);
                                 packet.runServer(this);
                             }
-                        }
-                        if (channel.process()) {
+                            return true;
+                        })) {
                             state = State.CLOSED;
                             return false;
                         }
@@ -257,32 +269,15 @@ public class RemotePlayerConnection extends PlayerConnection {
                             channel.queueBundle();
                         }
                     }
+                    break;
                 case CLOSING:
-                    if (channel.process()) {
+                    if (channel.process(bundle -> true)) {
                         state = State.CLOSED;
                         return false;
                     }
                     break;
                 default:
-                    Optional<RandomReadableByteStream> bundle = channel.fetch();
-                    if (bundle.isPresent()) {
-                        switch (state) {
-                            case LOGIN_STEP_1:
-                                loginStep1(bundle.get());
-                                break;
-                            case LOGIN_STEP_2:
-                                loginStep2(bundle.get());
-                                break;
-                            case LOGIN_STEP_3:
-                                loginStep3(bundle.get());
-                                break;
-                        }
-                    }
-                    if (channel.process()) {
-                        state = State.CLOSED;
-                        return false;
-                    }
-                    return false;
+                    throw new IllegalStateException("Unknown state: " + state);
             }
         } catch (ConnectionCloseException | InvalidPacketDataException e) {
             server.message("Disconnecting player: " + nickname,
@@ -304,9 +299,7 @@ public class RemotePlayerConnection extends PlayerConnection {
     }
 
     enum State {
-        LOGIN_STEP_1,
-        LOGIN_STEP_2,
-        LOGIN_STEP_3,
+        LOGIN,
         OPEN,
         CLOSING,
         CLOSED

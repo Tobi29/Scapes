@@ -62,8 +62,7 @@ public class BlockHyperBomb extends BlockSimple implements BlockExplosive {
                         random.nextDouble() * 0.1 - 0.05,
                         random.nextDouble() * 0.2 + 0.2), this, (short) 0,
                 random.nextDouble() * 2.0);
-        entity.onSpawn();
-        terrain.world().addEntity(entity);
+        terrain.world().addEntityNew(entity);
     }
 
     @Override

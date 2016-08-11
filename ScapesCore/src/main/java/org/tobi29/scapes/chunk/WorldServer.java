@@ -24,20 +24,19 @@ import org.tobi29.scapes.chunk.generator.ChunkGenerator;
 import org.tobi29.scapes.chunk.generator.ChunkPopulator2D;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.connection.PlayConnection;
+import org.tobi29.scapes.engine.utils.MutableInteger;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.Sync;
-import org.tobi29.scapes.engine.utils.ThreadLocalUtil;
 import org.tobi29.scapes.engine.utils.io.tag.MultiTag;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
-import org.tobi29.scapes.engine.utils.math.AABB;
 import org.tobi29.scapes.engine.utils.math.FastMath;
-import org.tobi29.scapes.engine.utils.math.Frustum;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.engine.utils.profiler.Profiler;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
 import org.tobi29.scapes.entity.CreatureType;
+import org.tobi29.scapes.entity.EntityContainer;
 import org.tobi29.scapes.entity.server.*;
 import org.tobi29.scapes.packets.PacketClient;
 import org.tobi29.scapes.packets.PacketEntityAdd;
@@ -51,13 +50,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class WorldServer extends World
-        implements MultiTag.ReadAndWrite, PlayConnection<PacketClient> {
-    protected static final ThreadLocal<Set<EntityServer>> ENTITY_SET =
-            ThreadLocalUtil.of(HashSet::new);
-    protected static final ThreadLocal<Set<MobServer>> MOB_SET =
-            ThreadLocalUtil.of(HashSet::new);
-    private static final int MAX_ENTITY_SIZE = 16;
+public class WorldServer extends World<EntityServer>
+        implements EntityContainer<EntityServer>, MultiTag.ReadAndWrite,
+        PlayConnection<PacketClient> {
     private final Collection<EntityListener> entityListeners =
             Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final Collection<MobSpawner> spawners =
@@ -111,98 +106,103 @@ public class WorldServer extends World
         spawn = environment.calculateSpawn(terrain);
     }
 
-    public void addEntity(EntityServer entity) {
+    @Override
+    public boolean addEntity(EntityServer entity) {
+        initEntity(entity);
+        return terrain.addEntity(entity);
+    }
+
+    @Override
+    public boolean removeEntity(EntityServer entity) {
+        return terrain.removeEntity(entity);
+    }
+
+    @Override
+    public boolean hasEntity(EntityServer entity) {
+        return entity(entity.uuid()).isPresent() || terrain.hasEntity(entity);
+    }
+
+    @Override
+    public Optional<EntityServer> entity(UUID uuid) {
+        Optional<MobPlayerServer> player = Streams.of(players.values())
+                .filter(entity -> entity.uuid().equals(uuid)).findAny();
+        if (player.isPresent()) {
+            return Optional.of(player.get());
+        }
+        return terrain.entity(uuid);
+    }
+
+    @Override
+    public void entities(Consumer<Stream<? extends EntityServer>> consumer) {
+        terrain.entities(consumer);
+        consumer.accept(Streams.of(players.values()));
+    }
+
+    @Override
+    public void entities(int x, int y, int z,
+            Consumer<Stream<? extends EntityServer>> consumer) {
+        terrain.entities(x, y, z, consumer);
+        consumer.accept(Streams.of(players.values())
+                .filter(entity -> FastMath.floor(entity.x()) == x)
+                .filter(entity -> FastMath.floor(entity.y()) == y)
+                .filter(entity -> FastMath.floor(entity.z()) == z));
+    }
+
+    @Override
+    public void entitiesAtLeast(int minX, int minY, int minZ, int maxX,
+            int maxY, int maxZ,
+            Consumer<Stream<? extends EntityServer>> consumer) {
+        terrain.entities(minX, minY, minZ, maxX, maxY, maxZ, consumer);
+        consumer.accept(Streams.of(players.values()));
+    }
+
+    @Override
+    public void entityAdded(EntityServer entity) {
+        initEntity(entity);
+        send(new PacketEntityAdd(entity, plugins.registry()));
+    }
+
+    @Override
+    public void entityRemoved(EntityServer entity) {
+        send(new PacketEntityDespawn(entity));
+    }
+
+    public void addEntityNew(EntityServer entity) {
+        initEntity(entity);
+        entity.onSpawn();
         terrain.addEntity(entity);
+    }
+
+    public void initEntity(EntityServer entity) {
         Streams.forEach(entityListeners, listener -> listener.listen(entity));
-        if (entity.id(plugins.registry()) >= 0) {
-            send(new PacketEntityAdd(entity, plugins.registry()));
+    }
+
+    public Collection<MobPlayerServer> players() {
+        return players.values();
+    }
+
+    public void addPlayer(MobPlayerServer player, boolean isNew) {
+        initEntity(player);
+        if (isNew) {
+            player.onSpawn();
         }
+        players.put(player.nickname(), player);
     }
 
-    public void removeEntity(EntityServer entity) {
-        if (entity != null) {
-            terrain.removeEntity(entity);
-            send(new PacketEntityDespawn(entity));
-        }
-    }
-
-    public Stream<MobServer> entities(Frustum frustum) {
-        double x = frustum.x();
-        double y = frustum.y();
-        double z = frustum.z();
-        double range = frustum.range();
-        int minX = FastMath.floor(x - range);
-        int minY = FastMath.floor(y - range);
-        int minZ = FastMath.floor(z - range);
-        int maxX = (int) FastMath.ceil(x + range);
-        int maxY = (int) FastMath.ceil(y + range);
-        int maxZ = (int) FastMath.ceil(z + range);
-        return mobs(entities -> terrain
-                .entitiesAtLeast(minX, minY, minZ, maxX, maxY, maxZ,
-                        stream -> stream
-                                .filter(entity -> entity instanceof MobServer)
-                                .map(entity -> (MobServer) entity)
-                                .filter(mob -> frustum.inView(mob.aabb()) > 0)
-                                .forEach(entities::add)));
-    }
-
-    public Stream<MobServer> entities(AABB aabb) {
-        int minX = FastMath.floor(aabb.minX) - MAX_ENTITY_SIZE;
-        int minY = FastMath.floor(aabb.minY) - MAX_ENTITY_SIZE;
-        int minZ = FastMath.floor(aabb.minZ) - MAX_ENTITY_SIZE;
-        int maxX = (int) FastMath.ceil(aabb.maxX) + MAX_ENTITY_SIZE;
-        int maxY = (int) FastMath.ceil(aabb.maxY) + MAX_ENTITY_SIZE;
-        int maxZ = (int) FastMath.ceil(aabb.maxZ) + MAX_ENTITY_SIZE;
-        return mobs(entities -> terrain
-                .entitiesAtLeast(minX, minY, minZ, maxX, maxY, maxZ,
-                        stream -> stream
-                                .filter(entity -> entity instanceof MobServer)
-                                .map(entity -> (MobServer) entity)
-                                .filter(mob -> aabb.inside(mob.pos()))
-                                .forEach(entities::add)));
-    }
-
-    public Stream<EntityServer> entities(Vector3 pos, double range) {
-        int minX = FastMath.floor(pos.doubleX() - range);
-        int minY = FastMath.floor(pos.doubleY() - range);
-        int minZ = FastMath.floor(pos.doubleZ() - range);
-        int maxX = (int) FastMath.ceil(pos.doubleX() + range);
-        int maxY = (int) FastMath.ceil(pos.doubleY() + range);
-        int maxZ = (int) FastMath.ceil(pos.doubleZ() + range);
-        double rangeSqr = range * range;
-        return entities(entities -> terrain
-                .entitiesAtLeast(minX, minY, minZ, maxX, maxY, maxZ,
-                        stream -> stream.filter(entity ->
-                                FastMath.pointDistanceSqr(pos, entity.pos()) <=
-                                        rangeSqr).forEach(entities::add)));
-    }
-
-    public Stream<EntityServer> entities(int x, int y, int z) {
-        return entities(entities -> terrain
-                .entities(x, y, z, stream -> stream.forEach(entities::add)));
-    }
-
-    public Stream<EntityServer> entities(int minX, int minY, int minZ, int maxX,
-            int maxY, int maxZ) {
-        return entities(entities -> terrain
-                .entitiesAtLeast(minX, minY, minZ, maxX, maxY, maxZ,
-                        stream -> stream.forEach(entities::add)));
-    }
-
-    public Optional<EntityServer> entity(int i) {
-        return terrain.entity(i);
-    }
-
-    public Stream<EntityServer> entities() {
-        return entities(entities -> terrain
-                .entities(stream -> stream.forEach(entities::add)));
+    public synchronized void removePlayer(MobPlayerServer player) {
+        players.remove(player.nickname());
+        removeEntity(player);
     }
 
     public int mobs(CreatureType creatureType) {
-        return (int) entities()
-                .filter(entity -> entity instanceof MobLivingServer)
-                .filter(entity -> ((MobLivingServer) entity).creatureType() ==
-                        creatureType).count();
+        // TODO: Optimize: Keep track using add and remove
+        MutableInteger count = new MutableInteger(0);
+        entities(stream -> count.a +=
+                stream.filter(entity -> entity instanceof MobLivingServer)
+                        .filter(entity ->
+                                ((MobLivingServer) entity).creatureType() ==
+                                        creatureType).count());
+        return count.a;
     }
 
     private void update(double delta) {
@@ -211,32 +211,12 @@ public class WorldServer extends World
                 terrain.update(delta, spawners);
             }
             try (Profiler.C ignored = Profiler.section("Entities")) {
-                entities().forEach(entity -> {
-                    entity.update(delta);
-                    if (entity instanceof MobServer) {
-                        ((MobServer) entity).move(delta);
-                    }
-                    if (entity instanceof MobLivingServer) {
-                        if (((MobLivingServer) entity).isDead()) {
-                            ((MobLivingServer) entity).onDeath();
-                            if (!(entity instanceof MobPlayerServer)) {
-                                removeEntity(entity);
-                            }
-                        } else {
-                            if (((MobLivingServer) entity).creatureType()
-                                    .doesDespawn()) {
-                                MobPlayerServer player =
-                                        nearestPlayer(entity.pos());
-                                if (player != null) {
-                                    if (FastMath.pointDistanceSqr(entity.pos(),
-                                            player.pos()) > 16384.0) {
-                                        removeEntity(entity);
-                                    }
-                                } else {
-                                    removeEntity(entity);
-                                }
-                            }
-                        }
+                Streams.forEach(players.values(), player -> {
+                    player.update(delta);
+                    player.updateListeners(delta);
+                    player.move(delta);
+                    if (player.isDead()) {
+                        player.onDeath();
                     }
                 });
             }
@@ -281,8 +261,7 @@ public class WorldServer extends World
                 new Vector3d(-2.0 + random.nextDouble() * 4.0,
                         -2.0 + random.nextDouble() * 4.0,
                         random.nextDouble() * 1.0 + 0.5), item, despawntime);
-        entity.onSpawn();
-        addEntity(entity);
+        addEntityNew(entity);
     }
 
     public boolean checkBlocked(int x1, int y1, int z1, int x2, int y2,
@@ -314,19 +293,6 @@ public class WorldServer extends World
             }
         }
         return player;
-    }
-
-    public Collection<MobPlayerServer> players() {
-        return players.values();
-    }
-
-    public void addPlayer(MobPlayerServer player) {
-        players.put(player.nickname(), player);
-    }
-
-    public synchronized void removePlayer(MobPlayerServer player) {
-        players.remove(player.nickname());
-        removeEntity(player);
     }
 
     public void addSpawner(MobSpawner spawner) {
@@ -414,10 +380,6 @@ public class WorldServer extends World
         entityListeners.add(listener);
     }
 
-    public Stream<EntityListener> entityListeners() {
-        return Streams.of(entityListeners);
-    }
-
     public void stop(Optional<WorldServer> dropWorld) {
         if (dropWorld.isPresent() && dropWorld.get() != this) {
             WorldServer world = dropWorld.get();
@@ -470,30 +432,9 @@ public class WorldServer extends World
                 .forEach(player -> player.send(packet));
     }
 
-    private Stream<EntityServer> entities(
-            Consumer<Set<EntityServer>> consumer) {
-        return Streams.of(entityArray(consumer));
-    }
-
-    private EntityServer[] entityArray(Consumer<Set<EntityServer>> consumer) {
-        Set<EntityServer> entities = ENTITY_SET.get();
-        consumer.accept(entities);
-        EntityServer[] array =
-                entities.toArray(new EntityServer[entities.size()]);
-        entities.clear();
-        return array;
-    }
-
-    private Stream<MobServer> mobs(Consumer<Set<MobServer>> consumer) {
-        return Streams.of(mobArray(consumer));
-    }
-
-    private MobServer[] mobArray(Consumer<Set<MobServer>> consumer) {
-        Set<MobServer> entities = MOB_SET.get();
-        consumer.accept(entities);
-        MobServer[] array = entities.toArray(new MobServer[entities.size()]);
-        entities.clear();
-        return array;
+    @Override
+    protected Stream<MobPlayerServer> worldEntities() {
+        return Streams.of(players.values());
     }
 
     public interface EntityListener {

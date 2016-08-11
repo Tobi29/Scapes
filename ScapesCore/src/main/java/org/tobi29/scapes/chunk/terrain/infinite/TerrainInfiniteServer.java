@@ -19,7 +19,6 @@ import java8.util.Optional;
 import java8.util.function.Consumer;
 import java8.util.function.Function;
 import java8.util.stream.Collectors;
-import java8.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.block.BlockType;
@@ -49,11 +48,10 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class TerrainInfiniteServer extends TerrainInfinite
+public class TerrainInfiniteServer extends TerrainInfinite<EntityServer>
         implements TerrainServer.TerrainMutable {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(TerrainInfiniteServer.class);
-    protected final Object entityLock = new Object();
     private final WorldServer world;
     private final TerrainInfiniteFormat format;
     private final Queue<BlockChanges> blockChanges =
@@ -178,8 +176,33 @@ public class TerrainInfiniteServer extends TerrainInfinite
     }
 
     @Override
+    public BlockType air() {
+        // TODO: Move
+        return world.air();
+    }
+
+    @Override
+    public boolean addEntity(EntityServer entity) {
+        int x = FastMath.floor(entity.x()) >> 4;
+        int y = FastMath.floor(entity.y()) >> 4;
+        return chunkS(x, y, chunk -> chunk.addEntity(entity));
+    }
+
+    @Override
     public Optional<TerrainInfiniteChunkServer> chunkNoLoad(int x, int y) {
         return chunkManager.get(x, y);
+    }
+
+    @Override
+    public void entityAdded(EntityServer entity) {
+        super.entityAdded(entity);
+        world.entityAdded(entity);
+    }
+
+    @Override
+    public void entityRemoved(EntityServer entity) {
+        super.entityRemoved(entity);
+        world.entityRemoved(entity);
     }
 
     @Override
@@ -315,8 +338,7 @@ public class TerrainInfiniteServer extends TerrainInfinite
                                 if (spawner.canSpawn(this, xx, yy, z)) {
                                     EntityServer entity =
                                             spawner.spawn(this, xx, yy, z);
-                                    entity.onSpawn();
-                                    world.addEntity(entity);
+                                    world.addEntityNew(entity);
                                 }
                             }
                         }
@@ -381,97 +403,12 @@ public class TerrainInfiniteServer extends TerrainInfinite
     }
 
     @Override
-    public boolean addEntity(EntityServer entity) {
-        synchronized (entityLock) {
-            return addEntity(entity, freeEntityID());
-        }
-    }
-
-    @Override
-    public boolean removeEntity(EntityServer entity) {
-        if (entity != null) {
-            int x = FastMath.floor(entity.x()) >> 4;
-            int y = FastMath.floor(entity.y()) >> 4;
-            if (chunkReturnS(x, y, chunk -> chunk.removeEntity(entity))
-                    .orElse(false)) {
-                return true;
-            }
-            for (TerrainInfiniteChunkServer chunk : chunkManager.iterator()) {
-                if (chunk.removeEntity(entity)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public Optional<EntityServer> entity(int id) {
-        Optional<MobPlayerServer> player = Streams.of(world.players())
-                .filter(entity -> entity.entityID() == id).findAny();
-        if (player.isPresent()) {
-            return Optional.of(player.get());
-        }
-        return Streams.of(chunkManager.iterator())
-                .map(chunk -> chunk.entity(id)).filter(Optional::isPresent)
-                .map(Optional::get).findAny();
-    }
-
-    @Override
-    public void entities(Consumer<Stream<EntityServer>> consumer) {
-        for (TerrainInfiniteChunkServer chunk : chunkManager.iterator()) {
-            consumer.accept(chunk.entities());
-        }
-    }
-
-    @Override
-    public void entities(int x, int y, int z,
-            Consumer<Stream<EntityServer>> consumer) {
-        chunkS(x >> 4, y >> 4, chunk -> consumer.accept(chunk.entities()
-                .filter(entity -> FastMath.floor(entity.x()) == x)
-                .filter(entity -> FastMath.floor(entity.y()) == y)
-                .filter(entity -> FastMath.floor(entity.z()) == z)));
-    }
-
-    @Override
-    public void entitiesAtLeast(int minX, int minY, int minZ, int maxX,
-            int maxY, int maxZ, Consumer<Stream<EntityServer>> consumer) {
-        int minCX = minX >> 4;
-        int minCY = minY >> 4;
-        int maxCX = maxX >> 4;
-        int maxCY = maxY >> 4;
-        for (int yy = minCY; yy <= maxCY; yy++) {
-            for (int xx = minCX; xx <= maxCX; xx++) {
-                chunkNoLoad(xx, yy)
-                        .ifPresent(chunk -> consumer.accept(chunk.entities()));
-            }
-        }
-    }
-
-    @Override
     public void dispose() {
         joiner.join();
         lighting.dispose();
         Streams.forEach(chunkManager.iterator(), chunkUnloadQueue::add);
         removeChunks();
         format.dispose();
-    }
-
-    public boolean addEntity(EntityServer entity, int id) {
-        entity.setEntityID(id);
-        int x = FastMath.floor(entity.x()) >> 4;
-        int y = FastMath.floor(entity.y()) >> 4;
-        return chunkS(x, y, chunk -> chunk.addEntity(entity));
-    }
-
-    protected int freeEntityID() {
-        Random random = ThreadLocalRandom.current();
-        while (true) {
-            int i = random.nextInt(Integer.MAX_VALUE);
-            if (!world.entity(i).isPresent()) {
-                return i;
-            }
-        }
     }
 
     @Override

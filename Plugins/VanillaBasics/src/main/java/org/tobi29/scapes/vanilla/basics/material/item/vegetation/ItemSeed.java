@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.item.vegetation;
 
 import org.tobi29.scapes.block.GameRegistry;
@@ -54,10 +53,10 @@ public class ItemSeed extends VanillaItem {
             item.setAmount(item.amount() - 1);
             Random random = ThreadLocalRandom.current();
             if (random.nextInt(1) == 0) {
-                terrain.world().entities(x, y, z)
+                terrain.world().entities(x, y, z, stream -> stream
                         .filter(farmland -> farmland instanceof EntityFarmlandServer)
                         .forEach(farmland -> ((EntityFarmlandServer) farmland)
-                                .seed(CropType.WHEAT));
+                                .seed(CropType.WHEAT)));
             }
         }
         return 0.0;

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import java8.util.Optional;
@@ -28,9 +27,11 @@ import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
+import java.util.UUID;
 
-public class PacketEntityMetaData extends PacketAbstract implements PacketClient {
-    private int entityID;
+public class PacketEntityMetaData extends PacketAbstract
+        implements PacketClient {
+    private UUID uuid;
     private String category;
     private TagStructure tag;
 
@@ -39,7 +40,7 @@ public class PacketEntityMetaData extends PacketAbstract implements PacketClient
 
     public PacketEntityMetaData(EntityServer entity, String category) {
         super(entity.pos());
-        entityID = entity.entityID();
+        uuid = entity.uuid();
         this.category = category;
         tag = entity.metaData(category);
     }
@@ -47,7 +48,8 @@ public class PacketEntityMetaData extends PacketAbstract implements PacketClient
     @Override
     public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        stream.putInt(entityID);
+        stream.putLong(uuid.getMostSignificantBits());
+        stream.putLong(uuid.getLeastSignificantBits());
         stream.putString(category);
         TagStructureBinary.write(tag, stream);
     }
@@ -55,7 +57,7 @@ public class PacketEntityMetaData extends PacketAbstract implements PacketClient
     @Override
     public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        entityID = stream.getInt();
+        uuid = new UUID(stream.getLong(), stream.getLong());
         category = stream.getString();
         tag = new TagStructure();
         TagStructureBinary.read(tag, stream);
@@ -71,12 +73,12 @@ public class PacketEntityMetaData extends PacketAbstract implements PacketClient
         if (world == null) {
             return;
         }
-        Optional<EntityClient> fetch = world.entity(entityID);
+        Optional<EntityClient> fetch = world.entity(uuid);
         if (fetch.isPresent()) {
             EntityClient entity = fetch.get();
             entity.processPacket(this);
         } else {
-            client.send(new PacketRequestEntity(entityID));
+            client.send(new PacketRequestEntity(uuid));
         }
     }
 

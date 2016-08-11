@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.entity.server;
 
 import org.tobi29.scapes.block.AABBElement;
@@ -30,6 +29,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.MobPositionHandler;
 import org.tobi29.scapes.entity.MobileEntity;
+import org.tobi29.scapes.packets.PacketClient;
 
 import java.util.Iterator;
 
@@ -190,16 +190,13 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
 
     public void dropItem(ItemStack item) {
         EntityServer entity = new MobItemServer(world, pos.now(), new Vector3d(
-                FastMath.cosTable(rot.doubleZ() * FastMath.DEG_2_RAD) *
-                        10.0 *
+                FastMath.cosTable(rot.doubleZ() * FastMath.DEG_2_RAD) * 10.0 *
                         FastMath.cosTable(rot.doubleX() * FastMath.DEG_2_RAD),
-                FastMath.sinTable(rot.doubleZ() * FastMath.DEG_2_RAD) *
-                        10.0 *
+                FastMath.sinTable(rot.doubleZ() * FastMath.DEG_2_RAD) * 10.0 *
                         FastMath.cosTable(rot.doubleX() * FastMath.DEG_2_RAD),
                 FastMath.sinTable(rot.doubleX() * FastMath.DEG_2_RAD) * 0.3 +
                         0.3), item, Double.NaN);
-        entity.onSpawn();
-        world.addEntity(entity);
+        world.addEntityNew(entity);
     }
 
     public AABB aabb() {
@@ -224,7 +221,7 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
     }
 
     protected MobPositionHandler createPositionHandler(
-            PlayConnection connection) {
+            PlayConnection<PacketClient> connection) {
         return new MobPositionHandler(pos.now(), connection::send, pos::set,
                 speed::set, rot::set,
                 (ground, slidingWall, inWater, swimming) -> {
@@ -295,8 +292,8 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
 
     public void updatePosition() {
         positionHandler
-                .submitUpdate(entityID, pos.now(), speed.now(), rot.now(),
-                        ground, slidingWall, inWater, swimming, true);
+                .submitUpdate(uuid, pos.now(), speed.now(), rot.now(), ground,
+                        slidingWall, inWater, swimming, true);
     }
 
     public boolean isHeadInWater() {
@@ -341,7 +338,7 @@ public abstract class MobServer extends EntityServer implements MobileEntity {
                 FastMath.floor(pos.doubleZ() + 0.7)).isLiquid();
         collide(aabb, aabbs, delta);
         positionHandler
-                .submitUpdate(entityID, pos.now(), speed.now(), rot.now(),
-                        ground, slidingWall, inWater, swimming);
+                .submitUpdate(uuid, pos.now(), speed.now(), rot.now(), ground,
+                        slidingWall, inWater, swimming);
     }
 }

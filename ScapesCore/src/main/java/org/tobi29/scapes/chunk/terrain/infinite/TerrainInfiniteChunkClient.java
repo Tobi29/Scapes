@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import java8.util.Optional;
+import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
+import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i;
 import org.tobi29.scapes.entity.client.EntityClient;
+import org.tobi29.scapes.entity.client.MobClient;
 import org.tobi29.scapes.packets.PacketRequestChunk;
 
-public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
+public class TerrainInfiniteChunkClient
+        extends TerrainInfiniteChunk<EntityClient> {
     private final Optional<TerrainInfiniteChunkClient> optional =
             Optional.of(this);
     private final TerrainInfiniteClient terrain;
@@ -32,7 +35,7 @@ public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
     public TerrainInfiniteChunkClient(Vector2i pos,
             TerrainInfiniteClient terrain, int zSize,
             TerrainInfiniteRenderer renderer) {
-        super(pos, terrain, terrain.world(), zSize);
+        super(pos, terrain, zSize, terrain.world().registry().blocks());
         this.terrain = terrain;
         rendererChunk = new TerrainInfiniteRendererChunk(this, renderer);
     }
@@ -57,6 +60,26 @@ public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
 
     public void setLoaded() {
         state = State.LOADED;
+    }
+
+    public void updateClient(double delta) {
+        Streams.forEach(entities.values(), entity -> {
+            entity.update(delta);
+            if (entity instanceof MobClient) {
+                ((MobClient) entity).move(delta);
+            }
+            int x = FastMath.floor(entity.x()) >> 4;
+            int y = FastMath.floor(entity.y()) >> 4;
+            if ((x != pos.intX() || y != pos.intY()) && unmapEntity(entity)) {
+                if (!terrain.chunkC(x, y, chunk -> chunk.mapEntity(entity))) {
+                    terrain.entityRemoved(entity);
+                }
+            }
+        });
+    }
+
+    public void dispose() {
+        Streams.forEach(entities.values(), terrain::entityRemoved);
     }
 
     @Override
@@ -93,12 +116,6 @@ public class TerrainInfiniteChunkClient extends TerrainInfiniteChunk {
         bData.load(tagStructure.getList("BlockData"));
         bLight.load(tagStructure.getList("BlockLight"));
         initHeightMap();
-        for (TagStructure tag : tagStructure.getList("Entities")) {
-            EntityClient entity =
-                    EntityClient.make(tag.getInteger("ID"), terrain.world());
-            entity.read(tag.getStructure("Data"));
-            terrain.world().addEntity(entity, tag.getInteger("EntityID"));
-        }
         metaData = tagStructure.getStructure("MetaData");
         initHeightMap();
     }

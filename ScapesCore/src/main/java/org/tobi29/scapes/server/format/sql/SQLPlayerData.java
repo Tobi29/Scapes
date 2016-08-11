@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.server.format.sql;
 
 import java8.util.Optional;
@@ -87,6 +86,10 @@ public class SQLPlayerData implements PlayerData {
             public Optional<MobPlayerServer> createEntity(
                     PlayerConnection player, Optional<WorldServer> world,
                     Optional<Vector3> pos) {
+                if (!entityTag.isPresent()) {
+                    return Optional.empty();
+                }
+                TagStructure tagStructure = entityTag.get();
                 ScapesServer server = player.server().server();
                 if (!world.isPresent() && worldName.isPresent()) {
                     world = server.world(worldName.get());
@@ -104,14 +107,9 @@ public class SQLPlayerData implements PlayerData {
                         .newPlayer(spawnWorld, spawnPos, Vector3d.ZERO, 0.0,
                                 0.0, player.name(), player.skin().checksum(),
                                 player);
-                if (entityTag.isPresent()) {
-                    TagStructure tagStructure = entityTag.get();
-                    pos.ifPresent(forcePos -> tagStructure
-                            .setMultiTag("Pos", forcePos));
-                    entity.read(tagStructure);
-                } else {
-                    entity.onSpawn();
-                }
+                pos.ifPresent(
+                        forcePos -> tagStructure.setMultiTag("Pos", forcePos));
+                entity.read(tagStructure);
                 return Optional.of(entity);
             }
 

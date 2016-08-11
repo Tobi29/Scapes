@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import java8.util.Optional;
@@ -29,6 +28,7 @@ import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.PointerPane;
 import org.tobi29.scapes.engine.utils.math.vector.*;
+import org.tobi29.scapes.entity.EntityCollector;
 import org.tobi29.scapes.entity.server.EntityBlockBreakServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
@@ -120,10 +120,15 @@ public class PacketItemUse extends PacketAbstract implements PacketServer {
                                                 Vector3d.ZERO);
                                         EntityBlockBreakServer entityBreak = null;
                                         Optional<EntityBlockBreakServer> fetch =
-                                                world.entities(block.intX(),
-                                                        block.intY(), block.intZ())
-                                                        .filter(entity -> entity instanceof EntityBlockBreakServer)
-                                                        .map(entity -> (EntityBlockBreakServer) entity)
+                                                EntityCollector.<EntityBlockBreakServer>entities(
+                                                        entities -> world
+                                                                .entities(block.intX(),
+                                                                        block.intY(),
+                                                                        block.intZ(),
+                                                                        stream -> entities
+                                                                                .accept(stream
+                                                                                        .filter(entity -> entity instanceof EntityBlockBreakServer)
+                                                                                        .map(entity -> (EntityBlockBreakServer) entity))))
                                                         .findAny();
                                         if (fetch.isPresent()) {
                                             entityBreak = fetch.get();
@@ -135,8 +140,7 @@ public class PacketItemUse extends PacketAbstract implements PacketServer {
                                                                     block.intY() + 0.5,
                                                                     block.intZ() +
                                                                             0.5));
-                                            entityBreak.onSpawn();
-                                            world.addEntity(entityBreak);
+                                            world.addEntityNew(entityBreak);
                                         }
                                         if (entityBreak.punch(world, punch)) {
                                             if (type.destroy(handler, block.intX(),

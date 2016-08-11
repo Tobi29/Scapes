@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import org.tobi29.scapes.block.GameRegistry;
@@ -22,22 +21,29 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 public abstract class PacketAbstract implements Packet {
     protected final Vector3 pos;
     protected final double range;
-    protected final boolean isChunkContent, vital;
+    protected final boolean isChunkContent, vital, immediate;
 
     protected PacketAbstract() {
         this(null, 0.0, false);
     }
 
-    protected PacketAbstract(Vector3 pos, double range, boolean isChunkContent) {
+    protected PacketAbstract(Vector3 pos, double range,
+            boolean isChunkContent) {
         this(pos, range, isChunkContent, true);
     }
 
     protected PacketAbstract(Vector3 pos, double range, boolean isChunkContent,
             boolean vital) {
+        this(pos, range, isChunkContent, vital, false);
+    }
+
+    protected PacketAbstract(Vector3 pos, double range, boolean isChunkContent,
+            boolean vital, boolean immediate) {
         this.pos = pos;
         this.range = range;
         this.isChunkContent = isChunkContent;
         this.vital = vital;
+        this.immediate = immediate;
     }
 
     protected PacketAbstract(Vector3 pos) {
@@ -53,8 +59,8 @@ public abstract class PacketAbstract implements Packet {
     }
 
     public static PacketAbstract make(GameRegistry registry, short id) {
-        return registry.<GameRegistry,PacketAbstract>getSupplier("Core", "Packet").get(id)
-                .apply(registry);
+        return registry.<GameRegistry, PacketAbstract>getSupplier("Core",
+                "Packet").get(id).apply(registry);
     }
 
     public short id(GameRegistry registry) {
@@ -75,5 +81,9 @@ public abstract class PacketAbstract implements Packet {
 
     public boolean isVital() {
         return vital;
+    }
+
+    public boolean isImmediate() {
+        return immediate;
     }
 }

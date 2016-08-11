@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.states;
 
 import org.slf4j.Logger;
@@ -32,16 +31,15 @@ import org.tobi29.scapes.client.gui.GuiWidgetConnectionProfiler;
 import org.tobi29.scapes.client.states.scenes.SceneScapesVoxelWorld;
 import org.tobi29.scapes.engine.GameState;
 import org.tobi29.scapes.engine.ScapesEngine;
+import org.tobi29.scapes.engine.graphics.Scene;
 import org.tobi29.scapes.engine.gui.*;
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues;
 import org.tobi29.scapes.engine.input.ControllerKey;
-import org.tobi29.scapes.engine.graphics.Scene;
 import org.tobi29.scapes.engine.utils.io.IOFunction;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.entity.model.EntityModelBlockBreakShared;
 import org.tobi29.scapes.entity.model.MobLivingModelHumanShared;
 import org.tobi29.scapes.entity.particle.ParticleTransparentAtlas;
-import org.tobi29.scapes.packets.PacketPingClient;
 
 import java.io.IOException;
 
@@ -62,7 +60,6 @@ public class GameStateGameMP extends GameState {
     private final ParticleTransparentAtlas particleTransparentAtlas;
     private final MobLivingModelHumanShared modelHumanShared;
     private final EntityModelBlockBreakShared modelBlockBreakShared;
-    private double pingWait;
 
     protected GameStateGameMP(
             IOFunction<GameStateGameMP, ? extends ClientConnection> clientSupplier,
@@ -163,11 +160,6 @@ public class GameStateGameMP extends GameState {
         playlist.update(player, delta);
         player.world().update(delta);
         updateTimestamp(delta);
-        pingWait -= delta;
-        while (pingWait <= 0.0) {
-            pingWait += 1.0;
-            client.send(new PacketPingClient(System.currentTimeMillis()));
-        }
         tickDebug.setValue(1.0 / delta);
     }
 

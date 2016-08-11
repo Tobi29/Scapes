@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui.touch;
 
 import java8.util.Optional;
@@ -31,7 +30,6 @@ import org.tobi29.scapes.engine.server.*;
 import org.tobi29.scapes.engine.utils.BufferCreator;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.graphics.Image;
-import org.tobi29.scapes.engine.utils.io.RandomReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.WritableByteStream;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 
@@ -171,16 +169,13 @@ public class GuiTouchServerSelect extends GuiTouchMenuDouble {
                         }
                         break;
                     case 2:
-                        if (bundleChannel.process()) {
-                            throw new IOException("Disconnected");
-                        }
-                        Optional<RandomReadableByteStream> bundle =
-                                bundleChannel.fetch();
-                        if (bundle.isPresent()) {
-                            RandomReadableByteStream input = bundle.get();
+                        if (bundleChannel.process(bundle -> {
+                            if (readState != 2) {
+                                return true;
+                            }
                             ByteBuffer infoBuffer =
-                                    BufferCreator.bytes(input.remaining());
-                            input.get(infoBuffer);
+                                    BufferCreator.bytes(bundle.remaining());
+                            bundle.get(infoBuffer);
                             infoBuffer.flip();
                             ServerInfo serverInfo = new ServerInfo(infoBuffer);
                             label.setText(serverInfo.getName());
@@ -194,12 +189,11 @@ public class GuiTouchServerSelect extends GuiTouchMenuDouble {
                             icon.setIcon(texture);
                             bundleChannel.requestClose();
                             readState++;
-                        }
-                        break;
-                    case 3:
-                        if (bundleChannel.process()) {
+                            return true;
+                        })) {
                             readState = -1;
                         }
+                        break;
                 }
             } catch (IOException e) {
                 LOGGER.info("Failed to fetch server info: {}", e.toString());

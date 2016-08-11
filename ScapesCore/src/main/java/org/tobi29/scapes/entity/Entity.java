@@ -13,15 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.tobi29.scapes.entity.client;
+package org.tobi29.scapes.entity;
 
-import java8.util.Optional;
-import org.tobi29.scapes.block.InventoryContainer;
-import org.tobi29.scapes.engine.gui.Gui;
-import org.tobi29.scapes.entity.Entity;
+import org.tobi29.scapes.engine.utils.math.AABB;
+import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 
-public interface EntityContainerClient extends Entity {
-    Optional<Gui> gui(MobPlayerClientMain player);
+import java.util.UUID;
 
-    InventoryContainer inventories();
+public interface Entity {
+    UUID uuid();
+
+    Vector3 pos();
+
+    double x();
+
+    double y();
+
+    double z();
+
+    default AABB aabb() {
+        AABB aabb = new AABB(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5);
+        Vector3 pos = pos();
+        aabb.add(pos.doubleX(), pos.doubleY(), pos.doubleZ());
+        return aabb;
+    }
 }

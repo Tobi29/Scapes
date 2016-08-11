@@ -15,20 +15,28 @@
  */
 package org.tobi29.scapes.chunk.terrain.infinite;
 
+import java8.util.Optional;
+import java8.util.stream.Stream;
 import org.tobi29.scapes.block.BlockType;
-import org.tobi29.scapes.chunk.World;
 import org.tobi29.scapes.chunk.data.ChunkArraySection1x16;
 import org.tobi29.scapes.chunk.data.ChunkArraySection2x4;
 import org.tobi29.scapes.chunk.data.ChunkData;
 import org.tobi29.scapes.chunk.terrain.TerrainChunk2D;
 import org.tobi29.scapes.engine.utils.Pair;
 import org.tobi29.scapes.engine.utils.Pool;
+import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.ThreadLocalUtil;
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i;
+import org.tobi29.scapes.entity.Entity;
 
-public abstract class TerrainInfiniteChunk implements TerrainChunk2D {
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public abstract class TerrainInfiniteChunk<E extends Entity>
+        implements TerrainChunk2D {
     private static final ThreadLocal<Pair<Pool<LightSpread>, Pool<LightSpread>>>
             SPREAD_POOLS = ThreadLocalUtil
             .of(() -> new Pair<>(new Pool<>(LightSpread::new),
@@ -37,22 +45,21 @@ public abstract class TerrainInfiniteChunk implements TerrainChunk2D {
     protected final ChunkData bData;
     protected final ChunkData bLight;
     protected final Vector2i pos, posBlock;
-    protected final TerrainInfinite terrain;
-    protected final World world;
+    protected final TerrainInfinite<E> terrain;
     protected final int zSize;
     protected final BlockType[] blocks;
     protected final int[] heightMap;
+    protected final Map<UUID, E> entities = new ConcurrentHashMap<>();
     protected State state = State.NEW;
     protected TagStructure metaData = new TagStructure();
 
-    protected TerrainInfiniteChunk(Vector2i pos, TerrainInfinite terrain,
-            World world, int zSize) {
+    protected TerrainInfiniteChunk(Vector2i pos, TerrainInfinite<E> terrain,
+            int zSize, BlockType[] blocks) {
         this.pos = pos;
         posBlock = new Vector2i(pos.intX() << 4, pos.intY() << 4);
         this.terrain = terrain;
-        this.world = world;
         this.zSize = zSize;
-        blocks = world.registry().blocks();
+        this.blocks = blocks;
         bData = new ChunkData(0, 0, 5, 4, 4, 4, ChunkArraySection1x16::new);
         bID = new ChunkData(0, 0, 5, 4, 4, 4, ChunkArraySection1x16::new);
         bLight = new ChunkData(0, 0, 5, 4, 4, 4, ChunkArraySection2x4::new);
@@ -195,8 +202,8 @@ public abstract class TerrainInfiniteChunk implements TerrainChunk2D {
     }
 
     @Override
-    public TagStructure metaData(String category) {
-        return metaData.getStructure(category);
+    public TagStructure metaData(String id) {
+        return metaData.getStructure(id);
     }
 
     @Override
@@ -213,7 +220,7 @@ public abstract class TerrainInfiniteChunk implements TerrainChunk2D {
         return bID.isEmpty(0, 0, i, 15, 15, i + 15);
     }
 
-    public TerrainInfinite terrain() {
+    public TerrainInfinite<E> terrain() {
         return terrain;
     }
 
@@ -434,6 +441,39 @@ public abstract class TerrainInfiniteChunk implements TerrainChunk2D {
         }
     }
 
+    public void addEntity(E entity) {
+        mapEntity(entity);
+        terrain.entityAdded(entity);
+    }
+
+    public boolean removeEntity(E entity) {
+        if (unmapEntity(entity)) {
+            terrain.entityRemoved(entity);
+            return true;
+        }
+        return false;
+    }
+
+    protected void mapEntity(E entity) {
+        E removed = entities.put(entity.uuid(), entity);
+        if (removed != null) {
+            throw new IllegalStateException(
+                    "Duplicate entity in chunk: " + removed.uuid());
+        }
+    }
+
+    protected boolean unmapEntity(E entity) {
+        return entities.remove(entity.uuid()) != null;
+    }
+
+    public Stream<E> entities() {
+        return Streams.of(entities.values());
+    }
+
+    public Optional<E> entity(UUID uuid) {
+        return Optional.ofNullable(entities.get(uuid));
+    }
+
     protected void initHeightMap() {
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 16; y++) {
@@ -449,9 +489,9 @@ public abstract class TerrainInfiniteChunk implements TerrainChunk2D {
 
     protected void updateHeightMap(int x, int y, int z, BlockType type) {
         int height = heightMap[y << 4 | x];
-        if (z > height && type != world.air()) {
+        if (z > height && type != terrain.air()) {
             heightMap[y << 4 | x] = z;
-        } else if (height == z && type == world.air()) {
+        } else if (height == z && type == terrain.air()) {
             int zzz = 0;
             for (int zz = height; zz >= 0; zz--) {
                 if (bID.getData(x, y, zz, 0) != 0) {

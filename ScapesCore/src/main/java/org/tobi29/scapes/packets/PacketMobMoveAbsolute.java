@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import java8.util.Optional;
@@ -28,18 +27,20 @@ import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
+import java.util.UUID;
 
-public class PacketMobMoveAbsolute extends PacketAbstract implements PacketBoth {
-    private int entityID;
+public class PacketMobMoveAbsolute extends PacketAbstract
+        implements PacketBoth {
+    private UUID uuid;
     private double x, y, z;
 
     public PacketMobMoveAbsolute() {
     }
 
-    public PacketMobMoveAbsolute(int entityID, Vector3 pos, double x, double y,
+    public PacketMobMoveAbsolute(UUID uuid, Vector3 pos, double x, double y,
             double z) {
         super(pos);
-        this.entityID = entityID;
+        this.uuid = uuid;
         this.x = x;
         this.y = y;
         this.z = z;
@@ -48,7 +49,8 @@ public class PacketMobMoveAbsolute extends PacketAbstract implements PacketBoth 
     @Override
     public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        stream.putInt(entityID);
+        stream.putLong(uuid.getMostSignificantBits());
+        stream.putLong(uuid.getLeastSignificantBits());
         stream.putDouble(x);
         stream.putDouble(y);
         stream.putDouble(z);
@@ -57,7 +59,7 @@ public class PacketMobMoveAbsolute extends PacketAbstract implements PacketBoth 
     @Override
     public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        entityID = stream.getInt();
+        uuid = new UUID(stream.getLong(), stream.getLong());
         x = stream.getDouble();
         y = stream.getDouble();
         z = stream.getDouble();
@@ -68,7 +70,7 @@ public class PacketMobMoveAbsolute extends PacketAbstract implements PacketBoth 
         if (world == null) {
             return;
         }
-        Optional<EntityClient> fetch = world.entity(entityID);
+        Optional<EntityClient> fetch = world.entity(uuid);
         if (fetch.isPresent()) {
             EntityClient entity = fetch.get();
             if (entity instanceof MobileEntity) {
@@ -78,7 +80,7 @@ public class PacketMobMoveAbsolute extends PacketAbstract implements PacketBoth 
         } else if (world.terrain()
                 .isBlockTicking(FastMath.floor(x), FastMath.floor(y),
                         FastMath.floor(z))) {
-            client.send(new PacketRequestEntity(entityID));
+            client.send(new PacketRequestEntity(uuid));
         }
     }
 

@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.block;
 
 import java8.util.Optional;
 import org.tobi29.scapes.chunk.terrain.TerrainServer;
 import org.tobi29.scapes.engine.utils.math.Face;
+import org.tobi29.scapes.entity.EntityCollector;
 import org.tobi29.scapes.entity.server.EntityContainerServer;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 
@@ -31,9 +31,10 @@ public abstract class BlockTypeContainer extends BlockType {
     public boolean click(TerrainServer terrain, int x, int y, int z, Face face,
             MobPlayerServer player) {
         Optional<EntityContainerServer> container =
-                terrain.world().entities(x, y, z)
-                        .filter(entity -> entity instanceof EntityContainerServer)
-                        .map(entity -> (EntityContainerServer) entity)
+                EntityCollector.<EntityContainerServer>entities(
+                        entities -> terrain.entities(x, y, z, stream -> stream
+                                .filter(entity -> entity instanceof EntityContainerServer)
+                                .map(entity -> (EntityContainerServer) entity)))
                         .findAny();
         if (container.isPresent()) {
             player.openGui(container.get());

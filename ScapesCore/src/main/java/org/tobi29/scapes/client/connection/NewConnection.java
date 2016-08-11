@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.connection;
 
 import java8.util.Optional;
@@ -25,6 +24,7 @@ import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.server.ConnectionCloseException;
 import org.tobi29.scapes.engine.server.PacketBundleChannel;
 import org.tobi29.scapes.engine.utils.BufferCreator;
+import org.tobi29.scapes.engine.utils.SleepUtil;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.VersionUtil;
 import org.tobi29.scapes.engine.utils.graphics.Image;
@@ -61,8 +61,8 @@ public class NewConnection {
     private final Account account;
     private int loadingDistance;
     private IDStorage idStorage;
-    private IOFunction<RandomReadableByteStream, Optional<String>> state =
-            this::loginStep1;
+    private Optional<IOFunction<RandomReadableByteStream, Optional<String>>>
+            state = Optional.empty();
     private Optional<String> status = Optional.of("Logging in...");
 
     public NewConnection(ScapesEngine engine, PacketBundleChannel channel,
@@ -85,7 +85,7 @@ public class NewConnection {
         byte[] array = keyPair.getPublic().getEncoded();
         output.put(array);
         channel.queueBundle();
-        state = this::loginStep1;
+        state = Optional.of(this::loginStep1);
         return Optional.of("Logging in...");
     }
 
@@ -140,7 +140,7 @@ public class NewConnection {
             output.putInt(i);
         }
         channel.queueBundle();
-        state = this::loginStep2;
+        state = Optional.of(this::loginStep2);
         return Optional.of("Logging in...");
     }
 
@@ -152,7 +152,7 @@ public class NewConnection {
         if (pluginRequests.isEmpty()) {
             return loginStep4();
         }
-        state = this::loginStep3;
+        state = Optional.of(this::loginStep3);
         return Optional.of("Downloading plugins...");
     }
 
@@ -184,7 +184,7 @@ public class NewConnection {
         output.putInt(loadingDistanceRequest);
         sendSkin(output);
         channel.queueBundle();
-        state = this::loginStep5;
+        state = Optional.of(this::loginStep5);
         return Optional.of("Receiving server info...");
     }
 
@@ -197,6 +197,7 @@ public class NewConnection {
         TagStructure idsTag = new TagStructure();
         TagStructureBinary.read(idsTag, input);
         idStorage = new IDStorage(idsTag);
+        state = Optional.empty();
         return Optional.empty();
     }
 
@@ -225,11 +226,8 @@ public class NewConnection {
     }
 
     public Optional<String> login() throws IOException {
-        Optional<RandomReadableByteStream> bundle = channel.fetch();
-        if (bundle.isPresent()) {
-            status = state.apply(bundle.get());
-        }
-        if (channel.process()) {
+        if (channel.process(() -> state,
+                (state, bundle) -> status = state.apply(bundle))) {
             throw new IOException("Connection closed before login");
         }
         return status;

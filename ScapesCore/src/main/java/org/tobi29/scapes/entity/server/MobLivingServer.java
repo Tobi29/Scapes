@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.entity.server;
 
 import java8.util.Optional;
@@ -78,16 +77,17 @@ public abstract class MobLivingServer extends MobServer {
                 pos.doubleZ() + viewOffset.doubleZ(), pos.doubleX() + lookX,
                 pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0, 0, 1);
         List<MobLivingServer> mobs = new ArrayList<>();
-        world.entities(hitField)
-                .filter(mob -> mob instanceof MobLivingServer && mob != this)
-                .map(mob -> (MobLivingServer) mob).forEach(mob -> {
-            mobs.add(mob);
-            mob.damage(damage);
-            mob.onNotice(this);
-            double rad = rot.doubleZ() * FastMath.DEG_2_RAD;
-            mob.push(FastMath.cosTable(rad) * 10.0,
-                    FastMath.sinTable(rad) * 10.0, 2.0);
-        });
+        world.entities(hitField, stream -> stream
+                .filter(entity -> entity instanceof MobLivingServer &&
+                        entity != this).map(mob -> (MobLivingServer) mob)
+                .forEach(mob -> {
+                    mobs.add(mob);
+                    mob.damage(damage);
+                    mob.onNotice(this);
+                    double rad = rot.doubleZ() * FastMath.DEG_2_RAD;
+                    mob.push(FastMath.cosTable(rad) * 10.0,
+                            FastMath.sinTable(rad) * 10.0, 2.0);
+                }));
         return mobs;
     }
 
@@ -209,12 +209,15 @@ public abstract class MobLivingServer extends MobServer {
                 pos.doubleY() + viewOffset.doubleY(),
                 pos.doubleZ() + viewOffset.doubleZ(), pos.doubleX() + lookX,
                 pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0, 0, 1);
-        world.entities(viewField).forEach(entity -> {
-            if (!world.checkBlocked(pos.intX(), pos.intY(), pos.intZ(),
-                    entity.pos.intX(), entity.pos.intY(), entity.pos.intZ())) {
-                onNotice(entity);
-            }
-        });
+        world.entities(viewField,
+                stream -> stream.filter(entity -> entity instanceof MobServer)
+                        .map(entity -> (MobServer) entity).forEach(mob -> {
+                            if (!world.checkBlocked(pos.intX(), pos.intY(),
+                                    pos.intZ(), mob.pos.intX(), mob.pos.intY(),
+                                    mob.pos.intZ())) {
+                                onNotice(mob);
+                            }
+                        }));
         if (invincibleTicks >= 0.0) {
             invincibleTicks = FastMath.max(invincibleTicks - delta, 0.0);
         }

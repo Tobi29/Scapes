@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import java8.util.Optional;
+import java8.util.function.Consumer;
+import java8.util.stream.Stream;
 import org.tobi29.scapes.block.AABBElement;
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.chunk.WorldClient;
@@ -25,13 +26,15 @@ import org.tobi29.scapes.chunk.terrain.TerrainRenderer;
 import org.tobi29.scapes.engine.utils.Pool;
 import org.tobi29.scapes.engine.utils.math.PointerPane;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2;
+import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.packets.PacketBlockChange;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 public class TerrainInfiniteSection implements TerrainClient {
     @SuppressWarnings("unchecked")
-    private final Optional<? extends TerrainInfiniteChunk>[] chunks =
+    private final Optional<TerrainInfiniteChunkClient>[] chunks =
             new Optional[9];
     private TerrainInfiniteClient terrain;
     private BlockType air;
@@ -69,7 +72,7 @@ public class TerrainInfiniteSection implements TerrainClient {
         if (z < 0 || z >= zSize) {
             return;
         }
-        Optional<? extends TerrainInfiniteChunk> chunk = get(x, y);
+        Optional<TerrainInfiniteChunkClient> chunk = get(x, y);
         if (chunk.isPresent()) {
             chunk.get().
                     sunLightG(x, y, z, light);
@@ -83,7 +86,7 @@ public class TerrainInfiniteSection implements TerrainClient {
         if (z < 0 || z >= zSize) {
             return;
         }
-        Optional<? extends TerrainInfiniteChunk> chunk = get(x, y);
+        Optional<TerrainInfiniteChunkClient> chunk = get(x, y);
         if (chunk.isPresent()) {
             chunk.get().
                     blockLightG(x, y, z, light);
@@ -97,7 +100,7 @@ public class TerrainInfiniteSection implements TerrainClient {
         if (z < 0 || z >= zSize) {
             return air;
         }
-        Optional<? extends TerrainInfiniteChunk> chunk = get(x, y);
+        Optional<TerrainInfiniteChunkClient> chunk = get(x, y);
         if (chunk.isPresent()) {
             return chunk.get().typeG(x, y, z);
         }
@@ -109,7 +112,7 @@ public class TerrainInfiniteSection implements TerrainClient {
         if (z < 0 || z >= zSize) {
             return 0;
         }
-        Optional<? extends TerrainInfiniteChunk> chunk = get(x, y);
+        Optional<TerrainInfiniteChunkClient> chunk = get(x, y);
         if (chunk.isPresent()) {
             return chunk.get().dataG(x, y, z);
         }
@@ -121,7 +124,7 @@ public class TerrainInfiniteSection implements TerrainClient {
         if (z < 0 || z >= zSize) {
             return 0;
         }
-        Optional<? extends TerrainInfiniteChunk> chunk = get(x, y);
+        Optional<TerrainInfiniteChunkClient> chunk = get(x, y);
         if (chunk.isPresent()) {
             return chunk.get().lightG(x, y, z);
         }
@@ -133,7 +136,7 @@ public class TerrainInfiniteSection implements TerrainClient {
         if (z < 0 || z >= zSize) {
             return 0;
         }
-        Optional<? extends TerrainInfiniteChunk> chunk = get(x, y);
+        Optional<TerrainInfiniteChunkClient> chunk = get(x, y);
         if (chunk.isPresent()) {
             return chunk.get().sunLightG(x, y, z);
         }
@@ -145,7 +148,7 @@ public class TerrainInfiniteSection implements TerrainClient {
         if (z < 0 || z >= zSize) {
             return 0;
         }
-        Optional<? extends TerrainInfiniteChunk> chunk = get(x, y);
+        Optional<TerrainInfiniteChunkClient> chunk = get(x, y);
         if (chunk.isPresent()) {
             return chunk.get().blockLightG(x, y, z);
         }
@@ -159,9 +162,9 @@ public class TerrainInfiniteSection implements TerrainClient {
 
     @Override
     public int highestBlockZAt(int x, int y) {
-        Optional<? extends TerrainInfiniteChunk> chunk = get(x, y);
+        Optional<TerrainInfiniteChunkClient> chunk = get(x, y);
         if (chunk.isPresent()) {
-            TerrainInfiniteChunk chunk2 = chunk.get();
+            TerrainInfiniteChunkClient chunk2 = chunk.get();
             return chunk2.highestBlockZAtG(x, y);
         }
         return terrain.highestBlockZAt(x, y);
@@ -169,9 +172,9 @@ public class TerrainInfiniteSection implements TerrainClient {
 
     @Override
     public int highestTerrainBlockZAt(int x, int y) {
-        Optional<? extends TerrainInfiniteChunk> chunk = get(x, y);
+        Optional<TerrainInfiniteChunkClient> chunk = get(x, y);
         if (chunk.isPresent()) {
-            TerrainInfiniteChunk chunk2 = chunk.get();
+            TerrainInfiniteChunkClient chunk2 = chunk.get();
             return chunk2.highestTerrainBlockZAtG(x, y);
         }
         return terrain.highestTerrainBlockZAt(x, y);
@@ -198,7 +201,60 @@ public class TerrainInfiniteSection implements TerrainClient {
         return terrain.pointerPanes(x, y, z, range);
     }
 
-    private Optional<? extends TerrainInfiniteChunk> get(int x, int y) {
+    @Override
+    public BlockType air() {
+        return terrain.air();
+    }
+
+    @Override
+    public boolean addEntity(EntityClient entity) {
+        return terrain.addEntity(entity);
+    }
+
+    @Override
+    public boolean removeEntity(EntityClient entity) {
+        return terrain.removeEntity(entity);
+    }
+
+    @Override
+    public boolean hasEntity(EntityClient entity) {
+        return terrain.hasEntity(entity);
+    }
+
+    @Override
+    public Optional<EntityClient> entity(UUID uuid) {
+        return terrain.entity(uuid);
+    }
+
+    @Override
+    public void entities(Consumer<Stream<? extends EntityClient>> consumer) {
+        terrain.entities(consumer);
+    }
+
+    @Override
+    public void entities(int x, int y, int z,
+            Consumer<Stream<? extends EntityClient>> consumer) {
+        terrain.entities(x, y, z, consumer);
+    }
+
+    @Override
+    public void entitiesAtLeast(int minX, int minY, int minZ, int maxX,
+            int maxY, int maxZ,
+            Consumer<Stream<? extends EntityClient>> consumer) {
+        terrain.entities(minX, minY, minZ, maxX, maxY, maxZ, consumer);
+    }
+
+    @Override
+    public void entityAdded(EntityClient entity) {
+        terrain.entityAdded(entity);
+    }
+
+    @Override
+    public void entityRemoved(EntityClient entity) {
+        terrain.entityRemoved(entity);
+    }
+
+    private Optional<TerrainInfiniteChunkClient> get(int x, int y) {
         x = (x >> 4) - this.x;
         y = (y >> 4) - this.y;
         if (x < 0 || x >= 3 || y < 0 || y >= 3) {

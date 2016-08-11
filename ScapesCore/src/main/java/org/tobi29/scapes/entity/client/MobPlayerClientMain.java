@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.entity.client;
 
 import java8.util.Optional;
@@ -210,8 +209,8 @@ public abstract class MobPlayerClientMain extends MobPlayerClient {
 
     public void updatePosition() {
         positionHandler
-                .submitUpdate(entityID, pos.now(), speed.now(), rot.now(),
-                        ground, slidingWall, inWater, swimming, true);
+                .submitUpdate(uuid, pos.now(), speed.now(), rot.now(), ground,
+                        slidingWall, inWater, swimming, true);
     }
 
     public void onNotice(MobClient notice) {
@@ -248,8 +247,8 @@ public abstract class MobPlayerClientMain extends MobPlayerClient {
             collide(aabb, aabbs);
         }
         positionHandler
-                .submitUpdate(entityID, pos.now(), speed.now(), rot.now(),
-                        ground, slidingWall, inWater, swimming);
+                .submitUpdate(uuid, pos.now(), speed.now(), rot.now(), ground,
+                        slidingWall, inWater, swimming);
         double lookX = FastMath.cosTable(rot.doubleZ() * FastMath.PI / 180) *
                 FastMath.cosTable(rot.doubleX() * FastMath.PI / 180) * 6;
         double lookY = FastMath.sinTable(rot.doubleZ() * FastMath.PI / 180) *
@@ -260,17 +259,18 @@ public abstract class MobPlayerClientMain extends MobPlayerClient {
                 pos.doubleY() + viewOffset.doubleY(),
                 pos.doubleZ() + viewOffset.doubleZ(), pos.doubleX() + lookX,
                 pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0, 0, 1);
-        world.entities().filter(entity -> entity instanceof MobClient)
-                .forEach(entity -> {
-                    MobClient mob = (MobClient) entity;
-                    if (viewField.inView(mob.aabb()) > 0) {
-                        if (!world.checkBlocked(pos.intX(), pos.intY(),
-                                pos.intZ(), entity.pos.intX(),
-                                entity.pos.intY(), entity.pos.intZ())) {
-                            onNotice(mob);
-                        }
-                    }
-                });
+        world.entities(
+                stream -> stream.filter(entity -> entity instanceof MobClient)
+                        .forEach(entity -> {
+                            MobClient mob = (MobClient) entity;
+                            if (viewField.inView(mob.aabb()) > 0) {
+                                if (!world.checkBlocked(pos.intX(), pos.intY(),
+                                        pos.intZ(), entity.pos.intX(),
+                                        entity.pos.intY(), entity.pos.intZ())) {
+                                    onNotice(mob);
+                                }
+                            }
+                        }));
         footStep -= delta;
         if (footStep <= 0.0) {
             footStep = 0.0;

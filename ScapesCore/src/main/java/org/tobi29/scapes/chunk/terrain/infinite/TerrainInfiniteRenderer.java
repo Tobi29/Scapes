@@ -121,7 +121,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
         TerrainInfiniteChunkClient terrainChunk = chunk.chunk();
         int x = terrainChunk.x();
         int y = terrainChunk.y();
-        TerrainInfinite terrain = terrainChunk.terrain();
+        TerrainInfiniteClient terrain = terrainChunk.terrain();
         if (!checkLoaded(terrain, x - 1, y - 1)) {
             return false;
         }
@@ -412,9 +412,8 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                 chunk -> chunk.rendererChunk().setGeometryDirty(z));
     }
 
-    private boolean checkLoaded(TerrainInfinite terrain, int x, int y) {
-        Optional<? extends TerrainInfiniteChunk> chunk =
-                terrain.chunkNoLoad(x, y);
+    private boolean checkLoaded(TerrainInfiniteClient terrain, int x, int y) {
+        Optional<TerrainInfiniteChunkClient> chunk = terrain.chunkNoLoad(x, y);
         return chunk.isPresent() && chunk.get().isLoaded();
     }
 
@@ -446,7 +445,7 @@ public class TerrainInfiniteRenderer implements TerrainRenderer {
                 return;
             }
             TerrainInfiniteChunkModel model = null;
-            TerrainInfiniteChunk terrainChunk = chunk.chunk();
+            TerrainInfiniteChunkClient terrainChunk = chunk.chunk();
             if (terrainChunk.isEmpty(i)) {
                 chunk.setSolid(i, false);
             } else {

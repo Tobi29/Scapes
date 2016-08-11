@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.entity.server;
 
 import java8.util.stream.Stream;
 import org.tobi29.scapes.block.InventoryContainer;
+import org.tobi29.scapes.entity.Entity;
 
-public interface EntityContainerServer {
+public interface EntityContainerServer extends Entity {
     InventoryContainer inventories();
 
     void addViewer(MobPlayerServer player);

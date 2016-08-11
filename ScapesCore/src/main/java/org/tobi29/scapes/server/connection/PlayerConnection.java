@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.server.connection;
 
 import java8.util.Optional;
@@ -26,6 +25,7 @@ import org.tobi29.scapes.engine.server.Account;
 import org.tobi29.scapes.engine.server.Connection;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3;
+import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.entity.skin.ServerSkin;
 import org.tobi29.scapes.packets.PacketChat;
@@ -86,14 +86,27 @@ public abstract class PlayerConnection
         Optional<MobPlayerServer> newEntity =
                 player.createEntity(this, Optional.ofNullable(world),
                         Optional.ofNullable(pos));
-        if (!newEntity.isPresent()) {
-            disconnect("Unable to spawn in world");
+        boolean isNew;
+        MobPlayerServer entity;
+        if (newEntity.isPresent()) {
+            entity = newEntity.get();
+            isNew = false;
+        } else {
+            Optional<WorldServer> spawnWorld = server.server().defaultWorld();
+            if (!spawnWorld.isPresent()) {
+                disconnect("Unable to spawn into a world");
+                return;
+            }
+            world = spawnWorld.get();
+            Vector3 spawnPos = new Vector3d(0.5, 0.5, 1.0).plus(world.spawn());
+            entity = world.plugins().worldType()
+                    .newPlayer(world, spawnPos, Vector3d.ZERO, 0.0, 0.0, name(),
+                            skin().checksum(), this);
+            isNew = true;
         }
-        MobPlayerServer entity = newEntity.get();
         this.entity = entity;
-        entity.world().addEntity(entity);
         send(new PacketSetWorld(entity.world(), entity));
-        entity.world().addPlayer(entity);
+        entity.world().addPlayer(entity, isNew);
     }
 
     protected synchronized void save() {

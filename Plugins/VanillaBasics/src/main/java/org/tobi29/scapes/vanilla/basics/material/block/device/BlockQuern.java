@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.material.block.device;
 
 import java8.util.Optional;
@@ -31,40 +30,19 @@ import org.tobi29.scapes.engine.graphics.Shader;
 import org.tobi29.scapes.engine.utils.math.Face;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.server.EntityContainerServer;
-import org.tobi29.scapes.entity.server.EntityServer;
-import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityQuernServer;
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial;
-import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock;
+import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer;
 
 import java.util.Collections;
 import java.util.List;
 
-public class BlockQuern extends VanillaBlock {
+public class BlockQuern extends VanillaBlockContainer {
     private TerrainTexture textureTop, textureSide, textureBottom;
     private BlockModel model;
 
     public BlockQuern(VanillaMaterial materials) {
         super(materials, "vanilla.basics.block.Quern");
-    }
-
-    @Override
-    public boolean click(TerrainServer terrain, int x, int y, int z, Face face,
-            MobPlayerServer player) {
-        terrain.world().entities(x, y, z)
-                .filter(entity -> entity instanceof EntityQuernServer).forEach(
-                entity -> player.openGui((EntityContainerServer) entity));
-        return true;
-    }
-
-    @Override
-    public boolean place(TerrainServer.TerrainMutable terrain, int x, int y,
-            int z, Face face, MobPlayerServer player) {
-        EntityServer entity = new EntityQuernServer(terrain.world(),
-                new Vector3d(x + 0.5, y + 0.5, z + 0.5));
-        entity.onSpawn();
-        terrain.world().addEntity(entity);
-        return true;
     }
 
     @Override
@@ -105,8 +83,12 @@ public class BlockQuern extends VanillaBlock {
     }
 
     @Override
-    public boolean causesTileUpdate() {
-        return true;
+    protected EntityContainerServer placeEntity(TerrainServer terrain, int x,
+            int y, int z) {
+        EntityQuernServer entity = new EntityQuernServer(terrain.world(),
+                new Vector3d(x + 0.5, y + 0.5, z + 0.5));
+        terrain.world().addEntityNew(entity);
+        return entity;
     }
 
     @Override

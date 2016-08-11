@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import java8.util.Objects;
 import java8.util.Optional;
+import java8.util.function.Consumer;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.math.FastMath;
+import org.tobi29.scapes.entity.client.EntityClient;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class TerrainInfiniteChunkManagerClient
-        implements TerrainInfiniteChunkManager {
+        implements TerrainInfiniteChunkManager<EntityClient> {
     private final int radius, size;
     private final TerrainInfiniteChunkClient[] array;
     private final AtomicLong lock = new AtomicLong();
@@ -107,7 +108,8 @@ public class TerrainInfiniteChunkManagerClient
         return Streams.collect(array, Objects::nonNull);
     }
 
-    protected boolean setCenter(int x, int y) {
+    protected boolean setCenter(int x, int y,
+            Consumer<TerrainInfiniteChunkClient> removed) {
         x -= radius;
         y -= radius;
         if (x != this.x || y != this.y) {
@@ -120,11 +122,11 @@ public class TerrainInfiniteChunkManagerClient
                         clear();
                     } else {
                         for (int i = 0; i < xDiff; i++) {
-                            shiftXPositive();
+                            shiftXPositive(removed);
                         }
                         xDiff = -xDiff;
                         for (int i = 0; i < xDiff; i++) {
-                            shiftXNegative();
+                            shiftXNegative(removed);
                         }
                     }
                     this.x = x;
@@ -136,11 +138,11 @@ public class TerrainInfiniteChunkManagerClient
                         clear();
                     } else {
                         for (int i = 0; i < yDiff; i++) {
-                            shiftYPositive();
+                            shiftYPositive(removed);
                         }
                         yDiff = -yDiff;
                         for (int i = 0; i < yDiff; i++) {
-                            shiftYNegative();
+                            shiftYNegative(removed);
                         }
                     }
                     this.y = y;
@@ -156,31 +158,63 @@ public class TerrainInfiniteChunkManagerClient
         Arrays.fill(array, null);
     }
 
-    private void shiftXPositive() {
-        System.arraycopy(array, 0, array, 1, array.length - 1);
+    private void shiftXPositive(Consumer<TerrainInfiniteChunkClient> removed) {
         for (int i = 0; i < array.length; i += size) {
-            array[i] = null;
+            if (array[i] != null) {
+                removed.accept(array[i]);
+            }
+        }
+        System.arraycopy(array, 0, array, 1, array.length - 1);
+        for (int i = size - 1; i < array.length; i += size) {
+            if (array[i] != null) {
+                removed.accept(array[i]);
+                array[i] = null;
+            }
         }
     }
 
-    private void shiftXNegative() {
+    private void shiftXNegative(Consumer<TerrainInfiniteChunkClient> removed) {
+        for (int i = 0; i < array.length; i += size) {
+            if (array[i] != null) {
+                removed.accept(array[i]);
+            }
+        }
         System.arraycopy(array, 1, array, 0, array.length - 1);
         for (int i = size - 1; i < array.length; i += size) {
-            array[i] = null;
+            if (array[i] != null) {
+                removed.accept(array[i]);
+                array[i] = null;
+            }
         }
     }
 
-    private void shiftYPositive() {
+    private void shiftYPositive(Consumer<TerrainInfiniteChunkClient> removed) {
+        for (int i = array.length - size; i < array.length; i++) {
+            if (array[i] != null) {
+                removed.accept(array[i]);
+            }
+        }
         System.arraycopy(array, 0, array, size, array.length - size);
         for (int i = 0; i < size; i++) {
-            array[i] = null;
+            if (array[i] != null) {
+                removed.accept(array[i]);
+                array[i] = null;
+            }
         }
     }
 
-    private void shiftYNegative() {
+    private void shiftYNegative(Consumer<TerrainInfiniteChunkClient> removed) {
+        for (int i = 0; i < size; i++) {
+            if (array[i] != null) {
+                removed.accept(array[i]);
+            }
+        }
         System.arraycopy(array, size, array, 0, array.length - size);
         for (int i = array.length - size; i < array.length; i++) {
-            array[i] = null;
+            if (array[i] != null) {
+                removed.accept(array[i]);
+                array[i] = null;
+            }
         }
     }
 }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.connection;
 
 import java8.util.Optional;
@@ -26,7 +25,6 @@ import org.tobi29.scapes.engine.server.ConnectionEndException;
 import org.tobi29.scapes.engine.server.PacketBundleChannel;
 import org.tobi29.scapes.engine.server.RemoteAddress;
 import org.tobi29.scapes.engine.utils.io.IORunnable;
-import org.tobi29.scapes.engine.utils.io.RandomReadableByteStream;
 import org.tobi29.scapes.engine.utils.io.RandomWritableByteStream;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
@@ -71,20 +69,18 @@ public class RemoteClientConnection extends ClientConnection
                 if (channel.bundleSize() > 0) {
                     channel.queueBundle();
                 }
-                Optional<RandomReadableByteStream> bundle = channel.fetch();
-                if (bundle.isPresent()) {
-                    RandomReadableByteStream input = bundle.get();
-                    while (input.hasRemaining()) {
+                if (channel.process(bundle -> {
+                    while (bundle.hasRemaining()) {
                         PacketClient packet = (PacketClient) PacketAbstract
-                                .make(plugins.registry(), input.getShort());
-                        int pos = input.position();
-                        packet.parseClient(this, input);
-                        int size = input.position() - pos;
+                                .make(plugins.registry(), bundle.getShort());
+                        int pos = bundle.position();
+                        packet.parseClient(this, bundle);
+                        int size = bundle.position() - pos;
                         profilerReceived.packet(packet, size);
                         packet.runClient(this, world);
                     }
-                }
-                if (channel.process()) {
+                    return true;
+                })) {
                     break;
                 }
                 try {
@@ -134,6 +130,7 @@ public class RemoteClientConnection extends ClientConnection
     @Override
     protected void task(IORunnable runnable) {
         sendQueue.add(runnable);
+        selector.wakeup();
     }
 
     @Override

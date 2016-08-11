@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import java8.util.Optional;
@@ -27,13 +26,14 @@ import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary;
 import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.EntityContainerClient;
 import org.tobi29.scapes.entity.server.EntityContainerServer;
-import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
+import java.util.UUID;
 
-public class PacketUpdateInventory extends PacketAbstract implements PacketClient {
-    private int entityID;
+public class PacketUpdateInventory extends PacketAbstract
+        implements PacketClient {
+    private UUID uuid;
     private String id;
     private TagStructure tag;
 
@@ -41,7 +41,7 @@ public class PacketUpdateInventory extends PacketAbstract implements PacketClien
     }
 
     public PacketUpdateInventory(EntityContainerServer entity, String id) {
-        entityID = ((EntityServer) entity).entityID();
+        uuid = entity.uuid();
         this.id = id;
         tag = entity.inventories().accessReturn(id, Inventory::save);
     }
@@ -49,7 +49,8 @@ public class PacketUpdateInventory extends PacketAbstract implements PacketClien
     @Override
     public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        stream.putInt(entityID);
+        stream.putLong(uuid.getMostSignificantBits());
+        stream.putLong(uuid.getLeastSignificantBits());
         stream.putString(id);
         TagStructureBinary.write(tag, stream);
     }
@@ -57,7 +58,7 @@ public class PacketUpdateInventory extends PacketAbstract implements PacketClien
     @Override
     public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        entityID = stream.getInt();
+        uuid = new UUID(stream.getLong(), stream.getLong());
         id = stream.getString();
         tag = new TagStructure();
         TagStructureBinary.read(tag, stream);
@@ -73,7 +74,7 @@ public class PacketUpdateInventory extends PacketAbstract implements PacketClien
         if (world == null) {
             return;
         }
-        Optional<EntityClient> fetch = world.entity(entityID);
+        Optional<EntityClient> fetch = world.entity(uuid);
         if (fetch.isPresent()) {
             EntityClient entity = fetch.get();
             if (entity instanceof EntityContainerClient) {
@@ -83,7 +84,7 @@ public class PacketUpdateInventory extends PacketAbstract implements PacketClien
                         .modify(id, inventory -> inventory.load(tag));
             }
         } else {
-            client.send(new PacketRequestEntity(entityID));
+            client.send(new PacketRequestEntity(uuid));
         }
     }
 }

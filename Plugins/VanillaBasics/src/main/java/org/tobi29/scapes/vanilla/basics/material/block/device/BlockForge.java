@@ -49,8 +49,7 @@ public class BlockForge extends VanillaBlockContainer {
             int y, int z) {
         EntityForgeServer entity = new EntityForgeServer(terrain.world(),
                 new Vector3d(x + 0.5, y + 0.5, z + 0.5));
-        entity.onSpawn();
-        terrain.world().addEntity(entity);
+        terrain.world().addEntityNew(entity);
         return entity;
     }
 

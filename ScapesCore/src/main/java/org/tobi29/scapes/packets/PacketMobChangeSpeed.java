@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import java8.util.Optional;
@@ -28,18 +27,19 @@ import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class PacketMobChangeSpeed extends PacketAbstract implements PacketBoth {
-    private int entityID;
+    private UUID uuid;
     private short x, y, z;
 
     public PacketMobChangeSpeed() {
     }
 
-    public PacketMobChangeSpeed(int entityID, Vector3 pos, double x, double y,
+    public PacketMobChangeSpeed(UUID uuid, Vector3 pos, double x, double y,
             double z) {
         super(pos, 0.0, false, false);
-        this.entityID = entityID;
+        this.uuid = uuid;
         this.x = (short) FastMath
                 .clamp(x * 100.0, Short.MIN_VALUE, Short.MAX_VALUE);
         this.y = (short) FastMath
@@ -51,7 +51,8 @@ public class PacketMobChangeSpeed extends PacketAbstract implements PacketBoth {
     @Override
     public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        stream.putInt(entityID);
+        stream.putLong(uuid.getMostSignificantBits());
+        stream.putLong(uuid.getLeastSignificantBits());
         stream.putShort(x);
         stream.putShort(y);
         stream.putShort(z);
@@ -60,7 +61,7 @@ public class PacketMobChangeSpeed extends PacketAbstract implements PacketBoth {
     @Override
     public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        entityID = stream.getInt();
+        uuid = new UUID(stream.getLong(), stream.getLong());
         x = stream.getShort();
         y = stream.getShort();
         z = stream.getShort();
@@ -71,7 +72,7 @@ public class PacketMobChangeSpeed extends PacketAbstract implements PacketBoth {
         if (world == null) {
             return;
         }
-        Optional<EntityClient> fetch = world.entity(entityID);
+        Optional<EntityClient> fetch = world.entity(uuid);
         if (fetch.isPresent()) {
             EntityClient entity = fetch.get();
             if (entity instanceof MobileEntity) {
@@ -79,7 +80,7 @@ public class PacketMobChangeSpeed extends PacketAbstract implements PacketBoth {
                         .receiveSpeed(x / 100.0, y / 100.0, z / 100.0);
             }
         } else {
-            client.send(new PacketRequestEntity(entityID));
+            client.send(new PacketRequestEntity(uuid));
         }
     }
 

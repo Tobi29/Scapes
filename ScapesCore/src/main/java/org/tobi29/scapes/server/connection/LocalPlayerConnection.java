@@ -42,8 +42,6 @@ import java.nio.channels.Selector;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class LocalPlayerConnection extends PlayerConnection {
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(LocalPlayerConnection.class);
     private final LocalClientConnection client;
     private State state = State.OPEN;
 
@@ -132,7 +130,7 @@ public class LocalPlayerConnection extends PlayerConnection {
             return;
         }
         try {
-            client.receive((PacketClient) packet);
+            client.receive(packet);
         } catch (IOException e) {
             error(e);
         }
@@ -146,6 +144,7 @@ public class LocalPlayerConnection extends PlayerConnection {
 
     @Override
     public void disconnect(String reason, double time) {
+        removeEntity();
         transmit(new PacketDisconnect(reason, time));
         error(new ConnectionCloseException(reason));
     }

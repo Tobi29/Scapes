@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.vanilla.basics.entity.server;
 
 import org.tobi29.scapes.chunk.WorldServer;
@@ -26,6 +25,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3;
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d;
 import org.tobi29.scapes.entity.WieldMode;
 import org.tobi29.scapes.entity.server.MobPlayerServer;
+import org.tobi29.scapes.entity.server.MobServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.util.Random;
@@ -60,13 +60,16 @@ public class MobPlayerServerVB extends MobPlayerServer {
                 pos.doubleY() + viewOffset.doubleY(),
                 pos.doubleZ() + viewOffset.doubleZ(), pos.doubleX() + lookX,
                 pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0, 0, 1);
-        world.entities(viewField).forEach(entity -> {
-            Vector3 mobPos = entity.pos();
-            if (!world.checkBlocked(pos.intX(), pos.intY(), pos.intZ(),
-                    mobPos.intX(), mobPos.intY(), mobPos.intZ())) {
-                onNotice(entity);
-            }
-        });
+        world.entities(viewField,
+                stream -> stream.filter(entity -> entity instanceof MobServer)
+                        .map(entity -> (MobServer) entity).forEach(mob -> {
+                            Vector3 mobPos = mob.pos();
+                            if (!world.checkBlocked(pos.intX(), pos.intY(),
+                                    pos.intZ(), mobPos.intX(), mobPos.intY(),
+                                    mobPos.intZ())) {
+                                onNotice(mob);
+                            }
+                        }));
         if (pos.doubleZ() < -100.0) {
             damage(-pos.doubleZ() - 100.0);
         }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.server.format.basic;
 
 import java8.util.Optional;
@@ -54,27 +53,36 @@ public class BasicPlayerData implements PlayerData {
     @Override
     public synchronized PlayerEntry player(String id) {
         TagStructure tagStructure = load(id);
+        Optional<TagStructure> entityTag;
+        if (tagStructure.has("Entity")) {
+            entityTag = Optional.of(tagStructure.getStructure("Entity"));
+        } else {
+            entityTag = Optional.empty();
+        }
+        Optional<String> worldName;
+        if (tagStructure.has("World")) {
+            worldName = Optional.of(tagStructure.getString("World"));
+        } else {
+            worldName = Optional.empty();
+        }
         return new PlayerEntry() {
             @Override
             public Optional<MobPlayerServer> createEntity(
                     PlayerConnection player, Optional<WorldServer> world,
                     Optional<Vector3> pos) {
+                if (!entityTag.isPresent()) {
+                    return Optional.empty();
+                }
+                TagStructure tagStructure = entityTag.get();
                 ScapesServer server = player.server().server();
-                if (!world.isPresent()) {
-                    world = server.world(tagStructure.getString("World"));
+                if (!world.isPresent() && worldName.isPresent()) {
+                    world = server.world(worldName.get());
                 }
                 if (!world.isPresent()) {
                     world = server.defaultWorld();
                 }
                 if (!world.isPresent()) {
                     return Optional.empty();
-                }
-                Optional<TagStructure> entityTag;
-                if (tagStructure.has("Entity")) {
-                    entityTag =
-                            Optional.of(tagStructure.getStructure("Entity"));
-                } else {
-                    entityTag = Optional.empty();
                 }
                 WorldServer spawnWorld = world.get();
                 Vector3 spawnPos = new Vector3d(0.5, 0.5, 1.0)
@@ -83,14 +91,9 @@ public class BasicPlayerData implements PlayerData {
                         .newPlayer(spawnWorld, spawnPos, Vector3d.ZERO, 0.0,
                                 0.0, player.name(), player.skin().checksum(),
                                 player);
-                if (entityTag.isPresent()) {
-                    TagStructure tagStructure = entityTag.get();
-                    pos.ifPresent(forcePos -> tagStructure
-                            .setMultiTag("Pos", forcePos));
-                    entity.read(tagStructure);
-                } else {
-                    entity.onSpawn();
-                }
+                pos.ifPresent(
+                        forcePos -> tagStructure.setMultiTag("Pos", forcePos));
+                entity.read(tagStructure);
                 return Optional.of(entity);
             }
 

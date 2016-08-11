@@ -54,8 +54,7 @@ public class BlockBellows extends VanillaBlock {
         terrain.data(x, y, z, face.getData());
         EntityServer entity = new EntityBellowsServer(terrain.world(),
                 new Vector3d(x + 0.5, y + 0.5, z + 0.5), face);
-        entity.onSpawn();
-        terrain.world().addEntity(entity);
+        terrain.world().addEntityNew(entity);
         return true;
     }
 

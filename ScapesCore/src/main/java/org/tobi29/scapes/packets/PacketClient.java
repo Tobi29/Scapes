@@ -46,4 +46,6 @@ public interface PacketClient extends Packet {
     boolean isChunkContent();
 
     boolean isVital();
+
+    boolean isImmediate();
 }

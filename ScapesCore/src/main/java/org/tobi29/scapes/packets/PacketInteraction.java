@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import java8.util.Optional;
@@ -27,12 +26,13 @@ import org.tobi29.scapes.entity.client.MobPlayerClient;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class PacketInteraction extends PacketAbstract
         implements PacketClient, PacketServer {
     public static final byte INVENTORY_SLOT_LEFT = 0x00, INVENTORY_SLOT_RIGHT =
             0x01, OPEN_INVENTORY = 0x10, CLOSE_INVENTORY = 0x11;
-    private int entityID;
+    private UUID uuid;
     private byte type, data;
 
     public PacketInteraction() {
@@ -47,8 +47,8 @@ public class PacketInteraction extends PacketAbstract
         this.data = data;
     }
 
-    public PacketInteraction(int entityID, byte type, byte data) {
-        this.entityID = entityID;
+    public PacketInteraction(UUID uuid, byte type, byte data) {
+        this.uuid = uuid;
         this.type = type;
         this.data = data;
     }
@@ -56,7 +56,8 @@ public class PacketInteraction extends PacketAbstract
     @Override
     public void sendClient(PlayerConnection player, WritableByteStream stream)
             throws IOException {
-        stream.putInt(entityID);
+        stream.putLong(uuid.getMostSignificantBits());
+        stream.putLong(uuid.getLeastSignificantBits());
         stream.put(type);
         stream.put(data);
     }
@@ -64,7 +65,7 @@ public class PacketInteraction extends PacketAbstract
     @Override
     public void parseClient(ClientConnection client, ReadableByteStream stream)
             throws IOException {
-        entityID = stream.getInt();
+        uuid = new UUID(stream.getLong(), stream.getLong());
         type = stream.get();
         data = stream.get();
     }
@@ -74,7 +75,7 @@ public class PacketInteraction extends PacketAbstract
         if (world == null) {
             return;
         }
-        Optional<EntityClient> fetch = world.entity(entityID);
+        Optional<EntityClient> fetch = world.entity(uuid);
         if (fetch.isPresent()) {
             EntityClient entity = fetch.get();
             if (entity instanceof MobPlayerClient) {
@@ -89,7 +90,7 @@ public class PacketInteraction extends PacketAbstract
                 }
             }
         } else {
-            client.send(new PacketRequestEntity(entityID));
+            client.send(new PacketRequestEntity(uuid));
         }
     }
 
@@ -117,7 +118,7 @@ public class PacketInteraction extends PacketAbstract
                                 "Invalid slot change data!");
                     }
                     mob.setInventorySelectLeft(data);
-                    mob.world().send(new PacketInteraction(mob.entityID(),
+                    mob.world().send(new PacketInteraction(mob.uuid(),
                             INVENTORY_SLOT_LEFT, data));
                     break;
                 case INVENTORY_SLOT_RIGHT:
@@ -126,7 +127,7 @@ public class PacketInteraction extends PacketAbstract
                                 "Invalid slot change data!");
                     }
                     mob.setInventorySelectRight(data);
-                    mob.world().send(new PacketInteraction(mob.entityID(),
+                    mob.world().send(new PacketInteraction(mob.uuid(),
                             INVENTORY_SLOT_RIGHT, data));
                     break;
                 case OPEN_INVENTORY:

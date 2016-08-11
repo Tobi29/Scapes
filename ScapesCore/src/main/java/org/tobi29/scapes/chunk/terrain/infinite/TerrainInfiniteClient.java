@@ -13,21 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import java8.util.Optional;
 import java8.util.function.Consumer;
 import java8.util.function.Function;
 import java8.util.stream.Collectors;
+import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.chunk.WorldClient;
 import org.tobi29.scapes.chunk.terrain.TerrainClient;
 import org.tobi29.scapes.chunk.terrain.TerrainRenderer;
 import org.tobi29.scapes.engine.utils.Streams;
 import org.tobi29.scapes.engine.utils.math.FastMath;
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i;
+import org.tobi29.scapes.engine.utils.profiler.Profiler;
 import org.tobi29.scapes.engine.utils.task.Joiner;
 import org.tobi29.scapes.engine.utils.task.TaskExecutor;
+import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.entity.client.MobPlayerClientMain;
 import org.tobi29.scapes.packets.PacketBlockChange;
 
@@ -36,7 +38,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class TerrainInfiniteClient extends TerrainInfinite
+public class TerrainInfiniteClient extends TerrainInfinite<EntityClient>
         implements TerrainClient {
     protected final TerrainInfiniteRenderer renderer;
     private final List<Vector2i> sortedLocations;
@@ -116,9 +118,14 @@ public class TerrainInfiniteClient extends TerrainInfinite
 
     @Override
     public void update(double delta) {
+        try (Profiler.C ignored = Profiler.section("Chunks")) {
+            Streams.forEach(chunkManager.iterator(),
+                    chunk -> chunk.updateClient(delta));
+        }
         int xx = FastMath.floor(player.x() / 16.0);
         int yy = FastMath.floor(player.y() / 16.0);
-        if (chunkManager.setCenter(xx, yy)) {
+        if (chunkManager
+                .setCenter(xx, yy, TerrainInfiniteChunkClient::dispose)) {
             boolean active = false;
             for (int x = -loadingRadius; x <= loadingRadius; x++) {
                 int xxx = x + xx;
@@ -178,6 +185,18 @@ public class TerrainInfiniteClient extends TerrainInfinite
     }
 
     @Override
+    public void entityAdded(EntityClient entity) {
+        super.entityAdded(entity);
+        world.entityAdded(entity);
+    }
+
+    @Override
+    public void entityRemoved(EntityClient entity) {
+        super.entityRemoved(entity);
+        world.entityRemoved(entity);
+    }
+
+    @Override
     public Optional<TerrainInfiniteChunkClient> chunk(int x, int y) {
         return chunkManager.get(x, y);
     }
@@ -227,11 +246,25 @@ public class TerrainInfiniteClient extends TerrainInfinite
     private void removeChunk(TerrainInfiniteChunkClient chunk) {
         int x = chunk.x();
         int y = chunk.y();
-        chunkManager.remove(x, y);
+        chunkManager.remove(x, y)
+                .ifPresent(TerrainInfiniteChunkClient::dispose);
     }
 
     @Override
     public int sunLightReduction(int x, int y) {
         return (int) world.environment().sunLightReduction(x, y);
+    }
+
+    @Override
+    public BlockType air() {
+        // TODO: Move
+        return world.air();
+    }
+
+    @Override
+    public boolean addEntity(EntityClient entity) {
+        int x = FastMath.floor(entity.x()) >> 4;
+        int y = FastMath.floor(entity.y()) >> 4;
+        return chunkC(x, y, chunk -> chunk.addEntity(entity));
     }
 }

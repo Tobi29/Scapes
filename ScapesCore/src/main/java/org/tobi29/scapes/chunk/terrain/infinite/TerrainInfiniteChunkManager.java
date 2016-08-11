@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain.infinite;
 
 import java8.util.Optional;
+import org.tobi29.scapes.entity.Entity;
 
 import java.util.Collection;
 
-public interface TerrainInfiniteChunkManager {
-    Optional<? extends TerrainInfiniteChunk> get(int x, int y);
+public interface TerrainInfiniteChunkManager<E extends Entity> {
+    Optional<? extends TerrainInfiniteChunk<E>> get(int x, int y);
 
     boolean has(int x, int y);
 
-    Collection<? extends TerrainInfiniteChunk> iterator();
+    Collection<? extends TerrainInfiniteChunk<E>> iterator();
 }

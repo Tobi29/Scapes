@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.packets;
 
 import org.tobi29.scapes.block.GameRegistry;
@@ -32,11 +31,13 @@ import org.tobi29.scapes.entity.server.MobPlayerServer;
 import org.tobi29.scapes.server.connection.PlayerConnection;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class PacketSetWorld extends PacketAbstract implements PacketClient {
     private TagStructure tag;
     private long seed;
-    private int entityID, environment;
+    private UUID uuid;
+    private int environment;
 
     public PacketSetWorld() {
     }
@@ -44,7 +45,7 @@ public class PacketSetWorld extends PacketAbstract implements PacketClient {
     public PacketSetWorld(WorldServer world, MobPlayerServer player) {
         tag = player.write();
         seed = world.seed();
-        entityID = player.entityID();
+        uuid = player.uuid();
         environment = world.registry().getAsymSupplier("Core", "Environment")
                 .id(world.environment());
     }
@@ -54,7 +55,8 @@ public class PacketSetWorld extends PacketAbstract implements PacketClient {
             throws IOException {
         TagStructureBinary.write(tag, stream);
         stream.putLong(seed);
-        stream.putInt(entityID);
+        stream.putLong(uuid.getMostSignificantBits());
+        stream.putLong(uuid.getLeastSignificantBits());
         stream.putInt(environment);
     }
 
@@ -64,7 +66,7 @@ public class PacketSetWorld extends PacketAbstract implements PacketClient {
         tag = new TagStructure();
         TagStructureBinary.read(tag, stream);
         seed = stream.getLong();
-        entityID = stream.getInt();
+        uuid = new UUID(stream.getLong(), stream.getLong());
         environment = stream.getInt();
     }
 
@@ -83,6 +85,6 @@ public class PacketSetWorld extends PacketAbstract implements PacketClient {
                         seed, newWorld -> new TerrainInfiniteClient(newWorld,
                         client.loadingRadius() >> 4, 512,
                         client.game().engine().taskExecutor()),
-                        environmentRegistry.get(environment).b, tag, entityID));
+                        environmentRegistry.get(environment).b, tag, uuid));
     }
 }

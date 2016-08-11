@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.vanilla.basics.util;
 
-import org.tobi29.scapes.vanilla.basics.material.block.BlockExplosive;
 import org.tobi29.scapes.block.BlockType;
 import org.tobi29.scapes.block.ItemStack;
 import org.tobi29.scapes.chunk.WorldServer;
@@ -28,6 +27,7 @@ import org.tobi29.scapes.entity.server.EntityServer;
 import org.tobi29.scapes.entity.server.MobFlyingBlockServer;
 import org.tobi29.scapes.entity.server.MobLivingServer;
 import org.tobi29.scapes.entity.server.MobServer;
+import org.tobi29.scapes.vanilla.basics.material.block.BlockExplosive;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,24 +41,25 @@ public final class ExplosionUtil {
     public static void explosionEntities(WorldServer world, double x, double y,
             double z, double radius, double push, double damage) {
         assert world.checkThread();
-        world.entities(new Vector3d(x, y, z), radius)
-                .filter(entity -> entity instanceof MobServer)
-                .forEach(entity -> {
-                    Vector3 relative =
-                            entity.pos().minus(new Vector3d(x, y, z));
-                    double s = radius - FastMath.length(relative);
-                    if (s > 0) {
-                        double p = s * push;
-                        Vector3 force =
-                                FastMath.normalizeSafe(relative).multiply(p);
-                        ((MobServer) entity)
-                                .push(force.doubleX(), force.doubleY(),
-                                        force.doubleZ());
-                        if (entity instanceof MobLivingServer) {
-                            ((MobLivingServer) entity).damage(s * damage);
-                        }
-                    }
-                });
+        world.entities(new Vector3d(x, y, z), radius,
+                stream -> stream.filter(entity -> entity instanceof MobServer)
+                        .forEach(entity -> {
+                            Vector3 relative =
+                                    entity.pos().minus(new Vector3d(x, y, z));
+                            double s = radius - FastMath.length(relative);
+                            if (s > 0) {
+                                double p = s * push;
+                                Vector3 force = FastMath.normalizeSafe(relative)
+                                        .multiply(p);
+                                ((MobServer) entity)
+                                        .push(force.doubleX(), force.doubleY(),
+                                                force.doubleZ());
+                                if (entity instanceof MobLivingServer) {
+                                    ((MobLivingServer) entity)
+                                            .damage(s * damage);
+                                }
+                            }
+                        }));
     }
 
     public static void explosionBlockPush(TerrainServer.TerrainMutable handle,
@@ -113,10 +114,7 @@ public final class ExplosionUtil {
             }
         }
         world.taskExecutor().addTask(() -> {
-            Streams.forEach(entities, entity -> {
-                entity.onSpawn();
-                world.addEntity(entity);
-            });
+            Streams.forEach(entities, world::addEntityNew);
             explosionEntities(world, x, y, z, size, push, damage);
         }, "Explosion-Entities");
     }

@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.chunk.terrain;
 
 import org.tobi29.scapes.chunk.WorldClient;
+import org.tobi29.scapes.entity.client.EntityClient;
 import org.tobi29.scapes.packets.PacketBlockChange;
 
-public interface TerrainClient extends Terrain {
+public interface TerrainClient extends TerrainEntity<EntityClient> {
     WorldClient world();
 
     TerrainRenderer renderer();
