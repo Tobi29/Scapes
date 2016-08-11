@@ -226,7 +226,7 @@ public class RemotePlayerConnection extends PlayerConnection {
     }
 
     @Override
-    public boolean tick(AbstractServerConnection.NetWorkerThread worker) {
+    public void tick(AbstractServerConnection.NetWorkerThread worker) {
         try {
             switch (state) {
                 case LOGIN:
@@ -261,9 +261,7 @@ public class RemotePlayerConnection extends PlayerConnection {
                             return true;
                         })) {
                             state = State.CLOSED;
-                            return false;
                         }
-                        return false;
                     } catch (ConnectionCloseException e) {
                         if (channel.bundleSize() > 0) {
                             channel.queueBundle();
@@ -273,7 +271,6 @@ public class RemotePlayerConnection extends PlayerConnection {
                 case CLOSING:
                     if (channel.process(bundle -> true)) {
                         state = State.CLOSED;
-                        return false;
                     }
                     break;
                 default:
@@ -289,7 +286,6 @@ public class RemotePlayerConnection extends PlayerConnection {
                     MessageLevel.SERVER_INFO);
             state = State.CLOSED;
         }
-        return false;
     }
 
     @Override

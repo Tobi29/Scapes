@@ -13,12 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.server.connection;
 
 import java8.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.tobi29.scapes.client.connection.LocalClientConnection;
 import org.tobi29.scapes.client.states.GameStateGameMP;
 import org.tobi29.scapes.engine.ScapesEngine;
@@ -154,8 +151,7 @@ public class LocalPlayerConnection extends PlayerConnection {
     }
 
     @Override
-    public boolean tick(AbstractServerConnection.NetWorkerThread worker) {
-        return false;
+    public void tick(AbstractServerConnection.NetWorkerThread worker) {
     }
 
     @Override
