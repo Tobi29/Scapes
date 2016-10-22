@@ -36,7 +36,8 @@ apply from: "$rootDir/ScapesEngine/SWTUtils/swt.gradle"
 version = "0.0.0_1"
 
 application {
-    fullName = "Scapes-VanillaTerrain"
+    name = "Scapes-VanillaTerrain"
+    fullName = "Scapes Vanilla Terrain"
     version = project.version
     company = "Tobi29"
     url = "https://github.com/Tobi29/Scapes"
