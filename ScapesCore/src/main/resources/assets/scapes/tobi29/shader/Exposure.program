@@ -19,7 +19,7 @@ shader fragment() {
             color += texture(uniform_Texture, vector2(blurOffset[j], currentOffset)).rgb * blurWeight[j] * currentWeight;
         }
     }
-    Float luminance = dot(color, lumcoeff);
+    Float luminance = clamp(dot(color, lumcoeff), 0.1, 10.0);
     out_Color.r = mix(1.0, -1.3, luminance);
     out_Color.a = uniform_Alpha;
 }

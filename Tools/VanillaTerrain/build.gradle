@@ -1,0 +1,58 @@
+/*
+ * Copyright 2012-2016 Tobi29
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * Copyright 2012-2016 Tobi29
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply from: "$rootDir/ScapesEngine/resources/scapesengineapplication.gradle"
+apply from: "$rootDir/ScapesEngine/SWTUtils/swt.gradle"
+
+version = "0.0.0_1"
+
+application {
+    fullName = "Scapes-VanillaTerrain"
+    version = project.version
+    company = "Tobi29"
+    url = "https://github.com/Tobi29/Scapes"
+    copyright = "© 2012-2015 Tobi29"
+    uuid = "9DDFCF42-6835-41B6-B6C7-204871BC9400"
+    mainClass = "org.tobi29.scapes.vanilla.basics.viewer.generator.TerrainViewerKt"
+}
+
+dependencies {
+    compile project(":ScapesEngine:SWTUtils")
+    compile project(":Plugins:VanillaBasics")
+
+    testCompile "junit:junit:4.12"
+
+    runtime project(":ScapesEngine:FileSystems:NIOFileSystem")
+    runtime "org.apache.logging.log4j:log4j-api:2.7"
+    runtime "org.apache.logging.log4j:log4j-core:2.7"
+    runtime "org.apache.logging.log4j:log4j-slf4j-impl:2.7"
+}

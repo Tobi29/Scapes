@@ -1,0 +1,43 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+repositories {
+    jcenter()
+}
+
+android {
+    compileSdkVersion = 24
+    buildToolsVersion = androidBuildToolsVersion
+
+    defaultConfig {
+        minSdkVersion 11
+        targetSdkVersion 24
+        versionCode = 1
+        versionName = "1.0"
+    }
+
+    lintOptions {
+        abortOnError = false
+    }
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+}
+
+dependencies {
+    compile project(":ScapesEngine:SQLFramework")
+    compile project(":ScapesEngine:FileSystems")
+    compile project(":ScapesEngine:Utils")
+    compile "org.jetbrains.kotlin:kotlin-stdlib:1.0.4"
+}
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.2.0-rc1'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.4"
+    }
+}

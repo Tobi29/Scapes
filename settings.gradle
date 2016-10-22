@@ -27,8 +27,14 @@ Closure subProjects = { root ->
 }
 
 apply from: "ScapesEngine/include.gradle"
-
 include "ScapesCore"
-include "MariaDBStorage"
-include "SQLiteStorage"
+include "ScapesCore:MariaDBStorage"
+include "ScapesCore:SQLiteStorage"
+include "ScapesDesktop"
 include subProjects("Plugins")
+include subProjects("Tools")
+
+if (androidEnable == "true") {
+    apply from: "ScapesEngineAndroid/include.gradle"
+    include "ScapesAndroid"
+}

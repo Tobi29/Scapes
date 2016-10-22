@@ -1,0 +1,53 @@
+/*
+ * Copyright 2012-2016 Tobi29
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply from: "$rootDir/ScapesEngine/resources/scapesengineapplication.gradle"
+apply from: "$rootDir/ScapesEngine/Backends/glfw.gradle"
+
+version = "0.0.0_1"
+
+application {
+    fullName = "Scapes"
+    version = project.version
+    company = "Tobi29"
+    url = "https://github.com/Tobi29/Scapes"
+    copyright = "© 2012-2016 Tobi29"
+    uuid = "1861B0A8-3269-41D8-AD55-4A7DC0DF7190"
+    mainClass = "org.tobi29.scapes.desktop.ScapesKt"
+}
+
+dependencies {
+    compile project(":ScapesCore")
+    compile project(":ScapesCore:SQLiteStorage")
+
+    testCompile "junit:junit:4.12"
+
+    runtime project(":ScapesEngine:FileSystems:NIOFileSystem")
+    runtime project(":ScapesEngine:ServerFramework:JVMSSLProvider")
+    runtime project(":ScapesEngine:Utils:MBeansCPUReader")
+    runtime project(":ScapesEngine:Codecs:CodecOGG")
+    runtime project(":ScapesEngine:Codecs:CodecMP3")
+    runtime project(":ScapesEngine:Codecs:CodecWAV")
+    runtime "org.apache.logging.log4j:log4j-api:2.7"
+    runtime "org.apache.logging.log4j:log4j-core:2.7"
+    runtime "org.apache.logging.log4j:log4j-slf4j-impl:2.7"
+
+    nativesLinux32 "com.almworks.sqlite4java:libsqlite4java-linux-i386:1.0.392"
+    nativesLinux64 "com.almworks.sqlite4java:libsqlite4java-linux-amd64:1.0.392"
+    nativesMacOSX "com.almworks.sqlite4java:libsqlite4java-osx:1.0.392"
+    nativesWindows32 "com.almworks.sqlite4java:sqlite4java-win32-x86:1.0.392"
+    nativesWindows64 "com.almworks.sqlite4java:sqlite4java-win32-x64:1.0.392"
+}

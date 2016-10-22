@@ -1,0 +1,80 @@
+task wrapper(type: Wrapper) {
+    gradleVersion = "3.0"
+    distributionUrl =
+            "https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
+repositories {
+    jcenter()
+}
+
+android {
+    compileSdkVersion = 24
+    buildToolsVersion = androidBuildToolsVersion
+
+    defaultConfig {
+        applicationId = "org.tobi29.scapes"
+        minSdkVersion 11
+        targetSdkVersion 24
+        versionCode = 1
+        versionName = "1.0"
+        /*jackOptions {
+            enabled true
+        }
+        dexOptions {
+            javaMaxHeapSize "2048M"
+        }*/
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+        debug {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro", "proguard-rules-debug.pro"
+        }
+    }
+
+    lintOptions {
+        abortOnError = false
+    }
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+}
+
+dependencies {
+    compile project(":ScapesCore")
+    compile project(":ScapesEngine")
+    compile project(":ScapesEngine:Codecs:CodecMP3")
+    compile project(":ScapesEngine:Codecs:CodecOGG")
+    compile project(":ScapesEngine:Codecs:CodecWAV")
+    compile project(":ScapesEngine:FileSystems")
+    compile project(":ScapesEngine:GraphicsUtils")
+    compile project(":ScapesEngine:Utils")
+    compile project(":ScapesEngineAndroid:AndroidBackend")
+    compile project(":ScapesEngineAndroid:AndroidFileSystem")
+    compile project(":ScapesEngineAndroid:AndroidSQLite")
+    compile project(":ScapesEngineAndroid:AndroidSSLProvider")
+    compile "org.jetbrains.kotlin:kotlin-stdlib:1.0.4"
+    compile "net.sourceforge.streamsupport:streamsupport:1.5.2"
+    compile "org.slf4j:slf4j-android:1.7.21"
+
+    compile project(":Plugins:VanillaBasics")
+}
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.2.0-beta3'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.4"
+    }
+}
