@@ -1,12 +1,12 @@
 # Scapes
-3D Voxel Engine written written in Java, based on
+3D Voxel Engine written written in Kotlin, based on
 [ScapesEngine](https://github.com/Tobi29/ScapesEngine).
 
 The gameplay is implemented by plugins, like the VanillaBasics one found in
 `Plugins/VanillaBasics`.
 
 Designed to be powerful and easy to use, uses modern libraries and can support
-any OpenGL binding that supports OpenGL 3.2. Utilizes a strict server + client
+any OpenGL binding that supports OpenGL 3.3. Utilizes a strict server + client
 architecture ensure good multiplayer compatibility.
 
 
@@ -35,7 +35,8 @@ executing the `run` task.
 You can check the available deployment targets using the `task` target (in
 Deployment group).
 
-Other than that, running the `deploy` target will run all available tasks.
+Other than that, running the `deploy` target will run all available deploy
+tasks.
 
 Note: Windows deployment can take a long time due to compression, edit
 `Setup.iss` to disable compression for testing.
@@ -62,7 +63,7 @@ For deployment however additional software needs to be set up:
   * Place the unextracted archive into `ScapesEngine/resources/JRE/Windows/32`
     and `ScapesEngine/resources/JRE/Windows/64` respectively
   * Download Launch4j for your platform
-  * Place the extracted archive into `ScapesEngine/resources/Launch4j`
+  * Place the extracted archives into `ScapesEngine/resources/Launch4j`
     (Make sure the jar is in `ScapesEngine/resources/Launch4j/launch4j.jar`!)
   * Download Inno Setup (Unicode version recommended)
   * Windows only:
