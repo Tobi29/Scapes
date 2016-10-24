@@ -24,13 +24,13 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.read
 import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary
 import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.entity.skin.ServerSkin
 import org.tobi29.scapes.packets.*
 import org.tobi29.scapes.plugins.PluginFile
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.extension.event.MessageEvent
 import java.io.IOException
+import java.nio.channels.SelectionKey
 import java.security.InvalidKeyException
 import java.security.KeyFactory
 import java.security.NoSuchAlgorithmException
@@ -45,7 +45,8 @@ import javax.crypto.Cipher
 import javax.crypto.IllegalBlockSizeException
 import javax.crypto.NoSuchPaddingException
 
-class RemotePlayerConnection(private val channel: PacketBundleChannel,
+class RemotePlayerConnection(private val worker: ConnectionWorker.NetWorkerThread,
+                             private val channel: PacketBundleChannel,
                              server: ServerConnection) : PlayerConnection(
         server) {
     private val sendQueue = ConcurrentLinkedQueue<() -> Unit>()
@@ -55,9 +56,9 @@ class RemotePlayerConnection(private val channel: PacketBundleChannel,
     private var challenge: ByteArray? = null
     private var pingTimeout = 0L
     private var pingWait = 0L
-    private var joiner: Joiner.Joinable? = null
 
     init {
+        channel.register(worker.joiner, SelectionKey.OP_READ)
         pingTimeout = System.currentTimeMillis() + 30000
         loginState = { this.loginStep1(it) }
     }
@@ -70,7 +71,7 @@ class RemotePlayerConnection(private val channel: PacketBundleChannel,
         }
         task({ sendPacket(packet) })
         if (packet.isImmediate) {
-            joiner?.wake()
+            worker.joiner.wake()
         }
     }
 
@@ -179,7 +180,6 @@ class RemotePlayerConnection(private val channel: PacketBundleChannel,
     @Synchronized override fun close() {
         super.close()
         channel.close()
-        joiner = null
         state = State.CLOSED
     }
 
@@ -221,12 +221,6 @@ class RemotePlayerConnection(private val channel: PacketBundleChannel,
     private fun task(runnable: () -> Unit) {
         sendQueueSize.incrementAndGet()
         sendQueue.add(runnable)
-    }
-
-    override fun register(joiner: Joiner.SelectorJoinable,
-                          opt: Int) {
-        channel.register(joiner, opt)
-        this.joiner = joiner
     }
 
     override fun tick(worker: ConnectionWorker.NetWorkerThread) {

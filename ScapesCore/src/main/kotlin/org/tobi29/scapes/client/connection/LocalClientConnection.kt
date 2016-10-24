@@ -43,7 +43,9 @@ class LocalClientConnection(game: GameStateGameMP,
             }
             try {
                 player.start(account)
-                player.server.addClient(player)
+                if (!player.server.addConnection { player }) {
+                    throw IOException("Failed to add client to server")
+                }
             } catch (e: IOException) {
                 player.error(e)
             }

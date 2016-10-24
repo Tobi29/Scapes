@@ -144,10 +144,6 @@ class LocalPlayerConnection(server: ServerConnection, game: GameStateGameMP,
         error(ConnectionCloseException(reason))
     }
 
-    override fun register(joiner: Joiner.SelectorJoinable,
-                          opt: Int) {
-    }
-
     override fun tick(worker: ConnectionWorker.NetWorkerThread) {
     }
 

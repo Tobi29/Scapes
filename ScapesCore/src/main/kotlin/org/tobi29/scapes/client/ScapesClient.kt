@@ -31,6 +31,7 @@ import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.SceneEmpty
 import org.tobi29.scapes.engine.gui.GuiNotificationSimple
 import org.tobi29.scapes.engine.input.*
+import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.utils.Version
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath
 import org.tobi29.scapes.engine.utils.io.filesystem.createDirectories
@@ -42,6 +43,7 @@ import java.util.*
 class ScapesClient(engine: ScapesEngine, private val skipIntro: Boolean,
                    private val savesSupplier: (ScapesClient) -> SaveStorage) : Game(
         engine) {
+    val connection = ConnectionWorker(engine.taskExecutor)
     private val inputModes = ArrayList<InputMode>()
     private lateinit var saves: SaveStorage
     private lateinit var inputMode: InputMode
@@ -84,6 +86,7 @@ class ScapesClient(engine: ScapesEngine, private val skipIntro: Boolean,
     }
 
     override fun init() {
+        connection.workers(1)
         if (skipIntro) {
             engine.switchState(GameStateMenu(engine))
         } else {
@@ -95,7 +98,7 @@ class ScapesClient(engine: ScapesEngine, private val skipIntro: Boolean,
     override fun initLate() {
         val tagStructure = engine.tagStructure
         if (!tagStructure.has("Scapes")) {
-            val oi = structure {
+            tagStructure.setStructure("Scapes", structure {
                 val lightDefaults = engine.container.formFactor() == Container.FormFactor.PHONE
                 if (lightDefaults) {
                     setBoolean("Animations", false)
@@ -120,7 +123,7 @@ class ScapesClient(engine: ScapesEngine, private val skipIntro: Boolean,
                         }
                     }
                 }
-            }
+            })
         }
         loadInput()
     }
@@ -148,6 +151,7 @@ class ScapesClient(engine: ScapesEngine, private val skipIntro: Boolean,
     }
 
     override fun dispose() {
+        connection.stop()
     }
 
     fun loadInput() {

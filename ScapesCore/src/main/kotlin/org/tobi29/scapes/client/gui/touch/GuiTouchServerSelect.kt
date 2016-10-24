@@ -13,72 +13,55 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.tobi29.scapes.client.gui.touch
 
 import mu.KLogging
+import org.tobi29.scapes.client.ScapesClient
+import org.tobi29.scapes.client.connection.GetInfoOutConnection
 import org.tobi29.scapes.client.states.GameStateLoadMP
 import org.tobi29.scapes.connection.ConnectionInfo
 import org.tobi29.scapes.connection.ConnectionType
-import org.tobi29.scapes.connection.ServerInfo
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.graphics.TextureFilter
 import org.tobi29.scapes.engine.graphics.TextureWrap
 import org.tobi29.scapes.engine.gui.*
-import org.tobi29.scapes.engine.server.*
-import org.tobi29.scapes.engine.utils.BufferCreator
+import org.tobi29.scapes.engine.server.NewOutConnection
+import org.tobi29.scapes.engine.server.PacketBundleChannel
+import org.tobi29.scapes.engine.server.RemoteAddress
+import org.tobi29.scapes.engine.server.SSLProvider
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import java.io.IOException
-import java.nio.channels.SocketChannel
 import java.util.*
 
 class GuiTouchServerSelect(state: GameState, previous: Gui, style: GuiStyle) : GuiTouchMenuDouble(
         state, "Multiplayer", "Add", "Back", previous, style) {
     private val servers = ArrayList<TagStructure>()
-    private val elements = ArrayList<Element>()
     private val scrollPane: GuiComponentScrollPaneViewport
 
     init {
-        scrollPane = pane.addVert(112.0, 10.0, 736.0, 320.0
-        ) { GuiComponentScrollPane(it, 70) }.viewport()
+        scrollPane = pane.addVert(112.0, 10.0, 736.0, 320.0) {
+            GuiComponentScrollPane(it, 70)
+        }.viewport()
 
         save.on(GuiEvent.CLICK_LEFT) { event ->
             state.engine.guiStack.add("10-Menu",
                     GuiTouchAddServer(state, this, style))
         }
+
         val scapesTag = state.engine.tagStructure.structure("Scapes")
         if (scapesTag.has("Servers")) {
             scapesTag.getList("Servers")?.let { servers.addAll(it) }
         }
         updateServers()
-        on(GuiAction.BACK) { this.disposeServers() }
     }
 
-    private fun disposeServers() {
-        for (element in elements) {
-            if (element.channel != null) {
-                try {
-                    element.channel!!.close()
-                } catch (e: IOException) {
-                    logger.warn { "Failed to close server info socket: $e" }
-                }
-            }
-            scrollPane.remove(element)
-        }
-        elements.clear()
-    }
 
     fun updateServers() {
-        disposeServers()
+        scrollPane.removeAll()
         for (tagStructure in servers) {
-            val element = scrollPane.addVert(0.0, 0.0, -1.0,
-                    80.0) { Element(it, tagStructure) }
-            elements.add(element)
+            scrollPane.addVert(0.0, 0.0, -1.0, 90.0) {
+                Element(it, tagStructure)
+            }
         }
-    }
-
-    public override fun updateComponent(delta: Double) {
-        elements.forEach { it.checkConnection() }
     }
 
     fun addServer(server: TagStructure) {
@@ -87,14 +70,12 @@ class GuiTouchServerSelect(state: GameState, previous: Gui, style: GuiStyle) : G
         scapesTag.setList("Servers", servers)
     }
 
-    private inner class Element(parent: GuiLayoutData, tagStructure: TagStructure) : GuiComponentGroupSlab(
+    private inner class Element(parent: GuiLayoutData,
+                                tagStructure: TagStructure) : GuiComponentGroupSlab(
             parent) {
         val icon: GuiComponentIcon
         val label: GuiComponentTextButton
         val address: RemoteAddress
-        var channel: SocketChannel? = null
-        var bundleChannel: PacketBundleChannel? = null
-        var readState = 0
 
         init {
             icon = addHori(10.0, 10.0, 60.0,
@@ -106,6 +87,8 @@ class GuiTouchServerSelect(state: GameState, previous: Gui, style: GuiStyle) : G
                 button(it, "Delete")
             }
 
+            selection(label, delete)
+
             address = RemoteAddress(tagStructure)
             label.on(GuiEvent.CLICK_LEFT) { event ->
                 state.engine.switchState(GameStateLoadMP(address, state.engine,
@@ -115,75 +98,40 @@ class GuiTouchServerSelect(state: GameState, previous: Gui, style: GuiStyle) : G
                 servers.remove(tagStructure)
                 val scapesTag = state.engine.tagStructure.structure("Scapes")
                 scapesTag.setList("Servers", servers)
-                elements.remove(this)
                 scrollPane.remove(this)
             }
-        }
 
-        fun checkConnection() {
-            try {
-                when (readState) {
-                    0 -> {
-                        val socketAddress = AddressResolver.resolve(address,
-                                state.engine.taskExecutor)
-                        if (socketAddress != null) {
-                            channel = SocketChannel.open()
-                            channel!!.configureBlocking(false)
-                            channel!!.connect(socketAddress)
-                            readState++
+            val connections = (state.engine.game as ScapesClient).connection
+            connections.addConnection { worker ->
+                NewOutConnection(address, worker, { e ->
+                    label.setText(error(e))
+                }) { channel ->
+                    label.setText("Fetching info...")
+                    // Ignore invalid certificates because worst case
+                    // server name and icon get faked
+                    val ssl = SSLProvider.sslHandle({ certificates -> true })
+                    val bundleChannel = PacketBundleChannel(address, channel,
+                            state.engine.taskExecutor, ssl, true)
+                    val output = bundleChannel.outputStream
+                    output.put(ConnectionInfo.header())
+                    output.put(ConnectionType.GET_INFO.data().toInt())
+                    bundleChannel.queueBundle()
+                    worker.addConnection {
+                        val connection = GetInfoOutConnection(worker,
+                                bundleChannel, { e ->
+                            label.setText(error(e))
+                        }) { serverInfo ->
+                            label.setText(serverInfo.name)
+                            val image = serverInfo.image
+                            val texture = state.engine.graphics.createTexture(
+                                    image, 0, TextureFilter.NEAREST,
+                                    TextureFilter.NEAREST, TextureWrap.CLAMP,
+                                    TextureWrap.CLAMP)
+                            icon.texture = texture
                         }
-                    }
-                    1 -> if (channel!!.finishConnect()) {
-                        // Ignore invalid certificates because worst case
-                        // server name and icon get faked
-                        val ssl = SSLProvider.sslHandle({ true })
-                        bundleChannel = PacketBundleChannel(address, channel!!,
-                                state.engine.taskExecutor, ssl,
-                                true)
-                        val output = bundleChannel!!.outputStream
-                        output.put(ConnectionInfo.header())
-                        output.put(ConnectionType.GET_INFO.data().toInt())
-                        bundleChannel!!.queueBundle()
-                        readState++
-                    }
-                    2 -> if (bundleChannel!!.process({ bundle ->
-                        if (readState != 2) {
-                            return@process true
-                        }
-                        val infoBuffer = BufferCreator.bytes(bundle.remaining())
-                        bundle[infoBuffer]
-                        infoBuffer.flip()
-                        val serverInfo = ServerInfo(infoBuffer)
-                        label.setText(serverInfo.name)
-                        val image = serverInfo.image
-                        val texture = state.engine.graphics.createTexture(image,
-                                0,
-                                TextureFilter.NEAREST,
-                                TextureFilter.NEAREST,
-                                TextureWrap.CLAMP,
-                                TextureWrap.CLAMP)
-                        icon.texture = texture
-                        bundleChannel!!.requestClose()
-                        readState++
-                        true
-                    })) {
-                        readState = -1
+                        connection
                     }
                 }
-            } catch (e: IOException) {
-                logger.info { "Failed to fetch server info: $e" }
-                readState = -1
-                label.setText(error(e))
-            }
-
-            if (readState == -1) {
-                readState = -2
-                try {
-                    channel!!.close()
-                } catch (e: IOException) {
-                    logger.warn { "Failed to close server info socket: $e" }
-                }
-
             }
         }
     }

@@ -18,6 +18,7 @@ package org.tobi29.scapes.server
 
 import java8.util.stream.Collectors
 import mu.KLogging
+import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.server.ControlPanelProtocol
 import org.tobi29.scapes.engine.server.PacketBundleChannel
 import org.tobi29.scapes.engine.utils.CPUUtil
@@ -31,9 +32,10 @@ import org.tobi29.scapes.server.connection.ServerConnection
 import org.tobi29.scapes.server.extension.event.MessageEvent
 import javax.crypto.Cipher
 
-class ControlPanel(channel: PacketBundleChannel,
+class ControlPanel(worker: ConnectionWorker.NetWorkerThread,
+                   channel: PacketBundleChannel,
                    private val connection: ServerConnection,
-                   authentication: (String, Int, ByteArray) -> Cipher?) : ControlPanelProtocol(
+                   authentication: (String, Int, ByteArray) -> Cipher?) : ControlPanelProtocol(worker,
         channel, connection.events, authentication), Executor {
 
 

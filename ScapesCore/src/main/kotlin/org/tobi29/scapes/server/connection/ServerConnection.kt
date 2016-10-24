@@ -141,15 +141,17 @@ class ServerConnection(val server: ScapesServer,
         return null
     }
 
-    override fun newConnection(channel: PacketBundleChannel,
+    override fun newConnection(worker: NetWorkerThread,
+                               channel: PacketBundleChannel,
                                id: Byte): Connection? {
         when (ConnectionType[id]) {
-            ConnectionType.GET_INFO -> return GetInfoConnection(channel,
+            ConnectionType.GET_INFO -> return GetInfoConnection(worker, channel,
                     server.serverInfo)
-            ConnectionType.PLAY -> return RemotePlayerConnection(channel, this)
+            ConnectionType.PLAY -> return RemotePlayerConnection(worker,
+                    channel, this)
             ConnectionType.CONTROL -> {
                 if (controlPassword != null) {
-                    val controlPanel = ControlPanel(channel,
+                    val controlPanel = ControlPanel(worker, channel,
                             this) { id, mode, salt ->
                         if (id != "Control Panel") {
                             throw IOException("Invalid name: $id")
