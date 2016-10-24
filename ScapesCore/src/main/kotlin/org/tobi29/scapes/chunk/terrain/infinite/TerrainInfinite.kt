@@ -290,7 +290,7 @@ abstract class TerrainInfinite<E : Entity>(val zSize: Int,
     abstract fun chunkNoLoad(x: Int,
                              y: Int): TerrainInfiniteChunk<E>?
 
-    abstract fun loadedChunks(): Collection<TerrainInfiniteChunk<E>>
+    abstract fun loadedChunks(): Stream<out TerrainInfiniteChunk<E>>
 
     fun lighting(): LightingEngine {
         return lighting

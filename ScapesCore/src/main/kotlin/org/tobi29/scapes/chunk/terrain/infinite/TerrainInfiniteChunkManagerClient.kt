@@ -16,8 +16,11 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
+import java8.util.stream.Stream
 import org.tobi29.scapes.engine.utils.collect
 import org.tobi29.scapes.engine.utils.math.abs
+import org.tobi29.scapes.engine.utils.notNull
+import org.tobi29.scapes.engine.utils.stream
 import org.tobi29.scapes.entity.client.EntityClient
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
@@ -103,8 +106,8 @@ class TerrainInfiniteChunkManagerClient(private val radius: Int) : TerrainInfini
         return get(x, y) != null
     }
 
-    override fun iterator(): Collection<TerrainInfiniteChunkClient> {
-        return array.collect({ it != null }, { it!! })
+    override fun stream(): Stream<TerrainInfiniteChunkClient> {
+        return stream(*array).notNull()
     }
 
     internal fun setCenter(x: Int,

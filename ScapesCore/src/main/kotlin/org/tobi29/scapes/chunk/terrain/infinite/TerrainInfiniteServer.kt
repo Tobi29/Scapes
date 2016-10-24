@@ -62,7 +62,7 @@ class TerrainInfiniteServer(override val world: WorldServer, zSize: Int,
             while (!joiner.marked) {
                 val players = world.players()
                 if (players.isEmpty()) {
-                    chunkManager.iterator().forEach {
+                    chunkManager.stream().forEach {
                         chunkUnloadQueue.add(it)
                     }
                     removeChunks()
@@ -111,16 +111,18 @@ class TerrainInfiniteServer(override val world: WorldServer, zSize: Int,
                                     Collectors.toList<Vector2i>())
                         }
                         addChunks(newChunks)
-                        val chunks = chunkManager.iterator()
-                        chunks.stream().filter({ it.shouldPopulate() }).limit(
+                        chunkManager.stream().filter(
+                                { it.shouldPopulate() }).limit(
                                 32).forEach({ it.populate() })
-                        chunks.forEach({ it.shouldFinish() }) { it.finish() }
+                        chunkManager.stream().filter(
+                                TerrainInfiniteChunkServer::shouldFinish).forEach(
+                                TerrainInfiniteChunkServer::finish)
                         val time = System.currentTimeMillis() - 2000
-                        chunks.forEach({ chunk ->
+                        chunkManager.stream().filter { chunk ->
                             chunk.lastAccess() < time && !requiredChunks.contains(
                                     chunk.pos)
-                        }) { chunkUnloadQueue.add(it) }
-                        chunks.forEach { it.updateAdjacent() }
+                        }.forEach { chunkUnloadQueue.add(it) }
+                        chunkManager.stream().forEach { it.updateAdjacent() }
                         if (removeChunks() && loadingChunks.isEmpty()) {
                             joiner.sleep(100)
                         }
@@ -191,9 +193,7 @@ class TerrainInfiniteServer(override val world: WorldServer, zSize: Int,
         return chunkManager[x, y]
     }
 
-    override fun loadedChunks(): Collection<TerrainInfiniteChunkServer> {
-        return chunkManager.iterator()
-    }
+    override fun loadedChunks() = chunkManager.stream()
 
     fun addChunk(x: Int,
                  y: Int): TerrainInfiniteChunkServer? {
@@ -253,14 +253,14 @@ class TerrainInfiniteServer(override val world: WorldServer, zSize: Int,
     override fun update(delta: Double,
                         spawners: Collection<MobSpawner>) {
         profilerSection("Chunks") {
-            chunkManager.iterator().forEach { it.updateServer(delta) }
+            chunkManager.stream().forEach { it.updateServer(delta) }
         }
         profilerSection("Spawning") {
             val random = ThreadLocalRandom.current()
             for (spawner in spawners) {
                 if (world.mobs(
                         spawner.creatureType()) < chunkManager.chunks() * spawner.mobsPerChunk()) {
-                    for (chunk in chunkManager.iterator()) {
+                    for (chunk in chunkManager.stream()) {
                         if (random.nextInt(
                                 spawner.chunkChance()) == 0 && chunk.isLoaded) {
                             for (i in 0..spawner.spawnAttempts() - 1) {
@@ -346,13 +346,13 @@ class TerrainInfiniteServer(override val world: WorldServer, zSize: Int,
     }
 
     override fun chunks(consumer: (TerrainChunk) -> Unit) {
-        chunkManager.iterator().forEach { consumer(it) }
+        chunkManager.stream().forEach { consumer(it) }
     }
 
     override fun dispose() {
         joiner.join()
         lighting.dispose()
-        chunkManager.iterator().forEach { chunkUnloadQueue.add(it) }
+        chunkManager.stream().forEach { chunkUnloadQueue.add(it) }
         removeChunks()
         format.dispose()
     }

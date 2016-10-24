@@ -103,7 +103,7 @@ class TerrainInfiniteClient(override val world: WorldClient, loadingRadius: Int,
 
     override fun update(delta: Double) {
         profilerSection("Chunks") {
-            chunkManager.iterator().forEach { it.updateClient(delta) }
+            chunkManager.stream().forEach { it.updateClient(delta) }
         }
         profilerSection("Center") {
             val pos = player.getCurrentPos()
@@ -137,7 +137,7 @@ class TerrainInfiniteClient(override val world: WorldClient, loadingRadius: Int,
     override fun dispose() {
         joiner.join()
         lighting.dispose()
-        chunkManager.iterator().forEach { removeChunk(it) }
+        chunkManager.stream().forEach { removeChunk(it) }
         renderer.dispose()
     }
 
@@ -166,9 +166,7 @@ class TerrainInfiniteClient(override val world: WorldClient, loadingRadius: Int,
         return chunkManager[x, y]
     }
 
-    override fun loadedChunks(): Collection<TerrainInfiniteChunkClient> {
-        return chunkManager.iterator()
-    }
+    override fun loadedChunks() = chunkManager.stream()
 
     fun addChunk(x: Int,
                  y: Int): TerrainInfiniteChunkClient? {

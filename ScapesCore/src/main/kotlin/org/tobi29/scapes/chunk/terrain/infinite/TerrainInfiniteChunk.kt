@@ -57,6 +57,11 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
         return lock.write { block(data) }
     }
 
+    @Suppress("NOTHING_TO_INLINE")
+    protected inline fun block(id: Int): BlockType {
+        return blocks[id] ?: throw IllegalArgumentException()
+    }
+
     abstract fun update(x: Int,
                         y: Int,
                         z: Int,
@@ -88,7 +93,7 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
                     if (z < light) {
                         val id = lockRead { bID.getData(x, y, z, 0) }
                         if (id != 0) {
-                            val type = blocks[id]!!
+                            val type = block(id)
                             if (type.isSolid(terrain, x + posBlock.x,
                                     y + posBlock.x,
                                     z) || !type.isTransparent(terrain,
@@ -118,9 +123,9 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
             for (s in spreads) {
                 if (s.x >= 0 && s.x < 16 && s.y >= 0 && s.y < 16 && s.z >= 0 &&
                         s.z < zSize) {
-                    s.l += blocks[lockRead {
+                    s.l += block(lockRead {
                         bID.getData(s.x, s.y, s.z, 0)
-                    }]!!.lightTrough(
+                    }).lightTrough(
                             terrain, s.x + posBlock.x,
                             s.y + posBlock.y, s.z).toInt()
                     s.l = clamp(s.l, 0.toByte().toInt(), 15.toByte().toInt())
@@ -152,7 +157,7 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
                 while (z >= 0 && sunLight > 0) {
                     val id = lockRead { bID.getData(x, y, z, 0) }
                     if (id != 0) {
-                        val type = blocks[id]!!
+                        val type = block(id)
                         if (type.isSolid(terrain, x + posBlock.x,
                                 y + posBlock.x, z) || !type.isTransparent(
                                 terrain,
@@ -209,7 +214,7 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
             for (z in heightMap[y shl 4 or x] downTo 0) {
                 val id = lockRead { bID.getData(x, y, z, 0) }
                 if (id != 0) {
-                    val type = blocks[id]!!
+                    val type = block(id)
                     if (type.isSolid(terrain, x + posBlock.x,
                             y + posBlock.x, z) && !type.isTransparent(
                             terrain, x + posBlock.x,
@@ -253,7 +258,7 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
               y: Int,
               z: Int): BlockType {
         if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 && z < zSize) {
-            return blocks[lockRead { bID.getData(x, y, z, 0) }]!!
+            return block(lockRead { bID.getData(x, y, z, 0) })
         }
         throw ChunkMissException(
                 "Tried to access block $x $y $z in chunk ${pos.x} ${pos.y}")
@@ -324,7 +329,7 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
                    z: Int,
                    type: BlockType) {
         if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 && z < zSize) {
-            val oldType = blocks[lockRead { bID.getData(x, y, z, 0) }]!!
+            val oldType = block(lockRead { bID.getData(x, y, z, 0) })
             if (oldType !== type) {
                 lockWrite { bID.setData(x, y, z, 0, type.id().toInt()) }
                 updateHeightMap(x, y, z, type)
@@ -350,7 +355,7 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
                   type: BlockType,
                   data: Int) {
         if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 && z < zSize) {
-            val oldType = blocks[lockRead { bID.getData(x, y, z, 0) }]!!
+            val oldType = block(lockRead { bID.getData(x, y, z, 0) })
             if (oldType !== type || lockRead {
                 bData.getData(x, y, z, 0)
             } != data) {
@@ -380,10 +385,10 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
               data: Int) {
         if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 && z < zSize) {
             if (lockRead { bData.getData(x, y, z, 0) } != data) {
-                val oldType = lockWrite {
+                val oldType = block(lockWrite {
                     bData.setData(x, y, z, 0, data)
-                    blocks[bID.getData(x, y, z, 0)]!!
-                }
+                    bID.getData(x, y, z, 0)
+                })
                 update(x, y, z, oldType.causesTileUpdate())
             }
         } else {
