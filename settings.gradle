@@ -14,25 +14,14 @@
  * limitations under the License.
  */
 
-Closure subProjects = { root ->
-    def list = []
-    new File(rootDir, root.replaceAll(":", "/")).eachDir() { dir ->
-        dir.eachFile({
-            if (it.name == "build.gradle") {
-                list += root + ":" + dir.name
-            }
-        })
-    }
-    list.toArray(new java.lang.String[0])
-}
-
 apply from: "ScapesEngine/include.gradle"
 include "ScapesCore"
 include "ScapesCore:MariaDBStorage"
 include "ScapesCore:SQLiteStorage"
 include "ScapesDesktop"
-include subProjects("Plugins")
-include subProjects("Tools")
+include "Plugins:VanillaBasics"
+include "Tools:ControlPanel"
+include "Tools:VanillaTerrain"
 
 if (androidEnable == "true") {
     apply from: "ScapesEngineAndroid/include.gradle"
