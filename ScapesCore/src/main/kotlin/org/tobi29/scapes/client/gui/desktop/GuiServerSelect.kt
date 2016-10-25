@@ -25,10 +25,10 @@ import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.graphics.TextureFilter
 import org.tobi29.scapes.engine.graphics.TextureWrap
 import org.tobi29.scapes.engine.gui.*
-import org.tobi29.scapes.engine.server.NewOutConnection
 import org.tobi29.scapes.engine.server.PacketBundleChannel
 import org.tobi29.scapes.engine.server.RemoteAddress
 import org.tobi29.scapes.engine.server.SSLProvider
+import org.tobi29.scapes.engine.server.addOutConnection
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import java.util.*
 
@@ -105,36 +105,34 @@ class GuiServerSelect(state: GameState, previous: Gui, style: GuiStyle) : GuiMen
                 scrollPane.remove(this)
             }
 
-            val connections = (state.engine.game as ScapesClient).connection
-            connections.addConnection { worker ->
-                NewOutConnection(address, worker, { e ->
-                    label.setText(error(e))
-                }) { channel ->
-                    label.setText("Fetching info...")
-                    // Ignore invalid certificates because worst case
-                    // server name and icon get faked
-                    val ssl = SSLProvider.sslHandle({ certificates -> true })
-                    val bundleChannel = PacketBundleChannel(address, channel,
-                            state.engine.taskExecutor, ssl, true)
-                    val output = bundleChannel.outputStream
-                    output.put(ConnectionInfo.header())
-                    output.put(ConnectionType.GET_INFO.data().toInt())
-                    bundleChannel.queueBundle()
-                    worker.addConnection {
-                        val connection = GetInfoOutConnection(worker,
-                                bundleChannel, { e ->
-                            label.setText(error(e))
-                        }) { serverInfo ->
-                            label.setText(serverInfo.name)
-                            val image = serverInfo.image
-                            val texture = state.engine.graphics.createTexture(
-                                    image, 0, TextureFilter.NEAREST,
-                                    TextureFilter.NEAREST, TextureWrap.CLAMP,
-                                    TextureWrap.CLAMP)
-                            icon.texture = texture
-                        }
-                        connection
+            (state.engine.game as ScapesClient).connection.addOutConnection(
+                    address, { e ->
+                label.setText(error(e))
+            }) { worker, channel ->
+                label.setText("Fetching info...")
+                // Ignore invalid certificates because worst case
+                // server name and icon get faked
+                val ssl = SSLProvider.sslHandle({ certificates -> true })
+                val bundleChannel = PacketBundleChannel(address, channel,
+                        state.engine.taskExecutor, ssl, true)
+                val output = bundleChannel.outputStream
+                output.put(ConnectionInfo.header())
+                output.put(ConnectionType.GET_INFO.data().toInt())
+                bundleChannel.queueBundle()
+                worker.addConnection {
+                    val connection = GetInfoOutConnection(worker,
+                            bundleChannel, { e ->
+                        label.setText(error(e))
+                    }) { serverInfo ->
+                        label.setText(serverInfo.name)
+                        val image = serverInfo.image
+                        val texture = state.engine.graphics.createTexture(
+                                image, 0, TextureFilter.NEAREST,
+                                TextureFilter.NEAREST, TextureWrap.CLAMP,
+                                TextureWrap.CLAMP)
+                        icon.texture = texture
                     }
+                    connection
                 }
             }
         }
