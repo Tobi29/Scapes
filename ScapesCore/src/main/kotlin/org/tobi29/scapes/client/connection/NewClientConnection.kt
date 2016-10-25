@@ -45,9 +45,8 @@ import javax.crypto.Cipher
 import javax.crypto.IllegalBlockSizeException
 import javax.crypto.NoSuchPaddingException
 
-
 // TODO: Cleanup
-class NewClientConnection(worker: ConnectionWorker,
+class NewClientConnection(private val worker: ConnectionWorker,
                           private val engine: ScapesEngine,
                           channel: PacketBundleChannel,
                           private val account: Account,
@@ -236,7 +235,10 @@ class NewClientConnection(worker: ConnectionWorker,
             it ?: throw IllegalStateException("Failed to receive plugin")
         }, idStorage)
         init { state ->
-            RemoteClientConnection(state, channel, plugins, loadingDistance)
+            val connection = RemoteClientConnection(worker, state, channel,
+                    plugins, loadingDistance)
+            worker.addConnection { connection }
+            connection
         }
         state = null
         this.channel = null

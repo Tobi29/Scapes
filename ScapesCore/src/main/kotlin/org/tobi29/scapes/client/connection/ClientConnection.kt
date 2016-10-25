@@ -21,6 +21,7 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
+import org.tobi29.scapes.engine.server.Connection
 import org.tobi29.scapes.engine.server.RemoteAddress
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.packets.PacketServer
@@ -28,7 +29,7 @@ import org.tobi29.scapes.plugins.Plugins
 
 abstract class ClientConnection(val game: GameStateGameMP,
                                 val plugins: Plugins,
-                                val loadingDistance: Int) : PlayConnection<PacketServer> {
+                                val loadingDistance: Int) : PlayConnection<PacketServer>, Connection {
     val profilerSent = ConnectionProfiler()
     val profilerReceived = ConnectionProfiler()
     protected val pingDebug: GuiWidgetDebugValues.Element
@@ -42,6 +43,11 @@ abstract class ClientConnection(val game: GameStateGameMP,
         pingDebug = debugValues["Connection-Ping"]
         downloadDebug = debugValues["Connection-Down"]
         uploadDebug = debugValues["Connection-Up"]
+    }
+
+    override fun requestClose() {
+        throw UnsupportedOperationException(
+                "not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun send(packet: PacketServer) {

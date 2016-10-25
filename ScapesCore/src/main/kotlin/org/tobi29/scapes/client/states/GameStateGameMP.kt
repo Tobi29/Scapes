@@ -35,12 +35,10 @@ import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.entity.model.EntityModelBlockBreakShared
 import org.tobi29.scapes.entity.model.MobLivingModelHumanShared
 import org.tobi29.scapes.entity.particle.ParticleTransparentAtlas
-import java.io.IOException
 
-open class GameStateGameMP @Throws(IOException::class)
-constructor(
-        clientSupplier: (GameStateGameMP) -> ClientConnection,
-        scene: Scene, engine: ScapesEngine) : GameState(engine, scene) {
+open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection,
+                           scene: Scene,
+                           engine: ScapesEngine) : GameState(engine, scene) {
     internal val client: ClientConnection
     internal val playlist: Playlist
     private val chatHistory: ChatHistory
@@ -71,11 +69,13 @@ constructor(
         debugWidget = debug.add(32.0, 32.0, 160.0,
                 200.0) { parent: GuiLayoutData -> GuiWidgetDebugClient(parent) }
         debugWidget.isVisible = false
-        connectionSentProfiler = debug.add(32.0, 32.0, 360.0, 256.0
-        ) { GuiWidgetConnectionProfiler(it, client.profilerSent) }
+        connectionSentProfiler = debug.add(32.0, 32.0, 360.0, 256.0) {
+            GuiWidgetConnectionProfiler(it, client.profilerSent)
+        }
         connectionSentProfiler.isVisible = false
-        connectionReceivedProfiler = debug.add(32.0, 32.0, 360.0, 256.0
-        ) { GuiWidgetConnectionProfiler(it, client.profilerReceived) }
+        connectionReceivedProfiler = debug.add(32.0, 32.0, 360.0, 256.0) {
+            GuiWidgetConnectionProfiler(it, client.profilerReceived)
+        }
         connectionReceivedProfiler.isVisible = false
         performanceWidget = debug.add(32.0, 32.0, 240.0, 96.0,
                 ::GuiWidgetPerformanceClient)
@@ -204,27 +204,32 @@ constructor(
     private inner class GuiWidgetDebugClient(parent: GuiLayoutData) : GuiComponentWidget(
             parent, "Debug Values") {
         init {
-            val geometry = addVert(10.0, 10.0, 10.0, 2.0, 140.0, 15.0
-            ) { GuiComponentTextButton(it, 12, "Geometry") }
-            val wireframe = addVert(10.0, 2.0, 140.0, 15.0
-            ) { GuiComponentTextButton(it, 12, "Wireframe") }
-            val distance = addVert(10.0, 2.0, 140.0, 15.0
-            ) {
+            val geometry = addVert(10.0, 10.0, 10.0, 2.0, 140.0, 15.0) {
+                GuiComponentTextButton(it, 12, "Geometry")
+            }
+            val wireframe = addVert(10.0, 2.0, 140.0, 15.0) {
+                GuiComponentTextButton(it, 12, "Wireframe")
+            }
+            val distance = addVert(10.0, 2.0, 140.0, 15.0) {
                 GuiComponentTextButton(it, 12,
                         "Static Render Distance")
             }
-            val reloadGeometry = addVert(10.0, 2.0, 140.0, 15.0
-            ) { GuiComponentTextButton(it, 12, "Reload Geometry") }
-            val performance = addVert(10.0, 2.0, 140.0, 15.0
-            ) { GuiComponentTextButton(it, 12, "Performance") }
-            val connSent = addVert(10.0, 2.0, 140.0, 15.0
-            ) { GuiComponentTextButton(it, 12, "Conn. Sent") }
-            val connSentReset = addVert(10.0, 2.0, 140.0, 15.0
-            ) { GuiComponentTextButton(it, 12, "Conn. Sent Reset") }
-            val connReceived = addVert(10.0, 2.0, 140.0, 15.0
-            ) { GuiComponentTextButton(it, 12, "Conn. Received") }
-            val connReceivedReset = addVert(10.0, 2.0, 140.0, 15.0
-            ) {
+            val reloadGeometry = addVert(10.0, 2.0, 140.0, 15.0) {
+                GuiComponentTextButton(it, 12, "Reload Geometry")
+            }
+            val performance = addVert(10.0, 2.0, 140.0, 15.0) {
+                GuiComponentTextButton(it, 12, "Performance")
+            }
+            val connSent = addVert(10.0, 2.0, 140.0, 15.0) {
+                GuiComponentTextButton(it, 12, "Conn. Sent")
+            }
+            val connSentReset = addVert(10.0, 2.0, 140.0, 15.0) {
+                GuiComponentTextButton(it, 12, "Conn. Sent Reset")
+            }
+            val connReceived = addVert(10.0, 2.0, 140.0, 15.0) {
+                GuiComponentTextButton(it, 12, "Conn. Received")
+            }
+            val connReceivedReset = addVert(10.0, 2.0, 140.0, 15.0) {
                 GuiComponentTextButton(it, 12,
                         "Conn. Received Reset")
             }

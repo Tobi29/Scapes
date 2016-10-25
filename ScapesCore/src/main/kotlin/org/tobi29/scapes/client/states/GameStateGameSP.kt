@@ -24,11 +24,12 @@ import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.format.WorldSource
 import java.io.IOException
 
-class GameStateGameSP @Throws(IOException::class)
-constructor(
-        clientSupplier: (GameStateGameMP) -> ClientConnection,
-        private val source: WorldSource, private val server: ScapesServer, scene: Scene,
-        engine: ScapesEngine) : GameStateGameMP(clientSupplier, scene, engine) {
+class GameStateGameSP(clientSupplier: (GameStateGameMP) -> ClientConnection,
+                      private val source: WorldSource,
+                      private val server: ScapesServer,
+                      scene: Scene,
+                      engine: ScapesEngine) : GameStateGameMP(clientSupplier,
+        scene, engine) {
 
     fun source(): WorldSource {
         return source

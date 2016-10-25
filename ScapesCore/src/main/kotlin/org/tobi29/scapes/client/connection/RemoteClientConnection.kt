@@ -21,10 +21,10 @@ import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.client.states.GameStateMenu
 import org.tobi29.scapes.client.states.GameStateServerDisconnect
 import org.tobi29.scapes.engine.server.ConnectionEndException
+import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.server.PacketBundleChannel
 import org.tobi29.scapes.engine.server.RemoteAddress
 import org.tobi29.scapes.engine.utils.mapNotNull
-import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.packets.PacketAbstract
 import org.tobi29.scapes.packets.PacketClient
 import org.tobi29.scapes.packets.PacketPingClient
@@ -32,56 +32,48 @@ import org.tobi29.scapes.packets.PacketServer
 import org.tobi29.scapes.plugins.Plugins
 import java.io.IOException
 import java.nio.channels.SelectionKey
-import java.nio.channels.Selector
 import java.util.concurrent.ConcurrentLinkedQueue
 
-class RemoteClientConnection @Throws(IOException::class)
-constructor(game: GameStateGameMP,
-            private val channel: PacketBundleChannel, plugins: Plugins, loadingDistance: Int) : ClientConnection(
-        game, plugins, loadingDistance) {
-    private val selector: Selector
+class RemoteClientConnection(worker: ConnectionWorker,
+                             game: GameStateGameMP,
+                             private val channel: PacketBundleChannel,
+                             plugins: Plugins,
+                             loadingDistance: Int) : ClientConnection(game,
+        plugins, loadingDistance) {
     private val sendQueue = ConcurrentLinkedQueue<() -> Unit>()
-    private var joiner: Joiner? = null
-    private var state = State.OPEN
+    private var state = State.WAIT
 
     init {
-        selector = Selector.open()
-        this.channel.register(selector, SelectionKey.OP_READ)
+        channel.register(worker.joiner, SelectionKey.OP_READ)
     }
 
-    fun run(joiner: Joiner.Joinable) {
+    override fun tick(worker: ConnectionWorker) {
+        if (state != State.OPEN) {
+            return
+        }
         try {
-            while (state == State.OPEN) {
-                while (!sendQueue.isEmpty()) {
-                    sendQueue.poll()()
-                }
-                if (channel.bundleSize() > 0) {
-                    channel.queueBundle()
-                }
-                if (channel.process({ bundle ->
-                    while (bundle.hasRemaining()) {
-                        val packet = PacketAbstract.make(plugins.registry(),
-                                bundle.short) as PacketClient
-                        val pos = bundle.position()
-                        packet.parseClient(this, bundle)
-                        val size = bundle.position() - pos
-                        profilerReceived.packet(packet, size.toLong())
-                        packet.runClient(this)
-                    }
-                    true
-                })) {
-                    break
-                }
-                try {
-                    selector.select(10)
-                    selector.selectedKeys().clear()
-                } catch (e: IOException) {
-                    logger.warn { "Error when waiting for events: $e" }
-                }
-
+            while (!sendQueue.isEmpty()) {
+                sendQueue.poll()()
             }
-            logger.info { "Closed client connection!" }
-            game.engine.switchState(GameStateMenu(game.engine))
+            if (channel.bundleSize() > 0) {
+                channel.queueBundle()
+            }
+            if (channel.process({ bundle ->
+                while (bundle.hasRemaining()) {
+                    val packet = PacketAbstract.make(plugins.registry(),
+                            bundle.short) as PacketClient
+                    val pos = bundle.position()
+                    packet.parseClient(this, bundle)
+                    val size = bundle.position() - pos
+                    profilerReceived.packet(packet, size.toLong())
+                    packet.runClient(this)
+                }
+                true
+            })) {
+                state = State.CLOSED
+                logger.info { "Closed client connection!" }
+                game.engine.switchState(GameStateMenu(game.engine))
+            }
         } catch (e: ConnectionEndException) {
             logger.info { "Closed client connection: $e" }
         } catch (e: IOException) {
@@ -89,20 +81,17 @@ constructor(game: GameStateGameMP,
             game.engine.switchState(GameStateServerDisconnect(e.message ?: "",
                     game.engine))
         }
+    }
 
-        state = State.CLOSED
-        try {
-            channel.close()
-            selector.close()
-        } catch (e: IOException) {
-            logger.error { "Error closing socket: $e" }
-        }
+    override val isClosed: Boolean
+        get() = state == State.CLOSED
 
+    override fun close() {
+        channel.close()
     }
 
     override fun start() {
-        joiner = game.engine.taskExecutor.runThread({ run(it) },
-                "Client-Connection")
+        state = State.OPEN
         game.engine.taskExecutor.addTask({
             send(PacketPingClient(System.currentTimeMillis()))
             downloadDebug.setValue(channel.inputRate / 128.0)
@@ -113,12 +102,10 @@ constructor(game: GameStateGameMP,
 
     override fun stop() {
         channel.requestClose()
-        joiner!!.join()
     }
 
     override fun task(runnable: () -> Unit) {
         sendQueue.add(runnable)
-        selector.wakeup()
     }
 
     override fun transmit(packet: PacketServer) {
@@ -139,6 +126,7 @@ constructor(game: GameStateGameMP,
     }
 
     internal enum class State {
+        WAIT,
         OPEN,
         CLOSED
     }

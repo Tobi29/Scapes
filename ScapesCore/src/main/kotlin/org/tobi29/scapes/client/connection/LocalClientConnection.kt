@@ -19,6 +19,7 @@ package org.tobi29.scapes.client.connection
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.client.states.GameStateMenu
 import org.tobi29.scapes.connection.Account
+import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.server.RemoteAddress
 import org.tobi29.scapes.packets.PacketClient
 import org.tobi29.scapes.packets.PacketServer
@@ -30,6 +31,15 @@ class LocalClientConnection(game: GameStateGameMP,
                             private val player: LocalPlayerConnection, plugins: Plugins, loadingDistance: Int,
                             private val account: Account) : ClientConnection(
         game, plugins, loadingDistance) {
+
+    override fun tick(worker: ConnectionWorker) {
+    }
+
+    override val isClosed: Boolean
+        get() = player.isClosed
+
+    override fun close() {
+    }
 
     fun receive(packet: PacketClient) {
         packet.localClient()
