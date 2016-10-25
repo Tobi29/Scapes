@@ -43,7 +43,7 @@ import java.util.*
 class ScapesClient(engine: ScapesEngine, private val skipIntro: Boolean,
                    private val savesSupplier: (ScapesClient) -> SaveStorage) : Game(
         engine) {
-    val connection = ConnectionManager(engine.taskExecutor)
+    val connection = ConnectionManager(engine.taskExecutor, 10)
     private val inputModes = ArrayList<InputMode>()
     private lateinit var saves: SaveStorage
     private lateinit var inputMode: InputMode

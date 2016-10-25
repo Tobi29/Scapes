@@ -17,7 +17,8 @@
 package org.tobi29.scapes.client.states
 
 import mu.KLogging
-import org.tobi29.scapes.client.connection.NewConnection
+import org.tobi29.scapes.client.ScapesClient
+import org.tobi29.scapes.client.connection.NewClientConnection
 import org.tobi29.scapes.client.gui.desktop.GuiLoading
 import org.tobi29.scapes.client.gui.touch.GuiTouchLoading
 import org.tobi29.scapes.connection.Account
@@ -36,42 +37,38 @@ import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.ssl.dummy.DummyKeyManagerProvider
 import java.io.IOException
 import java.net.InetSocketAddress
-import java.nio.channels.SocketChannel
 
 class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngine,
                             scene: Scene) : GameState(engine, scene) {
     private var step = 0
     private var server: ScapesServer? = null
-    private var channel: SocketChannel? = null
-    private var address: InetSocketAddress? = null
-    private var client: NewConnection? = null
     private var progress: ((String) -> Unit)? = null
 
     override fun dispose() {
-        if (server != null) {
-            try {
-                server!!.stop(ScapesServer.ShutdownReason.ERROR)
-            } catch (e: IOException) {
-                logger.error(
-                        e) { "Failed to stop internal server after login error" }
-            }
+        try {
+            server?.stop(ScapesServer.ShutdownReason.ERROR)
+        } catch (e: IOException) {
+            logger.error(
+                    e) { "Failed to stop internal server after login error" }
         }
-        if (source != null) {
-            try {
-                source!!.close()
-            } catch (e: IOException) {
-                logger.error(e) { "Failed to close world source" }
-            }
+        try {
+            source?.close()
+        } catch (e: IOException) {
+            logger.error(e) { "Failed to close world source" }
         }
     }
 
     override fun init() {
-        val gui: Gui
         val valueSupplier = {
-            if (step < 0)
+            if (step < 0) {
                 Double.NEGATIVE_INFINITY
-            else if (step >= 6) Double.POSITIVE_INFINITY else step / 6.0
+            } else if (step >= 3) {
+                Double.POSITIVE_INFINITY
+            } else {
+                step / 3.0
+            }
         }
+        val gui: Gui
         when (engine.container.formFactor()) {
             Container.FormFactor.PHONE -> {
                 val progress = GuiTouchLoading(this, valueSupplier,
@@ -96,7 +93,7 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
             when (step) {
                 0 -> {
                     step++
-                    progress!!("Creating server...")
+                    progress?.invoke("Creating server...")
                 }
                 1 -> {
                     val tagStructure = engine.tagStructure.structure(
@@ -120,56 +117,61 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
                     server = ScapesServer(source!!, tagStructure, serverInfo,
                             ssl, engine)
                     step++
-                    progress!!("Starting server...")
+                    progress?.invoke("Starting server...")
                 }
                 2 -> {
                     val port = server!!.connection.start(0)
                     if (port <= 0) {
                         throw IOException(
-                                "Unable to open server socket (Invalid port returned: " +
-                                        port + ')')
+                                "Unable to open server socket (Invalid port returned: $port)")
                     }
-                    address = InetSocketAddress(port)
-                    channel = SocketChannel.open(address)
-                    channel!!.configureBlocking(false)
+                    val address = InetSocketAddress(port)
+
                     step++
-                    progress!!("Connecting to server...")
-                }
-                3 -> if (channel!!.finishConnect()) {
-                    step++
-                    progress!!("Sending request...")
-                }
-                4 -> {
-                    val bundleChannel: PacketBundleChannel
-                    // Ignore invalid certificates because local server
-                    // cannot provide a valid one
-                    val ssl = SSLProvider.sslHandle { certificates -> true }
-                    bundleChannel = PacketBundleChannel(
-                            RemoteAddress(address!!),
-                            channel!!, engine.taskExecutor, ssl, true)
-                    val loadingRadius = round(engine.tagStructure.getStructure(
-                            "Scapes")?.getDouble("RenderDistance") ?: 0.0) + 16
-                    val account = Account[engine.home.resolve(
-                            "Account.properties")]
-                    client = NewConnection(engine, bundleChannel, account,
-                            loadingRadius)
-                    step++
-                }
-                5 -> {
-                    val status = client!!.login()
-                    if (status != null) {
-                        progress!!(status)
-                    } else {
-                        step++
-                        progress!!("Loading world...")
+                    progress?.invoke("Connecting to local server...")
+
+                    (engine.game as ScapesClient).connection.addOutConnection(
+                            address, { e ->
+                        GameStateLoadMP.logger.error(
+                                e) { "Failed to connect to server" }
+                        engine.switchState(
+                                GameStateServerDisconnect(
+                                        e.message ?: "", engine))
+                    }) { worker, channel ->
+                        progress?.invoke("Logging in...")
+                        val bundleChannel: PacketBundleChannel
+                        val ssl = SSLProvider.sslHandle { certificates -> true }
+                        bundleChannel = PacketBundleChannel(
+                                RemoteAddress(address), channel,
+                                engine.taskExecutor, ssl, true)
+                        val loadingRadius = round(
+                                engine.tagStructure.getStructure(
+                                        "Scapes")?.getDouble(
+                                        "RenderDistance") ?: 0.0) + 16
+                        val account = Account[engine.home.resolve(
+                                "Account.properties")]
+                        worker.addConnection {
+                            val connection = NewClientConnection(worker, engine,
+                                    bundleChannel, account, loadingRadius,
+                                    { status ->
+                                        progress?.invoke(status)
+                                    }, { e ->
+                                GameStateLoadMP.logger.error(
+                                        e) { "Failed to log into server" }
+                                engine.switchState(
+                                        GameStateServerDisconnect(
+                                                e.message ?: "", engine))
+                            }) { init ->
+                                progress?.invoke("Loading world...")
+                                val game = GameStateGameSP(init, source!!,
+                                        server!!, scene, engine)
+                                server = null
+                                source = null
+                                engine.switchState(game)
+                            }
+                            connection
+                        }
                     }
-                }
-                6 -> {
-                    val game = GameStateGameSP(client!!.finish(), source!!,
-                            server!!, scene, engine)
-                    server = null
-                    source = null
-                    engine.switchState(game)
                 }
             }
         } catch (e: IOException) {
