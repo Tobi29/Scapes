@@ -7,7 +7,7 @@ import org.eclipse.swt.widgets.Composite
 import org.eclipse.swt.widgets.Label
 import org.eclipse.swt.widgets.MenuItem
 import org.eclipse.swt.widgets.ProgressBar
-import org.tobi29.scapes.engine.server.ConnectionWorker
+import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.server.RemoteAddress
 import org.tobi29.scapes.engine.server.SSLHandle
 import org.tobi29.scapes.engine.swt.util.framework.Document
@@ -18,7 +18,7 @@ import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
 class ReconnectDocument(private val address: RemoteAddress,
                         private val password: String,
                         private val ssl: SSLHandle,
-                        private val connection: ConnectionWorker) : Document {
+                        private val connection: ConnectionManager) : Document {
     private var timer = 5
 
     override val title = address.address + ':' + address.port

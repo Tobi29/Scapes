@@ -18,12 +18,13 @@ package org.tobi29.scapes.connection
 
 import mu.KLogging
 import org.tobi29.scapes.engine.server.Connection
+import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.server.PacketBundleChannel
 import java.io.IOException
 import java.nio.channels.SelectionKey
 
-class GetInfoConnection(worker: ConnectionWorker.NetWorkerThread,
+class GetInfoConnection(worker: ConnectionWorker,
                         private val channel: PacketBundleChannel,
                         serverInfo: ServerInfo) : Connection {
     private val startup: Long
@@ -38,7 +39,7 @@ class GetInfoConnection(worker: ConnectionWorker.NetWorkerThread,
         channel.requestClose()
     }
 
-    override fun tick(worker: ConnectionWorker.NetWorkerThread) {
+    override fun tick(worker: ConnectionWorker) {
         try {
             if (channel.process({ true })) {
                 state = State.CLOSED

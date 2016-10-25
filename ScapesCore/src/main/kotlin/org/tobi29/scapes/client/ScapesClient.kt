@@ -31,7 +31,7 @@ import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.SceneEmpty
 import org.tobi29.scapes.engine.gui.GuiNotificationSimple
 import org.tobi29.scapes.engine.input.*
-import org.tobi29.scapes.engine.server.ConnectionWorker
+import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.utils.Version
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath
 import org.tobi29.scapes.engine.utils.io.filesystem.createDirectories
@@ -43,7 +43,7 @@ import java.util.*
 class ScapesClient(engine: ScapesEngine, private val skipIntro: Boolean,
                    private val savesSupplier: (ScapesClient) -> SaveStorage) : Game(
         engine) {
-    val connection = ConnectionWorker(engine.taskExecutor)
+    val connection = ConnectionManager(engine.taskExecutor)
     private val inputModes = ArrayList<InputMode>()
     private lateinit var saves: SaveStorage
     private lateinit var inputMode: InputMode

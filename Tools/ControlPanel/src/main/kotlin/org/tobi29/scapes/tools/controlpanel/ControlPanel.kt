@@ -21,7 +21,7 @@ import org.eclipse.swt.widgets.Button
 import org.eclipse.swt.widgets.Composite
 import org.eclipse.swt.widgets.Spinner
 import org.eclipse.swt.widgets.Text
-import org.tobi29.scapes.engine.server.ConnectionWorker
+import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.server.RemoteAddress
 import org.tobi29.scapes.engine.server.SSLProvider
 import org.tobi29.scapes.engine.swt.util.Shortcut
@@ -39,7 +39,7 @@ fun main(args: Array<String>) {
 
 class ControlPanel : MultiDocumentApplication("Scapes Control Panel",
         "ControlPanel", version("0.0.0_1")) {
-    val connection = ConnectionWorker(taskExecutor)
+    val connection = ConnectionManager(taskExecutor)
 
     override fun init() {
         connection.workers(1)

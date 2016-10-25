@@ -45,7 +45,7 @@ import javax.crypto.Cipher
 import javax.crypto.IllegalBlockSizeException
 import javax.crypto.NoSuchPaddingException
 
-class RemotePlayerConnection(private val worker: ConnectionWorker.NetWorkerThread,
+class RemotePlayerConnection(private val worker: ConnectionWorker,
                              private val channel: PacketBundleChannel,
                              server: ServerConnection) : PlayerConnection(
         server) {
@@ -223,7 +223,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker.NetWorkerThrea
         sendQueue.add(runnable)
     }
 
-    override fun tick(worker: ConnectionWorker.NetWorkerThread) {
+    override fun tick(worker: ConnectionWorker) {
         try {
             when (state) {
                 RemotePlayerConnection.State.LOGIN -> channel.process(

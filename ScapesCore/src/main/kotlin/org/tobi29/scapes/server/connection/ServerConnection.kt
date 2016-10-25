@@ -141,7 +141,7 @@ class ServerConnection(val server: ScapesServer,
         return null
     }
 
-    override fun newConnection(worker: NetWorkerThread,
+    override fun newConnection(worker: ConnectionWorker,
                                channel: PacketBundleChannel,
                                id: Byte): Connection? {
         when (ConnectionType[id]) {

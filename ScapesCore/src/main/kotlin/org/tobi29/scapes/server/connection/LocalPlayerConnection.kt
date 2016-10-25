@@ -20,6 +20,7 @@ import org.tobi29.scapes.client.connection.LocalClientConnection
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.server.ConnectionCloseException
+import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.utils.BufferCreator
 import org.tobi29.scapes.engine.utils.graphics.Image
@@ -144,7 +145,7 @@ class LocalPlayerConnection(server: ServerConnection, game: GameStateGameMP,
         error(ConnectionCloseException(reason))
     }
 
-    override fun tick(worker: ConnectionWorker.NetWorkerThread) {
+    override fun tick(worker: ConnectionWorker) {
     }
 
     override val isClosed: Boolean

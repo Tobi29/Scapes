@@ -22,13 +22,14 @@ import org.tobi29.scapes.connection.ConnectionType
 import org.tobi29.scapes.connection.GetInfoConnection
 import org.tobi29.scapes.connection.ServerInfo
 import org.tobi29.scapes.engine.server.Connection
+import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.server.PacketBundleChannel
 import org.tobi29.scapes.engine.utils.BufferCreator
 import java.io.IOException
 import java.nio.channels.SelectionKey
 
-class GetInfoOutConnection(worker: ConnectionWorker.NetWorkerThread,
+class GetInfoOutConnection(worker: ConnectionWorker,
                            private val channel: PacketBundleChannel,
                            private val error: (IOException) -> Unit,
                            private val callback: (ServerInfo) -> Unit) : Connection {
@@ -44,7 +45,7 @@ class GetInfoOutConnection(worker: ConnectionWorker.NetWorkerThread,
         channel.queueBundle()
     }
 
-    override fun tick(worker: ConnectionWorker.NetWorkerThread) {
+    override fun tick(worker: ConnectionWorker) {
         try {
             if (channel.process({ bundle ->
                 if (state != State.OPEN) {

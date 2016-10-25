@@ -19,7 +19,7 @@ import org.tobi29.scapes.engine.utils.toTypedArray
 class ConnectDocument(private val address: RemoteAddress,
                       private val password: String,
                       private val ssl: SSLHandle,
-                      private val connections: ConnectionWorker,
+                      private val connections: ConnectionManager,
                       private val application: MultiDocumentApplication) : Document {
     private var document: Document = this
 
