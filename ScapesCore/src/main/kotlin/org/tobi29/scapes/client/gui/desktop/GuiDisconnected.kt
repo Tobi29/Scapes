@@ -30,8 +30,10 @@ class GuiDisconnected(state: GameState, message: String, style: GuiStyle) : GuiM
         pane.addVert(16.0, 5.0, -1.0, 12.0) {
             GuiComponentText(it, message)
         }
-        reconnectTimer = pane.addVert(16.0, 320.0, -1.0,
-                32.0) {  GuiComponentText(it, "") }
+        reconnectTimer = pane.addVert(16.0, 30.0, 16.0, 30.0, -1.0, 32.0,
+                Long.MIN_VALUE + 250) {
+            GuiComponentText(it, "Reconnecting in: ur face!")
+        }
 
         on(GuiAction.BACK) { engine.switchState(GameStateMenu(engine)) }
     }
