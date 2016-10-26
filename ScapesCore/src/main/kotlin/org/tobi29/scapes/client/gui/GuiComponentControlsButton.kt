@@ -33,7 +33,7 @@ class GuiComponentControlsButton(parent: GuiLayoutData, textSize: Int,
     private val text: GuiComponentText
     private val keys = ArrayList<ControllerKey>()
     private var editing: Byte = 0
-    private var key: ControllerKeyReference? = null
+    private var key: ControllerKeyReference
 
     init {
         text = addSubHori(4.0, 0.0, -1.0,
@@ -69,7 +69,7 @@ class GuiComponentControlsButton(parent: GuiLayoutData, textSize: Int,
         } else {
             text.append(name)
             text.append(": ")
-            text.append(key!!.humanName())
+            text.append(key.humanName())
         }
         this.text.text = text.toString()
     }
@@ -82,7 +82,7 @@ class GuiComponentControlsButton(parent: GuiLayoutData, textSize: Int,
             val keyEvent = controller.pressEvents().filter { event -> event.state() == ControllerBasic.PressState.RELEASE }.findAny()
             if (keyEvent.isPresent && !keys.isEmpty()) {
                 key = ControllerKeyReference(keys)
-                tagStructure.setString(id, key!!.toString())
+                tagStructure.setString(id, key.toString())
                 editing = 0
                 keys.clear()
             }

@@ -341,7 +341,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient, private val cam: Cam
         fbo.deactivate(gl)
         if (state is GameStateGameSP) {
             try {
-                state.source().panorama(panorama)
+                state.source.panorama(panorama)
             } catch (e: IOException) {
                 logger.warn(e) { "Failed to save panorama" }
             }

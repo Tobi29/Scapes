@@ -19,15 +19,15 @@ package org.tobi29.scapes.client.states
 import mu.KLogging
 import org.tobi29.scapes.client.gui.desktop.GuiLoading
 import org.tobi29.scapes.client.gui.touch.GuiTouchLoading
+import org.tobi29.scapes.connection.Account
+import org.tobi29.scapes.connection.ServerInfo
 import org.tobi29.scapes.engine.Container
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Scene
 import org.tobi29.scapes.engine.gui.Gui
-import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.server.SSLHandle
 import org.tobi29.scapes.engine.server.SSLProvider
-import org.tobi29.scapes.connection.ServerInfo
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException
 import org.tobi29.scapes.engine.utils.io.tag.getDouble
 import org.tobi29.scapes.engine.utils.math.round
@@ -41,48 +41,46 @@ class GameStateLoadSP(private var source: WorldSource?, engine: ScapesEngine,
                       scene: Scene) : GameState(engine, scene) {
     private var step = 0
     private var server: ScapesServer? = null
-    private var progress: ((String) -> Unit)? = null
+    private var progress: ((String, Double) -> Unit)? = null
 
     override fun dispose() {
-        if (server != null) {
-            try {
-                server!!.stop(ScapesServer.ShutdownReason.ERROR)
-            } catch (e: IOException) {
-                logger.error(
-                        e) { "Failed to stop internal server after login error" }
-            }
-
+        try {
+            server?.stop(ScapesServer.ShutdownReason.ERROR)
+        } catch (e: IOException) {
+            logger.error(
+                    e) { "Failed to stop internal server after login error" }
         }
-        if (source != null) {
-            try {
-                source!!.close()
-            } catch (e: IOException) {
-                logger.error(e) { "Failed to close world source" }
-            }
-
+        try {
+            source?.close()
+        } catch (e: IOException) {
+            logger.error(e) { "Failed to close world source" }
         }
     }
 
     override fun init() {
         val gui: Gui
-        val valueSupplier = {
-            if (step < 0)
-                Double.NEGATIVE_INFINITY
-            else if (step >= 2) Double.POSITIVE_INFINITY else step / 2.0
-        }
+        var progressvalue = 0.0
         when (engine.container.formFactor()) {
             Container.FormFactor.PHONE -> {
-                val progress = GuiTouchLoading(this, valueSupplier,
+                val progress = GuiTouchLoading(this, { progressvalue },
                         engine.guiStyle)
-                this.progress = { progress.setLabel(it) }
+                this.progress = { status, value ->
+                    progress.setLabel(status)
+                    progressvalue = value
+                }
                 gui = progress
             }
             else -> {
-                val progress = GuiLoading(this, valueSupplier, engine.guiStyle)
-                this.progress = { progress.setLabel(it) }
+                val progress = GuiLoading(this, { progressvalue },
+                        engine.guiStyle)
+                this.progress = { status, value ->
+                    progress.setLabel(status)
+                    progressvalue = value
+                }
                 gui = progress
             }
         }
+        progress?.invoke("Creating server...", 0.0)
         engine.guiStack.add("20-Progress", gui)
     }
 
@@ -93,10 +91,6 @@ class GameStateLoadSP(private var source: WorldSource?, engine: ScapesEngine,
         try {
             when (step) {
                 0 -> {
-                    step++
-                    progress!!("Creating server...")
-                }
-                1 -> {
                     val tagStructure = engine.tagStructure.structure(
                             "Scapes").structure("IntegratedServer")
                     val panorama = source!!.panorama()
@@ -118,9 +112,9 @@ class GameStateLoadSP(private var source: WorldSource?, engine: ScapesEngine,
                     server = ScapesServer(source!!, tagStructure, serverInfo,
                             ssl, engine)
                     step++
-                    progress!!("Starting server...")
+                    progress?.invoke("Starting server...", 1.0)
                 }
-                2 -> {
+                1 -> {
                     val loadingRadius = round(engine.tagStructure.getStructure(
                             "Scapes")?.getDouble("RenderDistance") ?: 0.0) + 16
                     val account = Account[engine.home.resolve(
@@ -135,6 +129,9 @@ class GameStateLoadSP(private var source: WorldSource?, engine: ScapesEngine,
                     this.server = null
                     source = null
                     engine.switchState(game)
+                    step++
+                    progress?.invoke("Loading world...",
+                            Double.POSITIVE_INFINITY)
                 }
             }
         } catch (e: IOException) {
@@ -143,7 +140,6 @@ class GameStateLoadSP(private var source: WorldSource?, engine: ScapesEngine,
                     GameStateServerDisconnect(e.message ?: "", engine))
             step = -1
         }
-
     }
 
     companion object : KLogging()

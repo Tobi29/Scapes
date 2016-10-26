@@ -111,7 +111,7 @@ constructor(private val files: List<PluginFile>, idStorage: IDStorage) {
     }
 
     fun worldType(): WorldType {
-        return worldType!!
+        return worldType ?: throw IllegalStateException("No world type loaded")
     }
 
     fun plugin(name: String): Plugin {
@@ -142,7 +142,7 @@ constructor(private val files: List<PluginFile>, idStorage: IDStorage) {
             registry.registryTypes({ registry ->
                 plugins.forEach { it.registryType(registry) }
             })
-            registry.init(worldType!!)
+            registry.init(worldType())
             plugins.forEach { it.register(registry) }
             plugins.forEach { it.init(registry) }
             registry.lock()

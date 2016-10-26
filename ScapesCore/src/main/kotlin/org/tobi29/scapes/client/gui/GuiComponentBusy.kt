@@ -62,7 +62,7 @@ class GuiComponentBusy(parent: GuiLayoutData) : GuiComponentHeavy(parent) {
         val matrix = matrixStack.push()
         matrix.translate(size.floatX() * 0.5f, size.floatY() * 0.5f, 0.0f)
         matrix.rotateAccurate(value, 0.0f, 0.0f, 1.0f)
-        model!!.render(gl, shader)
+        model?.render(gl, shader)
         matrixStack.pop()
     }
 

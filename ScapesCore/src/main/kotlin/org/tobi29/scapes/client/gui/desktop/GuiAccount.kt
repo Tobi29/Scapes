@@ -31,7 +31,7 @@ import java.util.regex.Pattern
 
 class GuiAccount(state: GameState, previous: Gui, account: Account,
                  style: GuiStyle) : GuiMenu(state, "Account", "Save", style) {
-    private var keyPair: KeyPair? = null
+    private var keyPair: KeyPair
     private var nickname = ""
 
     init {
@@ -48,10 +48,9 @@ class GuiAccount(state: GameState, previous: Gui, account: Account,
         val keyCopyID = slab.addHori(5.0, 5.0, -1.0, -1.0) {
             button(it, "Copy ID")
         }
-        val id = pane.addVert(16.0, 5.0, -1.0, 12.0
-        ) {
+        val id = pane.addVert(16.0, 5.0, -1.0, 12.0) {
             GuiComponentText(it,
-                    "ID: ${checksum(keyPair!!.public.encoded, Algorithm.SHA1)}")
+                    "ID: ${checksum(keyPair.public.encoded, Algorithm.SHA1)}")
         }
         pane.addVert(16.0, 5.0, -1.0, 18.0) {
             GuiComponentText(it, "Nickname:")
@@ -87,7 +86,7 @@ class GuiAccount(state: GameState, previous: Gui, account: Account,
         keyCopyID.on(GuiEvent.CLICK_LEFT
         ) { event ->
             state.engine.container.clipboardCopy(
-                    checksum(keyPair!!.public.encoded,
+                    checksum(keyPair.public.encoded,
                             Algorithm.SHA1).toString())
         }
         skin.on(GuiEvent.CLICK_LEFT) { event ->
@@ -107,7 +106,7 @@ class GuiAccount(state: GameState, previous: Gui, account: Account,
                 return@on
             }
             try {
-                Account(keyPair!!, this.nickname).write(
+                Account(keyPair, this.nickname).write(
                         state.engine.home.resolve("Account.properties"))
             } catch (e: IOException) {
                 logger.error { "Failed to write account file: $e" }

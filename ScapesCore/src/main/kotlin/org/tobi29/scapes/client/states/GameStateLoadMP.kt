@@ -39,27 +39,32 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class GameStateLoadMP(private val address: RemoteAddress, engine: ScapesEngine,
                       scene: Scene) : GameState(engine, scene) {
-    private var progress: ((String) -> Unit)? = null
+    private var progress: ((String, Double) -> Unit)? = null
     private var gui: Gui? = null
 
     override fun init() {
-        val valueSupplier = {
-            // TODO: Implement better
-            0.5
-        }
+        var progressvalue = 0.0
         when (engine.container.formFactor()) {
             Container.FormFactor.PHONE -> {
-                val progress = GuiTouchLoading(this, valueSupplier,
+                val progress = GuiTouchLoading(this, { progressvalue },
                         engine.guiStyle)
-                this.progress = { progress.setLabel(it) }
+                this.progress = { status, value ->
+                    progress.setLabel(status)
+                    progressvalue = value
+                }
                 gui = progress
             }
             else -> {
-                val progress = GuiLoading(this, valueSupplier, engine.guiStyle)
-                this.progress = { progress.setLabel(it) }
+                val progress = GuiLoading(this, { progressvalue },
+                        engine.guiStyle)
+                this.progress = { status, value ->
+                    progress.setLabel(status)
+                    progressvalue = value
+                }
                 gui = progress
             }
         }
+        progress?.invoke("Connecting...", 0.0)
         gui?.let { engine.guiStack.add("20-Progress", it) }
 
         (engine.game as ScapesClient).connection.addOutConnection(address,
@@ -68,7 +73,7 @@ class GameStateLoadMP(private val address: RemoteAddress, engine: ScapesEngine,
                     engine.switchState(
                             GameStateServerDisconnect(e.message ?: "", engine))
                 }) { worker, channel ->
-            progress?.invoke("Logging in...")
+            progress?.invoke("Logging in...", 0.3)
             val bundleChannel: PacketBundleChannel
             val ssl = SSLProvider.sslHandle { certificates ->
                 gui?.let { gui ->
@@ -105,13 +110,13 @@ class GameStateLoadMP(private val address: RemoteAddress, engine: ScapesEngine,
             worker.addConnection {
                 val connection = NewClientConnection(worker, engine,
                         bundleChannel, account, loadingRadius, { status ->
-                    progress?.invoke(status)
+                    progress?.invoke(status, 0.66)
                 }, { e ->
                     logger.error(e) { "Failed to connect to server" }
                     engine.switchState(
                             GameStateServerDisconnect(e.message ?: "", engine))
                 }) { init ->
-                    progress?.invoke("Loading world...")
+                    progress?.invoke("Loading world...", 1.0)
                     val game = GameStateGameMP(init, scene, engine)
                     engine.switchState(game)
                 }

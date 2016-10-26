@@ -42,7 +42,7 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
                             scene: Scene) : GameState(engine, scene) {
     private var step = 0
     private var server: ScapesServer? = null
-    private var progress: ((String) -> Unit)? = null
+    private var progress: ((String, Double) -> Unit)? = null
 
     override fun dispose() {
         try {
@@ -59,29 +59,29 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
     }
 
     override fun init() {
-        val valueSupplier = {
-            if (step < 0) {
-                Double.NEGATIVE_INFINITY
-            } else if (step >= 3) {
-                Double.POSITIVE_INFINITY
-            } else {
-                step / 3.0
-            }
-        }
         val gui: Gui
+        var progressvalue = 0.0
         when (engine.container.formFactor()) {
             Container.FormFactor.PHONE -> {
-                val progress = GuiTouchLoading(this, valueSupplier,
+                val progress = GuiTouchLoading(this, { progressvalue },
                         engine.guiStyle)
-                this.progress = { progress.setLabel(it) }
+                this.progress = { status, value ->
+                    progress.setLabel(status)
+                    progressvalue = value
+                }
                 gui = progress
             }
             else -> {
-                val progress = GuiLoading(this, valueSupplier, engine.guiStyle)
-                this.progress = { progress.setLabel(it) }
+                val progress = GuiLoading(this, { progressvalue },
+                        engine.guiStyle)
+                this.progress = { status, value ->
+                    progress.setLabel(status)
+                    progressvalue = value
+                }
                 gui = progress
             }
         }
+        progress?.invoke("Creating server...", 0.0)
         engine.guiStack.add("20-Progress", gui)
     }
 
@@ -92,10 +92,6 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
         try {
             when (step) {
                 0 -> {
-                    step++
-                    progress?.invoke("Creating server...")
-                }
-                1 -> {
                     val tagStructure = engine.tagStructure.structure(
                             "Scapes").structure("IntegratedServer")
                     val panorama = source!!.panorama()
@@ -117,9 +113,9 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
                     server = ScapesServer(source!!, tagStructure, serverInfo,
                             ssl, engine)
                     step++
-                    progress?.invoke("Starting server...")
+                    progress?.invoke("Starting server...", 0.2)
                 }
-                2 -> {
+                1 -> {
                     val port = server!!.connection.start(0)
                     if (port <= 0) {
                         throw IOException(
@@ -128,7 +124,7 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
                     val address = InetSocketAddress(port)
 
                     step++
-                    progress?.invoke("Connecting to local server...")
+                    progress?.invoke("Connecting to local server...", 0.4)
 
                     (engine.game as ScapesClient).connection.addOutConnection(
                             address, { e ->
@@ -138,7 +134,7 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
                                 GameStateServerDisconnect(
                                         e.message ?: "", engine))
                     }) { worker, channel ->
-                        progress?.invoke("Logging in...")
+                        progress?.invoke("Logging in...", 0.6)
                         val bundleChannel: PacketBundleChannel
                         val ssl = SSLProvider.sslHandle { certificates -> true }
                         bundleChannel = PacketBundleChannel(
@@ -154,7 +150,7 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
                             val connection = NewClientConnection(worker, engine,
                                     bundleChannel, account, loadingRadius,
                                     { status ->
-                                        progress?.invoke(status)
+                                        progress?.invoke(status, 0.8)
                                     }, { e ->
                                 GameStateLoadMP.logger.error(
                                         e) { "Failed to log into server" }
@@ -162,7 +158,7 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
                                         GameStateServerDisconnect(
                                                 e.message ?: "", engine))
                             }) { init ->
-                                progress?.invoke("Loading world...")
+                                progress?.invoke("Loading world...", 1.0)
                                 val game = GameStateGameSP(init, source!!,
                                         server!!, scene, engine)
                                 server = null

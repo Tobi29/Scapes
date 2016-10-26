@@ -100,7 +100,7 @@ class GuiPlugins(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu(
             if (plugin.file() != null) {
                 delete.on(GuiEvent.CLICK_LEFT) { event ->
                     try {
-                        delete(plugin.file()!!)
+                        plugin.file()?.let(::delete)
                         scrollPane.remove(this)
                     } catch (e: IOException) {
                         logger.warn { "Failed to delete plugin: $e" }
@@ -108,23 +108,23 @@ class GuiPlugins(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu(
                 }
                 try {
                     label.setText(plugin.name())
-                    zipFile(plugin.file()!!).use { zip ->
-                        val stream = BufferedReadChannelStream(
-                                Channels.newChannel(zip.getInputStream(
-                                        zip.getEntry("Icon.png"))))
-                        val image = decodePNG(stream) {
-                            state.engine.allocate(it)
+                    plugin.file()?.let {
+                        zipFile(it).use { zip ->
+                            val stream = BufferedReadChannelStream(
+                                    Channels.newChannel(zip.getInputStream(
+                                            zip.getEntry("Icon.png"))))
+                            val image = decodePNG(stream) {
+                                state.engine.allocate(it)
+                            }
+                            val texture = state.engine.graphics.createTexture(
+                                    image, 0, TextureFilter.LINEAR,
+                                    TextureFilter.LINEAR, TextureWrap.CLAMP,
+                                    TextureWrap.CLAMP)
+                            icon.texture = texture
                         }
-                        val texture = state.engine.graphics.createTexture(image,
-                                0,
-                                TextureFilter.LINEAR,
-                                TextureFilter.LINEAR, TextureWrap.CLAMP,
-                                TextureWrap.CLAMP)
-                        icon.texture = texture
                     }
                 } catch (e: IOException) {
                 }
-
             }
         }
     }

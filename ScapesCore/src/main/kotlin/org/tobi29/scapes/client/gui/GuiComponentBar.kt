@@ -53,12 +53,12 @@ class GuiComponentBar(parent: GuiLayoutData, private val r: Float, private val g
         val matrixStack = gl.matrixStack()
         var matrix = matrixStack.push()
         matrix.scale(value.toFloat(), 1.0f, 1.0f)
-        model1!!.render(gl, shader)
+        model1?.render(gl, shader)
         matrixStack.pop()
         matrix = matrixStack.push()
         matrix.translate((value * size.x).toFloat(), 0.0f, 0.0f)
         matrix.scale((1.0 - value).toFloat(), 1.0f, 1.0f)
-        model2!!.render(gl, shader)
+        model2?.render(gl, shader)
         matrixStack.pop()
     }
 

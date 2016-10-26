@@ -115,7 +115,6 @@ class GuiCreateWorld(state: GameState, previous: GuiSaveSelect,
         }
     }
 
-    @SuppressWarnings("AmbiguousFieldAccess")
     private inner class GuiAddons(state: GameState, previous: GuiCreateWorld,
                                   parent: String, plugins: List<PluginFile>, style: GuiStyle) : GuiMenu(
             state, "Addons", "Apply", previous, style) {
@@ -153,23 +152,25 @@ class GuiCreateWorld(state: GameState, previous: GuiSaveSelect,
                     }
                 }
                 try {
-                    zipFile(addon.file()!!).use { zip ->
-                        val stream = BufferedReadChannelStream(
-                                Channels.newChannel(zip.getInputStream(
-                                        zip.getEntry("Icon.png"))))
-                        val image = decodePNG(stream) {
-                            state.engine.allocate(it)
+                    addon.file()?.let {
+                        zipFile(it).use { zip ->
+                            val stream = BufferedReadChannelStream(
+                                    Channels.newChannel(zip.getInputStream(
+                                            zip.getEntry("Icon.png"))))
+                            val image = decodePNG(stream) {
+                                state.engine.allocate(it)
+                            }
+                            val texture = state.engine.graphics.createTexture(
+                                    image,
+                                    0,
+                                    TextureFilter.LINEAR,
+                                    TextureFilter.LINEAR, TextureWrap.CLAMP,
+                                    TextureWrap.CLAMP)
+                            icon.texture = texture
                         }
-                        val texture = state.engine.graphics.createTexture(image,
-                                0,
-                                TextureFilter.LINEAR,
-                                TextureFilter.LINEAR, TextureWrap.CLAMP,
-                                TextureWrap.CLAMP)
-                        icon.texture = texture
                     }
                 } catch (e: IOException) {
                 }
-
             }
         }
     }

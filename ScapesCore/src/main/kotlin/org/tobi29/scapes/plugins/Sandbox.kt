@@ -41,7 +41,7 @@ object Sandbox {
             }
 
             override fun getPermissions(domain: ProtectionDomain?): Permissions {
-                if (domain!!.classLoader is PluginClassLoader) {
+                if (domain == null || domain.classLoader is PluginClassLoader) {
                     return Permissions()
                 }
                 val permissions = getPermissions(domain.codeSource)

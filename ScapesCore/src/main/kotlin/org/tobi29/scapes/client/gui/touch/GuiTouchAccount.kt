@@ -33,8 +33,7 @@ import java.util.regex.Pattern
 class GuiTouchAccount(state: GameState, previous: Gui, account: Account,
                       style: GuiStyle) : GuiTouchMenu(state, "Account", "Save",
         style) {
-    @SuppressWarnings("CanBeFinal")
-    private var keyPair: KeyPair? = null
+    private var keyPair: KeyPair
     private var nickname = ""
 
     init {
@@ -56,23 +55,25 @@ class GuiTouchAccount(state: GameState, previous: Gui, account: Account,
         val id = pane.addVert(112.0, 5.0, -1.0, 24.0
         ) {
             GuiComponentText(it,
-                    "ID: ${checksum(keyPair!!.public.encoded, Algorithm.SHA1)}")
+                    "ID: ${checksum(keyPair.public.encoded, Algorithm.SHA1)}")
         }
         slab = row(pane)
-        slab.addHori(10.0, 10.0, -1.0, 36.0
-        ) { GuiComponentFlowText(it, "Nickname:") }
-        val nickname = slab.addHori(10.0, 10.0, -1.0, 60.0
-        ) { GuiComponentTextField(it, 36, this.nickname) }
+        slab.addHori(10.0, 10.0, -1.0, 36.0) {
+            GuiComponentFlowText(it, "Nickname:")
+        }
+        val nickname = slab.addHori(10.0, 10.0, -1.0, 60.0) {
+            GuiComponentTextField(it, 36, this.nickname)
+        }
         val skin = row(pane) { button(it, "Skin") }
-        val error = pane.addVert(112.0, 10.0, -1.0,
-                36.0) { GuiComponentText(it, "") }
+        val error = pane.addVert(112.0, 10.0, -1.0, 36.0) {
+            GuiComponentText(it, "")
+        }
 
         selection(keyCopy, keyPaste, keyCopyID)
         selection(nickname)
         selection(skin)
 
-        keyCopy.on(GuiEvent.CLICK_LEFT
-        ) { event ->
+        keyCopy.on(GuiEvent.CLICK_LEFT) { event ->
             state.engine.container.clipboardCopy(Account.key(keyPair))
         }
         keyPaste.on(GuiEvent.CLICK_LEFT) { event ->
@@ -87,11 +88,9 @@ class GuiTouchAccount(state: GameState, previous: Gui, account: Account,
                 error.text = "Invalid key!"
             }
         }
-        keyCopyID.on(GuiEvent.CLICK_LEFT
-        ) { event ->
+        keyCopyID.on(GuiEvent.CLICK_LEFT) { event ->
             state.engine.container.clipboardCopy(
-                    checksum(keyPair!!.public.encoded,
-                            Algorithm.SHA1).toString())
+                    checksum(keyPair.public.encoded, Algorithm.SHA1).toString())
         }
         skin.on(GuiEvent.CLICK_LEFT) { event ->
             try {
@@ -113,7 +112,7 @@ class GuiTouchAccount(state: GameState, previous: Gui, account: Account,
                 return@on
             }
             try {
-                Account(keyPair!!, this.nickname).write(
+                Account(keyPair, this.nickname).write(
                         state.engine.home.resolve("Account.properties"))
             } catch (e: IOException) {
                 logger.error { "Failed to write account file: $e" }

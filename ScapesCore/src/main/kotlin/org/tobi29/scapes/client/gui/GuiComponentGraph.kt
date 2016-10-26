@@ -30,7 +30,7 @@ class GuiComponentGraph(parent: GuiLayoutData, graphs: Int, private val r: Float
                         private val g: FloatArray, private val b: FloatArray, private val a: FloatArray) : GuiComponentHeavy(
         parent) {
     private val i: IntArray
-    private var data: Array<FloatArray>? = null
+    private var data = Array(graphs) { FloatArray(0) }
 
     init {
         assert(graphs > 0)
@@ -38,7 +38,6 @@ class GuiComponentGraph(parent: GuiLayoutData, graphs: Int, private val r: Float
         assert(g.size == graphs)
         assert(b.size == graphs)
         assert(a.size == graphs)
-        data = Array(graphs) { FloatArray(0) }
         i = IntArray(graphs)
     }
 
@@ -48,14 +47,14 @@ class GuiComponentGraph(parent: GuiLayoutData, graphs: Int, private val r: Float
                                         pixelSize: Vector2d,
                                         delta: Double) {
         val w = ceil(size.x)
-        if (data!![0].size != w) {
-            data = Array(data!!.size) { FloatArray(w) }
+        if (data[0].size != w) {
+            data = Array(data.size) { FloatArray(w) }
         }
-        val vertex = FloatArray(data!!.size * w * 3)
-        val color = FloatArray(w * (data!!.size shl 2))
+        val vertex = FloatArray(data.size * w * 3)
+        val color = FloatArray(w * (data.size shl 2))
         val limit = w - 1
         val index = IntArray(w * (limit shl 1))
-        for (i in data!!.indices) {
+        for (i in data.indices) {
             val offset = i * w
             for (j in 0..w - 1) {
                 var x = j + this.i[i]
@@ -65,7 +64,7 @@ class GuiComponentGraph(parent: GuiLayoutData, graphs: Int, private val r: Float
                 x = clamp(x, 0, limit)
                 var k = (offset + j) * 3
                 vertex[k++] = j.toFloat()
-                vertex[k++] = (data!![i][x] * size.y).toFloat()
+                vertex[k++] = (data[i][x] * size.y).toFloat()
                 vertex[k] = 0.0f
                 k = offset + j shl 2
                 color[k++] = r[i]
@@ -89,7 +88,7 @@ class GuiComponentGraph(parent: GuiLayoutData, graphs: Int, private val r: Float
 
     fun addStamp(value: Double,
                  graph: Int) {
-        val data = this.data!![graph]
+        val data = this.data[graph]
         if (i[graph] < data.size) {
             data[i[graph]++] = (1.0 - pow(value, 0.25)).toFloat()
         }

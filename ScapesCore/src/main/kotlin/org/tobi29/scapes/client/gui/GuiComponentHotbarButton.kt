@@ -51,10 +51,10 @@ class GuiComponentHotbarButton(parent: GuiLayoutData, item: ItemStack,
                                         delta: Double) {
         if (player.inventorySelectLeft() == slot) {
             gl.textures().bind("Scapes:image/gui/HotbarLeft", gl)
-            model!!.render(gl, shader)
+            model?.render(gl, shader)
         } else if (player.inventorySelectRight() == slot) {
             gl.textures().bind("Scapes:image/gui/HotbarRight", gl)
-            model!!.render(gl, shader)
+            model?.render(gl, shader)
         }
     }
 

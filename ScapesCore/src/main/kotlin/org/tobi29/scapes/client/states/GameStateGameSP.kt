@@ -25,20 +25,11 @@ import org.tobi29.scapes.server.format.WorldSource
 import java.io.IOException
 
 class GameStateGameSP(clientSupplier: (GameStateGameMP) -> ClientConnection,
-                      private val source: WorldSource,
-                      private val server: ScapesServer,
+                      val source: WorldSource,
+                      val server: ScapesServer,
                       scene: Scene,
                       engine: ScapesEngine) : GameStateGameMP(clientSupplier,
         scene, engine) {
-
-    fun source(): WorldSource {
-        return source
-    }
-
-    fun server(): ScapesServer {
-        return server
-    }
-
     override fun dispose() {
         try {
             server.stop(ScapesServer.ShutdownReason.STOP)

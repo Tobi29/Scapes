@@ -51,7 +51,7 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
     private var chunkDistance = 0.0
     private var disposed = false
     private var staticRenderDistance = false
-    private var cam: Cam? = null
+    private var cam = Cam(0.1f, 1.0f)
     private var cullingPool1 = Pool({ VisibleUpdate() })
     private var cullingPool2 = Pool({ VisibleUpdate() })
 
@@ -469,9 +469,9 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
                     renderer.updateVisible.set(true)
                 }
                 if (!empty && chunk.isVisible(i)) {
-                    val relativeX = terrainChunk.posBlock.x - renderer.cam!!.position.doubleX()
-                    val relativeY = terrainChunk.posBlock.y - renderer.cam!!.position.doubleY()
-                    val relativeZ = (i shl 4) - renderer.cam!!.position.doubleZ()
+                    val relativeX = terrainChunk.posBlock.x - renderer.cam.position.doubleX()
+                    val relativeY = terrainChunk.posBlock.y - renderer.cam.position.doubleY()
+                    val relativeZ = (i shl 4) - renderer.cam.position.doubleZ()
                     val lod = sqr(relativeX + 8) +
                             sqr(relativeY + 8) +
                             sqr(relativeZ + 8) < 9216
