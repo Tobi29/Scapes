@@ -47,14 +47,14 @@ open class GuiMenuDouble protected constructor(state: GameState, title: String, 
         spacer()
         pane.addVert(16.0, 14.0, -1.0, 32.0) { GuiComponentText(it, title) }
         pane.addVert(24.0, 6.0, -1.0, 2.0, ::GuiComponentSeparator)
-        pane.addVert(0.0, 0.0, 0.0, 0.0, -1.0, -1.0, Long.MIN_VALUE,
+        pane.addVert(0.0, 0.0, 0.0, 0.0, -1.0, -1.0, Long.MIN_VALUE + 300,
                 ::GuiComponentGroup)
-        pane.addVert(24.0, 6.0, 24.0, 6.0, -1.0, 2.0, Long.MIN_VALUE,
+        pane.addVert(24.0, 6.0, 24.0, 6.0, -1.0, 2.0, Long.MIN_VALUE + 200,
                 ::GuiComponentSeparator)
         this.save = pane.addVert(112.0, 12.0, 112.0, 5.0, 176.0, 30.0,
-                Long.MIN_VALUE) { button(it, save) }
+                Long.MIN_VALUE + 100) { button(it, save) }
         this.back = pane.addVert(112.0, 5.0, 112.0, 12.0, 176.0, 30.0,
-                Long.MIN_VALUE) { button(it, back) }
+                Long.MIN_VALUE + 100) { button(it, back) }
 
         selection(this.save)
         selection(this.back)

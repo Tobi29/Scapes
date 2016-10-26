@@ -48,12 +48,12 @@ open class GuiTouchMenuDouble protected constructor(state: GameState, title: Str
             GuiComponentText(it, title)
         }
         pane.addVert(130.0, 6.0, -1.0, 2.0, ::GuiComponentSeparator)
-        pane.addVert(0.0, 0.0, 0.0, 0.0, -1.0, -1.0, Long.MIN_VALUE,
+        pane.addVert(0.0, 0.0, 0.0, 0.0, -1.0, -1.0, Long.MIN_VALUE + 300,
                 ::GuiComponentGroup)
-        pane.addVert(130.0, 6.0, 130.0, 6.0, -1.0, 2.0, Long.MIN_VALUE,
+        pane.addVert(130.0, 6.0, 130.0, 6.0, -1.0, 2.0, Long.MIN_VALUE + 200,
                 ::GuiComponentSeparator)
         val bottom = pane.addVert(112.0, 4.0, 112.0, 28.0, -1.0, 60.0,
-                Long.MIN_VALUE, ::GuiComponentGroupSlab)
+                Long.MIN_VALUE + 100, ::GuiComponentGroupSlab)
         this.back = bottom.addHori(0.0, 0.0, 10.0, 0.0, -1.0, -1.0) {
             button(it, back)
         }

@@ -44,12 +44,12 @@ open class GuiTouchMenu protected constructor(state: GameState, title: String, b
         pane = addHori(0.0, 0.0, -1.0, -1.0, ::GuiComponentVisiblePane)
         pane.addVert(130.0, 14.0, -1.0, 48.0) { GuiComponentText(it, title) }
         pane.addVert(130.0, 6.0, -1.0, 2.0, ::GuiComponentSeparator)
-        pane.addVert(0.0, 0.0, 0.0, 0.0, -1.0, -1.0, Long.MIN_VALUE,
+        pane.addVert(0.0, 0.0, 0.0, 0.0, -1.0, -1.0, Long.MIN_VALUE + 300,
                 ::GuiComponentGroup)
-        pane.addVert(130.0, 6.0, 130.0, 6.0, -1.0, 2.0, Long.MIN_VALUE,
+        pane.addVert(130.0, 6.0, 130.0, 6.0, -1.0, 2.0, Long.MIN_VALUE + 200,
                 ::GuiComponentSeparator)
         this.back = pane.addVert(301.0, 4.0, 301.0, 28.0, -1.0, 60.0,
-                Long.MIN_VALUE) { button(it, back) }
+                Long.MIN_VALUE + 100) { button(it, back) }
 
         selection(this.back)
 
