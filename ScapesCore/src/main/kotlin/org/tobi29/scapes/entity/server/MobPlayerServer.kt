@@ -218,10 +218,8 @@ abstract class MobPlayerServer(world: WorldServer, pos: Vector3d, speed: Vector3
     }
 
     fun closeGui() {
-        if (currentContainer != null) {
-            currentContainer!!.removeViewer(this)
-            currentContainer = null
-        }
+        currentContainer?.removeViewer(this)
+        currentContainer = null
     }
 
     override fun canMoveHere(terrain: TerrainServer,

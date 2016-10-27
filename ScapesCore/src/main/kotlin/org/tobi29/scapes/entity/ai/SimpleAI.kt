@@ -30,10 +30,8 @@ class SimpleAI(private val mob: MobLivingServer) : AI {
     private var yaw = 0.0
 
     override fun update(delta: Double) {
-        if (mobTarget != null) {
-            target = mobTarget!!.getCurrentPos()
-        }
-        target?.let { it ->
+        mobTarget?.let { target = it.getCurrentPos() }
+        target?.let {
             val pos = mob.getCurrentPos()
             yaw = pos.direction(it).toDeg()
             timeout -= delta

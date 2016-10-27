@@ -28,7 +28,7 @@ class ParticleTransparentAtlas(engine: ScapesEngine) : TextureAtlas<ParticleTran
         }
         val image = load(path)
         texture = ParticleTransparentTexture(image.buffer,
-                image.width) { this.texture!! }
+                image.width) { texture() }
         textures.put(path, texture)
         return texture
     }

@@ -36,8 +36,8 @@ enum class ConnectionType constructor(private val data: Byte) {
             }
         }
 
-        operator fun get(data: Byte): ConnectionType {
-            return VALUES[data]!!
+        operator fun get(data: Byte): ConnectionType? {
+            return VALUES[data]
         }
     }
 }

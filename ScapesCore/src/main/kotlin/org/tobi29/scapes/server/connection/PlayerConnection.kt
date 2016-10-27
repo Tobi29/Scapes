@@ -74,11 +74,11 @@ abstract class PlayerConnection(val server: ServerConnection) : Connection, Play
     }
 
     fun skin(): ServerSkin {
-        return skin!!
+        return skin ?: throw IllegalStateException("Player not initialized")
     }
 
     fun id(): String {
-        return id!!
+        return id ?: throw IllegalStateException("Player not initialized")
     }
 
     fun server(): ServerConnection {
@@ -88,7 +88,7 @@ abstract class PlayerConnection(val server: ServerConnection) : Connection, Play
     @Synchronized fun setWorld(world: WorldServer? = null,
                                pos: Vector3d? = null) {
         removeEntity()
-        val player = server.server.getPlayer(id!!)
+        val player = server.server.getPlayer(id())
         permissionLevel = player.permissions()
         val newEntity = player.createEntity(this, world, pos)
         val isNew: Boolean
@@ -114,7 +114,9 @@ abstract class PlayerConnection(val server: ServerConnection) : Connection, Play
     }
 
     @Synchronized protected fun save() {
-        server.server.savePlayer(id!!, entity!!, permissionLevel)
+        server.server.savePlayer(id(),
+                entity ?: throw IllegalStateException("Player not initialized"),
+                permissionLevel)
     }
 
     protected fun generateResponse(challengeMatch: Boolean): String? {
@@ -124,7 +126,7 @@ abstract class PlayerConnection(val server: ServerConnection) : Connection, Play
         if (!challengeMatch) {
             return "Invalid protected key!"
         }
-        if (!server.server.playerExists(id!!)) {
+        if (!server.server.playerExists(id())) {
             if (!server.doesAllowCreation()) {
                 return "This server does not allow account creation!"
             }

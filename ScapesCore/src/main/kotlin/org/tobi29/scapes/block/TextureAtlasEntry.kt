@@ -18,7 +18,9 @@ package org.tobi29.scapes.block
 import org.tobi29.scapes.engine.graphics.Texture
 import java.nio.ByteBuffer
 
-open class TextureAtlasEntry(var buffer: ByteBuffer?, val resolution: Int, protected val texture: () -> Texture) {
+open class TextureAtlasEntry(var buffer: ByteBuffer?,
+                             val resolution: Int,
+                             protected val texture: () -> Texture) {
     var tileX = 0
     var tileY = 0
     var x = 0.0

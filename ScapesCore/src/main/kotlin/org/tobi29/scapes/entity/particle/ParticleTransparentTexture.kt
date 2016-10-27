@@ -21,5 +21,5 @@ import org.tobi29.scapes.engine.graphics.Texture
 import java.nio.ByteBuffer
 
 class ParticleTransparentTexture(buffer: ByteBuffer, resolution: Int,
-                                 texture: Function0<Texture>) : TextureAtlasEntry(
+                                 texture: () -> Texture) : TextureAtlasEntry(
         buffer, resolution, texture)

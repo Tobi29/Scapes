@@ -89,12 +89,13 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
         get() = false
 
     override fun step(delta: Double) {
+        val source = source ?: return
         try {
             when (step) {
                 0 -> {
                     val tagStructure = engine.tagStructure.structure(
                             "Scapes").structure("IntegratedServer")
-                    val panorama = source!!.panorama()
+                    val panorama = source.panorama()
                     val serverInfo: ServerInfo
                     if (panorama != null) {
                         serverInfo = ServerInfo("Local Server",
@@ -110,13 +111,15 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
                         throw UnsupportedJVMException(e)
                     }
 
-                    server = ScapesServer(source!!, tagStructure, serverInfo,
+                    this.server = ScapesServer(source, tagStructure, serverInfo,
                             ssl, engine)
                     step++
                     progress?.invoke("Starting server...", 0.2)
                 }
                 1 -> {
-                    val port = server!!.connection.start(0)
+                    val server = server ?: throw IllegalStateException(
+                            "Server lost too early")
+                    val port = server.connection.start(0)
                     if (port <= 0) {
                         throw IOException(
                                 "Unable to open server socket (Invalid port returned: $port)")
@@ -159,10 +162,10 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
                                                 e.message ?: "", engine))
                             }) { init ->
                                 progress?.invoke("Loading world...", 1.0)
-                                val game = GameStateGameSP(init, source!!,
-                                        server!!, scene, engine)
-                                server = null
-                                source = null
+                                val game = GameStateGameSP(init, source,
+                                        server, scene, engine)
+                                this.server = null
+                                this.source = null
                                 engine.switchState(game)
                             }
                             connection

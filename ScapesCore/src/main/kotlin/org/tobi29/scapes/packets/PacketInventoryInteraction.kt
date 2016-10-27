@@ -27,8 +27,8 @@ import java.util.*
 class PacketInventoryInteraction : PacketAbstract, PacketServer {
     private lateinit var uuid: UUID
     private var slot = 0
-    private var id: String? = null
-    private var type: Byte = 0
+    private lateinit var id: String
+    private var type = 0.toByte()
 
     constructor() {
     }
@@ -46,7 +46,7 @@ class PacketInventoryInteraction : PacketAbstract, PacketServer {
         stream.putLong(uuid.mostSignificantBits)
         stream.putLong(uuid.leastSignificantBits)
         stream.put(type.toInt())
-        stream.putString(id!!)
+        stream.putString(id)
         stream.putInt(slot)
     }
 
@@ -65,7 +65,7 @@ class PacketInventoryInteraction : PacketAbstract, PacketServer {
                 if (entity is EntityContainerServer) {
                     if (entity.viewers().filter { it == mob }.findAny().isPresent) {
                         synchronized(entity) {
-                            entity.inventories().modify(id!!) { chestI ->
+                            entity.inventories().modify(id) { chestI ->
                                 mob.inventories().modify(
                                         "Hold") { playerI ->
                                     val hold = playerI.item(0)

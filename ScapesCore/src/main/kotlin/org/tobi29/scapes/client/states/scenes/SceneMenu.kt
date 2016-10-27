@@ -119,7 +119,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
                 }
                 texture.bind(gl)
                 gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f)
-                model!!.render(gl, shaderTextured)
+                model?.render(gl, shaderTextured)
                 matrixStack.pop()
             }
         }

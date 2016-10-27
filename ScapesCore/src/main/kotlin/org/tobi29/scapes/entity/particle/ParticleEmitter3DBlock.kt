@@ -94,7 +94,7 @@ class ParticleEmitter3DBlock(system: ParticleSystem) : ParticleEmitter<ParticleI
                 gl.setAttribute2f(4,
                         world.terrain.blockLight(x, y, z) / 15.0f,
                         world.terrain.sunLight(x, y, z) / 15.0f)
-                instance.item!!.material().render(instance.item!!, gl, shader)
+                instance.item.material().render(instance.item, gl, shader)
                 matrixStack.pop()
             }
         }

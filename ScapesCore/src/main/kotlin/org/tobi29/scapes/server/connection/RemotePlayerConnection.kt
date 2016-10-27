@@ -53,14 +53,13 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
     private val sendQueueSize = AtomicInteger()
     private var state = State.LOGIN
     private var loginState: ((RandomReadableByteStream) -> Unit)?
-    private var challenge: ByteArray? = null
     private var pingTimeout = 0L
     private var pingWait = 0L
 
     init {
         channel.register(worker.joiner, SelectionKey.OP_READ)
         pingTimeout = System.currentTimeMillis() + 30000
-        loginState = { this.loginStep1(it) }
+        loginState = { loginStep1(it) }
     }
 
     override fun send(packet: PacketClient) {
@@ -79,7 +78,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
         val array = ByteArray(550)
         input[array]
         id = checksum(array, Algorithm.SHA1).toString()
-        challenge = ByteArray(501)
+        val challenge = ByteArray(501)
         SecureRandom().nextBytes(challenge)
         val output = channel.outputStream
         try {
@@ -87,7 +86,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                     X509EncodedKeySpec(array))
             val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
             cipher.init(Cipher.ENCRYPT_MODE, key)
-            output.put(cipher.doFinal(challenge!!))
+            output.put(cipher.doFinal(challenge))
         } catch (e: NoSuchAlgorithmException) {
             throw IOException(e)
         } catch (e: NoSuchPaddingException) {
@@ -109,12 +108,13 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
             sendPluginMetaData(iterator.next(), output)
         }
         channel.queueBundle()
-        loginState = { this.loginStep2(it) }
+        loginState = { loginStep2(it, challenge) }
     }
 
-    private fun loginStep2(input: RandomReadableByteStream) {
+    private fun loginStep2(input: RandomReadableByteStream,
+                           challengeExpected: ByteArray) {
         val plugins = server.plugins
-        val challenge = ByteArray(this.challenge!!.size)
+        val challenge = ByteArray(challengeExpected.size)
         input[challenge]
         nickname = input.getString(1 shl 10)
         var length = input.int
@@ -124,7 +124,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
         }
         val output = channel.outputStream
         val response = generateResponse(
-                Arrays.equals(challenge, this.challenge))
+                Arrays.equals(challenge, challengeExpected))
         if (response != null) {
             output.putBoolean(true)
             output.putString(response)
@@ -134,9 +134,11 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
         output.putBoolean(false)
         channel.queueBundle()
         for (request in requests) {
-            sendPlugin(plugins.file(request).file()!!, output)
+            sendPlugin(
+                    plugins.file(request).file() ?: throw IllegalStateException(
+                            "Trying to send embedded plugin"), output)
         }
-        loginState = { this.loginStep3(it) }
+        loginState = { loginStep3(it) }
     }
 
     private fun loginStep3(input: RandomReadableByteStream) {

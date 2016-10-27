@@ -49,12 +49,12 @@ class ParticleEmitterFallenBodyPart(system: ParticleSystem) : ParticleEmitter<Pa
                 instance.state = ParticleInstance.State.DEAD
                 continue
             }
-            aabb.minX = instance.pos.doubleX() + instance.box!!.minX
-            aabb.minY = instance.pos.doubleY() + instance.box!!.minY
-            aabb.minZ = instance.pos.doubleZ() + instance.box!!.minZ
-            aabb.maxX = instance.pos.doubleX() + instance.box!!.maxX
-            aabb.maxY = instance.pos.doubleY() + instance.box!!.maxY
-            aabb.maxZ = instance.pos.doubleZ() + instance.box!!.maxZ
+            aabb.minX = instance.pos.doubleX() + instance.box.minX
+            aabb.minY = instance.pos.doubleY() + instance.box.minY
+            aabb.minZ = instance.pos.doubleZ() + instance.box.minZ
+            aabb.maxX = instance.pos.doubleX() + instance.box.maxX
+            aabb.maxY = instance.pos.doubleY() + instance.box.maxY
+            aabb.maxZ = instance.pos.doubleZ() + instance.box.maxZ
             if (ParticlePhysics.update(delta, instance, terrain, aabb,
                     gravitation, 1.0f,
                     0.2f, 0.4f, 8.0f)) {
@@ -95,7 +95,7 @@ class ParticleEmitterFallenBodyPart(system: ParticleSystem) : ParticleEmitter<Pa
                 gl.setAttribute2f(4,
                         world.terrain.blockLight(x, y, z) / 15.0f,
                         world.terrain.sunLight(x, y, z) / 15.0f)
-                instance.box!!.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader)
+                instance.box.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader)
                 matrixStack.pop()
             }
         }

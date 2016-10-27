@@ -22,6 +22,6 @@ import org.tobi29.scapes.entity.model.Box
 class ParticleInstanceFallenBodyPart : ParticleInstance() {
     val rotation = MutableVector3d()
     val rotationSpeed = MutableVector3d()
-    var box: Box? = null
-    var texture: Texture? = null
+    lateinit var box: Box
+    lateinit var texture: Texture
 }

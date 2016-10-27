@@ -88,12 +88,13 @@ class GameStateLoadSP(private var source: WorldSource?, engine: ScapesEngine,
         get() = false
 
     override fun step(delta: Double) {
+        val source = source ?: return
         try {
             when (step) {
                 0 -> {
                     val tagStructure = engine.tagStructure.structure(
                             "Scapes").structure("IntegratedServer")
-                    val panorama = source!!.panorama()
+                    val panorama = source.panorama()
                     val serverInfo: ServerInfo
                     if (panorama != null) {
                         serverInfo = ServerInfo("Local Server",
@@ -109,25 +110,24 @@ class GameStateLoadSP(private var source: WorldSource?, engine: ScapesEngine,
                         throw UnsupportedJVMException(e)
                     }
 
-                    server = ScapesServer(source!!, tagStructure, serverInfo,
-                            ssl, engine)
+                    server = ScapesServer(source, tagStructure, serverInfo, ssl,
+                            engine)
                     step++
                     progress?.invoke("Starting server...", 1.0)
                 }
                 1 -> {
+                    val server = server ?: throw IllegalStateException(
+                            "Server lost too early")
                     val loadingRadius = round(engine.tagStructure.getStructure(
                             "Scapes")?.getDouble("RenderDistance") ?: 0.0) + 16
                     val account = Account[engine.home.resolve(
                             "Account.properties")]
-                    val server = this.server!!.connection
-                    val game = GameStateGameSP(
-                            { g ->
-                                LocalPlayerConnection(server, g,
-                                        loadingRadius, account).client()
-                            }, source!!,
-                            this.server!!, scene, engine)
+                    val game = GameStateGameSP({
+                        LocalPlayerConnection(server.connection, it,
+                                loadingRadius, account).client()
+                    }, source, server, scene, engine)
                     this.server = null
-                    source = null
+                    this.source = null
                     engine.switchState(game)
                     step++
                     progress?.invoke("Loading world...",

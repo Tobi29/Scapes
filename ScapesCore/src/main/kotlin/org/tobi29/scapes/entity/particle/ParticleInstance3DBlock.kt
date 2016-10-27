@@ -21,5 +21,5 @@ import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
 class ParticleInstance3DBlock : ParticleInstance() {
     val rotation = MutableVector3d()
     val rotationSpeed = MutableVector3d()
-    var item: ItemStack? = null
+    lateinit var item: ItemStack
 }
