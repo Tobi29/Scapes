@@ -24,7 +24,7 @@ import org.tobi29.scapes.engine.utils.graphics.gaussianBlurOffset
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurWeight
 import org.tobi29.scapes.engine.utils.io.use
 import org.tobi29.scapes.engine.utils.join
-import org.tobi29.scapes.engine.utils.math.FastMath
+import org.tobi29.scapes.engine.utils.math.PI
 import org.tobi29.scapes.engine.utils.math.cos
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.server.format.WorldSource
@@ -69,7 +69,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
         val space = gl.sceneSpace()
         val samples = round(space * 8.0) + 8
         val blurOffsets = gaussianBlurOffset(samples, 0.04f)
-        val blurWeights = gaussianBlurWeight(samples) { cos(it * FastMath.PI) }
+        val blurWeights = gaussianBlurWeight(samples) { cos(it * PI) }
         val blurLength = blurOffsets.size
         val blurOffset = join(*blurOffsets)
         val blurWeight = join(*blurWeights)

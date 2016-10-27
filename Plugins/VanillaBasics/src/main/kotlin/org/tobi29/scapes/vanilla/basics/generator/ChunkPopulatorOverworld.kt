@@ -152,7 +152,7 @@ class ChunkPopulatorOverworld(world: WorldServer, private val plugin: VanillaBas
             this.decorators = decorators.toTypedArray()
             val base = RandomNoiseRandomLayer(random.nextLong(),
                     decorators.size)
-            val zoom = RandomNoiseZoomLayer(base, 1024f)
+            val zoom = RandomNoiseZoomLayer(base, 1024.0)
             val noise = RandomNoiseSimplexNoiseLayer(zoom, random.nextLong(),
                     512.0)
             this.noise = RandomNoiseNoiseLayer(noise, random.nextLong(), 3)

@@ -71,19 +71,18 @@ class ChunkGeneratorOverworld(random: Random,
             sandstoneLayers[i] = random.nextInt(6).toShort()
         }
         val sandBase = RandomNoiseRandomLayer(random.nextLong(), 6)
-        val sandZoom = RandomNoiseZoomLayer(sandBase, 1024f)
+        val sandZoom = RandomNoiseZoomLayer(sandBase, 1024.0)
         val sandNoise = RandomNoiseSimplexNoiseLayer(sandZoom,
-                random.nextLong(),
-                128.0)
+                random.nextLong(), 128.0)
         sandLayer = RandomNoiseNoiseLayer(sandNoise, random.nextLong(), 2)
         stoneLayers = stream(*stoneTypes).map {
             val stoneBase = RandomNoiseRandomLayer(random.nextLong(), it.size)
             val stoneFilter = RandomNoiseFilterLayer(stoneBase, *it)
-            val stoneZoom = RandomNoiseZoomLayer(stoneFilter, 2048f)
+            val stoneZoom = RandomNoiseZoomLayer(stoneFilter, 2048.0)
             RandomNoiseSimplexNoiseLayer(stoneZoom, random.nextLong(), 1024.0)
         }.toArray { arrayOfNulls<RandomNoiseLayer>(it) }
         val sandstoneBase = RandomNoiseRandomLayer(random.nextLong(), 4)
-        val sandstoneZoom = RandomNoiseZoomLayer(sandstoneBase, 2048f)
+        val sandstoneZoom = RandomNoiseZoomLayer(sandstoneBase, 2048.0)
         val sandstoneNoise = RandomNoiseSimplexNoiseLayer(sandstoneZoom,
                 random.nextLong(), 1024.0)
         sandstoneLayer = RandomNoiseNoiseLayer(sandstoneNoise,

@@ -18,7 +18,7 @@ package org.tobi29.scapes.entity.particle
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.AABB
-import org.tobi29.scapes.engine.utils.math.FastMath
+import org.tobi29.scapes.engine.utils.math.HALF_PI
 import org.tobi29.scapes.engine.utils.math.atan2Fast
 import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f
 import org.tobi29.scapes.engine.utils.math.max
@@ -110,7 +110,7 @@ class ParticleEmitterBlock(system: ParticleSystem, texture: Texture) : ParticleE
                         length(posRenderX, posRenderY))
                 matrix.identity()
                 matrix.translate(posRenderX, posRenderY, posRenderZ)
-                matrix.rotateRad(yaw + FastMath.HALF_PI.toFloat(), 0f, 0f, 1f)
+                matrix.rotateRad(yaw + HALF_PI.toFloat(), 0f, 0f, 1f)
                 matrix.rotateRad(pitch, 1f, 0f, 0f)
                 matrix.rotateRad(yaw + instance.dir, 0f, 1f, 0f)
                 buffer.put(instance.r)

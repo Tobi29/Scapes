@@ -116,9 +116,9 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
         yaw -= (angleDiff(entity.yaw(), yaw.toDouble()) * factorRot).toFloat()
         pos.plus(entity.getCurrentPos().minus(pos.now()).times(factorPos))
         swing += moveSpeed * 2.0 * delta
-        swing %= FastMath.TWO_PI
+        swing %= TWO_PI
         lazyName += delta
-        lazyName %= FastMath.TWO_PI
+        lazyName %= TWO_PI
         moveSpeedRender += (moveSpeed - moveSpeedRender) * factorSpeed
         val newChargeLeft = entity.leftCharge().toDouble()
         val weaponLeft = entity.leftWeapon()
@@ -236,7 +236,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
         if (item.material() === world.air) {
             matrix.rotate((lazyNameDir * 60.0).toFloat(), 0f, 1f, 0f)
             matrix.rotate((-swingDir * 60.0).toFloat(), 1f, 0f, 0f)
-            rot = sinTable(charge * FastMath.PI)
+            rot = sinTable(charge * PI)
             matrix.rotate((charge2 * -20.0).toFloat(), 0f, 0f, 1f)
             matrix.rotate(
                     (rot * 50.0 + charge2 * 90.0 + pitch * charge2).toFloat(),
@@ -250,7 +250,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                 matrix.rotate(swingDir.toFloat() * 10, 1f, 0f, 0f)
             }
             if (item.material().isWeapon(item)) {
-                rot = sinTable(-charge * FastMath.PI)
+                rot = sinTable(-charge * PI)
                 if (rot < 0 && charge > 0.0) {
                     rot /= 4.0
                 }
@@ -262,12 +262,12 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                 matrix.rotate((rot * 10.0 + 40.0 + charge2 * 45.0 +
                         pitch * charge2).toFloat(), 1.0f, 0.0f, 0.0f)
             } else {
-                rot = sinTable(charge * FastMath.PI)
+                rot = sinTable(charge * PI)
                 matrix.rotate((charge2 * -20.0).toFloat(), 0f, 0f, 1f)
                 matrix.rotate((rot * 50 + 40.0 + charge2 * 45 +
                         pitch * charge2).toFloat(), 1f, 0f, 0f)
                 if (charge > -1.5f && charge < -0.5f) {
-                    val center = cosTable(charge * FastMath.PI).toFloat()
+                    val center = cosTable(charge * PI).toFloat()
                     matrix.rotate(center * 30.0f, 0.0f, 1.0f, 0.0f)
                 }
             }
@@ -310,7 +310,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
         if (item.material() === world.air) {
             matrix.rotate((lazyNameDir * -60.0).toFloat(), 0f, 1f, 0f)
             matrix.rotate((swingDir * 60.0).toFloat(), 1f, 0f, 0f)
-            rot = sinTable(charge * FastMath.PI)
+            rot = sinTable(charge * PI)
             matrix.rotate((charge2 * -20.0).toFloat(), 0f, 0f, 1f)
             matrix.rotate(
                     (rot * 50.0 + charge2 * 90.0 + pitch * charge2).toFloat(),
@@ -324,7 +324,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                 matrix.rotate(swingDir.toFloat() * 10, 1f, 0f, 0f)
             }
             if (item.material().isWeapon(item)) {
-                rot = sinTable(-charge * FastMath.PI).toFloat().toDouble()
+                rot = sinTable(-charge * PI).toFloat().toDouble()
                 if (rot < 0.0f && charge > 0.0) {
                     rot /= 4.0
                 }
@@ -336,12 +336,12 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                 matrix.rotate((rot * 10.0 + 40.0 + charge2 * 45.0 +
                         pitch * charge2).toFloat(), 1.0f, 0.0f, 0.0f)
             } else {
-                rot = sinTable(charge * FastMath.PI).toFloat().toDouble()
+                rot = sinTable(charge * PI).toFloat().toDouble()
                 matrix.rotate((charge2 * -20).toFloat(), 0f, 0f, 1f)
                 matrix.rotate((rot * 50 + 40.0 + charge2 * 45 +
                         pitch * charge2).toFloat(), 1f, 0f, 0f)
                 if (charge > -1.5f && charge < -0.5f) {
-                    val center = cosTable(charge * FastMath.PI).toFloat()
+                    val center = cosTable(charge * PI).toFloat()
                     matrix.rotate(center * -30.0f, 0.0f, 1.0f, 0.0f)
                 }
             }

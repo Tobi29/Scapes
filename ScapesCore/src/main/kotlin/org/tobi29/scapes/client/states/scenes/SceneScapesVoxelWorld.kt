@@ -442,14 +442,14 @@ class SceneScapesVoxelWorld(private val world: WorldClient, private val cam: Cam
         init {
             val blurOffset = gaussianBlurOffset(5, 0.01f)
             val blurWeight = gaussianBlurWeight(5) {
-                pow(cos(it * FastMath.PI), 0.1)
+                pow(cos(it * PI), 0.1)
             }
             BLUR_LENGTH = blurOffset.size
             BLUR_OFFSET = join(*blurOffset)
             BLUR_WEIGHT = join(*blurWeight)
             val sampleOffset = gaussianBlurOffset(11, 0.5f)
             val sampleWeight = gaussianBlurWeight(11) {
-                pow(cos(it * FastMath.PI), 0.1)
+                pow(cos(it * PI), 0.1)
             }
             for (i in sampleOffset.indices) {
                 sampleOffset[i] = sampleOffset[i] + 0.5f

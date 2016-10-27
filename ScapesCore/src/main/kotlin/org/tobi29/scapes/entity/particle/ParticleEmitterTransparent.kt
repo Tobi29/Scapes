@@ -92,7 +92,7 @@ class ParticleEmitterTransparent(system: ParticleSystem, texture: Texture) : Par
                         length(posRenderX, posRenderY))
                 matrix.identity()
                 matrix.translate(posRenderX, posRenderY, posRenderZ)
-                matrix.rotateRad(yaw + FastMath.HALF_PI.toFloat(), 0f, 0f, 1f)
+                matrix.rotateRad(yaw + HALF_PI.toFloat(), 0f, 0f, 1f)
                 matrix.rotateRad(pitch, 1f, 0f, 0f)
                 matrix.rotateRad(yaw + instance.dir, 0f, 1f, 0f)
                 val progress = instance.time / instance.timeMax

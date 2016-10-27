@@ -338,7 +338,7 @@ abstract class MobPlayerClientMain protected constructor(world: WorldClient, pos
                                 random.nextFloat() * 2.0f + 1.0f)
                         instance.time = time
                         instance.friction = friction
-                        instance.dir = random.nextFloat() * FastMath.TWO_PI.toFloat()
+                        instance.dir = random.nextFloat() * TWO_PI.toFloat()
                         instance.textureOffset.set(
                                 Vector2d(texture.realX() + tx,
                                         texture.realY() + ty))
