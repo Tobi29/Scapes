@@ -37,6 +37,7 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.model.MobLivingModelHuman
 import org.tobi29.scapes.packets.PacketInteraction
 import org.tobi29.scapes.packets.PacketItemUse
+import org.tobi29.scapes.packets.PacketPlayerJump
 import org.tobi29.scapes.vanilla.basics.gui.GuiPlayerInventory
 
 class MobPlayerClientMainVB(world: WorldClient, pos: Vector3d, speed: Vector3d,
@@ -104,6 +105,7 @@ class MobPlayerClientMainVB(world: WorldClient, pos: Vector3d, speed: Vector3d,
                 } else if (isOnGround) {
                     speed.setZ(5.1)
                     isOnGround = false
+                    connection().send(PacketPlayerJump())
                 }
             }
             val camera = controller.camera(delta)

@@ -120,6 +120,8 @@ class GameRegistry(private val idStorage: IDStorage) {
         pr.reg({ PacketInventoryInteraction() },
                 PacketInventoryInteraction::class.java,
                 "core.packet.InventoryInteraction")
+        pr.reg({ PacketPlayerJump() }, PacketPlayerJump::class.java,
+                "core.packet.PlayerJump")
         pr.reg({ PacketOpenGui() }, PacketOpenGui::class.java,
                 "core.packet.OpenGui")
         pr.reg({ PacketCloseGui() }, PacketCloseGui::class.java,
