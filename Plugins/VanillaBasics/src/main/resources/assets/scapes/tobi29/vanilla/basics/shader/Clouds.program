@@ -6,21 +6,6 @@ uniform 6 Vector2 uniform_CamPos;
 
 const Vector4 pParam = vector4( 17.0*17.0, 34.0, 1.0, 7.0);
 
-fun Float permute(Float x0,Vector3 p) {
-  Float x1 = mod(x0 * p.y, p.x);
-  return(floor(  mod( (x1 + p.z) *x0, p.x )));
-}
-
-fun Vector2 permute(Vector2 x0,Vector3 p) {
-  Vector2 x1 = mod(x0 * p.y, p.x);
-  return(floor(  mod( (x1 + p.z) *x0, p.x )));
-}
-
-fun Vector3 permute(Vector3 x0,Vector3 p) {
-  Vector3 x1 = mod(x0 * p.y, p.x);
-  return(floor(  mod( (x1 + p.z) *x0, p.x )));
-}
-
 fun Vector4 permute(Vector4 x0,Vector3 p) {
   Vector4 x1 = mod(x0 * p.y, p.x);
   return(floor(  mod( (x1 + p.z) *x0, p.x )));

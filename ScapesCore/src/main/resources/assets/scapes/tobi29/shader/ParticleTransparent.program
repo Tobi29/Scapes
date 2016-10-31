@@ -42,7 +42,7 @@ shader fragment(Vector4 varying_Color,
     out_Color = texture(uniform_Texture, varying_Texture);
     out_Color.a *= varying_Color.a;
     if (out_Color.a <= 0.01) {
-        discard;
+        discard();
     }
     Float fog = min(varying_Depth / uniform_FogEnd, 1.0);
     fog *= fog;

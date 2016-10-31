@@ -16,7 +16,7 @@ shader fragment(Vector4 varying_Color,
     relative *= relative;
     Float a = max(1.0 - (relative.x + relative.y) * 4.0, 0.0);
     if (a <= 0.01) {
-        discard;
+        discard();
     }
     a *= a;
     a *= a;

@@ -92,7 +92,7 @@ shader vertex(0 Vector4 attribute_Position,
     Vector3 normal = uniform_NormalMatrix * attribute_Normal;
     Float light = (mix(dot(normal, BLOCKLIGHT_NORMAL), dot(normal, uniform_SunlightNormal), lightSunLevel) + 1.2) / 2.2;
     varying_Color.rgb *= light;
-    gl_Position = uniform_ModelViewProjectionMatrix * vertex;
+    out_Position = uniform_ModelViewProjectionMatrix * vertex;
 }
 
 shader fragment(Vector4 varying_Color,
@@ -101,12 +101,12 @@ shader fragment(Vector4 varying_Color,
     out_Color = texture(uniform_Texture, varying_Texture);
     out_Color.a *= varying_Color.a;
     if (out_Color.a <= 0.01) {
-        discard;
+        discard();
     }
     Float fog = min(varying_Depth / uniform_FogEnd, 1.0);
     Float fogBackground = mix(10.0, 0.0, fog);
     if (fogBackground <= 0.01) {
-        discard;
+        discard();
     }
     fog *= fog;
     out_Color.rgb = mix(out_Color.rgb * varying_Color.rgb, uniform_FogColor, fog);
