@@ -18,7 +18,6 @@ package org.tobi29.scapes.connection
 
 import mu.KLogging
 import org.tobi29.scapes.engine.server.Connection
-import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.server.PacketBundleChannel
 import java.io.IOException

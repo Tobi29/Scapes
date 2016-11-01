@@ -17,7 +17,6 @@
 package org.tobi29.scapes.chunk.terrain.infinite
 
 import java8.util.stream.Stream
-import org.tobi29.scapes.engine.utils.collect
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.notNull
 import org.tobi29.scapes.engine.utils.stream

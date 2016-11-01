@@ -22,7 +22,6 @@ import org.tobi29.scapes.connection.ConnectionType
 import org.tobi29.scapes.connection.GetInfoConnection
 import org.tobi29.scapes.connection.ServerInfo
 import org.tobi29.scapes.engine.server.Connection
-import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.server.PacketBundleChannel
 import org.tobi29.scapes.engine.utils.BufferCreator

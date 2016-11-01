@@ -20,7 +20,6 @@ import org.tobi29.scapes.client.connection.LocalClientConnection
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.server.ConnectionCloseException
-import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.utils.BufferCreator
 import org.tobi29.scapes.engine.utils.graphics.Image
@@ -29,7 +28,6 @@ import org.tobi29.scapes.engine.utils.io.Algorithm
 import org.tobi29.scapes.engine.utils.io.checksum
 import org.tobi29.scapes.engine.utils.io.filesystem.exists
 import org.tobi29.scapes.engine.utils.io.filesystem.read
-import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.entity.skin.ServerSkin
 import org.tobi29.scapes.packets.PacketClient
 import org.tobi29.scapes.packets.PacketDisconnect
