@@ -16,8 +16,10 @@
 
 package org.tobi29.scapes.block
 
+import java8.util.stream.Collectors
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import java.util.*
+import org.tobi29.scapes.engine.utils.io.tag.getListStructure
+import org.tobi29.scapes.engine.utils.stream
 
 class Inventory(private val registry: GameRegistry, size: Int) {
     private val items: Array<ItemStack>
@@ -105,20 +107,16 @@ class Inventory(private val registry: GameRegistry, size: Int) {
     }
 
     fun load(tag: TagStructure) {
-        tag.getList("Items")?.let { list ->
-            for (i in list.indices) {
-                items[i].load(list[i])
-            }
+        var i = 0
+        tag.getListStructure("Items") { element ->
+            items[i++].load(element)
         }
     }
 
     fun save(): TagStructure {
-        val tag = TagStructure()
-        val list = ArrayList<TagStructure>()
-        for (i in items.indices) {
-            list.add(i, items[i].save())
-        }
-        tag.setList("Items", list)
-        return tag
+        val structure = TagStructure()
+        structure.setList("Items", stream(*items).map { it.save() }.collect(
+                Collectors.toList<Any>()))
+        return structure
     }
 }

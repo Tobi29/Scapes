@@ -214,32 +214,28 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
         }
         initHeightMap()
         val oldTick = tagStructure.getLong("Tick") ?: 0
-        tagStructure.getList("Entities")?.let {
-            for (tag in it) {
-                EntityServer.make(tag.getInt("ID"),
-                        terrain2.world)?.let { entity ->
-                    tag.getUUID("UUID")?.let { entity.setEntityID(it) }
-                    tag.getStructure("Data")?.let { entity.read(it) }
-                    addEntity(entity)
-                    val newTick = terrain2.world.tick
-                    if (newTick > oldTick) {
-                        entity.tickSkip(oldTick, newTick)
-                    }
+        tagStructure.getListStructure("Entities") { tag ->
+            EntityServer.make(tag.getInt("ID"),
+                    terrain2.world)?.let { entity ->
+                tag.getUUID("UUID")?.let { entity.setEntityID(it) }
+                tag.getStructure("Data")?.let { entity.read(it) }
+                addEntity(entity)
+                val newTick = terrain2.world.tick
+                if (newTick > oldTick) {
+                    entity.tickSkip(oldTick, newTick)
                 }
             }
         }
-        tagStructure.getList("Updates")?.let {
-            for (tag in it) {
-                var xy = tag.getInt("PosXY") ?: 0
-                if (xy < 0) {
-                    xy += 256
-                }
-                addDelayedUpdate(Update.make(terrain2.world.plugins.registry(),
-                        (xy and 0xF) + posBlock.x,
-                        (xy shr 4) + posBlock.y,
-                        tag.getInt("PosZ") ?: 0, tag.getDouble("Delay") ?: 0.0,
-                        tag.getInt("ID") ?: 0))
+        tagStructure.getListStructure("Updates") { tag ->
+            var xy = tag.getInt("PosXY") ?: 0
+            if (xy < 0) {
+                xy += 256
             }
+            addDelayedUpdate(Update.make(terrain2.world.plugins.registry(),
+                    (xy and 0xF) + posBlock.x,
+                    (xy shr 4) + posBlock.y,
+                    tag.getInt("PosZ") ?: 0, tag.getDouble("Delay") ?: 0.0,
+                    tag.getInt("ID") ?: 0))
         }
         if (tagStructure.getBoolean("Populated") ?: false) {
             state = TerrainInfiniteChunk.State.POPULATED

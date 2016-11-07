@@ -16,6 +16,7 @@
 package org.tobi29.scapes.chunk.data
 
 import java8.util.stream.Collectors
+import org.tobi29.scapes.engine.utils.filterMap
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import org.tobi29.scapes.engine.utils.stream
 import java.util.*
@@ -106,10 +107,11 @@ class ChunkData(private val xSectionBits: Int,
         return tagStructures
     }
 
-    fun load(tags: List<TagStructure>) {
+    fun load(tags: List<Any>) {
+        val iterator = tags.stream().filterMap<TagStructure>().iterator()
         for (i in data.indices) {
-            if (i < tags.size) {
-                data[i].load(tags[i])
+            if (iterator.hasNext()) {
+                data[i].load(iterator.next())
             } else {
                 data[i].load(null)
             }

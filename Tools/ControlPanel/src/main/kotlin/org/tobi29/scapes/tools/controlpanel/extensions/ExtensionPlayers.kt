@@ -6,6 +6,8 @@ import org.eclipse.swt.widgets.Group
 import org.tobi29.scapes.engine.server.ControlPanelProtocol
 import org.tobi29.scapes.engine.swt.util.framework.Application
 import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
+import org.tobi29.scapes.engine.utils.filterMap
+import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import org.tobi29.scapes.engine.utils.io.tag.structure
 import org.tobi29.scapes.engine.utils.notNull
 import org.tobi29.scapes.engine.utils.stream
@@ -27,7 +29,7 @@ class ExtensionPlayers(application: Application,
                     return@accessAsync
                 }
                 payload.getList("Players")?.let {
-                    players.items = it.stream().map {
+                    players.items = it.stream().filterMap<TagStructure>().map {
                         it.getString("Name")
                     }.notNull().toTypedArray()
                 }

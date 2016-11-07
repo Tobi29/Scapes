@@ -11,8 +11,8 @@ import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.swt.util.framework.Document
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
+import org.tobi29.scapes.engine.utils.filterMap
 import org.tobi29.scapes.engine.utils.io.tag.structure
-import org.tobi29.scapes.engine.utils.notNull
 import org.tobi29.scapes.engine.utils.stream
 import org.tobi29.scapes.engine.utils.toTypedArray
 
@@ -49,9 +49,7 @@ class ConnectDocument(private val address: RemoteAddress,
                 connection.addCommand("Commands-Send") { payload ->
                     application.accessAsync(document) { composite ->
                         payload.getList("Commands")?.let {
-                            val commands = it.stream().map {
-                                it.getString("Command")
-                            }.notNull().toTypedArray()
+                            val commands = it.stream().filterMap<String>().toTypedArray()
                             document = ControlPanelDocument(address,
                                     connection, commands)
                             application.replaceTab(composite, document)

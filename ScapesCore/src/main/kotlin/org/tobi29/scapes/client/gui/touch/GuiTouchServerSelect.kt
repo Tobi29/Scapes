@@ -30,6 +30,7 @@ import org.tobi29.scapes.engine.server.RemoteAddress
 import org.tobi29.scapes.engine.server.SSLProvider
 import org.tobi29.scapes.engine.server.addOutConnection
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.getListStructure
 import java.util.*
 
 class GuiTouchServerSelect(state: GameState, previous: Gui, style: GuiStyle) : GuiTouchMenuDouble(
@@ -48,9 +49,7 @@ class GuiTouchServerSelect(state: GameState, previous: Gui, style: GuiStyle) : G
         }
 
         val scapesTag = state.engine.tagStructure.structure("Scapes")
-        if (scapesTag.has("Servers")) {
-            scapesTag.getList("Servers")?.let { servers.addAll(it) }
-        }
+        scapesTag.getListStructure("Servers") { servers.add(it) }
         updateServers()
     }
 

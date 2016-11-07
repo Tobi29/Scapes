@@ -22,10 +22,7 @@ import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.server.ControlPanelProtocol
 import org.tobi29.scapes.engine.server.PacketBundleChannel
 import org.tobi29.scapes.engine.utils.CPUUtil
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.setDouble
-import org.tobi29.scapes.engine.utils.io.tag.setLong
-import org.tobi29.scapes.engine.utils.io.tag.structure
+import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.replace
 import org.tobi29.scapes.server.command.Executor
 import org.tobi29.scapes.server.connection.ServerConnection
@@ -35,7 +32,8 @@ import javax.crypto.Cipher
 class ControlPanel(worker: ConnectionWorker,
                    channel: PacketBundleChannel,
                    private val connection: ServerConnection,
-                   authentication: (String, Int, ByteArray) -> Cipher?) : ControlPanelProtocol(worker,
+                   authentication: (String, Int, ByteArray) -> Cipher?) : ControlPanelProtocol(
+        worker,
         channel, connection.events, authentication), Executor {
 
 
@@ -64,13 +62,11 @@ class ControlPanel(worker: ConnectionWorker,
                                     output.toString()))
                 }
             }
-            payload.getList("Commands")?.forEach {
-                payload.getString("Command")?.let { command ->
-                    connection.server.commandRegistry()[command, this].execute().forEach { output ->
-                        events.fireLocal(
-                                MessageEvent(this, MessageLevel.FEEDBACK_ERROR,
-                                        output.toString()))
-                    }
+            payload.getListString("Commands") { command ->
+                connection.server.commandRegistry()[command, this].execute().forEach { output ->
+                    events.fireLocal(
+                            MessageEvent(this, MessageLevel.FEEDBACK_ERROR,
+                                    output.toString()))
                 }
             }
         }
@@ -89,8 +85,11 @@ class ControlPanel(worker: ConnectionWorker,
             val list = connection.players().map { it.name() }.map {
                 structure { setString("Name", it) }
             }.collect(Collectors.toList<TagStructure>())
-            send("Players-List",
-                    structure { setList("Players", list) })
+            send("Players-List", structure {
+                setList("Players") {
+
+                }
+            })
         }
     }
 
