@@ -46,6 +46,7 @@ import org.tobi29.scapes.server.format.WorldFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ThreadLocalRandom
+import java.util.concurrent.atomic.AtomicInteger
 
 class WorldServer(worldFormat: WorldFormat, val id: String, seed: Long,
                   val connection: ServerConnection, taskExecutor: TaskExecutor,
@@ -64,6 +65,10 @@ class WorldServer(worldFormat: WorldFormat, val id: String, seed: Long,
     private val players = ConcurrentHashMap<String, MobPlayerServer>()
     private val generator: ChunkGenerator
     private var joiner: Joiner? = null
+    private val entityCounts: Map<CreatureType, AtomicInteger> = EnumMap<CreatureType, AtomicInteger>(
+            CreatureType::class.java).apply {
+        CreatureType.values().forEach { put(it, AtomicInteger()) }
+    }
 
     init {
         environment = environmentSupplier(this)
@@ -148,10 +153,16 @@ class WorldServer(worldFormat: WorldFormat, val id: String, seed: Long,
 
     override fun entityAdded(entity: EntityServer) {
         initEntity(entity)
+        if (entity is MobLivingServer) {
+            entityCounts[entity.creatureType()]?.andIncrement
+        }
         send(PacketEntityAdd(entity, plugins.registry()))
     }
 
     override fun entityRemoved(entity: EntityServer) {
+        if (entity is MobLivingServer) {
+            entityCounts[entity.creatureType()]?.andDecrement
+        }
         send(PacketEntityDespawn(entity))
     }
 
@@ -185,14 +196,7 @@ class WorldServer(worldFormat: WorldFormat, val id: String, seed: Long,
     }
 
     fun mobs(creatureType: CreatureType): Int {
-        // TODO: Optimize: Keep track using add and remove
-        var count = 0
-        getEntities { stream ->
-            count += stream.filter(
-                    { entity -> entity is MobLivingServer }).filter(
-                    { entity -> (entity as MobLivingServer).creatureType() === creatureType }).count().toInt()
-        }
-        return count
+        return entityCounts[creatureType]?.get() ?: 0
     }
 
     private fun update(delta: Double) {
