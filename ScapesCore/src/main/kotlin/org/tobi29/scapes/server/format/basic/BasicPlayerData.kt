@@ -51,7 +51,7 @@ class BasicPlayerData(private val path: FilePath) : PlayerData {
                                     permissions: Int) {
         save(structure {
             setStructure("Entity", entity.write(false))
-            setString("World", entity.world.id())
+            setString("World", entity.world.id)
             setInt("Permissions", permissions)
         }, id)
     }

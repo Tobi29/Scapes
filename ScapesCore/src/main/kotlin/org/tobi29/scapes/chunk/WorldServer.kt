@@ -17,8 +17,6 @@ package org.tobi29.scapes.chunk
 
 import java8.util.stream.Stream
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.chunk.generator.ChunkGenerator
-import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.utils.Sync
@@ -48,8 +46,11 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.atomic.AtomicInteger
 
-class WorldServer(worldFormat: WorldFormat, val id: String, seed: Long,
-                  val connection: ServerConnection, taskExecutor: TaskExecutor,
+class WorldServer(worldFormat: WorldFormat,
+                  val id: String,
+                  seed: Long,
+                  val connection: ServerConnection,
+                  taskExecutor: TaskExecutor,
                   terrainSupplier: (WorldServer) -> TerrainServer,
                   environmentSupplier: (WorldServer) -> EnvironmentServer) : World<EntityServer>(
         worldFormat.plugins(), taskExecutor, worldFormat.plugins().registry(),
@@ -58,12 +59,10 @@ class WorldServer(worldFormat: WorldFormat, val id: String, seed: Long,
             ConcurrentHashMap<(EntityServer) -> Unit, Boolean>())
     private val spawners = Collections.newSetFromMap(
             ConcurrentHashMap<MobSpawner, Boolean>())
-    private val populators = ArrayList<ChunkPopulator>()
     val terrain: TerrainServer
     val environment: EnvironmentServer
     private val sync = Sync(20.0, 5000000000L, true, "Server-Update")
     private val players = ConcurrentHashMap<String, MobPlayerServer>()
-    private val generator: ChunkGenerator
     private var joiner: Joiner? = null
     private val entityCounts: Map<CreatureType, AtomicInteger> = EnumMap<CreatureType, AtomicInteger>(
             CreatureType::class.java).apply {
@@ -73,8 +72,6 @@ class WorldServer(worldFormat: WorldFormat, val id: String, seed: Long,
     init {
         environment = environmentSupplier(this)
         terrain = terrainSupplier(this)
-        generator = environment.generator()
-        populators.add(environment.populator())
         worldFormat.plugins().plugins().forEach { plugin ->
             plugin.worldInit(this)
         }
@@ -292,26 +289,6 @@ class WorldServer(worldFormat: WorldFormat, val id: String, seed: Long,
         synchronized(spawners) {
             spawners.add(spawner)
         }
-    }
-
-    fun environment(): EnvironmentServer {
-        return environment
-    }
-
-    fun id(): String {
-        return id
-    }
-
-    fun addPopulator(populator: ChunkPopulator) {
-        populators.add(populator)
-    }
-
-    fun generator(): ChunkGenerator {
-        return generator
-    }
-
-    fun populators(): Stream<ChunkPopulator> {
-        return populators.stream()
     }
 
     fun dispose() {

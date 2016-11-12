@@ -95,7 +95,6 @@ open class SQLWorldFormat(protected val path: FilePath, protected val database: 
         plugins = createPlugins()
     }
 
-    @Throws(IOException::class)
     open protected fun createPlugins(): Plugins {
         return Plugins(pluginFiles(), idStorage)
     }
@@ -116,8 +115,7 @@ open class SQLWorldFormat(protected val path: FilePath, protected val database: 
         return plugins
     }
 
-    @Synchronized @Throws(IOException::class)
-    override fun registerWorld(server: ScapesServer,
+    @Synchronized override fun registerWorld(server: ScapesServer,
                                environmentSupplier: Function1<WorldServer, EnvironmentServer>,
                                name: String,
                                seed: Long): WorldServer {
@@ -128,7 +126,9 @@ open class SQLWorldFormat(protected val path: FilePath, protected val database: 
         val world = WorldServer(this, name, seed, server.connection,
                 TaskExecutor(server.taskExecutor(), name),
                 {
-                    TerrainInfiniteServer(it, 512, format, it.air)
+                    TerrainInfiniteServer(it, 512, format,
+                            it.environment.generator(),
+                            arrayOf(it.environment.populator()), it.air)
                 }, environmentSupplier)
         val rows = getWorldData.run(name)
         if (!rows.isEmpty()) {
@@ -155,7 +155,7 @@ open class SQLWorldFormat(protected val path: FilePath, protected val database: 
             stream.buffer().get(array)
             stream.buffer().clear()
             database.replace("Worlds", arrayOf("World", "Data"),
-                    arrayOf<Any>(world.id(), array))
+                    arrayOf<Any>(world.id, array))
         } catch (e: IOException) {
             logger.error { "Failed to save world info: $e" }
         }
@@ -174,8 +174,7 @@ open class SQLWorldFormat(protected val path: FilePath, protected val database: 
         return true
     }
 
-    @Synchronized @Throws(IOException::class)
-    override fun dispose() {
+    @Synchronized override fun dispose() {
         plugins.dispose()
         TagStructureBinary.write(stream, idTagStructure, 1.toByte())
         stream.buffer().flip()
@@ -186,7 +185,6 @@ open class SQLWorldFormat(protected val path: FilePath, protected val database: 
                 arrayOf<Any>("IDs", array))
     }
 
-    @Throws(IOException::class)
     open protected fun pluginFiles(): List<PluginFile> {
         val path = this.path.resolve("plugins")
         val files = listRecursive(path,
@@ -201,7 +199,6 @@ open class SQLWorldFormat(protected val path: FilePath, protected val database: 
     companion object : KLogging() {
         private val SPACE = Pattern.compile(" ")
 
-        @Throws(IOException::class)
         fun checkDatabase(database: SQLDatabase) {
             database.createTable("Data", "Name",
                     SQLColumn("Name", SQLType.VARCHAR, "255"),
@@ -219,7 +216,6 @@ open class SQLWorldFormat(protected val path: FilePath, protected val database: 
                     SQLColumn("Data", SQLType.LONGBLOB))
         }
 
-        @Throws(IOException::class)
         fun initDatabase(database: SQLDatabase,
                          seed: Long) {
             checkDatabase(database)

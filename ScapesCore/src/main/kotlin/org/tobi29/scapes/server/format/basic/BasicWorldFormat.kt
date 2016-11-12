@@ -36,8 +36,7 @@ import java.security.PrivilegedAction
 import java.security.PrivilegedActionException
 import java.util.*
 
-class BasicWorldFormat @Throws(IOException::class)
-constructor(private val path: FilePath, tagStructure: TagStructure) : WorldFormat {
+class BasicWorldFormat(private val path: FilePath, tagStructure: TagStructure) : WorldFormat {
     private val regionPath: FilePath
     private val idStorage: IDStorage
     private val plugins: Plugins
@@ -57,7 +56,6 @@ constructor(private val path: FilePath, tagStructure: TagStructure) : WorldForma
         plugins = createPlugins()
     }
 
-    @Throws(IOException::class)
     private fun createPlugins(): Plugins {
         return Plugins(pluginFiles(), idStorage)
     }
@@ -78,12 +76,10 @@ constructor(private val path: FilePath, tagStructure: TagStructure) : WorldForma
         return plugins
     }
 
-    @SuppressWarnings("CallToNativeMethodWhileLocked")
-    @Synchronized @Throws(IOException::class)
-    override fun registerWorld(server: ScapesServer,
-                               environmentSupplier: Function1<WorldServer, EnvironmentServer>,
-                               name: String,
-                               seed: Long): WorldServer {
+    @Synchronized override fun registerWorld(server: ScapesServer,
+                                             environmentSupplier: Function1<WorldServer, EnvironmentServer>,
+                                             name: String,
+                                             seed: Long): WorldServer {
         val format = AccessController.doPrivileged(
                 PrivilegedAction {
                     try {
@@ -100,17 +96,18 @@ constructor(private val path: FilePath, tagStructure: TagStructure) : WorldForma
         val world = WorldServer(this, name, seed, server.connection,
                 TaskExecutor(server.taskExecutor(), name),
                 {
-                    TerrainInfiniteServer(it, 512, format, it.air)
+                    TerrainInfiniteServer(it, 512, format,
+                            it.environment.generator(),
+                            arrayOf(it.environment.populator()), it.air)
                 }, environmentSupplier)
         worldsTagStructure.getStructure(name)?.let { world.read(it) }
         return world
     }
 
     @Synchronized override fun removeWorld(world: WorldServer) {
-        worldsTagStructure.setStructure(world.id(), world.write())
+        worldsTagStructure.setStructure(world.id, world.write())
     }
 
-    @SuppressWarnings("ReturnOfNull", "CallToNativeMethodWhileLocked")
     @Synchronized override fun deleteWorld(name: String): Boolean {
         val worldDirectory = regionPath.resolve(name.toLowerCase())
         if (exists(worldDirectory)) {
@@ -127,12 +124,10 @@ constructor(private val path: FilePath, tagStructure: TagStructure) : WorldForma
         return true
     }
 
-    @Throws(IOException::class)
     override fun dispose() {
         plugins.dispose()
     }
 
-    @Throws(IOException::class)
     private fun pluginFiles(): List<PluginFile> {
         val path = this.path.resolve("plugins")
         val files = listRecursive(path,

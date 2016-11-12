@@ -24,8 +24,10 @@ import org.tobi29.scapes.entity.Entity
 import org.tobi29.scapes.entity.EntityContainer
 import org.tobi29.scapes.plugins.Plugins
 
-abstract class World<E : Entity> protected constructor(val plugins: Plugins, val taskExecutor: TaskExecutor,
-                                                       val registry: GameRegistry, val seed: Long) : EntityContainer<E> {
+abstract class World<E : Entity>(val plugins: Plugins,
+                                 val taskExecutor: TaskExecutor,
+                                 val registry: GameRegistry,
+                                 val seed: Long) : EntityContainer<E> {
     val air: BlockType
     protected var thread: Thread? = null
     var spawn = Vector3i.ZERO

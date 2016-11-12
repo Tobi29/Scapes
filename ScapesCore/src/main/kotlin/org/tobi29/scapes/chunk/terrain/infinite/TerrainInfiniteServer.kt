@@ -22,6 +22,8 @@ import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.Update
 import org.tobi29.scapes.chunk.MobSpawner
 import org.tobi29.scapes.chunk.WorldServer
+import org.tobi29.scapes.chunk.generator.ChunkGenerator
+import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.generator.GeneratorOutput
 import org.tobi29.scapes.chunk.terrain.TerrainChunk
 import org.tobi29.scapes.chunk.terrain.TerrainServer
@@ -41,8 +43,11 @@ import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ThreadLocalRandom
 
-class TerrainInfiniteServer(override val world: WorldServer, zSize: Int,
+class TerrainInfiniteServer(override val world: WorldServer,
+                            zSize: Int,
                             private val format: TerrainInfiniteFormat,
+                            override val generator: ChunkGenerator,
+                            internal val populators: Array<ChunkPopulator>,
                             air: BlockType) : TerrainInfinite<EntityServer>(
         zSize, world.taskExecutor, air, air,
         world.registry.blocks()), TerrainServer.TerrainMutable {
@@ -235,7 +240,7 @@ class TerrainInfiniteServer(override val world: WorldServer, zSize: Int,
                             var time = System.currentTimeMillis()
                             val chunk2 = TerrainInfiniteChunkServer(
                                     Vector2i(x, y), this, zSize,
-                                    world.generator(), generatorOutput)
+                                    generator, generatorOutput)
                             time = System.currentTimeMillis() - time
                             logger.debug { "Chunk generated in ${time}ms" }
                             chunkManager.add(chunk2)

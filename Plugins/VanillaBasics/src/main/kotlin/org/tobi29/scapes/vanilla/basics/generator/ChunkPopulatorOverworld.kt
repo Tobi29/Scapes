@@ -57,7 +57,7 @@ class ChunkPopulatorOverworld(world: WorldServer, private val plugin: VanillaBas
         hash = 31 * hash + x
         hash = 31 * hash + y
         val random = Random(hash + seedInt)
-        val gen = terrain.world.generator() as ChunkGeneratorOverworld
+        val gen = terrain.generator as ChunkGeneratorOverworld
         val materials = plugin.materials
         val passes = dx * dy / 64
         for (i in 0..passes - 1) {

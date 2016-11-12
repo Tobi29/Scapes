@@ -19,6 +19,7 @@ package org.tobi29.scapes.chunk.terrain.infinite
 import java8.util.stream.Stream
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.block.BlockType
+import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.lighting.LightingEngine
 import org.tobi29.scapes.chunk.lighting.LightingEngineThreaded
 import org.tobi29.scapes.chunk.terrain.TerrainEntity

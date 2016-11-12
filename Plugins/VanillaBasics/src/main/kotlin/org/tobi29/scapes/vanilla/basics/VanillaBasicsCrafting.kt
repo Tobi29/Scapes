@@ -62,9 +62,9 @@ private fun VanillaBasics.registerRecipesBasics(registry: GameRegistry,
         }
     }
 
-    val hammer = Arrays.asList(materials.flintHammer.example(1),
+    val hammer = listOf(materials.flintHammer.example(1),
             materials.metalHammer.example(1))
-    val saw = Arrays.asList(materials.flintSaw.example(1),
+    val saw = listOf(materials.flintSaw.example(1),
             materials.metalSaw.example(1))
     val plank = treeRegistry.values().stream().notNull().map {
         ItemStack(materials.wood, it.data(registry))
@@ -185,7 +185,7 @@ private fun VanillaBasics.registerRecipesStone(registry: GameRegistry) {
             result = swordHead
         }
         recipe("vanilla.basics.crafting.stone.BreakTool") {
-            ingredients.add(Arrays.asList(hoe, hoeHead, hammer, hammerHead, saw,
+            ingredients.add(listOf(hoe, hoeHead, hammer, hammerHead, saw,
                     sawHead, axe,
                     axeHead, shovel, shovelHead, pickaxe, pickaxeHead,
                     sword, swordHead))
@@ -239,9 +239,9 @@ private fun VanillaBasics.registerRecipesFood(registry: GameRegistry,
         it.data(registry)
     }.mapToObj { ItemStack(materials.cobblestone, it, 2) }.collect(
             Collectors.toList<ItemStack>())
-    val pickaxe = Arrays.asList(materials.flintPickaxe.example(1),
+    val pickaxe = listOf(materials.flintPickaxe.example(1),
             materials.metalPickaxe.example(1))
-    val hammer = Arrays.asList(materials.flintHammer.example(1),
+    val hammer = listOf(materials.flintHammer.example(1),
             materials.metalHammer.example(1))
 
     crafting(recipeType) {

@@ -98,7 +98,7 @@ class BlockCrop(materials: VanillaMaterial,
         val dropData = (data / 8).toShort()
         if (data % 8 == 7) {
             val random = ThreadLocalRandom.current()
-            return Arrays.asList(
+            return listOf(
                     ItemStack(materials.cropDrop, dropData.toInt()),
                     ItemStack(materials.seed, dropData.toInt(),
                             random.nextInt(2) + 1))

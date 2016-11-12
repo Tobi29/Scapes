@@ -52,7 +52,7 @@ class BlockOreGold(materials: VanillaMaterial,
                        data: Int): List<ItemStack> {
         if ("Pickaxe" == item.material().toolType(item) && canBeBroken(
                 item.material().toolLevel(item), data)) {
-            return Arrays.asList(
+            return listOf(
                     ItemStack(materials.oreChunk, 7.toShort().toInt()),
                     ItemStack(materials.stoneRock, data,
                             Random().nextInt(4) + 8))

@@ -322,7 +322,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
     fun populate() {
         state = TerrainInfiniteChunk.State.POPULATING
         terrain2.queue({ handle ->
-            terrain2.world.populators().forEach { pop ->
+            terrain2.populators.forEach { pop ->
                 pop.populate(handle, this)
             }
             updateSunLight()
@@ -337,7 +337,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
 
     fun finish() {
         terrain2.queue({ handle ->
-            terrain2.world.populators().forEach { pop ->
+            terrain2.populators.forEach { pop ->
                 pop.load(handle, this)
             }
             state = TerrainInfiniteChunk.State.BORDER

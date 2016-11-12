@@ -19,11 +19,13 @@ import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.Update
 import org.tobi29.scapes.chunk.MobSpawner
 import org.tobi29.scapes.chunk.WorldServer
+import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 
 interface TerrainServer : TerrainEntity<EntityServer> {
     val world: WorldServer
+    val generator: ChunkGenerator
 
     fun update(delta: Double,
                spawners: Collection<MobSpawner>)

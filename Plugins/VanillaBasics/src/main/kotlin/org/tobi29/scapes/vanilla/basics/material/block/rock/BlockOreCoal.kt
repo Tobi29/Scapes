@@ -52,7 +52,7 @@ class BlockOreCoal(materials: VanillaMaterial,
                        data: Int): List<ItemStack> {
         if ("Pickaxe" == item.material().toolType(item) && canBeBroken(
                 item.material().toolLevel(item), data)) {
-            return Arrays.asList(ItemStack(materials.coal, 0.toShort().toInt()),
+            return listOf(ItemStack(materials.coal, 0.toShort().toInt()),
                     ItemStack(materials.stoneRock, data,
                             Random().nextInt(4) + 8))
         }

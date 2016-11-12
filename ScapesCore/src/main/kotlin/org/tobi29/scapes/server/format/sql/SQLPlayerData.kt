@@ -79,7 +79,7 @@ class SQLPlayerData(private val database: SQLDatabase) : PlayerData {
             stream.buffer().clear()
             database.replace("Players",
                     arrayOf("ID", "World", "Permissions", "Entity"),
-                    arrayOf<Any>(id, world.id(), permissions, array))
+                    arrayOf<Any>(id, world.id, permissions, array))
         } catch (e: IOException) {
             logger.error { "Failed to save player: $e" }
         }
