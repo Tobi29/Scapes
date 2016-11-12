@@ -1,5 +1,6 @@
 package org.tobi29.scapes.tools.controlpanel
 
+import java8.util.stream.Collectors
 import org.eclipse.swt.layout.FillLayout
 import org.eclipse.swt.widgets.Composite
 import org.tobi29.scapes.engine.server.ControlPanelProtocol
@@ -8,10 +9,10 @@ import org.tobi29.scapes.engine.swt.util.Shortcut
 import org.tobi29.scapes.engine.swt.util.framework.Document
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
+import org.tobi29.scapes.engine.utils.stream
 import org.tobi29.scapes.tools.controlpanel.extensions.*
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
 import java.util.*
-import java.util.stream.Collectors
 
 class ControlPanelDocument(address: RemoteAddress,
                            private val connection: ControlPanelProtocol,
@@ -23,8 +24,7 @@ class ControlPanelDocument(address: RemoteAddress,
     override val shortTitle = address.address
 
     init {
-        this.commands = Arrays.stream(commands).collect(
-                Collectors.toSet<String>())
+        this.commands = stream(*commands).collect(Collectors.toSet<String>())
     }
 
     override fun forceClose() {
