@@ -1,11 +1,20 @@
-task wrapper(type: Wrapper) {
-    gradleVersion = "3.0"
-    distributionUrl =
-            "https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
-}
-
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
+/*
+ * Copyright 2012-2016 Tobi29
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+apply plugin: "com.android.application"
+apply plugin: "kotlin-android"
 
 repositories {
     jcenter()
@@ -62,7 +71,7 @@ dependencies {
     compile project(":ScapesEngineAndroid:AndroidSQLite")
     compile project(":ScapesEngineAndroid:AndroidSSLProvider")
     compile project(":ScapesEngineAndroid:AndroidSysTrace")
-    compile "org.jetbrains.kotlin:kotlin-stdlib:1.0.4"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:1.0.5"
     compile "net.sourceforge.streamsupport:streamsupport:1.5.2"
     compile "org.slf4j:slf4j-android:1.7.21"
 
@@ -76,6 +85,6 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:2.2.0-beta3'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.4"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.5"
     }
 }
