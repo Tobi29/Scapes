@@ -19,6 +19,8 @@ package org.tobi29.scapes.vanilla.basics.generator
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldSkybox
 import org.tobi29.scapes.engine.graphics.*
+import org.tobi29.scapes.engine.gui.GuiComponentGroup
+import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
 import org.tobi29.scapes.engine.sound.StaticAudio
 import org.tobi29.scapes.engine.utils.graphics.Cam
@@ -280,11 +282,19 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                 "sound.Weather", 1.0f, 0.0f)
         val player = world.player
         if (player is MobPlayerClientMainVB) {
-            player.game.hud().add(8.0, 490.0, 500.0, 50.0) {
+            val hud = player.game.hud().addHori(0.0, 0.0, -1.0, -1.0,
+                    ::GuiComponentGroup)
+            hud.spacer()
+            val hudSlab = hud.addVert(0.0, 0.0, -1.0, 76.0,
+                    ::GuiComponentGroupSlab)
+            val hudBar = hudSlab.addHori(0.0, 0.0, 408.0, -1.0,
+                    ::GuiComponentGroup)
+            hudBar.addVert(4.0, 4.0, 400.0, 20.0) {
+                GuiComponentCondition(it, player)
+            }
+            hudBar.addVert(4.0, 4.0, 400.0, 40.0) {
                 GuiComponentHotbar(it, player)
             }
-            player.game.hud().add(8.0, 456.0, 500.0,
-                    24.0) { GuiComponentCondition(it, player) }
         }
     }
 
