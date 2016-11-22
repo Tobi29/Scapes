@@ -17,6 +17,7 @@
 package org.tobi29.scapes.client.gui
 
 import org.tobi29.scapes.client.connection.ClientConnection
+import org.tobi29.scapes.client.gui.desktop.GuiDesktop
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.engine.gui.GuiAction
 import org.tobi29.scapes.engine.gui.GuiComponentTextField
@@ -27,7 +28,7 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.packets.PacketChat
 
 class GuiChatWrite(state: GameStateGameMP, private val player: MobPlayerClientMain,
-                   style: GuiStyle) : GuiState(state, style) {
+                   style: GuiStyle) : GuiDesktop(state, style) {
     private val write: GuiComponentTextField
     private val client: ClientConnection
 

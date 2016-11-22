@@ -17,21 +17,31 @@ package org.tobi29.scapes.client.gui.desktop
 
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
+import org.tobi29.scapes.engine.utils.math.min
+import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 
 open class GuiDesktop(state: GameState, style: GuiStyle) : GuiState(state,
         style) {
+
+    override fun baseSize(): Vector2d {
+        val container = engine.container
+        val width = container.containerWidth().toDouble()
+        val height = container.containerHeight().toDouble()
+        val scale = min(540.0 / height, 1.0)
+        return Vector2d(width * scale, height * scale)
+    }
 
     protected fun row(pane: GuiContainerRow): GuiComponentGroupSlab {
         return pane.addVert(11.0, 0.0, -1.0, 40.0, ::GuiComponentGroupSlab)
     }
 
     protected fun <T : GuiComponent> row(pane: GuiContainerRow,
-                                         component: (GuiLayoutDataVertical) -> T): T {
+                                         component: (GuiLayoutDataFlow) -> T): T {
         return pane.addVert(16.0, 5.0, -1.0, 30.0, component)
     }
 
     protected fun <T : GuiComponent> rowCenter(pane: GuiContainerRow,
-                                               component: (GuiLayoutDataVertical) -> T): T {
+                                               component: (GuiLayoutDataFlow) -> T): T {
         return pane.addVert(112.0, 5.0, 176.0, 30.0, component)
     }
 

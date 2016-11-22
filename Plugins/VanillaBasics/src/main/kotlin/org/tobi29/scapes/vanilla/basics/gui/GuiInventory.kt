@@ -29,6 +29,7 @@ import java.util.*
 
 open class GuiInventory(name: String, protected val player: MobPlayerClientMainVB,
                         style: GuiStyle) : GuiMenu(player.game, name, style) {
+    protected val topPane: GuiComponentGroup
     protected val inventoryPane: GuiComponentVisiblePane
     private var hoverT: String? = null
     private var hoverNew: String? = null
@@ -38,49 +39,47 @@ open class GuiInventory(name: String, protected val player: MobPlayerClientMainV
     private var cursorY = Double.NaN
 
     init {
-        inventoryPane = pane.add(16.0, 268.0, 368.0, 162.0,
-                ::GuiComponentVisiblePane)
-        var i = 0
+        topPane = pane.addVert(0.0, 0.0, -1.0, -1.0, ::GuiComponentGroup)
+        inventoryPane = pane.addVert(16.0, 5.0, 350.0, 150.0,
+                :: GuiComponentVisiblePane)
         val buttons = ArrayList<GuiComponent>(10)
-        for (x in 0..9) {
-            val xx = x * 35 + 11
-            buttons.add(button(xx, 121, 30, 30, i))
-            i++
-        }
-        selection(-2, buttons)
+        var i = 10
         buttons.clear()
         for (y in 0..2) {
-            val yy = y * 35 + 11
+            val row = inventoryPane.addVert(0.0, 0.0, -1.0, -1.0,
+                    ::GuiComponentGroupSlab)
             for (x in 0..9) {
-                val xx = x * 35 + 11
-                buttons.add(button(xx, yy, 30, 30, i))
+                buttons.add(
+                        row.addHori(5.0, 5.0, -1.0, -1.0) { button(it, i) })
                 i++
             }
             selection(-1, buttons)
             buttons.clear()
         }
+        inventoryPane.addVert(0.0, 0.0, -1.0, 10.0, ::GuiComponentGroup)
+        i = 0
+        val row = inventoryPane.addVert(0.0, 0.0, -1.0, -1.0,
+                ::GuiComponentGroupSlab)
+        for (x in 0..9) {
+            buttons.add(
+                    row.addHori(5.0, 5.0, -1.0, -1.0) { button(it, i) })
+            i++
+        }
+        selection(-1, buttons)
 
         on(GuiAction.BACK, { player.closeGui() })
     }
 
-    protected fun button(x: Int,
-                         y: Int,
-                         width: Int,
-                         height: Int,
+    protected fun button(parent: GuiLayoutData,
                          slot: Int): GuiComponentItemButton {
-        return button(x, y, width, height, "Container", slot)
+        return button(parent, "Container", slot)
     }
 
-    protected fun button(x: Int,
-                         y: Int,
-                         width: Int,
-                         height: Int,
+    protected fun button(parent: GuiLayoutData,
                          id: String,
                          slot: Int): GuiComponentItemButton {
         val inventory = player.inventories().accessUnsafe(id)
-        val button = inventoryPane.add(x.toDouble(), y.toDouble(),
-                width.toDouble(), height.toDouble()
-        ) { GuiComponentItemButton(it, inventory.item(slot)) }
+        val button = GuiComponentItemButton(parent, inventory.item(slot))
         button.on(GuiEvent.CLICK_LEFT) { event -> leftClick(id, slot) }
         button.on(GuiEvent.CLICK_RIGHT) { event -> rightClick(id, slot) }
         button.on(GuiEvent.HOVER) { event -> setTooltip(inventory.item(slot)) }

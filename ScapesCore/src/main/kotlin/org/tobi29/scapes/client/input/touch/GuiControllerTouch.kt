@@ -33,7 +33,8 @@ class GuiControllerTouch(engine: ScapesEngine, private val controller: Controlle
     private var clicks: List<Pair<GuiCursor, ControllerBasic.PressEvent>> = emptyList()
 
     override fun update(delta: Double) {
-        val ratio = 540.0 / engine.container.containerHeight()
+        //val ratio = 540.0 / engine.container.containerHeight()
+        val ratio = 1.0
         val newClicks = ArrayList<Pair<GuiCursor, ControllerBasic.PressEvent>>()
         val newFingers = ConcurrentHashMap<ControllerTouch.Tracker, Finger>()
         controller.fingers().forEach { tracker ->

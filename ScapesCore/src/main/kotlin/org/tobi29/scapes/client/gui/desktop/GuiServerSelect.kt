@@ -39,12 +39,10 @@ class GuiServerSelect(state: GameState, previous: Gui, style: GuiStyle) : GuiMen
     private val scrollPane: GuiComponentScrollPaneViewport
 
     init {
-        scrollPane = pane.addVert(16.0, 5.0, 368.0, 340.0) {
+        scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {
             GuiComponentScrollPane(it, 70)
-        }.viewport()
-        val add = pane.addVert(112.0, 5.0, 176.0, 30.0) {
-            button(it, "Add")
-        }
+        }.viewport
+        val add = addControl(60) { button(it, "Add") }
 
         selection(-1, add)
 

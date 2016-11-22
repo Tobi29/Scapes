@@ -28,8 +28,9 @@ class GuiScreenshots(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu
     private val scrollPane: GuiComponentScrollPaneViewport
 
     init {
-        scrollPane = pane.addVert(16.0, 5.0, 368.0, 390.0
-        ) { GuiComponentScrollPane(it, 70) }.viewport()
+        scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {
+            GuiComponentScrollPane(it, 70)
+        }.viewport
         try {
             val path = state.engine.home.resolve("screenshots")
             val files = listRecursive(path,

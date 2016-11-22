@@ -40,7 +40,7 @@ class GuiTouchPlaylists(state: GameState, previous: Gui, style: GuiStyle) : GuiT
         selection(day, night, battle)
         scrollPane = pane.addVert(112.0, 10.0, 736.0, 250.0) {
             GuiComponentScrollPane(it, 60)
-        }.viewport()
+        }.viewport
         updateTitles("day")
 
         day.on(GuiEvent.CLICK_LEFT) { event -> updateTitles("day") }

@@ -43,9 +43,10 @@ class GuiSaveSelect(state: GameState, previous: Gui, private val scene: SceneMen
         val game = state.engine.game as ScapesClient
         saves = game.saves()
 
-        scrollPane = pane.addVert(16.0, 5.0, 368.0, 340.0
-        ) { GuiComponentScrollPane(it, 70) }.viewport()
-        val create = rowCenter(pane) { button(it, "Create") }
+        scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {
+            GuiComponentScrollPane(it, 70)
+        }.viewport
+        val create = addControl(60) { button(it, "Create") }
         updateSaves()
 
         selection(-1, create)

@@ -27,12 +27,12 @@ open class GuiTouch(state: GameState, style: GuiStyle) : GuiState(state,
     }
 
     protected fun <T : GuiComponent> row(pane: GuiContainerRow,
-                                         component: (GuiLayoutDataVertical) -> T): T {
+                                         component: (GuiLayoutDataFlow) -> T): T {
         return pane.addVert(112.0, 10.0, -1.0, 60.0, component)
     }
 
     protected fun <T : GuiComponent> rowCenter(pane: GuiContainerRow,
-                                               component: (GuiLayoutDataVertical) -> T): T {
+                                               component: (GuiLayoutDataFlow) -> T): T {
         return pane.addVert(301.0, 10.0, -1.0, 60.0, component)
     }
 

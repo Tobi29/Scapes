@@ -120,7 +120,7 @@ class GuiCreateWorld(state: GameState, previous: GuiSaveSelect,
             state, "Addons", "Apply", previous, style) {
         init {
             val scrollPane = pane.addVert(16.0, 5.0, -1.0, 350.0
-            ) { GuiComponentScrollPane(it, 70) }.viewport()
+            ) { GuiComponentScrollPane(it, 70) }.viewport
             plugins.forEach({ plugin -> plugin.parent() == parent }) { plugin ->
                 scrollPane.addVert(0.0, 0.0, -1.0, 70.0) { Element(it, plugin) }
             }

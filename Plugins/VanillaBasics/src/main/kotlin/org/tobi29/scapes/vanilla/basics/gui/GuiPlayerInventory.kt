@@ -23,9 +23,7 @@ import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
 class GuiPlayerInventory(player: MobPlayerClientMainVB, style: GuiStyle) : GuiInventory(
         "Inventory", player, style) {
     init {
-        val crafting = pane.addVert(16.0, 5.0, 368.0, 30.0) {
-            button(it, "Crafting")
-        }
+        val crafting = row(topPane) { button(it, "Crafting") }
 
         selection(crafting)
 

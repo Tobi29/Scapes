@@ -15,13 +15,17 @@
  */
 package org.tobi29.scapes.client.gui.desktop
 
+import org.tobi29.scapes.client.gui.GuiComponentMenuPane
+import org.tobi29.scapes.client.gui.GuiLayoutDataMenuControl
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
 
-open class GuiMenu protected constructor(state: GameState, title: String, back: String,
-                                         style: GuiStyle) : GuiDesktop(state,
-        style) {
-    protected val pane: GuiComponentVisiblePane
+open class GuiMenu(state: GameState,
+                   title: String,
+                   back: String,
+                   style: GuiStyle) : GuiDesktop(state, style) {
+    protected val view: GuiComponentMenuPane
+    protected val pane: GuiComponentScrollPaneViewport
     protected val back: GuiComponentTextButton
 
     protected constructor(state: GameState, title: String, previous: Gui,
@@ -39,18 +43,33 @@ open class GuiMenu protected constructor(state: GameState, title: String, back: 
         ) { state.engine.guiStack.swap(this, previous) }
     }
 
+    fun <T : GuiComponent> addControl(priority: Int,
+                                      child: (GuiLayoutDataMenuControl) -> T): T {
+        if (priority < 0 || priority > 100) {
+            throw IllegalArgumentException("Priority out of bounds: $priority")
+        }
+        return view.addControl(112.0, 5.0, 112.0, 5.0, -1.0, 30.0, 5.0,
+                5.0, 5.0, 5.0, -1.0, 30.0, Long.MIN_VALUE + priority, child)
+    }
+
     init {
         spacer()
-        pane = addHori(0.0, 0.0, 400.0, -1.0, ::GuiComponentVisiblePane)
+        view = addHori(0.0, 0.0, 400.0, -1.0) {
+            GuiComponentMenuPane(it, 540.0)
+        }
         spacer()
-        pane.addVert(16.0, 14.0, -1.0, 32.0) { GuiComponentText(it, title) }
-        pane.addVert(24.0, 6.0, -1.0, 2.0, ::GuiComponentSeparator)
-        pane.addVert(0.0, 0.0, 0.0, 0.0, -1.0, -1.0, Long.MIN_VALUE + 300,
-                ::GuiComponentGroup)
-        pane.addVert(24.0, 6.0, 24.0, 6.0, -1.0, 2.0, Long.MIN_VALUE + 200,
+        view.addVert(16.0, 14.0, -1.0, 32.0) { GuiComponentText(it, title) }
+        view.addVert(24.0, 6.0, -1.0, 2.0, ::GuiComponentSeparator)
+        pane = view.addVert(0.0, 0.0, 0.0, 0.0, -1.0, -1.0) {
+            GuiComponentScrollPaneHidden(it, 40)
+        }.viewport
+        view.addVert(24.0, 6.0, 24.0, 6.0, -1.0, 2.0, Long.MIN_VALUE + 400,
                 ::GuiComponentSeparator)
-        this.back = pane.addVert(112.0, 12.0, 112.0, 12.0, 176.0, 30.0,
-                Long.MIN_VALUE + 100) { button(it, back) }
+        view.addControl(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 48.0,
+                0.0, Long.MIN_VALUE + 300, ::GuiComponentGroup)
+        view.addControl(0.0, 0.0, 0.0, 0.0, 0.0, 6.0, 0.0, 0.0, 0.0, 0.0, 48.0,
+                0.0, Long.MIN_VALUE, ::GuiComponentGroup)
+        this.back = addControl(50) { button(it, back) }
 
         selection(this.back)
 

@@ -16,10 +16,13 @@
 package org.tobi29.scapes.client.gui
 
 import org.tobi29.scapes.VERSION
+import org.tobi29.scapes.client.gui.desktop.GuiDesktop
 import org.tobi29.scapes.engine.GameState
-import org.tobi29.scapes.engine.gui.*
+import org.tobi29.scapes.engine.gui.GuiComponentFlowText
+import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
+import org.tobi29.scapes.engine.gui.GuiStyle
 
-class GuiVersion(state: GameState, style: GuiStyle) : GuiState(state, style) {
+class GuiVersion(state: GameState, style: GuiStyle) : GuiDesktop(state, style) {
     init {
         val pane = spacer()
         pane.spacer()

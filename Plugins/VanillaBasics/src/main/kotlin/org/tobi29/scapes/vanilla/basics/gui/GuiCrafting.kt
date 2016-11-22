@@ -25,7 +25,8 @@ import org.tobi29.scapes.vanilla.basics.material.CraftingRecipeType
 import org.tobi29.scapes.vanilla.basics.packet.PacketCrafting
 import java.util.*
 
-class GuiCrafting(private val table: Boolean, player: MobPlayerClientMainVB,
+class GuiCrafting(private val table: Boolean,
+                  player: MobPlayerClientMainVB,
                   style: GuiStyle) : GuiInventory(
         "Crafting" + if (table) " Table" else "", player, style) {
     private val scrollPaneTypes: GuiComponentScrollPaneViewport
@@ -36,12 +37,14 @@ class GuiCrafting(private val table: Boolean, player: MobPlayerClientMainVB,
     private var nextExample = 0L
 
     init {
-        scrollPaneTypes = pane.add(16.0, 80.0, 90.0, 180.0) {
+        val columns = topPane.addVert(11.0, 0.0, -1.0, -1.0,
+                ::GuiComponentGroupSlab)
+        scrollPaneTypes = columns.addHori(5.0, 5.0, -0.3, -1.0) {
             GuiComponentScrollPane(it, 20)
-        }.viewport()
-        scrollPaneRecipes = pane.add(116.0, 80.0, 268.0, 180.0) {
+        }.viewport
+        scrollPaneRecipes = columns.addHori(5.0, 5.0, -1.0, -1.0) {
             GuiComponentScrollPane(it, 40)
-        }.viewport()
+        }.viewport
         updateTypes()
         updateRecipes()
     }
@@ -69,7 +72,8 @@ class GuiCrafting(private val table: Boolean, player: MobPlayerClientMainVB,
             }
         }
         if (!tableOnly.isEmpty()) {
-            val separator = scrollPaneTypes.addVert(0.0, 0.0, 90.0, 30.0, ::GuiComponentGroup)
+            val separator = scrollPaneTypes.addVert(0.0, 0.0, -1.0, 30.0,
+                    ::GuiComponentGroup)
             separator.add(5.0, 9.0, -1.0, 12.0) {
                 GuiComponentText(it, "Table only:")
             }
@@ -99,7 +103,7 @@ class GuiCrafting(private val table: Boolean, player: MobPlayerClientMainVB,
         scrollPaneRecipes.removeAll()
         currentType?.let { recipeType ->
             recipeType.recipes().forEach { recipe ->
-                elements.add(scrollPaneRecipes.addVert(0.0, 0.0, 268.0, 40.0) {
+                elements.add(scrollPaneRecipes.addVert(0.0, 0.0, -1.0, 40.0) {
                     Element(it, recipe)
                 })
             }

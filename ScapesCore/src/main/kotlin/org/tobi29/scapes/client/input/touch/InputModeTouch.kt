@@ -62,35 +62,45 @@ class InputModeTouch(engine: ScapesEngine, private val controller: ControllerTou
 
     override fun createInGameGUI(gui: Gui,
                                  world: WorldClient) {
-        val size = 100
-        val gap = 20
-        val pad = gui.add(610.0, 310.0, (size * 3 + (gap shl 1)).toDouble(),
-                ((size shl 1) + gap).toDouble(), ::GuiComponentGroup)
-        val padUp = pad.add((size + gap).toDouble(), 0.0, size.toDouble(),
-                size.toDouble(), ::GuiComponentButton)
-        val padDown = pad.add((size + gap).toDouble(), (size + gap).toDouble(),
-                size.toDouble(), size.toDouble(), ::GuiComponentButton)
-        val padLeft = pad.add(0.0, (size + gap).toDouble(), size.toDouble(),
-                size.toDouble(), ::GuiComponentButton)
-        val padRight = pad.add((size + gap shl 1).toDouble(),
-                (size + gap).toDouble(), size.toDouble(), size.toDouble(),
+        val size = 70
+        val gap = 5
+        val buttonsColumn = gui.addHori(0.0, 0.0,
+                80.0, -1.0, ::GuiComponentGroup)
+        val buttonsRow = buttonsColumn.addVert(0.0, 0.0,
+                -1.0, 40.0, ::GuiComponentGroupSlab)
+        val menu = buttonsRow.addHori(5.0, 5.0, -1.0, -1.0,
                 ::GuiComponentButton)
-        val inventory = gui.add(0.0, 0.0, 40.0, 40.0, ::GuiComponentButton)
-        val menu = gui.add(50.0, 0.0, 40.0, 40.0, ::GuiComponentButton)
+        val inventory = buttonsRow.addHori(5.0, 5.0, -1.0, -1.0,
+                ::GuiComponentButton)
+        gui.spacer()
+        val padColumn = gui.addHori(0.0, 0.0,
+                (size * 3 + (gap shl 1)).toDouble(), -1.0,
+                ::GuiComponentGroup)
+        padColumn.spacer()
+        val pad = padColumn.addVert(0.0, 0.0, -1.0,
+                ((size shl 1) + gap).toDouble(), ::GuiComponentGroup)
+        val padTop = pad.addVert(0.0, 0.0, -1.0, -1.0, ::GuiComponentGroupSlab)
+        val padBottom = pad.addVert(0.0, 0.0, -1.0, -1.0,
+                ::GuiComponentGroupSlab)
+        padTop.addHori(5.0, 5.0, -1.0, -1.0, ::GuiComponentGroup)
+        val padUp = padTop.addHori(5.0, 5.0, -1.0, -1.0, ::GuiComponentButton)
+        padTop.addHori(5.0, 5.0, -1.0, -1.0, ::GuiComponentGroup)
+        val padLeft = padBottom.addHori(5.0, 5.0, -1.0, -1.0,
+                ::GuiComponentButton)
+        val padDown = padBottom.addHori(5.0, 5.0, -1.0, -1.0,
+                ::GuiComponentButton)
+        val padRight = padBottom.addHori(5.0, 5.0, -1.0, -1.0,
+                ::GuiComponentButton)
         val swipe = gui.add(0.0, 0.0, -1.0, -1.0, ::GuiComponentPane)
 
         padUp.on(GuiEvent.PRESS_LEFT) { event -> walkUp = true }
         padUp.on(GuiEvent.DROP_LEFT) { event -> walkUp = false }
-        padUp.on(GuiEvent.DRAG_LEFT, { this.swipe(it) })
         padDown.on(GuiEvent.PRESS_LEFT) { event -> walkDown = true }
         padDown.on(GuiEvent.DROP_LEFT) { event -> walkDown = false }
-        padDown.on(GuiEvent.DRAG_LEFT, { this.swipe(it) })
         padLeft.on(GuiEvent.PRESS_LEFT) { event -> walkLeft = true }
         padLeft.on(GuiEvent.DROP_LEFT) { event -> walkLeft = false }
-        padLeft.on(GuiEvent.DRAG_LEFT, { this.swipe(it) })
         padRight.on(GuiEvent.PRESS_LEFT) { event -> walkRight = true }
         padRight.on(GuiEvent.DROP_LEFT) { event -> walkRight = false }
-        padRight.on(GuiEvent.DRAG_LEFT, { this.swipe(it) })
         inventory.on(GuiEvent.CLICK_LEFT) { event ->
             if (!world.player.closeGui()) {
                 world.send(PacketInteraction(
@@ -104,7 +114,10 @@ class InputModeTouch(engine: ScapesEngine, private val controller: ControllerTou
                                 world.game.engine.guiStyle))
             }
         }
-        swipe.on(GuiEvent.DRAG_LEFT, { this.swipe(it) })
+        swipe.on(GuiEvent.DRAG_LEFT, { event ->
+            this.swipe.plusX(event.relativeX / event.size.x * 960.0)
+            this.swipe.plusY(event.relativeY / event.size.y * 540.0)
+        })
         swipe.on(GuiEvent.PRESS_LEFT) { event ->
             swipeStart = Vector2d(event.x, event.y)
             if (rightHand) {
@@ -115,11 +128,12 @@ class InputModeTouch(engine: ScapesEngine, private val controller: ControllerTou
             lastTouch = System.currentTimeMillis()
         }
         swipe.on(GuiEvent.DRAG_LEFT) { event ->
-            var x = event.x / 480.0 - 1.0
-            var y = 1.0 - event.y / 270.0
+            var x = event.x / event.size.x * 2.0 - 1.0
+            var y = 1.0 - event.y / event.size.y * 2.0
             val cam = world.scene.cam()
             matrix1.identity()
-            matrix1.perspective(cam.fov, 1920.0f / 1080.0f, cam.near, cam.far)
+            matrix1.perspective(cam.fov,
+                    (event.size.x / event.size.y).toFloat(), cam.near, cam.far)
             matrix1.rotateAccurate((-cam.tilt).toDouble(), 0.0f, 0.0f, 1.0f)
             matrix1.rotateAccurate((-cam.pitch - 90.0f).toDouble(), 1.0f, 0.0f,
                     0.0f)
@@ -158,10 +172,6 @@ class InputModeTouch(engine: ScapesEngine, private val controller: ControllerTou
 
     override fun guiController(): GuiController {
         return guiController
-    }
-
-    private fun swipe(event: GuiComponentEvent) {
-        swipe.plusX(event.relativeX).plusY(event.relativeY)
     }
 
     override fun toString(): String {

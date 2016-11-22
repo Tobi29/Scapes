@@ -40,9 +40,10 @@ class GuiPlugins(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu(
 
     init {
         path = state.engine.home.resolve("plugins")
-        scrollPane = pane.addVert(16.0, 5.0, -1.0, 340.0
-        ) { GuiComponentScrollPane(it, 70) }.viewport()
-        val add = rowCenter(pane) { button(it, "Add") }
+        scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {
+            GuiComponentScrollPane(it, 70)
+        }.viewport
+        val add = addControl(60) { button(it, "Add") }
         updatePlugins()
 
         selection(-1, add)

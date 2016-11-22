@@ -17,11 +17,11 @@
 package org.tobi29.scapes.client.gui.desktop
 
 import mu.KLogging
+import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.connection.Account
 import java.io.IOException
 
 class GuiOptions(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu(
@@ -39,12 +39,14 @@ class GuiOptions(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu(
         val controls = row(pane) { button(it, "Controls") }
         val graphics = row(pane) { button(it, "Video settings") }
         val account = row(pane) { button(it, "Account") }
+        val plugins = row(pane) { button(it, "Plugins") }
 
         selection(musicVolume)
         selection(soundVolume)
         selection(controls)
         selection(graphics)
         selection(account)
+        selection(plugins)
 
         musicVolume.on(GuiEvent.CHANGE) { event ->
             state.engine.config.setVolume("music", musicVolume.value())
@@ -69,6 +71,9 @@ class GuiOptions(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu(
             } catch (e: IOException) {
                 logger.error { "Failed to read account file: $e" }
             }
+        }
+        plugins.on(GuiEvent.CLICK_LEFT) { event ->
+            state.engine.guiStack.add("10-Menu", GuiPlugins(state, this, style))
         }
     }
 

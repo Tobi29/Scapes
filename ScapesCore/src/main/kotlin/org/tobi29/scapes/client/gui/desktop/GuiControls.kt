@@ -42,7 +42,7 @@ abstract class GuiControls protected constructor(state: GameState, previous: Gui
             engine.guiStack.swap(this, previous)
         }
         scrollPane = pane.add(16.0, 80.0, 368.0, 390.0
-        ) { GuiComponentScrollPane(it, 40) }.viewport()
+        ) { GuiComponentScrollPane(it, 40) }.viewport
     }
 
     private fun sensitivity(value: Double): Double {

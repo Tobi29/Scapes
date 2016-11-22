@@ -16,13 +16,14 @@
 package org.tobi29.scapes.client.gui.desktop
 
 import org.tobi29.scapes.engine.GameState
-import org.tobi29.scapes.engine.gui.*
+import org.tobi29.scapes.engine.gui.Gui
+import org.tobi29.scapes.engine.gui.GuiAction
+import org.tobi29.scapes.engine.gui.GuiComponentTextButton
+import org.tobi29.scapes.engine.gui.GuiStyle
 
 open class GuiMenuDouble protected constructor(state: GameState, title: String, save: String,
-                                               back: String, style: GuiStyle) : GuiDesktop(
-        state, style) {
-    protected val pane: GuiComponentVisiblePane
-    protected val back: GuiComponentTextButton
+                                               back: String, style: GuiStyle) : GuiMenu(
+        state, title, back, style) {
     protected val save: GuiComponentTextButton
 
     protected constructor(state: GameState, title: String, previous: Gui,
@@ -42,25 +43,8 @@ open class GuiMenuDouble protected constructor(state: GameState, title: String, 
     }
 
     init {
-        spacer()
-        pane = addHori(0.0, 0.0, 400.0, -1.0, ::GuiComponentVisiblePane)
-        spacer()
-        pane.addVert(16.0, 14.0, -1.0, 32.0) { GuiComponentText(it, title) }
-        pane.addVert(24.0, 6.0, -1.0, 2.0, ::GuiComponentSeparator)
-        pane.addVert(0.0, 0.0, 0.0, 0.0, -1.0, -1.0, Long.MIN_VALUE + 300,
-                ::GuiComponentGroup)
-        pane.addVert(24.0, 6.0, 24.0, 6.0, -1.0, 2.0, Long.MIN_VALUE + 200,
-                ::GuiComponentSeparator)
-        this.save = pane.addVert(112.0, 12.0, 112.0, 5.0, 176.0, 30.0,
-                Long.MIN_VALUE + 100) { button(it, save) }
-        this.back = pane.addVert(112.0, 5.0, 112.0, 12.0, 176.0, 30.0,
-                Long.MIN_VALUE + 100) { button(it, back) }
+        this.save = addControl(60) { button(it, save) }
 
         selection(this.save)
-        selection(this.back)
-
-        this.back.on(GuiEvent.CLICK_LEFT) { event ->
-            fireAction(GuiAction.BACK)
-        }
     }
 }

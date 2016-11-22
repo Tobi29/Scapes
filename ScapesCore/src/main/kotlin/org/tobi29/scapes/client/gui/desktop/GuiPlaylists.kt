@@ -36,13 +36,13 @@ class GuiPlaylists(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu(
         val night = slab.addHori(5.0, 5.0, -1.0, -1.0) { button(it, "Night") }
         val battle = slab.addHori(5.0, 5.0, -1.0, -1.0) { button(it, "Battle") }
         selection(day, night, battle)
-        scrollPane = pane.addVert(16.0, 5.0, -1.0, 300.0) {
+        scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {
             GuiComponentScrollPane(it, 70)
-        }.viewport()
-        val add = rowCenter(pane) { button(it, "Add") }
+        }.viewport
+        val add = addControl(60) { button(it, "Add") }
         updateTitles("day")
 
-        selection(-1, add)
+        selection(add)
 
         day.on(GuiEvent.CLICK_LEFT) { event -> updateTitles("day") }
         night.on(GuiEvent.CLICK_LEFT) { event -> updateTitles("night") }

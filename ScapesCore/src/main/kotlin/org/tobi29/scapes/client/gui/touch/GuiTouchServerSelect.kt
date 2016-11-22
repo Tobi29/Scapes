@@ -41,7 +41,7 @@ class GuiTouchServerSelect(state: GameState, previous: Gui, style: GuiStyle) : G
     init {
         scrollPane = pane.addVert(112.0, 10.0, 736.0, 320.0) {
             GuiComponentScrollPane(it, 70)
-        }.viewport()
+        }.viewport
 
         save.on(GuiEvent.CLICK_LEFT) { event ->
             state.engine.guiStack.add("10-Menu",

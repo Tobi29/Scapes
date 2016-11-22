@@ -16,13 +16,13 @@
 
 package org.tobi29.scapes.client.gui
 
+import org.tobi29.scapes.client.gui.desktop.GuiDesktop
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.graphics.*
-import org.tobi29.scapes.engine.gui.GuiState
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 
-class GuiHud(state: GameState, style: GuiStyle) : GuiState(state, style) {
+class GuiHud(state: GameState, style: GuiStyle) : GuiDesktop(state, style) {
     private val cross: Model
 
     init {
@@ -45,9 +45,7 @@ class GuiHud(state: GameState, style: GuiStyle) : GuiState(state, style) {
         if (isVisible) {
             val matrixStack = gl.matrixStack()
             val matrix = matrixStack.push()
-            matrix.translate(
-                    gl.sceneWidth().toFloat() / gl.sceneHeight() * 270.0f,
-                    270.0f,
+            matrix.translate((size.x * 0.5).toFloat(), (size.y * 0.5).toFloat(),
                     0.0f)
             gl.textures().bind("Scapes:image/gui/Cross", gl)
             gl.setBlending(BlendingMode.INVERT)

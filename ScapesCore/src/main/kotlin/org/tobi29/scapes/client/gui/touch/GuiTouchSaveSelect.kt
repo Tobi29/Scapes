@@ -45,7 +45,7 @@ class GuiTouchSaveSelect(state: GameState, previous: Gui, private val scene: Sce
         val game = state.engine.game as ScapesClient
         saves = game.saves()
         scrollPane = pane.addVert(112.0, 10.0, 736.0, 320.0
-        ) { GuiComponentScrollPane(it, 70) }.viewport()
+        ) { GuiComponentScrollPane(it, 70) }.viewport
 
         save.on(GuiEvent.CLICK_LEFT) { event ->
             try {
