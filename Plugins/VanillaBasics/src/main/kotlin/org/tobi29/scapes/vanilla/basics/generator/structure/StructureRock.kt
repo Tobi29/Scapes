@@ -30,7 +30,7 @@ fun TerrainServer.TerrainMutable.genOreRock(x: Int,
                                             oreChance: Int,
                                             size: Double,
                                             random: Random) {
-    val ceilSize = ceil(size).toInt()
+    val ceilSize = ceil(size)
     for (xx in -ceilSize..ceilSize) {
         for (yy in -ceilSize..ceilSize) {
             for (zz in -ceilSize..ceilSize) {
@@ -41,7 +41,7 @@ fun TerrainServer.TerrainMutable.genOreRock(x: Int,
                     } else {
                         type = stone
                     }
-                    typeData(x + xx, y + yy, z + zz, type, data.toInt())
+                    typeData(x + xx, y + yy, z + zz, type, data)
                 }
             }
         }

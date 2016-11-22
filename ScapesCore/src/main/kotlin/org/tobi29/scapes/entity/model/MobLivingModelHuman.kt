@@ -112,8 +112,8 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
         val speed = entity.speed()
         val moveSpeed = min(sqrt(length(speed.x, speed.y)), 2.0)
         pitch -= (angleDiff(entity.pitch(),
-                pitch.toDouble()) * factorRot).toFloat()
-        yaw -= (angleDiff(entity.yaw(), yaw.toDouble()) * factorRot).toFloat()
+                pitch) * factorRot).toFloat()
+        yaw -= (angleDiff(entity.yaw(), yaw) * factorRot).toFloat()
         pos.plus(entity.getCurrentPos().minus(pos.now()).times(factorPos))
         swing += moveSpeed * 2.0 * delta
         swing %= TWO_PI
@@ -124,7 +124,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
         val weaponLeft = entity.leftWeapon()
         if (newChargeLeft > 0.01) {
             armDirLeft2 += (2.4 * delta).toFloat()
-            armDirLeft2 -= armDirLeft2.toDouble() * 2.7 * delta.toFloat()
+            armDirLeft2 -= armDirLeft2 * 2.7 * delta.toFloat()
         } else {
             if (armDirLeft > 0.01f) {
                 if (armDirLeft >= 0.45f) {
@@ -136,7 +136,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                 }
             }
             if (armDirLeft < 0.01f) {
-                armDirLeft2 -= armDirLeft2.toDouble() * 2.7 * delta.toFloat()
+                armDirLeft2 -= armDirLeft2 * 2.7 * delta.toFloat()
             }
         }
         armDirLeft = newChargeLeft
@@ -150,7 +150,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
         val weaponRight = entity.rightWeapon()
         if (newChargeRight > 0.01) {
             armDirRight2 += 2.4 * delta
-            armDirRight2 -= armDirRight2.toDouble() * 2.7 * delta
+            armDirRight2 -= armDirRight2 * 2.7 * delta
         } else {
             if (armDirRight > 0.01) {
                 if (armDirRight >= 0.45) {
@@ -162,7 +162,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                 }
             }
             if (armDirRight < 0.01f) {
-                armDirRight2 -= armDirRight2.toDouble() * 2.7 * delta
+                armDirRight2 -= armDirRight2 * 2.7 * delta
             }
         }
         armDirRight = newChargeRight
@@ -185,7 +185,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
         val posRenderZ = (pos.doubleZ() - cam.position.doubleZ()).toFloat()
         val l = pitch * 0.004
         if (l < 0.0) {
-            val d = yaw.toRad().toDouble()
+            val d = yaw.toRad()
             posRenderX += (cosTable(d) * l).toFloat()
             posRenderY += (sinTable(d) * l).toFloat()
         }
@@ -226,12 +226,12 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
         var item: ItemStack
         if (wieldMode === WieldMode.RIGHT) {
             item = entity.rightWeapon()
-            charge = armDirRightRender.toDouble()
+            charge = armDirRightRender
             charge2 = armDirRight2 * 0.4
         } else {
             item = entity.leftWeapon()
-            charge = armDirLeftRender.toDouble()
-            charge2 = armDirLeft2.toDouble()
+            charge = armDirLeftRender
+            charge2 = armDirLeft2
         }
         if (item.material() === world.air) {
             matrix.rotate((lazyNameDir * 60.0).toFloat(), 0f, 1f, 0f)
@@ -300,12 +300,12 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
         matrix.translate(0.25f, 0f, 0.25f)
         if (wieldMode === WieldMode.LEFT) {
             item = entity.leftWeapon()
-            charge = armDirLeftRender.toDouble()
+            charge = armDirLeftRender
             charge2 = armDirLeft2 * 0.4
         } else {
             item = entity.rightWeapon()
-            charge = armDirRightRender.toDouble()
-            charge2 = armDirRight2.toDouble()
+            charge = armDirRightRender
+            charge2 = armDirRight2
         }
         if (item.material() === world.air) {
             matrix.rotate((lazyNameDir * -60.0).toFloat(), 0f, 1f, 0f)

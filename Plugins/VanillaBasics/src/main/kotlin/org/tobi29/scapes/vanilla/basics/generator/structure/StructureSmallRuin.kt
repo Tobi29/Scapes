@@ -106,7 +106,7 @@ private fun TerrainServer.TerrainMutable.placePillar(x: Int,
                                                      type: Array<BlockType>,
                                                      vararg data: Int) {
     for (i in type.indices) {
-        typeData(x, y, z + i, type[i], data[i].toInt())
+        typeData(x, y, z + i, type[i], data[i])
     }
 }
 
@@ -117,7 +117,7 @@ private fun TerrainServer.TerrainMutable.placePillar(x: Int,
                                                      data: Int,
                                                      height: Int) {
     for (i in 0..height - 1) {
-        typeData(x, y, z + i, type, data.toInt())
+        typeData(x, y, z + i, type, data)
     }
 }
 
@@ -129,7 +129,7 @@ private fun TerrainServer.TerrainMutable.fillGround(x: Int,
                                                     maxDepth: Int) {
     for (i in 0..maxDepth - 1) {
         if (type(x, y, z - i).isReplaceable(this, x, y, z - i)) {
-            typeData(x, y, z - i, type, data.toInt())
+            typeData(x, y, z - i, type, data)
         } else {
             return
         }

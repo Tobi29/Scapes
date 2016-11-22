@@ -119,7 +119,7 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
                 }
             }
         }
-        while (!spreads.isEmpty) {
+        while (spreads.isNotEmpty()) {
             for (s in spreads) {
                 if (s.x >= 0 && s.x < 16 && s.y >= 0 && s.y < 16 && s.z >= 0 &&
                         s.z < zSize) {

@@ -17,7 +17,6 @@ package org.tobi29.scapes.client
 
 import java8.util.stream.Stream
 import org.tobi29.scapes.engine.utils.EventDispatcher
-import org.tobi29.scapes.engine.utils.collect
 import org.tobi29.scapes.engine.utils.stream
 import java.util.*
 
@@ -36,7 +35,7 @@ class ChatHistory {
 
     @Synchronized fun update() {
         val time = System.currentTimeMillis()
-        val removals = lines.collect { line -> time - line.time > 10000 }
+        val removals = lines.filter { line -> time - line.time > 10000 }
         if (!removals.isEmpty()) {
             lines.removeAll(removals)
             events.fire(ChatChangeEvent(this))

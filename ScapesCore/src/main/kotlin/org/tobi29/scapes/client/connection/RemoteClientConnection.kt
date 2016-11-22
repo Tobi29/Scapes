@@ -111,7 +111,7 @@ class RemoteClientConnection(worker: ConnectionWorker,
     override fun transmit(packet: PacketServer) {
         val output = channel.outputStream
         val pos = output.position()
-        output.putShort(packet.id(plugins.registry()).toInt())
+        output.putShort(packet.id(plugins.registry()))
         packet.sendServer(this, output)
         val size = output.position() - pos
         profilerSent.packet(packet, size.toLong())

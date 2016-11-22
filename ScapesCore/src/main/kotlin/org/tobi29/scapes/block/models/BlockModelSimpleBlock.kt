@@ -98,7 +98,7 @@ class BlockModelSimpleBlock(private val block: BlockType,
         val g2 = g * this.g
         val b2 = b * this.b
         val a2 = a * this.a
-        val connectStage = block.connectStage(terrain, x, y, z).toInt()
+        val connectStage = block.connectStage(terrain, x, y, z)
         val x0 = x - 1
         val y0 = y - 1
         val z0 = z - 1

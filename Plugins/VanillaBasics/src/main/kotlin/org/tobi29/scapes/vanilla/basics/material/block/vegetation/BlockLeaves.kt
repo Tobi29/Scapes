@@ -372,7 +372,7 @@ class BlockLeaves(materials: VanillaMaterial,
         var checksSwap: Pool<MutableVector3i>
         checks.push().set(pos)
         var i = 0
-        while (i < 5 && !checks.isEmpty) {
+        while (i < 5 && !checks.isEmpty()) {
             for (check in checks) {
                 val checkBlock = terrain.block(check.x, check.y,
                         check.z)

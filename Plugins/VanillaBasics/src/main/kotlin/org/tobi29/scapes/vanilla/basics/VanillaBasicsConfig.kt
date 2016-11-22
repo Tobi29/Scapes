@@ -120,11 +120,7 @@ class AlloyTypeCreator {
     var toolLevel = 0
 }
 
-class OreTypeCreator {
-    constructor(materials: VanillaMaterial) {
-        type = materials.stoneRaw
-    }
-
+class OreTypeCreator(materials: VanillaMaterial) {
     val stoneTypes = ArrayList<StoneType>()
     var type: BlockType
     var rarity = 4
@@ -132,6 +128,10 @@ class OreTypeCreator {
     var rockChance = 8
     var rockDistance = 48
     var size = 6.0
+
+    init {
+        type = materials.stoneRaw
+    }
 }
 
 class CraftingRecipeCreator {

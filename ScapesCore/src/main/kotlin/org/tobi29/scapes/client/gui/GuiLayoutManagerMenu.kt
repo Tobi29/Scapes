@@ -42,7 +42,7 @@ class GuiLayoutManagerMenu(start: Vector2d, maxSize: Vector2d,
         var maxHeight = Double.MIN_VALUE
         val widths = ArrayList<Width>()
         for (component in components) {
-            if (!component.isVisible) {
+            if (!component.visible) {
                 continue
             }
             val data = component.parent
@@ -100,7 +100,7 @@ class GuiLayoutManagerMenu(start: Vector2d, maxSize: Vector2d,
         val widthIterator = widths.iterator()
         var preferredSizeHorizontal = Vector2d.ZERO
         for (component in components) {
-            if (!component.isVisible) {
+            if (!component.visible) {
                 continue
             }
             val data = component.parent

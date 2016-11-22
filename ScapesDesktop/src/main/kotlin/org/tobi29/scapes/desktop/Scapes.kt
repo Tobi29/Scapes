@@ -75,7 +75,7 @@ fun main(args: Array<String>) {
     val cmdArgs = commandLine.args
     val mode = commandLine.getOptionValue('m', "client")
     val home: FilePath
-    if (cmdArgs.size > 0) {
+    if (cmdArgs.isNotEmpty()) {
         home = path(HOME_PATH.matcher(cmdArgs[0]).replaceAll(
                 System.getProperty("user.home"))).toAbsolutePath()
         System.setProperty("user.dir", home.toAbsolutePath().toString())

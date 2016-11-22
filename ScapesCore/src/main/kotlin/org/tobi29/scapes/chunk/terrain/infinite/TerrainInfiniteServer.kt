@@ -401,7 +401,7 @@ class TerrainInfiniteServer(override val world: WorldServer,
             val xxx = xx + x
             for (yy in -1..1) {
                 if (xx != 0 || yy != 0) {
-                    chunkManager[xxx, yy + y]?.let { it.updateAdjacent() }
+                    chunkManager[xxx, yy + y]?.updateAdjacent()
                 }
             }
         }

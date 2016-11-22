@@ -21,20 +21,22 @@ import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.utils.math.round
 import java.util.concurrent.ThreadLocalRandom
 
-class GuiComponentLogo(parent: GuiLayoutData, height: Int, textSize: Int) : GuiComponent(
+class GuiComponentLogo(parent: GuiLayoutData,
+                       height: Int,
+                       textSize: Int) : GuiComponentGroup(
         parent) {
     private val splash: GuiComponentText
 
     init {
         val textX = height - 8
         val textY = textSize shr 2
-        addSub(0.0, 0.0, height.toDouble(), height.toDouble()) {
+        add(0.0, 0.0, height.toDouble(), height.toDouble()) {
             GuiComponentIcon(it, engine.graphics.textures["Scapes:image/Icon"])
         }
-        addSub(textX.toDouble(), textY.toDouble(), -1.0, textSize.toDouble()) {
+        add(textX.toDouble(), textY.toDouble(), -1.0, textSize.toDouble()) {
             GuiComponentText(it, "Scapes", 1.0f, 1.0f, 1.0f, 1.0f)
         }
-        splash = addSub(textX.toDouble(),
+        splash = add(textX.toDouble(),
                 (textY + round(textSize * 1.2)).toDouble(), -1.0,
                 ((textSize shl 1) / 3).toDouble()) {
             GuiComponentText(it, splash(), 1.0f, 1.0f, 0.0f, 1.0f)

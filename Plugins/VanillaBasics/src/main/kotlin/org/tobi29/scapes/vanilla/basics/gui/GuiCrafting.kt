@@ -145,7 +145,7 @@ class GuiCrafting(private val table: Boolean,
                     GuiComponentItemButton(it, ingredient.example(example))
                 }
                 b.on(GuiEvent.HOVER) { setTooltip(b.item(), "Ingredient:\n") }
-                examples.add() { b.setItem(ingredient.example(example)) }
+                examples.add { b.setItem(ingredient.example(example)) }
             }
             if (recipe.requirements().findAny().isPresent) {
                 addHori(5.0, 5.0, -1.0, 16.0) { GuiComponentFlowText(it, "+") }
@@ -156,7 +156,7 @@ class GuiCrafting(private val table: Boolean,
                             requirement.example(example))
                 }
                 b.on(GuiEvent.HOVER) { setTooltip(b.item(), "Requirement:\n") }
-                examples.add() { b.setItem(requirement.example(example)) }
+                examples.add { b.setItem(requirement.example(example)) }
             }
 
             selection(result)

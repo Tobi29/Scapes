@@ -72,9 +72,9 @@ class MobLivingModelPig(shared: MobLivingModelPigShared,
         val moveSpeed = min(
                 sqrt(length(speed.x, speed.y)), 2.0)
         xRotRender -= (angleDiff(entity.pitch(),
-                xRotRender.toDouble()) * factorRot).toFloat()
+                xRotRender) * factorRot).toFloat()
         zRotRender -= (angleDiff(entity.yaw(),
-                zRotRender.toDouble()) * factorRot).toFloat()
+                zRotRender) * factorRot).toFloat()
         pos.plus(entity.getCurrentPos().minus(pos.now()).times(factorPos))
         swing += moveSpeed * 2.0 * delta
         swing %= TWO_PI

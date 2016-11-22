@@ -28,7 +28,6 @@ import org.tobi29.scapes.vanilla.basics.material.CropType
 import org.tobi29.scapes.vanilla.basics.material.StoneType
 import org.tobi29.scapes.vanilla.basics.material.TreeType
 import org.tobi29.scapes.vanilla.basics.util.createStoneTool
-import java.util.*
 
 internal fun VanillaBasics.registerRecipes(registry: GameRegistry) {
     val cropRegistry = registry.get<CropType>("VanillaBasics", "CropType")

@@ -103,24 +103,24 @@ class BlockModelLiquid(private val block: BlockType, private val registry: Terra
                     val terrainTile = texTop.size()
                     val anim = texTop.shaderAnimation().id()
                     mesh.addVertex(terrain, Face.UP, x.toDouble(), y.toDouble(),
-                            (z + height00).toDouble(), xx, yy,
+                            (z + height00), xx, yy,
                             zz + height00, texTop.x(), texTop.y(), r2, g2, b2,
                             a2,
                             lod, if (static00) noAnim else anim)
                     mesh.addVertex(terrain, Face.UP, (x + 1).toDouble(),
-                            y.toDouble(), (z + height10).toDouble(),
+                            y.toDouble(), (z + height10),
                             xx + 1, yy, zz + height10,
                             texTop.x() + terrainTile,
                             texTop.y(), r2, g2, b2, a2, lod,
                             if (static10) noAnim else anim)
                     mesh.addVertex(terrain, Face.UP, (x + 1).toDouble(),
-                            (y + 1).toDouble(), (z + height11).toDouble(),
+                            (y + 1).toDouble(), (z + height11),
                             xx + 1, yy + 1, zz + height11,
                             texTop.x() + terrainTile,
                             texTop.y() + terrainTile,
                             r2, g2, b2, a2, lod, if (static11) noAnim else anim)
                     mesh.addVertex(terrain, Face.UP, x.toDouble(),
-                            (y + 1).toDouble(), (z + height01).toDouble(), xx,
+                            (y + 1).toDouble(), (z + height01), xx,
                             yy + 1, zz + height01, texTop.x(),
                             texTop.y() + terrainTile, r2, g2, b2, a2, lod,
                             if (static01) noAnim else anim)
@@ -174,12 +174,12 @@ class BlockModelLiquid(private val block: BlockType, private val registry: Terra
                 val textureHeight00 = max(1.0 - height00, 0.0) * terrainTile
                 val textureHeight10 = max(1.0 - height10, 0.0) * terrainTile
                 mesh.addVertex(terrain, Face.NORTH, (x + 1).toDouble(),
-                        y.toDouble(), (z + height10).toDouble(),
+                        y.toDouble(), (z + height10),
                         xx + 1, yy, zz + height10, texSide1.x() + terrainTile,
                         texSide1.y() + textureHeight10, r2, g2, b2, a2, lod,
                         if (static10) noAnim else anim)
                 mesh.addVertex(terrain, Face.NORTH, x.toDouble(), y.toDouble(),
-                        (z + height00).toDouble(), xx, yy,
+                        (z + height00), xx, yy,
                         zz + height00, texSide1.x(),
                         texSide1.y() + textureHeight00, r2, g2, b2, a2, lod,
                         if (static00) noAnim else anim)
@@ -204,13 +204,13 @@ class BlockModelLiquid(private val block: BlockType, private val registry: Terra
                 val textureHeight10 = max(1.0 - height10, 0.0) * terrainTile
                 val textureHeight11 = max(1.0 - height11, 0.0) * terrainTile
                 mesh.addVertex(terrain, Face.EAST, (x + 1).toDouble(),
-                        (y + 1).toDouble(), (z + height11).toDouble(),
+                        (y + 1).toDouble(), (z + height11),
                         xx + 1, yy + 1, zz + height11,
                         texSide2.x() + terrainTile,
                         texSide2.y() + textureHeight11, r2, g2, b2, a2, lod,
                         if (static11) noAnim else anim)
                 mesh.addVertex(terrain, Face.EAST, (x + 1).toDouble(),
-                        y.toDouble(), (z + height10).toDouble(),
+                        y.toDouble(), (z + height10),
                         xx + 1, yy, zz + height10, texSide2.x(),
                         texSide2.y() + textureHeight10, r2, g2, b2, a2, lod,
                         if (static10) noAnim else anim)
@@ -245,12 +245,12 @@ class BlockModelLiquid(private val block: BlockType, private val registry: Terra
                         texSide3.y() + terrainTile,
                         r2, g2, b2, a2, lod, noAnim)
                 mesh.addVertex(terrain, Face.SOUTH, x.toDouble(),
-                        (y + 1).toDouble(), (z + height01).toDouble(), xx,
+                        (y + 1).toDouble(), (z + height01), xx,
                         yy + 1, zz + height01, texSide3.x() + terrainTile,
                         texSide3.y() + textureHeight01, r2, g2, b2, a2, lod,
                         if (static01) noAnim else anim)
                 mesh.addVertex(terrain, Face.SOUTH, (x + 1).toDouble(),
-                        (y + 1).toDouble(), (z + height11).toDouble(),
+                        (y + 1).toDouble(), (z + height11),
                         xx + 1, yy + 1, zz + height11, texSide3.x(),
                         texSide3.y() + textureHeight11, r2, g2, b2, a2, lod,
                         if (static11) noAnim else anim)
@@ -275,12 +275,12 @@ class BlockModelLiquid(private val block: BlockType, private val registry: Terra
                         texSide4.y() + terrainTile,
                         r2, g2, b2, a2, lod, noAnim)
                 mesh.addVertex(terrain, Face.WEST, x.toDouble(), y.toDouble(),
-                        (z + height00).toDouble(), xx, yy,
+                        (z + height00), xx, yy,
                         zz + height00, texSide4.x() + terrainTile,
                         texSide4.y() + textureHeight00, r2, g2, b2, a2, lod,
                         if (static00) noAnim else anim)
                 mesh.addVertex(terrain, Face.WEST, x.toDouble(),
-                        (y + 1).toDouble(), (z + height01).toDouble(), xx,
+                        (y + 1).toDouble(), (z + height01), xx,
                         yy + 1, zz + height01, texSide4.x(),
                         texSide4.y() + textureHeight01, r2, g2, b2, a2, lod,
                         if (static01) noAnim else anim)

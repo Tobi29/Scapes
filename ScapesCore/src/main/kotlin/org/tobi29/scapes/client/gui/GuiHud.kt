@@ -42,7 +42,7 @@ class GuiHud(state: GameState, style: GuiStyle) : GuiDesktop(state, style) {
                         pixelSize: Vector2d,
                         delta: Double) {
         super.render(gl, shader, size, pixelSize, delta)
-        if (isVisible) {
+        if (visible) {
             val matrixStack = gl.matrixStack()
             val matrix = matrixStack.push()
             matrix.translate((size.x * 0.5).toFloat(), (size.y * 0.5).toFloat(),

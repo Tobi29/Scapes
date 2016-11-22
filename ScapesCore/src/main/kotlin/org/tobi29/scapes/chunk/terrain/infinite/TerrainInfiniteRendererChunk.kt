@@ -162,30 +162,19 @@ class TerrainInfiniteRendererChunk(private val chunk: TerrainInfiniteChunkClient
         if (visible[i] && model != null) {
             model.model?.let { it.first.weak = true }
             model.modelAlpha?.let { it.first.weak = true }
-            model.model?.let {
-                it.second.add(chunk.posBlock.x.toDouble(),
-                        chunk.posBlock.y.toDouble(),
-                        (i shl 4).toDouble())
-            }
-            model.modelAlpha?.let {
-                it.second.add(chunk.posBlock.x.toDouble(),
-                        chunk.posBlock.y.toDouble(),
-                        (i shl 4).toDouble())
-            }
+            model.model?.second?.add(chunk.posBlock.x.toDouble(),
+                    chunk.posBlock.y.toDouble(),
+                    (i shl 4).toDouble())
+            model.modelAlpha?.second?.add(chunk.posBlock.x.toDouble(),
+                    chunk.posBlock.y.toDouble(),
+                    (i shl 4).toDouble())
             vao[i] = model
         } else {
             vao[i] = null
         }
         if (!geometryInit[0]) {
             geometryInit[i + 1] = true
-            var flag = true
-            for (j in 1..geometryInit.size - 1) {
-                if (!geometryInit[j]) {
-                    flag = false
-                    break
-                }
-            }
-            if (flag) {
+            if (geometryInit.indices.any { geometryInit[it] }) {
                 geometryInit[0] = true
             }
         }

@@ -53,7 +53,7 @@ class GuiBloomeryInventory(container: EntityBloomeryClient,
     override fun updateComponent(delta: Double) {
         super.updateComponent(delta)
         updateTemperatureText()
-        bellowsText.isVisible = !container.hasBellows()
+        bellowsText.visible = !container.hasBellows()
     }
 
     private fun updateTemperatureText() {

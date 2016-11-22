@@ -192,7 +192,7 @@ class TerrainInfiniteClient(override val world: WorldClient, loadingRadius: Int,
     private fun removeChunk(chunk: TerrainInfiniteChunkClient) {
         val x = chunk.pos.x
         val y = chunk.pos.y
-        chunkManager.remove(x, y)?.let { it.dispose() }
+        chunkManager.remove(x, y)?.dispose()
     }
 
     override fun sunLightReduction(x: Int,

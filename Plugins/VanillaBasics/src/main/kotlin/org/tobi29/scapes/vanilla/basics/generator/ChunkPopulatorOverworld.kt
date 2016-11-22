@@ -79,14 +79,14 @@ class ChunkPopulatorOverworld(world: WorldServer, private val plugin: VanillaBas
             if (type == materials.stoneRaw &&
                     gen.it(xx + random.nextInt(21) - 10,
                             yy + random.nextInt(21) - 10,
-                            zz + random.nextInt(9) - 4).toInt() != data) {
+                            zz + random.nextInt(9) - 4) != data) {
                 val ore = gen.randomOreType(plugin, data, random)
                 if (ore != null) {
                     val ores = terrain.genOre(xx, yy, zz, materials.stoneRaw,
                             ore.type(),
-                            ceil(random.nextDouble() * ore.size()).toInt(),
-                            ceil(random.nextDouble() * ore.size()).toInt(),
-                            ceil(random.nextDouble() * ore.size()).toInt(),
+                            ceil(random.nextDouble() * ore.size()),
+                            ceil(random.nextDouble() * ore.size()),
+                            ceil(random.nextDouble() * ore.size()),
                             ore.chance(), random)
                     if (ores > 0 && random.nextInt(ore.rockChance()) == 0) {
                         val xxx = xx + random.nextInt(21) - 10
@@ -118,7 +118,7 @@ class ChunkPopulatorOverworld(world: WorldServer, private val plugin: VanillaBas
             }
         }
         val biome = biomes[biomeGenerator[(x + dx / 2).toDouble(), (y + dy / 2).toDouble()]]
-        if (biome != null && biome.decorators.size > 0) {
+        if (biome != null && biome.decorators.isNotEmpty()) {
             val decorator = biome.decorators[biome.noise.getInt(x + dx / 2,
                     y + dy / 2)]
             for (yyy in 0..dy - 1) {

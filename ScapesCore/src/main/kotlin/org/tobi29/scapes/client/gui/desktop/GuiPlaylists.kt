@@ -101,7 +101,7 @@ class GuiPlaylists(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu(
             selection(play, delete)
 
             play.on(GuiEvent.CLICK_LEFT) { event ->
-                state.engine.notifications.add() {
+                state.engine.notifications.add {
                     GuiNotificationSimple(it,
                             state.engine.graphics.textures()["Scapes:image/gui/Playlist"],
                             name)

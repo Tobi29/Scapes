@@ -96,13 +96,13 @@ class GuiComponentBusy(parent: GuiLayoutData) : GuiComponentHeavy(parent) {
                            h3: Double,
                            w4: Double,
                            h4: Double) {
-        var cos = cos(start.toRad()).toDouble()
-        var sin = sin(start.toRad()).toDouble()
+        var cos = cos(start.toRad())
+        var sin = sin(start.toRad())
         mesh.color(r.toDouble(), g.toDouble(), b.toDouble(), 0.0)
         var dir = start + section
         while (dir <= end) {
-            val ncos = cos(dir.toRad()).toDouble()
-            val nsin = sin(dir.toRad()).toDouble()
+            val ncos = cos(dir.toRad())
+            val nsin = sin(dir.toRad())
             mesh.vertex((ncos * w1).toFloat().toDouble(),
                     (nsin * h1).toFloat().toDouble(), 0.0)
             mesh.vertex((cos * w1).toFloat().toDouble(),

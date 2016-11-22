@@ -306,7 +306,7 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
         terrain.chunkNoLoad(x - 1, y)?.let { chunk ->
             cullingPool1.push().set(x - 1, y, z, chunk, chunk.rendererChunk())
         }
-        while (!cullingPool1.isEmpty) {
+        while (cullingPool1.isNotEmpty()) {
             cullingPool1.forEach({ !it.rendererChunk.isCulled(it.z) }) {
                 checkVisible(it, cullingPool2)
             }

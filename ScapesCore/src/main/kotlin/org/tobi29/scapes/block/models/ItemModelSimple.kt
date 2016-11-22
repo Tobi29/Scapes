@@ -53,7 +53,7 @@ class ItemModelSimple(private val texture: TerrainTexture?, private val r: Doubl
             mesh.texture(texMinX, texMaxY)
             mesh.vertex(0.0, 1.0, 0.0)
         } else {
-            val pixelCount = texture.resolution().toInt()
+            val pixelCount = texture.resolution()
             val pixel = 1.0 / pixelCount
             val halfPixel = pixel / 2.0
             mesh.normal(0.0, 1.0, 0.0)

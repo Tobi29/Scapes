@@ -20,7 +20,6 @@ import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Texture
 import org.tobi29.scapes.engine.utils.Checksum
-import org.tobi29.scapes.engine.utils.collect
 import org.tobi29.scapes.engine.utils.graphics.Image
 import org.tobi29.scapes.packets.PacketSkin
 import java.nio.ByteBuffer
@@ -39,8 +38,7 @@ class ClientSkinStorage(private val engine: ScapesEngine, private val defaultTex
     }
 
     fun update(connection: ClientConnection) {
-        val oldSkins =
-                skins.values.collect { it.increaseTicks() > 1200 }
+        val oldSkins = skins.values.filter { it.increaseTicks() > 1200 }
         oldSkins.forEach { skin -> skins.remove(skin.checksum()) }
         while (!skinRequests.isEmpty()) {
             connection.send(PacketSkin(skinRequests.poll()))

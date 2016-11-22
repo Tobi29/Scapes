@@ -149,10 +149,10 @@ class Account(private val keyPair: KeyPair, private val nickname: String) {
             if (nickname.contains(" ")) {
                 return "Name may not contain spaces!"
             }
-            for (i in 0..nickname.length - 1) {
-                if (!Character.isLetterOrDigit(nickname[i])) {
-                    return "Name may only contain letters and digits!"
-                }
+            if (nickname.indices.any {
+                !Character.isLetterOrDigit(nickname[it])
+            }) {
+                return "Name may only contain letters and digits!"
             }
             return null
         }

@@ -58,14 +58,7 @@ object Sandbox {
         System.setSecurityManager(object : SecurityManager() {
             override fun checkPackageAccess(pkg: String) {
                 super.checkPackageAccess(pkg)
-                var whitelisted = false
-                for (whitelist in PACKAGE_WHITELIST) {
-                    if (pkg.startsWith(whitelist)) {
-                        whitelisted = true
-                        break
-                    }
-                }
-                if (!whitelisted) {
+                if (PACKAGE_WHITELIST.none { pkg.startsWith(it) }) {
                     checkPermission(
                             RuntimePermission("scapes.restrictedPkg"))
                 }

@@ -63,7 +63,7 @@ class CommandRegistry constructor(private val prefix: String = "") {
     }
 
     private fun command(split: Array<String>): Pair<String, Array<String>> {
-        if (split.size == 0) {
+        if (split.isEmpty()) {
             return Pair("", EMPTY_STRING)
         }
         val name = split[0]

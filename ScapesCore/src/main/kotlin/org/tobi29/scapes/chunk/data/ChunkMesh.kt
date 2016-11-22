@@ -128,12 +128,12 @@ class ChunkMesh(private val arrays: ChunkMesh.VertexArrays) {
         arrays.lightArray[i++] = light.toFloat()
         arrays.lightArray[i] = sunLight.toFloat()
         arrays.animationArray[pos++] = anim.toInt()
-        aabb.minX = min(aabb.minX, xx.toDouble())
-        aabb.minY = min(aabb.minY, yy.toDouble())
-        aabb.minZ = min(aabb.minZ, zz.toDouble())
-        aabb.maxX = max(aabb.maxX, xx.toDouble())
-        aabb.maxY = max(aabb.maxY, yy.toDouble())
-        aabb.maxZ = max(aabb.maxZ, zz.toDouble())
+        aabb.minX = min(aabb.minX, xx)
+        aabb.minY = min(aabb.minY, yy)
+        aabb.minZ = min(aabb.minZ, zz)
+        aabb.maxX = max(aabb.maxX, xx)
+        aabb.maxY = max(aabb.maxY, yy)
+        aabb.maxZ = max(aabb.maxZ, zz)
         remaining--
     }
 

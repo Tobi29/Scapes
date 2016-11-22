@@ -171,14 +171,7 @@ abstract class MobServer protected constructor(world: WorldServer, pos: Vector3d
             }
         }
         aabb.minZ = mix(aabb.minZ, aabb.maxZ, 0.6)
-        var water = false
-        for (element in aabbs) {
-            if (aabb.overlay(element.aabb)) {
-                if (element.collision.isLiquid) {
-                    water = true
-                }
-            }
-        }
+        val water = aabbs.any { aabb.overlay(it.aabb) && it.collision.isLiquid }
         if (water) {
             swim++
             swimming = swim > 1

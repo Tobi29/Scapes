@@ -46,7 +46,7 @@ class UpdateWaterFlow : Update() {
                 }
                 dataNeed++
                 if (dataNeed <= 6) {
-                    if (dataNeed.toInt() != dataHas || type !== materials.water) {
+                    if (dataNeed != dataHas || type !== materials.water) {
                         if (terrain.type(x, y, z) === materials.lava) {
                             terrain.typeData(x, y, z, materials.cobblestone,
                                     StoneType.BASALT.data(materials.registry))

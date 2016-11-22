@@ -68,18 +68,18 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         debug = GuiState(this, style)
         debugWidget = debug.add(32.0, 32.0, 160.0,
                 200.0) { parent: GuiLayoutData -> GuiWidgetDebugClient(parent) }
-        debugWidget.isVisible = false
+        debugWidget.visible = false
         connectionSentProfiler = debug.add(32.0, 32.0, 360.0, 256.0) {
             GuiWidgetConnectionProfiler(it, client.profilerSent)
         }
-        connectionSentProfiler.isVisible = false
+        connectionSentProfiler.visible = false
         connectionReceivedProfiler = debug.add(32.0, 32.0, 360.0, 256.0) {
             GuiWidgetConnectionProfiler(it, client.profilerReceived)
         }
-        connectionReceivedProfiler.isVisible = false
+        connectionReceivedProfiler.visible = false
         performanceWidget = debug.add(32.0, 32.0, 240.0, 96.0,
                 ::GuiWidgetPerformanceClient)
-        performanceWidget.isVisible = false
+        performanceWidget.visible = false
     }
 
     override val tps = 240.0
@@ -129,10 +129,10 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         val scene = this.scene as SceneScapesVoxelWorld
         engine.controller?.let { controller ->
             if (controller.isPressed(ControllerKey.KEY_F1)) {
-                setHudVisible(!hud.isVisible)
+                setHudVisible(!hud.visible)
             }
             if (Debug.enabled() && controller.isPressed(ControllerKey.KEY_F6)) {
-                debugWidget.isVisible = !debugWidget.isVisible
+                debugWidget.visible = !debugWidget.visible
             }
         }
         val player = scene.player()
@@ -175,8 +175,8 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
     }
 
     fun setHudVisible(visible: Boolean) {
-        hud.isVisible = visible
-        inputGui.isVisible = visible
+        hud.visible = visible
+        inputGui.visible = visible
     }
 
     fun hud(): GuiHud {
@@ -253,15 +253,15 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
                 client.mob { it.world.terrain.reloadGeometry() }
             }
             performance.on(
-                    GuiEvent.CLICK_LEFT) { event -> performanceWidget.isVisible = !performanceWidget.isVisible }
+                    GuiEvent.CLICK_LEFT) { event -> performanceWidget.visible = !performanceWidget.visible }
             connSent.on(
-                    GuiEvent.CLICK_LEFT) { event -> connectionSentProfiler.isVisible = !connectionSentProfiler.isVisible }
+                    GuiEvent.CLICK_LEFT) { event -> connectionSentProfiler.visible = !connectionSentProfiler.visible }
             connSentReset.on(GuiEvent.CLICK_LEFT) { event ->
                 client.profilerSent.clear()
                 connectionSentProfiler.clear()
             }
             connReceived.on(GuiEvent.CLICK_LEFT
-            ) { event -> connectionReceivedProfiler.isVisible = !connectionReceivedProfiler.isVisible }
+            ) { event -> connectionReceivedProfiler.visible = !connectionReceivedProfiler.visible }
             connReceivedReset.on(GuiEvent.CLICK_LEFT) { event ->
                 client.profilerReceived.clear()
                 connectionReceivedProfiler.clear()

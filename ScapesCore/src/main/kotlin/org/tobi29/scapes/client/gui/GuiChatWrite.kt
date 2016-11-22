@@ -21,7 +21,6 @@ import org.tobi29.scapes.client.gui.desktop.GuiDesktop
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.engine.gui.GuiAction
 import org.tobi29.scapes.engine.gui.GuiComponentTextField
-import org.tobi29.scapes.engine.gui.GuiState
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
@@ -34,7 +33,7 @@ class GuiChatWrite(state: GameStateGameMP, private val player: MobPlayerClientMa
 
     init {
         // Workaround for typing right after opening chat write
-        state.engine.controller?.let { it.clearTypeEvents() }
+        state.engine.controller?.clearTypeEvents()
         client = state.client
         write = add(12.0, 480.0, 600.0, 30.0) {
             GuiComponentTextField(it, 16, "", 64, false, true)

@@ -53,7 +53,7 @@ class LightingEngineThreaded(private val terrain: Terrain, taskExecutor: TaskExe
         var updatesTake = updates
         var updatesNext = newUpdates
         updatesTake.push().set(x, y, z)
-        while (!updatesTake.isEmpty) {
+        while (updatesTake.isNotEmpty()) {
             for (update in updatesTake) {
                 if (terrain.isBlockLoaded(update.x, update.y,
                         update.z)) {
@@ -123,7 +123,7 @@ class LightingEngineThreaded(private val terrain: Terrain, taskExecutor: TaskExe
         var updatesTake = updates
         var updatesNext = newUpdates
         updatesTake.push().set(x, y, z)
-        while (!updatesTake.isEmpty) {
+        while (updatesTake.isNotEmpty()) {
             for (update in updatesTake) {
                 if (terrain.isBlockLoaded(update.x, update.y,
                         update.z)) {
