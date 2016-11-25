@@ -28,8 +28,10 @@ import org.tobi29.scapes.engine.utils.io.tag.setDouble
 import org.tobi29.scapes.engine.utils.math.pow
 import org.tobi29.scapes.engine.utils.math.round
 
-abstract class GuiControls protected constructor(state: GameState, previous: Gui, game: ScapesClient,
-                                                 style: GuiStyle) : GuiMenu(
+abstract class GuiControls(state: GameState,
+                           previous: Gui,
+                           game: ScapesClient,
+                           style: GuiStyle) : GuiMenu(
         state, "Controls", "Save", style) {
     protected val scrollPane: GuiComponentScrollPaneViewport
 
@@ -41,8 +43,9 @@ abstract class GuiControls protected constructor(state: GameState, previous: Gui
             game.loadInput()
             engine.guiStack.swap(this, previous)
         }
-        scrollPane = pane.add(16.0, 80.0, 368.0, 390.0
-        ) { GuiComponentScrollPane(it, 40) }.viewport
+        scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {
+            GuiComponentScrollPane(it, 40)
+        }.viewport
     }
 
     private fun sensitivity(value: Double): Double {
@@ -63,8 +66,9 @@ abstract class GuiControls protected constructor(state: GameState, previous: Gui
     }
 
     protected fun addText(text: String) {
-        scrollPane.addVert(40.0, 16.0, 40.0, 5.0, -1.0, 18.0
-        ) { GuiComponentText(it, text) }
+        scrollPane.addVert(40.0, 16.0, 40.0, 5.0, -1.0, 18.0) {
+            GuiComponentText(it, text)
+        }
     }
 
     protected fun addButton(name: String,
