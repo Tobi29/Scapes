@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.client.gui
 
-import org.tobi29.scapes.client.gui.GuiComponentBar
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.GuiComponentGroup
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton

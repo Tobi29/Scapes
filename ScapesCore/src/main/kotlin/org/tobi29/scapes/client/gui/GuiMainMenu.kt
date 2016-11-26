@@ -17,7 +17,6 @@
 package org.tobi29.scapes.client.gui
 
 import org.tobi29.scapes.VERSION
-import org.tobi29.scapes.client.gui.GuiComponentLogo
 import org.tobi29.scapes.client.states.scenes.SceneMenu
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
