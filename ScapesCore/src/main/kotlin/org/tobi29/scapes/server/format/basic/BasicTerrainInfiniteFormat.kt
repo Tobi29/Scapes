@@ -105,7 +105,6 @@ class BasicTerrainInfiniteFormat(private val path: FilePath) : TerrainInfiniteFo
         return region
     }
 
-    @SuppressWarnings("ReturnOfNull")
     private fun removeRegion(location: Vector2i) {
         AccessController.doPrivileged(PrivilegedAction {
             regions.remove(location)?.write()

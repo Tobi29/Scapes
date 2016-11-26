@@ -38,8 +38,8 @@ class TerrainRenderInfo(
         layers.values.forEach { it.init(x, y, z, xSize, ySize, zSize) }
     }
 
-    @SuppressWarnings("unchecked")
     operator fun <E : InfoLayer> get(name: String): E {
+        @Suppress("UNCHECKED_CAST")
         return layers[name] as E
     }
 

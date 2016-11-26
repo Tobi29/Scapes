@@ -224,9 +224,7 @@ class TerrainGenerator(random: Random) {
     }
 
     class TerrainGeneratorLayer {
-        @SuppressWarnings("FieldMayBeStatic")
         val terrainBase = SEA_LEVEL - 31
-        @SuppressWarnings("FieldMayBeStatic")
         val riverBottom = terrainBase + 20.0
         var height = 0.0
         var mountain = 0.0
@@ -239,17 +237,11 @@ class TerrainGenerator(random: Random) {
     }
 
     class TerrainGeneratorOutput {
-        @SuppressWarnings("FieldMayBeStatic")
         val waterHeight = SEA_LEVEL
-        @SuppressWarnings("FieldMayBeStatic")
         val caveAverageHeight = waterHeight * 0.5
-        @SuppressWarnings("FieldMayBeStatic")
         val caveHeightVary = caveAverageHeight * 0.75
-        @SuppressWarnings("FieldMayBeStatic")
         val caveRiverHeight = waterHeight * 0.5
-        @SuppressWarnings("FieldMayBeStatic")
         val beachMinHeight = SEA_LEVEL - 6.0
-        @SuppressWarnings("FieldMayBeStatic")
         val beachMaxHeight = SEA_LEVEL + 2.0
         var height = 0.0
         var mountainFactor = 0.0

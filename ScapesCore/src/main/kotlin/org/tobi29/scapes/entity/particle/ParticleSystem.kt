@@ -24,7 +24,6 @@ import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import java.util.concurrent.ConcurrentHashMap
 
 class ParticleSystem(val world: WorldClient, tps: Double) {
-    @SuppressWarnings("rawtypes")
     private val emitters = ConcurrentHashMap<Class<out ParticleEmitter<*>>, ParticleEmitter<*>>()
     private val joiner: Joiner
 
@@ -43,10 +42,10 @@ class ParticleSystem(val world: WorldClient, tps: Double) {
         emitters.put(emitter.javaClass, emitter)
     }
 
-    @SuppressWarnings("unchecked")
     fun <P : ParticleEmitter<*>> emitter(clazz: Class<P>): P {
         val emitter = emitters[clazz] ?: throw IllegalStateException(
                 "Particle emitter not registered")
+        @Suppress("UNCHECKED_CAST")
         return emitter as P
     }
 

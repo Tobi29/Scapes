@@ -26,7 +26,6 @@ object Sandbox {
             "org.tobi29.scapes", "org.slf4j", "java8")
     private var sandboxed = false
 
-    @SuppressWarnings("CustomSecurityManager")
     fun sandbox() {
         if (sandboxed) {
             return

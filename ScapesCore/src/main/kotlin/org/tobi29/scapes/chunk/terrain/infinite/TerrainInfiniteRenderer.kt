@@ -109,7 +109,6 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
         }, taskLock, "Update-Chunk-Geometry")
     }
 
-    @SuppressWarnings("RedundantIfStatement")
     private fun checkLoaded(chunk: TerrainInfiniteRendererChunk): Boolean {
         val terrainChunk = chunk.chunk()
         val x = terrainChunk.pos.x
