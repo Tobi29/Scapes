@@ -17,15 +17,12 @@
 package org.tobi29.scapes.client.states
 
 import mu.KLogging
-import org.tobi29.scapes.client.gui.desktop.GuiLoading
-import org.tobi29.scapes.client.gui.touch.GuiTouchLoading
+import org.tobi29.scapes.client.gui.GuiLoading
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.connection.ServerInfo
-import org.tobi29.scapes.engine.Container
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Scene
-import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.server.SSLHandle
 import org.tobi29.scapes.engine.server.SSLProvider
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException
@@ -41,7 +38,7 @@ class GameStateLoadSP(private var source: WorldSource?, engine: ScapesEngine,
                       scene: Scene) : GameState(engine, scene) {
     private var step = 0
     private var server: ScapesServer? = null
-    private var progress: ((String, Double) -> Unit)? = null
+    private var gui: GuiLoading? = null
 
     override fun dispose() {
         try {
@@ -58,30 +55,9 @@ class GameStateLoadSP(private var source: WorldSource?, engine: ScapesEngine,
     }
 
     override fun init() {
-        val gui: Gui
-        var progressvalue = 0.0
-        when (engine.container.formFactor()) {
-            Container.FormFactor.PHONE -> {
-                val progress = GuiTouchLoading(this, { progressvalue },
-                        engine.guiStyle)
-                this.progress = { status, value ->
-                    progress.setLabel(status)
-                    progressvalue = value
-                }
-                gui = progress
-            }
-            else -> {
-                val progress = GuiLoading(this, { progressvalue },
-                        engine.guiStyle)
-                this.progress = { status, value ->
-                    progress.setLabel(status)
-                    progressvalue = value
-                }
-                gui = progress
-            }
+        gui = GuiLoading(this, engine.guiStyle).apply {
+            engine.guiStack.add("20-Progress", this)
         }
-        progress?.invoke("Creating server...", 0.0)
-        engine.guiStack.add("20-Progress", gui)
     }
 
     override val isMouseGrabbed: Boolean
@@ -92,6 +68,7 @@ class GameStateLoadSP(private var source: WorldSource?, engine: ScapesEngine,
         try {
             when (step) {
                 0 -> {
+                    gui?.setProgress("Creating server...", 0.0)
                     val tagStructure = engine.tagStructure.structure(
                             "Scapes").structure("IntegratedServer")
                     val panorama = source.panorama()
@@ -113,15 +90,16 @@ class GameStateLoadSP(private var source: WorldSource?, engine: ScapesEngine,
                     server = ScapesServer(source, tagStructure, serverInfo, ssl,
                             engine)
                     step++
-                    progress?.invoke("Starting server...", 1.0)
                 }
                 1 -> {
+                    gui?.setProgress("Starting server...", 0.5)
                     val server = server ?: throw IllegalStateException(
                             "Server lost too early")
                     val loadingRadius = round(engine.tagStructure.getStructure(
                             "Scapes")?.getDouble("RenderDistance") ?: 0.0) + 16
                     val account = Account[engine.home.resolve(
                             "Account.properties")]
+                    gui?.setProgress("Loading world...", 1.0)
                     val game = GameStateGameSP({
                         LocalPlayerConnection(server.connection, it,
                                 loadingRadius, account).client()
@@ -130,8 +108,6 @@ class GameStateLoadSP(private var source: WorldSource?, engine: ScapesEngine,
                     this.source = null
                     engine.switchState(game)
                     step++
-                    progress?.invoke("Loading world...",
-                            Double.POSITIVE_INFINITY)
                 }
             }
         } catch (e: IOException) {

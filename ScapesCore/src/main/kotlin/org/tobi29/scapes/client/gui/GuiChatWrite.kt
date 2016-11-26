@@ -17,7 +17,6 @@
 package org.tobi29.scapes.client.gui
 
 import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.scapes.client.gui.desktop.GuiDesktop
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.engine.gui.GuiAction
 import org.tobi29.scapes.engine.gui.GuiComponentTextField

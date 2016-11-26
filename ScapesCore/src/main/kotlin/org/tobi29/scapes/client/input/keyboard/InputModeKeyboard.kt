@@ -18,8 +18,8 @@ package org.tobi29.scapes.client.input.keyboard
 
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.gui.GuiChatWrite
-import org.tobi29.scapes.client.gui.desktop.GuiControlsDefault
-import org.tobi29.scapes.client.gui.desktop.GuiPause
+import org.tobi29.scapes.client.gui.GuiControlsDefault
+import org.tobi29.scapes.client.gui.GuiPause
 import org.tobi29.scapes.client.input.InputMode
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine

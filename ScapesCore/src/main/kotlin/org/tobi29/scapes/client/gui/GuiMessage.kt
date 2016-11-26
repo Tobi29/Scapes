@@ -13,22 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.tobi29.scapes.client.gui
 
-import org.tobi29.scapes.VERSION
 import org.tobi29.scapes.engine.GameState
-import org.tobi29.scapes.engine.gui.GuiComponentFlowText
-import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
+import org.tobi29.scapes.engine.gui.Gui
+import org.tobi29.scapes.engine.gui.GuiComponentText
 import org.tobi29.scapes.engine.gui.GuiStyle
 
-class GuiVersion(state: GameState, style: GuiStyle) : GuiDesktop(state, style) {
+class GuiMessage(state: GameState, previous: Gui, title: String,
+                 message: String, style: GuiStyle) : GuiMenu(state, title,
+        previous, style) {
     init {
-        val pane = spacer()
-        pane.spacer()
-        val slab = pane.addVert(0.0, 0.0, -1.0, 26.0, ::GuiComponentGroupSlab)
-        slab.spacer()
-        slab.addHori(5.0, 5.0, -1.0, 16.0) {
-            GuiComponentFlowText(it, "v$VERSION")
-        }
+        pane.add(16.0, 80.0, -1.0, 18.0) {  GuiComponentText(it, message) }
     }
 }

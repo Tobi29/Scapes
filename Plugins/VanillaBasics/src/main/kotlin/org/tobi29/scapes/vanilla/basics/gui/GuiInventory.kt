@@ -18,8 +18,8 @@ package org.tobi29.scapes.vanilla.basics.gui
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.client.gui.GuiComponentItemButton
+import org.tobi29.scapes.client.gui.GuiMenu
 import org.tobi29.scapes.client.gui.GuiUtils
-import org.tobi29.scapes.client.gui.desktop.GuiMenu
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d

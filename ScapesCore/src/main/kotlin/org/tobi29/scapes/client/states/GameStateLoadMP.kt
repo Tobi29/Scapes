@@ -19,15 +19,12 @@ package org.tobi29.scapes.client.states
 import mu.KLogging
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.connection.NewClientConnection
-import org.tobi29.scapes.client.gui.desktop.GuiCertificateWarning
-import org.tobi29.scapes.client.gui.desktop.GuiLoading
-import org.tobi29.scapes.client.gui.touch.GuiTouchLoading
+import org.tobi29.scapes.client.gui.GuiCertificateWarning
+import org.tobi29.scapes.client.gui.GuiLoading
 import org.tobi29.scapes.connection.Account
-import org.tobi29.scapes.engine.Container
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Scene
-import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.server.PacketBundleChannel
 import org.tobi29.scapes.engine.server.RemoteAddress
 import org.tobi29.scapes.engine.server.SSLProvider
@@ -39,33 +36,13 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class GameStateLoadMP(private val address: RemoteAddress, engine: ScapesEngine,
                       scene: Scene) : GameState(engine, scene) {
-    private var progress: ((String, Double) -> Unit)? = null
-    private var gui: Gui? = null
+    private var gui: GuiLoading? = null
 
     override fun init() {
-        var progressvalue = 0.0
-        when (engine.container.formFactor()) {
-            Container.FormFactor.PHONE -> {
-                val progress = GuiTouchLoading(this, { progressvalue },
-                        engine.guiStyle)
-                this.progress = { status, value ->
-                    progress.setLabel(status)
-                    progressvalue = value
-                }
-                gui = progress
-            }
-            else -> {
-                val progress = GuiLoading(this, { progressvalue },
-                        engine.guiStyle)
-                this.progress = { status, value ->
-                    progress.setLabel(status)
-                    progressvalue = value
-                }
-                gui = progress
-            }
+        gui = GuiLoading(this, engine.guiStyle).apply {
+            setProgress("Connecting...", 0.0)
+            engine.guiStack.add("20-Progress", this)
         }
-        progress?.invoke("Connecting...", 0.0)
-        gui?.let { engine.guiStack.add("20-Progress", it) }
 
         (engine.game as ScapesClient).connection.addOutConnection(address,
                 { e ->
@@ -73,7 +50,7 @@ class GameStateLoadMP(private val address: RemoteAddress, engine: ScapesEngine,
                     engine.switchState(
                             GameStateServerDisconnect(e.message ?: "", engine))
                 }) { worker, channel ->
-            progress?.invoke("Logging in...", 0.3)
+            gui?.setProgress("Logging in...", 0.3)
             val bundleChannel: PacketBundleChannel
             val ssl = SSLProvider.sslHandle { certificates ->
                 gui?.let { gui ->
@@ -110,13 +87,13 @@ class GameStateLoadMP(private val address: RemoteAddress, engine: ScapesEngine,
             worker.addConnection {
                 val connection = NewClientConnection(worker, engine,
                         bundleChannel, account, loadingRadius, { status ->
-                    progress?.invoke(status, 0.66)
+                    gui?.setProgress(status, 0.66)
                 }, { e ->
                     logger.error(e) { "Failed to connect to server" }
                     engine.switchState(
                             GameStateServerDisconnect(e.message ?: "", engine))
                 }) { init ->
-                    progress?.invoke("Loading world...", 1.0)
+                    gui?.setProgress("Loading world...", 1.0)
                     val game = GameStateGameMP(init, scene, engine)
                     engine.switchState(game)
                 }

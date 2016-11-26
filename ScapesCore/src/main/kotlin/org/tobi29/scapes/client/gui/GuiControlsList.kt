@@ -13,22 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.tobi29.scapes.client.gui
 
-import org.tobi29.scapes.VERSION
+import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
-import org.tobi29.scapes.engine.gui.GuiComponentFlowText
-import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
+import org.tobi29.scapes.engine.gui.Gui
+import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiStyle
 
-class GuiVersion(state: GameState, style: GuiStyle) : GuiDesktop(state, style) {
+class GuiControlsList(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu(
+        state, "Controls", previous, style) {
     init {
-        val pane = spacer()
-        pane.spacer()
-        val slab = pane.addVert(0.0, 0.0, -1.0, 26.0, ::GuiComponentGroupSlab)
-        slab.spacer()
-        slab.addHori(5.0, 5.0, -1.0, 16.0) {
-            GuiComponentFlowText(it, "v$VERSION")
+        (state.engine.game as ScapesClient).inputModes().forEach { inputMode ->
+            val controls = row(pane) {  button(it, inputMode.toString()) }
+            selection(controls)
+            controls.on(GuiEvent.CLICK_LEFT
+            ) { event ->
+                state.engine.guiStack.swap(this,
+                        inputMode.createControlsGUI(state, this))
+            }
         }
     }
 }

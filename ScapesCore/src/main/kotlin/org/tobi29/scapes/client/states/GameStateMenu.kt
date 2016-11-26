@@ -17,9 +17,9 @@
 package org.tobi29.scapes.client.states
 
 import mu.KLogging
-import org.tobi29.scapes.client.gui.desktop.GuiAccount
-import org.tobi29.scapes.client.gui.desktop.GuiGenerateAccount
-import org.tobi29.scapes.client.gui.desktop.GuiMainMenu
+import org.tobi29.scapes.client.gui.GuiAccount
+import org.tobi29.scapes.client.gui.GuiGenerateAccount
+import org.tobi29.scapes.client.gui.GuiMainMenu
 import org.tobi29.scapes.client.states.scenes.SceneMenu
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.GameState

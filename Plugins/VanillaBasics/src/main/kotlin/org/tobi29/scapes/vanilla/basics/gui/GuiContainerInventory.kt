@@ -44,7 +44,7 @@ open class GuiContainerInventory<out T : EntityContainerClient>(name: String, pl
         val inventory = container.inventories().accessUnsafe(id)
         val button = pane.add(x.toDouble(), y.toDouble(), width.toDouble(),
                 height.toDouble()
-        ) {  GuiComponentItemButton(it, inventory.item(slot)) }
+        ) { GuiComponentItemButton(it, inventory.item(slot)) }
         button.on(GuiEvent.CLICK_LEFT) { event -> leftClickContainer(id, slot) }
         button.on(GuiEvent.CLICK_RIGHT) { event ->
             rightClickContainer(id, slot)

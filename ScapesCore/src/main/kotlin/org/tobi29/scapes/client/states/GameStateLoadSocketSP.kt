@@ -19,15 +19,12 @@ package org.tobi29.scapes.client.states
 import mu.KLogging
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.connection.NewClientConnection
-import org.tobi29.scapes.client.gui.desktop.GuiLoading
-import org.tobi29.scapes.client.gui.touch.GuiTouchLoading
+import org.tobi29.scapes.client.gui.GuiLoading
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.connection.ServerInfo
-import org.tobi29.scapes.engine.Container
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Scene
-import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException
 import org.tobi29.scapes.engine.utils.io.tag.getDouble
@@ -42,7 +39,7 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
                             scene: Scene) : GameState(engine, scene) {
     private var step = 0
     private var server: ScapesServer? = null
-    private var progress: ((String, Double) -> Unit)? = null
+    private var gui: GuiLoading? = null
 
     override fun dispose() {
         try {
@@ -59,30 +56,9 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
     }
 
     override fun init() {
-        val gui: Gui
-        var progressvalue = 0.0
-        when (engine.container.formFactor()) {
-            Container.FormFactor.PHONE -> {
-                val progress = GuiTouchLoading(this, { progressvalue },
-                        engine.guiStyle)
-                this.progress = { status, value ->
-                    progress.setLabel(status)
-                    progressvalue = value
-                }
-                gui = progress
-            }
-            else -> {
-                val progress = GuiLoading(this, { progressvalue },
-                        engine.guiStyle)
-                this.progress = { status, value ->
-                    progress.setLabel(status)
-                    progressvalue = value
-                }
-                gui = progress
-            }
+        gui = GuiLoading(this, engine.guiStyle).apply {
+            engine.guiStack.add("20-Progress", this)
         }
-        progress?.invoke("Creating server...", 0.0)
-        engine.guiStack.add("20-Progress", gui)
     }
 
     override val isMouseGrabbed: Boolean
@@ -93,6 +69,7 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
         try {
             when (step) {
                 0 -> {
+                    gui?.setProgress("Creating server...", 0.0)
                     val tagStructure = engine.tagStructure.structure(
                             "Scapes").structure("IntegratedServer")
                     val panorama = source.panorama()
@@ -114,9 +91,9 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
                     this.server = ScapesServer(source, tagStructure, serverInfo,
                             ssl, engine)
                     step++
-                    progress?.invoke("Starting server...", 0.2)
                 }
                 1 -> {
+                    gui?.setProgress("Starting server...", 0.2)
                     val server = server ?: throw IllegalStateException(
                             "Server lost too early")
                     val port = server.connection.start(0)
@@ -127,7 +104,7 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
                     val address = InetSocketAddress(port)
 
                     step++
-                    progress?.invoke("Connecting to local server...", 0.4)
+                    gui?.setProgress("Connecting to local server...", 0.4)
 
                     (engine.game as ScapesClient).connection.addOutConnection(
                             address, { e ->
@@ -137,7 +114,7 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
                                 GameStateServerDisconnect(
                                         e.message ?: "", engine))
                     }) { worker, channel ->
-                        progress?.invoke("Logging in...", 0.6)
+                        gui?.setProgress("Logging in...", 0.6)
                         val bundleChannel: PacketBundleChannel
                         val ssl = SSLProvider.sslHandle { certificates -> true }
                         bundleChannel = PacketBundleChannel(
@@ -153,7 +130,7 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
                             val connection = NewClientConnection(worker, engine,
                                     bundleChannel, account, loadingRadius,
                                     { status ->
-                                        progress?.invoke(status, 0.8)
+                                        gui?.setProgress(status, 0.8)
                                     }, { e ->
                                 GameStateLoadMP.logger.error(
                                         e) { "Failed to log into server" }
@@ -161,7 +138,7 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
                                         GameStateServerDisconnect(
                                                 e.message ?: "", engine))
                             }) { init ->
-                                progress?.invoke("Loading world...", 1.0)
+                                gui?.setProgress("Loading world...", 1.0)
                                 val game = GameStateGameSP(init, source,
                                         server, scene, engine)
                                 this.server = null

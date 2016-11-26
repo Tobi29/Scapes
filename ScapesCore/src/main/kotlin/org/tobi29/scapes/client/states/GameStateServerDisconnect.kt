@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.client.states
 
-import org.tobi29.scapes.client.gui.desktop.GuiDisconnected
+import org.tobi29.scapes.client.gui.GuiDisconnected
 import org.tobi29.scapes.client.states.scenes.SceneError
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine

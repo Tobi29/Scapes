@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.tobi29.scapes.client.gui
 
-import org.tobi29.scapes.VERSION
 import org.tobi29.scapes.engine.GameState
-import org.tobi29.scapes.engine.gui.GuiComponentFlowText
-import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
+import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiStyle
+import org.tobi29.scapes.connection.Account
+import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 
-class GuiVersion(state: GameState, style: GuiStyle) : GuiDesktop(state, style) {
+class GuiGenerateAccount(state: GameState, path: FilePath,
+                         next: (Account) -> Gui, style: GuiStyle) : GuiBusy(
+        state, style) {
     init {
-        val pane = spacer()
-        pane.spacer()
-        val slab = pane.addVert(0.0, 0.0, -1.0, 26.0, ::GuiComponentGroupSlab)
-        slab.spacer()
-        slab.addHori(5.0, 5.0, -1.0, 16.0) {
-            GuiComponentFlowText(it, "v$VERSION")
-        }
+        setLabel("Creating account...")
+        state.engine.taskExecutor.runThread({ joiner ->
+            val account = Account.generate(path)
+            state.engine.guiStack.swap(this, next(account))
+        }, "Generate-Account")
     }
 }

@@ -16,8 +16,8 @@
 package org.tobi29.scapes.client.input.touch
 
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.client.gui.desktop.GuiMessage
-import org.tobi29.scapes.client.gui.desktop.GuiPause
+import org.tobi29.scapes.client.gui.GuiMessage
+import org.tobi29.scapes.client.gui.GuiPause
 import org.tobi29.scapes.client.input.InputMode
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
