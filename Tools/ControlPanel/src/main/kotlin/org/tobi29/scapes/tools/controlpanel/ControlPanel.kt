@@ -38,7 +38,7 @@ fun main(args: Array<String>) {
 }
 
 class ControlPanel : MultiDocumentApplication("Scapes Control Panel",
-        "ControlPanel", version("0.0.0_1")) {
+        "ControlPanel", version("0.0.0")) {
     val connection = ConnectionManager(taskExecutor)
 
     override fun init() {

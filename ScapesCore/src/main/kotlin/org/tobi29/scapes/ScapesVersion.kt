@@ -18,4 +18,4 @@ package org.tobi29.scapes
 
 import org.tobi29.scapes.engine.utils.Version
 
-val VERSION = Version(0, 0, 0, 1)
+val VERSION = Version(0, 0, 0)

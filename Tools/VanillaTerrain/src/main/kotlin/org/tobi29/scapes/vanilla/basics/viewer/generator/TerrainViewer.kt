@@ -31,7 +31,7 @@ fun main(args: Array<String>) {
 }
 
 class TerrainViewer : MultiDocumentApplication("Scapes Terrain Viewer",
-        "TerrainViewer", version("0.0.0_1")) {
+        "TerrainViewer", version("0.0.0")) {
     override fun init() {
         openTab(openTerrain())
     }

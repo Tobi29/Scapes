@@ -56,9 +56,9 @@ class PluginFile {
             id = tagStructure.getString("ID") ?: ""
             name = tagStructure.getString("Name") ?: ""
             parent = tagStructure.getString("Parent") ?: ""
-            version = versionParse(tagStructure.getString("Version") ?: "")
+            version = versionParse(tagStructure.getString("Version") ?: "0.0.0")
             scapesVersion = versionParse(
-                    tagStructure.getString("ScapesVersion") ?: "")
+                    tagStructure.getString("ScapesVersion") ?: "0.0.0")
             mainClass = tagStructure.getString("MainClass") ?: ""
         } catch (e: VersionException) {
             throw IOException(e.message, e)
@@ -73,10 +73,9 @@ class PluginFile {
             id = tagStructure.getString("ID") ?: ""
             name = tagStructure.getString("Name") ?: ""
             parent = tagStructure.getString("Parent") ?: ""
-            version = versionParse(
-                    tagStructure.getString("Version") ?: "0.0.0_0")
+            version = versionParse(tagStructure.getString("Version") ?: "0.0.0")
             scapesVersion = versionParse(
-                    tagStructure.getString("ScapesVersion") ?: "0.0.0_0")
+                    tagStructure.getString("ScapesVersion") ?: "0.0.0")
             mainClass = tagStructure.getString("MainClass") ?: ""
         } catch (e: VersionException) {
             throw IOException(e.message, e)
