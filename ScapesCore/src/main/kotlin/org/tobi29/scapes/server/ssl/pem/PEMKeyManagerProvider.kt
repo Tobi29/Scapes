@@ -29,8 +29,6 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.security.KeyStore
 import java.security.KeyStoreException
-import java.security.NoSuchAlgorithmException
-import java.security.UnrecoverableKeyException
 import java.security.cert.CertificateException
 import javax.net.ssl.KeyManager
 
@@ -44,24 +42,20 @@ class PEMKeyManagerProvider : KeyManagerProvider {
         return "PEM"
     }
 
-    @Throws(IOException::class)
     override fun get(path: FilePath,
                      config: TagStructure): Array<KeyManager> {
         try {
             val certificates = read(
-                    path.resolve(config.getString("Certificate") ?: ""),
-                    { stream ->
-                        readCertificateChain(BufferedReader(
-                                InputStreamReader(
-                                        ByteStreamInputStream(stream))))
-                    })
-            val keys = read(
-                    path.resolve(config.getString("PrivateKey") ?: ""),
-                    { stream ->
-                        readPrivateKeys(BufferedReader(
-                                InputStreamReader(
-                                        ByteStreamInputStream(stream))))
-                    })
+                    path.resolve(config.getString(
+                            "Certificate") ?: "")) { readCertificateChain(
+                    BufferedReader(
+                            InputStreamReader(ByteStreamInputStream(it))))
+            }
+            val keys = read(path.resolve(
+                    config.getString("PrivateKey") ?: "")) { readPrivateKeys(
+                    BufferedReader(
+                            InputStreamReader(ByteStreamInputStream(it))))
+            }
             val keyStore = KeyStore.getInstance("JKS")
             keyStore.load(null, EMPTY_CHAR)
             val certificateArray = certificates.toTypedArray()
@@ -72,14 +66,9 @@ class PEMKeyManagerProvider : KeyManagerProvider {
             return keyManagers(keyStore, "")
         } catch (e: KeyStoreException) {
             throw IOException(e)
-        } catch (e: NoSuchAlgorithmException) {
-            throw IOException(e)
-        } catch (e: UnrecoverableKeyException) {
-            throw IOException(e)
         } catch (e: CertificateException) {
             throw IOException(e)
         }
-
     }
 
     companion object {

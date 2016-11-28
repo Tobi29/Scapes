@@ -28,7 +28,7 @@ import org.tobi29.scapes.engine.gui.PressEvent
 import org.tobi29.scapes.engine.input.ControllerJoystick
 import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.engine.input.ControllerKeyReference
-import org.tobi29.scapes.engine.utils.filter
+import org.tobi29.scapes.engine.utils.and
 import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.mix
 import org.tobi29.scapes.engine.utils.math.sqrNoAbs
@@ -198,7 +198,7 @@ class InputModeGamepad(engine: ScapesEngine, private val controller: ControllerJ
                 if (event.muted) {
                     return@listener
                 }
-                if (player.currentGui()?.filter { it is GuiChatWrite } == null && menu.isPressed(
+                if (player.currentGui()?.and { it is GuiChatWrite } == null && menu.isPressed(
                         event.key, controller)) {
                     if (!player.closeGui()) {
                         player.openGui(GuiPause(player.game, player,
@@ -207,7 +207,7 @@ class InputModeGamepad(engine: ScapesEngine, private val controller: ControllerJ
                     event.muted = true
                     return@listener
                 }
-                if (player.currentGui()?.filter { it is GuiChatWrite } == null && inventory.isPressed(
+                if (player.currentGui()?.and { it is GuiChatWrite } == null && inventory.isPressed(
                         event.key, controller)) {
                     if (!player.closeGui()) {
                         player.world.send(PacketInteraction(
@@ -216,7 +216,7 @@ class InputModeGamepad(engine: ScapesEngine, private val controller: ControllerJ
                     event.muted = true
                     return@listener
                 }
-                if (player.currentGui()?.filter { it is GuiChatWrite } == null && chat.isPressed(
+                if (player.currentGui()?.and { it is GuiChatWrite } == null && chat.isPressed(
                         event.key, controller)) {
                     if (!player.hasGui()) {
                         player.openGui(GuiChatWrite(player.game, player,

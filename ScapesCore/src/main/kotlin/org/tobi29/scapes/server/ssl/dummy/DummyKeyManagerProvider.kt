@@ -23,8 +23,6 @@ import org.tobi29.scapes.engine.utils.keyStore
 import org.tobi29.scapes.server.ssl.spi.KeyManagerProvider
 import java.io.IOException
 import java.security.KeyStoreException
-import java.security.NoSuchAlgorithmException
-import java.security.UnrecoverableKeyException
 import javax.net.ssl.KeyManager
 
 class DummyKeyManagerProvider : KeyManagerProvider {
@@ -37,14 +35,12 @@ class DummyKeyManagerProvider : KeyManagerProvider {
         return "Dummy"
     }
 
-    @Throws(IOException::class)
     override fun get(path: FilePath,
                      config: TagStructure): Array<KeyManager> {
         return get()
     }
 
     companion object {
-        @Throws(IOException::class)
         fun get(): Array<KeyManager> {
             try {
                 val keyStore = keyStore("default.p12", "storepass",
@@ -52,12 +48,7 @@ class DummyKeyManagerProvider : KeyManagerProvider {
                 return keyManagers(keyStore, "storepass")
             } catch (e: KeyStoreException) {
                 throw IOException(e)
-            } catch (e: NoSuchAlgorithmException) {
-                throw IOException(e)
-            } catch (e: UnrecoverableKeyException) {
-                throw IOException(e)
             }
-
         }
     }
 }

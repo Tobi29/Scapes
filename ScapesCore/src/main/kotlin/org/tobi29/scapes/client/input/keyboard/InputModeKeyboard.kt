@@ -30,7 +30,7 @@ import org.tobi29.scapes.engine.gui.PressEvent
 import org.tobi29.scapes.engine.input.ControllerDefault
 import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.engine.input.ControllerKeyReference
-import org.tobi29.scapes.engine.utils.filter
+import org.tobi29.scapes.engine.utils.and
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import org.tobi29.scapes.engine.utils.io.tag.getDouble
 import org.tobi29.scapes.engine.utils.io.tag.setDouble
@@ -221,7 +221,7 @@ class InputModeKeyboard(engine: ScapesEngine, private val controller: Controller
                 if (event.muted) {
                     return@listener
                 }
-                if (player.currentGui()?.filter { it is GuiChatWrite } == null && menu.isPressed(
+                if (player.currentGui()?.and { it is GuiChatWrite } == null && menu.isPressed(
                         event.key, controller)) {
                     if (!player.closeGui()) {
                         player.openGui(GuiPause(player.game, player,
@@ -230,7 +230,7 @@ class InputModeKeyboard(engine: ScapesEngine, private val controller: Controller
                     event.muted = true
                     return@listener
                 }
-                if (player.currentGui()?.filter { it is GuiChatWrite } == null && inventory.isPressed(
+                if (player.currentGui()?.and { it is GuiChatWrite } == null && inventory.isPressed(
                         event.key, controller)) {
                     if (!player.closeGui()) {
                         player.world.send(PacketInteraction(
@@ -239,7 +239,7 @@ class InputModeKeyboard(engine: ScapesEngine, private val controller: Controller
                     event.muted = true
                     return@listener
                 }
-                if (player.currentGui()?.filter { it is GuiChatWrite } == null && chat.isPressed(
+                if (player.currentGui()?.and { it is GuiChatWrite } == null && chat.isPressed(
                         event.key, controller)) {
                     if (!player.hasGui()) {
                         player.openGui(GuiChatWrite(player.game, player,
