@@ -34,6 +34,9 @@ class EntityModelBlockBreak(shared: EntityModelBlockBreakShared,
     private val pos: MutableVector3d
     private val pointerPanes = Pool { PointerPane() }
     private val model: Model
+    private val texture = Array(9) {
+        entity.world.game.engine.graphics.textures["Scapes:image/entity/Break${it + 1}"]
+    }
 
     init {
         pos = MutableVector3d(entity.getCurrentPos())
@@ -79,7 +82,7 @@ class EntityModelBlockBreak(shared: EntityModelBlockBreakShared,
                         pos.intZ()) / 15.0f,
                 world.terrain.sunLight(pos.intX(), pos.intY(),
                         pos.intZ()) / 15.0f)
-        gl.textures().bind("Scapes:image/entity/Break" + i, gl)
+        texture[i - 1].get().bind(gl)
         for (pane in pointerPanes) {
             val matrixStack = gl.matrixStack()
             val matrix = matrixStack.push()

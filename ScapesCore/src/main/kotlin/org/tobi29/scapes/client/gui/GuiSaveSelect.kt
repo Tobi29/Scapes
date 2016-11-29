@@ -28,6 +28,7 @@ import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.graphics.TextureFilter
 import org.tobi29.scapes.engine.graphics.TextureWrap
 import org.tobi29.scapes.engine.gui.*
+import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.io.use
 import org.tobi29.scapes.engine.utils.stream
 import org.tobi29.scapes.plugins.PluginFile
@@ -136,7 +137,7 @@ class GuiSaveSelect(state: GameState, previous: Gui, private val scene: SceneMen
                                 TextureFilter.LINEAR,
                                 TextureFilter.LINEAR, TextureWrap.CLAMP,
                                 TextureWrap.CLAMP)
-                        icon.texture = texture
+                        icon.texture = Resource(texture)
                     }
                 }
             } catch (e: IOException) {

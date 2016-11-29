@@ -24,11 +24,15 @@ import org.tobi29.scapes.engine.gui.GuiRenderer
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 
-class GuiComponentHotbarButton(parent: GuiLayoutData, item: ItemStack,
-                               private val player: MobPlayerClientMain, private val slot: Int) : GuiComponentButtonHeavy(
+class GuiComponentHotbarButton(parent: GuiLayoutData,
+                               item: ItemStack,
+                               private val player: MobPlayerClientMain,
+                               private val slot: Int) : GuiComponentButtonHeavy(
         parent) {
     private val item: GuiComponentItem
     private var model: Model? = null
+    private val textureHotbarLeft = gui.engine.graphics.textures["Scapes:image/gui/HotbarLeft"]
+    private val textureHotbarRight = gui.engine.graphics.textures["Scapes:image/gui/HotbarRight"]
 
     init {
         this.item = addSubHori(0.0, 0.0, -1.0, -1.0) {
@@ -50,10 +54,10 @@ class GuiComponentHotbarButton(parent: GuiLayoutData, item: ItemStack,
                                         pixelSize: Vector2d,
                                         delta: Double) {
         if (player.inventorySelectLeft() == slot) {
-            gl.textures().bind("Scapes:image/gui/HotbarLeft", gl)
+            textureHotbarLeft.get().bind(gl)
             model?.render(gl, shader)
         } else if (player.inventorySelectRight() == slot) {
-            gl.textures().bind("Scapes:image/gui/HotbarRight", gl)
+            textureHotbarRight.get().bind(gl)
             model?.render(gl, shader)
         }
     }

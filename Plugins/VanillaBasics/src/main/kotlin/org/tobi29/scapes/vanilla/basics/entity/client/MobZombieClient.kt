@@ -37,7 +37,7 @@ class MobZombieClient constructor(world: WorldClient, pos: Vector3d = Vector3d.Z
         val texture = world.game.engine.graphics.textures()["VanillaBasics:image/entity/mob/Zombie"]
         MobLivingModelHuman.particles(world.game.modelHumanShared(),
                 world.scene.particles(), pos.now(), speed.now(), rot.now(),
-                texture)
+                texture.get())
     }
 
     override fun creatureType(): CreatureType {

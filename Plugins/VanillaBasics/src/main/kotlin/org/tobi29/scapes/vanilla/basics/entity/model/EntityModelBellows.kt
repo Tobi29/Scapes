@@ -38,6 +38,9 @@ class EntityModelBellows(shared: EntityModelBellowsShared,
     private val side: Box
     private val middle: Box
     private val pipe: Box
+    private val textureSide = entity.world.game.engine.graphics.textures["VanillaBasics:image/terrain/tree/birch/Planks"]
+    private val textureMiddle = entity.world.game.engine.graphics.textures["VanillaBasics:image/terrain/tree/oak/Planks"]
+    private val texturePipe = entity.world.game.engine.graphics.textures["VanillaBasics:image/terrain/device/Anvil"]
     private var scale = 0.0f
 
     init {
@@ -87,11 +90,11 @@ class EntityModelBellows(shared: EntityModelBellowsShared,
         matrix.translate(posRenderX, posRenderY, posRenderZ)
         matrix = matrixStack.push()
         matrix.scale(1.0f, 1.0f, scale)
-        gl.textures().bind("VanillaBasics:image/terrain/tree/birch/Planks", gl)
+        textureMiddle.get().bind(gl)
         middle.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader)
         matrixStack.pop()
         matrix = matrixStack.push()
-        gl.textures().bind("VanillaBasics:image/terrain/tree/oak/Planks", gl)
+        textureSide.get().bind(gl)
         matrix.translate(0.0f, 0.0f, scale * 0.5f)
         side.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader)
         matrixStack.pop()
@@ -110,7 +113,7 @@ class EntityModelBellows(shared: EntityModelBellowsShared,
             Face.UP, Face.NONE -> {
             }
         }
-        gl.textures().bind("VanillaBasics:image/terrain/device/Anvil", gl)
+        texturePipe.get().bind(gl)
         pipe.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader)
         matrixStack.pop()
         matrixStack.pop()

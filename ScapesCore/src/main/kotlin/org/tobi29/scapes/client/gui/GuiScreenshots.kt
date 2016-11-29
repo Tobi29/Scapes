@@ -19,6 +19,7 @@ package org.tobi29.scapes.client.gui
 import mu.KLogging
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
+import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.stream
@@ -47,7 +48,7 @@ class GuiScreenshots(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu
                             state.engine.graphics.createTexture(image,
                                     0)
                         })
-                        element.icon.texture = texture
+                        element.icon.texture = Resource(texture)
                     } catch (e: IOException) {
                         logger.warn { "Failed to load screenshot: $e" }
                     }

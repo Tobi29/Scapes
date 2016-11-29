@@ -26,6 +26,7 @@ import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.graphics.TextureFilter
 import org.tobi29.scapes.engine.graphics.TextureWrap
 import org.tobi29.scapes.engine.gui.*
+import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.server.PacketBundleChannel
 import org.tobi29.scapes.engine.server.RemoteAddress
 import org.tobi29.scapes.engine.server.SSLProvider
@@ -128,7 +129,7 @@ class GuiServerSelect(state: GameState, previous: Gui, style: GuiStyle) : GuiMen
                                 image, 0, TextureFilter.NEAREST,
                                 TextureFilter.NEAREST, TextureWrap.CLAMP,
                                 TextureWrap.CLAMP)
-                        icon.texture = texture
+                        icon.texture = Resource(texture)
                     }
                     connection
                 }

@@ -22,6 +22,7 @@ import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.graphics.TextureFilter
 import org.tobi29.scapes.engine.graphics.TextureWrap
 import org.tobi29.scapes.engine.gui.*
+import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.forEach
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.hash
@@ -162,12 +163,11 @@ class GuiCreateWorld(state: GameState, previous: GuiSaveSelect,
                                 state.engine.allocate(it)
                             }
                             val texture = state.engine.graphics.createTexture(
-                                    image,
-                                    0,
+                                    image, 0,
                                     TextureFilter.LINEAR,
                                     TextureFilter.LINEAR, TextureWrap.CLAMP,
                                     TextureWrap.CLAMP)
-                            icon.texture = texture
+                            icon.texture = Resource(texture)
                         }
                     }
                 } catch (e: IOException) {

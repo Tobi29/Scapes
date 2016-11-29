@@ -21,13 +21,15 @@ import org.tobi29.scapes.engine.graphics.Texture
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiComponentImage
 import org.tobi29.scapes.engine.gui.GuiStyle
+import org.tobi29.scapes.engine.resource.Resource
 
-class GuiScreenshot(state: GameState, previous: Gui, texture: Texture,
+class GuiScreenshot(state: GameState, previous: Gui, texture: Resource<Texture>,
                     style: GuiStyle) : GuiMenu(state, "Screenshots", previous,
         style) {
     init {
+        val tex = texture.get()
         pane.add(16.0, 80.0, 368.0,
-                (texture.height().toDouble() / texture.width() * 368).toInt().toDouble()
-        ) {  GuiComponentImage(it, texture) }
+                (tex.height().toDouble() / tex.width() * 368).toInt().toDouble()
+        ) { GuiComponentImage(it, texture) }
     }
 }

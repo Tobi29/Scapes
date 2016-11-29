@@ -86,7 +86,7 @@ class ParticleEmitterFallenBodyPart(system: ParticleSystem) : ParticleEmitter<Pa
                 val posRenderX = (instance.pos.doubleX() - cam.position.doubleX()).toFloat()
                 val posRenderY = (instance.pos.doubleY() - cam.position.doubleY()).toFloat()
                 val posRenderZ = (instance.pos.doubleZ() - cam.position.doubleZ()).toFloat()
-                gl.textures().bind(instance.texture, gl)
+                instance.texture.bind(gl)
                 val matrixStack = gl.matrixStack()
                 val matrix = matrixStack.push()
                 matrix.translate(posRenderX, posRenderY, posRenderZ)

@@ -19,6 +19,7 @@ package org.tobi29.scapes.entity.skin
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Texture
+import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.Checksum
 import org.tobi29.scapes.engine.utils.graphics.Image
 import org.tobi29.scapes.packets.PacketSkin
@@ -26,13 +27,14 @@ import java.nio.ByteBuffer
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 
-class ClientSkinStorage(private val engine: ScapesEngine, private val defaultTexture: Texture) {
+class ClientSkinStorage(private val engine: ScapesEngine,
+                        private val defaultTexture: Resource<Texture>) {
     private val skins = ConcurrentHashMap<Checksum, ClientSkin>()
     private val skinRequests = ConcurrentLinkedQueue<Checksum>()
     private val defaultSkin: ByteBuffer
 
     init {
-        defaultSkin = defaultTexture.buffer(
+        defaultSkin = defaultTexture.get().buffer(
                 0) ?: throw IllegalArgumentException(
                 "Default skin texture is empty")
     }
@@ -51,7 +53,7 @@ class ClientSkinStorage(private val engine: ScapesEngine, private val defaultTex
         skin?.setImage(image.buffer)
     }
 
-    operator fun get(checksum: Checksum?): Texture {
+    operator fun get(checksum: Checksum?): Resource<Texture> {
         if (checksum == null) {
             return defaultTexture
         }

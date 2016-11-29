@@ -21,6 +21,7 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.graphics.Texture
+import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.*
@@ -32,7 +33,8 @@ import java.util.concurrent.ThreadLocalRandom
 
 class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                           private val entity: MobLivingEquippedClient,
-                          private val texture: Texture, thin: Boolean = false,
+                          private val texture: Resource<Texture>,
+                          thin: Boolean = false,
                           culling: Boolean = true,
                           private val precise: Boolean = false) : MobLivingModel {
     private val pos: MutableVector3d
@@ -196,7 +198,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                 pos.intZ()) / 15.0f,
                 world.terrain.sunLight(pos.intX(), pos.intY(),
                         pos.intZ()) / 15.0f)
-        texture.bind(gl)
+        texture.get().bind(gl)
         val matrixStack = gl.matrixStack()
         var matrix = matrixStack.push()
         matrix.translate(posRenderX, posRenderY, posRenderZ)
@@ -353,7 +355,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
             }
         }
         rot = min(rot * 2, 1.0)
-        texture.bind(gl)
+        texture.get().bind(gl)
         armRight.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
         if (wieldMode !== WieldMode.LEFT) {
             matrix.translate(0.3f, 0.4f, -0.4f)

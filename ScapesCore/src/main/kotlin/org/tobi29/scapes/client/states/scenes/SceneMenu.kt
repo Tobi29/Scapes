@@ -19,6 +19,7 @@ import java8.util.stream.Collectors
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.*
+import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurOffset
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurWeight
@@ -184,6 +185,11 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
             defaultBackground()
         }
 
+    }
+
+    protected fun setBackground(replace: Resource<Texture>,
+                                i: Int) {
+        textures[i] = replace.get()
     }
 
     protected fun setBackground(replace: Texture,

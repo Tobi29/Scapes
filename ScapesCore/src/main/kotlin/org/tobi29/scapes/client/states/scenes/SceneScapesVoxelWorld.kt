@@ -62,6 +62,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient, private val cam: Cam
     private val shaderComposite1: Shader
     private val shaderComposite2: Shader
     private val shaderTextured: Shader
+    private val textureNoise = engine.graphics.textures["Scapes:image/Noise"]
     private var brightness = 0.0f
     private var renderDistance = 0.0f
     private var fov = 0.0f
@@ -277,7 +278,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient, private val cam: Cam
         if (fxaa) {
             if (pass == 0) {
                 gl.activeTexture(3)
-                gl.textures().bind("Scapes:image/Noise", gl)
+                textureNoise.get().bind(gl)
                 gl.activeTexture(0)
                 shaderFXAA.setUniform1i(4, 3)
                 return shaderFXAA
@@ -371,7 +372,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient, private val cam: Cam
                     yaw, 0.0f)
             gl.clearDepth()
             renderWorld(gl, cam, 256, 256)
-            gl.textures().bind(fbo.textureColor(0), gl)
+            fbo.textureColor(0).bind(gl)
             gl.screenShotFBO(fbo)
         }
         world.game.setHudVisible(true)
@@ -397,13 +398,13 @@ class SceneScapesVoxelWorld(private val world: WorldClient, private val cam: Cam
         skyboxFBO.deactivate(gl)
         gl.viewport(0, 0, width, height)
         gl.setProjectionOrthogonal(0.0f, 0.0f, 1.0f, 1.0f)
-        gl.textures().bind(skyboxFBO.textureColor(0), gl)
+        skyboxFBO.textureColor(0).bind(gl)
         model.render(gl, shaderTextured)
         gl.setProjectionPerspective(width.toFloat(), height.toFloat(), cam)
         gl.enableDepthTest()
         gl.enableDepthMask()
         gl.activeTexture(1)
-        gl.textures().bind(skyboxFBO.textureColor(0), gl)
+        skyboxFBO.textureColor(0).bind(gl)
         gl.activeTexture(0)
         val wireframe = this.wireframe
         if (wireframe) {

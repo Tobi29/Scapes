@@ -19,29 +19,31 @@ package org.tobi29.scapes.entity.skin
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Texture
+import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.Checksum
 
 import java.nio.ByteBuffer
 
-class ClientSkin(engine: ScapesEngine, buffer: ByteBuffer,
+class ClientSkin(engine: ScapesEngine,
+                 buffer: ByteBuffer,
                  private val checksum: Checksum) {
-    private val texture: Texture
+    private val texture: Resource<Texture>
     private var unusedTicks = 0
 
     init {
-        texture = engine.graphics.createTexture(64, 64, buffer)
+        texture = Resource(engine.graphics.createTexture(64, 64, buffer))
     }
 
     fun setImage(buffer: ByteBuffer) {
-        texture.setBuffer(buffer)
+        texture.get().setBuffer(buffer)
     }
 
     fun bind(gl: GL) {
         unusedTicks = 0
-        texture.bind(gl)
+        texture.get().bind(gl)
     }
 
-    fun texture(): Texture {
+    fun texture(): Resource<Texture> {
         return texture
     }
 

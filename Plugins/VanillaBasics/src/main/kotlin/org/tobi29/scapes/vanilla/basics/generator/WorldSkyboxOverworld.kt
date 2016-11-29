@@ -37,7 +37,8 @@ import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
 class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
-                           private val biomeGenerator: BiomeGenerator, private val world: WorldClient) : WorldSkybox {
+                           private val biomeGenerator: BiomeGenerator,
+                           private val world: WorldClient) : WorldSkybox {
     private val fbo: Framebuffer
     private val billboardMesh: Model
     private val cloudTextureMesh: Model
@@ -49,6 +50,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
     private val shaderGlow: Shader
     private val shaderClouds: Shader
     private val shaderTextured: Shader
+    private val textureMoon = world.game.engine.graphics.textures["VanillaBasics:image/Moon"]
     private var temperatureDebug: GuiWidgetDebugValues.Element? = null
     private var humidityDebug: GuiWidgetDebugValues.Element? = null
     private var weatherDebug: GuiWidgetDebugValues.Element? = null
@@ -389,7 +391,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
         billboardMesh.render(gl, shaderGlow)
         matrixStack.pop()
         // Moon
-        gl.textures().bind("VanillaBasics:image/Moon", gl)
+        textureMoon.get().bind(gl)
         matrix = matrixStack.push()
         matrix.rotateAccurate(sunAzimuth, 0.0f, 0.0f, 1.0f)
         matrix.rotateAccurate(sunElevation, 1.0f, 0.0f, 0.0f)
@@ -398,7 +400,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
         matrixStack.pop()
         gl.setBlending(BlendingMode.NORMAL)
         // Clouds
-        gl.textures().bind(fbo.textureColor(0), gl)
+        fbo.textureColor(0).bind(gl)
         cloudMesh.render(gl, shaderSkybox)
         gl.textures().unbind(gl)
         // Bottom

@@ -23,6 +23,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 
 class GuiHud(state: GameState, style: GuiStyle) : GuiDesktop(state, style) {
     private val cross: Model
+    private val textureCross = gui.engine.graphics.textures["Scapes:image/gui/Cross"]
 
     init {
         cross = createVCTI(state.engine,
@@ -46,7 +47,7 @@ class GuiHud(state: GameState, style: GuiStyle) : GuiDesktop(state, style) {
             val matrix = matrixStack.push()
             matrix.translate((size.x * 0.5).toFloat(), (size.y * 0.5).toFloat(),
                     0.0f)
-            gl.textures().bind("Scapes:image/gui/Cross", gl)
+            textureCross.get().bind(gl)
             gl.setBlending(BlendingMode.INVERT)
             cross.render(gl, shader)
             gl.setBlending(BlendingMode.NORMAL)

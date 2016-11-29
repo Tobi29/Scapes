@@ -22,6 +22,7 @@ import org.tobi29.scapes.engine.graphics.TextureFilter
 import org.tobi29.scapes.engine.graphics.TextureWrap
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.input.FileType
+import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.io.BufferedReadChannelStream
 import org.tobi29.scapes.engine.utils.io.filesystem.*
@@ -122,7 +123,7 @@ class GuiPlugins(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu(
                                     image, 0, TextureFilter.LINEAR,
                                     TextureFilter.LINEAR, TextureWrap.CLAMP,
                                     TextureWrap.CLAMP)
-                            icon.texture = texture
+                            icon.texture = Resource(texture)
                         }
                     }
                 } catch (e: IOException) {
