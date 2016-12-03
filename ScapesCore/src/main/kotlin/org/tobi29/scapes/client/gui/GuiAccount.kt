@@ -28,7 +28,6 @@ import org.tobi29.scapes.engine.utils.io.process
 import org.tobi29.scapes.engine.utils.io.put
 import java.io.IOException
 import java.security.KeyPair
-import java.util.regex.Pattern
 
 class GuiAccount(state: GameState, previous: Gui, account: Account,
                  style: GuiStyle) : GuiMenu(state, "Account", "Save", style) {
@@ -73,7 +72,7 @@ class GuiAccount(state: GameState, previous: Gui, account: Account,
         }
         keyPaste.on(GuiEvent.CLICK_LEFT) { event ->
             val str = state.engine.container.clipboardPaste()
-            val keyPair = Account.key(REPLACE.matcher(str).replaceAll(""))
+            val keyPair = Account.key(str.replace(REPLACE, ""))
             if (keyPair != null) {
                 this.keyPair = keyPair
                 id.text = "ID: ${checksum(keyPair.public.encoded,
@@ -117,6 +116,6 @@ class GuiAccount(state: GameState, previous: Gui, account: Account,
     }
 
     companion object : KLogging() {
-        private val REPLACE = Pattern.compile("[^A-Za-z0-9+/= ]")
+        private val REPLACE = "[^A-Za-z0-9+/= ]".toRegex()
     }
 }

@@ -18,15 +18,12 @@ package org.tobi29.scapes.vanilla.basics.material
 
 import org.tobi29.scapes.block.GameRegistry
 
-import java.util.regex.Pattern
-
 class CropType(private val name: String, private val bakedName: String, textureRoot: String,
                private val time: Double, private val nutrient: Int) {
     private val texture: String
 
     init {
-        texture = textureRoot + '/' +
-                REPLACE.matcher(name).replaceAll("").toLowerCase()
+        texture = "$textureRoot/${name.replace(" ", "").toLowerCase()}"
     }
 
     fun name(): String {
@@ -54,7 +51,6 @@ class CropType(private val name: String, private val bakedName: String, textureR
     }
 
     companion object {
-        private val REPLACE = Pattern.compile(" ")
         private val ROOT = "VanillaBasics:image/terrain/crops"
         val WHEAT = CropType("Wheat", "Bread", ROOT, 4000.0, 0)
 

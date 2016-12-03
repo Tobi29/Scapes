@@ -19,7 +19,6 @@ package org.tobi29.scapes.vanilla.basics.material
 import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.vanilla.basics.generator.tree.*
-import java.util.regex.Pattern
 
 class TreeType internal constructor(private val name: String, textureRoot: String, private val colorCold: Vector3d,
                                     private val colorWarm: Vector3d, private val colorAutumn: Vector3d, private val dropChance: Int,
@@ -40,8 +39,7 @@ class TreeType internal constructor(private val name: String, textureRoot: Strin
     }
 
     init {
-        texture = textureRoot + '/' +
-                REPLACE.matcher(name).replaceAll("").toLowerCase()
+        texture = "$textureRoot/${name.replace(" ", "").toLowerCase()}"
     }
 
     fun name(): String {
@@ -77,7 +75,6 @@ class TreeType internal constructor(private val name: String, textureRoot: Strin
     }
 
     companion object {
-        private val REPLACE = Pattern.compile(" ")
         private val ROOT = "VanillaBasics:image/terrain/tree"
         val OAK = TreeType("Oak", ROOT, Vector3d(0.5, 0.9, 0.4),
                 Vector3d(0.5, 0.8, 0.0), Vector3d(1.0, 0.7, 0.0), 80, TreeOak())

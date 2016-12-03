@@ -42,9 +42,9 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
-import java.util.regex.Pattern
 
-open class SQLWorldFormat(protected val path: FilePath, protected val database: SQLDatabase) : WorldFormat {
+open class SQLWorldFormat(protected val path: FilePath,
+                          protected val database: SQLDatabase) : WorldFormat {
     protected val idStorage: IDStorage
     protected val idTagStructure: TagStructure
     protected val getMetaData: SQLQuery
@@ -116,10 +116,10 @@ open class SQLWorldFormat(protected val path: FilePath, protected val database: 
     }
 
     @Synchronized override fun registerWorld(server: ScapesServer,
-                               environmentSupplier: Function1<WorldServer, EnvironmentServer>,
-                               name: String,
-                               seed: Long): WorldServer {
-        val table = SPACE.matcher(name).replaceAll("")
+                                             environmentSupplier: Function1<WorldServer, EnvironmentServer>,
+                                             name: String,
+                                             seed: Long): WorldServer {
+        val table = name.replace(" ", "")
         database.createTable(table, "Pos", SQLColumn("Pos", SQLType.BIGINT),
                 SQLColumn("Data", SQLType.LONGBLOB))
         val format = SQLTerrainInfiniteFormat(database, table)
@@ -164,7 +164,7 @@ open class SQLWorldFormat(protected val path: FilePath, protected val database: 
 
     @Synchronized override fun deleteWorld(name: String): Boolean {
         try {
-            val table = SPACE.matcher(name).replaceAll("")
+            val table = name.replace(" ", "")
             database.dropTable(table)
         } catch (e: IOException) {
             logger.error { "Error whilst deleting world: $e" }
@@ -197,8 +197,6 @@ open class SQLWorldFormat(protected val path: FilePath, protected val database: 
     }
 
     companion object : KLogging() {
-        private val SPACE = Pattern.compile(" ")
-
         fun checkDatabase(database: SQLDatabase) {
             database.createTable("Data", "Name",
                     SQLColumn("Name", SQLType.VARCHAR, "255"),

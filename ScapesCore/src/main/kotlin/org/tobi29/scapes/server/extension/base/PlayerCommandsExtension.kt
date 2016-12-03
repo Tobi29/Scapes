@@ -35,9 +35,10 @@ class PlayerCommandsExtension(server: ScapesServer) : ServerExtension(server) {
                 { options -> }) { args, executor, commands ->
             val exp = args.arg(0) ?: "*"
             val pattern = wildcard(exp)
+            println(pattern)
             commands.add({
                 server.connection.players().map { it.name() }.filter { nickname ->
-                    pattern.matcher(nickname).matches()
+                    pattern.matches(nickname)
                 }.forEach { message ->
                     executor.events.fireLocal(
                             MessageEvent(executor, MessageLevel.FEEDBACK_INFO,

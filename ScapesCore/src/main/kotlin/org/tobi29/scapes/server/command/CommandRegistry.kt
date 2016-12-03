@@ -24,16 +24,15 @@ import java.io.PrintWriter
 import java.io.StringWriter
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import java.util.regex.Pattern
 
 class CommandRegistry constructor(private val prefix: String = "") {
-    private val commands = ConcurrentHashMap<String, (Array<String>, Executor) -> Command.Compiled>()
+    private val commands = ConcurrentHashMap<String, (List<String>, Executor) -> Command.Compiled>()
 
     fun register(usage: String,
                  level: Int,
                  optionSupplier: (Command.CommandOptions) -> Unit,
                  compiler: (Command.Arguments, Executor, MutableCollection<() -> Unit>) -> Unit) {
-        val split = SPLIT.split(usage, 2)
+        val split = usage.split(' ', limit = 2)
         val name = split[0]
         commands.put(name,
                 compiler(prefix + usage, level, optionSupplier, compiler))
@@ -48,11 +47,10 @@ class CommandRegistry constructor(private val prefix: String = "") {
 
     operator fun get(line: String,
                      executor: Executor): Command.Compiled {
-        val split = PATTERN.split(line)
-        return get(split, "", executor)
+        return get(line.split(PATTERN), "", executor)
     }
 
-    private operator fun get(split: Array<String>,
+    private operator fun get(split: List<String>,
                              prefix: String,
                              executor: Executor): Command.Compiled {
         val pair = command(split)
@@ -62,16 +60,16 @@ class CommandRegistry constructor(private val prefix: String = "") {
         return compiler(pair.second, executor)
     }
 
-    private fun command(split: Array<String>): Pair<String, Array<String>> {
+    private fun command(split: List<String>): Pair<String, List<String>> {
         if (split.isEmpty()) {
-            return Pair("", EMPTY_STRING)
+            return Pair("", emptyList())
         }
         val name = split[0]
-        val args: Array<String>
+        val args: List<String>
         if (split.size == 1) {
-            args = EMPTY_STRING
+            args = emptyList()
         } else {
-            args = Array(split.size - 1, { split[it + 1] })
+            args = (0..split.lastIndex - 1).map { split[it + 1] }
         }
         return Pair(name, args)
     }
@@ -79,7 +77,7 @@ class CommandRegistry constructor(private val prefix: String = "") {
     private fun compiler(usage: String,
                          level: Int,
                          optionSupplier: (Command.CommandOptions) -> Unit,
-                         compiler: (Command.Arguments, Executor, MutableCollection<() -> Unit>) -> Unit): (Array<String>, Executor) -> Command.Compiled {
+                         compiler: (Command.Arguments, Executor, MutableCollection<() -> Unit>) -> Unit): (List<String>, Executor) -> Command.Compiled {
         return { args, executor ->
             val parser = DefaultParser()
             try {
@@ -87,14 +85,13 @@ class CommandRegistry constructor(private val prefix: String = "") {
                 val options = Options()
                 options.addOption("h", "help", false, "Display this help")
                 optionSupplier(Command.CommandOptions(options))
-                val commandLine = parser.parse(options, args)
+                val commandLine = parser.parse(options, args.toTypedArray())
                 if (commandLine.hasOption('h')) {
                     val helpFormatter = HelpFormatter()
                     val writer = StringWriter()
                     val printWriter = PrintWriter(writer)
                     helpFormatter.printHelp(printWriter, 74, usage, null,
-                            options, 1,
-                            3, null, false)
+                            options, 1, 3, null, false)
                     val help = writer.toString()
                     Command.Null(Command.Output(1, help))
                 } else {
@@ -114,9 +111,6 @@ class CommandRegistry constructor(private val prefix: String = "") {
 
 
     companion object {
-        private val EMPTY_STRING = arrayOf<String>()
-        private val PATTERN = Pattern.compile(
-                "[ ]+(?=([^\"]*\"[^\"]*\")*[^\"]*$)")
-        private val SPLIT = Pattern.compile(" ")
+        private val PATTERN = "[ ]+(?=([^\"]*\"[^\"]*\")*[^\"]*$)".toRegex()
     }
 }

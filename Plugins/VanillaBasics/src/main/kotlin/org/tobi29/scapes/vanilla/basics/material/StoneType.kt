@@ -18,13 +18,11 @@ package org.tobi29.scapes.vanilla.basics.material
 
 import org.tobi29.scapes.block.GameRegistry
 
-import java.util.regex.Pattern
-
 class StoneType(private val name: String, private val textureRoot: String, private val resistance: Double) {
     private val texture: String
 
     init {
-        texture = REPLACE.matcher(name).replaceAll("")
+        texture = name.replace(" ", "")
     }
 
     fun name(): String {
@@ -48,7 +46,6 @@ class StoneType(private val name: String, private val textureRoot: String, priva
     }
 
     companion object {
-        private val REPLACE = Pattern.compile(" ")
         private val ROOT = "VanillaBasics:image/terrain/stone"
         val DIRT_STONE = StoneType("Dirt Stone", ROOT, 0.1)
         val FLINT = StoneType("Flint", ROOT, 2.1)

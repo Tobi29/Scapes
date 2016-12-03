@@ -28,9 +28,6 @@ import org.tobi29.scapes.plugins.Sandbox
 import org.tobi29.scapes.server.format.sqlite.SQLiteSaveStorage
 import org.tobi29.scapes.server.shell.ScapesServerHeadless
 import java.io.IOException
-import java.util.regex.Pattern
-
-private val HOME_PATH = Pattern.compile("\\\$HOME")
 
 fun main(args: Array<String>) {
     val options = Options()
@@ -76,8 +73,8 @@ fun main(args: Array<String>) {
     val mode = commandLine.getOptionValue('m', "client")
     val home: FilePath
     if (cmdArgs.isNotEmpty()) {
-        home = path(HOME_PATH.matcher(cmdArgs[0]).replaceAll(
-                System.getProperty("user.home"))).toAbsolutePath()
+        home = path(
+                cmdArgs[0].replace("\$HOME", System.getProperty("user.home")))
         System.setProperty("user.dir", home.toAbsolutePath().toString())
     } else {
         home = path(System.getProperty("user.dir")).toAbsolutePath()
