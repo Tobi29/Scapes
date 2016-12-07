@@ -18,7 +18,6 @@ package org.tobi29.scapes.server.format.sql
 
 import mu.KLogging
 import org.tobi29.scapes.engine.sql.SQLDatabase
-import org.tobi29.scapes.engine.sql.SQLQuery
 import org.tobi29.scapes.engine.utils.BufferCreator
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
@@ -29,14 +28,13 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.util.*
 
-class SQLTerrainInfiniteFormat(private val database: SQLDatabase, private val table: String) : TerrainInfiniteFormat {
+class SQLTerrainInfiniteFormat(private val database: SQLDatabase,
+                               private val table: String,
+                               private val world: String) : TerrainInfiniteFormat {
     private val stream = ByteBufferStream({ BufferCreator.bytes(it) },
             { it + 1048576 })
-    private val getChunk: SQLQuery
-
-    init {
-        getChunk = database.compileQuery(table, arrayOf("Data"), "Pos")
-    }
+    private val getChunk = database.compileQuery(table, arrayOf("Data"),
+            "World", "Pos")
 
     @Synchronized override fun chunkTags(
             chunks: List<Vector2i>): List<TagStructure?> {
@@ -48,7 +46,6 @@ class SQLTerrainInfiniteFormat(private val database: SQLDatabase, private val ta
                 logger.error { "Failed to load chunk: $e" }
                 tagStructures.add(null)
             }
-
         }
         return tagStructures
     }
@@ -63,14 +60,14 @@ class SQLTerrainInfiniteFormat(private val database: SQLDatabase, private val ta
             stream.buffer().flip()
             val array = ByteArray(stream.buffer().remaining())
             stream.buffer().get(array)
-            values.add(arrayOf<Any>(pos, array))
+            values.add(arrayOf<Any>(world, pos, array))
             if (values.size >= 64) {
-                database.replace(table, arrayOf("Pos", "Data"), values)
+                database.replace(table, arrayOf("World", "Pos", "Data"), values)
                 values.clear()
             }
         }
         if (!values.isEmpty()) {
-            database.replace(table, arrayOf("Pos", "Data"), values)
+            database.replace(table, arrayOf("World", "Pos", "Data"), values)
         }
     }
 
@@ -80,7 +77,7 @@ class SQLTerrainInfiniteFormat(private val database: SQLDatabase, private val ta
     private fun chunkTag(x: Int,
                          y: Int): TagStructure? {
         val pos = pos(x, y)
-        val rows = getChunk.run(pos)
+        val rows = getChunk.run(world, pos)
         if (!rows.isEmpty()) {
             val row = rows[0]
             if (row[0] is ByteArray) {

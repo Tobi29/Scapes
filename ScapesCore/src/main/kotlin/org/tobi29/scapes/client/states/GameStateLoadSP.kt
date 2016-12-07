@@ -17,6 +17,8 @@
 package org.tobi29.scapes.client.states
 
 import mu.KLogging
+import org.tobi29.scapes.client.ScapesClient
+import org.tobi29.scapes.client.connection.LocalClientConnection
 import org.tobi29.scapes.client.gui.GuiLoading
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.connection.ServerInfo
@@ -100,13 +102,22 @@ class GameStateLoadSP(private var source: WorldSource?, engine: ScapesEngine,
                     val account = Account[engine.home.resolve(
                             "Account.properties")]
                     gui?.setProgress("Loading world...", 1.0)
-                    val game = GameStateGameSP({
-                        LocalPlayerConnection(server.connection, it,
-                                loadingRadius, account).client()
-                    }, source, server, scene, engine)
-                    this.server = null
-                    this.source = null
-                    engine.switchState(game)
+
+                    server.connection.addConnection {
+                        val player = LocalPlayerConnection(it,
+                                server.connection, loadingRadius)
+                        (engine.game as ScapesClient).connection.addConnection { worker ->
+                            val game = GameStateGameSP({
+                                LocalClientConnection(worker, it, player,
+                                        server.plugins, loadingRadius, account)
+                            }, source, server, scene, engine)
+                            this.server = null
+                            this.source = null
+                            engine.switchState(game)
+                            game.client
+                        }
+                        player
+                    }
                     step++
                 }
             }

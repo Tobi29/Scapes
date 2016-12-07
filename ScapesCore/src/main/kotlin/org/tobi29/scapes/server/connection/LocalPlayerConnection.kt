@@ -17,10 +17,10 @@
 package org.tobi29.scapes.server.connection
 
 import org.tobi29.scapes.client.connection.LocalClientConnection
-import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.server.ConnectionCloseException
 import org.tobi29.scapes.engine.server.ConnectionWorker
+import org.tobi29.scapes.engine.server.InvalidPacketDataException
 import org.tobi29.scapes.engine.utils.BufferCreator
 import org.tobi29.scapes.engine.utils.graphics.Image
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
@@ -35,22 +35,36 @@ import org.tobi29.scapes.packets.PacketServer
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.extension.event.MessageEvent
 import java.io.IOException
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicReference
 
-class LocalPlayerConnection(server: ServerConnection, game: GameStateGameMP,
-                            loadingDistance: Int, account: Account) : PlayerConnection(
+class LocalPlayerConnection(private val worker: ConnectionWorker,
+                            server: ServerConnection,
+                            loadingDistance: Int) : PlayerConnection(
         server) {
-    private val client: LocalClientConnection
+    private val queue = ConcurrentLinkedQueue<PacketServer>()
+    internal val queueClient = ConcurrentLinkedQueue<PacketClient>()
+    private var workerClient: ConnectionWorker? = null
     private var state = State.OPEN
 
     init {
         loadingRadius = loadingDistance
-        client = LocalClientConnection(game, this, server.plugins,
-                loadingDistance, account)
     }
 
-    @Throws(IOException::class)
-    fun start(account: Account): String? {
+    internal fun receiveServer(packet: PacketServer) {
+        queue.add(packet)
+        worker.joiner.wake()
+    }
+
+    internal fun receiveClient(packet: PacketClient) {
+        queueClient.add(packet)
+        workerClient?.joiner?.wake()
+    }
+
+    fun start(client: LocalClientConnection,
+              workerClient: ConnectionWorker,
+              account: Account): String? {
+        this.workerClient = workerClient
         val engine = client.game.engine
         val path = engine.home.resolve("Skin.png")
         val image: Image
@@ -77,6 +91,7 @@ class LocalPlayerConnection(server: ServerConnection, game: GameStateGameMP,
         }
         added = true
         setWorld()
+        workerClient.joiner.wake()
         return null
     }
 
@@ -91,23 +106,6 @@ class LocalPlayerConnection(server: ServerConnection, game: GameStateGameMP,
         state = State.CLOSED
     }
 
-    fun client(): LocalClientConnection {
-        return client
-    }
-
-    @Synchronized fun receive(packet: PacketServer) {
-        if (state == State.CLOSED) {
-            return
-        }
-        try {
-            packet.localServer()
-            packet.runServer(this)
-        } catch (e: ConnectionCloseException) {
-            error(e)
-        }
-
-    }
-
     override fun send(packet: PacketClient) {
         if (state == State.CLOSED) {
             return
@@ -119,20 +117,11 @@ class LocalPlayerConnection(server: ServerConnection, game: GameStateGameMP,
         }
     }
 
-    @Synchronized override fun transmit(packet: PacketClient) {
-        if (state == State.CLOSED) {
-            return
-        }
-        try {
-            client.receive(packet)
-        } catch (e: IOException) {
-            error(e)
-        }
-
+    override fun transmit(packet: PacketClient) {
+        receiveClient(packet)
     }
 
-    @Synchronized override fun close() {
-        super.close()
+    override fun close() {
         state = State.CLOSED
     }
 
@@ -144,6 +133,28 @@ class LocalPlayerConnection(server: ServerConnection, game: GameStateGameMP,
     }
 
     override fun tick(worker: ConnectionWorker) {
+        try {
+            while (queue.isNotEmpty()) {
+                val packet = queue.poll()
+                packet.localServer()
+                packet.runServer(this)
+            }
+        } catch (e: ConnectionCloseException) {
+            server.events.fireLocal(
+                    MessageEvent(this, MessageLevel.SERVER_INFO,
+                            "Disconnecting player: $nickname"))
+            state = State.CLOSED
+        } catch (e: InvalidPacketDataException) {
+            server.events.fireLocal(
+                    MessageEvent(this, MessageLevel.SERVER_INFO,
+                            "Disconnecting player: $nickname"))
+            state = State.CLOSED
+        } catch (e: IOException) {
+            server.events.fireLocal(
+                    MessageEvent(this, MessageLevel.SERVER_INFO,
+                            "Player disconnected: $nickname ($e)"))
+            state = State.CLOSED
+        }
     }
 
     override val isClosed: Boolean

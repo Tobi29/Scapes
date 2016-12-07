@@ -18,21 +18,37 @@ package org.tobi29.scapes.client.connection
 
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.client.states.GameStateMenu
+import org.tobi29.scapes.client.states.GameStateServerDisconnect
 import org.tobi29.scapes.connection.Account
+import org.tobi29.scapes.engine.server.ConnectionEndException
 import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.server.RemoteAddress
-import org.tobi29.scapes.packets.PacketClient
 import org.tobi29.scapes.packets.PacketServer
 import org.tobi29.scapes.plugins.Plugins
 import org.tobi29.scapes.server.connection.LocalPlayerConnection
 import java.io.IOException
 
-class LocalClientConnection(game: GameStateGameMP,
-                            private val player: LocalPlayerConnection, plugins: Plugins, loadingDistance: Int,
+class LocalClientConnection(private val worker: ConnectionWorker,
+                            game: GameStateGameMP,
+                            private val player: LocalPlayerConnection,
+                            plugins: Plugins,
+                            loadingDistance: Int,
                             private val account: Account) : ClientConnection(
         game, plugins, loadingDistance) {
-
     override fun tick(worker: ConnectionWorker) {
+        try {
+            while (player.queueClient.isNotEmpty()) {
+                val packet = player.queueClient.poll()
+                packet.localClient()
+                packet.runClient(this)
+            }
+        } catch (e: ConnectionEndException) {
+            logger.info { "Closed client connection: $e" }
+        } catch (e: IOException) {
+            logger.info { "Lost connection: $e" }
+            game.engine.switchState(GameStateServerDisconnect(e.message ?: "",
+                    game.engine))
+        }
     }
 
     override val isClosed: Boolean
@@ -41,18 +57,13 @@ class LocalClientConnection(game: GameStateGameMP,
     override fun close() {
     }
 
-    fun receive(packet: PacketClient) {
-        packet.localClient()
-        packet.runClient(this)
-    }
-
     override fun start() {
         synchronized(player) {
             if (player.isClosed) {
                 return
             }
             try {
-                player.start(account)
+                player.start(this, worker, account)
                 if (!player.server.addConnection { player }) {
                     throw IOException("Failed to add client to server")
                 }
@@ -84,7 +95,7 @@ class LocalClientConnection(game: GameStateGameMP,
     }
 
     override fun transmit(packet: PacketServer) {
-        player.receive(packet)
+        player.receiveServer(packet)
     }
 
     override fun address(): RemoteAddress? {

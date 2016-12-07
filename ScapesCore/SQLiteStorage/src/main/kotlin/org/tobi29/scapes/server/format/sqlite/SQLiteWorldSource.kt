@@ -36,6 +36,7 @@ class SQLiteWorldSource(private val path: FilePath, taskExecutor: TaskExecutor) 
         createDirectories(path)
         val config = SQLiteConfig()
         config.secureDelete = false
+        config.foreignKeys = true
         config.journalMode = SQLiteConfig.JournalMode.WAL
         config.synchronous = SQLiteConfig.Synchronous.NORMAL
         database = SQLiteDatabase(path.resolve("Data.db"), taskExecutor,

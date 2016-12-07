@@ -17,7 +17,6 @@ package org.tobi29.scapes.server.format.sql
 
 import mu.KLogging
 import org.tobi29.scapes.engine.sql.SQLDatabase
-import org.tobi29.scapes.engine.sql.SQLQuery
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream
 import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary
 import org.tobi29.scapes.entity.server.MobPlayerServer
@@ -28,14 +27,10 @@ import java.nio.ByteBuffer
 
 class SQLPlayerData(private val database: SQLDatabase) : PlayerData {
     private val stream = ByteBufferStream()
-    private val getPlayer: SQLQuery
-    private val checkPlayer: SQLQuery
-
-    init {
-        getPlayer = this.database.compileQuery("Players",
-                arrayOf("World", "Permissions", "Entity"), "ID")
-        checkPlayer = this.database.compileQuery("Players", arrayOf("1"), "ID")
-    }
+    private val getPlayer = database.compileQuery("Players",
+            arrayOf("World", "Permissions", "Entity"), "ID")
+    private val checkPlayer = database.compileQuery("Players", arrayOf("1"),
+            "ID")
 
     @Synchronized override fun player(id: String): PlayerEntry {
         var permissions = 0
@@ -79,7 +74,7 @@ class SQLPlayerData(private val database: SQLDatabase) : PlayerData {
             stream.buffer().clear()
             database.replace("Players",
                     arrayOf("ID", "World", "Permissions", "Entity"),
-                    arrayOf<Any>(id, world.id, permissions, array))
+                    arrayOf(id, world.id, permissions, array))
         } catch (e: IOException) {
             logger.error { "Failed to save player: $e" }
         }
@@ -97,7 +92,7 @@ class SQLPlayerData(private val database: SQLDatabase) : PlayerData {
 
     @Synchronized override fun remove(id: String) {
         try {
-            database.delete("Players", Pair<String, Any>("ID", id))
+            database.delete("Players", Pair("ID", id))
         } catch (e: IOException) {
             logger.error { "Failed to delete player: $e" }
         }
