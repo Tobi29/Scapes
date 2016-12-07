@@ -17,22 +17,24 @@
 package org.tobi29.scapes.chunk.terrain.infinite
 
 import java8.util.stream.Stream
+import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.stream
 import org.tobi29.scapes.entity.server.EntityServer
 import java.util.concurrent.ConcurrentHashMap
 
 class TerrainInfiniteChunkManagerServer : TerrainInfiniteChunkManager<EntityServer> {
-    private val chunks = ConcurrentHashMap<Vector2i, TerrainInfiniteChunkServer>()
+    private val chunks = ConcurrentHashMap<ChunkLabel, TerrainInfiniteChunkServer>()
     private var lastLookup: TerrainInfiniteChunkServer? = null
 
     fun add(chunk: TerrainInfiniteChunkServer) {
-        chunks.put(chunk.pos, chunk)
+        chunks.put(ChunkLabel(chunk.pos), chunk)
     }
 
     fun remove(x: Int,
                y: Int): TerrainInfiniteChunkServer? {
-        val chunk = chunks.remove(Vector2i(x, y))
+        val label = LABEL.get().set(x, y)
+        val chunk = chunks.remove(label)
         if (chunk === lastLookup) {
             lastLookup = null
         }
@@ -47,7 +49,8 @@ class TerrainInfiniteChunkManagerServer : TerrainInfiniteChunkManager<EntityServ
                 return lastChunk
             }
         }
-        val chunk = chunks[Vector2i(x, y)]
+        val label = LABEL.get().set(x, y)
+        val chunk = chunks[label]
         lastLookup = chunk
         if (chunk == null) {
             return null
@@ -58,7 +61,8 @@ class TerrainInfiniteChunkManagerServer : TerrainInfiniteChunkManager<EntityServ
 
     override fun has(x: Int,
                      y: Int): Boolean {
-        return chunks.containsKey(Vector2i(x, y))
+        val label = LABEL.get().set(x, y)
+        return chunks.containsKey(label)
     }
 
     override fun stream(): Stream<TerrainInfiniteChunkServer> {
@@ -67,5 +71,20 @@ class TerrainInfiniteChunkManagerServer : TerrainInfiniteChunkManager<EntityServ
 
     fun chunks(): Int {
         return chunks.size
+    }
+
+    private data class ChunkLabel(var x: Int, var y: Int) {
+        constructor(pos: Vector2i) : this(pos.x, pos.y)
+
+        fun set(x: Int,
+                y: Int): ChunkLabel {
+            this.x = x
+            this.y = y
+            return this
+        }
+    }
+
+    companion object {
+        private val LABEL = ThreadLocal { ChunkLabel(0, 0) }
     }
 }
