@@ -34,7 +34,7 @@ class SQLTerrainInfiniteFormat(private val database: SQLDatabase,
     private val stream = ByteBufferStream({ BufferCreator.bytes(it) },
             { it + 1048576 })
     private val getChunk = database.compileQuery(table, arrayOf("Data"),
-            "World", "Pos")
+            "World", "X", "Y")
 
     @Synchronized override fun chunkTags(
             chunks: List<Vector2i>): List<TagStructure?> {
@@ -54,20 +54,20 @@ class SQLTerrainInfiniteFormat(private val database: SQLDatabase,
             chunks: List<Pair<Vector2i, TagStructure>>) {
         val values = ArrayList<Array<Any>>(chunks.size)
         for (chunk in chunks) {
-            val pos = pos(chunk.first.x, chunk.first.y)
             stream.buffer().clear()
             TagStructureBinary.write(stream, chunk.second, 1.toByte())
             stream.buffer().flip()
             val array = ByteArray(stream.buffer().remaining())
             stream.buffer().get(array)
-            values.add(arrayOf<Any>(world, pos, array))
+            values.add(arrayOf<Any>(world, chunk.first.x, chunk.first.y, array))
             if (values.size >= 64) {
-                database.replace(table, arrayOf("World", "Pos", "Data"), values)
+                database.replace(table, arrayOf("World", "X", "Y", "Data"),
+                        values)
                 values.clear()
             }
         }
         if (!values.isEmpty()) {
-            database.replace(table, arrayOf("World", "Pos", "Data"), values)
+            database.replace(table, arrayOf("World", "X", "Y", "Data"), values)
         }
     }
 
@@ -76,8 +76,7 @@ class SQLTerrainInfiniteFormat(private val database: SQLDatabase,
 
     private fun chunkTag(x: Int,
                          y: Int): TagStructure? {
-        val pos = pos(x, y)
-        val rows = getChunk.run(world, pos)
+        val rows = getChunk.run(world, x, y)
         if (!rows.isEmpty()) {
             val row = rows[0]
             if (row[0] is ByteArray) {
@@ -89,19 +88,6 @@ class SQLTerrainInfiniteFormat(private val database: SQLDatabase,
             }
         }
         return null
-    }
-
-    private fun pos(x: Int,
-                    y: Int): Long {
-        var xx = x.toLong()
-        if (xx < 0) {
-            xx += 0x100000000L
-        }
-        var yy = y.toLong()
-        if (yy < 0) {
-            yy += 0x100000000L
-        }
-        return yy shl 32 or xx
     }
 
     companion object : KLogging()

@@ -203,11 +203,12 @@ open class SQLWorldFormat(protected val path: FilePath,
             database.createTable("Worlds", arrayOf("World"),
                     SQLColumn("World", SQLType.VARCHAR, "255"),
                     SQLColumn("Data", SQLType.LONGBLOB))
-            database.createTable("Chunks", arrayOf("World", "Pos"),
+            database.createTable("Chunks", arrayOf("World", "X", "Y"),
                     SQLColumn("World", SQLType.VARCHAR, "255",
                             SQLForeignKey("Worlds", "World",
                                     SQLReferentialAction.CASCADE)),
-                    SQLColumn("Pos", SQLType.BIGINT),
+                    SQLColumn("X", SQLType.INT),
+                    SQLColumn("Y", SQLType.INT),
                     SQLColumn("Data", SQLType.LONGBLOB, notNull = true))
         }
 
