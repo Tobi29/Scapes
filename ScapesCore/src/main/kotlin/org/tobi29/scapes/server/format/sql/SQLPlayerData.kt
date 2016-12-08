@@ -29,8 +29,11 @@ class SQLPlayerData(private val database: SQLDatabase) : PlayerData {
     private val stream = ByteBufferStream()
     private val getPlayer = database.compileQuery("Players",
             arrayOf("World", "Permissions", "Entity"), "ID")
-    private val checkPlayer = database.compileQuery("Players", arrayOf("1"),
-            "ID")
+    private val insertPlayer = database.compileInsert("Players",
+            "ID", "Permissions")
+    private val deletePlayer = database.compileDelete("Players", "ID")
+    private val checkPlayer = database.compileQuery("Players",
+            arrayOf("1"), "ID")
 
     @Synchronized override fun player(id: String): PlayerEntry {
         var permissions = 0
@@ -83,8 +86,7 @@ class SQLPlayerData(private val database: SQLDatabase) : PlayerData {
 
     @Synchronized override fun add(id: String) {
         try {
-            database.insert("Players", arrayOf("ID", "Permissions"),
-                    arrayOf(id, 0))
+            insertPlayer.run(arrayOf(id, 0))
         } catch (e: IOException) {
             logger.error { "Failed to delete player: $e" }
         }
@@ -92,7 +94,7 @@ class SQLPlayerData(private val database: SQLDatabase) : PlayerData {
 
     @Synchronized override fun remove(id: String) {
         try {
-            database.delete("Players", Pair("ID", id))
+            deletePlayer.run(id)
         } catch (e: IOException) {
             logger.error { "Failed to delete player: $e" }
         }

@@ -52,6 +52,8 @@ open class SQLWorldFormat(protected val path: FilePath,
             arrayOf("Data"), "World")
     protected val setWorldData = database.compileUpdate("Worlds",
             arrayOf("World"), "Data")
+    protected val insertWorldData = database.compileInsert("Worlds", "World")
+    protected val deleteWorldData = database.compileDelete("Worlds", "World")
     protected val plugins: Plugins
     protected val playerData: PlayerData
     protected val seed: Long
@@ -133,8 +135,7 @@ open class SQLWorldFormat(protected val path: FilePath,
                 world.read(tagStructure)
             }
         } else {
-            database.insert("Worlds", arrayOf("World", "Data"),
-                    arrayOf(name, null))
+            insertWorldData.run(arrayOf(name))
         }
         return world
     }
@@ -154,7 +155,7 @@ open class SQLWorldFormat(protected val path: FilePath,
 
     @Synchronized override fun deleteWorld(name: String): Boolean {
         try {
-            database.delete("Worlds", Pair("World", name))
+            deleteWorldData.run(name)
         } catch (e: IOException) {
             logger.error { "Error whilst deleting world: $e" }
             return false
