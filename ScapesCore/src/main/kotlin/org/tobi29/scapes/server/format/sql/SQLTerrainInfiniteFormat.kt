@@ -35,6 +35,8 @@ class SQLTerrainInfiniteFormat(private val database: SQLDatabase,
             { it + 1048576 })
     private val getChunk = database.compileQuery(table, arrayOf("Data"),
             "World", "X", "Y")
+    private val replaceChunk = database.compileReplace(table, "World", "X", "Y",
+            "Data")
 
     @Synchronized override fun chunkTags(
             chunks: List<Vector2i>): List<TagStructure?> {
@@ -61,13 +63,12 @@ class SQLTerrainInfiniteFormat(private val database: SQLDatabase,
             stream.buffer().get(array)
             values.add(arrayOf<Any>(world, chunk.first.x, chunk.first.y, array))
             if (values.size >= 64) {
-                database.replace(table, arrayOf("World", "X", "Y", "Data"),
-                        values)
+                replaceChunk(*values.toTypedArray())
                 values.clear()
             }
         }
         if (!values.isEmpty()) {
-            database.replace(table, arrayOf("World", "X", "Y", "Data"), values)
+            replaceChunk(*values.toTypedArray())
         }
     }
 
@@ -76,7 +77,7 @@ class SQLTerrainInfiniteFormat(private val database: SQLDatabase,
 
     private fun chunkTag(x: Int,
                          y: Int): TagStructure? {
-        val rows = getChunk.run(world, x, y)
+        val rows = getChunk(world, x, y)
         if (!rows.isEmpty()) {
             val row = rows[0]
             if (row[0] is ByteArray) {

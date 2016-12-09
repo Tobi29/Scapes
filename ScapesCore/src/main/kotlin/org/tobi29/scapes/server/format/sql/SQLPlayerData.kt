@@ -31,6 +31,8 @@ class SQLPlayerData(private val database: SQLDatabase) : PlayerData {
             arrayOf("World", "Permissions", "Entity"), "ID")
     private val insertPlayer = database.compileInsert("Players",
             "ID", "Permissions")
+    private val replacePlayer = database.compileReplace("Players", "ID",
+            "World", "Permissions", "Entity")
     private val deletePlayer = database.compileDelete("Players", "ID")
     private val checkPlayer = database.compileQuery("Players",
             arrayOf("1"), "ID")
@@ -38,7 +40,7 @@ class SQLPlayerData(private val database: SQLDatabase) : PlayerData {
     @Synchronized override fun player(id: String): PlayerEntry {
         var permissions = 0
         try {
-            val rows = getPlayer.run(id)
+            val rows = getPlayer(id)
             if (rows.isEmpty()) {
                 return PlayerEntry(permissions)
             } else {
@@ -75,9 +77,7 @@ class SQLPlayerData(private val database: SQLDatabase) : PlayerData {
             val array = ByteArray(stream.buffer().remaining())
             stream.buffer().get(array)
             stream.buffer().clear()
-            database.replace("Players",
-                    arrayOf("ID", "World", "Permissions", "Entity"),
-                    arrayOf(id, world.id, permissions, array))
+            replacePlayer(arrayOf(id, world.id, permissions, array))
         } catch (e: IOException) {
             logger.error { "Failed to save player: $e" }
         }
@@ -86,7 +86,7 @@ class SQLPlayerData(private val database: SQLDatabase) : PlayerData {
 
     @Synchronized override fun add(id: String) {
         try {
-            insertPlayer.run(arrayOf(id, 0))
+            insertPlayer(arrayOf(id, 0))
         } catch (e: IOException) {
             logger.error { "Failed to delete player: $e" }
         }
@@ -94,7 +94,7 @@ class SQLPlayerData(private val database: SQLDatabase) : PlayerData {
 
     @Synchronized override fun remove(id: String) {
         try {
-            deletePlayer.run(id)
+            deletePlayer(id)
         } catch (e: IOException) {
             logger.error { "Failed to delete player: $e" }
         }
@@ -103,7 +103,7 @@ class SQLPlayerData(private val database: SQLDatabase) : PlayerData {
 
     override fun playerExists(id: String): Boolean {
         try {
-            return !checkPlayer.run(id).isEmpty()
+            return checkPlayer(id).isNotEmpty()
         } catch (e: IOException) {
             logger.error { "Failed to load player: $e" }
         }

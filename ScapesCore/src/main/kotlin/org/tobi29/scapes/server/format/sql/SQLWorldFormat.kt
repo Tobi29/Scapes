@@ -46,8 +46,11 @@ open class SQLWorldFormat(protected val path: FilePath,
     protected val idTagStructure: TagStructure
     protected val getMetaData = database.compileQuery("MetaData",
             arrayOf("Value"), "Name")
+    protected val replaceMetaData = database.compileReplace("MetaData", "Name",
+            "Value")
     protected val getData = database.compileQuery("Data", arrayOf("Value"),
             "Name")
+    protected val replaceData = database.compileReplace("Data", "Name", "Value")
     protected val getWorldData = database.compileQuery("Worlds",
             arrayOf("Data"), "World")
     protected val setWorldData = database.compileUpdate("Worlds",
@@ -62,7 +65,7 @@ open class SQLWorldFormat(protected val path: FilePath,
     init {
         playerData = SQLPlayerData(this.database)
         checkDatabase(database)
-        var rows = getMetaData.run("Seed")
+        var rows = getMetaData("Seed")
         if (!rows.isEmpty()) {
             val row = rows[0]
             try {
@@ -73,10 +76,9 @@ open class SQLWorldFormat(protected val path: FilePath,
         } else {
             logger.info { "No seed in database, adding a random one in." }
             seed = ThreadLocalRandom.current().nextLong()
-            this.database.replace("MetaData", arrayOf("Name", "Value"),
-                    arrayOf("Seed", seed))
+            replaceMetaData(arrayOf("Seed", seed))
         }
-        rows = getData.run("IDs")
+        rows = getData("IDs")
         if (!rows.isEmpty()) {
             val row = rows[0]
             if (row[0] is ByteArray) {
@@ -125,7 +127,7 @@ open class SQLWorldFormat(protected val path: FilePath,
                             it.environment.generator(),
                             arrayOf(it.environment.populator()), it.air)
                 }, environmentSupplier)
-        val rows = getWorldData.run(name)
+        val rows = getWorldData(name)
         if (!rows.isEmpty()) {
             val row = rows[0]
             if (row[0] is ByteArray) {
@@ -135,7 +137,7 @@ open class SQLWorldFormat(protected val path: FilePath,
                 world.read(tagStructure)
             }
         } else {
-            insertWorldData.run(arrayOf(name))
+            insertWorldData(arrayOf(name))
         }
         return world
     }
@@ -147,7 +149,7 @@ open class SQLWorldFormat(protected val path: FilePath,
             val array = ByteArray(stream.buffer().remaining())
             stream.buffer().get(array)
             stream.buffer().clear()
-            setWorldData.run(arrayOf(world.id), array)
+            setWorldData(arrayOf(world.id), array)
         } catch (e: IOException) {
             logger.error { "Failed to save world info: $e" }
         }
@@ -155,7 +157,7 @@ open class SQLWorldFormat(protected val path: FilePath,
 
     @Synchronized override fun deleteWorld(name: String): Boolean {
         try {
-            deleteWorldData.run(name)
+            deleteWorldData(name)
         } catch (e: IOException) {
             logger.error { "Error whilst deleting world: $e" }
             return false
@@ -171,8 +173,7 @@ open class SQLWorldFormat(protected val path: FilePath,
         val array = ByteArray(stream.buffer().remaining())
         stream.buffer().get(array)
         stream.buffer().clear()
-        database.replace("Data", arrayOf("Name", "Value"),
-                arrayOf<Any>("IDs", array))
+        replaceData(arrayOf("IDs", array))
     }
 
     open protected fun pluginFiles(): List<PluginFile> {
@@ -194,6 +195,9 @@ open class SQLWorldFormat(protected val path: FilePath,
             database.createTable("MetaData", arrayOf("Name"),
                     SQLColumn("Name", SQLType.VARCHAR, "255"),
                     SQLColumn("Value", SQLType.VARCHAR, "255"))
+            database.createTable("Worlds", arrayOf("World"),
+                    SQLColumn("World", SQLType.VARCHAR, "255"),
+                    SQLColumn("Data", SQLType.LONGBLOB))
             database.createTable("Players", arrayOf("ID"),
                     SQLColumn("ID", SQLType.CHAR, "40"),
                     SQLColumn("World", SQLType.VARCHAR, "255",
@@ -201,9 +205,6 @@ open class SQLWorldFormat(protected val path: FilePath,
                                     SQLReferentialAction.SET_NULL)),
                     SQLColumn("Permissions", SQLType.INT, notNull = true),
                     SQLColumn("Entity", SQLType.LONGBLOB))
-            database.createTable("Worlds", arrayOf("World"),
-                    SQLColumn("World", SQLType.VARCHAR, "255"),
-                    SQLColumn("Data", SQLType.LONGBLOB))
             database.createTable("Chunks", arrayOf("World", "X", "Y"),
                     SQLColumn("World", SQLType.VARCHAR, "255",
                             SQLForeignKey("Worlds", "World",
@@ -216,7 +217,7 @@ open class SQLWorldFormat(protected val path: FilePath,
         fun initDatabase(database: SQLDatabase,
                          seed: Long) {
             checkDatabase(database)
-            database.replace("MetaData", arrayOf("Name", "Value"),
+            database.compileReplace("MetaData", "Name", "Value")(
                     arrayOf("Seed", seed))
         }
     }

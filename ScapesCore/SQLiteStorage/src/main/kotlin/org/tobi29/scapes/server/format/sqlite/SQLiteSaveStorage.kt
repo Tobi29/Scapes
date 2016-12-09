@@ -20,11 +20,10 @@ import java8.util.stream.Stream
 import org.tobi29.scapes.client.SaveStorage
 import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.stream
-import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.server.format.WorldSource
 import java.io.IOException
 
-class SQLiteSaveStorage(private val path: FilePath, private val taskExecutor: TaskExecutor) : SaveStorage {
+class SQLiteSaveStorage(private val path: FilePath) : SaveStorage {
 
     @Throws(IOException::class)
     override fun list(): Stream<String> {
@@ -42,7 +41,7 @@ class SQLiteSaveStorage(private val path: FilePath, private val taskExecutor: Ta
 
     @Throws(IOException::class)
     override fun get(name: String): WorldSource {
-        return SQLiteWorldSource(path.resolve(name), taskExecutor)
+        return SQLiteWorldSource(path.resolve(name))
     }
 
     @Throws(IOException::class)

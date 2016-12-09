@@ -82,8 +82,7 @@ fun main(args: Array<String>) {
     when (mode) {
         "client" -> {
             val saves: (ScapesClient) -> SaveStorage = { scapes ->
-                SQLiteSaveStorage(home.resolve("saves"),
-                        scapes.engine.taskExecutor)
+                SQLiteSaveStorage(home.resolve("saves"))
             }
             var backend = ScapesEngine.loadBackend()
             if (commandLine.hasOption('t')) {

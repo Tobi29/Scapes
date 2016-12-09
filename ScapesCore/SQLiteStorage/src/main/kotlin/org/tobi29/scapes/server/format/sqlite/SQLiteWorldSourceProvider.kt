@@ -37,6 +37,6 @@ class SQLiteWorldSourceProvider : WorldSourceProvider {
     override fun get(path: FilePath,
                      config: TagStructure,
                      taskExecutor: TaskExecutor): WorldSource {
-        return SQLiteWorldSource(path, taskExecutor)
+        return SQLiteWorldSource(path)
     }
 }

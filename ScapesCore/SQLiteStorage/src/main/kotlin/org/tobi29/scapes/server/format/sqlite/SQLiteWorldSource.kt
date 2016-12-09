@@ -16,31 +16,31 @@
 
 package org.tobi29.scapes.server.format.sqlite
 
-import org.tobi29.scapes.engine.sql.sqlite.SQLiteConfig
+import org.sqlite.SQLiteConfig
+import org.sqlite.SQLiteDataSource
 import org.tobi29.scapes.engine.sql.sqlite.SQLiteDatabase
 import org.tobi29.scapes.engine.utils.BufferCreator
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.graphics.encodePNG
 import org.tobi29.scapes.engine.utils.io.filesystem.*
-import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.format.WorldFormat
 import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.format.newPanorama
 import org.tobi29.scapes.server.format.sql.SQLWorldFormat
+import java.io.IOException
+import java.sql.Connection
+import java.sql.SQLException
 
-class SQLiteWorldSource(private val path: FilePath, taskExecutor: TaskExecutor) : WorldSource {
+class SQLiteWorldSource(private val path: FilePath,
+                        private val connection: Connection) : WorldSource {
     private val database: SQLiteDatabase
 
+    constructor(path: FilePath) : this(path,
+            openSave(path))
+
     init {
-        createDirectories(path)
-        val config = SQLiteConfig()
-        config.secureDelete = false
-        config.foreignKeys = true
-        config.journalMode = SQLiteConfig.JournalMode.WAL
-        config.synchronous = SQLiteConfig.Synchronous.NORMAL
-        database = SQLiteDatabase(path.resolve("Data.db"), taskExecutor,
-                config)
+        database = SQLiteDatabase(connection)
     }
 
     override fun init(seed: Long,
@@ -78,6 +78,35 @@ class SQLiteWorldSource(private val path: FilePath, taskExecutor: TaskExecutor) 
     }
 
     override fun close() {
-        database.close()
+        try {
+            connection.close()
+        } catch (e: SQLException) {
+            throw IOException(e)
+        }
+    }
+
+    companion object {
+        fun openSave(path: FilePath): Connection {
+            createDirectories(path)
+            return openDatabase(path.resolve("Data.db"))
+        }
+        fun openDatabase(path: FilePath): Connection {
+            return openDatabase(
+                    "jdbc:sqlite:${path.toAbsolutePath().toUri().toURL()}")
+        }
+
+        fun openDatabase(url: String): Connection {
+            try {
+                val config = SQLiteConfig()
+                config.enforceForeignKeys(true)
+                config.setJournalMode(SQLiteConfig.JournalMode.WAL)
+                config.setLockingMode(SQLiteConfig.LockingMode.NORMAL)
+                val source = SQLiteDataSource(config)
+                source.url = url
+                return source.connection
+            } catch (e: SQLException) {
+                throw IOException(e)
+            }
+        }
     }
 }
