@@ -38,13 +38,10 @@ class GuiComponentChat(parent: GuiLayoutData, private val chatHistory: ChatHisto
     override fun updateMesh(renderer: GuiRenderer,
                             size: Vector2d) {
         var yy = -16
-        val iterator = chatHistory.lines().iterator()
-        while (iterator.hasNext()) {
-            val line = iterator.next()
+        chatHistory.lines { line ->
             gui.style.font.render(
                     FontRenderer.to(renderer, 0.0f, yy.toFloat(), 1.0f, 1.0f,
-                            1.0f, 1.0f), line,
-                    16.0f)
+                            1.0f, 1.0f), line, 16.0f)
             yy -= 20
         }
     }

@@ -9,9 +9,7 @@ import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
 import org.tobi29.scapes.engine.utils.filterMap
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import org.tobi29.scapes.engine.utils.io.tag.structure
-import org.tobi29.scapes.engine.utils.notNull
-import org.tobi29.scapes.engine.utils.stream
-import org.tobi29.scapes.engine.utils.toTypedArray
+import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelPlayers
 
@@ -29,9 +27,9 @@ class ExtensionPlayers(application: Application,
                     return@accessAsync
                 }
                 payload.getList("Players")?.let {
-                    players.items = it.stream().filterMap<TagStructure>().map {
+                    players.items = it.asSequence().filterMap<TagStructure>().mapNotNull {
                         it.getString("Name")
-                    }.notNull().toTypedArray()
+                    }.toArray()
                 }
             }
         }

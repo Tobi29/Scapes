@@ -32,7 +32,7 @@ import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.PointerPane
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.StoneType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
@@ -174,24 +174,24 @@ class BlockStoneRock(materials: VanillaMaterial,
     }
 
     override fun registerTextures(registry: TerrainTextureRegistry) {
-        textures = stoneRegistry.values().stream().map {
+        textures = stoneRegistry.values().asSequence().map {
             it?.let {
                 return@map registry.registerTexture(
                         it.textureRoot() + "/raw/" + it.texture() + ".png")
             }
-        }.toArray { arrayOfNulls<TerrainTexture?>(it) }
-        texturesItem = stoneRegistry.values().stream().map {
+        }.toArray()
+        texturesItem = stoneRegistry.values().asSequence().map {
             it?.let {
                 return@map registry.registerTexture(
                         "VanillaBasics:image/terrain/stone/rock/" + it.texture() + ".png")
             }
-        }.toArray { arrayOfNulls<TerrainTexture?>(it) }
+        }.toArray()
     }
 
     override fun createModels(registry: TerrainTextureRegistry) {
         textures?.let {
-            models = stream(*it).map {
-                stream(*SELECTION).map { i ->
+            models = it.asSequence().map {
+                SELECTION.asSequence().map { i ->
                     val shapes = ArrayList<BlockModelComplex.Shape>()
                     val shape = BlockModelComplex.ShapeBox(it, it, it, it, it,
                             it, i.minX - 0.5, i.minY - 0.5, i.minZ - 0.5,
@@ -199,13 +199,13 @@ class BlockStoneRock(materials: VanillaMaterial,
                             1.0, 1.0)
                     shapes.add(shape)
                     BlockModelComplex(registry, shapes, 1.0)
-                }.toArray { arrayOfNulls<BlockModel>(it) }
-            }.toArray { arrayOfNulls<Array<BlockModel>?>(it) }
+                }.toArray<BlockModel>()
+            }.toArray()
         }
         texturesItem?.let {
-            modelsItem = stream(*it).map {
+            modelsItem = it.asSequence().map {
                 ItemModelSimple(it, 1.0, 1.0, 1.0, 1.0)
-            }.toArray { arrayOfNulls<ItemModel?>(it) }
+            }.toArray()
         }
     }
 

@@ -28,8 +28,7 @@ import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.stream
-import org.tobi29.scapes.engine.utils.streamRange
+import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityFarmlandServer
 import org.tobi29.scapes.vanilla.basics.generator.ClimateInfoLayer
@@ -281,11 +280,11 @@ class BlockGrass(materials: VanillaMaterial,
                 "VanillaBasics:image/terrain/soil/Dirt.png")
         textureBottomSand = registry.registerTexture(
                 "VanillaBasics:image/terrain/soil/Sand.png")
-        texturesGrass = streamRange(1, 9).mapToObj {
+        texturesGrass = (1..8).asSequence().map {
             registry.registerTexture(
                     "VanillaBasics:image/terrain/TallGrass" +
                             it + ".png", ShaderAnimation.TALL_GRASS)
-        }.toArray { arrayOfNulls<TerrainTexture?>(it) }
+        }.toArray()
     }
 
     override fun createModels(registry: TerrainTextureRegistry) {
@@ -310,7 +309,7 @@ class BlockGrass(materials: VanillaMaterial,
                 textureBottomSand, null, null, null, null, 1.0, 1.0, 1.0,
                 1.0)
         texturesGrass?.let {
-            modelsTallGrass = stream(*it).map {
+            modelsTallGrass = it.asSequence().map {
                 val shapes = ArrayList<BlockModelComplex.Shape>()
                 val shape = BlockModelComplex.ShapeBillboard(it,
                         -8.0, -8.0, -8.0, 8.0, 8.0, 8.0, 0.0, 0.0,
@@ -318,7 +317,7 @@ class BlockGrass(materials: VanillaMaterial,
                 shape.rotateZ(45.0)
                 shapes.add(shape)
                 BlockModelComplex(registry, shapes, 0.0625)
-            }.toArray { arrayOfNulls<BlockModel?>(it) }
+            }.toArray()
         }
     }
 

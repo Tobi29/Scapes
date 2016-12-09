@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.block
 
-import java8.util.stream.Collectors
 import mu.KLogging
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Texture
@@ -23,7 +22,6 @@ import org.tobi29.scapes.engine.utils.BufferCreator
 import org.tobi29.scapes.engine.utils.graphics.Image
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.math.min
-import org.tobi29.scapes.engine.utils.stream
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.util.concurrent.ConcurrentHashMap
@@ -144,8 +142,9 @@ abstract class TextureAtlas<T : TextureAtlasEntry> protected constructor(val eng
     }
 
     fun init(engine: ScapesEngine): Int {
-        val textureList = textures.values.stream().sorted { texture1, texture2 -> texture2.resolution() - texture1.resolution() }.collect(
-                Collectors.toList<T>())
+        // TODO: Clean up
+        val textureList = textures.values.asSequence()
+                .sortedBy { it.resolution }.toMutableList<T?>()
         textureList.add(0, null)
         var size = 16
         var atlas = Array(size) { IntArray(size) }
@@ -154,7 +153,7 @@ abstract class TextureAtlas<T : TextureAtlasEntry> protected constructor(val eng
         var x = 0
         var y = 0
         for (i in 1..textureList.size - 1) {
-            val texture = textureList[i]
+            val texture = textureList[i]!!
             val textureTiles = texture.resolution() shr minBits
             if (textureTiles != tiles) {
                 x = 0
@@ -205,7 +204,7 @@ abstract class TextureAtlas<T : TextureAtlasEntry> protected constructor(val eng
                 val i = atlas[x][y]
                 if (i > 0) {
                     val xx = x shl minBits
-                    val texture = textureList[i]
+                    val texture = textureList[i]!!
                     texture.x = x.toDouble() / size
                     texture.y = y.toDouble() / size
                     texture.tileX = xx

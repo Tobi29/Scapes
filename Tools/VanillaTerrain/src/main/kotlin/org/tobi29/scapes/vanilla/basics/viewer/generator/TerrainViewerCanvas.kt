@@ -30,7 +30,6 @@ import org.tobi29.scapes.engine.utils.math.min
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
-import org.tobi29.scapes.engine.utils.stream
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -145,7 +144,7 @@ class TerrainViewerCanvas(parent: Composite, style: Int,
     fun wipeCache() {
         checkWidget()
         cache.incrementAndGet()
-        chunks.values.stream().filter { it != emptyImage }.forEach(
+        chunks.values.asSequence().filter { it != emptyImage }.forEach(
                 Image::dispose)
         chunks.clear()
     }

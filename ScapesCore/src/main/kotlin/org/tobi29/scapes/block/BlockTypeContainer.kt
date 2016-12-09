@@ -30,14 +30,8 @@ abstract class BlockTypeContainer protected constructor(registry: GameRegistry, 
                        z: Int,
                        face: Face,
                        player: MobPlayerServer): Boolean {
-        var fetch: EntityContainerServer? = null
-        terrain.getEntities(x, y, z) { stream ->
-            if (fetch == null) {
-                fetch = stream.filterMap<EntityContainerServer>().findAny().orElse(
-                        null)
-            }
-        }
-        val container = fetch
+        val container = terrain.getEntities(x, y,
+                z).filterMap<EntityContainerServer>().firstOrNull()
         if (container != null) {
             player.openGui(container)
         } else {

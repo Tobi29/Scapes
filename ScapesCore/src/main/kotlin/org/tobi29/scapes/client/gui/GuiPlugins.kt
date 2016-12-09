@@ -29,7 +29,6 @@ import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.io.process
 import org.tobi29.scapes.engine.utils.io.put
 import org.tobi29.scapes.engine.utils.io.use
-import org.tobi29.scapes.engine.utils.stream
 import org.tobi29.scapes.plugins.PluginFile
 import org.tobi29.scapes.plugins.Plugins
 import java.io.IOException
@@ -73,9 +72,8 @@ class GuiPlugins(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu(
     private fun updatePlugins() {
         try {
             scrollPane.removeAll()
-            Plugins.installed(path).stream().sorted { plugin1, plugin2 ->
-                plugin1.name().compareTo(plugin2.name())
-            }.forEach { file ->
+            Plugins.installed(
+                    path).asSequence().sortedBy { it.name() }.forEach { file ->
                 scrollPane.addVert(0.0, 0.0, -1.0, 70.0) {
                     Element(it, file)
                 }

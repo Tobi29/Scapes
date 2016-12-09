@@ -15,20 +15,18 @@
  */
 package org.tobi29.scapes.client
 
-import java8.util.stream.Stream
 import org.tobi29.scapes.engine.utils.io.filesystem.*
-import org.tobi29.scapes.engine.utils.stream
 import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.format.basic.BasicWorldSource
 
 class BasicSaveStorage(private val path: FilePath) : SaveStorage {
-    override fun list(): Stream<String> {
+    override fun list(): Sequence<String> {
         if (!exists(path)) {
-            return stream()
+            return emptySequence()
         }
         return list(path, {
             isDirectory(it) && isNotHidden(it)
-        }).stream().map { it.fileName }.map { it.toString() }
+        }).asSequence().map { it.fileName }.map { it.toString() }
     }
 
     override fun exists(name: String): Boolean {

@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.chunk
 
-import java8.util.stream.Stream
 import mu.KLogging
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
@@ -36,11 +35,10 @@ import org.tobi29.scapes.engine.utils.math.sqrt
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.entity.client.MobClient
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
-import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.entity.model.EntityModel
 import org.tobi29.scapes.entity.model.MobModel
 import org.tobi29.scapes.packets.PacketServer
@@ -133,21 +131,19 @@ class WorldClient(val connection: ClientConnection, cam: Cam, seed: Long,
         return terrain.getEntity(uuid)
     }
 
-    override fun getEntities(consumer: (Stream<EntityClient>) -> Unit) {
-        terrain.getEntities(consumer)
-        consumer(stream(player))
+    override fun getEntities(): Sequence<EntityClient> {
+        return terrain.getEntities() + player
     }
 
-    @Suppress("USELESS_CAST")
     override fun getEntities(x: Int,
                              y: Int,
-                             z: Int,
-                             consumer: (Stream<EntityClient>) -> Unit) {
-        terrain.getEntities(x, y, z, consumer)
-        consumer(stream(player).map { it as EntityClient }.filter { entity ->
-            val pos = entity.getCurrentPos()
-            pos.intX() == x && pos.intY() == y && pos.intZ() == z
-        })
+                             z: Int): Sequence<EntityClient> {
+        val sequence = terrain.getEntities(x, y, z)
+        val pos = player.getCurrentPos()
+        if (pos.intX() == x && pos.intY() == y && pos.intZ() == z) {
+            return sequence + player
+        }
+        return sequence
     }
 
     override fun getEntitiesAtLeast(minX: Int,
@@ -155,10 +151,9 @@ class WorldClient(val connection: ClientConnection, cam: Cam, seed: Long,
                                     minZ: Int,
                                     maxX: Int,
                                     maxY: Int,
-                                    maxZ: Int,
-                                    consumer: (Stream<EntityClient>) -> Unit) {
-        terrain.getEntities(minX, minY, minZ, maxX, maxY, maxZ) { consumer(it) }
-        consumer(stream(player))
+                                    maxZ: Int): Sequence<EntityClient> {
+        return terrain.getEntitiesAtLeast(minX, minY, minZ, maxX, maxY,
+                maxZ) + player
     }
 
     override fun entityAdded(entity: EntityClient) {
@@ -307,9 +302,7 @@ class WorldClient(val connection: ClientConnection, cam: Cam, seed: Long,
         infoLayers.put(name, layer)
     }
 
-    fun infoLayers(): Stream<Map.Entry<String, () -> TerrainRenderInfo.InfoLayer>> {
-        return infoLayers.entries.stream<Map.Entry<String, () -> TerrainRenderInfo.InfoLayer>>()
-    }
+    fun infoLayers() = infoLayers.readOnly()
 
     fun disposed(): Boolean {
         return disposed
@@ -322,10 +315,6 @@ class WorldClient(val connection: ClientConnection, cam: Cam, seed: Long,
 
     override fun send(packet: PacketServer) {
         connection.send(packet)
-    }
-
-    override fun getWorldEntities(): Stream<MobPlayerClientMain> {
-        return stream(player)
     }
 
     companion object : KLogging()

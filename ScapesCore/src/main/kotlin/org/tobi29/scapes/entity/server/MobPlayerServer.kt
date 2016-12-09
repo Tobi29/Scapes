@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.entity.server
 
-import java8.util.stream.Stream
 import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.block.InventoryContainer
 import org.tobi29.scapes.block.ItemStack
@@ -32,7 +31,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.math.vector.plus
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.MobPositionReceiver
 import org.tobi29.scapes.entity.getEntities
@@ -50,7 +49,8 @@ abstract class MobPlayerServer(world: WorldServer, pos: Vector3d, speed: Vector3
         world, pos, speed, aabb, lives, maxLives, viewField,
         hitField), EntityContainerServer {
     protected val positionSenderOther: MobPositionSenderServer
-    protected val viewers: MutableList<MobPlayerServer> = ArrayList()
+    protected val viewersMut = ArrayList<MobPlayerServer>()
+    override val viewers = viewersMut.readOnly()
     protected val inventories: InventoryContainer
     private val punchListeners = ConcurrentHashMap<String, (Double) -> Unit>()
     val positionReceiver: MobPositionReceiver
@@ -65,7 +65,7 @@ abstract class MobPlayerServer(world: WorldServer, pos: Vector3d, speed: Vector3
         }
         inventories.add("Container", Inventory(registry, 40))
         inventories.add("Hold", Inventory(registry, 1))
-        viewers.add(this)
+        viewersMut.add(this)
         val exceptions = listOf(connection)
         positionSenderOther = MobPositionSenderServer(pos,
                 { world.send(it, exceptions) })
@@ -129,17 +129,13 @@ abstract class MobPlayerServer(world: WorldServer, pos: Vector3d, speed: Vector3
     }
 
     override fun addViewer(player: MobPlayerServer) {
-        if (!viewers.contains(player)) {
-            viewers.add(player)
+        if (!viewersMut.contains(player)) {
+            viewersMut.add(player)
         }
     }
 
-    override fun viewers(): Stream<MobPlayerServer> {
-        return viewers.stream()
-    }
-
     override fun removeViewer(player: MobPlayerServer) {
-        viewers.remove(player)
+        viewersMut.remove(player)
     }
 
     override fun createPositionHandler(): MobPositionSenderServer {
@@ -183,22 +179,21 @@ abstract class MobPlayerServer(world: WorldServer, pos: Vector3d, speed: Vector3
         }
         hitField.setPerspective(100 / range, 1.0, 0.1, range)
         val mobs = ArrayList<MobLivingServer>()
-        world.getEntities(hitField) {
-            it.filterMap<MobLivingServer>().filter { it != this }.forEach { mob ->
-                mobs.add(mob)
-                if (side) {
-                    mob.damage(leftWeapon().material().click(this, leftWeapon(),
-                            mob) * strength)
-                } else {
-                    mob.damage(
-                            rightWeapon().material().click(this, rightWeapon(),
-                                    mob) * strength)
-                }
-                mob.onNotice(this)
-                val rad = rot.doubleZ().toRad()
-                mob.push(cos(rad) * 10.0,
-                        sin(rad) * 10.0, 2.0)
+        world.getEntities(
+                hitField).filterMap<MobLivingServer>().filter { it != this }.forEach { mob ->
+            mobs.add(mob)
+            if (side) {
+                mob.damage(leftWeapon().material().click(this, leftWeapon(),
+                        mob) * strength)
+            } else {
+                mob.damage(
+                        rightWeapon().material().click(this, rightWeapon(),
+                                mob) * strength)
             }
+            mob.onNotice(this)
+            val rad = rot.doubleZ().toRad()
+            mob.push(cos(rad) * 10.0,
+                    sin(rad) * 10.0, 2.0)
         }
         return mobs
     }

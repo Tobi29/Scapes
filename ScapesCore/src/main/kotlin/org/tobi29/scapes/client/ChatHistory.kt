@@ -15,9 +15,7 @@
  */
 package org.tobi29.scapes.client
 
-import java8.util.stream.Stream
 import org.tobi29.scapes.engine.utils.EventDispatcher
-import org.tobi29.scapes.engine.utils.stream
 import java.util.*
 
 class ChatHistory {
@@ -42,8 +40,8 @@ class ChatHistory {
         }
     }
 
-    @Synchronized fun lines(): Stream<String> {
-        return lines.stream().map { it.text }
+    @Synchronized fun lines(block: (String) -> Unit) {
+        lines.asSequence().map { it.text }.forEach(block)
     }
 
     private class ChatLine(val text: String) {

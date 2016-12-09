@@ -35,7 +35,7 @@ import org.tobi29.scapes.engine.utils.math.mix
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3i
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.math.vector.plus
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.generator.ClimateInfoLayer
 import org.tobi29.scapes.vanilla.basics.generator.EnvironmentClimate
@@ -280,7 +280,7 @@ class BlockLeaves(materials: VanillaMaterial,
     }
 
     override fun registerTextures(registry: TerrainTextureRegistry) {
-        textures = treeRegistry.values().stream().map {
+        textures = treeRegistry.values().asSequence().map {
             if (it == null) {
                 return@map null
             }
@@ -290,15 +290,12 @@ class BlockLeaves(materials: VanillaMaterial,
                             ShaderAnimation.LEAVES),
                     registry.registerTexture(
                             it.texture() + "/LeavesFast.png"))
-        }.toArray {
-            arrayOfNulls<Triple<TreeType, TerrainTexture, TerrainTexture>?>(
-                    it)
-        }
+        }.toArray()
     }
 
     override fun createModels(registry: TerrainTextureRegistry) {
         textures?.let {
-            modelsFancy = stream(*it).map {
+            modelsFancy = it.asSequence().map {
                 if (it == null) {
                     return@map null
                 }
@@ -308,16 +305,16 @@ class BlockLeaves(materials: VanillaMaterial,
                         -8.0, 8.0, 8.0, 8.0, 1.0, 1.0, 1.0, 1.0)
                 shapes.add(shape)
                 BlockModelComplex(registry, shapes, 0.0625)
-            }.toArray { arrayOfNulls<BlockModel?>(it) }
-            modelsFast = stream(*it).map {
+            }.toArray()
+            modelsFast = it.asSequence().map {
                 if (it == null) {
                     return@map null
                 }
                 BlockModelSimpleBlock(this, registry, it.third, it.third,
                         it.third, it.third, it.third, it.third, 1.0, 1.0,
                         1.0, 1.0)
-            }.toArray { arrayOfNulls<BlockModel?>(it) }
-            modelsColored = stream(*it).map {
+            }.toArray()
+            modelsColored = it.asSequence().map {
                 if (it == null) {
                     return@map null
                 }
@@ -332,7 +329,7 @@ class BlockLeaves(materials: VanillaMaterial,
                         -8.0, 8.0, 8.0, 8.0, r, g, b, 1.0)
                 shapes.add(shape)
                 BlockModelComplex(registry, shapes, 0.0625)
-            }.toArray { arrayOfNulls<BlockModel?>(it) }
+            }.toArray()
         }
     }
 

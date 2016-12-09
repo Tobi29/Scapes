@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
-import java8.util.stream.Stream
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.lighting.LightingEngine
@@ -26,7 +25,6 @@ import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.math.PointerPane
 import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.stream
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.entity.Entity
 import java.util.*
@@ -226,21 +224,21 @@ abstract class TerrainInfinite<E : Entity>(val zSize: Int,
         return entityMap[uuid]
     }
 
-    override fun getEntities(consumer: (Stream<E>) -> Unit) {
-        consumer(entityMap.values.stream())
+    override fun getEntities(): Sequence<E> {
+        return entityMap.values.asSequence()
     }
 
     override fun getEntities(x: Int,
                              y: Int,
-                             z: Int,
-                             consumer: (Stream<E>) -> Unit) {
-        chunk(x shr 4, y shr 4, { chunk ->
-            consumer(chunk.entities().filter(
-                    { entity ->
-                        val pos = entity.getCurrentPos()
-                        pos.intX() == x && pos.intY() == y && pos.intZ() == z
-                    }))
-        })
+                             z: Int): Sequence<E> {
+        var s = emptySequence<E>()
+        chunk(x shr 4, y shr 4) {
+            s += it.entities.values.asSequence().filter { entity ->
+                val pos = entity.getCurrentPos()
+                pos.intX() == x && pos.intY() == y && pos.intZ() == z
+            }
+        }
+        return s
     }
 
     override fun getEntitiesAtLeast(minX: Int,
@@ -248,8 +246,8 @@ abstract class TerrainInfinite<E : Entity>(val zSize: Int,
                                     minZ: Int,
                                     maxX: Int,
                                     maxY: Int,
-                                    maxZ: Int,
-                                    consumer: (Stream<E>) -> Unit) {
+                                    maxZ: Int): Sequence<E> {
+        var s = emptySequence<E>()
         val minCX = minX shr 4
         val minCY = minY shr 4
         val maxCX = maxX shr 4
@@ -257,10 +255,11 @@ abstract class TerrainInfinite<E : Entity>(val zSize: Int,
         for (yy in minCY..maxCY) {
             for (xx in minCX..maxCX) {
                 chunkNoLoad(xx, yy)?.let { chunk ->
-                    consumer(chunk.entities())
+                    s += chunk.entities.values.asSequence()
                 }
             }
         }
+        return s
     }
 
     override fun entityAdded(entity: E) {
@@ -290,7 +289,7 @@ abstract class TerrainInfinite<E : Entity>(val zSize: Int,
     abstract fun chunkNoLoad(x: Int,
                              y: Int): TerrainInfiniteChunk<E>?
 
-    abstract fun loadedChunks(): Stream<out TerrainInfiniteChunk<E>>
+    abstract fun loadedChunks(): Sequence<TerrainInfiniteChunk<E>>
 
     fun lighting(): LightingEngine {
         return lighting

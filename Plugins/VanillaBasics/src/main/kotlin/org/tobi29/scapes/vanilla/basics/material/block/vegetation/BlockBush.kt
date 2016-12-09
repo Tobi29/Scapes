@@ -33,7 +33,7 @@ import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.PointerPane
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
@@ -168,7 +168,7 @@ class BlockBush(materials: VanillaMaterial) : VanillaBlock(materials,
 
     override fun createModels(registry: TerrainTextureRegistry) {
         textures?.let {
-            models = stream(*it).map {
+            models = it.asSequence().map {
                 val shapes = ArrayList<BlockModelComplex.Shape>()
                 var shape: BlockModelComplex.Shape = BlockModelComplex.ShapeBillboard(
                         it.first, -8.0, -8.0, -8.0, 8.0, 8.0, 8.0, 1.0,
@@ -183,7 +183,7 @@ class BlockBush(materials: VanillaMaterial) : VanillaBlock(materials,
                     shapes.add(shape)
                 }
                 BlockModelComplex(registry, shapes, 0.0625)
-            }.toArray { arrayOfNulls<BlockModel>(it) }
+            }.toArray()
         }
     }
 

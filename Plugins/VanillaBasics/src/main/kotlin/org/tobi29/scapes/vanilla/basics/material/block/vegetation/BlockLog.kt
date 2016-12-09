@@ -31,7 +31,7 @@ import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.math.vector.plus
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.TreeType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
@@ -115,25 +115,25 @@ class BlockLog(materials: VanillaMaterial,
     }
 
     override fun registerTextures(registry: TerrainTextureRegistry) {
-        textures = treeRegistry.values().stream().map {
+        textures = treeRegistry.values().asSequence().map {
             if (it == null) {
                 return@map null
             }
             Pair(registry.registerTexture(it.texture() + "/LogTop.png"),
                     registry.registerTexture(it.texture() + "/LogSide.png"))
-        }.toArray { arrayOfNulls<Pair<TerrainTexture, TerrainTexture>?>(it) }
+        }.toArray()
     }
 
     override fun createModels(registry: TerrainTextureRegistry) {
         textures?.let {
-            models = stream(*it).map {
+            models = it.asSequence().map {
                 if (it == null) {
                     return@map null
                 }
                 BlockModelSimpleBlock(this, registry, it.first, it.first,
                         it.second, it.second, it.second, it.second,
                         1.0, 1.0, 1.0, 1.0)
-            }.toArray { arrayOfNulls<BlockModel?>(it) }
+            }.toArray()
         }
     }
 

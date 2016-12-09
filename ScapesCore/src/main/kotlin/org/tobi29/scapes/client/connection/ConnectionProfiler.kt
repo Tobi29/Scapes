@@ -16,27 +16,21 @@
 package org.tobi29.scapes.client.connection
 
 import java8.util.concurrent.ConcurrentMaps
-import java8.util.stream.Stream
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.readOnly
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 
 class ConnectionProfiler {
-    private val bytes = ConcurrentHashMap<Class<*>, AtomicLong>()
+    private val bytesMut = ConcurrentHashMap<Class<*>, AtomicLong>()
+    val bytes = bytesMut.readOnly()
 
     fun packet(packet: Any,
                size: Long) {
-        ConcurrentMaps.computeIfAbsent(bytes, packet.javaClass
-        ) { key -> AtomicLong() }.addAndGet(size)
-    }
-
-    fun entries(): Stream<Pair<Class<*>, Long>> {
-        return bytes.entries.stream().map { entry ->
-            Pair(entry.key, entry.value.get())
-        }
+        ConcurrentMaps.computeIfAbsent(bytesMut,
+                packet.javaClass) { AtomicLong() }.addAndGet(size)
     }
 
     fun clear() {
-        bytes.clear()
+        bytesMut.clear()
     }
 }

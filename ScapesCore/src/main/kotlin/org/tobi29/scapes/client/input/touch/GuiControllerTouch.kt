@@ -49,7 +49,7 @@ class GuiControllerTouch(engine: ScapesEngine, private val controller: Controlle
                 engine.guiStack.fireEvent(
                         GuiComponentEvent(guiPos.x, guiPos.y),
                         { component, event -> true })?.let { component ->
-                    if (!fingers.values.stream().filter { it.dragging == component }.findAny().isPresent) {
+                    if (!fingers.values.any { it.dragging == component }) {
                         finger.dragging = component
                         component.gui.sendNewEvent(GuiEvent.PRESS_LEFT,
                                 GuiComponentEvent(
@@ -64,8 +64,8 @@ class GuiControllerTouch(engine: ScapesEngine, private val controller: Controlle
             }
             newFingers.put(tracker, fetch)
         }
-        fingers.keys.stream().filter { tracker ->
-            !newFingers.containsKey(tracker)
+        fingers.keys.asSequence().filter {
+            !newFingers.containsKey(it)
         }.forEach { tracker ->
             val finger = fingers.remove(tracker)
             val component = finger?.dragging

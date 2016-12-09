@@ -29,7 +29,7 @@ import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.io.tag.getFloat
 import org.tobi29.scapes.engine.utils.io.tag.setFloat
 import org.tobi29.scapes.engine.utils.math.Face
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobItemServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.item.ItemHeatable
@@ -83,10 +83,10 @@ class BlockSand(materials: VanillaMaterial) : BlockSoil(materials,
 
     override fun createModels(registry: TerrainTextureRegistry) {
         textures?.let {
-            models = stream(*it).map {
+            models = it.asSequence().map {
                 BlockModelSimpleBlock(this, registry, it, it, it, it, it, it,
                         1.0, 1.0, 1.0, 1.0)
-            }.toArray { arrayOfNulls<BlockModel?>(it) }
+            }.toArray()
         }
     }
 

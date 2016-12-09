@@ -32,7 +32,7 @@ import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.PointerPane
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.TreeType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
@@ -170,17 +170,17 @@ class BlockSapling(materials: VanillaMaterial,
     }
 
     override fun registerTextures(registry: TerrainTextureRegistry) {
-        textures = treeRegistry.values().stream().map {
+        textures = treeRegistry.values().asSequence().map {
             if (it == null) {
                 return@map null
             }
             registry.registerTexture(it.texture() + "/Sapling.png")
-        }.toArray { arrayOfNulls<TerrainTexture?>(it) }
+        }.toArray()
     }
 
     override fun createModels(registry: TerrainTextureRegistry) {
         textures?.let {
-            models = stream(*it).map {
+            models = it.asSequence().map {
                 if (it == null) {
                     return@map null
                 }
@@ -190,10 +190,10 @@ class BlockSapling(materials: VanillaMaterial,
                 shape.rotateZ(45.0)
                 shapes.add(shape)
                 BlockModelComplex(registry, shapes, 0.0625)
-            }.toArray { arrayOfNulls<BlockModel?>(it) }
-            modelsItem = stream(*it).map {
+            }.toArray()
+            modelsItem = it.asSequence().map {
                 ItemModelSimple(it, 1.0, 1.0, 1.0, 1.0)
-            }.toArray { arrayOfNulls<ItemModel?>(it) }
+            }.toArray()
         }
     }
 

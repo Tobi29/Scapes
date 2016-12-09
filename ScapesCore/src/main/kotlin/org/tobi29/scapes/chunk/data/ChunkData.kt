@@ -108,7 +108,7 @@ class ChunkData(private val xSectionBits: Int,
     }
 
     fun load(tags: List<Any>) {
-        val iterator = tags.stream().filterMap<TagStructure>().iterator()
+        val iterator = tags.asSequence().filterMap<TagStructure>().iterator()
         for (i in data.indices) {
             if (iterator.hasNext()) {
                 data[i].load(iterator.next())

@@ -27,8 +27,7 @@ import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
-import org.tobi29.scapes.engine.utils.stream
-import org.tobi29.scapes.engine.utils.streamRange
+import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 
 abstract class BlockSimpleData protected constructor(materials: VanillaMaterial, nameID: String) : VanillaBlock(
@@ -67,17 +66,17 @@ abstract class BlockSimpleData protected constructor(materials: VanillaMaterial,
     }
 
     override fun registerTextures(registry: TerrainTextureRegistry) {
-        textures = streamRange(0, types()).mapToObj {
+        textures = (0..types() - 1).asSequence().map {
             registry.registerTexture(texture(it))
-        }.toArray { arrayOfNulls<TerrainTexture?>(it) }
+        }.toArray()
     }
 
     override fun createModels(registry: TerrainTextureRegistry) {
         textures?.let {
-            models = stream(*it).map {
+            models = it.asSequence().map {
                 BlockModelSimpleBlock(this, registry, it, it, it, it, it, it,
                         1.0, 1.0, 1.0, 1.0)
-            }.toArray { arrayOfNulls<BlockModel?>(it) }
+            }.toArray()
         }
     }
 

@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.client.states.scenes
 
-import java8.util.stream.Collectors
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.*
@@ -169,7 +168,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
         val saves = game.saves()
         val random = ThreadLocalRandom.current()
         try {
-            val list = saves.list().collect(Collectors.toList<String>())
+            val list = saves.list().toList()
             if (list.isEmpty()) {
                 throw IOException("No save available")
             }

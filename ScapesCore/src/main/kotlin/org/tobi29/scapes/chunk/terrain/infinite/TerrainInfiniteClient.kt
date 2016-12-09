@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
-import java8.util.stream.Collectors
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.terrain.TerrainClient
@@ -25,7 +24,6 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
 import org.tobi29.scapes.engine.utils.math.vector.lengthSqr
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
-import org.tobi29.scapes.engine.utils.stream
 import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.entity.client.EntityClient
@@ -55,13 +53,7 @@ class TerrainInfiniteClient(override val world: WorldClient, loadingRadius: Int,
                 locations.add(Vector2i(xx, yy))
             }
         }
-        Collections.sort(locations) { vector1, vector2 ->
-            val distance1 = vector1.distanceSqr(Vector2i.ZERO)
-            val distance2 = vector2.distanceSqr(Vector2i.ZERO)
-            if (distance1 == distance2) 0 else if (distance1 > distance2) 1 else -1
-        }
-        sortedLocations = locations.stream().collect(
-                Collectors.toList<Vector2i>())
+        sortedLocations = locations.sortedBy { it.distanceSqr(Vector2i.ZERO) }
         renderer = TerrainInfiniteRenderer(this, player,
                 loadingRadius.toDouble(),
                 sortedLocations)

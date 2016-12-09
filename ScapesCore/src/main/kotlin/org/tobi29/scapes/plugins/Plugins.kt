@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.plugins
 
-import java8.util.stream.Collectors
 import java8.util.stream.Stream
 import mu.KLogging
 import org.tobi29.scapes.block.GameRegistry
@@ -39,8 +38,7 @@ constructor(private val files: List<PluginFile>, idStorage: IDStorage) {
     private var init = false
 
     init {
-        val paths = files.stream().filter { it.file() != null }.map { it.file() }.collect(
-                Collectors.toList<FilePath>())
+        val paths = files.asSequence().mapNotNull { it.file() }.toList()
         if (paths.isEmpty()) {
             classLoader = null
             val classLoader = Plugins::class.java.classLoader
@@ -154,12 +152,10 @@ constructor(private val files: List<PluginFile>, idStorage: IDStorage) {
         @Throws(IOException::class)
         fun installed(path: FilePath): List<PluginFile> {
             val files = ArrayList<PluginFile>()
-            streamRecursive(path) {
-                it.forEach { file ->
-                    if (isRegularFile(file) && isNotHidden(file)) {
-                        files.add(PluginFile(file))
-                    }
-                }
+            listRecursive(path) {
+                filter {
+                    isRegularFile(it) && isNotHidden(it)
+                }.forEach { files.add(PluginFile(it)) }
             }
             files.addAll(embedded())
             return files

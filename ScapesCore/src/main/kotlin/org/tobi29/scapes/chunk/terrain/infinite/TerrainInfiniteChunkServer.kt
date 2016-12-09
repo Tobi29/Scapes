@@ -67,7 +67,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
     }
 
     fun updateServer(delta: Double) {
-        entities.values.forEach { entity ->
+        entitiesMut.values.forEach { entity ->
             entity.update(delta)
             entity.updateListeners(delta)
             if (entity is MobServer) {
@@ -139,7 +139,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
     }
 
     fun dispose(): TagStructure {
-        entities.values.forEach { terrain.entityRemoved(it) }
+        entitiesMut.values.forEach { terrain.entityRemoved(it) }
         return save(false)
     }
 
@@ -259,7 +259,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
             tagStructure.setLong("Tick", tick)
             val entitiesTag = ArrayList<TagStructure>()
             val registry = terrain2.world.registry
-            entities.values.forEach { entity ->
+            entitiesMut.values.forEach { entity ->
                 val entityTag = TagStructure()
                 entityTag.setUUID("UUID", entity.getUUID())
                 entityTag.setInt("ID", entity.id(registry))

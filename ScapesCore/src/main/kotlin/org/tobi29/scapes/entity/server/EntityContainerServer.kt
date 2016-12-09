@@ -15,16 +15,15 @@
  */
 package org.tobi29.scapes.entity.server
 
-import java8.util.stream.Stream
 import org.tobi29.scapes.block.InventoryContainer
 import org.tobi29.scapes.entity.Entity
 
 interface EntityContainerServer : Entity {
+    val viewers: List<MobPlayerServer>
+
     fun inventories(): InventoryContainer
 
     fun addViewer(player: MobPlayerServer)
-
-    fun viewers(): Stream<MobPlayerServer>
 
     fun removeViewer(player: MobPlayerServer)
 }

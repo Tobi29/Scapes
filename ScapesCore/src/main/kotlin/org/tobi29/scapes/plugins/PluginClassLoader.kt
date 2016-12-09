@@ -18,7 +18,7 @@ package org.tobi29.scapes.plugins
 
 import mu.KLogging
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.toArray
 import java.io.IOException
 import java.net.URL
 import java.net.URLClassLoader
@@ -46,9 +46,7 @@ constructor(path: List<FilePath>) : URLClassLoader(
     companion object : KLogging() {
         @Throws(IOException::class)
         private fun urls(paths: List<FilePath>): Array<URL> {
-            return paths.stream().map { it.toUri().toURL() }.toArray {
-                arrayOfNulls<URL>(it)
-            }
+            return paths.asSequence().map { it.toUri().toURL() }.toArray()
         }
     }
 }

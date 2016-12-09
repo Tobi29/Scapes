@@ -18,6 +18,7 @@ package org.tobi29.scapes.vanilla.basics.material.item.vegetation
 import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.engine.utils.filterMap
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityFarmlandServer
@@ -40,11 +41,10 @@ class ItemSeed(materials: VanillaMaterial,
             item.setAmount(item.amount() - 1)
             val random = ThreadLocalRandom.current()
             if (random.nextInt(1) == 0) {
-                terrain.world.getEntities(x, y, z, { stream ->
-                    stream.filter { farmland -> farmland is EntityFarmlandServer }.forEach { farmland ->
-                        (farmland as EntityFarmlandServer).seed(CropType.WHEAT)
-                    }
-                })
+                terrain.world.getEntities(x, y,
+                        z).filterMap<EntityFarmlandServer>().forEach { farmland ->
+                    farmland.seed(CropType.WHEAT)
+                }
             }
         }
         return 0.0

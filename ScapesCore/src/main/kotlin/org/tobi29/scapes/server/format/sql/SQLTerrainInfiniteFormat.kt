@@ -28,8 +28,8 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.util.*
 
-class SQLTerrainInfiniteFormat(private val database: SQLDatabase,
-                               private val table: String,
+class SQLTerrainInfiniteFormat(database: SQLDatabase,
+                               table: String,
                                private val world: String) : TerrainInfiniteFormat {
     private val stream = ByteBufferStream({ BufferCreator.bytes(it) },
             { it + 1048576 })

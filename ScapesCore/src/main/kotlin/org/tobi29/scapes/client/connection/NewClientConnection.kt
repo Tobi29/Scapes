@@ -144,12 +144,12 @@ class NewClientConnection(private val worker: ConnectionWorker,
             }
 
             val checksum = input.byteArray
-            val embedded = Plugins.embedded().stream().filter { plugin -> plugin.id() == id }.filter { plugin ->
+            val embedded = Plugins.embedded().asSequence().filter { plugin -> plugin.id() == id }.filter { plugin ->
                 compare(plugin.version(), version).`in`(Comparison.LOWER_BUILD,
                         Comparison.HIGHER_MINOR)
-            }.findAny()
-            if (embedded.isPresent) {
-                plugins.add(embedded.get())
+            }.firstOrNull()
+            if (embedded != null) {
+                plugins.add(embedded)
             } else {
                 val location = FileCache.Location("plugins", checksum)
                 val file = cache.retrieve(location)

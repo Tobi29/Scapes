@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.entity
 
-import java8.util.stream.Stream
 import java.util.*
 
 interface EntityContainer<E : Entity> {
@@ -32,20 +31,18 @@ interface EntityContainer<E : Entity> {
 
     fun getEntity(uuid: UUID): E?
 
-    fun getEntities(consumer: (Stream<E>) -> Unit)
+    fun getEntities(): Sequence<E>
 
     fun getEntities(x: Int,
                     y: Int,
-                    z: Int,
-                    consumer: (Stream<E>) -> Unit)
+                    z: Int): Sequence<E>
 
     fun getEntitiesAtLeast(minX: Int,
                            minY: Int,
                            minZ: Int,
                            maxX: Int,
                            maxY: Int,
-                           maxZ: Int,
-                           consumer: (Stream<E>) -> Unit)
+                           maxZ: Int): Sequence<E>
 
     fun entityAdded(entity: E)
 

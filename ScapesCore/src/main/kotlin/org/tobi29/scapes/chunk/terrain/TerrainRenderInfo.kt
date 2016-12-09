@@ -16,17 +16,14 @@
 
 package org.tobi29.scapes.chunk.terrain
 
-import java8.util.stream.Stream
 import java.util.concurrent.ConcurrentHashMap
 
 class TerrainRenderInfo(
-        layers: Stream<Map.Entry<String, () -> TerrainRenderInfo.InfoLayer>>) {
+        layers: Map<String, () -> TerrainRenderInfo.InfoLayer>) {
     private val layers = ConcurrentHashMap<String, InfoLayer>()
 
     init {
-        layers.forEach { entry ->
-            this.layers.put(entry.key, entry.value())
-        }
+        layers.forEach { this.layers.put(it.key, it.value()) }
     }
 
     fun init(x: Int,

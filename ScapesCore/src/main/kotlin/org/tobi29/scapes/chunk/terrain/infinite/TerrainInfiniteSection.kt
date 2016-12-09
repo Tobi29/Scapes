@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
-import java8.util.stream.Stream
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.WorldClient
@@ -27,7 +26,6 @@ import org.tobi29.scapes.engine.utils.math.PointerPane
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
-import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.packets.PacketBlockChange
 import java.util.*
 
@@ -260,15 +258,14 @@ class TerrainInfiniteSection : TerrainClient {
         }
     }
 
-    override fun getEntities(consumer: (Stream<EntityClient>) -> Unit) {
-        access { it.getEntities(consumer) }
+    override fun getEntities(): Sequence<EntityClient> {
+        access { return it.getEntities() }
     }
 
     override fun getEntities(x: Int,
                              y: Int,
-                             z: Int,
-                             consumer: (Stream<EntityClient>) -> Unit) {
-        access { it.getEntities(x, y, z, consumer) }
+                             z: Int): Sequence<EntityClient> {
+        access { return it.getEntities(x, y, z) }
     }
 
     override fun getEntitiesAtLeast(minX: Int,
@@ -276,9 +273,10 @@ class TerrainInfiniteSection : TerrainClient {
                                     minZ: Int,
                                     maxX: Int,
                                     maxY: Int,
-                                    maxZ: Int,
-                                    consumer: (Stream<EntityClient>) -> Unit) {
-        access { it.getEntities(minX, minY, minZ, maxX, maxY, maxZ, consumer) }
+                                    maxZ: Int): Sequence<EntityClient> {
+        access {
+            return it.getEntitiesAtLeast(minX, minY, minZ, maxX, maxY, maxZ)
+        }
     }
 
     override fun entityAdded(entity: EntityClient) {

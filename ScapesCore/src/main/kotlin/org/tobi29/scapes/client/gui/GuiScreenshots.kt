@@ -22,7 +22,6 @@ import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.io.filesystem.*
-import org.tobi29.scapes.engine.utils.stream
 import java.io.IOException
 
 class GuiScreenshots(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu(
@@ -37,7 +36,7 @@ class GuiScreenshots(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu
             val path = state.engine.home.resolve("screenshots")
             val files = listRecursive(path,
                     { isRegularFile(it) && isNotHidden(it) })
-            files.stream().sorted().forEach { file ->
+            files.asSequence().sorted().forEach { file ->
                 val element = scrollPane.addVert(0.0, 0.0, -1.0,
                         70.0) { Element(it, file, this) }
                 state.engine.taskExecutor.runTask({

@@ -62,7 +62,7 @@ class PacketAnvil : PacketAbstract, PacketServer {
         player.mob { mob ->
             mob.world.getEntity(uuid)?.let { anvil ->
                 if (anvil is EntityAnvilServer) {
-                    if (anvil.viewers().filter { check -> check === mob }.findAny().isPresent) {
+                    if (mob in anvil.viewers) {
                         val plugin = mob.world.plugins.plugin(
                                 "VanillaBasics") as VanillaBasics
                         anvil.inventories().modify("Container") { anvilI ->

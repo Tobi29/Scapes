@@ -16,10 +16,8 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
-import java8.util.stream.Stream
 import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
-import org.tobi29.scapes.engine.utils.stream
 import org.tobi29.scapes.entity.server.EntityServer
 import java.util.concurrent.ConcurrentHashMap
 
@@ -65,8 +63,8 @@ class TerrainInfiniteChunkManagerServer : TerrainInfiniteChunkManager<EntityServ
         return chunks.containsKey(label)
     }
 
-    override fun stream(): Stream<TerrainInfiniteChunkServer> {
-        return chunks.values.stream()
+    override fun stream(): Sequence<TerrainInfiniteChunkServer> {
+        return chunks.values.asSequence()
     }
 
     fun chunks(): Int {

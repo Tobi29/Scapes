@@ -56,14 +56,13 @@ class MobPlayerServerVB(world: WorldServer, pos: Vector3d, speed: Vector3d,
                 pos.doubleY() + viewOffset.y,
                 pos.doubleZ() + viewOffset.z, pos.doubleX() + lookX,
                 pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0.0, 0.0, 1.0)
-        world.getEntities(viewField) {
-            it.filterMap<MobServer>().forEach { mob ->
-                val mobPos = mob.getCurrentPos()
-                if (!world.checkBlocked(pos.intX(), pos.intY(),
-                        pos.intZ(), mobPos.intX(), mobPos.intY(),
-                        mobPos.intZ())) {
-                    onNotice(mob)
-                }
+        world.getEntities(
+                viewField).filterMap<MobServer>().filter { it != this }.forEach { mob ->
+            val mobPos = mob.getCurrentPos()
+            if (!world.checkBlocked(pos.intX(), pos.intY(),
+                    pos.intZ(), mobPos.intX(), mobPos.intY(),
+                    mobPos.intZ())) {
+                onNotice(mob)
             }
         }
         if (pos.doubleZ() < -100.0) {

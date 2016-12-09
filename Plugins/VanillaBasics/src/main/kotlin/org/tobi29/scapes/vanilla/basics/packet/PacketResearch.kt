@@ -56,7 +56,7 @@ class PacketResearch : PacketAbstract, PacketServer {
         player.mob { mob ->
             mob.world.getEntity(uuid)?.let { researchTable ->
                 if (researchTable is EntityResearchTableServer) {
-                    if (researchTable.viewers().filter { check -> check === mob }.findAny().isPresent) {
+                    if (mob in researchTable.viewers) {
                         val plugin = mob.world.plugins.plugin(
                                 "VanillaBasics") as VanillaBasics
                         researchTable.inventories().modify(

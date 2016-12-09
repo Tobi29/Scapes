@@ -35,7 +35,7 @@ import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.PointerPane
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
@@ -212,17 +212,17 @@ class BlockFlower(materials: VanillaMaterial) : VanillaBlock(materials,
 
     override fun createModels(registry: TerrainTextureRegistry) {
         textures?.let {
-            models = stream(*it).map {
+            models = it.asSequence().map {
                 val shapes = ArrayList<BlockModelComplex.Shape>()
                 val shape = BlockModelComplex.ShapeBillboard(it, -8.0, -8.0,
                         -8.0, 8.0, 8.0, 8.0, 1.0, 1.0, 1.0, 1.0)
                 shape.rotateZ(45.0)
                 shapes.add(shape)
                 BlockModelComplex(registry, shapes, 0.0625)
-            }.toArray { arrayOfNulls<BlockModel?>(it) }
-            modelsItem = stream(*it).map {
+            }.toArray()
+            modelsItem = it.asSequence().map {
                 ItemModelSimple(it, 1.0, 1.0, 1.0, 1.0)
-            }.toArray { arrayOfNulls<ItemModel?>(it) }
+            }.toArray()
         }
     }
 

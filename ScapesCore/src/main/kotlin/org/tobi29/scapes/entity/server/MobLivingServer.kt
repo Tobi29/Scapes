@@ -68,17 +68,15 @@ abstract class MobLivingServer(world: WorldServer, pos: Vector3d, speed: Vector3
                 pos.doubleZ() + viewOffset.z, pos.doubleX() + lookX,
                 pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0.0, 0.0, 1.0)
         val mobs = ArrayList<MobLivingServer>()
-        world.getEntities(hitField, { stream ->
-            stream.filter { it is MobLivingServer && it !== this }.map(
-                    { it as MobLivingServer }).forEach { mob ->
-                mobs.add(mob)
-                mob.damage(damage)
-                mob.onNotice(this)
-                val rad = rot.doubleZ().toRad()
-                mob.push(cos(rad) * 10.0,
-                        sin(rad) * 10.0, 2.0)
-            }
-        })
+        world.getEntities(
+                hitField).filterMap<MobLivingServer>().filter { it != this }.forEach { mob ->
+            mobs.add(mob)
+            mob.damage(damage)
+            mob.onNotice(this)
+            val rad = rot.doubleZ().toRad()
+            mob.push(cos(rad) * 10.0,
+                    sin(rad) * 10.0, 2.0)
+        }
         return mobs
     }
 
@@ -194,13 +192,12 @@ abstract class MobLivingServer(world: WorldServer, pos: Vector3d, speed: Vector3
                 pos.doubleY() + viewOffset.y,
                 pos.doubleZ() + viewOffset.z, pos.doubleX() + lookX,
                 pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0.0, 0.0, 1.0)
-        world.getEntities(viewField) {
-            it.filterMap<MobServer>().forEach { mob ->
-                val otherPos = mob.getCurrentPos()
-                if (!world.checkBlocked(pos.intX(), pos.intY(), pos.intZ(),
-                        otherPos.intX(), otherPos.intY(), otherPos.intZ())) {
-                    onNotice(mob)
-                }
+        world.getEntities(
+                viewField).filterMap<MobServer>().filter { it != this }.forEach { mob ->
+            val otherPos = mob.getCurrentPos()
+            if (!world.checkBlocked(pos.intX(), pos.intY(), pos.intZ(),
+                    otherPos.intX(), otherPos.intY(), otherPos.intZ())) {
+                onNotice(mob)
             }
         }
         if (invincibleTicks >= 0.0) {

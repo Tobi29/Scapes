@@ -42,11 +42,9 @@ open class UpdateBlockUpdate : Update() {
         val type = terrain.type(block)
         val data = terrain.data(block)
         if (updateTile || type.causesTileUpdate()) {
-            terrain.getEntities(x, y, z, { stream ->
-                stream.forEach { entity ->
-                    entity.updateTile(terrain, x, y, z, data)
-                }
-            })
+            terrain.getEntities(x, y, z).forEach { entity ->
+                entity.updateTile(terrain, x, y, z, data)
+            }
         }
         type.update(terrain, x, y, z, data)
     }

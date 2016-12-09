@@ -16,15 +16,19 @@
 
 package org.tobi29.scapes.client
 
-import java8.util.stream.Stream
 import org.tobi29.scapes.server.format.WorldSource
+import java.io.IOException
 
 interface SaveStorage {
-    fun list(): Stream<String>
+    @Throws(IOException::class)
+    fun list(): Sequence<String>
 
+    @Throws(IOException::class)
     fun exists(name: String): Boolean
 
+    @Throws(IOException::class)
     operator fun get(name: String): WorldSource
 
+    @Throws(IOException::class)
     fun delete(name: String): Boolean
 }

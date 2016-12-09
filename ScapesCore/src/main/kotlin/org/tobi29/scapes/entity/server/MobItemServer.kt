@@ -72,10 +72,9 @@ class MobItemServer(world: WorldServer, pos: Vector3d = Vector3d.ZERO, speed: Ve
             stackwait -= delta
             if (stackwait <= 0) {
                 stackwait += 1.0
-                world.getEntities(pos.now(), 1.0) {
-                    it.filterMap<MobItemServer>().filter { it != this }.forEach {
-                        item.setAmount(item.amount() - it.item.stack(item))
-                    }
+                world.getEntities(pos.now(),
+                        1.0).filterMap<MobItemServer>().filter { it != this }.forEach {
+                    item.setAmount(item.amount() - it.item.stack(item))
                 }
             }
         } else {

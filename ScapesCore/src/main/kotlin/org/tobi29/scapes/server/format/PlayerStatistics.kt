@@ -15,13 +15,11 @@
  */
 package org.tobi29.scapes.server.format
 
-import java8.util.stream.Collectors
 import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.Material
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import org.tobi29.scapes.engine.utils.io.tag.getInt
 import org.tobi29.scapes.engine.utils.io.tag.setInt
-import org.tobi29.scapes.engine.utils.stream
 import java.util.*
 
 class PlayerStatistics {
@@ -67,7 +65,7 @@ class PlayerStatistics {
     fun load(registry: GameRegistry,
              tagStructures: List<TagStructure>) {
         statisticMaterials.addAll(
-                tagStructures.stream().map { tagStructure ->
+                tagStructures.asSequence().map { tagStructure ->
                     StatisticMaterial(
                             registry.material(
                                     tagStructure.getInt(
@@ -76,7 +74,7 @@ class PlayerStatistics {
                             tagStructure.getInt("BreakAmount") ?: 0,
                             tagStructure.getInt("PlaceAmount") ?: 0,
                             tagStructure.getInt("CraftAmount") ?: 0)
-                }.collect(Collectors.toList<StatisticMaterial>()))
+                }.toList())
     }
 
     fun save(): List<TagStructure> {

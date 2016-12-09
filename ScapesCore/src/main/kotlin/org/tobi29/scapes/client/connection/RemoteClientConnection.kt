@@ -24,7 +24,6 @@ import org.tobi29.scapes.engine.server.ConnectionEndException
 import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.server.PacketBundleChannel
 import org.tobi29.scapes.engine.server.RemoteAddress
-import org.tobi29.scapes.engine.utils.mapNotNull
 import org.tobi29.scapes.packets.PacketAbstract
 import org.tobi29.scapes.packets.PacketClient
 import org.tobi29.scapes.packets.PacketPingClient
@@ -118,7 +117,7 @@ class RemoteClientConnection(worker: ConnectionWorker,
     }
 
     override fun address(): RemoteAddress? {
-        return channel.remoteAddress?.mapNotNull(::RemoteAddress)
+        return channel.remoteAddress?.let(::RemoteAddress)
     }
 
     fun updatePing(ping: Long) {

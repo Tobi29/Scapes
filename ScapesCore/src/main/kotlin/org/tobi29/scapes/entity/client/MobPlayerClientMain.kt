@@ -30,6 +30,7 @@ import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.length
+import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.entity.particle.ParticleEmitterBlock
 import org.tobi29.scapes.packets.PacketInteraction
 import java.util.concurrent.ThreadLocalRandom
@@ -255,16 +256,12 @@ abstract class MobPlayerClientMain protected constructor(world: WorldClient, pos
                 pos.doubleZ() + viewOffset.z,
                 pos.doubleX() + lookX, pos.doubleY() + lookY,
                 pos.doubleZ() + lookZ, 0.0, 0.0, 1.0)
-        world.getEntities {
-            it.filterMap<MobClient>().forEach { entity ->
-                if (viewField.inView(entity.getAABB()) > 0) {
-                    val pos2 = entity.getCurrentPos()
-                    if (!world.checkBlocked(pos.intX(), pos.intY(),
-                            pos.intZ(), pos2.intX(), pos2.intY(),
-                            pos2.intZ())) {
-                        onNotice(entity)
-                    }
-                }
+        world.getEntities(viewField).filterMap<MobClient>().forEach { entity ->
+            val pos2 = entity.getCurrentPos()
+            if (!world.checkBlocked(pos.intX(), pos.intY(),
+                    pos.intZ(), pos2.intX(), pos2.intY(),
+                    pos2.intZ())) {
+                onNotice(entity)
             }
         }
         footStep -= delta

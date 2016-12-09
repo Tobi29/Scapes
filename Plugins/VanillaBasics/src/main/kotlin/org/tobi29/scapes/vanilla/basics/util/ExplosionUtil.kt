@@ -37,21 +37,19 @@ fun WorldServer.explosionEntities(x: Double,
                                   push: Double,
                                   damage: Double) {
     assert(checkThread())
-    getEntities(Vector3d(x, y, z), radius, { stream ->
-        stream.filterMap<MobServer>().forEach {
-            val relative = it.getCurrentPos().minus(Vector3d(x, y, z))
-            val s = radius - relative.length()
-            if (s > 0) {
-                val p = s * push
-                val force = relative.normalizeSafe().times(p)
-                (it as MobServer).push(force.x, force.y,
-                        force.z)
-                if (it is MobLivingServer) {
-                    it.damage(s * damage)
-                }
+    getEntities(Vector3d(x, y, z),
+            radius).filterMap<MobServer>().forEach { mob ->
+        val relative = mob.getCurrentPos().minus(Vector3d(x, y, z))
+        val s = radius - relative.length()
+        if (s > 0) {
+            val p = s * push
+            val force = relative.normalizeSafe().times(p)
+            mob.push(force.x, force.y, force.z)
+            if (mob is MobLivingServer) {
+                mob.damage(s * damage)
             }
         }
-    })
+    }
 }
 
 fun TerrainServer.TerrainMutable.explosionBlockPush(

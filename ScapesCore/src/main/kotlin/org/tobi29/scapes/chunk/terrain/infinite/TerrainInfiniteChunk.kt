@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
-import java8.util.stream.Stream
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.data.ChunkArraySection1x16
 import org.tobi29.scapes.chunk.data.ChunkArraySection2x4
@@ -31,7 +30,7 @@ import org.tobi29.scapes.engine.utils.math.lb
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.entity.Entity
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -45,7 +44,8 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
     protected val data = ChunkDatas(lb(zSize shr 4))
     protected val lock = StampLock()
     protected val heightMap = IntArray(256)
-    protected val entities = ConcurrentHashMap<UUID, E>()
+    protected val entitiesMut = ConcurrentHashMap<UUID, E>()
+    val entities = entitiesMut.readOnly()
     protected var state = State.NEW
     protected var metaData = TagStructure()
 
@@ -452,7 +452,7 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
     }
 
     internal fun mapEntity(entity: E) {
-        val removed = entities.put(entity.getUUID(), entity)
+        val removed = entitiesMut.put(entity.getUUID(), entity)
         if (removed != null) {
             throw IllegalStateException(
                     "Duplicate entity in chunk: ${removed.getUUID()}")
@@ -460,11 +460,7 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
     }
 
     internal fun unmapEntity(entity: E): Boolean {
-        return entities.remove(entity.getUUID()) != null
-    }
-
-    fun entities(): Stream<E> {
-        return entities.values.stream()
+        return entitiesMut.remove(entity.getUUID()) != null
     }
 
     protected fun initHeightMap() {

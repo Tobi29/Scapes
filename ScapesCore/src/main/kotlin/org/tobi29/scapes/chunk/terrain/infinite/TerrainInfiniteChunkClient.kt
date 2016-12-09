@@ -55,7 +55,7 @@ class TerrainInfiniteChunkClient(pos: Vector2i,
 
     fun updateClient(delta: Double) {
         profilerSection("Entities") {
-            entities.values.forEach { entity ->
+            entitiesMut.values.forEach { entity ->
                 entity.update(delta)
                 if (entity is MobClient) {
                     entity.move(delta)
@@ -77,7 +77,7 @@ class TerrainInfiniteChunkClient(pos: Vector2i,
     }
 
     fun dispose() {
-        entities.values.forEach { terrain.entityRemoved(it) }
+        entitiesMut.values.forEach { terrain.entityRemoved(it) }
     }
 
     override fun update(x: Int,

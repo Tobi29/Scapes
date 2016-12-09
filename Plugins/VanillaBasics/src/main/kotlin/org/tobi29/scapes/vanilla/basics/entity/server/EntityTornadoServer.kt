@@ -69,14 +69,13 @@ class EntityTornadoServer(world: WorldServer, pos: Vector3d = Vector3d.ZERO) : E
                 pos.intY()) + 0.5)
         updatePosition()
         val currentPos = pos.now()
-        world.getEntities(currentPos, 16.0) {
-            it.filterMap<MobServer>().forEach {
-                val push = it.getCurrentPos().minus(currentPos)
-                val s = max(0.0,
-                        320.0 - push.length() * 8.0) * delta
-                val force = push.normalizeSafe().times(-s)
-                (it as MobServer).push(force.x, force.y, s)
-            }
+        world.getEntities(currentPos,
+                16.0).filterMap<MobServer>().forEach { mob ->
+            val push = mob.getCurrentPos() - currentPos
+            val s = max(0.0,
+                    320.0 - push.length() * 8.0) * delta
+            val force = push.normalizeSafe() * -s
+            mob.push(force.x, force.y, s)
         }
         time -= delta
         if (time <= 0.0) {

@@ -54,7 +54,7 @@ class PacketQuern : PacketAbstract, PacketServer {
         player.mob { mob ->
             mob.world.getEntity(uuid)?.let { quern ->
                 if (quern is EntityQuernServer) {
-                    if (quern.viewers().filter { quern === mob }.findAny().isPresent) {
+                    if (mob in quern.viewers) {
                         val plugin = mob.world.plugins.plugin(
                                 "VanillaBasics") as VanillaBasics
                         val materials = plugin.materials

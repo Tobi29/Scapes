@@ -23,6 +23,7 @@ import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.math.noise.layer.*
 import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.toTypedArray
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.OreType
 import org.tobi29.scapes.vanilla.basics.material.StoneType
@@ -80,7 +81,7 @@ class ChunkGeneratorOverworld(random: Random,
             val stoneFilter = RandomNoiseFilterLayer(stoneBase, *it)
             val stoneZoom = RandomNoiseZoomLayer(stoneFilter, 2048.0)
             RandomNoiseSimplexNoiseLayer(stoneZoom, random.nextLong(), 1024.0)
-        }.toArray { arrayOfNulls<RandomNoiseLayer>(it) }
+        }.toTypedArray()
         val sandstoneBase = RandomNoiseRandomLayer(random.nextLong(), 4)
         val sandstoneZoom = RandomNoiseZoomLayer(sandstoneBase, 2048.0)
         val sandstoneNoise = RandomNoiseSimplexNoiseLayer(sandstoneZoom,

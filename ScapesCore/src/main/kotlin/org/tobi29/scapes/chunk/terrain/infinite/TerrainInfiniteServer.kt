@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
-import java8.util.stream.Collectors
 import mu.KLogging
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.Update
@@ -29,11 +28,11 @@ import org.tobi29.scapes.chunk.terrain.TerrainChunk
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.forEach
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.limit
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.*
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
-import org.tobi29.scapes.engine.utils.stream
 import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
@@ -62,7 +61,7 @@ class TerrainInfiniteServer(override val world: WorldServer,
         chunkManager = TerrainInfiniteChunkManagerServer()
         generatorOutput = GeneratorOutput(zSize)
         val loadJoiner = world.taskExecutor.runThread({ joiner ->
-            val requiredChunks = ArrayList<Vector2i>()
+            val requiredChunks = HashSet<Vector2i>()
             val loadingChunks = ArrayList<Vector2i>()
             while (!joiner.marked) {
                 val players = world.players()
@@ -102,18 +101,12 @@ class TerrainInfiniteServer(override val world: WorldServer,
                         }) { loadingChunks.add(it) }
                         val newChunks: List<Vector2i>
                         if (loadingChunks.size > 64) {
-                            newChunks = loadingChunks.stream().sorted { pos1, pos2 ->
-                                val distance1 = loadArea.distanceSqr(pos1)
-                                val distance2 = loadArea.distanceSqr(pos2)
-                                if (distance1 == distance2)
-                                    0
-                                else if (distance1 > distance2) 1 else -1
-                            }.limit(32).collect(
-                                    Collectors.toList<Vector2i>())
+                            newChunks = loadingChunks.asSequence().sortedBy {
+                                it.distanceSqr(loadArea)
+                            }.limit(32).toList()
                         } else {
-                            newChunks = loadingChunks.stream().limit(
-                                    32).collect(
-                                    Collectors.toList<Vector2i>())
+                            newChunks = loadingChunks.asSequence().limit(
+                                    32).toList()
                         }
                         addChunks(newChunks)
                         chunkManager.stream().filter(

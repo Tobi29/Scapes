@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.chunk
 
-import java8.util.stream.Stream
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.connection.PlayConnection
@@ -29,7 +28,6 @@ import org.tobi29.scapes.engine.utils.math.sqrt
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
-import org.tobi29.scapes.engine.utils.stream
 import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.entity.CreatureType
@@ -111,29 +109,23 @@ class WorldServer(worldFormat: WorldFormat,
     }
 
     override fun getEntity(uuid: UUID): EntityServer? {
-        val player = players.values.stream().filter { entity -> entity.getUUID() == uuid }.findAny()
-        if (player.isPresent) {
-            return player.get()
-        }
-        return terrain.getEntity(uuid)
+        return players.values.asSequence()
+                .filter { entity -> entity.getUUID() == uuid }
+                .firstOrNull() ?: terrain.getEntity(uuid)
     }
 
-    override fun getEntities(consumer: (Stream<EntityServer>) -> Unit) {
-        terrain.getEntities(consumer)
-        consumer(players.values.stream())
+    override fun getEntities(): Sequence<EntityServer> {
+        return terrain.getEntities() + players.values.asSequence()
     }
 
-    @Suppress("USELESS_CAST")
     override fun getEntities(x: Int,
                              y: Int,
-                             z: Int,
-                             consumer: (Stream<EntityServer>) -> Unit) {
-        terrain.getEntities(x, y, z, consumer)
-        consumer(
-                players.values.stream().map { it as EntityServer }.filter { entity ->
-                    val pos = entity.getCurrentPos()
-                    pos.intX() == x && pos.intY() == y && pos.intZ() == z
-                })
+                             z: Int): Sequence<EntityServer> {
+        return terrain.getEntities(x, y,
+                z) + players.values.asSequence().filter { entity ->
+            val pos = entity.getCurrentPos()
+            pos.intX() == x && pos.intY() == y && pos.intZ() == z
+        }
     }
 
     override fun getEntitiesAtLeast(minX: Int,
@@ -141,11 +133,9 @@ class WorldServer(worldFormat: WorldFormat,
                                     minZ: Int,
                                     maxX: Int,
                                     maxY: Int,
-                                    maxZ: Int,
-                                    consumer: (Stream<EntityServer>) -> Unit) {
-        terrain.getEntitiesAtLeast(minX, minY, minZ, maxX, maxY,
-                maxZ) { consumer(it) }
-        consumer(players.values.stream())
+                                    maxZ: Int): Sequence<EntityServer> {
+        return terrain.getEntitiesAtLeast(minX, minY, minZ, maxX, maxY,
+                maxZ) + players.values.asSequence()
     }
 
     override fun entityAdded(entity: EntityServer) {
@@ -364,8 +354,7 @@ class WorldServer(worldFormat: WorldFormat,
             while (!joiner.marked) {
                 if (!players.isEmpty()) {
                     profilerSection("Tick") { update(0.05) }
-                    if (players.values.stream().filter(
-                            { it.isActive() }).findAny().isPresent) {
+                    if (players.values.asSequence().filter { it.isActive() }.any()) {
                         sync.cap()
                     } else {
                         sync.tick()
@@ -384,12 +373,8 @@ class WorldServer(worldFormat: WorldFormat,
 
     fun send(packet: PacketClient,
              exceptions: List<PlayerConnection>) {
-        players.values.stream().map { it.connection() }.filter {
+        players.values.asSequence().map { it.connection() }.filter {
             !exceptions.contains(it)
         }.forEach { it.send(packet) }
-    }
-
-    override fun getWorldEntities(): Stream<MobPlayerServer> {
-        return players.values.stream()
     }
 }

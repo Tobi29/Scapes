@@ -30,8 +30,6 @@ import org.tobi29.scapes.engine.utils.io.BufferedReadChannelStream
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.zipFile
 import org.tobi29.scapes.engine.utils.io.use
-import org.tobi29.scapes.engine.utils.notNull
-import org.tobi29.scapes.engine.utils.stream
 import org.tobi29.scapes.plugins.PluginFile
 import java.io.IOException
 import java.nio.channels.Channels
@@ -103,7 +101,7 @@ class GuiCreateWorld(state: GameState, previous: GuiSaveSelect,
                 val pluginFiles = ArrayList<FilePath>()
                 val worldType = worldTypes[environmentID]
                 worldType.file()?.let { pluginFiles.add(it) }
-                addons.stream().map { it.file() }.notNull().forEach {
+                addons.asSequence().map { it.file() }.filterNotNull().forEach {
                     pluginFiles.add(it)
                 }
                 saves[saveName].use { source ->

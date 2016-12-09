@@ -26,8 +26,8 @@ class GuiWidgetConnectionProfiler(parent: GuiLayoutData,
 
     override fun updateComponent(delta: Double) {
         super.updateComponent(delta)
-        profiler.entries().forEach { entry ->
-            get(entry.first.simpleName).setValue(entry.second)
+        profiler.bytes.entries.forEach { entry ->
+            get(entry.key.simpleName).setValue(entry.value)
         }
     }
 }

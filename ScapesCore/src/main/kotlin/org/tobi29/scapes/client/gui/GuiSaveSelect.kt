@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.client.gui
 
-import java8.util.stream.Collectors
 import mu.KLogging
 import org.tobi29.scapes.Debug
 import org.tobi29.scapes.client.SaveStorage
@@ -30,8 +29,6 @@ import org.tobi29.scapes.engine.graphics.TextureWrap
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.io.use
-import org.tobi29.scapes.engine.utils.stream
-import org.tobi29.scapes.plugins.PluginFile
 import org.tobi29.scapes.plugins.Plugins
 import java.io.IOException
 
@@ -57,8 +54,9 @@ class GuiSaveSelect(state: GameState, previous: Gui, private val scene: SceneMen
             try {
                 val path = state.engine.home.resolve("plugins")
                 val plugins = Plugins.installed(path)
-                val worldTypes = plugins.stream().filter { plugin -> "WorldType" == plugin.parent() }.collect(
-                        Collectors.toList<PluginFile>())
+                val worldTypes = plugins.asSequence()
+                        .filter { plugin -> "WorldType" == plugin.parent() }
+                        .sortedBy { it.name() }.toList()
                 if (worldTypes.isEmpty()) {
                     state.engine.guiStack.swap(this,
                             GuiMessage(state, this, "Error", NO_WORLD_TYPE,

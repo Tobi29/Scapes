@@ -23,7 +23,6 @@ import org.tobi29.scapes.engine.utils.io.filesystem.write
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureArchive
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
-import org.tobi29.scapes.engine.utils.stream
 import org.tobi29.scapes.server.format.TerrainInfiniteFormat
 import java.io.IOException
 import java.security.AccessController
@@ -98,9 +97,9 @@ class BasicTerrainInfiniteFormat(private val path: FilePath) : TerrainInfiniteFo
                                             location.y) + ".star"))
                 })
         val time = System.currentTimeMillis()
-        regions.entries.stream().filter { entry -> time - entry.value.lastUse > 1000 }.map { it.key }.forEach {
-            this.removeRegion(it)
-        }
+        regions.entries.asSequence()
+                .filter { entry -> time - entry.value.lastUse > 1000 }
+                .map { it.key }.forEach { removeRegion(it) }
         regions.put(location, region)
         return region
     }

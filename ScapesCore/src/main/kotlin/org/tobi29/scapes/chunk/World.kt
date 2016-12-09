@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.chunk
 
-import java8.util.stream.Stream
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
@@ -44,6 +43,4 @@ abstract class World<E : Entity>(val plugins: Plugins,
     fun checkThread(): Boolean {
         return Thread.currentThread() === thread
     }
-
-    abstract fun getWorldEntities(): Stream<out E>
 }

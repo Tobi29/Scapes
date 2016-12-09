@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.server
 
-import java8.util.stream.Stream
 import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.block.InventoryContainer
 import org.tobi29.scapes.chunk.WorldServer
@@ -24,7 +23,7 @@ import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.plus
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.entity.server.EntityContainerServer
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
@@ -35,7 +34,8 @@ abstract class EntityAbstractContainerServer(world: WorldServer, pos: Vector3d,
                                              inventory: Inventory) : EntityServer(
         world, pos), EntityContainerServer {
     protected val inventories: InventoryContainer
-    protected val viewers: MutableList<MobPlayerServer> = ArrayList()
+    protected val viewersMut = ArrayList<MobPlayerServer>()
+    override val viewers = viewersMut.readOnly()
 
     init {
         inventories = InventoryContainer { id ->
@@ -50,16 +50,12 @@ abstract class EntityAbstractContainerServer(world: WorldServer, pos: Vector3d,
 
     override fun addViewer(player: MobPlayerServer) {
         if (!viewers.contains(player)) {
-            viewers.add(player)
+            viewersMut.add(player)
         }
     }
 
-    override fun viewers(): Stream<MobPlayerServer> {
-        return viewers.stream()
-    }
-
     override fun removeViewer(player: MobPlayerServer) {
-        viewers.remove(player)
+        viewersMut.remove(player)
     }
 
     override fun write(): TagStructure {

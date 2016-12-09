@@ -16,35 +16,28 @@
 
 package org.tobi29.scapes.server.format.sqlite
 
-import java8.util.stream.Stream
 import org.tobi29.scapes.client.SaveStorage
 import org.tobi29.scapes.engine.utils.io.filesystem.*
-import org.tobi29.scapes.engine.utils.stream
 import org.tobi29.scapes.server.format.WorldSource
-import java.io.IOException
 
 class SQLiteSaveStorage(private val path: FilePath) : SaveStorage {
-
-    @Throws(IOException::class)
-    override fun list(): Stream<String> {
+    override fun list(): Sequence<String> {
         if (!exists(path)) {
-            return stream()
+            return emptySequence()
         }
-        return list(path, ::isDirectory,
-                ::isNotHidden).stream().map { it.fileName }.map { it.toString() }
+        return list(path, {
+            isDirectory(path) && isNotHidden(path)
+        }).asSequence().map { it.fileName.toString() }
     }
 
-    @Throws(IOException::class)
     override fun exists(name: String): Boolean {
         return exists(path.resolve(name))
     }
 
-    @Throws(IOException::class)
     override fun get(name: String): WorldSource {
         return SQLiteWorldSource(path.resolve(name))
     }
 
-    @Throws(IOException::class)
     override fun delete(name: String): Boolean {
         deleteDir(path.resolve(name))
         return true

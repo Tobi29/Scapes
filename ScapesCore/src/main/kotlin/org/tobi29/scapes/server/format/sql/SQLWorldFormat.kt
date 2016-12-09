@@ -63,7 +63,7 @@ open class SQLWorldFormat(protected val path: FilePath,
     private val stream = ByteBufferStream()
 
     init {
-        playerData = SQLPlayerData(this.database)
+        playerData = SQLPlayerData(database, "Players")
         checkDatabase(database)
         var rows = getMetaData("Seed")
         if (!rows.isEmpty()) {

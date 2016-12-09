@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.entity
 
-import java8.util.stream.Stream
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.Frustum
 import org.tobi29.scapes.engine.utils.math.ceil
@@ -29,31 +28,28 @@ fun <E : Entity> EntityContainer<E>.getEntities(minX: Int,
                                                 minZ: Int,
                                                 maxX: Int,
                                                 maxY: Int,
-                                                maxZ: Int,
-                                                consumer: (Stream<E>) -> Unit) {
-    getEntitiesAtLeast(minX, minY, minZ, maxX, maxY, maxZ) {
-        consumer(it.filter { entity ->
-            val pos = entity.getCurrentPos()
-            val x = pos.intX()
-            if (x >= minX && x <= maxX) {
-                return@filter false
-            }
-            val y = pos.intY()
-            if (y >= minY && y <= maxY) {
-                return@filter false
-            }
-            val z = pos.intZ()
-            if (z >= minZ && z <= maxZ) {
-                return@filter false
-            }
-            true
-        })
+                                                maxZ: Int): Sequence<E> {
+    return getEntitiesAtLeast(minX, minY, minZ, maxX, maxY,
+            maxZ).filter { entity ->
+        val pos = entity.getCurrentPos()
+        val x = pos.intX()
+        if (x >= minX && x <= maxX) {
+            return@filter false
+        }
+        val y = pos.intY()
+        if (y >= minY && y <= maxY) {
+            return@filter false
+        }
+        val z = pos.intZ()
+        if (z >= minZ && z <= maxZ) {
+            return@filter false
+        }
+        true
     }
 }
 
 fun <E : Entity> EntityContainer<E>.getEntities(pos: Vector3d,
-                                                range: Double,
-                                                consumer: (Stream<E>) -> Unit) {
+                                                range: Double): Sequence<E> {
     val minX = floor(pos.x - range)
     val minY = floor(pos.y - range)
     val minZ = floor(pos.z - range)
@@ -61,28 +57,24 @@ fun <E : Entity> EntityContainer<E>.getEntities(pos: Vector3d,
     val maxY = ceil(pos.y + range)
     val maxZ = ceil(pos.z + range)
     val rangeSqr = range * range
-    getEntitiesAtLeast(minX, minY, minZ, maxX, maxY, maxZ) {
-        consumer(it.filter { entity ->
-            pos.distanceSqr(entity.getCurrentPos()) <= rangeSqr
-        })
+    return getEntitiesAtLeast(minX, minY, minZ, maxX, maxY,
+            maxZ).filter { entity ->
+        pos.distanceSqr(entity.getCurrentPos()) <= rangeSqr
     }
 }
 
-fun <E : Entity> EntityContainer<E>.getEntities(aabb: AABB,
-                                                consumer: (Stream<E>) -> Unit) {
+fun <E : Entity> EntityContainer<E>.getEntities(aabb: AABB): Sequence<E> {
     val minX = floor(aabb.minX) - EntityContainer.MAX_ENTITY_SIZE
     val minY = floor(aabb.minY) - EntityContainer.MAX_ENTITY_SIZE
     val minZ = floor(aabb.minZ) - EntityContainer.MAX_ENTITY_SIZE
     val maxX = ceil(aabb.maxX) + EntityContainer.MAX_ENTITY_SIZE
     val maxY = ceil(aabb.maxY) + EntityContainer.MAX_ENTITY_SIZE
     val maxZ = ceil(aabb.maxZ) + EntityContainer.MAX_ENTITY_SIZE
-    getEntitiesAtLeast(minX, minY, minZ, maxX, maxY, maxZ) {
-        consumer(it.filter { entity -> aabb.overlay(entity.getAABB()) })
-    }
+    return getEntitiesAtLeast(minX, minY, minZ, maxX, maxY,
+            maxZ).filter { entity -> aabb.overlay(entity.getAABB()) }
 }
 
-fun <E : Entity> EntityContainer<E>.getEntities(frustum: Frustum,
-                                                consumer: (Stream<E>) -> Unit) {
+fun <E : Entity> EntityContainer<E>.getEntities(frustum: Frustum): Sequence<E> {
     val x = frustum.x()
     val y = frustum.y()
     val z = frustum.z()
@@ -93,7 +85,6 @@ fun <E : Entity> EntityContainer<E>.getEntities(frustum: Frustum,
     val maxX = ceil(x + range)
     val maxY = ceil(y + range)
     val maxZ = ceil(z + range)
-    getEntitiesAtLeast(minX, minY, minZ, maxX, maxY, maxZ) {
-        consumer(it.filter { entity -> frustum.inView(entity.getAABB()) > 0 })
-    }
+    return getEntitiesAtLeast(minX, minY, minZ, maxX, maxY,
+            maxZ).filter { entity -> frustum.inView(entity.getAABB()) > 0 }
 }

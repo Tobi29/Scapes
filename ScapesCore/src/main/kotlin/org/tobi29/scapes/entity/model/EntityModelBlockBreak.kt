@@ -73,7 +73,7 @@ class EntityModelBlockBreak(shared: EntityModelBlockBreakShared,
         val posRenderX = (pos.doubleX() - cam.position.doubleX()).toFloat()
         val posRenderY = (pos.doubleY() - cam.position.doubleY()).toFloat()
         val posRenderZ = (pos.doubleZ() - cam.position.doubleZ()).toFloat()
-        val i = floor(entity.progress() * 10) + 1
+        val i = clamp(floor(entity.progress() * 10) + 1, 1, 9)
         if (i < 1 || i > 10) {
             return
         }

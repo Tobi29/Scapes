@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
-import java8.util.stream.Stream
 import org.tobi29.scapes.entity.Entity
 
 interface TerrainInfiniteChunkManager<E : Entity> {
@@ -26,5 +25,5 @@ interface TerrainInfiniteChunkManager<E : Entity> {
     fun has(x: Int,
             y: Int): Boolean
 
-    fun stream(): Stream<out TerrainInfiniteChunk<E>>
+    fun stream(): Sequence<TerrainInfiniteChunk<E>>
 }

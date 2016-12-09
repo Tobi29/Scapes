@@ -18,9 +18,8 @@ package org.tobi29.scapes.vanilla.basics.material.block.rock
 
 import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.TerrainTexture
 import org.tobi29.scapes.block.TerrainTextureRegistry
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.vanilla.basics.material.StoneType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 
@@ -46,12 +45,12 @@ abstract class BlockOre protected constructor(materials: VanillaMaterial, nameID
     override fun registerTextures(registry: TerrainTextureRegistry) {
         val ore = "VanillaBasics:image/terrain/ore/block/" +
                 oreTexture() + ".png"
-        textures = stoneRegistry.values().stream().map {
+        textures = stoneRegistry.values().asSequence().map {
             it?.let {
                 return@map registry.registerTexture(
                         it.textureRoot() + "/raw/" + it.texture() + ".png", ore)
             }
-        }.toArray { arrayOfNulls<TerrainTexture?>(it) }
+        }.toArray()
     }
 
     protected abstract fun oreTexture(): String

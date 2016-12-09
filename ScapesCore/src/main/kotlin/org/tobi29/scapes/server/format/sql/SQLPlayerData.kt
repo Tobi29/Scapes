@@ -25,16 +25,17 @@ import org.tobi29.scapes.server.format.PlayerData
 import java.io.IOException
 import java.nio.ByteBuffer
 
-class SQLPlayerData(private val database: SQLDatabase) : PlayerData {
+class SQLPlayerData(database: SQLDatabase,
+                    table: String) : PlayerData {
     private val stream = ByteBufferStream()
-    private val getPlayer = database.compileQuery("Players",
+    private val getPlayer = database.compileQuery(table,
             arrayOf("World", "Permissions", "Entity"), "ID")
-    private val insertPlayer = database.compileInsert("Players",
+    private val insertPlayer = database.compileInsert(table,
             "ID", "Permissions")
-    private val replacePlayer = database.compileReplace("Players", "ID",
+    private val replacePlayer = database.compileReplace(table, "ID",
             "World", "Permissions", "Entity")
-    private val deletePlayer = database.compileDelete("Players", "ID")
-    private val checkPlayer = database.compileQuery("Players",
+    private val deletePlayer = database.compileDelete(table, "ID")
+    private val checkPlayer = database.compileQuery(table,
             arrayOf("1"), "ID")
 
     @Synchronized override fun player(id: String): PlayerEntry {

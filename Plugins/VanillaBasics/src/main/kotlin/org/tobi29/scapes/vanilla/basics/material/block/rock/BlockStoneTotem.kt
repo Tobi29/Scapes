@@ -18,9 +18,8 @@ package org.tobi29.scapes.vanilla.basics.material.block.rock
 
 import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.TerrainTexture
 import org.tobi29.scapes.block.TerrainTextureRegistry
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.vanilla.basics.material.StoneType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 
@@ -42,13 +41,13 @@ class BlockStoneTotem(materials: VanillaMaterial,
     }
 
     override fun registerTextures(registry: TerrainTextureRegistry) {
-        textures = stoneRegistry.values().stream().map {
+        textures = stoneRegistry.values().asSequence().map {
             it?.let {
                 return@map registry.registerTexture(
                         it.textureRoot() + "/raw/" + it.texture() + ".png",
                         "VanillaBasics:image/terrain/stone/overlay/Totem.png")
             }
-        }.toArray { arrayOfNulls<TerrainTexture?>(it) }
+        }.toArray()
     }
 
     override fun name(item: ItemStack): String {

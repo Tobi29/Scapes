@@ -63,7 +63,7 @@ class PacketInventoryInteraction : PacketAbstract, PacketServer {
             val world = mob.world
             world.getEntity(uuid) { entity ->
                 if (entity is EntityContainerServer) {
-                    if (entity.viewers().filter { it == mob }.findAny().isPresent) {
+                    if (mob in entity.viewers) {
                         synchronized(entity) {
                             entity.inventories().modify(id) { chestI ->
                                 mob.inventories().modify(

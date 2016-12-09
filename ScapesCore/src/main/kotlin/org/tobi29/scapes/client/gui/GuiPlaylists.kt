@@ -23,7 +23,6 @@ import org.tobi29.scapes.engine.input.FileType
 import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.io.process
 import org.tobi29.scapes.engine.utils.io.put
-import org.tobi29.scapes.engine.utils.stream
 import java.io.IOException
 
 class GuiPlaylists(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu(
@@ -70,11 +69,13 @@ class GuiPlaylists(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu(
         this.playlist = playlist
         try {
             val path = state.engine.home.resolve("playlists").resolve(playlist)
-            val files = listRecursive(path,
-                    { isRegularFile(it) && isNotHidden(it) })
-            files.stream().sorted().forEach { file ->
-                scrollPane.addVert(0.0, 0.0, -1.0, 20.0) {
-                    Element(it, file)
+            listRecursive(path) {
+                filter {
+                    isRegularFile(it) && isNotHidden(it)
+                }.sorted().forEach { file ->
+                    scrollPane.addVert(0.0, 0.0, -1.0, 20.0) {
+                        Element(it, file)
+                    }
                 }
             }
         } catch (e: IOException) {

@@ -113,16 +113,12 @@ class PacketItemUse : PacketAbstract, PacketServer {
                                                 Vector3d(blockPos),
                                                 Vector3d.ZERO)
                                     }
-                                    var fetch: EntityBlockBreakServer? = null
-                                    world.getEntities(blockPos.x,
+                                    val entityBreak = terrain.getEntities(
+                                            blockPos.x,
                                             blockPos.y,
-                                            blockPos.z) { stream ->
-                                        if (fetch == null) {
-                                            fetch = stream.filterMap<EntityBlockBreakServer>().findAny().orElse(
-                                                    null)
-                                        }
-                                    }
-                                    val entityBreak = fetch ?: run {
+                                            blockPos.z)
+                                            .filterMap<EntityBlockBreakServer>()
+                                            .firstOrNull() ?: run {
                                         val entityBreak = EntityBlockBreakServer(
                                                 world, Vector3d(blockPos))
                                         world.addEntityNew(entityBreak)

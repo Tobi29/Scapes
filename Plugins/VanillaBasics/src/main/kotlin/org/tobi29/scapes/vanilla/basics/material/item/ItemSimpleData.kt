@@ -23,8 +23,7 @@ import org.tobi29.scapes.block.models.ItemModel
 import org.tobi29.scapes.block.models.ItemModelSimple
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.utils.stream
-import org.tobi29.scapes.engine.utils.streamRange
+import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 
 abstract class ItemSimpleData protected constructor(materials: VanillaMaterial, nameID: String) : VanillaItem(
@@ -37,20 +36,20 @@ abstract class ItemSimpleData protected constructor(materials: VanillaMaterial, 
     protected abstract fun texture(data: Int): String?
 
     override fun registerTextures(registry: TerrainTextureRegistry) {
-        textures = streamRange(0, types()).mapToObj {
-            val texture = texture(it) ?: return@mapToObj null
+        textures = (0..types() - 1).asSequence().map {
+            val texture = texture(it) ?: return@map null
             registry.registerTexture(texture)
-        }.toArray { arrayOfNulls<TerrainTexture?>(it) }
+        }.toArray()
     }
 
     override fun createModels(registry: TerrainTextureRegistry) {
         textures?.let {
-            models = stream(*it).map {
+            models = it.asSequence().map {
                 if (it == null) {
                     return@map null
                 }
                 ItemModelSimple(it, 1.0, 1.0, 1.0, 1.0)
-            }.toArray { arrayOfNulls<ItemModel?>(it) }
+            }.toArray()
         }
     }
 

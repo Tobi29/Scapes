@@ -30,8 +30,7 @@ import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.PointerPane
-import org.tobi29.scapes.engine.utils.stream
-import org.tobi29.scapes.engine.utils.streamRange
+import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.CropType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
@@ -178,32 +177,32 @@ class BlockCrop(materials: VanillaMaterial,
     }
 
     override fun registerTextures(registry: TerrainTextureRegistry) {
-        textures = cropRegistry.values().stream().map {
+        textures = cropRegistry.values().asSequence().map {
             if (it == null) {
                 return@map null
             }
-            return@map streamRange(1, 9).mapToObj { i ->
+            return@map (1..8).asSequence().map { i ->
                 registry.registerTexture(
                         it.texture() + "/Crop" + i + ".png")
-            }.toArray { arrayOfNulls<TerrainTexture>(it) }
-        }.toArray { arrayOfNulls<Array<TerrainTexture>?>(it) }
+            }.toArray()
+        }.toArray()
     }
 
     override fun createModels(registry: TerrainTextureRegistry) {
         textures?.let {
-            models = stream(*it).map {
+            models = it.asSequence().map {
                 if (it == null) {
                     return@map null
                 }
-                stream(*it).map {
+                it.asSequence().map {
                     val shapes = ArrayList<BlockModelComplex.Shape>()
                     val shape = BlockModelComplex.ShapeBillboard(it, -8.0, -8.0,
                             -8.0, 8.0, 8.0, 8.0, 1.0, 1.0, 1.0, 1.0)
                     shape.rotateZ(45.0)
                     shapes.add(shape)
                     BlockModelComplex(registry, shapes, 0.0625)
-                }.toArray { arrayOfNulls<BlockModel>(it) }
-            }.toArray { arrayOfNulls<Array<BlockModel>?>(it) }
+                }.toArray<BlockModel>()
+            }.toArray()
         }
     }
 

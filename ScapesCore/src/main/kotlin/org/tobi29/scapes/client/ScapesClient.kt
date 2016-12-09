@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.client
 
-import java8.util.stream.Stream
 import mu.KLogging
 import org.tobi29.scapes.VERSION
 import org.tobi29.scapes.client.input.InputMode
@@ -36,15 +35,18 @@ import org.tobi29.scapes.engine.utils.Version
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath
 import org.tobi29.scapes.engine.utils.io.filesystem.createDirectories
 import org.tobi29.scapes.engine.utils.io.tag.*
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.readOnly
 import java.io.IOException
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 class ScapesClient(engine: ScapesEngine, private val skipIntro: Boolean,
                    private val savesSupplier: (ScapesClient) -> SaveStorage) : Game(
         engine) {
     val connection = ConnectionManager(engine.taskExecutor, 10)
-    private val inputModes = ArrayList<InputMode>()
+    private val inputModesMut = Collections.newSetFromMap<InputMode>(
+            ConcurrentHashMap())
+    val inputModes = inputModesMut.readOnly()
     private lateinit var saves: SaveStorage
     private lateinit var inputMode: InputMode
     private var freezeInputMode = false
@@ -133,7 +135,7 @@ class ScapesClient(engine: ScapesEngine, private val skipIntro: Boolean,
             loadInput()
         }
         var newInputMode: InputMode? = null
-        for (inputMode in inputModes) {
+        for (inputMode in inputModesMut) {
             if (inputMode.poll()) {
                 newInputMode = inputMode
             }
@@ -158,25 +160,27 @@ class ScapesClient(engine: ScapesEngine, private val skipIntro: Boolean,
         logger.info { "Loading input" }
         val tagStructure = engine.tagStructure.structure("Scapes").structure(
                 "Input")
-        inputModes.clear()
+        inputModesMut.clear()
         val controller = engine.container.controller()
         if (controller != null) {
             loadService(engine, controller,
-                    tagStructure)?.let { inputModes.add(it) }
+                    tagStructure)?.let { inputModesMut.add(it) }
         }
         val touch = engine.container.touch()
         if (touch != null) {
-            loadService(engine, touch, tagStructure)?.let { inputModes.add(it) }
+            loadService(engine, touch, tagStructure)?.let {
+                inputModesMut.add(it)
+            }
         }
         for (joystick in engine.container.joysticks()) {
             loadService(engine, joystick, tagStructure)?.let {
-                inputModes.add(it)
+                inputModesMut.add(it)
             }
         }
-        if (inputModes.isEmpty()) {
+        if (inputModesMut.isEmpty()) {
             throw InputException("No input mode available")
         }
-        changeInput(inputModes[0])
+        changeInput(inputModesMut.first())
     }
 
     private fun changeInput(inputMode: InputMode) {
@@ -187,10 +191,6 @@ class ScapesClient(engine: ScapesEngine, private val skipIntro: Boolean,
 
     fun setFreezeInputMode(freezeInputMode: Boolean) {
         this.freezeInputMode = freezeInputMode
-    }
-
-    fun inputModes(): Stream<InputMode> {
-        return inputModes.stream()
     }
 
     companion object : KLogging() {
