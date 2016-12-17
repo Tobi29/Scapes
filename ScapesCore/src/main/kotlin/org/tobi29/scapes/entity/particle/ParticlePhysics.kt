@@ -21,8 +21,8 @@ import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.math.*
 
 object ParticlePhysics {
-    fun collisions(aabbs: Pool<AABBElement>): Iterator<AABB> {
-        return aabbs.stream().filter { it.isSolid }.map { it.aabb() }.iterator()
+    fun collisions(aabbs: Pool<AABBElement>): Sequence<AABB> {
+        return aabbs.asSequence().filter { it.isSolid }.map { it.aabb() }
     }
 
     fun update(delta: Double,

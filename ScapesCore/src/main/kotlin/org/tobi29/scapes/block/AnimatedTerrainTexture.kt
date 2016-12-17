@@ -20,8 +20,7 @@ import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Texture
 import org.tobi29.scapes.engine.utils.graphics.generateMipMaps
 import org.tobi29.scapes.engine.utils.math.floor
-import org.tobi29.scapes.engine.utils.streamRange
-import org.tobi29.scapes.engine.utils.toTypedArray
+import org.tobi29.scapes.engine.utils.toArray
 import java.nio.ByteBuffer
 
 class AnimatedTerrainTexture(buffer: ByteBuffer, width: Int, height: Int,
@@ -34,11 +33,11 @@ class AnimatedTerrainTexture(buffer: ByteBuffer, width: Int, height: Int,
 
     init {
         val frameSize = width * width shl 2
-        frames = streamRange(0, height / width).mapToObj {
+        frames = (0..height / width - 1).asSequence().map {
             buffer.position(it * frameSize)
             generateMipMaps(buffer, { engine.allocate(it) }, width, width, 4,
                     true)
-        }.toTypedArray()
+        }.toArray()
     }
 
     override fun renderAnim(gl: GL) {

@@ -59,8 +59,7 @@ class GuiPlugins(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu(
                         process(input, put(output))
                     }
                     val newPlugin = PluginFile(temp)
-                    move(temp, path.resolve(
-                            newPlugin.id() + ".jar"))
+                    move(temp, path.resolve(newPlugin.id() + ".jar"))
                     updatePlugins()
                 }
             } catch (e: IOException) {

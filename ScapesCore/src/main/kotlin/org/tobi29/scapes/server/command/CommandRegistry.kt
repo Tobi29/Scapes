@@ -30,7 +30,7 @@ class CommandRegistry constructor(private val prefix: String = "") {
 
     fun register(usage: String,
                  level: Int,
-                 optionSupplier: (Command.CommandOptions) -> Unit,
+                 optionSupplier: Command.CommandOptions.() -> Unit,
                  compiler: (Command.Arguments, Executor, MutableCollection<() -> Unit>) -> Unit) {
         val split = usage.split(' ', limit = 2)
         val name = split[0]

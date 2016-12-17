@@ -41,12 +41,12 @@ class GuiScreenshots(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu
                         70.0) { Element(it, file, this) }
                 state.engine.taskExecutor.runTask({
                     try {
-                        val texture = read(file, { stream ->
-                            val image = decodePNG(
-                                    stream) { state.engine.allocate(it) }
-                            state.engine.graphics.createTexture(image,
-                                    0)
-                        })
+                        val texture = read(file) {
+                            val image = decodePNG(it) {
+                                state.engine.allocate(it)
+                            }
+                            state.engine.graphics.createTexture(image, 0)
+                        }
                         element.icon.texture = Resource(texture)
                     } catch (e: IOException) {
                         logger.warn { "Failed to load screenshot: $e" }

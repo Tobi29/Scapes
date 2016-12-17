@@ -48,14 +48,14 @@ class GuiAlloyInventory(container: EntityAlloyClient, player: MobPlayerClientMai
     private fun updateInfoText() {
         val text = StringBuilder(64)
         val alloy = container.alloy()
-        if (alloy.metals().findAny().isPresent) {
+        if (alloy.metals.isNotEmpty()) {
             text.append("Metal: ").append(alloy.type(
                     container.world.plugins.plugin(
                             "VanillaBasics") as VanillaBasics).name())
-            alloy.metals().forEach { entry ->
-                text.append('\n').append(entry.first.name()).append(
+            alloy.metals.forEach { entry ->
+                text.append('\n').append(entry.key.name()).append(
                         " - ").append(
-                        round(entry.second * 100.0) / 100.0)
+                        round(entry.value * 100.0) / 100.0)
             }
         } else {
             text.append("Insert molten metal on top\nslot, extract below.")

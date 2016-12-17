@@ -3,7 +3,6 @@ package org.tobi29.scapes.android
 import android.content.Context
 import org.tobi29.scapes.engine.android.sqlite.AndroidSQLite
 import org.tobi29.scapes.engine.android.sqlite.AndroidSQLiteOpenHelper
-import org.tobi29.scapes.engine.utils.BufferCreator
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.graphics.encodePNG
 import org.tobi29.scapes.engine.utils.io.filesystem.*
@@ -45,7 +44,7 @@ class AndroidWorldSource(context: Context, private val path: FilePath) : WorldSo
         return newPanorama {
             val background = path.resolve("Panorama$it.png")
             if (exists(background)) {
-                read(background, { decodePNG(it) { BufferCreator.bytes(it) } })
+                read(background) { decodePNG(it) }
             } else {
                 return null
             }

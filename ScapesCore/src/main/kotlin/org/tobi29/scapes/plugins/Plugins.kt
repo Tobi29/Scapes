@@ -16,25 +16,30 @@
 
 package org.tobi29.scapes.plugins
 
-import java8.util.stream.Stream
 import mu.KLogging
 import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.chunk.IDStorage
 import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathResource
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.readOnly
 import java.io.IOException
 import java.net.URLClassLoader
 import java.util.*
 
 class Plugins @Throws(IOException::class)
-constructor(private val files: List<PluginFile>, idStorage: IDStorage) {
-    private val plugins = ArrayList<Plugin>()
-    private val dimensions = ArrayList<Dimension>()
+constructor(files: List<PluginFile>, idStorage: IDStorage) {
+    val files = files.readOnly()
+    private val pluginsMut = ArrayList<Plugin>()
+    val plugins = pluginsMut.readOnly()
+    private val dimensionsMut = ArrayList<Dimension>()
+    val dimensions = dimensionsMut.readOnly()
     private val registry: GameRegistry
     private val classLoader: URLClassLoader?
-    private var worldType: WorldType? = null
+    private var worldTypeMut: WorldType? = null
+    val worldType: WorldType
+        get() = worldTypeMut ?: throw IllegalStateException(
+                "No world type loaded")
     private var init = false
 
     init {
@@ -51,7 +56,7 @@ constructor(private val files: List<PluginFile>, idStorage: IDStorage) {
                 load(file.plugin(classLoader))
             }
         }
-        if (worldType == null) {
+        if (worldTypeMut == null) {
             throw IOException("No world type found")
         }
         registry = GameRegistry(idStorage)
@@ -59,22 +64,22 @@ constructor(private val files: List<PluginFile>, idStorage: IDStorage) {
 
     @Throws(IOException::class)
     private fun load(plugin: Plugin) {
-        plugins.add(plugin)
+        pluginsMut.add(plugin)
         if (plugin is Dimension) {
-            dimensions.add(plugin)
+            dimensionsMut.add(plugin)
         }
         if (plugin is WorldType) {
-            if (worldType != null) {
+            if (worldTypeMut != null) {
                 throw IOException("Found 2nd world type: " + plugin)
             }
-            worldType = plugin
+            worldTypeMut = plugin
         }
     }
 
     fun dispose() {
-        plugins.clear()
-        dimensions.clear()
-        worldType = null
+        pluginsMut.clear()
+        dimensionsMut.clear()
+        worldTypeMut = null
         if (classLoader != null) {
             try {
                 classLoader.close()
@@ -88,32 +93,8 @@ constructor(private val files: List<PluginFile>, idStorage: IDStorage) {
         return registry
     }
 
-    fun fileCount(): Int {
-        return files.size
-    }
-
-    fun files(): Stream<PluginFile> {
-        return files.stream()
-    }
-
-    fun file(i: Int): PluginFile {
-        return files[i]
-    }
-
-    fun plugins(): Stream<Plugin> {
-        return plugins.stream()
-    }
-
-    fun dimensions(): Stream<Dimension> {
-        return dimensions.stream()
-    }
-
-    fun worldType(): WorldType {
-        return worldType ?: throw IllegalStateException("No world type loaded")
-    }
-
     fun plugin(name: String): Plugin {
-        for (plugin in plugins) {
+        for (plugin in pluginsMut) {
             if (plugin.id() == name) {
                 return plugin
             }
@@ -122,7 +103,7 @@ constructor(private val files: List<PluginFile>, idStorage: IDStorage) {
     }
 
     fun addFileSystems(files: FileSystemContainer) {
-        for (plugin in plugins) {
+        for (plugin in pluginsMut) {
             files.registerFileSystem(plugin.id(),
                     ClasspathPath(plugin.javaClass.classLoader,
                             plugin.assetRoot()))
@@ -130,7 +111,7 @@ constructor(private val files: List<PluginFile>, idStorage: IDStorage) {
     }
 
     fun removeFileSystems(files: FileSystemContainer) {
-        for (plugin in plugins) {
+        for (plugin in pluginsMut) {
             files.removeFileSystem(plugin.id())
         }
     }
@@ -138,11 +119,11 @@ constructor(private val files: List<PluginFile>, idStorage: IDStorage) {
     fun init() {
         if (!init) {
             registry.registryTypes({ registry ->
-                plugins.forEach { it.registryType(registry) }
+                pluginsMut.forEach { it.registryType(registry) }
             })
-            registry.init(worldType())
-            plugins.forEach { it.register(registry) }
-            plugins.forEach { it.init(registry) }
+            registry.init(worldType)
+            pluginsMut.forEach { it.register(registry) }
+            pluginsMut.forEach { it.init(registry) }
             registry.lock()
             init = true
         }

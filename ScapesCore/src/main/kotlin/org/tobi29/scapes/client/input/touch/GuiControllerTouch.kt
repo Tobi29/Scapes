@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.client.input.touch
 
-import java8.util.stream.Stream
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.input.ControllerBasic
@@ -23,7 +22,6 @@ import org.tobi29.scapes.engine.input.ControllerTouch
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector2d
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.engine.utils.math.vector.times
-import org.tobi29.scapes.engine.utils.stream
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -94,12 +92,12 @@ class GuiControllerTouch(engine: ScapesEngine, private val controller: Controlle
         return true
     }
 
-    override fun cursors(): Stream<GuiCursor> {
-        return fingers.values.stream().map { it.cursor }
+    override fun cursors(): Sequence<GuiCursor> {
+        return fingers.values.asSequence().map { it.cursor }
     }
 
-    override fun clicks(): Stream<Pair<GuiCursor, ControllerBasic.PressEvent>> {
-        return clicks.stream()
+    override fun clicks(): Sequence<Pair<GuiCursor, ControllerBasic.PressEvent>> {
+        return clicks.asSequence()
     }
 
     override fun captureCursor(): Boolean {

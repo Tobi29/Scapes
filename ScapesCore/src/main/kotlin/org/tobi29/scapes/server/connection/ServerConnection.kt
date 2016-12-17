@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.server.connection
 
-import java8.util.stream.Stream
 import org.tobi29.scapes.connection.ConnectionInfo
 import org.tobi29.scapes.connection.ConnectionType
 import org.tobi29.scapes.connection.GetInfoConnection
@@ -24,7 +23,7 @@ import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.utils.Checksum
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import org.tobi29.scapes.engine.utils.io.tag.getInt
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.entity.skin.ServerSkin
 import org.tobi29.scapes.packets.PacketClient
 import org.tobi29.scapes.plugins.Plugins
@@ -45,7 +44,8 @@ class ServerConnection(val server: ScapesServer,
     private val mayPlayers: Int
     private val controlPassword: String?
     val plugins: Plugins
-    private val players = ConcurrentHashMap<String, PlayerConnection>()
+    private val playersMut = ConcurrentHashMap<String, PlayerConnection>()
+    val players = playersMut.values.readOnly()
     private val playerByName = ConcurrentHashMap<String, PlayerConnection>()
     private val executors = Collections.newSetFromMap<Executor>(
             ConcurrentHashMap<Executor, Boolean>())
@@ -60,7 +60,7 @@ class ServerConnection(val server: ScapesServer,
     }
 
     fun player(id: String): PlayerConnection? {
-        return players[id]
+        return playersMut[id]
     }
 
     fun playerByName(name: String): PlayerConnection? {
@@ -74,10 +74,6 @@ class ServerConnection(val server: ScapesServer,
             }
         }
         return null
-    }
-
-    fun players(): Stream<PlayerConnection> {
-        return playerByName.values.stream()
     }
 
     fun send(packet: PacketClient) {
@@ -109,17 +105,17 @@ class ServerConnection(val server: ScapesServer,
     }
 
     fun addPlayer(player: PlayerConnection): String? {
-        synchronized(players) {
-            if (players.size >= mayPlayers) {
+        synchronized(playersMut) {
+            if (playersMut.size >= mayPlayers) {
                 return "Server full"
             }
-            if (players.containsKey(player.id())) {
+            if (playersMut.containsKey(player.id())) {
                 return "User already online"
             }
             if (playerByName.containsKey(player.name())) {
                 return "User with same name online"
             }
-            players.put(player.id(), player)
+            playersMut.put(player.id(), player)
             playerByName.put(player.name(), player)
             addExecutor(player)
         }
@@ -127,7 +123,7 @@ class ServerConnection(val server: ScapesServer,
     }
 
     fun removePlayer(player: PlayerConnection) {
-        players.remove(player.id())
+        playersMut.remove(player.id())
         playerByName.remove(player.name())
         removeExecutor(player)
     }

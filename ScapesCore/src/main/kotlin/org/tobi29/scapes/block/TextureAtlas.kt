@@ -18,7 +18,7 @@ package org.tobi29.scapes.block
 import mu.KLogging
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Texture
-import org.tobi29.scapes.engine.utils.BufferCreator
+import org.tobi29.scapes.engine.utils.ByteBuffer
 import org.tobi29.scapes.engine.utils.graphics.Image
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.math.min
@@ -59,9 +59,7 @@ abstract class TextureAtlas<T : TextureAtlasEntry> protected constructor(val eng
             val source2 = sources[paths[0]]
             val source: Image
             if (source2 == null) {
-                source = engine.files[paths[0]].read {
-                    decodePNG(it) { BufferCreator.bytes(it) }
-                }
+                source = engine.files[paths[0]].read { decodePNG(it) }
                 sources.put(paths[0], source)
             } else {
                 source = source2
@@ -69,7 +67,7 @@ abstract class TextureAtlas<T : TextureAtlasEntry> protected constructor(val eng
             width = source.width
             height = source.height
             if (paths.size > 1) {
-                buffer = BufferCreator.bytes(width * height shl 2)
+                buffer = ByteBuffer(width * height shl 2)
                 buffer.put(source.buffer)
                 buffer.rewind()
                 source.buffer.rewind()
@@ -77,9 +75,7 @@ abstract class TextureAtlas<T : TextureAtlasEntry> protected constructor(val eng
                     val layer2 = sources[paths[i]]
                     val layer: Image
                     if (layer2 == null) {
-                        layer = engine.files[paths[i]].read {
-                            decodePNG(it) { BufferCreator.bytes(it) }
-                        }
+                        layer = engine.files[paths[i]].read { decodePNG(it) }
                         sources.put(paths[i], layer)
                     } else {
                         layer = layer2
@@ -134,7 +130,7 @@ abstract class TextureAtlas<T : TextureAtlasEntry> protected constructor(val eng
             }
         } catch (e: IOException) {
             logger.error { "Failed to load texture: $e" }
-            buffer = BufferCreator.bytes(0x400)
+            buffer = ByteBuffer(0x400)
             width = minSize
             height = minSize
         }
@@ -195,7 +191,7 @@ abstract class TextureAtlas<T : TextureAtlasEntry> protected constructor(val eng
             }
         }
         val imageSize = size shl minBits
-        val buffer = BufferCreator.bytes(imageSize * imageSize shl 2)
+        val buffer = ByteBuffer(imageSize * imageSize shl 2)
         y = 0
         while (y < size) {
             val yy = y shl minBits

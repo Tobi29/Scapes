@@ -103,7 +103,7 @@ abstract class PlayerConnection(val server: ServerConnection) : Connection, Play
                 return
             }
             val spawnPos = Vector3d(spawnWorld.spawn + Vector3i(0, 0, 1))
-            entity = spawnWorld.plugins.worldType().newPlayer(spawnWorld,
+            entity = spawnWorld.plugins.worldType.newPlayer(spawnWorld,
                     spawnPos, Vector3d.ZERO, 0.0, 0.0, name(), skin().checksum,
                     this)
             isNew = true

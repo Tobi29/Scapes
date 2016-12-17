@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.vanilla.basics.generator
 
-import java8.util.stream.Stream
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.terrain.TerrainChunk
@@ -137,7 +136,7 @@ class ChunkPopulatorOverworld(world: WorldServer, private val plugin: VanillaBas
                 terrain, chunk)
     }
 
-    private class BiomeDecoratorChooser(collection: Stream<BiomeDecorator>,
+    private class BiomeDecoratorChooser(collection: Sequence<BiomeDecorator>,
                                         random: Random) {
         val noise: RandomNoiseLayer
         val decorators: Array<BiomeDecorator>

@@ -99,7 +99,7 @@ open class GuiInventory(name: String, protected val player: MobPlayerClientMainV
     }
 
     public override fun updateComponent(delta: Double) {
-        val cursor = engine.guiController.cursors().findAny()?.orElse(null)
+        val cursor = engine.guiController.cursors().firstOrNull()
         if (cursor != null) {
             val guiPos = cursor.currentGuiPos()
             cursorX = guiPos.x

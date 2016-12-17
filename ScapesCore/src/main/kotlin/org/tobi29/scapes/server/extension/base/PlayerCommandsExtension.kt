@@ -31,57 +31,53 @@ class PlayerCommandsExtension(server: ScapesServer) : ServerExtension(server) {
         val group = server.commandRegistry().group("players")
         val connection = server.connection
 
-        group.register("list [MATCH]", 9,
-                { options -> }) { args, executor, commands ->
+        group.register("list [MATCH]", 9, {}) { args, executor, commands ->
             val exp = args.arg(0) ?: "*"
             val pattern = wildcard(exp)
-            commands.add({
-                server.connection.players().map { it.name() }.filter { nickname ->
+            commands.add {
+                server.connection.players.asSequence().map { it.name() }.filter { nickname ->
                     pattern.matches(nickname)
                 }.forEach { message ->
                     executor.events.fireLocal(
                             MessageEvent(executor, MessageLevel.FEEDBACK_INFO,
                                     message))
                 }
-            })
+            }
         }
 
-        group.register("add PLAYER-ID...", 9,
-                { options -> }) { args, executor, commands ->
-            args.args().forEach { id -> commands.add({ server.addPlayer(id) }) }
+        group.register("add PLAYER-ID...", 9, {}) { args, executor, commands ->
+            args.args.forEach { commands.add { server.addPlayer(it) } }
         }
 
         group.register("remove PLAYER-ID...", 9,
-                { options -> }) { args, executor, commands ->
-            args.args().forEach { id ->
+                {}) { args, executor, commands ->
+            args.args.forEach { id ->
                 commands.add({ server.removePlayer(id) })
             }
         }
 
         group.register("kick PLAYER-NAME...", 9,
-                { options -> }) { args, executor, commands ->
+                {}) { args, executor, commands ->
             val message = "Kick by an Admin!"
-            args.args().forEach { playerName ->
-                commands.add({
+            args.args.forEach { playerName ->
+                commands.add {
                     val player = requireGet({ connection.playerByName(it) },
                             playerName)
                     player.disconnect(message)
-                })
+                }
             }
         }
 
-        group.register("op -l LEVEL PLAYER-NAME...", 10, { options ->
-            options.add("l", "level", true, "Permission level (0-10)")
+        group.register("op -l LEVEL PLAYER-NAME...", 10, {
+            add("l", "level", true, "Permission level (0-10)")
         }) { args, executor, commands ->
-            val playerNames = args.args()
-            val permissionLevel = getInt(
-                    args.requireOption('l'))
-            playerNames.forEach { playerName ->
-                commands.add({
+            val permissionLevel = getInt(args.requireOption('l'))
+            args.args.forEach { playerName ->
+                commands.add {
                     val player = requireGet({ connection.playerByName(it) },
                             playerName)
                     player.permissionLevel = permissionLevel
-                })
+                }
             }
         }
     }

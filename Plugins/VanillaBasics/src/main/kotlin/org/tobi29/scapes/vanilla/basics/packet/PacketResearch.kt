@@ -26,7 +26,6 @@ import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityResearchTableClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityResearchTableServer
 import org.tobi29.scapes.vanilla.basics.material.item.ItemResearch
-import java.io.IOException
 import java.util.*
 
 class PacketResearch : PacketAbstract, PacketServer {
@@ -39,14 +38,12 @@ class PacketResearch : PacketAbstract, PacketServer {
         uuid = researchTable.getUUID()
     }
 
-    @Throws(IOException::class)
     override fun sendServer(client: ClientConnection,
                             stream: WritableByteStream) {
         stream.putLong(uuid.mostSignificantBits)
         stream.putLong(uuid.leastSignificantBits)
     }
 
-    @Throws(IOException::class)
     override fun parseServer(player: PlayerConnection,
                              stream: ReadableByteStream) {
         uuid = UUID(stream.long, stream.long)
@@ -77,29 +74,26 @@ class PacketResearch : PacketAbstract, PacketServer {
                                         material.itemID()),
                                         true)
                             }
-                            plugin.researchRecipes().forEach { recipe ->
+                            plugin.researchRecipes.forEach { recipe ->
                                 if (!(mob.metaData("Vanilla").structure(
                                         "Research").structure(
                                         "Finished").getBoolean(
-                                        recipe.name()) ?: false)) {
-                                    if (!recipe.items().filter { requirement ->
+                                        recipe.name) ?: false)) {
+                                    if (!recipe.items.filter { requirement ->
                                         !(mob.metaData("Vanilla").structure(
                                                 "Research").structure(
                                                 "Items").getBoolean(
                                                 requirement) ?: false)
-                                    }.findAny().isPresent) {
+                                    }.any()) {
                                         mob.metaData("Vanilla").structure(
                                                 "Research").structure(
                                                 "Finished").setBoolean(
-                                                recipe.name(),
-                                                true)
+                                                recipe.name, true)
                                         mob.world.send(PacketEntityMetaData(
-                                                mob,
-                                                "Vanilla"))
+                                                mob, "Vanilla"))
                                         player.send(
-                                                PacketNotification(
-                                                        "Research",
-                                                        recipe.text()))
+                                                PacketNotification("Research",
+                                                        recipe.text))
                                     }
                                 }
                             }

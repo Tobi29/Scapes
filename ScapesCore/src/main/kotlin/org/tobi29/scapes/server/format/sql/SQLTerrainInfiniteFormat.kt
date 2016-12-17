@@ -18,7 +18,6 @@ package org.tobi29.scapes.server.format.sql
 
 import mu.KLogging
 import org.tobi29.scapes.engine.sql.SQLDatabase
-import org.tobi29.scapes.engine.utils.BufferCreator
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary
@@ -31,8 +30,7 @@ import java.util.*
 class SQLTerrainInfiniteFormat(database: SQLDatabase,
                                table: String,
                                private val world: String) : TerrainInfiniteFormat {
-    private val stream = ByteBufferStream({ BufferCreator.bytes(it) },
-            { it + 1048576 })
+    private val stream = ByteBufferStream(growth = { it + 1048576 })
     private val getChunk = database.compileQuery(table, arrayOf("Data"),
             "World", "X", "Y")
     private val replaceChunk = database.compileReplace(table, "World", "X", "Y",

@@ -16,13 +16,12 @@
 
 package org.tobi29.scapes.server.command
 
-import java8.util.stream.Stream
 import org.apache.commons.cli.CommandLine
 import org.apache.commons.cli.Option
 import org.apache.commons.cli.Options
 import org.tobi29.scapes.engine.utils.join
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.readOnly
 import java.util.*
 
 object Command {
@@ -48,6 +47,8 @@ object Command {
 
     class Arguments(private val commandLine: CommandLine) {
 
+        val args = commandLine.argList.readOnly()
+
         fun hasOption(option: Char): Boolean {
             return commandLine.hasOption(option)
         }
@@ -71,10 +72,6 @@ object Command {
             return commandLine.getOptionValue(option, def)
         }
 
-        fun args(): Array<String> {
-            return commandLine.args
-        }
-
         fun arg(i: Int): String? {
             val args = commandLine.args
             if (i < 0 || i >= args.size) {
@@ -85,7 +82,7 @@ object Command {
     }
 
     open class Compiled(private val commands: Collection<() -> Unit>) {
-        fun execute(): Stream<Output> {
+        fun execute(): List<Output> {
             val outputs = ArrayList<Output>(commands.size)
             commands.forEach { command ->
                 try {
@@ -94,7 +91,7 @@ object Command {
                     outputs.add(Output(252, e.message ?: ""))
                 }
             }
-            return outputs.stream()
+            return outputs
         }
     }
 

@@ -400,7 +400,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
         matrixStack.pop()
         gl.setBlending(BlendingMode.NORMAL)
         // Clouds
-        fbo.textureColor(0).bind(gl)
+        fbo.texturesColor[0].bind(gl)
         cloudMesh.render(gl, shaderSkybox)
         gl.textures().unbind(gl)
         // Bottom

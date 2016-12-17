@@ -16,8 +16,6 @@
 
 package org.tobi29.scapes.vanilla.basics
 
-import java8.util.concurrent.ConcurrentMaps
-import java8.util.stream.Stream
 import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.chunk.EnvironmentClient
 import org.tobi29.scapes.chunk.EnvironmentServer
@@ -26,7 +24,7 @@ import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.engine.utils.Checksum
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.entity.client.MobPlayerClient
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.server.MobPlayerServer
@@ -49,16 +47,21 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class VanillaBasics : WorldType {
-    private val craftingRecipes = ArrayList<CraftingRecipeType>()
-    private val researchRecipes = ArrayList<ResearchRecipe>()
-    private val metalTypes = ConcurrentHashMap<String, MetalType>()
-    private val alloyTypes = ConcurrentHashMap<String, AlloyType>()
-    private val crapMetal = MetalType("CrapMetal", "Crap Metal", 200.0, 0.17f,
+    private val craftingRecipesMut = ArrayList<CraftingRecipeType>()
+    val craftingRecipes = craftingRecipesMut.readOnly()
+    private val researchRecipesMut = ArrayList<ResearchRecipe>()
+    val researchRecipes = researchRecipesMut.readOnly()
+    private val metalTypesMut = ConcurrentHashMap<String, MetalType>()
+    private val alloyTypesMut = ConcurrentHashMap<String, AlloyType>()
+    val metalTypes = metalTypesMut.readOnly()
+    val alloyTypes = alloyTypesMut.readOnly()
+    val crapMetal = MetalType("CrapMetal", "Crap Metal", 200.0, 0.17f,
             0.12f, 0.1f)
-    private val crapAlloy = AlloyType("CrapMetal", "Crap Metal", "Crap Metal",
+    val crapAlloy = AlloyType("CrapMetal", "Crap Metal", "Crap Metal",
             Collections.singletonMap(crapMetal, 1.0), 0.17f, 0.12f,
             0.1f, 0.0, 0.0, 0.0, 0)
-    private val oreTypes = ArrayList<OreType>()
+    private val oreTypesMut = ArrayList<OreType>()
+    val oreTypes = oreTypesMut.readOnly()
     private val biomeDecorators = EnumMap<BiomeGenerator.Biome, MutableMap<String, BiomeDecorator>>(
             BiomeGenerator.Biome::class.java)
     private val biomeDecoratorOverlays = ConcurrentHashMap<String, BiomeDecorator.() -> Unit>()
@@ -75,59 +78,39 @@ class VanillaBasics : WorldType {
     }
 
     fun addCraftingRecipe(recipe: CraftingRecipeType) {
-        craftingRecipes.add(recipe)
-    }
-
-    fun craftingRecipes(): Stream<CraftingRecipeType> {
-        return craftingRecipes.stream()
+        craftingRecipesMut.add(recipe)
     }
 
     fun addResearchRecipe(researchRecipe: ResearchRecipe) {
         if (locked) {
             throw IllegalStateException("Initializing already ended")
         }
-        researchRecipes.add(researchRecipe)
-    }
-
-    fun researchRecipes(): Stream<ResearchRecipe> {
-        return researchRecipes.stream()
+        researchRecipesMut.add(researchRecipe)
     }
 
     fun addMetalType(metalType: MetalType) {
         if (locked) {
             throw IllegalStateException("Initializing already ended")
         }
-        metalTypes.put(metalType.id(), metalType)
+        metalTypesMut.put(metalType.id(), metalType)
     }
 
     fun metalType(id: String): MetalType {
-        return ConcurrentMaps.getOrDefault(metalTypes, id, crapMetal)
+        return metalTypes[id] ?: crapMetal
     }
 
     fun addAlloyType(alloyType: AlloyType) {
         if (locked) {
             throw IllegalStateException("Initializing already ended")
         }
-        alloyTypes.put(alloyType.id(), alloyType)
-    }
-
-    fun alloyType(id: String): AlloyType {
-        return ConcurrentMaps.getOrDefault(alloyTypes, id, crapAlloy)
-    }
-
-    fun alloyTypes(): Stream<AlloyType> {
-        return alloyTypes.values.stream()
+        alloyTypesMut.put(alloyType.id(), alloyType)
     }
 
     fun addOreType(oreType: OreType) {
         if (locked) {
             throw IllegalStateException("Initializing already ended")
         }
-        oreTypes.add(oreType)
-    }
-
-    fun oreTypes(): Stream<OreType> {
-        return oreTypes.stream()
+        oreTypesMut.add(oreType)
     }
 
     fun addBiomeDecoratorOverlay(name: String,
@@ -156,9 +139,9 @@ class VanillaBasics : WorldType {
         }
     }
 
-    fun biomeDecorators(biome: BiomeGenerator.Biome): Stream<BiomeDecorator> {
-        val biomeDecorator = biomeDecorators[biome] ?: return stream()
-        return biomeDecorator.values.stream()
+    fun biomeDecorators(biome: BiomeGenerator.Biome): Sequence<BiomeDecorator> {
+        val biomeDecorator = biomeDecorators[biome] ?: return emptySequence()
+        return biomeDecorator.values.asSequence()
     }
 
     fun modelPigShared(): MobLivingModelPigShared {

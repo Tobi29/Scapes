@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.client.input.gamepad
 
-import java8.util.stream.Stream
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.gui.GuiAction
 import org.tobi29.scapes.engine.gui.GuiController
@@ -24,8 +23,6 @@ import org.tobi29.scapes.engine.input.ControllerBasic
 import org.tobi29.scapes.engine.input.ControllerJoystick
 import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.engine.input.ControllerKeyReference
-import org.tobi29.scapes.engine.utils.*
-import kotlin.Pair
 
 class GuiControllerGamepad(engine: ScapesEngine,
                            private val controller: ControllerJoystick, private val primaryButton: ControllerKeyReference,
@@ -53,12 +50,12 @@ class GuiControllerGamepad(engine: ScapesEngine,
         return false // TODO: Implement keyboard for gamepads
     }
 
-    override fun cursors(): Stream<GuiCursor> {
-        return stream()
+    override fun cursors(): Sequence<GuiCursor> {
+        return emptySequence()
     }
 
-    override fun clicks(): Stream<Pair<GuiCursor, ControllerBasic.PressEvent>> {
-        return stream()
+    override fun clicks(): Sequence<Pair<GuiCursor, ControllerBasic.PressEvent>> {
+        return emptySequence()
     }
 
     override fun captureCursor(): Boolean {

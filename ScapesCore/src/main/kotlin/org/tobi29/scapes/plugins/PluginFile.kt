@@ -35,12 +35,12 @@ import java.nio.channels.Channels
 class PluginFile {
     private val path: FilePath?
     private val checksum: Checksum
-    private val id: String
-    private val name: String
-    private val parent: String
-    private val mainClass: String
-    private val version: Version
-    private val scapesVersion: Version
+    val id: String
+    val name: String
+    val parent: String
+    val mainClass: String
+    val version: Version
+    val scapesVersion: Version
 
     constructor(path: FilePath) {
         this.path = path

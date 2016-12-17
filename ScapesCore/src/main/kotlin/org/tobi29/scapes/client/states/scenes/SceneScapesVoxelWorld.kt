@@ -236,7 +236,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient, private val cam: Cam
     override fun postRender(gl: GL,
                             delta: Double) {
         if (exposureFBO != null) {
-            state.fbo(0).textureColor(0).bind(gl)
+            state.fbo(0).texturesColor[0].bind(gl)
             exposureFBO.activate(gl)
             gl.viewport(0, 0, 1, 1)
             gl.setProjectionOrthogonal(0.0f, 0.0f, 1.0f, 1.0f)
@@ -291,7 +291,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient, private val cam: Cam
         } else {
             if (exposureFBO != null) {
                 gl.activeTexture(3)
-                exposureFBO.textureColor(0).bind(gl)
+                exposureFBO.texturesColor[0].bind(gl)
                 gl.activeTexture(0)
             }
             shaderComposite2.setUniform1f(6, brightness)
@@ -372,7 +372,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient, private val cam: Cam
                     yaw, 0.0f)
             gl.clearDepth()
             renderWorld(gl, cam, 256, 256)
-            fbo.textureColor(0).bind(gl)
+            fbo.texturesColor[0].bind(gl)
             gl.screenShotFBO(fbo)
         }
         world.game.setHudVisible(true)
@@ -398,13 +398,13 @@ class SceneScapesVoxelWorld(private val world: WorldClient, private val cam: Cam
         skyboxFBO.deactivate(gl)
         gl.viewport(0, 0, width, height)
         gl.setProjectionOrthogonal(0.0f, 0.0f, 1.0f, 1.0f)
-        skyboxFBO.textureColor(0).bind(gl)
+        skyboxFBO.texturesColor[0].bind(gl)
         model.render(gl, shaderTextured)
         gl.setProjectionPerspective(width.toFloat(), height.toFloat(), cam)
         gl.enableDepthTest()
         gl.enableDepthMask()
         gl.activeTexture(1)
-        skyboxFBO.textureColor(0).bind(gl)
+        skyboxFBO.texturesColor[0].bind(gl)
         gl.activeTexture(0)
         val wireframe = this.wireframe
         if (wireframe) {

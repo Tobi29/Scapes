@@ -104,7 +104,7 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         engine.guiStack.addUnfocused("99-SceneDebug", debug)
         client.plugins.addFileSystems(engine.files)
         client.plugins.init()
-        client.plugins.plugins().forEach { plugin -> plugin.initClient(this) }
+        client.plugins.plugins.forEach { it.initClient(this) }
         var time = System.currentTimeMillis()
         val registry = client.plugins.registry()
         for (type in registry.materials()) {

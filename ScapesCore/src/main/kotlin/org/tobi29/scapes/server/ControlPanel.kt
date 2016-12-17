@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.server
 
-import java8.util.stream.Collectors
 import mu.KLogging
 import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.server.ControlPanelProtocol
@@ -82,12 +81,11 @@ class ControlPanel(worker: ConnectionWorker,
             })
         }
         addCommand("Players-List") {
-            val list = connection.players().map { it.name() }.map {
-                structure { setString("Name", it) }
-            }.collect(Collectors.toList<TagStructure>())
             send("Players-List", structure {
                 setList("Players") {
-
+                    connection.players.asSequence().map { it.name() }.map {
+                        structure { setString("Name", it) }
+                    }.forEach { add(it) }
                 }
             })
         }

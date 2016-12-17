@@ -42,7 +42,7 @@ class PlayerEntry(private val permissions: Int,
             return null
         }
         val spawnPos = Vector3d(spawnWorld.spawn + Vector3i(0, 0, 1))
-        val entity = spawnWorld.plugins.worldType().newPlayer(
+        val entity = spawnWorld.plugins.worldType.newPlayer(
                 spawnWorld, spawnPos, Vector3d.ZERO, 0.0, 0.0,
                 player.name(), player.skin().checksum, player)
         pos?.let { entityTag.setMultiTag("Pos", it) }

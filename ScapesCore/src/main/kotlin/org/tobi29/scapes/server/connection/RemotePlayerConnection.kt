@@ -17,7 +17,7 @@
 package org.tobi29.scapes.server.connection
 
 import org.tobi29.scapes.engine.server.*
-import org.tobi29.scapes.engine.utils.BufferCreator
+import org.tobi29.scapes.engine.utils.ByteBuffer
 import org.tobi29.scapes.engine.utils.graphics.Image
 import org.tobi29.scapes.engine.utils.io.*
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
@@ -102,11 +102,8 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
         }
 
         val plugins = server.plugins
-        output.putInt(plugins.fileCount())
-        val iterator = plugins.files().iterator()
-        while (iterator.hasNext()) {
-            sendPluginMetaData(iterator.next(), output)
-        }
+        output.putInt(plugins.files.size)
+        plugins.files.forEach { sendPluginMetaData(it, output) }
         channel.queueBundle()
         loginState = { loginStep2(it, challenge) }
     }
@@ -135,7 +132,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
         channel.queueBundle()
         for (request in requests) {
             sendPlugin(
-                    plugins.file(request).file() ?: throw IllegalStateException(
+                    plugins.files[request].file() ?: throw IllegalStateException(
                             "Trying to send embedded plugin"), output)
         }
         loginState = { loginStep3(it) }
@@ -143,7 +140,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
 
     private fun loginStep3(input: RandomReadableByteStream) {
         loadingRadius = clamp(input.int, 10, server.server.maxLoadingRadius())
-        val buffer = BufferCreator.bytes(64 * 64 * 4)
+        val buffer = ByteBuffer(64 * 64 * 4)
         input[buffer]
         buffer.flip()
         skin = ServerSkin(Image(64, 64, buffer))

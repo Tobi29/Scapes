@@ -22,8 +22,7 @@ import org.tobi29.scapes.chunk.generator.GeneratorOutput
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.math.noise.layer.*
-import org.tobi29.scapes.engine.utils.stream
-import org.tobi29.scapes.engine.utils.toTypedArray
+import org.tobi29.scapes.engine.utils.reduceOrNull
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.OreType
 import org.tobi29.scapes.vanilla.basics.material.StoneType
@@ -76,7 +75,7 @@ class ChunkGeneratorOverworld(random: Random,
         val sandNoise = RandomNoiseSimplexNoiseLayer(sandZoom,
                 random.nextLong(), 128.0)
         sandLayer = RandomNoiseNoiseLayer(sandNoise, random.nextLong(), 2)
-        stoneLayers = stream(*stoneTypes).map {
+        stoneLayers = stoneTypes.map {
             val stoneBase = RandomNoiseRandomLayer(random.nextLong(), it.size)
             val stoneFilter = RandomNoiseFilterLayer(stoneBase, *it)
             val stoneZoom = RandomNoiseZoomLayer(stoneFilter, 2048.0)
@@ -93,27 +92,19 @@ class ChunkGeneratorOverworld(random: Random,
     fun randomOreType(plugin: VanillaBasics,
                       stoneType: Int,
                       random: Random): OreType? {
-        var type: OreType? = null
-        var max = -1
-        val iterator = plugin.oreTypes().filter { ore ->
-            ore.stoneTypes().contains(stoneType)
-        }.iterator()
-        while (iterator.hasNext()) {
-            val oreType = iterator.next()
-            val check = random.nextInt(oreType.rarity())
-            if (random.nextBoolean()) {
-                if (check > max) {
-                    type = oreType
-                    max = check
-                }
+        return plugin.oreTypes.asSequence().filter { oreType ->
+            oreType.stoneTypes().contains(stoneType)
+        }.map { oreType ->
+            Pair(oreType, random.nextInt(oreType.rarity()))
+        }.reduceOrNull { first, second ->
+            if (first.second == second.second && random.nextBoolean()) {
+                first
+            } else if (first.second > second.second) {
+                first
             } else {
-                if (check >= max) {
-                    type = oreType
-                    max = check
-                }
+                second
             }
-        }
-        return type
+        }?.first
     }
 
     fun it(xxx: Int,

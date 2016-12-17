@@ -70,9 +70,7 @@ class WorldServer(worldFormat: WorldFormat,
     init {
         environment = environmentSupplier(this)
         terrain = terrainSupplier(this)
-        worldFormat.plugins().plugins().forEach { plugin ->
-            plugin.worldInit(this)
-        }
+        worldFormat.plugins().plugins.forEach { it.worldInit(this) }
     }
 
     fun connection(): ServerConnection {

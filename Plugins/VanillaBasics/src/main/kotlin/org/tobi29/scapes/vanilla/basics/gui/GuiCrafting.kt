@@ -55,9 +55,7 @@ class GuiCrafting(private val table: Boolean,
         val plugin = player.connection().plugins.plugin(
                 "VanillaBasics") as VanillaBasics
         val tableOnly = ArrayList<CraftingRecipeType>()
-        val iterator = plugin.craftingRecipes().iterator()
-        while (iterator.hasNext()) {
-            val recipeType = iterator.next()
+        plugin.craftingRecipes.forEach { recipeType ->
             if (recipeType.availableFor(player)) {
                 val enabled = table || !recipeType.table()
                 if (enabled) {
@@ -102,7 +100,7 @@ class GuiCrafting(private val table: Boolean,
         val elements = ArrayList<Element>()
         scrollPaneRecipes.removeAll()
         currentType?.let { recipeType ->
-            recipeType.recipes().forEach { recipe ->
+            recipeType.recipes.forEach { recipe ->
                 elements.add(scrollPaneRecipes.addVert(0.0, 0.0, -1.0, 40.0) {
                     Element(it, recipe)
                 })
@@ -140,17 +138,17 @@ class GuiCrafting(private val table: Boolean,
                 GuiComponentItemButton(it, recipe.result())
             }
             addHori(5.0, 5.0, -1.0, 16.0) { GuiComponentFlowText(it, "<=") }
-            recipe.ingredients().forEach { ingredient ->
+            recipe.ingredients.forEach { ingredient ->
                 val b = addHori(5.0, 5.0, 25.0, 25.0) {
                     GuiComponentItemButton(it, ingredient.example(example))
                 }
                 b.on(GuiEvent.HOVER) { setTooltip(b.item(), "Ingredient:\n") }
                 examples.add { b.setItem(ingredient.example(example)) }
             }
-            if (recipe.requirements().findAny().isPresent) {
+            if (recipe.requirements.isNotEmpty()) {
                 addHori(5.0, 5.0, -1.0, 16.0) { GuiComponentFlowText(it, "+") }
             }
-            recipe.requirements().forEach { requirement ->
+            recipe.requirements.forEach { requirement ->
                 val b = addHori(5.0, 5.0, 25.0, 25.0) {
                     GuiComponentItemButton(it,
                             requirement.example(example))

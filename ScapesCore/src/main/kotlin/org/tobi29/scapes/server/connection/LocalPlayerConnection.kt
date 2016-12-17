@@ -21,8 +21,6 @@ import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.server.ConnectionCloseException
 import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.server.InvalidPacketDataException
-import org.tobi29.scapes.engine.utils.BufferCreator
-import org.tobi29.scapes.engine.utils.graphics.Image
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.io.Algorithm
 import org.tobi29.scapes.engine.utils.io.checksum
@@ -36,7 +34,6 @@ import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.extension.event.MessageEvent
 import java.io.IOException
 import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.atomic.AtomicReference
 
 class LocalPlayerConnection(private val worker: ConnectionWorker,
                             server: ServerConnection,
@@ -67,16 +64,12 @@ class LocalPlayerConnection(private val worker: ConnectionWorker,
         this.workerClient = workerClient
         val engine = client.game.engine
         val path = engine.home.resolve("Skin.png")
-        val image: Image
-        if (exists(path)) {
-            image = read(path) { decodePNG(it) { BufferCreator.bytes(it) } }
+        val image = if (exists(path)) {
+            read(path) { decodePNG(it) }
         } else {
-            val reference = AtomicReference<Image>()
-            engine.files["Scapes:image/entity/mob/Player.png"].read({ stream ->
-                val defaultImage = decodePNG(stream) { BufferCreator.bytes(it) }
-                reference.set(defaultImage)
-            })
-            image = reference.get()
+            engine.files["Scapes:image/entity/mob/Player.png"].read {
+                decodePNG(it)
+            }
         }
         if (image.width != 64 || image.height != 64) {
             throw ConnectionCloseException("Invalid skin!")

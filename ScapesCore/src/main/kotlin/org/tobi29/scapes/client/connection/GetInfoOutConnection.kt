@@ -24,7 +24,7 @@ import org.tobi29.scapes.connection.ServerInfo
 import org.tobi29.scapes.engine.server.Connection
 import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.server.PacketBundleChannel
-import org.tobi29.scapes.engine.utils.BufferCreator
+import org.tobi29.scapes.engine.utils.ByteBuffer
 import java.io.IOException
 import java.nio.channels.SelectionKey
 
@@ -50,7 +50,7 @@ class GetInfoOutConnection(worker: ConnectionWorker,
                 if (state != State.OPEN) {
                     return@process true
                 }
-                val infoBuffer = BufferCreator.bytes(bundle.remaining())
+                val infoBuffer = ByteBuffer(bundle.remaining())
                 bundle[infoBuffer]
                 infoBuffer.flip()
                 val serverInfo = ServerInfo(infoBuffer)

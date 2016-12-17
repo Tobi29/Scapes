@@ -16,14 +16,14 @@
 
 package org.tobi29.scapes.vanilla.basics.material
 
-import java8.util.stream.Stream
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import java.util.*
 
 abstract class CraftingRecipeType {
-    protected val recipes: MutableList<CraftingRecipe> = ArrayList()
+    private val recipesMut = ArrayList<CraftingRecipe>()
+    val recipes = recipesMut.readOnly()
 
     abstract fun name(): String
 
@@ -34,10 +34,6 @@ abstract class CraftingRecipeType {
     abstract fun availableFor(player: MobPlayerClientMain): Boolean
 
     fun add(recipe: CraftingRecipe) {
-        recipes.add(recipe)
-    }
-
-    fun recipes(): Stream<CraftingRecipe> {
-        return recipes.stream()
+        recipesMut.add(recipe)
     }
 }

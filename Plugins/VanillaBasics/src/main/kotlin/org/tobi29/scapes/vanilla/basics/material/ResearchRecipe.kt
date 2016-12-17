@@ -16,20 +16,10 @@
 
 package org.tobi29.scapes.vanilla.basics.material
 
-import java8.util.stream.Stream
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.readOnly
 
-class ResearchRecipe(private val name: String, private val text: String, private val items: Array<String>) {
-
-    fun items(): Stream<String> {
-        return stream(*items)
-    }
-
-    fun name(): String {
-        return name
-    }
-
-    fun text(): String {
-        return text
-    }
+class ResearchRecipe(val name: String,
+                     val text: String,
+                     items: List<String>) {
+    val items = items.readOnly()
 }

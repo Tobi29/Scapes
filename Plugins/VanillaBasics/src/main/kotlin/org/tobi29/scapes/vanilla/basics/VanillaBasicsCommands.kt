@@ -31,12 +31,12 @@ internal fun registerCommands(server: ScapesServer,
     val registry = server.commandRegistry()
     val connection = server.connection
 
-    registry.register("time", 8, { options ->
-        options.add("w", "world", true, "World that is targeted")
-        options.add("d", "day", true, "Day that time will be set to")
-        options.add("t", "time", true,
+    registry.register("time", 8, {
+        add("w", "world", true, "World that is targeted")
+        add("d", "day", true, "Day that time will be set to")
+        add("t", "time", true,
                 "Time of day that time will be set to")
-        options.add("r", "relative", false,
+        add("r", "relative", false,
                 "Add time instead of setting it")
     }) { args, executor, commands ->
         val worldName = args.requireOption('w')
@@ -80,12 +80,11 @@ internal fun registerCommands(server: ScapesServer,
         }
     }
 
-    registry.register("hunger", 8, { options ->
-        options.add("p", "player", true,
-                "Player whose hunger values will be changed")
-        options.add("w", "wake", true, "Wake value (0.0-1.0)")
-        options.add("s", "saturation", true, "Saturation value (0.0-1.0)")
-        options.add("t", "thirst", true, "Thirst value (0.0-1.0)")
+    registry.register("hunger", 8, {
+        add("p", "player", true, "Player whose hunger values will be changed")
+        add("w", "wake", true, "Wake value (0.0-1.0)")
+        add("s", "saturation", true, "Saturation value (0.0-1.0)")
+        add("t", "thirst", true, "Thirst value (0.0-1.0)")
     }) { args, executor, commands ->
         val playerName = args.requireOption('p', executor.playerName())
         val wakeOption = args.option('w')
@@ -135,13 +134,12 @@ internal fun registerCommands(server: ScapesServer,
         }
     }
 
-    registry.register("giveingot", 8, { options ->
-        options.add("p", "player", true,
-                "Player that the item will be given to")
-        options.add("m", "metal", true, "Metal type")
-        options.add("d", "data", true, "Data value of item")
-        options.add("a", "amount", true, "Amount of item in stack")
-        options.add("t", "temperature", true, "Temperature of metal")
+    registry.register("giveingot", 8, {
+        add("p", "player", true, "Player that the item will be given to")
+        add("m", "metal", true, "Metal type")
+        add("d", "data", true, "Data value of item")
+        add("a", "amount", true, "Amount of item in stack")
+        add("t", "temperature", true, "Temperature of metal")
     }) { args, executor, commands ->
         val playerName = args.requireOption('p', executor.playerName())
         val metal = args.requireOption('m')
@@ -159,14 +157,13 @@ internal fun registerCommands(server: ScapesServer,
         }
     }
 
-    registry.register("givetool", 8, { options ->
-        options.add("p", "player", true,
-                "Player that the item will be given to")
-        options.add("m", "metal", true, "Metal type")
-        options.add("d", "data", true, "Data value of item")
-        options.add("a", "amount", true, "Amount of item in stack")
-        options.add("t", "temperature", true, "Temperature of metal")
-        options.add("k", "kind", true, "Kind of tool")
+    registry.register("givetool", 8, {
+        add("p", "player", true, "Player that the item will be given to")
+        add("m", "metal", true, "Metal type")
+        add("d", "data", true, "Data value of item")
+        add("a", "amount", true, "Amount of item in stack")
+        add("t", "temperature", true, "Temperature of metal")
+        add("k", "kind", true, "Kind of tool")
     }) { args, executor, commands ->
         val playerName = args.requireOption('p', executor.playerName())
         val metal = args.requireOption('m')
@@ -193,24 +190,24 @@ internal fun registerCommands(server: ScapesServer,
     worldGroup.register("new NAME", 9, {}) { args, executor, commands ->
 
         val name = require(args.arg(0), "name")
-        commands.add({
+        commands.add {
             server.registerWorld(
                     { world -> EnvironmentOverworldServer(world, plugin) },
                     name, hash(name, server.seed))
-        })
+        }
     }
 
     worldGroup.register("remove NAME", 9, {}) { args, executor, commands ->
         val name = require(args.arg(0), "name")
-        commands.add({
+        commands.add {
             if (!server.removeWorld(name)) {
                 error("World not loaded: " + name)
             }
-        })
+        }
     }
 
     worldGroup.register("delete NAME", 9, {}) { args, executor, commands ->
         val name = require(args.arg(0), "name")
-        commands.add({ server.deleteWorld(name) })
+        commands.add { server.deleteWorld(name) }
     }
 }

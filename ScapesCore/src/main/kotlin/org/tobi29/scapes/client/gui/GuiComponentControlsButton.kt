@@ -76,11 +76,15 @@ class GuiComponentControlsButton(parent: GuiLayoutData, textSize: Int,
 
     override fun updateComponent(delta: Double) {
         if (editing > 1) {
-            controller.pressEvents().filter { event -> event.state() == ControllerBasic.PressState.PRESS }.map { it.key() }.forEach {
+            controller.pressEvents()
+                    .filter { it.state() == ControllerBasic.PressState.PRESS }
+                    .map { it.key() }.forEach {
                 keys.add(it)
             }
-            val keyEvent = controller.pressEvents().filter { event -> event.state() == ControllerBasic.PressState.RELEASE }.findAny()
-            if (keyEvent.isPresent && !keys.isEmpty()) {
+            val keyEvent = controller.pressEvents()
+                    .filter { it.state() == ControllerBasic.PressState.RELEASE }
+                    .firstOrNull()
+            if (keyEvent != null && !keys.isEmpty()) {
                 key = ControllerKeyReference(keys)
                 tagStructure.setString(id, key.toString())
                 editing = 0

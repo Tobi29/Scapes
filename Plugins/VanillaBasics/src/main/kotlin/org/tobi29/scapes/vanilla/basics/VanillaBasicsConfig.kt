@@ -16,10 +16,8 @@
 
 package org.tobi29.scapes.vanilla.basics
 
-import java8.util.stream.Collectors
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.stream
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
 import org.tobi29.scapes.vanilla.basics.generator.decorator.BiomeDecorator
 import org.tobi29.scapes.vanilla.basics.material.*
@@ -29,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap
 fun VanillaBasics.research(name: String,
                            text: String,
                            vararg items: String) {
-    val researchRecipe = ResearchRecipe(name, text, arrayOf(*items))
+    val researchRecipe = ResearchRecipe(name, text, listOf(*items))
     addResearchRecipe(researchRecipe)
 }
 
@@ -76,9 +74,9 @@ fun VanillaBasics.alloy(alloy: AlloyTypeCreator.() -> Unit) {
 fun VanillaBasics.ore(ore: OreTypeCreator.() -> Unit) {
     val creator = OreTypeCreator(materials)
     ore(creator)
-    val stoneTypes = creator.stoneTypes.stream().map { stoneType ->
+    val stoneTypes = creator.stoneTypes.map { stoneType ->
         stoneType.data(materials.registry)
-    }.collect(Collectors.toList<Int>())
+    }
     val oreType = OreType(creator.type, creator.rarity, creator.size,
             creator.chance, creator.rockChance,
             creator.rockDistance, stoneTypes)

@@ -38,13 +38,12 @@ class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
         val connection = server.connection
         val group = server.commandRegistry().group("debug")
 
-        group.register("give", 8, { options ->
-            options.add("p", "player", true,
-                    "Player that the item will be given to")
-            options.add("m", "item", true, "Material of item")
-            options.add("d", "data", true, "Data value of item")
-            options.add("a", "amount", true, "Amount of item in stack")
-        }, { args, executor, commands ->
+        group.register("give", 8, {
+            add("p", "player", true, "Player that the item will be given to")
+            add("m", "item", true, "Material of item")
+            add("d", "data", true, "Data value of item")
+            add("a", "amount", true, "Amount of item in stack")
+        }) { args, executor, commands ->
             val playerName = args.requireOption('p', executor.playerName())
             val materialName = args.requireOption('m')
             val data = getInt(args.option('d', "0"))
@@ -60,11 +59,10 @@ class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
                             { inventory -> inventory.add(item) })
                 })
             })
-        })
+        }
 
-        group.register("clear", 8, { options -> }, { args, executor, commands ->
-            val playerNames = args.args()
-            playerNames.forEach { playerName ->
+        group.register("clear", 8, {}) { args, executor, commands ->
+            args.args.forEach { playerName ->
                 commands.add({
                     val player = requireGet({ connection.playerByName(it) },
                             playerName)
@@ -73,17 +71,17 @@ class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
                     })
                 })
             }
-        })
+        }
 
-        group.register("tp", 8, { options ->
-            options.add("p", "player", true, "Player who will be teleported")
-            options.add("t", "target", true,
+        group.register("tp", 8, {
+            add("p", "player", true, "Player who will be teleported")
+            add("t", "target", true,
                     "Target that the player will be teleported to")
-            options.add("w", "world", true,
+            add("w", "world", true,
                     "World that the player will be teleported to")
-            options.add("l", "location", 3,
+            add("l", "location", 3,
                     "Target that the player will be teleported to")
-        }, { args, executor, commands ->
+        }) { args, executor, commands ->
             val playerName = args.requireOption('p', executor.playerName())
             val worldOption = args.option('w')
             val locationOption = args.optionArray('l')
@@ -137,37 +135,36 @@ class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
                     })
                 }
             }
-        })
+        }
 
-        group.register("item", 8, { options ->
-            options.add("p", "player", true,
+        group.register("item", 8, {
+            add("p", "player", true,
                     "Player holding the item in the left hand to debug")
-        },
-                { args, executor, commands ->
-                    val playerName = args.requireOption('p',
-                            executor.playerName())
-                    commands.add({
-                        val player = requireGet({ connection.playerByName(it) },
-                                playerName)
-                        player.mob({ mob ->
-                            try {
-                                val stream = ByteBufferStream()
-                                TagStructureJSON.write(mob.leftWeapon().save(),
-                                        stream)
-                                stream.buffer().flip()
-                                val str = process(stream, asString())
-                                executor.events.fireLocal(
-                                        MessageEvent(executor,
-                                                MessageLevel.FEEDBACK_INFO,
-                                                str))
-                            } catch (e: IOException) {
-                                executor.events.fireLocal(
-                                        MessageEvent(executor,
-                                                MessageLevel.FEEDBACK_ERROR,
-                                                "Failed to serialize item: ${e.message}"))
-                            }
-                        })
-                    })
+        }) { args, executor, commands ->
+            val playerName = args.requireOption('p',
+                    executor.playerName())
+            commands.add({
+                val player = requireGet({ connection.playerByName(it) },
+                        playerName)
+                player.mob({ mob ->
+                    try {
+                        val stream = ByteBufferStream()
+                        TagStructureJSON.write(mob.leftWeapon().save(),
+                                stream)
+                        stream.buffer().flip()
+                        val str = process(stream, asString())
+                        executor.events.fireLocal(
+                                MessageEvent(executor,
+                                        MessageLevel.FEEDBACK_INFO,
+                                        str))
+                    } catch (e: IOException) {
+                        executor.events.fireLocal(
+                                MessageEvent(executor,
+                                        MessageLevel.FEEDBACK_ERROR,
+                                        "Failed to serialize item: ${e.message}"))
+                    }
                 })
+            })
+        }
     }
 }

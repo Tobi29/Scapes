@@ -17,7 +17,7 @@
 package org.tobi29.scapes.connection
 
 import mu.KLogging
-import org.tobi29.scapes.engine.utils.BufferCreator
+import org.tobi29.scapes.engine.utils.ByteBuffer
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException
 import org.tobi29.scapes.engine.utils.graphics.Image
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
@@ -52,7 +52,7 @@ class ServerInfo {
 
         buffer.flip()
         val array = name.toByteArray(StandardCharsets.UTF_8)
-        this.buffer = BufferCreator.bytes(1 + array.size + buffer.remaining())
+        this.buffer = ByteBuffer(1 + array.size + buffer.remaining())
         this.buffer.put(array.size.toByte())
         this.buffer.put(array)
         this.buffer.put(buffer)
@@ -86,9 +86,7 @@ class ServerInfo {
         private fun image(path: FilePath): Image {
             if (exists(path)) {
                 try {
-                    val image = read(path) {
-                        decodePNG(it) { BufferCreator.bytes(it) }
-                    }
+                    val image = read(path) { decodePNG(it) }
                     val width = image.width
                     if (width != image.height) {
                         logger.warn { "The icon has to be square sized." }

@@ -16,25 +16,19 @@
 
 package org.tobi29.scapes.vanilla.basics.material
 
-import java8.util.stream.Stream
 import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.stream
+import org.tobi29.scapes.engine.utils.readOnly
 import java.util.*
 
-class CraftingRecipe(private val ingredients: List<CraftingRecipe.Ingredient>,
-                     private val requirements: List<CraftingRecipe.Ingredient>, private val result: ItemStack) {
+class CraftingRecipe(ingredients: List<CraftingRecipe.Ingredient>,
+                     requirements: List<CraftingRecipe.Ingredient>,
+                     private val result: ItemStack) {
+    val ingredients = ingredients.readOnly()
+    val requirements = requirements.readOnly()
 
-    fun ingredients(): Stream<Ingredient> {
-        return ingredients.stream()
-    }
-
-    fun requirements(): Stream<Ingredient> {
-        return requirements.stream()
-    }
-
-    fun takes(inventory: Inventory): Stream<ItemStack>? {
+    fun takes(inventory: Inventory): List<ItemStack>? {
         var inventory = inventory
         inventory = Inventory(inventory)
         val takes = ArrayList<ItemStack>()
@@ -52,7 +46,7 @@ class CraftingRecipe(private val ingredients: List<CraftingRecipe.Ingredient>,
                 return null
             }
         }
-        return takes.stream()
+        return takes
     }
 
     fun result(): ItemStack {

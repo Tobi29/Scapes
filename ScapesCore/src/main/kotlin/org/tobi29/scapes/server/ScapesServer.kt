@@ -70,8 +70,8 @@ class ScapesServer(source: WorldSource, tagStructure: TagStructure,
         connection = ServerConnection(this, socketTag, ssl)
         extensions.init()
         format.plugins().init()
-        format.plugins().plugins().forEach { it.initServer(this) }
-        format.plugins().dimensions().forEach { this.registerWorld(it) }
+        format.plugins().plugins.forEach { it.initServer(this) }
+        format.plugins().dimensions.forEach { this.registerWorld(it) }
         connection.workers(socketTag.getInt("WorkerCount") ?: 1)
     }
 
@@ -96,7 +96,7 @@ class ScapesServer(source: WorldSource, tagStructure: TagStructure,
     }
 
     fun defaultWorld(): WorldServer? {
-        return worlds[plugins.worldType().id()]
+        return worlds[plugins.worldType.id()]
     }
 
     fun registerWorld(dimension: Dimension): WorldServer? {

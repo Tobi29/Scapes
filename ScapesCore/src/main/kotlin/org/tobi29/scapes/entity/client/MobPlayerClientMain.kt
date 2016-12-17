@@ -397,9 +397,8 @@ abstract class MobPlayerClientMain protected constructor(world: WorldClient, pos
     }
 
     companion object {
-        protected fun collisions(aabbs: Pool<AABBElement>): Iterator<AABB> {
-            return aabbs.stream().filter({ it.isSolid }).map(
-                    { it.aabb() }).iterator()
+        protected fun collisions(aabbs: Pool<AABBElement>): Sequence<AABB> {
+            return aabbs.asSequence().filter { it.isSolid }.map { it.aabb() }
         }
     }
 }

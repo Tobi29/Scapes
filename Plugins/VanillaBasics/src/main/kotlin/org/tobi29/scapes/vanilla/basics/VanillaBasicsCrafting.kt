@@ -16,11 +16,8 @@
 
 package org.tobi29.scapes.vanilla.basics
 
-import java8.util.stream.Collectors
 import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.notNull
-import org.tobi29.scapes.engine.utils.stream
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.CraftingRecipeType
@@ -65,9 +62,9 @@ private fun VanillaBasics.registerRecipesBasics(registry: GameRegistry,
             materials.metalHammer.example(1))
     val saw = listOf(materials.flintSaw.example(1),
             materials.metalSaw.example(1))
-    val plank = treeRegistry.values().stream().notNull().map {
+    val plank = treeRegistry.values().asSequence().filterNotNull().map {
         ItemStack(materials.wood, it.data(registry))
-    }.collect(Collectors.toList<ItemStack>())
+    }.toList()
 
     crafting(recipeType) {
         recipe("vanilla.basics.crafting.basics.CraftingTable") {
@@ -87,9 +84,8 @@ private fun VanillaBasics.registerRecipesBasics(registry: GameRegistry,
             requirements.add(saw)
             result = ItemStack(materials.researchTable, 0)
         }
-        stoneRegistry.values().stream().notNull().mapToInt {
-            it.data(registry)
-        }.forEach {
+        stoneRegistry.values().asSequence().filterNotNull()
+                .map { it.data(registry) }.forEach {
             recipe("vanilla.basics.crafting.basics.Cobblestone" + it, {
                 ingredients.add(ItemStack(materials.stoneRock, it, 9))
                 requirements.add(hammer)
@@ -234,10 +230,9 @@ private fun VanillaBasics.registerRecipesFood(registry: GameRegistry,
         }
     }
 
-    val cobblestones = stoneRegistry.values().stream().notNull().filter { it.resistance() > 0.1 }.mapToInt {
-        it.data(registry)
-    }.mapToObj { ItemStack(materials.cobblestone, it, 2) }.collect(
-            Collectors.toList<ItemStack>())
+    val cobblestones = stoneRegistry.values().asSequence().filterNotNull()
+            .filter { it.resistance() > 0.1 }.map { it.data(registry) }
+            .map { ItemStack(materials.cobblestone, it, 2) }.toList()
     val pickaxe = listOf(materials.flintPickaxe.example(1),
             materials.metalPickaxe.example(1))
     val hammer = listOf(materials.flintHammer.example(1),
@@ -256,9 +251,8 @@ private fun VanillaBasics.registerRecipesFood(registry: GameRegistry,
             requirements.add(hammer)
             result = ItemStack(materials.quern, 0)
         }
-        cropRegistry.values().stream().notNull().mapToInt {
-            it.data(registry)
-        }.forEach {
+        cropRegistry.values().asSequence().filterNotNull()
+                .map { it.data(registry) }.forEach {
             recipe("vanilla.basics.crafting.food.Dough" + it, {
                 ingredients.add(ItemStack(materials.grain, it, 8))
                 result = ItemStack(materials.dough, it)
@@ -295,10 +289,9 @@ private fun VanillaBasics.registerRecipesMetal(registry: GameRegistry,
                     "Metal") ?: false
         }
     }
-    val cobblestones = stoneRegistry.values().stream().notNull().filter { it.resistance() > 0.1 }.mapToInt {
-        it.data(registry)
-    }.mapToObj { ItemStack(materials.cobblestone, it, 2) }.collect(
-            Collectors.toList<ItemStack>())
+    val cobblestones = stoneRegistry.values().asSequence().filterNotNull()
+            .filter { it.resistance() > 0.1 }.map { it.data(registry) }
+            .map { ItemStack(materials.cobblestone, it, 2) }.toList()
 
     crafting(recipeType) {
         recipe("vanilla.basics.crafting.metal.Mold") {
@@ -345,9 +338,9 @@ private fun VanillaBasics.registerRecipesIron(registry: GameRegistry,
         }
     }
 
-    val plank = treeRegistry.values().stream().notNull()
+    val plank = treeRegistry.values().asSequence().filterNotNull()
             .map { ItemStack(materials.wood, it.data(registry)) }
-            .collect(Collectors.toList<ItemStack>())
+            .toList()
 
     crafting(recipeType) {
         recipe("vanilla.basics.crafting.iron.Bloomery") {

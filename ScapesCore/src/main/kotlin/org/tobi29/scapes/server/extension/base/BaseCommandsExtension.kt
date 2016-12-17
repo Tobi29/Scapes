@@ -32,14 +32,14 @@ class BaseCommandsExtension(server: ScapesServer) : ServerExtension(server) {
         val registry = server.commandRegistry()
         val serverGroup = registry.group("server")
 
-        registry.register("say MESSAGE...", 0, { options ->
-            options.add("n", "name", true, "Name used for prefix")
-            options.add("r", "raw", false, "Disable prefix")
-        }, { args, executor, commands ->
+        registry.register("say MESSAGE...", 0, {
+            add("n", "name", true, "Name used for prefix")
+            add("r", "raw", false, "Disable prefix")
+        }) { args, executor, commands ->
             val message: String
             if (args.hasOption('r')) {
                 requirePermission(executor, 8, 'r')
-                message = join(*args.args(), delimiter = " ")
+                message = join(args.args, delimiter = " ")
             } else {
                 val name: String
                 val nameOption = args.option('n')
@@ -49,24 +49,24 @@ class BaseCommandsExtension(server: ScapesServer) : ServerExtension(server) {
                 } else {
                     name = executor.name()
                 }
-                message = "<$name> ${join(*args.args(), delimiter = " ")}"
+                message = "<$name> ${join(args.args, delimiter = " ")}"
             }
             commands.add {
                 server.events.fireLocal(
                         MessageEvent(executor, MessageLevel.CHAT, message))
             }
-        })
+        }
 
-        registry.register("tell MESSAGE...", 0, { options ->
-            options.add("t", "target", true, "Target player")
-            options.add("n", "name", true, "Name used for prefix")
-            options.add("r", "raw", false, "Disable prefix")
-        }, { args, executor, commands ->
+        registry.register("tell MESSAGE...", 0, {
+            add("t", "target", true, "Target player")
+            add("n", "name", true, "Name used for prefix")
+            add("r", "raw", false, "Disable prefix")
+        }) { args, executor, commands ->
             val targetName = args.requireOption('t', executor.playerName())
             val message: String
             if (args.hasOption('r')) {
                 requirePermission(executor, 8, 'r')
-                message = join(*args.args(), delimiter = " ")
+                message = join(args.args, delimiter = " ")
             } else {
                 val name: String
                 val nameOption = args.option('n')
@@ -76,24 +76,22 @@ class BaseCommandsExtension(server: ScapesServer) : ServerExtension(server) {
                 } else {
                     name = executor.name()
                 }
-                message = "[$name] ${join(*args.args(), delimiter = " ")}"
+                message = "[$name] ${join(args.args, delimiter = " ")}"
             }
-            commands.add({
+            commands.add {
                 val target = requireGet({ connection.playerByName(it) },
                         targetName)
                 target.events.fireLocal(
                         MessageEvent(executor, MessageLevel.CHAT, message))
-            })
-        })
+            }
+        }
 
-        serverGroup.register("stop", 10, { options -> },
-                { args, executor, commands ->
-                    server.scheduleStop(ScapesServer.ShutdownReason.STOP)
-                })
+        serverGroup.register("stop", 10, {}) { args, executor, commands ->
+            server.scheduleStop(ScapesServer.ShutdownReason.STOP)
+        }
 
-        serverGroup.register("reload", 10, { options -> },
-                { args, executor, commands ->
-                    server.scheduleStop(ScapesServer.ShutdownReason.RELOAD)
-                })
+        serverGroup.register("reload", 10, {}) { args, executor, commands ->
+            server.scheduleStop(ScapesServer.ShutdownReason.RELOAD)
+        }
     }
 }

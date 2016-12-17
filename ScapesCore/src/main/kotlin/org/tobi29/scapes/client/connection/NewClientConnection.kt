@@ -24,7 +24,6 @@ import org.tobi29.scapes.connection.ConnectionType
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.utils.*
-import org.tobi29.scapes.engine.utils.graphics.Image
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.io.*
 import org.tobi29.scapes.engine.utils.io.filesystem.FileCache
@@ -39,7 +38,6 @@ import java.nio.channels.SelectionKey
 import java.security.InvalidKeyException
 import java.security.NoSuchAlgorithmException
 import java.util.*
-import java.util.concurrent.atomic.AtomicReference
 import javax.crypto.BadPaddingException
 import javax.crypto.Cipher
 import javax.crypto.IllegalBlockSizeException
@@ -144,10 +142,12 @@ class NewClientConnection(private val worker: ConnectionWorker,
             }
 
             val checksum = input.byteArray
-            val embedded = Plugins.embedded().asSequence().filter { plugin -> plugin.id() == id }.filter { plugin ->
-                compare(plugin.version(), version).`in`(Comparison.LOWER_BUILD,
-                        Comparison.HIGHER_MINOR)
-            }.firstOrNull()
+            val embedded = Plugins.embedded().asSequence()
+                    .filter { it.id() == id }
+                    .filter {
+                        compare(it.version, version).inside(
+                                Comparison.LOWER_BUILD, Comparison.HIGHER_MINOR)
+                    }.firstOrNull()
             if (embedded != null) {
                 plugins.add(embedded)
             } else {
@@ -247,16 +247,12 @@ class NewClientConnection(private val worker: ConnectionWorker,
 
     private fun sendSkin(output: WritableByteStream) {
         val path = engine.home.resolve("Skin.png")
-        val image: Image
-        if (exists(path)) {
-            image = read(path) { decodePNG(it) { BufferCreator.bytes(it) } }
+        val image = if (exists(path)) {
+            read(path) { decodePNG(it) }
         } else {
-            val reference = AtomicReference<Image>()
-            engine.files["Scapes:image/entity/mob/Player.png"].read({ stream ->
-                val defaultImage = decodePNG(stream) { BufferCreator.bytes(it) }
-                reference.set(defaultImage)
-            })
-            image = reference.get()
+            engine.files["Scapes:image/entity/mob/Player.png"].read {
+                decodePNG(it)
+            }
         }
         if (image.width != 64 || image.height != 64) {
             throw ConnectionCloseException("Invalid skin!")

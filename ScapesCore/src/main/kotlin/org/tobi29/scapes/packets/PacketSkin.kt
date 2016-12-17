@@ -16,7 +16,7 @@
 package org.tobi29.scapes.packets
 
 import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.scapes.engine.utils.BufferCreator
+import org.tobi29.scapes.engine.utils.ByteBuffer
 import org.tobi29.scapes.engine.utils.Checksum
 import org.tobi29.scapes.engine.utils.graphics.Image
 import org.tobi29.scapes.engine.utils.io.Algorithm
@@ -44,13 +44,13 @@ class PacketSkin : PacketAbstract, PacketBoth {
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {
         stream.put(image.buffer)
-        stream.putString(checksum.algorithm().name)
+        stream.putString(checksum.algorithm.name)
         stream.put(checksum.array())
     }
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        val buffer = BufferCreator.bytes(64 * 64 * 4)
+        val buffer = ByteBuffer(64 * 64 * 4)
         stream[buffer]
         buffer.flip()
         image = Image(64, 64, buffer)
@@ -74,7 +74,7 @@ class PacketSkin : PacketAbstract, PacketBoth {
 
     override fun sendServer(client: ClientConnection,
                             stream: WritableByteStream) {
-        stream.putString(checksum.algorithm().name)
+        stream.putString(checksum.algorithm.name)
         stream.put(checksum.array())
     }
 

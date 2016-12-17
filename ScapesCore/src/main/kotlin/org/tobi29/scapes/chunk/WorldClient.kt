@@ -68,15 +68,13 @@ class WorldClient(val connection: ClientConnection, cam: Cam, seed: Long,
     init {
         game = connection.game
         environment = environmentSupplier(this)
-        player = connection.plugins.worldType().newPlayer(this, Vector3d.ZERO,
+        player = connection.plugins.worldType.newPlayer(this, Vector3d.ZERO,
                 Vector3d.ZERO, 0.0, 0.0, "")
         player.setEntityID(playerID)
         player.read(playerTag)
         scene = SceneScapesVoxelWorld(this, cam)
         playerModel = player.createModel()
-        connection.plugins.plugins().forEach { plugin ->
-            plugin.worldInit(this)
-        }
+        connection.plugins.plugins.forEach { it.worldInit(this) }
         terrain = terrainSupplier(this)
         logger.info { "Received player entity: $player with id: $playerID" }
         val scapesTag = game.engine.tagStructure.getStructure("Scapes")
