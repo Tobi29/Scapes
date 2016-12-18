@@ -4,5 +4,5 @@
   "Version": "0.0.0",
   "ScapesVersion": "0.0.0",
   "Parent": "WorldType",
-  "MainClass": "org.tobi29.scapes.vanilla.basics.VanillaBasics"
+  "MainClass": "scapes.plugin.tobi29.vanilla.basics.VanillaBasics"
 }
