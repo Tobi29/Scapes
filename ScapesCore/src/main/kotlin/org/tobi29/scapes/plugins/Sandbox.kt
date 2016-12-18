@@ -22,8 +22,9 @@ import java.util.concurrent.ForkJoinPool
 import java.util.concurrent.ThreadLocalRandom
 
 object Sandbox {
-    private val PACKAGE_WHITELIST = arrayOf("java", "kotlin",
-            "org.tobi29.scapes", "org.slf4j", "java8")
+    private val whitelist = packageAccess("java.**", "kotlin.**",
+            "org.tobi29.scapes.**", "org.slf4j.**", "java8.**")
+    private val permission = RuntimePermission("scapes.restrictedPkg")
     private var sandboxed = false
 
     fun sandbox() {
@@ -57,9 +58,13 @@ object Sandbox {
         System.setSecurityManager(object : SecurityManager() {
             override fun checkPackageAccess(pkg: String) {
                 super.checkPackageAccess(pkg)
-                if (PACKAGE_WHITELIST.none { pkg.startsWith(it) }) {
-                    checkPermission(
-                            RuntimePermission("scapes.restrictedPkg"))
+                if (!whitelist(pkg)) {
+                    try {
+                        checkPermission(permission)
+                    } catch (e: AccessControlException) {
+                        throw AccessControlException(
+                                "Package access denied on: $pkg", permission)
+                    }
                 }
             }
         })
@@ -70,5 +75,70 @@ object Sandbox {
         Spliterators.emptySpliterator<Any>()
         ForkJoinPool.commonPool()
         ThreadLocalRandom.current()
+    }
+
+    fun packageAccess(vararg str: String): (String) -> Boolean {
+        val check = compose(matchPackages(*str))
+        return { check(it.split('.')) }
+    }
+
+    private fun compose(functions: List<(List<String>) -> Boolean>): (List<String>) -> Boolean {
+        return { pkg -> functions.any { it(pkg) } }
+    }
+
+    private fun matchPackages(vararg str: String): List<(List<String>) -> Boolean> {
+        return str.asSequence().map { matchPackage(it) }.toList()
+    }
+
+    private fun matchPackage(str: String): (List<String>) -> Boolean {
+        val split = str.split('.').asSequence()
+                .map<String, (String?) -> PkgMatchResult> {
+                    when (it) {
+                        "*" -> { pkg ->
+                            PkgMatchResult.CONTINUE
+                        }
+                        "**" -> { pkg ->
+                            PkgMatchResult.MATCHES
+                        }
+                        else -> { pkg ->
+                            if (it == pkg) {
+                                PkgMatchResult.CONTINUE
+                            } else {
+                                PkgMatchResult.ABORT
+                            }
+                        }
+                    }
+                }.toList()
+
+        return matcher@ { pkg ->
+            val iterator = pkg.iterator()
+            split.forEach {
+                if (iterator.hasNext()) {
+                    when (it(iterator.next())) {
+                        PkgMatchResult.CONTINUE -> {
+                        }
+                        PkgMatchResult.MATCHES -> {
+                            return@matcher true
+                        }
+                        PkgMatchResult.ABORT -> {
+                            return@matcher false
+                        }
+                    }
+                } else {
+                    return@matcher when (it(null)) {
+                        PkgMatchResult.CONTINUE -> false
+                        PkgMatchResult.MATCHES -> true
+                        PkgMatchResult.ABORT -> false
+                    }
+                }
+            }
+            !iterator.hasNext()
+        }
+    }
+
+    private enum class PkgMatchResult {
+        CONTINUE,
+        MATCHES,
+        ABORT
     }
 }
