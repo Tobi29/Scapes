@@ -18,6 +18,7 @@ package org.tobi29.scapes.block
 
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.GL
+import org.tobi29.scapes.engine.graphics.TextureAtlas
 
 class TerrainTextureRegistry(engine: ScapesEngine) : TextureAtlas<TerrainTexture>(
         engine, 4) {
@@ -46,17 +47,14 @@ class TerrainTextureRegistry(engine: ScapesEngine) : TextureAtlas<TerrainTexture
                         animated: Boolean,
                         shaderAnimation: ShaderAnimation = ShaderAnimation.NONE): TerrainTexture {
         val path = path(paths)
-        var texture: TerrainTexture? = textures[path]
-        if (texture != null) {
-            return texture
-        }
+        textures[path]?.let { return it }
         val image = load(paths)
-        if (animated) {
-            texture = AnimatedTerrainTexture(image.buffer, image.width,
-                    image.height, shaderAnimation, engine, { texture() })
+        val texture = if (animated) {
+            AnimatedTerrainTexture(image.buffer, image.width, image.height,
+                    shaderAnimation, engine, { texture() })
         } else {
-            texture = TerrainTexture(image.buffer, image.width,
-                    shaderAnimation, { texture() })
+            TerrainTexture(image.buffer, image.width, shaderAnimation,
+                    { texture() })
         }
         textures[path] = texture
         return texture

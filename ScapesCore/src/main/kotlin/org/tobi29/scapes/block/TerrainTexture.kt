@@ -18,6 +18,7 @@ package org.tobi29.scapes.block
 
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Texture
+import org.tobi29.scapes.engine.graphics.TextureAtlasEntry
 
 import java.nio.ByteBuffer
 

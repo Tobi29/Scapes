@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.entity.particle
 
-import org.tobi29.scapes.block.TextureAtlasEntry
+import org.tobi29.scapes.engine.graphics.TextureAtlasEntry
 import org.tobi29.scapes.engine.graphics.Texture
 
 import java.nio.ByteBuffer

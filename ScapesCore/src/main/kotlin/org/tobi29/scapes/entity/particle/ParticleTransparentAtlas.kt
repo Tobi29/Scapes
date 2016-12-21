@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.entity.particle
 
-import org.tobi29.scapes.block.TextureAtlas
+import org.tobi29.scapes.engine.graphics.TextureAtlas
 import org.tobi29.scapes.engine.ScapesEngine
 
 class ParticleTransparentAtlas(engine: ScapesEngine) : TextureAtlas<ParticleTransparentTexture>(

@@ -31,7 +31,6 @@ import org.tobi29.scapes.engine.graphics.SceneEmpty
 import org.tobi29.scapes.engine.gui.GuiNotificationSimple
 import org.tobi29.scapes.engine.input.*
 import org.tobi29.scapes.engine.server.ConnectionManager
-import org.tobi29.scapes.engine.utils.Version
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath
 import org.tobi29.scapes.engine.utils.io.filesystem.createDirectories
 import org.tobi29.scapes.engine.utils.io.tag.*
@@ -40,7 +39,8 @@ import java.io.IOException
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-class ScapesClient(engine: ScapesEngine, private val skipIntro: Boolean,
+class ScapesClient(engine: ScapesEngine,
+                   private val skipIntro: Boolean,
                    private val savesSupplier: (ScapesClient) -> SaveStorage) : Game(
         engine) {
     val connection = ConnectionManager(engine.taskExecutor, 10)
@@ -59,14 +59,9 @@ class ScapesClient(engine: ScapesEngine, private val skipIntro: Boolean,
         return inputMode
     }
 
-    override val name: String
-        get() = "Scapes"
-
-    override val id: String
-        get() = "Scapes"
-
-    override val version: Version
-        get() = VERSION
+    override val name = "Scapes"
+    override val id = "Scapes"
+    override val version = VERSION
 
     override fun initEarly() {
         try {
