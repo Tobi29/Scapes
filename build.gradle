@@ -25,7 +25,7 @@ buildscript {
 }
 
 plugins {
-    id "nebula.kotlin" version "1.0.5-2" apply false
+    id "nebula.kotlin" version "1.0.5-3" apply false
 }
 
 task wrapper(type: Wrapper) {

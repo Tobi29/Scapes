@@ -71,7 +71,7 @@ dependencies {
     compile project(":ScapesEngineAndroid:AndroidSQLite")
     compile project(":ScapesEngineAndroid:AndroidSSLProvider")
     compile project(":ScapesEngineAndroid:AndroidSysTrace")
-    compile "org.jetbrains.kotlin:kotlin-stdlib:1.0.5-2"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:1.0.5-3"
     compile "net.sourceforge.streamsupport:streamsupport:1.5.2"
     compile "org.slf4j:slf4j-android:1.7.21"
 
@@ -85,6 +85,6 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:2.2.0-beta3'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.5-2"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.5-3"
     }
 }
