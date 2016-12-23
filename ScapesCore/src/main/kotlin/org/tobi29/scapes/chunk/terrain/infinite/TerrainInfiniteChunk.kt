@@ -62,6 +62,25 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
         return blocks[id] ?: throw IllegalArgumentException()
     }
 
+    @Suppress("NOTHING_TO_INLINE")
+    protected inline fun checkCoords(x: Int,
+                                     y: Int) {
+        if (x < 0 || x >= 16 || y < 0 || y >= 16) {
+            throw ChunkMissException(
+                    "Tried to access block $x $y in chunk ${pos.x} ${pos.y}")
+        }
+    }
+
+    @Suppress("NOTHING_TO_INLINE")
+    protected inline fun checkCoords(x: Int,
+                                     y: Int,
+                                     z: Int) {
+        if (x < 0 || x >= 16 || y < 0 || y >= 16 || z < 0 || z >= zSize) {
+            throw ChunkMissException(
+                    "Tried to access block $x $y $z in chunk ${pos.x} ${pos.y}")
+        }
+    }
+
     abstract fun update(x: Int,
                         y: Int,
                         z: Int,
@@ -196,11 +215,8 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
 
     fun highestBlockZAtL(x: Int,
                          y: Int): Int {
-        if (x >= 0 && x < 16 && y >= 0 && y < 16) {
-            return heightMap[y shl 4 or x] + 1
-        }
-        throw ChunkMissException(
-                "Tried to access block $x $y in chunk ${pos.x} ${pos.y}")
+        checkCoords(x, y)
+        return heightMap[y shl 4 or x] + 1
     }
 
     fun highestTerrainBlockZAtG(x: Int,
@@ -210,23 +226,20 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
 
     fun highestTerrainBlockZAtL(x: Int,
                                 y: Int): Int {
-        if (x >= 0 && x < 16 && y >= 0 && y < 16) {
-            for (z in heightMap[y shl 4 or x] downTo 0) {
-                val id = lockRead { bID.getData(x, y, z, 0) }
-                if (id != 0) {
-                    val type = block(id)
-                    if (type.isSolid(terrain, x + posBlock.x,
-                            y + posBlock.x, z) && !type.isTransparent(
-                            terrain, x + posBlock.x,
-                            y + posBlock.x, z)) {
-                        return z + 1
-                    }
+        checkCoords(x, y)
+        for (z in heightMap[y shl 4 or x] downTo 0) {
+            val id = lockRead { bID.getData(x, y, z, 0) }
+            if (id != 0) {
+                val type = block(id)
+                if (type.isSolid(terrain, x + posBlock.x,
+                        y + posBlock.x, z) && !type.isTransparent(
+                        terrain, x + posBlock.x,
+                        y + posBlock.x, z)) {
+                    return z + 1
                 }
             }
-            return 0
         }
-        throw ChunkMissException(
-                "Tried to access block $x $y in chunk ${pos.x} ${pos.y}")
+        return 0
     }
 
     fun blockG(x: Int,
@@ -238,14 +251,11 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
     fun blockL(x: Int,
                y: Int,
                z: Int): Long {
-        if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 && z < zSize) {
-            return lockRead {
-                (bID.getData(x, y, z, 0).toLong() shl 32) or bData.getData(x,
-                        y, z, 0).toLong()
-            }
+        checkCoords(x, y, z)
+        return lockRead {
+            (bID.getData(x, y, z, 0).toLong() shl 32) or bData.getData(x,
+                    y, z, 0).toLong()
         }
-        throw ChunkMissException(
-                "Tried to access block $x $y $z in chunk ${pos.x} ${pos.y}")
     }
 
     fun typeG(x: Int,
@@ -257,11 +267,8 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
     fun typeL(x: Int,
               y: Int,
               z: Int): BlockType {
-        if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 && z < zSize) {
-            return block(lockRead { bID.getData(x, y, z, 0) })
-        }
-        throw ChunkMissException(
-                "Tried to access block $x $y $z in chunk ${pos.x} ${pos.y}")
+        checkCoords(x, y, z)
+        return block(lockRead { bID.getData(x, y, z, 0) })
     }
 
     fun lightG(x: Int,
@@ -273,16 +280,13 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
     fun lightL(x: Int,
                y: Int,
                z: Int): Int {
-        if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 && z < zSize) {
-            return lockRead {
-                max(bLight.getData(x, y, z, 1),
-                        bLight.getData(x, y, z, 0) - terrain.sunLightReduction(
-                                x + posBlock.x,
-                                y + posBlock.y))
-            }
+        checkCoords(x, y, z)
+        return lockRead {
+            max(bLight.getData(x, y, z, 1),
+                    bLight.getData(x, y, z, 0) - terrain.sunLightReduction(
+                            x + posBlock.x,
+                            y + posBlock.y))
         }
-        throw ChunkMissException(
-                "Tried to access block $x $y $z in chunk ${pos.x} ${pos.y}")
     }
 
     fun sunLightG(x: Int,
@@ -294,11 +298,8 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
     fun sunLightL(x: Int,
                   y: Int,
                   z: Int): Int {
-        if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 && z < zSize) {
-            return lockRead { bLight.getData(x, y, z, 0) }
-        }
-        throw ChunkMissException(
-                "Tried to access block $x $y $z in chunk ${pos.x} ${pos.y}")
+        checkCoords(x, y, z)
+        return lockRead { bLight.getData(x, y, z, 0) }
     }
 
     fun blockLightG(x: Int,
@@ -310,11 +311,8 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
     fun blockLightL(x: Int,
                     y: Int,
                     z: Int): Int {
-        if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 && z < zSize) {
-            return lockRead { bLight.getData(x, y, z, 1) }
-        }
-        throw ChunkMissException(
-                "Tried to access block $x $y $z in chunk ${pos.x} ${pos.y}")
+        checkCoords(x, y, z)
+        return lockRead { bLight.getData(x, y, z, 1) }
     }
 
     fun blockTypeG(x: Int,
@@ -328,16 +326,12 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
                    y: Int,
                    z: Int,
                    type: BlockType) {
-        if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 && z < zSize) {
-            val oldType = block(lockRead { bID.getData(x, y, z, 0) })
-            if (oldType !== type) {
-                lockWrite { bID.setData(x, y, z, 0, type.id().toInt()) }
-                updateHeightMap(x, y, z, type)
-                update(x, y, z, oldType.causesTileUpdate())
-            }
-        } else {
-            throw ChunkMissException(
-                    "Tried to access block $x $y $z in chunk ${pos.x} ${pos.y}")
+        checkCoords(x, y, z)
+        val oldType = block(lockRead { bID.getData(x, y, z, 0) })
+        if (oldType !== type) {
+            lockWrite { bID.setData(x, y, z, 0, type.id().toInt()) }
+            updateHeightMap(x, y, z, type)
+            update(x, y, z, oldType.causesTileUpdate())
         }
     }
 
@@ -354,21 +348,17 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
                   z: Int,
                   type: BlockType,
                   data: Int) {
-        if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 && z < zSize) {
-            val oldType = block(lockRead { bID.getData(x, y, z, 0) })
-            if (oldType !== type || lockRead {
-                bData.getData(x, y, z, 0)
-            } != data) {
-                lockWrite {
-                    bID.setData(x, y, z, 0, type.id().toInt())
-                    bData.setData(x, y, z, 0, data)
-                }
-                updateHeightMap(x, y, z, type)
-                update(x, y, z, oldType.causesTileUpdate())
+        checkCoords(x, y, z)
+        val oldType = block(lockRead { bID.getData(x, y, z, 0) })
+        if (oldType !== type || lockRead {
+            bData.getData(x, y, z, 0)
+        } != data) {
+            lockWrite {
+                bID.setData(x, y, z, 0, type.id().toInt())
+                bData.setData(x, y, z, 0, data)
             }
-        } else {
-            throw ChunkMissException(
-                    "Tried to access block $x $y $z in chunk ${pos.x} ${pos.y}")
+            updateHeightMap(x, y, z, type)
+            update(x, y, z, oldType.causesTileUpdate())
         }
     }
 
@@ -383,17 +373,13 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
               y: Int,
               z: Int,
               data: Int) {
-        if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 && z < zSize) {
-            if (lockRead { bData.getData(x, y, z, 0) } != data) {
-                val oldType = block(lockWrite {
-                    bData.setData(x, y, z, 0, data)
-                    bID.getData(x, y, z, 0)
-                })
-                update(x, y, z, oldType.causesTileUpdate())
-            }
-        } else {
-            throw ChunkMissException(
-                    "Tried to access block $x $y $z in chunk ${pos.x} ${pos.y}")
+        checkCoords(x, y, z)
+        if (lockRead { bData.getData(x, y, z, 0) } != data) {
+            val oldType = block(lockWrite {
+                bData.setData(x, y, z, 0, data)
+                bID.getData(x, y, z, 0)
+            })
+            update(x, y, z, oldType.causesTileUpdate())
         }
     }
 
@@ -408,14 +394,9 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
                   y: Int,
                   z: Int,
                   light: Int) {
-        if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 && z < zSize) {
-            lockWrite { bLight.setData(x, y, z, 0, light) }
-            updateLight(x, y, z)
-        } else {
-            throw ChunkMissException(
-                    "Tried to access block " + x + ' ' + y + ' ' + z +
-                            " in chunk " + pos.x + ' ' + pos.y)
-        }
+        checkCoords(x, y, z)
+        lockWrite { bLight.setData(x, y, z, 0, light) }
+        updateLight(x, y, z)
     }
 
     fun blockLightG(x: Int,
@@ -429,13 +410,9 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
                     y: Int,
                     z: Int,
                     light: Int) {
-        if (x >= 0 && x < 16 && y >= 0 && y < 16 && z >= 0 && z < zSize) {
-            lockWrite { bLight.setData(x, y, z, 1, light) }
-            updateLight(x, y, z)
-        } else {
-            throw ChunkMissException(
-                    "Tried to access block $x $y $z in chunk ${pos.x} ${pos.y}")
-        }
+        checkCoords(x, y, z)
+        lockWrite { bLight.setData(x, y, z, 1, light) }
+        updateLight(x, y, z)
     }
 
     fun addEntity(entity: E) {
