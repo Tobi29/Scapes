@@ -219,18 +219,20 @@ class TerrainInfiniteSection : TerrainClient {
                             minZ: Int,
                             maxX: Int,
                             maxY: Int,
-                            maxZ: Int): Pool<AABBElement> {
+                            maxZ: Int,
+                            pool: Pool<AABBElement>) {
         access { terrain ->
-            return terrain.collisions(minX, minY, minZ, maxX, maxY, maxZ)
+            terrain.collisions(minX, minY, minZ, maxX, maxY, maxZ, pool)
         }
     }
 
     override fun pointerPanes(x: Int,
                               y: Int,
                               z: Int,
-                              range: Int): Pool<PointerPane> {
+                              range: Int,
+                              pool: Pool<PointerPane>) {
         access { terrain ->
-            return terrain.pointerPanes(x, y, z, range)
+            terrain.pointerPanes(x, y, z, range, pool)
         }
     }
 

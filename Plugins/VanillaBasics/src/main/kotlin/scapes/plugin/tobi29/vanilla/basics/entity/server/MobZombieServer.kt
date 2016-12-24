@@ -81,7 +81,7 @@ class MobZombieServer(world: WorldServer, pos: Vector3d = Vector3d.ZERO, speed: 
     override fun update(delta: Double) {
         if (isSwimming) {
             speed.plusZ(1.2)
-            isOnGround = false
+            physicsState.isOnGround = false
         }
         ai.update(delta)
         var walkSpeed = 0.0
@@ -106,7 +106,7 @@ class MobZombieServer(world: WorldServer, pos: Vector3d = Vector3d.ZERO, speed: 
             lookWait = random.nextDouble() * 8.0 + 1.0
             rot.setX(random.nextDouble() * 40.0 - 20.0)
         }
-        if (!isOnGround && !slidingWall && !isInWater) {
+        if (!isOnGround && !physicsState.slidingWall && !isInWater) {
             walkSpeed *= 0.0006
         } else if (!isOnGround && !isInWater) {
             walkSpeed *= 0.05

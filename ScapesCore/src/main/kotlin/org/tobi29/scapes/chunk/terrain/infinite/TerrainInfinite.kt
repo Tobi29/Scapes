@@ -150,9 +150,8 @@ abstract class TerrainInfinite<E : Entity>(val zSize: Int,
                             minZ: Int,
                             maxX: Int,
                             maxY: Int,
-                            maxZ: Int): Pool<AABBElement> {
-        val aabbs = AABBS.get()
-        aabbs.reset()
+                            maxZ: Int,
+                            pool: Pool<AABBElement>) {
         val minZZ = clamp(minZ, 0, zSize)
         val maxZZ = clamp(maxZ, 0, zSize)
         for (x in minX..maxX) {
@@ -161,43 +160,37 @@ abstract class TerrainInfinite<E : Entity>(val zSize: Int,
                 if (chunk != null && chunk.isLoaded) {
                     for (z in minZZ..maxZZ) {
                         if (z >= 0 && z < zSize) {
-                            chunk.typeG(x, y, z).addCollision(aabbs, this, x,
+                            chunk.typeG(x, y, z).addCollision(pool, this, x,
                                     y, z)
                         }
                     }
                 } else {
-                    aabbs.push().set(x.toDouble(), y.toDouble(),
+                    pool.push().set(x.toDouble(), y.toDouble(),
                             minZZ.toDouble(), x + 1.0, y + 1.0, maxZZ + 1.0)
                 }
             }
         }
-        return aabbs
     }
 
     override fun pointerPanes(x: Int,
                               y: Int,
                               z: Int,
-                              range: Int): Pool<PointerPane> {
-        val pointerPanes = POINTER_PANES.get()
-        for (xx in -range..range) {
-            val xxx = x + xx
-            for (yy in -range..range) {
-                val yyy = y + yy
-                for (zz in -range..range) {
-                    val zzz = z + zz
-                    if (zzz >= 0 && zzz < zSize) {
-                        chunk(xxx shr 4, yyy shr 4) { chunk ->
-                            val block = chunk.blockG(xxx, yyy, zzz)
-                            val type = type(block)
-                            val data = data(block)
-                            type.addPointerCollision(data, pointerPanes, xxx,
-                                    yyy, zzz)
-                        }
-                    }
+                              range: Int,
+                              pool: Pool<PointerPane>) {
+        (x - range..x + range).forEach { xx ->
+            (y - range..y + range).forEach { yy ->
+                chunk(xx shr 4, yy shr 4) { chunk ->
+                    (z - range..z + range).asSequence()
+                            .filter { it >= 0 && it < zSize }
+                            .forEach { zz ->
+                                val block = chunk.blockG(xx, yy, zz)
+                                val type = type(block)
+                                val data = data(block)
+                                type.addPointerCollision(data, pool, xx, yy, zz)
+                            }
                 }
             }
         }
-        return pointerPanes
     }
 
     override fun removeEntity(entity: E): Boolean {

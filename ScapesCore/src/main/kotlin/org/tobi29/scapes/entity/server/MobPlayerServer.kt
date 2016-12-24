@@ -33,6 +33,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.math.vector.plus
 import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.entity.CreatureType
+import org.tobi29.scapes.entity.EntityPhysics
 import org.tobi29.scapes.entity.MobPositionReceiver
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.packets.PacketEntityChange
@@ -75,14 +76,14 @@ abstract class MobPlayerServer(world: WorldServer, pos: Vector3d, speed: Vector3
                 { this.rot.set(it) },
                 { ground, slidingWall, inWater, swimming ->
                     if (ground != this.isOnGround) {
-                        this.isOnGround = ground
+                        physicsState.isOnGround = ground
                         if (speed.z > 0.0 && !inWater) {
                             onJump()
                         }
                     }
-                    this.slidingWall = slidingWall
-                    this.isInWater = inWater
-                    this.isSwimming = swimming
+                    physicsState.slidingWall = slidingWall
+                    physicsState.isInWater = inWater
+                    physicsState.isSwimming = swimming
                 })
         onDeath("Local", {
             inventories.modify<List<ItemStack>>(
@@ -244,21 +245,22 @@ abstract class MobPlayerServer(world: WorldServer, pos: Vector3d, speed: Vector3
 
     override fun move(delta: Double) {
         val aabb = getAABB()
-        val aabbs = world.terrain.collisions(floor(aabb.minX),
-                floor(aabb.minY),
-                floor(aabb.minZ),
-                floor(aabb.maxX),
-                floor(aabb.maxY),
-                floor(aabb.maxZ))
-        collide(aabb, aabbs, delta)
+        val aabbs = AABBS.get()
+        // stepHeight is 0.0 as we will not actually move around here, just
+        // blocks that we are inside of
+        EntityPhysics.collisions(delta, speed, world.terrain, aabb, 0.0, aabbs)
+        EntityPhysics.collide(delta, aabb, aabbs, physicsState) {
+            it.collision.inside(this, delta)
+        }
         positionSenderOther.submitUpdate(uuid, pos.now(), speed.now(),
-                rot.now(), isOnGround,
-                slidingWall, isInWater, isSwimming)
+                rot.now(), physicsState.isOnGround, physicsState.slidingWall,
+                physicsState.isInWater, physicsState.isSwimming)
         isHeadInWater = world.terrain.type(pos.intX(), pos.intY(),
                 floor(pos.doubleZ() + 0.7)).isLiquid
         if (invincibleTicks > 0.0) {
             invincibleTicks = max(invincibleTicks - delta, 0.0)
         }
+        aabbs.reset()
     }
 
     fun write(packet: Boolean): TagStructure {

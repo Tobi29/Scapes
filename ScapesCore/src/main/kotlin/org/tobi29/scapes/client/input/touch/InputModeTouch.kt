@@ -141,11 +141,10 @@ class InputModeTouch(engine: ScapesEngine, private val controller: ControllerTou
                     1.0f)
             matrix1.invert(matrix1, matrix2)
             val pos = matrix2.multiply(Vector3d(x, y, 1.0))
-            x = pos.direction().toDeg()
-            y = direction((pos as Vector2d).length(), pos.z).toDeg()
-            x = angleDiff(cam.yaw.toDouble(), x)
-            y -= cam.pitch.toDouble()
-            direction.set(x, y)
+            val rotX = direction((pos as Vector2d).length(),
+                    pos.z).toDeg() - cam.pitch.toDouble()
+            val rotY = angleDiff(cam.yaw.toDouble(), pos.direction().toDeg())
+            direction.set(rotX, rotY)
             val swipeStart = swipeStart
             if (swipeStart != null) {
                 if (!leftHand && !rightHand &&

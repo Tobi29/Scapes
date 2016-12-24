@@ -19,168 +19,37 @@ import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.Pool
+import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.entity.EntityPhysics
 
 abstract class MobServer protected constructor(world: WorldServer, pos: Vector3d, speed: Vector3d, protected val collision: AABB) : EntityServer(
         world, pos) {
     protected val speed: MutableVector3d
     protected val rot = MutableVector3d()
     protected val positionSender: MobPositionSenderServer
-    var isOnGround = false
-        protected set
-    var isInWater = false
-        protected set
-    var isSwimming = false
-        protected set
+    val isOnGround: Boolean
+        get() = physicsState.isOnGround
+    val isInWater: Boolean
+        get() = physicsState.isInWater
+    val isSwimming: Boolean
+        get() = physicsState.isSwimming
     var isHeadInWater = false
         protected set
-    protected var slidingWall = false
-    protected var swim = 0
     protected var gravitationMultiplier = 1.0
     protected var airFriction = 0.2
     protected var groundFriction = 1.6
     protected var wallFriction = 2.0
     protected var waterFriction = 8.0
     protected var stepHeight = 1.0
+    protected var physicsState = EntityPhysics.PhysicsState()
 
     init {
         this.speed = MutableVector3d(speed)
         positionSender = createPositionHandler()
-    }
-
-    protected fun updateVelocity(gravitation: Double,
-                                 delta: Double) {
-        speed.div(1.0 + airFriction * delta)
-        if (isInWater) {
-            speed.div(1.0 + waterFriction * delta)
-        } else {
-            if (isOnGround) {
-                speed.div(1.0 + groundFriction * delta * gravitation)
-            }
-            if (slidingWall) {
-                speed.div(1.0 + wallFriction * delta)
-            }
-        }
-        speed.plusZ(-gravitation * gravitationMultiplier * delta)
-    }
-
-    protected fun move(aabb: AABB,
-                       aabbs: Pool<AABBElement>,
-                       goX: Double,
-                       goY: Double,
-                       goZ: Double) {
-        var goX = goX
-        var goY = goY
-        var ground = false
-        var slidingWall = false
-        val lastGoZ = aabb.moveOutZ(collisions(aabbs), goZ)
-        pos.plusZ(lastGoZ)
-        aabb.add(0.0, 0.0, lastGoZ)
-        if (lastGoZ - goZ > 0) {
-            ground = true
-        }
-        // Walk
-        var walking = true
-        while (walking) {
-            walking = false
-            if (goX != 0.0) {
-                val lastGoX = aabb.moveOutX(collisions(aabbs), goX)
-                if (lastGoX != 0.0) {
-                    pos.plusX(lastGoX)
-                    aabb.add(lastGoX, 0.0, 0.0)
-                    goX -= lastGoX
-                    walking = true
-                }
-            }
-            if (goY != 0.0) {
-                val lastGoY = aabb.moveOutY(collisions(aabbs), goY)
-                if (lastGoY != 0.0) {
-                    pos.plusY(lastGoY)
-                    aabb.add(0.0, lastGoY, 0.0)
-                    goY -= lastGoY
-                    walking = true
-                }
-            }
-        }
-        // Check collision
-        val slidingX = goX != 0.0
-        val slidingY = goY != 0.0
-        if (slidingX || slidingY) {
-            if (stepHeight > 0.0 && (this.isOnGround || isInWater)) {
-                // Step
-                // Calculate step height
-                var aabbStep = AABB(aabb).add(goX, 0.0, 0.0)
-                val stepX = aabbStep.moveOutZ(collisions(aabbs), stepHeight)
-                aabbStep = AABB(aabb).add(0.0, goY, 0.0)
-                val stepY = aabbStep.moveOutZ(collisions(aabbs), stepHeight)
-                var step = max(stepX, stepY)
-                aabbStep = AABB(aabb).add(goX, goY, step)
-                step += aabbStep.moveOutZ(collisions(aabbs), -step)
-                // Check step height
-                aabbStep.copy(aabb).add(0.0, 0.0, step)
-                step = aabb.moveOutZ(collisions(aabbs), step)
-                // Attempt walk at new height
-                val lastGoX = aabbStep.moveOutX(collisions(aabbs), goX)
-                aabbStep.add(lastGoX, 0.0, 0.0)
-                val lastGoY = aabbStep.moveOutY(collisions(aabbs), goY)
-                // Check if walk was successful
-                if (lastGoX != 0.0 || lastGoY != 0.0) {
-                    pos.plusX(lastGoX)
-                    pos.plusY(lastGoY)
-                    aabb.copy(aabbStep).add(0.0, lastGoY, 0.0)
-                    pos.plusZ(step)
-                } else {
-                    // Collide
-                    slidingWall = true
-                    if (slidingX) {
-                        speed.setX(0.0)
-                    }
-                    if (slidingY) {
-                        speed.setY(0.0)
-                    }
-                }
-            } else {
-                // Collide
-                slidingWall = true
-                if (slidingX) {
-                    speed.setX(0.0)
-                }
-                if (slidingY) {
-                    speed.setY(0.0)
-                }
-            }
-        }
-        this.isOnGround = ground
-        this.slidingWall = slidingWall
-    }
-
-    protected fun collide(aabb: AABB,
-                          aabbs: Pool<AABBElement>,
-                          delta: Double) {
-        var inWater = false
-        val swimming: Boolean
-        for (element in aabbs) {
-            if (aabb.overlay(element.aabb)) {
-                element.collision.inside(this, delta)
-                if (element.collision.isLiquid) {
-                    inWater = true
-                }
-            }
-        }
-        aabb.minZ = mix(aabb.minZ, aabb.maxZ, 0.6)
-        val water = aabbs.any { aabb.overlay(it.aabb) && it.collision.isLiquid }
-        if (water) {
-            swim++
-            swimming = swim > 1
-        } else {
-            swimming = false
-            swim = 0
-        }
-        this.isInWater = inWater
-        this.isSwimming = swimming
     }
 
     fun dropItem(item: ItemStack) {
@@ -255,41 +124,40 @@ abstract class MobServer protected constructor(world: WorldServer, pos: Vector3d
 
     fun updatePosition() {
         positionSender.submitUpdate(uuid, pos.now(), speed.now(), rot.now(),
-                isOnGround,
-                slidingWall, isInWater, isSwimming, true)
+                physicsState.isOnGround, physicsState.slidingWall,
+                physicsState.isInWater, isSwimming, true)
     }
 
     open fun move(delta: Double) {
         if (!world.terrain.isBlockTicking(pos.intX(), pos.intY(), pos.intZ())) {
             return
         }
-        updateVelocity(world.gravity, delta)
-        val goX = clamp(speed.doubleX() * delta, -1.0, 1.0)
-        val goY = clamp(speed.doubleY() * delta, -1.0, 1.0)
-        val goZ = clamp(speed.doubleZ() * delta, -1.0, 1.0)
+        EntityPhysics.updateVelocity(delta, speed, world.gravity,
+                gravitationMultiplier, airFriction, groundFriction,
+                waterFriction, wallFriction, physicsState)
         val aabb = getAABB()
-        val aabbs = world.terrain.collisions(
-                floor(aabb.minX + min(goX, 0.0)),
-                floor(aabb.minY + min(goY, 0.0)),
-                floor(aabb.minZ + min(goZ, 0.0)),
-                floor(aabb.maxX + max(goX, 0.0)),
-                floor(aabb.maxY + max(goY, 0.0)),
-                floor(aabb.maxZ + max(goZ, stepHeight)))
-        move(aabb, aabbs, goX, goY, goZ)
+        val aabbs = AABBS.get()
+        EntityPhysics.collisions(delta, speed, world.terrain, aabb,
+                stepHeight, aabbs)
+        EntityPhysics.move(delta, pos, speed, aabb, stepHeight,
+                physicsState, aabbs)
         if (isOnGround) {
             speed.setZ(speed.doubleZ() / (1.0 + 4.0 * delta))
         }
+        EntityPhysics.collide(delta, aabb, aabbs, physicsState) {
+            it.collision.inside(this, delta)
+        }
         isHeadInWater = world.terrain.type(pos.intX(), pos.intY(),
                 floor(pos.doubleZ() + 0.7)).isLiquid
-        collide(aabb, aabbs, delta)
         positionSender.submitUpdate(uuid, pos.now(), speed.now(), rot.now(),
-                isOnGround,
-                slidingWall, isInWater, isSwimming)
+                physicsState.isOnGround, physicsState.slidingWall,
+                physicsState.isInWater, physicsState.isSwimming)
+        aabbs.reset()
     }
 
     companion object {
-        protected fun collisions(aabbs: Pool<AABBElement>): Sequence<AABB> {
-            return aabbs.asSequence().filter { it.isSolid }.map { it.aabb() }
-        }
+        // Kotlin limitation, has to be JvmStatic
+        @JvmStatic
+        protected val AABBS = ThreadLocal { Pool { AABBElement() } }
     }
 }

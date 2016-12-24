@@ -22,6 +22,7 @@ import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.entity.EntityPhysics
 import org.tobi29.scapes.entity.MobPositionReceiver
 import org.tobi29.scapes.entity.model.MobModel
 
@@ -31,15 +32,15 @@ abstract class MobClient(world: WorldClient, pos: Vector3d, speed: Vector3d,
     protected val speed: MutableVector3d
     protected val rot = MutableVector3d()
     override val positionReceiver: MobPositionReceiver
-    var isOnGround = false
-        protected set
-    var isInWater = false
-        protected set
-    var isSwimming = false
-        protected set
+    val isOnGround: Boolean
+        get() = physicsState.isOnGround
+    val isInWater: Boolean
+        get() = physicsState.isInWater
+    val isSwimming: Boolean
+        get() = physicsState.isSwimming
     var isHeadInWater = false
         protected set
-    protected var slidingWall = false
+    protected var physicsState = EntityPhysics.PhysicsState()
 
     init {
         this.speed = MutableVector3d(speed)
@@ -48,10 +49,10 @@ abstract class MobClient(world: WorldClient, pos: Vector3d, speed: Vector3d,
                 { this.speed.set(it) },
                 { this.rot.set(it) },
                 { ground, slidingWall, inWater, swimming ->
-                    this.isOnGround = ground
-                    this.slidingWall = slidingWall
-                    this.isInWater = inWater
-                    this.isSwimming = swimming
+                    physicsState.isOnGround = ground
+                    physicsState.slidingWall = slidingWall
+                    physicsState.isInWater = inWater
+                    physicsState.isSwimming = swimming
                 })
     }
 

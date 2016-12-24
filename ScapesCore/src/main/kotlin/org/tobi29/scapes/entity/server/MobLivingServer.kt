@@ -17,6 +17,7 @@ package org.tobi29.scapes.entity.server
 
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.chunk.terrain.selectBlock
 import org.tobi29.scapes.engine.utils.filterMap
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import org.tobi29.scapes.engine.utils.io.tag.getDouble
@@ -24,8 +25,8 @@ import org.tobi29.scapes.engine.utils.io.tag.setDouble
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.distance
 import org.tobi29.scapes.engine.utils.math.vector.plus
+import org.tobi29.scapes.engine.utils.math.vector.xz
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.ai.AI
 import org.tobi29.scapes.entity.ai.SimpleAI
@@ -82,32 +83,8 @@ abstract class MobLivingServer(world: WorldServer, pos: Vector3d, speed: Vector3
 
     fun block(distance: Double,
               direction: Vector2d): PointerPane? {
-        val pointerPanes = world.terrain.pointerPanes(pos.intX(), pos.intY(),
-                pos.intZ(),
-                ceil(distance))
-        val rotX = (rot.doubleX() + direction.y).toRad()
-        val rotZ = (rot.doubleZ() + direction.x).toRad()
-        val factor = cos(rotX) * 6.0
-        val lookX = cos(rotZ) * factor
-        val lookY = sin(rotZ) * factor
-        val lookZ = sin(rotX) * 6.0
-        val viewOffset = viewOffset()
-        val f = pos.now().plus(viewOffset)
-        val t = f.plus(Vector3d(lookX, lookY, lookZ))
-        var distanceSqr = distance * distance
-        var closest: PointerPane? = null
-        for (pane in pointerPanes) {
-            val intersection = Intersection.intersectPointerPane(f, t, pane)
-            if (intersection != null) {
-                val check = f.distance(intersection)
-                if (check < distanceSqr) {
-                    closest = pane
-                    distanceSqr = check
-                }
-            }
-        }
-        pointerPanes.reset()
-        return closest
+        return world.terrain.selectBlock(pos.now() + viewOffset(), distance,
+                rot.now().xz + direction)
     }
 
     abstract fun canMoveHere(terrain: TerrainServer,

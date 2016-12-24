@@ -104,7 +104,7 @@ class MobPlayerClientMainVB(world: WorldClient, pos: Vector3d, speed: Vector3d,
                     speed.plusZ(50.0 * delta)
                 } else if (isOnGround) {
                     speed.setZ(5.1)
-                    isOnGround = false
+                    physicsState.isOnGround = false
                     connection().send(PacketPlayerJump())
                 }
             }
@@ -116,7 +116,7 @@ class MobPlayerClientMainVB(world: WorldClient, pos: Vector3d, speed: Vector3d,
             var walkSpeed = clamp(
                     max(abs(walk.x),
                             abs(walk.y)), 0.0, 1.0) * 120.0
-            if (!isOnGround && !slidingWall && !isInWater && !flying) {
+            if (!isOnGround && !physicsState.slidingWall && !isInWater && !flying) {
                 walkSpeed *= 0.0006
             } else if (!isOnGround && !isInWater && !flying) {
                 walkSpeed *= 0.05

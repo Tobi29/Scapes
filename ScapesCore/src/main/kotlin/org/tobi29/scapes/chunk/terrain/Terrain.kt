@@ -75,12 +75,14 @@ interface Terrain {
                    minZ: Int,
                    maxX: Int,
                    maxY: Int,
-                   maxZ: Int): Pool<AABBElement>
+                   maxZ: Int,
+                   pool: Pool<AABBElement>)
 
     fun pointerPanes(x: Int,
                      y: Int,
                      z: Int,
-                     range: Int): Pool<PointerPane>
+                     range: Int,
+                     pool: Pool<PointerPane>)
 
     fun type(block: Long): BlockType
 

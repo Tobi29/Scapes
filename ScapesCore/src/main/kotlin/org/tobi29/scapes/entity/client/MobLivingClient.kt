@@ -17,6 +17,7 @@
 package org.tobi29.scapes.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
+import org.tobi29.scapes.chunk.terrain.selectBlock
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import org.tobi29.scapes.engine.utils.io.tag.getDouble
 import org.tobi29.scapes.engine.utils.math.*
@@ -34,32 +35,8 @@ abstract class MobLivingClient(world: WorldClient, pos: Vector3d, speed: Vector3
 
     fun block(distance: Double,
               direction: Vector2d): PointerPane? {
-        val pointerPanes = world.terrain.pointerPanes(pos.intX(), pos.intY(),
-                pos.intZ(),
-                ceil(distance))
-        val rotX = rot.doubleX() + direction.y
-        val rotZ = rot.doubleZ() + direction.x
-        val factor = cos(rotX.toRad()) * 6
-        val lookX = cos(rotZ.toRad()) * factor
-        val lookY = sin(rotZ.toRad()) * factor
-        val lookZ = sin(rotX.toRad()) * 6
-        val viewOffset = viewOffset()
-        val f = pos.now().plus(viewOffset)
-        val t = f.plus(Vector3d(lookX, lookY, lookZ))
-        var distanceSqr = distance * distance
-        var closest: PointerPane? = null
-        for (pane in pointerPanes) {
-            val intersection = Intersection.intersectPointerPane(f, t, pane)
-            if (intersection != null) {
-                val check = f.distance(intersection)
-                if (check < distanceSqr) {
-                    closest = pane
-                    distanceSqr = check
-                }
-            }
-        }
-        pointerPanes.reset()
-        return closest
+        return world.terrain.selectBlock(pos.now() + viewOffset(), distance,
+                rot.now().xz + direction)
     }
 
     fun onHeal(heal: Double) {
