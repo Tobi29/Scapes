@@ -159,7 +159,7 @@ object EntityPhysics {
             if (state.slidingWall) {
                 val div = 1.0 + wallFriction * delta
                 if (speed.z > 0.0) {
-                    speed.div(Vector3d(div, div, 0.0))
+                    speed.div(Vector3d(div, div, 1.0))
                 } else {
                     speed.div(div)
                 }
