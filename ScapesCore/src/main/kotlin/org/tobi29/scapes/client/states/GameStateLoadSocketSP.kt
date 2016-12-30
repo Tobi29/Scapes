@@ -25,6 +25,7 @@ import org.tobi29.scapes.connection.ServerInfo
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Scene
+import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException
 import org.tobi29.scapes.engine.utils.io.tag.getDouble
@@ -35,8 +36,10 @@ import org.tobi29.scapes.server.ssl.dummy.DummyKeyManagerProvider
 import java.io.IOException
 import java.net.InetSocketAddress
 
-class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngine,
-                            scene: Scene) : GameState(engine, scene) {
+class GameStateLoadSocketSP(private var source: WorldSource?,
+                            engine: ScapesEngine,
+                            private val scene: Scene) : GameState(
+        engine) {
     private var step = 0
     private var server: ScapesServer? = null
     private var gui: GuiLoading? = null
@@ -58,6 +61,9 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
     override fun init() {
         gui = GuiLoading(this, engine.guiStyle).apply {
             engine.guiStack.add("20-Progress", this)
+        }
+        switchPipeline { gl ->
+            renderScene(gl, scene)
         }
     }
 
@@ -139,8 +145,8 @@ class GameStateLoadSocketSP(private var source: WorldSource?, engine: ScapesEngi
                                                 e.message ?: "", engine))
                             }) { init ->
                                 gui?.setProgress("Loading world...", 1.0)
-                                val game = GameStateGameSP(init, source,
-                                        server, scene, engine)
+                                val game = GameStateGameSP(init, scene, source,
+                                        server, engine)
                                 this.server = null
                                 this.source = null
                                 engine.switchState(game)

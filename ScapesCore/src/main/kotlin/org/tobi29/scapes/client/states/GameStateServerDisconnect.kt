@@ -20,24 +20,25 @@ import org.tobi29.scapes.client.gui.GuiDisconnected
 import org.tobi29.scapes.client.states.scenes.SceneError
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
+import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.server.RemoteAddress
 
 class GameStateServerDisconnect(message: String,
                                 private val address: RemoteAddress?, engine: ScapesEngine,
                                 private var reconnectTimer: Double) : GameState(
-        engine, SceneError(engine)) {
-    private val gui: GuiDisconnected
+        engine) {
+    private val gui = GuiDisconnected(this, message, engine.guiStyle)
+    private val scene = SceneError(engine)
 
     constructor(message: String, engine: ScapesEngine) : this(message,
             null, engine, 0.0) {
     }
 
-    init {
-        gui = GuiDisconnected(this, message, engine.guiStyle)
-    }
-
     override fun init() {
         engine.guiStack.add("10-Menu", gui)
+        switchPipeline { gl ->
+            renderScene(gl, scene)
+        }
     }
 
     override val isMouseGrabbed: Boolean

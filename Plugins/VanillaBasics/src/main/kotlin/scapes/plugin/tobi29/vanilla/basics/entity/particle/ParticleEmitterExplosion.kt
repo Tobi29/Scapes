@@ -73,8 +73,11 @@ class ParticleEmitterExplosion(system: ParticleSystem) : ParticleEmitter<Particl
         this.hasAlive = hasAlive
     }
 
-    override fun render(gl: GL,
-                        cam: Cam) {
+    override fun addToPipeline(gl: GL,
+                               width: Int,
+                               height: Int,
+                               cam: Cam): () -> Unit {
+        return {}
     }
 
     companion object {

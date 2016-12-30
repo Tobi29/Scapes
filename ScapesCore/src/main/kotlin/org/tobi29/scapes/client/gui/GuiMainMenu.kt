@@ -21,8 +21,9 @@ import org.tobi29.scapes.client.states.scenes.SceneMenu
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
 
-class GuiMainMenu(state: GameState, scene: SceneMenu, style: GuiStyle) : GuiDesktop(
-        state, style) {
+class GuiMainMenu(state: GameState,
+                  scene: SceneMenu,
+                  style: GuiStyle) : GuiDesktop(state, style) {
     init {
         val pane = addHori(0.0, 0.0, 150.0, -1.0, ::GuiComponentVisiblePane)
         pane.addVert(0.0, 10.0, 5.0, 20.0, 144.0, 80.0) {
@@ -69,7 +70,7 @@ class GuiMainMenu(state: GameState, scene: SceneMenu, style: GuiStyle) : GuiDesk
         }
         multiPlayer.on(GuiEvent.CLICK_LEFT) { event ->
             state.engine.guiStack.add("10-Menu",
-                    GuiServerSelect(state, this, style))
+                    GuiServerSelect(state, this, scene, style))
         }
         options.on(GuiEvent.CLICK_LEFT) { event ->
             state.engine.guiStack.add("10-Menu", GuiOptions(state, this, style))

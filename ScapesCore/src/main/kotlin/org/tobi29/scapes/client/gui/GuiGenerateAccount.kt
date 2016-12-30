@@ -16,10 +16,10 @@
 
 package org.tobi29.scapes.client.gui
 
+import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 
 class GuiGenerateAccount(state: GameState, path: FilePath,

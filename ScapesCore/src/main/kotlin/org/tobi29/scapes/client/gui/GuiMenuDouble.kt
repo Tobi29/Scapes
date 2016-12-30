@@ -22,8 +22,8 @@ import org.tobi29.scapes.engine.gui.GuiAction
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton
 import org.tobi29.scapes.engine.gui.GuiStyle
 
-open class GuiMenuDouble protected constructor(state: GameState, title: String, save: String,
-                                               back: String, style: GuiStyle) : GuiMenu(
+open class GuiMenuDouble(state: GameState, title: String, save: String,
+                         back: String, style: GuiStyle) : GuiMenu(
         state, title, back, style) {
     protected val save: GuiComponentTextButton
 

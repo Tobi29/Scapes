@@ -27,35 +27,44 @@ class ParticleEmitterTransparent(system: ParticleSystem, texture: Texture) : Par
         system, texture, ParticleEmitterTransparent.createAttributes(), 6,
         ParticleEmitterTransparent.createAttributesStream(),
         RenderType.TRIANGLES, Array(10240, { ParticleInstanceTransparent() })) {
-    private val shader: Shader
     private val instancesSorted: Array<ParticleInstanceTransparent>
     private val matrix = Matrix4f()
 
     init {
-        val graphics = system.world.game.engine.graphics
-        shader = graphics.createShader("Scapes:shader/ParticleTransparent")
         instancesSorted = Array(maxInstances, { instances[it] })
     }
 
     override fun prepareShader(gl: GL,
-                               cam: Cam): Shader {
+                               width: Int,
+                               height: Int,
+                               cam: Cam): ((Shader) -> Unit) -> Unit {
+        val shader = gl.engine.graphics.createShader(
+                "Scapes:shader/ParticleTransparent") {
+            supplyPreCompile {
+                supplyProperty("SCENE_WIDTH", width)
+                supplyProperty("SCENE_HEIGHT", height)
+            }
+        }
         val world = system.world
         val scene = world.scene
         val player = world.player
         val environment = world.environment
-        val sunLightReduction = environment.sunLightReduction(
-                cam.position.doubleX(),
-                cam.position.doubleY()) / 15.0f
-        val playerLight = max(
-                player.leftWeapon().material().playerLight(player.leftWeapon()),
-                player.rightWeapon().material().playerLight(
-                        player.rightWeapon()))
-        shader.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB())
-        shader.setUniform1f(5, scene.fogDistance() * scene.renderDistance())
-        shader.setUniform1i(6, 1)
-        shader.setUniform1f(7, sunLightReduction)
-        shader.setUniform1f(8, playerLight)
-        return shader
+        return { render ->
+            val sunLightReduction = environment.sunLightReduction(
+                    cam.position.doubleX(),
+                    cam.position.doubleY()) / 15.0f
+            val playerLight = max(
+                    player.leftWeapon().material().playerLight(
+                            player.leftWeapon()),
+                    player.rightWeapon().material().playerLight(
+                            player.rightWeapon()))
+            shader.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB())
+            shader.setUniform1f(5, scene.fogDistance() * scene.renderDistance())
+            shader.setUniform1i(6, 1)
+            shader.setUniform1f(7, sunLightReduction)
+            shader.setUniform1f(8, playerLight)
+            render(shader)
+        }
     }
 
     override fun prepareBuffer(cam: Cam): Int {

@@ -27,7 +27,6 @@ import org.tobi29.scapes.engine.Container
 import org.tobi29.scapes.engine.Game
 import org.tobi29.scapes.engine.GameStateStartup
 import org.tobi29.scapes.engine.ScapesEngine
-import org.tobi29.scapes.engine.graphics.SceneEmpty
 import org.tobi29.scapes.engine.gui.GuiNotificationSimple
 import org.tobi29.scapes.engine.input.*
 import org.tobi29.scapes.engine.server.ConnectionManager
@@ -88,7 +87,7 @@ class ScapesClient(engine: ScapesEngine,
             engine.switchState(GameStateMenu(engine))
         } else {
             engine.switchState(GameStateStartup(GameStateMenu(engine),
-                    "Engine:image/Logo", 0.5, SceneEmpty(engine), engine))
+                    "Engine:image/Logo", 0.5, engine))
         }
     }
 

@@ -20,10 +20,13 @@ import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import java.nio.ByteBuffer
 
-abstract class ParticleEmitterInstanced<P : ParticleInstance> protected constructor(system: ParticleSystem, protected val texture: Texture,
-                                                                                    attributes: List<ModelAttribute>, length: Int,
-                                                                                    attributesStream: List<ModelAttribute>, renderType: RenderType,
-                                                                                    instances: Array<P>) : ParticleEmitter<P>(
+abstract class ParticleEmitterInstanced<P : ParticleInstance>(system: ParticleSystem,
+                                                              protected val texture: Texture,
+                                                              attributes: List<ModelAttribute>,
+                                                              length: Int,
+                                                              attributesStream: List<ModelAttribute>,
+                                                              renderType: RenderType,
+                                                              instances: Array<P>) : ParticleEmitter<P>(
         system, instances) {
     protected val vao: ModelHybrid
     protected val buffer: ByteBuffer
@@ -36,25 +39,31 @@ abstract class ParticleEmitterInstanced<P : ParticleInstance> protected construc
                 vao.strideStream() * maxInstances)
     }
 
-    override fun render(gl: GL,
-                        cam: Cam) {
-        if (!hasAlive) {
-            return
-        }
-        texture.bind(gl)
-        val shader = prepareShader(gl, cam)
-        buffer.clear()
-        vao.ensureStored(gl)
-        val count = prepareBuffer(cam)
-        if (count > 0) {
-            buffer.flip()
-            vao.bufferStream(gl, buffer)
-            vao.renderInstanced(gl, shader, 6, count)
+    override fun addToPipeline(gl: GL,
+                               width: Int,
+                               height: Int,
+                               cam: Cam): () -> Unit {
+        val shader = prepareShader(gl, width, height, cam)
+        return render@ {
+            if (!hasAlive) {
+                return@render
+            }
+            texture.bind(gl)
+            buffer.clear()
+            vao.ensureStored(gl)
+            val count = prepareBuffer(cam)
+            if (count > 0) {
+                buffer.flip()
+                vao.bufferStream(gl, buffer)
+                shader { vao.renderInstanced(gl, it, 6, count) }
+            }
         }
     }
 
     protected abstract fun prepareShader(gl: GL,
-                                         cam: Cam): Shader
+                                         width: Int,
+                                         height: Int,
+                                         cam: Cam): ((Shader) -> Unit) -> Unit
 
     protected abstract fun prepareBuffer(cam: Cam): Int
 }

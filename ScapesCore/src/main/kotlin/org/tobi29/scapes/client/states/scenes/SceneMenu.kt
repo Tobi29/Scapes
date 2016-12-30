@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.tobi29.scapes.client.states.scenes
 
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.resource.Resource
+import org.tobi29.scapes.engine.utils.chain
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurOffset
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurWeight
@@ -35,33 +37,81 @@ import java.util.concurrent.atomic.AtomicReference
 open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
     private val textures = arrayOfNulls<Texture>(6)
     private val cam: Cam
-    private val shaderBlur1: Shader
-    private val shaderBlur2: Shader
-    private val shaderTextured: Shader
+    private val save = AtomicReference<WorldSource.Panorama?>()
     private var speed = 0.6f
     private var yaw = 0.0f
-    private var model: Model? = null
-    private val save = AtomicReference<WorldSource.Panorama?>()
-    private var texturesLoaded = false
 
     init {
         cam = Cam(0.4f, 2.0f)
         val random = ThreadLocalRandom.current()
         yaw = random.nextFloat() * 360.0f
-        val graphics = engine.graphics
-        shaderBlur1 = graphics.createShader("Scapes:shader/Menu1"
-        ) { information ->
-            information.supplyPreCompile({ gl, processor ->
-                blur(gl, processor)
-            })
+        loadTextures()
+    }
+
+    override fun appendToPipeline(gl: GL): () -> Unit {
+        val shaderBlur1 = gl.engine.graphics.createShader(
+                "Scapes:shader/Menu1") {
+            supplyPreCompile { gl ->
+                blur(gl, this)
+            }
         }
-        shaderBlur2 = graphics.createShader("Scapes:shader/Menu2"
-        ) { information ->
-            information.supplyPreCompile({ gl, processor ->
-                blur(gl, processor)
-            })
+        val shaderBlur2 = gl.engine.graphics.createShader(
+                "Scapes:shader/Menu2") {
+            supplyPreCompile { gl ->
+                blur(gl, this)
+            }
         }
-        shaderTextured = graphics.createShader("Engine:shader/Textured")
+        val shaderTextured = gl.engine.graphics.createShader(
+                "Engine:shader/Textured")
+        val model = createVTI(engine,
+                floatArrayOf(-1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f,
+                        -1.0f, -1.0f, 1.0f, -1.0f, -1.0f),
+                floatArrayOf(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f),
+                intArrayOf(0, 1, 2, 2, 1, 3), RenderType.TRIANGLES)
+
+        val f1 = gl.engine.graphics.createFramebuffer(
+                gl.sceneWidth(), gl.sceneHeight(), 1, false, false, false)
+        val f2 = gl.engine.graphics.createFramebuffer(
+                gl.sceneWidth(), gl.sceneHeight(), 1, false, false, false)
+        val f3 = gl.engine.graphics.createFramebuffer(
+                gl.sceneWidth(), gl.sceneHeight(), 1, false, false, false)
+        val render = gl.into(f1) {
+            gl.clearDepth()
+            val save = save.getAndSet(null)
+            if (save != null) {
+                changeBackground(save)
+            }
+            cam.setPerspective(gl.sceneWidth().toFloat() / gl.sceneHeight(), 90.0f)
+            cam.setView(0.0f, yaw, 0.0f)
+            gl.setProjectionPerspective(gl.sceneWidth().toFloat(),
+                    gl.sceneHeight().toFloat(), cam)
+            val matrixStack = gl.matrixStack()
+            for (i in 0..5) {
+                val texture = textures[i]
+                if (texture != null) {
+                    val matrix = matrixStack.push()
+                    if (i == 1) {
+                        matrix.rotate(90.0f, 0.0f, 0.0f, 1.0f)
+                    } else if (i == 2) {
+                        matrix.rotate(180.0f, 0.0f, 0.0f, 1.0f)
+                    } else if (i == 3) {
+                        matrix.rotate(270.0f, 0.0f, 0.0f, 1.0f)
+                    } else if (i == 4) {
+                        matrix.rotate(90.0f, 1.0f, 0.0f, 0.0f)
+                    } else if (i == 5) {
+                        matrix.rotate(-90.0f, 1.0f, 0.0f, 0.0f)
+                    }
+                    texture.bind(gl)
+                    gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f)
+                    model.render(gl, shaderTextured)
+                    matrixStack.pop()
+                }
+            }
+        }
+        val pp1 = gl.into(f2, postProcess(gl, shaderBlur1, f1))
+        val pp2 = gl.into(f3, postProcess(gl, shaderBlur2, f2))
+        val upscale = postProcess(gl, shaderTextured, f3)
+        return chain(render, pp1, pp2, upscale)
     }
 
     private fun blur(gl: GL,
@@ -83,87 +133,12 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
         save.set(saveBackground(source))
     }
 
-    override fun init(gl: GL) {
-        model = createVTI(engine,
-                floatArrayOf(-1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f,
-                        -1.0f, -1.0f, 1.0f, -1.0f, -1.0f),
-                floatArrayOf(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f),
-                intArrayOf(0, 1, 2, 2, 1, 3), RenderType.TRIANGLES)
-        loadTextures(gl)
-    }
-
-    override fun renderScene(gl: GL) {
-        val save = save.getAndSet(null)
-        if (save != null) {
-            changeBackground(save)
-        }
-        cam.setPerspective(gl.sceneWidth().toFloat() / gl.sceneHeight(), 90.0f)
-        cam.setView(0.0f, yaw, 0.0f)
-        gl.setProjectionPerspective(gl.sceneWidth().toFloat(),
-                gl.sceneHeight().toFloat(), cam)
-        val matrixStack = gl.matrixStack()
-        for (i in 0..5) {
-            val texture = textures[i]
-            if (texture != null) {
-                val matrix = matrixStack.push()
-                if (i == 1) {
-                    matrix.rotate(90.0f, 0.0f, 0.0f, 1.0f)
-                } else if (i == 2) {
-                    matrix.rotate(180.0f, 0.0f, 0.0f, 1.0f)
-                } else if (i == 3) {
-                    matrix.rotate(270.0f, 0.0f, 0.0f, 1.0f)
-                } else if (i == 4) {
-                    matrix.rotate(90.0f, 1.0f, 0.0f, 0.0f)
-                } else if (i == 5) {
-                    matrix.rotate(-90.0f, 1.0f, 0.0f, 0.0f)
-                }
-                texture.bind(gl)
-                gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f)
-                model?.render(gl, shaderTextured)
-                matrixStack.pop()
-            }
-        }
-    }
-
-    override fun postRender(gl: GL,
-                            delta: Double) {
+    fun step(delta: Double) {
         yaw -= (speed * delta).toFloat()
         yaw %= 360f
     }
 
-    override fun postProcessing(gl: GL,
-                                pass: Int): Shader? {
-        when (pass) {
-            0 -> return shaderBlur1
-            1 -> return shaderBlur2
-        }
-        return null
-    }
-
-    override fun width(width: Int): Int {
-        return width shr 2
-    }
-
-    override fun height(height: Int): Int {
-        return height shr 2
-    }
-
-    override fun renderPasses(): Int {
-        return 2
-    }
-
-    override fun dispose() {
-    }
-
-    fun setSpeed(speed: Float) {
-        this.speed = speed
-    }
-
-    protected open fun loadTextures(gl: GL) {
-        if (texturesLoaded) {
-            return
-        }
-        texturesLoaded = true
+    protected open fun loadTextures() {
         val game = engine.game as ScapesClient
         val saves = game.saves()
         val random = ThreadLocalRandom.current()
@@ -183,7 +158,6 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
         } catch (e: IOException) {
             defaultBackground()
         }
-
     }
 
     protected fun setBackground(replace: Resource<Texture>,

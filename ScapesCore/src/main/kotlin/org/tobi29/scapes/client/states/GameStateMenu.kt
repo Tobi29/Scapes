@@ -24,15 +24,15 @@ import org.tobi29.scapes.client.states.scenes.SceneMenu
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
+import org.tobi29.scapes.engine.graphics.GL
+import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import java.io.IOException
 
-class GameStateMenu private constructor(engine: ScapesEngine, private val scene2: SceneMenu) : GameState(
-        engine, scene2) {
-    constructor(engine: ScapesEngine) : this(engine, SceneMenu(engine)) {
-    }
+class GameStateMenu(engine: ScapesEngine) : GameState(engine) {
+    private val scene = SceneMenu(engine)
 
     override fun dispose() {
         engine.sounds.stop("music")
@@ -48,12 +48,19 @@ class GameStateMenu private constructor(engine: ScapesEngine, private val scene2
             null
         }
         engine.guiStack.add("10-Menu", menu(account, file, style))
+        switchPipeline { gl ->
+            renderScene(gl, scene)
+        }
     }
 
     override val isMouseGrabbed: Boolean
         get() = false
 
     override fun step(delta: Double) {
+    }
+
+    override fun renderStep(delta: Double) {
+        scene.step(delta)
     }
 
     private fun menu(account: Account?,
@@ -75,7 +82,7 @@ class GameStateMenu private constructor(engine: ScapesEngine, private val scene2
     }
 
     private fun menu(style: GuiStyle): Gui {
-        return GuiMainMenu(this, scene2, style)
+        return GuiMainMenu(this, scene, style)
     }
 
     companion object : KLogging()

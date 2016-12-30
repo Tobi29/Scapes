@@ -26,7 +26,7 @@ class GuiControlsList(state: GameState, previous: Gui, style: GuiStyle) : GuiMen
         state, "Controls", previous, style) {
     init {
         (state.engine.game as ScapesClient).inputModes.forEach { inputMode ->
-            val controls = row(pane) {  button(it, inputMode.toString()) }
+            val controls = row(pane) { button(it, inputMode.toString()) }
             selection(controls)
             controls.on(GuiEvent.CLICK_LEFT
             ) { event ->

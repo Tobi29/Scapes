@@ -21,7 +21,8 @@ import org.tobi29.scapes.engine.gui.GuiComponentFlowText
 import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
 import org.tobi29.scapes.engine.gui.GuiStyle
 
-class GuiVersion(state: GameState, style: GuiStyle) : GuiDesktop(state, style) {
+class GuiVersion(state: GameState, style: GuiStyle) : GuiDesktop(state,
+        style) {
     init {
         val pane = spacer()
         pane.spacer()

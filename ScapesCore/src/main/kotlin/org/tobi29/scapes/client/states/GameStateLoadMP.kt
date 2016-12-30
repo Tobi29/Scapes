@@ -25,6 +25,7 @@ import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Scene
+import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.server.PacketBundleChannel
 import org.tobi29.scapes.engine.server.RemoteAddress
 import org.tobi29.scapes.engine.server.SSLProvider
@@ -34,14 +35,18 @@ import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.task.Joiner
 import java.util.concurrent.atomic.AtomicBoolean
 
-class GameStateLoadMP(private val address: RemoteAddress, engine: ScapesEngine,
-                      scene: Scene) : GameState(engine, scene) {
+class GameStateLoadMP(private val address: RemoteAddress,
+                      engine: ScapesEngine,
+                      private val scene: Scene) : GameState(engine) {
     private var gui: GuiLoading? = null
 
     override fun init() {
         gui = GuiLoading(this, engine.guiStyle).apply {
             setProgress("Connecting...", 0.0)
             engine.guiStack.add("20-Progress", this)
+        }
+        switchPipeline { gl ->
+            renderScene(gl, scene)
         }
 
         (engine.game as ScapesClient).connection.addOutConnection(address,

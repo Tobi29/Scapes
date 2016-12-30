@@ -29,7 +29,7 @@ interface InputMode {
                           prev: Gui): Gui
 
     fun createInGameGUI(gui: Gui,
-                             world: WorldClient) {
+                        world: WorldClient) {
     }
 
     fun playerController(player: MobPlayerClientMain): MobPlayerClientMain.Controller

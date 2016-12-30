@@ -32,7 +32,7 @@ open class GuiBusy(state: GameState, style: GuiStyle) : GuiDesktop(state,
         spacer()
         pane.spacer()
         busy = pane.addVert(0.0, 10.0, 32.0, 32.0, ::GuiComponentBusy)
-        label = row(pane) {  button(it, "Loading...") }
+        label = row(pane) { button(it, "Loading...") }
         pane.spacer()
     }
 

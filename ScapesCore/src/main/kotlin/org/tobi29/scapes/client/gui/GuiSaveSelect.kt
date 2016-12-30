@@ -32,7 +32,9 @@ import org.tobi29.scapes.engine.utils.io.use
 import org.tobi29.scapes.plugins.Plugins
 import java.io.IOException
 
-class GuiSaveSelect(state: GameState, previous: Gui, private val scene: SceneMenu,
+class GuiSaveSelect(state: GameState,
+                    previous: Gui,
+                    private val scene: SceneMenu,
                     style: GuiStyle) : GuiMenu(state, "Singleplayer", previous,
         style) {
     private val saves: SaveStorage
@@ -97,15 +99,14 @@ class GuiSaveSelect(state: GameState, previous: Gui, private val scene: SceneMen
             selection(label, delete)
 
             label.on(GuiEvent.CLICK_LEFT) { event ->
-                scene.setSpeed(0.0f)
                 try {
                     if (Debug.socketSingleplayer()) {
                         state.engine.switchState(
                                 GameStateLoadSocketSP(saves[name],
-                                        state.engine, state.scene()))
+                                        state.engine, scene))
                     } else {
                         state.engine.switchState(GameStateLoadSP(saves[name],
-                                state.engine, state.scene()))
+                                state.engine, scene))
                     }
                 } catch (e: IOException) {
                     logger.warn { "Failed to open save: $e" }

@@ -22,15 +22,15 @@ import org.tobi29.scapes.engine.utils.graphics.Cam
 interface WorldSkybox {
     fun update(delta: Double)
 
-    fun init(gl: GL)
+    fun init()
 
     fun renderUpdate(cam: Cam,
                      delta: Double)
 
-    fun render(gl: GL,
-               cam: Cam)
+    fun appendToPipeline(gl: GL,
+                         cam: Cam): () -> Unit
 
-    fun dispose(gl: GL)
+    fun dispose()
 
     fun exposure(): Float
 

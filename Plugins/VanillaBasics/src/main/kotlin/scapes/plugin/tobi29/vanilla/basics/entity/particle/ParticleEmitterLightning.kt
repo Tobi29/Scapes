@@ -16,7 +16,10 @@
 
 package scapes.plugin.tobi29.vanilla.basics.entity.particle
 
-import org.tobi29.scapes.engine.graphics.*
+import org.tobi29.scapes.engine.graphics.GL
+import org.tobi29.scapes.engine.graphics.Model
+import org.tobi29.scapes.engine.graphics.RenderType
+import org.tobi29.scapes.engine.graphics.createVNI
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.TWO_PI
 import org.tobi29.scapes.engine.utils.math.cos
@@ -31,12 +34,9 @@ import java.util.concurrent.ThreadLocalRandom
 
 class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<ParticleInstanceLightning>(
         system, Array(256, { ParticleInstanceLightning() })) {
-    private val shader: Shader
     private val models: Array<Model>
 
     init {
-        val graphics = system.world.game.engine.graphics
-        shader = graphics.createShader("VanillaBasics:shader/ParticleLightning")
         models = Array(16) {
             val lines = createLighting()
             val vertex = FloatArray(lines.size * 6)
@@ -164,32 +164,43 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
         this.hasAlive = hasAlive
     }
 
-    override fun render(gl: GL,
-                        cam: Cam) {
-        if (!hasAlive) {
-            return
-        }
-        val world = system.world
-        val terrain = world.terrain
-        gl.textures().unbind(gl)
-        for (instance in instances) {
-            if (instance.state != ParticleInstance.State.ALIVE) {
-                continue
+    override fun addToPipeline(gl: GL,
+                               width: Int,
+                               height: Int,
+                               cam: Cam): () -> Unit {
+        val shader = gl.engine.graphics.createShader(
+                "VanillaBasics:shader/ParticleLightning") {
+            supplyPreCompile {
+                supplyProperty("SCENE_WIDTH", width)
+                supplyProperty("SCENE_HEIGHT", height)
             }
-            val x = instance.pos.intX()
-            val y = instance.pos.intY()
-            val z = instance.pos.intZ()
-            val type = terrain.type(x, y, z)
-            if (!type.isSolid(world.terrain, x, y, z) || type.isTransparent(
-                    world.terrain, x, y, z)) {
-                val posRenderX = (instance.pos.doubleX() - cam.position.doubleX()).toFloat()
-                val posRenderY = (instance.pos.doubleY() - cam.position.doubleY()).toFloat()
-                val posRenderZ = (instance.pos.doubleZ() - cam.position.doubleZ()).toFloat()
-                val matrixStack = gl.matrixStack()
-                val matrix = matrixStack.push()
-                matrix.translate(posRenderX, posRenderY, posRenderZ)
-                models[instance.vao].render(gl, shader)
-                matrixStack.pop()
+        }
+        return render@ {
+            if (!hasAlive) {
+                return@render
+            }
+            val world = system.world
+            val terrain = world.terrain
+            gl.textures().unbind(gl)
+            for (instance in instances) {
+                if (instance.state != ParticleInstance.State.ALIVE) {
+                    continue
+                }
+                val x = instance.pos.intX()
+                val y = instance.pos.intY()
+                val z = instance.pos.intZ()
+                val type = terrain.type(x, y, z)
+                if (!type.isSolid(world.terrain, x, y, z) || type.isTransparent(
+                        world.terrain, x, y, z)) {
+                    val posRenderX = (instance.pos.doubleX() - cam.position.doubleX()).toFloat()
+                    val posRenderY = (instance.pos.doubleY() - cam.position.doubleY()).toFloat()
+                    val posRenderZ = (instance.pos.doubleZ() - cam.position.doubleZ()).toFloat()
+                    val matrixStack = gl.matrixStack()
+                    val matrix = matrixStack.push()
+                    matrix.translate(posRenderX, posRenderY, posRenderZ)
+                    models[instance.vao].render(gl, shader)
+                    matrixStack.pop()
+                }
             }
         }
     }

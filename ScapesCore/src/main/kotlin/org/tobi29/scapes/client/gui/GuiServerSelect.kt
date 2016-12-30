@@ -20,6 +20,7 @@ import mu.KLogging
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.connection.GetInfoOutConnection
 import org.tobi29.scapes.client.states.GameStateLoadMP
+import org.tobi29.scapes.client.states.scenes.SceneMenu
 import org.tobi29.scapes.connection.ConnectionInfo
 import org.tobi29.scapes.connection.ConnectionType
 import org.tobi29.scapes.engine.GameState
@@ -35,8 +36,11 @@ import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import org.tobi29.scapes.engine.utils.io.tag.getListStructure
 import java.util.*
 
-class GuiServerSelect(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu(
-        state, "Multiplayer", previous, style) {
+class GuiServerSelect(state: GameState,
+                      previous: Gui,
+                      private val scene: SceneMenu,
+                      style: GuiStyle) : GuiMenu(state, "Multiplayer", previous,
+        style) {
     private val servers = ArrayList<TagStructure>()
     private val scrollPane: GuiComponentScrollPaneViewport
 
@@ -95,7 +99,7 @@ class GuiServerSelect(state: GameState, previous: Gui, style: GuiStyle) : GuiMen
             address = RemoteAddress(tagStructure)
             label.on(GuiEvent.CLICK_LEFT) { event ->
                 state.engine.switchState(GameStateLoadMP(address, state.engine,
-                        state.scene()))
+                        scene))
             }
             delete.on(GuiEvent.CLICK_LEFT) { event ->
                 servers.remove(tagStructure)

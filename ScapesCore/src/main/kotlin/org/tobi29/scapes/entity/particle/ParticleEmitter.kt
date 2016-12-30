@@ -75,8 +75,10 @@ abstract class ParticleEmitter<P : ParticleInstance> protected constructor(prote
         consumer(instance)
     }
 
-    abstract fun update(delta: Double)
+    abstract fun addToPipeline(gl: GL,
+                               width: Int,
+                               height: Int,
+                               cam: Cam): () -> Unit
 
-    abstract fun render(gl: GL,
-                        cam: Cam)
+    abstract fun update(delta: Double)
 }

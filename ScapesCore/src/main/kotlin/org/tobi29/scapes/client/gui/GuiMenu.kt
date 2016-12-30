@@ -16,33 +16,33 @@
 
 package org.tobi29.scapes.client.gui
 
+import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
 
-open class GuiMenu(state: org.tobi29.scapes.engine.GameState,
+open class GuiMenu(state: GameState,
                    title: String,
                    back: String,
-                   style: org.tobi29.scapes.engine.gui.GuiStyle) : org.tobi29.scapes.client.gui.GuiDesktop(state, style) {
-    protected val view: org.tobi29.scapes.client.gui.GuiComponentMenuPane
-    protected val pane: org.tobi29.scapes.engine.gui.GuiComponentScrollPaneViewport
-    protected val back: org.tobi29.scapes.engine.gui.GuiComponentTextButton
+                   style: GuiStyle) : GuiDesktop(state, style) {
+    protected val view: GuiComponentMenuPane
+    protected val pane: GuiComponentScrollPaneViewport
+    protected val back: GuiComponentTextButton
 
-    protected constructor(state: org.tobi29.scapes.engine.GameState, title: String, previous: org.tobi29.scapes.engine.gui.Gui,
-                          style: org.tobi29.scapes.engine.gui.GuiStyle) : this(state, title, "Back",
+    protected constructor(state: GameState, title: String, previous: Gui,
+                          style: GuiStyle) : this(state, title, "Back",
             previous, style) {
     }
 
-    protected constructor(state: org.tobi29.scapes.engine.GameState, title: String, style: org.tobi29.scapes.engine.gui.GuiStyle) : this(
+    protected constructor(state: GameState, title: String, style: GuiStyle) : this(
             state, title, "Back", style) {
     }
 
-    protected constructor(state: org.tobi29.scapes.engine.GameState, title: String, back: String, previous: org.tobi29.scapes.engine.gui.Gui,
-                          style: org.tobi29.scapes.engine.gui.GuiStyle) : this(state, title, back, style) {
-        on(org.tobi29.scapes.engine.gui.GuiAction.BACK
-        ) { state.engine.guiStack.swap(this, previous) }
+    protected constructor(state: GameState, title: String, back: String, previous: Gui,
+                          style: GuiStyle) : this(state, title, back, style) {
+        on(GuiAction.BACK) { state.engine.guiStack.swap(this, previous) }
     }
 
-    fun <T : org.tobi29.scapes.engine.gui.GuiComponent> addControl(priority: Int,
-                                                                   child: (org.tobi29.scapes.client.gui.GuiLayoutDataMenuControl) -> T): T {
+    fun <T : GuiComponent> addControl(priority: Int,
+                                      child: (GuiLayoutDataMenuControl) -> T): T {
         if (priority < 0 || priority > 100) {
             throw IllegalArgumentException("Priority out of bounds: $priority")
         }
@@ -53,11 +53,11 @@ open class GuiMenu(state: org.tobi29.scapes.engine.GameState,
     init {
         spacer()
         view = addHori(0.0, 0.0, 400.0, -1.0) {
-            org.tobi29.scapes.client.gui.GuiComponentMenuPane(it, 540.0)
+            GuiComponentMenuPane(it, 540.0)
         }
         spacer()
         view.addVert(16.0, 14.0, -1.0, 32.0) {
-            org.tobi29.scapes.engine.gui.GuiComponentText(it, title)
+            GuiComponentText(it, title)
         }
         view.addVert(24.0, 6.0, -1.0, 2.0, ::GuiComponentSeparator)
         pane = view.addVert(0.0, 0.0, 0.0, 0.0, -1.0, -1.0) {

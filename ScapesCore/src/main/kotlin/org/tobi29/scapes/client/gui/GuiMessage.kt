@@ -25,6 +25,6 @@ class GuiMessage(state: GameState, previous: Gui, title: String,
                  message: String, style: GuiStyle) : GuiMenu(state, title,
         previous, style) {
     init {
-        pane.add(16.0, 80.0, -1.0, 18.0) {  GuiComponentText(it, message) }
+        pane.add(16.0, 80.0, -1.0, 18.0) { GuiComponentText(it, message) }
     }
 }

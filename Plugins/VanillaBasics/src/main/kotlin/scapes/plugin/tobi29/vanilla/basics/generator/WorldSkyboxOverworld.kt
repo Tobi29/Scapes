@@ -23,6 +23,7 @@ import org.tobi29.scapes.engine.gui.GuiComponentGroup
 import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
 import org.tobi29.scapes.engine.sound.StaticAudio
+import org.tobi29.scapes.engine.utils.chain
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.io.tag.getDouble
 import org.tobi29.scapes.engine.utils.math.*
@@ -46,10 +47,6 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
     private val skyboxMesh: Model
     private val skyboxBottomMesh: Model
     private val starMesh: Model
-    private val shaderSkybox: Shader
-    private val shaderGlow: Shader
-    private val shaderClouds: Shader
-    private val shaderTextured: Shader
     private val textureMoon = world.game.engine.graphics.textures["VanillaBasics:image/Moon"]
     private var temperatureDebug: GuiWidgetDebugValues.Element? = null
     private var humidityDebug: GuiWidgetDebugValues.Element? = null
@@ -174,11 +171,6 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
             addStar(0.01 + random.nextDouble() * 0.02, 0, starMesh, random)
         }
         this.starMesh = starMesh.finish(world.game.engine)
-        val graphics = world.game.engine.graphics
-        shaderSkybox = graphics.createShader("VanillaBasics:shader/Skybox")
-        shaderGlow = graphics.createShader("VanillaBasics:shader/Glow")
-        shaderClouds = graphics.createShader("VanillaBasics:shader/Clouds")
-        shaderTextured = graphics.createShader("Engine:shader/Textured")
     }
 
     override fun update(delta: Double) {
@@ -262,7 +254,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
         exposureDebug?.setValue(exposure)
     }
 
-    override fun init(gl: GL) {
+    override fun init() {
         val engine = world.game.engine
         val debugValues = engine.debugValues
         temperatureDebug = debugValues["Vanilla-Environment-Temperature"]
@@ -339,87 +331,102 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
         exposure += (heatstroke * 0.3 - exposure) * factor
     }
 
-    override fun render(gl: GL,
-                        cam: Cam) {
-        val player = world.player
-        val pos = player.getCurrentPos()
+    override fun appendToPipeline(gl: GL,
+                                  cam: Cam): () -> Unit {
         val scene = world.scene
-        val matrixStack = gl.matrixStack()
-        val skyLight = (15.0 - climateGenerator.sunLightReduction(
-                scene.cam().position.intX().toDouble(),
-                scene.cam().position.intY().toDouble())).toFloat() / 15.0f
-        val skyboxLight = skyLight * fogBrightness
-        val weather = climateGenerator.weather(pos.x, pos.y)
-        val sunElevation = (climateGenerator.sunElevation(
-                cam.position.doubleX(),
-                cam.position.doubleY()) * RAD_2_DEG)
-        val sunAzimuth = (climateGenerator.sunAzimuth(cam.position.doubleX(),
-                cam.position.doubleY()) * RAD_2_DEG)
-        // Sky
-        gl.textures().unbind(gl)
-        gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f)
-        shaderSkybox.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB())
-        shaderSkybox.setUniform1f(5, scene.fogDistance())
-        shaderSkybox.setUniform4f(6, skyboxLight * skyboxLight, skyboxLight,
-                skyboxLight, 1.0f)
-        skyboxMesh.render(gl, shaderSkybox)
-        // Stars
-        if (skyLight < 1.0f) {
-            val random = ThreadLocalRandom.current()
-            gl.setBlending(BlendingMode.ADD)
-            val brightness = max(
-                    1.0f - skyLight - random.nextFloat() * 0.1f,
-                    0.0f)
-            shaderGlow.setUniform4f(4, brightness, brightness, brightness, 1.0f)
-            val matrix = matrixStack.push()
-            matrix.rotateAccurate(sunAzimuth + 180.0, 0.0f, 0.0f, 1.0f)
+        val player = world.player
+        val shaderSkybox = gl.engine.graphics.createShader(
+                "VanillaBasics:shader/Skybox")
+        val shaderGlow = gl.engine.graphics.createShader(
+                "VanillaBasics:shader/Glow")
+        val shaderClouds = gl.engine.graphics.createShader(
+                "VanillaBasics:shader/Clouds")
+        val shaderTextured = gl.engine.graphics.createShader(
+                "Engine:shader/Textured")
+        val render: () -> Unit = {
+            val matrixStack = gl.matrixStack()
+            val skyLight = (15.0 - climateGenerator.sunLightReduction(
+                    scene.cam().position.intX().toDouble(),
+                    scene.cam().position.intY().toDouble())).toFloat() / 15.0f
+            val skyboxLight = skyLight * fogBrightness
+            val sunElevation = (climateGenerator.sunElevation(
+                    cam.position.doubleX(),
+                    cam.position.doubleY()) * RAD_2_DEG)
+            val sunAzimuth = (climateGenerator.sunAzimuth(
+                    cam.position.doubleX(),
+                    cam.position.doubleY()) * RAD_2_DEG)
+            // Sky
+            gl.textures().unbind(gl)
+            gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f)
+            shaderSkybox.setUniform3f(4, scene.fogR(), scene.fogG(),
+                    scene.fogB())
+            shaderSkybox.setUniform1f(5, scene.fogDistance())
+            shaderSkybox.setUniform4f(6, skyboxLight * skyboxLight, skyboxLight,
+                    skyboxLight, 1.0f)
+            skyboxMesh.render(gl, shaderSkybox)
+            // Stars
+            if (skyLight < 1.0f) {
+                val random = ThreadLocalRandom.current()
+                gl.setBlending(BlendingMode.ADD)
+                val brightness = max(
+                        1.0f - skyLight - random.nextFloat() * 0.1f,
+                        0.0f)
+                shaderGlow.setUniform4f(4, brightness, brightness, brightness,
+                        1.0f)
+                val matrix = matrixStack.push()
+                matrix.rotateAccurate(sunAzimuth + 180.0, 0.0f, 0.0f, 1.0f)
+                matrix.rotateAccurate(-sunElevation, 1.0f, 0.0f, 0.0f)
+                starMesh.render(gl, shaderGlow)
+                matrixStack.pop()
+            } else {
+                gl.setBlending(BlendingMode.ADD)
+            }
+            // Sun
+            var matrix = matrixStack.push()
+            matrix.rotateAccurate(sunAzimuth + 180.0f, 0.0f, 0.0f, 1.0f)
             matrix.rotateAccurate(-sunElevation, 1.0f, 0.0f, 0.0f)
-            starMesh.render(gl, shaderGlow)
+            matrix.scale(1.0f, 1.0f, 1.0f)
+            shaderGlow.setUniform4f(4, fogR * 1.0f, fogG * 1.1f, fogB * 1.1f,
+                    1.0f)
+            billboardMesh.render(gl, shaderGlow)
+            matrix.scale(0.2f, 1.0f, 0.2f)
+            shaderGlow.setUniform4f(4, fogR * 1.6f, fogG * 1.6f, fogB * 1.3f,
+                    1.0f)
+            billboardMesh.render(gl, shaderGlow)
             matrixStack.pop()
-        } else {
-            gl.setBlending(BlendingMode.ADD)
+            // Moon
+            textureMoon.get().bind(gl)
+            matrix = matrixStack.push()
+            matrix.rotateAccurate(sunAzimuth, 0.0f, 0.0f, 1.0f)
+            matrix.rotateAccurate(sunElevation, 1.0f, 0.0f, 0.0f)
+            matrix.scale(0.1f, 1.0f, 0.1f)
+            billboardMesh.render(gl, shaderTextured)
+            matrixStack.pop()
+            gl.setBlending(BlendingMode.NORMAL)
+            // Clouds
+            fbo.texturesColor[0].bind(gl)
+            cloudMesh.render(gl, shaderSkybox)
+            gl.textures().unbind(gl)
+            // Bottom
+            skyboxBottomMesh.render(gl, shaderSkybox)
         }
-        // Sun
-        var matrix = matrixStack.push()
-        matrix.rotateAccurate(sunAzimuth + 180.0f, 0.0f, 0.0f, 1.0f)
-        matrix.rotateAccurate(-sunElevation, 1.0f, 0.0f, 0.0f)
-        matrix.scale(1.0f, 1.0f, 1.0f)
-        shaderGlow.setUniform4f(4, fogR * 1.0f, fogG * 1.1f, fogB * 1.1f, 1.0f)
-        billboardMesh.render(gl, shaderGlow)
-        matrix.scale(0.2f, 1.0f, 0.2f)
-        shaderGlow.setUniform4f(4, fogR * 1.6f, fogG * 1.6f, fogB * 1.3f, 1.0f)
-        billboardMesh.render(gl, shaderGlow)
-        matrixStack.pop()
-        // Moon
-        textureMoon.get().bind(gl)
-        matrix = matrixStack.push()
-        matrix.rotateAccurate(sunAzimuth, 0.0f, 0.0f, 1.0f)
-        matrix.rotateAccurate(sunElevation, 1.0f, 0.0f, 0.0f)
-        matrix.scale(0.1f, 1.0f, 0.1f)
-        billboardMesh.render(gl, shaderTextured)
-        matrixStack.pop()
-        gl.setBlending(BlendingMode.NORMAL)
-        // Clouds
-        fbo.texturesColor[0].bind(gl)
-        cloudMesh.render(gl, shaderSkybox)
-        gl.textures().unbind(gl)
-        // Bottom
-        skyboxBottomMesh.render(gl, shaderSkybox)
-        val cloudTime = System.currentTimeMillis() % 1000000 / 1000000.0f
-        fbo.activate(gl)
-        gl.viewport(0, 0, fbo.width(), fbo.height())
-        gl.clear(0.0f, 0.0f, 0.0f, 0.0f)
-        gl.setProjectionOrthogonal(0f, 0f, 1f, 1f)
-        shaderClouds.setUniform1f(4, cloudTime)
-        shaderClouds.setUniform1f(5, weather.toFloat())
-        shaderClouds.setUniform2f(6,
-                (scene.cam().position.doubleX() / 2048.0 % 1024.0).toFloat(),
-                (scene.cam().position.doubleY() / 2048.0 % 1024.0).toFloat())
-        cloudTextureMesh.render(gl, shaderClouds)
-        fbo.deactivate(gl)
+        val clouds = gl.into(fbo) {
+            val pos = player.getCurrentPos()
+            val weather = climateGenerator.weather(pos.x, pos.y)
+            val cloudTime = System.currentTimeMillis() % 1000000 / 1000000.0f
+            gl.clear(0.0f, 0.0f, 0.0f, 0.0f)
+            gl.setProjectionOrthogonal(0.0f, 0.0f, 1.0f, 1.0f)
+            shaderClouds.setUniform1f(4, cloudTime)
+            shaderClouds.setUniform1f(5, weather.toFloat())
+            shaderClouds.setUniform2f(6,
+                    (scene.cam().position.doubleX() / 2048.0 % 1024.0).toFloat(),
+                    (scene.cam().position.doubleY() / 2048.0 % 1024.0).toFloat())
+            cloudTextureMesh.render(gl, shaderClouds)
+        }
+        return chain(render, clouds)
     }
 
-    override fun dispose(gl: GL) {
+    override fun dispose() {
         rainAudio?.dispose()
         windAudio?.dispose()
     }

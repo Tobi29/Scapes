@@ -18,9 +18,11 @@ package org.tobi29.scapes.entity.particle
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.utils.Sync
+import org.tobi29.scapes.engine.utils.chain
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
+import org.tobi29.scapes.engine.utils.toArray
 import java.util.concurrent.ConcurrentHashMap
 
 class ParticleSystem(val world: WorldClient, tps: Double) {
@@ -56,12 +58,17 @@ class ParticleSystem(val world: WorldClient, tps: Double) {
         }
     }
 
-    fun render(gl: GL,
-               cam: Cam) {
-        emitters.values.forEach { emitter ->
-            emitter.pollRender()
-            emitter.render(gl, cam)
-        }
+    fun addToPipeline(gl: GL,
+                      width: Int,
+                      height: Int,
+                      cam: Cam): () -> Unit {
+        return chain(*emitters.values.asSequence().map {
+            val render = it.addToPipeline(gl, width, height, cam);
+            {
+                it.pollRender()
+                render()
+            }
+        }.toArray())
     }
 
     fun world(): WorldClient {

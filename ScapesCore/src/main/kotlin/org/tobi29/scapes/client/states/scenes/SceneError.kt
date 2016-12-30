@@ -17,17 +17,12 @@
 package org.tobi29.scapes.client.states.scenes
 
 import org.tobi29.scapes.engine.ScapesEngine
-import org.tobi29.scapes.engine.graphics.GL
 
 class SceneError(engine: ScapesEngine) : SceneMenu(engine) {
-    init {
-        setSpeed(0.0f)
-    }
-
-    override fun loadTextures(gl: GL) {
+    override fun loadTextures() {
         for (i in 0..5) {
             setBackground(
-                    gl.textures()["Scapes:image/gui/panorama/error/Panorama$i"],
+                    engine.graphics.textures()["Scapes:image/gui/panorama/error/Panorama$i"],
                     i)
         }
     }

@@ -17,20 +17,12 @@
 package org.tobi29.scapes.entity.particle
 
 import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.times
 
 class ParticleEmitter3DBlock(system: ParticleSystem) : ParticleEmitter<ParticleInstance3DBlock>(
         system, Array(256, { ParticleInstance3DBlock() })) {
-    private val shader: Shader
-
-    init {
-        val graphics = system.world.game.engine.graphics
-        shader = graphics.createShader("Scapes:shader/Entity")
-    }
-
     override fun update(delta: Double) {
         if (!hasAlive) {
             return
@@ -66,36 +58,46 @@ class ParticleEmitter3DBlock(system: ParticleSystem) : ParticleEmitter<ParticleI
         this.hasAlive = hasAlive
     }
 
-    override fun render(gl: GL,
-                        cam: Cam) {
-        if (!hasAlive) {
-            return
-        }
-        val world = system.world
-        val terrain = world.terrain
-        for (instance in instances) {
-            if (instance.state != ParticleInstance.State.ALIVE) {
-                continue
+    override fun addToPipeline(gl: GL,
+                               width: Int,
+                               height: Int,
+                               cam: Cam): () -> Unit {
+        val shader = gl.engine.graphics.createShader("Scapes:shader/Entity") {
+            supplyPreCompile {
+                supplyProperty("SCENE_WIDTH", width)
+                supplyProperty("SCENE_HEIGHT", height)
             }
-            val x = instance.pos.intX()
-            val y = instance.pos.intY()
-            val z = instance.pos.intZ()
-            val type = terrain.type(x, y, z)
-            if (!type.isSolid(world.terrain, x, y, z) || type.isTransparent(
-                    world.terrain, x, y, z)) {
-                val posRenderX = (instance.pos.doubleX() - cam.position.doubleX()).toFloat()
-                val posRenderY = (instance.pos.doubleY() - cam.position.doubleY()).toFloat()
-                val posRenderZ = (instance.pos.doubleZ() - cam.position.doubleZ()).toFloat()
-                val matrixStack = gl.matrixStack()
-                val matrix = matrixStack.push()
-                matrix.translate(posRenderX, posRenderY, posRenderZ)
-                matrix.rotate(instance.rotation.floatZ(), 0f, 0f, 1f)
-                matrix.rotate(instance.rotation.floatX(), 1f, 0f, 0f)
-                gl.setAttribute2f(4,
-                        world.terrain.blockLight(x, y, z) / 15.0f,
-                        world.terrain.sunLight(x, y, z) / 15.0f)
-                instance.item.material().render(instance.item, gl, shader)
-                matrixStack.pop()
+        }
+        return render@ {
+            if (!hasAlive) {
+                return@render
+            }
+            val world = system.world
+            val terrain = world.terrain
+            for (instance in instances) {
+                if (instance.state != ParticleInstance.State.ALIVE) {
+                    continue
+                }
+                val x = instance.pos.intX()
+                val y = instance.pos.intY()
+                val z = instance.pos.intZ()
+                val type = terrain.type(x, y, z)
+                if (!type.isSolid(world.terrain, x, y, z) || type.isTransparent(
+                        world.terrain, x, y, z)) {
+                    val posRenderX = (instance.pos.doubleX() - cam.position.doubleX()).toFloat()
+                    val posRenderY = (instance.pos.doubleY() - cam.position.doubleY()).toFloat()
+                    val posRenderZ = (instance.pos.doubleZ() - cam.position.doubleZ()).toFloat()
+                    val matrixStack = gl.matrixStack()
+                    val matrix = matrixStack.push()
+                    matrix.translate(posRenderX, posRenderY, posRenderZ)
+                    matrix.rotate(instance.rotation.floatZ(), 0f, 0f, 1f)
+                    matrix.rotate(instance.rotation.floatX(), 1f, 0f, 0f)
+                    gl.setAttribute2f(4,
+                            world.terrain.blockLight(x, y, z) / 15.0f,
+                            world.terrain.sunLight(x, y, z) / 15.0f)
+                    instance.item.material().render(instance.item, gl, shader)
+                    matrixStack.pop()
+                }
             }
         }
     }

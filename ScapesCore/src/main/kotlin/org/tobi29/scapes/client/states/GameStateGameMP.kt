@@ -22,13 +22,13 @@ import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.client.ChatHistory
 import org.tobi29.scapes.client.Playlist
 import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.scapes.client.gui.GuiComponentGraph
 import org.tobi29.scapes.client.gui.GuiHud
 import org.tobi29.scapes.client.gui.GuiWidgetConnectionProfiler
 import org.tobi29.scapes.client.states.scenes.SceneScapesVoxelWorld
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Scene
+import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
 import org.tobi29.scapes.engine.input.ControllerKey
@@ -37,15 +37,14 @@ import org.tobi29.scapes.entity.model.MobLivingModelHumanShared
 import org.tobi29.scapes.entity.particle.ParticleTransparentAtlas
 
 open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection,
-                           scene: Scene,
-                           engine: ScapesEngine) : GameState(engine, scene) {
+                           private val loadScene: Scene,
+                           engine: ScapesEngine) : GameState(engine) {
     internal val client: ClientConnection
     internal val playlist: Playlist
     private val chatHistory: ChatHistory
     private val hud: GuiHud
     private val inputGui: Gui
     private val debug: Gui
-    private val performanceWidget: GuiWidgetPerformanceClient
     private val debugWidget: GuiWidgetDebugClient
     private val connectionSentProfiler: GuiWidgetDebugValues
     private val connectionReceivedProfiler: GuiWidgetDebugValues
@@ -53,6 +52,7 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
     private val particleTransparentAtlas: ParticleTransparentAtlas
     private val modelHumanShared: MobLivingModelHumanShared
     private val modelBlockBreakShared: EntityModelBlockBreakShared
+    private var scene: SceneScapesVoxelWorld? = null
 
     init {
         chatHistory = ChatHistory()
@@ -66,8 +66,9 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         hud = GuiHud(this, style)
         inputGui = GuiState(this, style)
         debug = GuiState(this, style)
-        debugWidget = debug.add(32.0, 32.0, 160.0,
-                200.0) { parent: GuiLayoutData -> GuiWidgetDebugClient(parent) }
+        debugWidget = debug.add(32.0, 32.0, 160.0, 184.0) {
+            GuiWidgetDebugClient(it)
+        }
         debugWidget.visible = false
         connectionSentProfiler = debug.add(32.0, 32.0, 360.0, 256.0) {
             GuiWidgetConnectionProfiler(it, client.profilerSent)
@@ -77,9 +78,15 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
             GuiWidgetConnectionProfiler(it, client.profilerReceived)
         }
         connectionReceivedProfiler.visible = false
-        performanceWidget = debug.add(32.0, 32.0, 240.0, 96.0,
-                ::GuiWidgetPerformanceClient)
-        performanceWidget.visible = false
+    }
+
+    @Synchronized
+    fun switchScene(scene: SceneScapesVoxelWorld) {
+        this.scene?.dispose()
+        this.scene = scene
+        switchPipeline { gl ->
+            renderScene(gl, scene)
+        }
     }
 
     override val tps = 240.0
@@ -89,6 +96,7 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
     }
 
     override fun dispose() {
+        this.scene?.dispose()
         client.stop()
         terrainTextureRegistry.texture().markDisposed()
         engine.sounds.stop("music")
@@ -118,16 +126,15 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         logger.info { "Loaded terrain models with $size textures in ${time}ms." }
         particleTransparentAtlas.init(engine)
         client.start()
+        switchPipeline { gl ->
+            renderScene(gl, loadScene)
+        }
     }
 
     override val isMouseGrabbed: Boolean
-        get() = scene is SceneScapesVoxelWorld && (scene as SceneScapesVoxelWorld).isMouseGrabbed
+        get() = !(scene?.world()?.player?.hasGui() ?: false)
 
     override fun step(delta: Double) {
-        if (scene !is SceneScapesVoxelWorld) {
-            return
-        }
-        val scene = this.scene as SceneScapesVoxelWorld
         engine.controller?.let { controller ->
             if (controller.isPressed(ControllerKey.KEY_F1)) {
                 setHudVisible(!hud.visible)
@@ -136,11 +143,13 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
                 debugWidget.visible = !debugWidget.visible
             }
         }
-        val player = scene.player()
         chatHistory.update()
-        playlist.update(player, delta)
-        player.world.update(delta)
-        updateTimestamp(delta)
+        scene?.world()?.player?.let { playlist.update(it, delta) }
+        scene?.world()?.update(delta)
+    }
+
+    override fun renderStep(delta: Double) {
+        scene?.step(delta)
     }
 
     fun terrainTextureRegistry(): TerrainTextureRegistry {
@@ -167,14 +176,6 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         return playlist
     }
 
-    fun updateTimestamp(delta: Double) {
-        performanceWidget.graph.addStamp(delta, 1)
-    }
-
-    fun renderTimestamp(delta: Double) {
-        performanceWidget.graph.addStamp(delta, 0)
-    }
-
     fun setHudVisible(visible: Boolean) {
         hud.visible = visible
         inputGui.visible = visible
@@ -188,64 +189,39 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         return inputGui
     }
 
-    private class GuiWidgetPerformanceClient(parent: GuiLayoutData) : GuiComponentWidget(
-            parent, "Performance Graph") {
-        val graph: GuiComponentGraph
-
-        init {
-            graph = addVert(0.0, 0.0, -1.0, -1.0
-            ) {
-                GuiComponentGraph(it, 2, floatArrayOf(1.0f, 0.0f),
-                        floatArrayOf(0.0f, 0.0f), floatArrayOf(0.0f, 1.0f),
-                        floatArrayOf(1.0f, 1.0f))
-            }
-        }
-    }
-
     private inner class GuiWidgetDebugClient(parent: GuiLayoutData) : GuiComponentWidget(
             parent, "Debug Values") {
         init {
-            val geometry = addVert(10.0, 10.0, 10.0, 2.0, 140.0, 15.0) {
+            val geometry = addVert(10.0, 10.0, 10.0, 2.0, -1.0, 15.0) {
                 GuiComponentTextButton(it, 12, "Geometry")
             }
-            val wireframe = addVert(10.0, 2.0, 140.0, 15.0) {
+            val wireframe = addVert(10.0, 2.0, -1.0, 15.0) {
                 GuiComponentTextButton(it, 12, "Wireframe")
             }
-            val distance = addVert(10.0, 2.0, 140.0, 15.0) {
-                GuiComponentTextButton(it, 12,
-                        "Static Render Distance")
+            val distance = addVert(10.0, 2.0, -1.0, 15.0) {
+                GuiComponentTextButton(it, 12, "Static Render Distance")
             }
-            val reloadGeometry = addVert(10.0, 2.0, 140.0, 15.0) {
+            val reloadGeometry = addVert(10.0, 2.0, -1.0, 15.0) {
                 GuiComponentTextButton(it, 12, "Reload Geometry")
             }
-            val performance = addVert(10.0, 2.0, 140.0, 15.0) {
-                GuiComponentTextButton(it, 12, "Performance")
-            }
-            val connSent = addVert(10.0, 2.0, 140.0, 15.0) {
+            val connSent = addVert(10.0, 2.0, -1.0, 15.0) {
                 GuiComponentTextButton(it, 12, "Conn. Sent")
             }
-            val connSentReset = addVert(10.0, 2.0, 140.0, 15.0) {
+            val connSentReset = addVert(10.0, 2.0, -1.0, 15.0) {
                 GuiComponentTextButton(it, 12, "Conn. Sent Reset")
             }
-            val connReceived = addVert(10.0, 2.0, 140.0, 15.0) {
+            val connReceived = addVert(10.0, 2.0, -1.0, 15.0) {
                 GuiComponentTextButton(it, 12, "Conn. Received")
             }
-            val connReceivedReset = addVert(10.0, 2.0, 140.0, 15.0) {
-                GuiComponentTextButton(it, 12,
-                        "Conn. Received Reset")
+            val connReceivedReset = addVert(10.0, 2.0, 10.0, 10.0, -1.0, 15.0) {
+                GuiComponentTextButton(it, 12, "Conn. Received Reset")
             }
 
             geometry.on(GuiEvent.CLICK_LEFT) { event ->
-                val scene = this@GameStateGameMP.scene
-                if (scene is SceneScapesVoxelWorld) {
-                    scene.toggleChunkDebug()
-                }
+                scene?.toggleChunkDebug()
             }
             wireframe.on(GuiEvent.CLICK_LEFT) { event ->
-                val scene = this@GameStateGameMP.scene
-                if (scene is SceneScapesVoxelWorld) {
-                    scene.toggleWireframe()
-                }
+                scene?.toggleWireframe()
             }
             distance.on(GuiEvent.CLICK_LEFT) { event ->
                 client.mob { it.world.terrain.toggleStaticRenderDistance() }
@@ -253,8 +229,6 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
             reloadGeometry.on(GuiEvent.CLICK_LEFT) { event ->
                 client.mob { it.world.terrain.reloadGeometry() }
             }
-            performance.on(
-                    GuiEvent.CLICK_LEFT) { event -> performanceWidget.visible = !performanceWidget.visible }
             connSent.on(
                     GuiEvent.CLICK_LEFT) { event -> connectionSentProfiler.visible = !connectionSentProfiler.visible }
             connSentReset.on(GuiEvent.CLICK_LEFT) { event ->

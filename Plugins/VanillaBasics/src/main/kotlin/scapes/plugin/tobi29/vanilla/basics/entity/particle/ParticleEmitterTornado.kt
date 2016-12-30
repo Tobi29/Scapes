@@ -94,7 +94,10 @@ class ParticleEmitterTornado(system: ParticleSystem) : ParticleEmitter<ParticleI
         this.hasAlive = hasAlive
     }
 
-    override fun render(gl: GL,
-                        cam: Cam) {
+    override fun addToPipeline(gl: GL,
+                               width: Int,
+                               height: Int,
+                               cam: Cam): () -> Unit {
+        return {}
     }
 }
