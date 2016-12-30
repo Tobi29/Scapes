@@ -89,7 +89,7 @@ class GuiComponentControlsAxis(parent: GuiLayoutData, textSize: Int,
                         break
                     }
                 } else if (blacklisted) {
-                    blacklist.removeAt(i)
+                    blacklist.remove(i)
                 }
             }
         } else if (editing > 0) {
