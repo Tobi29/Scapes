@@ -28,8 +28,7 @@ class PacketNotification : PacketAbstract, PacketClient {
     private lateinit var title: String
     private lateinit var text: String
 
-    constructor() {
-    }
+    constructor()
 
     constructor(title: String, text: String) {
         this.title = title

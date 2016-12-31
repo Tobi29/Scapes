@@ -25,19 +25,16 @@ class ItemStack constructor(private var material: Material, private var data: In
     private val registry: GameRegistry
 
     constructor(item: ItemStack) : this(item.material, item.data, item.amount,
-            item.metaData.copy()) {
-    }
+            item.metaData.copy())
 
-    constructor(registry: GameRegistry) : this(registry.air(), 0, 0) {
-    }
+    constructor(registry: GameRegistry) : this(registry.air(), 0, 0)
 
     init {
         registry = material.registry()
     }
 
     constructor(material: Material, data: Int, metaData: TagStructure) : this(
-            material, data, 1, metaData) {
-    }
+            material, data, 1, metaData)
 
     fun amount(): Int {
         return amount

@@ -28,8 +28,7 @@ class PacketEntityChange : PacketAbstract, PacketClient {
     private lateinit var uuid: UUID
     private lateinit var tag: TagStructure
 
-    constructor() {
-    }
+    constructor()
 
     constructor(entity: EntityServer) : super(entity.getCurrentPos()) {
         uuid = entity.getUUID()

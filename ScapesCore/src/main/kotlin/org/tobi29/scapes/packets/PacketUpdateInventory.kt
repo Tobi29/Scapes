@@ -31,8 +31,7 @@ class PacketUpdateInventory : PacketAbstract, PacketClient {
     private lateinit var id: String
     private lateinit var tag: TagStructure
 
-    constructor() {
-    }
+    constructor()
 
     constructor(entity: EntityContainerServer, id: String) {
         uuid = entity.getUUID()

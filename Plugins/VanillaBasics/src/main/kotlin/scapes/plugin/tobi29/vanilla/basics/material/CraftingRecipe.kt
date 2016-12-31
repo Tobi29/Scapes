@@ -66,8 +66,7 @@ class CraftingRecipe(ingredients: List<CraftingRecipe.Ingredient>,
     class IngredientList(private val variations: List<ItemStack>) : Ingredient {
 
         constructor(vararg variations: ItemStack) : this(
-                listOf(*variations)) {
-        }
+                listOf(*variations))
 
         override fun match(inventory: Inventory): ItemStack? {
             for (variant in variations) {

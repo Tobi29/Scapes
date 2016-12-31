@@ -29,8 +29,7 @@ import java.io.IOException
 class PacketCrafting : PacketAbstract, PacketServer {
     private var id = 0
 
-    constructor() {
-    }
+    constructor()
 
     constructor(id: Int) {
         this.id = id

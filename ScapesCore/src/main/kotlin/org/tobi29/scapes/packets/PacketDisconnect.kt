@@ -27,8 +27,7 @@ class PacketDisconnect : PacketAbstract, PacketClient {
     private lateinit var reason: String
     private var time = 0.0
 
-    constructor() {
-    }
+    constructor()
 
     constructor(reason: String, time: Double) {
         this.reason = reason

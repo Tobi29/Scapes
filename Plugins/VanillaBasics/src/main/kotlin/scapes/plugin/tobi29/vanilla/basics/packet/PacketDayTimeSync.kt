@@ -29,8 +29,7 @@ class PacketDayTimeSync : PacketAbstract, PacketClient {
     private var day = 0L
     private var dayTime = 0.0
 
-    constructor() {
-    }
+    constructor()
 
     constructor(dayTime: Double, day: Long) {
         this.dayTime = dayTime

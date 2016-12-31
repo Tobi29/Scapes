@@ -29,8 +29,7 @@ class PacketMobChangeRot : PacketAbstract, PacketBoth {
     private var y = 0.0f
     private var z = 0.0f
 
-    constructor() {
-    }
+    constructor()
 
     constructor(uuid: UUID, pos: Vector3d?, x: Float, y: Float,
                 z: Float) : super(pos, 0.0, false, false) {

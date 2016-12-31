@@ -30,8 +30,7 @@ class PacketMobChangeState : PacketAbstract, PacketBoth {
     private var inWater = false
     private var swimming = false
 
-    constructor() {
-    }
+    constructor()
 
     constructor(uuid: UUID, pos: Vector3d?, ground: Boolean,
                 slidingWall: Boolean, inWater: Boolean, swimming: Boolean) : super(

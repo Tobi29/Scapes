@@ -27,8 +27,7 @@ import org.tobi29.scapes.server.extension.event.MessageEvent
 class PacketChat : PacketAbstract, PacketBoth {
     private lateinit var text: String
 
-    constructor() {
-    }
+    constructor()
 
     constructor(text: String) {
         this.text = text

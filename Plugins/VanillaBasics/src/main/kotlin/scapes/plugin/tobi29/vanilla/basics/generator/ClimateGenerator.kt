@@ -32,8 +32,7 @@ class ClimateGenerator private constructor(private val temperatureNoise: ValueNo
     constructor(random: Random, terrainGenerator: TerrainGenerator) : this(
             SimplexNoise(random.nextLong()),
             SimplexNoise(random.nextLong()),
-            SimplexNoise(random.nextLong()), terrainGenerator) {
-    }
+            SimplexNoise(random.nextLong()), terrainGenerator)
 
     fun add(time: Double) {
         dayTime += time

@@ -31,8 +31,7 @@ import java.util.*
 class PacketResearch : PacketAbstract, PacketServer {
     private lateinit var uuid: UUID
 
-    constructor() {
-    }
+    constructor()
 
     constructor(researchTable: EntityResearchTableClient) {
         uuid = researchTable.getUUID()

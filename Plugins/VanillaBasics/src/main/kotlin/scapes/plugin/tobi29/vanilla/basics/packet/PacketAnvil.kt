@@ -35,8 +35,7 @@ class PacketAnvil : PacketAbstract, PacketServer {
     private lateinit var uuid: UUID
     private var id = 0
 
-    constructor() {
-    }
+    constructor()
 
     constructor(anvil: EntityAnvilClient, id: Int) {
         uuid = anvil.getUUID()

@@ -30,8 +30,7 @@ class PacketMobChangeSpeed : PacketAbstract, PacketBoth {
     private var y: Short = 0
     private var z: Short = 0
 
-    constructor() {
-    }
+    constructor()
 
     constructor(uuid: UUID, pos: Vector3d?, x: Double, y: Double,
                 z: Double) : super(pos, 0.0, false, false) {

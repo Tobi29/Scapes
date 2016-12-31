@@ -28,15 +28,13 @@ class TreeType internal constructor(private val name: String, textureRoot: Strin
     constructor(name: String, textureRoot: String, colorCold: Vector3d,
                 colorWarm: Vector3d, dropChance: Int, generator: Tree) : this(
             name, textureRoot, colorCold, colorWarm, Vector3d.ZERO, dropChance,
-            generator, true) {
-    }
+            generator, true)
 
     constructor(name: String, textureRoot: String, colorCold: Vector3d,
                 colorWarm: Vector3d, colorAutumn: Vector3d, dropChance: Int,
                 generator: Tree) : this(name, textureRoot, colorCold, colorWarm,
             colorAutumn, dropChance,
-            generator, false) {
-    }
+            generator, false)
 
     init {
         texture = "$textureRoot/${name.replace(" ", "").toLowerCase()}"

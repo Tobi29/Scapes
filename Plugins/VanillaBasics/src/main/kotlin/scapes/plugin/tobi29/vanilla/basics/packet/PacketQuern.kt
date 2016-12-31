@@ -30,8 +30,7 @@ import java.util.*
 class PacketQuern : PacketAbstract, PacketServer {
     private lateinit var uuid: UUID
 
-    constructor() {
-    }
+    constructor()
 
     constructor(quern: EntityQuernClient) {
         uuid = quern.getUUID()

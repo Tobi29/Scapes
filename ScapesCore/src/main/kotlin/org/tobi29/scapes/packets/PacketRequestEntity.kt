@@ -24,8 +24,7 @@ import java.util.*
 class PacketRequestEntity : PacketAbstract, PacketServer {
     private lateinit var uuid: UUID
 
-    constructor() {
-    }
+    constructor()
 
     constructor(uuid: UUID) {
         this.uuid = uuid

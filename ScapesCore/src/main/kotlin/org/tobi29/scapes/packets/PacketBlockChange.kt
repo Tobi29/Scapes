@@ -30,8 +30,7 @@ open class PacketBlockChange : PacketAbstract, PacketClient {
     protected var id = 0
     protected var data = 0
 
-    constructor() {
-    }
+    constructor()
 
     constructor(x: Int, y: Int, z: Int, id: Int, data: Int) : super(
             Vector3d(x + 0.5, y + 0.5, z + 0.5), true) {

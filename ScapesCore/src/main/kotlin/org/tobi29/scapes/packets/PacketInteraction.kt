@@ -28,8 +28,7 @@ class PacketInteraction : PacketAbstract, PacketClient, PacketServer {
     private var type: Byte = 0
     private var data: Byte = 0
 
-    constructor() {
-    }
+    constructor()
 
     constructor(type: Byte, data: Byte = 0) {
         this.type = type

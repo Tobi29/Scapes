@@ -21,11 +21,9 @@ import org.tobi29.scapes.client.connection.RemoteClientConnection
 import org.tobi29.scapes.server.connection.PlayerConnection
 
 class PacketPingClient : PacketPing {
-    constructor() {
-    }
+    constructor()
 
-    constructor(timestamp: Long) : super(timestamp) {
-    }
+    constructor(timestamp: Long) : super(timestamp)
 
     override fun runServer(player: PlayerConnection) {
         player.send(PacketPingClient(timestamp))

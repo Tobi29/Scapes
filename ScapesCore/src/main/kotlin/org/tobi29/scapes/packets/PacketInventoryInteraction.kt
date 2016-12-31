@@ -30,8 +30,7 @@ class PacketInventoryInteraction : PacketAbstract, PacketServer {
     private lateinit var id: String
     private var type = 0.toByte()
 
-    constructor() {
-    }
+    constructor()
 
     constructor(chest: EntityContainerClient, type: Byte,
                 id: String, slot: Int) {

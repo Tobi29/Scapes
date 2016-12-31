@@ -29,8 +29,7 @@ class PacketSkin : PacketAbstract, PacketBoth {
     private lateinit var image: Image
     private lateinit var checksum: Checksum
 
-    constructor() {
-    }
+    constructor()
 
     constructor(checksum: Checksum) {
         this.checksum = checksum

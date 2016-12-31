@@ -28,8 +28,7 @@ class PacketMobDamage : PacketAbstract, PacketClient {
     private var health = 0.0
     private var maxHealth = 0.0
 
-    constructor() {
-    }
+    constructor()
 
     constructor(entity: MobLivingServer) : super(entity.getCurrentPos()) {
         uuid = entity.getUUID()

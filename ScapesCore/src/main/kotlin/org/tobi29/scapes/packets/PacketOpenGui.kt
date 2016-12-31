@@ -26,8 +26,7 @@ import java.util.*
 class PacketOpenGui : PacketAbstract, PacketClient {
     private lateinit var uuid: UUID
 
-    constructor() {
-    }
+    constructor()
 
     constructor(entity: EntityContainerServer) {
         uuid = entity.getUUID()

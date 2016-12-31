@@ -22,11 +22,9 @@ import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.server.connection.PlayerConnection
 
 class PacketBlockChangeAir : PacketBlockChange {
-    constructor() {
-    }
+    constructor()
 
-    constructor(x: Int, y: Int, z: Int) : super(x, y, z, 0, 0) {
-    }
+    constructor(x: Int, y: Int, z: Int) : super(x, y, z, 0, 0)
 
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {

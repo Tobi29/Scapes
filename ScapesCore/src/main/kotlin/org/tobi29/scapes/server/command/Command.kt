@@ -115,8 +115,7 @@ object Command {
     class CommandException(val returnCode: Int, message: String) : Exception(
             message) {
 
-        constructor(output: Output) : this(output.returnCode, output.out) {
-        }
+        constructor(output: Output) : this(output.returnCode, output.out)
     }
 }
 

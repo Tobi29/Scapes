@@ -31,8 +31,7 @@ class PacketEntityAdd : PacketAbstract, PacketClient {
     private var id = 0
     private lateinit var tag: TagStructure
 
-    constructor() {
-    }
+    constructor()
 
     constructor(entity: EntityServer, registry: GameRegistry) : super(
             entity.getCurrentPos()) {

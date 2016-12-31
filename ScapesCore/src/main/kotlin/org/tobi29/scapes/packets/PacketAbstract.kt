@@ -22,8 +22,7 @@ abstract class PacketAbstract(protected val pos: Vector3d? = null, protected val
                               val isVital: Boolean = true, val isImmediate: Boolean = false) : Packet {
 
     protected constructor(pos: Vector3d, isChunkContent: Boolean) : this(pos,
-            0.0, isChunkContent) {
-    }
+            0.0, isChunkContent)
 
     fun pos(): Vector3d? {
         return pos

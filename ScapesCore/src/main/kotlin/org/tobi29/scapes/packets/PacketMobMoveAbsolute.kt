@@ -29,8 +29,7 @@ class PacketMobMoveAbsolute : PacketAbstract, PacketBoth {
     private var y = 0.0
     private var z = 0.0
 
-    constructor() {
-    }
+    constructor()
 
     constructor(uuid: UUID, pos: Vector3d?, x: Double, y: Double,
                 z: Double) : super(pos) {

@@ -26,8 +26,7 @@ class PacketRequestChunk : PacketAbstract, PacketBoth {
     private var x = 0
     private var y = 0
 
-    constructor() {
-    }
+    constructor()
 
     constructor(x: Int, y: Int) {
         this.x = x

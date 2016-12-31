@@ -30,8 +30,7 @@ class PacketEntityMetaData : PacketAbstract, PacketClient {
     private lateinit var category: String
     private lateinit var tag: TagStructure
 
-    constructor() {
-    }
+    constructor()
 
     constructor(entity: EntityServer, category: String) : super(
             entity.getCurrentPos()) {

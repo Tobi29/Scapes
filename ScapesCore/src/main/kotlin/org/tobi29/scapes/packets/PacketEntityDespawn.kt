@@ -29,8 +29,7 @@ class PacketEntityDespawn : PacketAbstract, PacketClient {
     private lateinit var uuid: UUID
     private var dead = false
 
-    constructor() {
-    }
+    constructor()
 
     constructor(entity: EntityServer) {
         uuid = entity.getUUID()

@@ -32,8 +32,7 @@ class PacketLightning : PacketAbstract, PacketClient {
     private var y = 0.0
     private var z = 0.0
 
-    constructor() {
-    }
+    constructor()
 
     constructor(x: Double, y: Double, z: Double) {
         this.x = x

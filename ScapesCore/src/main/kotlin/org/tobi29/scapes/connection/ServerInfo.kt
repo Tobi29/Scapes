@@ -37,8 +37,7 @@ class ServerInfo {
     private val buffer: ByteBuffer
 
     constructor(name: String, iconPath: FilePath) : this(name,
-            image(iconPath)) {
-    }
+            image(iconPath))
 
     constructor(name: String, image: Image = Image()) {
         this.name = name

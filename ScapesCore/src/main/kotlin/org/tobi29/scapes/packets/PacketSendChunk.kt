@@ -30,8 +30,7 @@ class PacketSendChunk : PacketAbstract, PacketClient {
     private var y = 0
     private lateinit var tag: TagStructure
 
-    constructor() {
-    }
+    constructor()
 
     constructor(chunk: TerrainInfiniteChunkServer) {
         x = chunk.pos.x

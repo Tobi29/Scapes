@@ -34,8 +34,7 @@ class PacketItemUse : PacketAbstract, PacketServer {
     private var side = false
     private lateinit var direction: Vector2d
 
-    constructor() {
-    }
+    constructor()
 
     constructor(strength: Double, side: Boolean, direction: Vector2d) {
         this.strength = strength

@@ -612,8 +612,7 @@ class BlockModelComplex(private val registry: TerrainTextureRegistry,
                     minZ: Double, maxX: Double, maxY: Double, maxZ: Double, r: Double,
                     g: Double, b: Double, a: Double) : this(texture, minX, minY,
                 minZ, maxX, maxY, maxZ, Double.NaN, Double.NaN, Double.NaN, r,
-                g, b, a) {
-        }
+                g, b, a)
 
         init {
             this.minX = minX

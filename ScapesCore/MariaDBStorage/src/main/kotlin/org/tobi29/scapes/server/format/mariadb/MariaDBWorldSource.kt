@@ -33,8 +33,7 @@ class MariaDBWorldSource(private val path: FilePath, private val connection: Con
 
     constructor(path: FilePath, url: String, user: String,
                 password: String) : this(path,
-            openDatabase(url, user, password)) {
-    }
+            openDatabase(url, user, password))
 
     init {
         database = MySQLDatabase(connection)

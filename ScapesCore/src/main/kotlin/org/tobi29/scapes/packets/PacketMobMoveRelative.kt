@@ -29,8 +29,7 @@ class PacketMobMoveRelative : PacketAbstract, PacketBoth {
     private var y: Byte = 0
     private var z: Byte = 0
 
-    constructor() {
-    }
+    constructor()
 
     constructor(uuid: UUID, pos: Vector3d?, x: Byte, y: Byte,
                 z: Byte) : super(pos, 32.0, false, false) {

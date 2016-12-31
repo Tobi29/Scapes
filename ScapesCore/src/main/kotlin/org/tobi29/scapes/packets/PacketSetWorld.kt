@@ -36,8 +36,7 @@ class PacketSetWorld : PacketAbstract, PacketClient {
     private lateinit var uuid: UUID
     private var environment = 0
 
-    constructor() {
-    }
+    constructor()
 
     constructor(world: WorldServer, player: MobPlayerServer) {
         tag = player.write()

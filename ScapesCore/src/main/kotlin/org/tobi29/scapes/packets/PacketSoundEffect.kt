@@ -29,8 +29,7 @@ class PacketSoundEffect : PacketAbstract, PacketClient {
     private var pitch = 0.0f
     private var gain = 0.0f
 
-    constructor() {
-    }
+    constructor()
 
     constructor(audio: String, position: Vector3d, velocity: Vector3d,
                 pitch: Float, gain: Float, range: Float) : super(position,

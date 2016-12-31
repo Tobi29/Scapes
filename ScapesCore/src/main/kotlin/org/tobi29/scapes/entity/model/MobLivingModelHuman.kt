@@ -104,11 +104,10 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
 
     override fun renderUpdate(delta: Double) {
         val factorPos = min(1.0, delta * 20.0)
-        val factorRot: Double
-        if (precise) {
-            factorRot = 0.9
+        val factorRot = if (precise) {
+            0.9
         } else {
-            factorRot = min(1.0, delta * 40.0)
+            min(1.0, delta * 40.0)
         }
         val factorSpeed = min(1.0, delta * 5.0)
         val speed = entity.speed()
