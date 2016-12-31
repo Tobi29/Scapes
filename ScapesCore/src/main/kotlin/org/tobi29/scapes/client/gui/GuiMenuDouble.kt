@@ -29,12 +29,10 @@ open class GuiMenuDouble(state: GameState, title: String, save: String,
 
     protected constructor(state: GameState, title: String, previous: Gui,
                           style: GuiStyle) : this(state, title, "Save", "Back",
-            previous, style) {
-    }
+            previous, style)
 
     protected constructor(state: GameState, title: String, style: GuiStyle) : this(
-            state, title, "Save", "Back", style) {
-    }
+            state, title, "Save", "Back", style)
 
     protected constructor(state: GameState, title: String, save: String,
                           back: String, previous: Gui, style: GuiStyle) : this(

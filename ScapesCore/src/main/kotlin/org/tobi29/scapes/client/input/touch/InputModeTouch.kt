@@ -17,22 +17,24 @@ package org.tobi29.scapes.client.input.touch
 
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.client.gui.GuiMessage
-import org.tobi29.scapes.client.gui.GuiPause
 import org.tobi29.scapes.client.input.InputMode
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.input.ControllerTouch
+import org.tobi29.scapes.engine.utils.EventDispatcher
+import org.tobi29.scapes.engine.utils.ListenerOwnerHandle
 import org.tobi29.scapes.engine.utils.math.angleDiff
 import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f
 import org.tobi29.scapes.engine.utils.math.toDeg
 import org.tobi29.scapes.engine.utils.math.vector.*
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
-import org.tobi29.scapes.packets.PacketInteraction
 
-class InputModeTouch(engine: ScapesEngine, private val controller: ControllerTouch) : InputMode {
-    private val guiController: GuiController
-    private val swipe = MutableVector2d()
+class InputModeTouch(engine: ScapesEngine,
+                     private val controller: ControllerTouch) : InputMode {
+    override val events = EventDispatcher()
+    override val listenerOwner = ListenerOwnerHandle()
+    private val guiController = GuiControllerTouch(engine, controller)
     private val direction = MutableVector2d()
     private val matrix1 = Matrix4f()
     private val matrix2 = Matrix4f()
@@ -43,13 +45,9 @@ class InputModeTouch(engine: ScapesEngine, private val controller: ControllerTou
     private var walkRight = false
     private var leftHand = false
     private var rightHand = false
-    private var lastTouch: Long = 0
+    private var lastTouch = 0L
 
-    init {
-        guiController = GuiControllerTouch(engine, controller)
-    }
-
-    override fun poll(): Boolean {
+    override fun poll(delta: Double): Boolean {
         controller.poll()
         return controller.isActive
     }
@@ -102,21 +100,15 @@ class InputModeTouch(engine: ScapesEngine, private val controller: ControllerTou
         padRight.on(GuiEvent.PRESS_LEFT) { event -> walkRight = true }
         padRight.on(GuiEvent.DROP_LEFT) { event -> walkRight = false }
         inventory.on(GuiEvent.CLICK_LEFT) { event ->
-            if (!world.player.closeGui()) {
-                world.send(PacketInteraction(
-                        PacketInteraction.OPEN_INVENTORY))
-            }
+            events.fire(MobPlayerClientMain.MenuInventoryEvent())
         }
         menu.on(GuiEvent.CLICK_LEFT) { event ->
-            if (!world.player.closeGui()) {
-                world.player.openGui(
-                        GuiPause(world.game, world.player,
-                                world.game.engine.guiStyle))
-            }
+            events.fire(MobPlayerClientMain.MenuOpenEvent())
         }
         swipe.on(GuiEvent.DRAG_LEFT, { event ->
-            this.swipe.plusX(event.relativeX / event.size.x * 960.0)
-            this.swipe.plusY(event.relativeY / event.size.y * 540.0)
+            val dir = Vector2d(event.relativeX / event.size.x * 960.0,
+                    event.relativeY / event.size.y * 540.0)
+            events.fire(MobPlayerClientMain.InputDirectionEvent(dir))
         })
         swipe.on(GuiEvent.PRESS_LEFT) { event ->
             swipeStart = Vector2d(event.x, event.y)
@@ -128,8 +120,8 @@ class InputModeTouch(engine: ScapesEngine, private val controller: ControllerTou
             lastTouch = System.currentTimeMillis()
         }
         swipe.on(GuiEvent.DRAG_LEFT) { event ->
-            var x = event.x / event.size.x * 2.0 - 1.0
-            var y = 1.0 - event.y / event.size.y * 2.0
+            val x = event.x / event.size.x * 2.0 - 1.0
+            val y = 1.0 - event.y / event.size.y * 2.0
             val cam = world.scene.cam()
             matrix1.identity()
             matrix1.perspective(cam.fov,
@@ -164,9 +156,38 @@ class InputModeTouch(engine: ScapesEngine, private val controller: ControllerTou
         }
     }
 
-    override fun playerController(
-            player: MobPlayerClientMain): MobPlayerClientMain.Controller {
-        return PlayerController(player)
+    override fun walk(): Vector2d {
+        var x = 0.0
+        var y = 0.0
+        if (walkUp) {
+            y += 1.0
+        }
+        if (walkDown) {
+            y -= 1.0
+        }
+        if (walkLeft) {
+            x -= 1.0
+        }
+        if (walkRight) {
+            x += 1.0
+        }
+        return Vector2d(x, y)
+    }
+
+    override fun hitDirection(): Vector2d {
+        return direction.now()
+    }
+
+    override fun left(): Boolean {
+        return leftHand
+    }
+
+    override fun right(): Boolean {
+        return rightHand
+    }
+
+    override fun jump(): Boolean {
+        return false
     }
 
     override fun guiController(): GuiController {
@@ -175,55 +196,5 @@ class InputModeTouch(engine: ScapesEngine, private val controller: ControllerTou
 
     override fun toString(): String {
         return "Touchscreen"
-    }
-
-    private inner class PlayerController(player: MobPlayerClientMain) : MobPlayerClientMain.Controller {
-        override fun walk(): Vector2d {
-            var x = 0.0
-            var y = 0.0
-            if (walkUp) {
-                y += 1.0
-            }
-            if (walkDown) {
-                y -= 1.0
-            }
-            if (walkLeft) {
-                x -= 1.0
-            }
-            if (walkRight) {
-                x += 1.0
-            }
-            return Vector2d(x, y)
-        }
-
-        override fun camera(delta: Double): Vector2d {
-            val camera = swipe.now()
-            swipe.set(0.0, 0.0)
-            return camera
-        }
-
-        override fun hitDirection(): Vector2d {
-            return direction.now()
-        }
-
-        override fun left(): Boolean {
-            return leftHand
-        }
-
-        override fun right(): Boolean {
-            return rightHand
-        }
-
-        override fun jump(): Boolean {
-            return false
-        }
-
-        override fun hotbarLeft(previous: Int): Int {
-            return 0
-        }
-
-        override fun hotbarRight(previous: Int): Int {
-            return 9
-        }
     }
 }

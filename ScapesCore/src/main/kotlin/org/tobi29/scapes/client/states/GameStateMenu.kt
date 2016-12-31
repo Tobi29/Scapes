@@ -24,7 +24,6 @@ import org.tobi29.scapes.client.states.scenes.SceneMenu
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
-import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiStyle

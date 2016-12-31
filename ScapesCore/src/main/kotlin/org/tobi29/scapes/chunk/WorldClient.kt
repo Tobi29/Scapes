@@ -18,6 +18,8 @@ package org.tobi29.scapes.chunk
 import mu.KLogging
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
+import org.tobi29.scapes.client.InputModeChangeEvent
+import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.client.states.scenes.SceneScapesVoxelWorld
@@ -44,10 +46,13 @@ import org.tobi29.scapes.packets.PacketServer
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-class WorldClient(val connection: ClientConnection, cam: Cam, seed: Long,
+class WorldClient(val connection: ClientConnection,
+                  cam: Cam,
+                  seed: Long,
                   terrainSupplier: (WorldClient) -> TerrainClient,
                   environmentSupplier: (WorldClient) -> EnvironmentClient,
-                  playerTag: TagStructure, playerID: UUID) : World<EntityClient>(
+                  playerTag: TagStructure,
+                  playerID: UUID) : World<EntityClient>(
         connection.plugins, connection.game.engine.taskExecutor,
         connection.plugins.registry(),
         seed), PlayConnection<PacketServer> {
@@ -68,10 +73,17 @@ class WorldClient(val connection: ClientConnection, cam: Cam, seed: Long,
                 Vector3d.ZERO, 0.0, 0.0, "")
         player.setEntityID(playerID)
         player.read(playerTag)
+        terrain = terrainSupplier(this)
         scene = SceneScapesVoxelWorld(this, cam)
         playerModel = player.createModel()
         connection.plugins.plugins.forEach { it.worldInit(this) }
-        terrain = terrainSupplier(this)
+
+        val game = game.engine.game as ScapesClient
+        game.engine.events.listener<InputModeChangeEvent>(player) { event ->
+            player.setInputMode(event.inputMode)
+        }
+        player.setInputMode(game.inputMode())
+
         logger.info { "Received player entity: $player with id: $playerID" }
     }
 

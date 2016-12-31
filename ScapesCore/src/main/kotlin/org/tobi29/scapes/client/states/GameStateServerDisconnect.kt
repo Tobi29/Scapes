@@ -31,8 +31,7 @@ class GameStateServerDisconnect(message: String,
     private val scene = SceneError(engine)
 
     constructor(message: String, engine: ScapesEngine) : this(message,
-            null, engine, 0.0) {
-    }
+            null, engine, 0.0)
 
     override fun init() {
         engine.guiStack.add("10-Menu", gui)

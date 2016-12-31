@@ -124,13 +124,13 @@ class ScapesClient(engine: ScapesEngine,
         loadInput()
     }
 
-    override fun step() {
+    override fun step(delta: Double) {
         if (engine.container.joysticksChanged()) {
             loadInput()
         }
         var newInputMode: InputMode? = null
         for (inputMode in inputModesMut) {
-            if (inputMode.poll()) {
+            if (inputMode.poll(delta)) {
                 newInputMode = inputMode
             }
         }

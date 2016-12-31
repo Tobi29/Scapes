@@ -32,8 +32,7 @@ class GuiComponentBar(parent: GuiLayoutData, private val r: Float, private val g
 
     constructor(parent: GuiLayoutData, r: Float, g: Float, b: Float,
                 a: Float, supplier: () -> Double) : this(parent, r, g, b, a,
-            10.0, supplier) {
-    }
+            10.0, supplier)
 
     public override fun renderComponent(gl: GL,
                                         shader: Shader,

@@ -19,14 +19,11 @@ package org.tobi29.scapes.entity.client
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.terrain.TerrainClient
-import org.tobi29.scapes.client.InputModeChangeEvent
-import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.connection.ClientConnection
+import org.tobi29.scapes.client.input.InputMode
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.engine.gui.Gui
-import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.utils.ThreadLocal
-import org.tobi29.scapes.engine.utils.filterMap
+import org.tobi29.scapes.engine.utils.*
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
@@ -37,12 +34,17 @@ import org.tobi29.scapes.entity.particle.ParticleEmitterBlock
 import org.tobi29.scapes.packets.PacketInteraction
 import java.util.concurrent.ThreadLocalRandom
 
-abstract class MobPlayerClientMain(world: WorldClient, pos: Vector3d, speed: Vector3d,
-                                   aabb: AABB, lives: Double, maxLives: Double, private val viewField: Frustum,
+abstract class MobPlayerClientMain(world: WorldClient,
+                                   pos: Vector3d,
+                                   speed: Vector3d,
+                                   aabb: AABB,
+                                   lives: Double,
+                                   maxLives: Double,
+                                   private val viewField: Frustum,
                                    nickname: String) : MobPlayerClient(
         world, pos, speed, aabb, lives, maxLives, nickname) {
-    val game: GameStateGameMP
-    protected var controller: Controller
+    val game = world.game
+    protected lateinit var input: InputMode
     protected var flying = false
     protected var gravitationMultiplier = 1.0
     protected var airFriction = 0.2
@@ -50,24 +52,9 @@ abstract class MobPlayerClientMain(world: WorldClient, pos: Vector3d, speed: Vec
     protected var wallFriction = 2.0
     protected var waterFriction = 8.0
     protected var stepHeight = 1.0
-    protected val sendPositionHandler: MobPositionSenderClient
-
-    init {
-        game = world.game
-        val game = this.game.engine.game as ScapesClient
-        game.engine.events.listener<InputModeChangeEvent>(this) { event ->
-            val inputGui = this.game.input()
-            inputGui.removeAll()
-            event.inputMode.createInGameGUI(inputGui, world)
-            controller = event.inputMode.playerController(this)
-        }
-        val inputGui = this.game.input()
-        inputGui.removeAll()
-        game.inputMode().createInGameGUI(inputGui, world)
-        controller = game.inputMode().playerController(this)
-        sendPositionHandler = MobPositionSenderClient(this.pos.now(),
-                { world.connection.send(it) })
-    }
+    protected val sendPositionHandler = MobPositionSenderClient(
+            this.pos.now()) { world.connection.send(it) }
+    private var inputListenerOwner: InputListenerOwner? = null
 
     fun updatePosition() {
         sendPositionHandler.submitUpdate(uuid, pos.now(), speed.now(),
@@ -242,22 +229,52 @@ abstract class MobPlayerClientMain(world: WorldClient, pos: Vector3d, speed: Vec
         return game.client()
     }
 
-    interface Controller {
-        fun walk(): Vector2d
+    @Synchronized
+    fun setInputMode(input: InputMode) {
+        inputListenerOwner?.invalidate()
+        val inputListenerOwner = InputListenerOwner()
+        val inputGui = game.input()
+        inputGui.removeAll()
+        input.createInGameGUI(inputGui, world)
+        inputMode(input, inputListenerOwner)
+        this.input = input
+        this.inputListenerOwner = inputListenerOwner
+    }
 
-        fun camera(delta: Double): Vector2d
+    protected abstract fun inputMode(input: InputMode,
+                                     listenerOwner: ListenerOwner)
 
-        fun hitDirection(): Vector2d
+    class InputDirectionEvent(val direction: Vector2d)
 
-        fun left(): Boolean
+    class HotbarChangeLeftEvent(val delta: Int)
 
-        fun right(): Boolean
+    class HotbarChangeRightEvent(val delta: Int)
 
-        fun jump(): Boolean
+    class HotbarSetLeftEvent(val value: Int)
 
-        fun hotbarLeft(previous: Int): Int
+    class HotbarSetRightEvent(val value: Int)
 
-        fun hotbarRight(previous: Int): Int
+    class MenuOpenEvent {
+        var success: Boolean = true
+    }
+
+    class MenuInventoryEvent {
+        var success: Boolean = true
+    }
+
+    class MenuChatEvent {
+        var success: Boolean = true
+    }
+
+    private inner class InputListenerOwner : ListenerOwner {
+        private var valid = true
+        override val listenerOwner = ListenerOwnerHandle {
+            valid && this@MobPlayerClientMain.listenerOwner.isValid
+        }
+
+        fun invalidate() {
+            valid = false
+        }
     }
 
     companion object {

@@ -25,7 +25,6 @@ import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.math.PointerPane
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.entity.client.EntityClient
-import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.packets.PacketBlockChange
 import java.util.*
 
@@ -36,8 +35,6 @@ class TerrainInfiniteSection : TerrainClient {
         get() = access { it.world }
     override val renderer: TerrainRenderer
         get() = access { it.renderer }
-    override val player: MobPlayerClientMain
-        get() = access { it.player }
     private val chunks = arrayOfNulls<TerrainInfiniteChunkClient?>(9)
     private var terrain: TerrainInfiniteClient? = null
     private var zSize = 0

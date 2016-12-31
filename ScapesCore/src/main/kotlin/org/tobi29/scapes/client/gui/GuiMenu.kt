@@ -29,12 +29,10 @@ open class GuiMenu(state: GameState,
 
     protected constructor(state: GameState, title: String, previous: Gui,
                           style: GuiStyle) : this(state, title, "Back",
-            previous, style) {
-    }
+            previous, style)
 
     protected constructor(state: GameState, title: String, style: GuiStyle) : this(
-            state, title, "Back", style) {
-    }
+            state, title, "Back", style)
 
     protected constructor(state: GameState, title: String, back: String, previous: Gui,
                           style: GuiStyle) : this(state, title, back, style) {

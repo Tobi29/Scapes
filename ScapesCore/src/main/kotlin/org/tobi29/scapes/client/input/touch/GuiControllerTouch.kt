@@ -25,7 +25,8 @@ import org.tobi29.scapes.engine.utils.math.vector.times
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-class GuiControllerTouch(engine: ScapesEngine, private val controller: ControllerTouch) : GuiController(
+class GuiControllerTouch(engine: ScapesEngine,
+                         private val controller: ControllerTouch) : GuiController(
         engine) {
     private val fingers = ConcurrentHashMap<ControllerTouch.Tracker, Finger>()
     private var clicks: List<Pair<GuiCursor, ControllerBasic.PressEvent>> = emptyList()
@@ -71,6 +72,10 @@ class GuiControllerTouch(engine: ScapesEngine, private val controller: Controlle
                 val guiPos = finger.cursor.currentGuiPos()
                 if (System.currentTimeMillis() - finger.start < 250) {
                     component.gui.sendNewEvent(GuiEvent.CLICK_LEFT,
+                            GuiComponentEvent(guiPos.x,
+                                    guiPos.y), component)
+                } else {
+                    component.gui.sendNewEvent(GuiEvent.CLICK_RIGHT,
                             GuiComponentEvent(guiPos.x,
                                     guiPos.y), component)
                 }

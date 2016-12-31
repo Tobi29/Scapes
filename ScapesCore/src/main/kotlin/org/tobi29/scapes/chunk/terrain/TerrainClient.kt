@@ -17,13 +17,11 @@ package org.tobi29.scapes.chunk.terrain
 
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.entity.client.EntityClient
-import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.packets.PacketBlockChange
 
 interface TerrainClient : TerrainEntity<EntityClient> {
     val world: WorldClient
     val renderer: TerrainRenderer
-    val player: MobPlayerClientMain
 
     fun update(delta: Double)
 

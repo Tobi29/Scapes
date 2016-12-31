@@ -20,10 +20,14 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiController
-import org.tobi29.scapes.entity.client.MobPlayerClientMain
+import org.tobi29.scapes.engine.utils.EventDispatcher
+import org.tobi29.scapes.engine.utils.ListenerOwner
+import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 
-interface InputMode {
-    fun poll(): Boolean
+interface InputMode : ListenerOwner {
+    val events: EventDispatcher
+
+    fun poll(delta: Double): Boolean
 
     fun createControlsGUI(state: GameState,
                           prev: Gui): Gui
@@ -32,7 +36,15 @@ interface InputMode {
                         world: WorldClient) {
     }
 
-    fun playerController(player: MobPlayerClientMain): MobPlayerClientMain.Controller
+    fun walk(): Vector2d
+
+    fun hitDirection(): Vector2d
+
+    fun left(): Boolean
+
+    fun right(): Boolean
+
+    fun jump(): Boolean
 
     fun guiController(): GuiController
 }

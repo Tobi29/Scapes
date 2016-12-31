@@ -32,12 +32,11 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.math.vector.div
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.task.TaskLock
-import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
-                              player: MobPlayerClientMain, chunkDistance: Double,
+                              chunkDistance: Double,
                               private val sortedLocations: List<Vector2i>) : TerrainRenderer {
     private val chunkDistanceMax: Double
     private val chunks = ArrayList<TerrainInfiniteRendererChunk>()
@@ -59,7 +58,7 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
         chunkDistanceMax = chunkDistance * 16.0 - 16.0
         val min = 0.001f
         val max = 0.999f
-        frame = createVI(player.game.engine,
+        frame = createVI(terrain.world.game.engine,
                 floatArrayOf(min, min, min, max, min, min, max, max, min, min,
                         max, min, min, min, max, max, min, max, max, max, max,
                         min, max, max),

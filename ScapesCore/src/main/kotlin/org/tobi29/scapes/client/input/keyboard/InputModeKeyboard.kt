@@ -17,9 +17,7 @@
 package org.tobi29.scapes.client.input.keyboard
 
 import org.tobi29.scapes.client.ScapesClient
-import org.tobi29.scapes.client.gui.GuiChatWrite
 import org.tobi29.scapes.client.gui.GuiControlsDefault
-import org.tobi29.scapes.client.gui.GuiPause
 import org.tobi29.scapes.client.input.InputMode
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
@@ -30,27 +28,147 @@ import org.tobi29.scapes.engine.gui.PressEvent
 import org.tobi29.scapes.engine.input.ControllerDefault
 import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.engine.input.ControllerKeyReference
+import org.tobi29.scapes.engine.utils.EventDispatcher
+import org.tobi29.scapes.engine.utils.ListenerOwnerHandle
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import org.tobi29.scapes.engine.utils.io.tag.getDouble
 import org.tobi29.scapes.engine.utils.io.tag.setDouble
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.engine.utils.math.vector.times
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
-import org.tobi29.scapes.packets.PacketInteraction
 
-class InputModeKeyboard(engine: ScapesEngine, private val controller: ControllerDefault,
+class InputModeKeyboard(engine: ScapesEngine,
+                        private val controller: ControllerDefault,
                         tagStructure: TagStructure) : InputMode {
+    override val events = EventDispatcher()
+    override val listenerOwner = ListenerOwnerHandle()
     private val tagStructure: TagStructure
     private val guiController: GuiControllerMouse
+    private val walkForward: ControllerKeyReference
+    private val walkBackward: ControllerKeyReference
+    private val walkLeft: ControllerKeyReference
+    private val walkRight: ControllerKeyReference
+    private val walkSprint: ControllerKeyReference
+    private val jump: ControllerKeyReference
+    private val left: ControllerKeyReference
+    private val right: ControllerKeyReference
 
     init {
         this.tagStructure = tagStructure.structure("Default")
         defaultConfig(this.tagStructure)
+
         val miscTag = this.tagStructure.structure("Misc")
         val miscScrollTag = miscTag.structure("Scroll")
         val scrollSensitivity = miscScrollTag.getDouble("Sensitivity") ?: 0.0
+
         guiController = GuiControllerMouse(engine, controller,
                 scrollSensitivity)
+
+        val movementTag = this.tagStructure.getStructure("Movement")
+        walkForward = ControllerKeyReference.valueOf(
+                movementTag?.getString("Forward"))
+        walkBackward = ControllerKeyReference.valueOf(
+                movementTag?.getString("Backward"))
+        walkLeft = ControllerKeyReference.valueOf(
+                movementTag?.getString("Left"))
+        walkRight = ControllerKeyReference.valueOf(
+                movementTag?.getString("Right"))
+        walkSprint = ControllerKeyReference.valueOf(
+                movementTag?.getString("Sprint"))
+        jump = ControllerKeyReference.valueOf(
+                movementTag?.getString("Jump"))
+
+        val cameraTag = this.tagStructure.getStructure("Camera")
+        val cameraSensitivity = cameraTag?.getDouble("Sensitivity") ?: 0.0
+
+        val actionTag = this.tagStructure.getStructure("Action")
+        left = ControllerKeyReference.valueOf(actionTag?.getString("Left"))
+        right = ControllerKeyReference.valueOf(
+                actionTag?.getString("Right"))
+
+        val menuTag = this.tagStructure.getStructure("Menu")
+        val inventory = ControllerKeyReference.valueOf(
+                menuTag?.getString("Inventory"))
+        val menu = ControllerKeyReference.valueOf(menuTag?.getString("Menu"))
+        val chat = ControllerKeyReference.valueOf(menuTag?.getString("Chat"))
+
+        val hotbarTag = this.tagStructure.getStructure("Hotbar")
+        val hotbarAdd = ControllerKeyReference.valueOf(
+                hotbarTag?.getString("Add"))
+        val hotbarSubtract = ControllerKeyReference.valueOf(
+                hotbarTag?.getString("Subtract"))
+        val hotbarLeft = ControllerKeyReference.valueOf(
+                hotbarTag?.getString("Left"))
+        val hotbarBoth = ControllerKeyReference.valueOf(
+                hotbarTag?.getString("Both"))
+        val hotbar = Array(10) {
+            ControllerKeyReference.valueOf(hotbarTag?.getString("$it"))
+        }
+
+        controller.events.listener<ControllerDefault.MouseDeltaSyncEvent>(
+                this) { event ->
+            val dir = event.delta * cameraSensitivity
+            events.fire(MobPlayerClientMain.InputDirectionEvent(dir))
+        }
+        guiController.events.listener<PressEvent>(this) { event ->
+            if (event.muted) {
+                return@listener
+            }
+            if (menu.isPressed(event.key, controller)) {
+                if (MobPlayerClientMain.MenuOpenEvent().apply {
+                    events.fire(this)
+                }.success) {
+                    event.muted = true
+                    return@listener
+                }
+            }
+            if (inventory.isPressed(event.key, controller)) {
+                if (MobPlayerClientMain.MenuInventoryEvent().apply {
+                    events.fire(this)
+                }.success) {
+                    event.muted = true
+                    return@listener
+                }
+            }
+            if (chat.isPressed(event.key, controller)) {
+                if (MobPlayerClientMain.MenuChatEvent().apply {
+                    events.fire(this)
+                }.success) {
+                    event.muted = true
+                    return@listener
+                }
+            }
+            if (hotbarLeft.isDown(controller) || hotbarBoth.isDown(
+                    controller)) {
+                if (hotbarAdd.isPressed(event.key, controller)) {
+                    events.fire(MobPlayerClientMain.HotbarChangeLeftEvent(1))
+                }
+                if (hotbarSubtract.isPressed(event.key, controller)) {
+                    events.fire(MobPlayerClientMain.HotbarChangeLeftEvent(-1))
+                }
+                val hotbarSet = ControllerKeyReference.isDown(controller,
+                        *hotbar)
+                if (hotbarSet != null) {
+                    events.fire(MobPlayerClientMain.HotbarSetLeftEvent(
+                            hotbar.indexOf(hotbarSet)))
+                }
+            }
+            if (!hotbarLeft.isDown(controller) || hotbarBoth.isDown(
+                    controller)) {
+                if (hotbarAdd.isPressed(event.key, controller)) {
+                    events.fire(MobPlayerClientMain.HotbarChangeRightEvent(1))
+                }
+                if (hotbarSubtract.isPressed(event.key, controller)) {
+                    events.fire(MobPlayerClientMain.HotbarChangeRightEvent(-1))
+                }
+                val hotbarSet = ControllerKeyReference.isDown(controller,
+                        *hotbar)
+                if (hotbarSet != null) {
+                    events.fire(MobPlayerClientMain.HotbarSetRightEvent(
+                            hotbar.indexOf(hotbarSet)))
+                }
+            }
+        }
     }
 
     private fun defaultConfig(tagStructure: TagStructure) {
@@ -112,7 +230,7 @@ class InputModeKeyboard(engine: ScapesEngine, private val controller: Controller
         }
     }
 
-    override fun poll(): Boolean {
+    override fun poll(delta: Double): Boolean {
         controller.poll()
         return controller.isActive
     }
@@ -124,9 +242,42 @@ class InputModeKeyboard(engine: ScapesEngine, private val controller: Controller
                 prev.style)
     }
 
-    override fun playerController(
-            player: MobPlayerClientMain): MobPlayerClientMain.Controller {
-        return PlayerController(player)
+    override fun walk(): Vector2d {
+        var x = 0.0
+        var y = 0.0
+        if (walkForward.isDown(controller)) {
+            y += 1.0
+        }
+        if (walkBackward.isDown(controller)) {
+            y -= 1.0
+        }
+        if (walkLeft.isDown(controller)) {
+            x -= 1.0
+        }
+        if (walkRight.isDown(controller)) {
+            x += 1.0
+        }
+        if (!walkSprint.isDown(controller)) {
+            x *= 0.4
+            y *= 0.4
+        }
+        return Vector2d(x, y)
+    }
+
+    override fun hitDirection(): Vector2d {
+        return Vector2d.ZERO
+    }
+
+    override fun left(): Boolean {
+        return left.isDown(controller)
+    }
+
+    override fun right(): Boolean {
+        return right.isDown(controller)
+    }
+
+    override fun jump(): Boolean {
+        return jump.isDown(controller)
     }
 
     override fun guiController(): GuiController {
@@ -135,251 +286,5 @@ class InputModeKeyboard(engine: ScapesEngine, private val controller: Controller
 
     override fun toString(): String {
         return "Keyboard + Mouse"
-    }
-
-    private inner class PlayerController(player: MobPlayerClientMain) : MobPlayerClientMain.Controller {
-        private val walkForward: ControllerKeyReference
-        private val walkBackward: ControllerKeyReference
-        private val walkLeft: ControllerKeyReference
-        private val walkRight: ControllerKeyReference
-        private val walkSprint: ControllerKeyReference
-        private val jump: ControllerKeyReference
-        private val inventory: ControllerKeyReference
-        private val menu: ControllerKeyReference
-        private val chat: ControllerKeyReference
-        private val left: ControllerKeyReference
-        private val right: ControllerKeyReference
-        private val hotbarAdd: ControllerKeyReference
-        private val hotbarSubtract: ControllerKeyReference
-        private val hotbarLeft: ControllerKeyReference
-        private val hotbarBoth: ControllerKeyReference
-        private val hotbar0: ControllerKeyReference
-        private val hotbar1: ControllerKeyReference
-        private val hotbar2: ControllerKeyReference
-        private val hotbar3: ControllerKeyReference
-        private val hotbar4: ControllerKeyReference
-        private val hotbar5: ControllerKeyReference
-        private val hotbar6: ControllerKeyReference
-        private val hotbar7: ControllerKeyReference
-        private val hotbar8: ControllerKeyReference
-        private val hotbar9: ControllerKeyReference
-        private val cameraSensitivity: Double
-        private val scrollSensitivity: Double
-
-        init {
-            val movementTag = tagStructure.getStructure("Movement")
-            walkForward = ControllerKeyReference.valueOf(
-                    movementTag?.getString("Forward"))
-            walkBackward = ControllerKeyReference.valueOf(
-                    movementTag?.getString("Backward"))
-            walkLeft = ControllerKeyReference.valueOf(
-                    movementTag?.getString("Left"))
-            walkRight = ControllerKeyReference.valueOf(
-                    movementTag?.getString("Right"))
-            walkSprint = ControllerKeyReference.valueOf(
-                    movementTag?.getString("Sprint"))
-            jump = ControllerKeyReference.valueOf(
-                    movementTag?.getString("Jump"))
-
-            val cameraTag = tagStructure.getStructure("Camera")
-            cameraSensitivity = cameraTag?.getDouble("Sensitivity") ?: 0.0
-
-            val actionTag = tagStructure.getStructure("Action")
-            left = ControllerKeyReference.valueOf(actionTag?.getString("Left"))
-            right = ControllerKeyReference.valueOf(
-                    actionTag?.getString("Right"))
-
-            val menuTag = tagStructure.getStructure("Menu")
-            inventory = ControllerKeyReference.valueOf(
-                    menuTag?.getString("Inventory"))
-            menu = ControllerKeyReference.valueOf(menuTag?.getString("Menu"))
-            chat = ControllerKeyReference.valueOf(menuTag?.getString("Chat"))
-
-            val hotbarTag = tagStructure.getStructure("Hotbar")
-            hotbarAdd = ControllerKeyReference.valueOf(
-                    hotbarTag?.getString("Add"))
-            hotbarSubtract = ControllerKeyReference.valueOf(
-                    hotbarTag?.getString("Subtract"))
-            hotbarLeft = ControllerKeyReference.valueOf(
-                    hotbarTag?.getString("Left"))
-            hotbarBoth = ControllerKeyReference.valueOf(
-                    hotbarTag?.getString("Both"))
-            hotbar0 = ControllerKeyReference.valueOf(hotbarTag?.getString("0"))
-            hotbar1 = ControllerKeyReference.valueOf(hotbarTag?.getString("1"))
-            hotbar2 = ControllerKeyReference.valueOf(hotbarTag?.getString("2"))
-            hotbar3 = ControllerKeyReference.valueOf(hotbarTag?.getString("3"))
-            hotbar4 = ControllerKeyReference.valueOf(hotbarTag?.getString("4"))
-            hotbar5 = ControllerKeyReference.valueOf(hotbarTag?.getString("5"))
-            hotbar6 = ControllerKeyReference.valueOf(hotbarTag?.getString("6"))
-            hotbar7 = ControllerKeyReference.valueOf(hotbarTag?.getString("7"))
-            hotbar8 = ControllerKeyReference.valueOf(hotbarTag?.getString("8"))
-            hotbar9 = ControllerKeyReference.valueOf(hotbarTag?.getString("9"))
-            scrollSensitivity = hotbarTag?.getDouble("Sensitivity") ?: 0.0
-
-            guiController.events.listener<PressEvent>(player) { event ->
-                if (event.muted) {
-                    return@listener
-                }
-                if (player.currentGui() !is GuiChatWrite && menu.isPressed(
-                        event.key, controller)) {
-                    if (!player.closeGui()) {
-                        player.openGui(GuiPause(player.game, player,
-                                player.game.engine.guiStyle))
-                    }
-                    event.muted = true
-                    return@listener
-                }
-                if (player.currentGui() !is GuiChatWrite && inventory.isPressed(
-                        event.key, controller)) {
-                    if (!player.closeGui()) {
-                        player.world.send(PacketInteraction(
-                                PacketInteraction.OPEN_INVENTORY))
-                    }
-                    event.muted = true
-                    return@listener
-                }
-                if (player.currentGui() !is GuiChatWrite && chat.isPressed(
-                        event.key, controller)) {
-                    if (!player.hasGui()) {
-                        player.openGui(GuiChatWrite(player.game, player,
-                                player.game.engine.guiStyle))
-                        event.muted = true
-                        return@listener
-                    }
-                }
-            }
-        }
-
-        override fun walk(): Vector2d {
-            var x = 0.0
-            var y = 0.0
-            if (walkForward.isDown(controller)) {
-                y += 1.0
-            }
-            if (walkBackward.isDown(controller)) {
-                y -= 1.0
-            }
-            if (walkLeft.isDown(controller)) {
-                x -= 1.0
-            }
-            if (walkRight.isDown(controller)) {
-                x += 1.0
-            }
-            if (!walkSprint.isDown(controller)) {
-                x *= 0.4
-                y *= 0.4
-            }
-            return Vector2d(x, y)
-        }
-
-        override fun camera(delta: Double): Vector2d {
-            val camera = Vector2d(controller.deltaX(), controller.deltaY())
-            return camera.times(cameraSensitivity)
-        }
-
-        override fun hitDirection(): Vector2d {
-            return Vector2d.ZERO
-        }
-
-        override fun left(): Boolean {
-            return left.isDown(controller)
-        }
-
-        override fun right(): Boolean {
-            return right.isDown(controller)
-        }
-
-        override fun jump(): Boolean {
-            return jump.isDown(controller)
-        }
-
-        override fun hotbarLeft(previous: Int): Int {
-            var previous = previous
-            if (hotbarLeft.isDown(controller) || hotbarBoth.isDown(
-                    controller)) {
-                if (hotbarAdd.isPressed(controller)) {
-                    previous++
-                }
-                if (hotbarSubtract.isPressed(controller)) {
-                    previous--
-                }
-                val hotbar = ControllerKeyReference.isDown(controller,
-                        hotbar0, hotbar1, hotbar2,
-                        hotbar3, hotbar4, hotbar5, hotbar6,
-                        hotbar7, hotbar8, hotbar9)
-                if (hotbar != null) {
-                    if (hotbar === hotbar0) {
-                        previous = 0
-                    } else if (hotbar === hotbar1) {
-                        previous = 1
-                    } else if (hotbar === hotbar2) {
-                        previous = 2
-                    } else if (hotbar === hotbar3) {
-                        previous = 3
-                    } else if (hotbar === hotbar4) {
-                        previous = 4
-                    } else if (hotbar === hotbar5) {
-                        previous = 5
-                    } else if (hotbar === hotbar6) {
-                        previous = 6
-                    } else if (hotbar === hotbar7) {
-                        previous = 7
-                    } else if (hotbar === hotbar8) {
-                        previous = 8
-                    } else if (hotbar === hotbar9) {
-                        previous = 9
-                    }
-                }
-            }
-            previous %= 10
-            if (previous < 0) {
-                previous += 10
-            }
-            return previous
-        }
-
-        override fun hotbarRight(previous: Int): Int {
-            var previous = previous
-            if (!hotbarLeft.isDown(controller)) {
-                if (hotbarAdd.isPressed(controller)) {
-                    previous++
-                }
-                if (hotbarSubtract.isPressed(controller)) {
-                    previous--
-                }
-                val hotbar = ControllerKeyReference.isDown(controller,
-                        hotbar0, hotbar1, hotbar2,
-                        hotbar3, hotbar4, hotbar5, hotbar6,
-                        hotbar7, hotbar8, hotbar9)
-                if (hotbar != null) {
-                    if (hotbar === hotbar0) {
-                        previous = 0
-                    } else if (hotbar === hotbar1) {
-                        previous = 1
-                    } else if (hotbar === hotbar2) {
-                        previous = 2
-                    } else if (hotbar === hotbar3) {
-                        previous = 3
-                    } else if (hotbar === hotbar4) {
-                        previous = 4
-                    } else if (hotbar === hotbar5) {
-                        previous = 5
-                    } else if (hotbar === hotbar6) {
-                        previous = 6
-                    } else if (hotbar === hotbar7) {
-                        previous = 7
-                    } else if (hotbar === hotbar8) {
-                        previous = 8
-                    } else if (hotbar === hotbar9) {
-                        previous = 9
-                    }
-                }
-            }
-            previous %= 10
-            if (previous < 0) {
-                previous += 10
-            }
-            return previous
-        }
     }
 }

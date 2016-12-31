@@ -27,15 +27,16 @@ import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.entity.client.EntityClient
-import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.packets.PacketBlockChange
 import java.util.*
 
-class TerrainInfiniteClient(override val world: WorldClient, loadingRadius: Int,
-                            zSize: Int, taskExecutor: TaskExecutor, air: BlockType) : TerrainInfinite<EntityClient>(
+class TerrainInfiniteClient(override val world: WorldClient,
+                            loadingRadius: Int,
+                            zSize: Int,
+                            taskExecutor: TaskExecutor,
+                            air: BlockType) : TerrainInfinite<EntityClient>(
         zSize, taskExecutor, air, air, world.registry.blocks()), TerrainClient {
     override val renderer: TerrainInfiniteRenderer
-    override val player: MobPlayerClientMain
     private val sortedLocations: List<Vector2i>
     private val chunkManager: TerrainInfiniteChunkManagerClient
     private val loadingRadiusSqr: Int
@@ -44,7 +45,6 @@ class TerrainInfiniteClient(override val world: WorldClient, loadingRadius: Int,
 
     init {
         loadingRadiusSqr = loadingRadius * loadingRadius
-        player = world.player
         chunkManager = TerrainInfiniteChunkManagerClient(loadingRadius)
         val locations = ArrayList<Vector2i>()
         val loadingRadiusSqr = sqr(loadingRadius)
@@ -54,13 +54,12 @@ class TerrainInfiniteClient(override val world: WorldClient, loadingRadius: Int,
             }
         }
         sortedLocations = locations.sortedBy { it.distanceSqr(Vector2i.ZERO) }
-        renderer = TerrainInfiniteRenderer(this, player,
-                loadingRadius.toDouble(),
+        renderer = TerrainInfiniteRenderer(this, loadingRadius.toDouble(),
                 sortedLocations)
         joiner = taskExecutor.runThread({ joiner ->
             while (!joiner.marked) {
                 var active = false
-                val playerPos = player.getCurrentPos()
+                val playerPos = world.player.getCurrentPos()
                 val x = playerPos.intX() shr 4
                 val y = playerPos.intY() shr 4
                 for (pos in sortedLocations) {
@@ -98,7 +97,7 @@ class TerrainInfiniteClient(override val world: WorldClient, loadingRadius: Int,
             chunkManager.stream().forEach { it.updateClient(delta) }
         }
         profilerSection("Center") {
-            val pos = player.getCurrentPos()
+            val pos = world.player.getCurrentPos()
             val xx = pos.intX() shr 4
             val yy = pos.intY() shr 4
             if (chunkManager.setCenter(xx, yy) { it.dispose() }) {

@@ -22,8 +22,12 @@ import org.tobi29.scapes.block.InventoryContainer
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.client.Playlist
+import org.tobi29.scapes.client.gui.GuiChatWrite
+import org.tobi29.scapes.client.gui.GuiPause
+import org.tobi29.scapes.client.input.InputMode
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.input.ControllerKey
+import org.tobi29.scapes.engine.utils.ListenerOwner
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
@@ -40,22 +44,34 @@ import org.tobi29.scapes.packets.PacketItemUse
 import org.tobi29.scapes.packets.PacketPlayerJump
 import scapes.plugin.tobi29.vanilla.basics.gui.GuiPlayerInventory
 
-class MobPlayerClientMainVB(world: WorldClient, pos: Vector3d, speed: Vector3d,
-                            xRot: Double, zRot: Double, nickname: String) : MobPlayerClientMain(
+class MobPlayerClientMainVB(world: WorldClient,
+                            pos: Vector3d,
+                            speed: Vector3d,
+                            xRot: Double,
+                            zRot: Double,
+                            nickname: String) : MobPlayerClientMain(
         world, pos, speed, AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 100.0, 100.0,
         Frustum(90.0, 1.0, 0.1, 24.0), nickname), EntityContainerClient {
-    private val inventories: InventoryContainer
+    private val inventories = InventoryContainer().apply {
+        add("Container", Inventory(registry, 40))
+        add("Hold", Inventory(registry, 1))
+    }
     private var punchLeft: Long = -1
     private var punchRight: Long = -1
     private var chargeLeft = 0.0f
     private var chargeRight = 0.0f
 
     init {
-        inventories = InventoryContainer()
-        inventories.add("Container", Inventory(registry, 40))
-        inventories.add("Hold", Inventory(registry, 1))
         rot.setX(xRot)
         rot.setZ(zRot)
+    }
+
+    internal fun setHotbarSelectLeft(value: Int) {
+        inventorySelectLeft = value
+    }
+
+    internal fun setHotbarSelectRight(value: Int) {
+        inventorySelectRight = value
     }
 
     override fun update(delta: Double) {
@@ -65,23 +81,6 @@ class MobPlayerClientMainVB(world: WorldClient, pos: Vector3d, speed: Vector3d,
             return
         }
         if (!hasGui()) {
-            // Inventory
-            var previous = inventorySelectLeft
-            var hotbar = controller.hotbarLeft(previous)
-            if (hotbar != previous) {
-                inventorySelectLeft = hotbar
-                world.send(PacketInteraction(
-                        PacketInteraction.INVENTORY_SLOT_LEFT,
-                        inventorySelectLeft.toByte()))
-            }
-            previous = inventorySelectRight
-            hotbar = controller.hotbarRight(previous)
-            if (hotbar != previous) {
-                inventorySelectRight = hotbar
-                world.send(PacketInteraction(
-                        PacketInteraction.INVENTORY_SLOT_RIGHT,
-                        inventorySelectRight.toByte()))
-            }
             // Debug
             if (Debug.enabled()) {
                 game.engine.controller?.let { controllerDefault ->
@@ -99,7 +98,7 @@ class MobPlayerClientMainVB(world: WorldClient, pos: Vector3d, speed: Vector3d,
                 }
             }
             // Movement
-            if (controller.jump()) {
+            if (input.jump()) {
                 if (isSwimming) {
                     speed.plusZ(50.0 * delta)
                 } else if (isOnGround) {
@@ -108,11 +107,7 @@ class MobPlayerClientMainVB(world: WorldClient, pos: Vector3d, speed: Vector3d,
                     connection().send(PacketPlayerJump())
                 }
             }
-            val camera = controller.camera(delta)
-            rot.setZ((rot.doubleZ() - camera.x) % 360)
-            rot.setX(min(89.0,
-                    max(-89.0, rot.doubleX() - camera.y)))
-            val walk = controller.walk()
+            val walk = input.walk()
             var walkSpeed = clamp(
                     max(abs(walk.x),
                             abs(walk.y)), 0.0, 1.0) * 120.0
@@ -130,7 +125,7 @@ class MobPlayerClientMainVB(world: WorldClient, pos: Vector3d, speed: Vector3d,
                 speed.plusY(sin(dir) * walkSpeed)
             }
             // Placement
-            if (controller.left() && wieldMode() != WieldMode.RIGHT) {
+            if (input.left() && wieldMode() != WieldMode.RIGHT) {
                 if (chargeLeft < 0.01f) {
                     if (punchLeft == -1L) {
                         punchLeft = System.currentTimeMillis()
@@ -138,7 +133,7 @@ class MobPlayerClientMainVB(world: WorldClient, pos: Vector3d, speed: Vector3d,
                 }
             } else if (punchLeft != -1L) {
                 updatePosition()
-                val direction = controller.hitDirection()
+                val direction = input.hitDirection()
                 breakParticles(world.terrain, 16, direction)
                 world.send(PacketItemUse(min(
                         (System.currentTimeMillis() - punchLeft).toDouble() / leftWeapon().material().hitWait(
@@ -146,7 +141,7 @@ class MobPlayerClientMainVB(world: WorldClient, pos: Vector3d, speed: Vector3d,
                         0.5) * 2.0, true, direction))
                 punchLeft = -1
             }
-            if (controller.right() && wieldMode() != WieldMode.LEFT) {
+            if (input.right() && wieldMode() != WieldMode.LEFT) {
                 if (chargeRight < 0.01f) {
                     if (punchRight == -1L) {
                         punchRight = System.currentTimeMillis()
@@ -154,7 +149,7 @@ class MobPlayerClientMainVB(world: WorldClient, pos: Vector3d, speed: Vector3d,
                 }
             } else if (punchRight != -1L) {
                 updatePosition()
-                val direction = controller.hitDirection()
+                val direction = input.hitDirection()
                 breakParticles(world.terrain, 16, direction)
                 world.send(PacketItemUse(min(
                         (System.currentTimeMillis() - punchRight).toDouble() / rightWeapon().material().hitWait(
@@ -262,6 +257,66 @@ class MobPlayerClientMainVB(world: WorldClient, pos: Vector3d, speed: Vector3d,
         tagStructure.getStructure("Inventory")?.let { inventoryTag ->
             inventories.forEach { id, inventory ->
                 inventoryTag.getStructure(id)?.let { inventory.load(it) }
+            }
+        }
+    }
+
+    override fun inputMode(input: InputMode,
+                           listenerOwner: ListenerOwner) {
+        input.events.listener<InputDirectionEvent>(listenerOwner) { event ->
+            if (!hasGui()) {
+                rot.setZ((rot.doubleZ() - event.direction.x) % 360)
+                rot.setX(min(89.0,
+                        max(-89.0, rot.doubleX() - event.direction.y)))
+            }
+        }
+        input.events.listener<HotbarChangeLeftEvent>(listenerOwner) { event ->
+            inventorySelectLeft = (inventorySelectLeft + event.delta) modP 10
+            world.send(PacketInteraction(
+                    PacketInteraction.INVENTORY_SLOT_LEFT,
+                    inventorySelectLeft.toByte()))
+        }
+        input.events.listener<HotbarChangeRightEvent>(listenerOwner) { event ->
+            inventorySelectRight = (inventorySelectRight + event.delta) modP 10
+            world.send(PacketInteraction(
+                    PacketInteraction.INVENTORY_SLOT_RIGHT,
+                    inventorySelectRight.toByte()))
+        }
+        input.events.listener<HotbarSetLeftEvent>(listenerOwner) { event ->
+            inventorySelectLeft = event.value
+            world.send(PacketInteraction(
+                    PacketInteraction.INVENTORY_SLOT_LEFT,
+                    inventorySelectLeft.toByte()))
+        }
+        input.events.listener<HotbarSetRightEvent>(listenerOwner) { event ->
+            inventorySelectRight = event.value
+            world.send(PacketInteraction(
+                    PacketInteraction.INVENTORY_SLOT_RIGHT,
+                    inventorySelectRight.toByte()))
+        }
+        input.events.listener<MenuOpenEvent>(listenerOwner) { event ->
+            if (currentGui() !is GuiChatWrite) {
+                event.success = true
+                if (!closeGui()) {
+                    openGui(GuiPause(game, this, game.engine.guiStyle))
+                }
+            }
+        }
+        input.events.listener<MenuInventoryEvent>(listenerOwner) { event ->
+            if (currentGui() !is GuiChatWrite) {
+                event.success = true
+                if (!closeGui()) {
+                    world.send(
+                            PacketInteraction(PacketInteraction.OPEN_INVENTORY))
+                }
+            }
+        }
+        input.events.listener<MenuChatEvent>(listenerOwner) { event ->
+            if (currentGui() !is GuiChatWrite) {
+                event.success = true
+                if (!hasGui()) {
+                    openGui(GuiChatWrite(game, this, game.engine.guiStyle))
+                }
             }
         }
     }
