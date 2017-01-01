@@ -15,9 +15,13 @@
  */
 package scapes.plugin.tobi29.vanilla.basics.util
 
+import java8.util.Maps
+import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.engine.utils.Pool
+import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.filterMap
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.*
@@ -29,6 +33,8 @@ import org.tobi29.scapes.entity.server.MobServer
 import scapes.plugin.tobi29.vanilla.basics.material.block.BlockExplosive
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
+
+private val LOCATIONS = ThreadLocal { Pool { Location() } }
 
 fun WorldServer.explosionEntities(x: Double,
                                   y: Double,
@@ -62,56 +68,125 @@ fun TerrainServer.TerrainMutable.explosionBlockPush(
         push: Double,
         damage: Double) {
     val entities = ArrayList<EntityServer>()
+    val locations = LOCATIONS.get()
     val random = ThreadLocalRandom.current()
-    val step = 360.0 / TWO_PI / size
-    var pitch = 90.0
-    while (pitch >= -90.0) {
-        val cosYaw = cosTable(pitch.toRad())
-        val stepYawForPitch = abs(step / cosYaw)
-        val deltaZ = sinTable(pitch.toRad())
+    val step = 2.0 / PI / size
+    var pitch = 0.0
+    val set = HashMap<Location, Location>()
+    while (pitch < TWO_PI) {
+        val sinYaw = sinTable(pitch)
+        val stepYawForPitch = abs(step / sinYaw)
+        val deltaZ = cosTable(pitch)
         var yaw = 0.0
-        while (yaw < 360.0) {
-            val deltaX = cosTable(yaw.toRad()) * cosYaw
-            val deltaY = sinTable(yaw.toRad()) * cosYaw
+        while (yaw < TWO_PI) {
+            val deltaX = cosTable(yaw) * sinYaw
+            val deltaY = sinTable(yaw) * sinYaw
             var distance = 0.0
-            while (distance < size) {
+            var blast = size
+            while (true) {
                 val xxx = floor(x + deltaX * distance)
                 val yyy = floor(y + deltaY * distance)
                 val zzz = floor(z + deltaZ * distance)
-                val block = block(xxx, yyy, zzz)
-                val type = type(block)
-                val data = data(block)
-                if (type != air) {
-                    if (type is BlockExplosive) {
-                        type.igniteByExplosion(this, xxx, yyy, zzz, data)
-                    } else {
-                        if (random.nextDouble() < dropChance) {
-                            world.dropItems(type.drops(
-                                    ItemStack(world.registry),
-                                    data), xxx, yyy, zzz)
-                        } else if (type.isSolid(this, xxx, yyy, zzz) &&
-                                !type.isTransparent(this, xxx, yyy,
-                                        zzz) &&
-                                random.nextDouble() < blockChance) {
-                            entities.add(MobFlyingBlockServer(world,
-                                    Vector3d(xxx + 0.5, yyy + 0.5,
-                                            zzz + 0.5), Vector3d(
-                                    random.nextDouble() * 0.1 - 0.05,
-                                    random.nextDouble() * 0.1 - 0.05,
-                                    random.nextDouble() * 1 + 2), type,
-                                    data))
-                        }
-                    }
-                    typeData(xxx, yyy, zzz, air, 0)
+                val location = locations.push().apply {
+                    set(xxx, yyy, zzz)
                 }
+                val previous = Maps.putIfAbsent(set, location, location)
+                val type: BlockType
+                val data: Int
+                if (previous == null) {
+                    val block = block(xxx, yyy, zzz)
+                    type = type(block)
+                    data = data(block)
+                    location.set(type, data)
+                } else {
+                    locations.pop()
+                    type = previous.type
+                    data = previous.data
+                }
+                // TODO: Blast resistanceq
+                blast -= 1.0
                 distance++
+                if (blast < 0.0) {
+                    if (previous == null) {
+                        locations.pop()
+                    }
+                    break
+                }
             }
             yaw += stepYawForPitch
         }
-        pitch -= step
+        pitch += step
     }
+    locations.forEach { location ->
+        val xxx = location.x
+        val yyy = location.y
+        val zzz = location.z
+        val type = location.type
+        val data = location.data
+        if (type is BlockExplosive) {
+            type.igniteByExplosion(this, xxx, yyy, zzz, data)
+        } else {
+            if (random.nextDouble() < dropChance) {
+                world.dropItems(type.drops(
+                        ItemStack(world.registry),
+                        data), xxx, yyy, zzz)
+            } else if (type.isSolid(this, xxx, yyy, zzz) &&
+                    !type.isTransparent(this, xxx, yyy,
+                            zzz) &&
+                    random.nextDouble() < blockChance) {
+                entities.add(MobFlyingBlockServer(world,
+                        Vector3d(xxx + 0.5, yyy + 0.5,
+                                zzz + 0.5), Vector3d(
+                        random.nextDouble() * 0.1 - 0.05,
+                        random.nextDouble() * 0.1 - 0.05,
+                        random.nextDouble() * 1 + 2), type,
+                        data))
+            }
+        }
+        typeData(xxx, yyy, zzz, air, 0)
+    }
+    locations.reset()
     world.taskExecutor.addTaskOnce({
         entities.forEach { world.addEntityNew(it) }
         world.explosionEntities(x, y, z, size, push, damage)
     }, "Explosion-Entities")
+}
+
+private class Location {
+    var x = 0
+    var y = 0
+    var z = 0
+    lateinit var type: BlockType
+    var data = 0
+
+    fun set(x: Int,
+            y: Int,
+            z: Int) {
+        this.x = x
+        this.y = y
+        this.z = z
+    }
+
+    fun set(type: BlockType,
+            data: Int) {
+        this.type = type
+        this.data = data
+    }
+
+    override fun hashCode(): Int {
+        return (x * 31 + y) * 31 + z
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (other !is Location) {
+            return false
+        }
+        if (x != other.x || y != other.y || z != other.z) {
+            return false
+        }
+        return true
+    }
 }
