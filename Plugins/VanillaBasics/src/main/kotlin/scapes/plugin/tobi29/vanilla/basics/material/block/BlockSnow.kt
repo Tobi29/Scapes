@@ -165,7 +165,7 @@ class BlockSnow(materials: VanillaMaterial) : VanillaBlock(materials,
     override fun createModels(registry: TerrainTextureRegistry) {
         model = BlockModelLiquid(this, registry, texture, texture, texture,
                 texture, texture, texture, 1.0, 1.0, 1.0, 1.0, 0.0625,
-                1.0625)
+                1.0625, 0, 7)
     }
 
     override fun render(item: ItemStack,

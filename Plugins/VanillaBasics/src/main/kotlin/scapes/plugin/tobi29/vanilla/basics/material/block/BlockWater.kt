@@ -161,7 +161,7 @@ class BlockWater(materials: VanillaMaterial) : VanillaBlock(materials,
     override fun createModels(registry: TerrainTextureRegistry) {
         model = BlockModelLiquid(this, registry, textureStill, textureStill,
                 textureFlow, textureFlow, textureFlow, textureFlow, 1.0, 1.0,
-                1.0, 0.7, 0.0, 1.0)
+                1.0, 0.7, 0.0, 1.0, 1, 9)
     }
 
     override fun render(item: ItemStack,

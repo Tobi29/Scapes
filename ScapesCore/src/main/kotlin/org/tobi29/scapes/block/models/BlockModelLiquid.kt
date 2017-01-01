@@ -29,20 +29,26 @@ import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.max
 
-class BlockModelLiquid(private val block: BlockType, private val registry: TerrainTextureRegistry,
-                       private val texTop: TerrainTexture?, private val texBottom: TerrainTexture?,
-                       private val texSide1: TerrainTexture?, private val texSide2: TerrainTexture?,
-                       private val texSide3: TerrainTexture?, private val texSide4: TerrainTexture?, private val r: Double, private val g: Double,
-                       private val b: Double, private val a: Double, private val min: Double, max: Double) : BlockModel {
-    private val diff: Double
-    private val model: Model
-    private val modelInventory: Model
-
-    init {
-        diff = max - min
-        model = buildVAO(false)
-        modelInventory = buildVAO(true)
-    }
+class BlockModelLiquid(private val block: BlockType,
+                       private val registry: TerrainTextureRegistry,
+                       private val texTop: TerrainTexture?,
+                       private val texBottom: TerrainTexture?,
+                       private val texSide1: TerrainTexture?,
+                       private val texSide2: TerrainTexture?,
+                       private val texSide3: TerrainTexture?,
+                       private val texSide4: TerrainTexture?,
+                       private val r: Double,
+                       private val g: Double,
+                       private val b: Double,
+                       private val a: Double,
+                       private val min: Double,
+                       max: Double,
+                       private val offset: Int,
+                       steps: Int) : BlockModel {
+    private val diff = max - min
+    private val steps = steps.toDouble()
+    private val model = buildVAO(false)
+    private val modelInventory = buildVAO(true)
 
     override fun addToChunkMesh(mesh: ChunkMesh,
                                 terrain: TerrainClient,
@@ -74,10 +80,14 @@ class BlockModelLiquid(private val block: BlockType, private val registry: Terra
         var flag = top !== block
         val noAnim = ShaderAnimation.NONE.id()
         if (flag) {
-            height00 = calcHeight(x, y, z, terrain, block) * diff + min
-            height01 = calcHeight(x, y + 1, z, terrain, block) * diff + min
-            height11 = calcHeight(x + 1, y + 1, z, terrain, block) * diff + min
-            height10 = calcHeight(x + 1, y, z, terrain, block) * diff + min
+            height00 = calcHeight(x, y, z, terrain, block, offset,
+                    steps) * diff + min
+            height01 = calcHeight(x, y + 1, z, terrain, block, offset,
+                    steps) * diff + min
+            height11 = calcHeight(x + 1, y + 1, z, terrain, block, offset,
+                    steps) * diff + min
+            height10 = calcHeight(x + 1, y, z, terrain, block, offset,
+                    steps) * diff + min
             static00 = height00 > 1.5
             static01 = height01 > 1.5
             static11 = height11 > 1.5
@@ -397,12 +407,13 @@ class BlockModelLiquid(private val block: BlockType, private val registry: Terra
     }
 
     companion object {
-
         private fun calcHeight(x: Int,
                                y: Int,
                                z: Int,
                                terrain: Terrain,
-                               block: BlockType): Double {
+                               block: BlockType,
+                               offset: Int,
+                               steps: Double): Double {
             if (terrain.type(x, y, z + 1) === block ||
                     terrain.type(x - 1, y, z + 1) === block ||
                     terrain.type(x - 1, y - 1, z + 1) === block ||
@@ -430,19 +441,19 @@ class BlockModelLiquid(private val block: BlockType, private val registry: Terra
             var height = 0.0
             var heights = 0
             if (other1) {
-                height += 1 - max(0, terrain.data(block1) - 1) / 7.0
+                height += 1 - max(0, terrain.data(block1) - 1) / steps
                 heights++
             }
             if (other2) {
-                height += 1 - max(0, terrain.data(block2) - 1) / 7.0
+                height += 1 - max(0, terrain.data(block2) - 1) / steps
                 heights++
             }
             if (other3) {
-                height += 1 - max(0, terrain.data(block3) - 1) / 7.0
+                height += 1 - max(0, terrain.data(block3) - 1) / steps
                 heights++
             }
             if (other4) {
-                height += 1 - max(0, terrain.data(block4) - 1) / 7.0
+                height += 1 - max(0, terrain.data(block4) - 1) / steps
                 heights++
             }
             if (heights == 0) {

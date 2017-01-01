@@ -170,7 +170,7 @@ class BlockLava(materials: VanillaMaterial) : VanillaBlock(materials,
     override fun createModels(registry: TerrainTextureRegistry) {
         model = BlockModelLiquid(this, registry, textureStill, textureStill,
                 textureFlow, textureFlow, textureFlow, textureFlow, 1.0, 1.0,
-                1.0, 1.0, 0.0, 1.0)
+                1.0, 1.0, 0.0, 1.0, 1, 5)
     }
 
     override fun render(item: ItemStack,
