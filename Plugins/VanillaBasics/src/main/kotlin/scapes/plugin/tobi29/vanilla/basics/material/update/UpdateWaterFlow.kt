@@ -35,7 +35,7 @@ class UpdateWaterFlow : Update() {
         val dataHas = terrain.data(block)
         if (type.isReplaceable(terrain, x, y, z)) {
             if (dataHas > 0 || type !== materials.water) {
-                var dataNeed = 6
+                var dataNeed = Int.MAX_VALUE
                 if (terrain.type(x, y, z + 1) === materials.water) {
                     dataNeed = 1
                 } else {
@@ -45,7 +45,7 @@ class UpdateWaterFlow : Update() {
                     dataNeed = data(terrain, x, y + 1, z, dataNeed, materials)
                 }
                 dataNeed++
-                if (dataNeed <= 6) {
+                if (dataNeed <= 9) {
                     if (dataNeed != dataHas || type !== materials.water) {
                         if (terrain.type(x, y, z) === materials.lava) {
                             terrain.typeData(x, y, z, materials.cobblestone,
