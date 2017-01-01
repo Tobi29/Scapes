@@ -72,7 +72,7 @@ class UpdateWaterFlow : Update() {
         val block = terrain.block(x, y, z)
         val type = terrain.type(block)
         val data = terrain.data(block)
-        if (type == materials.lava) {
+        if (type == materials.water) {
             val newData = max(0, data - 1) + 1
             if (newData < oldData) {
                 return newData
