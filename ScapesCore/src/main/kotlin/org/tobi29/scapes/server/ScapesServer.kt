@@ -38,8 +38,11 @@ import org.tobi29.scapes.server.format.WorldSource
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 
-class ScapesServer(source: WorldSource, tagStructure: TagStructure,
-                   val serverInfo: ServerInfo, ssl: SSLHandle, crashHandler: Crashable) {
+class ScapesServer(source: WorldSource,
+                   tagStructure: TagStructure,
+                   val serverInfo: ServerInfo,
+                   ssl: SSLHandle,
+                   crashHandler: Crashable) {
     val connection: ServerConnection
     val plugins: Plugins
     val taskExecutor: TaskExecutor
@@ -68,11 +71,11 @@ class ScapesServer(source: WorldSource, tagStructure: TagStructure,
         val socketTag = serverTag.structure("Socket")
         maxLoadingRadius = serverTag.getInt("MaxLoadingRadius") ?: 0
         connection = ServerConnection(this, socketTag, ssl)
+        connection.workers(socketTag.getInt("WorkerCount") ?: 1)
         extensions.init()
         format.plugins().init()
         format.plugins().plugins.forEach { it.initServer(this) }
         format.plugins().dimensions.forEach { this.registerWorld(it) }
-        connection.workers(socketTag.getInt("WorkerCount") ?: 1)
     }
 
     fun shutdownReason(): ShutdownReason {
