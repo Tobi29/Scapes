@@ -32,7 +32,7 @@ class GeneratorOutput(height: Int) {
 
     fun type(z: Int,
              type: BlockType) {
-        this.type[z] = type.id().toInt()
+        this.type[z] = type.id
     }
 
     fun data(z: Int,

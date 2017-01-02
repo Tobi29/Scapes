@@ -33,11 +33,6 @@ import java.util.*
 
 abstract class BlockType protected constructor(registry: GameRegistry, nameID: String) : Material(
         registry, nameID) {
-
-    fun id(): Short {
-        return id.toShort()
-    }
-
     fun block(data: Int): Long {
         return (id.toLong() shl 32) or data.toLong()
     }

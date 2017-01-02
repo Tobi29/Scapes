@@ -46,7 +46,8 @@ import scapes.plugin.tobi29.vanilla.basics.packet.PacketLightning
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
-class EnvironmentOverworldServer(private val world: WorldServer, plugin: VanillaBasics) : EnvironmentServer, EnvironmentClimate {
+class EnvironmentOverworldServer(private val world: WorldServer,
+                                 plugin: VanillaBasics) : EnvironmentServer, EnvironmentClimate {
     private val materials: VanillaMaterial
     private val gen: ChunkGeneratorOverworld
     private val pop: ChunkPopulatorOverworld
@@ -457,12 +458,13 @@ class EnvironmentOverworldServer(private val world: WorldServer, plugin: Vanilla
                 val y = chunk.posBlock.y + random.nextInt(16)
                 val weather = climateGenerator.weather(x.toDouble(),
                         y.toDouble())
-                if (random.nextInt((513 - weather * 512).toInt()) == 0 &&
-                        random.nextInt(1000) == 0 && weather > 0.7f) {
+                if (random.nextInt((513.0 - weather * 512.0).toInt()) == 0 &&
+                        random.nextInt(1000) == 0 && weather > 0.7) {
                     world.send(PacketLightning(x.toDouble(), y.toDouble(),
                             terrain.highestTerrainBlockZAt(x, y).toDouble()))
-                } else if (random.nextInt((513 - weather * 512).toInt()) == 0 &&
-                        random.nextInt(10000) == 0 && weather > 0.85f) {
+                } else if (random.nextInt(
+                        (513.0 - weather * 512.0).toInt()) == 0 &&
+                        random.nextInt(10000) == 0 && weather > 0.85) {
                     val entity = EntityTornadoServer(world,
                             Vector3d(x.toDouble(), y.toDouble(),
                                     terrain.highestTerrainBlockZAt(x,
@@ -559,16 +561,14 @@ class EnvironmentOverworldServer(private val world: WorldServer, plugin: Vanilla
                     if (humidity > 0.2) {
                         if (groundType === materials.dirt) {
                             chunk.typeData(xxx, yyy, z - 1, materials.grass,
-                                    random.nextInt(4).toShort().toInt())
+                                    random.nextInt(4))
                         } else if (groundType === materials.grass && random.nextInt(
                                 20) == 0) {
-                            chunk.data(xxx, yyy, z - 1,
-                                    random.nextInt(9).toShort().toInt())
+                            chunk.data(xxx, yyy, z - 1, random.nextInt(9))
                         }
                     } else {
                         if (groundType === materials.grass) {
-                            chunk.typeData(xxx, yyy, z - 1, materials.dirt,
-                                    0.toShort().toInt())
+                            chunk.typeData(xxx, yyy, z - 1, materials.dirt, 0)
                         }
                     }
                     if (temperature > 1.0) {
@@ -586,8 +586,7 @@ class EnvironmentOverworldServer(private val world: WorldServer, plugin: Vanilla
                             if (spaceType === materials.air ||
                                     spaceType === materials.flower ||
                                     spaceType === materials.stoneRock) {
-                                chunk.typeData(xxx, yyy, z, materials.snow,
-                                        8.toShort().toInt())
+                                chunk.typeData(xxx, yyy, z, materials.snow, 8)
                             } else if (spaceType === materials.snow && spaceData > 0) {
                                 chunk.data(xxx, yyy, z, spaceData - 1)
                             }

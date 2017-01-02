@@ -28,9 +28,15 @@ import scapes.plugin.tobi29.vanilla.basics.VanillaBasics
 import scapes.plugin.tobi29.vanilla.basics.material.item.ItemFuel
 import scapes.plugin.tobi29.vanilla.basics.material.item.ItemHeatable
 
-abstract class EntityAbstractFurnaceServer(world: WorldServer, pos: Vector3d,
-                                           inventory: Inventory, fuel: Int, protected val items: Int, protected var maximumTemperature: Float,
-                                           protected val temperatureFalloff: Float, protected val fuelHeat: Int, protected val fuelTier: Int) : EntityAbstractContainerServer(
+abstract class EntityAbstractFurnaceServer(world: WorldServer,
+                                           pos: Vector3d,
+                                           inventory: Inventory,
+                                           fuel: Int,
+                                           protected val items: Int,
+                                           protected var maximumTemperature: Float,
+                                           protected val temperatureFalloff: Float,
+                                           protected val fuelHeat: Int,
+                                           protected val fuelTier: Int) : EntityAbstractContainerServer(
         world, pos, inventory) {
     protected val fuel: FloatArray
     protected val fuelTemperature: FloatArray
@@ -118,7 +124,7 @@ abstract class EntityAbstractFurnaceServer(world: WorldServer, pos: Vector3d,
             if (temperature > maximumTemperature) {
                 world.terrain.queue { handler ->
                     handler.typeData(pos.intX(), pos.intY(), pos.intZ(),
-                            materials.air, 0.toShort().toInt())
+                            materials.air, 0)
                 }
             }
         }

@@ -40,7 +40,8 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
     private var lastAccess = System.currentTimeMillis()
 
     constructor(pos: Vector2i,
-                terrain: TerrainInfiniteServer, zSize: Int,
+                terrain: TerrainInfiniteServer,
+                zSize: Int,
                 tagStructure: TagStructure) : super(pos, terrain, zSize,
             terrain.world.registry.blocks()) {
         this.terrain2 = terrain
@@ -49,7 +50,9 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
     }
 
     constructor(pos: Vector2i,
-                terrain: TerrainInfiniteServer, zSize: Int, generator: ChunkGenerator,
+                terrain: TerrainInfiniteServer,
+                zSize: Int,
+                generator: ChunkGenerator,
                 output: GeneratorOutput) : super(pos, terrain, zSize,
             terrain.world.registry.blocks()) {
         this.terrain2 = terrain
@@ -192,7 +195,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
             } else {
                 val data = terrain.data(block)
                 terrain2.world.send(PacketBlockChange(x + posBlock.x,
-                        y + posBlock.y, z, type.id().toInt(), data))
+                        y + posBlock.y, z, type.id, data))
             }
         }
         if (state.id >= TerrainInfiniteChunk.State.LOADED.id) {

@@ -27,8 +27,11 @@ import org.tobi29.scapes.entity.server.MobLivingServer
 import scapes.plugin.tobi29.vanilla.basics.VanillaBasics
 import java.util.concurrent.ThreadLocalRandom
 
-class MobPigServer(world: WorldServer, pos: Vector3d = Vector3d.ZERO, speed: Vector3d = Vector3d.ZERO,
-                   xRot: Double = 0.0, zRot: Double = 0.0) : MobLivingServer(
+class MobPigServer(world: WorldServer,
+                   pos: Vector3d = Vector3d.ZERO,
+                   speed: Vector3d = Vector3d.ZERO,
+                   xRot: Double = 0.0,
+                   zRot: Double = 0.0) : MobLivingServer(
         world, pos, speed, AABB(-0.45, -0.45, -0.6875, 0.45, 0.45, 0.375), 20.0,
         30.0, Frustum(90.0, 1.0, 0.1, 24.0), Frustum(20.0, 0.5, 0.1, 0.2)) {
     private var soundWait = 0.0
@@ -46,9 +49,8 @@ class MobPigServer(world: WorldServer, pos: Vector3d = Vector3d.ZERO, speed: Vec
                     (random.nextInt(2) + 1) + ".ogg", this)
         }
         onDeath("Local") {
-            world.dropItem(
-                    ItemStack(materials.meat, 0.toShort().toInt(),
-                            random.nextInt(7) + 10), this.pos.now())
+            world.dropItem(ItemStack(materials.meat, 0, random.nextInt(7) + 10),
+                    this.pos.now())
         }
     }
 

@@ -329,7 +329,7 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
         checkCoords(x, y, z)
         val oldType = block(lockRead { bID.getData(x, y, z, 0) })
         if (oldType !== type) {
-            lockWrite { bID.setData(x, y, z, 0, type.id().toInt()) }
+            lockWrite { bID.setData(x, y, z, 0, type.id) }
             updateHeightMap(x, y, z, type)
             update(x, y, z, oldType.causesTileUpdate())
         }
@@ -354,7 +354,7 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
             bData.getData(x, y, z, 0)
         } != data) {
             lockWrite {
-                bID.setData(x, y, z, 0, type.id().toInt())
+                bID.setData(x, y, z, 0, type.id)
                 bData.setData(x, y, z, 0, data)
             }
             updateHeightMap(x, y, z, type)

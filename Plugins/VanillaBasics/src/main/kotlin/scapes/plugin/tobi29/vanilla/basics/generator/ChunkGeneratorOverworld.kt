@@ -38,7 +38,7 @@ class ChunkGeneratorOverworld(random: Random,
     private val stoneLayers: Array<RandomNoiseLayer>
     private val layer = TerrainGenerator.TerrainGeneratorLayer()
     private val generator = TerrainGenerator.TerrainGeneratorOutput()
-    private val sandstoneLayers: ShortArray
+    private val sandstoneLayers: IntArray
     private val seedInt: Long
 
     init {
@@ -66,9 +66,9 @@ class ChunkGeneratorOverworld(random: Random,
                         StoneType.CONGLOMERATE.data(
                                 materials.registry)))
         seedInt = random.nextInt().toLong() shl 32
-        sandstoneLayers = ShortArray(512)
+        sandstoneLayers = IntArray(512)
         for (i in sandstoneLayers.indices) {
-            sandstoneLayers[i] = random.nextInt(6).toShort()
+            sandstoneLayers[i] = random.nextInt(6)
         }
         val sandBase = RandomNoiseRandomLayer(random.nextLong(), 6)
         val sandZoom = RandomNoiseZoomLayer(sandBase, 1024.0)
@@ -168,9 +168,9 @@ class ChunkGeneratorOverworld(random: Random,
         for (zz in lastFree downTo z) {
             zzzShifted = zz + stoneTypeZShift
             if (zzzShifted == 240) {
-                stoneType = stoneLayers[1].getInt(x, y).toShort().toInt()
+                stoneType = stoneLayers[1].getInt(x, y)
             } else if (zzzShifted == 96) {
-                stoneType = stoneLayers[0].getInt(x, y).toShort().toInt()
+                stoneType = stoneLayers[0].getInt(x, y)
             }
             var type: BlockType
             var data = 0
@@ -238,7 +238,7 @@ class ChunkGeneratorOverworld(random: Random,
                 if (type === materials.stoneRaw) {
                     if (sandstone && zz > 240) {
                         type = materials.sandstone
-                        data = sandstoneLayers[zz].toInt()
+                        data = sandstoneLayers[zz]
                     } else {
                         data = stoneType
                     }
