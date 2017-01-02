@@ -29,6 +29,8 @@ import org.tobi29.scapes.packets.*
 import org.tobi29.scapes.plugins.PluginFile
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.extension.event.MessageEvent
+import org.tobi29.scapes.server.extension.event.PlayerJoinEvent
+import org.tobi29.scapes.server.extension.event.PlayerLeaveEvent
 import java.io.IOException
 import java.nio.channels.SelectionKey
 import java.security.InvalidKeyException
@@ -163,6 +165,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
         val currentTime = System.currentTimeMillis()
         pingWait = currentTime + 1000
         pingTimeout = currentTime + 10000
+        server.events.fireLocal(PlayerJoinEvent(this))
         server.events.fireLocal(
                 MessageEvent(this, MessageLevel.SERVER_INFO,
                         "Player connected: $id ($nickname) on $channel"))
@@ -252,6 +255,10 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                         }
                         true
                     })) {
+                        server.events.fireLocal(PlayerLeaveEvent(this))
+                        server.events.fireLocal(
+                                MessageEvent(this, MessageLevel.SERVER_INFO,
+                                        "Player disconnected: $nickname"))
                         state = State.CLOSED
                     }
                 } catch (e: ConnectionCloseException) {
@@ -266,18 +273,21 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                 else -> throw IllegalStateException("Unknown state: " + state)
             }
         } catch (e: ConnectionCloseException) {
+            server.events.fireLocal(PlayerLeaveEvent(this))
             server.events.fireLocal(
                     MessageEvent(this, MessageLevel.SERVER_INFO,
                             "Disconnecting player: $nickname"))
             channel.requestClose()
             state = State.CLOSING
         } catch (e: InvalidPacketDataException) {
+            server.events.fireLocal(PlayerLeaveEvent(this))
             server.events.fireLocal(
                     MessageEvent(this, MessageLevel.SERVER_INFO,
                             "Disconnecting player: $nickname"))
             channel.requestClose()
             state = State.CLOSING
         } catch (e: IOException) {
+            server.events.fireLocal(PlayerLeaveEvent(this))
             server.events.fireLocal(
                     MessageEvent(this, MessageLevel.SERVER_INFO,
                             "Player disconnected: $nickname ($e)"))
