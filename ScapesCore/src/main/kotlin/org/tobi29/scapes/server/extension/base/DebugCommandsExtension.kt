@@ -20,6 +20,7 @@ import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream
 import org.tobi29.scapes.engine.utils.io.asString
 import org.tobi29.scapes.engine.utils.io.process
+import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import org.tobi29.scapes.engine.utils.io.tag.json.TagStructureJSON
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.ScapesServer
@@ -29,6 +30,7 @@ import org.tobi29.scapes.server.command.requireGet
 import org.tobi29.scapes.server.command.requireOption
 import org.tobi29.scapes.server.extension.ServerExtension
 import org.tobi29.scapes.server.extension.event.MessageEvent
+import org.tobi29.scapes.server.extension.spi.ServerExtensionProvider
 import java.io.IOException
 
 class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
@@ -166,5 +168,14 @@ class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
                 })
             })
         }
+    }
+}
+
+class DebugCommandsExtensionProvider : ServerExtensionProvider {
+    override val name = "Debug Commands"
+
+    override fun create(server: ScapesServer,
+                        configStructure: TagStructure?): ServerExtension? {
+        return DebugCommandsExtension(server)
     }
 }

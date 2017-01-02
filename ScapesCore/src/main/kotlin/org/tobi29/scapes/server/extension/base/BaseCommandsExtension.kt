@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.server.extension.base
 
+import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import org.tobi29.scapes.engine.utils.join
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.ScapesServer
@@ -24,6 +25,7 @@ import org.tobi29.scapes.server.command.requireOption
 import org.tobi29.scapes.server.command.requirePermission
 import org.tobi29.scapes.server.extension.ServerExtension
 import org.tobi29.scapes.server.extension.event.MessageEvent
+import org.tobi29.scapes.server.extension.spi.ServerExtensionProvider
 
 class BaseCommandsExtension(server: ScapesServer) : ServerExtension(server) {
 
@@ -93,5 +95,14 @@ class BaseCommandsExtension(server: ScapesServer) : ServerExtension(server) {
         serverGroup.register("reload", 10, {}) { args, executor, commands ->
             server.scheduleStop(ScapesServer.ShutdownReason.RELOAD)
         }
+    }
+}
+
+class BaseCommandsExtensionProvider : ServerExtensionProvider {
+    override val name = "Base Commands"
+
+    override fun create(server: ScapesServer,
+                        configStructure: TagStructure?): ServerExtension? {
+        return BaseCommandsExtension(server)
     }
 }

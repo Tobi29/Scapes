@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.server.extension.base
 
+import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import org.tobi29.scapes.engine.utils.wildcard
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.ScapesServer
@@ -24,6 +25,7 @@ import org.tobi29.scapes.server.command.requireGet
 import org.tobi29.scapes.server.command.requireOption
 import org.tobi29.scapes.server.extension.ServerExtension
 import org.tobi29.scapes.server.extension.event.MessageEvent
+import org.tobi29.scapes.server.extension.spi.ServerExtensionProvider
 
 class PlayerCommandsExtension(server: ScapesServer) : ServerExtension(server) {
 
@@ -80,5 +82,14 @@ class PlayerCommandsExtension(server: ScapesServer) : ServerExtension(server) {
                 }
             }
         }
+    }
+}
+
+class PlayerCommandsExtensionProvider : ServerExtensionProvider {
+    override val name = "Player Commands"
+
+    override fun create(server: ScapesServer,
+                        configStructure: TagStructure?): ServerExtension? {
+        return PlayerCommandsExtension(server)
     }
 }
