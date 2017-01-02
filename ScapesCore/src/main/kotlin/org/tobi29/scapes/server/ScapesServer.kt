@@ -64,7 +64,7 @@ class ScapesServer(source: WorldSource,
         plugins = format.plugins()
         seed = format.seed()
         extensions = ServerExtensions(this)
-        extensions.loadExtensions()
+        extensions.loadExtensions(tagStructure.structure("Extension"))
         taskExecutor = TaskExecutor(crashHandler, "Server")
         commandRegistry = CommandRegistry()
         val serverTag = tagStructure.structure("Server")

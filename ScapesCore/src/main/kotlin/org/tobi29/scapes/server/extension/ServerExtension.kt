@@ -18,13 +18,10 @@ package org.tobi29.scapes.server.extension
 
 import org.tobi29.scapes.server.ScapesServer
 
-abstract class ServerExtension protected constructor(protected val server: ScapesServer) {
-
-    fun initEarly() {
-    }
+abstract class ServerExtension(protected val server: ScapesServer) {
 
     abstract fun init()
 
-    fun initLate() {
+    open fun initLate() {
     }
 }

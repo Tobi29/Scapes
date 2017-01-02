@@ -17,6 +17,7 @@
 package org.tobi29.scapes.server.extension
 
 import mu.KLogging
+import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.extension.spi.ServerExtensionProvider
 import java.util.*
@@ -29,22 +30,21 @@ class ServerExtensions(private val server: ScapesServer) {
         extensions.forEach { it.initLate() }
     }
 
-    fun loadExtensions() {
+    fun loadExtensions(configStructure: TagStructure) {
         for (provider in ServiceLoader.load(
                 ServerExtensionProvider::class.java)) {
             try {
-                val extension = provider.create(server)
-                loadExtension(extension)
+                val name = provider.name
+                val extension = provider.create(server,
+                        configStructure.getStructure(name))
+                if (extension != null) {
+                    logger.info { "Loaded extension: $name" }
+                    extensions.add(extension)
+                }
             } catch (e: ServiceConfigurationError) {
                 logger.warn { "Unable to load extension: $e" }
             }
         }
-    }
-
-    fun loadExtension(extension: ServerExtension) {
-        logger.info { "Loaded extension: ${extension.javaClass.name}" }
-        extension.initEarly()
-        extensions.add(extension)
     }
 
     companion object : KLogging()
