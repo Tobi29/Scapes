@@ -344,7 +344,7 @@ class TerrainInfiniteServer(override val world: WorldServer,
     }
 
     override fun chunks(consumer: (TerrainChunk) -> Unit) {
-        chunkManager.stream().forEach { consumer(it) }
+        chunkManager.stream().filter { it.isLoaded }.forEach { consumer(it) }
     }
 
     override fun dispose() {
