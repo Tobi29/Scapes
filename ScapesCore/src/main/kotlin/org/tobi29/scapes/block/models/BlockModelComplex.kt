@@ -24,6 +24,8 @@ import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Mesh
 import org.tobi29.scapes.engine.graphics.Model
 import org.tobi29.scapes.engine.graphics.Shader
+import org.tobi29.scapes.engine.utils.graphics.marginX
+import org.tobi29.scapes.engine.utils.graphics.marginY
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.cos
 import org.tobi29.scapes.engine.utils.math.sin
@@ -33,7 +35,8 @@ import org.tobi29.scapes.engine.utils.math.vector.plus
 import org.tobi29.scapes.engine.utils.math.vector.times
 
 class BlockModelComplex(private val registry: TerrainTextureRegistry,
-                        private val shapes: List<BlockModelComplex.Shape>, scale: Double) : BlockModel {
+                        private val shapes: List<BlockModelComplex.Shape>,
+                        scale: Double) : BlockModel {
     private val model: Model
     private val modelInventory: Model
 
@@ -67,13 +70,13 @@ class BlockModelComplex(private val registry: TerrainTextureRegistry,
 
     override fun render(gl: GL,
                         shader: Shader) {
-        registry.texture().bind(gl)
+        registry.texture.bind(gl)
         model.render(gl, shader)
     }
 
     override fun renderInventory(gl: GL,
                                  shader: Shader) {
-        registry.texture().bind(gl)
+        registry.texture.bind(gl)
         val matrixStack = gl.matrixStack()
         val matrix = matrixStack.push()
         matrix.translate(0.5f, 0.5f, 0.5f)
@@ -268,11 +271,22 @@ class BlockModelComplex(private val registry: TerrainTextureRegistry,
                                inventory: Boolean)
     }
 
-    class ShapeBox(private val texTop: TerrainTexture?, private val texBottom: TerrainTexture?,
-                   private val texSide1: TerrainTexture?, private val texSide2: TerrainTexture?,
-                   private val texSide3: TerrainTexture?, private val texSide4: TerrainTexture?, minX: Double,
-                   minY: Double, minZ: Double, maxX: Double, maxY: Double, maxZ: Double,
-                   r: Double, g: Double, b: Double, a: Double) : Shape() {
+    class ShapeBox(private val texTop: TerrainTexture?,
+                   private val texBottom: TerrainTexture?,
+                   private val texSide1: TerrainTexture?,
+                   private val texSide2: TerrainTexture?,
+                   private val texSide3: TerrainTexture?,
+                   private val texSide4: TerrainTexture?,
+                   minX: Double,
+                   minY: Double,
+                   minZ: Double,
+                   maxX: Double,
+                   maxY: Double,
+                   maxZ: Double,
+                   r: Double,
+                   g: Double,
+                   b: Double,
+                   a: Double) : Shape() {
 
         init {
             this.minX = minX
@@ -313,172 +327,166 @@ class BlockModelComplex(private val registry: TerrainTextureRegistry,
             val b2 = b * this.b
             val a2 = a * this.a
             if (texTop != null) {
-                val terrainTile = texTop.size()
                 val anim = texTop.shaderAnimation().id()
-                val texMinX = terrainTile * minX
-                val texMaxX = terrainTile * maxX
-                val texMinY = terrainTile * minY
-                val texMaxY = terrainTile * maxY
+                val texMinX = texTop.marginX(minX)
+                val texMaxX = texTop.marginX(maxX)
+                val texMinY = texTop.marginY(minY)
+                val texMaxY = texTop.marginY(maxY)
                 mesh.addVertex(terrain, Face.UP, x + tllh.x,
                         y + tllh.y, z + tllh.z,
                         xx + tllh.x, yy + tllh.y,
-                        zz + tllh.z, texTop.x() + texMinX,
-                        texTop.y() + texMinY, r2, g2, b2, a2, lod, anim)
+                        zz + tllh.z, texMinX,
+                        texMinY, r2, g2, b2, a2, lod, anim)
                 mesh.addVertex(terrain, Face.UP, x + thlh.x,
                         y + thlh.y, z + thlh.z,
                         xx + thlh.x, yy + thlh.y,
-                        zz + thlh.z, texTop.x() + texMaxX,
-                        texTop.y() + texMinY, r2, g2, b2, a2, lod, anim)
+                        zz + thlh.z, texMaxX,
+                        texMinY, r2, g2, b2, a2, lod, anim)
                 mesh.addVertex(terrain, Face.UP, x + thhh.x,
                         y + thhh.y, z + thhh.z,
                         xx + thhh.x, yy + thhh.y,
-                        zz + thhh.z, texTop.x() + texMaxX,
-                        texTop.y() + texMaxY, r2, g2, b2, a2, lod, anim)
+                        zz + thhh.z, texMaxX,
+                        texMaxY, r2, g2, b2, a2, lod, anim)
                 mesh.addVertex(terrain, Face.UP, x + tlhh.x,
                         y + tlhh.y, z + tlhh.z,
                         xx + tlhh.x, yy + tlhh.y,
-                        zz + tlhh.z, texTop.x() + texMinX,
-                        texTop.y() + texMaxY, r2, g2, b2, a2, lod, anim)
+                        zz + tlhh.z, texMinX,
+                        texMaxY, r2, g2, b2, a2, lod, anim)
             }
             if (texBottom != null) {
-                val terrainTile = texBottom.size()
                 val anim = texBottom.shaderAnimation().id()
-                val texMinX = terrainTile * minX
-                val texMaxX = terrainTile * maxX
-                val texMinY = terrainTile * minY
-                val texMaxY = terrainTile * maxY
+                val texMinX = texBottom.marginX(minX)
+                val texMaxX = texBottom.marginX(maxX)
+                val texMinY = texBottom.marginY(minY)
+                val texMaxY = texBottom.marginY(maxY)
                 mesh.addVertex(terrain, Face.DOWN, x + tlhl.x,
                         y + tlhl.y, z + tlhl.z,
                         xx + tlhl.x, yy + tlhl.y,
-                        zz + tlhl.z, texBottom.x() + texMinX,
-                        texBottom.y() + texMaxY, r2, g2, b2, a2, lod, anim)
+                        zz + tlhl.z, texMinX,
+                        texMaxY, r2, g2, b2, a2, lod, anim)
                 mesh.addVertex(terrain, Face.DOWN, x + thhl.x,
                         y + thhl.y, z + thhl.z,
                         xx + thhl.x, yy + thhl.y,
-                        zz + thhl.z, texBottom.x() + texMaxX,
-                        texBottom.y() + texMaxY, r2, g2, b2, a2, lod, anim)
+                        zz + thhl.z, texMaxX,
+                        texMaxY, r2, g2, b2, a2, lod, anim)
                 mesh.addVertex(terrain, Face.DOWN, x + thll.x,
                         y + thll.y, z + thll.z,
                         xx + thll.x, yy + thll.y,
-                        zz + thll.z, texBottom.x() + texMaxX,
-                        texBottom.y() + texMinY, r2, g2, b2, a2, lod, anim)
+                        zz + thll.z, texMaxX,
+                        texMinY, r2, g2, b2, a2, lod, anim)
                 mesh.addVertex(terrain, Face.DOWN, x + tlll.x,
                         y + tlll.y, z + tlll.z,
                         xx + tlll.x, yy + tlll.y,
-                        zz + tlll.z, texBottom.x() + texMinX,
-                        texBottom.y() + texMinY, r2, g2, b2, a2, lod, anim)
+                        zz + tlll.z, texMinX,
+                        texMinY, r2, g2, b2, a2, lod, anim)
             }
             if (texSide1 != null) {
-                val terrainTile = texSide1.size()
                 val anim = texSide1.shaderAnimation().id()
-                val texMinX = terrainTile * minX
-                val texMaxX = terrainTile * maxX
-                val texMinY = terrainTile * minZ
-                val texMaxY = terrainTile * maxZ
+                val texMinX = texSide1.marginX(minX)
+                val texMaxX = texSide1.marginX(maxX)
+                val texMinY = texSide1.marginY(minZ)
+                val texMaxY = texSide1.marginY(maxZ)
                 mesh.addVertex(terrain, Face.NORTH, x + thlh.x,
                         y + thlh.y, z + thlh.z,
                         xx + thlh.x, yy + thlh.y,
-                        zz + thlh.z, texSide1.x() + texMaxX,
-                        texSide1.y() + texMinY, r2, g2, b2, a2, lod, anim)
+                        zz + thlh.z, texMaxX,
+                        texMinY, r2, g2, b2, a2, lod, anim)
                 mesh.addVertex(terrain, Face.NORTH, x + tllh.x,
                         y + tllh.y, z + tllh.z,
                         xx + tllh.x, yy + tllh.y,
-                        zz + tllh.z, texSide1.x() + texMinX,
-                        texSide1.y() + texMinY, r2, g2, b2, a2, lod, anim)
+                        zz + tllh.z, texMinX,
+                        texMinY, r2, g2, b2, a2, lod, anim)
                 mesh.addVertex(terrain, Face.NORTH, x + tlll.x,
                         y + tlll.y, z + tlll.z,
                         xx + tlll.x, yy + tlll.y,
-                        zz + tlll.z, texSide1.x() + texMinX,
-                        texSide1.y() + texMaxY, r2, g2, b2, a2, lod, anim)
+                        zz + tlll.z, texMinX,
+                        texMaxY, r2, g2, b2, a2, lod, anim)
                 mesh.addVertex(terrain, Face.NORTH, x + thll.x,
                         y + thll.y, z + thll.z,
                         xx + thll.x, yy + thll.y,
-                        zz + thll.z, texSide1.x() + texMaxX,
-                        texSide1.y() + texMaxY, r2, g2, b2, a2, lod, anim)
+                        zz + thll.z, texMaxX,
+                        texMaxY, r2, g2, b2, a2, lod, anim)
             }
             if (texSide2 != null) {
-                val terrainTile = texSide2.size()
                 val anim = texSide2.shaderAnimation().id()
-                val texMinX = terrainTile * minY
-                val texMaxX = terrainTile * maxY
-                val texMinY = terrainTile * minZ
-                val texMaxY = terrainTile * maxZ
+                val texMinX = texSide2.marginX(minY)
+                val texMaxX = texSide2.marginX(maxY)
+                val texMinY = texSide2.marginY(minZ)
+                val texMaxY = texSide2.marginY(maxZ)
                 mesh.addVertex(terrain, Face.EAST, x + thhh.x,
                         y + thhh.y, z + thhh.z,
                         xx + thhh.x, yy + thhh.y,
-                        zz + thhh.z, texSide2.x() + texMaxX,
-                        texSide2.y() + texMinY, r2, g2, b2, a2, lod, anim)
+                        zz + thhh.z, texMaxX,
+                        texMinY, r2, g2, b2, a2, lod, anim)
                 mesh.addVertex(terrain, Face.EAST, x + thlh.x,
                         y + thlh.y, z + thlh.z,
                         xx + thlh.x, yy + thlh.y,
-                        zz + thlh.z, texSide2.x() + texMinX,
-                        texSide2.y() + texMinY, r2, g2, b2, a2, lod, anim)
+                        zz + thlh.z, texMinX,
+                        texMinY, r2, g2, b2, a2, lod, anim)
                 mesh.addVertex(terrain, Face.EAST, x + thll.x,
                         y + thll.y, z + thll.z,
                         xx + thll.x, yy + thll.y,
-                        zz + thll.z, texSide2.x() + texMinX,
-                        texSide2.y() + texMaxY, r2, g2, b2, a2, lod, anim)
+                        zz + thll.z, texMinX,
+                        texMaxY, r2, g2, b2, a2, lod, anim)
                 mesh.addVertex(terrain, Face.EAST, x + thhl.x,
                         y + thhl.y, z + thhl.z,
                         xx + thhl.x, yy + thhl.y,
-                        zz + thhl.z, texSide2.x() + texMaxX,
-                        texSide2.y() + texMaxY, r2, g2, b2, a2, lod, anim)
+                        zz + thhl.z, texMaxX,
+                        texMaxY, r2, g2, b2, a2, lod, anim)
             }
             if (texSide3 != null) {
-                val terrainTile = texSide3.size()
                 val anim = texSide3.shaderAnimation().id()
-                val texMinX = terrainTile * minX
-                val texMaxX = terrainTile * maxX
-                val texMinZ = terrainTile * minZ
-                val texMaxZ = terrainTile * maxZ
+                val texMinX = texSide3.marginX(minX)
+                val texMaxX = texSide3.marginX(maxX)
+                val texMinZ = texSide3.marginY(minZ)
+                val texMaxZ = texSide3.marginY(maxZ)
                 mesh.addVertex(terrain, Face.SOUTH, x + thhl.x,
                         y + thhl.y, z + thhl.z,
                         xx + thhl.x, yy + thhl.y,
-                        zz + thhl.z, texSide3.x() + texMinX,
-                        texSide3.y() + texMaxZ, r2, g2, b2, a2, lod, anim)
+                        zz + thhl.z, texMinX,
+                        texMaxZ, r2, g2, b2, a2, lod, anim)
                 mesh.addVertex(terrain, Face.SOUTH, x + tlhl.x,
                         y + tlhl.y, z + tlhl.z,
                         xx + tlhl.x, yy + tlhl.y,
-                        zz + tlhl.z, texSide3.x() + texMaxX,
-                        texSide3.y() + texMaxZ, r2, g2, b2, a2, lod, anim)
+                        zz + tlhl.z, texMaxX,
+                        texMaxZ, r2, g2, b2, a2, lod, anim)
                 mesh.addVertex(terrain, Face.SOUTH, x + tlhh.x,
                         y + tlhh.y, z + tlhh.z,
                         xx + tlhh.x, yy + tlhh.y,
-                        zz + tlhh.z, texSide3.x() + texMaxX,
-                        texSide3.y() + texMinZ, r2, g2, b2, a2, lod, anim)
+                        zz + tlhh.z, texMaxX,
+                        texMinZ, r2, g2, b2, a2, lod, anim)
                 mesh.addVertex(terrain, Face.SOUTH, x + thhh.x,
                         y + thhh.y, z + thhh.z,
                         xx + thhh.x, yy + thhh.y,
-                        zz + thhh.z, texSide3.x() + texMinX,
-                        texSide3.y() + texMinZ, r2, g2, b2, a2, lod, anim)
+                        zz + thhh.z, texMinX,
+                        texMinZ, r2, g2, b2, a2, lod, anim)
             }
             if (texSide4 != null) {
-                val terrainTile = texSide4.size()
                 val anim = texSide4.shaderAnimation().id()
-                val texMinX = terrainTile * minY
-                val texMaxX = terrainTile * maxY
-                val texMinZ = terrainTile * minZ
-                val texMaxZ = terrainTile * maxZ
+                val texMinX = texSide4.marginX(minY)
+                val texMaxX = texSide4.marginX(maxY)
+                val texMinZ = texSide4.marginY(minZ)
+                val texMaxZ = texSide4.marginY(maxZ)
                 mesh.addVertex(terrain, Face.WEST, x + tlhl.x,
                         y + tlhl.y, z + tlhl.z,
                         xx + tlhl.x, yy + tlhl.y,
-                        zz + tlhl.z, texSide4.x() + texMinX,
-                        texSide4.y() + texMaxZ, r2, g2, b2, a2, lod, anim)
+                        zz + tlhl.z, texMinX,
+                        texMaxZ, r2, g2, b2, a2, lod, anim)
                 mesh.addVertex(terrain, Face.WEST, x + tlll.x,
                         y + tlll.y, z + tlll.z,
                         xx + tlll.x, yy + tlll.y,
-                        zz + tlll.z, texSide4.x() + texMaxX,
-                        texSide4.y() + texMaxZ, r2, g2, b2, a2, lod, anim)
+                        zz + tlll.z, texMaxX,
+                        texMaxZ, r2, g2, b2, a2, lod, anim)
                 mesh.addVertex(terrain, Face.WEST, x + tllh.x,
                         y + tllh.y, z + tllh.z,
                         xx + tllh.x, yy + tllh.y,
-                        zz + tllh.z, texSide4.x() + texMaxX,
-                        texSide4.y() + texMinZ, r2, g2, b2, a2, lod, anim)
+                        zz + tllh.z, texMaxX,
+                        texMinZ, r2, g2, b2, a2, lod, anim)
                 mesh.addVertex(terrain, Face.WEST, x + tlhh.x,
                         y + tlhh.y, z + tlhh.z,
                         xx + tlhh.x, yy + tlhh.y,
-                        zz + tlhh.z, texSide4.x() + texMinX,
-                        texSide4.y() + texMinZ, r2, g2, b2, a2, lod, anim)
+                        zz + tlhh.z, texMinX,
+                        texMinZ, r2, g2, b2, a2, lod, anim)
             }
         }
 
@@ -486,131 +494,132 @@ class BlockModelComplex(private val registry: TerrainTextureRegistry,
                                inventory: Boolean) {
             mesh.color(r, g, b, a)
             if (texTop != null) {
-                val terrainTile = texTop.size()
-                val texMinX = terrainTile * minX
-                val texMaxX = terrainTile * maxX
-                val texMinY = terrainTile * minY
-                val texMaxY = terrainTile * maxY
+                val texMinX = texTop.marginX(minX)
+                val texMaxX = texTop.marginX(maxX)
+                val texMinY = texTop.marginY(minY)
+                val texMaxY = texTop.marginY(maxY)
                 mesh.normal(0.0, 0.0, 1.0)
-                mesh.texture(texTop.x() + texMinX, texTop.y() + texMinY)
+                mesh.texture(texMinX, texMinY)
                 mesh.vertex(llh.x, llh.y, llh.z)
-                mesh.texture(texTop.x() + texMaxX, texTop.y() + texMinY)
+                mesh.texture(texMaxX, texMinY)
                 mesh.vertex(hlh.x, hlh.y, hlh.z)
-                mesh.texture(texTop.x() + texMaxX, texTop.y() + texMaxY)
+                mesh.texture(texMaxX, texMaxY)
                 mesh.vertex(hhh.x, hhh.y, hhh.z)
-                mesh.texture(texTop.x() + texMinX, texTop.y() + texMaxY)
+                mesh.texture(texMinX, texMaxY)
                 mesh.vertex(lhh.x, lhh.y, lhh.z)
             }
             if (texSide2 != null) {
                 if (inventory) {
                     mesh.color(r * 0.7, g * 0.7, b * 0.7, a * 1.0)
                 }
-                val terrainTile = texSide2.size()
-                val texMinX = terrainTile * minY
-                val texMaxX = terrainTile * maxY
-                val texMinY = terrainTile * minZ
-                val texMaxY = terrainTile * maxZ
+                val texMinX = texSide2.marginX(minY)
+                val texMaxX = texSide2.marginX(maxY)
+                val texMinY = texSide2.marginY(minZ)
+                val texMaxY = texSide2.marginY(maxZ)
                 mesh.normal(1.0, 0.0, 0.0)
-                mesh.texture(texSide2.x() + texMinX, texSide2.y() + texMinY)
+                mesh.texture(texMinX, texMinY)
                 mesh.vertex(hhh.x, hhh.y, hhh.z)
-                mesh.texture(texSide2.x() + texMaxX, texSide2.y() + texMinY)
+                mesh.texture(texMaxX, texMinY)
                 mesh.vertex(hlh.x, hlh.y, hlh.z)
-                mesh.texture(texSide2.x() + texMaxX, texSide2.y() + texMaxY)
+                mesh.texture(texMaxX, texMaxY)
                 mesh.vertex(hll.x, hll.y, hll.z)
-                mesh.texture(texSide2.x() + texMinX, texSide2.y() + texMaxY)
+                mesh.texture(texMinX, texMaxY)
                 mesh.vertex(hhl.x, hhl.y, hhl.z)
             }
             if (texSide3 != null) {
                 if (inventory) {
                     mesh.color(r * 0.8f, g * 0.8f, b * 0.8f, a)
                 }
-                val terrainTile = texSide3.size()
-                val texMinX = terrainTile * minX
-                val texMaxX = terrainTile * maxX
-                val texMinY = terrainTile * minZ
-                val texMaxY = terrainTile * maxZ
+                val texMinX = texSide3.marginX(minX)
+                val texMaxX = texSide3.marginX(maxX)
+                val texMinY = texSide3.marginY(minZ)
+                val texMaxY = texSide3.marginY(maxZ)
                 mesh.normal(0.0, 1.0, 0.0)
-                mesh.texture(texSide3.x() + texMaxX, texSide3.y() + texMaxY)
+                mesh.texture(texMaxX, texMaxY)
                 mesh.vertex(hhl.x, hhl.y, hhl.z)
-                mesh.texture(texSide3.x() + texMinX, texSide3.y() + texMaxY)
+                mesh.texture(texMinX, texMaxY)
                 mesh.vertex(lhl.x, lhl.y, lhl.z)
-                mesh.texture(texSide3.x() + texMinX, texSide3.y() + texMinY)
+                mesh.texture(texMinX, texMinY)
                 mesh.vertex(lhh.x, lhh.y, lhh.z)
-                mesh.texture(texSide3.x() + texMaxX, texSide3.y() + texMinY)
+                mesh.texture(texMaxX, texMinY)
                 mesh.vertex(hhh.x, hhh.y, hhh.z)
             }
             if (!inventory) {
                 if (texSide4 != null) {
-                    val terrainTile = texSide4.size()
-                    val texMinX = terrainTile * minY
-                    val texMaxX = terrainTile * maxY
-                    val texMinY = terrainTile * minZ
-                    val texMaxY = terrainTile * maxZ
+                    val texMinX = texSide4.marginX(minY)
+                    val texMaxX = texSide4.marginX(maxY)
+                    val texMinY = texSide4.marginY(minZ)
+                    val texMaxY = texSide4.marginY(maxZ)
                     mesh.normal(-1.0, 0.0, 0.0)
-                    mesh.texture(texSide4.x() + texMinX,
-                            texSide4.y() + texMaxY)
+                    mesh.texture(texMinX, texMaxY)
                     mesh.vertex(lhl.x, lhl.y, lhl.z)
-                    mesh.texture(texSide4.x() + texMaxX,
-                            texSide4.y() + texMaxY)
+                    mesh.texture(texMaxX, texMaxY)
                     mesh.vertex(lll.x, lll.y, lll.z)
-                    mesh.texture(texSide4.x() + texMaxX,
-                            texSide4.y() + texMinY)
+                    mesh.texture(texMaxX, texMinY)
                     mesh.vertex(llh.x, llh.y, llh.z)
-                    mesh.texture(texSide4.x() + texMinX,
-                            texSide4.y() + texMinY)
+                    mesh.texture(texMinX, texMinY)
                     mesh.vertex(lhh.x, lhh.y, lhh.z)
                 }
                 if (texSide1 != null) {
-                    val terrainTile = texSide1.size()
-                    val texMinX = terrainTile * minX
-                    val texMaxX = terrainTile * maxX
-                    val texMinY = terrainTile * minZ
-                    val texMaxY = terrainTile * maxZ
+                    val texMinX = texSide1.marginX(minX)
+                    val texMaxX = texSide1.marginX(maxX)
+                    val texMinY = texSide1.marginY(minZ)
+                    val texMaxY = texSide1.marginY(maxZ)
                     mesh.normal(0.0, -1.0, 0.0)
-                    mesh.texture(texSide1.x() + texMinX,
-                            texSide1.y() + texMinY)
+                    mesh.texture(texMinX, texMinY)
                     mesh.vertex(hlh.x, hlh.y, hlh.z)
-                    mesh.texture(texSide1.x() + texMaxX,
-                            texSide1.y() + texMinY)
+                    mesh.texture(texMaxX, texMinY)
                     mesh.vertex(llh.x, llh.y, llh.z)
-                    mesh.texture(texSide1.x() + texMaxX,
-                            texSide1.y() + texMaxY)
+                    mesh.texture(texMaxX, texMaxY)
                     mesh.vertex(lll.x, lll.y, lll.z)
-                    mesh.texture(texSide1.x() + texMinX,
-                            texSide1.y() + texMaxY)
+                    mesh.texture(texMinX, texMaxY)
                     mesh.vertex(hll.x, hll.y, hll.z)
                 }
                 if (texBottom != null) {
-                    val terrainTile = texBottom.size()
-                    val texMinX = terrainTile * minX
-                    val texMaxX = terrainTile * maxX
-                    val texMinY = terrainTile * minY
-                    val texMaxY = terrainTile * maxY
+                    val texMinX = texBottom.marginX(minX)
+                    val texMaxX = texBottom.marginX(maxX)
+                    val texMinY = texBottom.marginY(minY)
+                    val texMaxY = texBottom.marginY(maxY)
                     mesh.normal(0.0, 0.0, -1.0)
-                    mesh.texture(texBottom.x() + texMinX,
-                            texBottom.y() + texMaxY)
+                    mesh.texture(texMinX, texMaxY)
                     mesh.vertex(lhl.x, lhl.y, lhl.z)
-                    mesh.texture(texBottom.x() + texMaxX,
-                            texBottom.y() + texMaxY)
+                    mesh.texture(texMaxX, texMaxY)
                     mesh.vertex(hhl.x, hhl.y, hhl.z)
-                    mesh.texture(texBottom.x() + texMaxX,
-                            texBottom.y() + texMinY)
+                    mesh.texture(texMaxX, texMinY)
                     mesh.vertex(hll.x, hll.y, hll.z)
-                    mesh.texture(texBottom.x() + texMinX,
-                            texBottom.y() + texMinY)
+                    mesh.texture(texMinX, texMinY)
                     mesh.vertex(lll.x, lll.y, lll.z)
                 }
             }
         }
     }
 
-    class ShapeBillboard(private val texture: TerrainTexture?, minX: Double, minY: Double,
-                         minZ: Double, maxX: Double, maxY: Double, maxZ: Double, private val nx: Double,
-                         private val ny: Double, private val nz: Double, r: Double, g: Double, b: Double, a: Double) : Shape() {
+    class ShapeBillboard(private val texture: TerrainTexture?,
+                         minX: Double,
+                         minY: Double,
+                         minZ: Double,
+                         maxX: Double,
+                         maxY: Double,
+                         maxZ: Double,
+                         private val nx: Double,
+                         private val ny: Double,
+                         private val nz: Double,
+                         r: Double,
+                         g: Double,
+                         b: Double,
+                         a: Double) : Shape() {
 
-        constructor(texture: TerrainTexture, minX: Double, minY: Double,
-                    minZ: Double, maxX: Double, maxY: Double, maxZ: Double, r: Double,
-                    g: Double, b: Double, a: Double) : this(texture, minX, minY,
+        constructor(texture: TerrainTexture,
+                    minX: Double,
+                    minY: Double,
+                    minZ: Double,
+                    maxX: Double,
+                    maxY: Double,
+                    maxZ: Double,
+                    r: Double,
+                    g: Double,
+                    b: Double,
+                    a: Double) : this(texture, minX, minY,
                 minZ, maxX, maxY, maxZ, Double.NaN, Double.NaN, Double.NaN, r,
                 g, b, a)
 
@@ -657,7 +666,6 @@ class BlockModelComplex(private val registry: TerrainTextureRegistry,
             val g2 = g * this.g
             val b2 = b * this.b
             val a2 = a * this.a
-            val terrainTile = texture.size()
             val animation = texture.shaderAnimation()
             val animBottom = animation.id()
             val animTop: Byte
@@ -666,90 +674,58 @@ class BlockModelComplex(private val registry: TerrainTextureRegistry,
             } else {
                 animTop = animBottom
             }
-            val texMinX = terrainTile * minX
-            val texMaxX = terrainTile * maxX
-            val texMinY = terrainTile * minY
-            val texMaxY = terrainTile * maxY
-            mesh.addVertex(terrain, Face.NONE, x + tlll.x,
-                    y + tlll.y, z + tlll.z,
-                    xx + tlll.x, yy + tlll.y,
-                    zz + tlll.z, nx, ny, nz, texture.x() + texMinX,
-                    texture.y() + texMaxY, r2, g2, b2, a2, lod, animTop)
-            mesh.addVertex(terrain, Face.NONE, x + tlhl.x,
-                    y + tlhl.y, z + tlhl.z,
-                    xx + tlhl.x, yy + tlhl.y,
-                    zz + tlhl.z, nx, ny, nz, texture.x() + texMaxX,
-                    texture.y() + texMaxY, r2, g2, b2, a2, lod, animTop)
-            mesh.addVertex(terrain, Face.NONE, x + tlhh.x,
-                    y + tlhh.y, z + tlhh.z,
-                    xx + tlhh.x, yy + tlhh.y,
-                    zz + tlhh.z, nx, ny, nz, texture.x() + texMaxX,
-                    texture.y() + texMinY, r2, g2, b2, a2, lod, animBottom)
-            mesh.addVertex(terrain, Face.NONE, x + tllh.x,
-                    y + tllh.y, z + tllh.z,
-                    xx + tllh.x, yy + tllh.y,
-                    zz + tllh.z, nx, ny, nz, texture.x() + texMinX,
-                    texture.y() + texMinY, r2, g2, b2, a2, lod, animBottom)
-            mesh.addVertex(terrain, Face.NONE, x + tllh.x,
-                    y + tllh.y, z + tllh.z,
-                    xx + tllh.x, yy + tllh.y,
-                    zz + tllh.z, nx, ny, nz, texture.x() + texMaxX,
-                    texture.y() + texMinY, r2, g2, b2, a2, lod, animBottom)
-            mesh.addVertex(terrain, Face.NONE, x + tlhh.x,
-                    y + tlhh.y, z + tlhh.z,
-                    xx + tlhh.x, yy + tlhh.y,
-                    zz + tlhh.z, nx, ny, nz, texture.x() + texMinX,
-                    texture.y() + texMinY, r2, g2, b2, a2, lod, animBottom)
-            mesh.addVertex(terrain, Face.NONE, x + tlhl.x,
-                    y + tlhl.y, z + tlhl.z,
-                    xx + tlhl.x, yy + tlhl.y,
-                    zz + tlhl.z, nx, ny, nz, texture.x() + texMinX,
-                    texture.y() + texMaxY, r2, g2, b2, a2, lod, animTop)
-            mesh.addVertex(terrain, Face.NONE, x + tlll.x,
-                    y + tlll.y, z + tlll.z,
-                    xx + tlll.x, yy + tlll.y,
-                    zz + tlll.z, nx, ny, nz, texture.x() + texMaxX,
-                    texture.y() + texMaxY, r2, g2, b2, a2, lod, animTop)
-            mesh.addVertex(terrain, Face.NONE, x + thll.x,
-                    y + thll.y, z + thll.z,
-                    xx + thll.x, yy + thll.y,
-                    zz + thll.z, nx, ny, nz, texture.x() + texMinX,
-                    texture.y() + texMaxY, r2, g2, b2, a2, lod, animTop)
-            mesh.addVertex(terrain, Face.NONE, x + thhl.x,
-                    y + thhl.y, z + thhl.z,
-                    xx + thhl.x, yy + thhl.y,
-                    zz + thhl.z, nx, ny, nz, texture.x() + texMaxX,
-                    texture.y() + texMaxY, r2, g2, b2, a2, lod, animTop)
-            mesh.addVertex(terrain, Face.NONE, x + thhh.x,
-                    y + thhh.y, z + thhh.z,
-                    xx + thhh.x, yy + thhh.y,
-                    zz + thhh.z, nx, ny, nz, texture.x() + texMaxX,
-                    texture.y() + texMinY, r2, g2, b2, a2, lod, animBottom)
-            mesh.addVertex(terrain, Face.NONE, x + thlh.x,
-                    y + thlh.y, z + thlh.z,
-                    xx + thlh.x, yy + thlh.y,
-                    zz + thlh.z, nx, ny, nz, texture.x() + texMinX,
-                    texture.y() + texMinY, r2, g2, b2, a2, lod, animBottom)
-            mesh.addVertex(terrain, Face.NONE, x + thlh.x,
-                    y + thlh.y, z + thlh.z,
-                    xx + thlh.x, yy + thlh.y,
-                    zz + thlh.z, nx, ny, nz, texture.x() + texMaxX,
-                    texture.y() + texMinY, r2, g2, b2, a2, lod, animBottom)
-            mesh.addVertex(terrain, Face.NONE, x + thhh.x,
-                    y + thhh.y, z + thhh.z,
-                    xx + thhh.x, yy + thhh.y,
-                    zz + thhh.z, nx, ny, nz, texture.x() + texMinX,
-                    texture.y() + texMinY, r2, g2, b2, a2, lod, animBottom)
-            mesh.addVertex(terrain, Face.NONE, x + thhl.x,
-                    y + thhl.y, z + thhl.z,
-                    xx + thhl.x, yy + thhl.y,
-                    zz + thhl.z, nx, ny, nz, texture.x() + texMinX,
-                    texture.y() + texMaxY, r2, g2, b2, a2, lod, animTop)
-            mesh.addVertex(terrain, Face.NONE, x + thll.x,
-                    y + thll.y, z + thll.z,
-                    xx + thll.x, yy + thll.y,
-                    zz + thll.z, nx, ny, nz, texture.x() + texMaxX,
-                    texture.y() + texMaxY, r2, g2, b2, a2, lod, animTop)
+            val texMinX = texture.marginX(minX)
+            val texMaxX = texture.marginX(maxX)
+            val texMinY = texture.marginY(minY)
+            val texMaxY = texture.marginY(maxY)
+            mesh.addVertex(terrain, Face.NONE, x + tlll.x, y + tlll.y,
+                    z + tlll.z, xx + tlll.x, yy + tlll.y, zz + tlll.z, nx, ny,
+                    nz, texMinX, texMaxY, r2, g2, b2, a2, lod, animTop)
+            mesh.addVertex(terrain, Face.NONE, x + tlhl.x, y + tlhl.y,
+                    z + tlhl.z, xx + tlhl.x, yy + tlhl.y, zz + tlhl.z, nx, ny,
+                    nz, texMaxX, texMaxY, r2, g2, b2, a2, lod, animTop)
+            mesh.addVertex(terrain, Face.NONE, x + tlhh.x, y + tlhh.y,
+                    z + tlhh.z, xx + tlhh.x, yy + tlhh.y, zz + tlhh.z, nx, ny,
+                    nz, texMaxX, texMinY, r2, g2, b2, a2, lod, animBottom)
+            mesh.addVertex(terrain, Face.NONE, x + tllh.x, y + tllh.y,
+                    z + tllh.z, xx + tllh.x, yy + tllh.y, zz + tllh.z, nx, ny,
+                    nz, texMinX, texMinY, r2, g2, b2, a2, lod, animBottom)
+            mesh.addVertex(terrain, Face.NONE, x + tllh.x, y + tllh.y,
+                    z + tllh.z, xx + tllh.x, yy + tllh.y, zz + tllh.z, nx, ny,
+                    nz, texMaxX, texMinY, r2, g2, b2, a2, lod, animBottom)
+            mesh.addVertex(terrain, Face.NONE, x + tlhh.x, y + tlhh.y,
+                    z + tlhh.z, xx + tlhh.x, yy + tlhh.y, zz + tlhh.z, nx, ny,
+                    nz, texMinX, texMinY, r2, g2, b2, a2, lod, animBottom)
+            mesh.addVertex(terrain, Face.NONE, x + tlhl.x, y + tlhl.y,
+                    z + tlhl.z, xx + tlhl.x, yy + tlhl.y, zz + tlhl.z, nx, ny,
+                    nz, texMinX, texMaxY, r2, g2, b2, a2, lod, animTop)
+            mesh.addVertex(terrain, Face.NONE, x + tlll.x, y + tlll.y,
+                    z + tlll.z, xx + tlll.x, yy + tlll.y, zz + tlll.z, nx, ny,
+                    nz, texMaxX, texMaxY, r2, g2, b2, a2, lod, animTop)
+            mesh.addVertex(terrain, Face.NONE, x + thll.x, y + thll.y,
+                    z + thll.z, xx + thll.x, yy + thll.y, zz + thll.z, nx, ny,
+                    nz, texMinX, texMaxY, r2, g2, b2, a2, lod, animTop)
+            mesh.addVertex(terrain, Face.NONE, x + thhl.x, y + thhl.y,
+                    z + thhl.z, xx + thhl.x, yy + thhl.y, zz + thhl.z, nx, ny,
+                    nz, texMaxX, texMaxY, r2, g2, b2, a2, lod, animTop)
+            mesh.addVertex(terrain, Face.NONE, x + thhh.x, y + thhh.y,
+                    z + thhh.z, xx + thhh.x, yy + thhh.y, zz + thhh.z, nx, ny,
+                    nz, texMaxX, texMinY, r2, g2, b2, a2, lod, animBottom)
+            mesh.addVertex(terrain, Face.NONE, x + thlh.x, y + thlh.y,
+                    z + thlh.z, xx + thlh.x, yy + thlh.y, zz + thlh.z, nx, ny,
+                    nz, texMinX, texMinY, r2, g2, b2, a2, lod, animBottom)
+            mesh.addVertex(terrain, Face.NONE, x + thlh.x, y + thlh.y,
+                    z + thlh.z, xx + thlh.x, yy + thlh.y, zz + thlh.z, nx, ny,
+                    nz, texMaxX, texMinY, r2, g2, b2, a2, lod, animBottom)
+            mesh.addVertex(terrain, Face.NONE, x + thhh.x, y + thhh.y,
+                    z + thhh.z, xx + thhh.x, yy + thhh.y, zz + thhh.z, nx, ny,
+                    nz, texMinX, texMinY, r2, g2, b2, a2, lod, animBottom)
+            mesh.addVertex(terrain, Face.NONE, x + thhl.x, y + thhl.y,
+                    z + thhl.z, xx + thhl.x, yy + thhl.y, zz + thhl.z, nx, ny,
+                    nz, texMinX, texMaxY, r2, g2, b2, a2, lod, animTop)
+            mesh.addVertex(terrain, Face.NONE, x + thll.x, y + thll.y,
+                    z + thll.z, xx + thll.x, yy + thll.y, zz + thll.z, nx, ny,
+                    nz, texMaxX, texMaxY, r2, g2, b2, a2, lod, animTop)
         }
 
         override fun addToMesh(mesh: Mesh,
@@ -757,44 +733,43 @@ class BlockModelComplex(private val registry: TerrainTextureRegistry,
             if (texture == null) {
                 return
             }
-            val terrainTile = texture.size()
-            val texMinX = terrainTile * minX
-            val texMaxX = terrainTile * maxX
-            val texMinY = terrainTile * minY
-            val texMaxY = terrainTile * maxY
+            val texMinX = texture.marginX(minX)
+            val texMaxX = texture.marginX(maxX)
+            val texMinY = texture.marginY(minY)
+            val texMaxY = texture.marginY(maxY)
             mesh.color(r, g, b, a)
             mesh.normal(0.0, 0.0, 1.0) // TODO: Implement proper normals
-            mesh.texture(texture.x() + texMinX, texture.y() + texMaxY)
+            mesh.texture(texMinX, texMaxY)
             mesh.vertex(lll.x, lll.y, lll.z)
-            mesh.texture(texture.x() + texMaxX, texture.y() + texMaxY)
+            mesh.texture(texMaxX, texMaxY)
             mesh.vertex(lhl.x, lhl.y, lhl.z)
-            mesh.texture(texture.x() + texMaxX, texture.y() + texMinY)
+            mesh.texture(texMaxX, texMinY)
             mesh.vertex(lhh.x, lhh.y, lhh.z)
-            mesh.texture(texture.x() + texMinX, texture.y() + texMinY)
+            mesh.texture(texMinX, texMinY)
             mesh.vertex(llh.x, llh.y, llh.z)
-            mesh.texture(texture.x() + texMinX, texture.y() + texMinY)
+            mesh.texture(texMinX, texMinY)
             mesh.vertex(llh.x, llh.y, llh.z)
-            mesh.texture(texture.x() + texMaxX, texture.y() + texMinY)
+            mesh.texture(texMaxX, texMinY)
             mesh.vertex(lhh.x, lhh.y, lhh.z)
-            mesh.texture(texture.x() + texMaxX, texture.y() + texMaxY)
+            mesh.texture(texMaxX, texMaxY)
             mesh.vertex(lhl.x, lhl.y, lhl.z)
-            mesh.texture(texture.x() + texMinX, texture.y() + texMaxY)
+            mesh.texture(texMinX, texMaxY)
             mesh.vertex(lll.x, lll.y, lll.z)
-            mesh.texture(texture.x() + texMinX, texture.y() + texMaxY)
+            mesh.texture(texMinX, texMaxY)
             mesh.vertex(hll.x, hll.y, hll.z)
-            mesh.texture(texture.x() + texMaxX, texture.y() + texMaxY)
+            mesh.texture(texMaxX, texMaxY)
             mesh.vertex(hhl.x, hhl.y, hhl.z)
-            mesh.texture(texture.x() + texMaxX, texture.y() + texMinY)
+            mesh.texture(texMaxX, texMinY)
             mesh.vertex(hhh.x, hhh.y, hhh.z)
-            mesh.texture(texture.x() + texMinX, texture.y() + texMinY)
+            mesh.texture(texMinX, texMinY)
             mesh.vertex(hlh.x, hlh.y, hlh.z)
-            mesh.texture(texture.x() + texMinX, texture.y() + texMinY)
+            mesh.texture(texMinX, texMinY)
             mesh.vertex(hlh.x, hlh.y, hlh.z)
-            mesh.texture(texture.x() + texMaxX, texture.y() + texMinY)
+            mesh.texture(texMaxX, texMinY)
             mesh.vertex(hhh.x, hhh.y, hhh.z)
-            mesh.texture(texture.x() + texMaxX, texture.y() + texMaxY)
+            mesh.texture(texMaxX, texMaxY)
             mesh.vertex(hhl.x, hhl.y, hhl.z)
-            mesh.texture(texture.x() + texMinX, texture.y() + texMaxY)
+            mesh.texture(texMinX, texMaxY)
             mesh.vertex(hll.x, hll.y, hll.z)
         }
     }

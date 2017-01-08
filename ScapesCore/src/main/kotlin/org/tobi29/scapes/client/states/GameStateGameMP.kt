@@ -98,7 +98,7 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
     override fun dispose() {
         this.scene?.dispose()
         client.stop()
-        terrainTextureRegistry.texture().markDisposed()
+        terrainTextureRegistry.texture.markDisposed()
         engine.sounds.stop("music")
         client.plugins.dispose()
         client.plugins.removeFileSystems(engine.files)
@@ -118,13 +118,15 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         for (type in registry.materials()) {
             type?.registerTextures(terrainTextureRegistry)
         }
-        val size = terrainTextureRegistry.init(engine)
+        val size = terrainTextureRegistry.init()
+        terrainTextureRegistry.initTexture(4)
         time = System.currentTimeMillis() - time
         for (type in registry.materials()) {
             type?.createModels(terrainTextureRegistry)
         }
         logger.info { "Loaded terrain models with $size textures in ${time}ms." }
-        particleTransparentAtlas.init(engine)
+        particleTransparentAtlas.init()
+        particleTransparentAtlas.initTexture(4)
         client.start()
         switchPipeline { gl ->
             renderScene(gl, loadScene)

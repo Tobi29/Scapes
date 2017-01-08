@@ -26,6 +26,8 @@ import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Mesh
 import org.tobi29.scapes.engine.graphics.Model
 import org.tobi29.scapes.engine.graphics.Shader
+import org.tobi29.scapes.engine.utils.graphics.marginX
+import org.tobi29.scapes.engine.utils.graphics.marginY
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.max
 
@@ -110,30 +112,27 @@ class BlockModelLiquid(private val block: BlockType,
             }
             if (flag) {
                 if (texTop != null) {
-                    val terrainTile = texTop.size()
+                    val texMinX = texTop.marginX(0.0)
+                    val texMaxX = texTop.marginX(1.0)
+                    val texMinY = texTop.marginY(0.0)
+                    val texMaxY = texTop.marginY(1.0)
                     val anim = texTop.shaderAnimation().id()
                     mesh.addVertex(terrain, Face.UP, x.toDouble(), y.toDouble(),
-                            (z + height00), xx, yy,
-                            zz + height00, texTop.x(), texTop.y(), r2, g2, b2,
-                            a2,
-                            lod, if (static00) noAnim else anim)
+                            (z + height00), xx, yy, zz + height00, texMinX,
+                            texMinY, r2, g2, b2, a2, lod,
+                            if (static00) noAnim else anim)
                     mesh.addVertex(terrain, Face.UP, (x + 1).toDouble(),
-                            y.toDouble(), (z + height10),
-                            xx + 1, yy, zz + height10,
-                            texTop.x() + terrainTile,
-                            texTop.y(), r2, g2, b2, a2, lod,
-                            if (static10) noAnim else anim)
+                            y.toDouble(), (z + height10), xx + 1, yy,
+                            zz + height10, texMaxX, texMinY, r2, g2, b2, a2,
+                            lod, if (static10) noAnim else anim)
                     mesh.addVertex(terrain, Face.UP, (x + 1).toDouble(),
-                            (y + 1).toDouble(), (z + height11),
-                            xx + 1, yy + 1, zz + height11,
-                            texTop.x() + terrainTile,
-                            texTop.y() + terrainTile,
-                            r2, g2, b2, a2, lod, if (static11) noAnim else anim)
+                            (y + 1).toDouble(), (z + height11), xx + 1, yy + 1,
+                            zz + height11, texMaxX, texMaxY, r2, g2, b2, a2,
+                            lod, if (static11) noAnim else anim)
                     mesh.addVertex(terrain, Face.UP, x.toDouble(),
-                            (y + 1).toDouble(), (z + height01), xx,
-                            yy + 1, zz + height01, texTop.x(),
-                            texTop.y() + terrainTile, r2, g2, b2, a2, lod,
-                            if (static01) noAnim else anim)
+                            (y + 1).toDouble(), (z + height01), xx, yy + 1,
+                            zz + height01, texMinX, texMaxY, r2, g2, b2, a2,
+                            lod, if (static01) noAnim else anim)
                 }
             }
         } else {
@@ -151,118 +150,99 @@ class BlockModelLiquid(private val block: BlockType,
         if (other != block && other.connectStage(terrain, x, y,
                 z - 1) <= connectStage) {
             if (texBottom != null) {
-                val terrainTile = texBottom.size()
+                val texMinX = texBottom.marginX(0.0)
+                val texMaxX = texBottom.marginX(1.0)
+                val texMinY = texBottom.marginY(0.0)
+                val texMaxY = texBottom.marginY(1.0)
                 mesh.addVertex(terrain, Face.DOWN, x.toDouble(),
                         (y + 1).toDouble(), z.toDouble(), xx, yy + 1, zz,
-                        texBottom.x(), texBottom.y() + terrainTile, r2, g2,
-                        b2,
-                        a2,
-                        lod, noAnim)
+                        texMinX, texMaxY, r2, g2, b2, a2, lod, noAnim)
                 mesh.addVertex(terrain, Face.DOWN, (x + 1).toDouble(),
-                        (y + 1).toDouble(), z.toDouble(), xx + 1,
-                        yy + 1, zz, texBottom.x() + terrainTile,
-                        texBottom.y() + terrainTile, r2, g2, b2, a2, lod,
-                        noAnim)
+                        (y + 1).toDouble(), z.toDouble(), xx + 1, yy + 1, zz,
+                        texMaxX, texMaxY, r2, g2, b2, a2, lod, noAnim)
                 mesh.addVertex(terrain, Face.DOWN, (x + 1).toDouble(),
-                        y.toDouble(), z.toDouble(), xx + 1, yy, zz,
-                        texBottom.x() + terrainTile, texBottom.y(), r2, g2,
-                        b2,
-                        a2,
-                        lod, noAnim)
+                        y.toDouble(), z.toDouble(), xx + 1, yy, zz, texMaxX,
+                        texMinY, r2, g2, b2, a2, lod, noAnim)
                 mesh.addVertex(terrain, Face.DOWN, x.toDouble(), y.toDouble(),
-                        z.toDouble(), xx, yy, zz,
-                        texBottom.x(), texBottom.y(), r2, g2, b2, a2, lod,
-                        noAnim)
+                        z.toDouble(), xx, yy, zz, texMinX, texMinY, r2, g2, b2,
+                        a2, lod, noAnim)
             }
         }
         other = terrain.type(x, y - 1, z)
         if (other != block && other.connectStage(terrain, x, y - 1,
                 z) <= connectStage) {
             if (texSide1 != null) {
-                val terrainTile = texSide1.size()
                 val anim = texSide1.shaderAnimation().id()
-                val textureHeight00 = max(1.0 - height00, 0.0) * terrainTile
-                val textureHeight10 = max(1.0 - height10, 0.0) * terrainTile
+                val texMinX = texSide1.marginX(0.0)
+                val texMaxX = texSide1.marginX(1.0)
+                val texMinY00 = texSide1.marginY(max(1.0 - height00, 0.0))
+                val texMinY10 = texSide1.marginY(max(1.0 - height10, 0.0))
+                val texMaxY = texSide1.marginY(1.0)
                 mesh.addVertex(terrain, Face.NORTH, (x + 1).toDouble(),
-                        y.toDouble(), (z + height10),
-                        xx + 1, yy, zz + height10, texSide1.x() + terrainTile,
-                        texSide1.y() + textureHeight10, r2, g2, b2, a2, lod,
+                        y.toDouble(), (z + height10), xx + 1, yy, zz + height10,
+                        texMaxX, texMinY10, r2, g2, b2, a2, lod,
                         if (static10) noAnim else anim)
                 mesh.addVertex(terrain, Face.NORTH, x.toDouble(), y.toDouble(),
-                        (z + height00), xx, yy,
-                        zz + height00, texSide1.x(),
-                        texSide1.y() + textureHeight00, r2, g2, b2, a2, lod,
+                        (z + height00), xx, yy, zz + height00, texMinX,
+                        texMinY00, r2, g2, b2, a2, lod,
                         if (static00) noAnim else anim)
                 mesh.addVertex(terrain, Face.NORTH, x.toDouble(), y.toDouble(),
-                        z.toDouble(), xx, yy, zz,
-                        texSide1.x(), texSide1.y() + terrainTile, r2, g2, b2,
-                        a2,
-                        lod, noAnim)
+                        z.toDouble(), xx, yy, zz, texMinX, texMaxY, r2, g2, b2,
+                        a2, lod, noAnim)
                 mesh.addVertex(terrain, Face.NORTH, (x + 1).toDouble(),
-                        y.toDouble(), z.toDouble(), xx + 1, yy, zz,
-                        texSide1.x() + terrainTile,
-                        texSide1.y() + terrainTile,
-                        r2, g2, b2, a2, lod, noAnim)
+                        y.toDouble(), z.toDouble(), xx + 1, yy, zz, texMaxX,
+                        texMaxY, r2, g2, b2, a2, lod, noAnim)
             }
         }
         other = terrain.type(x + 1, y, z)
         if (other != block && other.connectStage(terrain, x + 1, y,
                 z) <= connectStage) {
             if (texSide2 != null) {
-                val terrainTile = texSide2.size()
                 val anim = texSide2.shaderAnimation().id()
-                val textureHeight10 = max(1.0 - height10, 0.0) * terrainTile
-                val textureHeight11 = max(1.0 - height11, 0.0) * terrainTile
+                val texMinX = texSide2.marginX(0.0)
+                val texMaxX = texSide2.marginX(1.0)
+                val texMaxY10 = texSide2.marginY(max(1.0 - height10, 0.0))
+                val texMaxY11 = texSide2.marginY(max(1.0 - height11, 0.0))
+                val texMaxY = texSide2.marginY(1.0)
                 mesh.addVertex(terrain, Face.EAST, (x + 1).toDouble(),
-                        (y + 1).toDouble(), (z + height11),
-                        xx + 1, yy + 1, zz + height11,
-                        texSide2.x() + terrainTile,
-                        texSide2.y() + textureHeight11, r2, g2, b2, a2, lod,
+                        (y + 1).toDouble(), (z + height11), xx + 1, yy + 1,
+                        zz + height11, texMaxX, texMaxY11, r2, g2, b2, a2, lod,
                         if (static11) noAnim else anim)
                 mesh.addVertex(terrain, Face.EAST, (x + 1).toDouble(),
-                        y.toDouble(), (z + height10),
-                        xx + 1, yy, zz + height10, texSide2.x(),
-                        texSide2.y() + textureHeight10, r2, g2, b2, a2, lod,
+                        y.toDouble(), (z + height10), xx + 1, yy, zz + height10,
+                        texMinX, texMaxY10, r2, g2, b2, a2, lod,
                         if (static10) noAnim else anim)
                 mesh.addVertex(terrain, Face.EAST, (x + 1).toDouble(),
-                        y.toDouble(), z.toDouble(), xx + 1, yy, zz,
-                        texSide2.x(), texSide2.y() + terrainTile, r2, g2, b2,
-                        a2,
-                        lod, noAnim)
+                        y.toDouble(), z.toDouble(), xx + 1, yy, zz, texMinX,
+                        texMaxY, r2, g2, b2, a2, lod, noAnim)
                 mesh.addVertex(terrain, Face.EAST, (x + 1).toDouble(),
-                        (y + 1).toDouble(), z.toDouble(), xx + 1,
-                        yy + 1, zz, texSide2.x() + terrainTile,
-                        texSide2.y() + terrainTile, r2, g2, b2, a2, lod,
-                        noAnim)
+                        (y + 1).toDouble(), z.toDouble(), xx + 1, yy + 1, zz,
+                        texMaxX, texMaxY, r2, g2, b2, a2, lod, noAnim)
             }
         }
         other = terrain.type(x, y + 1, z)
         if (other != block && other.connectStage(terrain, x, y + 1,
                 z) <= connectStage) {
             if (texSide3 != null) {
-                val terrainTile = texSide3.size()
                 val anim = texSide3.shaderAnimation().id()
-                val textureHeight01 = max(1.0 - height01, 0.0) * terrainTile
-                val textureHeight11 = max(1.0 - height11, 0.0) * terrainTile
+                val texMinX = texSide3.marginX(0.0)
+                val texMaxX = texSide3.marginX(1.0)
+                val texMaxY01 = texSide3.marginY(max(1.0 - height01, 0.0))
+                val texMaxY11 = texSide3.marginY(max(1.0 - height11, 0.0))
+                val texMaxY = texSide3.marginY(1.0)
                 mesh.addVertex(terrain, Face.SOUTH, (x + 1).toDouble(),
-                        (y + 1).toDouble(), z.toDouble(), xx + 1,
-                        yy + 1, zz, texSide3.x(), texSide3.y() + terrainTile,
-                        r2,
-                        g2, b2, a2, lod, noAnim)
+                        (y + 1).toDouble(), z.toDouble(), xx + 1, yy + 1, zz,
+                        texMinX, texMaxY, r2, g2, b2, a2, lod, noAnim)
                 mesh.addVertex(terrain, Face.SOUTH, x.toDouble(),
                         (y + 1).toDouble(), z.toDouble(), xx, yy + 1, zz,
-                        texSide3.x() + terrainTile,
-                        texSide3.y() + terrainTile,
-                        r2, g2, b2, a2, lod, noAnim)
+                        texMaxX, texMaxY, r2, g2, b2, a2, lod, noAnim)
                 mesh.addVertex(terrain, Face.SOUTH, x.toDouble(),
-                        (y + 1).toDouble(), (z + height01), xx,
-                        yy + 1, zz + height01, texSide3.x() + terrainTile,
-                        texSide3.y() + textureHeight01, r2, g2, b2, a2, lod,
+                        (y + 1).toDouble(), (z + height01), xx, yy + 1,
+                        zz + height01, texMaxX, texMaxY01, r2, g2, b2, a2, lod,
                         if (static01) noAnim else anim)
                 mesh.addVertex(terrain, Face.SOUTH, (x + 1).toDouble(),
-                        (y + 1).toDouble(), (z + height11),
-                        xx + 1, yy + 1, zz + height11, texSide3.x(),
-                        texSide3.y() + textureHeight11, r2, g2, b2, a2, lod,
+                        (y + 1).toDouble(), (z + height11), xx + 1, yy + 1,
+                        zz + height11, texMinX, texMaxY11, r2, g2, b2, a2, lod,
                         if (static11) noAnim else anim)
             }
         }
@@ -270,29 +250,25 @@ class BlockModelLiquid(private val block: BlockType,
         if (other != block && other.connectStage(terrain, x - 1, y,
                 z) <= connectStage) {
             if (texSide4 != null) {
-                val terrainTile = texSide4.size()
                 val anim = texSide4.shaderAnimation().id()
-                val textureHeight00 = max(1.0 - height00, 0.0) * terrainTile
-                val textureHeight01 = max(1.0 - height01, 0.0) * terrainTile
+                val texMinX = texSide4.marginX(0.0)
+                val texMaxX = texSide4.marginX(1.0)
+                val texMinY00 = texSide4.marginY(max(1.0 - height00, 0.0))
+                val texMinY01 = texSide4.marginY(max(1.0 - height01, 0.0))
+                val texMaxY = texSide4.marginY(1.0)
                 mesh.addVertex(terrain, Face.WEST, x.toDouble(),
                         (y + 1).toDouble(), z.toDouble(), xx, yy + 1, zz,
-                        texSide4.x(), texSide4.y() + terrainTile, r2, g2, b2,
-                        a2,
-                        lod, noAnim)
+                        texMinX, texMaxY, r2, g2, b2, a2, lod, noAnim)
                 mesh.addVertex(terrain, Face.WEST, x.toDouble(), y.toDouble(),
-                        z.toDouble(), xx, yy, zz,
-                        texSide4.x() + terrainTile,
-                        texSide4.y() + terrainTile,
-                        r2, g2, b2, a2, lod, noAnim)
+                        z.toDouble(), xx, yy, zz, texMaxX, texMaxY, r2, g2, b2,
+                        a2, lod, noAnim)
                 mesh.addVertex(terrain, Face.WEST, x.toDouble(), y.toDouble(),
-                        (z + height00), xx, yy,
-                        zz + height00, texSide4.x() + terrainTile,
-                        texSide4.y() + textureHeight00, r2, g2, b2, a2, lod,
+                        (z + height00), xx, yy, zz + height00, texMaxX,
+                        texMinY00, r2, g2, b2, a2, lod,
                         if (static00) noAnim else anim)
                 mesh.addVertex(terrain, Face.WEST, x.toDouble(),
-                        (y + 1).toDouble(), (z + height01), xx,
-                        yy + 1, zz + height01, texSide4.x(),
-                        texSide4.y() + textureHeight01, r2, g2, b2, a2, lod,
+                        (y + 1).toDouble(), (z + height01), xx, yy + 1,
+                        zz + height01, texMinX, texMinY01, r2, g2, b2, a2, lod,
                         if (static01) noAnim else anim)
             }
         }
@@ -300,13 +276,13 @@ class BlockModelLiquid(private val block: BlockType,
 
     override fun render(gl: GL,
                         shader: Shader) {
-        registry.texture().bind(gl)
+        registry.texture.bind(gl)
         model.render(gl, shader)
     }
 
     override fun renderInventory(gl: GL,
                                  shader: Shader) {
-        registry.texture().bind(gl)
+        registry.texture.bind(gl)
         val matrixStack = gl.matrixStack()
         val matrix = matrixStack.push()
         matrix.translate(0.5f, 0.5f, 0.5f)
@@ -326,81 +302,94 @@ class BlockModelLiquid(private val block: BlockType,
                          inventory: Boolean) {
         mesh.color(r, g, b, a)
         if (texTop != null) {
-            val terrainTile = texTop.size()
+            val texMinX = texTop.marginX(0.0)
+            val texMaxX = texTop.marginX(1.0)
+            val texMinY = texTop.marginY(0.0)
+            val texMaxY = texTop.marginY(1.0)
             mesh.normal(0.0, 0.0, 1.0)
-            mesh.texture(texTop.x(), texTop.y())
+            mesh.texture(texMinX, texMinY)
             mesh.vertex(-0.5, -0.5, 0.5)
-            mesh.texture(texTop.x() + terrainTile, texTop.y())
+            mesh.texture(texMaxX, texMinY)
             mesh.vertex(0.5, -0.5, 0.5)
-            mesh.texture(texTop.x() + terrainTile, texTop.y() + terrainTile)
+            mesh.texture(texMaxX, texMaxY)
             mesh.vertex(0.5, 0.5, 0.5)
-            mesh.texture(texTop.x(), texTop.y() + terrainTile)
+            mesh.texture(texMinX, texMaxY)
             mesh.vertex(-0.5, 0.5, 0.5)
         }
         if (texSide2 != null) {
-            val terrainTile = texSide2.size()
+            val texMinX = texSide2.marginX(0.0)
+            val texMaxX = texSide2.marginX(1.0)
+            val texMinY = texSide2.marginY(0.0)
+            val texMaxY = texSide2.marginY(1.0)
             mesh.normal(1.0, 0.0, 0.0)
-            mesh.texture(texSide2.x(), texSide2.y())
+            mesh.texture(texMinX, texMinY)
             mesh.vertex(0.5, 0.5, 0.5)
-            mesh.texture(texSide2.x() + terrainTile, texSide2.y())
+            mesh.texture(texMaxX, texMinY)
             mesh.vertex(0.5, -0.5, 0.5)
-            mesh.texture(texSide2.x() + terrainTile,
-                    texSide2.y() + terrainTile)
+            mesh.texture(texMaxX, texMaxY)
             mesh.vertex(0.5, -0.5, -0.5)
-            mesh.texture(texSide2.x(), texSide2.y() + terrainTile)
+            mesh.texture(texMinX, texMaxY)
             mesh.vertex(0.5, 0.5, -0.5)
         }
         if (texSide3 != null) {
-            val terrainTile = texSide3.size()
+            val texMinX = texSide3.marginX(0.0)
+            val texMaxX = texSide3.marginX(1.0)
+            val texMinY = texSide3.marginY(0.0)
+            val texMaxY = texSide3.marginY(1.0)
             mesh.normal(0.0, 1.0, 0.0)
-            mesh.texture(texSide3.x() + terrainTile,
-                    texSide3.y() + terrainTile)
+            mesh.texture(texMaxX, texMaxY)
             mesh.vertex(0.5, 0.5, -0.5)
-            mesh.texture(texSide3.x(), texSide3.y() + terrainTile)
+            mesh.texture(texMinX, texMaxY)
             mesh.vertex(-0.5, 0.5, -0.5)
-            mesh.texture(texSide3.x(), texSide3.y())
+            mesh.texture(texMinX, texMinY)
             mesh.vertex(-0.5, 0.5, 0.5)
-            mesh.texture(texSide3.x() + terrainTile, texSide3.y())
+            mesh.texture(texMaxX, texMinY)
             mesh.vertex(0.5, 0.5, 0.5)
         }
         if (!inventory) {
             if (texSide4 != null) {
-                val terrainTile = texSide4.size()
+                val texMinX = texSide4.marginX(0.0)
+                val texMaxX = texSide4.marginX(1.0)
+                val texMinY = texSide4.marginY(0.0)
+                val texMaxY = texSide4.marginY(1.0)
                 mesh.normal(-1.0, 0.0, 0.0)
-                mesh.texture(texSide4.x(), texSide4.y() + terrainTile)
+                mesh.texture(texMinX, texMaxY)
                 mesh.vertex(-0.5, 0.5, -0.5)
-                mesh.texture(texSide4.x() + terrainTile,
-                        texSide4.y() + terrainTile)
+                mesh.texture(texMaxX, texMaxY)
                 mesh.vertex(-0.5, -0.5, -0.5)
-                mesh.texture(texSide4.x() + terrainTile, texSide4.y())
+                mesh.texture(texMaxX, texMinY)
                 mesh.vertex(-0.5, -0.5, 0.5)
-                mesh.texture(texSide4.x(), texSide4.y())
+                mesh.texture(texMinX, texMinY)
                 mesh.vertex(-0.5, 0.5, 0.5)
             }
             if (texSide1 != null) {
-                val terrainTile = texSide1.size()
+                val texMinX = texSide1.marginX(0.0)
+                val texMaxX = texSide1.marginX(1.0)
+                val texMinY = texSide1.marginY(0.0)
+                val texMaxY = texSide1.marginY(1.0)
                 mesh.normal(0.0, -1.0, 0.0)
-                mesh.texture(texSide1.x(), texSide1.y())
+                mesh.texture(texMinX, texMinY)
                 mesh.vertex(0.5, -0.5, 0.5)
-                mesh.texture(texSide1.x() + terrainTile, texSide1.y())
+                mesh.texture(texMaxX, texMinY)
                 mesh.vertex(-0.5, -0.5, 0.5)
-                mesh.texture(texSide1.x() + terrainTile,
-                        texSide1.y() + terrainTile)
+                mesh.texture(texMaxX, texMaxY)
                 mesh.vertex(-0.5, -0.5, -0.5)
-                mesh.texture(texSide1.x(), texSide1.y() + terrainTile)
+                mesh.texture(texMinX, texMaxY)
                 mesh.vertex(0.5, -0.5, -0.5)
             }
             if (texBottom != null) {
-                val terrainTile = texBottom.size()
+                val texMinX = texBottom.marginX(0.0)
+                val texMaxX = texBottom.marginX(1.0)
+                val texMinY = texBottom.marginY(0.0)
+                val texMaxY = texBottom.marginY(1.0)
                 mesh.normal(0.0, 0.0, -1.0)
-                mesh.texture(texBottom.x(), texBottom.y() + terrainTile)
+                mesh.texture(texMinX, texMaxY)
                 mesh.vertex(-0.5, 0.5, -0.5)
-                mesh.texture(texBottom.x() + terrainTile,
-                        texBottom.y() + terrainTile)
+                mesh.texture(texMaxX, texMaxY)
                 mesh.vertex(0.5, 0.5, -0.5)
-                mesh.texture(texBottom.x() + terrainTile, texBottom.y())
+                mesh.texture(texMaxX, texMinY)
                 mesh.vertex(0.5, -0.5, -0.5)
-                mesh.texture(texBottom.x(), texBottom.y())
+                mesh.texture(texMinX, texMinY)
                 mesh.vertex(-0.5, -0.5, -0.5)
             }
         }
@@ -441,19 +430,19 @@ class BlockModelLiquid(private val block: BlockType,
             var height = 0.0
             var heights = 0
             if (other1) {
-                height += 1 - max(0, terrain.data(block1) - 1) / steps
+                height += 1.0 - max(0, terrain.data(block1) - offset) / steps
                 heights++
             }
             if (other2) {
-                height += 1 - max(0, terrain.data(block2) - 1) / steps
+                height += 1.0 - max(0, terrain.data(block2) - offset) / steps
                 heights++
             }
             if (other3) {
-                height += 1 - max(0, terrain.data(block3) - 1) / steps
+                height += 1.0 - max(0, terrain.data(block3) - offset) / steps
                 heights++
             }
             if (other4) {
-                height += 1 - max(0, terrain.data(block4) - 1) / steps
+                height += 1.0 - max(0, terrain.data(block4) - offset) / steps
                 heights++
             }
             if (heights == 0) {

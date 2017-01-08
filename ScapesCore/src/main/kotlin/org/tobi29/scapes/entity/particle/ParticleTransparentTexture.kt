@@ -15,11 +15,12 @@
  */
 package org.tobi29.scapes.entity.particle
 
-import org.tobi29.scapes.engine.graphics.TextureAtlasEntry
 import org.tobi29.scapes.engine.graphics.Texture
-
+import org.tobi29.scapes.engine.graphics.TextureAtlasEngineEntry
 import java.nio.ByteBuffer
 
-class ParticleTransparentTexture(buffer: ByteBuffer, resolution: Int,
-                                 texture: () -> Texture) : TextureAtlasEntry(
-        buffer, resolution, texture)
+class ParticleTransparentTexture(buffer: ByteBuffer,
+                                 width: Int,
+                                 height: Int,
+                                 texture: () -> Texture) : TextureAtlasEngineEntry(
+        buffer, width, height, texture)

@@ -264,7 +264,7 @@ class WorldClient(val connection: ClientConnection,
                     sunlightNormal.floatY(), sunlightNormal.floatZ())
             shaderEntity.setUniform1f(10, playerLight)
             gl.setBlending(BlendingMode.NONE)
-            scene.terrainTextureRegistry().texture().bind(gl)
+            scene.terrainTextureRegistry().texture.bind(gl)
             terrain.renderer.render(gl, shaderTerrain1, shaderTerrain2, cam,
                     debug)
             gl.setBlending(BlendingMode.NORMAL)
@@ -276,7 +276,7 @@ class WorldClient(val connection: ClientConnection,
                 it.shapeAABB(aabb)
                 cam.frustum.inView(aabb) != 0
             }) { it.render(gl, this, cam, shaderEntity) }
-            scene.terrainTextureRegistry().texture().bind(gl)
+            scene.terrainTextureRegistry().texture.bind(gl)
             terrain.renderer.renderAlpha(gl, shaderTerrain1, shaderTerrain2,
                     cam)
             renderParticles()

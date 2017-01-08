@@ -18,10 +18,10 @@ package org.tobi29.scapes.block
 
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.graphics.TextureAtlas
+import org.tobi29.scapes.engine.graphics.TextureAtlasEngine
 
-class TerrainTextureRegistry(engine: ScapesEngine) : TextureAtlas<TerrainTexture>(
-        engine, 4) {
+class TerrainTextureRegistry(engine: ScapesEngine) : TextureAtlasEngine<TerrainTexture>(
+        engine, 16) {
 
     fun registerTexture(vararg paths: String): TerrainTexture {
         return registerTexture(paths, false, ShaderAnimation.NONE)
@@ -51,10 +51,10 @@ class TerrainTextureRegistry(engine: ScapesEngine) : TextureAtlas<TerrainTexture
         val image = load(paths)
         val texture = if (animated) {
             AnimatedTerrainTexture(image.buffer, image.width, image.height,
-                    shaderAnimation, engine, { texture() })
+                    shaderAnimation, engine, { texture })
         } else {
-            TerrainTexture(image.buffer, image.width, shaderAnimation,
-                    { texture() })
+            TerrainTexture(image.buffer, image.width, image.height,
+                    shaderAnimation, { texture })
         }
         textures[path] = texture
         return texture

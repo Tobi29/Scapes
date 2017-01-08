@@ -85,11 +85,11 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
         skybox = world.environment.createSkybox(world)
         // TODO: Move somewhere better
         particles.register(ParticleEmitterBlock(particles,
-                terrainTextureRegistry.texture()))
+                terrainTextureRegistry.texture))
         particles.register(ParticleEmitter3DBlock(particles))
         particles.register(ParticleEmitterFallenBodyPart(particles))
         particles.register(ParticleEmitterTransparent(particles,
-                world.game.particleTransparentAtlas().texture()))
+                world.game.particleTransparentAtlas().texture))
 
         val hud = world.game.hud()
         hud.removeAll()

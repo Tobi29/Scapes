@@ -18,13 +18,16 @@ package org.tobi29.scapes.block
 
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Texture
-import org.tobi29.scapes.engine.graphics.TextureAtlasEntry
+import org.tobi29.scapes.engine.graphics.TextureAtlasEngineEntry
 
 import java.nio.ByteBuffer
 
-open class TerrainTexture(buffer: ByteBuffer, resolution: Int,
-                          protected val shaderAnimation: ShaderAnimation, texture: () -> Texture) : TextureAtlasEntry(
-        buffer, resolution, texture) {
+open class TerrainTexture(buffer: ByteBuffer?,
+                          width: Int,
+                          height: Int,
+                          protected val shaderAnimation: ShaderAnimation,
+                          texture: () -> Texture) : TextureAtlasEngineEntry(
+        buffer, width, height, texture) {
 
     fun shaderAnimation(): ShaderAnimation {
         return shaderAnimation

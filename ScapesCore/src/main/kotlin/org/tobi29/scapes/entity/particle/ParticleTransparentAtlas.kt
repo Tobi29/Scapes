@@ -15,11 +15,11 @@
  */
 package org.tobi29.scapes.entity.particle
 
-import org.tobi29.scapes.engine.graphics.TextureAtlas
 import org.tobi29.scapes.engine.ScapesEngine
+import org.tobi29.scapes.engine.graphics.TextureAtlasEngine
 
-class ParticleTransparentAtlas(engine: ScapesEngine) : TextureAtlas<ParticleTransparentTexture>(
-        engine, 4) {
+class ParticleTransparentAtlas(engine: ScapesEngine) : TextureAtlasEngine<ParticleTransparentTexture>(
+        engine, 16) {
 
     fun registerTexture(path: String): ParticleTransparentTexture {
         var texture: ParticleTransparentTexture? = textures[path]
@@ -28,7 +28,7 @@ class ParticleTransparentAtlas(engine: ScapesEngine) : TextureAtlas<ParticleTran
         }
         val image = load(path)
         texture = ParticleTransparentTexture(image.buffer,
-                image.width) { texture() }
+                image.width, image.height) { this.texture }
         textures.put(path, texture)
         return texture
     }

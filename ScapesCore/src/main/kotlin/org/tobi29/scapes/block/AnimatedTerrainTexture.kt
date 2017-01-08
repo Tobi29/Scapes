@@ -23,9 +23,13 @@ import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.engine.utils.toArray
 import java.nio.ByteBuffer
 
-class AnimatedTerrainTexture(buffer: ByteBuffer, width: Int, height: Int,
-                             shaderAnimation: ShaderAnimation, engine: ScapesEngine, texture: () -> Texture) : TerrainTexture(
-        buffer, width, shaderAnimation, texture) {
+class AnimatedTerrainTexture(buffer: ByteBuffer,
+                             width: Int,
+                             height: Int,
+                             shaderAnimation: ShaderAnimation,
+                             engine: ScapesEngine,
+                             texture: () -> Texture) : TerrainTexture(
+        null, width, width, shaderAnimation, texture) {
     private val frames: Array<Array<ByteBuffer?>>
     private var dirty = true
     private var spin: Double = 0.0
@@ -43,8 +47,7 @@ class AnimatedTerrainTexture(buffer: ByteBuffer, width: Int, height: Int,
     override fun renderAnim(gl: GL) {
         if (dirty) {
             texture().bind(gl)
-            gl.replaceTextureMipMap(tileX, tileY, resolution, resolution,
-                    *frames[i])
+            gl.replaceTextureMipMap(x, y, width, height, *frames[i])
             dirty = false
         }
     }

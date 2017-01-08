@@ -15,6 +15,8 @@
  */
 package org.tobi29.scapes.entity.particle
 
+import org.tobi29.scapes.engine.utils.graphics.marginX
+import org.tobi29.scapes.engine.utils.graphics.marginY
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector2d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 
@@ -56,7 +58,7 @@ class ParticleInstanceTransparent : ParticleInstance() {
     }
 
     fun setTexture(texture: ParticleTransparentTexture) {
-        textureOffset.set(texture.x(), texture.y())
-        textureSize.set(texture.size(), texture.size())
+        textureOffset.set(texture.marginX(0.0), texture.marginY(0.0))
+        textureSize.set(texture.marginX(1.0), texture.marginY(1.0))
     }
 }
