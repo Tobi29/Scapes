@@ -6,6 +6,7 @@ import org.tobi29.scapes.engine.server.ControlPanelProtocol
 import org.tobi29.scapes.engine.server.RemoteAddress
 import org.tobi29.scapes.engine.swt.util.Shortcut
 import org.tobi29.scapes.engine.swt.util.framework.Document
+import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
 import org.tobi29.scapes.tools.controlpanel.extensions.*
@@ -33,7 +34,7 @@ class ControlPanelDocument(address: RemoteAddress,
         extensions.clear()
     }
 
-    override fun populate(composite: Composite,
+    override fun populate(composite: DocumentComposite,
                           menu: SmartMenuBar,
                           application: MultiDocumentApplication) {
         assert(extensions.isEmpty())

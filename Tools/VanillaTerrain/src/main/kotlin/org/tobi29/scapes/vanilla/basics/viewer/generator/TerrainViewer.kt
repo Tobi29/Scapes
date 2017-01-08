@@ -16,8 +16,8 @@
 
 package org.tobi29.scapes.vanilla.basics.viewer.generator
 
-import org.eclipse.swt.widgets.Composite
 import org.tobi29.scapes.engine.swt.util.framework.Document
+import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
 import org.tobi29.scapes.engine.utils.version
@@ -39,7 +39,7 @@ class TerrainViewer : MultiDocumentApplication("Scapes Terrain Viewer",
     override fun dispose() {
     }
 
-    override fun populate(composite: Composite,
+    override fun populate(composite: DocumentComposite,
                           menu: SmartMenuBar) {
         val view = menu.menu("View")
         view.action("Terrain") { openNewTab(composite, openTerrain()) }

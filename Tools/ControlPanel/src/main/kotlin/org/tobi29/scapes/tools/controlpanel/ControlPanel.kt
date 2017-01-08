@@ -18,13 +18,13 @@ package org.tobi29.scapes.tools.controlpanel
 import org.eclipse.swt.SWT
 import org.eclipse.swt.layout.GridData
 import org.eclipse.swt.widgets.Button
-import org.eclipse.swt.widgets.Composite
 import org.eclipse.swt.widgets.Spinner
 import org.eclipse.swt.widgets.Text
 import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.server.RemoteAddress
 import org.tobi29.scapes.engine.server.SSLProvider
 import org.tobi29.scapes.engine.swt.util.Shortcut
+import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.InputDialog
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
@@ -50,7 +50,7 @@ class ControlPanel : MultiDocumentApplication("Scapes Control Panel",
         connection.stop()
     }
 
-    override fun populate(composite: Composite,
+    override fun populate(composite: DocumentComposite,
                           menu: SmartMenuBar) {
         val connection = menu.menu("Connection")
         connection.action("Connect...", {

@@ -20,6 +20,7 @@ import org.eclipse.swt.SWT
 import org.eclipse.swt.layout.FillLayout
 import org.eclipse.swt.widgets.Composite
 import org.tobi29.scapes.engine.swt.util.framework.Document
+import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
 
@@ -35,7 +36,7 @@ open class TerrainViewerDocument(
         canvas = null
     }
 
-    override fun populate(composite: Composite,
+    override fun populate(composite: DocumentComposite,
                           menu: SmartMenuBar,
                           application: MultiDocumentApplication) {
         composite.layout = FillLayout()

@@ -9,6 +9,7 @@ import org.eclipse.swt.widgets.MenuItem
 import org.eclipse.swt.widgets.ProgressBar
 import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.swt.util.framework.Document
+import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
 import org.tobi29.scapes.engine.utils.filterMap
@@ -87,7 +88,7 @@ class ConnectDocument(private val address: RemoteAddress,
     override fun destroy() {
     }
 
-    override fun populate(composite: Composite,
+    override fun populate(composite: DocumentComposite,
                           menu: SmartMenuBar,
                           application: MultiDocumentApplication) {
         val connection = menu.menu("Connection")

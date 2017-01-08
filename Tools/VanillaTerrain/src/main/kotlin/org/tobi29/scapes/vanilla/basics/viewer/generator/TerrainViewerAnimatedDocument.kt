@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.vanilla.basics.viewer.generator
 
-import org.eclipse.swt.widgets.Composite
+import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
 import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
@@ -23,7 +23,7 @@ import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
 class TerrainViewerAnimatedDocument(colorSupplier: () -> TerrainViewerCanvas.ColorSupplier,
                                     private val progress: () -> Unit) : TerrainViewerDocument(
         colorSupplier) {
-    override fun populate(composite: Composite,
+    override fun populate(composite: DocumentComposite,
                           menu: SmartMenuBar,
                           application: MultiDocumentApplication) {
         super.populate(composite, menu, application)
