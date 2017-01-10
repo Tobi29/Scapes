@@ -173,12 +173,6 @@ abstract class MobPlayerClientMain(world: WorldClient,
                 for (i in 0..amount - 1) {
                     emitter.add { instance ->
                         val random = ThreadLocalRandom.current()
-                        val tx = (random.nextInt(
-                                3) + 0.005) * texture.textureWidth * 0.25 + texture.textureX
-                        val ty = (random.nextInt(
-                                3) + 0.005) * texture.textureHeight * 0.25 + texture.textureY
-                        val tw = texture.textureWidth * 0.99
-                        val th = texture.textureHeight * 0.99
                         val time = 3.0f
                         instance.pos.set(blockPos)
                         instance.pos.plus(Vector3d(random.nextDouble(),
@@ -189,8 +183,7 @@ abstract class MobPlayerClientMain(world: WorldClient,
                         instance.time = time
                         instance.friction = friction
                         instance.dir = random.nextFloat() * TWO_PI.toFloat()
-                        instance.textureOffset.set(Vector2d(tx, ty))
-                        instance.textureSize.set(Vector2d(tw, th))
+                        instance.setTexture(texture, random)
                         instance.setColor(r, g, b, 1.0f)
                     }
                 }

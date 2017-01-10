@@ -15,8 +15,12 @@
  */
 package org.tobi29.scapes.entity.particle
 
+import org.tobi29.scapes.block.TerrainTexture
+import org.tobi29.scapes.engine.utils.graphics.marginX
+import org.tobi29.scapes.engine.utils.graphics.marginY
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector2d
+import java.util.*
 
 class ParticleInstanceBlock : ParticleInstance() {
     val textureOffset = MutableVector2d()
@@ -43,5 +47,26 @@ class ParticleInstanceBlock : ParticleInstance() {
         this.g = round(g * 255.0).toByte()
         this.b = round(b * 255.0).toByte()
         this.a = round(a * 255.0).toByte()
+    }
+
+    fun setTexture(texture: TerrainTexture,
+                   random: Random) {
+        val size = 0.25
+        val rx = random.nextInt(4) * size
+        val ry = random.nextInt(4) * size
+        setTexture(texture, rx, ry, rx + size, ry + size)
+    }
+
+    fun setTexture(texture: TerrainTexture,
+                   tMinX: Double,
+                   tMinY: Double,
+                   tMaxX: Double,
+                   tMaxY: Double) {
+        val texMinX = texture.marginX(tMinX)
+        val texMaxX = texture.marginX(tMaxX)
+        val texMinY = texture.marginY(tMinY)
+        val texMaxY = texture.marginY(tMaxY)
+        textureOffset.set(texMinX, texMinY)
+        textureSize.set(texMaxX - texMinX, texMaxY - texMinY)
     }
 }
