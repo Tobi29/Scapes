@@ -57,8 +57,16 @@ class ParticleInstanceTransparent : ParticleInstance() {
         this.waterFriction = waterFriction
     }
 
-    fun setTexture(texture: ParticleTransparentTexture) {
-        textureOffset.set(texture.marginX(0.0), texture.marginY(0.0))
-        textureSize.set(texture.marginX(1.0), texture.marginY(1.0))
+    fun setTexture(texture: ParticleTransparentTexture,
+                   tMinX: Double = 0.0,
+                   tMinY: Double = 0.0,
+                   tMaxX: Double = 1.0,
+                   tMaxY: Double = 1.0) {
+        val texMinX = texture.marginX(tMinX)
+        val texMaxX = texture.marginX(tMaxX)
+        val texMinY = texture.marginY(tMinY)
+        val texMaxY = texture.marginY(tMaxY)
+        textureOffset.set(texMinX, texMinY)
+        textureSize.set(texMaxX - texMinX, texMaxY - texMinY)
     }
 }
