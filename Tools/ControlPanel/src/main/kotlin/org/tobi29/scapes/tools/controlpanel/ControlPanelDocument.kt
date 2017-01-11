@@ -1,7 +1,6 @@
 package org.tobi29.scapes.tools.controlpanel
 
 import org.eclipse.swt.layout.FillLayout
-import org.eclipse.swt.widgets.Composite
 import org.tobi29.scapes.engine.server.ControlPanelProtocol
 import org.tobi29.scapes.engine.server.RemoteAddress
 import org.tobi29.scapes.engine.swt.util.Shortcut
