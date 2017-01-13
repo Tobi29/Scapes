@@ -33,7 +33,7 @@ import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.*
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
-import org.tobi29.scapes.engine.utils.task.Joiner
+import org.tobi29.scapes.engine.utils.task.ThreadJoiner
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.server.format.TerrainInfiniteFormat
@@ -54,13 +54,13 @@ class TerrainInfiniteServer(override val world: WorldServer,
     private val chunkUnloadQueue = ConcurrentLinkedQueue<TerrainInfiniteChunkServer>()
     private val chunkManager: TerrainInfiniteChunkManagerServer
     private val generatorOutput: GeneratorOutput
-    private val updateJoiner: Joiner
-    private val joiner: Joiner
+    private val loadJoiner: ThreadJoiner
+    private val updateJoiner: ThreadJoiner
 
     init {
         chunkManager = TerrainInfiniteChunkManagerServer()
         generatorOutput = GeneratorOutput(zSize)
-        val loadJoiner = world.taskExecutor.runThread({ joiner ->
+        loadJoiner = world.taskExecutor.runThread({ joiner ->
             val requiredChunks = HashSet<Vector2i>()
             val loadingChunks = ArrayList<Vector2i>()
             while (!joiner.marked) {
@@ -142,7 +142,6 @@ class TerrainInfiniteServer(override val world: WorldServer,
                 }
             }
         }, "Chunk-Updating")
-        joiner = Joiner(loadJoiner, updateJoiner)
     }
 
     override fun sunLightReduction(x: Int,
@@ -295,6 +294,7 @@ class TerrainInfiniteServer(override val world: WorldServer,
     }
 
     override fun queue(blockChanges: (TerrainServer.TerrainMutable) -> Unit) {
+        assert(world.checkThread() || Thread.currentThread().let { it == loadJoiner.thread || it == updateJoiner.thread })
         this.blockChanges.add(blockChanges)
         updateJoiner.wake()
     }
@@ -348,7 +348,8 @@ class TerrainInfiniteServer(override val world: WorldServer,
     }
 
     override fun dispose() {
-        joiner.join()
+        loadJoiner.join()
+        updateJoiner.join()
         lighting.dispose()
         chunkManager.stream().forEach { chunkUnloadQueue.add(it) }
         removeChunks()
