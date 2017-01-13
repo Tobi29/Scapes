@@ -30,7 +30,8 @@ import org.tobi29.scapes.entity.particle.ParticlePhysics
 import org.tobi29.scapes.entity.particle.ParticleSystem
 import java.util.*
 
-class ParticleEmitterSnow(system: ParticleSystem, texture: Texture) : ParticleEmitterInstanced<ParticleInstanceSnow>(
+class ParticleEmitterSnow(system: ParticleSystem,
+                          texture: Texture) : ParticleEmitterInstanced<ParticleInstanceSnow>(
         system, texture, ParticleEmitterSnow.createAttributes(), 6,
         ParticleEmitterSnow.createAttributesStream(), RenderType.TRIANGLES,
         Array(4096, { ParticleInstanceSnow() })) {
@@ -71,7 +72,7 @@ class ParticleEmitterSnow(system: ParticleSystem, texture: Texture) : ParticleEm
                                width: Int,
                                height: Int,
                                cam: Cam): ((Shader) -> Unit) -> Unit {
-        val shader = gl.engine.graphics.createShader(
+        val shader = gl.engine.graphics.loadShader(
                 "VanillaBasics:shader/ParticleSnow") {
             supplyPreCompile {
                 supplyProperty("SCENE_WIDTH", width)
@@ -91,12 +92,13 @@ class ParticleEmitterSnow(system: ParticleSystem, texture: Texture) : ParticleEm
                             player.leftWeapon()),
                     player.rightWeapon().material().playerLight(
                             player.rightWeapon()))
-            shader.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB())
-            shader.setUniform1f(5, scene.fogDistance() * scene.renderDistance())
-            shader.setUniform1i(6, 1)
-            shader.setUniform1f(7, sunLightReduction)
-            shader.setUniform1f(8, playerLight)
-            render(shader)
+            val s = shader.get()
+            s.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB())
+            s.setUniform1f(5, scene.fogDistance() * scene.renderDistance())
+            s.setUniform1i(6, 1)
+            s.setUniform1f(7, sunLightReduction)
+            s.setUniform1f(8, playerLight)
+            render(s)
         }
     }
 

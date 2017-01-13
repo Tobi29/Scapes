@@ -189,7 +189,7 @@ class WorldClient(val connection: ClientConnection,
         val scapesTag = game.engine.tagStructure.getStructure("Scapes")
         val animations = scapesTag?.getBoolean("Animations") ?: false
 
-        val shaderTerrain1 = gl.engine.graphics.createShader(
+        val shaderTerrain1 = gl.engine.graphics.loadShader(
                 "Scapes:shader/Terrain") {
             supplyPreCompile {
                 supplyProperty("SCENE_WIDTH", width)
@@ -199,7 +199,7 @@ class WorldClient(val connection: ClientConnection,
                 supplyProperty("LOD_HIGH", true)
             }
         }
-        val shaderTerrain2 = gl.engine.graphics.createShader(
+        val shaderTerrain2 = gl.engine.graphics.loadShader(
                 "Scapes:shader/Terrain") {
             supplyPreCompile {
                 supplyProperty("SCENE_WIDTH", width)
@@ -209,7 +209,7 @@ class WorldClient(val connection: ClientConnection,
                 supplyProperty("LOD_HIGH", false)
             }
         }
-        val shaderEntity = gl.engine.graphics.createShader(
+        val shaderEntity = gl.engine.graphics.loadShader(
                 "Scapes:shader/Entity") {
             supplyPreCompile {
                 supplyProperty("SCENE_WIDTH", width)
@@ -233,51 +233,54 @@ class WorldClient(val connection: ClientConnection,
             val sunlightNormal = environment.sunLightNormal(
                     cam.position.doubleX(),
                     cam.position.doubleY())
-            shaderTerrain1.setUniform3f(4, scene.fogR(), scene.fogG(),
+            val sTerrain1 = shaderTerrain1.get()
+            sTerrain1.setUniform3f(4, scene.fogR(), scene.fogG(),
                     scene.fogB())
-            shaderTerrain1.setUniform1f(5,
+            sTerrain1.setUniform1f(5,
                     scene.fogDistance() * scene.renderDistance())
-            shaderTerrain1.setUniform1i(6, 1)
-            shaderTerrain1.setUniform1f(7, time)
-            shaderTerrain1.setUniform1f(8, sunLightReduction)
-            shaderTerrain1.setUniform3f(9, sunlightNormal.floatX(),
+            sTerrain1.setUniform1i(6, 1)
+            sTerrain1.setUniform1f(7, time)
+            sTerrain1.setUniform1f(8, sunLightReduction)
+            sTerrain1.setUniform3f(9, sunlightNormal.floatX(),
                     sunlightNormal.floatY(), sunlightNormal.floatZ())
-            shaderTerrain1.setUniform1f(10, playerLight)
-            shaderTerrain2.setUniform3f(4, scene.fogR(), scene.fogG(),
+            sTerrain1.setUniform1f(10, playerLight)
+            val sTerrain2 = shaderTerrain2.get()
+            sTerrain2.setUniform3f(4, scene.fogR(), scene.fogG(),
                     scene.fogB())
-            shaderTerrain2.setUniform1f(5,
+            sTerrain2.setUniform1f(5,
                     scene.fogDistance() * scene.renderDistance())
-            shaderTerrain2.setUniform1i(6, 1)
-            shaderTerrain2.setUniform1f(7, time)
-            shaderTerrain2.setUniform1f(8, sunLightReduction)
-            shaderTerrain2.setUniform3f(9, sunlightNormal.floatX(),
+            sTerrain2.setUniform1i(6, 1)
+            sTerrain2.setUniform1f(7, time)
+            sTerrain2.setUniform1f(8, sunLightReduction)
+            sTerrain2.setUniform3f(9, sunlightNormal.floatX(),
                     sunlightNormal.floatY(), sunlightNormal.floatZ())
-            shaderTerrain2.setUniform1f(10, playerLight)
-            shaderEntity.setUniform3f(4, scene.fogR(), scene.fogG(),
+            sTerrain2.setUniform1f(10, playerLight)
+            val sEntity = shaderEntity.get()
+            sEntity.setUniform3f(4, scene.fogR(), scene.fogG(),
                     scene.fogB())
-            shaderEntity.setUniform1f(5,
+            sEntity.setUniform1f(5,
                     scene.fogDistance() * scene.renderDistance())
-            shaderEntity.setUniform1i(6, 1)
-            shaderEntity.setUniform1f(7, time)
-            shaderEntity.setUniform1f(8, sunLightReduction)
-            shaderEntity.setUniform3f(9, sunlightNormal.floatX(),
+            sEntity.setUniform1i(6, 1)
+            sEntity.setUniform1f(7, time)
+            sEntity.setUniform1f(8, sunLightReduction)
+            sEntity.setUniform3f(9, sunlightNormal.floatX(),
                     sunlightNormal.floatY(), sunlightNormal.floatZ())
-            shaderEntity.setUniform1f(10, playerLight)
+            sEntity.setUniform1f(10, playerLight)
             gl.setBlending(BlendingMode.NONE)
             scene.terrainTextureRegistry().texture.bind(gl)
-            terrain.renderer.render(gl, shaderTerrain1, shaderTerrain2, cam,
+            terrain.renderer.render(gl, sTerrain1, sTerrain2, cam,
                     debug)
             gl.setBlending(BlendingMode.NORMAL)
             if (game.hud().visible) {
-                playerModel?.render(gl, this, cam, shaderEntity)
+                playerModel?.render(gl, this, cam, sEntity)
             }
             val aabb = AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
             entityModels.values.forEach({
                 it.shapeAABB(aabb)
                 cam.frustum.inView(aabb) != 0
-            }) { it.render(gl, this, cam, shaderEntity) }
+            }) { it.render(gl, this, cam, sEntity) }
             scene.terrainTextureRegistry().texture.bind(gl)
-            terrain.renderer.renderAlpha(gl, shaderTerrain1, shaderTerrain2,
+            terrain.renderer.renderAlpha(gl, sTerrain1, sTerrain2,
                     cam)
             renderParticles()
         }

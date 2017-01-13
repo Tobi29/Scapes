@@ -23,7 +23,8 @@ import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
 import org.tobi29.scapes.engine.utils.math.vector.length
 import java.util.*
 
-class ParticleEmitterTransparent(system: ParticleSystem, texture: Texture) : ParticleEmitterInstanced<ParticleInstanceTransparent>(
+class ParticleEmitterTransparent(system: ParticleSystem,
+                                 texture: Texture) : ParticleEmitterInstanced<ParticleInstanceTransparent>(
         system, texture, ParticleEmitterTransparent.createAttributes(), 6,
         ParticleEmitterTransparent.createAttributesStream(),
         RenderType.TRIANGLES, Array(10240, { ParticleInstanceTransparent() })) {
@@ -38,7 +39,7 @@ class ParticleEmitterTransparent(system: ParticleSystem, texture: Texture) : Par
                                width: Int,
                                height: Int,
                                cam: Cam): ((Shader) -> Unit) -> Unit {
-        val shader = gl.engine.graphics.createShader(
+        val shader = gl.engine.graphics.loadShader(
                 "Scapes:shader/ParticleTransparent") {
             supplyPreCompile {
                 supplyProperty("SCENE_WIDTH", width)
@@ -58,12 +59,13 @@ class ParticleEmitterTransparent(system: ParticleSystem, texture: Texture) : Par
                             player.leftWeapon()),
                     player.rightWeapon().material().playerLight(
                             player.rightWeapon()))
-            shader.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB())
-            shader.setUniform1f(5, scene.fogDistance() * scene.renderDistance())
-            shader.setUniform1i(6, 1)
-            shader.setUniform1f(7, sunLightReduction)
-            shader.setUniform1f(8, playerLight)
-            render(shader)
+            val s = shader.get()
+            s.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB())
+            s.setUniform1f(5, scene.fogDistance() * scene.renderDistance())
+            s.setUniform1i(6, 1)
+            s.setUniform1f(7, sunLightReduction)
+            s.setUniform1f(8, playerLight)
+            render(s)
         }
     }
 

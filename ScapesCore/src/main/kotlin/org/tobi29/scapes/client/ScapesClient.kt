@@ -39,7 +39,6 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class ScapesClient(engine: ScapesEngine,
-                   private val skipIntro: Boolean,
                    private val savesSupplier: (ScapesClient) -> SaveStorage) : Game(
         engine) {
     val connection = ConnectionManager(engine.taskExecutor, 10)
@@ -83,12 +82,7 @@ class ScapesClient(engine: ScapesEngine,
 
     override fun init() {
         connection.workers(1)
-        if (skipIntro) {
-            engine.switchState(GameStateMenu(engine))
-        } else {
-            engine.switchState(GameStateStartup(GameStateMenu(engine),
-                    "Engine:image/Logo", 0.5, engine))
-        }
+        engine.switchState(GameStateStartup(engine) { GameStateMenu(engine) })
     }
 
     override fun initLate() {

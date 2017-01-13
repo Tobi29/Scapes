@@ -49,19 +49,17 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
     }
 
     override fun appendToPipeline(gl: GL): () -> Unit {
-        val shaderBlur1 = gl.engine.graphics.createShader(
-                "Scapes:shader/Menu1") {
+        val shaderBlur1 = gl.engine.graphics.loadShader("Scapes:shader/Menu1") {
             supplyPreCompile { gl ->
                 blur(gl, this)
             }
         }
-        val shaderBlur2 = gl.engine.graphics.createShader(
-                "Scapes:shader/Menu2") {
+        val shaderBlur2 = gl.engine.graphics.loadShader("Scapes:shader/Menu2") {
             supplyPreCompile { gl ->
                 blur(gl, this)
             }
         }
-        val shaderTextured = gl.engine.graphics.createShader(
+        val shaderTextured = gl.engine.graphics.loadShader(
                 "Engine:shader/Textured")
         val model = createVTI(engine,
                 floatArrayOf(-1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f,
@@ -81,7 +79,8 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
             if (save != null) {
                 changeBackground(save)
             }
-            cam.setPerspective(gl.sceneWidth().toFloat() / gl.sceneHeight(), 90.0f)
+            cam.setPerspective(gl.sceneWidth().toFloat() / gl.sceneHeight(),
+                    90.0f)
             cam.setView(0.0f, yaw, 0.0f)
             gl.setProjectionPerspective(gl.sceneWidth().toFloat(),
                     gl.sceneHeight().toFloat(), cam)
@@ -102,8 +101,9 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
                         matrix.rotate(-90.0f, 1.0f, 0.0f, 0.0f)
                     }
                     texture.bind(gl)
-                    gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f)
-                    model.render(gl, shaderTextured)
+                    gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
+                            1.0f)
+                    model.render(gl, shaderTextured.get())
                     matrixStack.pop()
                 }
             }

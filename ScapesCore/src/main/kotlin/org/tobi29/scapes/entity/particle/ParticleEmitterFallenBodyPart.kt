@@ -62,7 +62,7 @@ class ParticleEmitterFallenBodyPart(system: ParticleSystem) : ParticleEmitter<Pa
                                width: Int,
                                height: Int,
                                cam: Cam): () -> Unit {
-        val shader = gl.engine.graphics.createShader("Scapes:shader/Entity") {
+        val shader = gl.engine.graphics.loadShader("Scapes:shader/Entity") {
             supplyPreCompile {
                 supplyProperty("SCENE_WIDTH", width)
                 supplyProperty("SCENE_HEIGHT", height)
@@ -74,6 +74,7 @@ class ParticleEmitterFallenBodyPart(system: ParticleSystem) : ParticleEmitter<Pa
             }
             val world = system.world
             val terrain = world.terrain
+            val s = shader.get()
             for (instance in instances) {
                 if (instance.state != ParticleInstance.State.ALIVE) {
                     continue
@@ -96,7 +97,7 @@ class ParticleEmitterFallenBodyPart(system: ParticleSystem) : ParticleEmitter<Pa
                     gl.setAttribute2f(4,
                             world.terrain.blockLight(x, y, z) / 15.0f,
                             world.terrain.sunLight(x, y, z) / 15.0f)
-                    instance.box.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader)
+                    instance.box.render(1.0f, 1.0f, 1.0f, 1.0f, gl, s)
                     matrixStack.pop()
                 }
             }

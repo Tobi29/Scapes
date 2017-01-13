@@ -38,7 +38,6 @@ fun main(args: Array<String>) {
         addOption("d", "debug", false, "Run in debug mode")
         addOption("r", "socketsp", false, "Use network socket for singleplayer")
         addOption("t", "touch", false, "Emulate touch interface")
-        addOption("s", "skipintro", false, "Skip client intro")
         addOption("c", "config", true, "Config directory for server")
     }
     val parser = DefaultParser()
@@ -89,7 +88,7 @@ fun main(args: Array<String>) {
                 backend = ScapesEngine.emulateTouch(backend)
             }
             val engine = ScapesEngine(
-                    { ScapesClient(it, commandLine.hasOption('s'), saves) },
+                    { ScapesClient(it, saves) },
                     backend,
                     home, Debug.enabled())
             System.exit(engine.run())

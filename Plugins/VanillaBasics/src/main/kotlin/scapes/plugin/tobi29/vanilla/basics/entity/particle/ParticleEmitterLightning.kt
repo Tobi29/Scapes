@@ -168,7 +168,7 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
                                width: Int,
                                height: Int,
                                cam: Cam): () -> Unit {
-        val shader = gl.engine.graphics.createShader(
+        val shader = gl.engine.graphics.loadShader(
                 "VanillaBasics:shader/ParticleLightning") {
             supplyPreCompile {
                 supplyProperty("SCENE_WIDTH", width)
@@ -182,6 +182,7 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
             val world = system.world
             val terrain = world.terrain
             gl.textures().unbind(gl)
+            val s = shader.get()
             for (instance in instances) {
                 if (instance.state != ParticleInstance.State.ALIVE) {
                     continue
@@ -198,12 +199,13 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
                     val matrixStack = gl.matrixStack()
                     val matrix = matrixStack.push()
                     matrix.translate(posRenderX, posRenderY, posRenderZ)
-                    models[instance.vao].render(gl, shader)
+                    models[instance.vao].render(gl, s)
                     matrixStack.pop()
                 }
             }
         }
     }
 
-    private class Line(val start: Vector3d, val end: Vector3d)
+    private class Line(val start: Vector3d,
+                       val end: Vector3d)
 }

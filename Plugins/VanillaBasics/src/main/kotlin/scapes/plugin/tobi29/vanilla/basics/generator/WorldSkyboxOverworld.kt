@@ -335,13 +335,13 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                                   cam: Cam): () -> Unit {
         val scene = world.scene
         val player = world.player
-        val shaderSkybox = gl.engine.graphics.createShader(
+        val shaderSkybox = gl.engine.graphics.loadShader(
                 "VanillaBasics:shader/Skybox")
-        val shaderGlow = gl.engine.graphics.createShader(
+        val shaderGlow = gl.engine.graphics.loadShader(
                 "VanillaBasics:shader/Glow")
-        val shaderClouds = gl.engine.graphics.createShader(
+        val shaderClouds = gl.engine.graphics.loadShader(
                 "VanillaBasics:shader/Clouds")
-        val shaderTextured = gl.engine.graphics.createShader(
+        val shaderTextured = gl.engine.graphics.loadShader(
                 "Engine:shader/Textured")
         val render: () -> Unit = {
             val matrixStack = gl.matrixStack()
@@ -358,12 +358,13 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
             // Sky
             gl.textures().unbind(gl)
             gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f)
-            shaderSkybox.setUniform3f(4, scene.fogR(), scene.fogG(),
-                    scene.fogB())
-            shaderSkybox.setUniform1f(5, scene.fogDistance())
-            shaderSkybox.setUniform4f(6, skyboxLight * skyboxLight, skyboxLight,
+            val sSkybox = shaderSkybox.get()
+            sSkybox.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB())
+            sSkybox.setUniform1f(5, scene.fogDistance())
+            sSkybox.setUniform4f(6, skyboxLight * skyboxLight, skyboxLight,
                     skyboxLight, 1.0f)
-            skyboxMesh.render(gl, shaderSkybox)
+            skyboxMesh.render(gl, sSkybox)
+            val sGlow = shaderGlow.get()
             // Stars
             if (skyLight < 1.0f) {
                 val random = ThreadLocalRandom.current()
@@ -371,12 +372,11 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                 val brightness = max(
                         1.0f - skyLight - random.nextFloat() * 0.1f,
                         0.0f)
-                shaderGlow.setUniform4f(4, brightness, brightness, brightness,
-                        1.0f)
+                sGlow.setUniform4f(4, brightness, brightness, brightness, 1.0f)
                 val matrix = matrixStack.push()
                 matrix.rotateAccurate(sunAzimuth + 180.0, 0.0f, 0.0f, 1.0f)
                 matrix.rotateAccurate(-sunElevation, 1.0f, 0.0f, 0.0f)
-                starMesh.render(gl, shaderGlow)
+                starMesh.render(gl, sGlow)
                 matrixStack.pop()
             } else {
                 gl.setBlending(BlendingMode.ADD)
@@ -386,13 +386,13 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
             matrix.rotateAccurate(sunAzimuth + 180.0f, 0.0f, 0.0f, 1.0f)
             matrix.rotateAccurate(-sunElevation, 1.0f, 0.0f, 0.0f)
             matrix.scale(1.0f, 1.0f, 1.0f)
-            shaderGlow.setUniform4f(4, fogR * 1.0f, fogG * 1.1f, fogB * 1.1f,
+            sGlow.setUniform4f(4, fogR * 1.0f, fogG * 1.1f, fogB * 1.1f,
                     1.0f)
-            billboardMesh.render(gl, shaderGlow)
+            billboardMesh.render(gl, sGlow)
             matrix.scale(0.2f, 1.0f, 0.2f)
-            shaderGlow.setUniform4f(4, fogR * 1.6f, fogG * 1.6f, fogB * 1.3f,
+            sGlow.setUniform4f(4, fogR * 1.6f, fogG * 1.6f, fogB * 1.3f,
                     1.0f)
-            billboardMesh.render(gl, shaderGlow)
+            billboardMesh.render(gl, sGlow)
             matrixStack.pop()
             // Moon
             textureMoon.get().bind(gl)
@@ -400,15 +400,16 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
             matrix.rotateAccurate(sunAzimuth, 0.0f, 0.0f, 1.0f)
             matrix.rotateAccurate(sunElevation, 1.0f, 0.0f, 0.0f)
             matrix.scale(0.1f, 1.0f, 0.1f)
-            billboardMesh.render(gl, shaderTextured)
+            val sTextured = shaderTextured.get()
+            billboardMesh.render(gl, sTextured)
             matrixStack.pop()
             gl.setBlending(BlendingMode.NORMAL)
             // Clouds
             fbo.texturesColor[0].bind(gl)
-            cloudMesh.render(gl, shaderSkybox)
+            cloudMesh.render(gl, sSkybox)
             gl.textures().unbind(gl)
             // Bottom
-            skyboxBottomMesh.render(gl, shaderSkybox)
+            skyboxBottomMesh.render(gl, sSkybox)
         }
         val clouds = gl.into(fbo) {
             val pos = player.getCurrentPos()
@@ -416,12 +417,13 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
             val cloudTime = System.currentTimeMillis() % 1000000 / 1000000.0f
             gl.clear(0.0f, 0.0f, 0.0f, 0.0f)
             gl.setProjectionOrthogonal(0.0f, 0.0f, 1.0f, 1.0f)
-            shaderClouds.setUniform1f(4, cloudTime)
-            shaderClouds.setUniform1f(5, weather.toFloat())
-            shaderClouds.setUniform2f(6,
+            val sClouds = shaderClouds.get()
+            sClouds.setUniform1f(4, cloudTime)
+            sClouds.setUniform1f(5, weather.toFloat())
+            sClouds.setUniform2f(6,
                     (scene.cam().position.doubleX() / 2048.0 % 1024.0).toFloat(),
                     (scene.cam().position.doubleY() / 2048.0 % 1024.0).toFloat())
-            cloudTextureMesh.render(gl, shaderClouds)
+            cloudTextureMesh.render(gl, sClouds)
         }
         return chain(render, clouds)
     }

@@ -84,7 +84,7 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
     fun switchScene(scene: SceneScapesVoxelWorld) {
         this.scene?.dispose()
         this.scene = scene
-        switchPipeline { gl ->
+        switchPipelineWhenLoaded { gl ->
             renderScene(gl, scene)
         }
     }

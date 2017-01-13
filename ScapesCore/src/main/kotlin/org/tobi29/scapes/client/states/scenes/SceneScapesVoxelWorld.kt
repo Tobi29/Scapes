@@ -110,7 +110,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                 gl.sceneWidth(), gl.sceneHeight(), 1, true, true, false)
         val renderScene = render(gl)
         val render = if (fxaa) {
-            val shaderFXAA = gl.engine.graphics.createShader(
+            val shaderFXAA = gl.engine.graphics.loadShader(
                     "Scapes:shader/FXAA") {
                 supplyPreCompile {
                     supplyProperty("SCENE_WIDTH", width)
@@ -128,7 +128,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                         gl.activeTexture(3)
                         textureNoise.get().bind(gl)
                         gl.activeTexture(0)
-                        shaderFXAA.setUniform1i(4, 3)
+                        setUniform1i(4, 3)
                     })
             chain(render, pp)
         } else {
@@ -143,7 +143,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
             null
         }
         val pp = if (bloom) {
-            val shaderComposite1 = gl.engine.graphics.createShader(
+            val shaderComposite1 = gl.engine.graphics.loadShader(
                     "Scapes:shader/Composite1") {
                 supplyPreCompile {
                     supplyProperty("BLUR_OFFSET", BLUR_OFFSET)
@@ -151,7 +151,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                     supplyProperty("BLUR_LENGTH", BLUR_LENGTH)
                 }
             }
-            val shaderComposite2 = gl.engine.graphics.createShader(
+            val shaderComposite2 = gl.engine.graphics.loadShader(
                     "Scapes:shader/Composite2") {
                 supplyPreCompile {
                     supplyProperty("ENABLE_BLOOM", true)
@@ -172,15 +172,15 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                     exposureFBO.texturesColor[0].bind(gl)
                     gl.activeTexture(0)
                 }
-                shaderComposite2.setUniform1f(6, brightness)
-                shaderComposite2.setUniform1f(7, pow(2.0,
-                        skybox.exposure().toDouble()).toFloat())
-                shaderComposite2.setUniform1i(8, 2)
-                shaderComposite2.setUniform1i(9, 3)
+                setUniform1f(6, brightness)
+                setUniform1f(7,
+                        pow(2.0, skybox.exposure().toDouble()).toFloat())
+                setUniform1i(8, 2)
+                setUniform1i(9, 3)
             }
             chain(pp1, pp2)
         } else {
-            val shaderComposite = gl.engine.graphics.createShader(
+            val shaderComposite = gl.engine.graphics.loadShader(
                     "Scapes:shader/Composite2") {
                 supplyPreCompile {
                     supplyProperty("ENABLE_BLOOM", false)
@@ -196,16 +196,16 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                     exposureFBO.texturesColor[0].bind(gl)
                     gl.activeTexture(0)
                 }
-                shaderComposite.setUniform1f(6, brightness)
-                shaderComposite.setUniform1f(7,
+                setUniform1f(6, brightness)
+                setUniform1f(7,
                         pow(2.0, skybox.exposure().toDouble()).toFloat())
-                shaderComposite.setUniform1i(8, 2)
-                shaderComposite.setUniform1i(9, 3)
+                setUniform1i(8, 2)
+                setUniform1i(9, 3)
             }
         }
         if (exposureFBO != null) {
             exposureSync.init()
-            val shaderExposure = gl.engine.graphics.createShader(
+            val shaderExposure = gl.engine.graphics.loadShader(
                     "Scapes:shader/Exposure") {
                 supplyPreCompile {
                     supplyProperty("BLUR_OFFSET", SAMPLE_OFFSET)
@@ -217,7 +217,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                     sceneBuffer) {
                 exposureSync.tick()
                 val delta = exposureSync.delta()
-                shaderExposure.setUniform1f(4, (delta * 0.5).toFloat())
+                setUniform1f(4, (delta * 0.5).toFloat())
             })
             return chain(render, pp, exp)
         } else {
@@ -398,7 +398,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                     height: Int = gl.sceneHeight()): () -> Unit {
         val skyboxFBO = gl.engine.graphics.createFramebuffer(width, height, 1,
                 false, true, false)
-        val shaderTextured = gl.engine.graphics.createShader(
+        val shaderTextured = gl.engine.graphics.loadShader(
                 "Engine:shader/Textured")
         val renderSkybox = skybox.appendToPipeline(gl, cam)
         val renderBackground = gl.into(skyboxFBO) {

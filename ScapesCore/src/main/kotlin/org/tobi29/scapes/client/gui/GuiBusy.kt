@@ -17,13 +17,15 @@
 package org.tobi29.scapes.client.gui
 
 import org.tobi29.scapes.engine.GameState
+import org.tobi29.scapes.engine.gui.GuiComponentBusy
 import org.tobi29.scapes.engine.gui.GuiComponentGroup
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton
 import org.tobi29.scapes.engine.gui.GuiStyle
 
-open class GuiBusy(state: GameState, style: GuiStyle) : GuiDesktop(state,
+open class GuiBusy(state: GameState,
+                   style: GuiStyle) : GuiDesktop(state,
         style) {
-    private val busy: GuiComponentBusy
+    private val busy: org.tobi29.scapes.engine.gui.GuiComponentBusy
     private val label: GuiComponentTextButton
 
     init {

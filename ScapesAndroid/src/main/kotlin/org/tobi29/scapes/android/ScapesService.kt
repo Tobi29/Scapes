@@ -9,9 +9,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 class ScapesService : ScapesEngineService() {
     override fun onCreateEngine(home: FilePath): (ScapesEngine) -> Game {
         return {
-            ScapesClient(it, true) {
-                AndroidSaveStorage(this, home.resolve("saves"))
-            }
+            ScapesClient(it) { AndroidSaveStorage(this, home.resolve("saves")) }
         }
     }
 }

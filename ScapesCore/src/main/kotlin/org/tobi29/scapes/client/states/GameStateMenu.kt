@@ -24,6 +24,7 @@ import org.tobi29.scapes.client.states.scenes.SceneMenu
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
+import org.tobi29.scapes.engine.graphics.busyPipeline
 import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiStyle
@@ -48,6 +49,13 @@ class GameStateMenu(engine: ScapesEngine) : GameState(engine) {
         }
         engine.guiStack.add("10-Menu", menu(account, file, style))
         switchPipeline { gl ->
+            val busy = busyPipeline(gl);
+            {
+                gl.clear(0.0f, 0.0f, 0.0f, 1.0f)
+                busy()
+            }
+        }
+        switchPipelineWhenLoaded { gl ->
             renderScene(gl, scene)
         }
     }
