@@ -6,3 +6,7 @@
     path = ScapesEngineAndroid
     url = https://github.com/Tobi29/ScapesEngineAndroid
     branch = master
+[submodule "buildSrc"]
+	path = buildSrc
+	url = https://github.com/Tobi29/ScapesEngineBuild
+	branch = master
