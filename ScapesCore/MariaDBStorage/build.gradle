@@ -15,6 +15,7 @@
  */
 
 apply from: "$rootDir/ScapesEngine/resources/scapesengineextension.gradle"
+apply plugin: ScapesEngineExtensionLinux
 
 version = "0.0.0"
 

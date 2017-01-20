@@ -15,6 +15,10 @@
  */
 
 apply from: "$rootDir/ScapesEngine/resources/scapesengineapplication.gradle"
+apply plugin: ScapesEngineApplicationLinux
+apply plugin: ScapesEngineApplicationMacOSX
+apply plugin: ScapesEngineApplicationWindows
+
 apply from: "$rootDir/ScapesEngine/Backends/glfw.gradle"
 
 version = "0.0.0"
