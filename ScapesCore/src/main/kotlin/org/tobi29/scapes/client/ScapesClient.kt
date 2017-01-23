@@ -72,7 +72,7 @@ class ScapesClient(engine: ScapesEngine,
             val files = engine.files
             files.registerFileSystem("Scapes",
                     ClasspathPath(javaClass.classLoader,
-                            "assets/scapes/tobi29/"))
+                            "assets/scapes/tobi29"))
             saves = savesSupplier(this)
         } catch (e: IOException) {
             engine.crash(e)

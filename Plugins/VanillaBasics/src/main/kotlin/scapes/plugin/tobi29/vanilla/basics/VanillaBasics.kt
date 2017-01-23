@@ -235,7 +235,7 @@ class VanillaBasics : WorldType {
     }
 
     override fun assetRoot(): String {
-        return "assets/scapes/tobi29/vanilla/basics/"
+        return "assets/scapes/tobi29/vanilla/basics"
     }
 
     override fun playerSupplier(): (WorldClient) -> MobPlayerClient {

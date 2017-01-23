@@ -27,7 +27,7 @@ class GuiCredits(state: GameState, previous: Gui, style: GuiStyle) : GuiDesktop(
     init {
         val credits = StringBuilder(200)
         try {
-            state.engine.files["Scapes:Readme.txt"].reader().use { reader ->
+            state.engine.files["Scapes:Readme.txt"].get().reader().use { reader ->
                 var line: String? = reader.readLine()
                 while (line != null) {
                     credits.append(line).append('\n')

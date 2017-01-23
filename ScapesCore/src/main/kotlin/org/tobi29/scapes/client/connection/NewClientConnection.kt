@@ -250,7 +250,7 @@ class NewClientConnection(private val worker: ConnectionWorker,
         val image = if (exists(path)) {
             read(path) { decodePNG(it) }
         } else {
-            engine.files["Scapes:image/entity/mob/Player.png"].read {
+            engine.files["Scapes:image/entity/mob/Player.png"].get().read {
                 decodePNG(it)
             }
         }
