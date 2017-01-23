@@ -22,6 +22,7 @@ import org.tobi29.scapes.engine.utils.graphics.generateMipMaps
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.engine.utils.toArray
 import java.nio.ByteBuffer
+import java.util.concurrent.atomic.AtomicInteger
 
 class AnimatedTerrainTexture(buffer: ByteBuffer,
                              width: Int,
@@ -31,9 +32,8 @@ class AnimatedTerrainTexture(buffer: ByteBuffer,
                              texture: () -> Texture) : TerrainTexture(
         null, width, width, shaderAnimation, texture) {
     private val frames: Array<Array<ByteBuffer?>>
-    private var dirty = true
-    private var spin: Double = 0.0
-    private var i = 0
+    private val newFrame = AtomicInteger(-1)
+    private var spin = 0.0
 
     init {
         val frameSize = width * width shl 2
@@ -45,21 +45,20 @@ class AnimatedTerrainTexture(buffer: ByteBuffer,
     }
 
     override fun renderAnim(gl: GL) {
-        if (dirty) {
+        val frame = newFrame.getAndSet(-1)
+        if (frame >= 0) {
             texture().bind(gl)
-            gl.replaceTextureMipMap(x, y, width, height, *frames[i])
-            dirty = false
+            gl.replaceTextureMipMap(x, y, width, height, *frames[frame])
         }
     }
 
     override fun updateAnim(delta: Double) {
+        val old = floor(spin)
         spin += delta * 20.0
-        var i = floor(spin)
-        if (i >= frames.size) {
-            spin -= frames.size.toDouble()
-            i = 0
+        spin %= frames.size.toDouble()
+        val i = floor(spin)
+        if (old != i) {
+            newFrame.set(i)
         }
-        this.i = i
-        dirty = true
     }
 }
