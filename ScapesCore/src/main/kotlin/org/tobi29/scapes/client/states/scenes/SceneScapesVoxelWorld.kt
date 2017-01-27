@@ -22,10 +22,7 @@ import org.tobi29.scapes.chunk.WorldSkybox
 import org.tobi29.scapes.client.gui.GuiComponentChat
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.client.states.GameStateGameSP
-import org.tobi29.scapes.engine.graphics.Framebuffer
-import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.graphics.Scene
-import org.tobi29.scapes.engine.graphics.postProcess
+import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
 import org.tobi29.scapes.engine.utils.Sync
 import org.tobi29.scapes.engine.utils.chain
@@ -402,10 +399,19 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                 "Engine:shader/Textured")
         val renderSkybox = skybox.appendToPipeline(gl, cam)
         val renderBackground = gl.into(skyboxFBO) {
-            gl.disableDepthTest()
-            gl.disableDepthMask()
-            gl.setProjectionPerspective(width.toFloat(), height.toFloat(), cam)
-            renderSkybox()
+            gl.matrixStack.push { matrix ->
+                gl.enableCulling()
+                gl.enableDepthTest()
+                gl.disableDepthMask()
+                gl.setBlending(BlendingMode.NORMAL)
+                matrix.identity()
+                matrix.modelViewProjection().perspective(cam.fov,
+                        gl.sceneWidth().toFloat() / gl.sceneHeight().toFloat(),
+                        cam.near, cam.far)
+                matrix.modelViewProjection().camera(cam)
+                matrix.modelView().camera(cam)
+                renderSkybox()
+            }
         }
         val copyBackground = postProcess(gl, shaderTextured, skyboxFBO)
         val renderWorld = world.addToPipeline(gl, cam, chunkGeometryDebug)
@@ -421,8 +427,18 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
             if (wireframe) {
                 gl.enableWireframe()
             }
-            gl.setProjectionPerspective(width.toFloat(), height.toFloat(), cam)
-            renderWorld()
+            gl.matrixStack.push { matrix ->
+                gl.enableCulling()
+                gl.enableDepthTest()
+                gl.setBlending(BlendingMode.NORMAL)
+                matrix.identity()
+                matrix.modelViewProjection().perspective(cam.fov,
+                        gl.sceneWidth().toFloat() / gl.sceneHeight().toFloat(),
+                        cam.near, cam.far)
+                matrix.modelViewProjection().camera(cam)
+                matrix.modelView().camera(cam)
+                renderWorld()
+            }
             if (wireframe) {
                 gl.disableWireframe()
             }

@@ -82,29 +82,37 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
             cam.setPerspective(gl.sceneWidth().toFloat() / gl.sceneHeight(),
                     90.0f)
             cam.setView(0.0f, yaw, 0.0f)
-            gl.setProjectionPerspective(gl.sceneWidth().toFloat(),
-                    gl.sceneHeight().toFloat(), cam)
-            val matrixStack = gl.matrixStack()
-            for (i in 0..5) {
-                val texture = textures[i]
-                if (texture != null) {
-                    val matrix = matrixStack.push()
-                    if (i == 1) {
-                        matrix.rotate(90.0f, 0.0f, 0.0f, 1.0f)
-                    } else if (i == 2) {
-                        matrix.rotate(180.0f, 0.0f, 0.0f, 1.0f)
-                    } else if (i == 3) {
-                        matrix.rotate(270.0f, 0.0f, 0.0f, 1.0f)
-                    } else if (i == 4) {
-                        matrix.rotate(90.0f, 1.0f, 0.0f, 0.0f)
-                    } else if (i == 5) {
-                        matrix.rotate(-90.0f, 1.0f, 0.0f, 0.0f)
+            gl.matrixStack.push { matrix ->
+                gl.enableCulling()
+                gl.enableDepthTest()
+                gl.setBlending(BlendingMode.NORMAL)
+                matrix.identity()
+                matrix.modelViewProjection().perspective(cam.fov,
+                        gl.sceneWidth().toFloat() / gl.sceneHeight().toFloat(),
+                        cam.near, cam.far)
+                matrix.modelViewProjection().camera(cam)
+                matrix.modelView().camera(cam)
+                for (i in 0..5) {
+                    val texture = textures[i]
+                    if (texture != null) {
+                        gl.matrixStack.push { matrix ->
+                            if (i == 1) {
+                                matrix.rotate(90.0f, 0.0f, 0.0f, 1.0f)
+                            } else if (i == 2) {
+                                matrix.rotate(180.0f, 0.0f, 0.0f, 1.0f)
+                            } else if (i == 3) {
+                                matrix.rotate(270.0f, 0.0f, 0.0f, 1.0f)
+                            } else if (i == 4) {
+                                matrix.rotate(90.0f, 1.0f, 0.0f, 0.0f)
+                            } else if (i == 5) {
+                                matrix.rotate(-90.0f, 1.0f, 0.0f, 0.0f)
+                            }
+                            texture.bind(gl)
+                            gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 1.0f,
+                                    1.0f, 1.0f)
+                            model.render(gl, shaderTextured.get())
+                        }
                     }
-                    texture.bind(gl)
-                    gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f,
-                            1.0f)
-                    model.render(gl, shaderTextured.get())
-                    matrixStack.pop()
                 }
             }
         }

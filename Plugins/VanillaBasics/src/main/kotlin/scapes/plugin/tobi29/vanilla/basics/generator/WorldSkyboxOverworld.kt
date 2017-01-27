@@ -416,14 +416,20 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
             val weather = climateGenerator.weather(pos.x, pos.y)
             val cloudTime = System.currentTimeMillis() % 1000000 / 1000000.0f
             gl.clear(0.0f, 0.0f, 0.0f, 0.0f)
-            gl.setProjectionOrthogonal(0.0f, 0.0f, 1.0f, 1.0f)
-            val sClouds = shaderClouds.get()
-            sClouds.setUniform1f(4, cloudTime)
-            sClouds.setUniform1f(5, weather.toFloat())
-            sClouds.setUniform2f(6,
-                    (scene.cam().position.doubleX() / 2048.0 % 1024.0).toFloat(),
-                    (scene.cam().position.doubleY() / 2048.0 % 1024.0).toFloat())
-            cloudTextureMesh.render(gl, sClouds)
+            gl.disableCulling()
+            gl.disableDepthTest()
+            gl.setBlending(BlendingMode.NORMAL)
+            gl.matrixStack.push { matrix ->
+                matrix.identity()
+                matrix.modelViewProjection().orthogonal(0.0f, 0.0f, 1.0f, 1.0f)
+                val sClouds = shaderClouds.get()
+                sClouds.setUniform1f(4, cloudTime)
+                sClouds.setUniform1f(5, weather.toFloat())
+                sClouds.setUniform2f(6,
+                        (scene.cam().position.doubleX() / 2048.0 % 1024.0).toFloat(),
+                        (scene.cam().position.doubleY() / 2048.0 % 1024.0).toFloat())
+                cloudTextureMesh.render(gl, sClouds)
+            }
         }
         return chain(render, clouds)
     }
