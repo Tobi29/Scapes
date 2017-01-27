@@ -88,6 +88,10 @@
 -keep class org.tobi29.scapes.engine.utils.io.filesystem.spi.FileSystemProvider
 -keep class * implements org.tobi29.scapes.engine.utils.io.filesystem.spi.FileSystemProvider
 
+# Keep profiler dispatcher
+-keep class org.tobi29.scapes.engine.utils.profiler.spi.ProfilerDispatcherProvider
+-keep class * implements org.tobi29.scapes.engine.utils.profiler.spi.ProfilerDispatcherProvider
+
 # Keep codecs
 -keep class org.tobi29.scapes.engine.utils.codec.spi.ReadableAudioStreamProvider
 -keep class * implements org.tobi29.scapes.engine.utils.codec.spi.ReadableAudioStreamProvider
