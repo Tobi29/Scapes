@@ -39,7 +39,7 @@ class RemoteClientConnection(worker: ConnectionWorker,
                              plugins: Plugins,
                              loadingDistance: Int) : ClientConnection(game,
         plugins, loadingDistance) {
-    private val sendQueue = ConcurrentLinkedQueue<() -> Unit>()
+    private val sendQueue = ConcurrentLinkedQueue<PacketServer>()
     private var state = State.WAIT
 
     init {
@@ -52,7 +52,13 @@ class RemoteClientConnection(worker: ConnectionWorker,
         }
         try {
             while (!sendQueue.isEmpty()) {
-                sendQueue.poll()()
+                val packet = sendQueue.poll()
+                val output = channel.outputStream
+                val pos = output.position()
+                output.putShort(packet.id(plugins.registry()))
+                packet.sendServer(this, output)
+                val size = output.position() - pos
+                profilerSent.packet(packet, size.toLong())
             }
             if (channel.bundleSize() > 0) {
                 channel.queueBundle()
@@ -103,17 +109,8 @@ class RemoteClientConnection(worker: ConnectionWorker,
         channel.requestClose()
     }
 
-    override fun task(runnable: () -> Unit) {
-        sendQueue.add(runnable)
-    }
-
     override fun transmit(packet: PacketServer) {
-        val output = channel.outputStream
-        val pos = output.position()
-        output.putShort(packet.id(plugins.registry()))
-        packet.sendServer(this, output)
-        val size = output.position() - pos
-        profilerSent.packet(packet, size.toLong())
+        sendQueue.add(packet)
     }
 
     override fun address(): RemoteAddress? {

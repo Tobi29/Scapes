@@ -58,18 +58,13 @@ class LocalClientConnection(private val worker: ConnectionWorker,
     }
 
     override fun start() {
-        synchronized(player) {
-            if (player.isClosed) {
-                return
-            }
-            try {
-                player.start(this, worker, account)
-                if (!player.server.addConnection { player }) {
-                    throw IOException("Failed to add client to server")
-                }
-            } catch (e: IOException) {
-                player.error(e)
-            }
+        if (player.isClosed) {
+            return
+        }
+        try {
+            player.start(this, worker, account)
+        } catch (e: IOException) {
+            player.error(e)
         }
     }
 
@@ -77,20 +72,6 @@ class LocalClientConnection(private val worker: ConnectionWorker,
         if (!player.isClosed) {
             player.stop()
             game.engine.switchState(GameStateMenu(game.engine))
-        }
-    }
-
-    override fun task(runnable: () -> Unit) {
-        synchronized(player) {
-            if (player.isClosed) {
-                return
-            }
-            try {
-                runnable()
-            } catch (e: IOException) {
-                player.error(e)
-            }
-
         }
     }
 

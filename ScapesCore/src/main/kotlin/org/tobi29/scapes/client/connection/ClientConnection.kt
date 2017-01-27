@@ -51,18 +51,12 @@ abstract class ClientConnection(val game: GameStateGameMP,
     }
 
     override fun send(packet: PacketServer) {
-        task({ sendPacket(packet) })
-    }
-
-    protected fun sendPacket(packet: PacketServer) {
         transmit(packet)
     }
 
     abstract fun start()
 
     abstract fun stop()
-
-    protected abstract fun task(runnable: () -> Unit)
 
     protected abstract fun transmit(packet: PacketServer)
 
