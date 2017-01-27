@@ -17,10 +17,13 @@
 buildscript {
     repositories {
         jcenter()
+        maven {
+            url "https://dl.bintray.com/kotlin/kotlin-eap-1.1"
+        }
     }
     dependencies {
         classpath "com.android.tools.build:gradle:2.2.2"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.6"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.1.0-beta-22"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.11"
     }
 }
