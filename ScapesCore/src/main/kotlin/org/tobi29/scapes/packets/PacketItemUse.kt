@@ -63,8 +63,8 @@ class PacketItemUse : PacketAbstract, PacketServer {
         if (strength > 1.0 || strength < 0.0) {
             throw InvalidPacketDataException("Invalid item use strength!")
         }
-        if (abs(direction.x) > 180.0 || abs(
-                direction.y) > 90.0) {
+        if (abs(direction.x) > 90.0 || abs(
+                direction.y) > 180.0) {
             throw InvalidPacketDataException("Invalid direction!")
         }
         player.mob { mob ->
