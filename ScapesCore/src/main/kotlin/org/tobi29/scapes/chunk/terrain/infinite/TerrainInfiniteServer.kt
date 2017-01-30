@@ -84,7 +84,7 @@ class TerrainInfiniteServer(override val world: WorldServer,
                             val xxx = x + xx
                             for (y in -loadingRadius..loadingRadius) {
                                 val yyy = y + yy
-                                if (xxx >= cxMin && xxx <= cxMax &&
+                                if (xxx in cxMin..cxMax &&
                                         yyy >= cyMin && yyy <= cyMax) {
                                     if (x * x + y * y <= loadingRadiusSqr) {
                                         requiredChunks.add(Vector2i(x + xx,
@@ -407,7 +407,7 @@ class TerrainInfiniteServer(override val world: WorldServer,
             val xx = chunk.pos.x + x
             for (y in -radius..radius) {
                 val yy = chunk.pos.y + y
-                if (xx >= cxMin && xx <= cxMax && yy >= cyMin && yy <= cyMax) {
+                if (xx in cxMin..cxMax && yy >= cyMin && yy <= cyMax) {
                     if (chunkNoLoad(xx, yy) == null) {
                         return false
                     }
@@ -423,7 +423,7 @@ class TerrainInfiniteServer(override val world: WorldServer,
             val xx = chunk.pos.x + x
             for (y in -radius..radius) {
                 val yy = chunk.pos.y + y
-                if (xx >= cxMin && xx <= cxMax && yy >= cyMin && yy <= cyMax) {
+                if (xx in cxMin..cxMax && yy >= cyMin && yy <= cyMax) {
                     val check = chunkNoLoad(xx, yy)
                     if (check == null || !check.isLoaded) {
                         return false

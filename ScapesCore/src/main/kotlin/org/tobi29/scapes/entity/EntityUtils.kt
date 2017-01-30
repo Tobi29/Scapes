@@ -33,15 +33,15 @@ fun <E : Entity> EntityContainer<E>.getEntities(minX: Int,
             maxZ).filter { entity ->
         val pos = entity.getCurrentPos()
         val x = pos.intX()
-        if (x >= minX && x <= maxX) {
+        if (x in minX..maxX) {
             return@filter false
         }
         val y = pos.intY()
-        if (y >= minY && y <= maxY) {
+        if (y in minY..maxY) {
             return@filter false
         }
         val z = pos.intZ()
-        if (z >= minZ && z <= maxZ) {
+        if (z in minZ..maxZ) {
             return@filter false
         }
         true

@@ -98,7 +98,7 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
             for (y in 0..15) {
                 var sunLight: Byte = 15
                 var spread: Int
-                if (x > 0 && x < 15 && y > 0 && y < 15) {
+                if (x in 1..14 && y > 0 && y < 15) {
                     spread = heightMap[y shl 4 or x - 1]
                     spread = max(heightMap[y shl 4 or x + 1], spread)
                     spread = max(heightMap[y - 1 shl 4 or x], spread)
@@ -140,7 +140,7 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
         }
         while (spreads.isNotEmpty()) {
             for (s in spreads) {
-                if (s.x >= 0 && s.x < 16 && s.y >= 0 && s.y < 16 && s.z >= 0 &&
+                if (s.x in 0..15 && s.y >= 0 && s.y < 16 && s.z >= 0 &&
                         s.z < zSize) {
                     s.l += block(lockRead {
                         bID.getData(s.x, s.y, s.z, 0)

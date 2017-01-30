@@ -23,19 +23,22 @@ import org.tobi29.scapes.entity.client.MobPlayerClient
 import org.tobi29.scapes.server.connection.PlayerConnection
 import java.util.*
 
-class PacketInteraction : PacketAbstract, PacketClient, PacketServer {
+class PacketInteraction : PacketAbstract, PacketBoth {
     private lateinit var uuid: UUID
     private var type: Byte = 0
     private var data: Byte = 0
 
     constructor()
 
-    constructor(type: Byte, data: Byte = 0) {
+    constructor(type: Byte,
+                data: Byte = 0) {
         this.type = type
         this.data = data
     }
 
-    constructor(uuid: UUID, type: Byte, data: Byte) {
+    constructor(uuid: UUID,
+                type: Byte,
+                data: Byte) {
         this.uuid = uuid
         this.type = type
         this.data = data

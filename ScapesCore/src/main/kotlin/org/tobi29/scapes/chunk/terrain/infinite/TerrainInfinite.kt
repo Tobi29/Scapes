@@ -159,7 +159,7 @@ abstract class TerrainInfinite<E : Entity>(val zSize: Int,
                 val chunk = chunkNoLoad(x shr 4, y shr 4)
                 if (chunk != null && chunk.isLoaded) {
                     for (z in minZZ..maxZZ) {
-                        if (z >= 0 && z < zSize) {
+                        if (z in 0..(zSize - 1)) {
                             chunk.typeG(x, y, z).addCollision(pool, this, x,
                                     y, z)
                         }
@@ -181,7 +181,7 @@ abstract class TerrainInfinite<E : Entity>(val zSize: Int,
             (y - range..y + range).forEach { yy ->
                 chunk(xx shr 4, yy shr 4) { chunk ->
                     (z - range..z + range).asSequence()
-                            .filter { it >= 0 && it < zSize }
+                            .filter { it in 0..(zSize - 1) }
                             .forEach { zz ->
                                 val block = chunk.blockG(xx, yy, zz)
                                 val type = type(block)

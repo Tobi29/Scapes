@@ -36,7 +36,7 @@ class TerrainInfiniteChunkManagerClient(private val radius: Int) : TerrainInfini
     @Synchronized fun add(chunk: TerrainInfiniteChunkClient) {
         val xx = chunk.pos.x - x
         val yy = chunk.pos.y - y
-        if (xx >= 0 && xx < size && yy >= 0 && yy < size) {
+        if (xx in 0..(size - 1) && yy >= 0 && yy < size) {
             val i = yy * size + xx
             array[i] = chunk
         }
@@ -46,7 +46,7 @@ class TerrainInfiniteChunkManagerClient(private val radius: Int) : TerrainInfini
                              y: Int): TerrainInfiniteChunkClient? {
         val xx = x - this.x
         val yy = y - this.y
-        if (xx >= 0 && xx < size && yy >= 0 && yy < size) {
+        if (xx in 0..(size - 1) && yy >= 0 && yy < size) {
             val i = yy * size + xx
             val chunk = array[i]
             if (chunk != null) {
@@ -65,7 +65,7 @@ class TerrainInfiniteChunkManagerClient(private val radius: Int) : TerrainInfini
         run {
             val xx = x - this.x
             val yy = y - this.y
-            if (xx >= 0 && xx < size && yy >= 0 && yy < size) {
+            if (xx in 0..(size - 1) && yy >= 0 && yy < size) {
                 val i = yy * size + xx
                 val value = array[i]
                 val validate = lock.get()
@@ -83,7 +83,7 @@ class TerrainInfiniteChunkManagerClient(private val radius: Int) : TerrainInfini
         synchronized(this) {
             val xx = x - this.x
             val yy = y - this.y
-            if (xx >= 0 && xx < size && yy >= 0 && yy < size) {
+            if (xx in 0..(size - 1) && yy >= 0 && yy < size) {
                 val i = yy * size + xx
                 val value = array[i]
                 if (value != null) {
