@@ -35,6 +35,7 @@
 -keep class kotlin.jvm.internal.DefaultConstructorMarker
 -keepattributes Signature
 -dontwarn kotlin.**
+-dontwarn kotlinx.**
 
 # Antlr
 -keep class org.antlr.v4.runtime.atn.ATNConfigSet
@@ -83,6 +84,7 @@
 -dontwarn org.tobi29.scapes.vanilla.basics.material.block.vegetation.BlockCrop$createModels$1$1$2
 -dontwarn java.util.concurrent.ConcurrentHashMap$KeySetView
 -dontwarn org.tobi29.scapes.server.extension.base.DebugCommandsExtension$init$4$1$1
+-dontwarn org.tobi29.scapes.engine.server.ControlPanelProtocol
 
 # Keep filesystem access
 -keep class org.tobi29.scapes.engine.utils.io.filesystem.spi.FileSystemProvider
