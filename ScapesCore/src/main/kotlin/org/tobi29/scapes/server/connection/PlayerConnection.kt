@@ -21,7 +21,6 @@ import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.connection.PlayConnection
-import org.tobi29.scapes.engine.server.Connection
 import org.tobi29.scapes.engine.utils.EventDispatcher
 import org.tobi29.scapes.engine.utils.ListenerOwnerHandle
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
@@ -39,7 +38,7 @@ import org.tobi29.scapes.server.extension.event.MessageEvent
 import org.tobi29.scapes.server.extension.event.PlayerAuthenticateEvent
 import java.io.IOException
 
-abstract class PlayerConnection(val server: ServerConnection) : Connection, PlayConnection<PacketClient>, Executor {
+abstract class PlayerConnection(val server: ServerConnection) : PlayConnection<PacketClient>, Executor {
     override val events = EventDispatcher(server.events)
     protected val registry: GameRegistry
     protected var entity: MobPlayerServer? = null
@@ -48,6 +47,8 @@ abstract class PlayerConnection(val server: ServerConnection) : Connection, Play
     protected var nickname = "_Error_"
     protected var added = false
     protected var loadingRadius = 0
+    var isClosed = false
+        protected set
     var permissionLevel = 0
         get() {
             if (Debug.enabled()) {
@@ -144,8 +145,7 @@ abstract class PlayerConnection(val server: ServerConnection) : Connection, Play
         return loadingRadius
     }
 
-    @Throws(IOException::class)
-    protected fun sendPacket(packet: PacketClient) {
+    override fun send(packet: PacketClient) {
         val entity = this.entity ?: return
         val pos3d = packet.pos()
         if (pos3d != null) {
@@ -167,19 +167,6 @@ abstract class PlayerConnection(val server: ServerConnection) : Connection, Play
 
     @Throws(IOException::class)
     protected abstract fun transmit(packet: PacketClient)
-
-    override fun requestClose() {
-        disconnect("Server closed", 5.0)
-    }
-
-    @Synchronized @Throws(IOException::class)
-    override fun close() {
-        if (added) {
-            server.removePlayer(this)
-            added = false
-        }
-        removeEntity()
-    }
 
     protected fun removeEntity() {
         val entity = this.entity

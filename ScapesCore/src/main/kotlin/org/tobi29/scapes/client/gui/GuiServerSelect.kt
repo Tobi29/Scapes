@@ -18,22 +18,23 @@ package org.tobi29.scapes.client.gui
 
 import mu.KLogging
 import org.tobi29.scapes.client.ScapesClient
-import org.tobi29.scapes.client.connection.GetInfoOutConnection
 import org.tobi29.scapes.client.states.GameStateLoadMP
+import org.tobi29.scapes.client.states.GameStateLoadSocketSP
 import org.tobi29.scapes.client.states.scenes.SceneMenu
 import org.tobi29.scapes.connection.ConnectionInfo
 import org.tobi29.scapes.connection.ConnectionType
+import org.tobi29.scapes.connection.ServerInfo
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.graphics.TextureFilter
 import org.tobi29.scapes.engine.graphics.TextureWrap
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.resource.Resource
-import org.tobi29.scapes.engine.server.PacketBundleChannel
-import org.tobi29.scapes.engine.server.RemoteAddress
-import org.tobi29.scapes.engine.server.SSLProvider
-import org.tobi29.scapes.engine.server.addOutConnection
+import org.tobi29.scapes.engine.server.*
+import org.tobi29.scapes.engine.utils.ByteBuffer
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import org.tobi29.scapes.engine.utils.io.tag.getListStructure
+import java.io.IOException
+import java.nio.channels.SelectionKey
 import java.util.*
 
 class GuiServerSelect(state: GameState,
@@ -108,34 +109,56 @@ class GuiServerSelect(state: GameState,
                 scrollPane.remove(this)
             }
 
-            (state.engine.game as ScapesClient).connection.addOutConnection(
-                    address, { e ->
+            val fail = { e: Exception ->
                 label.setText(error(e))
-            }) { worker, channel ->
-                label.setText("Fetching info...")
-                // Ignore invalid certificates because worst case
-                // server name and icon get faked
-                val ssl = SSLProvider.sslHandle({ certificates -> true })
-                val bundleChannel = PacketBundleChannel(address, channel,
-                        state.engine.taskExecutor, ssl, true)
-                val output = bundleChannel.outputStream
-                output.put(ConnectionInfo.header())
-                output.put(ConnectionType.GET_INFO.data().toInt())
-                bundleChannel.queueBundle()
-                worker.addConnection {
-                    val connection = GetInfoOutConnection(worker,
-                            bundleChannel, { e ->
-                        label.setText(error(e))
-                    }) { serverInfo ->
-                        label.setText(serverInfo.name)
-                        val image = serverInfo.image
-                        val texture = state.engine.graphics.createTexture(
-                                image, 0, TextureFilter.NEAREST,
-                                TextureFilter.NEAREST, TextureWrap.CLAMP,
-                                TextureWrap.CLAMP)
-                        icon.texture = Resource(texture)
+            }
+            (state.engine.game as ScapesClient).connection.addConnection { worker, connection ->
+                val channel = try {
+                    connect(worker, address)
+                } catch (e: Exception) {
+                    fail(e)
+                    return@addConnection
+                }
+                try {
+                    channel.register(worker.joiner.selector,
+                            SelectionKey.OP_READ)
+                    label.setText("Fetching info...")
+                    // Ignore invalid certificates because worst case
+                    // server name and icon get faked
+                    val ssl = SSLProvider.sslHandle { true }
+                    val bundleChannel = PacketBundleChannel(address,
+                            channel,
+                            state.engine.taskExecutor, ssl, true)
+                    val output = bundleChannel.outputStream
+                    output.put(ConnectionInfo.header())
+                    output.put(ConnectionType.GET_INFO.data().toInt())
+                    bundleChannel.queueBundle()
+                    if (bundleChannel.receive()) {
+                        return@addConnection
                     }
-                    connection
+                    val infoBuffer = ByteBuffer(
+                            bundleChannel.inputStream.remaining())
+                    bundleChannel.inputStream[infoBuffer]
+                    infoBuffer.flip()
+                    val serverInfo = ServerInfo(infoBuffer)
+                    label.setText(serverInfo.name)
+                    val image = serverInfo.image
+                    val texture = state.engine.graphics.createTexture(
+                            image, 0, TextureFilter.NEAREST,
+                            TextureFilter.NEAREST,
+                            TextureWrap.CLAMP,
+                            TextureWrap.CLAMP)
+                    icon.texture = Resource(texture)
+                    bundleChannel.aClose()
+                } catch (e: Exception) {
+                    label.setText(error(e))
+                } finally {
+                    try {
+                        channel.close()
+                    } catch (e: IOException) {
+                        GameStateLoadSocketSP.logger.warn(
+                                e) { "Failed to close socket" }
+                    }
                 }
             }
         }

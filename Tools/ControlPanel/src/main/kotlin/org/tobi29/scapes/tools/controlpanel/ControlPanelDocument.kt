@@ -14,7 +14,8 @@ import java.util.*
 
 class ControlPanelDocument(address: RemoteAddress,
                            private val connection: ControlPanelProtocol,
-                           commands: Array<String>) : Document {
+                           commands: Array<String>,
+                           private val requestClose: () -> Unit) : Document {
     private val extensions = ArrayList<Extension>()
     private val commands: Set<String>
 
@@ -26,7 +27,7 @@ class ControlPanelDocument(address: RemoteAddress,
     }
 
     override fun forceClose() {
-        connection.requestClose()
+        requestClose()
     }
 
     override fun destroy() {

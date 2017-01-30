@@ -16,4 +16,6 @@
 
 package org.tobi29.scapes.packets
 
-interface PacketBoth : PacketClient, PacketServer
+interface PacketBoth : PacketClient, PacketServer {
+    override val isImmediate get() = false
+}

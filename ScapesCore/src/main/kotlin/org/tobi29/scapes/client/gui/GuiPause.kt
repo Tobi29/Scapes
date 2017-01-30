@@ -23,20 +23,22 @@ import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 
-class GuiPause(state: GameStateGameMP, player: MobPlayerClientMain,
+class GuiPause(state: GameStateGameMP,
+               player: MobPlayerClientMain,
                style: GuiStyle) : GuiMenuDouble(state, "Pause",
         if (state is GameStateGameSP)
             "Save and quit"
         else
             "Disconnect", "Back", style) {
     init {
-        val options = row(pane) {  button(it, "Options") }
+        val options = row(pane) { button(it, "Options") }
 
         selection(options)
 
-        options.on(GuiEvent.CLICK_LEFT
-        ) { event -> player.openGui(GuiOptionsInGame(state, style)) }
-        save.on(GuiEvent.CLICK_LEFT) { event -> player.connection().stop() }
+        options.on(GuiEvent.CLICK_LEFT) {
+            player.openGui(GuiOptionsInGame(state, style))
+        }
+        save.on(GuiEvent.CLICK_LEFT) { player.connection().stop() }
         on(GuiAction.BACK) { player.closeGui() }
     }
 }

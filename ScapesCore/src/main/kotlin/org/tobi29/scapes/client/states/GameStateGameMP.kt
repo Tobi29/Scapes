@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.client.states
 
+import kotlinx.coroutines.experimental.yield
 import mu.KLogging
 import org.tobi29.scapes.Debug
 import org.tobi29.scapes.block.TerrainTextureRegistry
@@ -53,6 +54,7 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
     private val modelHumanShared: MobLivingModelHumanShared
     private val modelBlockBreakShared: EntityModelBlockBreakShared
     private var scene: SceneScapesVoxelWorld? = null
+    private var init = false
 
     init {
         chatHistory = ChatHistory()
@@ -130,6 +132,13 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         client.start()
         switchPipeline { gl ->
             renderScene(gl, loadScene)
+        }
+        init = true
+    }
+
+    suspend fun awaitInit() {
+        while (!init) {
+            yield()
         }
     }
 

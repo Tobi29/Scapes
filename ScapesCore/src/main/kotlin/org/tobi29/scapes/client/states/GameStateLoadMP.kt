@@ -19,6 +19,7 @@ package org.tobi29.scapes.client.states
 import mu.KLogging
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.connection.NewClientConnection
+import org.tobi29.scapes.client.connection.RemoteClientConnection
 import org.tobi29.scapes.client.gui.GuiCertificateWarning
 import org.tobi29.scapes.client.gui.GuiLoading
 import org.tobi29.scapes.connection.Account
@@ -29,10 +30,12 @@ import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.server.PacketBundleChannel
 import org.tobi29.scapes.engine.server.RemoteAddress
 import org.tobi29.scapes.engine.server.SSLProvider
-import org.tobi29.scapes.engine.server.addOutConnection
+import org.tobi29.scapes.engine.server.connect
 import org.tobi29.scapes.engine.utils.io.tag.getDouble
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.task.Joiner
+import java.io.IOException
+import java.nio.channels.SelectionKey
 import java.util.concurrent.atomic.AtomicBoolean
 
 class GameStateLoadMP(private val address: RemoteAddress,
@@ -49,60 +52,83 @@ class GameStateLoadMP(private val address: RemoteAddress,
             renderScene(gl, scene)
         }
 
-        (engine.game as ScapesClient).connection.addOutConnection(address,
-                { e ->
-                    logger.error(e) { "Failed to connect to server" }
-                    engine.switchState(
-                            GameStateServerDisconnect(e.message ?: "", engine))
-                }) { worker, channel ->
-            gui?.setProgress("Logging in...", 0.3)
-            val bundleChannel: PacketBundleChannel
-            val ssl = SSLProvider.sslHandle { certificates ->
-                gui?.let { gui ->
-                    engine.guiStack.remove(gui)
-                    try {
-                        for (certificate in certificates) {
-                            val result = AtomicBoolean()
-                            val joinable = Joiner.BasicJoinable()
-                            val warning = GuiCertificateWarning(this,
-                                    certificate, { value ->
-                                result.set(value)
-                                joinable.join()
-                            }, gui.style)
-                            engine.guiStack.add("10-Menu", warning)
-                            joinable.joiner.join { warning.isValid }
-                            engine.guiStack.remove(warning)
-                            if (!result.get()) {
-                                return@sslHandle false
-                            }
-                        }
-                        return@sslHandle true
-                    } finally {
-                        engine.guiStack.add("20-Progress", gui)
-                    }
-                }
-                return@sslHandle false
+        val fail = { e: Exception ->
+            GameStateLoadSocketSP.logger.error(
+                    e) { "Failed to connect to server" }
+            engine.switchState(
+                    GameStateServerDisconnect(
+                            e.message ?: "", engine))
+        }
+
+        (engine.game as ScapesClient).connection.addConnection { worker, connection ->
+            val channel = try {
+                connect(worker, address)
+            } catch (e: Exception) {
+                fail(e)
+                return@addConnection
             }
-            bundleChannel = PacketBundleChannel(address, channel,
-                    engine.taskExecutor, ssl, true)
-            val loadingRadius = round(engine.tagStructure.getStructure(
-                    "Scapes")?.getDouble("RenderDistance") ?: 0.0) + 16
-            val account = Account[engine.home.resolve(
-                    "Account.properties")]
-            worker.addConnection {
-                val connection = NewClientConnection(worker, engine,
-                        bundleChannel, account, loadingRadius, { status ->
-                    gui?.setProgress(status, 0.66)
-                }, { e ->
-                    logger.error(e) { "Failed to connect to server" }
-                    engine.switchState(
-                            GameStateServerDisconnect(e.message ?: "", engine))
-                }) { init ->
-                    gui?.setProgress("Loading world...", 1.0)
-                    val game = GameStateGameMP(init, scene, engine)
-                    engine.switchState(game)
+            try {
+                channel.register(worker.joiner.selector,
+                        SelectionKey.OP_READ)
+                gui?.setProgress("Logging in...", 0.6)
+                val bundleChannel: PacketBundleChannel
+                val ssl = SSLProvider.sslHandle { certificates ->
+                    gui?.let { gui ->
+                        engine.guiStack.remove(gui)
+                        try {
+                            for (certificate in certificates) {
+                                val result = AtomicBoolean()
+                                val joinable = Joiner.BasicJoinable()
+                                val warning = GuiCertificateWarning(
+                                        this@GameStateLoadMP, certificate,
+                                        { value ->
+                                            result.set(value)
+                                            joinable.join()
+                                        }, gui.style)
+                                engine.guiStack.add("10-Menu", warning)
+                                joinable.joiner.join { warning.isValid }
+                                engine.guiStack.remove(warning)
+                                if (!result.get()) {
+                                    return@sslHandle false
+                                }
+                            }
+                            return@sslHandle true
+                        } finally {
+                            engine.guiStack.add("20-Progress", gui)
+                        }
+                    }
+                    return@sslHandle false
                 }
-                connection
+                bundleChannel = PacketBundleChannel(
+                        address, channel,
+                        engine.taskExecutor, ssl, true)
+                val loadingRadius = round(
+                        engine.tagStructure.getStructure(
+                                "Scapes")?.getDouble(
+                                "RenderDistance") ?: 0.0) + 16
+                val account = Account[engine.home.resolve(
+                        "Account.properties")]
+                val (plugins, loadingDistanceServer) = NewClientConnection.run(
+                        bundleChannel, engine, account, loadingRadius,
+                        { status ->
+                            gui?.setProgress(status, 0.66)
+                        }) ?: return@addConnection
+                gui?.setProgress("Loading world...", 1.0)
+                val game = GameStateGameMP({ state ->
+                    RemoteClientConnection(worker, state, bundleChannel,
+                            plugins, loadingDistanceServer)
+                }, scene, engine)
+                engine.switchState(game)
+                game.awaitInit()
+                game.client.run(connection)
+            } catch (e: Exception) {
+                fail(e)
+            } finally {
+                try {
+                    channel.close()
+                } catch (e: IOException) {
+                    logger.warn(e) { "Failed to close socket" }
+                }
             }
         }
     }

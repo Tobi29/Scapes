@@ -26,14 +26,11 @@ import org.tobi29.scapes.engine.utils.replace
 import org.tobi29.scapes.server.command.Executor
 import org.tobi29.scapes.server.connection.ServerConnection
 import org.tobi29.scapes.server.extension.event.MessageEvent
-import javax.crypto.Cipher
 
 class ControlPanel(worker: ConnectionWorker,
                    channel: PacketBundleChannel,
-                   private val connection: ServerConnection,
-                   authentication: (String, Int, ByteArray) -> Cipher?) : ControlPanelProtocol(
-        worker,
-        channel, connection.events, authentication), Executor {
+                   private val connection: ServerConnection) : ControlPanelProtocol(
+        worker, channel, connection.events), Executor {
 
 
     init {

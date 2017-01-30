@@ -42,5 +42,5 @@ interface PacketClient : Packet {
 
     val isVital: Boolean
 
-    val isImmediate: Boolean
+    val isImmediate get() = false
 }

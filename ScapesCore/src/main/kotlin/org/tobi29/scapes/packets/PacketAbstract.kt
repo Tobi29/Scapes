@@ -18,10 +18,13 @@ package org.tobi29.scapes.packets
 import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 
-abstract class PacketAbstract(protected val pos: Vector3d? = null, protected val range: Double = 0.0, val isChunkContent: Boolean = false,
-                              val isVital: Boolean = true, val isImmediate: Boolean = false) : Packet {
+abstract class PacketAbstract(protected val pos: Vector3d? = null,
+                              protected val range: Double = 0.0,
+                              val isChunkContent: Boolean = false,
+                              val isVital: Boolean = true) : Packet {
 
-    protected constructor(pos: Vector3d, isChunkContent: Boolean) : this(pos,
+    protected constructor(pos: Vector3d,
+                          isChunkContent: Boolean) : this(pos,
             0.0, isChunkContent)
 
     fun pos(): Vector3d? {

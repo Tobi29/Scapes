@@ -37,7 +37,8 @@ import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.ssl.dummy.DummyKeyManagerProvider
 import java.io.IOException
 
-class GameStateLoadSP(private var source: WorldSource?, engine: ScapesEngine,
+class GameStateLoadSP(private var source: WorldSource?,
+                      engine: ScapesEngine,
                       private val scene: Scene) : GameState(engine) {
     private var step = 0
     private var server: ScapesServer? = null
@@ -107,20 +108,22 @@ class GameStateLoadSP(private var source: WorldSource?, engine: ScapesEngine,
                             "Account.properties")]
                     gui?.setProgress("Loading world...", 1.0)
 
-                    server.connection.addConnection {
-                        val player = LocalPlayerConnection(it,
+                    server.connection.addConnection { worker, connection ->
+                        val player = LocalPlayerConnection(worker,
                                 server.connection, loadingRadius)
-                        (engine.game as ScapesClient).connection.addConnection { worker ->
+                        (engine.game as ScapesClient).connection.addConnection { worker, connection ->
                             val game = GameStateGameSP({
-                                LocalClientConnection(worker, it, player,
-                                        server.plugins, loadingRadius, account)
+                                LocalClientConnection(worker, it,
+                                        player, server.plugins, loadingRadius,
+                                        account)
                             }, scene, source, server, engine)
-                            this.server = null
-                            this.source = null
+                            this@GameStateLoadSP.server = null
+                            this@GameStateLoadSP.source = null
                             engine.switchState(game)
-                            game.client
+                            game.awaitInit()
+                            game.client.run(connection)
                         }
-                        player
+                        player.run(connection)
                     }
                     step++
                 }

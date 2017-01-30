@@ -16,13 +16,16 @@
 
 package org.tobi29.scapes.client.connection
 
+import kotlinx.coroutines.experimental.yield
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.client.states.GameStateMenu
 import org.tobi29.scapes.client.states.GameStateServerDisconnect
 import org.tobi29.scapes.connection.Account
+import org.tobi29.scapes.engine.server.Connection
 import org.tobi29.scapes.engine.server.ConnectionEndException
 import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.server.RemoteAddress
+import org.tobi29.scapes.packets.PacketDisconnectSelf
 import org.tobi29.scapes.packets.PacketServer
 import org.tobi29.scapes.plugins.Plugins
 import org.tobi29.scapes.server.connection.LocalPlayerConnection
@@ -35,32 +38,8 @@ class LocalClientConnection(private val worker: ConnectionWorker,
                             loadingDistance: Int,
                             private val account: Account) : ClientConnection(
         game, plugins, loadingDistance) {
-    override fun tick(worker: ConnectionWorker) {
-        try {
-            while (player.queueClient.isNotEmpty()) {
-                val packet = player.queueClient.poll()
-                packet.localClient()
-                packet.runClient(this)
-            }
-        } catch (e: ConnectionEndException) {
-            logger.info { "Closed client connection: $e" }
-        } catch (e: IOException) {
-            logger.info { "Lost connection: $e" }
-            game.engine.switchState(GameStateServerDisconnect(e.message ?: "",
-                    game.engine))
-        }
-    }
-
-    override val isClosed: Boolean
-        get() = player.isClosed
-
-    override fun close() {
-    }
 
     override fun start() {
-        if (player.isClosed) {
-            return
-        }
         try {
             player.start(this, worker, account)
         } catch (e: IOException) {
@@ -69,13 +48,36 @@ class LocalClientConnection(private val worker: ConnectionWorker,
     }
 
     override fun stop() {
-        if (!player.isClosed) {
-            player.stop()
+        player.receiveServer(PacketDisconnectSelf("Disconnected"))
+    }
+
+    override suspend fun run(connection: Connection) {
+        try {
+            while (!player.isClosed) {
+                connection.increaseTimeout(10000)
+                if (connection.shouldClose) {
+                    player.receiveServer(PacketDisconnectSelf("Disconnected"))
+                    break
+                }
+                while (player.queueClient.isNotEmpty()) {
+                    val packet = player.queueClient.poll()
+                    packet.localClient()
+                    packet.runClient(this@LocalClientConnection)
+                }
+                yield()
+            }
             game.engine.switchState(GameStateMenu(game.engine))
+        } catch (e: ConnectionEndException) {
+            logger.info { "Closed client connection: $e" }
+        } catch (e: IOException) {
+            logger.info { "Lost connection: $e" }
+            game.engine.switchState(
+                    GameStateServerDisconnect(e.message ?: "",
+                            game.engine))
         }
     }
 
-    override fun transmit(packet: PacketServer) {
+    override fun send(packet: PacketServer) {
         player.receiveServer(packet)
     }
 

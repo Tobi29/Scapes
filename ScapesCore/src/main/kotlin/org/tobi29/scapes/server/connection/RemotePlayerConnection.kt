@@ -16,12 +16,17 @@
 
 package org.tobi29.scapes.server.connection
 
+import kotlinx.coroutines.experimental.yield
+import mu.KLogging
 import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.utils.ByteBuffer
 import org.tobi29.scapes.engine.utils.graphics.Image
-import org.tobi29.scapes.engine.utils.io.*
+import org.tobi29.scapes.engine.utils.io.Algorithm
+import org.tobi29.scapes.engine.utils.io.WritableByteStream
+import org.tobi29.scapes.engine.utils.io.checksum
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.read
+import org.tobi29.scapes.engine.utils.io.process
 import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary
 import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.entity.skin.ServerSkin
@@ -32,7 +37,6 @@ import org.tobi29.scapes.server.extension.event.MessageEvent
 import org.tobi29.scapes.server.extension.event.PlayerJoinEvent
 import org.tobi29.scapes.server.extension.event.PlayerLeaveEvent
 import java.io.IOException
-import java.nio.channels.SelectionKey
 import java.security.InvalidKeyException
 import java.security.KeyFactory
 import java.security.NoSuchAlgorithmException
@@ -51,151 +55,231 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                              private val channel: PacketBundleChannel,
                              server: ServerConnection) : PlayerConnection(
         server) {
-    private val sendQueue = ConcurrentLinkedQueue<() -> Unit>()
+    private val sendQueue = ConcurrentLinkedQueue<PacketClient>()
     private val sendQueueSize = AtomicInteger()
-    private var state = State.LOGIN
-    private var loginState: ((RandomReadableByteStream) -> Unit)?
-    private var pingTimeout = 0L
     private var pingWait = 0L
+    private var pingHandler: (Long) -> Unit = {}
 
-    init {
-        channel.register(worker.joiner, SelectionKey.OP_READ)
-        pingTimeout = System.currentTimeMillis() + 30000
-        loginState = { loginStep1(it) }
+    suspend fun run(connection: Connection) {
+        pingHandler = { connection.increaseTimeout(10000L - it) }
+        try {
+            val output = channel.outputStream
+            val input = channel.inputStream
+            if (channel.receive()) {
+                return
+            }
+            val array = ByteArray(550)
+            input[array]
+            id = checksum(array, Algorithm.SHA1).toString()
+            val challenge = ByteArray(501)
+            SecureRandom().nextBytes(challenge)
+            try {
+                val key = KeyFactory.getInstance("RSA").generatePublic(
+                        X509EncodedKeySpec(array))
+                val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
+                cipher.init(Cipher.ENCRYPT_MODE, key)
+                output.put(cipher.doFinal(challenge))
+            } catch (e: NoSuchAlgorithmException) {
+                throw IOException(e)
+            } catch (e: NoSuchPaddingException) {
+                throw IOException(e)
+            } catch (e: IllegalBlockSizeException) {
+                throw IOException(e)
+            } catch (e: BadPaddingException) {
+                throw IOException(e)
+            } catch (e: InvalidKeyException) {
+                throw IOException(e)
+            } catch (e: InvalidKeySpecException) {
+                throw IOException(e)
+            }
+            val plugins = server.plugins
+            output.putInt(plugins.files.size)
+            plugins.files.forEach { sendPluginMetaData(it, output) }
+            channel.queueBundle()
+
+            if (channel.receive()) {
+                return
+            }
+            val challengeReceived = ByteArray(challenge.size)
+            input[challengeReceived]
+            nickname = input.getString(1 shl 10)
+            var length = input.int
+            val requests = ArrayList<Int>(length)
+            while (length-- > 0) {
+                requests.add(input.int)
+            }
+            val response2 = generateResponse(
+                    Arrays.equals(challengeReceived, challenge))
+            if (response2 != null) {
+                output.putBoolean(true)
+                output.putString(response2)
+                channel.queueBundle()
+                throw ConnectionCloseException(response2)
+            }
+            output.putBoolean(false)
+            channel.queueBundle()
+            for (request in requests) {
+                sendPlugin(
+                        plugins.files[request].file() ?: throw IllegalStateException(
+                                "Trying to send embedded plugin"), output)
+            }
+
+            if (channel.receive()) {
+                return
+            }
+            loadingRadius = clamp(input.int, 10,
+                    server.server.maxLoadingRadius())
+            val buffer = ByteBuffer(64 * 64 * 4)
+            input[buffer]
+            buffer.flip()
+            skin = ServerSkin(Image(64, 64, buffer))
+            val response = server.addPlayer(this@RemotePlayerConnection)
+            if (response != null) {
+                output.putBoolean(true)
+                output.putString(response)
+                channel.queueBundle()
+                throw ConnectionCloseException(response)
+            }
+            added = true
+            setWorld()
+            output.putBoolean(false)
+            output.putInt(loadingRadius)
+            TagStructureBinary.write(
+                    output,
+                    server.server.plugins.registry().idStorage().save())
+            channel.queueBundle()
+            pingWait = System.currentTimeMillis() + 1000
+            server.events.fireLocal(
+                    PlayerJoinEvent(this@RemotePlayerConnection))
+            server.events.fireLocal(
+                    MessageEvent(this@RemotePlayerConnection,
+                            MessageLevel.SERVER_INFO,
+                            "Player connected: $id ($nickname) on $channel"))
+            while (!connection.shouldClose) {
+                if (connection.shouldClose) {
+                    send(PacketDisconnect("Server closed", 5.0))
+                    channel.queueBundle()
+                    channel.aClose()
+                    return
+                }
+                try {
+                    val currentTime = System.currentTimeMillis()
+                    if (pingWait < currentTime) {
+                        pingWait = currentTime + 1000
+                        send(PacketPingServer(currentTime))
+                    }
+                    while (!sendQueue.isEmpty()) {
+                        val packet = sendQueue.poll()
+                        sendQueueSize.decrementAndGet()
+                        // This packet is not registered as it is just for
+                        // internal use
+                        if (packet !is PacketDisconnectSelf) {
+                            channel.outputStream.putShort(
+                                    packet.id(server.plugins.registry()))
+                        }
+                        packet.sendClient(this, channel.outputStream)
+                        if (channel.bundleSize() > 1 shl 10 shl 4) {
+                            break
+                        }
+                    }
+                    if (channel.bundleSize() > 0) {
+                        channel.queueBundle()
+                    }
+                    loop@ while (true) {
+                        when (channel.process()) {
+                            PacketBundleChannel.FetchResult.CLOSED -> {
+                                server.events.fireLocal(PlayerLeaveEvent(
+                                        this@RemotePlayerConnection))
+                                server.events.fireLocal(
+                                        MessageEvent(
+                                                this@RemotePlayerConnection,
+                                                MessageLevel.SERVER_INFO,
+                                                "Player disconnected: $nickname"))
+                                return
+                            }
+                            PacketBundleChannel.FetchResult.YIELD -> break@loop
+                            PacketBundleChannel.FetchResult.BUNDLE -> {
+                                while (channel.inputStream.hasRemaining()) {
+                                    val packet = PacketAbstract.make(registry,
+                                            channel.inputStream.short) as PacketServer
+                                    packet.parseServer(
+                                            this@RemotePlayerConnection,
+                                            channel.inputStream)
+                                    packet.runServer(
+                                            this@RemotePlayerConnection)
+                                }
+                            }
+                        }
+                    }
+                } catch (e: ConnectionCloseException) {
+                    if (channel.bundleSize() > 0) {
+                        channel.queueBundle()
+                    }
+                    throw e
+                }
+                yield()
+            }
+            channel.aClose()
+        } catch (e: ConnectionCloseException) {
+            server.events.fireLocal(
+                    PlayerLeaveEvent(this@RemotePlayerConnection))
+            server.events.fireLocal(
+                    MessageEvent(this@RemotePlayerConnection,
+                            MessageLevel.SERVER_INFO,
+                            "Disconnecting player: $nickname"))
+            channel.aClose()
+        } catch (e: InvalidPacketDataException) {
+            server.events.fireLocal(
+                    PlayerLeaveEvent(this@RemotePlayerConnection))
+            server.events.fireLocal(
+                    MessageEvent(this@RemotePlayerConnection,
+                            MessageLevel.SERVER_INFO,
+                            "Disconnecting player: $nickname"))
+            channel.aClose()
+        } catch (e: IOException) {
+            server.events.fireLocal(
+                    PlayerLeaveEvent(this@RemotePlayerConnection))
+            server.events.fireLocal(
+                    MessageEvent(this@RemotePlayerConnection,
+                            MessageLevel.SERVER_INFO,
+                            "Player disconnected: $nickname ($e)"))
+        } finally {
+            isClosed = true
+            if (added) {
+                server.removePlayer(this)
+                added = false
+            }
+            removeEntity()
+            try {
+                channel.close()
+            } catch (e: IOException) {
+                logger.warn(e) { "Failed to close socket" }
+            }
+        }
     }
 
-    override fun send(packet: PacketClient) {
+    override fun transmit(packet: PacketClient) {
         if (sendQueueSize.get() > 128) {
             if (!packet.isVital) {
                 return
             }
         }
-        task({ sendPacket(packet) })
+        sendQueueSize.incrementAndGet()
+        sendQueue.add(packet)
         if (packet.isImmediate) {
             worker.joiner.wake()
         }
     }
 
-    private fun loginStep1(input: RandomReadableByteStream) {
-        val array = ByteArray(550)
-        input[array]
-        id = checksum(array, Algorithm.SHA1).toString()
-        val challenge = ByteArray(501)
-        SecureRandom().nextBytes(challenge)
-        val output = channel.outputStream
-        try {
-            val key = KeyFactory.getInstance("RSA").generatePublic(
-                    X509EncodedKeySpec(array))
-            val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
-            cipher.init(Cipher.ENCRYPT_MODE, key)
-            output.put(cipher.doFinal(challenge))
-        } catch (e: NoSuchAlgorithmException) {
-            throw IOException(e)
-        } catch (e: NoSuchPaddingException) {
-            throw IOException(e)
-        } catch (e: IllegalBlockSizeException) {
-            throw IOException(e)
-        } catch (e: BadPaddingException) {
-            throw IOException(e)
-        } catch (e: InvalidKeyException) {
-            throw IOException(e)
-        } catch (e: InvalidKeySpecException) {
-            throw IOException(e)
-        }
-
-        val plugins = server.plugins
-        output.putInt(plugins.files.size)
-        plugins.files.forEach { sendPluginMetaData(it, output) }
-        channel.queueBundle()
-        loginState = { loginStep2(it, challenge) }
-    }
-
-    private fun loginStep2(input: RandomReadableByteStream,
-                           challengeExpected: ByteArray) {
-        val plugins = server.plugins
-        val challenge = ByteArray(challengeExpected.size)
-        input[challenge]
-        nickname = input.getString(1 shl 10)
-        var length = input.int
-        val requests = ArrayList<Int>(length)
-        while (length-- > 0) {
-            requests.add(input.int)
-        }
-        val output = channel.outputStream
-        val response = generateResponse(
-                Arrays.equals(challenge, challengeExpected))
-        if (response != null) {
-            output.putBoolean(true)
-            output.putString(response)
-            channel.queueBundle()
-            throw ConnectionCloseException(response)
-        }
-        output.putBoolean(false)
-        channel.queueBundle()
-        for (request in requests) {
-            sendPlugin(
-                    plugins.files[request].file() ?: throw IllegalStateException(
-                            "Trying to send embedded plugin"), output)
-        }
-        loginState = { loginStep3(it) }
-    }
-
-    private fun loginStep3(input: RandomReadableByteStream) {
-        loadingRadius = clamp(input.int, 10, server.server.maxLoadingRadius())
-        val buffer = ByteBuffer(64 * 64 * 4)
-        input[buffer]
-        buffer.flip()
-        skin = ServerSkin(Image(64, 64, buffer))
-        val output = channel.outputStream
-        val response = server.addPlayer(this)
-        if (response != null) {
-            output.putBoolean(true)
-            output.putString(response)
-            channel.queueBundle()
-            throw ConnectionCloseException(response)
-        }
-        added = true
-        setWorld()
-        output.putBoolean(false)
-        output.putInt(loadingRadius)
-        TagStructureBinary.write(
-                output,
-                server.server.plugins.registry().idStorage().save())
-        channel.queueBundle()
-        val currentTime = System.currentTimeMillis()
-        pingWait = currentTime + 1000
-        pingTimeout = currentTime + 10000
-        server.events.fireLocal(PlayerJoinEvent(this))
-        server.events.fireLocal(
-                MessageEvent(this, MessageLevel.SERVER_INFO,
-                        "Player connected: $id ($nickname) on $channel"))
-        loginState = null
-        state = State.OPEN
-    }
-
-    override fun transmit(packet: PacketClient) {
-        val output = channel.outputStream
-        output.putShort(packet.id(server.plugins.registry()))
-        packet.sendClient(this, output)
-    }
-
-    @Synchronized override fun close() {
-        super.close()
-        channel.close()
-        state = State.CLOSED
-    }
-
     override fun disconnect(reason: String,
                             time: Double) {
         removeEntity()
-        task({
-            sendPacket(PacketDisconnect(reason, time))
-            throw ConnectionCloseException(reason)
-        })
+        send(PacketDisconnect(reason, time))
+        send(PacketDisconnectSelf(reason))
     }
 
     fun updatePing(ping: Long) {
-        pingTimeout = ping + 10000
+        pingHandler(ping)
     }
 
     private fun sendPluginMetaData(plugin: PluginFile,
@@ -220,89 +304,5 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
         channel.queueBundle()
     }
 
-    private fun task(runnable: () -> Unit) {
-        sendQueueSize.incrementAndGet()
-        sendQueue.add(runnable)
-    }
-
-    override fun tick(worker: ConnectionWorker) {
-        try {
-            when (state) {
-                RemotePlayerConnection.State.LOGIN -> channel.process(
-                        { loginState }, { obj, t -> obj(t) })
-                RemotePlayerConnection.State.OPEN -> try {
-                    val currentTime = System.currentTimeMillis()
-                    if (pingWait < currentTime) {
-                        pingWait = currentTime + 1000
-                        sendPacket(PacketPingServer(currentTime))
-                    }
-                    while (!sendQueue.isEmpty()) {
-                        sendQueue.poll()()
-                        sendQueueSize.decrementAndGet()
-                        if (channel.bundleSize() > 1 shl 10 shl 4) {
-                            break
-                        }
-                    }
-                    if (channel.bundleSize() > 0) {
-                        channel.queueBundle()
-                    }
-                    if (channel.process({ bundle ->
-                        while (bundle.hasRemaining()) {
-                            val packet = PacketAbstract.make(registry,
-                                    bundle.short) as PacketServer
-                            packet.parseServer(this, bundle)
-                            packet.runServer(this)
-                        }
-                        true
-                    })) {
-                        server.events.fireLocal(PlayerLeaveEvent(this))
-                        server.events.fireLocal(
-                                MessageEvent(this, MessageLevel.SERVER_INFO,
-                                        "Player disconnected: $nickname"))
-                        state = State.CLOSED
-                    }
-                } catch (e: ConnectionCloseException) {
-                    if (channel.bundleSize() > 0) {
-                        channel.queueBundle()
-                    }
-                }
-
-                RemotePlayerConnection.State.CLOSING -> if (channel.processVoid()) {
-                    state = State.CLOSED
-                }
-                else -> throw IllegalStateException("Unknown state: " + state)
-            }
-        } catch (e: ConnectionCloseException) {
-            server.events.fireLocal(PlayerLeaveEvent(this))
-            server.events.fireLocal(
-                    MessageEvent(this, MessageLevel.SERVER_INFO,
-                            "Disconnecting player: $nickname"))
-            channel.requestClose()
-            state = State.CLOSING
-        } catch (e: InvalidPacketDataException) {
-            server.events.fireLocal(PlayerLeaveEvent(this))
-            server.events.fireLocal(
-                    MessageEvent(this, MessageLevel.SERVER_INFO,
-                            "Disconnecting player: $nickname"))
-            channel.requestClose()
-            state = State.CLOSING
-        } catch (e: IOException) {
-            server.events.fireLocal(PlayerLeaveEvent(this))
-            server.events.fireLocal(
-                    MessageEvent(this, MessageLevel.SERVER_INFO,
-                            "Player disconnected: $nickname ($e)"))
-            state = State.CLOSED
-        }
-
-    }
-
-    override val isClosed: Boolean
-        get() = pingTimeout < System.currentTimeMillis() || state == State.CLOSED
-
-    internal enum class State {
-        LOGIN,
-        OPEN,
-        CLOSING,
-        CLOSED
-    }
+    companion object : KLogging()
 }

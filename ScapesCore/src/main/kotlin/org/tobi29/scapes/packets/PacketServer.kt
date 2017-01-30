@@ -32,4 +32,6 @@ interface PacketServer : Packet {
     }
 
     fun runServer(player: PlayerConnection)
+
+    val isImmediate get() = false
 }

@@ -18,7 +18,6 @@ package org.tobi29.scapes.server.connection
 
 import org.tobi29.scapes.connection.ConnectionInfo
 import org.tobi29.scapes.connection.ConnectionType
-import org.tobi29.scapes.connection.GetInfoConnection
 import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.utils.Checksum
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
@@ -32,6 +31,7 @@ import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.command.Executor
 import org.tobi29.scapes.server.extension.event.NewConnectionEvent
 import java.io.IOException
+import java.nio.channels.SelectionKey
 import java.nio.channels.SocketChannel
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -137,34 +137,42 @@ class ServerConnection(val server: ScapesServer,
         return null
     }
 
-    override fun newConnection(worker: ConnectionWorker,
-                               channel: PacketBundleChannel,
-                               id: Byte): Connection? {
+    suspend override fun onConnect(worker: ConnectionWorker,
+                                   channel: PacketBundleChannel,
+                                   id: Byte,
+                                   connection: Connection) {
         when (ConnectionType[id]) {
-            ConnectionType.GET_INFO -> return GetInfoConnection(worker, channel,
-                    server.serverInfo)
-            ConnectionType.PLAY -> return RemotePlayerConnection(worker,
-                    channel, this)
+            ConnectionType.GET_INFO -> {
+                channel.register(worker.joiner, SelectionKey.OP_READ)
+                val output = channel.outputStream
+                output.put(server.serverInfo.getBuffer())
+                channel.queueBundle()
+                channel.aClose()
+            }
+            ConnectionType.PLAY -> {
+                RemotePlayerConnection(worker, channel, this).run(connection)
+            }
             ConnectionType.CONTROL -> {
                 if (controlPassword != null) {
-                    val controlPanel = ControlPanel(worker, channel,
-                            this) { id, mode, salt ->
-                        if (id != "Control Panel") {
-                            throw IOException("Invalid name: $id")
-                        }
-                        ControlPanelProtocol.passwordAuthentication(mode, salt,
-                                controlPassword)
-                    }
+                    val controlPanel = ControlPanel(worker, channel, this)
                     controlPanel.openHook {
-                        ControlPanel.logger.info { "Control panel accepted from $channel" }
+                        logger.info { "Control panel accepted from $channel" }
                     }
                     addExecutor(controlPanel)
-                    controlPanel.closeHook { removeExecutor(controlPanel) }
-                    return controlPanel
+                    try {
+                        controlPanel.runServer(connection) { id, mode, salt ->
+                            if (id != "Control Panel") {
+                                throw IOException("Invalid name: $id")
+                            }
+                            ControlPanelProtocol.passwordAuthentication(mode,
+                                    salt, controlPassword)
+                        }
+                    } finally {
+                        removeExecutor(controlPanel)
+                    }
                 }
             }
         }
-        return null
     }
 
     companion object {

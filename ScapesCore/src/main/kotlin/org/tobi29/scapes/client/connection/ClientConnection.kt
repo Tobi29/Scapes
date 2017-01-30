@@ -29,7 +29,7 @@ import org.tobi29.scapes.plugins.Plugins
 
 abstract class ClientConnection(val game: GameStateGameMP,
                                 val plugins: Plugins,
-                                val loadingDistance: Int) : PlayConnection<PacketServer>, Connection {
+                                val loadingDistance: Int) : PlayConnection<PacketServer> {
     val profilerSent = ConnectionProfiler()
     val profilerReceived = ConnectionProfiler()
     protected val pingDebug: GuiWidgetDebugValues.Element
@@ -45,20 +45,11 @@ abstract class ClientConnection(val game: GameStateGameMP,
         uploadDebug = debugValues["Connection-Up"]
     }
 
-    override fun requestClose() {
-        throw UnsupportedOperationException(
-                "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun send(packet: PacketServer) {
-        transmit(packet)
-    }
-
     abstract fun start()
 
     abstract fun stop()
 
-    protected abstract fun transmit(packet: PacketServer)
+    abstract suspend fun run(connection: Connection)
 
     fun mob(consumer: (MobPlayerClientMain) -> Unit) {
         entity?.let {
