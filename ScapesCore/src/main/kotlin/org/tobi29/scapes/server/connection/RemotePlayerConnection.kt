@@ -61,7 +61,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
     private var pingHandler: (Long) -> Unit = {}
 
     suspend fun run(connection: Connection) {
-        pingHandler = { connection.increaseTimeout(10000L - it) }
+        pingHandler = { connection.increaseTimeout(10000L + it) }
         try {
             val output = channel.outputStream
             val input = channel.inputStream

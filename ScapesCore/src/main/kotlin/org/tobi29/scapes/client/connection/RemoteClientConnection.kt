@@ -54,7 +54,7 @@ class RemoteClientConnection(private val worker: ConnectionWorker,
     }
 
     override suspend fun run(connection: Connection) {
-        pingHandler = { connection.increaseTimeout(10000L - it) }
+        pingHandler = { connection.increaseTimeout(10000L + it) }
         try {
             while (!connection.shouldClose) {
                 while (!sendQueue.isEmpty()) {
