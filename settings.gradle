@@ -15,16 +15,12 @@
  */
 
 apply from: "ScapesEngine/include.gradle"
-include "PlatformerCore"
-include "PlatformerDesktop"
 include "ScapesCore"
 include "ScapesCore:MariaDBStorage"
 include "ScapesCore:SQLiteStorage"
 include "ScapesDesktop"
 include "Plugins:VanillaBasics"
 include "Tools:ControlPanel"
-include "Tools:VanillaTerrain"
-include "Tools:TagEditor"
 include "Tools:VanillaTerrain"
 
 if (androidEnable == "true") {
