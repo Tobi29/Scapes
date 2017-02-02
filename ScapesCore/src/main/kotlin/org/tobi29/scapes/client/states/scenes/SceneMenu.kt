@@ -72,7 +72,8 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
         val f2 = gl.engine.graphics.createFramebuffer(
                 gl.sceneWidth(), gl.sceneHeight(), 1, false, false, false)
         val f3 = gl.engine.graphics.createFramebuffer(
-                gl.sceneWidth(), gl.sceneHeight(), 1, false, false, false)
+                gl.sceneWidth(), gl.sceneHeight(), 1, false, false, false,
+                TextureFilter.LINEAR)
         val render = gl.into(f1) {
             gl.clearDepth()
             val save = save.getAndSet(null)

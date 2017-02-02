@@ -74,8 +74,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
     init {
         val seed = world.seed
         fbo = world.game.engine.graphics.createFramebuffer(512, 512, 1,
-                false, false,
-                true)
+                false, false, true, TextureFilter.LINEAR)
         billboardMesh = createVTI(world.game.engine,
                 floatArrayOf(1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f,
                         -1.0f, 1.0f, 1.0f, -1.0f, 1.0f),

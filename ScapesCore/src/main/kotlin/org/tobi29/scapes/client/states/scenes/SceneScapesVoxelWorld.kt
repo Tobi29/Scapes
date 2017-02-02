@@ -104,7 +104,8 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
         val exposure = scapesTag?.getBoolean("AutoExposure") ?: false
 
         val sceneBuffer = gl.engine.graphics.createFramebuffer(
-                gl.sceneWidth(), gl.sceneHeight(), 1, true, true, false)
+                gl.sceneWidth(), gl.sceneHeight(), 1, true, true, false,
+                TextureFilter.LINEAR)
         val renderScene = render(gl)
         val render = if (fxaa) {
             val shaderFXAA = gl.engine.graphics.loadShader(
@@ -115,7 +116,8 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                 }
             }
             val fxaaBuffer = gl.engine.graphics.createFramebuffer(
-                    gl.sceneWidth(), gl.sceneHeight(), 1, true, true, false)
+                    gl.sceneWidth(), gl.sceneHeight(), 1, true, true, false,
+                    TextureFilter.LINEAR)
             val render = gl.into(fxaaBuffer) {
                 gl.clearDepth()
                 renderScene()
@@ -159,7 +161,8 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                 }
             }
             val compositeBuffer = gl.engine.graphics.createFramebuffer(
-                    gl.sceneWidth(), gl.sceneHeight(), 2, true, true, false)
+                    gl.sceneWidth(), gl.sceneHeight(), 2, true, true, false,
+                    TextureFilter.LINEAR)
             val pp1 = gl.into(compositeBuffer,
                     postProcess(gl, shaderComposite1, sceneBuffer))
             val pp2 = postProcess(gl, shaderComposite2,
