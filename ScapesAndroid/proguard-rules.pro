@@ -20,7 +20,6 @@
 -dontwarn aQute.bnd.annotation.Version
 
 -dontwarn java.net.URLClassLoader
--dontwarn java.util.concurrent.ForkJoinPool
 
 -dontnote android.net.http.SslCertificate
 -dontnote android.net.http.SslError
