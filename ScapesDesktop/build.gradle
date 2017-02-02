@@ -38,8 +38,6 @@ dependencies {
     compile project(":ScapesCore")
     compile project(":ScapesCore:SQLiteStorage")
 
-    testCompile "junit:junit:4.12"
-
     runtime project(":ScapesEngine:FileSystems:NIOFileSystem")
     runtime project(":ScapesEngine:ServerFramework:JVMSSLProvider")
     runtime project(":ScapesEngine:Utils:MBeansCPUReader")

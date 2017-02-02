@@ -39,8 +39,6 @@ dependencies {
     compile project(":ScapesEngine:SWTUtils")
     compile project(":Plugins:VanillaBasics")
 
-    testCompile "junit:junit:4.12"
-
     runtime project(":ScapesEngine:FileSystems:NIOFileSystem")
     runtime "org.apache.logging.log4j:log4j-api:2.7"
     runtime "org.apache.logging.log4j:log4j-core:2.7"

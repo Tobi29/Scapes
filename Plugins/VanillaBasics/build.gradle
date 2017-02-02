@@ -18,6 +18,4 @@ apply from: "$rootDir/ScapesEngine/resources/scapesenginemodulekotlin.gradle"
 
 dependencies {
     compile project(":ScapesCore")
-
-    testCompile "junit:junit:4.12"
 }

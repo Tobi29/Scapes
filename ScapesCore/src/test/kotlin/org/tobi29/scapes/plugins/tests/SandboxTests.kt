@@ -16,45 +16,70 @@
 
 package org.tobi29.scapes.plugins.tests
 
-import org.junit.Assert
-import org.junit.Test
+import org.jetbrains.spek.api.Spek
+import org.jetbrains.spek.api.dsl.describe
+import org.jetbrains.spek.api.dsl.given
+import org.jetbrains.spek.api.dsl.it
+import org.jetbrains.spek.api.dsl.on
+import org.tobi29.scapes.engine.test.assertions.shouldEqual
 import org.tobi29.scapes.plugins.Sandbox
 
-class SandboxTests {
-    @Test
-    fun testExactMatches() {
-        val pkgs = setOf("a.b.c", "a.b.c.d", "a.b.d")
-        val pairs = pkgs.map { Pair(it, Sandbox.packageAccess(it)) }
-        for (pkg in pkgs) {
-            for (check in pairs) {
-                val matches = check.second(pkg)
-                if (pkg == check.first) {
-                    Assert.assertTrue("Equal package does not match", matches)
-                } else {
-                    Assert.assertFalse("Not equal package matches", matches)
+object SandboxTests : Spek({
+    describe("package matching") {
+        given("a matcher for a.b.c, a.b.c.d, a.b.d") {
+            val pkgs = setOf("a.b.c", "a.b.c.d", "a.b.d")
+            val pairs = pkgs.map { Pair(it, Sandbox.packageAccess(it)) }
+            on("checking if all those can match themselves") {
+                for (pkg in pkgs) {
+                    for (check in pairs) {
+                        val matches = check.second(pkg)
+                        if (pkg == check.first) {
+                            it("should match") {
+                                matches shouldEqual true
+                            }
+                        } else {
+                            it("should not match") {
+                                matches shouldEqual false
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        given("a matcher for a.b.*") {
+            val access = Sandbox.packageAccess("a.b.*")
+            val pkgs = listOf(
+                    Pair("a.b.c", true),
+                    Pair("a.b.d", true),
+                    Pair("a.c.d", false),
+                    Pair("a.b", false),
+                    Pair("a.b.c.d", false)
+            )
+            for ((pkg, expected) in pkgs) {
+                on("checking $pkg") {
+                    it("should match") {
+                        access(pkg) shouldEqual expected
+                    }
+                }
+            }
+        }
+        given("a matcher for a.b.**") {
+            val access = Sandbox.packageAccess("a.b.**")
+            val pkgs = listOf(
+                    Pair("a.b", true),
+                    Pair("a.b.c", true),
+                    Pair("a.b.d", true),
+                    Pair("a.b.c.d", true),
+                    Pair("a.c.d", false),
+                    Pair("a", false)
+            )
+            for ((pkg, expected) in pkgs) {
+                on("checking $pkg") {
+                    it("should match") {
+                        access(pkg) shouldEqual expected
+                    }
                 }
             }
         }
     }
-
-    @Test
-    fun testWildcardMatches() {
-        val access = Sandbox.packageAccess("a.b.*")
-        Assert.assertTrue("Equal package does not match", access("a.b.c"))
-        Assert.assertTrue("Equal package does not match", access("a.b.d"))
-        Assert.assertFalse("Not equal package matches", access("a.c.d"))
-        Assert.assertFalse("Shorter package matches", access("a.b"))
-        Assert.assertFalse("Longer package matches", access("a.b.c.d"))
-    }
-
-    @Test
-    fun testDoubleWildcardMatches() {
-        val access = Sandbox.packageAccess("a.b.**")
-        Assert.assertTrue("Equal package does not match", access("a.b.c"))
-        Assert.assertTrue("Equal package does not match", access("a.b.d"))
-        Assert.assertTrue("Shorter package does not matches", access("a.b.c.d"))
-        Assert.assertTrue("Longer package does not matches", access("a.b.c.d"))
-        Assert.assertFalse("Not equal package matches", access("a.c.d"))
-        Assert.assertFalse("Twice shorter package matches", access("a"))
-    }
-}
+})

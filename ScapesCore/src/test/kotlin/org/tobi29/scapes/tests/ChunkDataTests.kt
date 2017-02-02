@@ -16,136 +16,129 @@
 
 package org.tobi29.scapes.tests
 
-import org.junit.Assert
-import org.junit.Test
+import org.jetbrains.spek.api.Spek
+import org.jetbrains.spek.api.dsl.describe
+import org.jetbrains.spek.api.dsl.given
+import org.jetbrains.spek.api.dsl.it
 import org.tobi29.scapes.chunk.data.ChunkArraySection1x16
 import org.tobi29.scapes.chunk.data.ChunkArraySection1x8
 import org.tobi29.scapes.chunk.data.ChunkArraySection2x4
 import org.tobi29.scapes.chunk.data.ChunkData
-import java.security.SecureRandom
+import org.tobi29.scapes.engine.test.assertions.shouldEqual
 import java.util.*
 
-class ChunkDataTests {
-    @Test
-    fun testChunkData16() {
-        testChunkData16(2, 2, 2, 2, 2, 2)
-    }
-
-    private fun testChunkData16(xSectionBits: Int,
-                                ySectionBits: Int,
-                                zSectionBits: Int,
-                                xSizeBits: Int,
-                                ySizeBits: Int,
-                                zSizeBits: Int) {
-        val seed = SecureRandom().nextLong()
-        var random = Random(seed)
-        val chunkData = ChunkData(xSectionBits, ySectionBits, zSectionBits,
-                xSizeBits, ySizeBits, zSizeBits, ::ChunkArraySection1x16)
-        val xSize = 1 shl xSizeBits + xSectionBits
-        val ySize = 1 shl ySizeBits + ySectionBits
-        val zSize = 1 shl zSizeBits + zSectionBits
-        for (z in 0..zSize - 1) {
-            for (y in 0..ySize - 1) {
-                for (x in 0..xSize - 1) {
-                    val value = random.nextInt(0x100)
-                    chunkData.setData(x, y, z, 0, value)
+object ChunkDataTests : Spek({
+    describe("2 x 4-bit chunk data") {
+        given("an instance filled with random data") {
+            val xSectionBits = 2
+            val ySectionBits = 2
+            val zSectionBits = 2
+            val xSizeBits = 2
+            val ySizeBits = 2
+            val zSizeBits = 2
+            val random = Random(0)
+            val chunkData = ChunkData(xSectionBits, ySectionBits, zSectionBits,
+                    xSizeBits, ySizeBits, zSizeBits, ::ChunkArraySection2x4)
+            val xSize = 1 shl xSizeBits + xSectionBits
+            val ySize = 1 shl ySizeBits + ySectionBits
+            val zSize = 1 shl zSizeBits + zSectionBits
+            for (z in 0..zSize - 1) {
+                for (y in 0..ySize - 1) {
+                    for (x in 0..xSize - 1) {
+                        val value1 = random.nextInt(0x10)
+                        val value2 = random.nextInt(0x10)
+                        chunkData.setData(x, y, z, 0, value1)
+                        chunkData.setData(x, y, z, 1, value2)
+                    }
                 }
             }
-        }
-        random = Random(seed)
-        for (z in 0..zSize - 1) {
-            for (y in 0..ySize - 1) {
-                for (x in 0..xSize - 1) {
-                    val requirement = random.nextInt(0x100)
-                    val value = chunkData.getData(x, y, z, 0)
-                    Assert.assertEquals("Returned data not equal to stored",
-                            requirement.toLong(), value.toLong())
-                }
-            }
-        }
-    }
-
-    @Test
-    fun testChunkData8() {
-        testChunkData8(2, 2, 2, 2, 2, 2)
-    }
-
-    private fun testChunkData8(xSectionBits: Int,
-                               ySectionBits: Int,
-                               zSectionBits: Int,
-                               xSizeBits: Int,
-                               ySizeBits: Int,
-                               zSizeBits: Int) {
-        val seed = SecureRandom().nextLong()
-        var random = Random(seed)
-        val chunkData = ChunkData(xSectionBits, ySectionBits, zSectionBits,
-                xSizeBits, ySizeBits, zSizeBits, ::ChunkArraySection1x8)
-        val xSize = 1 shl xSizeBits + xSectionBits
-        val ySize = 1 shl ySizeBits + ySectionBits
-        val zSize = 1 shl zSizeBits + zSectionBits
-        for (z in 0..zSize - 1) {
-            for (y in 0..ySize - 1) {
-                for (x in 0..xSize - 1) {
-                    val value = random.nextInt(0x80)
-                    chunkData.setData(x, y, z, 0, value)
-                }
-            }
-        }
-        random = Random(seed)
-        for (z in 0..zSize - 1) {
-            for (y in 0..ySize - 1) {
-                for (x in 0..xSize - 1) {
-                    val requirement = random.nextInt(0x80)
-                    val value = chunkData.getData(x, y, z, 0)
-                    Assert.assertEquals("Returned data not equal to stored",
-                            requirement.toLong(), value.toLong())
+            it("should contain the same values") {
+                val random = Random(0)
+                for (z in 0..zSize - 1) {
+                    for (y in 0..ySize - 1) {
+                        for (x in 0..xSize - 1) {
+                            val requirement1 = random.nextInt(0x10)
+                            val value1 = chunkData.getData(x, y, z, 0)
+                            val requirement2 = random.nextInt(0x10)
+                            val value2 = chunkData.getData(x, y, z, 1)
+                            value1 shouldEqual requirement1
+                            value2 shouldEqual requirement2
+                        }
+                    }
                 }
             }
         }
     }
-
-    @Test
-    fun testChunkLight() {
-        testChunkLight(2, 2, 2, 2, 2, 2)
-    }
-
-    private fun testChunkLight(xSectionBits: Int,
-                               ySectionBits: Int,
-                               zSectionBits: Int,
-                               xSizeBits: Int,
-                               ySizeBits: Int,
-                               zSizeBits: Int) {
-        val seed = SecureRandom().nextLong()
-        var random = Random(seed)
-        val chunkData = ChunkData(xSectionBits, ySectionBits, zSectionBits,
-                xSizeBits, ySizeBits, zSizeBits, ::ChunkArraySection2x4)
-        val xSize = 1 shl xSizeBits + xSectionBits
-        val ySize = 1 shl ySizeBits + ySectionBits
-        val zSize = 1 shl zSizeBits + zSectionBits
-        for (z in 0..zSize - 1) {
-            for (y in 0..ySize - 1) {
-                for (x in 0..xSize - 1) {
-                    var value = random.nextInt(0x10)
-                    chunkData.setData(x, y, z, 0, value)
-                    value = random.nextInt(0x10)
-                    chunkData.setData(x, y, z, 1, value)
+    describe("8-bit chunk data") {
+        given("an instance filled with random data") {
+            val xSectionBits = 2
+            val ySectionBits = 2
+            val zSectionBits = 2
+            val xSizeBits = 2
+            val ySizeBits = 2
+            val zSizeBits = 2
+            val random = Random(0)
+            val chunkData = ChunkData(xSectionBits, ySectionBits, zSectionBits,
+                    xSizeBits, ySizeBits, zSizeBits, ::ChunkArraySection1x8)
+            val xSize = 1 shl xSizeBits + xSectionBits
+            val ySize = 1 shl ySizeBits + ySectionBits
+            val zSize = 1 shl zSizeBits + zSectionBits
+            for (z in 0..zSize - 1) {
+                for (y in 0..ySize - 1) {
+                    for (x in 0..xSize - 1) {
+                        val value = random.nextInt(0x100).toByte()
+                        chunkData.setData(x, y, z, 0, value.toInt())
+                    }
                 }
             }
-        }
-        random = Random(seed)
-        for (z in 0..zSize - 1) {
-            for (y in 0..ySize - 1) {
-                for (x in 0..xSize - 1) {
-                    var requirement = random.nextInt(0x10)
-                    var value = chunkData.getData(x, y, z, 0)
-                    Assert.assertEquals("Returned data not equal to stored",
-                            requirement.toLong(), value.toLong())
-                    requirement = random.nextInt(0x10)
-                    value = chunkData.getData(x, y, z, 1)
-                    Assert.assertEquals("Returned data not equal to stored",
-                            requirement.toLong(), value.toLong())
+            it("should contain the same values") {
+                val random = Random(0)
+                for (z in 0..zSize - 1) {
+                    for (y in 0..ySize - 1) {
+                        for (x in 0..xSize - 1) {
+                            val requirement = random.nextInt(0x100).toByte()
+                            val value = chunkData.getData(x, y, z, 0).toByte()
+                            value shouldEqual requirement
+                        }
+                    }
                 }
             }
         }
     }
-}
+    describe("16-bit chunk data") {
+        given("an instance filled with random data") {
+            val xSectionBits = 2
+            val ySectionBits = 2
+            val zSectionBits = 2
+            val xSizeBits = 2
+            val ySizeBits = 2
+            val zSizeBits = 2
+            val random = Random(0)
+            val chunkData = ChunkData(xSectionBits, ySectionBits, zSectionBits,
+                    xSizeBits, ySizeBits, zSizeBits, ::ChunkArraySection1x16)
+            val xSize = 1 shl xSizeBits + xSectionBits
+            val ySize = 1 shl ySizeBits + ySectionBits
+            val zSize = 1 shl zSizeBits + zSectionBits
+            for (z in 0..zSize - 1) {
+                for (y in 0..ySize - 1) {
+                    for (x in 0..xSize - 1) {
+                        val value = random.nextInt(0x10000).toShort()
+                        chunkData.setData(x, y, z, 0, value.toInt())
+                    }
+                }
+            }
+            it("should contain the same values") {
+                val random = Random(0)
+                for (z in 0..zSize - 1) {
+                    for (y in 0..ySize - 1) {
+                        for (x in 0..xSize - 1) {
+                            val requirement = random.nextInt(0x10000).toShort()
+                            val value = chunkData.getData(x, y, z, 0).toShort()
+                            value shouldEqual requirement
+                        }
+                    }
+                }
+            }
+        }
+    }
+})

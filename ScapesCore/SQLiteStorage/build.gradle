@@ -22,6 +22,4 @@ version = "0.0.0"
 dependencies {
     compile project(":ScapesCore")
     compile project(":ScapesEngine:SQLFramework:SQLite")
-
-    testCompile "junit:junit:4.12"
 }

@@ -29,6 +29,4 @@ dependencies {
     compile project(":ScapesEngine:SQLFramework:MariaDB")
 
     runtime "net.java.dev.jna:jna:4.2.1"
-
-    testCompile "junit:junit:4.12"
 }
