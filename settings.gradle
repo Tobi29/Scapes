@@ -25,6 +25,5 @@ include "Tools:VanillaTerrain"
 
 if (androidEnable == "true") {
     apply from: "ScapesEngineAndroid/include.gradle"
-    include "PlatformerAndroid"
     include "ScapesAndroid"
 }
