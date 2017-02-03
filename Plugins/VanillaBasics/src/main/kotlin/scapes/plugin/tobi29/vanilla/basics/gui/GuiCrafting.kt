@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,8 @@ class GuiCrafting(private val table: Boolean,
         }
     }
 
-    private inner class ElementType(parent: GuiLayoutData, recipeType: CraftingRecipeType,
+    private inner class ElementType(parent: GuiLayoutData,
+                                    recipeType: CraftingRecipeType,
                                     enabled: Boolean) : GuiComponentGroupSlab(
             parent) {
         init {
@@ -129,7 +130,8 @@ class GuiCrafting(private val table: Boolean,
         }
     }
 
-    private inner class Element(parent: GuiLayoutData, recipe: CraftingRecipe) : GuiComponentGroupSlab(
+    private inner class Element(parent: GuiLayoutData,
+                                recipe: CraftingRecipe) : GuiComponentGroupSlab(
             parent) {
         private val examples = ArrayList<() -> Unit>()
 

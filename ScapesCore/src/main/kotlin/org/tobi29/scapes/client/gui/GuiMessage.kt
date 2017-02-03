@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,11 @@ import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiComponentText
 import org.tobi29.scapes.engine.gui.GuiStyle
 
-class GuiMessage(state: GameState, previous: Gui, title: String,
-                 message: String, style: GuiStyle) : GuiMenu(state, title,
+class GuiMessage(state: GameState,
+                 previous: Gui,
+                 title: String,
+                 message: String,
+                 style: GuiStyle) : GuiMenu(state, title,
         previous, style) {
     init {
         pane.add(16.0, 80.0, -1.0, 18.0) { GuiComponentText(it, message) }

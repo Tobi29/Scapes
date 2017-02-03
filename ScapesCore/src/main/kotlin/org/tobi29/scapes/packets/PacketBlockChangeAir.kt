@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,9 @@ import org.tobi29.scapes.server.connection.PlayerConnection
 class PacketBlockChangeAir : PacketBlockChange {
     constructor()
 
-    constructor(x: Int, y: Int, z: Int) : super(x, y, z, 0, 0)
+    constructor(x: Int,
+                y: Int,
+                z: Int) : super(x, y, z, 0, 0)
 
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,11 @@ import org.tobi29.scapes.entity.server.EntityServer
 import scapes.plugin.tobi29.vanilla.basics.VanillaBasics
 import scapes.plugin.tobi29.vanilla.basics.material.CropType
 
-class EntityFarmlandServer(world: WorldServer, pos: Vector3d = Vector3d.ZERO, private var nutrientA: Float = 0.0f,
-                           private var nutrientB: Float = 0.0f, private var nutrientC: Float = 0.0f) : EntityServer(
+class EntityFarmlandServer(world: WorldServer,
+                           pos: Vector3d = Vector3d.ZERO,
+                           private var nutrientA: Float = 0.0f,
+                           private var nutrientB: Float = 0.0f,
+                           private var nutrientC: Float = 0.0f) : EntityServer(
         world, pos) {
     private var time = 0.0f
     private var stage: Byte = 0

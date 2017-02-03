@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,9 @@ import org.tobi29.scapes.engine.utils.io.tag.getInt
 import org.tobi29.scapes.engine.utils.io.tag.setInt
 import org.tobi29.scapes.engine.utils.math.min
 
-class ItemStack constructor(private var material: Material, private var data: Int, private var amount: Int = 1,
+class ItemStack constructor(private var material: Material,
+                            private var data: Int,
+                            private var amount: Int = 1,
                             private var metaData: TagStructure = TagStructure()) {
     private val registry: GameRegistry
 
@@ -33,7 +35,9 @@ class ItemStack constructor(private var material: Material, private var data: In
         registry = material.registry()
     }
 
-    constructor(material: Material, data: Int, metaData: TagStructure) : this(
+    constructor(material: Material,
+                data: Int,
+                metaData: TagStructure) : this(
             material, data, 1, metaData)
 
     fun amount(): Int {

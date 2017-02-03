@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ import org.tobi29.scapes.engine.utils.io.tag.getByte
 import org.tobi29.scapes.engine.utils.io.tag.setByte
 import java.util.*
 
-class ChunkArraySection2x4(private val xSizeBits: Int, private val ySizeBits: Int, zSizeBits: Int) : ChunkArraySection {
+class ChunkArraySection2x4(private val xSizeBits: Int,
+                           private val ySizeBits: Int,
+                           zSizeBits: Int) : ChunkArraySection {
     private val size: Int
     private var data: ByteArray? = null
     private var defaultValue: Byte = 0

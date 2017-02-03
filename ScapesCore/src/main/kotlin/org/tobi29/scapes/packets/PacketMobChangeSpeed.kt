@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,10 @@ class PacketMobChangeSpeed : PacketAbstract, PacketBoth {
 
     constructor()
 
-    constructor(uuid: UUID, pos: Vector3d?, x: Double, y: Double,
+    constructor(uuid: UUID,
+                pos: Vector3d?,
+                x: Double,
+                y: Double,
                 z: Double) : super(pos, 0.0, false, false) {
         this.uuid = uuid
         this.x = clamp(x * 100.0, Short.MIN_VALUE.toDouble(),

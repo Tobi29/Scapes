@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,11 @@ package scapes.plugin.tobi29.vanilla.basics.material
 
 import org.tobi29.scapes.block.GameRegistry
 
-class CropType(private val name: String, private val bakedName: String, textureRoot: String,
-               private val time: Double, private val nutrient: Int) {
+class CropType(private val name: String,
+               private val bakedName: String,
+               textureRoot: String,
+               private val time: Double,
+               private val nutrient: Int) {
     private val texture: String
 
     init {

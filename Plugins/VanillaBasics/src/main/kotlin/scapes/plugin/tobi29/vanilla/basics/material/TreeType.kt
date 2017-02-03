@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,31 @@ import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import scapes.plugin.tobi29.vanilla.basics.generator.tree.*
 
-class TreeType internal constructor(private val name: String, textureRoot: String, private val colorCold: Vector3d,
-                                    private val colorWarm: Vector3d, private val colorAutumn: Vector3d, private val dropChance: Int,
-                                    private val generator: Tree, val isEvergreen: Boolean) {
+class TreeType internal constructor(private val name: String,
+                                    textureRoot: String,
+                                    private val colorCold: Vector3d,
+                                    private val colorWarm: Vector3d,
+                                    private val colorAutumn: Vector3d,
+                                    private val dropChance: Int,
+                                    private val generator: Tree,
+                                    val isEvergreen: Boolean) {
     private val texture: String
 
-    constructor(name: String, textureRoot: String, colorCold: Vector3d,
-                colorWarm: Vector3d, dropChance: Int, generator: Tree) : this(
+    constructor(name: String,
+                textureRoot: String,
+                colorCold: Vector3d,
+                colorWarm: Vector3d,
+                dropChance: Int,
+                generator: Tree) : this(
             name, textureRoot, colorCold, colorWarm, Vector3d.ZERO, dropChance,
             generator, true)
 
-    constructor(name: String, textureRoot: String, colorCold: Vector3d,
-                colorWarm: Vector3d, colorAutumn: Vector3d, dropChance: Int,
+    constructor(name: String,
+                textureRoot: String,
+                colorCold: Vector3d,
+                colorWarm: Vector3d,
+                colorAutumn: Vector3d,
+                dropChance: Int,
                 generator: Tree) : this(name, textureRoot, colorCold, colorWarm,
             colorAutumn, dropChance,
             generator, false)

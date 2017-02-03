@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,12 @@ class ServerInfo {
     val image: Image
     private val buffer: ByteBuffer
 
-    constructor(name: String, iconPath: FilePath) : this(name,
+    constructor(name: String,
+                iconPath: FilePath) : this(name,
             image(iconPath))
 
-    constructor(name: String, image: Image = Image()) {
+    constructor(name: String,
+                image: Image = Image()) {
         this.name = name
         this.image = image
         val buffer: ByteBuffer

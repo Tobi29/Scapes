@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,8 @@ import org.tobi29.scapes.entity.server.MobPositionSenderServer
 import org.tobi29.scapes.entity.server.MobServer
 import java.util.concurrent.ThreadLocalRandom
 
-class EntityTornadoServer(world: WorldServer, pos: Vector3d = Vector3d.ZERO) : EntityServer(
+class EntityTornadoServer(world: WorldServer,
+                          pos: Vector3d = Vector3d.ZERO) : EntityServer(
         world, pos) {
     private val positionHandler: MobPositionSenderServer
     private var time = 0.0

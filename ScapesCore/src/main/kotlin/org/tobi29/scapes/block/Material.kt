@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
 
-abstract class Material protected constructor(protected val registry: GameRegistry, protected val nameID: String) {
+abstract class Material protected constructor(protected val registry: GameRegistry,
+                                              protected val nameID: String) {
     var id = 0
 
     open fun example(data: Int): ItemStack {

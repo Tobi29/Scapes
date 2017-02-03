@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,9 @@ import org.tobi29.scapes.engine.gui.GuiComponentTextButton
 import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiStyle
 
-class GuiShaderSettings(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu(
+class GuiShaderSettings(state: GameState,
+                        previous: Gui,
+                        style: GuiStyle) : GuiMenu(
         state, "Shader Settings", previous, style) {
     init {
         val scapesTag = state.engine.tagStructure.structure("Scapes")

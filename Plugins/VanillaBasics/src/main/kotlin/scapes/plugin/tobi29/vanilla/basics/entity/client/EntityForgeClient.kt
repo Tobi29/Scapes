@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@ import scapes.plugin.tobi29.vanilla.basics.VanillaBasics
 import scapes.plugin.tobi29.vanilla.basics.gui.GuiForgeInventory
 import java.util.concurrent.ThreadLocalRandom
 
-class EntityForgeClient(world: WorldClient, pos: Vector3d = Vector3d.ZERO) : EntityAbstractFurnaceClient(
+class EntityForgeClient(world: WorldClient,
+                        pos: Vector3d = Vector3d.ZERO) : EntityAbstractFurnaceClient(
         world, pos, Inventory(world.registry, 9), 4, 3,
         Float.POSITIVE_INFINITY, 1.006f, 10, 50) {
     private var particleWait = 0.1

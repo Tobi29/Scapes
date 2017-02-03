@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,11 @@ import org.tobi29.scapes.entity.server.MobLivingEquippedServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import java.util.concurrent.ThreadLocalRandom
 
-class MobZombieServer(world: WorldServer, pos: Vector3d = Vector3d.ZERO, speed: Vector3d = Vector3d.ZERO,
-                      xRot: Double = 0.0, zRot: Double = 0.0) : MobLivingEquippedServer(
+class MobZombieServer(world: WorldServer,
+                      pos: Vector3d = Vector3d.ZERO,
+                      speed: Vector3d = Vector3d.ZERO,
+                      xRot: Double = 0.0,
+                      zRot: Double = 0.0) : MobLivingEquippedServer(
         world, pos, speed, AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 20.0, 30.0,
         Frustum(90.0, 1.0, 0.1, 24.0), Frustum(20.0, 0.5, 0.1, 0.2)) {
     private var soundWait = 0.0

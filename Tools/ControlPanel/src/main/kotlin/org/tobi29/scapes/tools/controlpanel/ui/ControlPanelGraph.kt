@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2015 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,9 @@ import org.eclipse.swt.widgets.Canvas
 import org.eclipse.swt.widgets.Composite
 import org.eclipse.swt.widgets.Label
 
-class ControlPanelGraph(parent: Composite, max: Double, scale: Double,
+class ControlPanelGraph(parent: Composite,
+                        max: Double,
+                        scale: Double,
                         private val borderNameFilter: (Double) -> String) : Composite(
         parent, SWT.NONE) {
     val canvas: Canvas

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@ import org.tobi29.scapes.engine.utils.math.vector.minus
 import org.tobi29.scapes.engine.utils.math.vector.plus
 import java.util.*
 
-class GuiLayoutManagerMenu(start: Vector2d, maxSize: Vector2d,
+class GuiLayoutManagerMenu(start: Vector2d,
+                           maxSize: Vector2d,
                            components: Set<GuiComponent>,
                            private val vertical: Boolean = false) : GuiLayoutManager(
         start, maxSize, components) {
@@ -159,5 +160,6 @@ class GuiLayoutManagerMenu(start: Vector2d, maxSize: Vector2d,
         this.size = outSize.now()
     }
 
-    private class Width(val unsized: Double, val used: Double)
+    private class Width(val unsized: Double,
+                        val used: Double)
 }

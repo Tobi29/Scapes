@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,8 @@ import scapes.plugin.tobi29.vanilla.basics.generator.structure.genOreRock
 import scapes.plugin.tobi29.vanilla.basics.generator.structure.placeRandomRuin
 import java.util.*
 
-class ChunkPopulatorOverworld(world: WorldServer, private val plugin: VanillaBasics,
+class ChunkPopulatorOverworld(world: WorldServer,
+                              private val plugin: VanillaBasics,
                               private val biomeGenerator: BiomeGenerator) : ChunkPopulator {
     private val seedInt: Long
     private val biomes = EnumMap<BiomeGenerator.Biome, BiomeDecoratorChooser>(

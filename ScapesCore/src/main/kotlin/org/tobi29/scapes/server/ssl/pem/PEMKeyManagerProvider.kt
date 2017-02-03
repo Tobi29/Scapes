@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,14 +47,16 @@ class PEMKeyManagerProvider : KeyManagerProvider {
         try {
             val certificates = read(
                     path.resolve(config.getString(
-                            "Certificate") ?: "")) { readCertificateChain(
-                    BufferedReader(
-                            InputStreamReader(ByteStreamInputStream(it))))
+                            "Certificate") ?: "")) {
+                readCertificateChain(
+                        BufferedReader(
+                                InputStreamReader(ByteStreamInputStream(it))))
             }
             val keys = read(path.resolve(
-                    config.getString("PrivateKey") ?: "")) { readPrivateKeys(
-                    BufferedReader(
-                            InputStreamReader(ByteStreamInputStream(it))))
+                    config.getString("PrivateKey") ?: "")) {
+                readPrivateKeys(
+                        BufferedReader(
+                                InputStreamReader(ByteStreamInputStream(it))))
             }
             val keyStore = KeyStore.getInstance("JKS")
             keyStore.load(null, EMPTY_CHAR)

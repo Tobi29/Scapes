@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,16 @@ import org.tobi29.scapes.engine.utils.math.noise.value.ValueNoise
 import java.util.*
 
 class ClimateGenerator private constructor(private val temperatureNoise: ValueNoise,
-                                           private val humidityNoise: ValueNoise, private val weatherNoise: ValueNoise,
+                                           private val humidityNoise: ValueNoise,
+                                           private val weatherNoise: ValueNoise,
                                            private val terrainGenerator: TerrainGenerator) {
     private var day: Long = 0
     private var dayTime = 0.0
     private var sunDeclination = 0.0
     private var sunHourAngleCos = 0.0
 
-    constructor(random: Random, terrainGenerator: TerrainGenerator) : this(
+    constructor(random: Random,
+                terrainGenerator: TerrainGenerator) : this(
             SimplexNoise(random.nextLong()),
             SimplexNoise(random.nextLong()),
             SimplexNoise(random.nextLong()), terrainGenerator)
@@ -115,7 +117,7 @@ class ClimateGenerator private constructor(private val temperatureNoise: ValueNo
     }
 
     fun sunIntensityD(latitude: Double,
-                                    declination: Double = sunDeclination): Double {
+                      declination: Double = sunDeclination): Double {
         val declination2 = declination * 0.5
         val swap = latitude > PI
         val latitude2: Double
@@ -216,10 +218,10 @@ class ClimateGenerator private constructor(private val temperatureNoise: ValueNo
     }
 
     fun temperature2D(x: Double,
-                                    y: Double,
-                                    humidity3: Double,
-                                    sunIntensity: Double = sunIntensity(y,
-                                            0.9)): Double {
+                      y: Double,
+                      humidity3: Double,
+                      sunIntensity: Double = sunIntensity(y,
+                              0.9)): Double {
         val xx = x / SCALE
         val yy = y / SCALE
         val noiseGlobal = temperatureNoise.noise(xx, yy,

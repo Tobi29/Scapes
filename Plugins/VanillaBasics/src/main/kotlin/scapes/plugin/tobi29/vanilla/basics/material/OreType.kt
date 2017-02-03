@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,13 @@ package scapes.plugin.tobi29.vanilla.basics.material
 
 import org.tobi29.scapes.block.BlockType
 
-class OreType(private val type: BlockType, private val rarity: Int, private val size: Double, private val chance: Int,
-              private val rockChance: Int, private val rockDistance: Int, private val stoneTypes: List<Int>) {
+class OreType(private val type: BlockType,
+              private val rarity: Int,
+              private val size: Double,
+              private val chance: Int,
+              private val rockChance: Int,
+              private val rockDistance: Int,
+              private val stoneTypes: List<Int>) {
 
     fun rarity(): Int {
         return rarity

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,14 @@ import org.tobi29.scapes.engine.utils.io.tag.setInt
 import scapes.plugin.tobi29.vanilla.basics.VanillaBasics
 import scapes.plugin.tobi29.vanilla.basics.material.item.ItemIngot
 
-fun createTool(plugin: VanillaBasics, item: ItemStack,
+fun createTool(plugin: VanillaBasics,
+               item: ItemStack,
                type: String): Boolean {
     return createTool(plugin, item, id(type))
 }
 
-fun createTool(plugin: VanillaBasics, item: ItemStack,
+fun createTool(plugin: VanillaBasics,
+               item: ItemStack,
                id: Int): Boolean {
     val materials = plugin.materials
     val ingot = item.material() as ItemIngot
@@ -76,12 +78,14 @@ fun createTool(plugin: VanillaBasics, item: ItemStack,
     return true
 }
 
-fun createStoneTool(plugin: VanillaBasics, item: ItemStack,
+fun createStoneTool(plugin: VanillaBasics,
+                    item: ItemStack,
                     type: String): Boolean {
     return createStoneTool(plugin, item, id(type))
 }
 
-fun createStoneTool(plugin: VanillaBasics, item: ItemStack,
+fun createStoneTool(plugin: VanillaBasics,
+                    item: ItemStack,
                     id: Int): Boolean {
     val materials = plugin.materials
     var efficiency = 1.0

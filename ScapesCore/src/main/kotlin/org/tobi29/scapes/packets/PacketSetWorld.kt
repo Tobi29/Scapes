@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,8 @@ class PacketSetWorld : PacketAbstract, PacketClient {
 
     constructor()
 
-    constructor(world: WorldServer, player: MobPlayerServer) {
+    constructor(world: WorldServer,
+                player: MobPlayerServer) {
         tag = player.write()
         seed = world.seed
         uuid = player.getUUID()

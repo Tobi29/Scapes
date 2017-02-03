@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,8 @@ class PacketDayTimeSync : PacketAbstract, PacketClient {
 
     constructor()
 
-    constructor(dayTime: Double, day: Long) {
+    constructor(dayTime: Double,
+                day: Long) {
         this.dayTime = dayTime
         this.day = day
     }

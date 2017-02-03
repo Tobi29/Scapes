@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,8 @@ import java.security.NoSuchAlgorithmException
 import java.security.spec.InvalidKeySpecException
 import java.util.*
 
-class Account(private val keyPair: KeyPair, private val nickname: String) {
+class Account(private val keyPair: KeyPair,
+              private val nickname: String) {
 
     @Throws(IOException::class)
     fun write(path: FilePath) {

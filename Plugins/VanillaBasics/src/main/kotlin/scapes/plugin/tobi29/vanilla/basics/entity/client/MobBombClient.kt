@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,12 @@ import org.tobi29.scapes.entity.client.MobClient
 import org.tobi29.scapes.entity.model.MobModelBlock
 import scapes.plugin.tobi29.vanilla.basics.material.block.BlockExplosive
 
-class MobBombClient(world: WorldClient, pos: Vector3d = Vector3d.ZERO, speed: Vector3d = Vector3d.ZERO,
-                    type: BlockType = world.air, data: Int = 0, private var time: Double = 0.0) : MobClient(
+class MobBombClient(world: WorldClient,
+                    pos: Vector3d = Vector3d.ZERO,
+                    speed: Vector3d = Vector3d.ZERO,
+                    type: BlockType = world.air,
+                    data: Int = 0,
+                    private var time: Double = 0.0) : MobClient(
         world, pos, speed, AABB(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)) {
     private val item: ItemStack
     private var exploded = false
@@ -49,7 +53,8 @@ class MobBombClient(world: WorldClient, pos: Vector3d = Vector3d.ZERO, speed: Ve
 
     override fun update(delta: Double) {
         time -= delta
-        if (time < 0.05 && !exploded) { // TODO: Replace with proper packet
+        if (time < 0.05 && !exploded) {
+            // TODO: Replace with proper packet
             (item.material() as BlockExplosive).explodeClient(world, pos.now(),
                     speed.now())
             exploded = true

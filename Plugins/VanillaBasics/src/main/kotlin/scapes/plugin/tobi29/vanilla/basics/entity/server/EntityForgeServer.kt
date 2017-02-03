@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ import org.tobi29.scapes.packets.PacketEntityChange
 import scapes.plugin.tobi29.vanilla.basics.VanillaBasics
 import scapes.plugin.tobi29.vanilla.basics.material.item.ItemIngot
 
-class EntityForgeServer(world: WorldServer, pos: Vector3d = Vector3d.ZERO) : EntityAbstractFurnaceServer(
+class EntityForgeServer(world: WorldServer,
+                        pos: Vector3d = Vector3d.ZERO) : EntityAbstractFurnaceServer(
         world, pos, Inventory(world.registry, 9), 4, 3,
         Float.POSITIVE_INFINITY, 1.006f, 10, 50) {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,8 @@ import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 
-class GuiHud(state: GameState, style: GuiStyle) : GuiDesktop(state, style) {
+class GuiHud(state: GameState,
+             style: GuiStyle) : GuiDesktop(state, style) {
     private val cross: Model
     private val textureCross = gui.engine.graphics.textures["Scapes:image/gui/Cross"]
 

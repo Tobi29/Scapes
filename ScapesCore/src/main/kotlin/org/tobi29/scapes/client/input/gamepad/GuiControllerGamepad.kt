@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,11 @@ import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.engine.input.ControllerKeyReference
 
 class GuiControllerGamepad(engine: ScapesEngine,
-                           private val controller: ControllerJoystick, private val primaryButton: ControllerKeyReference,
+                           private val controller: ControllerJoystick,
+                           private val primaryButton: ControllerKeyReference,
                            private val secondaryButton: ControllerKeyReference,
-                           private val upButton: ControllerKeyReference, private val downButton: ControllerKeyReference,
+                           private val upButton: ControllerKeyReference,
+                           private val downButton: ControllerKeyReference,
                            private val leftButton: ControllerKeyReference,
                            private val rightButton: ControllerKeyReference) : GuiController(
         engine) {

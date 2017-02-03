@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,13 @@ import java.io.IOException
 import java.sql.Connection
 import java.sql.SQLException
 
-class MariaDBWorldSource(private val path: FilePath, private val connection: Connection) : WorldSource {
+class MariaDBWorldSource(private val path: FilePath,
+                         private val connection: Connection) : WorldSource {
     private val database: MySQLDatabase
 
-    constructor(path: FilePath, url: String, user: String,
+    constructor(path: FilePath,
+                url: String,
+                user: String,
                 password: String) : this(path,
             openDatabase(url, user, password))
 

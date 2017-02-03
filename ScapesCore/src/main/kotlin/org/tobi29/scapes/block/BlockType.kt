@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,8 @@ import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
 import java.util.*
 
-abstract class BlockType protected constructor(registry: GameRegistry, nameID: String) : Material(
+abstract class BlockType protected constructor(registry: GameRegistry,
+                                               nameID: String) : Material(
         registry, nameID) {
     fun block(data: Int): Long {
         return (id.toLong() shl 32) or data.toLong()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@ import scapes.plugin.tobi29.vanilla.basics.gui.GuiAlloyInventory
 import scapes.plugin.tobi29.vanilla.basics.util.Alloy
 import scapes.plugin.tobi29.vanilla.basics.util.read
 
-class EntityAlloyClient(world: WorldClient, pos: Vector3d = Vector3d.ZERO) : EntityAbstractContainerClient(
+class EntityAlloyClient(world: WorldClient,
+                        pos: Vector3d = Vector3d.ZERO) : EntityAbstractContainerClient(
         world, pos, Inventory(world.registry, 2)) {
     private var alloy = Alloy()
     private var temperature = 0.0

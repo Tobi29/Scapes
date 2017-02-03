@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,10 @@ import java.io.IOException
 import java.nio.channels.Channels
 import java.util.*
 
-class GuiCreateWorld(state: GameState, previous: GuiSaveSelect,
-                     worldTypes: List<PluginFile>, plugins: List<PluginFile>,
+class GuiCreateWorld(state: GameState,
+                     previous: GuiSaveSelect,
+                     worldTypes: List<PluginFile>,
+                     plugins: List<PluginFile>,
                      style: GuiStyle) : GuiMenuDouble(state, "New World",
         previous, style) {
     val addons: MutableList<PluginFile> = ArrayList()
@@ -115,8 +117,11 @@ class GuiCreateWorld(state: GameState, previous: GuiSaveSelect,
         }
     }
 
-    private inner class GuiAddons(state: GameState, previous: GuiCreateWorld,
-                                  parent: String, plugins: List<PluginFile>, style: GuiStyle) : GuiMenu(
+    private inner class GuiAddons(state: GameState,
+                                  previous: GuiCreateWorld,
+                                  parent: String,
+                                  plugins: List<PluginFile>,
+                                  style: GuiStyle) : GuiMenu(
             state, "Addons", "Apply", previous, style) {
         init {
             val scrollPane = pane.addVert(16.0, 5.0, -1.0, 350.0
@@ -126,7 +131,8 @@ class GuiCreateWorld(state: GameState, previous: GuiSaveSelect,
             }
         }
 
-        private inner class Element(parent: GuiLayoutData, addon: PluginFile) : GuiComponentGroupSlab(
+        private inner class Element(parent: GuiLayoutData,
+                                    addon: PluginFile) : GuiComponentGroupSlab(
                 parent) {
             private var active = false
 

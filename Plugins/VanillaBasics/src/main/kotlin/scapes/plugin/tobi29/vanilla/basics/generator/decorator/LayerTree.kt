@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,16 @@ package scapes.plugin.tobi29.vanilla.basics.generator.decorator
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import scapes.plugin.tobi29.vanilla.basics.generator.tree.Tree
 import scapes.plugin.tobi29.vanilla.basics.material.VanillaMaterial
+import java.util.*
 
-import java.util.Random
+class LayerTree(private val tree: Tree,
+                private val chance: Int) : BiomeDecorator.Layer {
 
-class LayerTree(private val tree: Tree, private val chance: Int) : BiomeDecorator.Layer {
-
-    override fun decorate(terrain: TerrainServer.TerrainMutable, x: Int, y: Int,
-                          materials: VanillaMaterial, random: Random) {
+    override fun decorate(terrain: TerrainServer.TerrainMutable,
+                          x: Int,
+                          y: Int,
+                          materials: VanillaMaterial,
+                          random: Random) {
         if (random.nextInt(chance) == 0) {
             val z = terrain.highestTerrainBlockZAt(x, y)
             tree.gen(terrain, x, y, z, materials, random)

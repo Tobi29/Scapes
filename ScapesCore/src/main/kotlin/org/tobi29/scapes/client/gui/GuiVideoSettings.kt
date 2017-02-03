@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,9 @@ import org.tobi29.scapes.engine.utils.io.tag.getDouble
 import org.tobi29.scapes.engine.utils.io.tag.setDouble
 import org.tobi29.scapes.engine.utils.math.round
 
-class GuiVideoSettings(state: GameState, previous: Gui, style: GuiStyle) : GuiMenu(
+class GuiVideoSettings(state: GameState,
+                       previous: Gui,
+                       style: GuiStyle) : GuiMenu(
         state, "Video Settings", previous, style) {
     init {
         val scapesTag = state.engine.tagStructure.structure("Scapes")

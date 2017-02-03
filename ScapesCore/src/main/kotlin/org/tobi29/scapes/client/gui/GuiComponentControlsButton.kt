@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,11 @@ import org.tobi29.scapes.engine.input.ControllerKeyReference
 import org.tobi29.scapes.engine.utils.io.tag.TagStructure
 import java.util.*
 
-class GuiComponentControlsButton(parent: GuiLayoutData, textSize: Int,
-                                 private val name: String, private val id: String, private val tagStructure: TagStructure,
+class GuiComponentControlsButton(parent: GuiLayoutData,
+                                 textSize: Int,
+                                 private val name: String,
+                                 private val id: String,
+                                 private val tagStructure: TagStructure,
                                  private val controller: ControllerBasic) : GuiComponentButtonHeavy(
         parent) {
     private val text: GuiComponentText

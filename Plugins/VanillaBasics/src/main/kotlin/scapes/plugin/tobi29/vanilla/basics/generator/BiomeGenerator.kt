@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,19 +24,24 @@ class BiomeGenerator(climateGenerator: ClimateGenerator,
         this.climateGenerator = climateGenerator.at(-100, 0.0)
     }
 
-    operator fun get(x: Double, y: Double): Biome {
+    operator fun get(x: Double,
+                     y: Double): Biome {
         val humidity3 = climateGenerator.humidity3(x, y)
         val temperature2 = climateGenerator.temperature2D(x, y, humidity3)
         val riverHumidity = climateGenerator.riverHumidity(x, y)
         val humidity2 = climateGenerator.humidity2D(temperature2, humidity3)
         val terrainFactor = terrainGenerator.generateTerrainFactorLayer(x, y)
-        val mountainFactor = terrainGenerator.generateMountainFactorLayer(x, y, terrainFactor)
+        val mountainFactor = terrainGenerator.generateMountainFactorLayer(x, y,
+                terrainFactor)
         return getD(humidity2, riverHumidity, temperature2, terrainFactor,
                 mountainFactor)
     }
 
-    fun getD(humidity2: Double, riverHumidity: Double,
-             temperature: Double, terrainFactor: Double, mountainFactor: Double): Biome {
+    fun getD(humidity2: Double,
+             riverHumidity: Double,
+             temperature: Double,
+             terrainFactor: Double,
+             mountainFactor: Double): Biome {
         if (terrainFactor + mountainFactor * 3.2 < 0.21) {
             if (temperature < -20.0) {
                 return Biome.OCEAN_ARCTIC
@@ -103,7 +108,8 @@ class BiomeGenerator(climateGenerator: ClimateGenerator,
         TROPIC
     }
 
-    enum class Biome constructor(private val zone: Zone, val isValidSpawn: Boolean) {
+    enum class Biome constructor(private val zone: Zone,
+                                 val isValidSpawn: Boolean) {
         POLAR(Zone.ARCTIC, false),
         TUNDRA(Zone.ARCTIC, false),
         TAIGA(Zone.ARCTIC, false),

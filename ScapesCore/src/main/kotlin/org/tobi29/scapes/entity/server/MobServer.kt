@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,10 @@ import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityPhysics
 
-abstract class MobServer protected constructor(world: WorldServer, pos: Vector3d, speed: Vector3d, protected val collision: AABB) : EntityServer(
+abstract class MobServer protected constructor(world: WorldServer,
+                                               pos: Vector3d,
+                                               speed: Vector3d,
+                                               protected val collision: AABB) : EntityServer(
         world, pos) {
     protected val speed: MutableVector3d
     protected val rot = MutableVector3d()

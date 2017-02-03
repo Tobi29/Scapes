@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,24 @@ import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.math.min
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 
-class GuiComponentBar(parent: GuiLayoutData, private val r: Float, private val g: Float, private val b: Float,
-                      private val a: Float, private val updateFactor: Double, private val supplier: () -> Double) : GuiComponentHeavy(
+class GuiComponentBar(parent: GuiLayoutData,
+                      private val r: Float,
+                      private val g: Float,
+                      private val b: Float,
+                      private val a: Float,
+                      private val updateFactor: Double,
+                      private val supplier: () -> Double) : GuiComponentHeavy(
         parent) {
     private var model1: Model? = null
     private var model2: Model? = null
     private var value = 0.0
 
-    constructor(parent: GuiLayoutData, r: Float, g: Float, b: Float,
-                a: Float, supplier: () -> Double) : this(parent, r, g, b, a,
+    constructor(parent: GuiLayoutData,
+                r: Float,
+                g: Float,
+                b: Float,
+                a: Float,
+                supplier: () -> Double) : this(parent, r, g, b, a,
             10.0, supplier)
 
     public override fun renderComponent(gl: GL,

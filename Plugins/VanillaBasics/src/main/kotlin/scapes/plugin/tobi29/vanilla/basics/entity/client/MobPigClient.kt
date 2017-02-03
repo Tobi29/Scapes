@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,11 @@ import org.tobi29.scapes.entity.client.MobLivingClient
 import scapes.plugin.tobi29.vanilla.basics.VanillaBasics
 import scapes.plugin.tobi29.vanilla.basics.entity.model.MobLivingModelPig
 
-class MobPigClient(world: WorldClient, pos: Vector3d = Vector3d.ZERO, speed: Vector3d = Vector3d.ZERO,
-                   xRot: Double = 0.0, zRot: Double = 0.0) : MobLivingClient(
+class MobPigClient(world: WorldClient,
+                   pos: Vector3d = Vector3d.ZERO,
+                   speed: Vector3d = Vector3d.ZERO,
+                   xRot: Double = 0.0,
+                   zRot: Double = 0.0) : MobLivingClient(
         world, pos, speed, AABB(-0.45, -0.45, -0.6875, 0.45, 0.45, 0.375), 20.0,
         30.0) {
 

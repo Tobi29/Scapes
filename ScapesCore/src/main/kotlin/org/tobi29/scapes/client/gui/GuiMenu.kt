@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,21 @@ open class GuiMenu(state: GameState,
     protected val pane: GuiComponentScrollPaneViewport
     protected val back: GuiComponentTextButton
 
-    protected constructor(state: GameState, title: String, previous: Gui,
+    protected constructor(state: GameState,
+                          title: String,
+                          previous: Gui,
                           style: GuiStyle) : this(state, title, "Back",
             previous, style)
 
-    protected constructor(state: GameState, title: String, style: GuiStyle) : this(
+    protected constructor(state: GameState,
+                          title: String,
+                          style: GuiStyle) : this(
             state, title, "Back", style)
 
-    protected constructor(state: GameState, title: String, back: String, previous: Gui,
+    protected constructor(state: GameState,
+                          title: String,
+                          back: String,
+                          previous: Gui,
                           style: GuiStyle) : this(state, title, back, style) {
         on(GuiAction.BACK) { state.engine.guiStack.swap(this, previous) }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,15 @@ import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.server.RemoteAddress
 
 class GameStateServerDisconnect(message: String,
-                                private val address: RemoteAddress?, engine: ScapesEngine,
+                                private val address: RemoteAddress?,
+                                engine: ScapesEngine,
                                 private var reconnectTimer: Double) : GameState(
         engine) {
     private val gui = GuiDisconnected(this, message, engine.guiStyle)
     private val scene = SceneError(engine)
 
-    constructor(message: String, engine: ScapesEngine) : this(message,
+    constructor(message: String,
+                engine: ScapesEngine) : this(message,
             null, engine, 0.0)
 
     override fun init() {

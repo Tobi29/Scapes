@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,8 @@ import java.security.PrivilegedAction
 import java.security.PrivilegedActionException
 import java.util.*
 
-class BasicWorldFormat(private val path: FilePath, tagStructure: TagStructure) : WorldFormat {
+class BasicWorldFormat(private val path: FilePath,
+                       tagStructure: TagStructure) : WorldFormat {
     private val regionPath: FilePath
     private val idStorage: IDStorage
     private val plugins: Plugins

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,16 @@ package org.tobi29.scapes.entity.model
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.*
 
-class Box constructor(engine: ScapesEngine, tbs: Float, minX: Float, minY: Float,
-                      minZ: Float, maxX: Float, maxY: Float, maxZ: Float, tX: Float, tY: Float,
+class Box constructor(engine: ScapesEngine,
+                      tbs: Float,
+                      minX: Float,
+                      minY: Float,
+                      minZ: Float,
+                      maxX: Float,
+                      maxY: Float,
+                      maxZ: Float,
+                      tX: Float,
+                      tY: Float,
                       culling: Boolean = true) {
 
     val minX: Float

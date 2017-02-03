@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,8 @@ import scapes.plugin.tobi29.vanilla.basics.util.read
 import scapes.plugin.tobi29.vanilla.basics.util.write
 import java.util.concurrent.ConcurrentHashMap
 
-abstract class ItemMetalTool protected constructor(materials: VanillaMaterial, nameID: String) : VanillaItem(
+abstract class ItemMetalTool protected constructor(materials: VanillaMaterial,
+                                                   nameID: String) : VanillaItem(
         materials, nameID), ItemMetal {
     private val modelsHead = ConcurrentHashMap<AlloyType, ItemModel>()
     private val modelsBuilt = ConcurrentHashMap<AlloyType, ItemModel>()

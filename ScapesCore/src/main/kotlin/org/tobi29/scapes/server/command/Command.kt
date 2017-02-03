@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,8 @@ object Command {
         }
     }
 
-    class Output(val returnCode: Int, val out: String) {
+    class Output(val returnCode: Int,
+                 val out: String) {
 
         init {
             if (returnCode < 0 || returnCode > 255) {
@@ -112,7 +113,8 @@ object Command {
     class Null(output: Output) : Compiled(
             listOf<() -> Unit>({ throw CommandException(output) }))
 
-    class CommandException(val returnCode: Int, message: String) : Exception(
+    class CommandException(val returnCode: Int,
+                           message: String) : Exception(
             message) {
 
         constructor(output: Output) : this(output.returnCode, output.out)

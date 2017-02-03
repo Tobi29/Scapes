@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import scapes.plugin.tobi29.vanilla.basics.gui.GuiResearchTableInventory
 
-class EntityResearchTableClient(world: WorldClient, pos: Vector3d = Vector3d.ZERO) : EntityAbstractContainerClient(
+class EntityResearchTableClient(world: WorldClient,
+                                pos: Vector3d = Vector3d.ZERO) : EntityAbstractContainerClient(
         world, pos, Inventory(world.registry, 2)) {
 
     override fun gui(player: MobPlayerClientMain): Gui? {

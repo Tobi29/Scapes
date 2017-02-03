@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import scapes.plugin.tobi29.vanilla.basics.entity.client.EntityForgeClient
 import scapes.plugin.tobi29.vanilla.basics.entity.client.MobPlayerClientMainVB
 
 class GuiForgeInventory(container: EntityForgeClient,
-                        player: MobPlayerClientMainVB, style: GuiStyle) : GuiContainerInventory<EntityForgeClient>(
+                        player: MobPlayerClientMainVB,
+                        style: GuiStyle) : GuiContainerInventory<EntityForgeClient>(
         "Forge", player, container, style) {
     private val temperatureText: GuiComponentText
 
@@ -38,7 +39,7 @@ class GuiForgeInventory(container: EntityForgeClient,
         selection(buttonContainer(96, 120, 30, 30, 7))
         selection(buttonContainer(96, 80, 30, 30, 8))
         temperatureText = pane.add(220.0, 170.0, -1.0,
-                24.0) {  GuiComponentText(it, "") }
+                24.0) { GuiComponentText(it, "") }
         updateTemperatureText()
     }
 

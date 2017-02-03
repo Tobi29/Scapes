@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,8 @@ import scapes.plugin.tobi29.vanilla.basics.entity.client.MobPlayerClientMainVB
 import scapes.plugin.tobi29.vanilla.basics.packet.PacketAnvil
 
 class GuiAnvilInventory(container: EntityAnvilClient,
-                        player: MobPlayerClientMainVB, style: GuiStyle) : GuiContainerInventory<EntityAnvilClient>(
+                        player: MobPlayerClientMainVB,
+                        style: GuiStyle) : GuiContainerInventory<EntityAnvilClient>(
         "Anvil", player, container, style) {
 
     init {
@@ -51,7 +52,7 @@ class GuiAnvilInventory(container: EntityAnvilClient,
                           i: Int): GuiComponentItemButton {
         val icon = material.example(1)
         val item = pane.add(x.toDouble(), y.toDouble(), 30.0, 30.0
-        ) {  GuiComponentItemButton(it, icon) }
+        ) { GuiComponentItemButton(it, icon) }
         item.on(GuiEvent.CLICK_LEFT) { event ->
             player.connection().send(PacketAnvil(container, i))
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,12 @@ interface WorldSource : AutoCloseable {
 
     override fun close()
 
-    class Panorama(image0: Image, image1: Image, image2: Image,
-                   image3: Image, image4: Image, image5: Image) {
+    class Panorama(image0: Image,
+                   image1: Image,
+                   image2: Image,
+                   image3: Image,
+                   image4: Image,
+                   image5: Image) {
         val elements = listOf(image0, image1, image2, image3, image4, image5)
     }
 }

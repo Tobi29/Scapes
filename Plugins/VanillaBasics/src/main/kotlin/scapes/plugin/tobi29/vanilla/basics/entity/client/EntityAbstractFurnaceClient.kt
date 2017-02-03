@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,15 @@ import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import scapes.plugin.tobi29.vanilla.basics.material.item.ItemHeatable
 
-abstract class EntityAbstractFurnaceClient protected constructor(world: WorldClient, pos: Vector3d,
-                                                                 inventory: Inventory, fuel: Int, protected val items: Int, protected var maximumTemperature: Float,
-                                                                 protected val temperatureFalloff: Float, protected val fuelHeat: Int, protected val fuelTier: Int) : EntityAbstractContainerClient(
+abstract class EntityAbstractFurnaceClient protected constructor(world: WorldClient,
+                                                                 pos: Vector3d,
+                                                                 inventory: Inventory,
+                                                                 fuel: Int,
+                                                                 protected val items: Int,
+                                                                 protected var maximumTemperature: Float,
+                                                                 protected val temperatureFalloff: Float,
+                                                                 protected val fuelHeat: Int,
+                                                                 protected val fuelTier: Int) : EntityAbstractContainerClient(
         world, pos, inventory) {
     protected val fuel: IntArray
     protected val fuelTemperature: FloatArray

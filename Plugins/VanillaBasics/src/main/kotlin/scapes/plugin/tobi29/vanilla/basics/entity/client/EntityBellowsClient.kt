@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,9 @@ import org.tobi29.scapes.entity.model.EntityModel
 import scapes.plugin.tobi29.vanilla.basics.VanillaBasics
 import scapes.plugin.tobi29.vanilla.basics.entity.model.EntityModelBellows
 
-class EntityBellowsClient constructor(world: WorldClient, pos: Vector3d = Vector3d.ZERO, private var face: Face = Face.NONE) : EntityClient(
+class EntityBellowsClient constructor(world: WorldClient,
+                                      pos: Vector3d = Vector3d.ZERO,
+                                      private var face: Face = Face.NONE) : EntityClient(
         world, pos) {
     private var scale = 0.0f
 

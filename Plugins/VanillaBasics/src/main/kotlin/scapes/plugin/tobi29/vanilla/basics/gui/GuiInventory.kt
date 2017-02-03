@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@ import org.tobi29.scapes.packets.PacketInventoryInteraction
 import scapes.plugin.tobi29.vanilla.basics.entity.client.MobPlayerClientMainVB
 import java.util.*
 
-open class GuiInventory(name: String, protected val player: MobPlayerClientMainVB,
+open class GuiInventory(name: String,
+                        protected val player: MobPlayerClientMainVB,
                         style: GuiStyle) : GuiMenu(player.game, name, style) {
     protected val topPane: GuiComponentGroup
     protected val inventoryPane: GuiComponentVisiblePane
@@ -41,7 +42,7 @@ open class GuiInventory(name: String, protected val player: MobPlayerClientMainV
     init {
         topPane = pane.addVert(0.0, 0.0, -1.0, -1.0, ::GuiComponentGroup)
         inventoryPane = pane.addVert(16.0, 5.0, 350.0, 150.0,
-                :: GuiComponentVisiblePane)
+                ::GuiComponentVisiblePane)
         val buttons = ArrayList<GuiComponent>(10)
         var i = 10
         buttons.clear()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,13 @@ import org.tobi29.scapes.packets.PacketMobDamage
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-abstract class MobLivingServer(world: WorldServer, pos: Vector3d, speed: Vector3d,
-                               aabb: AABB, protected var health: Double, protected var maxHealth: Double, protected val viewField: Frustum,
+abstract class MobLivingServer(world: WorldServer,
+                               pos: Vector3d,
+                               speed: Vector3d,
+                               aabb: AABB,
+                               protected var health: Double,
+                               protected var maxHealth: Double,
+                               protected val viewField: Frustum,
                                protected val hitField: Frustum) : MobServer(
         world, pos, speed, aabb) {
     protected val noticeListeners: MutableMap<String, (MobServer) -> Unit> = ConcurrentHashMap()

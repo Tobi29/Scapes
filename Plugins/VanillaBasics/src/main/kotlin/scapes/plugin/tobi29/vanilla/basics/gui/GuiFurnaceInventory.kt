@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import scapes.plugin.tobi29.vanilla.basics.entity.client.EntityFurnaceClient
 import scapes.plugin.tobi29.vanilla.basics.entity.client.MobPlayerClientMainVB
 
 class GuiFurnaceInventory(container: EntityFurnaceClient,
-                          player: MobPlayerClientMainVB, style: GuiStyle) : GuiContainerInventory<EntityFurnaceClient>(
+                          player: MobPlayerClientMainVB,
+                          style: GuiStyle) : GuiContainerInventory<EntityFurnaceClient>(
         "Furnace", player, container, style) {
     private val temperatureText: GuiComponentText
 
@@ -37,7 +38,7 @@ class GuiFurnaceInventory(container: EntityFurnaceClient,
         selection(buttonContainer(56, 120, 30, 30, 6))
         selection(buttonContainer(96, 120, 30, 30, 7))
         temperatureText = pane.add(220.0, 170.0, -1.0,
-                24.0) {  GuiComponentText(it, "") }
+                24.0) { GuiComponentText(it, "") }
         updateTemperatureText()
     }
 

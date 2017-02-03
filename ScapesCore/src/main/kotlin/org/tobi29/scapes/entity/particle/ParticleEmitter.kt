@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import java.util.concurrent.ConcurrentLinkedQueue
 
-abstract class ParticleEmitter<P : ParticleInstance> protected constructor(protected val system: ParticleSystem, protected val instances: Array<P>) {
+abstract class ParticleEmitter<P : ParticleInstance> protected constructor(protected val system: ParticleSystem,
+                                                                           protected val instances: Array<P>) {
     protected val maxInstances: Int
     private val queue = ConcurrentLinkedQueue<(P) -> Unit>()
     private val activateQueue = ConcurrentLinkedQueue<P>()

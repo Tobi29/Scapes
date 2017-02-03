@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,8 @@ import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import java.util.concurrent.ConcurrentLinkedQueue
 
-class LightingEngineThreaded(private val terrain: Terrain, taskExecutor: TaskExecutor) : LightingEngine {
+class LightingEngineThreaded(private val terrain: Terrain,
+                             taskExecutor: TaskExecutor) : LightingEngine {
     private val updates = ConcurrentLinkedQueue<Vector3i>()
     private val joiner: Joiner
 

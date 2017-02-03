@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,13 @@ import org.tobi29.scapes.entity.server.MobServer
 import org.tobi29.scapes.server.connection.PlayerConnection
 import java.util.concurrent.ThreadLocalRandom
 
-class MobPlayerServerVB(world: WorldServer, pos: Vector3d, speed: Vector3d,
-                        xRot: Double, zRot: Double, nickname: String, skin: Checksum,
+class MobPlayerServerVB(world: WorldServer,
+                        pos: Vector3d,
+                        speed: Vector3d,
+                        xRot: Double,
+                        zRot: Double,
+                        nickname: String,
+                        skin: Checksum,
                         connection: PlayerConnection) : MobPlayerServer(world,
         pos, speed, AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 100.0, 100.0,
         Frustum(90.0, 1.0, 0.1, 24.0), Frustum(50.0, 1.0, 0.1, 2.0), nickname,

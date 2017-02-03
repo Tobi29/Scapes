@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.engine.utils.toArray
 import java.util.concurrent.ConcurrentHashMap
 
-class ParticleSystem(val world: WorldClient, tps: Double) {
+class ParticleSystem(val world: WorldClient,
+                     tps: Double) {
     private val emitters = ConcurrentHashMap<Class<out ParticleEmitter<*>>, ParticleEmitter<*>>()
     private val joiner: Joiner
 

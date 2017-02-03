@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,8 @@ import scapes.plugin.tobi29.vanilla.basics.util.Alloy
 import scapes.plugin.tobi29.vanilla.basics.util.read
 import scapes.plugin.tobi29.vanilla.basics.util.write
 
-class EntityAlloyServer(world: WorldServer, pos: Vector3d = Vector3d.ZERO) : EntityAbstractContainerServer(
+class EntityAlloyServer(world: WorldServer,
+                        pos: Vector3d = Vector3d.ZERO) : EntityAbstractContainerServer(
         world, pos, Inventory(world.registry, 2)) {
     private var metals = Alloy()
     private var temperature = 0.0

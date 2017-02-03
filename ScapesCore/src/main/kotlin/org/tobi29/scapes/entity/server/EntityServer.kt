@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,8 @@ import org.tobi29.scapes.entity.client.EntityClient
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-open class EntityServer(val world: WorldServer, pos: Vector3d) : Entity, MultiTag.ReadAndWrite {
+open class EntityServer(val world: WorldServer,
+                        pos: Vector3d) : Entity, MultiTag.ReadAndWrite {
     protected val spawnListeners: MutableMap<String, () -> Unit> = ConcurrentHashMap()
     protected val updateListeners: MutableMap<String, (Double) -> Unit> = ConcurrentHashMap()
     protected val registry: GameRegistry

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,20 +22,31 @@ import org.tobi29.scapes.engine.gui.GuiAction
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton
 import org.tobi29.scapes.engine.gui.GuiStyle
 
-open class GuiMenuDouble(state: GameState, title: String, save: String,
-                         back: String, style: GuiStyle) : GuiMenu(
+open class GuiMenuDouble(state: GameState,
+                         title: String,
+                         save: String,
+                         back: String,
+                         style: GuiStyle) : GuiMenu(
         state, title, back, style) {
     protected val save: GuiComponentTextButton
 
-    protected constructor(state: GameState, title: String, previous: Gui,
+    protected constructor(state: GameState,
+                          title: String,
+                          previous: Gui,
                           style: GuiStyle) : this(state, title, "Save", "Back",
             previous, style)
 
-    protected constructor(state: GameState, title: String, style: GuiStyle) : this(
+    protected constructor(state: GameState,
+                          title: String,
+                          style: GuiStyle) : this(
             state, title, "Save", "Back", style)
 
-    protected constructor(state: GameState, title: String, save: String,
-                          back: String, previous: Gui, style: GuiStyle) : this(
+    protected constructor(state: GameState,
+                          title: String,
+                          save: String,
+                          back: String,
+                          previous: Gui,
+                          style: GuiStyle) : this(
             state, title, save, back, style) {
         on(GuiAction.BACK
         ) { state.engine.guiStack.swap(this, previous) }

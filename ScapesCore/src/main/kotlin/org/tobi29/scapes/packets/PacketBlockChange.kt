@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,11 @@ open class PacketBlockChange : PacketAbstract, PacketClient {
 
     constructor()
 
-    constructor(x: Int, y: Int, z: Int, id: Int, data: Int) : super(
+    constructor(x: Int,
+                y: Int,
+                z: Int,
+                id: Int,
+                data: Int) : super(
             Vector3d(x + 0.5, y + 0.5, z + 0.5), true) {
         this.x = x
         this.y = y

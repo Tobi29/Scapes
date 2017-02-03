@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiStyle
 import scapes.plugin.tobi29.vanilla.basics.entity.client.MobPlayerClientMainVB
 
-class GuiPlayerInventory(player: MobPlayerClientMainVB, style: GuiStyle) : GuiInventory(
+class GuiPlayerInventory(player: MobPlayerClientMainVB,
+                         style: GuiStyle) : GuiInventory(
         "Inventory", player, style) {
     init {
         val crafting = row(topPane) { button(it, "Crafting") }

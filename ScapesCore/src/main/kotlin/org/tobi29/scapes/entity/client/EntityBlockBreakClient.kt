@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.model.EntityModel
 import org.tobi29.scapes.entity.model.EntityModelBlockBreak
 
-class EntityBlockBreakClient(world: WorldClient, pos: Vector3d = Vector3d.ZERO) : EntityClient(
+class EntityBlockBreakClient(world: WorldClient,
+                             pos: Vector3d = Vector3d.ZERO) : EntityClient(
         world, pos) {
     private var progress = 0.0
 

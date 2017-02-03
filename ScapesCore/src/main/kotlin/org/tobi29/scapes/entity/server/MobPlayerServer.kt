@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,16 @@ import org.tobi29.scapes.server.connection.PlayerConnection
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-abstract class MobPlayerServer(world: WorldServer, pos: Vector3d, speed: Vector3d,
-                               aabb: AABB, lives: Double, maxLives: Double, viewField: Frustum,
-                               hitField: Frustum, protected val nickname: String, private val skin: Checksum,
+abstract class MobPlayerServer(world: WorldServer,
+                               pos: Vector3d,
+                               speed: Vector3d,
+                               aabb: AABB,
+                               lives: Double,
+                               maxLives: Double,
+                               viewField: Frustum,
+                               hitField: Frustum,
+                               protected val nickname: String,
+                               private val skin: Checksum,
                                protected val connection: PlayerConnection) : MobLivingEquippedServer(
         world, pos, speed, aabb, lives, maxLives, viewField,
         hitField), EntityContainerServer {

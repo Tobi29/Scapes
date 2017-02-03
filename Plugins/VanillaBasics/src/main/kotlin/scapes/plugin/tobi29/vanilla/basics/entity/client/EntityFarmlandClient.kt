@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,5 +20,6 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.client.EntityClient
 
-class EntityFarmlandClient constructor(world: WorldClient, pos: Vector3d = Vector3d.ZERO) : EntityClient(
+class EntityFarmlandClient constructor(world: WorldClient,
+                                       pos: Vector3d = Vector3d.ZERO) : EntityClient(
         world, pos)

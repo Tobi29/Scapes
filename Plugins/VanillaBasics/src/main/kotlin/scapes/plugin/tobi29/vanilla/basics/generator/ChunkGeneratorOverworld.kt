@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,8 @@ import scapes.plugin.tobi29.vanilla.basics.material.update.UpdateLavaFlow
 import java.util.*
 
 class ChunkGeneratorOverworld(random: Random,
-                              private val terrainGenerator: TerrainGenerator, private val materials: VanillaMaterial) : ChunkGenerator {
+                              private val terrainGenerator: TerrainGenerator,
+                              private val materials: VanillaMaterial) : ChunkGenerator {
     private val random = Random()
     private val sandLayer: RandomNoiseLayer
     private val sandstoneLayer: RandomNoiseLayer

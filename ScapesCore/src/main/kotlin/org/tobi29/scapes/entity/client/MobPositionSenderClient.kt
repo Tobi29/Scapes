@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,8 @@ import org.tobi29.scapes.packets.*
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
-class MobPositionSenderClient(pos: Vector3d, private val packetHandler: (PacketBoth) -> Unit) {
+class MobPositionSenderClient(pos: Vector3d,
+                              private val packetHandler: (PacketBoth) -> Unit) {
     private val sentPos: MutableVector3d
     private val sentSpeed = MutableVector3d()
     private val sentRot = MutableVector3d()

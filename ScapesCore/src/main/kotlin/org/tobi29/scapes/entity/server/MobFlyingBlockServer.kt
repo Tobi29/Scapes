@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,11 @@ import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import java.util.concurrent.ThreadLocalRandom
 
-class MobFlyingBlockServer(world: WorldServer, pos: Vector3d = Vector3d.ZERO, speed: Vector3d = Vector3d.ZERO,
-                           type: BlockType = world.air, data: Int = 0) : MobServer(
+class MobFlyingBlockServer(world: WorldServer,
+                           pos: Vector3d = Vector3d.ZERO,
+                           speed: Vector3d = Vector3d.ZERO,
+                           type: BlockType = world.air,
+                           data: Int = 0) : MobServer(
         world, pos, speed, AABB(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)) {
     private val item: ItemStack
     private var time = 0.0

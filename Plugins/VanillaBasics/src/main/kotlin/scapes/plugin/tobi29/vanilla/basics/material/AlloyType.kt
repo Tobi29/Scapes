@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,16 @@
 
 package scapes.plugin.tobi29.vanilla.basics.material
 
-class AlloyType(private val id: String, private val name: String, private val ingotName: String,
-                private val ingredients: Map<MetalType, Double>, private val r: Float, private val g: Float, private val b: Float,
-                private val toolEfficiency: Double, private val toolStrength: Double, private val toolDamage: Double,
+class AlloyType(private val id: String,
+                private val name: String,
+                private val ingotName: String,
+                private val ingredients: Map<MetalType, Double>,
+                private val r: Float,
+                private val g: Float,
+                private val b: Float,
+                private val toolEfficiency: Double,
+                private val toolStrength: Double,
+                private val toolDamage: Double,
                 private val toolLevel: Int) {
 
     fun id(): String {

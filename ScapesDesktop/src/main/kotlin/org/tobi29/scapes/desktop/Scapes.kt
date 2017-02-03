@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ fun main(args: Array<String>) {
         addOption("r", "socketsp", false, "Use network socket for singleplayer")
         addOption("t", "touch", false, "Emulate touch interface")
         addOption("c", "config", true, "Config directory for server")
+        addOption("n", "nosandbox", false, "Disable sandbox")
     }
     val parser = DefaultParser()
     val commandLine: CommandLine
@@ -61,7 +62,15 @@ fun main(args: Array<String>) {
         System.exit(0)
         return
     }
-    Sandbox.sandbox()
+    if (commandLine.hasOption('n')) {
+        println("----------------------------------------")
+        println("Sandbox disabled by command line option!")
+        println("Do NOT connect to untrusted servers with")
+        println("this option enabled!")
+        println("----------------------------------------")
+    } else {
+        Sandbox.sandbox()
+    }
     if (commandLine.hasOption('d')) {
         Debug.enable()
     }

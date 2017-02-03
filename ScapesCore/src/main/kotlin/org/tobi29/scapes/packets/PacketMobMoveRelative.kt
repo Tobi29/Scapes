@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,10 @@ class PacketMobMoveRelative : PacketAbstract, PacketBoth {
 
     constructor()
 
-    constructor(uuid: UUID, pos: Vector3d?, x: Byte, y: Byte,
+    constructor(uuid: UUID,
+                pos: Vector3d?,
+                x: Byte,
+                y: Byte,
                 z: Byte) : super(pos, 32.0, false, false) {
         this.uuid = uuid
         this.x = x

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Tobi29
+ * Copyright 2012-2017 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,12 @@ class PacketSoundEffect : PacketAbstract, PacketClient {
 
     constructor()
 
-    constructor(audio: String, position: Vector3d, velocity: Vector3d,
-                pitch: Float, gain: Float, range: Float) : super(position,
+    constructor(audio: String,
+                position: Vector3d,
+                velocity: Vector3d,
+                pitch: Float,
+                gain: Float,
+                range: Float) : super(position,
             range.toDouble()) {
         this.position = position
         this.velocity = velocity
