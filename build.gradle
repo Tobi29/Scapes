@@ -23,7 +23,7 @@ buildscript {
     }
     dependencies {
         classpath "com.android.tools.build:gradle:2.2.2"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.1.0-beta-22"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.1.0-beta-38"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.11"
         classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.0-M3'
     }

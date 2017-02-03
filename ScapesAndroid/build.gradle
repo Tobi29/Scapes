@@ -74,7 +74,7 @@ dependencies {
     compile project(":ScapesEngineAndroid:AndroidSQLite")
     compile project(":ScapesEngineAndroid:AndroidSSLProvider")
     compile project(":ScapesEngineAndroid:AndroidSysTrace")
-    compile "org.jetbrains.kotlin:kotlin-stdlib:1.1.0-beta-22"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:1.1.0-beta-38"
     compile "org.slf4j:slf4j-android:1.7.21"
 
     compile project(":Plugins:VanillaBasics")
