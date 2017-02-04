@@ -39,6 +39,7 @@ import org.tobi29.scapes.entity.client.MobClient
 import org.tobi29.scapes.entity.client.MobLivingClient
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.model.MobLivingModelHuman
+import org.tobi29.scapes.entity.model.RotationSmoothing
 import org.tobi29.scapes.packets.PacketInteraction
 import org.tobi29.scapes.packets.PacketItemUse
 import org.tobi29.scapes.packets.PacketPlayerJump
@@ -249,7 +250,10 @@ class MobPlayerClientMainVB(world: WorldClient,
     override fun createModel(): MobLivingModelHuman? {
         val texture = world.scene.skinStorage()[skin]
         return MobLivingModelHuman(world.game.modelHumanShared(), this, texture,
-                false, true, true)
+                false, true, {
+            if (input.requiresCameraSmoothing) RotationSmoothing.TIGHT
+            else RotationSmoothing.DISABLE
+        })
     }
 
     override fun read(tagStructure: TagStructure) {

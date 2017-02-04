@@ -21,3 +21,7 @@ interface MobModel : EntityModel {
 
     fun yaw(): Double
 }
+
+enum class RotationSmoothing {
+    NORMAL, TIGHT, DISABLE
+}

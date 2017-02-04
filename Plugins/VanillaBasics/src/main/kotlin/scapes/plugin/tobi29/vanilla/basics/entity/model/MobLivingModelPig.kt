@@ -40,8 +40,8 @@ class MobLivingModelPig(shared: MobLivingModelPigShared,
     private val legBackRight: Box
     private var swing = 0.0
     private var moveSpeedRender = 0.0
-    private var xRotRender = 0.0
-    private var zRotRender = 0.0
+    private var pitch = 0.0
+    private var yaw = 0.0
 
     init {
         pos = MutableVector3d(entity.getCurrentPos())
@@ -71,12 +71,9 @@ class MobLivingModelPig(shared: MobLivingModelPigShared,
         val factorRot = min(1.0, delta * 40.0)
         val factorSpeed = min(1.0, delta * 5.0)
         val speed = entity.speed()
-        val moveSpeed = min(
-                sqrt(length(speed.x, speed.y)), 2.0)
-        xRotRender -= (angleDiff(entity.pitch(),
-                xRotRender) * factorRot).toFloat()
-        zRotRender -= (angleDiff(entity.yaw(),
-                zRotRender) * factorRot).toFloat()
+        val moveSpeed = min(sqrt(length(speed.x, speed.y)), 2.0)
+        pitch -= angleDiff(entity.pitch(), pitch) * factorRot
+        yaw -= angleDiff(entity.yaw(), yaw) * factorRot
         pos.plus(entity.getCurrentPos().minus(pos.now()).times(factorPos))
         swing += moveSpeed * 2.0 * delta
         swing %= TWO_PI
@@ -102,11 +99,11 @@ class MobLivingModelPig(shared: MobLivingModelPigShared,
         val matrixStack = gl.matrixStack()
         var matrix = matrixStack.push()
         matrix.translate(posRenderX, posRenderY, posRenderZ)
-        matrix.rotate(zRotRender - 90, 0f, 0f, 1f)
+        matrix.rotate(yaw - 90, 0f, 0f, 1f)
         body.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
         matrix = matrixStack.push()
         matrix.translate(0f, 0.3125f, 0.0625f)
-        matrix.rotate(xRotRender, 1f, 0f, 0f)
+        matrix.rotate(pitch, 1f, 0f, 0f)
         head.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
         matrixStack.pop()
         matrix = matrixStack.push()
@@ -133,10 +130,10 @@ class MobLivingModelPig(shared: MobLivingModelPigShared,
     }
 
     override fun pitch(): Double {
-        return xRotRender
+        return pitch
     }
 
     override fun yaw(): Double {
-        return zRotRender
+        return yaw
     }
 }

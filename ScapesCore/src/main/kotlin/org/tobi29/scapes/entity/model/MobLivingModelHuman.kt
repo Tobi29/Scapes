@@ -36,7 +36,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                           private val texture: Resource<Texture>,
                           thin: Boolean = false,
                           culling: Boolean = true,
-                          private val precise: Boolean = false) : MobLivingModel {
+                          private val smoothing: (() -> RotationSmoothing)? = null) : MobLivingModel {
     private val pos: MutableVector3d
     private val body: Box
     private val head: Box
@@ -104,17 +104,22 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
 
     override fun renderUpdate(delta: Double) {
         val factorPos = min(1.0, delta * 20.0)
-        val factorRot = if (precise) {
-            0.9
+        val smoothing = smoothing?.invoke() ?: RotationSmoothing.NORMAL
+        if (smoothing == RotationSmoothing.DISABLE) {
+            pitch = entity.pitch()
+            yaw = entity.yaw()
         } else {
-            min(1.0, delta * 40.0)
+            val factorRot = if (smoothing == RotationSmoothing.TIGHT) {
+                0.9
+            } else {
+                min(1.0, delta * 40.0)
+            }
+            pitch -= angleDiff(entity.pitch(), pitch) * factorRot
+            yaw -= angleDiff(entity.yaw(), yaw) * factorRot
         }
         val factorSpeed = min(1.0, delta * 5.0)
         val speed = entity.speed()
         val moveSpeed = min(sqrt(length(speed.x, speed.y)), 2.0)
-        pitch -= (angleDiff(entity.pitch(),
-                pitch) * factorRot).toFloat()
-        yaw -= (angleDiff(entity.yaw(), yaw) * factorRot).toFloat()
         pos.plus(entity.getCurrentPos().minus(pos.now()).times(factorPos))
         swing += moveSpeed * 2.0 * delta
         swing %= TWO_PI
