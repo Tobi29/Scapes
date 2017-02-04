@@ -53,6 +53,8 @@ class InputModeKeyboard(engine: ScapesEngine,
     private val left: ControllerKeyReference
     private val right: ControllerKeyReference
 
+    override val requiresCameraSmoothing get() = false
+
     init {
         this.tagStructure = tagStructure.structure("Default")
         defaultConfig(this.tagStructure)

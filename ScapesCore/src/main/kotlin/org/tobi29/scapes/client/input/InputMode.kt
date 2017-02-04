@@ -27,6 +27,8 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 interface InputMode : ListenerOwner {
     val events: EventDispatcher
 
+    val requiresCameraSmoothing get() = true
+
     fun poll(delta: Double): Boolean
 
     fun createControlsGUI(state: GameState,
