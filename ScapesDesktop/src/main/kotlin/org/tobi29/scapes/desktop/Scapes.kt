@@ -23,7 +23,7 @@ import org.tobi29.scapes.client.SaveStorage
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.io.filesystem.get
+import org.tobi29.scapes.engine.utils.io.filesystem.path
 import org.tobi29.scapes.plugins.Sandbox
 import org.tobi29.scapes.server.format.sqlite.SQLiteSaveStorage
 import org.tobi29.scapes.server.shell.ScapesServerHeadless
@@ -81,11 +81,11 @@ fun main(args: Array<String>) {
     val mode = commandLine.getOptionValue('m', "client")
     val home: FilePath
     if (cmdArgs.isNotEmpty()) {
-        home = get(
+        home = path(
                 cmdArgs[0].replace("\$HOME", System.getProperty("user.home")))
         System.setProperty("user.dir", home.toAbsolutePath().toString())
     } else {
-        home = get(System.getProperty("user.dir")).toAbsolutePath()
+        home = path(System.getProperty("user.dir")).toAbsolutePath()
     }
     when (mode) {
         "client" -> {
@@ -106,7 +106,7 @@ fun main(args: Array<String>) {
             val config: FilePath
             if (commandLine.hasOption('c')) {
                 config = home.resolve(
-                        get(commandLine.getOptionValue('c'))).toAbsolutePath()
+                        path(commandLine.getOptionValue('c'))).toAbsolutePath()
             } else {
                 config = home
             }
