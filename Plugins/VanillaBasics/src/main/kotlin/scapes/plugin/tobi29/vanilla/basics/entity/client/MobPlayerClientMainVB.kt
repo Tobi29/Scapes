@@ -275,13 +275,13 @@ class MobPlayerClientMainVB(world: WorldClient,
             }
         }
         input.events.listener<HotbarChangeLeftEvent>(listenerOwner) { event ->
-            inventorySelectLeft = (inventorySelectLeft + event.delta) modP 10
+            inventorySelectLeft = (inventorySelectLeft + event.delta) remP 10
             world.send(PacketInteraction(
                     PacketInteraction.INVENTORY_SLOT_LEFT,
                     inventorySelectLeft.toByte()))
         }
         input.events.listener<HotbarChangeRightEvent>(listenerOwner) { event ->
-            inventorySelectRight = (inventorySelectRight + event.delta) modP 10
+            inventorySelectRight = (inventorySelectRight + event.delta) remP 10
             world.send(PacketInteraction(
                     PacketInteraction.INVENTORY_SLOT_RIGHT,
                     inventorySelectRight.toByte()))
