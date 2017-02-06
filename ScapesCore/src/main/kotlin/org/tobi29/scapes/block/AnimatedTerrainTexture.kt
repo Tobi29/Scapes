@@ -20,6 +20,7 @@ import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Texture
 import org.tobi29.scapes.engine.utils.graphics.generateMipMaps
 import org.tobi29.scapes.engine.utils.math.floor
+import org.tobi29.scapes.engine.utils.math.remP
 import org.tobi29.scapes.engine.utils.toArray
 import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicInteger
@@ -54,8 +55,7 @@ class AnimatedTerrainTexture(buffer: ByteBuffer,
 
     override fun updateAnim(delta: Double) {
         val old = floor(spin)
-        spin += delta * 20.0
-        spin %= frames.size.toDouble()
+        spin = (spin + delta * 20.0) remP frames.size.toDouble()
         val i = floor(spin)
         if (old != i) {
             newFrame.set(i)

@@ -28,6 +28,7 @@ import org.tobi29.scapes.engine.utils.io.use
 import org.tobi29.scapes.engine.utils.join
 import org.tobi29.scapes.engine.utils.math.PI
 import org.tobi29.scapes.engine.utils.math.cos
+import org.tobi29.scapes.engine.utils.math.remP
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.server.format.WorldSource
 import java.io.IOException
@@ -38,7 +39,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
     private val textures = arrayOfNulls<Texture>(6)
     private val cam: Cam
     private val save = AtomicReference<WorldSource.Panorama?>()
-    private var speed = 0.6f
+    private var speed = -0.6f
     private var yaw = 0.0f
 
     init {
@@ -143,8 +144,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
     }
 
     fun step(delta: Double) {
-        yaw -= (speed * delta).toFloat()
-        yaw %= 360f
+        yaw = (yaw + speed * delta).toFloat() remP 360.0f
     }
 
     protected open fun loadTextures() {

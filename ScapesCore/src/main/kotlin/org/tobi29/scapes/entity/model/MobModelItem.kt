@@ -23,6 +23,7 @@ import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.min
+import org.tobi29.scapes.engine.utils.math.remP
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.minus
@@ -62,8 +63,7 @@ class MobModelItem(private val entity: MobClient,
     override fun renderUpdate(delta: Double) {
         val factor = min(1.0, delta * 10.0)
         pos.plus(entity.getCurrentPos().minus(pos.now()).times(factor))
-        dir += (45.0 * delta).toFloat()
-        dir %= 360.0f
+        dir = (dir + 45.0 * delta) remP 360.0
     }
 
     override fun render(gl: GL,
