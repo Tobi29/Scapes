@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-apply from: "$rootDir/ScapesEngine/resources/scapesengineapplication.gradle"
+apply from: "$rootDir/resources/scapesengineapplication.gradle"
 apply plugin: ScapesEngineApplicationLinux
 apply plugin: ScapesEngineApplicationMacOSX
 apply plugin: ScapesEngineApplicationWindows
-
-apply from: "$rootDir/ScapesEngine/Backends/glfw.gradle"
 
 version = "0.0.0"
 
@@ -38,13 +36,28 @@ dependencies {
     compile project(":ScapesCore")
     compile project(":ScapesCore:SQLiteStorage")
 
-    runtime project(":ScapesEngine:FileSystems:NIOFileSystem")
-    runtime project(":ScapesEngine:ServerFramework:JVMSSLProvider")
-    runtime project(":ScapesEngine:Utils:MBeansCPUReader")
-    runtime project(":ScapesEngine:Codecs:CodecOGG")
-    runtime project(":ScapesEngine:Codecs:CodecMP3")
-    runtime project(":ScapesEngine:Codecs:CodecWAV")
-    runtime "org.apache.logging.log4j:log4j-api:2.7"
-    runtime "org.apache.logging.log4j:log4j-core:2.7"
-    runtime "org.apache.logging.log4j:log4j-slf4j-impl:2.7"
+    runtime rootProject.ext.scapesEngineNIOFileSystem
+    runtime rootProject.ext.scapesEngineJVMSSLProvider
+    runtime rootProject.ext.scapesEngineMBeansCPUReader
+    runtime rootProject.ext.scapesEngineGLFWBackend
+    runtime rootProject.ext.scapesEngineCodecOGG
+    runtime rootProject.ext.scapesEngineCodecMP3
+    runtime rootProject.ext.scapesEngineCodecWAV
+    runtime rootProject.ext.log4jAPI
+    runtime rootProject.ext.log4jCore
+    runtime rootProject.ext.log4jSLF4J
+    Closure natives = { module ->
+        nativesLinux32 "$module:natives-linux"
+        nativesLinux64 "$module:natives-linux"
+        nativesMacOSX "$module:natives-macos"
+        nativesWindows32 "$module:natives-windows"
+        nativesWindows64 "$module:natives-windows"
+    }
+    natives rootProject.ext.lwjgl
+    natives rootProject.ext.lwjglGLFW
+    natives rootProject.ext.lwjglOpenAL
+    natives rootProject.ext.lwjglOpenGL
+    natives rootProject.ext.lwjglOpenGLES
+    natives rootProject.ext.lwjglSTB
+    natives rootProject.ext.lwjglTinyFD
 }

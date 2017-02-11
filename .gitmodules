@@ -1,11 +1,3 @@
-[submodule "ScapesEngine"]
-    path = ScapesEngine
-    url = https://github.com/Tobi29/ScapesEngine
-    branch = master
-[submodule "ScapesEngineAndroid"]
-    path = ScapesEngineAndroid
-    url = https://github.com/Tobi29/ScapesEngineAndroid
-    branch = master
 [submodule "buildSrc"]
 	path = buildSrc
 	url = https://github.com/Tobi29/ScapesEngineBuild

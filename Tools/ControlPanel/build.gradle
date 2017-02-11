@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-apply from: "$rootDir/ScapesEngine/resources/scapesengineapplication.gradle"
+apply from: "$rootDir/resources/scapesengineapplication.gradle"
 apply plugin: ScapesEngineApplicationLinux
 apply plugin: ScapesEngineApplicationMacOSX
 apply plugin: ScapesEngineApplicationWindows
-
-apply from: "$rootDir/ScapesEngine/SWTUtils/swt.gradle"
 
 version = "0.0.0"
 
@@ -35,11 +33,23 @@ application {
 }
 
 dependencies {
-    compile project(":ScapesEngine:ServerFramework")
+    compile rootProject.ext.scapesEngineSWTUtils
+    compile rootProject.ext.scapesEngineServerFramework
+    compileOnly rootProject.ext.swtWindows32
 
-    runtime project(":ScapesEngine:FileSystems:NIOFileSystem")
-    runtime project(":ScapesEngine:ServerFramework:JVMSSLProvider")
-    runtime "org.apache.logging.log4j:log4j-api:2.7"
-    runtime "org.apache.logging.log4j:log4j-core:2.7"
-    runtime "org.apache.logging.log4j:log4j-slf4j-impl:2.7"
+    runtime rootProject.ext.scapesEngineNIOFileSystem
+    runtime rootProject.ext.scapesEngineJVMSSLProvider
+    runtime rootProject.ext.log4jAPI
+    runtime rootProject.ext.log4jCore
+    runtime rootProject.ext.log4jSLF4J
+    runtimeLinux32 rootProject.ext.swtLinux32
+    runtimeLinux64 rootProject.ext.swtLinux64
+    runtimeMacOSX rootProject.ext.swtMacOSX
+    runtimeWindows32 rootProject.ext.swtWindows32
+    runtimeWindows64 rootProject.ext.swtWindows64
+    nativesLinux32 rootProject.ext.swtLinux32
+    nativesLinux64 rootProject.ext.swtLinux64
+    nativesMacOSX rootProject.ext.swtMacOSX
+    nativesWindows32 rootProject.ext.swtWindows32
+    nativesWindows64 rootProject.ext.swtWindows64
 }

@@ -14,12 +14,34 @@
  * limitations under the License.
  */
 
+apply plugin: "kotlin"
+apply plugin: "maven"
+apply plugin: "org.junit.platform.gradle.plugin"
+apply plugin: "org.jetbrains.dokka"
 
-apply from: "$rootDir/resources/scapesenginemodulekotlin.gradle"
+kotlin {
+    experimental {
+        coroutines "enable"
+    }
+}
 
-version = "0.0.0"
+compileTestKotlin {
+    kotlinOptions.freeCompilerArgs += "-Xskip-runtime-version-check"
+}
+
+task sourcesJar(type: Jar) {
+    classifier = "sources"
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
 
 dependencies {
-    compile project(":ScapesCore")
-    compile rootProject.ext.scapesEngineSQLite
+    testCompile rootProject.ext.spekAPI
+    testCompile rootProject.ext.kotlinTest
+    testCompile rootProject.ext.scapesEngineTestAssertions
+
+    testRuntime rootProject.ext.spekEngine
 }
