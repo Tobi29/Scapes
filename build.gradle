@@ -68,17 +68,16 @@ task wrapper(type: Wrapper) {
 
 ext {
     kotlinVersion = "1.1.0-beta-38"
-    kotlinLoggingVersion = "1.3.3"
-    slf4jVersion = "1.7.21"
+    kotlinLoggingVersion = "1.4.2"
+    slf4jVersion = "1.7.22"
     spekVersion = "f0935817fa"
     swtVersion = "4.6"
     lwjglVersion = "3.1.1"
-    javaxJSONVersion = "1.0.4"
-    log4jVersion = "2.7"
+    log4jVersion = "2.8"
     commonsCLIVersion = "1.3.1"
     jnaVersion = "4.2.1"
     androidBuildVersion = "2.3.0-beta4"
-    scapesEngineVersion = "0d9604cfca"
+    scapesEngineVersion = "35067076d4"
     scapesEngineAndroidVersion = "0cabe916e1"
 
     kotlinLogging = "io.github.microutils:kotlin-logging:$kotlinLoggingVersion"
@@ -150,6 +149,8 @@ ext {
             "com.github.Tobi29.ScapesEngine:GraphicsUtils:$scapesEngineVersion"
     scapesEngineTestAssertions =
             "com.github.Tobi29.ScapesEngine:TestAssertions:$scapesEngineVersion"
+    scapesEngineOpenALSounds =
+            "com.github.Tobi29.ScapesEngine:OpenALSounds:$scapesEngineVersion"
 
     scapesEngineAndroidBackend =
             "com.github.Tobi29.ScapesEngineAndroid:AndroidBackend:$scapesEngineAndroidVersion"
