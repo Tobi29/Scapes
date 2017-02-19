@@ -42,7 +42,7 @@ class ParticleSystem(val world: WorldClient,
     }
 
     fun <P : ParticleEmitter<*>> register(emitter: P) {
-        emitters.put(emitter.javaClass, emitter)
+        emitters.put(emitter::class.java, emitter)
     }
 
     fun <P : ParticleEmitter<*>> emitter(clazz: Class<P>): P {

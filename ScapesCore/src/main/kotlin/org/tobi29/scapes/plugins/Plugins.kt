@@ -106,7 +106,7 @@ constructor(files: List<PluginFile>,
     fun addFileSystems(files: FileSystemContainer) {
         for (plugin in pluginsMut) {
             files.registerFileSystem(plugin.id(),
-                    ClasspathPath(plugin.javaClass.classLoader,
+                    ClasspathPath(plugin::class.java.classLoader,
                             plugin.assetRoot()))
         }
     }

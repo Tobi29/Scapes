@@ -102,7 +102,7 @@ class CommandRegistry constructor(private val prefix: String = "") {
                 }
             } catch (e: ParseException) {
                 Command.Null(Command.Output(254,
-                        e.javaClass.simpleName + ": " + (e.message ?: "")))
+                        e::class.java.simpleName + ": " + (e.message ?: "")))
             } catch (e: Command.CommandException) {
                 Command.Null(Command.Output(253, e.message ?: ""))
             }

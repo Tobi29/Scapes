@@ -165,7 +165,7 @@ class GuiServerSelect(state: GameState,
             if (message != null) {
                 return message
             }
-            return e.javaClass.simpleName
+            return e::class.java.simpleName
         }
     }
 }

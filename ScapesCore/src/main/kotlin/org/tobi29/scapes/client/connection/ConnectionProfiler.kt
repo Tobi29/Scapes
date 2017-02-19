@@ -27,7 +27,7 @@ class ConnectionProfiler {
     fun packet(packet: Any,
                size: Long) {
         ConcurrentMaps.computeIfAbsent(bytesMut,
-                packet.javaClass) { AtomicLong() }.addAndGet(size)
+                packet::class.java) { AtomicLong() }.addAndGet(size)
     }
 
     fun clear() {

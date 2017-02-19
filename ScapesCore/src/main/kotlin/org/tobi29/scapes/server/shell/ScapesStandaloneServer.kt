@@ -169,7 +169,7 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
                     WorldSourceProvider::class.java)) {
                 try {
                     if (provider.available() && id == provider.configID()) {
-                        logger.debug { "Loaded world source: ${provider.javaClass.name}" }
+                        logger.debug { "Loaded world source: ${provider::class.java.name}" }
                         return provider
                     }
                 } catch (e: ServiceConfigurationError) {
@@ -186,7 +186,7 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
                     KeyManagerProvider::class.java)) {
                 try {
                     if (provider.available() && id == provider.configID()) {
-                        logger.debug { "Loaded key manager: ${provider.javaClass.name}" }
+                        logger.debug { "Loaded key manager: ${provider::class.java.name}" }
                         return provider
                     }
                 } catch (e: ServiceConfigurationError) {

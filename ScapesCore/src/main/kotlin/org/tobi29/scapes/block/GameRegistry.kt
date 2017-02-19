@@ -283,7 +283,7 @@ class GameRegistry(private val idStorage: IDStorage) {
 
         operator fun get(instance: E): Int {
             return ids[instance] ?: throw IllegalArgumentException(
-                    "${instance.javaClass}")
+                    "${instance::class.java}")
         }
     }
 
@@ -322,8 +322,8 @@ class GameRegistry(private val idStorage: IDStorage) {
         }
 
         fun id(instance: E): Int {
-            return ids[instance.javaClass] ?: throw IllegalArgumentException(
-                    "${instance.javaClass}")
+            return ids[instance::class.java] ?: throw IllegalArgumentException(
+                    "${instance::class.java}")
         }
     }
 
@@ -367,8 +367,8 @@ class GameRegistry(private val idStorage: IDStorage) {
         }
 
         fun id(instance: E): Int {
-            return ids[instance.javaClass] ?: throw IllegalArgumentException(
-                    "${instance.javaClass}")
+            return ids[instance::class.java] ?: throw IllegalArgumentException(
+                    "${instance::class.java}")
         }
     }
 

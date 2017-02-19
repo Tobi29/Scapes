@@ -163,7 +163,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                     if (update.isValidOn(
                             typeG(update.x(), update.y(), update.z()),
                             terrain2)) {
-                        if (update.javaClass == clazz) {
+                        if (update::class.java == clazz) {
                             return true
                         }
                     } else {

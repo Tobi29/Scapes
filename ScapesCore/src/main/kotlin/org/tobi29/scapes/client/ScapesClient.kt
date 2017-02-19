@@ -74,7 +74,7 @@ class ScapesClient(engine: ScapesEngine,
             createDirectories(path.resolve("plugins"))
             val files = engine.files
             files.registerFileSystem("Scapes",
-                    ClasspathPath(javaClass.classLoader,
+                    ClasspathPath(this::class.java.classLoader,
                             "assets/scapes/tobi29"))
             saves = savesSupplier(this)
         } catch (e: IOException) {
@@ -190,7 +190,7 @@ class ScapesClient(engine: ScapesEngine,
                 try {
                     val inputMode = provider.get(engine, controller, configMap)
                     if (inputMode != null) {
-                        logger.debug { "Loaded input mode: ${provider.javaClass.name}" }
+                        logger.debug { "Loaded input mode: ${provider::class.java.name}" }
                         return inputMode
                     }
                 } catch (e: ServiceConfigurationError) {
