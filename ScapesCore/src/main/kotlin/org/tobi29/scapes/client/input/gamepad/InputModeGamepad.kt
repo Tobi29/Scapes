@@ -37,10 +37,10 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain
 
 class InputModeGamepad(engine: ScapesEngine,
                        private val controller: ControllerJoystick,
-                       tagStructure: TagStructure) : InputMode {
+                       configMap: MutableTagMap) : InputMode {
     override val events = EventDispatcher()
     override val listenerOwner = ListenerOwnerHandle()
-    private val tagStructure: TagStructure
+    private val tagMap: MutableTagMap
     private val guiController: GuiController
     private val axisWalkX: Int
     private val axisWalkY: Int
@@ -53,55 +53,53 @@ class InputModeGamepad(engine: ScapesEngine,
 
     init {
         val id = controller.id()
-        this.tagStructure = tagStructure.structure(id)
-        defaultConfig(this.tagStructure)
+        tagMap = configMap.mapMut(id)
+        defaultConfig(tagMap)
 
-        val guiTag = this.tagStructure.structure("GUI")
+        val guiTag = tagMap.mapMut("GUI")
         val primaryButton = ControllerKeyReference.valueOf(
-                guiTag.getString("Primary"))
+                guiTag["Primary"].toString())
         val secondaryButton = ControllerKeyReference.valueOf(
-                guiTag.getString("Secondary"))
-        val upButton = ControllerKeyReference.valueOf(guiTag.getString("Up"))
+                guiTag["Secondary"].toString())
+        val upButton = ControllerKeyReference.valueOf(guiTag["Up"].toString())
         val downButton = ControllerKeyReference.valueOf(
-                guiTag.getString("Down"))
+                guiTag["Down"].toString())
         val leftButton = ControllerKeyReference.valueOf(
-                guiTag.getString("Left"))
+                guiTag["Left"].toString())
         val rightButton = ControllerKeyReference.valueOf(
-                guiTag.getString("Right"))
+                guiTag["Right"].toString())
 
         guiController = GuiControllerGamepad(engine, controller, primaryButton,
                 secondaryButton, upButton, downButton, leftButton,
                 rightButton)
 
-        val movementTag = this.tagStructure.getStructure("Movement")
-        axisWalkX = movementTag?.getInt("X") ?: 0
-        axisWalkY = movementTag?.getInt("Y") ?: 0
-        jump = ControllerKeyReference.valueOf(
-                movementTag?.getString("Jump"))
+        val movementTag = tagMap.mapMut("Movement")
+        axisWalkX = movementTag["X"]?.toInt() ?: 0
+        axisWalkY = movementTag["Y"]?.toInt() ?: 0
+        jump = ControllerKeyReference.valueOf(movementTag["Jump"].toString())
 
-        val cameraTag = this.tagStructure.getStructure("Camera")
-        axisCameraX = cameraTag?.getInt("X") ?: 0
-        axisCameraY = cameraTag?.getInt("Y") ?: 0
-        cameraSensitivity = (cameraTag?.getDouble("Sensitivity") ?: 0.0) * 400.0
+        val cameraTag = tagMap.mapMut("Camera")
+        axisCameraX = cameraTag["X"]?.toInt() ?: 0
+        axisCameraY = cameraTag["Y"]?.toInt() ?: 0
+        cameraSensitivity = (cameraTag["Sensitivity"]?.toDouble() ?: 0.0) * 400.0
 
-        val actionTag = this.tagStructure.getStructure("Action")
-        left = ControllerKeyReference.valueOf(actionTag?.getString("Left"))
-        right = ControllerKeyReference.valueOf(
-                actionTag?.getString("Right"))
+        val actionTag = tagMap.mapMut("Action")
+        left = ControllerKeyReference.valueOf(actionTag["Left"].toString())
+        right = ControllerKeyReference.valueOf(actionTag["Right"].toString())
 
-        val menuTag = this.tagStructure.getStructure("Menu")
+        val menuTag = tagMap.mapMut("Menu")
         val inventory = ControllerKeyReference.valueOf(
-                menuTag?.getString("Inventory"))
-        val menu = ControllerKeyReference.valueOf(menuTag?.getString("Menu"))
-        val chat = ControllerKeyReference.valueOf(menuTag?.getString("Chat"))
+                menuTag["Inventory"].toString())
+        val menu = ControllerKeyReference.valueOf(menuTag["Menu"].toString())
+        val chat = ControllerKeyReference.valueOf(menuTag["Chat"].toString())
 
-        val hotbarTag = this.tagStructure.getStructure("Hotbar")
+        val hotbarTag = tagMap.mapMut("Hotbar")
         val hotbarAdd = ControllerKeyReference.valueOf(
-                hotbarTag?.getString("Add"))
+                hotbarTag["Add"].toString())
         val hotbarSubtract = ControllerKeyReference.valueOf(
-                hotbarTag?.getString("Subtract"))
+                hotbarTag["Subtract"].toString())
         val hotbarLeft = ControllerKeyReference.valueOf(
-                hotbarTag?.getString("Left"))
+                hotbarTag["Left"].toString())
 
         guiController.events.listener<PressEvent>(this) { event ->
             if (event.muted) {
@@ -150,18 +148,18 @@ class InputModeGamepad(engine: ScapesEngine,
         }
     }
 
-    private fun defaultConfig(tagStructure: TagStructure) {
-        val movementTag = tagStructure.structure("Movement")
+    private fun defaultConfig(tagMap: MutableTagMap) {
+        val movementTag = tagMap.mapMut("Movement")
         check("X", 0, movementTag)
         check("Y", 1, movementTag)
         check("Jump", ControllerKey.BUTTON_0, movementTag)
 
-        val cameraTag = tagStructure.structure("Camera")
+        val cameraTag = tagMap.mapMut("Camera")
         check("X", 3, cameraTag)
         check("Y", 4, cameraTag)
         check("Sensitivity", 1.0, cameraTag)
 
-        val guiTag = tagStructure.structure("GUI")
+        val guiTag = tagMap.mapMut("GUI")
         check("Primary", ControllerKey.BUTTON_0, guiTag)
         check("Secondary", ControllerKey.BUTTON_1, guiTag)
         check("Up", ControllerKey.AXIS_NEG_1, guiTag)
@@ -169,16 +167,16 @@ class InputModeGamepad(engine: ScapesEngine,
         check("Left", ControllerKey.AXIS_NEG_0, guiTag)
         check("Right", ControllerKey.AXIS_0, guiTag)
 
-        val actionTag = tagStructure.structure("Action")
+        val actionTag = tagMap.mapMut("Action")
         check("Left", ControllerKey.AXIS_2, actionTag)
         check("Right", ControllerKey.AXIS_5, actionTag)
 
-        val menuTag = tagStructure.structure("Menu")
+        val menuTag = tagMap.mapMut("Menu")
         check("Inventory", ControllerKey.BUTTON_7, menuTag)
         check("Menu", ControllerKey.BUTTON_10, menuTag)
         check("Chat", ControllerKey.BUTTON_6, menuTag)
 
-        val hotbarTag = tagStructure.structure("Hotbar")
+        val hotbarTag = tagMap.mapMut("Hotbar")
         check("Add", ControllerKey.BUTTON_5, hotbarTag)
         check("Subtract", ControllerKey.BUTTON_4, hotbarTag)
         check("Left", ControllerKey.BUTTON_2, hotbarTag)
@@ -186,25 +184,25 @@ class InputModeGamepad(engine: ScapesEngine,
 
     private fun check(id: String,
                       def: ControllerKey,
-                      tagStructure: TagStructure) {
-        if (!tagStructure.has(id)) {
-            tagStructure.setString(id, def.toString())
+                      tagMap: MutableTagMap) {
+        if (!tagMap.containsKey(id)) {
+            tagMap[id] = def.toString()
         }
     }
 
     private fun check(id: String,
                       def: Double,
-                      tagStructure: TagStructure) {
-        if (!tagStructure.has(id)) {
-            tagStructure.setDouble(id, def)
+                      tagMap: MutableTagMap) {
+        if (!tagMap.containsKey(id)) {
+            tagMap[id] = def
         }
     }
 
     private fun check(id: String,
                       def: Int,
-                      tagStructure: TagStructure) {
-        if (!tagStructure.has(id)) {
-            tagStructure.setInt(id, def)
+                      tagMap: MutableTagMap) {
+        if (!tagMap.containsKey(id)) {
+            tagMap[id] = def
         }
     }
 
@@ -230,7 +228,7 @@ class InputModeGamepad(engine: ScapesEngine,
     override fun createControlsGUI(state: GameState,
                                    prev: Gui): Gui {
         return GuiControlsGamepad(state, prev,
-                state.engine.game as ScapesClient, tagStructure, controller,
+                state.engine.game as ScapesClient, tagMap, controller,
                 prev.style)
     }
 

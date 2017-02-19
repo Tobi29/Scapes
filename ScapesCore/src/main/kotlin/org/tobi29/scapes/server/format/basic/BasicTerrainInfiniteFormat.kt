@@ -20,7 +20,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.exists
 import org.tobi29.scapes.engine.utils.io.filesystem.read
 import org.tobi29.scapes.engine.utils.io.filesystem.write
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureArchive
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.server.format.TerrainInfiniteFormat
@@ -39,21 +39,20 @@ class BasicTerrainInfiniteFormat(private val path: FilePath) : TerrainInfiniteFo
                 RuntimePermission("scapes.terrainInfiniteFormat"))
     }
 
-    @Synchronized override fun chunkTags(chunks: List<Vector2i>): List<TagStructure?> {
-        val tagStructures = ArrayList<TagStructure?>(chunks.size)
+    @Synchronized override fun chunkTags(chunks: List<Vector2i>): List<TagMap?> {
+        val maps = ArrayList<TagMap?>(chunks.size)
         for (chunk in chunks) {
             try {
-                tagStructures.add(chunkTag(chunk.x, chunk.y))
+                maps.add(chunkTag(chunk.x, chunk.y))
             } catch (e: IOException) {
                 logger.error { "Failed to load chunk: $e" }
-                tagStructures.add(null)
+                maps.add(null)
             }
-
         }
-        return tagStructures
+        return maps
     }
 
-    @Synchronized override fun putChunkTags(chunks: List<Pair<Vector2i, TagStructure>>) {
+    @Synchronized override fun putChunkTags(chunks: List<Pair<Vector2i, TagMap>>) {
         for (chunk in chunks) {
             putChunkTag(chunk.first.x, chunk.first.y, chunk.second)
         }
@@ -64,28 +63,28 @@ class BasicTerrainInfiniteFormat(private val path: FilePath) : TerrainInfiniteFo
     }
 
     private fun chunkTag(x: Int,
-                         y: Int): TagStructure? {
+                         y: Int): TagMap? {
         val location = Vector2i(x shr 4, y shr 4)
         var region: RegionFile? = regions[location]
         if (region == null) {
             region = createRegion(location)
         }
         region.lastUse = System.currentTimeMillis()
-        return region.tag.getTagStructure(filename(x - (location.x shl 4),
-                y - (location.y shl 4)))
+        return region.tag.getTagMap(
+                filename(x - (location.x shl 4), y - (location.y shl 4)))
     }
 
     private fun putChunkTag(x: Int,
                             y: Int,
-                            tag: TagStructure) {
+                            map: TagMap) {
         val location = Vector2i(x shr 4, y shr 4)
         var region: RegionFile? = regions[location]
         if (region == null) {
             region = createRegion(location)
         }
         region.lastUse = System.currentTimeMillis()
-        region.tag.setTagStructure(filename(x - (location.x shl 4),
-                y - (location.y shl 4)), tag)
+        region.tag.setTagMap(filename(x - (location.x shl 4),
+                y - (location.y shl 4)), map)
     }
 
     private fun createRegion(location: Vector2i): RegionFile {

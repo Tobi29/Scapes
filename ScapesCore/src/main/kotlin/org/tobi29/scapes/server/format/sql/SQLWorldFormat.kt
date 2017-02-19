@@ -27,8 +27,12 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.isNotHidden
 import org.tobi29.scapes.engine.utils.io.filesystem.isRegularFile
 import org.tobi29.scapes.engine.utils.io.filesystem.listRecursive
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary
+import org.tobi29.scapes.engine.utils.io.tag.MutableTagMap
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
+import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
+import org.tobi29.scapes.engine.utils.io.tag.toMutTag
+import org.tobi29.scapes.engine.utils.io.tag.toTag
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.plugins.PluginFile
 import org.tobi29.scapes.plugins.Plugins
@@ -43,7 +47,7 @@ import java.util.concurrent.ThreadLocalRandom
 open class SQLWorldFormat(protected val path: FilePath,
                           protected val database: SQLDatabase) : WorldFormat {
     protected val idStorage: IDStorage
-    protected val idTagStructure: TagStructure
+    protected val idTagStructure: MutableTagMap
     protected val getMetaData = database.compileQuery("MetaData",
             arrayOf("Value"), "Name")
     protected val replaceMetaData = database.compileReplace("MetaData", "Name",
@@ -79,18 +83,17 @@ open class SQLWorldFormat(protected val path: FilePath,
             replaceMetaData(arrayOf("Seed", seed))
         }
         rows = getData("IDs")
-        if (!rows.isEmpty()) {
+        idTagStructure = if (!rows.isEmpty()) {
             val row = rows[0]
             if (row[0] is ByteArray) {
                 val array = row[0] as ByteArray
-                idTagStructure = TagStructureBinary.read(
-                        ByteBufferStream(ByteBuffer.wrap(array)))
+                readBinary(ByteBufferStream(ByteBuffer.wrap(array)))
             } else {
-                idTagStructure = TagStructure()
+                TagMap()
             }
         } else {
-            idTagStructure = TagStructure()
-        }
+            TagMap()
+        }.toMutTag()
         idStorage = IDStorage(idTagStructure)
         plugins = createPlugins()
     }
@@ -132,9 +135,7 @@ open class SQLWorldFormat(protected val path: FilePath,
             val row = rows[0]
             if (row[0] is ByteArray) {
                 val array = row[0] as ByteArray
-                val tagStructure = TagStructureBinary.read(
-                        ByteBufferStream(ByteBuffer.wrap(array)))
-                world.read(tagStructure)
+                world.read(readBinary(ByteBufferStream(ByteBuffer.wrap(array))))
             }
         } else {
             insertWorldData(arrayOf(name))
@@ -144,7 +145,7 @@ open class SQLWorldFormat(protected val path: FilePath,
 
     @Synchronized override fun removeWorld(world: WorldServer) {
         try {
-            TagStructureBinary.write(stream, world.write(), 1.toByte())
+            world.toTag().writeBinary(stream, 1)
             stream.buffer().flip()
             val array = ByteArray(stream.buffer().remaining())
             stream.buffer().get(array)
@@ -168,7 +169,7 @@ open class SQLWorldFormat(protected val path: FilePath,
 
     @Synchronized override fun dispose() {
         plugins.dispose()
-        TagStructureBinary.write(stream, idTagStructure, 1.toByte())
+        idTagStructure.toTag().writeBinary(stream, 1.toByte())
         stream.buffer().flip()
         val array = ByteArray(stream.buffer().remaining())
         stream.buffer().get(array)

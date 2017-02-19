@@ -21,8 +21,7 @@ import org.tobi29.scapes.engine.gui.GuiComponentText
 import org.tobi29.scapes.engine.gui.GuiComponentTextField
 import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.setInt
+import org.tobi29.scapes.engine.server.RemoteAddress
 
 class GuiAddServer(state: GameState,
                    previous: GuiServerSelect,
@@ -39,16 +38,14 @@ class GuiAddServer(state: GameState,
         selection(ip)
         selection(port)
 
-        save.on(GuiEvent.CLICK_LEFT) { event ->
-            val tagStructure = TagStructure()
-            tagStructure.setString("Address", ip.text())
-            try {
-                tagStructure.setInt("Port", port.text().toInt())
+        save.on(GuiEvent.CLICK_LEFT) {
+            val portInt = try {
+                port.text().toInt()
             } catch (e: NumberFormatException) {
-                tagStructure.setInt("Port", 12345)
+                12345
             }
-
-            previous.addServer(tagStructure)
+            val address = RemoteAddress(ip.text(), portInt)
+            previous.addServer(address.toTag())
             previous.updateServers()
             state.engine.guiStack.swap(this, previous)
         }

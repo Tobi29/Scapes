@@ -15,19 +15,17 @@
  */
 package org.tobi29.scapes.block
 
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getInt
-import org.tobi29.scapes.engine.utils.io.tag.setInt
+import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.min
 
-class ItemStack constructor(private var material: Material,
-                            private var data: Int,
-                            private var amount: Int = 1,
-                            private var metaData: TagStructure = TagStructure()) {
+class ItemStack(private var material: Material,
+                private var data: Int,
+                private var amount: Int = 1,
+                private var metaData: MutableTagMap = MutableTagMap()) {
     private val registry: GameRegistry
 
     constructor(item: ItemStack) : this(item.material, item.data, item.amount,
-            item.metaData.copy())
+            item.metaData.toTag().toMutTag())
 
     constructor(registry: GameRegistry) : this(registry.air(), 0, 0)
 
@@ -37,8 +35,7 @@ class ItemStack constructor(private var material: Material,
 
     constructor(material: Material,
                 data: Int,
-                metaData: TagStructure) : this(
-            material, data, 1, metaData)
+                metaData: MutableTagMap) : this(material, data, 1, metaData)
 
     fun amount(): Int {
         return amount
@@ -87,7 +84,7 @@ class ItemStack constructor(private var material: Material,
         material = registry.air()
         data = 0
         amount = 0
-        metaData = TagStructure()
+        metaData = MutableTagMap()
     }
 
     fun canStack(add: ItemStack): Int {
@@ -119,27 +116,23 @@ class ItemStack constructor(private var material: Material,
         return min(this.amount, amount)
     }
 
-    fun load(tag: TagStructure) {
-        tag.getInt("Type")?.let {
+    fun write(map: ReadWriteTagMap) {
+        map["Type"] = material.itemID()
+        map["Data"] = data
+        map["Amount"] = amount
+        map["MetaData"] = metaData.toTag()
+    }
+
+    fun read(map: TagMap) {
+        map["Type"]?.toInt()?.let {
             material = registry.material(it) ?: registry.air()
         }
-        tag.getInt("Data")?.let { data = it }
-        tag.getInt("Amount")?.let { amount = it }
-        metaData = tag.getStructure("MetaData") ?: TagStructure()
+        map["Data"]?.toInt()?.let { data = it }
+        map["Amount"]?.toInt()?.let { amount = it }
+        map["MetaData"]?.toMap()?.let { metaData = it.toMutTag() }
     }
 
-    fun save(): TagStructure {
-        val tag = TagStructure()
-        tag.setInt("Type", material.itemID())
-        tag.setInt("Data", data)
-        tag.setInt("Amount", amount)
-        tag.setStructure("MetaData", metaData)
-        return tag
-    }
-
-    fun metaData(category: String): TagStructure {
-        return metaData.structure(category)
-    }
+    fun metaData(category: String) = metaData.mapMut(category)
 
     fun stack(add: ItemStack): Int {
         val amount = min(min(material.maxStackSize(this),
@@ -164,7 +157,7 @@ class ItemStack constructor(private var material: Material,
         material = add.material
         data = add.data
         if (this.amount == 0) {
-            metaData = add.metaData.copy()
+            metaData = add.metaData.toTag().toMutTag()
         }
         this.amount += amount
         add.amount -= amount

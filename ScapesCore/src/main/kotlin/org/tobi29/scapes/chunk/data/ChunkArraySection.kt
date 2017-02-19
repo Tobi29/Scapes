@@ -16,7 +16,8 @@
 
 package org.tobi29.scapes.chunk.data
 
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.ReadWriteTagMap
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
 
 interface ChunkArraySection {
     fun getData(x: Int,
@@ -39,7 +40,7 @@ interface ChunkArraySection {
 
     fun compress(): Boolean
 
-    fun save(): TagStructure?
+    fun write(map: ReadWriteTagMap)
 
-    fun load(tag: TagStructure?)
+    fun read(map: TagMap?)
 }

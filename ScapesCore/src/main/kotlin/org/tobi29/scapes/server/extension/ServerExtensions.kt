@@ -17,7 +17,8 @@
 package org.tobi29.scapes.server.extension
 
 import mu.KLogging
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.ReadTagMap
+import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.extension.spi.ServerExtensionProvider
 import java.util.*
@@ -30,13 +31,12 @@ class ServerExtensions(private val server: ScapesServer) {
         extensions.forEach { it.initLate() }
     }
 
-    fun loadExtensions(configStructure: TagStructure) {
+    fun loadExtensions(map: ReadTagMap?) {
         for (provider in ServiceLoader.load(
                 ServerExtensionProvider::class.java)) {
             try {
                 val name = provider.name
-                val extension = provider.create(server,
-                        configStructure.getStructure(name))
+                val extension = provider.create(server, map?.get(name)?.toMap())
                 if (extension != null) {
                     logger.info { "Loaded extension: $name" }
                     extensions.add(extension)

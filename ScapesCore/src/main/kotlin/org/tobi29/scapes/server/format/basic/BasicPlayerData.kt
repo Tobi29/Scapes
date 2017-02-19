@@ -17,11 +17,12 @@ package org.tobi29.scapes.server.format.basic
 
 import mu.KLogging
 import org.tobi29.scapes.engine.utils.io.filesystem.*
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary
-import org.tobi29.scapes.engine.utils.io.tag.getInt
-import org.tobi29.scapes.engine.utils.io.tag.setInt
-import org.tobi29.scapes.engine.utils.io.tag.structure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
+import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
+import org.tobi29.scapes.engine.utils.io.tag.set
+import org.tobi29.scapes.engine.utils.io.tag.toInt
+import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.server.PlayerEntry
 import org.tobi29.scapes.server.format.PlayerData
@@ -40,19 +41,19 @@ class BasicPlayerData(private val path: FilePath) : PlayerData {
 
     @Synchronized override fun player(id: String): PlayerEntry {
         val tagStructure = load(id)
-        val permissions = tagStructure.getInt("Permissions") ?: 0
-        val worldName = tagStructure.getString("World")
-        val entityStructure = tagStructure.getStructure("Entity")
+        val permissions = tagStructure["Permissions"]?.toInt() ?: 0
+        val worldName = tagStructure["World"]?.toString()
+        val entityStructure = tagStructure["Entity"]?.toMap()
         return PlayerEntry(permissions, worldName, entityStructure)
     }
 
     @Synchronized override fun save(id: String,
                                     entity: MobPlayerServer,
                                     permissions: Int) {
-        save(structure {
-            setStructure("Entity", entity.write(false))
-            setString("World", entity.world.id)
-            setInt("Permissions", permissions)
+        save(TagMap {
+            this["Entity"] = TagMap { entity.write(this, false) }
+            this["World"] = entity.world.id
+            this["Permissions"] = permissions
         }, id)
     }
 
@@ -76,30 +77,26 @@ class BasicPlayerData(private val path: FilePath) : PlayerData {
         })
     }
 
-    @Synchronized private fun load(id: String): TagStructure {
+    @Synchronized private fun load(id: String): TagMap {
         return AccessController.doPrivileged(PrivilegedAction {
             try {
                 val file = path.resolve(id + ".stag")
                 if (exists(file)) {
-                    return@PrivilegedAction read(file) {
-                        TagStructureBinary.read(it)
-                    }
+                    return@PrivilegedAction read(file, ::readBinary)
                 }
             } catch (e: IOException) {
                 logger.error { "Error reading player data: $e" }
             }
-            TagStructure()
+            TagMap()
         })
     }
 
-    @Synchronized private fun save(tagStructure: TagStructure,
+    @Synchronized private fun save(map: TagMap,
                                    id: String) {
         AccessController.doPrivileged(PrivilegedAction {
             try {
                 val file = path.resolve(id + ".stag")
-                write(file, { stream ->
-                    TagStructureBinary.write(stream, tagStructure)
-                })
+                write(file) { map.writeBinary(it) }
             } catch (e: IOException) {
                 logger.error { "Error writing player data: $e" }
             }

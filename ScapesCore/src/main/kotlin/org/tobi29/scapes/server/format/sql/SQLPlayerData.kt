@@ -18,7 +18,9 @@ package org.tobi29.scapes.server.format.sql
 import mu.KLogging
 import org.tobi29.scapes.engine.sql.SQLDatabase
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream
-import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
+import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.server.PlayerEntry
 import org.tobi29.scapes.server.format.PlayerData
@@ -54,8 +56,8 @@ class SQLPlayerData(database: SQLDatabase,
                 }
                 if (row[2] is ByteArray) {
                     val array = row[2] as ByteArray
-                    val entityStructure = TagStructureBinary.read(
-                            ByteBufferStream(ByteBuffer.wrap(array)))
+                    val entityStructure = readBinary(ByteBufferStream(
+                            ByteBuffer.wrap(array)))
                     return PlayerEntry(permissions, worldName,
                             entityStructure)
                 } else {
@@ -73,7 +75,7 @@ class SQLPlayerData(database: SQLDatabase,
                                     permissions: Int) {
         val world = entity.world
         try {
-            TagStructureBinary.write(stream, entity.write(false), 1)
+            TagMap { entity.write(this, false) }.writeBinary(stream, 1)
             stream.buffer().flip()
             val array = ByteArray(stream.buffer().remaining())
             stream.buffer().get(array)

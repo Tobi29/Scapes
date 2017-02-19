@@ -37,8 +37,8 @@ import scapes.plugin.tobi29.vanilla.basics.material.item.ItemMetal
 import scapes.plugin.tobi29.vanilla.basics.material.item.VanillaItem
 import scapes.plugin.tobi29.vanilla.basics.util.Alloy
 import scapes.plugin.tobi29.vanilla.basics.util.createTool
-import scapes.plugin.tobi29.vanilla.basics.util.read
-import scapes.plugin.tobi29.vanilla.basics.util.write
+import scapes.plugin.tobi29.vanilla.basics.util.readAlloy
+import scapes.plugin.tobi29.vanilla.basics.util.writeAlloy
 import java.util.concurrent.ConcurrentHashMap
 
 abstract class ItemMetalTool protected constructor(materials: VanillaMaterial,
@@ -78,13 +78,13 @@ abstract class ItemMetalTool protected constructor(materials: VanillaMaterial,
                        z: Int,
                        face: Face): Double {
         if (item.data() > 0) {
-            val damage = item.metaData("Vanilla").getDouble("ToolDamage") ?: 0.0
+            val damage = item.metaData("Vanilla")[
+                    "ToolDamage"]?.toDouble() ?: 0.0
             val modifier = if (entity.wieldMode() == WieldMode.DUAL) 1.0 else 2.1
-            item.metaData("Vanilla").setDouble("ToolDamage",
-                    damage + (item.metaData("Vanilla").getDouble(
-                            "ToolDamageAdd") ?: 0.0))
-            return (item.metaData("Vanilla").getDouble(
-                    "ToolEfficiency") ?: 0.0) *
+            item.metaData("Vanilla")["ToolDamage"] = damage + (item.metaData(
+                    "Vanilla")["ToolDamageAdd"]?.toDouble() ?: 0.0)
+            return (item.metaData("Vanilla")[
+                    "ToolEfficiency"]?.toDouble() ?: 0.0) *
                     (1.0 - tanh(damage)) * modifier
         } else {
             return 0.0
@@ -95,10 +95,12 @@ abstract class ItemMetalTool protected constructor(materials: VanillaMaterial,
                        item: ItemStack,
                        hit: MobServer): Double {
         if (item.data() > 0) {
-            val damage = item.metaData("Vanilla").getDouble("ToolDamage") ?: 0.0
+            val damage = item.metaData(
+                    "Vanilla")["ToolDamage"]?.toDouble() ?: 0.0
             val modifier = if (entity.wieldMode() == WieldMode.DUAL) 1.0 else 2.1
-            item.metaData("Vanilla").setDouble("ToolDamage", damage)
-            return (item.metaData("Vanilla").getDouble("ToolStrength") ?: 0.0) *
+            item.metaData("Vanilla")["ToolDamage"] = damage
+            return (item.metaData(
+                    "Vanilla")["ToolStrength"]?.toDouble() ?: 0.0) *
                     (1.0 - tanh(damage)) * modifier
         } else {
             return 0.0
@@ -106,7 +108,7 @@ abstract class ItemMetalTool protected constructor(materials: VanillaMaterial,
     }
 
     override fun toolLevel(item: ItemStack): Int {
-        return item.metaData("Vanilla").getInt("ToolLevel") ?: 0
+        return item.metaData("Vanilla")["ToolLevel"]?.toInt() ?: 0
     }
 
     override fun toolType(item: ItemStack): String {
@@ -178,8 +180,8 @@ abstract class ItemMetalTool protected constructor(materials: VanillaMaterial,
             }
         }
         val damage = (1.0 - tanh(
-                item.metaData("Vanilla").getDouble(
-                        "ToolDamage") ?: 0.0)) * 100.0
+                item.metaData("Vanilla")[
+                        "ToolDamage"]?.toDouble() ?: 0.0)) * 100.0
         if (damage > 0.1) {
             name.append("\nDamage: ").append(floor(damage))
         }
@@ -195,11 +197,11 @@ abstract class ItemMetalTool protected constructor(materials: VanillaMaterial,
     override fun heat(item: ItemStack,
                       temperature: Float) {
         var currentTemperature = temperature(item)
-        if (currentTemperature < 1 && temperature < currentTemperature) {
-            item.metaData("Vanilla").setFloat("Temperature", 0.0f)
+        if (currentTemperature < 1.0 && temperature < currentTemperature) {
+            item.metaData("Vanilla")["Temperature"] = 0.0
         } else {
             currentTemperature += (temperature - currentTemperature) / 400.0f
-            item.metaData("Vanilla").setFloat("Temperature", currentTemperature)
+            item.metaData("Vanilla")["Temperature"] = currentTemperature
             if (currentTemperature >= meltingPoint(item)) {
                 val tag = item.metaData("Vanilla")
                 tag.remove("ToolEfficiency")
@@ -215,40 +217,40 @@ abstract class ItemMetalTool protected constructor(materials: VanillaMaterial,
 
     override fun cool(item: ItemStack) {
         val currentTemperature = temperature(item)
-        if (currentTemperature < 1) {
-            item.metaData("Vanilla").setFloat("Temperature", 0.0f)
+        if (currentTemperature < 1.0) {
+            item.metaData("Vanilla")["Temperature"] = 0.0
         } else {
-            item.metaData("Vanilla").setFloat("Temperature",
-                    currentTemperature / 1.002f)
+            item.metaData("Vanilla")["Temperature"] = currentTemperature / 1.002
         }
     }
 
     override fun cool(item: MobItemServer) {
         val currentTemperature = temperature(item.item())
-        if (currentTemperature < 1) {
-            item.item().metaData("Vanilla").setFloat("Temperature", 0.0f)
+        if (currentTemperature < 1.0) {
+            item.item().metaData("Vanilla")["Temperature"] = 0.0
         } else {
             if (item.isInWater) {
-                item.item().metaData("Vanilla").setFloat("Temperature",
-                        currentTemperature / 4.0f)
+                item.item().metaData("Vanilla")["Temperature"] =
+                        currentTemperature / 4.0
             } else {
-                item.item().metaData("Vanilla").setFloat("Temperature",
-                        currentTemperature / 1.002f)
+                item.item().metaData("Vanilla")["Temperature"] =
+                        currentTemperature / 1.002
             }
         }
     }
 
     override fun temperature(item: ItemStack): Float {
-        return item.metaData("Vanilla").getFloat("Temperature") ?: 0.0f
+        return item.metaData("Vanilla")["Temperature"]?.toFloat() ?: 0.0f
     }
 
     override fun alloy(item: ItemStack): Alloy {
-        return read(plugin, item.metaData("Vanilla").structure("Alloy"))
+        return readAlloy(plugin,
+                item.metaData("Vanilla")["Alloy"]?.toMap() ?: TagMap())
     }
 
     override fun setAlloy(item: ItemStack,
                           alloy: Alloy) {
-        item.metaData("Vanilla").setStructure("Alloy", write(alloy))
+        item.metaData("Vanilla")["Alloy"] = TagMap { writeAlloy(alloy, this) }
     }
 
     private fun modelHead(alloyType: AlloyType): ItemModel {

@@ -18,30 +18,30 @@ package org.tobi29.scapes.server.format.basic
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.graphics.encodePNG
 import org.tobi29.scapes.engine.utils.io.filesystem.*
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary
-import org.tobi29.scapes.engine.utils.io.tag.setLong
+import org.tobi29.scapes.engine.utils.io.tag.*
+import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
+import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.format.WorldFormat
 import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.format.newPanorama
 
 class BasicWorldSource(private val path: FilePath) : WorldSource {
-    private val tagStructure: TagStructure
+    private val map: MutableTagMap
 
     init {
         val data = path.resolve("Data.stag")
-        if (exists(data)) {
-            tagStructure = read(data, { TagStructureBinary.read(it) })
+        map = if (exists(data)) {
+            read(data, ::readBinary)
         } else {
-            tagStructure = TagStructure()
-        }
+            TagMap()
+        }.toMutTag()
     }
 
     override fun init(seed: Long,
                       plugins: List<FilePath>) {
         createDirectories(path)
-        tagStructure.setLong("Seed", seed)
+        map["Seed"] = seed
         val pluginsDir = path.resolve("plugins")
         createDirectories(pluginsDir)
         for (plugin in plugins) {
@@ -70,12 +70,10 @@ class BasicWorldSource(private val path: FilePath) : WorldSource {
     }
 
     override fun open(server: ScapesServer): WorldFormat {
-        return BasicWorldFormat(path, tagStructure)
+        return BasicWorldFormat(path, map)
     }
 
     override fun close() {
-        write(path.resolve("Data.stag")) { streamOut ->
-            TagStructureBinary.write(streamOut, tagStructure)
-        }
+        write(path.resolve("Data.stag")) { map.toTag().writeBinary(it) }
     }
 }

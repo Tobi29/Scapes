@@ -20,7 +20,7 @@ import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.ThreadLocal
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
@@ -72,17 +72,16 @@ abstract class MobServer protected constructor(world: WorldServer,
         return aabb
     }
 
-    override fun write(): TagStructure {
-        val tagStructure = super.write()
-        tagStructure.setMultiTag("Speed", speed)
-        tagStructure.setMultiTag("Rot", rot)
-        return tagStructure
+    override fun write(map: ReadWriteTagMap) {
+        super.write(map)
+        map["Speed"] = speed.now().toTag()
+        map["Rot"] = rot.now().toTag()
     }
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
-        tagStructure.getMultiTag("Speed", speed)
-        tagStructure.getMultiTag("Rot", rot)
+    override fun read(map: TagMap) {
+        super.read(map)
+        map["Speed"]?.toMap()?.let { speed.set(it) }
+        map["Rot"]?.toMap()?.let { rot.set(it) }
         updatePosition()
     }
 

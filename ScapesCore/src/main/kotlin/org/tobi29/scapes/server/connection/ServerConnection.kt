@@ -20,8 +20,8 @@ import org.tobi29.scapes.connection.ConnectionInfo
 import org.tobi29.scapes.connection.ConnectionType
 import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.utils.Checksum
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getInt
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.toInt
 import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.entity.skin.ServerSkin
 import org.tobi29.scapes.packets.PacketClient
@@ -37,7 +37,7 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class ServerConnection(val server: ScapesServer,
-                       tagStructure: TagStructure,
+                       configMap: TagMap,
                        ssl: SSLHandle) : AbstractServerConnection(
         server.taskExecutor(), ConnectionInfo.header(), ssl, 10) {
     val events = server.events
@@ -54,9 +54,9 @@ class ServerConnection(val server: ScapesServer,
 
     init {
         plugins = server.plugins
-        mayPlayers = tagStructure.getInt("MaxPlayers") ?: 0
+        mayPlayers = configMap["MaxPlayers"]?.toInt() ?: 0
         controlPassword = ServerConnection.checkControlPassword(
-                tagStructure.getString("ControlPassword"))
+                configMap["ControlPassword"]?.toString())
     }
 
     fun player(id: String): PlayerConnection? {

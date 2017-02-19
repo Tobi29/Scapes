@@ -18,7 +18,7 @@ package org.tobi29.scapes.server.ssl.jks
 
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.read
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.engine.utils.keyManagers
 import org.tobi29.scapes.engine.utils.keyStore
 import org.tobi29.scapes.server.ssl.spi.KeyManagerProvider
@@ -36,14 +36,14 @@ class JKSKeyManagerProvider : KeyManagerProvider {
     }
 
     override fun get(path: FilePath,
-                     config: TagStructure): Array<KeyManager> {
+                     configMap: TagMap): Array<KeyManager> {
         try {
             val keyStore = read(
-                    path.resolve(config.getString("KeyStore") ?: "")) {
-                keyStore(it, config.getString("StorePassword") ?: "")
+                    path.resolve(configMap["KeyStore"].toString())) {
+                keyStore(it, configMap["StorePassword"].toString())
             }
             return keyManagers(keyStore,
-                    config.getString("KeyPassword") ?: "")
+                    configMap["KeyPassword"].toString())
         } catch (e: KeyStoreException) {
             throw IOException(e)
         }

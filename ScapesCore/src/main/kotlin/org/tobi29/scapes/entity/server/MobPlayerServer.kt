@@ -22,10 +22,7 @@ import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.Checksum
 import org.tobi29.scapes.engine.utils.filterMap
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getInt
-import org.tobi29.scapes.engine.utils.io.tag.setInt
-import org.tobi29.scapes.engine.utils.io.tag.setStructure
+import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
@@ -42,6 +39,7 @@ import org.tobi29.scapes.packets.PacketUpdateInventory
 import org.tobi29.scapes.server.connection.PlayerConnection
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.collections.set
 
 abstract class MobPlayerServer(world: WorldServer,
                                pos: Vector3d,
@@ -236,16 +234,16 @@ abstract class MobPlayerServer(world: WorldServer,
         return CreatureType.CREATURE
     }
 
-    override fun write(): TagStructure {
-        return write(true)
+    override fun write(map: ReadWriteTagMap) {
+        write(map, true)
     }
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
-        tagStructure.getInt("HealWait")?.let { healWait = it }
-        tagStructure.getStructure("Inventory")?.let { inventoryTag ->
+    override fun read(map: TagMap) {
+        super.read(map)
+        map["HealWait"]?.toInt()?.let { healWait = it }
+        map["Inventory"]?.toMap()?.let { inventoryTag ->
             inventories.forEach { id, inventory ->
-                inventoryTag.getStructure(id)?.let { inventory.load(it) }
+                inventoryTag[id]?.toMap()?.let { inventory.read(it) }
             }
         }
     }
@@ -270,19 +268,19 @@ abstract class MobPlayerServer(world: WorldServer,
         aabbs.reset()
     }
 
-    fun write(packet: Boolean): TagStructure {
-        val tagStructure = super.write()
-        tagStructure.setInt("HealWait", healWait)
-        tagStructure.setStructure("Inventory") {
+    fun write(map: ReadWriteTagMap,
+              packet: Boolean) {
+        super.write(map)
+        map["HealWait"] = healWait
+        map["Inventory"] = TagMap {
             inventories.forEach { id, inventory ->
-                setStructure(id, inventory.save())
+                this[id] = TagMap { inventory.write(this) }
             }
         }
         if (packet) {
-            tagStructure.setString("Nickname", nickname)
-            tagStructure.setByteArray("SkinChecksum", *skin.array())
+            map["Nickname"] = nickname
+            map["SkinChecksum"] = skin.array()
         }
-        return tagStructure
     }
 
     fun onPunch(id: String,

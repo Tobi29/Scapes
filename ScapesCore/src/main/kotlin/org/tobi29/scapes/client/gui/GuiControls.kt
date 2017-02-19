@@ -21,9 +21,9 @@ import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.input.ControllerBasic
 import org.tobi29.scapes.engine.input.ControllerJoystick
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getDouble
-import org.tobi29.scapes.engine.utils.io.tag.setDouble
+import org.tobi29.scapes.engine.utils.io.tag.MutableTagMap
+import org.tobi29.scapes.engine.utils.io.tag.set
+import org.tobi29.scapes.engine.utils.io.tag.toDouble
 import org.tobi29.scapes.engine.utils.math.pow
 import org.tobi29.scapes.engine.utils.math.round
 
@@ -72,38 +72,36 @@ abstract class GuiControls(state: GameState,
 
     protected fun addButton(name: String,
                             id: String,
-                            tagStructure: TagStructure,
+                            tagMap: MutableTagMap,
                             controller: ControllerBasic) {
         val button = row(scrollPane) {
-            GuiComponentControlsButton(it, 18, name, id,
-                    tagStructure, controller)
+            GuiComponentControlsButton(it, 18, name, id, tagMap, controller)
         }
         selection(button)
     }
 
     protected fun addAxis(name: String,
                           id: String,
-                          tagStructure: TagStructure,
+                          tagMap: MutableTagMap,
                           controller: ControllerJoystick) {
         val axis = row(scrollPane) {
-            GuiComponentControlsAxis(it, 18, name, id, tagStructure,
-                    controller)
+            GuiComponentControlsAxis(it, 18, name, id, tagMap, controller)
         }
         selection(axis)
     }
 
     protected fun addSlider(name: String,
                             id: String,
-                            tagStructure: TagStructure) {
+                            tagMap: MutableTagMap) {
         val slider = row(scrollPane) {
-            slider(it, name, reverseSensitivity(tagStructure.getDouble(
-                    id) ?: 0.0)) { text, value ->
+            slider(it, name, reverseSensitivity(
+                    tagMap[id]?.toDouble() ?: 0.0)) { text, value ->
                 text + ": " + round(sensitivity(value) * 100.0) + '%'
             }
         }
         selection(slider)
         slider.on(GuiEvent.CHANGE) { event ->
-            tagStructure.setDouble(id, sensitivity(slider.value()))
+            tagMap[id] = sensitivity(slider.value())
         }
     }
 }

@@ -19,8 +19,7 @@ import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.io.tag.MultiTag
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.Entity
@@ -29,14 +28,14 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 open class EntityServer(val world: WorldServer,
-                        pos: Vector3d) : Entity, MultiTag.ReadAndWrite {
+                        pos: Vector3d) : Entity, TagMapWrite {
     protected val spawnListeners: MutableMap<String, () -> Unit> = ConcurrentHashMap()
     protected val updateListeners: MutableMap<String, (Double) -> Unit> = ConcurrentHashMap()
     protected val registry: GameRegistry
     protected val pos: MutableVector3d
     var uuid: UUID = UUID.randomUUID()
         protected set
-    protected var metaData = TagStructure()
+    protected var metaData = MutableTagMap()
 
     init {
         registry = world.registry
@@ -65,21 +64,17 @@ open class EntityServer(val world: WorldServer,
         return pos.now()
     }
 
-    override fun write(): TagStructure {
-        val tag = TagStructure()
-        tag.setMultiTag("Pos", pos)
-        tag.setStructure("MetaData", metaData)
-        return tag
+    override fun write(map: ReadWriteTagMap) {
+        map["Pos"] = pos.now().toTag()
+        map["MetaData"] = metaData.toTag()
     }
 
-    override fun read(tagStructure: TagStructure) {
-        tagStructure.getMultiTag("Pos", pos)
-        tagStructure.getStructure("MetaData")?.let { metaData = it }
+    open fun read(map: TagMap) {
+        map["Pos"]?.toMap()?.let { pos.set(it) }
+        map["MetaData"]?.toMap()?.let { metaData = it.toMutTag() }
     }
 
-    fun metaData(category: String): TagStructure {
-        return metaData.structure(category)
-    }
+    fun metaData(category: String) = metaData.mapMut(category)
 
     fun updateListeners(delta: Double) {
         updateListeners.values.forEach { it(delta) }

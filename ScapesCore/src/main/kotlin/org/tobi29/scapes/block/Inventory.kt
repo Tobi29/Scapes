@@ -16,8 +16,7 @@
 
 package org.tobi29.scapes.block
 
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getListStructure
+import org.tobi29.scapes.engine.utils.io.tag.*
 
 class Inventory(private val registry: GameRegistry,
                 size: Int) {
@@ -105,16 +104,14 @@ class Inventory(private val registry: GameRegistry,
         }
     }
 
-    fun load(tag: TagStructure) {
-        var i = 0
-        tag.getListStructure("Items") { element ->
-            items[i++].load(element)
+    fun read(map: TagMap) {
+        map["Items"]?.toList()?.asSequence()?.mapNotNull(
+                Tag::toMap)?.forEachIndexed { i, element ->
+            items[i].read(element)
         }
     }
 
-    fun save(): TagStructure {
-        val structure = TagStructure()
-        structure.setList("Items", items.map { it.save() })
-        return structure
+    fun write(map: ReadWriteTagMap) {
+        map["Items"] = items.asSequence().map { TagMap { it.write(this) } }
     }
 }

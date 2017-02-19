@@ -18,17 +18,15 @@ package scapes.plugin.tobi29.vanilla.basics.entity.server
 import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getDouble
-import org.tobi29.scapes.engine.utils.io.tag.setDouble
+import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.packets.PacketEntityChange
 import scapes.plugin.tobi29.vanilla.basics.VanillaBasics
 import scapes.plugin.tobi29.vanilla.basics.material.item.ItemIngot
 import scapes.plugin.tobi29.vanilla.basics.util.Alloy
-import scapes.plugin.tobi29.vanilla.basics.util.read
-import scapes.plugin.tobi29.vanilla.basics.util.write
+import scapes.plugin.tobi29.vanilla.basics.util.readAlloy
+import scapes.plugin.tobi29.vanilla.basics.util.writeAlloy
 
 class EntityAlloyServer(world: WorldServer,
                         pos: Vector3d = Vector3d.ZERO) : EntityAbstractContainerServer(
@@ -36,18 +34,17 @@ class EntityAlloyServer(world: WorldServer,
     private var metals = Alloy()
     private var temperature = 0.0
 
-    override fun write(): TagStructure {
-        val tag = super.write()
-        tag.setStructure("Alloy", write(metals))
-        tag.setDouble("Temperature", temperature)
-        return tag
+    override fun write(map: ReadWriteTagMap) {
+        super.write(map)
+        map["Alloy"] = TagMap { writeAlloy(metals, this) }
+        map["Temperature"] = temperature
     }
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
+    override fun read(map: TagMap) {
+        super.read(map)
         val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
-        tagStructure.getStructure("Alloy")?.let { metals = read(plugin, it) }
-        tagStructure.getDouble("Temperature")?.let { temperature = it }
+        map["Alloy"]?.toMap()?.let { metals = readAlloy(plugin, it) }
+        map["Temperature"]?.toDouble()?.let { temperature = it }
     }
 
     public override fun isValidOn(terrain: TerrainServer,
@@ -75,7 +72,7 @@ class EntityAlloyServer(world: WorldServer,
                     for ((key, value) in alloyType.ingredients()) {
                         metals.add(key, value)
                     }
-                    input.metaData("Vanilla").getDouble("Temperature")?.let {
+                    input.metaData("Vanilla")["Temperature"]?.toDouble()?.let {
                         temperature = max(temperature, it)
                     }
                     input.clear()
@@ -86,11 +83,11 @@ class EntityAlloyServer(world: WorldServer,
             val output = inventory.item(1)
             val outputType = output.material()
             if (outputType === materials.mold && output.data() == 1) {
-                input.metaData("Vanilla").getDouble("Temperature")?.let {
+                input.metaData("Vanilla")["Temperature"]?.toDouble()?.let {
                     temperature = max(temperature, it)
                 }
                 output.setMaterial(materials.ingot, 0)
-                output.metaData("Vanilla").setDouble("Temperature", temperature)
+                output.metaData("Vanilla")["Temperature"] = temperature
                 materials.ingot.setAlloy(output, metals.drain(1.0))
                 world.send(PacketEntityChange(this))
             }

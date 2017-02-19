@@ -19,20 +19,19 @@ package org.tobi29.scapes.chunk
 import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.TagMapWrite
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 
-interface EnvironmentServer {
+interface EnvironmentServer : TagMapWrite {
     fun generator(): ChunkGenerator
 
     fun populator(): ChunkPopulator
 
     fun calculateSpawn(terrain: TerrainServer): Vector3i
 
-    fun load(tagStructure: TagStructure)
-
-    fun save(): TagStructure
+    fun read(map: TagMap)
 
     fun tick(delta: Double)
 

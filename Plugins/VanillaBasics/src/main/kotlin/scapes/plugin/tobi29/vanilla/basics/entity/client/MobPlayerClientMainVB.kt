@@ -28,7 +28,10 @@ import org.tobi29.scapes.client.input.InputMode
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.engine.utils.ListenerOwner
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.map
+import org.tobi29.scapes.engine.utils.io.tag.toBoolean
+import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.direction
@@ -77,8 +80,8 @@ class MobPlayerClientMainVB(world: WorldClient,
 
     override fun update(delta: Double) {
         super.update(delta)
-        val conditionTag = metaData("Vanilla").structure("Condition")
-        if (conditionTag.getBoolean("Sleeping") ?: false) {
+        val conditionTag = metaData("Vanilla").map("Condition")
+        if (conditionTag?.get("Sleeping")?.toBoolean() ?: false) {
             return
         }
         if (!hasGui()) {
@@ -256,11 +259,13 @@ class MobPlayerClientMainVB(world: WorldClient,
         })
     }
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
-        tagStructure.getStructure("Inventory")?.let { inventoryTag ->
+    override fun read(map: TagMap) {
+        super.read(map)
+        map["Inventory"]?.toMap()?.let { inventoryTag ->
             inventories.forEach { id, inventory ->
-                inventoryTag.getStructure(id)?.let { inventory.load(it) }
+                inventoryTag[id]?.toMap()?.let {
+                    inventory.read(it)
+                }
             }
         }
     }

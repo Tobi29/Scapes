@@ -16,11 +16,11 @@
 
 package org.tobi29.scapes.chunk
 
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 
 interface EnvironmentClient {
-    fun load(tagStructure: TagStructure)
+    fun read(map: TagMap)
 
     fun tick(delta: Double)
 

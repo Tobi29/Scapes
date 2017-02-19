@@ -16,13 +16,13 @@
 
 package org.tobi29.scapes.server.format
 
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 
 interface TerrainInfiniteFormat {
-    fun chunkTags(chunks: List<Vector2i>): List<TagStructure?>
+    fun chunkTags(chunks: List<Vector2i>): List<TagMap?>
 
-    fun putChunkTags(chunks: List<Pair<Vector2i, TagStructure>>)
+    fun putChunkTags(chunks: List<Pair<Vector2i, TagMap>>)
 
     fun dispose()
 }

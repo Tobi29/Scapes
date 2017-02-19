@@ -21,16 +21,16 @@ import org.tobi29.scapes.engine.gui.GuiComponentText
 import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiLayoutData
 import org.tobi29.scapes.engine.input.ControllerJoystick
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getInt
-import org.tobi29.scapes.engine.utils.io.tag.setInt
+import org.tobi29.scapes.engine.utils.io.tag.MutableTagMap
+import org.tobi29.scapes.engine.utils.io.tag.set
+import org.tobi29.scapes.engine.utils.io.tag.toInt
 import java.util.*
 
 class GuiComponentControlsAxis(parent: GuiLayoutData,
                                textSize: Int,
                                private val name: String,
                                private val id: String,
-                               private val tagStructure: TagStructure,
+                               private val tagMap: MutableTagMap,
                                private val controller: ControllerJoystick) : GuiComponentButtonHeavy(
         parent) {
     private val text: GuiComponentText
@@ -41,7 +41,7 @@ class GuiComponentControlsAxis(parent: GuiLayoutData,
     init {
         text = addSubHori(4.0, 0.0, -1.0,
                 textSize.toDouble()) { GuiComponentText(it, "") }
-        tagStructure.getInt(id)?.let { axis = it }
+        tagMap[id]?.toInt()?.let { axis = it }
         on(GuiEvent.CLICK_LEFT) { event ->
             if (editing.toInt() == 0) {
                 blacklist.clear()
@@ -86,7 +86,7 @@ class GuiComponentControlsAxis(parent: GuiLayoutData,
                 if (controller.axis(i) > 0.5) {
                     if (!blacklisted) {
                         axis = i
-                        tagStructure.setInt(id, axis)
+                        tagMap[id] = axis
                         editing = 0
                         updateText()
                         break

@@ -23,9 +23,9 @@ import org.tobi29.scapes.block.models.ItemModelSimple
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.utils.io.tag.getDouble
-import org.tobi29.scapes.engine.utils.io.tag.getInt
-import org.tobi29.scapes.engine.utils.io.tag.setDouble
+import org.tobi29.scapes.engine.utils.io.tag.set
+import org.tobi29.scapes.engine.utils.io.tag.toDouble
+import org.tobi29.scapes.engine.utils.io.tag.toInt
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.engine.utils.math.tanh
@@ -71,13 +71,14 @@ abstract class ItemFlintTool protected constructor(materials: VanillaMaterial,
                        z: Int,
                        face: Face): Double {
         if (item.data() > 0) {
-            val damage = item.metaData("Vanilla").getDouble("ToolDamage") ?: 0.0
+            val damage = item.metaData("Vanilla")[
+                    "ToolDamage"]?.toDouble() ?: 0.0
             val modifier = if (entity.wieldMode() == WieldMode.DUAL) 1.0 else 2.1
-            item.metaData("Vanilla").setDouble("ToolDamage",
-                    damage + (item.metaData("Vanilla").getDouble(
-                            "ToolDamageAdd") ?: 0.0))
-            return (item.metaData("Vanilla").getDouble(
-                    "ToolEfficiency") ?: 0.0) *
+            item.metaData("Vanilla")["ToolDamage"] =
+                    damage + (item.metaData("Vanilla")[
+                            "ToolDamageAdd"]?.toDouble() ?: 0.0)
+            return (item.metaData("Vanilla")[
+                    "ToolEfficiency"]?.toDouble() ?: 0.0) *
                     (1.0 - tanh(damage)) * modifier
         } else {
             return 0.0
@@ -88,10 +89,12 @@ abstract class ItemFlintTool protected constructor(materials: VanillaMaterial,
                        item: ItemStack,
                        hit: MobServer): Double {
         if (item.data() > 0) {
-            val damage = item.metaData("Vanilla").getDouble("ToolDamage") ?: 0.0
+            val damage = item.metaData(
+                    "Vanilla")["ToolDamage"]?.toDouble() ?: 0.0
             val modifier = if (entity.wieldMode() == WieldMode.DUAL) 1.0 else 2.1
-            item.metaData("Vanilla").setDouble("ToolDamage", damage)
-            return (item.metaData("Vanilla").getDouble("ToolStrength") ?: 0.0) *
+            item.metaData("Vanilla")["ToolDamage"] = damage
+            return (item.metaData(
+                    "Vanilla")["ToolStrength"]?.toDouble() ?: 0.0) *
                     (1.0 - tanh(damage)) * modifier
         } else {
             return 0.0
@@ -99,7 +102,7 @@ abstract class ItemFlintTool protected constructor(materials: VanillaMaterial,
     }
 
     override fun toolLevel(item: ItemStack): Int {
-        return item.metaData("Vanilla").getInt("ToolLevel") ?: 0
+        return item.metaData("Vanilla")["ToolLevel"]?.toInt() ?: 0
     }
 
     override fun toolType(item: ItemStack): String {
@@ -155,8 +158,8 @@ abstract class ItemFlintTool protected constructor(materials: VanillaMaterial,
             name.append(" Head")
         }
         val damage = (1.0 - tanh(
-                item.metaData("Vanilla").getDouble(
-                        "ToolDamage") ?: 0.0)) * 100.0
+                item.metaData(
+                        "Vanilla")["ToolDamage"]?.toDouble() ?: 0.0)) * 100.0
         if (damage > 0.1) {
             name.append("\nDamage: ").append(floor(damage))
         }

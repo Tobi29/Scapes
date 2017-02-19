@@ -18,39 +18,35 @@ package org.tobi29.scapes.packets
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
+import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.server.connection.PlayerConnection
 import java.util.*
 
 class PacketEntityChange : PacketAbstract, PacketClient {
     private lateinit var uuid: UUID
-    private lateinit var tag: TagStructure
+    private lateinit var tag: TagMap
 
     constructor()
 
     constructor(entity: EntityServer) : super(entity.getCurrentPos()) {
         uuid = entity.getUUID()
-        tag = entity.write()
+        tag = TagMap { entity.write(this) }
     }
 
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {
         stream.putLong(uuid.mostSignificantBits)
         stream.putLong(uuid.leastSignificantBits)
-        TagStructureBinary.write(stream, tag)
+        tag.writeBinary(stream)
     }
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
         uuid = UUID(stream.long, stream.long)
-        tag = TagStructure()
-        TagStructureBinary.read(stream, tag)
-    }
-
-    override fun localClient() {
-        tag = tag.copy()
+        tag = readBinary(stream)
     }
 
     override fun runClient(client: ClientConnection) {

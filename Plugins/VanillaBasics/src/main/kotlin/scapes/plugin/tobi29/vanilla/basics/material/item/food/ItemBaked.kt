@@ -18,8 +18,9 @@ package scapes.plugin.tobi29.vanilla.basics.material.item.food
 
 import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.io.tag.getDouble
-import org.tobi29.scapes.engine.utils.io.tag.setDouble
+import org.tobi29.scapes.engine.utils.io.tag.set
+import org.tobi29.scapes.engine.utils.io.tag.syncMapMut
+import org.tobi29.scapes.engine.utils.io.tag.toDouble
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import scapes.plugin.tobi29.vanilla.basics.material.CropType
 import scapes.plugin.tobi29.vanilla.basics.material.VanillaMaterial
@@ -30,14 +31,13 @@ class ItemBaked(materials: VanillaMaterial,
         materials, "vanilla.basics.item.Baked") {
     override fun click(entity: MobPlayerServer,
                        item: ItemStack) {
-        val conditionTag = entity.metaData("Vanilla").structure("Condition")
-        synchronized(conditionTag) {
-            val stamina = conditionTag.getDouble("Stamina") ?: 0.0
-            conditionTag.setDouble("Stamina", stamina - 0.1)
-            val hunger = conditionTag.getDouble("Hunger") ?: 0.0
-            conditionTag.setDouble("Hunger", hunger + 0.1)
-            val thirst = conditionTag.getDouble("Thirst") ?: 0.0
-            conditionTag.setDouble("Thirst", thirst - 0.1)
+        entity.metaData("Vanilla").syncMapMut("Condition") { conditionTag ->
+            val stamina = conditionTag["Stamina"]?.toDouble() ?: 0.0
+            val hunger = conditionTag["Hunger"]?.toDouble() ?: 0.0
+            val thirst = conditionTag["Thirst"]?.toDouble() ?: 0.0
+            conditionTag["Stamina"] = stamina - 0.1
+            conditionTag["Hunger"] = hunger + 0.1
+            conditionTag["Thirst"] = thirst - 0.1
         }
         item.setAmount(item.amount() - 1)
     }

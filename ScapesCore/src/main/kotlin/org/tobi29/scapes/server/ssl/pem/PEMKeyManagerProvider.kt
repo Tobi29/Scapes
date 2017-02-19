@@ -19,7 +19,7 @@ package org.tobi29.scapes.server.ssl.pem
 import org.tobi29.scapes.engine.utils.io.ByteStreamInputStream
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.read
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.engine.utils.keyManagers
 import org.tobi29.scapes.engine.utils.readCertificateChain
 import org.tobi29.scapes.engine.utils.readPrivateKeys
@@ -43,17 +43,16 @@ class PEMKeyManagerProvider : KeyManagerProvider {
     }
 
     override fun get(path: FilePath,
-                     config: TagStructure): Array<KeyManager> {
+                     configMap: TagMap): Array<KeyManager> {
         try {
             val certificates = read(
-                    path.resolve(config.getString(
-                            "Certificate") ?: "")) {
+                    path.resolve(configMap["Certificate"].toString())) {
                 readCertificateChain(
                         BufferedReader(
                                 InputStreamReader(ByteStreamInputStream(it))))
             }
             val keys = read(path.resolve(
-                    config.getString("PrivateKey") ?: "")) {
+                    configMap["PrivateKey"].toString())) {
                 readPrivateKeys(
                         BufferedReader(
                                 InputStreamReader(ByteStreamInputStream(it))))

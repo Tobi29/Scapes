@@ -22,9 +22,9 @@ import org.eclipse.swt.widgets.Group
 import org.tobi29.scapes.engine.server.ControlPanelProtocol
 import org.tobi29.scapes.engine.swt.util.framework.Application
 import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
-import org.tobi29.scapes.engine.utils.io.tag.getDouble
-import org.tobi29.scapes.engine.utils.io.tag.getLong
-import org.tobi29.scapes.engine.utils.io.tag.structure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.toDouble
+import org.tobi29.scapes.engine.utils.io.tag.toLong
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelGraphs
 
@@ -42,15 +42,15 @@ class ExtensionStat(application: Application,
                 if (graphs.isDisposed) {
                     return@accessAsync
                 }
-                val cpu = payload.getDouble("CPU") ?: 0.0
+                val cpu = payload["CPU"]?.toDouble() ?: 0.0
                 graphs.cpu.addStamp(cpu)
-                val memory = (payload.getLong("Memory") ?: 0) / (1 shl 20)
+                val memory = (payload["Memory"]?.toLong() ?: 0L) / (1L shl 20)
                 graphs.memory.addStamp(memory.toDouble())
             }
         }
         application.taskExecutor.addTask({
             graphs.ifPresent {
-                connection.send("Stats", structure {})
+                connection.send("Stats", TagMap())
                 return@addTask 250
             }
             -1

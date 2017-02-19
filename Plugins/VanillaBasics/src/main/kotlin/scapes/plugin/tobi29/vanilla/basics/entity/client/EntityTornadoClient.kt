@@ -18,7 +18,7 @@ package scapes.plugin.tobi29.vanilla.basics.entity.client
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.engine.utils.math.TWO_PI
 import org.tobi29.scapes.engine.utils.math.cosTable
 import org.tobi29.scapes.engine.utils.math.sinTable
@@ -48,8 +48,8 @@ class EntityTornadoClient(world: WorldClient,
                 { ground, slidingWall, inWater, swimming -> })
     }
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
+    override fun read(map: TagMap) {
+        super.read(map)
         positionReceiver.receiveMoveAbsolute(pos.doubleX(), pos.doubleY(),
                 pos.doubleZ())
     }

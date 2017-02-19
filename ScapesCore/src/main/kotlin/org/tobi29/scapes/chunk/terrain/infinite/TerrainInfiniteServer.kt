@@ -27,7 +27,7 @@ import org.tobi29.scapes.chunk.generator.GeneratorOutput
 import org.tobi29.scapes.chunk.terrain.TerrainChunk
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.forEach
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.engine.utils.limit
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.max
@@ -201,7 +201,7 @@ class TerrainInfiniteServer(override val world: WorldServer,
             positions: List<Vector2i>): List<TerrainInfiniteChunkServer?> {
         val chunks = ArrayList<TerrainInfiniteChunkServer?>(
                 positions.size)
-        val tagStructures = format.chunkTags(positions)
+        val chunkMaps = format.chunkTags(positions)
         for (i in positions.indices) {
             val pos = positions[i]
             val x = pos.x
@@ -214,13 +214,12 @@ class TerrainInfiniteServer(override val world: WorldServer,
             synchronized(chunkManager) {
                 chunk = chunkManager[x, y]
                 if (chunk == null) {
-                    val tagStructure = tagStructures[i]
-                    if (tagStructure != null) {
+                    val map = chunkMaps[i]
+                    if (map != null) {
                         profilerSection("Load") {
                             var time = System.currentTimeMillis()
                             val chunk2 = TerrainInfiniteChunkServer(
-                                    Vector2i(x, y), this, zSize,
-                                    tagStructure)
+                                    Vector2i(x, y), this, zSize, map)
                             time = System.currentTimeMillis() - time
                             logger.debug { "Chunk loaded in ${time}ms" }
                             chunkManager.add(chunk2)
@@ -435,7 +434,7 @@ class TerrainInfiniteServer(override val world: WorldServer,
     }
 
     private fun removeChunks(): Boolean {
-        val chunks = ArrayList<Pair<Vector2i, TagStructure>>()
+        val chunks = ArrayList<Pair<Vector2i, TagMap>>()
         while (!chunkUnloadQueue.isEmpty()) {
             synchronized(this) {
                 chunks.add(removeChunk(chunkUnloadQueue.poll()))
@@ -453,7 +452,7 @@ class TerrainInfiniteServer(override val world: WorldServer,
     }
 
     private fun removeChunk(
-            chunk: TerrainInfiniteChunkServer): Pair<Vector2i, TagStructure> {
+            chunk: TerrainInfiniteChunkServer): Pair<Vector2i, TagMap> {
         val x = chunk.pos.x
         val y = chunk.pos.y
         chunkManager.remove(x, y)

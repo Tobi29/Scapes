@@ -37,29 +37,27 @@ class EntityFarmlandServer(world: WorldServer,
     private var cropType: CropType? = null
     private var updateBlock = false
 
-    override fun write(): TagStructure {
-        val tag = super.write()
-        tag.setFloat("NutrientA", nutrientA)
-        tag.setFloat("NutrientB", nutrientB)
-        tag.setFloat("NutrientC", nutrientC)
-        tag.setFloat("Time", time)
-        tag.setByte("Stage", stage)
+    override fun write(map: ReadWriteTagMap) {
+        super.write(map)
+        map["NutrientA"] = nutrientA
+        map["NutrientB"] = nutrientB
+        map["NutrientC"] = nutrientC
+        map["Time"] = time
+        map["Stage"] = stage
         cropType?.let {
-            tag.setInt("CropType", it.data(registry))
+            map["CropType"] = it.data(registry)
         }
-        return tag
     }
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
-        tagStructure.getFloat("NutrientA")?.let { nutrientA = it }
-        tagStructure.getFloat("NutrientB")?.let { nutrientB = it }
-        tagStructure.getFloat("NutrientC")?.let { nutrientC = it }
-        tagStructure.getFloat("Time")?.let { time = it }
-        tagStructure.getByte("Stage")?.let { stage = it }
-        if (tagStructure.has("CropType")) {
-            CropType[registry, tagStructure.getInt(
-                    "CropType")]?.let { cropType = it }
+    override fun read(map: TagMap) {
+        super.read(map)
+        map["NutrientA"]?.toFloat()?.let { nutrientA = it }
+        map["NutrientB"]?.toFloat()?.let { nutrientB = it }
+        map["NutrientC"]?.toFloat()?.let { nutrientC = it }
+        map["Time"]?.toFloat()?.let { time = it }
+        map["Stage"]?.toByte()?.let { stage = it }
+        if (map.containsKey("CropType")) {
+            CropType[registry, map["CropType"]?.toInt()]?.let { cropType = it }
             updateBlock = true
         } else {
             cropType = null

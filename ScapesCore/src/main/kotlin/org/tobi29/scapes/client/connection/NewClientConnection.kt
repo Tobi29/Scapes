@@ -33,8 +33,8 @@ import org.tobi29.scapes.engine.utils.io.filesystem.exists
 import org.tobi29.scapes.engine.utils.io.filesystem.read
 import org.tobi29.scapes.engine.utils.io.process
 import org.tobi29.scapes.engine.utils.io.put
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary
+import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
+import org.tobi29.scapes.engine.utils.io.tag.toMutTag
 import org.tobi29.scapes.plugins.PluginFile
 import org.tobi29.scapes.plugins.Plugins
 import java.io.IOException
@@ -174,9 +174,8 @@ object NewClientConnection {
             throw ConnectionCloseException(channel.inputStream.string)
         }
         val loadingDistanceServer = channel.inputStream.int
-        val idsTag = TagStructure()
-        TagStructureBinary.read(channel.inputStream, idsTag)
-        val idStorage = IDStorage(idsTag)
+        val idsTag = readBinary(channel.inputStream)
+        val idStorage = IDStorage(idsTag.toMutTag())
         val plugins2 = Plugins(plugins.map {
             it ?: throw IllegalStateException("Failed to receive plugin")
         }, idStorage)

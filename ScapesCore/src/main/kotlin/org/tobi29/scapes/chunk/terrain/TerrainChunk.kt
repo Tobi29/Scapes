@@ -15,12 +15,12 @@
  */
 package org.tobi29.scapes.chunk.terrain
 
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 
 interface TerrainChunk {
     val posBlock: Vector3i
     val size: Vector3i
 
-    fun metaData(id: String): TagStructure
+    fun metaData(id: String): MutableTagMap
 }

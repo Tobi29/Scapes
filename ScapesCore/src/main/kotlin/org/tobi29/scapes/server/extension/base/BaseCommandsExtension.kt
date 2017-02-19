@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.server.extension.base
 
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.engine.utils.join
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.ScapesServer
@@ -102,7 +102,7 @@ class BaseCommandsExtensionProvider : ServerExtensionProvider {
     override val name = "Base Commands"
 
     override fun create(server: ScapesServer,
-                        configStructure: TagStructure?): ServerExtension? {
+                        configMap: TagMap?): ServerExtension? {
         return BaseCommandsExtension(server)
     }
 }

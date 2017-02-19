@@ -28,7 +28,9 @@ import org.tobi29.scapes.engine.graphics.BlendingMode
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.utils.forEach
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.mapMut
+import org.tobi29.scapes.engine.utils.io.tag.toBoolean
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.engine.utils.math.max
@@ -51,7 +53,7 @@ class WorldClient(val connection: ClientConnection,
                   seed: Long,
                   terrainSupplier: (WorldClient) -> TerrainClient,
                   environmentSupplier: (WorldClient) -> EnvironmentClient,
-                  playerTag: TagStructure,
+                  playerTag: TagMap,
                   playerID: UUID) : World<EntityClient>(
         connection.plugins, connection.game.engine.taskExecutor,
         connection.plugins.registry(),
@@ -186,8 +188,8 @@ class WorldClient(val connection: ClientConnection,
         val width = gl.sceneWidth()
         val height = gl.sceneHeight()
 
-        val scapesTag = game.engine.tagStructure.getStructure("Scapes")
-        val animations = scapesTag?.getBoolean("Animations") ?: false
+        val scapesTag = game.engine.configMap.mapMut("Scapes")
+        val animations = scapesTag["Animations"]?.toBoolean() ?: false
 
         val shaderTerrain1 = gl.engine.graphics.loadShader(
                 "Scapes:shader/Terrain") {

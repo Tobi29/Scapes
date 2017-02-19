@@ -29,7 +29,9 @@ import org.tobi29.scapes.engine.graphics.Scene
 import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException
-import org.tobi29.scapes.engine.utils.io.tag.getDouble
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.toDouble
+import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.format.WorldSource
@@ -78,8 +80,8 @@ class GameStateLoadSocketSP(private var source: WorldSource?,
             when (step) {
                 0 -> {
                     gui?.setProgress("Creating server...", 0.0)
-                    val tagStructure = engine.tagStructure.structure(
-                            "Scapes").structure("IntegratedServer")
+                    val serverConfigMap = (engine.configMap["Scapes"]?.toMap()?.get(
+                            "IntegratedServer")?.toMap() ?: TagMap())
                     val panorama = source.panorama()
                     val serverInfo: ServerInfo
                     if (panorama != null) {
@@ -96,8 +98,8 @@ class GameStateLoadSocketSP(private var source: WorldSource?,
                         throw UnsupportedJVMException(e)
                     }
 
-                    this.server = ScapesServer(source, tagStructure, serverInfo,
-                            ssl, engine)
+                    this.server = ScapesServer(source, serverConfigMap,
+                            serverInfo, ssl, engine)
                     step++
                 }
                 1 -> {
@@ -139,9 +141,8 @@ class GameStateLoadSocketSP(private var source: WorldSource?,
                                     RemoteAddress(address), channel,
                                     engine.taskExecutor, ssl, true)
                             val loadingRadius = round(
-                                    engine.tagStructure.getStructure(
-                                            "Scapes")?.getDouble(
-                                            "RenderDistance") ?: 0.0) + 16
+                                    engine.configMap["Scapes"]?.toMap()?.get(
+                                            "RenderDistance")?.toDouble() ?: 0.0) + 16
                             val account = Account[engine.home.resolve(
                                     "Account.properties")]
                             val (plugins, loadingDistanceServer) = NewClientConnection.run(

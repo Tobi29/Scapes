@@ -19,9 +19,10 @@ import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.chunk.terrain.selectBlock
 import org.tobi29.scapes.engine.utils.filterMap
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getDouble
-import org.tobi29.scapes.engine.utils.io.tag.setDouble
+import org.tobi29.scapes.engine.utils.io.tag.ReadWriteTagMap
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.set
+import org.tobi29.scapes.engine.utils.io.tag.toDouble
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
@@ -149,17 +150,16 @@ abstract class MobLivingServer(world: WorldServer,
     val isDead: Boolean
         get() = health <= 0
 
-    override fun write(): TagStructure {
-        val tag = super.write()
-        tag.setDouble("Health", health)
-        tag.setDouble("MaxHealth", maxHealth)
-        return tag
+    override fun write(map: ReadWriteTagMap) {
+        super.write(map)
+        map["Health"] = health
+        map["MaxHealth"] = maxHealth
     }
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
-        tagStructure.getDouble("Health")?.let { health = it }
-        tagStructure.getDouble("MaxHealth")?.let { maxHealth = it }
+    override fun read(map: TagMap) {
+        super.read(map)
+        map["Health"]?.toDouble()?.let { health = it }
+        map["MaxHealth"]?.toDouble()?.let { maxHealth = it }
     }
 
     override fun move(delta: Double) {

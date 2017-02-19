@@ -26,8 +26,8 @@ import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.utils.io.tag.getFloat
-import org.tobi29.scapes.engine.utils.io.tag.setFloat
+import org.tobi29.scapes.engine.utils.io.tag.set
+import org.tobi29.scapes.engine.utils.io.tag.toFloat
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobItemServer
@@ -120,11 +120,11 @@ class BlockSand(materials: VanillaMaterial) : BlockSoil(materials,
             return
         }
         var currentTemperature = temperature(item)
-        if (currentTemperature < 1 && temperature < currentTemperature) {
-            item.metaData("Vanilla").setFloat("Temperature", 0.0f)
+        if (currentTemperature < 1.0 && temperature < currentTemperature) {
+            item.metaData("Vanilla")["Temperature"] = 0.0
         } else {
             currentTemperature += (temperature - currentTemperature) / 400.0f
-            item.metaData("Vanilla").setFloat("Temperature", currentTemperature)
+            item.metaData("Vanilla")["Temperature"] = currentTemperature
             if (currentTemperature >= meltingPoint(item)) {
                 if (item.data() == 0) {
                     item.setMaterial(materials.glass)
@@ -140,11 +140,10 @@ class BlockSand(materials: VanillaMaterial) : BlockSoil(materials,
             return
         }
         val currentTemperature = temperature(item)
-        if (currentTemperature < 1) {
-            item.metaData("Vanilla").setFloat("Temperature", 0.0f)
+        if (currentTemperature < 1.0) {
+            item.metaData("Vanilla")["Temperature"] = 0.0
         } else {
-            item.metaData("Vanilla").setFloat("Temperature",
-                    currentTemperature / 1.002f)
+            item.metaData("Vanilla")["Temperature"] = currentTemperature / 1.002
         }
     }
 
@@ -153,15 +152,15 @@ class BlockSand(materials: VanillaMaterial) : BlockSoil(materials,
             return
         }
         val currentTemperature = temperature(item.item())
-        if (currentTemperature < 1) {
-            item.item().metaData("Vanilla").setFloat("Temperature", 0.0f)
+        if (currentTemperature < 1.0) {
+            item.item().metaData("Vanilla")["Temperature"] = 0.0
         } else {
             if (item.isInWater) {
-                item.item().metaData("Vanilla").setFloat("Temperature",
-                        currentTemperature / 4.0f)
+                item.item().metaData(
+                        "Vanilla")["Temperature"] = currentTemperature / 4.0
             } else {
-                item.item().metaData("Vanilla").setFloat("Temperature",
-                        currentTemperature / 1.002f)
+                item.item().metaData(
+                        "Vanilla")["Temperature"] = currentTemperature / 1.002
             }
         }
     }
@@ -178,6 +177,6 @@ class BlockSand(materials: VanillaMaterial) : BlockSoil(materials,
         if (item.data() == 1) {
             return 0.0f
         }
-        return item.metaData("Vanilla").getFloat("Temperature") ?: 0.0f
+        return item.metaData("Vanilla")["Temperature"]?.toFloat() ?: 0.0f
     }
 }

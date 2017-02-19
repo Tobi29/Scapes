@@ -20,8 +20,7 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.ListenerOwner
 import org.tobi29.scapes.engine.utils.ListenerOwnerHandle
-import org.tobi29.scapes.engine.utils.io.tag.MultiTag
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.Entity
@@ -31,14 +30,14 @@ import org.tobi29.scapes.packets.PacketEntityMetaData
 import java.util.*
 
 open class EntityClient(val world: WorldClient,
-                        pos: Vector3d) : Entity, MultiTag.Readable, ListenerOwner {
+                        pos: Vector3d) : Entity, ListenerOwner {
     protected val registry: GameRegistry
     protected val pos: MutableVector3d
     override val listenerOwner = ListenerOwnerHandle {
         !world.disposed() && world.hasEntity(this)
     }
     protected var uuid: UUID = UUID.randomUUID()
-    protected var metaData = TagStructure()
+    protected var metaData = MutableTagMap()
 
     init {
         registry = world.registry
@@ -61,14 +60,12 @@ open class EntityClient(val world: WorldClient,
         return world
     }
 
-    override fun read(tagStructure: TagStructure) {
-        tagStructure.getMultiTag("Pos", pos)
-        tagStructure.getStructure("MetaData")?.let { metaData = it }
+    open fun read(map: TagMap) {
+        map["Pos"]?.toMap()?.let { pos.set(it) }
+        map["MetaData"]?.toMap()?.let { metaData = it.toMutTag() }
     }
 
-    fun metaData(category: String): TagStructure {
-        return metaData.structure(category)
-    }
+    fun metaData(category: String) = metaData.mapMut(category)
 
     open fun update(delta: Double) {
     }
@@ -78,7 +75,7 @@ open class EntityClient(val world: WorldClient,
     }
 
     fun processPacket(packet: PacketEntityMetaData) {
-        metaData.setStructure(packet.category(), packet.tagStructure())
+        metaData[packet.category] = packet.tag
     }
 
     companion object {

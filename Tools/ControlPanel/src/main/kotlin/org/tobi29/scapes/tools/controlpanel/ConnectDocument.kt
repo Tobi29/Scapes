@@ -29,7 +29,8 @@ import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
 import org.tobi29.scapes.engine.utils.filterMap
-import org.tobi29.scapes.engine.utils.io.tag.structure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.toList
 import org.tobi29.scapes.engine.utils.toArray
 import java.io.IOException
 import java.nio.channels.SelectionKey
@@ -74,7 +75,7 @@ class ConnectDocument(private val address: RemoteAddress,
                 try {
                     controlPanel.addCommand("Commands-Send") { payload ->
                         application.accessAsync(document) { composite ->
-                            payload.getList("Commands")?.let {
+                            payload["Commands"]?.toList()?.let {
                                 val commands = it.asSequence().filterMap<String>().toArray()
                                 document = ControlPanelDocument(address,
                                         controlPanel, commands,
@@ -83,7 +84,7 @@ class ConnectDocument(private val address: RemoteAddress,
                             }
                         }
                     }
-                    controlPanel.send("Commands-List", structure {})
+                    controlPanel.send("Commands-List", TagMap())
                     controlPanel.disconnectHook { e ->
                         application.accessAsync(document) { composite ->
                             if (application.message(composite,

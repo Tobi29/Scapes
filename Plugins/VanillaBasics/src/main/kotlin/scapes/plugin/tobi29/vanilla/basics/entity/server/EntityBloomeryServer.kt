@@ -19,7 +19,10 @@ package scapes.plugin.tobi29.vanilla.basics.entity.server
 import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.ReadWriteTagMap
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.set
+import org.tobi29.scapes.engine.utils.io.tag.toBoolean
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
@@ -32,15 +35,14 @@ class EntityBloomeryServer(world: WorldServer,
         50) {
     private var hasBellows = false
 
-    override fun write(): TagStructure {
-        val tag = super.write()
-        tag.setBoolean("Bellows", hasBellows)
-        return tag
+    override fun write(map: ReadWriteTagMap) {
+        super.write(map)
+        map["Bellows"] = hasBellows
     }
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
-        hasBellows = tagStructure.getBoolean("Bellows") ?: false
+    override fun read(map: TagMap) {
+        super.read(map)
+        hasBellows = map["Bellows"]?.toBoolean() ?: false
         maximumTemperature = if (hasBellows) Float.POSITIVE_INFINITY else 600.0f
     }
 

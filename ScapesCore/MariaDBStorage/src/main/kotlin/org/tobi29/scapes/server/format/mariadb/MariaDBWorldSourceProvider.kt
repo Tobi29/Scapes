@@ -17,11 +17,10 @@
 package org.tobi29.scapes.server.format.mariadb
 
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.format.spi.WorldSourceProvider
-
 import java.io.IOException
 
 class MariaDBWorldSourceProvider : WorldSourceProvider {
@@ -35,11 +34,11 @@ class MariaDBWorldSourceProvider : WorldSourceProvider {
 
     @Throws(IOException::class)
     override fun get(path: FilePath,
-                     config: TagStructure,
+                     configMap: TagMap,
                      taskExecutor: TaskExecutor): WorldSource {
-        val url = config.getString("URL") ?: ""
-        val user = config.getString("User") ?: ""
-        val password = config.getString("Password") ?: ""
+        val url = configMap["URL"].toString()
+        val user = configMap["User"].toString()
+        val password = configMap["Password"].toString()
         return MariaDBWorldSource(path, url, user, password)
     }
 }

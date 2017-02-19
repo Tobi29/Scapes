@@ -25,7 +25,9 @@ import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
 import org.tobi29.scapes.engine.sound.StaticAudio
 import org.tobi29.scapes.engine.utils.chain
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.io.tag.getDouble
+import org.tobi29.scapes.engine.utils.io.tag.map
+import org.tobi29.scapes.engine.utils.io.tag.toBoolean
+import org.tobi29.scapes.engine.utils.io.tag.toDouble
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.plus
@@ -242,14 +244,25 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                         pos.intZ()))
         weatherDebug?.setValue(weather)
         biomeDebug?.setValue(biomeGenerator[pos.x, pos.y])
-        val conditionTag = player.metaData("Vanilla").structure("Condition")
-        conditionTag.getDouble("Stamina")?.let { staminaDebug?.setValue(it) }
-        conditionTag.getDouble("Wake")?.let { wakeDebug?.setValue(it) }
-        conditionTag.getDouble("Hunger")?.let { hungerDebug?.setValue(it) }
-        conditionTag.getDouble("Thirst")?.let { thirstDebug?.setValue(it) }
-        conditionTag.getDouble(
-                "BodyTemperature")?.let { bodyTemperatureDebug?.setValue(it) }
-        conditionTag.getBoolean("Sleeping")?.let { sleepingDebug?.setValue(it) }
+        val conditionTag = player.metaData("Vanilla").map("Condition")
+        conditionTag?.get("Stamina")?.toDouble()?.let {
+            staminaDebug?.setValue(it)
+        }
+        conditionTag?.get("Wake")?.toDouble()?.let {
+            wakeDebug?.setValue(it)
+        }
+        conditionTag?.get("Hunger")?.toDouble()?.let {
+            hungerDebug?.setValue(it)
+        }
+        conditionTag?.get("Thirst")?.toDouble()?.let {
+            thirstDebug?.setValue(it)
+        }
+        conditionTag?.get("BodyTemperature")?.toDouble()?.let {
+            bodyTemperatureDebug?.setValue(it)
+        }
+        conditionTag?.get("Sleeping")?.toBoolean()?.let {
+            sleepingDebug?.setValue(it)
+        }
         exposureDebug?.setValue(exposure)
     }
 
@@ -323,9 +336,9 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
             fogB = mix(0.2f, 0.9f * skyLight * fogBrightness, sunsetLight)
             fogDistance = 1.0f
         }
-        val conditionTag = world.player.metaData("Vanilla").structure(
-                "Condition")
-        val temperature = conditionTag.getDouble("BodyTemperature") ?: 0.0
+        val conditionTag = world.player.metaData("Vanilla").map("Condition")
+        val temperature = conditionTag?.get(
+                "BodyTemperature")?.toDouble() ?: 0.0
         val heatstroke = max((temperature - 37.1) * 7.5, 0.0) + 1.0
         exposure += (heatstroke * 0.3 - exposure) * factor
     }

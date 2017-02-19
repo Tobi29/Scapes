@@ -23,8 +23,9 @@ import org.tobi29.scapes.connection.ServerInfo
 import org.tobi29.scapes.engine.server.SSLHandle
 import org.tobi29.scapes.engine.utils.Crashable
 import org.tobi29.scapes.engine.utils.EventDispatcher
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getInt
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.toInt
+import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.plugins.Dimension
@@ -39,7 +40,7 @@ import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 
 class ScapesServer(source: WorldSource,
-                   tagStructure: TagStructure,
+                   configMap: TagMap,
                    val serverInfo: ServerInfo,
                    ssl: SSLHandle,
                    crashHandler: Crashable) {
@@ -64,14 +65,14 @@ class ScapesServer(source: WorldSource,
         plugins = format.plugins()
         seed = format.seed()
         extensions = ServerExtensions(this)
-        extensions.loadExtensions(tagStructure.structure("Extension"))
+        extensions.loadExtensions(configMap["Extension"]?.toMap())
         taskExecutor = TaskExecutor(crashHandler, "Server")
         commandRegistry = CommandRegistry()
-        val serverTag = tagStructure.structure("Server")
-        val socketTag = serverTag.structure("Socket")
-        maxLoadingRadius = serverTag.getInt("MaxLoadingRadius") ?: 0
+        val serverTag = configMap["Server"]?.toMap()
+        val socketTag = serverTag?.get("Socket")?.toMap() ?: TagMap()
+        maxLoadingRadius = serverTag?.get("MaxLoadingRadius")?.toInt() ?: 0
         connection = ServerConnection(this, socketTag, ssl)
-        connection.workers(socketTag.getInt("WorkerCount") ?: 1)
+        connection.workers(socketTag["WorkerCount"]?.toInt() ?: 1)
         extensions.init()
         format.plugins().init()
         format.plugins().plugins.forEach { it.initServer(this) }

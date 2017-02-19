@@ -19,8 +19,9 @@ package scapes.plugin.tobi29.vanilla.basics.entity.client
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getDouble
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.toDouble
+import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.client.MobClient
@@ -41,10 +42,10 @@ class MobBombClient(world: WorldClient,
         item = ItemStack(type, data)
     }
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
-        tagStructure.getStructure("Block")?.let { item.load(it) }
-        tagStructure.getDouble("Time")?.let { time = it }
+    override fun read(map: TagMap) {
+        super.read(map)
+        map["Block"]?.toMap()?.let { item.read(it) }
+        map["Time"]?.toDouble()?.let { time = it }
     }
 
     override fun createModel(): MobModelBlock? {

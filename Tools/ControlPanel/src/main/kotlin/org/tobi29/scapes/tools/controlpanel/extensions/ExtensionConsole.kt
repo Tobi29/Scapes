@@ -21,7 +21,8 @@ import org.eclipse.swt.layout.FillLayout
 import org.eclipse.swt.widgets.Group
 import org.tobi29.scapes.engine.server.ControlPanelProtocol
 import org.tobi29.scapes.engine.swt.util.framework.Application
-import org.tobi29.scapes.engine.utils.io.tag.structure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.set
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConsole
 
@@ -41,7 +42,9 @@ class ExtensionConsole(application: Application,
                 if (console.isDisposed) {
                     return@accessAsync
                 }
-                payload.getString("Message")?.let { console.console.append(it) }
+                payload["Message"]?.toString()?.let {
+                    console.console.append(it)
+                }
             }
         }
         console.input.addListener(SWT.DefaultSelection) {
@@ -50,8 +53,8 @@ class ExtensionConsole(application: Application,
     }
 
     fun consoleCommandLineReturn() {
-        connection.send("Command", structure {
-            setString("Command", console.input.text)
+        connection.send("Command", TagMap {
+            this["Command"] = console.input.text
         })
         console.input.text = ""
     }

@@ -18,6 +18,10 @@ package scapes.plugin.tobi29.vanilla.basics.packet
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
+import org.tobi29.scapes.engine.utils.io.tag.map
+import org.tobi29.scapes.engine.utils.io.tag.mapMut
+import org.tobi29.scapes.engine.utils.io.tag.set
+import org.tobi29.scapes.engine.utils.io.tag.toBoolean
 import org.tobi29.scapes.packets.PacketAbstract
 import org.tobi29.scapes.packets.PacketEntityMetaData
 import org.tobi29.scapes.packets.PacketServer
@@ -61,33 +65,29 @@ class PacketResearch : PacketAbstract, PacketServer {
                             val material = item.material()
                             if (material is ItemResearch) {
                                 for (identifier in material.identifiers(item)) {
-                                    mob.metaData("Vanilla").structure(
-                                            "Research").structure(
-                                            "Items").setBoolean(identifier,
-                                            true)
+                                    mob.metaData("Vanilla").mapMut(
+                                            "Research").mapMut(
+                                            "Items")[identifier] = true
                                 }
                             } else {
-                                mob.metaData("Vanilla").structure(
-                                        "Research").structure(
-                                        "Items").setBoolean(Integer.toHexString(
-                                        material.itemID()),
-                                        true)
+                                mob.metaData("Vanilla").mapMut(
+                                        "Research").mapMut(
+                                        "Items")[Integer.toHexString(
+                                        material.itemID())] = true
                             }
                             plugin.researchRecipes.forEach { recipe ->
-                                if (!(mob.metaData("Vanilla").structure(
-                                        "Research").structure(
-                                        "Finished").getBoolean(
-                                        recipe.name) ?: false)) {
+                                if (!(mob.metaData("Vanilla").map(
+                                        "Research")?.map(
+                                        "Finished")?.get(
+                                        recipe.name)?.toBoolean() ?: false)) {
                                     if (!recipe.items.filter { requirement ->
-                                        !(mob.metaData("Vanilla").structure(
-                                                "Research").structure(
-                                                "Items").getBoolean(
-                                                requirement) ?: false)
+                                        !(mob.metaData("Vanilla").map(
+                                                "Research")?.map("Items")?.get(
+                                                requirement)?.toBoolean() ?: false)
                                     }.any()) {
-                                        mob.metaData("Vanilla").structure(
-                                                "Research").structure(
-                                                "Finished").setBoolean(
-                                                recipe.name, true)
+                                        mob.metaData("Vanilla").mapMut(
+                                                "Research").mapMut(
+                                                "Finished")[recipe.name] = true
                                         mob.world.send(PacketEntityMetaData(
                                                 mob, "Vanilla"))
                                         player.send(

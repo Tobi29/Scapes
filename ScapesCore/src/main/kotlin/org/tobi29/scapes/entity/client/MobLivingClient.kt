@@ -18,8 +18,8 @@ package org.tobi29.scapes.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.terrain.selectBlock
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getDouble
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.toDouble
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.*
 import org.tobi29.scapes.entity.CreatureType
@@ -69,10 +69,10 @@ abstract class MobLivingClient(world: WorldClient,
         return null
     }
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
-        tagStructure.getDouble("Health")?.let { health = it }
-        tagStructure.getDouble("MaxHealth")?.let { maxHealth = it }
+    override fun read(map: TagMap) {
+        super.read(map)
+        map["Health"]?.toDouble()?.let { health = it }
+        map["MaxHealth"]?.toDouble()?.let { maxHealth = it }
     }
 
     override fun move(delta: Double) {

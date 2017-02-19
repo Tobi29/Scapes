@@ -16,9 +16,7 @@
 
 package scapes.plugin.tobi29.vanilla.basics.util
 
-import org.tobi29.scapes.engine.utils.forEach
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.setDouble
+import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.engine.utils.reduceOrNull
@@ -27,21 +25,18 @@ import scapes.plugin.tobi29.vanilla.basics.material.AlloyType
 import scapes.plugin.tobi29.vanilla.basics.material.MetalType
 import java.util.concurrent.ConcurrentHashMap
 
-fun read(plugin: VanillaBasics,
-         tagStructure: TagStructure): Alloy {
+fun readAlloy(plugin: VanillaBasics,
+              map: TagMap): Alloy {
     val alloy = Alloy()
-    tagStructure.tagEntrySet.forEach({ it.value is Number }) {
-        alloy.add(plugin.metalType(it.key), it.value as Double)
+    map.asSequence().filter { (_, value) -> value is TagNumber }.forEach { (key, value) ->
+        alloy.add(plugin.metalType(key), (value as TagNumber).toDouble())
     }
     return alloy
 }
 
-fun write(alloy: Alloy): TagStructure {
-    val tagStructure = TagStructure()
-    alloy.metals.forEach { entry ->
-        tagStructure.setDouble(entry.key.id(), entry.value)
-    }
-    return tagStructure
+fun writeAlloy(alloy: Alloy,
+               map: ReadWriteTagMap) {
+    alloy.metals.forEach { (key, value) -> map[key.id()] = value }
 }
 
 class Alloy {

@@ -32,7 +32,10 @@ import org.tobi29.scapes.engine.input.*
 import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath
 import org.tobi29.scapes.engine.utils.io.filesystem.createDirectories
-import org.tobi29.scapes.engine.utils.io.tag.*
+import org.tobi29.scapes.engine.utils.io.tag.MutableTagMap
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.mapMut
+import org.tobi29.scapes.engine.utils.io.tag.set
 import org.tobi29.scapes.engine.utils.readOnly
 import java.io.IOException
 import java.util.*
@@ -86,34 +89,32 @@ class ScapesClient(engine: ScapesEngine,
     }
 
     override fun initLate() {
-        val tagStructure = engine.tagStructure
-        if (!tagStructure.has("Scapes")) {
-            tagStructure.setStructure("Scapes", structure {
+        if (!engine.configMap.containsKey("Scapes")) {
+            engine.configMap["Scapes"] = TagMap {
                 val lightDefaults = engine.container.formFactor() == Container.FormFactor.PHONE
                 if (lightDefaults) {
-                    setBoolean("Animations", false)
-                    setBoolean("Bloom", false)
-                    setBoolean("AutoExposure", false)
-                    setBoolean("FXAA", false)
-                    setDouble("RenderDistance", 64.0)
+                    this["Animations"] = false
+                    this["Bloom"] = false
+                    this["AutoExposure"] = false
+                    this["FXAA"] = false
+                    this["RenderDistance"] = 64.0
                 } else {
-                    setBoolean("Animations", true)
-                    setBoolean("Bloom", true)
-                    setBoolean("AutoExposure", true)
-                    setBoolean("FXAA", true)
-                    setDouble("RenderDistance", 128.0)
+                    this["Animations"] = true
+                    this["Bloom"] = true
+                    this["AutoExposure"] = true
+                    this["FXAA"] = true
+                    this["RenderDistance"] = 128.0
                 }
-                setStructure("IntegratedServer") {
-                    setStructure("Server") {
-                        setInt("MaxLoadingRadius", 288)
-                        setStructure("Socket") {
-                            setInt("MaxPlayers", 5)
-                            setInt("WorkerCount", 1)
-                            setInt("RSASize", 1024)
+                this["IntegratedServer"] = TagMap {
+                    this["Server"] = TagMap {
+                        this["MaxLoadingRadius"] = 288
+                        this["Socket"] = TagMap {
+                            this["MaxPlayers"] = 5
+                            this["WorkerCount"] = 1
                         }
                     }
                 }
-            })
+            }
         }
         loadInput()
     }
@@ -146,22 +147,21 @@ class ScapesClient(engine: ScapesEngine,
 
     fun loadInput() {
         logger.info { "Loading input" }
-        val tagStructure = engine.tagStructure.structure("Scapes").structure(
-                "Input")
+        val configMap = engine.configMap.mapMut("Scapes").mapMut("Input")
         inputModesMut.clear()
         val controller = engine.container.controller()
         if (controller != null) {
             loadService(engine, controller,
-                    tagStructure)?.let { inputModesMut.add(it) }
+                    configMap)?.let { inputModesMut.add(it) }
         }
         val touch = engine.container.touch()
         if (touch != null) {
-            loadService(engine, touch, tagStructure)?.let {
+            loadService(engine, touch, configMap)?.let {
                 inputModesMut.add(it)
             }
         }
         for (joystick in engine.container.joysticks()) {
-            loadService(engine, joystick, tagStructure)?.let {
+            loadService(engine, joystick, configMap)?.let {
                 inputModesMut.add(it)
             }
         }
@@ -184,11 +184,11 @@ class ScapesClient(engine: ScapesEngine,
     companion object : KLogging() {
         private fun loadService(engine: ScapesEngine,
                                 controller: Controller,
-                                tagStructure: TagStructure): InputMode? {
+                                configMap: MutableTagMap): InputMode? {
             for (provider in ServiceLoader.load(
                     InputModeProvider::class.java)) {
                 try {
-                    val inputMode = provider[engine, controller, tagStructure]
+                    val inputMode = provider.get(engine, controller, configMap)
                     if (inputMode != null) {
                         logger.debug { "Loaded input mode: ${provider.javaClass.name}" }
                         return inputMode
@@ -198,9 +198,9 @@ class ScapesClient(engine: ScapesEngine,
                 }
             }
             if (controller is ControllerDefault) {
-                return InputModeKeyboard(engine, controller, tagStructure)
+                return InputModeKeyboard(engine, controller, configMap)
             } else if (controller is ControllerJoystick) {
-                return InputModeGamepad(engine, controller, tagStructure)
+                return InputModeGamepad(engine, controller, configMap)
             } else if (controller is ControllerTouch) {
                 return InputModeTouch(engine, controller)
             }

@@ -17,8 +17,7 @@
 package scapes.plugin.tobi29.vanilla.basics.util
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.io.tag.setDouble
-import org.tobi29.scapes.engine.utils.io.tag.setInt
+import org.tobi29.scapes.engine.utils.io.tag.set
 import scapes.plugin.tobi29.vanilla.basics.VanillaBasics
 import scapes.plugin.tobi29.vanilla.basics.material.item.ItemIngot
 
@@ -71,10 +70,10 @@ fun createTool(plugin: VanillaBasics,
         }
         else -> return false
     }
-    item.metaData("Vanilla").setDouble("ToolEfficiency", efficiency)
-    item.metaData("Vanilla").setDouble("ToolStrength", strength)
-    item.metaData("Vanilla").setDouble("ToolDamageAdd", damage)
-    item.metaData("Vanilla").setInt("ToolLevel", level)
+    item.metaData("Vanilla")["ToolEfficiency"] = efficiency
+    item.metaData("Vanilla")["ToolStrength"] = strength
+    item.metaData("Vanilla")["ToolDamageAdd"] = damage
+    item.metaData("Vanilla")["ToolLevel"] = level
     return true
 }
 
@@ -124,10 +123,10 @@ fun createStoneTool(plugin: VanillaBasics,
         }
         else -> return false
     }
-    item.metaData("Vanilla").setDouble("ToolEfficiency", efficiency)
-    item.metaData("Vanilla").setDouble("ToolStrength", strength)
-    item.metaData("Vanilla").setDouble("ToolDamageAdd", damage)
-    item.metaData("Vanilla").setInt("ToolLevel", level)
+    item.metaData("Vanilla")["ToolEfficiency"] = efficiency
+    item.metaData("Vanilla")["ToolStrength"] = strength
+    item.metaData("Vanilla")["ToolDamageAdd"] = damage
+    item.metaData("Vanilla")["ToolLevel"] = level
     return true
 }
 

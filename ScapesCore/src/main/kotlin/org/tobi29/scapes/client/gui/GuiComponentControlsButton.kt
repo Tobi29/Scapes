@@ -23,14 +23,15 @@ import org.tobi29.scapes.engine.gui.GuiLayoutData
 import org.tobi29.scapes.engine.input.ControllerBasic
 import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.engine.input.ControllerKeyReference
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.MutableTagMap
+import org.tobi29.scapes.engine.utils.io.tag.set
 import java.util.*
 
 class GuiComponentControlsButton(parent: GuiLayoutData,
                                  textSize: Int,
                                  private val name: String,
                                  private val id: String,
-                                 private val tagStructure: TagStructure,
+                                 private val tagMap: MutableTagMap,
                                  private val controller: ControllerBasic) : GuiComponentButtonHeavy(
         parent) {
     private val text: GuiComponentText
@@ -41,7 +42,7 @@ class GuiComponentControlsButton(parent: GuiLayoutData,
     init {
         text = addSubHori(4.0, 0.0, -1.0,
                 textSize.toDouble()) { GuiComponentText(it, "") }
-        key = ControllerKeyReference.valueOf(tagStructure.getString(id))
+        key = ControllerKeyReference.valueOf(tagMap[id].toString())
         on(GuiEvent.CLICK_LEFT) { event ->
             if (editing.toInt() == 0) {
                 editing = 1
@@ -89,7 +90,7 @@ class GuiComponentControlsButton(parent: GuiLayoutData,
                     .firstOrNull()
             if (keyEvent != null && !keys.isEmpty()) {
                 key = ControllerKeyReference(keys)
-                tagStructure.setString(id, key.toString())
+                tagMap[id] = key.toString()
                 editing = 0
                 keys.clear()
             }

@@ -21,7 +21,8 @@ import org.tobi29.scapes.block.InventoryContainer
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.gui.Gui
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.WieldMode
@@ -83,11 +84,13 @@ class MobPlayerClientVB constructor(world: WorldClient,
         return MobLivingModelHuman(world.game.modelHumanShared(), this, texture)
     }
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
-        tagStructure.getStructure("Inventory")?.let { inventoryTag ->
+    override fun read(map: TagMap) {
+        super.read(map)
+        map["Inventory"]?.toMap()?.let { inventoryTag ->
             inventories.forEach { id, inventory ->
-                inventoryTag.getStructure(id)?.let { inventory.load(it) }
+                inventoryTag[id]?.toMap()?.let {
+                    inventory.read(it)
+                }
             }
         }
     }

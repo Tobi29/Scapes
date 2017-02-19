@@ -22,9 +22,10 @@ import org.eclipse.swt.widgets.Group
 import org.tobi29.scapes.engine.server.ControlPanelProtocol
 import org.tobi29.scapes.engine.swt.util.framework.Application
 import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
-import org.tobi29.scapes.engine.utils.filterMap
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.structure
+import org.tobi29.scapes.engine.utils.io.tag.Tag
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.toList
+import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelPlayers
@@ -43,16 +44,17 @@ class ExtensionPlayers(application: Application,
                 if (players.isDisposed) {
                     return@accessAsync
                 }
-                payload.getList("Players")?.let {
-                    players.items = it.asSequence().filterMap<TagStructure>().mapNotNull {
-                        it.getString("Name")
+                payload["Players"]?.toList()?.let {
+                    players.items = it.asSequence().mapNotNull(
+                            Tag::toMap).mapNotNull {
+                        it["Name"]?.toString()
                     }.toArray()
                 }
             }
         }
         application.taskExecutor.addTask({
             players.ifPresent {
-                connection.send("Players:List", structure {})
+                connection.send("Players:List", TagMap())
                 return@addTask 1000
             }
             -1

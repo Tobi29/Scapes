@@ -21,40 +21,36 @@ import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteClient
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
+import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
 import org.tobi29.scapes.server.connection.PlayerConnection
 
 class PacketSendChunk : PacketAbstract, PacketClient {
     private var x = 0
     private var y = 0
-    private lateinit var tag: TagStructure
+    private lateinit var tag: TagMap
 
     constructor()
 
     constructor(chunk: TerrainInfiniteChunkServer) {
         x = chunk.pos.x
         y = chunk.pos.y
-        tag = chunk.save(true)
+        tag = TagMap { chunk.write(this, true) }
     }
 
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {
         stream.putInt(x)
         stream.putInt(y)
-        TagStructureBinary.write(stream, tag)
+        tag.writeBinary(stream)
     }
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
         x = stream.int
         y = stream.int
-        tag = TagStructure()
-        TagStructureBinary.read(stream, tag)
-    }
-
-    override fun localClient() {
-        tag = tag.copy()
+        tag = readBinary(stream)
     }
 
     override fun runClient(client: ClientConnection) {
@@ -68,7 +64,7 @@ class PacketSendChunk : PacketAbstract, PacketClient {
                     if (chunk.isLoaded) {
                         logger.warn { "Chunk received twice: $x/$y" }
                     }
-                    chunk.load(tag)
+                    chunk.read(tag)
                     chunk.setLoaded()
                     chunk.resetRequest()
                     for (x in -1..1) {

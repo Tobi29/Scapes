@@ -17,7 +17,8 @@
 package org.tobi29.scapes.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
@@ -64,12 +65,12 @@ abstract class MobClient(world: WorldClient,
         return aabb
     }
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
+    override fun read(map: TagMap) {
+        super.read(map)
         positionReceiver.receiveMoveAbsolute(pos.doubleX(), pos.doubleY(),
                 pos.doubleZ())
-        tagStructure.getMultiTag("Speed", speed)
-        tagStructure.getMultiTag("Rot", rot)
+        map["Speed"]?.toMap()?.let { speed.set(it) }
+        map["Rot"]?.toMap()?.let { rot.set(it) }
     }
 
     override fun createModel(): MobModel? {

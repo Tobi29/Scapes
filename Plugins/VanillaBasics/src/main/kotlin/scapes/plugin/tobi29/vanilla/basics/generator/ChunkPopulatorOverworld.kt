@@ -22,6 +22,7 @@ import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.ceil
 import org.tobi29.scapes.engine.utils.math.clamp
+import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.noise.layer.*
 import scapes.plugin.tobi29.vanilla.basics.VanillaBasics
 import scapes.plugin.tobi29.vanilla.basics.generator.decorator.BiomeDecorator
@@ -72,7 +73,8 @@ class ChunkPopulatorOverworld(world: WorldServer,
             }
             val xx = x + (dx shr 1)
             val yy = y + (dy shr 1)
-            val zz = random.nextInt(terrain.highestTerrainBlockZAt(xx, yy) - 8)
+            val zz = random.nextInt(
+                    max(terrain.highestTerrainBlockZAt(xx, yy) - 8, 1))
             val block = terrain.block(xx, yy, zz)
             val type = terrain.type(block)
             val data = terrain.data(block)

@@ -29,6 +29,8 @@ import org.tobi29.scapes.engine.utils.chain
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurOffset
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurWeight
+import org.tobi29.scapes.engine.utils.io.tag.toBoolean
+import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.engine.utils.join
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
@@ -98,10 +100,10 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
     override fun appendToPipeline(gl: GL): () -> Unit {
         val width = gl.sceneWidth()
         val height = gl.sceneHeight()
-        val scapesTag = world.game.engine.tagStructure.getStructure("Scapes")
-        val fxaa = scapesTag?.getBoolean("FXAA") ?: false
-        val bloom = scapesTag?.getBoolean("Bloom") ?: false
-        val exposure = scapesTag?.getBoolean("AutoExposure") ?: false
+        val scapesTag = world.game.engine.configMap["Scapes"]?.toMap()
+        val fxaa = scapesTag?.get("FXAA")?.toBoolean() ?: false
+        val bloom = scapesTag?.get("Bloom")?.toBoolean() ?: false
+        val exposure = scapesTag?.get("AutoExposure")?.toBoolean() ?: false
 
         val sceneBuffer = gl.engine.graphics.createFramebuffer(
                 gl.sceneWidth(), gl.sceneHeight(), 1, true, true, false,

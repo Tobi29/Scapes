@@ -30,19 +30,17 @@ import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.engine.input.ControllerKeyReference
 import org.tobi29.scapes.engine.utils.EventDispatcher
 import org.tobi29.scapes.engine.utils.ListenerOwnerHandle
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getDouble
-import org.tobi29.scapes.engine.utils.io.tag.setDouble
+import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.engine.utils.math.vector.times
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 
 class InputModeKeyboard(engine: ScapesEngine,
                         private val controller: ControllerDefault,
-                        tagStructure: TagStructure) : InputMode {
+                        configMap: MutableTagMap) : InputMode {
     override val events = EventDispatcher()
     override val listenerOwner = ListenerOwnerHandle()
-    private val tagStructure: TagStructure
+    private val tagMap: MutableTagMap
     private val guiController: GuiControllerMouse
     private val walkForward: ControllerKeyReference
     private val walkBackward: ControllerKeyReference
@@ -56,55 +54,55 @@ class InputModeKeyboard(engine: ScapesEngine,
     override val requiresCameraSmoothing get() = false
 
     init {
-        this.tagStructure = tagStructure.structure("Default")
-        defaultConfig(this.tagStructure)
+        tagMap = configMap.mapMut("Default")
+        defaultConfig(tagMap)
 
-        val miscTag = this.tagStructure.structure("Misc")
-        val miscScrollTag = miscTag.structure("Scroll")
-        val scrollSensitivity = miscScrollTag.getDouble("Sensitivity") ?: 0.0
+        val miscTag = tagMap.mapMut("Misc")
+        val miscScrollTag = miscTag.mapMut("Scroll")
+        val scrollSensitivity = miscScrollTag["Sensitivity"]?.toDouble() ?: 0.0
 
         guiController = GuiControllerMouse(engine, controller,
                 scrollSensitivity)
 
-        val movementTag = this.tagStructure.getStructure("Movement")
+        val movementTag = tagMap.mapMut("Movement")
         walkForward = ControllerKeyReference.valueOf(
-                movementTag?.getString("Forward"))
+                movementTag["Forward"].toString())
         walkBackward = ControllerKeyReference.valueOf(
-                movementTag?.getString("Backward"))
+                movementTag["Backward"].toString())
         walkLeft = ControllerKeyReference.valueOf(
-                movementTag?.getString("Left"))
+                movementTag["Left"].toString())
         walkRight = ControllerKeyReference.valueOf(
-                movementTag?.getString("Right"))
+                movementTag["Right"].toString())
         walkSprint = ControllerKeyReference.valueOf(
-                movementTag?.getString("Sprint"))
+                movementTag["Sprint"].toString())
         jump = ControllerKeyReference.valueOf(
-                movementTag?.getString("Jump"))
+                movementTag["Jump"].toString())
 
-        val cameraTag = this.tagStructure.getStructure("Camera")
-        val cameraSensitivity = cameraTag?.getDouble("Sensitivity") ?: 0.0
+        val cameraTag = tagMap.mapMut("Camera")
+        val cameraSensitivity = cameraTag["Sensitivity"]?.toDouble() ?: 0.0
 
-        val actionTag = this.tagStructure.getStructure("Action")
-        left = ControllerKeyReference.valueOf(actionTag?.getString("Left"))
+        val actionTag = tagMap.mapMut("Action")
+        left = ControllerKeyReference.valueOf(actionTag["Left"].toString())
         right = ControllerKeyReference.valueOf(
-                actionTag?.getString("Right"))
+                actionTag["Right"].toString())
 
-        val menuTag = this.tagStructure.getStructure("Menu")
+        val menuTag = tagMap.mapMut("Menu")
         val inventory = ControllerKeyReference.valueOf(
-                menuTag?.getString("Inventory"))
-        val menu = ControllerKeyReference.valueOf(menuTag?.getString("Menu"))
-        val chat = ControllerKeyReference.valueOf(menuTag?.getString("Chat"))
+                menuTag["Inventory"].toString())
+        val menu = ControllerKeyReference.valueOf(menuTag["Menu"].toString())
+        val chat = ControllerKeyReference.valueOf(menuTag["Chat"].toString())
 
-        val hotbarTag = this.tagStructure.getStructure("Hotbar")
+        val hotbarTag = tagMap.mapMut("Hotbar")
         val hotbarAdd = ControllerKeyReference.valueOf(
-                hotbarTag?.getString("Add"))
+                hotbarTag["Add"].toString())
         val hotbarSubtract = ControllerKeyReference.valueOf(
-                hotbarTag?.getString("Subtract"))
+                hotbarTag["Subtract"].toString())
         val hotbarLeft = ControllerKeyReference.valueOf(
-                hotbarTag?.getString("Left"))
+                hotbarTag["Left"].toString())
         val hotbarBoth = ControllerKeyReference.valueOf(
-                hotbarTag?.getString("Both"))
+                hotbarTag["Both"].toString())
         val hotbar = Array(10) {
-            ControllerKeyReference.valueOf(hotbarTag?.getString("$it"))
+            ControllerKeyReference.valueOf(hotbarTag["$it"].toString())
         }
 
         controller.events.listener<ControllerDefault.MouseDeltaSyncEvent>(
@@ -173,8 +171,8 @@ class InputModeKeyboard(engine: ScapesEngine,
         }
     }
 
-    private fun defaultConfig(tagStructure: TagStructure) {
-        val movementTag = tagStructure.structure("Movement")
+    private fun defaultConfig(tagMap: MutableTagMap) {
+        val movementTag = tagMap.mapMut("Movement")
         check("Forward", ControllerKey.KEY_W, movementTag)
         check("Backward", ControllerKey.KEY_S, movementTag)
         check("Left", ControllerKey.KEY_A, movementTag)
@@ -182,19 +180,19 @@ class InputModeKeyboard(engine: ScapesEngine,
         check("Sprint", ControllerKey.KEY_LEFT_SHIFT, movementTag)
         check("Jump", ControllerKey.KEY_SPACE, movementTag)
 
-        val cameraTag = tagStructure.structure("Camera")
+        val cameraTag = tagMap.mapMut("Camera")
         check("Sensitivity", 0.6, cameraTag)
 
-        val actionTag = tagStructure.structure("Action")
+        val actionTag = tagMap.mapMut("Action")
         check("Left", ControllerKey.BUTTON_LEFT, actionTag)
         check("Right", ControllerKey.BUTTON_RIGHT, actionTag)
 
-        val menuTag = tagStructure.structure("Menu")
+        val menuTag = tagMap.mapMut("Menu")
         check("Inventory", ControllerKey.KEY_E, menuTag)
         check("Chat", ControllerKey.KEY_R, menuTag)
         check("Menu", ControllerKey.KEY_ESCAPE, menuTag)
 
-        val hotbarTag = tagStructure.structure("Hotbar")
+        val hotbarTag = tagMap.mapMut("Hotbar")
         check("Add", ControllerKey.SCROLL_DOWN, hotbarTag)
         check("Subtract", ControllerKey.SCROLL_UP, hotbarTag)
         check("Left", ControllerKey.KEY_LEFT_CONTROL, hotbarTag)
@@ -210,25 +208,25 @@ class InputModeKeyboard(engine: ScapesEngine,
         check("8", ControllerKey.KEY_9, hotbarTag)
         check("9", ControllerKey.KEY_0, hotbarTag)
 
-        val miscTag = tagStructure.structure("Misc")
+        val miscTag = tagMap.mapMut("Misc")
 
-        val miscScrollTag = miscTag.structure("Scroll")
-        miscScrollTag.setDouble("Sensitivity", 1.0)
+        val miscScrollTag = miscTag.mapMut("Scroll")
+        check("Sensitivity", 1.0, miscScrollTag)
     }
 
     private fun check(id: String,
                       def: ControllerKey,
-                      tagStructure: TagStructure) {
-        if (!tagStructure.has(id)) {
-            tagStructure.setString(id, def.toString())
+                      tagMap: MutableTagMap) {
+        if (!tagMap.containsKey(id)) {
+            tagMap[id] = def.toString()
         }
     }
 
     private fun check(id: String,
                       def: Double,
-                      tagStructure: TagStructure) {
-        if (!tagStructure.has(id)) {
-            tagStructure.setDouble(id, def)
+                      tagMap: MutableTagMap) {
+        if (!tagMap.containsKey(id)) {
+            tagMap[id] = def
         }
     }
 
@@ -240,7 +238,7 @@ class InputModeKeyboard(engine: ScapesEngine,
     override fun createControlsGUI(state: GameState,
                                    prev: Gui): Gui {
         return GuiControlsDefault(state, prev,
-                state.engine.game as ScapesClient, tagStructure, controller,
+                state.engine.game as ScapesClient, tagMap, controller,
                 prev.style)
     }
 

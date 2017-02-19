@@ -23,10 +23,9 @@ import org.tobi29.scapes.engine.utils.Crashable
 import org.tobi29.scapes.engine.utils.EventDispatcher
 import org.tobi29.scapes.engine.utils.ListenerOwnerHandle
 import org.tobi29.scapes.engine.utils.io.filesystem.*
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getInt
-import org.tobi29.scapes.engine.utils.io.tag.json.TagStructureJSON
-import org.tobi29.scapes.engine.utils.io.tag.setInt
+import org.tobi29.scapes.engine.utils.io.tag.*
+import org.tobi29.scapes.engine.utils.io.tag.json.readJSON
+import org.tobi29.scapes.engine.utils.io.tag.json.writeJSON
 import org.tobi29.scapes.engine.utils.io.use
 import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
@@ -52,17 +51,17 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
         RUNTIME.addShutdownHook(shutdownHook)
         try {
             while (!joinable.marked) {
-                val tagStructure = loadConfig(config.resolve("Server.json"))
-                val keyManagerConfig = tagStructure.structure("KeyManager")
+                val configMap = loadConfig(config.resolve("Server.json"))
+                val keyManagerConfig = configMap["KeyManager"]?.toMap() ?: TagMap()
                 val keyManagerProvider = loadKeyManager(
-                        keyManagerConfig.getString("ID") ?: "")
+                        keyManagerConfig["ID"].toString())
                 val ssl = SSLProvider.sslHandle(
                         keyManagerProvider[config, keyManagerConfig])
-                val worldSourceConfig = tagStructure.structure("WorldSource")
+                val worldSourceConfig = configMap["WorldSource"]?.toMap() ?: TagMap()
                 val worldSourceProvider = loadWorldSource(
-                        worldSourceConfig.getString("ID") ?: "")
+                        worldSourceConfig["ID"].toString())
                 worldSourceProvider[path, worldSourceConfig, taskExecutor].use { source ->
-                    val loop = start(source, tagStructure, ssl)
+                    val loop = start(source, configMap, ssl)
                     while (!server.shouldStop()) {
                         loop()
                         joinable.sleep(100)
@@ -90,12 +89,12 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
 
     @Throws(IOException::class)
     protected fun start(source: WorldSource,
-                        tagStructure: TagStructure,
+                        configMap: TagMap,
                         ssl: SSLHandle): () -> Unit {
-        val serverTag = tagStructure.structure("Server")
-        val serverInfo = ServerInfo(serverTag.getString("ServerName") ?: "",
-                config.resolve(serverTag.getString("ServerIcon") ?: ""))
-        server = ScapesServer(source, tagStructure, serverInfo, ssl, this)
+        val serverTag = configMap["Server"]?.toMap()
+        val serverInfo = ServerInfo(serverTag?.get("ServerName").toString(),
+                config.resolve(serverTag?.get("ServerIcon").toString()))
+        server = ScapesServer(source, configMap, serverInfo, ssl, this)
         val connection = server.connection
         val executor = object : Executor {
             override val events = EventDispatcher()
@@ -115,35 +114,39 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
         }
         connection.addExecutor(executor)
         connection.setAllowsCreation(
-                tagStructure.getBoolean("AllowAccountCreation") ?: false)
-        server.connection.start(tagStructure.getInt("ServerPort") ?: -1)
+                configMap["AllowAccountCreation"]?.toBoolean() ?: false)
+        server.connection.start(configMap["ServerPort"]?.toInt() ?: -1)
         return init(executor)
     }
 
     @Throws(IOException::class)
-    private fun loadConfig(path: FilePath): TagStructure {
+    private fun loadConfig(path: FilePath): TagMap {
         if (exists(path)) {
-            return read(path, { TagStructureJSON.read(it) })
+            return read(path, ::readJSON)
         }
-        val tagStructure = TagStructure()
-        tagStructure.setInt("ServerPort", 12345)
-        tagStructure.setBoolean("AllowAccountCreation", true)
-        val serverTag = tagStructure.structure("Server")
-        serverTag.setString("ServerName", "My Superb Server")
-        serverTag.setString("ServerIcon", "ServerIcon.png")
-        serverTag.setInt("MaxLoadingRadius", 256)
-        val socketTag = serverTag.structure("Socket")
-        socketTag.setInt("MaxPlayers", 20)
-        socketTag.setString("ControlPassword", "")
-        socketTag.setInt("WorkerCount", 2)
-        val sourceTag = tagStructure.structure("WorldSource")
-        sourceTag.setString("ID", "Basic")
-        val keyTag = tagStructure.structure("KeyManager")
-        keyTag.setString("ID", "Dummy")
-        write(path) { streamOut ->
-            TagStructureJSON.write(tagStructure, streamOut)
+        val map = TagMap {
+            this["ServerPort"] = 12345
+            this["AllowAccountCreation"] = true
+            this["Server"] = TagMap {
+                this["ServerName"] = "My Superb Server"
+                this["ServerIcon"] = "ServerIcon.png"
+                this["MaxLoadingRadius"] = 256
+            }
+            this["Socket"] = TagMap {
+                this["MaxPlayers"] = 20
+                this["ControlPassword"] = ""
+                this["WorkerCount"] = 2
+
+            }
+            this["WorldSource"] = TagMap {
+                this["ID"] = "Basic"
+            }
+            this["KeyManager"] = TagMap {
+                this["ID"] = "Dummy"
+            }
         }
-        return tagStructure
+        write(path) { map.writeJSON(it) }
+        return map
     }
 
     override fun crash(e: Throwable) {

@@ -31,7 +31,8 @@ import org.tobi29.scapes.engine.server.PacketBundleChannel
 import org.tobi29.scapes.engine.server.RemoteAddress
 import org.tobi29.scapes.engine.server.SSLProvider
 import org.tobi29.scapes.engine.server.connect
-import org.tobi29.scapes.engine.utils.io.tag.getDouble
+import org.tobi29.scapes.engine.utils.io.tag.toDouble
+import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.task.Joiner
 import java.io.IOException
@@ -103,9 +104,8 @@ class GameStateLoadMP(private val address: RemoteAddress,
                         address, channel,
                         engine.taskExecutor, ssl, true)
                 val loadingRadius = round(
-                        engine.tagStructure.getStructure(
-                                "Scapes")?.getDouble(
-                                "RenderDistance") ?: 0.0) + 16
+                        engine.configMap["Scapes"]?.toMap()?.get(
+                                "RenderDistance")?.toDouble() ?: 0.0) + 16
                 val account = Account[engine.home.resolve(
                         "Account.properties")]
                 val (plugins, loadingDistanceServer) = NewClientConnection.run(

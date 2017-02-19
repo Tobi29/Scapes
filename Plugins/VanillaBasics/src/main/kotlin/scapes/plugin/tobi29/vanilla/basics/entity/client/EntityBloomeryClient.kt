@@ -19,7 +19,8 @@ package scapes.plugin.tobi29.vanilla.basics.entity.client
 import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.gui.Gui
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.toBoolean
 import org.tobi29.scapes.engine.utils.math.TWO_PI
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
@@ -35,9 +36,9 @@ class EntityBloomeryClient constructor(world: WorldClient,
     private var particleWait = 0.1
     private var hasBellows = false
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
-        hasBellows = tagStructure.getBoolean("Bellows") ?: false
+    override fun read(map: TagMap) {
+        super.read(map)
+        hasBellows = map["Bellows"]?.toBoolean() ?: false
         maximumTemperature = if (hasBellows) Float.POSITIVE_INFINITY else 600.0f
     }
 

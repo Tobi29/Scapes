@@ -19,10 +19,7 @@ import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.utils.Sync
-import org.tobi29.scapes.engine.utils.io.tag.MultiTag
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getLong
-import org.tobi29.scapes.engine.utils.io.tag.setLong
+import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.engine.utils.math.sqrt
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
@@ -52,7 +49,7 @@ class WorldServer(worldFormat: WorldFormat,
                   terrainSupplier: (WorldServer) -> TerrainServer,
                   environmentSupplier: (WorldServer) -> EnvironmentServer) : World<EntityServer>(
         worldFormat.plugins(), taskExecutor, worldFormat.plugins().registry(),
-        seed), MultiTag.ReadAndWrite, PlayConnection<PacketClient> {
+        seed), TagMapWrite, PlayConnection<PacketClient> {
     private val entityListeners = Collections.newSetFromMap(
             ConcurrentHashMap<(EntityServer) -> Unit, Boolean>())
     private val spawners = Collections.newSetFromMap(
@@ -77,16 +74,14 @@ class WorldServer(worldFormat: WorldFormat,
         return connection
     }
 
-    override fun read(tagStructure: TagStructure) {
-        tagStructure.getLong("Tick")?.let { tick = it }
-        tagStructure.getStructure("Environment")?.let { environment.load(it) }
+    fun read(tagStructure: TagMap) {
+        tagStructure["Tick"]?.toLong()?.let { tick = it }
+        tagStructure["Environment"]?.toMap()?.let { environment.read(it) }
     }
 
-    override fun write(): TagStructure {
-        val tagStructure = TagStructure()
-        tagStructure.setLong("Tick", tick)
-        tagStructure.setStructure("Environment", environment.save())
-        return tagStructure
+    override fun write(map: ReadWriteTagMap) {
+        map["Tick"] = tick
+        map["Environment"] = environment.toTag()
     }
 
     fun calculateSpawn() {

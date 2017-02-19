@@ -31,18 +31,20 @@ import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.utils.ByteBuffer
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getListStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.listMut
+import org.tobi29.scapes.engine.utils.io.tag.mapMut
+import org.tobi29.scapes.engine.utils.io.tag.toMap
 import java.io.IOException
 import java.nio.channels.SelectionKey
-import java.util.*
 
 class GuiServerSelect(state: GameState,
                       previous: Gui,
                       private val scene: SceneMenu,
                       style: GuiStyle) : GuiMenu(state, "Multiplayer", previous,
         style) {
-    private val servers = ArrayList<TagStructure>()
+    private val servers = state.engine.configMap.mapMut("Scapes").listMut(
+            "Servers")
     private val scrollPane: GuiComponentScrollPaneViewport
 
     init {
@@ -57,29 +59,24 @@ class GuiServerSelect(state: GameState,
             state.engine.guiStack.add("10-Menu",
                     GuiAddServer(state, this, style))
         }
-
-        val scapesTag = state.engine.tagStructure.structure("Scapes")
-        scapesTag.getListStructure("Servers") { servers.add(it) }
         updateServers()
     }
 
     fun updateServers() {
         scrollPane.removeAll()
-        for (tagStructure in servers) {
+        servers.asSequence().mapNotNull { it.toMap() }.forEach { tagMap ->
             scrollPane.addVert(0.0, 0.0, -1.0, 70.0) {
-                Element(it, tagStructure)
+                Element(it, tagMap)
             }
         }
     }
 
-    fun addServer(server: TagStructure) {
+    fun addServer(server: TagMap) {
         servers.add(server)
-        val scapesTag = state.engine.tagStructure.structure("Scapes")
-        scapesTag.setList("Servers", servers)
     }
 
     private inner class Element(parent: GuiLayoutData,
-                                tagStructure: TagStructure) : GuiComponentGroupSlab(
+                                tagMap: TagMap) : GuiComponentGroupSlab(
             parent) {
         val icon: GuiComponentIcon
         val label: GuiComponentTextButton
@@ -97,15 +94,13 @@ class GuiServerSelect(state: GameState,
 
             selection(label, delete)
 
-            address = RemoteAddress(tagStructure)
+            address = RemoteAddress(tagMap)
             label.on(GuiEvent.CLICK_LEFT) { event ->
                 state.engine.switchState(GameStateLoadMP(address, state.engine,
                         scene))
             }
             delete.on(GuiEvent.CLICK_LEFT) { event ->
-                servers.remove(tagStructure)
-                val scapesTag = state.engine.tagStructure.structure("Scapes")
-                scapesTag.setList("Servers", servers)
+                servers.remove(tagMap)
                 scrollPane.remove(this)
             }
 

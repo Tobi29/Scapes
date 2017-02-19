@@ -21,29 +21,30 @@ import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.engine.input.ControllerJoystick
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.MutableTagMap
+import org.tobi29.scapes.engine.utils.io.tag.mapMut
 
 class GuiControlsGamepad(state: GameState,
                          previous: Gui,
                          game: ScapesClient,
-                         tagStructure: TagStructure,
+                         tagMap: MutableTagMap,
                          controller: ControllerJoystick,
                          style: GuiStyle) : GuiControls(state, previous, game,
         style) {
     init {
-        val movementTag = tagStructure.structure("Movement")
+        val movementTag = tagMap.mapMut("Movement")
         addText("Movement")
         addAxis("Horizontal", "X", movementTag, controller)
         addAxis("Vertical", "Y", movementTag, controller)
         addButton("Jump", "Jump", movementTag, controller)
 
-        val cameraTag = tagStructure.structure("Camera")
+        val cameraTag = tagMap.mapMut("Camera")
         addText("Camera")
         addAxis("Horizontal", "X", cameraTag, controller)
         addAxis("Vertical", "Y", cameraTag, controller)
         addSlider("Sensitivity", "Sensitivity", cameraTag)
 
-        val guiTag = tagStructure.structure("GUI")
+        val guiTag = tagMap.mapMut("GUI")
         addText("Cursor")
         addButton("Primary", "Primary", guiTag, controller)
         addButton("Secondary", "Secondary", guiTag, controller)
@@ -52,18 +53,18 @@ class GuiControlsGamepad(state: GameState,
         addButton("Select Left", "Left", guiTag, controller)
         addButton("Select Right", "Right", guiTag, controller)
 
-        val actionTag = tagStructure.structure("Action")
+        val actionTag = tagMap.mapMut("Action")
         addText("Action")
         addButton("Left", "Left", actionTag, controller)
         addButton("Right", "Right", actionTag, controller)
 
-        val menuTag = tagStructure.structure("Menu")
+        val menuTag = tagMap.mapMut("Menu")
         addText("Menu")
         addButton("Inventory", "Inventory", menuTag, controller)
         addButton("Chat", "Chat", menuTag, controller)
         addButton("Menu", "Menu", menuTag, controller)
 
-        val hotbarTag = tagStructure.structure("Hotbar")
+        val hotbarTag = tagMap.mapMut("Hotbar")
         addText("Hotbar")
         addButton("Right", "Add", hotbarTag, controller)
         addButton("Left", "Subtract", hotbarTag, controller)

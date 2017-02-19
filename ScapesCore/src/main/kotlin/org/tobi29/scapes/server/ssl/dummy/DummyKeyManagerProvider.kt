@@ -17,7 +17,7 @@
 package org.tobi29.scapes.server.ssl.dummy
 
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.engine.utils.keyManagers
 import org.tobi29.scapes.engine.utils.keyStore
 import org.tobi29.scapes.server.ssl.spi.KeyManagerProvider
@@ -36,7 +36,7 @@ class DummyKeyManagerProvider : KeyManagerProvider {
     }
 
     override fun get(path: FilePath,
-                     config: TagStructure): Array<KeyManager> {
+                     configMap: TagMap): Array<KeyManager> {
         return get()
     }
 

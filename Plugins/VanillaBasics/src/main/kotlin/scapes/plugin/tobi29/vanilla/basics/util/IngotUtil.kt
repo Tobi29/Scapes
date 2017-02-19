@@ -17,7 +17,7 @@
 package scapes.plugin.tobi29.vanilla.basics.util
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.io.tag.setFloat
+import org.tobi29.scapes.engine.utils.io.tag.set
 import scapes.plugin.tobi29.vanilla.basics.VanillaBasics
 import scapes.plugin.tobi29.vanilla.basics.material.MetalType
 import scapes.plugin.tobi29.vanilla.basics.material.item.ItemMetal
@@ -35,5 +35,5 @@ fun createIngot(item: ItemStack,
     val alloy = Alloy()
     alloy.add(metalType, 1.0)
     (item.material() as ItemMetal).setAlloy(item, alloy)
-    item.metaData("Vanilla").setFloat("Temperature", temperature)
+    item.metaData("Vanilla")["Temperature"] = temperature
 }

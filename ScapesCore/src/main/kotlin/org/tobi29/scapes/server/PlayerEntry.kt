@@ -17,7 +17,10 @@
 package org.tobi29.scapes.server
 
 import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.set
+import org.tobi29.scapes.engine.utils.io.tag.toMutTag
+import org.tobi29.scapes.engine.utils.io.tag.toTag
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.math.vector.plus
@@ -26,7 +29,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection
 
 class PlayerEntry(private val permissions: Int,
                   private val worldName: String? = null,
-                  private val entityTag: TagStructure? = null) {
+                  private val entityTag: TagMap? = null) {
     fun createEntity(
             player: PlayerConnection,
             world: WorldServer?,
@@ -45,7 +48,9 @@ class PlayerEntry(private val permissions: Int,
         val entity = spawnWorld.plugins.worldType.newPlayer(
                 spawnWorld, spawnPos, Vector3d.ZERO, 0.0, 0.0,
                 player.name(), player.skin().checksum, player)
-        pos?.let { entityTag.setMultiTag("Pos", it) }
+        val entityTag = pos?.let {
+            entityTag.toMutTag().apply { this["Pos"] = it }.toTag()
+        } ?: entityTag
         entity.read(entityTag)
         return entity
     }

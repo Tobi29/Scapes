@@ -26,7 +26,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.ReadSource
 import org.tobi29.scapes.engine.utils.io.filesystem.read
 import org.tobi29.scapes.engine.utils.io.filesystem.zipFile
-import org.tobi29.scapes.engine.utils.io.tag.json.TagStructureJSON
+import org.tobi29.scapes.engine.utils.io.tag.json.readJSON
 import org.tobi29.scapes.engine.utils.versionParse
 import java.io.IOException
 import java.lang.reflect.InvocationTargetException
@@ -46,37 +46,34 @@ class PluginFile {
         this.path = path
         checksum = read(path) { checksum(it) }
         try {
-            val tagStructure =
-                    zipFile(path).use { zip ->
-                        TagStructureJSON.read(
-                                BufferedReadChannelStream(Channels.newChannel(
-                                        zip.getInputStream(
-                                                zip.getEntry("Plugin.json")))))
-                    }
-            id = tagStructure.getString("ID") ?: ""
-            name = tagStructure.getString("Name") ?: ""
-            parent = tagStructure.getString("Parent") ?: ""
-            version = versionParse(tagStructure.getString("Version") ?: "0.0.0")
+            val pluginMap = zipFile(path).use { zip -> readJSON(
+                    BufferedReadChannelStream(Channels.newChannel(
+                            zip.getInputStream(zip.getEntry("Plugin.json")))))
+            }
+            id = pluginMap["ID"].toString()
+            name = pluginMap["Name"].toString()
+            parent = pluginMap["Parent"].toString()
+            version = versionParse(pluginMap["Version"].toString())
             scapesVersion = versionParse(
-                    tagStructure.getString("ScapesVersion") ?: "0.0.0")
-            mainClass = tagStructure.getString("MainClass") ?: ""
+                    pluginMap["ScapesVersion"].toString())
+            mainClass = pluginMap["MainClass"].toString()
         } catch (e: VersionException) {
             throw IOException(e.message, e)
         }
     }
 
     constructor(metaData: ReadSource) {
-        val tagStructure = metaData.read { TagStructureJSON.read(it) }
+        val pluginMap = metaData.read(::readJSON)
         try {
             path = null
             checksum = Checksum(Algorithm.UNKNOWN, EMPTY_BYTE)
-            id = tagStructure.getString("ID") ?: ""
-            name = tagStructure.getString("Name") ?: ""
-            parent = tagStructure.getString("Parent") ?: ""
-            version = versionParse(tagStructure.getString("Version") ?: "0.0.0")
+            id = pluginMap["ID"].toString()
+            name = pluginMap["Name"].toString()
+            parent = pluginMap["Parent"].toString()
+            version = versionParse(pluginMap["Version"].toString())
             scapesVersion = versionParse(
-                    tagStructure.getString("ScapesVersion") ?: "0.0.0")
-            mainClass = tagStructure.getString("MainClass") ?: ""
+                    pluginMap["ScapesVersion"].toString())
+            mainClass = pluginMap["MainClass"].toString()
         } catch (e: VersionException) {
             throw IOException(e.message, e)
         }

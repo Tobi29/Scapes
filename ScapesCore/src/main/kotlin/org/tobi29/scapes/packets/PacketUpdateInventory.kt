@@ -18,8 +18,9 @@ package org.tobi29.scapes.packets
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
+import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
 import org.tobi29.scapes.entity.client.EntityContainerClient
 import org.tobi29.scapes.entity.server.EntityContainerServer
 import org.tobi29.scapes.server.connection.PlayerConnection
@@ -29,7 +30,7 @@ import java.util.*
 class PacketUpdateInventory : PacketAbstract, PacketClient {
     private lateinit var uuid: UUID
     private lateinit var id: String
-    private lateinit var tag: TagStructure
+    private lateinit var tag: TagMap
 
     constructor()
 
@@ -37,7 +38,7 @@ class PacketUpdateInventory : PacketAbstract, PacketClient {
                 id: String) {
         uuid = entity.getUUID()
         this.id = id
-        tag = entity.inventories().access(id, { it.save() })
+        tag = entity.inventories().access(id) { TagMap { it.write(this) } }
     }
 
     @Throws(IOException::class)
@@ -46,7 +47,7 @@ class PacketUpdateInventory : PacketAbstract, PacketClient {
         stream.putLong(uuid.mostSignificantBits)
         stream.putLong(uuid.leastSignificantBits)
         stream.putString(id)
-        TagStructureBinary.write(stream, tag)
+        tag.writeBinary(stream)
     }
 
     @Throws(IOException::class)
@@ -54,19 +55,14 @@ class PacketUpdateInventory : PacketAbstract, PacketClient {
                              stream: ReadableByteStream) {
         uuid = UUID(stream.long, stream.long)
         id = stream.string
-        tag = TagStructure()
-        TagStructureBinary.read(stream, tag)
-    }
-
-    override fun localClient() {
-        tag = tag.copy()
+        tag = readBinary(stream)
     }
 
     override fun runClient(client: ClientConnection) {
         client.getEntity(uuid) { entity ->
             if (entity is EntityContainerClient) {
                 entity.inventories().modify(id) { inventory ->
-                    inventory.load(tag)
+                    inventory.read(tag)
                 }
             }
         }

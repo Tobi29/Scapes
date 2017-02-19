@@ -21,8 +21,9 @@ import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton
 import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.engine.utils.io.tag.getDouble
-import org.tobi29.scapes.engine.utils.io.tag.setDouble
+import org.tobi29.scapes.engine.utils.io.tag.mapMut
+import org.tobi29.scapes.engine.utils.io.tag.set
+import org.tobi29.scapes.engine.utils.io.tag.toDouble
 import org.tobi29.scapes.engine.utils.math.round
 
 class GuiVideoSettings(state: GameState,
@@ -30,12 +31,11 @@ class GuiVideoSettings(state: GameState,
                        style: GuiStyle) : GuiMenu(
         state, "Video Settings", previous, style) {
     init {
-        val scapesTag = state.engine.tagStructure.structure("Scapes")
+        val scapesTag = state.engine.configMap.mapMut("Scapes")
         val viewDistance = row(pane) {
-            slider(it, "View distance", ((scapesTag.getDouble(
-                    "RenderDistance") ?: 128.0) - 10.0) / 246.0) { text, value ->
-                text + ": " +
-                        round(10.0 + value * 246.0) + 'm'
+            slider(it, "View distance",
+                    ((scapesTag["RenderDistance"]?.toDouble() ?: 128.0) - 10.0) / 246.0) { text, value ->
+                text + ": " + round(10.0 + value * 246.0) + 'm'
             }
         }
         val shader = row(pane) { button(it, "Shaders") }
@@ -60,8 +60,7 @@ class GuiVideoSettings(state: GameState,
         selection(resolutionMultiplier)
 
         viewDistance.on(GuiEvent.CHANGE) { event ->
-            scapesTag.setDouble("RenderDistance",
-                    10.0 + viewDistance.value() * 246.0)
+            scapesTag["RenderDistance"] = 10.0 + viewDistance.value() * 246.0
         }
         shader.on(GuiEvent.CLICK_LEFT) { event ->
             state.engine.guiStack.add("10-Menu",

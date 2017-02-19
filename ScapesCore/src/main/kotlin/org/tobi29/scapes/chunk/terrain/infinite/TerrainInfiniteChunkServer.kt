@@ -21,6 +21,7 @@ import org.tobi29.scapes.block.UpdateBlockUpdate
 import org.tobi29.scapes.block.UpdateBlockUpdateUpdateTile
 import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.GeneratorOutput
+import org.tobi29.scapes.engine.utils.filterMap
 import org.tobi29.scapes.engine.utils.forEach
 import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
@@ -42,10 +43,10 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
     constructor(pos: Vector2i,
                 terrain: TerrainInfiniteServer,
                 zSize: Int,
-                tagStructure: TagStructure) : super(pos, terrain, zSize,
+                map: TagMap) : super(pos, terrain, zSize,
             terrain.world.registry.blocks()) {
         this.terrain2 = terrain
-        profilerSection("Load") { load(tagStructure) }
+        profilerSection("Load") { read(map) }
         profilerSection("HeightMap") { initHeightMap() }
     }
 
@@ -141,9 +142,9 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
         }
     }
 
-    fun dispose(): TagStructure {
+    fun dispose(): TagMap {
         entitiesMut.values.forEach { terrain.entityRemoved(it) }
-        return save(false)
+        return TagMap { write(this, false) }
     }
 
     fun addDelayedUpdate(update: Update) {
@@ -209,19 +210,18 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                              z: Int) {
     }
 
-    fun load(tagStructure: TagStructure) {
+    fun read(map: TagMap) {
         lockWrite {
-            tagStructure.getList("BlockID")?.let { bID.load(it) }
-            tagStructure.getList("BlockData")?.let { bData.load(it) }
-            tagStructure.getList("BlockLight")?.let { bLight.load(it) }
+            map["BlockID"]?.toList()?.let { bID.read(it) }
+            map["BlockData"]?.toList()?.let { bData.read(it) }
+            map["BlockLight"]?.toList()?.let { bLight.read(it) }
         }
-        initHeightMap()
-        val oldTick = tagStructure.getLong("Tick") ?: 0
-        tagStructure.getListStructure("Entities") { tag ->
-            EntityServer.make(tag.getInt("ID"),
+        val oldTick = map["Tick"]?.toLong() ?: 0L
+        map["Entities"]?.toList()?.asSequence()?.filterMap<TagMap>()?.forEach { tag ->
+            EntityServer.make(tag["ID"]?.toInt(),
                     terrain2.world)?.let { entity ->
-                tag.getUUID("UUID")?.let { entity.setEntityID(it) }
-                tag.getStructure("Data")?.let { entity.read(it) }
+                tag["UUID"]?.toUUID()?.let { entity.setEntityID(it) }
+                tag["Data"]?.toMap()?.let { entity.read(it) }
                 addEntity(entity)
                 val newTick = terrain2.world.tick
                 if (newTick > oldTick) {
@@ -229,71 +229,66 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                 }
             }
         }
-        tagStructure.getListStructure("Updates") { tag ->
-            var xy = tag.getInt("PosXY") ?: 0
+        map["Updates"]?.toList()?.asSequence()?.filterMap<TagMap>()?.forEach { tag ->
+            var xy = tag["PosXY"]?.toInt() ?: 0
             if (xy < 0) {
                 xy += 256
             }
             addDelayedUpdate(Update.make(terrain2.world.plugins.registry(),
                     (xy and 0xF) + posBlock.x,
-                    (xy shr 4) + posBlock.y,
-                    tag.getInt("PosZ") ?: 0, tag.getDouble("Delay") ?: 0.0,
-                    tag.getInt("ID") ?: 0))
+                    (xy ushr 4) + posBlock.y,
+                    tag["PosZ"]?.toInt() ?: 0, tag["Delay"]?.toDouble() ?: 0.0,
+                    tag["ID"]?.toInt() ?: 0))
         }
-        if (tagStructure.getBoolean("Populated") ?: false) {
+        if (map["Populated"]?.toBoolean() ?: false) {
             state = TerrainInfiniteChunk.State.POPULATED
         }
-        tagStructure.getStructure("MetaData")?.let { metaData = it }
+        map["MetaData"]?.toMap()?.let { metaData = it.toMutTag() }
+        initHeightMap()
     }
 
-    fun save(packet: Boolean): TagStructure {
+    fun write(map: ReadWriteTagMap,
+              packet: Boolean) {
         val tick = terrain2.world.tick
-        val tagStructure = TagStructure()
         lockWrite {
             bID.compress()
             bData.compress()
             bLight.compress()
-            tagStructure.setList("BlockID", bID.save())
-            tagStructure.setList("BlockData", bData.save())
-            tagStructure.setList("BlockLight", bLight.save())
+            map["BlockID"] = TagList { bID.write(this) }
+            map["BlockData"] = TagList { bData.write(this) }
+            map["BlockLight"] = TagList { bLight.write(this) }
         }
-        tagStructure.setStructure("MetaData", metaData)
+        map["MetaData"] = metaData.toTag()
         if (!packet) {
-            tagStructure.setLong("Tick", tick)
-            val entitiesTag = ArrayList<TagStructure>()
+            map["Tick"] = tick
             val registry = terrain2.world.registry
-            entitiesMut.values.forEach { entity ->
-                val entityTag = TagStructure()
-                entityTag.setUUID("UUID", entity.getUUID())
-                entityTag.setInt("ID", entity.id(registry))
-                entityTag.setStructure("Data", entity.write())
-                entitiesTag.add(entityTag)
-            }
-            tagStructure.setList("Entities", entitiesTag)
-            val updatesTag = ArrayList<TagStructure>()
-            synchronized(delayedUpdates) {
-                delayedUpdates.forEach({ update ->
-                    update.isValidOn(typeG(update.x(), update.y(), update.z()),
-                            terrain2)
-                }) { update ->
-                    val updateTag = TagStructure()
-                    updateTag.setInt("ID", update.id(registry))
-                    updateTag.setDouble("Delay", update.delay())
-                    updateTag.setByte("PosXY",
-                            (update.x() - posBlock.x or (update.y() - posBlock.y shl 4)).toByte())
-                    var xy = updateTag.getInt("PosXY") ?: 0
-                    if (xy < 0) {
-                        xy += 256
-                    }
-                    updateTag.setInt("PosZ", update.z())
-                    updatesTag.add(updateTag)
+            map["Entities"] = TagList {
+                entitiesMut.values.forEach { entity ->
+                    add(TagMap {
+                        this["UUID"] = entity.getUUID()
+                        this["ID"] = entity.id(registry)
+                        this["Data"] = TagMap { entity.write(this) }
+                    })
                 }
             }
-            tagStructure.setList("Updates", updatesTag)
-            tagStructure.setBoolean("Populated",
-                    state.id >= TerrainInfiniteChunk.State.POPULATED.id)
+            map["Updates"] = TagList {
+                synchronized(delayedUpdates) {
+                    delayedUpdates.forEach({ update ->
+                        update.isValidOn(
+                                typeG(update.x(), update.y(), update.z()),
+                                terrain2)
+                    }) { update ->
+                        add(TagMap {
+                            this["ID"] = update.id(registry)
+                            this["Delay"] = update.delay()
+                            this["PosXY"] = (update.x() - posBlock.x or (update.y() - posBlock.y shl 4)).toByte()
+                            this["PosZ"] = update.z()
+                        })
+                    }
+                }
+            }
+            map["Populated"] = state.id >= TerrainInfiniteChunk.State.POPULATED.id
         }
-        return tagStructure
     }
 
     private fun generate(generator: ChunkGenerator,

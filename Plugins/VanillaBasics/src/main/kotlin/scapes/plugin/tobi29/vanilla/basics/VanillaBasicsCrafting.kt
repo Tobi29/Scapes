@@ -18,6 +18,8 @@ package scapes.plugin.tobi29.vanilla.basics
 
 import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.engine.utils.io.tag.map
+import org.tobi29.scapes.engine.utils.io.tag.toBoolean
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import scapes.plugin.tobi29.vanilla.basics.material.CraftingRecipeType
@@ -218,15 +220,13 @@ private fun VanillaBasics.registerRecipesFood(registry: GameRegistry,
         }
 
         override fun availableFor(player: MobPlayerServer): Boolean {
-            return player.metaData("Vanilla").getStructure(
-                    "Research")?.getStructure("Finished")?.getBoolean(
-                    "Food") ?: false
+            return player.metaData("Vanilla").map("Research")?.map(
+                    "Finished")?.get("Food")?.toBoolean() ?: false
         }
 
         override fun availableFor(player: MobPlayerClientMain): Boolean {
-            return player.metaData("Vanilla").getStructure(
-                    "Research")?.getStructure("Finished")?.getBoolean(
-                    "Food") ?: false
+            return player.metaData("Vanilla").map("Research")?.map(
+                    "Finished")?.get("Food")?.toBoolean() ?: false
         }
     }
 
@@ -278,15 +278,13 @@ private fun VanillaBasics.registerRecipesMetal(registry: GameRegistry,
         }
 
         override fun availableFor(player: MobPlayerServer): Boolean {
-            return player.metaData("Vanilla").getStructure(
-                    "Research")?.getStructure("Finished")?.getBoolean(
-                    "Metal") ?: false
+            return player.metaData("Vanilla").map("Research")?.map(
+                    "Finished")?.get("Metal")?.toBoolean() ?: false
         }
 
         override fun availableFor(player: MobPlayerClientMain): Boolean {
-            return player.metaData("Vanilla").getStructure(
-                    "Research")?.getStructure("Finished")?.getBoolean(
-                    "Metal") ?: false
+            return player.metaData("Vanilla").map("Research")?.map(
+                    "Finished")?.get("Metal")?.toBoolean() ?: false
         }
     }
     val cobblestones = stoneRegistry.values().asSequence().filterNotNull()
@@ -326,15 +324,13 @@ private fun VanillaBasics.registerRecipesIron(registry: GameRegistry,
         }
 
         override fun availableFor(player: MobPlayerServer): Boolean {
-            return player.metaData("Vanilla").getStructure(
-                    "Research")?.getStructure("Finished")?.getBoolean(
-                    "Iron") ?: false
+            return player.metaData("Vanilla").map("Research")?.map(
+                    "Finished")?.get("Iron")?.toBoolean() ?: false
         }
 
         override fun availableFor(player: MobPlayerClientMain): Boolean {
-            return player.metaData("Vanilla").getStructure(
-                    "Research")?.getStructure("Finished")?.getBoolean(
-                    "Iron") ?: false
+            return player.metaData("Vanilla").map("Research")?.map(
+                    "Finished")?.get("Iron")?.toBoolean() ?: false
         }
     }
 

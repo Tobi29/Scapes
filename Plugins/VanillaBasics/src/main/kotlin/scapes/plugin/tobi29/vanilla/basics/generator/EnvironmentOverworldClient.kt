@@ -19,9 +19,9 @@ package scapes.plugin.tobi29.vanilla.basics.generator
 import org.tobi29.scapes.chunk.EnvironmentClient
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldSkybox
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getDouble
-import org.tobi29.scapes.engine.utils.io.tag.getLong
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.toDouble
+import org.tobi29.scapes.engine.utils.io.tag.toLong
 import org.tobi29.scapes.engine.utils.math.HALF_PI
 import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.math.cosTable
@@ -46,11 +46,9 @@ class EnvironmentOverworldClient(world: WorldClient) : EnvironmentClient, Enviro
         return climateGenerator
     }
 
-    override fun load(tagStructure: TagStructure) {
-        tagStructure.getDouble("DayTime")?.let {
-            climateGenerator.setDayTime(it)
-        }
-        tagStructure.getLong("Day")?.let { climateGenerator.setDay(it) }
+    override fun read(map: TagMap) {
+        map["DayTime"]?.toDouble()?.let { climateGenerator.setDayTime(it) }
+        map["Day"]?.toLong()?.let { climateGenerator.setDay(it) }
     }
 
     override fun tick(delta: Double) {

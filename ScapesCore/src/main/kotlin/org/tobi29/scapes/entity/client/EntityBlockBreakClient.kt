@@ -17,8 +17,8 @@
 package org.tobi29.scapes.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getDouble
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.toDouble
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.model.EntityModel
 import org.tobi29.scapes.entity.model.EntityModelBlockBreak
@@ -28,9 +28,9 @@ class EntityBlockBreakClient(world: WorldClient,
         world, pos) {
     private var progress = 0.0
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
-        tagStructure.getDouble("Progress")?.let { progress = it }
+    override fun read(map: TagMap) {
+        super.read(map)
+        map["Progress"]?.toDouble()?.let { progress = it }
     }
 
     override fun createModel(): EntityModel? {

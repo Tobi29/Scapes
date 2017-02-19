@@ -16,9 +16,7 @@
 
 package org.tobi29.scapes.chunk.data
 
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getShort
-import org.tobi29.scapes.engine.utils.io.tag.setShort
+import org.tobi29.scapes.engine.utils.io.tag.*
 
 class ChunkArraySection1x16(private val xSizeBits: Int,
                             private val ySizeBits: Int,
@@ -110,33 +108,29 @@ class ChunkArraySection1x16(private val xSizeBits: Int,
         return false
     }
 
-    override fun save(): TagStructure? {
+    override fun write(map: ReadWriteTagMap) {
         val data = this.data
-        val tag = TagStructure()
         if (data == null) {
-            if (defaultValue == 0.toShort()) {
-                return null
-            } else {
-                tag.setShort("Default", defaultValue)
-            }
+            map["Default"] = defaultValue
         } else {
-            tag.setByteArray("Array", *data)
+            map["Array"] = data
         }
-        return tag
     }
 
-    override fun load(tag: TagStructure?) {
-        if (tag == null) {
+    override fun read(map: TagMap?) {
+        if (map == null) {
             defaultValue = 0
             data = null
         } else {
-            val array = tag.getByteArray("Array")
+            val array = map["Array"]?.toByteArray()
             if (array != null) {
                 data = array
-                defaultValue = 0
-            } else if (tag.has("Default")) {
-                defaultValue = tag.getShort("Default") ?: 0
-                data = null
+                defaultValue = 1
+            } else {
+                map["Default"]?.toShort()?.let {
+                    defaultValue = it
+                    data = null
+                }
             }
         }
     }

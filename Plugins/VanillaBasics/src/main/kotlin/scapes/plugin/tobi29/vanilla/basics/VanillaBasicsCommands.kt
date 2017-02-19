@@ -18,7 +18,8 @@ package scapes.plugin.tobi29.vanilla.basics
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.engine.utils.hash
-import org.tobi29.scapes.engine.utils.io.tag.setDouble
+import org.tobi29.scapes.engine.utils.io.tag.set
+import org.tobi29.scapes.engine.utils.io.tag.syncMapMut
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.command.*
 import scapes.plugin.tobi29.vanilla.basics.generator.EnvironmentOverworldServer
@@ -94,10 +95,9 @@ internal fun registerCommands(server: ScapesServer,
                 val player = requireGet({ connection.playerByName(it) },
                         playerName)
                 player.mob { mob ->
-                    val conditionTag = mob.metaData("Vanilla").structure(
-                            "Condition")
-                    synchronized(conditionTag) {
-                        conditionTag.setDouble("Wake", wake)
+                    mob.metaData("Vanilla").syncMapMut(
+                            "Condition") { conditionTag ->
+                        conditionTag["Wake"] = wake
                     }
                 }
             }
@@ -109,10 +109,9 @@ internal fun registerCommands(server: ScapesServer,
                 val player = requireGet({ connection.playerByName(it) },
                         playerName)
                 player.mob { mob ->
-                    val conditionTag = mob.metaData("Vanilla").structure(
-                            "Condition")
-                    synchronized(conditionTag) {
-                        conditionTag.setDouble("Hunger", saturation)
+                    mob.metaData("Vanilla").syncMapMut(
+                            "Condition") { conditionTag ->
+                        conditionTag["Hunger"] = saturation
                     }
                 }
             }
@@ -124,10 +123,9 @@ internal fun registerCommands(server: ScapesServer,
                 val player = requireGet({ connection.playerByName(it) },
                         playerName)
                 player.mob { mob ->
-                    val conditionTag = mob.metaData("Vanilla").structure(
-                            "Condition")
-                    synchronized(conditionTag) {
-                        conditionTag.setDouble("Thirst", thirst)
+                    mob.metaData("Vanilla").syncMapMut(
+                            "Condition") { conditionTag ->
+                        conditionTag["Thirst"] = thirst
                     }
                 }
             }

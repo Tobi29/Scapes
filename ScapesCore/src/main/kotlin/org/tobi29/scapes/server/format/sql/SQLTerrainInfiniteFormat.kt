@@ -19,8 +19,9 @@ package org.tobi29.scapes.server.format.sql
 import mu.KLogging
 import org.tobi29.scapes.engine.sql.SQLDatabase
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
+import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.server.format.TerrainInfiniteFormat
 import java.io.IOException
@@ -36,26 +37,25 @@ class SQLTerrainInfiniteFormat(database: SQLDatabase,
     private val replaceChunk = database.compileReplace(table, "World", "X", "Y",
             "Data")
 
-    @Synchronized override fun chunkTags(
-            chunks: List<Vector2i>): List<TagStructure?> {
-        val tagStructures = ArrayList<TagStructure?>(chunks.size)
+    @Synchronized override fun chunkTags(chunks: List<Vector2i>): List<TagMap?> {
+        val maps = ArrayList<TagMap?>(chunks.size)
         for (chunk in chunks) {
             try {
-                tagStructures.add(chunkTag(chunk.x, chunk.y))
+                maps.add(chunkTag(chunk.x, chunk.y))
             } catch (e: IOException) {
                 logger.error { "Failed to load chunk: $e" }
-                tagStructures.add(null)
+                maps.add(null)
             }
         }
-        return tagStructures
+        return maps
     }
 
     @Synchronized override fun putChunkTags(
-            chunks: List<Pair<Vector2i, TagStructure>>) {
+            chunks: List<Pair<Vector2i, TagMap>>) {
         val values = ArrayList<Array<Any>>(chunks.size)
         for (chunk in chunks) {
             stream.buffer().clear()
-            TagStructureBinary.write(stream, chunk.second, 1.toByte())
+            chunk.second.writeBinary(stream, 1)
             stream.buffer().flip()
             val array = ByteArray(stream.buffer().remaining())
             stream.buffer().get(array)
@@ -74,16 +74,13 @@ class SQLTerrainInfiniteFormat(database: SQLDatabase,
     }
 
     private fun chunkTag(x: Int,
-                         y: Int): TagStructure? {
+                         y: Int): TagMap? {
         val rows = getChunk(world, x, y)
         if (!rows.isEmpty()) {
             val row = rows[0]
             if (row[0] is ByteArray) {
                 val array = row[0] as ByteArray
-                val tagStructure = TagStructureBinary.read(
-                        ByteBufferStream(ByteBuffer.wrap(array)),
-                        TagStructure())
-                return tagStructure
+                return readBinary(ByteBufferStream(ByteBuffer.wrap(array)))
             }
         }
         return null

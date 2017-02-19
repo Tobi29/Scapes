@@ -18,8 +18,8 @@ package scapes.plugin.tobi29.vanilla.basics.material.item.food
 
 import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.io.tag.getFloat
-import org.tobi29.scapes.engine.utils.io.tag.setFloat
+import org.tobi29.scapes.engine.utils.io.tag.set
+import org.tobi29.scapes.engine.utils.io.tag.toFloat
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.entity.server.MobItemServer
 import scapes.plugin.tobi29.vanilla.basics.material.CropType
@@ -58,11 +58,11 @@ class ItemDough(materials: VanillaMaterial,
     override fun heat(item: ItemStack,
                       temperature: Float) {
         var currentTemperature = temperature(item)
-        if (currentTemperature < 1 && temperature < currentTemperature) {
-            item.metaData("Vanilla").setFloat("Temperature", 0.0f)
+        if (currentTemperature < 1.0 && temperature < currentTemperature) {
+            item.metaData("Vanilla")["Temperature"] = 0.0
         } else {
             currentTemperature += (temperature - currentTemperature) / 400.0f
-            item.metaData("Vanilla").setFloat("Temperature", currentTemperature)
+            item.metaData("Vanilla")["Temperature"] = currentTemperature
             if (currentTemperature >= meltingPoint(item)) {
                 item.setMaterial(materials.baked)
             }
@@ -71,25 +71,24 @@ class ItemDough(materials: VanillaMaterial,
 
     override fun cool(item: ItemStack) {
         val currentTemperature = temperature(item)
-        if (currentTemperature < 1) {
-            item.metaData("Vanilla").setFloat("Temperature", 0.0f)
+        if (currentTemperature < 1.0) {
+            item.metaData("Vanilla")["Temperature"] = 0.0
         } else {
-            item.metaData("Vanilla").setFloat("Temperature",
-                    currentTemperature / 1.002f)
+            item.metaData("Vanilla")["Temperature"] = currentTemperature / 1.002
         }
     }
 
     override fun cool(item: MobItemServer) {
         val currentTemperature = temperature(item.item())
-        if (currentTemperature < 1) {
-            item.item().metaData("Vanilla").setFloat("Temperature", 0.0f)
+        if (currentTemperature < 1.0) {
+            item.item().metaData("Vanilla")["Temperature"] = 0.0
         } else {
             if (item.isInWater) {
-                item.item().metaData("Vanilla").setFloat("Temperature",
-                        currentTemperature / 4.0f)
+                item.item().metaData("Vanilla")["Temperature"] =
+                        currentTemperature / 4.0
             } else {
-                item.item().metaData("Vanilla").setFloat("Temperature",
-                        currentTemperature / 1.002f)
+                item.item().metaData("Vanilla")["Temperature"] =
+                        currentTemperature / 1.002
             }
         }
     }
@@ -101,7 +100,7 @@ class ItemDough(materials: VanillaMaterial,
     }
 
     override fun temperature(item: ItemStack): Float {
-        return item.metaData("Vanilla").getFloat("Temperature") ?: 0.0f
+        return item.metaData("Vanilla")["Temperature"]?.toFloat() ?: 0.0f
     }
 
     override fun identifiers(item: ItemStack): Array<String> {

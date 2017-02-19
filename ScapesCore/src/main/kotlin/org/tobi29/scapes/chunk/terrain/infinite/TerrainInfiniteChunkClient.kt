@@ -16,7 +16,10 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.toList
+import org.tobi29.scapes.engine.utils.io.tag.toMap
+import org.tobi29.scapes.engine.utils.io.tag.toMutTag
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.entity.client.EntityClient
@@ -110,14 +113,13 @@ class TerrainInfiniteChunkClient(pos: Vector2i,
         requested.set(false)
     }
 
-    fun load(tagStructure: TagStructure) {
+    fun read(map: TagMap) {
         lockWrite {
-            tagStructure.getList("BlockID")?.let { bID.load(it) }
-            tagStructure.getList("BlockData")?.let { bData.load(it) }
-            tagStructure.getList("BlockLight")?.let { bLight.load(it) }
+            map["BlockID"]?.toList()?.let { bID.read(it) }
+            map["BlockData"]?.toList()?.let { bData.read(it) }
+            map["BlockLight"]?.toList()?.let { bLight.read(it) }
         }
-        initHeightMap()
-        tagStructure.getStructure("MetaData")?.let { metaData = it }
+        map["MetaData"]?.toMap()?.let { metaData = it.toMutTag() }
         initHeightMap()
     }
 }

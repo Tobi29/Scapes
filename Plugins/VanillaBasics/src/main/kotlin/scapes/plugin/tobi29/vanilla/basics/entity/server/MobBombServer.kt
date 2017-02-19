@@ -19,9 +19,7 @@ package scapes.plugin.tobi29.vanilla.basics.entity.server
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getDouble
-import org.tobi29.scapes.engine.utils.io.tag.setDouble
+import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.server.MobServer
@@ -41,17 +39,16 @@ class MobBombServer(world: WorldServer,
         stepHeight = 0.0
     }
 
-    override fun write(): TagStructure {
-        val tag = super.write()
-        tag.setStructure("Block", item.save())
-        tag.setDouble("Time", time)
-        return tag
+    override fun write(map: ReadWriteTagMap) {
+        super.write(map)
+        map["Block"] = TagMap { item.write(this) }
+        map["Time"] = time
     }
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
-        tagStructure.getStructure("Block")?.let { item.load(it) }
-        tagStructure.getDouble("Time")?.let { time = it }
+    override fun read(map: TagMap) {
+        super.read(map)
+        map["Block"]?.toMap()?.let { item.read(it) }
+        map["Time"]?.toDouble()?.let { time = it }
     }
 
     override fun update(delta: Double) {

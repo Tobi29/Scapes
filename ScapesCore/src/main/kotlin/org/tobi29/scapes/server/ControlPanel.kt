@@ -42,7 +42,7 @@ class ControlPanel(worker: ConnectionWorker,
                 else -> style = ""
             }
             val html = "<span style=\"$style\">${ESCAPE(event.message)}</span>"
-            send("Message", structure { setString("Message", html) })
+            send("Message", TagMap { this["Message"] = html })
         }
     }
 
@@ -51,14 +51,15 @@ class ControlPanel(worker: ConnectionWorker,
             send("Pong", payload)
         }
         addCommand("Command") { payload ->
-            payload.getString("Command")?.let { command ->
+            payload["Command"]?.toString()?.let { command ->
                 connection.server.commandRegistry()[command, this].execute().forEach { output ->
                     events.fireLocal(
                             MessageEvent(this, MessageLevel.FEEDBACK_ERROR,
                                     output.toString()))
                 }
             }
-            payload.getListString("Commands") { command ->
+            payload["Commands"]?.toList()?.asSequence()?.mapNotNull(
+                    Tag::toString)?.forEach { command ->
                 connection.server.commandRegistry()[command, this].execute().forEach { output ->
                     events.fireLocal(
                             MessageEvent(this, MessageLevel.FEEDBACK_ERROR,
@@ -72,16 +73,16 @@ class ControlPanel(worker: ConnectionWorker,
         addCommand("Stats") {
             val cpu = cpuSupplier()
             val memory = runtime.totalMemory() - runtime.freeMemory()
-            send("Stats", structure {
-                setDouble("CPU", cpu)
-                setLong("Memory", memory)
+            send("Stats", TagMap {
+                this["CPU"] = cpu
+                this["Memory"] = memory
             })
         }
         addCommand("Players-List") {
-            send("Players-List", structure {
-                setList("Players") {
+            send("Players-List", TagMap {
+                this["Players"] = TagList {
                     connection.players.asSequence().map { it.name() }.map {
-                        structure { setString("Name", it) }
+                        TagMap { this["Name"] = it }
                     }.forEach { add(it) }
                 }
             })

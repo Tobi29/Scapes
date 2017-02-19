@@ -18,7 +18,8 @@ package org.tobi29.scapes.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.utils.Checksum
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.CreatureType
@@ -51,13 +52,9 @@ abstract class MobPlayerClient(world: WorldClient,
         return CreatureType.CREATURE
     }
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
-        tagStructure.getString("Nickname")?.let { nickname = it }
-        if (tagStructure.has("SkinChecksum")) {
-            tagStructure.getStructure("SkinChecksum")?.let {
-                skin = Checksum(it)
-            }
-        }
+    override fun read(map: TagMap) {
+        super.read(map)
+        map["Nickname"]?.toString()?.let { nickname = it }
+        map["SkinChecksum"]?.toMap()?.let { skin = Checksum(it) }
     }
 }

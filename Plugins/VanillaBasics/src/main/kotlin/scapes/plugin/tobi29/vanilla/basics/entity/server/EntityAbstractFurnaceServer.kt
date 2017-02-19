@@ -18,9 +18,10 @@ package scapes.plugin.tobi29.vanilla.basics.entity.server
 
 import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getFloat
-import org.tobi29.scapes.engine.utils.io.tag.setFloat
+import org.tobi29.scapes.engine.utils.io.tag.ReadWriteTagMap
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.set
+import org.tobi29.scapes.engine.utils.io.tag.toFloat
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.packets.PacketEntityChange
@@ -48,28 +49,26 @@ abstract class EntityAbstractFurnaceServer(world: WorldServer,
         fuelTemperature = FloatArray(fuel)
     }
 
-    override fun write(): TagStructure {
-        val tagStructure = super.write()
+    override fun write(map: ReadWriteTagMap) {
+        super.write(map)
         for (i in fuel.indices) {
-            tagStructure.setFloat("Fuel" + i, fuel[i])
+            map["Fuel$i"] = fuel[i]
         }
         for (i in fuelTemperature.indices) {
-            tagStructure.setFloat("FuelTemperature" + i, fuelTemperature[i])
+            map["FuelTemperature$i"] = fuelTemperature[i]
         }
-        tagStructure.setFloat("Temperature", temperature)
-        return tagStructure
+        map["Temperature"] = temperature
     }
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
+    override fun read(map: TagMap) {
+        super.read(map)
         for (i in fuel.indices) {
-            tagStructure.getFloat("Fuel$i")?.let { fuel[i] = it }
+            map["Fuel$i"]?.toFloat()?.let { fuel[i] = it }
         }
         for (i in fuelTemperature.indices) {
-            tagStructure.getFloat(
-                    "FuelTemperature$i")?.let { fuelTemperature[i] = it }
+            map["FuelTemperature$i"]?.toFloat()?.let { fuelTemperature[i] = it }
         }
-        tagStructure.getFloat("Temperature")?.let { temperature = it }
+        map["Temperature"]?.toFloat()?.let { temperature = it }
     }
 
     fun temperature(): Float {

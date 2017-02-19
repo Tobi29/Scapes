@@ -30,17 +30,16 @@ class EntityBellowsServer(world: WorldServer,
         world, pos) {
     private var scale = 0.0f
 
-    override fun write(): TagStructure {
-        val tagStructure = super.write()
-        tagStructure.setFloat("Scale", scale)
-        tagStructure.setByte("Face", face.data)
-        return tagStructure
+    override fun write(map: ReadWriteTagMap) {
+        super.write(map)
+        map["Scale"] = scale
+        map["Face"] = face.data
     }
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
-        tagStructure.getFloat("Scale")?.let { scale = it }
-        tagStructure.getInt("Face")?.let { face = Face[it] }
+    override fun read(map: TagMap) {
+        super.read(map)
+        map["Scale"]?.toFloat()?.let { scale = it }
+        map["Face"]?.toInt()?.let { face = Face[it] }
     }
 
     override fun update(delta: Double) {

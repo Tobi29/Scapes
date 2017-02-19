@@ -21,17 +21,18 @@ import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.engine.input.ControllerDefault
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.MutableTagMap
+import org.tobi29.scapes.engine.utils.io.tag.mapMut
 
 class GuiControlsDefault(state: GameState,
                          previous: Gui,
                          game: ScapesClient,
-                         tagStructure: TagStructure,
+                         tagMap: MutableTagMap,
                          controller: ControllerDefault,
                          style: GuiStyle) : GuiControls(state, previous, game,
         style) {
     init {
-        val movementTag = tagStructure.structure("Movement")
+        val movementTag = tagMap.mapMut("Movement")
         addText("Movement")
         addButton("Forward", "Forward", movementTag, controller)
         addButton("Backward", "Backward", movementTag, controller)
@@ -40,22 +41,22 @@ class GuiControlsDefault(state: GameState,
         addButton("Sprint", "Sprint", movementTag, controller)
         addButton("Jump", "Jump", movementTag, controller)
 
-        val cameraTag = tagStructure.structure("Camera")
+        val cameraTag = tagMap.mapMut("Camera")
         addText("Camera")
         addSlider("Sensitivity", "Sensitivity", cameraTag)
 
-        val actionTag = tagStructure.structure("Action")
+        val actionTag = tagMap.mapMut("Action")
         addText("Action")
         addButton("Left", "Left", actionTag, controller)
         addButton("Right", "Right", actionTag, controller)
 
-        val menuTag = tagStructure.structure("Menu")
+        val menuTag = tagMap.mapMut("Menu")
         addText("Menu")
         addButton("Inventory", "Inventory", menuTag, controller)
         addButton("Chat", "Chat", menuTag, controller)
         addButton("Menu", "Menu", menuTag, controller)
 
-        val hotbarTag = tagStructure.structure("Hotbar")
+        val hotbarTag = tagMap.mapMut("Hotbar")
         addText("Hotbar")
         addButton("Right", "Add", hotbarTag, controller)
         addButton("Left", "Subtract", hotbarTag, controller)
@@ -72,8 +73,8 @@ class GuiControlsDefault(state: GameState,
         addButton("Slot 9", "8", hotbarTag, controller)
         addButton("Slot 10", "9", hotbarTag, controller)
 
-        val miscTag = tagStructure.structure("Misc")
-        val miscScrollTag = miscTag.structure("Scroll")
+        val miscTag = tagMap.mapMut("Misc")
+        val miscScrollTag = miscTag.mapMut("Scroll")
         addText("Miscellaneous")
         addSlider("Scroll Sensitivity", "Sensitivity", miscScrollTag)
     }

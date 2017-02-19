@@ -22,15 +22,17 @@ import org.tobi29.scapes.block.models.ItemModel
 import org.tobi29.scapes.block.models.ItemModelSimple
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.utils.io.tag.getFloat
-import org.tobi29.scapes.engine.utils.io.tag.setFloat
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.set
+import org.tobi29.scapes.engine.utils.io.tag.toFloat
+import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.entity.server.MobItemServer
 import scapes.plugin.tobi29.vanilla.basics.material.AlloyType
 import scapes.plugin.tobi29.vanilla.basics.material.VanillaMaterial
 import scapes.plugin.tobi29.vanilla.basics.util.Alloy
-import scapes.plugin.tobi29.vanilla.basics.util.read
-import scapes.plugin.tobi29.vanilla.basics.util.write
+import scapes.plugin.tobi29.vanilla.basics.util.readAlloy
+import scapes.plugin.tobi29.vanilla.basics.util.writeAlloy
 import java.util.concurrent.ConcurrentHashMap
 
 class ItemIngot(materials: VanillaMaterial) : VanillaItem(materials,
@@ -115,10 +117,10 @@ class ItemIngot(materials: VanillaMaterial) : VanillaItem(materials,
                       temperature: Float) {
         var currentTemperature = temperature(item)
         if (currentTemperature < 1 && temperature < currentTemperature) {
-            item.metaData("Vanilla").setFloat("Temperature", 0.0f)
+            item.metaData("Vanilla")["Temperature"] = 0.0
         } else {
             currentTemperature += (temperature - currentTemperature) / 400.0f
-            item.metaData("Vanilla").setFloat("Temperature", currentTemperature)
+            item.metaData("Vanilla")["Temperature"] = currentTemperature
             if (currentTemperature >= meltingPoint(item) && item.data() == 1) {
                 item.setAmount(0)
             }
@@ -128,39 +130,39 @@ class ItemIngot(materials: VanillaMaterial) : VanillaItem(materials,
     override fun cool(item: ItemStack) {
         val currentTemperature = temperature(item)
         if (currentTemperature < 1) {
-            item.metaData("Vanilla").setFloat("Temperature", 0.0f)
+            item.metaData("Vanilla")["Temperature"] = 0.0
         } else {
-            item.metaData("Vanilla").setFloat("Temperature",
-                    currentTemperature / 1.002f)
+            item.metaData("Vanilla")["Temperature"] = currentTemperature / 1.002
         }
     }
 
     override fun cool(item: MobItemServer) {
         val currentTemperature = temperature(item.item())
-        if (currentTemperature < 1) {
-            item.item().metaData("Vanilla").setFloat("Temperature", 0.0f)
+        if (currentTemperature < 1.0) {
+            item.item().metaData("Vanilla")["Temperature"] = 0.0
         } else {
             if (item.isInWater) {
-                item.item().metaData("Vanilla").setFloat("Temperature",
-                        currentTemperature / 1.1f)
+                item.item().metaData(
+                        "Vanilla")["Temperature"] = currentTemperature / 1.1
             } else {
-                item.item().metaData("Vanilla").setFloat("Temperature",
-                        currentTemperature / 1.002f)
+                item.item().metaData(
+                        "Vanilla")["Temperature"] = currentTemperature / 1.002
             }
         }
     }
 
     override fun temperature(item: ItemStack): Float {
-        return item.metaData("Vanilla").getFloat("Temperature") ?: 0.0f
+        return item.metaData("Vanilla")["Temperature"]?.toFloat() ?: 0.0f
     }
 
     override fun alloy(item: ItemStack): Alloy {
-        return read(plugin, item.metaData("Vanilla").structure("Alloy"))
+        return readAlloy(plugin,
+                item.metaData("Vanilla")["Alloy"]?.toMap() ?: TagMap())
     }
 
     override fun setAlloy(item: ItemStack,
                           alloy: Alloy) {
-        item.metaData("Vanilla").setStructure("Alloy", write(alloy))
+        item.metaData("Vanilla")["Alloy"] = TagMap { writeAlloy(alloy, this) }
     }
 
     private fun modelRaw(alloy: AlloyType): ItemModel {

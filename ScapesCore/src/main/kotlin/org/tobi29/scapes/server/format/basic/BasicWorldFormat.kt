@@ -22,8 +22,7 @@ import org.tobi29.scapes.chunk.IDStorage
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteServer
 import org.tobi29.scapes.engine.utils.io.filesystem.*
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getLong
+import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.plugins.PluginFile
 import org.tobi29.scapes.plugins.Plugins
@@ -37,21 +36,21 @@ import java.security.PrivilegedActionException
 import java.util.*
 
 class BasicWorldFormat(private val path: FilePath,
-                       tagStructure: TagStructure) : WorldFormat {
+                       map: MutableTagMap) : WorldFormat {
     private val regionPath: FilePath
     private val idStorage: IDStorage
     private val plugins: Plugins
     private val playerData: PlayerData
-    private val worldsTagStructure: TagStructure
+    private val worldsTagStructure: MutableTagMap
     private val seed: Long
 
     init {
         val security = System.getSecurityManager()
         security?.checkPermission(
                 RuntimePermission("scapes.worldFormat"))
-        seed = tagStructure.getLong("Seed") ?: 0
-        idStorage = IDStorage(tagStructure.structure("IDs"))
-        worldsTagStructure = tagStructure.structure("Worlds")
+        seed = map["Seed"]?.toLong() ?: 0
+        idStorage = IDStorage(map.mapMut("IDs"))
+        worldsTagStructure = map.mapMut("Worlds")
         regionPath = path.resolve("region")
         playerData = BasicPlayerData(path.resolve("players"))
         plugins = createPlugins()
@@ -101,12 +100,12 @@ class BasicWorldFormat(private val path: FilePath,
                             it.environment.generator(),
                             arrayOf(it.environment.populator()), it.air)
                 }, environmentSupplier)
-        worldsTagStructure.getStructure(name)?.let { world.read(it) }
+        worldsTagStructure[name]?.toMap()?.let { world.read(it) }
         return world
     }
 
     @Synchronized override fun removeWorld(world: WorldServer) {
-        worldsTagStructure.setStructure(world.id, world.write())
+        worldsTagStructure[world.id] = TagMap { world.write(this) }
     }
 
     @Synchronized override fun deleteWorld(name: String): Boolean {

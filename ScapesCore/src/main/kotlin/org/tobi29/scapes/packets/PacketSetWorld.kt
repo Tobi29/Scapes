@@ -24,14 +24,15 @@ import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.binary.TagStructureBinary
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
+import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.server.connection.PlayerConnection
 import java.util.*
 
 class PacketSetWorld : PacketAbstract, PacketClient {
-    private lateinit var tag: TagStructure
+    private lateinit var tag: TagMap
     private var seed: Long = 0
     private lateinit var uuid: UUID
     private var environment = 0
@@ -40,7 +41,7 @@ class PacketSetWorld : PacketAbstract, PacketClient {
 
     constructor(world: WorldServer,
                 player: MobPlayerServer) {
-        tag = player.write()
+        tag = TagMap { player.write(this) }
         seed = world.seed
         uuid = player.getUUID()
         environment = world.registry.getAsymSupplier<Any, Any, Any, Any>("Core",
@@ -49,7 +50,7 @@ class PacketSetWorld : PacketAbstract, PacketClient {
 
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {
-        TagStructureBinary.write(stream, tag)
+        tag.writeBinary(stream)
         stream.putLong(seed)
         stream.putLong(uuid.mostSignificantBits)
         stream.putLong(uuid.leastSignificantBits)
@@ -58,15 +59,10 @@ class PacketSetWorld : PacketAbstract, PacketClient {
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        tag = TagStructure()
-        TagStructureBinary.read(stream, tag)
+        tag = readBinary(stream)
         seed = stream.long
         uuid = UUID(stream.long, stream.long)
         environment = stream.int
-    }
-
-    override fun localClient() {
-        tag = tag.copy()
     }
 
     override fun runClient(client: ClientConnection) {

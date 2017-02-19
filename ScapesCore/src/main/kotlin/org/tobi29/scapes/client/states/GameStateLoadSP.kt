@@ -29,7 +29,9 @@ import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.server.SSLHandle
 import org.tobi29.scapes.engine.server.SSLProvider
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException
-import org.tobi29.scapes.engine.utils.io.tag.getDouble
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.toDouble
+import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.connection.LocalPlayerConnection
@@ -76,8 +78,8 @@ class GameStateLoadSP(private var source: WorldSource?,
             when (step) {
                 0 -> {
                     gui?.setProgress("Creating server...", 0.0)
-                    val tagStructure = engine.tagStructure.structure(
-                            "Scapes").structure("IntegratedServer")
+                    val serverConfigMap = (engine.configMap["Scapes"]?.toMap()?.get(
+                            "IntegratedServer")?.toMap() ?: TagMap())
                     val panorama = source.panorama()
                     val serverInfo: ServerInfo
                     if (panorama != null) {
@@ -94,16 +96,17 @@ class GameStateLoadSP(private var source: WorldSource?,
                         throw UnsupportedJVMException(e)
                     }
 
-                    server = ScapesServer(source, tagStructure, serverInfo, ssl,
-                            engine)
+                    server = ScapesServer(source, serverConfigMap, serverInfo,
+                            ssl, engine)
                     step++
                 }
                 1 -> {
                     gui?.setProgress("Starting server...", 0.5)
                     val server = server ?: throw IllegalStateException(
                             "Server lost too early")
-                    val loadingRadius = round(engine.tagStructure.getStructure(
-                            "Scapes")?.getDouble("RenderDistance") ?: 0.0) + 16
+                    val loadingRadius = round(
+                            engine.configMap["Scapes"]?.toMap()?.get(
+                                    "RenderDistance")?.toDouble() ?: 0.0) + 16
                     val account = Account[engine.home.resolve(
                             "Account.properties")]
                     gui?.setProgress("Loading world...", 1.0)

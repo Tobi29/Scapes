@@ -18,9 +18,9 @@ package scapes.plugin.tobi29.vanilla.basics.entity.client
 
 import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getFloat
-import org.tobi29.scapes.engine.utils.io.tag.getInt
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.toFloat
+import org.tobi29.scapes.engine.utils.io.tag.toInt
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import scapes.plugin.tobi29.vanilla.basics.material.item.ItemHeatable
@@ -45,16 +45,15 @@ abstract class EntityAbstractFurnaceClient protected constructor(world: WorldCli
         fuelTemperature = FloatArray(fuel)
     }
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
+    override fun read(map: TagMap) {
+        super.read(map)
         for (i in fuel.indices) {
-            tagStructure.getInt("Fuel" + i)?.let { fuel[i] = it }
+            map["Fuel$i"]?.toInt()?.let { fuel[i] = it }
         }
         for (i in fuelTemperature.indices) {
-            tagStructure.getFloat(
-                    "FuelTemperature" + i)?.let { fuelTemperature[i] = it }
+            map["FuelTemperature$i"]?.toFloat()?.let { fuelTemperature[i] = it }
         }
-        tagStructure.getFloat("Temperature")?.let { temperature = it }
+        map["Temperature"]?.toFloat()?.let { temperature = it }
     }
 
     fun temperature(): Float {

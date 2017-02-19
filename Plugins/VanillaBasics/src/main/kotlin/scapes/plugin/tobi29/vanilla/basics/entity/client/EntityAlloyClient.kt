@@ -18,14 +18,15 @@ package scapes.plugin.tobi29.vanilla.basics.entity.client
 import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.gui.Gui
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getDouble
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.toDouble
+import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import scapes.plugin.tobi29.vanilla.basics.VanillaBasics
 import scapes.plugin.tobi29.vanilla.basics.gui.GuiAlloyInventory
 import scapes.plugin.tobi29.vanilla.basics.util.Alloy
-import scapes.plugin.tobi29.vanilla.basics.util.read
+import scapes.plugin.tobi29.vanilla.basics.util.readAlloy
 
 class EntityAlloyClient(world: WorldClient,
                         pos: Vector3d = Vector3d.ZERO) : EntityAbstractContainerClient(
@@ -40,11 +41,11 @@ class EntityAlloyClient(world: WorldClient,
         return null
     }
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
+    override fun read(map: TagMap) {
+        super.read(map)
         val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
-        tagStructure.getStructure("Alloy")?.let { alloy = read(plugin, it) }
-        tagStructure.getDouble("Temperature")?.let { temperature = it }
+        map["Alloy"]?.toMap()?.let { alloy = readAlloy(plugin, it) }
+        map["Temperature"]?.toDouble()?.let { temperature = it }
     }
 
     fun alloy(): Alloy {

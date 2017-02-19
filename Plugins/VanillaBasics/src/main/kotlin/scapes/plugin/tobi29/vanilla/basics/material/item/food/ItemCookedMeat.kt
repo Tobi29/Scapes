@@ -17,10 +17,10 @@
 package scapes.plugin.tobi29.vanilla.basics.material.item.food
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.io.tag.getDouble
-import org.tobi29.scapes.engine.utils.io.tag.getFloat
-import org.tobi29.scapes.engine.utils.io.tag.setDouble
-import org.tobi29.scapes.engine.utils.io.tag.setFloat
+import org.tobi29.scapes.engine.utils.io.tag.set
+import org.tobi29.scapes.engine.utils.io.tag.syncMapMut
+import org.tobi29.scapes.engine.utils.io.tag.toDouble
+import org.tobi29.scapes.engine.utils.io.tag.toFloat
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.entity.server.MobItemServer
 import org.tobi29.scapes.entity.server.MobLivingServer
@@ -34,23 +34,18 @@ class ItemCookedMeat(materials: VanillaMaterial) : ItemSimpleData(materials,
         "vanilla.basics.item.CookedMeat"), ItemHeatable {
     override fun click(entity: MobPlayerServer,
                        item: ItemStack) {
-        val conditionTag = entity.metaData("Vanilla").structure("Condition")
-        synchronized(conditionTag) {
+        entity.metaData("Vanilla").syncMapMut("Condition") { conditionTag ->
+            val stamina = conditionTag["Stamina"]?.toDouble() ?: 0.0
+            val hunger = conditionTag["Hunger"]?.toDouble() ?: 0.0
+            val thirst = conditionTag["Thirst"]?.toDouble() ?: 0.0
             if (temperature(item) >= 30) {
-                val stamina = conditionTag.getDouble("Stamina") ?: 0.0
-                conditionTag.setDouble("Stamina", stamina - 0.04)
-                val hunger = conditionTag.getDouble("Hunger") ?: 0.0
-                conditionTag.setDouble("Hunger", hunger + 0.4)
-                val thirst = conditionTag.getDouble("Thirst") ?: 0.0
-                conditionTag.setDouble("Thirst", thirst - 0.1)
-                entity.heal(10.0)
+                conditionTag["Stamina"] = stamina - 0.04
+                conditionTag["Hunger"] = hunger + 0.4
+                conditionTag["Thirst"] = thirst - 0.1
             } else {
-                val stamina = conditionTag.getDouble("Stamina") ?: 0.0
-                conditionTag.setDouble("Stamina", stamina - 0.4)
-                val hunger = conditionTag.getDouble("Hunger") ?: 0.0
-                conditionTag.setDouble("Hunger", hunger + 0.2)
-                val thirst = conditionTag.getDouble("Thirst") ?: 0.0
-                conditionTag.setDouble("Thirst", thirst - 0.2)
+                conditionTag["Stamina"] = stamina - 0.4
+                conditionTag["Hunger"] = hunger + 0.2
+                conditionTag["Thirst"] = thirst - 0.2
             }
         }
         item.setAmount(item.amount() - 1)
@@ -101,11 +96,11 @@ class ItemCookedMeat(materials: VanillaMaterial) : ItemSimpleData(materials,
     override fun heat(item: ItemStack,
                       temperature: Float) {
         var currentTemperature = temperature(item)
-        if (currentTemperature < 1 && temperature < currentTemperature) {
-            item.metaData("Vanilla").setFloat("Temperature", 0.0f)
+        if (currentTemperature < 1.0 && temperature < currentTemperature) {
+            item.metaData("Vanilla")["Temperature"] = 0.0
         } else {
             currentTemperature += (temperature - currentTemperature) / 400.0f
-            item.metaData("Vanilla").setFloat("Temperature", currentTemperature)
+            item.metaData("Vanilla")["Temperature"] = currentTemperature
             if (currentTemperature >= meltingPoint(item)) {
                 item.setAmount(0)
             }
@@ -114,25 +109,24 @@ class ItemCookedMeat(materials: VanillaMaterial) : ItemSimpleData(materials,
 
     override fun cool(item: ItemStack) {
         val currentTemperature = temperature(item)
-        if (currentTemperature < 1) {
-            item.metaData("Vanilla").setFloat("Temperature", 0.0f)
+        if (currentTemperature < 1.0) {
+            item.metaData("Vanilla")["Temperature"] = 0.0
         } else {
-            item.metaData("Vanilla").setFloat("Temperature",
-                    currentTemperature / 1.002f)
+            item.metaData("Vanilla")["Temperature"] = currentTemperature / 1.002
         }
     }
 
     override fun cool(item: MobItemServer) {
         val currentTemperature = temperature(item.item())
-        if (currentTemperature < 1) {
-            item.item().metaData("Vanilla").setFloat("Temperature", 0.0f)
+        if (currentTemperature < 1.0) {
+            item.item().metaData("Vanilla")["Temperature"] = 0.0
         } else {
             if (item.isInWater) {
-                item.item().metaData("Vanilla").setFloat("Temperature",
-                        currentTemperature / 4.0f)
+                item.item().metaData("Vanilla")["Temperature"] =
+                        currentTemperature / 4.0
             } else {
-                item.item().metaData("Vanilla").setFloat("Temperature",
-                        currentTemperature / 1.002f)
+                item.item().metaData("Vanilla")["Temperature"] =
+                        currentTemperature / 1.002
             }
         }
     }
@@ -144,6 +138,6 @@ class ItemCookedMeat(materials: VanillaMaterial) : ItemSimpleData(materials,
     }
 
     override fun temperature(item: ItemStack): Float {
-        return item.metaData("Vanilla").getFloat("Temperature") ?: 0.0f
+        return item.metaData("Vanilla")["Temperature"]?.toFloat() ?: 0.0f
     }
 }

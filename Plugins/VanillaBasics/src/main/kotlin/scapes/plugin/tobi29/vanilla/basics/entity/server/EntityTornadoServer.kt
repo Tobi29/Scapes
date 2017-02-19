@@ -17,9 +17,10 @@ package scapes.plugin.tobi29.vanilla.basics.entity.server
 
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.filterMap
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getDouble
-import org.tobi29.scapes.engine.utils.io.tag.setDouble
+import org.tobi29.scapes.engine.utils.io.tag.ReadWriteTagMap
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.set
+import org.tobi29.scapes.engine.utils.io.tag.toDouble
 import org.tobi29.scapes.engine.utils.math.cosTable
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.sinTable
@@ -45,17 +46,16 @@ class EntityTornadoServer(world: WorldServer,
         positionHandler = MobPositionSenderServer(pos, { world.send(it) })
     }
 
-    override fun write(): TagStructure {
-        val tag = super.write()
-        tag.setDouble("Dir", dir)
-        tag.setDouble("Time", time)
-        return tag
+    override fun write(map: ReadWriteTagMap) {
+        super.write(map)
+        map["Dir"] = dir
+        map["Time"] = time
     }
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
-        tagStructure.getDouble("Dir")?.let { dir = it }
-        tagStructure.getDouble("Time")?.let { time = it }
+    override fun read(map: TagMap) {
+        super.read(map)
+        map["Dir"]?.toDouble()?.let { dir = it }
+        map["Time"]?.toDouble()?.let { time = it }
         updatePosition()
     }
 

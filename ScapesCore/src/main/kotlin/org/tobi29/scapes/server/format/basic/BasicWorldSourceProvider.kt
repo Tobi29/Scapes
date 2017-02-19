@@ -17,11 +17,10 @@
 package org.tobi29.scapes.server.format.basic
 
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.format.spi.WorldSourceProvider
-
 import java.io.IOException
 
 class BasicWorldSourceProvider : WorldSourceProvider {
@@ -35,7 +34,7 @@ class BasicWorldSourceProvider : WorldSourceProvider {
 
     @Throws(IOException::class)
     override fun get(path: FilePath,
-                     config: TagStructure,
+                     configMap: TagMap,
                      taskExecutor: TaskExecutor): WorldSource {
         return BasicWorldSource(path)
     }

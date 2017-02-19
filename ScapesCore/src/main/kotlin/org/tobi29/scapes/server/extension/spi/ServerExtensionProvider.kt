@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.server.extension.spi
 
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.extension.ServerExtension
 
@@ -24,5 +24,5 @@ interface ServerExtensionProvider {
     val name: String
 
     fun create(server: ScapesServer,
-               configStructure: TagStructure?): ServerExtension?
+               configMap: TagMap?): ServerExtension?
 }

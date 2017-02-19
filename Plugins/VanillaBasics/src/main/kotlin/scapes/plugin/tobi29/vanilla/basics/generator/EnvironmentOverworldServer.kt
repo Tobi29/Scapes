@@ -249,26 +249,22 @@ class EnvironmentOverworldServer(private val world: WorldServer,
         world.entityListener({ entity ->
             if (entity is MobPlayerServer) {
                 entity.onSpawn("VanillaBasics:Condition", {
-                    val conditionTag = entity.metaData(
-                            "Vanilla").structure("Condition")
-                    synchronized(conditionTag) {
-                        conditionTag.setDouble("Stamina", 1.0)
-                        conditionTag.setDouble("Wake", 1.0)
-                        conditionTag.setDouble("Hunger", 1.0)
-                        conditionTag.setDouble("Thirst", 1.0)
-                        conditionTag.setDouble("BodyTemperature", 37.0)
+                    entity.metaData("Vanilla").syncMapMut(
+                            "Condition") { conditionTag ->
+                        conditionTag["Stamina"] = 1.0
+                        conditionTag["Wake"] = 1.0
+                        conditionTag["Hunger"] = 1.0
+                        conditionTag["Thirst"] = 1.0
+                        conditionTag["BodyTemperature"] = 37.0
                     }
                 })
                 entity.onJump("VanillaBasics:Condition", {
-                    val conditionTag = entity.metaData(
-                            "Vanilla").structure("Condition")
-                    synchronized(conditionTag) {
-                        val stamina = conditionTag.getDouble("Stamina") ?: 0.0
-                        val bodyTemperature = conditionTag.getDouble(
-                                "BodyTemperature") ?: 0.0
-                        conditionTag.setDouble("Stamina", stamina - 0.15)
-                        conditionTag.setDouble("BodyTemperature",
-                                bodyTemperature + 0.1)
+                    entity.metaData("Vanilla").syncMapMut(
+                            "Condition") { conditionTag ->
+                        val stamina = conditionTag["Stamina"]?.toDouble() ?: 0.0
+                        val bodyTemperature = conditionTag["BodyTemperature"]?.toDouble() ?: 0.0
+                        conditionTag["Stamina"] = stamina - 0.15
+                        conditionTag["BodyTemperature"] = bodyTemperature + 0.1
                     }
                 })
                 entity.onPunch("VanillaBasics:Condition", { strength ->
@@ -276,16 +272,12 @@ class EnvironmentOverworldServer(private val world: WorldServer,
                     if (entity.wieldMode() != WieldMode.DUAL) {
                         attackStrength *= 1.7
                     }
-                    val conditionTag = entity.metaData(
-                            "Vanilla").structure("Condition")
-                    synchronized(conditionTag) {
-                        val stamina = conditionTag.getDouble("Stamina") ?: 0.0
-                        val bodyTemperature = conditionTag.getDouble(
-                                "BodyTemperature") ?: 0.0
-                        conditionTag.setDouble("Stamina",
-                                stamina - 0.04 * attackStrength)
-                        conditionTag.setDouble("BodyTemperature",
-                                bodyTemperature + 0.03 * attackStrength)
+                    entity.metaData("Vanilla").syncMapMut(
+                            "Condition") { conditionTag ->
+                        val stamina = conditionTag["Stamina"]?.toDouble() ?: 0.0
+                        val bodyTemperature = conditionTag["BodyTemperature"]?.toDouble() ?: 0.0
+                        conditionTag["Stamina"] = stamina - 0.04 * attackStrength
+                        conditionTag["BodyTemperature"] = bodyTemperature + 0.03 * attackStrength
                     }
                 })
                 entity.onDeath("VanillaBasics:DeathMessage", {
@@ -325,20 +317,16 @@ class EnvironmentOverworldServer(private val world: WorldServer,
         return Vector3i(x, y, z)
     }
 
-    override fun load(tagStructure: TagStructure) {
-        tagStructure.getDouble("DayTime")?.let {
-            climateGenerator.setDayTime(it)
-        }
-        tagStructure.getLong("Day")?.let { climateGenerator.setDay(it) }
-        tagStructure.getLong("SimulationCount")?.let { simulationCount = it }
+    override fun read(map: TagMap) {
+        map["DayTime"]?.toDouble()?.let { climateGenerator.setDayTime(it) }
+        map["Day"]?.toLong()?.let { climateGenerator.setDay(it) }
+        map["SimulationCount"]?.toLong()?.let { simulationCount = it }
     }
 
-    override fun save(): TagStructure {
-        val tagStructure = TagStructure()
-        tagStructure.setDouble("DayTime", climateGenerator.dayTime())
-        tagStructure.setLong("Day", climateGenerator.day())
-        tagStructure.setLong("SimulationCount", simulationCount)
-        return tagStructure
+    override fun write(map: ReadWriteTagMap) {
+        map["DayTime"] = climateGenerator.dayTime()
+        map["Day"] = climateGenerator.day()
+        map["SimulationCount"] = simulationCount
     }
 
     override fun tick(delta: Double) {
@@ -350,16 +338,13 @@ class EnvironmentOverworldServer(private val world: WorldServer,
             world.players().forEach {
                 val health = it.health()
                 val maxHealth = it.maxHealth()
-                val conditionTag = it.metaData("Vanilla").structure(
-                        "Condition")
-                synchronized(conditionTag) {
-                    var stamina = conditionTag.getDouble("Stamina") ?: 0.0
-                    var wake = conditionTag.getDouble("Wake") ?: 0.0
-                    var hunger = conditionTag.getDouble("Hunger") ?: 0.0
-                    var thirst = conditionTag.getDouble("Thirst") ?: 0.0
-                    var bodyTemperature = conditionTag.getDouble(
-                            "BodyTemperature") ?: 0.0
-                    var sleeping = conditionTag.getBoolean("Sleeping") ?: false
+                it.metaData("Vanilla").syncMapMut("Condition") { conditionTag ->
+                    var stamina = conditionTag["Stamina"]?.toDouble() ?: 0.0
+                    var wake = conditionTag["Wake"]?.toDouble() ?: 0.0
+                    var hunger = conditionTag["Hunger"]?.toDouble() ?: 0.0
+                    var thirst = conditionTag["Thirst"]?.toDouble() ?: 0.0
+                    var bodyTemperature = conditionTag["BodyTemperature"]?.toDouble() ?: 0.0
+                    var sleeping = conditionTag["Sleeping"]?.toBoolean() ?: false
                     val ground = it.isOnGround
                     val inWater = it.isInWater
                     val pos = it.getCurrentPos()
@@ -427,12 +412,12 @@ class EnvironmentOverworldServer(private val world: WorldServer,
                     wake = clamp(wake, 0.0, 1.0)
                     hunger = clamp(hunger, 0.0, 1.0)
                     thirst = clamp(thirst, 0.0, 1.0)
-                    conditionTag.setDouble("Stamina", stamina)
-                    conditionTag.setDouble("Wake", wake)
-                    conditionTag.setDouble("Hunger", hunger)
-                    conditionTag.setDouble("Thirst", thirst)
-                    conditionTag.setDouble("BodyTemperature", bodyTemperature)
-                    conditionTag.setBoolean("Sleeping", sleeping)
+                    conditionTag["Stamina"] = stamina
+                    conditionTag["Wake"] = wake
+                    conditionTag["Hunger"] = hunger
+                    conditionTag["Thirst"] = thirst
+                    conditionTag["BodyTemperature"] = bodyTemperature
+                    conditionTag["Sleeping"] = sleeping
                 }
                 it.connection().send(PacketEntityMetaData(it, "Vanilla"))
             }
@@ -497,7 +482,7 @@ class EnvironmentOverworldServer(private val world: WorldServer,
     fun simulateSeason(terrain: TerrainServer,
                        chunk: TerrainChunk) {
         val tagStructure = chunk.metaData("Vanilla")
-        val chunkSimulationCount = tagStructure.getLong("SimulationCount") ?: 0
+        val chunkSimulationCount = tagStructure["SimulationCount"]?.toLong() ?: 0L
         val count: Int
         if (chunkSimulationCount <= 0) {
             count = 1
@@ -509,7 +494,7 @@ class EnvironmentOverworldServer(private val world: WorldServer,
             }
             count = max(10240 / delta.toInt(), 1)
         }
-        tagStructure.setLong("SimulationCount", simulationCount)
+        tagStructure["SimulationCount"] = simulationCount
         terrain.queue { handler ->
             simulateSeason(handler, chunk.posBlock.x,
                     chunk.posBlock.y, chunk.size.x, chunk.size.y,

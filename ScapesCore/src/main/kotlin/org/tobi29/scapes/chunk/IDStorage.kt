@@ -16,11 +16,9 @@
 
 package org.tobi29.scapes.chunk
 
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getInt
-import org.tobi29.scapes.engine.utils.io.tag.setInt
+import org.tobi29.scapes.engine.utils.io.tag.*
 
-class IDStorage(private val tagStructure: TagStructure) {
+class IDStorage(private val map: MutableTagMap) {
 
     operator fun get(module: String,
                      type: String,
@@ -33,30 +31,17 @@ class IDStorage(private val tagStructure: TagStructure) {
                                    name: String,
                                    min: Int,
                                    max: Int): Int {
-        val typeTag = tagStructure.structure(module).structure(type)
-        typeTag.getInt(name)?.let { return it }
+        val typeTag = map.mapMut(module).mapMut(type)
+        typeTag[name]?.toInt()?.let { return it }
         var i = min
-        while (true) {
+        while (typeTag.containsValue(i.toTag())) {
+            i++
             if (i > max) {
                 throw IllegalStateException(
                         "Overflowed IDs for: $module->$type")
             }
-            var contains = false
-            for ((key, value) in typeTag.tagEntrySet) {
-                if (value is Number) {
-                    if (value.toInt() == i) {
-                        contains = true
-                        break
-                    }
-                }
-            }
-            if (contains) {
-                i++
-            } else {
-                break
-            }
         }
-        typeTag.setInt(name, i)
+        typeTag[name] = i
         return i
     }
 
@@ -64,10 +49,12 @@ class IDStorage(private val tagStructure: TagStructure) {
                           type: String,
                           name: String,
                           value: Int) {
-        tagStructure.structure(module).structure(type).setInt(name, value)
+        map.mapMut(module).mapMut(type)[name] = value
     }
 
-    fun save(): TagStructure {
-        return tagStructure
+    fun write(map: ReadWriteTagMap) {
+        this.map.forEach { (key, value) ->
+            map[key] = value.toTag()
+        }
     }
 }

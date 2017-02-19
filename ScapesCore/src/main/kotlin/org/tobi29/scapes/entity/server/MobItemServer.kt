@@ -19,9 +19,7 @@ import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.filterMap
 import org.tobi29.scapes.engine.utils.forEach
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.getDouble
-import org.tobi29.scapes.engine.utils.io.tag.setDouble
+import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.getEntities
@@ -42,20 +40,18 @@ class MobItemServer(world: WorldServer,
         stepHeight = 0.0
     }
 
-    override fun write(): TagStructure {
-        val tagStructure = super.write()
-        item.save()
-        tagStructure.setStructure("Inventory", item.save())
-        tagStructure.setDouble("Pickupwait", pickupwait)
-        tagStructure.setDouble("Despawntime", despawntime)
-        return tagStructure
+    override fun write(map: ReadWriteTagMap) {
+        super.write(map)
+        map["Inventory"] = TagMap { item.write(this) }
+        map["Pickupwait"] = pickupwait
+        map["Despawntime"] = despawntime
     }
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
-        tagStructure.getStructure("Inventory")?.let { item.load(it) }
-        tagStructure.getDouble("Pickupwait")?.let { pickupwait = it }
-        tagStructure.getDouble("Despawntime")?.let { despawntime = it }
+    override fun read(map: TagMap) {
+        super.read(map)
+        map["Inventory"]?.toMap()?.let { item.read(it) }
+        map["Pickupwait"]?.toDouble()?.let { pickupwait = it }
+        map["Despawntime"]?.toDouble()?.let { despawntime = it }
     }
 
     fun item(): ItemStack {

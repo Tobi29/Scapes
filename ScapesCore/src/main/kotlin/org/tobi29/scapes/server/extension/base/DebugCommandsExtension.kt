@@ -20,8 +20,8 @@ import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream
 import org.tobi29.scapes.engine.utils.io.asString
 import org.tobi29.scapes.engine.utils.io.process
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import org.tobi29.scapes.engine.utils.io.tag.json.TagStructureJSON
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.json.writeJSON
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.command.getInt
@@ -151,7 +151,7 @@ class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
                 player.mob({ mob ->
                     try {
                         val stream = ByteBufferStream()
-                        TagStructureJSON.write(mob.leftWeapon().save(),
+                        TagMap { mob.leftWeapon().write(this) }.writeJSON(
                                 stream)
                         stream.buffer().flip()
                         val str = process(stream, asString())
@@ -175,7 +175,7 @@ class DebugCommandsExtensionProvider : ServerExtensionProvider {
     override val name = "Debug Commands"
 
     override fun create(server: ScapesServer,
-                        configStructure: TagStructure?): ServerExtension? {
+                        configMap: TagMap?): ServerExtension? {
         return DebugCommandsExtension(server)
     }
 }

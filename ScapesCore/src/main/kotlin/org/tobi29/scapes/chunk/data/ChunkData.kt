@@ -16,8 +16,9 @@
 package org.tobi29.scapes.chunk.data
 
 import org.tobi29.scapes.engine.utils.filterMap
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
-import java.util.*
+import org.tobi29.scapes.engine.utils.io.tag.ReadWriteTagList
+import org.tobi29.scapes.engine.utils.io.tag.Tag
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
 
 class ChunkData(private val xSectionBits: Int,
                 private val ySectionBits: Int,
@@ -88,29 +89,19 @@ class ChunkData(private val xSectionBits: Int,
         section(xOffset, yOffset, zOffset).setData(x, y, z, offset, value)
     }
 
-    fun save(): List<TagStructure> {
-        val tags = data.map { it.save() }
-        val tagStructures = ArrayList<TagStructure>(data.size)
-        var empty = true
-        for (i in tags.indices.reversed()) {
-            val tag = tags[i]
-            if (tag != null) {
-                empty = false
-                tagStructures.add(0, tag)
-            } else if (!empty) {
-                tagStructures.add(0, TagStructure())
-            }
+    fun write(list: ReadWriteTagList) {
+        data.asSequence().map { TagMap { it.write(this) } }.forEach {
+            list.add(it)
         }
-        return tagStructures
     }
 
-    fun load(tags: List<Any>) {
-        val iterator = tags.asSequence().filterMap<TagStructure>().iterator()
+    fun read(tags: List<Tag>) {
+        val iterator = tags.asSequence().filterMap<TagMap>().iterator()
         for (i in data.indices) {
             if (iterator.hasNext()) {
-                data[i].load(iterator.next())
+                data[i].read(iterator.next())
             } else {
-                data[i].load(null)
+                data[i].read(null)
             }
         }
     }

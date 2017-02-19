@@ -24,7 +24,8 @@ import org.tobi29.scapes.chunk.terrain.TerrainChunk
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.StampLock
 import org.tobi29.scapes.engine.utils.ThreadLocal
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.MutableTagMap
+import org.tobi29.scapes.engine.utils.io.tag.mapMut
 import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.math.lb
 import org.tobi29.scapes.engine.utils.math.max
@@ -47,7 +48,7 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
     protected val entitiesMut = ConcurrentHashMap<UUID, E>()
     val entities = entitiesMut.readOnly()
     protected var state = State.NEW
-    protected var metaData = TagStructure()
+    protected var metaData = MutableTagMap()
 
     protected inline fun <R> lockRead(block: ChunkDatas.() -> R): R {
         return lock.read { block(data) }
@@ -196,9 +197,7 @@ abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
         }
     }
 
-    override fun metaData(id: String): TagStructure {
-        return metaData.structure(id)
-    }
+    override fun metaData(id: String) = metaData.mapMut(id)
 
     val isLoaded: Boolean
         get() = state.id >= State.LOADED.id

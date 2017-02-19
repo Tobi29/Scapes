@@ -20,7 +20,10 @@ import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.block.InventoryContainer
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.io.tag.TagStructure
+import org.tobi29.scapes.engine.utils.io.tag.ReadWriteTagMap
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.set
+import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.plus
 import org.tobi29.scapes.engine.utils.readOnly
@@ -59,20 +62,20 @@ abstract class EntityAbstractContainerServer(world: WorldServer,
         viewersMut.remove(player)
     }
 
-    override fun write(): TagStructure {
-        val tagStructure = super.write()
-        val inventoryTag = tagStructure.structure("Inventory")
-        inventories.forEach { id, inventory ->
-            inventoryTag.setStructure(id, inventory.save())
+    override fun write(map: ReadWriteTagMap) {
+        super.write(map)
+        map["Inventory"] = TagMap {
+            inventories.forEach { id, inventory ->
+                this[id] = TagMap { inventory.write(this) }
+            }
         }
-        return tagStructure
     }
 
-    override fun read(tagStructure: TagStructure) {
-        super.read(tagStructure)
-        tagStructure.getStructure("Inventory")?.let { inventoryTag ->
+    override fun read(map: TagMap) {
+        super.read(map)
+        map["Inventory"]?.toMap()?.let { inventoryTag ->
             inventories.forEach { id, inventory ->
-                inventoryTag.getStructure(id)?.let { inventory.load(it) }
+                inventoryTag[id]?.toMap()?.let { inventory.read(it) }
             }
         }
     }
