@@ -18,7 +18,6 @@ package org.tobi29.scapes.server.format.sql
 
 import mu.KLogging
 import org.tobi29.scapes.chunk.EnvironmentServer
-import org.tobi29.scapes.chunk.IDStorage
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteServer
 import org.tobi29.scapes.engine.sql.*
@@ -46,8 +45,7 @@ import java.util.concurrent.ThreadLocalRandom
 
 open class SQLWorldFormat(protected val path: FilePath,
                           protected val database: SQLDatabase) : WorldFormat {
-    protected val idStorage: IDStorage
-    protected val idTagStructure: MutableTagMap
+    protected val idStorage: MutableTagMap
     protected val getMetaData = database.compileQuery("MetaData",
             arrayOf("Value"), "Name")
     protected val replaceMetaData = database.compileReplace("MetaData", "Name",
@@ -83,7 +81,7 @@ open class SQLWorldFormat(protected val path: FilePath,
             replaceMetaData(arrayOf("Seed", seed))
         }
         rows = getData("IDs")
-        idTagStructure = if (!rows.isEmpty()) {
+        idStorage = if (!rows.isEmpty()) {
             val row = rows[0]
             if (row[0] is ByteArray) {
                 val array = row[0] as ByteArray
@@ -94,16 +92,11 @@ open class SQLWorldFormat(protected val path: FilePath,
         } else {
             TagMap()
         }.toMutTag()
-        idStorage = IDStorage(idTagStructure)
         plugins = createPlugins()
     }
 
     open protected fun createPlugins(): Plugins {
         return Plugins(pluginFiles(), idStorage)
-    }
-
-    override fun idStorage(): IDStorage {
-        return idStorage
     }
 
     override fun playerData(): PlayerData {
@@ -169,7 +162,7 @@ open class SQLWorldFormat(protected val path: FilePath,
 
     @Synchronized override fun dispose() {
         plugins.dispose()
-        idTagStructure.toTag().writeBinary(stream, 1.toByte())
+        idStorage.toTag().writeBinary(stream, 1.toByte())
         stream.buffer().flip()
         val array = ByteArray(stream.buffer().remaining())
         stream.buffer().get(array)

@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.client.connection
 
-import org.tobi29.scapes.chunk.IDStorage
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.connection.ConnectionInfo
 import org.tobi29.scapes.connection.ConnectionType
@@ -174,11 +173,10 @@ object NewClientConnection {
             throw ConnectionCloseException(channel.inputStream.string)
         }
         val loadingDistanceServer = channel.inputStream.int
-        val idsTag = readBinary(channel.inputStream)
-        val idStorage = IDStorage(idsTag.toMutTag())
+        val idStorage = readBinary(channel.inputStream)
         val plugins2 = Plugins(plugins.map {
             it ?: throw IllegalStateException("Failed to receive plugin")
-        }, idStorage)
+        }, idStorage.toMutTag())
         return Pair(plugins2, loadingDistanceServer)
     }
 

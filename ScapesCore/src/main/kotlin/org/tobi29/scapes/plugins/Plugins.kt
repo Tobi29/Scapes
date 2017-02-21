@@ -18,10 +18,11 @@ package org.tobi29.scapes.plugins
 
 import mu.KLogging
 import org.tobi29.scapes.block.GameRegistry
-import org.tobi29.scapes.chunk.IDStorage
+import org.tobi29.scapes.block.init
 import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathResource
+import org.tobi29.scapes.engine.utils.io.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.readOnly
 import java.io.IOException
 import java.net.URLClassLoader
@@ -29,7 +30,7 @@ import java.util.*
 
 class Plugins @Throws(IOException::class)
 constructor(files: List<PluginFile>,
-            idStorage: IDStorage) {
+            idStorage: MutableTagMap) {
     val files = files.readOnly()
     private val pluginsMut = ArrayList<Plugin>()
     val plugins = pluginsMut.readOnly()
@@ -120,6 +121,10 @@ constructor(files: List<PluginFile>,
     fun init() {
         if (!init) {
             registry.registryTypes({ registry ->
+                registry.addAsymSupplier("Core", "Entity", 0, Int.MAX_VALUE)
+                registry.addAsymSupplier("Core", "Environment", 0, Int.MAX_VALUE)
+                registry.addSupplier("Core", "Packet", 0, Short.MAX_VALUE.toInt())
+                registry.addSupplier("Core", "Update", 0, Short.MAX_VALUE.toInt())
                 pluginsMut.forEach { it.registryType(registry) }
             })
             registry.init(worldType)

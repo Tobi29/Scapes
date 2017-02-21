@@ -17,16 +17,12 @@
 package org.tobi29.scapes.server.format
 
 import org.tobi29.scapes.chunk.EnvironmentServer
-import org.tobi29.scapes.chunk.IDStorage
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.plugins.Plugins
 import org.tobi29.scapes.server.ScapesServer
-
 import java.io.IOException
 
 interface WorldFormat {
-    fun idStorage(): IDStorage
-
     fun playerData(): PlayerData
 
     fun seed(): Long

@@ -27,7 +27,6 @@ import org.tobi29.scapes.engine.utils.io.checksum
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.read
 import org.tobi29.scapes.engine.utils.io.process
-import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
 import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.entity.skin.ServerSkin
@@ -145,9 +144,8 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
             setWorld()
             output.putBoolean(false)
             output.putInt(loadingRadius)
-            TagMap {
-                server.server.plugins.registry().idStorage().write(this)
-            }.writeBinary(output)
+            server.server.plugins.registry().writeIDStorage().writeBinary(
+                    output)
             channel.queueBundle()
             pingWait = System.currentTimeMillis() + 1000
             server.events.fireLocal(

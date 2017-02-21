@@ -18,7 +18,6 @@ package org.tobi29.scapes.server.format.basic
 
 import mu.KLogging
 import org.tobi29.scapes.chunk.EnvironmentServer
-import org.tobi29.scapes.chunk.IDStorage
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteServer
 import org.tobi29.scapes.engine.utils.io.filesystem.*
@@ -38,7 +37,7 @@ import java.util.*
 class BasicWorldFormat(private val path: FilePath,
                        map: MutableTagMap) : WorldFormat {
     private val regionPath: FilePath
-    private val idStorage: IDStorage
+    private val idStorage: MutableTagMap
     private val plugins: Plugins
     private val playerData: PlayerData
     private val worldsTagStructure: MutableTagMap
@@ -49,7 +48,7 @@ class BasicWorldFormat(private val path: FilePath,
         security?.checkPermission(
                 RuntimePermission("scapes.worldFormat"))
         seed = map["Seed"]?.toLong() ?: 0
-        idStorage = IDStorage(map.mapMut("IDs"))
+        idStorage = map.mapMut("IDs")
         worldsTagStructure = map.mapMut("Worlds")
         regionPath = path.resolve("region")
         playerData = BasicPlayerData(path.resolve("players"))
@@ -58,10 +57,6 @@ class BasicWorldFormat(private val path: FilePath,
 
     private fun createPlugins(): Plugins {
         return Plugins(pluginFiles(), idStorage)
-    }
-
-    override fun idStorage(): IDStorage {
-        return idStorage
     }
 
     override fun playerData(): PlayerData {
