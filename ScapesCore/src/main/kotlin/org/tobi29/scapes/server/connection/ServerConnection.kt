@@ -38,8 +38,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 class ServerConnection(val server: ScapesServer,
                        configMap: TagMap,
-                       ssl: SSLHandle) : AbstractServerConnection(
-        server.taskExecutor(), ConnectionInfo.header(), ssl, 10) {
+                       ssl: SSLHandle) : ConnectionListenWorker(
+        server.connections, ConnectionInfo.header(), ssl) {
     val events = server.events
     private val mayPlayers: Int
     private val controlPassword: String?

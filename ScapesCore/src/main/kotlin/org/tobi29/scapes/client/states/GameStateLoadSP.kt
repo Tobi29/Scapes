@@ -111,7 +111,7 @@ class GameStateLoadSP(private var source: WorldSource?,
                             "Account.properties")]
                     gui?.setProgress("Loading world...", 1.0)
 
-                    server.connection.addConnection { worker, connection ->
+                    server.connections.addConnection { worker, connection ->
                         val player = LocalPlayerConnection(worker,
                                 server.connection, loadingRadius)
                         (engine.game as ScapesClient).connection.addConnection { worker, connection ->

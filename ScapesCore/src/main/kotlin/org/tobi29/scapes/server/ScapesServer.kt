@@ -20,6 +20,7 @@ import mu.KLogging
 import org.tobi29.scapes.chunk.EnvironmentServer
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.connection.ServerInfo
+import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.server.SSLHandle
 import org.tobi29.scapes.engine.utils.Crashable
 import org.tobi29.scapes.engine.utils.EventDispatcher
@@ -44,6 +45,7 @@ class ScapesServer(source: WorldSource,
                    val serverInfo: ServerInfo,
                    ssl: SSLHandle,
                    crashHandler: Crashable) {
+    val connections: ConnectionManager
     val connection: ServerConnection
     val plugins: Plugins
     val taskExecutor: TaskExecutor
@@ -71,8 +73,9 @@ class ScapesServer(source: WorldSource,
         val serverTag = configMap["Server"]?.toMap()
         val socketTag = serverTag?.get("Socket")?.toMap() ?: TagMap()
         maxLoadingRadius = serverTag?.get("MaxLoadingRadius")?.toInt() ?: 0
+        connections = ConnectionManager(taskExecutor, 10)
+        connections.workers(socketTag["WorkerCount"]?.toInt() ?: 1)
         connection = ServerConnection(this, socketTag, ssl)
-        connection.workers(socketTag["WorkerCount"]?.toInt() ?: 1)
         extensions.init()
         format.plugins().init()
         format.plugins().plugins.forEach { it.initServer(this) }
@@ -178,7 +181,7 @@ class ScapesServer(source: WorldSource,
         assert(shutdownReason != ShutdownReason.RUNNING)
         stopped = true
         worlds.values.forEach { this.stopWorld(it) }
-        connection.stop()
+        connections.stop()
         taskExecutor.shutdown()
         format.dispose()
     }
