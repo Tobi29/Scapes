@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 apply from: "$rootDir/resources/scapesengineapplication.gradle"
 apply plugin: ScapesEngineApplicationLinux
 apply plugin: ScapesEngineApplicationMacOSX
@@ -39,9 +38,7 @@ dependencies {
 
     runtime rootProject.ext.scapesEngineNIOFileSystem
     runtime rootProject.ext.scapesEngineJVMSSLProvider
-    runtime rootProject.ext.log4jAPI
-    runtime rootProject.ext.log4jCore
-    runtime rootProject.ext.log4jSLF4J
+    runtime rootProject.ext.slf4jSimple
     runtimeLinux32 rootProject.ext.swtLinux32
     runtimeLinux64 rootProject.ext.swtLinux64
     runtimeMacOSX rootProject.ext.swtMacOSX

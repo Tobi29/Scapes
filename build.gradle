@@ -82,6 +82,7 @@ ext {
 
     kotlinLogging = "io.github.microutils:kotlin-logging:$kotlinLoggingVersion"
     slf4jAPI = "org.slf4j:slf4j-api:$slf4jVersion"
+    slf4jSimple = "org.slf4j:slf4j-simple:$slf4jVersion"
     kotlinSTD = "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     kotlinTest = "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
     lwjgl = "org.lwjgl:lwjgl:$lwjglVersion"

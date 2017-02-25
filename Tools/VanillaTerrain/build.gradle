@@ -39,9 +39,7 @@ dependencies {
     compileOnly rootProject.ext.swtWindows32
 
     runtime rootProject.ext.scapesEngineNIOFileSystem
-    runtime rootProject.ext.log4jAPI
-    runtime rootProject.ext.log4jCore
-    runtime rootProject.ext.log4jSLF4J
+    runtime rootProject.ext.slf4jSimple
     runtimeLinux32 rootProject.ext.swtLinux32
     runtimeLinux64 rootProject.ext.swtLinux64
     runtimeMacOSX rootProject.ext.swtMacOSX
