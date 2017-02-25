@@ -26,7 +26,6 @@ import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.generator.GeneratorOutput
 import org.tobi29.scapes.chunk.terrain.TerrainChunk
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.forEach
 import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.engine.utils.limit
 import org.tobi29.scapes.engine.utils.math.abs
@@ -96,9 +95,9 @@ class TerrainInfiniteServer(override val world: WorldServer,
                     }
                     for (player in players) {
                         val loadArea = Vector3i(player.getCurrentPos() / 16.0)
-                        requiredChunks.forEach({
+                        requiredChunks.asSequence().filter {
                             !hasChunk(it.x, it.y)
-                        }) { loadingChunks.add(it) }
+                        }.forEach { loadingChunks.add(it) }
                         val newChunks: List<Vector2i>
                         if (loadingChunks.size > 64) {
                             newChunks = loadingChunks.asSequence().sortedBy {

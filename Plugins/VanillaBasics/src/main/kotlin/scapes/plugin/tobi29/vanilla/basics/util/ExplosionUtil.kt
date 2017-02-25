@@ -15,7 +15,6 @@
  */
 package scapes.plugin.tobi29.vanilla.basics.util
 
-import java8.util.Maps
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
@@ -25,6 +24,7 @@ import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.filterMap
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.*
+import org.tobi29.scapes.engine.utils.putAbsent
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobFlyingBlockServer
@@ -90,7 +90,7 @@ fun TerrainServer.TerrainMutable.explosionBlockPush(
                 val location = locations.push().apply {
                     set(xxx, yyy, zzz)
                 }
-                val previous = Maps.putIfAbsent(set, location, location)
+                val previous = set.putAbsent(location, location)
                 val type: BlockType
                 val data: Int
                 if (previous == null) {

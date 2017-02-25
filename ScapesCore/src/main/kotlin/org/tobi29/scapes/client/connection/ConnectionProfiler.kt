@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.client.connection
 
-import java8.util.concurrent.ConcurrentMaps
+import org.tobi29.scapes.engine.utils.computeAbsent
 import org.tobi29.scapes.engine.utils.readOnly
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
@@ -26,8 +26,8 @@ class ConnectionProfiler {
 
     fun packet(packet: Any,
                size: Long) {
-        ConcurrentMaps.computeIfAbsent(bytesMut,
-                packet::class.java) { AtomicLong() }.addAndGet(size)
+        bytesMut.computeAbsent(packet::class.java) { AtomicLong() }.addAndGet(
+                size)
     }
 
     fun clear() {

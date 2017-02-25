@@ -18,7 +18,6 @@ package org.tobi29.scapes.entity.server
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.filterMap
-import org.tobi29.scapes.engine.utils.forEach
 import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
@@ -62,7 +61,9 @@ class MobItemServer(world: WorldServer,
         if (pickupwait <= 0) {
             pickupwait = 0.0
             val aabb = getAABB().grow(0.8, 0.8, 0.4)
-            world.players().forEach({ aabb.overlay(it.getAABB()) }) { entity ->
+            world.players().asSequence().filter {
+                aabb.overlay(it.getAABB())
+            }.forEach { entity ->
                 world.playSound("Scapes:sound/entity/mob/Item.ogg", this)
                 entity.inventories().modify("Container") { inventory ->
                     item.setAmount(item.amount() - inventory.add(item))

@@ -16,8 +16,6 @@
 
 package org.tobi29.scapes.plugins
 
-import java8.util.Spliterators
-import java8.util.concurrent.ForkJoinPool
 import java.security.*
 import java.util.concurrent.ThreadLocalRandom
 
@@ -73,8 +71,6 @@ object Sandbox {
 
     fun preload() {
         // Preload these to avoid permission errors when plugins trip into these
-        Spliterators.emptySpliterator<Any>()
-        ForkJoinPool.commonPool()
         ThreadLocalRandom.current()
     }
 

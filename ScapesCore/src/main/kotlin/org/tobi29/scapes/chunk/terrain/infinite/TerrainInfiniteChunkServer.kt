@@ -21,8 +21,6 @@ import org.tobi29.scapes.block.UpdateBlockUpdate
 import org.tobi29.scapes.block.UpdateBlockUpdateUpdateTile
 import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.GeneratorOutput
-import org.tobi29.scapes.engine.utils.filterMap
-import org.tobi29.scapes.engine.utils.forEach
 import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
@@ -217,7 +215,8 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
             map["BlockLight"]?.toList()?.let { bLight.read(it) }
         }
         val oldTick = map["Tick"]?.toLong() ?: 0L
-        map["Entities"]?.toList()?.asSequence()?.filterMap<TagMap>()?.forEach { tag ->
+        map["Entities"]?.toList()?.asSequence()?.mapNotNull(
+                Tag::toMap)?.forEach { tag ->
             EntityServer.make(tag["ID"]?.toInt(),
                     terrain2.world)?.let { entity ->
                 tag["UUID"]?.toUUID()?.let { entity.setEntityID(it) }
@@ -229,7 +228,8 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                 }
             }
         }
-        map["Updates"]?.toList()?.asSequence()?.filterMap<TagMap>()?.forEach { tag ->
+        map["Updates"]?.toList()?.asSequence()?.mapNotNull(
+                Tag::toMap)?.forEach { tag ->
             var xy = tag["PosXY"]?.toInt() ?: 0
             if (xy < 0) {
                 xy += 256
@@ -273,11 +273,11 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
             }
             map["Updates"] = TagList {
                 synchronized(delayedUpdates) {
-                    delayedUpdates.forEach({ update ->
+                    delayedUpdates.asSequence().filter { update ->
                         update.isValidOn(
                                 typeG(update.x(), update.y(), update.z()),
                                 terrain2)
-                    }) { update ->
+                    }.forEach { update ->
                         add(TagMap {
                             this["ID"] = update.id(registry)
                             this["Delay"] = update.delay()

@@ -71,10 +71,6 @@
 -dontwarn javazoom.jl.player.PlayerApplet
 -keep class javazoom.jl.decoder.JavaLayerUtils
 
-# Java8
--dontnote java8.util.**
--dontwarn build.IgnoreJava8API
-
 # ALAN
 -keep class paulscode.android.sound.ALAN
 

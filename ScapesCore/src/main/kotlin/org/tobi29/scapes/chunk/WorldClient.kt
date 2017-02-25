@@ -26,7 +26,6 @@ import org.tobi29.scapes.client.states.scenes.SceneScapesVoxelWorld
 import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.graphics.BlendingMode
 import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.utils.forEach
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.engine.utils.io.tag.mapMut
@@ -277,10 +276,12 @@ class WorldClient(val connection: ClientConnection,
                 playerModel?.render(gl, this, cam, sEntity)
             }
             val aabb = AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-            entityModels.values.forEach({
+            entityModels.values.asSequence().filter {
                 it.shapeAABB(aabb)
                 cam.frustum.inView(aabb) != 0
-            }) { it.render(gl, this, cam, sEntity) }
+            }.forEach {
+                it.render(gl, this, cam, sEntity)
+            }
             scene.terrainTextureRegistry().texture.bind(gl)
             terrain.renderer.renderAlpha(gl, sTerrain1, sTerrain2,
                     cam)

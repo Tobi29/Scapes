@@ -15,10 +15,10 @@
  */
 package org.tobi29.scapes.chunk.data
 
-import org.tobi29.scapes.engine.utils.filterMap
 import org.tobi29.scapes.engine.utils.io.tag.ReadWriteTagList
 import org.tobi29.scapes.engine.utils.io.tag.Tag
 import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.toMap
 
 class ChunkData(private val xSectionBits: Int,
                 private val ySectionBits: Int,
@@ -96,7 +96,7 @@ class ChunkData(private val xSectionBits: Int,
     }
 
     fun read(tags: List<Tag>) {
-        val iterator = tags.asSequence().filterMap<TagMap>().iterator()
+        val iterator = tags.asSequence().mapNotNull(Tag::toMap).iterator()
         for (i in data.indices) {
             if (iterator.hasNext()) {
                 data[i].read(iterator.next())

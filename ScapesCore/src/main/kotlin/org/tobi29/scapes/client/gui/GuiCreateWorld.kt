@@ -23,7 +23,6 @@ import org.tobi29.scapes.engine.graphics.TextureFilter
 import org.tobi29.scapes.engine.graphics.TextureWrap
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.resource.Resource
-import org.tobi29.scapes.engine.utils.forEach
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.hash
 import org.tobi29.scapes.engine.utils.io.BufferedReadChannelStream
@@ -126,7 +125,7 @@ class GuiCreateWorld(state: GameState,
         init {
             val scrollPane = pane.addVert(16.0, 5.0, -1.0, 350.0
             ) { GuiComponentScrollPane(it, 70) }.viewport
-            plugins.forEach({ plugin -> plugin.parent() == parent }) { plugin ->
+            plugins.asSequence().filter { it.parent() == parent }.forEach { plugin ->
                 scrollPane.addVert(0.0, 0.0, -1.0, 70.0) { Element(it, plugin) }
             }
         }

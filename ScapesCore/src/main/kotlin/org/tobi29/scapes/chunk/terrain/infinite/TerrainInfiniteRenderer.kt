@@ -22,7 +22,6 @@ import org.tobi29.scapes.chunk.terrain.TerrainRenderer
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.ThreadLocal
-import org.tobi29.scapes.engine.utils.forEach
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.min
@@ -305,9 +304,9 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
             cullingPool1.push().set(x - 1, y, z, chunk, chunk.rendererChunk())
         }
         while (cullingPool1.isNotEmpty()) {
-            cullingPool1.forEach({ !it.rendererChunk.isCulled(it.z) }) {
-                checkVisible(it, cullingPool2)
-            }
+            cullingPool1.asSequence().filter {
+                !it.rendererChunk.isCulled(it.z)
+            }.forEach { checkVisible(it, cullingPool2) }
             val swap = cullingPool1
             swap.reset()
             cullingPool1 = cullingPool2
