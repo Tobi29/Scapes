@@ -21,8 +21,7 @@ import java.util.concurrent.ThreadLocalRandom
 
 object Sandbox {
     private val whitelist = packageAccess("java.**", "kotlin.**",
-            "org.tobi29.scapes.**", "scapes.plugin.**", "org.slf4j.**",
-            "java8.**")
+            "org.tobi29.scapes.**", "scapes.plugin.**", "org.slf4j.**")
     private val permission = RuntimePermission("scapes.restrictedPkg")
     private var sandboxed = false
 
