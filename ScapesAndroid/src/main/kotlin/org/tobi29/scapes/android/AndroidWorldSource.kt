@@ -77,7 +77,7 @@ class AndroidWorldSource(context: Context,
             override fun pluginFiles(): List<PluginFile> {
                 return listOf(PluginFile(
                         ClasspathResource(javaClass.classLoader,
-                                "Plugin.json")))
+                                "scapes/plugin/Plugin.json")))
             }
         }
     }

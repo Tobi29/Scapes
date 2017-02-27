@@ -115,7 +115,8 @@ class GuiPlugins(state: GameState,
                         zipFile(it).use { zip ->
                             val stream = BufferedReadChannelStream(
                                     Channels.newChannel(zip.getInputStream(
-                                            zip.getEntry("Icon.png"))))
+                                            zip.getEntry(
+                                                    "scapes/plugin/Icon.png"))))
                             val image = decodePNG(stream) {
                                 state.engine.allocate(it)
                             }

@@ -46,9 +46,11 @@ class PluginFile {
         this.path = path
         checksum = read(path) { checksum(it) }
         try {
-            val pluginMap = zipFile(path).use { zip -> readJSON(
-                    BufferedReadChannelStream(Channels.newChannel(
-                            zip.getInputStream(zip.getEntry("Plugin.json")))))
+            val pluginMap = zipFile(path).use { zip ->
+                readJSON(
+                        BufferedReadChannelStream(Channels.newChannel(
+                                zip.getInputStream(zip.getEntry(
+                                        "scapes/plugin/Plugin.json")))))
             }
             id = pluginMap["ID"].toString()
             name = pluginMap["Name"].toString()

@@ -50,7 +50,7 @@ constructor(files: List<PluginFile>,
             classLoader = null
             val classLoader = Plugins::class.java.classLoader
             val file = PluginFile(
-                    ClasspathResource(classLoader, "Plugin.json"))
+                    ClasspathResource(classLoader, "scapes/plugin/Plugin.json"))
             load(file.plugin(classLoader))
         } else {
             classLoader = PluginClassLoader(paths)
@@ -122,9 +122,12 @@ constructor(files: List<PluginFile>,
         if (!init) {
             registry.registryTypes({ registry ->
                 registry.addAsymSupplier("Core", "Entity", 0, Int.MAX_VALUE)
-                registry.addAsymSupplier("Core", "Environment", 0, Int.MAX_VALUE)
-                registry.addSupplier("Core", "Packet", 0, Short.MAX_VALUE.toInt())
-                registry.addSupplier("Core", "Update", 0, Short.MAX_VALUE.toInt())
+                registry.addAsymSupplier("Core", "Environment", 0,
+                        Int.MAX_VALUE)
+                registry.addSupplier("Core", "Packet", 0,
+                        Short.MAX_VALUE.toInt())
+                registry.addSupplier("Core", "Update", 0,
+                        Short.MAX_VALUE.toInt())
                 pluginsMut.forEach { it.registryType(registry) }
             })
             registry.init(worldType)
@@ -151,7 +154,7 @@ constructor(files: List<PluginFile>,
         @Throws(IOException::class)
         fun embedded(): List<PluginFile> {
             val embedded = ClasspathResource(Plugins::class.java.classLoader,
-                    "Plugin.json")
+                    "scapes/plugin/Plugin.json")
             if (embedded.exists()) {
                 return listOf(PluginFile(embedded))
             }
