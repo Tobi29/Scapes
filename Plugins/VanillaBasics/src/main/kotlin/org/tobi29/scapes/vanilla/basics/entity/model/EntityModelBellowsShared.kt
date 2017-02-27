@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+package org.tobi29.scapes.vanilla.basics.entity.model
 
-apply from: "$rootDir/resources/scapesenginemodulekotlin.gradle"
+import org.tobi29.scapes.engine.ScapesEngine
+import org.tobi29.scapes.entity.model.Box
 
-dependencies {
-    compileOnly project(":ScapesCore")
-}
+class EntityModelBellowsShared(engine: ScapesEngine) {
+    val side: Box
+    val middle: Box
+    val pipe: Box
 
-def oldJarTask = tasks.jar
-task jar(type: ShadowJar, dependsOn: oldJarTask.dependsOn, overwrite: true) {
-    group = oldJarTask.group
-    description = oldJarTask.description
-    from sourceSets.main.output
-    configurations = [project.configurations.runtime]
-    mergeServiceFiles()
-    relocate("org.tobi29.scapes.vanilla.basics",
-            "scapes.plugin.tobi29.vanilla.basics")
+    init {
+        side = Box(engine, 0.0625f, -7f, -7f, -1f, 7f, 7f, 1f, 0f, 0f)
+        middle = Box(engine, 0.0625f, -6f, -6f, -7f, 6f, 6f, 7f, 0f, 0f)
+        pipe = Box(engine, 0.0625f, -2f, -2f, -16f, 2f, 2f, 0f, 0f, 0f)
+    }
 }

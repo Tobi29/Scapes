@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+package org.tobi29.scapes.vanilla.basics.generator.tree
 
-apply from: "$rootDir/resources/scapesenginemodulekotlin.gradle"
+import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import java.util.*
 
-dependencies {
-    compileOnly project(":ScapesCore")
-}
-
-def oldJarTask = tasks.jar
-task jar(type: ShadowJar, dependsOn: oldJarTask.dependsOn, overwrite: true) {
-    group = oldJarTask.group
-    description = oldJarTask.description
-    from sourceSets.main.output
-    configurations = [project.configurations.runtime]
-    mergeServiceFiles()
-    relocate("org.tobi29.scapes.vanilla.basics",
-            "scapes.plugin.tobi29.vanilla.basics")
+interface Tree {
+    fun gen(terrain: TerrainServer.TerrainMutable,
+            x: Int,
+            y: Int,
+            z: Int,
+            materials: VanillaMaterial,
+            random: Random)
 }

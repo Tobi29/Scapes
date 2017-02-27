@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+package org.tobi29.scapes.vanilla.basics.entity.particle
 
-apply from: "$rootDir/resources/scapesenginemodulekotlin.gradle"
+import org.tobi29.scapes.entity.particle.ParticleInstance
 
-dependencies {
-    compileOnly project(":ScapesCore")
-}
-
-def oldJarTask = tasks.jar
-task jar(type: ShadowJar, dependsOn: oldJarTask.dependsOn, overwrite: true) {
-    group = oldJarTask.group
-    description = oldJarTask.description
-    from sourceSets.main.output
-    configurations = [project.configurations.runtime]
-    mergeServiceFiles()
-    relocate("org.tobi29.scapes.vanilla.basics",
-            "scapes.plugin.tobi29.vanilla.basics")
+class ParticleInstanceTornado : ParticleInstance() {
+    var dir = 0.0f
+    var baseSpin = 0.0f
+    var widthRandom = 0.0f
+    var spin = 0.0f
+    var width = 0.0f
+    var puff = 0.0f
 }

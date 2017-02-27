@@ -13,22 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.tobi29.scapes.vanilla.basics.material.item
 
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.vanilla.basics.util.Alloy
 
-apply from: "$rootDir/resources/scapesenginemodulekotlin.gradle"
+interface ItemMetal : ItemHeatable {
+    fun alloy(item: ItemStack): Alloy
 
-dependencies {
-    compileOnly project(":ScapesCore")
-}
+    fun setAlloy(item: ItemStack,
+                 alloy: Alloy)
 
-def oldJarTask = tasks.jar
-task jar(type: ShadowJar, dependsOn: oldJarTask.dependsOn, overwrite: true) {
-    group = oldJarTask.group
-    description = oldJarTask.description
-    from sourceSets.main.output
-    configurations = [project.configurations.runtime]
-    mergeServiceFiles()
-    relocate("org.tobi29.scapes.vanilla.basics",
-            "scapes.plugin.tobi29.vanilla.basics")
+    override fun meltingPoint(item: ItemStack): Float {
+        return alloy(item).meltingPoint().toFloat()
+    }
 }

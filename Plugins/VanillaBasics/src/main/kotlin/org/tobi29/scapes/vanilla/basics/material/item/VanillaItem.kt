@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+package org.tobi29.scapes.vanilla.basics.material.item
 
-apply from: "$rootDir/resources/scapesenginemodulekotlin.gradle"
+import org.tobi29.scapes.block.Material
+import org.tobi29.scapes.vanilla.basics.VanillaBasics
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 
-dependencies {
-    compileOnly project(":ScapesCore")
-}
+abstract class VanillaItem protected constructor(protected val materials: VanillaMaterial,
+                                                 nameID: String) : Material(
+        materials.registry, nameID) {
+    protected val plugin: VanillaBasics
 
-def oldJarTask = tasks.jar
-task jar(type: ShadowJar, dependsOn: oldJarTask.dependsOn, overwrite: true) {
-    group = oldJarTask.group
-    description = oldJarTask.description
-    from sourceSets.main.output
-    configurations = [project.configurations.runtime]
-    mergeServiceFiles()
-    relocate("org.tobi29.scapes.vanilla.basics",
-            "scapes.plugin.tobi29.vanilla.basics")
+    init {
+        plugin = materials.plugin
+    }
 }

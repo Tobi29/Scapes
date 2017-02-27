@@ -14,21 +14,8 @@
  * limitations under the License.
  */
 
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+package org.tobi29.scapes.vanilla.basics.generator
 
-apply from: "$rootDir/resources/scapesenginemodulekotlin.gradle"
-
-dependencies {
-    compileOnly project(":ScapesCore")
-}
-
-def oldJarTask = tasks.jar
-task jar(type: ShadowJar, dependsOn: oldJarTask.dependsOn, overwrite: true) {
-    group = oldJarTask.group
-    description = oldJarTask.description
-    from sourceSets.main.output
-    configurations = [project.configurations.runtime]
-    mergeServiceFiles()
-    relocate("org.tobi29.scapes.vanilla.basics",
-            "scapes.plugin.tobi29.vanilla.basics")
+interface EnvironmentClimate {
+    fun climate(): ClimateGenerator
 }
