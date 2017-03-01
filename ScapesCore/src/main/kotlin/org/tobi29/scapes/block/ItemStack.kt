@@ -94,10 +94,13 @@ class ItemStack(private var material: Material,
 
     fun canStack(add: ItemStack,
                  amount: Int): Int {
-        if ((add.material !== material || add.data != data ||
+        if ((add.material != material ||
+                add.data != data ||
                 amount + this.amount > min(material.maxStackSize(this),
-                        add.material.maxStackSize(add))) &&
-                material !== registry.air() && this.amount > 0) {
+                        add.material.maxStackSize(add)) ||
+                metaData != add.metaData) &&
+                material != registry.air() &&
+                this.amount > 0) {
             return 0
         }
         return amount
@@ -135,8 +138,7 @@ class ItemStack(private var material: Material,
     fun metaData(category: String) = metaData.mapMut(category)
 
     fun stack(add: ItemStack): Int {
-        val amount = min(min(material.maxStackSize(this),
-                add.material.maxStackSize(add)) - this.amount, add.amount)
+        val amount = canStack(add)
         if (amount > 0) {
             return stack(add, amount)
         }
@@ -148,10 +150,7 @@ class ItemStack(private var material: Material,
         if (amount < 0) {
             throw IllegalArgumentException("Negative amount: " + amount)
         }
-        if ((add.material !== material || add.data != data ||
-                amount + this.amount > min(material.maxStackSize(this),
-                        add.material.maxStackSize(add))) &&
-                material !== registry.air() && this.amount > 0) {
+        if (canStack(add, amount) < amount) {
             return 0
         }
         material = add.material
