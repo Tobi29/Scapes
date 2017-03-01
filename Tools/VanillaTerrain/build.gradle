@@ -35,7 +35,8 @@ application {
 
 dependencies {
     compile rootProject.ext.scapesEngineSWTUtils
-    compile project(":Plugins:VanillaBasics")
+    compile project(":ScapesCore")
+    compile project(":Plugins:VanillaBasics:VanillaBasicsGenerator")
     compileOnly rootProject.ext.swtWindows32
 
     runtime rootProject.ext.scapesEngineNIOFileSystem

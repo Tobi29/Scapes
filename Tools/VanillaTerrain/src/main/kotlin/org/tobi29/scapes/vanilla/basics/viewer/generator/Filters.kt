@@ -16,9 +16,9 @@
 package org.tobi29.scapes.vanilla.basics.viewer.generator
 
 import org.tobi29.scapes.engine.utils.math.clamp
-import scapes.plugin.tobi29.vanilla.basics.generator.BiomeGenerator
-import scapes.plugin.tobi29.vanilla.basics.generator.ClimateGenerator
-import scapes.plugin.tobi29.vanilla.basics.generator.TerrainGenerator
+import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
+import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator
+import org.tobi29.scapes.vanilla.basics.generator.TerrainGenerator
 
 fun terrain(
         terrainGenerator: TerrainGenerator): TerrainViewerCanvas.ColorSupplier {

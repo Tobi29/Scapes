@@ -19,7 +19,8 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 apply from: "$rootDir/resources/scapesenginemodulekotlin.gradle"
 
 dependencies {
-    compileOnly project(":ScapesCore")
+    compile project(":ScapesCore")
+    compile project(":Plugins:VanillaBasics:VanillaBasicsCore")
 }
 
 def oldJarTask = tasks.jar
@@ -27,8 +28,16 @@ task jar(type: ShadowJar, dependsOn: oldJarTask.dependsOn, overwrite: true) {
     group = oldJarTask.group
     description = oldJarTask.description
     from sourceSets.main.output
-    configurations = [project.configurations.runtime]
+    from((project.configurations.runtime -
+            (project(":ScapesCore").configurations.getByName("runtime") +
+                    files(project(":ScapesCore").tasks.getByName("jar")))).
+            collect {
+                it.isDirectory() ? it : zipTree(it)
+            })
     mergeServiceFiles()
     relocate("org.tobi29.scapes.vanilla.basics",
             "scapes.plugin.tobi29.vanilla.basics")
+    dependencies {
+        exclude(project(':ScapesCore'))
+    }
 }
