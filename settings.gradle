@@ -19,6 +19,8 @@ include "ScapesCore:MariaDBStorage"
 include "ScapesCore:SQLiteStorage"
 include "ScapesDesktop"
 include "Plugins:VanillaBasics"
+include "Plugins:VanillaBasics:VanillaBasicsCore"
+include "Plugins:VanillaBasics:VanillaBasicsGenerator"
 include "Tools:ControlPanel"
 include "Tools:VanillaTerrain"
 // includeBuild("../ScapesEngine")
