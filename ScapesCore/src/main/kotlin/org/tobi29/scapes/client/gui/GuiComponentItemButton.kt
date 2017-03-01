@@ -18,24 +18,23 @@ package org.tobi29.scapes.client.gui
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.engine.gui.GuiComponentButton
+import org.tobi29.scapes.engine.gui.GuiComponentText
+import org.tobi29.scapes.engine.gui.GuiContainerRow
 import org.tobi29.scapes.engine.gui.GuiLayoutData
 
 class GuiComponentItemButton(parent: GuiLayoutData,
                              item: ItemStack) : GuiComponentButton(
         parent) {
-    private val item: GuiComponentItem
+    val item: GuiComponentItem = addSubHori(0.0, 0.0, -1.0, -1.0) {
+        GuiComponentItem(it, item)
+    }
 
-    init {
-        this.item = addSubHori(0.0, 0.0, -1.0, -1.0) {
-            GuiComponentItem(it, item)
+    override fun tooltip(p: GuiContainerRow): (() -> Unit)? {
+        val text = p.addVert(15.0, 15.0, -1.0, 16.0) {
+            GuiComponentText(it, "")
         }
-    }
-
-    fun item(): ItemStack {
-        return item.item()
-    }
-
-    fun setItem(item: ItemStack) {
-        this.item.setItem(item)
+        return {
+            text.text = item.item().name()
+        }
     }
 }

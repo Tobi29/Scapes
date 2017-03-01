@@ -79,7 +79,7 @@ ext {
     commonsCLIVersion = "1.3.1"
     jnaVersion = "4.3.0"
     androidBuildVersion = "2.3.0-beta4"
-    scapesEngineVersion = "02b45e3aed"
+    scapesEngineVersion = "4c3e1ee6e1"
     scapesEngineAndroidVersion = "0cabe916e1"
 
     kotlinLogging = "io.github.microutils:kotlin-logging:$kotlinLoggingVersion"
