@@ -14,25 +14,9 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.chunk.generator
+package org.tobi29.scapes.block
 
-import org.tobi29.scapes.block.BlockType
-import org.tobi29.scapes.block.GameRegistry
-import org.tobi29.scapes.block.Update
-import java.util.*
-
-class GeneratorOutput(height: Int) {
-    val type = IntArray(height)
-    val data = IntArray(height)
-    val updates = ArrayList<(GameRegistry) -> Update>()
-
-    fun type(z: Int,
-             type: BlockType) {
-        this.type[z] = type.id
-    }
-
-    fun data(z: Int,
-             data: Int) {
-        this.data[z] = data
-    }
+class UpdateType(val id: Int,
+                 private val instance: (UpdateType) -> Update) {
+    fun create() = instance(this)
 }

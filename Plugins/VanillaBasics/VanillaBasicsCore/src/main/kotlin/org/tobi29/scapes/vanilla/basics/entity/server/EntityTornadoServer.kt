@@ -34,7 +34,7 @@ import java.util.concurrent.ThreadLocalRandom
 
 class EntityTornadoServer(world: WorldServer,
                           pos: Vector3d = Vector3d.ZERO) : EntityServer(
-        world, pos) {
+        "vanilla.basics.entity.Tornado", world, pos) {
     private val positionHandler: MobPositionSenderServer
     private var time = 0.0
     private var dir = 0.0

@@ -208,8 +208,9 @@ class ChunkGeneratorOverworld(random: Random,
                                 if (generator.lavaChance > 0 && random.nextInt(
                                         generator.lavaChance) == 0) {
                                     type = materials.lava
-                                    output.updates.add(
-                                            UpdateLavaFlow().set(x, y, zz, 0.0))
+                                    output.updates.add {
+                                        UpdateLavaFlow(it).set(x, y, zz, 0.0)
+                                    }
                                 } else {
                                     type = materials.stoneRaw
                                 }

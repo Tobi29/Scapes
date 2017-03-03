@@ -32,7 +32,8 @@ import java.util.concurrent.ThreadLocalRandom
 
 class EntityBloomeryClient constructor(world: WorldClient,
                                        pos: Vector3d = Vector3d.ZERO) : EntityAbstractFurnaceClient(
-        world, pos, Inventory(world.registry, 14), 4, 9) {
+        "vanilla.basics.entity.Bloomery", world, pos,
+        Inventory(world.registry, 14), 4, 9) {
     private var particleWait = 0.1
     var hasBellows = false
         private set

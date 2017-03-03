@@ -179,11 +179,11 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                         updateTile: Boolean) {
         if (updateTile) {
             addDelayedUpdate(
-                    UpdateBlockUpdateUpdateTile().set(x + posBlock.x,
-                            y + posBlock.y, z, 0.0))
+                    UpdateBlockUpdateUpdateTile(terrain2.world.registry).set(
+                            x + posBlock.x, y + posBlock.y, z, 0.0))
         } else {
-            addDelayedUpdate(UpdateBlockUpdate().set(x + posBlock.x,
-                    y + posBlock.y, z, 0.0))
+            addDelayedUpdate(UpdateBlockUpdate(terrain2.world.registry).set(
+                    x + posBlock.x, y + posBlock.y, z, 0.0))
         }
         if (state.id >= TerrainInfiniteChunk.State.SENDABLE.id) {
             val block = blockL(x, y, z)
@@ -218,8 +218,8 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
         val oldTick = map["Tick"]?.toLong() ?: 0L
         map["Entities"]?.toList()?.asSequence()?.mapNotNull(
                 Tag::toMap)?.forEach { tag ->
-            EntityServer.make(tag["ID"]?.toInt(),
-                    terrain2.world)?.let { entity ->
+            tag["ID"]?.toInt()?.let {
+                val entity = EntityServer.make(it, terrain2.world)
                 tag["UUID"]?.toUUID()?.let { entity.setEntityID(it) }
                 tag["Data"]?.toMap()?.let { entity.read(it) }
                 addEntity(entity)
@@ -267,7 +267,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                 entitiesMut.values.forEach { entity ->
                     add(TagMap {
                         this["UUID"] = entity.getUUID()
-                        this["ID"] = entity.id(registry)
+                        this["ID"] = entity.type.id
                         this["Data"] = TagMap { entity.write(this) }
                     })
                 }
@@ -280,7 +280,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                                 terrain2)
                     }.forEach { update ->
                         add(TagMap {
-                            this["ID"] = update.id(registry)
+                            this["ID"] = update.type.id
                             this["Delay"] = update.delay()
                             this["PosXY"] = (update.x() - posBlock.x or (update.y() - posBlock.y shl 4)).toByte()
                             this["PosZ"] = update.z()
@@ -311,7 +311,8 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                             }
                         }
                     }
-                    output.updates.forEach { addDelayedUpdate(it) }
+                    val registry = terrain2.world.registry
+                    output.updates.forEach { addDelayedUpdate(it(registry)) }
                     output.updates.clear()
                 }
             }

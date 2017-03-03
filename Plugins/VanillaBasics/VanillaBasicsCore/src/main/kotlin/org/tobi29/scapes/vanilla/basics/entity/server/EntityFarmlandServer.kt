@@ -31,7 +31,7 @@ class EntityFarmlandServer(world: WorldServer,
                            private var nutrientA: Float = 0.0f,
                            private var nutrientB: Float = 0.0f,
                            private var nutrientC: Float = 0.0f) : EntityServer(
-        world, pos) {
+        "vanilla.basics.entity.Farmland", world, pos) {
     private var time = 0.0f
     private var stage: Byte = 0
     private var cropType: CropType? = null

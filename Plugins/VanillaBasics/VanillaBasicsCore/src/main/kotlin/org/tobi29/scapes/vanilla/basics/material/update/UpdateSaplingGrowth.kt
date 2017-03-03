@@ -17,13 +17,18 @@
 package org.tobi29.scapes.vanilla.basics.material.update
 
 import org.tobi29.scapes.block.BlockType
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.Update
+import org.tobi29.scapes.block.UpdateType
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.TreeType
 import java.util.*
 
-class UpdateSaplingGrowth : Update() {
+class UpdateSaplingGrowth(type: UpdateType) : Update(type) {
+    constructor(registry: GameRegistry) : this(
+            of(registry, "vanilla.basics.update.SaplingGrowth"))
+
     override fun run(terrain: TerrainServer.TerrainMutable) {
         val plugin = terrain.world.plugins.plugin(
                 "VanillaBasics") as VanillaBasics

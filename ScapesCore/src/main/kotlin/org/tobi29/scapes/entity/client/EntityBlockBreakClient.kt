@@ -25,7 +25,7 @@ import org.tobi29.scapes.entity.model.EntityModelBlockBreak
 
 class EntityBlockBreakClient(world: WorldClient,
                              pos: Vector3d = Vector3d.ZERO) : EntityClient(
-        world, pos) {
+        "core.entity.BlockBreak", world, pos) {
     private var progress = 0.0
 
     override fun read(map: TagMap) {

@@ -33,10 +33,11 @@ import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.packets.PacketUpdateInventory
 import java.util.*
 
-abstract class EntityAbstractContainerServer(world: WorldServer,
+abstract class EntityAbstractContainerServer(id: String,
+                                             world: WorldServer,
                                              pos: Vector3d,
                                              inventory: Inventory) : EntityServer(
-        world, pos), EntityContainerServer {
+        id, world, pos), EntityContainerServer {
     protected val inventories: InventoryContainer
     protected val viewersMut = ArrayList<MobPlayerServer>()
     override val viewers = viewersMut.readOnly()

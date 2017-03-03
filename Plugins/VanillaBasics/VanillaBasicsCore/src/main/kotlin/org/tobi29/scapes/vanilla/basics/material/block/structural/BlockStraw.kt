@@ -26,7 +26,8 @@ import org.tobi29.scapes.vanilla.basics.material.block.BlockSimpleDataTextured
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateStrawDry
 import java.util.concurrent.ThreadLocalRandom
 
-class BlockStraw(materials: VanillaMaterial) : BlockSimpleDataTextured(materials,
+class BlockStraw(materials: VanillaMaterial) : BlockSimpleDataTextured(
+        materials,
         "vanilla.basics.block.Straw") {
 
     override fun place(terrain: TerrainServer.TerrainMutable,
@@ -36,8 +37,9 @@ class BlockStraw(materials: VanillaMaterial) : BlockSimpleDataTextured(materials
                        face: Face,
                        player: MobPlayerServer): Boolean {
         val random = ThreadLocalRandom.current()
-        terrain.addDelayedUpdate(UpdateStrawDry().set(x, y, z,
-                random.nextDouble() * 800.0 + 800.0))
+        terrain.addDelayedUpdate(
+                UpdateStrawDry(terrain.world.registry).set(x, y, z,
+                        random.nextDouble() * 800.0 + 800.0))
         return true
     }
 

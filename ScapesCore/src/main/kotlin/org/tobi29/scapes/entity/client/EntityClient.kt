@@ -16,21 +16,22 @@
 package org.tobi29.scapes.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.ListenerOwner
 import org.tobi29.scapes.engine.utils.ListenerOwnerHandle
 import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.Entity
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.model.EntityModel
-import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.packets.PacketEntityMetaData
 import java.util.*
 
-open class EntityClient(val world: WorldClient,
+open class EntityClient(id: String,
+                        val world: WorldClient,
                         pos: Vector3d) : Entity, ListenerOwner {
     val registry = world.registry
+    override val type = Entity.of(registry, id)
     protected val pos = MutableVector3d(pos)
     override val listenerOwner = ListenerOwnerHandle {
         !world.disposed() && world.hasEntity(this)
@@ -76,8 +77,8 @@ open class EntityClient(val world: WorldClient,
 
         fun make(id: Int,
                  world: WorldClient): EntityClient {
-            return world.registry.getAsymSupplier<WorldServer, EntityServer, WorldClient, EntityClient>(
-                    "Core", "Entity").get2(id)(world)
+            return world.registry.get<EntityType>("Core",
+                    "Entity")[id].createClient(world)
         }
     }
 }

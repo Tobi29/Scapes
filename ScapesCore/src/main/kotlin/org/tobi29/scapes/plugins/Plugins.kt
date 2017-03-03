@@ -121,12 +121,10 @@ constructor(files: List<PluginFile>,
     fun init() {
         if (!init) {
             registry.registryTypes({ registry ->
-                registry.addAsymSupplier("Core", "Entity", 0, Int.MAX_VALUE)
-                registry.addAsymSupplier("Core", "Environment", 0,
-                        Int.MAX_VALUE)
+                registry.add("Core", "Entity", 0, Int.MAX_VALUE)
+                registry.add("Core", "Environment", 0, Int.MAX_VALUE)
                 registry.add("Core", "Packet", 0, Short.MAX_VALUE.toInt())
-                registry.addSupplier("Core", "Update", 0,
-                        Short.MAX_VALUE.toInt())
+                registry.add("Core", "Update", 0, Short.MAX_VALUE.toInt())
                 pluginsMut.forEach { it.registryType(registry) }
             })
             registry.init(worldType)

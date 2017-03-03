@@ -17,52 +17,62 @@
 package org.tobi29.scapes.vanilla.basics
 
 import org.tobi29.scapes.block.GameRegistry
-import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.scapes.entity.client.EntityClient
-import org.tobi29.scapes.entity.server.EntityServer
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.vanilla.basics.entity.client.*
 import org.tobi29.scapes.vanilla.basics.entity.server.*
 
 internal fun registerEntities(registry: GameRegistry) {
-    registry.getAsymSupplier<WorldServer, EntityServer, WorldClient, EntityClient>(
-            "Core", "Entity").run {
-        reg({ MobPigServer(it) }, { MobPigClient(it) },
-                MobPigServer::class.java, "vanilla.basics.mob.Pig")
-        reg({ MobZombieServer(it) }, { MobZombieClient(it) },
-                MobZombieServer::class.java, "vanilla.basics.mob.Zombie")
-        reg({ MobSkeletonServer(it) }, { MobSkeletonClient(it) },
-                MobSkeletonServer::class.java, "vanilla.basics.mob.Skeleton")
-        reg({ MobBombServer(it) }, { MobBombClient(it) },
-                MobBombServer::class.java, "vanilla.basics.mob.Bomb")
-        reg({ EntityTornadoServer(it) }, { EntityTornadoClient(it) },
-                EntityTornadoServer::class.java,
-                "vanilla.basics.entity.Tornado")
-        reg({ EntityAlloyServer(it) }, { EntityAlloyClient(it) },
-                EntityAlloyServer::class.java, "vanilla.basics.entity.Alloy")
-        reg({ EntityAnvilServer(it) }, { EntityAnvilClient(it) },
-                EntityAnvilServer::class.java, "vanilla.basics.entity.Anvil")
-        reg({ EntityBellowsServer(it) }, { EntityBellowsClient(it) },
-                EntityBellowsServer::class.java,
-                "vanilla.basics.entity.Bellows")
-        reg({ EntityBloomeryServer(it) }, { EntityBloomeryClient(it) },
-                EntityBloomeryServer::class.java,
-                "vanilla.basics.entity.Bloomery")
-        reg({ EntityChestServer(it) }, { EntityChestClient(it) },
-                EntityChestServer::class.java, "vanilla.basics.entity.Chest")
-        reg({ EntityForgeServer(it) }, { EntityForgeClient(it) },
-                EntityForgeServer::class.java, "vanilla.basics.entity.Forge")
-        reg({ EntityFurnaceServer(it) }, { EntityFurnaceClient(it) },
-                EntityFurnaceServer::class.java,
-                "vanilla.basics.entity.Furnace")
-        reg({ EntityQuernServer(it) }, { EntityQuernClient(it) },
-                EntityQuernServer::class.java, "vanilla.basics.entity.Quern")
-        reg({ EntityResearchTableServer(it) },
-                { EntityResearchTableClient(it) },
-                EntityResearchTableServer::class.java,
-                "vanilla.basics.entity.ResearchTable")
-        reg({ EntityFarmlandServer(it) }, { EntityFarmlandClient(it) },
-                EntityFarmlandServer::class.java,
-                "vanilla.basics.entity.Farmland")
+    registry.get<EntityType>("Core", "Entity").run {
+        reg("vanilla.basics.mob.Pig") {
+            EntityType(it, { MobPigClient(it) }, { MobPigServer(it) })
+        }
+        reg("vanilla.basics.mob.Zombie") {
+            EntityType(it, { MobZombieClient(it) }, { MobZombieServer(it) })
+        }
+        reg("vanilla.basics.mob.Skeleton") {
+            EntityType(it, { MobSkeletonClient(it) }, { MobSkeletonServer(it) })
+        }
+        reg("vanilla.basics.mob.Bomb") {
+            EntityType(it, { MobBombClient(it) }, { MobBombServer(it) })
+        }
+        reg("vanilla.basics.entity.Tornado") {
+            EntityType(it, { EntityTornadoClient(it) },
+                    { EntityTornadoServer(it) })
+        }
+        reg("vanilla.basics.entity.Alloy") {
+            EntityType(it, { EntityAlloyClient(it) }, { EntityAlloyServer(it) })
+        }
+        reg("vanilla.basics.entity.Anvil") {
+            EntityType(it, { EntityAnvilClient(it) }, { EntityAnvilServer(it) })
+        }
+        reg("vanilla.basics.entity.Bellows") {
+            EntityType(it, { EntityBellowsClient(it) },
+                    { EntityBellowsServer(it) })
+        }
+        reg("vanilla.basics.entity.Bloomery") {
+            EntityType(it, { EntityBloomeryClient(it) },
+                    { EntityBloomeryServer(it) })
+        }
+        reg("vanilla.basics.entity.Chest") {
+            EntityType(it, { EntityChestClient(it) }, { EntityChestServer(it) })
+        }
+        reg("vanilla.basics.entity.Forge") {
+            EntityType(it, { EntityForgeClient(it) }, { EntityForgeServer(it) })
+        }
+        reg("vanilla.basics.entity.Furnace") {
+            EntityType(it, { EntityFurnaceClient(it) },
+                    { EntityFurnaceServer(it) })
+        }
+        reg("vanilla.basics.entity.Quern") {
+            EntityType(it, { EntityQuernClient(it) }, { EntityQuernServer(it) })
+        }
+        reg("vanilla.basics.entity.ResearchTable") {
+            EntityType(it, { EntityResearchTableClient(it) },
+                    { EntityResearchTableServer(it) })
+        }
+        reg("vanilla.basics.entity.Farmland") {
+            EntityType(it, { EntityFarmlandClient(it) },
+                    { EntityFarmlandServer(it) })
+        }
     }
 }

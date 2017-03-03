@@ -36,14 +36,15 @@ import org.tobi29.scapes.packets.PacketMobDamage
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-abstract class MobLivingServer(world: WorldServer,
+abstract class MobLivingServer(id: String,
+                               world: WorldServer,
                                pos: Vector3d,
                                speed: Vector3d,
                                aabb: AABB,
                                protected var health: Double,
                                protected var maxHealth: Double,
                                protected val viewField: Frustum,
-                               protected val hitField: Frustum) : MobServer(
+                               protected val hitField: Frustum) : MobServer(id,
         world, pos, speed, aabb) {
     protected val noticeListeners: MutableMap<String, (MobServer) -> Unit> = ConcurrentHashMap()
     protected val jumpListeners: MutableMap<String, () -> Unit> = ConcurrentHashMap()

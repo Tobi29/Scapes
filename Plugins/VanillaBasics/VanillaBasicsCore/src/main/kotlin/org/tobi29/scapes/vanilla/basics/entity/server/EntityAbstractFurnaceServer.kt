@@ -31,6 +31,7 @@ import org.tobi29.scapes.vanilla.basics.material.ItemFuel
 import org.tobi29.scapes.vanilla.basics.material.ItemHeatable
 
 abstract class EntityAbstractFurnaceServer(
+        id: String,
         world: WorldServer,
         pos: Vector3d,
         inventory: Inventory,
@@ -41,7 +42,7 @@ abstract class EntityAbstractFurnaceServer(
         protected val fuelHeat: Double,
         protected val fuelTier: Int,
         private val beforeHeatUpdate: (Inventory, ItemStack) -> Unit = { _, _ -> }
-) : EntityAbstractContainerServer(world, pos, inventory) {
+) : EntityAbstractContainerServer(id, world, pos, inventory) {
     protected val fuel = DoubleArray(fuel)
     protected val fuelTemperature = DoubleArray(fuel)
     var temperature = 0.0

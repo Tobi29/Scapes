@@ -17,22 +17,28 @@
 package org.tobi29.scapes.vanilla.basics
 
 import org.tobi29.scapes.block.GameRegistry
-import org.tobi29.scapes.block.Update
+import org.tobi29.scapes.block.UpdateType
 import org.tobi29.scapes.vanilla.basics.material.update.*
 
 internal fun registerUpdates(registry: GameRegistry) {
-    registry.getSupplier<GameRegistry, Update>("Core", "Update").run {
-        reg({ UpdateWaterFlow() }, UpdateWaterFlow::class.java,
-                "vanilla.basics.update.WaterFlow")
-        reg({ UpdateLavaFlow() }, UpdateLavaFlow::class.java,
-                "vanilla.basics.update.LavaFlow")
-        reg({ UpdateGrassGrowth() }, UpdateGrassGrowth::class.java,
-                "vanilla.basics.update.GrassGrowth")
-        reg({ UpdateFlowerGrowth() }, UpdateFlowerGrowth::class.java,
-                "vanilla.basics.update.FlowerGrowth")
-        reg({ UpdateSaplingGrowth() }, UpdateSaplingGrowth::class.java,
-                "vanilla.basics.update.SaplingGrowth")
-        reg({ UpdateStrawDry() }, UpdateStrawDry::class.java,
-                "vanilla.basics.update.StrawDry")
+    registry.get<UpdateType>("Core", "Update").run {
+        reg("vanilla.basics.update.WaterFlow") {
+            UpdateType(it, ::UpdateWaterFlow)
+        }
+        reg("vanilla.basics.update.LavaFlow") {
+            UpdateType(it, ::UpdateLavaFlow)
+        }
+        reg("vanilla.basics.update.GrassGrowth") {
+            UpdateType(it, ::UpdateGrassGrowth)
+        }
+        reg("vanilla.basics.update.FlowerGrowth") {
+            UpdateType(it, ::UpdateFlowerGrowth)
+        }
+        reg("vanilla.basics.update.SaplingGrowth") {
+            UpdateType(it, ::UpdateSaplingGrowth)
+        }
+        reg("vanilla.basics.update.StrawDry") {
+            UpdateType(it, ::UpdateStrawDry)
+        }
     }
 }

@@ -17,6 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.world
 
 import org.tobi29.scapes.chunk.EnvironmentServer
+import org.tobi29.scapes.chunk.EnvironmentType
 import org.tobi29.scapes.chunk.MobSpawner
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.generator.ChunkGenerator
@@ -50,7 +51,8 @@ import org.tobi29.scapes.vanilla.basics.packet.PacketLightning
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
-class EnvironmentOverworldServer(private val world: WorldServer,
+class EnvironmentOverworldServer(override val type: EnvironmentType,
+                                 private val world: WorldServer,
                                  plugin: VanillaBasics) : EnvironmentServer, EnvironmentClimate {
     private val materials: VanillaMaterial
     private val gen: ChunkGeneratorOverworld

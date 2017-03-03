@@ -52,7 +52,7 @@ abstract class MobPlayerServer(world: WorldServer,
                                protected val nickname: String,
                                private val skin: Checksum,
                                protected val connection: PlayerConnection) : MobLivingEquippedServer(
-        world, pos, speed, aabb, lives, maxLives, viewField,
+        "core.mob.Player", world, pos, speed, aabb, lives, maxLives, viewField,
         hitField), EntityContainerServer {
     protected val positionSenderOther: MobPositionSenderServer
     protected val viewersMut = ArrayList<MobPlayerServer>()

@@ -24,7 +24,8 @@ import org.tobi29.scapes.vanilla.basics.VanillaBasics
 
 class EntityFurnaceServer(world: WorldServer,
                           pos: Vector3d = Vector3d.ZERO) : EntityAbstractFurnaceServer(
-        world, pos, Inventory(world.registry, 8), 4, 3, 800.0, 1.001, 3.0, 0) {
+        "vanilla.basics.entity.Furnace", world, pos,
+        Inventory(world.registry, 8), 4, 3, 800.0, 1.001, 3.0, 0) {
 
     public override fun isValidOn(terrain: TerrainServer,
                                   x: Int,

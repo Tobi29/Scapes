@@ -35,17 +35,15 @@ class PacketEntityAdd : PacketAbstract, PacketClient {
     constructor(type: PacketType) : super(type)
 
     constructor(type: PacketType,
-                entity: EntityServer,
-                registry: GameRegistry) : super(type, entity.getCurrentPos()) {
+                entity: EntityServer) : super(type, entity.getCurrentPos()) {
         uuid = entity.getUUID()
-        id = entity.id(registry)
+        id = entity.type.id
         tag = TagMap { entity.write(this) }
     }
 
     constructor(registry: GameRegistry,
                 entity: EntityServer) : this(
-            Packet.make(registry, "core.packet.EntityAdd"), entity,
-            registry)
+            Packet.make(registry, "core.packet.EntityAdd"), entity)
 
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {

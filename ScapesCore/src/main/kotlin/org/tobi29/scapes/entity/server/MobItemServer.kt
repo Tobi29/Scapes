@@ -29,7 +29,8 @@ class MobItemServer(world: WorldServer,
                     item: ItemStack = ItemStack(
                             world.registry),
                     private var despawntime: Double = Double.NaN) : MobServer(
-        world, pos, speed, AABB(-0.2, -0.2, -0.2, 0.2, 0.2, 0.2)) {
+        "core.mob.Item", world, pos, speed,
+        AABB(-0.2, -0.2, -0.2, 0.2, 0.2, 0.2)) {
     private val item: ItemStack
     private var pickupwait = 1.0
     private var stackwait = 0.0

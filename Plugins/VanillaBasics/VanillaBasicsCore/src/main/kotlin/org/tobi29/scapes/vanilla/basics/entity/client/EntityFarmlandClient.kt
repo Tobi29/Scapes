@@ -20,6 +20,6 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.client.EntityClient
 
-class EntityFarmlandClient constructor(world: WorldClient,
-                                       pos: Vector3d = Vector3d.ZERO) : EntityClient(
-        world, pos)
+class EntityFarmlandClient(world: WorldClient,
+                           pos: Vector3d = Vector3d.ZERO) : EntityClient(
+        "vanilla.basics.entity.Farmland", world, pos)

@@ -83,8 +83,9 @@ class BlockSapling(materials: VanillaMaterial,
                        player: MobPlayerServer): Boolean {
         if (terrain.type(x, y, z - 1).isSolid(terrain, x, y, z - 1)) {
             val random = ThreadLocalRandom.current()
-            terrain.addDelayedUpdate(UpdateSaplingGrowth().set(x, y, z,
-                    random.nextDouble() * 3600.0 + 3600.0))
+            terrain.addDelayedUpdate(
+                    UpdateSaplingGrowth(terrain.world.registry).set(x, y, z,
+                            random.nextDouble() * 3600.0 + 3600.0))
             return true
         }
         return false

@@ -25,7 +25,8 @@ import org.tobi29.scapes.vanilla.basics.gui.GuiChestInventory
 
 class EntityChestClient(world: WorldClient,
                         pos: Vector3d = Vector3d.ZERO) : EntityAbstractContainerClient(
-        world, pos, Inventory(world.registry, 40)) {
+        "vanilla.basics.entity.Chest", world, pos,
+        Inventory(world.registry, 40)) {
 
     override fun gui(player: MobPlayerClientMain): Gui? {
         if (player is MobPlayerClientMainVB) {

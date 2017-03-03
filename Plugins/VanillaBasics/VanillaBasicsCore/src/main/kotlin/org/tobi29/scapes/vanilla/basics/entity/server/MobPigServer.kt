@@ -32,7 +32,8 @@ class MobPigServer(world: WorldServer,
                    speed: Vector3d = Vector3d.ZERO,
                    xRot: Double = 0.0,
                    zRot: Double = 0.0) : MobLivingServer(
-        world, pos, speed, AABB(-0.45, -0.45, -0.6875, 0.45, 0.45, 0.375), 20.0,
+        "vanilla.basics.mob.Pig", world, pos, speed,
+        AABB(-0.45, -0.45, -0.6875, 0.45, 0.45, 0.375), 20.0,
         30.0, Frustum(90.0, 1.0, 0.1, 24.0), Frustum(20.0, 0.5, 0.1, 0.2)) {
     private var soundWait = 0.0
     private var lookWait = 0.0

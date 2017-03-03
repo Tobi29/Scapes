@@ -41,8 +41,8 @@ abstract class MobPlayerClientMain(world: WorldClient,
                                    lives: Double,
                                    maxLives: Double,
                                    private val viewField: Frustum,
-                                   nickname: String) : MobPlayerClient(
-        world, pos, speed, aabb, lives, maxLives, nickname) {
+                                   nickname: String) : MobPlayerClient(world,
+        pos, speed, aabb, lives, maxLives, nickname) {
     val game = world.game
     protected lateinit var input: InputMode
     protected var flying = false

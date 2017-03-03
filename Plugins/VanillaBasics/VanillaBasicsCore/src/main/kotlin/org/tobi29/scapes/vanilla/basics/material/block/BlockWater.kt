@@ -144,8 +144,9 @@ class BlockWater(materials: VanillaMaterial) : VanillaBlock(materials,
                         data: Int) {
         if (!terrain.hasDelayedUpdate(x, y, z, UpdateWaterFlow::class.java)) {
             val random = ThreadLocalRandom.current()
-            terrain.addDelayedUpdate(UpdateWaterFlow().set(x, y, z,
-                    random.nextDouble() * 0.2 + 0.1))
+            terrain.addDelayedUpdate(
+                    UpdateWaterFlow(terrain.world.registry).set(x, y, z,
+                            random.nextDouble() * 0.2 + 0.1))
         }
     }
 

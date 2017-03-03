@@ -16,27 +16,9 @@
 
 package org.tobi29.scapes.chunk
 
-import org.tobi29.scapes.engine.utils.io.tag.TagMap
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-
-interface EnvironmentClient {
-    val type: EnvironmentType
-
-    fun read(map: TagMap)
-
-    fun tick(delta: Double)
-
-    fun sunLightReduction(x: Double,
-                          y: Double): Float
-
-    fun sunLightNormal(x: Double,
-                       y: Double): Vector3d
-
-    fun createSkybox(world: WorldClient): WorldSkybox
-
-    companion object {
-        fun make(world: WorldClient,
-                 id: Int) = Environment.of(world.registry, id).createClient(
-                world)
-    }
+class EnvironmentType(val id: Int,
+                      private val client: (EnvironmentType, WorldClient) -> EnvironmentClient,
+                      private val server: (EnvironmentType, WorldServer) -> EnvironmentServer) {
+    fun createClient(world: WorldClient) = client(this, world)
+    fun createServer(world: WorldServer) = server(this, world)
 }

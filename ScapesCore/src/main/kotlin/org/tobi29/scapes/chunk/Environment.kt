@@ -16,27 +16,13 @@
 
 package org.tobi29.scapes.chunk
 
-import org.tobi29.scapes.engine.utils.io.tag.TagMap
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.block.GameRegistry
 
-interface EnvironmentClient {
-    val type: EnvironmentType
+object Environment {
+    fun of(registry: GameRegistry,
+           id: Int) = registry.get<EnvironmentType>("Core", "Environment")[id]
 
-    fun read(map: TagMap)
-
-    fun tick(delta: Double)
-
-    fun sunLightReduction(x: Double,
-                          y: Double): Float
-
-    fun sunLightNormal(x: Double,
-                       y: Double): Vector3d
-
-    fun createSkybox(world: WorldClient): WorldSkybox
-
-    companion object {
-        fun make(world: WorldClient,
-                 id: Int) = Environment.of(world.registry, id).createClient(
-                world)
-    }
+    fun of(registry: GameRegistry,
+           id: String) = registry.get<EnvironmentType>("Core",
+            "Environment")[id]
 }

@@ -17,13 +17,18 @@
 package org.tobi29.scapes.vanilla.basics.material.update
 
 import org.tobi29.scapes.block.BlockType
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.Update
+import org.tobi29.scapes.block.UpdateType
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 
-class UpdateLavaFlow : Update() {
+class UpdateLavaFlow(type: UpdateType) : Update(type) {
+    constructor(registry: GameRegistry) : this(
+            of(registry, "vanilla.basics.update.LavaFlow"))
+
     private fun flow(terrain: TerrainServer.TerrainMutable,
                      x: Int,
                      y: Int,
@@ -33,9 +38,9 @@ class UpdateLavaFlow : Update() {
         val type = terrain.type(block)
         val dataHas = terrain.data(block)
         if (type.isReplaceable(terrain, x, y, z)) {
-            if (dataHas > 0 || type !== materials.lava) {
+            if (dataHas > 0 || type != materials.lava) {
                 var dataNeed = Int.MAX_VALUE
-                if (terrain.type(x, y, z + 1) === materials.lava) {
+                if (terrain.type(x, y, z + 1) == materials.lava) {
                     dataNeed = 1
                 } else {
                     dataNeed = data(terrain, x - 1, y, z, dataNeed, materials)
@@ -43,17 +48,16 @@ class UpdateLavaFlow : Update() {
                     dataNeed = data(terrain, x, y - 1, z, dataNeed, materials)
                     dataNeed = data(terrain, x, y + 1, z, dataNeed, materials)
                 }
-                dataNeed++
                 if (dataNeed <= 5) {
-                    if (dataNeed != dataHas || type !== materials.lava) {
-                        if (terrain.type(x, y, z) === materials.water) {
+                    if (dataNeed != dataHas || type != materials.lava) {
+                        if (terrain.type(x, y, z) == materials.water) {
                             terrain.typeData(x, y, z, materials.cobblestone,
                                     materials.plugin.stoneTypes.BASALT.id)
                         } else {
                             terrain.typeData(x, y, z, materials.lava, dataNeed)
                         }
                     }
-                } else if (type === materials.lava) {
+                } else if (type == materials.lava) {
                     terrain.typeData(x, y, z, materials.air, 0)
                 }
             }
@@ -72,7 +76,7 @@ class UpdateLavaFlow : Update() {
         val type = terrain.type(block)
         val data = terrain.data(block)
         if (type == materials.lava) {
-            val newData = max(0, data - 1) + 1
+            val newData = max(0, data - 1) + 2
             if (newData < oldData) {
                 return newData
             }

@@ -191,9 +191,8 @@ internal fun registerCommands(server: ScapesServer,
 
         val name = require(args.arg(0), "name")
         commands.add {
-            server.registerWorld(
-                    { world -> EnvironmentOverworldServer(world, plugin) },
-                    name, hash(name, server.seed))
+            server.registerWorld({ plugin.createEnvironment(it) }, name,
+                    hash(name, server.seed))
         }
     }
 

@@ -31,12 +31,12 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityFarmlandServer
-import org.tobi29.scapes.vanilla.basics.world.ClimateInfoLayer
-import org.tobi29.scapes.vanilla.basics.world.EnvironmentClimate
 import org.tobi29.scapes.vanilla.basics.material.CropType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateGrassGrowth
+import org.tobi29.scapes.vanilla.basics.world.ClimateInfoLayer
+import org.tobi29.scapes.vanilla.basics.world.EnvironmentClimate
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
@@ -262,8 +262,9 @@ class BlockGrass(materials: VanillaMaterial,
                 y) > z + 1 && !terrain.hasDelayedUpdate(x, y, z,
                 UpdateGrassGrowth::class.java)) {
             val random = ThreadLocalRandom.current()
-            terrain.addDelayedUpdate(UpdateGrassGrowth().set(x, y, z,
-                    random.nextDouble() * 400.0 + 1600.0))
+            terrain.addDelayedUpdate(
+                    UpdateGrassGrowth(terrain.world.registry).set(x, y, z,
+                            random.nextDouble() * 400.0 + 1600.0))
         }
     }
 

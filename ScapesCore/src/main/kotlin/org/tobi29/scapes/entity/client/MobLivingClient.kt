@@ -27,12 +27,13 @@ import org.tobi29.scapes.entity.model.MobLivingModel
 import org.tobi29.scapes.packets.PacketMobDamage
 import java.util.concurrent.ThreadLocalRandom
 
-abstract class MobLivingClient(world: WorldClient,
+abstract class MobLivingClient(id: String,
+                               world: WorldClient,
                                pos: Vector3d,
                                speed: Vector3d,
                                aabb: AABB,
                                protected var health: Double,
-                               protected var maxHealth: Double) : MobClient(
+                               protected var maxHealth: Double) : MobClient(id,
         world, pos, speed, aabb) {
     protected var footStep = 0.0
     protected var invincibleTicks = 0.0

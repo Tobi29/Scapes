@@ -17,12 +17,17 @@
 package org.tobi29.scapes.vanilla.basics.material.update
 
 import org.tobi29.scapes.block.BlockType
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.Update
+import org.tobi29.scapes.block.UpdateType
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentOverworldServer
 
-class UpdateGrassGrowth : Update() {
+class UpdateGrassGrowth(type: UpdateType) : Update(type) {
+    constructor(registry: GameRegistry) : this(
+            of(registry, "vanilla.basics.update.GrassGrowth"))
+
     override fun run(terrain: TerrainServer.TerrainMutable) {
         val plugin = terrain.world.plugins.plugin(
                 "VanillaBasics") as VanillaBasics

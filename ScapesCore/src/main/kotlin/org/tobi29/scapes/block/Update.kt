@@ -18,7 +18,7 @@ package org.tobi29.scapes.block
 
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 
-abstract class Update {
+abstract class Update(val type: UpdateType) {
     protected var x = 0
     protected var y = 0
     protected var z = 0
@@ -50,11 +50,6 @@ abstract class Update {
         return delay
     }
 
-    fun id(registry: GameRegistry): Int {
-        return registry.getSupplier<GameRegistry, Update>("Core", "Update").id(
-                this)
-    }
-
     fun x(): Int {
         return x
     }
@@ -73,6 +68,11 @@ abstract class Update {
                            terrain: TerrainServer): Boolean
 
     companion object {
+        fun of(registry: GameRegistry,
+               id: Int) = registry.get<UpdateType>("Core", "Update")[id]
+
+        fun of(registry: GameRegistry,
+               id: String) = registry.get<UpdateType>("Core", "Update")[id]
 
         fun make(registry: GameRegistry,
                  x: Int,
@@ -80,15 +80,7 @@ abstract class Update {
                  z: Int,
                  delay: Double,
                  id: Int): Update {
-            try {
-                return registry.getSupplier<GameRegistry, Update>("Core",
-                        "Update")[id](registry).set(x, y, z, delay)
-            } catch (e: IllegalArgumentException) {
-                throw IllegalArgumentException(
-                        "Failed to make update over reflection! (id: " +
-                                id + ')', e)
-            }
-
+            return of(registry, id).create().set(x, y, z, delay)
         }
     }
 }

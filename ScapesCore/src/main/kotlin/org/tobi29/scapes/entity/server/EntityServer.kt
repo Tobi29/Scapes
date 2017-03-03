@@ -15,23 +15,23 @@
  */
 package org.tobi29.scapes.entity.server
 
-import org.tobi29.scapes.block.GameRegistry
-import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.Entity
-import org.tobi29.scapes.entity.client.EntityClient
+import org.tobi29.scapes.entity.EntityType
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-open class EntityServer(val world: WorldServer,
+open class EntityServer(id: String,
+                        val world: WorldServer,
                         pos: Vector3d) : Entity, TagMapWrite {
     protected val spawnListeners: MutableMap<String, () -> Unit> = ConcurrentHashMap()
     protected val updateListeners: MutableMap<String, (Double) -> Unit> = ConcurrentHashMap()
     val registry = world.registry
+    override val type = Entity.of(registry, id)
     protected val pos = MutableVector3d(pos)
     var uuid: UUID = UUID.randomUUID()
         protected set
@@ -44,11 +44,6 @@ open class EntityServer(val world: WorldServer,
 
     fun setEntityID(uuid: UUID) {
         this.uuid = uuid
-    }
-
-    fun id(registry: GameRegistry): Int {
-        return registry.getAsymSupplier<Any, Any, Any, Any>("Core",
-                "Entity").id(this)
     }
 
     fun world(): WorldServer {
@@ -109,17 +104,8 @@ open class EntityServer(val world: WorldServer,
     companion object {
         fun make(id: Int,
                  world: WorldServer): EntityServer {
-            return world.registry.getAsymSupplier<WorldServer, EntityServer, WorldClient, EntityClient>(
-                    "Core", "Entity").get1(id)(world)
-        }
-
-        fun make(id: Int?,
-                 world: WorldServer): EntityServer? {
-            if (id == null) {
-                return null
-            }
-            return world.registry.getAsymSupplier<WorldServer, EntityServer, WorldClient, EntityClient>(
-                    "Core", "Entity").get1(id)(world)
+            return world.registry.get<EntityType>("Core",
+                    "Entity")[id].createServer(world)
         }
     }
 }

@@ -29,7 +29,8 @@ class MobSkeletonClient constructor(world: WorldClient,
                                     speed: Vector3d = Vector3d.ZERO,
                                     xRot: Double = 0.0,
                                     zRot: Double = 0.0) : MobLivingEquippedClient(
-        world, pos, speed, AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 20.0, 30.0) {
+        "vanilla.basics.mob.Skeleton", world, pos, speed,
+        AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 20.0, 30.0) {
 
     init {
         rot.setX(xRot)

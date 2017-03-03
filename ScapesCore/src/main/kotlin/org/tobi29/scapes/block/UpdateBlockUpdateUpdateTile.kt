@@ -18,7 +18,10 @@ package org.tobi29.scapes.block
 
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 
-class UpdateBlockUpdateUpdateTile : UpdateBlockUpdate() {
+class UpdateBlockUpdateUpdateTile(type: UpdateType) : UpdateBlockUpdate(type) {
+    constructor(registry: GameRegistry) : this(
+            of(registry, "core.update.BlockUpdateUpdateTile"))
+
     override fun run(terrain: TerrainServer.TerrainMutable) {
         updateBlock(terrain, x, y, z, true)
         updateBlock(terrain, x - 1, y, z, false)

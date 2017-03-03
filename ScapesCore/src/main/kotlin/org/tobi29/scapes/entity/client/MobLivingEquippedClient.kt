@@ -20,10 +20,11 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 
-abstract class MobLivingEquippedClient(world: WorldClient,
+abstract class MobLivingEquippedClient(id: String,
+                                       world: WorldClient,
                                        pos: Vector3d,
                                        speed: Vector3d,
                                        aabb: AABB,
                                        lives: Double,
-                                       maxLives: Double) : MobLivingClient(
+                                       maxLives: Double) : MobLivingClient(id,
         world, pos, speed, aabb, lives, maxLives), EntityEquippedClient

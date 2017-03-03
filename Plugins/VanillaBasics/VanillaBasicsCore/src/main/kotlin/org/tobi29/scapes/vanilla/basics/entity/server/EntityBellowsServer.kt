@@ -27,7 +27,7 @@ import org.tobi29.scapes.vanilla.basics.VanillaBasics
 class EntityBellowsServer(world: WorldServer,
                           pos: Vector3d = Vector3d.ZERO,
                           face: Face = Face.NONE) : EntityServer(
-        world, pos) {
+        "vanilla.basics.entity.Bellows", world, pos) {
     var face: Face = face
         private set
     var scale = 0.0

@@ -25,6 +25,8 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 
 interface EnvironmentServer : TagMapWrite {
+    val type: EnvironmentType
+
     fun generator(): ChunkGenerator
 
     fun populator(): ChunkPopulator
@@ -40,4 +42,10 @@ interface EnvironmentServer : TagMapWrite {
 
     fun sunLightNormal(x: Double,
                        y: Double): Vector3d
+
+    companion object {
+        fun make(world: WorldServer,
+                 id: Int) = Environment.of(world.registry, id).createServer(
+                world)
+    }
 }

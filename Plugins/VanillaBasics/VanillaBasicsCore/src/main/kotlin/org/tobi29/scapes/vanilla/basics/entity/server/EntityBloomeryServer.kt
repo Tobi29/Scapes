@@ -31,8 +31,8 @@ import org.tobi29.scapes.vanilla.basics.VanillaBasics
 class EntityBloomeryServer(
         world: WorldServer,
         pos: Vector3d = Vector3d.ZERO
-) : EntityAbstractFurnaceServer(world, pos, Inventory(world.registry, 14), 4, 9,
-        600.0, 1.004, 4.0, 50) {
+) : EntityAbstractFurnaceServer("vanilla.basics.entity.Bloomery", world, pos,
+        Inventory(world.registry, 14), 4, 9, 600.0, 1.004, 4.0, 50) {
     private var hasBellows = false
 
     override fun write(map: ReadWriteTagMap) {

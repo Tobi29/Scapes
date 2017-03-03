@@ -15,11 +15,14 @@
  */
 package org.tobi29.scapes.entity
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import java.util.*
 
 interface Entity {
+    val type: EntityType
+
     fun getUUID(): UUID
 
     fun getCurrentPos(): Vector3d
@@ -29,5 +32,13 @@ interface Entity {
         val pos = getCurrentPos()
         aabb.add(pos.x, pos.y, pos.z)
         return aabb
+    }
+
+    companion object {
+        fun of(registry: GameRegistry,
+               id: Int) = registry.get<EntityType>("Core", "Entity")[id]
+
+        fun of(registry: GameRegistry,
+               id: String) = registry.get<EntityType>("Core", "Entity")[id]
     }
 }

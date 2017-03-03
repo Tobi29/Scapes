@@ -32,7 +32,8 @@ class MobZombieServer(world: WorldServer,
                       speed: Vector3d = Vector3d.ZERO,
                       xRot: Double = 0.0,
                       zRot: Double = 0.0) : MobLivingEquippedServer(
-        world, pos, speed, AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 20.0, 30.0,
+        "vanilla.basics.mob.Zombie", world, pos, speed,
+        AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 20.0, 30.0,
         Frustum(90.0, 1.0, 0.1, 24.0), Frustum(20.0, 0.5, 0.1, 0.2)) {
     private var soundWait = 0.0
     private var lookWait = 0.0

@@ -29,8 +29,8 @@ class MobPigClient(world: WorldClient,
                    speed: Vector3d = Vector3d.ZERO,
                    xRot: Double = 0.0,
                    zRot: Double = 0.0) : MobLivingClient(
-        world, pos, speed, AABB(-0.45, -0.45, -0.6875, 0.45, 0.45, 0.375), 20.0,
-        30.0) {
+        "vanilla.basics.mob.Pig", world, pos, speed,
+        AABB(-0.45, -0.45, -0.6875, 0.45, 0.45, 0.375), 20.0, 30.0) {
 
     init {
         rot.setX(xRot)

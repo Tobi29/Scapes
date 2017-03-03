@@ -31,7 +31,8 @@ class MobBombServer(world: WorldServer,
                     type: BlockType = world.air,
                     data: Int = 0,
                     private var time: Double = 0.0) : MobServer(
-        world, pos, speed, AABB(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)) {
+        "vanilla.basics.mob.Bomb", world, pos, speed,
+        AABB(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)) {
     private val item: ItemStack
 
     init {

@@ -24,7 +24,8 @@ import org.tobi29.scapes.vanilla.basics.VanillaBasics
 
 class EntityQuernServer(world: WorldServer,
                         pos: Vector3d = Vector3d.ZERO) : EntityAbstractContainerServer(
-        world, pos, Inventory(world.registry, 2)) {
+        "vanilla.basics.entity.Quern", world, pos,
+        Inventory(world.registry, 2)) {
 
     public override fun isValidOn(terrain: TerrainServer,
                                   x: Int,

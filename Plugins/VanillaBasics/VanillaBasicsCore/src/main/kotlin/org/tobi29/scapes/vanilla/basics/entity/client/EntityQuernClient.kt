@@ -25,7 +25,8 @@ import org.tobi29.scapes.vanilla.basics.gui.GuiQuernInventory
 
 class EntityQuernClient(world: WorldClient,
                         pos: Vector3d = Vector3d.ZERO) : EntityAbstractContainerClient(
-        world, pos, Inventory(world.registry, 2)) {
+        "vanilla.basics.entity.Quern", world, pos,
+        Inventory(world.registry, 2)) {
 
     override fun gui(player: MobPlayerClientMain): Gui? {
         if (player is MobPlayerClientMainVB) {

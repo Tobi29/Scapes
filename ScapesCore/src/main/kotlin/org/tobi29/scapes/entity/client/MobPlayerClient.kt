@@ -31,7 +31,7 @@ abstract class MobPlayerClient(world: WorldClient,
                                lives: Double,
                                maxLives: Double,
                                protected var nickname: String) : MobLivingEquippedClient(
-        world, pos, speed, aabb, lives, maxLives) {
+        "core.mob.Player", world, pos, speed, aabb, lives, maxLives) {
     var inventorySelectLeft = 0
     var inventorySelectRight = 9
     protected var skin: Checksum? = null

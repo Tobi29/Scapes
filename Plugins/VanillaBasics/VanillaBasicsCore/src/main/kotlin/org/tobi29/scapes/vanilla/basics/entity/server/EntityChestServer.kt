@@ -24,7 +24,8 @@ import org.tobi29.scapes.vanilla.basics.VanillaBasics
 
 class EntityChestServer(world: WorldServer,
                         pos: Vector3d = Vector3d.ZERO) : EntityAbstractContainerServer(
-        world, pos, Inventory(world.registry, 40)) {
+        "vanilla.basics.entity.Chest", world, pos,
+        Inventory(world.registry, 40)) {
 
     public override fun isValidOn(terrain: TerrainServer,
                                   x: Int,

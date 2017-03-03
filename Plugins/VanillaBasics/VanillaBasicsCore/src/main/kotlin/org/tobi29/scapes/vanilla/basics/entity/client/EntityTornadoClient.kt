@@ -35,7 +35,7 @@ import java.util.concurrent.ThreadLocalRandom
 
 class EntityTornadoClient(world: WorldClient,
                           pos: Vector3d = Vector3d.ZERO) : EntityClient(
-        world, pos), MobileEntityClient {
+        "vanilla.basics.entity.Tornado", world, pos), MobileEntityClient {
     override val positionReceiver: MobPositionReceiver
     private var puff = 0.0
     private var baseSpin = 0.0f

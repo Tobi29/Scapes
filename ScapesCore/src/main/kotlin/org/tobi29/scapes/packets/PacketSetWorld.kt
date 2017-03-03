@@ -17,7 +17,6 @@ package org.tobi29.scapes.packets
 
 import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.chunk.EnvironmentClient
-import org.tobi29.scapes.chunk.EnvironmentServer
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteClient
@@ -34,7 +33,7 @@ import java.util.*
 
 class PacketSetWorld : PacketAbstract, PacketClient {
     private lateinit var tag: TagMap
-    private var seed: Long = 0
+    private var seed = 0L
     private lateinit var uuid: UUID
     private var environment = 0
 
@@ -46,8 +45,7 @@ class PacketSetWorld : PacketAbstract, PacketClient {
         tag = TagMap { player.write(this) }
         seed = world.seed
         uuid = player.getUUID()
-        environment = world.registry.getAsymSupplier<Any, Any, Any, Any>("Core",
-                "Environment").id(world.environment)
+        environment = world.environment.type.id
     }
 
     constructor(registry: GameRegistry,
@@ -73,8 +71,6 @@ class PacketSetWorld : PacketAbstract, PacketClient {
     }
 
     override fun runClient(client: ClientConnection) {
-        val environmentRegistry = client.plugins.registry().getAsymSupplier<WorldServer, EnvironmentServer, WorldClient, EnvironmentClient>(
-                "Core", "Environment")
         client.changeWorld(
                 WorldClient(client,
                         Cam(0.01f, client.loadingDistance.toFloat()),
@@ -82,7 +78,6 @@ class PacketSetWorld : PacketAbstract, PacketClient {
                     TerrainInfiniteClient(it,
                             client.loadingDistance shr 4, 512,
                             client.game.engine.taskExecutor, it.air)
-                }, { environmentRegistry.get2(environment)(it) }, tag,
-                        uuid))
+                }, { EnvironmentClient.make(it, environment) }, tag, uuid))
     }
 }

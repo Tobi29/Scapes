@@ -30,7 +30,7 @@ import org.tobi29.scapes.vanilla.basics.entity.model.EntityModelBellows
 class EntityBellowsClient(world: WorldClient,
                           pos: Vector3d = Vector3d.ZERO,
                           face: Face = Face.NONE) : EntityClient(
-        world, pos) {
+        "vanilla.basics.entity.Bellows", world, pos) {
     var face: Face = face
         private set
     var scale = 0.0

@@ -15,15 +15,12 @@
  */
 package org.tobi29.scapes.block
 
-import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.io.tag.*
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.EntityBlockBreakClient
-import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.entity.client.MobFlyingBlockClient
 import org.tobi29.scapes.entity.client.MobItemClient
 import org.tobi29.scapes.entity.server.EntityBlockBreakServer
-import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobFlyingBlockServer
 import org.tobi29.scapes.entity.server.MobItemServer
 import org.tobi29.scapes.packets.*
@@ -34,8 +31,6 @@ import java.util.concurrent.ConcurrentHashMap
 
 class GameRegistry(private val idStorage: MutableTagMap) {
     private val registries = ConcurrentHashMap<Pair<String, String>, Registry<*>>()
-    private val supplierRegistries = ConcurrentHashMap<Pair<String, String>, SupplierRegistry<*, *>>()
-    private val asymSupplierRegistries = ConcurrentHashMap<Pair<String, String>, AsymSupplierRegistry<*, *, *, *>>()
     private val materialNames = ConcurrentHashMap<String, Material>()
     private val air: BlockType
     private var blocks: Array<BlockType?>
@@ -74,26 +69,6 @@ class GameRegistry(private val idStorage: MutableTagMap) {
         }
         @Suppress("UNCHECKED_CAST")
         return registries[Pair(module, type)] as Registry<E>
-    }
-
-    fun <D, E : Any> getSupplier(module: String,
-                                 type: String): SupplierRegistry<D, E> {
-        if (!lockedTypes) {
-            throw IllegalStateException("Early initializing not finished")
-        }
-        @Suppress("UNCHECKED_CAST")
-        return supplierRegistries[Pair(module, type)] as SupplierRegistry<D, E>
-    }
-
-    fun <D, E : Any, F, G : Any> getAsymSupplier(
-            module: String,
-            type: String): AsymSupplierRegistry<D, E, F, G> {
-        if (!lockedTypes) {
-            throw IllegalStateException("Early initializing not finished")
-        }
-        @Suppress("UNCHECKED_CAST")
-        return asymSupplierRegistries[Pair(module,
-                type)] as AsymSupplierRegistry<D, E, F, G>
     }
 
     fun material(name: String): Material? {
@@ -169,22 +144,6 @@ class GameRegistry(private val idStorage: MutableTagMap) {
         private val ids = ConcurrentHashMap<E, Int>()
         private val values = ArrayList<E?>()
 
-        fun reg(element: E,
-                name: String): Int {
-            if (locked) {
-                throw IllegalStateException("Initializing already ended")
-            }
-            val id = idStorage.getID(module, type, name, min, max)
-            objects.put(id, element)
-            objectsByStr.put(name, element)
-            ids.put(element, id)
-            while (values.size <= id) {
-                values.add(null)
-            }
-            values[id] = element
-            return id
-        }
-
         fun reg(name: String,
                 block: (Int) -> E): E {
             if (locked) {
@@ -219,93 +178,7 @@ class GameRegistry(private val idStorage: MutableTagMap) {
         }
 
         operator fun get(instance: E): Int {
-            return ids[instance] ?: throw IllegalArgumentException(
-                    "${instance::class.java}")
-        }
-    }
-
-    inner class SupplierRegistry<D, E : Any>(private val module: String,
-                                             private val type: String,
-                                             private val min: Int,
-                                             private val max: Int) {
-        private val objects = ConcurrentHashMap<Int, (D) -> E>()
-        private val ids = ConcurrentHashMap<Class<out E>, Int>()
-        private val values = ArrayList<((D) -> E)?>()
-
-        fun reg(element: (D) -> E,
-                clazz: Class<out E>,
-                name: String): Int {
-            if (locked) {
-                throw IllegalStateException("Initializing already ended")
-            }
-            val id = idStorage.getID(module, type, name, min, max)
-            objects.put(id, element)
-            ids.put(clazz, id)
-            while (values.size <= id) {
-                values.add(null)
-            }
-            values[id] = element
-            return id
-        }
-
-        fun values(): List<((D) -> E)?> {
-            return values
-        }
-
-        operator fun get(id: Int): (D) -> E {
-            val `object` = objects[id] ?: throw IllegalArgumentException(
-                    "Invalid id")
-            return `object`
-        }
-
-        fun id(instance: E): Int {
-            return ids[instance::class.java] ?: throw IllegalArgumentException(
-                    "${instance::class.java}")
-        }
-    }
-
-    inner class AsymSupplierRegistry<D, E : Any, F, G : Any>(private val module: String,
-                                                             private val type: String,
-                                                             private val min: Int,
-                                                             private val max: Int) {
-        private val objects = ConcurrentHashMap<Int, (D) -> E>()
-        private val objects2 = ConcurrentHashMap<Int, (F) -> G>()
-        private val ids = ConcurrentHashMap<Class<out E>, Int>()
-        private val values = ArrayList<((D) -> E)?>()
-
-        fun reg(element: (D) -> E,
-                element2: (F) -> G,
-                clazz: Class<out E>,
-                name: String): Int {
-            if (locked) {
-                throw IllegalStateException("Initializing already ended")
-            }
-            val id = idStorage.getID(module, type, name, min, max)
-            objects.put(id, element)
-            objects2.put(id, element2)
-            ids.put(clazz, id)
-            while (values.size <= id) {
-                values.add(null)
-            }
-            values[id] = element
-            return id
-        }
-
-        fun values(): List<((D) -> E)?> {
-            return values
-        }
-
-        fun get1(id: Int): (D) -> E {
-            return objects[id] ?: throw IllegalArgumentException("Invalid id")
-        }
-
-        fun get2(id: Int): (F) -> G {
-            return objects2[id] ?: throw IllegalArgumentException("Invalid id")
-        }
-
-        fun id(instance: E): Int {
-            return ids[instance::class.java] ?: throw IllegalArgumentException(
-                    "${instance::class.java}")
+            return ids[instance] ?: throw IllegalArgumentException("$instance")
         }
     }
 
@@ -325,69 +198,38 @@ class GameRegistry(private val idStorage: MutableTagMap) {
                 registries.put(pair, registry)
             }
         }
-
-        @Synchronized fun addSupplier(module: String,
-                                      type: String,
-                                      min: Int,
-                                      max: Int) {
-            if (lockedTypes) {
-                throw IllegalStateException(
-                        "Early initializing already ended")
-            }
-            val pair = Pair(module, type)
-            var registry: SupplierRegistry<*, *>? = supplierRegistries[pair]
-            if (registry == null) {
-                registry = SupplierRegistry<Any, Any>(module, type, min, max)
-                supplierRegistries.put(pair, registry)
-            }
-        }
-
-        @Synchronized fun addAsymSupplier(module: String,
-                                          type: String,
-                                          min: Int,
-                                          max: Int) {
-            if (lockedTypes) {
-                throw IllegalStateException(
-                        "Early initializing already ended")
-            }
-            val pair = Pair(module, type)
-            var registry: AsymSupplierRegistry<*, *, *, *>? = asymSupplierRegistries[pair]
-            if (registry == null) {
-                registry = AsymSupplierRegistry<Any, Any, Any, Any>(module,
-                        type, min, max)
-                asymSupplierRegistries.put(pair, registry)
-            }
-        }
     }
 }
 
 fun GameRegistry.init(worldType: WorldType) {
-    val er = getAsymSupplier<WorldServer, EntityServer, WorldClient, EntityClient>(
-            "Core", "Entity")
-    val ur = getSupplier<GameRegistry, Update>("Core", "Update")
-    er.reg({ throw UnsupportedOperationException() }, {
-        worldType.playerSupplier().invoke(it)
-    },
-            worldType.playerClass(), "core.mob.Player")
-    er.reg({
-        EntityBlockBreakServer(it)
-    }, { EntityBlockBreakClient(it) },
-            EntityBlockBreakServer::class.java, "core.entity.BlockBreak")
-    er.reg({ MobItemServer(it) },
-            { MobItemClient(it) },
-            MobItemServer::class.java,
-            "core.mob.Item")
-    er.reg({ MobFlyingBlockServer(it) }, { MobFlyingBlockClient(it) },
-            MobFlyingBlockServer::class.java, "core.mob.FlyingBlock")
-    ur.reg({ UpdateBlockUpdate() }, UpdateBlockUpdate::class.java,
-            "core.update.BlockUpdate")
-    ur.reg({ UpdateBlockUpdateUpdateTile() },
-            UpdateBlockUpdateUpdateTile::class.java,
-            "core.update.BlockUpdateUpdateTile")
-    initP(worldType)
-}
+    get<UpdateType>("Core", "Update").run {
+        reg("core.update.BlockUpdate") {
+            org.tobi29.scapes.block.UpdateType(it, ::UpdateBlockUpdate)
+        }
+        reg("core.update.BlockUpdateUpdateTile") {
+            org.tobi29.scapes.block.UpdateType(it,
+                    ::UpdateBlockUpdateUpdateTile)
+        }
+    }
 
-fun GameRegistry.initP(worldType: WorldType) {
+    get<EntityType>("Core", "Entity").run {
+        reg("core.mob.Player") {
+            EntityType(it, { worldType.playerSupplier().invoke(it) },
+                    { throw UnsupportedOperationException() })
+        }
+        reg("core.entity.BlockBreak") {
+            EntityType(it, { EntityBlockBreakClient(it) },
+                    { EntityBlockBreakServer(it) })
+        }
+        reg("core.mob.Item") {
+            EntityType(it, { MobItemClient(it) }, { MobItemServer(it) })
+        }
+        reg("core.mob.FlyingBlock") {
+            EntityType(it, { MobFlyingBlockClient(it) },
+                    { MobFlyingBlockServer(it) })
+        }
+    }
+
     get<PacketType>("Core", "Packet").run {
         reg("core.packet.RequestChunk") {
             PacketType(it, ::PacketRequestChunk)

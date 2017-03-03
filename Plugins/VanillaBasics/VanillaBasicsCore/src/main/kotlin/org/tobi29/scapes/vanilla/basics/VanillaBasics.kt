@@ -17,8 +17,8 @@
 package org.tobi29.scapes.vanilla.basics
 
 import org.tobi29.scapes.block.GameRegistry
-import org.tobi29.scapes.chunk.EnvironmentClient
 import org.tobi29.scapes.chunk.EnvironmentServer
+import org.tobi29.scapes.chunk.EnvironmentType
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.client.states.GameStateGameMP
@@ -68,6 +68,7 @@ class VanillaBasics : WorldType {
     lateinit var cropTypes: VanillaBasicsCrops
     lateinit var treeTypes: VanillaBasicsTrees
     lateinit var stoneTypes: VanillaBasicsStones
+    private lateinit var environmentOverworld: EnvironmentType
     private var modelPigShared: MobLivingModelPigShared? = null
     private var modelBellowsShared: EntityModelBellowsShared? = null
     private var locked = false
@@ -167,12 +168,13 @@ class VanillaBasics : WorldType {
     }
 
     override fun register(registry: GameRegistry) {
-        val environmentRegistry = registry.getAsymSupplier<WorldServer, EnvironmentServer, WorldClient, EnvironmentClient>(
-                "Core", "Environment")
-        environmentRegistry.reg({ EnvironmentOverworldServer(it, this) },
-                ::EnvironmentOverworldClient,
-                EnvironmentOverworldServer::class.java,
-                "vanilla.basics.Overworld")
+        registry.get<EnvironmentType>("Core", "Environment").run {
+            environmentOverworld = reg("vanilla.basics.Overworld") {
+                EnvironmentType(it, ::EnvironmentOverworldClient, { t, w ->
+                    EnvironmentOverworldServer(t, w, this@VanillaBasics)
+                })
+            }
+        }
         val cropRegistry = registry.get<CropType>("VanillaBasics", "CropType")
         cropTypes = VanillaBasicsCrops(cropRegistry::reg)
         val treeRegistry = registry.get<TreeType>("VanillaBasics", "TreeType")
@@ -278,6 +280,6 @@ class VanillaBasics : WorldType {
     }
 
     override fun createEnvironment(world: WorldServer): EnvironmentServer {
-        return EnvironmentOverworldServer(world, this)
+        return environmentOverworld.createServer(world)
     }
 }

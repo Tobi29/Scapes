@@ -14,25 +14,16 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.chunk.generator
+package org.tobi29.scapes.entity
 
-import org.tobi29.scapes.block.BlockType
-import org.tobi29.scapes.block.GameRegistry
-import org.tobi29.scapes.block.Update
-import java.util.*
+import org.tobi29.scapes.chunk.WorldClient
+import org.tobi29.scapes.chunk.WorldServer
+import org.tobi29.scapes.entity.client.EntityClient
+import org.tobi29.scapes.entity.server.EntityServer
 
-class GeneratorOutput(height: Int) {
-    val type = IntArray(height)
-    val data = IntArray(height)
-    val updates = ArrayList<(GameRegistry) -> Update>()
-
-    fun type(z: Int,
-             type: BlockType) {
-        this.type[z] = type.id
-    }
-
-    fun data(z: Int,
-             data: Int) {
-        this.data[z] = data
-    }
+class EntityType(val id: Int,
+                 private val client: (WorldClient) -> EntityClient,
+                 private val server: (WorldServer) -> EntityServer) {
+    fun createClient(world: WorldClient) = client(world)
+    fun createServer(world: WorldServer) = server(world)
 }

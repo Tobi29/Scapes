@@ -25,10 +25,11 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.entity.client.EntityContainerClient
 
-abstract class EntityAbstractContainerClient(world: WorldClient,
+abstract class EntityAbstractContainerClient(id: String,
+                                             world: WorldClient,
                                              pos: Vector3d,
                                              inventory: Inventory) : EntityClient(
-        world, pos), EntityContainerClient {
+        id, world, pos), EntityContainerClient {
     protected val inventories: InventoryContainer
 
     init {

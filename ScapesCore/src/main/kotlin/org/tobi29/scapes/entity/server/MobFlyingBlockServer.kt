@@ -29,7 +29,8 @@ class MobFlyingBlockServer(world: WorldServer,
                            speed: Vector3d = Vector3d.ZERO,
                            type: BlockType = world.air,
                            data: Int = 0) : MobServer(
-        world, pos, speed, AABB(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)) {
+        "core.mob.FlyingBlock", world, pos, speed,
+        AABB(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)) {
     private val item: ItemStack
     private var time = 0.0
 

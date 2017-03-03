@@ -17,13 +17,18 @@
 package org.tobi29.scapes.vanilla.basics.material.update
 
 import org.tobi29.scapes.block.BlockType
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.Update
+import org.tobi29.scapes.block.UpdateType
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
-class UpdateFlowerGrowth : Update() {
+class UpdateFlowerGrowth(type: UpdateType) : Update(type) {
+    constructor(registry: GameRegistry) : this(
+            of(registry, "vanilla.basics.update.FlowerGrowth"))
+
     override fun run(terrain: TerrainServer.TerrainMutable) {
         val plugin = terrain.world.plugins.plugin(
                 "VanillaBasics") as VanillaBasics
@@ -60,8 +65,9 @@ class UpdateFlowerGrowth : Update() {
             if (terrain.sunLight(x, y, z) >= 12 && terrain.type(x, y,
                     z - 1) === materials.grass) {
                 val random = ThreadLocalRandom.current()
-                terrain.addDelayedUpdate(UpdateFlowerGrowth().set(x, y, z,
-                        random.nextDouble() * 3600.0 + 3600.0))
+                terrain.addDelayedUpdate(
+                        UpdateFlowerGrowth(this.type).set(x, y, z,
+                                random.nextDouble() * 3600.0 + 3600.0))
             }
         }
     }

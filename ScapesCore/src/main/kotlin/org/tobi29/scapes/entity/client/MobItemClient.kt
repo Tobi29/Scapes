@@ -28,7 +28,7 @@ class MobItemClient(world: WorldClient,
                     pos: Vector3d = Vector3d.ZERO,
                     speed: Vector3d = Vector3d.ZERO,
                     item: ItemStack = ItemStack(
-                            world.registry)) : MobClient(
+                            world.registry)) : MobClient("core.mob.Item",
         world, pos, speed, AABB(-0.2, -0.2, -0.2, 0.2, 0.2, 0.2)) {
     private val item: ItemStack
 

@@ -30,7 +30,8 @@ import org.tobi29.scapes.vanilla.basics.util.readAlloy
 
 class EntityAlloyClient(world: WorldClient,
                         pos: Vector3d = Vector3d.ZERO) : EntityAbstractContainerClient(
-        world, pos, Inventory(world.registry, 2)) {
+        "vanilla.basics.entity.Alloy", world, pos,
+        Inventory(world.registry, 2)) {
     private var alloy = Alloy()
     private var temperature = 0.0
 

@@ -155,8 +155,9 @@ class BlockLava(materials: VanillaMaterial) : VanillaBlock(materials,
                         data: Int) {
         if (!terrain.hasDelayedUpdate(x, y, z, UpdateLavaFlow::class.java)) {
             val random = ThreadLocalRandom.current()
-            terrain.addDelayedUpdate(UpdateLavaFlow().set(x, y, z,
-                    random.nextDouble() * 0.3 + 0.2))
+            terrain.addDelayedUpdate(
+                    UpdateLavaFlow(terrain.world.registry).set(x, y, z,
+                            random.nextDouble() * 0.3 + 0.2))
         }
     }
 

@@ -21,13 +21,14 @@ import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.Frustum
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 
-abstract class MobLivingEquippedServer(world: WorldServer,
+abstract class MobLivingEquippedServer(id: String,
+                                       world: WorldServer,
                                        pos: Vector3d,
                                        speed: Vector3d,
                                        aabb: AABB,
                                        lives: Double,
                                        maxLives: Double,
                                        viewField: Frustum,
-                                       hitField: Frustum) : MobLivingServer(
+                                       hitField: Frustum) : MobLivingServer(id,
         world, pos, speed, aabb, lives, maxLives, viewField,
         hitField), EntityEquippedServer

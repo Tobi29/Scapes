@@ -26,7 +26,7 @@ import org.tobi29.scapes.packets.PacketEntityChange
 
 class EntityBlockBreakServer(world: WorldServer,
                              pos: Vector3d = Vector3d.ZERO) : EntityServer(
-        world, pos) {
+        "core.entity.BlockBreak", world, pos) {
     private var progress = 0.0
     private var wait = 0.0
 

@@ -17,6 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.world
 
 import org.tobi29.scapes.chunk.EnvironmentClient
+import org.tobi29.scapes.chunk.EnvironmentType
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldSkybox
 import org.tobi29.scapes.engine.utils.io.tag.TagMap
@@ -34,7 +35,8 @@ import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator
 import org.tobi29.scapes.vanilla.basics.generator.TerrainGenerator
 import java.util.*
 
-class EnvironmentOverworldClient(world: WorldClient) : EnvironmentClient, EnvironmentClimate {
+class EnvironmentOverworldClient(override val type: EnvironmentType,
+                                 world: WorldClient) : EnvironmentClient, EnvironmentClimate {
     private val climateGenerator: ClimateGenerator
     private val biomeGenerator: BiomeGenerator
 
