@@ -43,7 +43,7 @@ abstract class EntityAbstractContainerServer(world: WorldServer,
 
     init {
         inventories = InventoryContainer { id ->
-            world.send(PacketUpdateInventory(this, id))
+            world.send(PacketUpdateInventory(registry, this, id))
         }
         inventories.add("Container", inventory)
     }

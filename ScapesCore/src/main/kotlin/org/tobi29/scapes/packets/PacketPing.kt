@@ -24,9 +24,10 @@ import org.tobi29.scapes.server.connection.PlayerConnection
 abstract class PacketPing : PacketAbstract, PacketBoth {
     protected var timestamp: Long = 0
 
-    protected constructor()
+    protected constructor(type: PacketType) : super(type)
 
-    protected constructor(timestamp: Long) {
+    protected constructor(type: PacketType,
+                          timestamp: Long) : super(type) {
         this.timestamp = timestamp
     }
 

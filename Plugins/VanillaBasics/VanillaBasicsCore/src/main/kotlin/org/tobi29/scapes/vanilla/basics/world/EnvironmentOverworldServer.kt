@@ -43,8 +43,8 @@ import org.tobi29.scapes.vanilla.basics.entity.server.MobZombieServer
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator
 import org.tobi29.scapes.vanilla.basics.generator.TerrainGenerator
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.ItemHeatable
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.packet.PacketDayTimeSync
 import org.tobi29.scapes.vanilla.basics.packet.PacketLightning
 import java.util.*
@@ -429,13 +429,15 @@ class EnvironmentOverworldServer(private val world: WorldServer,
                     conditionTag["BodyTemperature"] = bodyTemperature
                     conditionTag["Sleeping"] = sleeping
                 }
-                it.connection().send(PacketEntityMetaData(it, "Vanilla"))
+                it.connection().send(
+                        PacketEntityMetaData(world.registry, it, "Vanilla"))
             }
         }
         syncWait -= delta
         while (syncWait <= 0.0) {
             syncWait += 4.0
-            world.send(PacketDayTimeSync(climateGenerator.dayTime(),
+            world.send(PacketDayTimeSync(world.registry,
+                    climateGenerator.dayTime(),
                     climateGenerator.day()))
         }
         tickWait -= delta
@@ -455,7 +457,8 @@ class EnvironmentOverworldServer(private val world: WorldServer,
                         y.toDouble())
                 if (random.nextInt((513.0 - weather * 512.0).toInt()) == 0 &&
                         random.nextInt(1000) == 0 && weather > 0.7) {
-                    world.send(PacketLightning(x.toDouble(), y.toDouble(),
+                    world.send(PacketLightning(world.registry, x.toDouble(),
+                            y.toDouble(),
                             terrain.highestTerrainBlockZAt(x, y).toDouble()))
                 } else if (random.nextInt(
                         (513.0 - weather * 512.0).toInt()) == 0 &&

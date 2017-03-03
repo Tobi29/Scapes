@@ -26,7 +26,6 @@ import org.tobi29.scapes.engine.utils.reduceOrNull
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.generator.TerrainGenerator
 import org.tobi29.scapes.vanilla.basics.material.OreType
-import org.tobi29.scapes.vanilla.basics.material.StoneType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateLavaFlow
 import java.util.*
@@ -44,29 +43,29 @@ class ChunkGeneratorOverworld(random: Random,
     private val seedInt: Long
 
     init {
-        val stoneTypes = arrayOf(
-                intArrayOf(StoneType.GRANITE.data(materials.registry),
-                        StoneType.GABBRO.data(materials.registry),
-                        StoneType.DIORITE.data(materials.registry)),
-                intArrayOf(StoneType.ANDESITE.data(materials.registry),
-                        StoneType.BASALT.data(materials.registry),
-                        StoneType.DACITE.data(materials.registry),
-                        StoneType.RHYOLITE.data(materials.registry),
-                        StoneType.MARBLE.data(materials.registry),
-                        StoneType.GRANITE.data(materials.registry),
-                        StoneType.GABBRO.data(materials.registry),
-                        StoneType.DIORITE.data(materials.registry)),
-                intArrayOf(StoneType.ANDESITE.data(materials.registry),
-                        StoneType.BASALT.data(materials.registry),
-                        StoneType.DACITE.data(materials.registry),
-                        StoneType.RHYOLITE.data(materials.registry),
-                        StoneType.DIRT_STONE.data(materials.registry)),
-                intArrayOf(StoneType.DIRT_STONE.data(materials.registry),
-                        StoneType.CHALK.data(materials.registry),
-                        StoneType.CLAYSTONE.data(materials.registry),
-                        StoneType.CHERT.data(materials.registry),
-                        StoneType.CONGLOMERATE.data(
-                                materials.registry)))
+        val stoneTypes = materials.plugin.stoneTypes
+        val stoneLayers = arrayOf(
+                intArrayOf(stoneTypes.GRANITE.id,
+                        stoneTypes.GABBRO.id,
+                        stoneTypes.DIORITE.id),
+                intArrayOf(stoneTypes.ANDESITE.id,
+                        stoneTypes.BASALT.id,
+                        stoneTypes.DACITE.id,
+                        stoneTypes.RHYOLITE.id,
+                        stoneTypes.MARBLE.id,
+                        stoneTypes.GRANITE.id,
+                        stoneTypes.GABBRO.id,
+                        stoneTypes.DIORITE.id),
+                intArrayOf(stoneTypes.ANDESITE.id,
+                        stoneTypes.BASALT.id,
+                        stoneTypes.DACITE.id,
+                        stoneTypes.RHYOLITE.id,
+                        stoneTypes.DIRT_STONE.id),
+                intArrayOf(stoneTypes.DIRT_STONE.id,
+                        stoneTypes.CHALK.id,
+                        stoneTypes.CLAYSTONE.id,
+                        stoneTypes.CHERT.id,
+                        stoneTypes.CONGLOMERATE.id))
         seedInt = random.nextInt().toLong() shl 32
         sandstoneLayers = IntArray(512)
         for (i in sandstoneLayers.indices) {
@@ -77,7 +76,7 @@ class ChunkGeneratorOverworld(random: Random,
         val sandNoise = RandomNoiseSimplexNoiseLayer(sandZoom,
                 random.nextLong(), 128.0)
         sandLayer = RandomNoiseNoiseLayer(sandNoise, random.nextLong(), 2)
-        stoneLayers = stoneTypes.map {
+        this.stoneLayers = stoneLayers.map {
             val stoneBase = RandomNoiseRandomLayer(random.nextLong(), it.size)
             val stoneFilter = RandomNoiseFilterLayer(stoneBase, *it)
             val stoneZoom = RandomNoiseZoomLayer(stoneFilter, 2048.0)
@@ -94,10 +93,10 @@ class ChunkGeneratorOverworld(random: Random,
     fun randomOreType(plugin: VanillaBasics,
                       stoneType: Int,
                       random: Random): OreType? {
-        return plugin.oreTypes.asSequence().filter { oreType ->
-            oreType.stoneTypes().contains(stoneType)
-        }.map { oreType ->
-            Pair(oreType, random.nextInt(oreType.rarity()))
+        return plugin.oreTypes.asSequence().filter {
+            it.stoneTypes.contains(stoneType)
+        }.map {
+            Pair(it, random.nextInt(it.rarity))
         }.reduceOrNull { first, second ->
             if (first.second == second.second && random.nextBoolean()) {
                 first

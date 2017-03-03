@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.server.InvalidPacketDataException
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
@@ -25,44 +26,58 @@ import java.util.*
 
 class PacketInteraction : PacketAbstract, PacketBoth {
     private lateinit var uuid: UUID
-    private var type: Byte = 0
+    private var side: Byte = 0
     private var data: Byte = 0
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(type: Byte,
-                data: Byte = 0) {
-        this.type = type
+    constructor(type: PacketType,
+                side: Byte,
+                data: Byte) : super(type) {
+        this.side = side
         this.data = data
     }
 
-    constructor(uuid: UUID,
-                type: Byte,
-                data: Byte) {
+    constructor(type: PacketType,
+                uuid: UUID,
+                side: Byte,
+                data: Byte) : super(type) {
         this.uuid = uuid
-        this.type = type
+        this.side = side
         this.data = data
     }
+
+    constructor(registry: GameRegistry,
+                side: Byte,
+                data: Byte) : this(
+            Packet.make(registry, "core.packet.Interaction"), side, data)
+
+    constructor(registry: GameRegistry,
+                uuid: UUID,
+                side: Byte,
+                data: Byte) : this(
+            Packet.make(registry, "core.packet.Interaction"), uuid, side,
+            data)
 
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {
         stream.putLong(uuid.mostSignificantBits)
         stream.putLong(uuid.leastSignificantBits)
-        stream.put(type.toInt())
+        stream.put(side.toInt())
         stream.put(data.toInt())
     }
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
         uuid = UUID(stream.long, stream.long)
-        type = stream.get()
+        side = stream.get()
         data = stream.get()
     }
 
     override fun runClient(client: ClientConnection) {
         client.getEntity(uuid) { entity ->
             if (entity is MobPlayerClient) {
-                when (type) {
+                when (side) {
                     INVENTORY_SLOT_LEFT -> entity.inventorySelectLeft = data.toInt()
                     INVENTORY_SLOT_RIGHT -> entity.inventorySelectRight = data.toInt()
                 }
@@ -72,26 +87,26 @@ class PacketInteraction : PacketAbstract, PacketBoth {
 
     override fun sendServer(client: ClientConnection,
                             stream: WritableByteStream) {
-        stream.put(type.toInt())
+        stream.put(side.toInt())
         stream.put(data.toInt())
     }
 
     override fun parseServer(player: PlayerConnection,
                              stream: ReadableByteStream) {
-        type = stream.get()
+        side = stream.get()
         data = stream.get()
     }
 
     override fun runServer(player: PlayerConnection) {
         player.mob { mob ->
-            when (type) {
+            when (side) {
                 INVENTORY_SLOT_LEFT -> {
                     if (data < 0 || data >= 10) {
                         throw InvalidPacketDataException(
                                 "Invalid slot change data!")
                     }
                     mob.inventorySelectLeft = data.toInt()
-                    mob.world.send(PacketInteraction(mob.getUUID(),
+                    mob.world.send(PacketInteraction(type, mob.getUUID(),
                             INVENTORY_SLOT_LEFT, data))
                 }
                 INVENTORY_SLOT_RIGHT -> {
@@ -100,16 +115,17 @@ class PacketInteraction : PacketAbstract, PacketBoth {
                                 "Invalid slot change data!")
                     }
                     mob.inventorySelectRight = data.toInt()
-                    mob.world.send(PacketInteraction(mob.getUUID(),
+                    mob.world.send(PacketInteraction(type, mob.getUUID(),
                             INVENTORY_SLOT_RIGHT, data))
                 }
-                OPEN_INVENTORY -> player.send(PacketOpenGui(mob))
+                OPEN_INVENTORY -> player.send(
+                        PacketOpenGui(player.server.plugins.registry, mob))
                 CLOSE_INVENTORY -> {
-                    mob.inventories().modify("Hold"
-                    ) { inventory ->
+                    mob.inventories().modify("Hold") { inventory ->
                         inventory.item(0).take()?.let { mob.dropItem(it) }
                     }
-                    player.send(PacketCloseGui())
+                    player.send(
+                            PacketCloseGui(player.server.plugins.registry))
                 }
                 else -> throw InvalidPacketDataException(
                         "Invalid interaction type!")

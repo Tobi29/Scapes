@@ -53,7 +53,7 @@ class EntityBlockBreakServer(world: WorldServer,
               strength: Double): Boolean {
         wait = 0.0
         progress = clamp(progress + strength, 0.0, 1.0)
-        world.send(PacketEntityChange(this))
+        world.send(PacketEntityChange(registry, this))
         return progress >= 1.0
     }
 }

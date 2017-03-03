@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -24,11 +25,16 @@ import java.util.*
 class PacketRequestEntity : PacketAbstract, PacketServer {
     private lateinit var uuid: UUID
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(uuid: UUID) {
+    constructor(type: PacketType,
+                uuid: UUID) : super(type) {
         this.uuid = uuid
     }
+
+    constructor(registry: GameRegistry,
+                uuid: UUID) : this(
+            Packet.make(registry, "core.packet.RequestEntity"), uuid)
 
     override fun sendServer(client: ClientConnection,
                             stream: WritableByteStream) {
@@ -43,8 +49,7 @@ class PacketRequestEntity : PacketAbstract, PacketServer {
 
     override fun runServer(player: PlayerConnection) {
         player.getEntity(uuid) { entity ->
-            player.send(PacketEntityAdd(entity,
-                    entity.world.plugins.registry()))
+            player.send(PacketEntityAdd(entity.world.plugins.registry, entity))
         }
     }
 }

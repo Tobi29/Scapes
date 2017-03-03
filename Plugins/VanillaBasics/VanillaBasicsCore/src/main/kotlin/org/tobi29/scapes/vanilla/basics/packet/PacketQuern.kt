@@ -15,11 +15,14 @@
  */
 package org.tobi29.scapes.vanilla.basics.packet
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
+import org.tobi29.scapes.packets.Packet
 import org.tobi29.scapes.packets.PacketAbstract
 import org.tobi29.scapes.packets.PacketServer
+import org.tobi29.scapes.packets.PacketType
 import org.tobi29.scapes.server.connection.PlayerConnection
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityQuernClient
@@ -30,11 +33,16 @@ import java.util.*
 class PacketQuern : PacketAbstract, PacketServer {
     private lateinit var uuid: UUID
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(quern: EntityQuernClient) {
+    constructor(type: PacketType,
+                quern: EntityQuernClient) : super(type) {
         uuid = quern.getUUID()
     }
+
+    constructor(registry: GameRegistry,
+                quern: EntityQuernClient) : this(
+            Packet.make(registry, "vanilla.basics.packet.Quern"), quern)
 
     @Throws(IOException::class)
     override fun sendServer(client: ClientConnection,

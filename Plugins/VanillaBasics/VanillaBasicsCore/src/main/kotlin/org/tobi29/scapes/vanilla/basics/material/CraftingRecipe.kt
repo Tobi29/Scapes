@@ -22,7 +22,8 @@ import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.engine.utils.readOnly
 import java.util.*
 
-class CraftingRecipe(ingredients: List<CraftingRecipe.Ingredient>,
+class CraftingRecipe(val id: Int,
+                     ingredients: List<CraftingRecipe.Ingredient>,
                      requirements: List<CraftingRecipe.Ingredient>,
                      private val result: ItemStack) {
     val ingredients = ingredients.readOnly()
@@ -53,10 +54,6 @@ class CraftingRecipe(ingredients: List<CraftingRecipe.Ingredient>,
         return ItemStack(result)
     }
 
-    fun data(registry: GameRegistry): Int {
-        return registry.get<Any>("VanillaBasics", "CraftingRecipe")[this]
-    }
-
     interface Ingredient {
         fun match(inventory: Inventory): ItemStack?
 
@@ -83,7 +80,6 @@ class CraftingRecipe(ingredients: List<CraftingRecipe.Ingredient>,
     }
 
     companion object {
-
         operator fun get(registry: GameRegistry,
                          data: Int): CraftingRecipe {
             return registry.get<CraftingRecipe>("VanillaBasics",

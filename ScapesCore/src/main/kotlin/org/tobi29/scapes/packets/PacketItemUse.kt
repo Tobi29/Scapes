@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.server.InvalidPacketDataException
@@ -34,15 +35,23 @@ class PacketItemUse : PacketAbstract, PacketServer {
     private var side = false
     private lateinit var direction: Vector2d
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(strength: Double,
+    constructor(type: PacketType,
+                strength: Double,
                 side: Boolean,
-                direction: Vector2d) {
+                direction: Vector2d) : super(type) {
         this.strength = strength
         this.side = side
         this.direction = direction
     }
+
+    constructor(registry: GameRegistry,
+                strength: Double,
+                side: Boolean,
+                direction: Vector2d) : this(
+            Packet.make(registry, "core.packet.ItemUse"),
+            strength, side, direction)
 
     @Throws(IOException::class)
     override fun sendServer(client: ClientConnection,

@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -29,18 +30,28 @@ class PacketMobMoveRelative : PacketAbstract, PacketBoth {
     private var y: Byte = 0
     private var z: Byte = 0
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(uuid: UUID,
+    constructor(type: PacketType,
+                uuid: UUID,
                 pos: Vector3d?,
                 x: Byte,
                 y: Byte,
-                z: Byte) : super(pos, 32.0, false, false) {
+                z: Byte) : super(type, pos, 32.0, false, false) {
         this.uuid = uuid
         this.x = x
         this.y = y
         this.z = z
     }
+
+    constructor(registry: GameRegistry,
+                uuid: UUID,
+                pos: Vector3d?,
+                x: Byte,
+                y: Byte,
+                z: Byte) : this(
+            Packet.make(registry, "core.packet.MobMoveRelative"), uuid,
+            pos, x, y, z)
 
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {

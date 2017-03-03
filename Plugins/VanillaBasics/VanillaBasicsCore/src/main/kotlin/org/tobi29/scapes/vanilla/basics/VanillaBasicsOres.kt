@@ -16,8 +16,6 @@
 
 package org.tobi29.scapes.vanilla.basics
 
-import org.tobi29.scapes.vanilla.basics.material.StoneType
-
 internal fun VanillaBasics.registerOres() {
     ore {
         type = materials.oreCoal
@@ -26,7 +24,7 @@ internal fun VanillaBasics.registerOres() {
         chance = 3
         rockChance = 20
         rockDistance = 16
-        stoneTypes.add(StoneType.DIRT_STONE)
+        stones.add(stoneTypes.DIRT_STONE)
     }
     ore {
         type = materials.oreCoal
@@ -35,18 +33,18 @@ internal fun VanillaBasics.registerOres() {
         chance = 3
         rockChance = 20
         rockDistance = 32
-        stoneTypes.add(StoneType.CHALK)
-        stoneTypes.add(StoneType.CHERT)
-        stoneTypes.add(StoneType.CLAYSTONE)
-        stoneTypes.add(StoneType.CONGLOMERATE)
-        stoneTypes.add(StoneType.MARBLE)
-        stoneTypes.add(StoneType.ANDESITE)
-        stoneTypes.add(StoneType.BASALT)
-        stoneTypes.add(StoneType.DACITE)
-        stoneTypes.add(StoneType.RHYOLITE)
-        stoneTypes.add(StoneType.DIORITE)
-        stoneTypes.add(StoneType.GABBRO)
-        stoneTypes.add(StoneType.GRANITE)
+        stones.add(stoneTypes.CHALK)
+        stones.add(stoneTypes.CHERT)
+        stones.add(stoneTypes.CLAYSTONE)
+        stones.add(stoneTypes.CONGLOMERATE)
+        stones.add(stoneTypes.MARBLE)
+        stones.add(stoneTypes.ANDESITE)
+        stones.add(stoneTypes.BASALT)
+        stones.add(stoneTypes.DACITE)
+        stones.add(stoneTypes.RHYOLITE)
+        stones.add(stoneTypes.DIORITE)
+        stones.add(stoneTypes.GABBRO)
+        stones.add(stoneTypes.GRANITE)
     }
     ore {
         type = materials.oreCassiterite
@@ -55,11 +53,11 @@ internal fun VanillaBasics.registerOres() {
         chance = 64
         rockChance = 12
         rockDistance = 32
-        stoneTypes.add(StoneType.ANDESITE)
-        stoneTypes.add(StoneType.BASALT)
-        stoneTypes.add(StoneType.DACITE)
-        stoneTypes.add(StoneType.RHYOLITE)
-        stoneTypes.add(StoneType.GRANITE)
+        stones.add(stoneTypes.ANDESITE)
+        stones.add(stoneTypes.BASALT)
+        stones.add(stoneTypes.DACITE)
+        stones.add(stoneTypes.RHYOLITE)
+        stones.add(stoneTypes.GRANITE)
     }
     ore {
         type = materials.oreSphalerite
@@ -68,7 +66,7 @@ internal fun VanillaBasics.registerOres() {
         chance = 3
         rockChance = 4
         rockDistance = 16
-        stoneTypes.add(StoneType.MARBLE)
+        stones.add(stoneTypes.MARBLE)
     }
     ore {
         type = materials.oreBismuthinite
@@ -77,14 +75,14 @@ internal fun VanillaBasics.registerOres() {
         chance = 8
         rockChance = 9
         rockDistance = 128
-        stoneTypes.add(StoneType.CHALK)
-        stoneTypes.add(StoneType.CHERT)
-        stoneTypes.add(StoneType.CLAYSTONE)
-        stoneTypes.add(StoneType.CONGLOMERATE)
-        stoneTypes.add(StoneType.MARBLE)
-        stoneTypes.add(StoneType.DIORITE)
-        stoneTypes.add(StoneType.GABBRO)
-        stoneTypes.add(StoneType.GRANITE)
+        stones.add(stoneTypes.CHALK)
+        stones.add(stoneTypes.CHERT)
+        stones.add(stoneTypes.CLAYSTONE)
+        stones.add(stoneTypes.CONGLOMERATE)
+        stones.add(stoneTypes.MARBLE)
+        stones.add(stoneTypes.DIORITE)
+        stones.add(stoneTypes.GABBRO)
+        stones.add(stoneTypes.GRANITE)
     }
     ore {
         type = materials.oreChalcocite
@@ -93,10 +91,10 @@ internal fun VanillaBasics.registerOres() {
         chance = 2
         rockChance = 1
         rockDistance = 24
-        stoneTypes.add(StoneType.CHALK)
-        stoneTypes.add(StoneType.CHERT)
-        stoneTypes.add(StoneType.CLAYSTONE)
-        stoneTypes.add(StoneType.CONGLOMERATE)
+        stones.add(stoneTypes.CHALK)
+        stones.add(stoneTypes.CHERT)
+        stones.add(stoneTypes.CLAYSTONE)
+        stones.add(stoneTypes.CONGLOMERATE)
     }
     ore {
         type = materials.oreMagnetite
@@ -105,10 +103,10 @@ internal fun VanillaBasics.registerOres() {
         chance = 12
         rockChance = 10
         rockDistance = 96
-        stoneTypes.add(StoneType.CHALK)
-        stoneTypes.add(StoneType.CHERT)
-        stoneTypes.add(StoneType.CLAYSTONE)
-        stoneTypes.add(StoneType.CONGLOMERATE)
+        stones.add(stoneTypes.CHALK)
+        stones.add(stoneTypes.CHERT)
+        stones.add(stoneTypes.CLAYSTONE)
+        stones.add(stoneTypes.CONGLOMERATE)
     }
     ore {
         type = materials.orePyrite
@@ -117,11 +115,11 @@ internal fun VanillaBasics.registerOres() {
         chance = 11
         rockChance = 13
         rockDistance = 48
-        stoneTypes.add(StoneType.CHALK)
-        stoneTypes.add(StoneType.CHERT)
-        stoneTypes.add(StoneType.CLAYSTONE)
-        stoneTypes.add(StoneType.CONGLOMERATE)
-        stoneTypes.add(StoneType.MARBLE)
+        stones.add(stoneTypes.CHALK)
+        stones.add(stoneTypes.CHERT)
+        stones.add(stoneTypes.CLAYSTONE)
+        stones.add(stoneTypes.CONGLOMERATE)
+        stones.add(stoneTypes.MARBLE)
     }
     ore {
         type = materials.oreSilver
@@ -130,7 +128,7 @@ internal fun VanillaBasics.registerOres() {
         chance = 4
         rockChance = 8
         rockDistance = 64
-        stoneTypes.add(StoneType.GRANITE)
+        stones.add(stoneTypes.GRANITE)
     }
     ore {
         type = materials.oreGold
@@ -139,12 +137,12 @@ internal fun VanillaBasics.registerOres() {
         chance = 4
         rockChance = 96
         rockDistance = 256
-        stoneTypes.add(StoneType.ANDESITE)
-        stoneTypes.add(StoneType.BASALT)
-        stoneTypes.add(StoneType.DACITE)
-        stoneTypes.add(StoneType.RHYOLITE)
-        stoneTypes.add(StoneType.DIORITE)
-        stoneTypes.add(StoneType.GABBRO)
-        stoneTypes.add(StoneType.GRANITE)
+        stones.add(stoneTypes.ANDESITE)
+        stones.add(stoneTypes.BASALT)
+        stones.add(stoneTypes.DACITE)
+        stones.add(stoneTypes.RHYOLITE)
+        stones.add(stoneTypes.DIORITE)
+        stones.add(stoneTypes.GABBRO)
+        stones.add(stoneTypes.GRANITE)
     }
 }

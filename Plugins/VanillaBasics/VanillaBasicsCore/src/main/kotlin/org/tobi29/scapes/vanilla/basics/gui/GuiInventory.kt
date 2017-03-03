@@ -82,14 +82,16 @@ open class GuiInventory(name: String,
 
     protected fun leftClick(id: String,
                             i: Int) {
-        player.connection().send(PacketInventoryInteraction(player,
-                PacketInventoryInteraction.LEFT, id, i))
+        player.connection().send(
+                PacketInventoryInteraction(player.registry, player,
+                        PacketInventoryInteraction.LEFT, id, i))
     }
 
     protected fun rightClick(id: String,
                              i: Int) {
-        player.connection().send(PacketInventoryInteraction(player,
-                PacketInventoryInteraction.RIGHT, id, i))
+        player.connection().send(
+                PacketInventoryInteraction(player.registry, player,
+                        PacketInventoryInteraction.RIGHT, id, i))
     }
 
     public override fun renderOverlay(gl: GL,

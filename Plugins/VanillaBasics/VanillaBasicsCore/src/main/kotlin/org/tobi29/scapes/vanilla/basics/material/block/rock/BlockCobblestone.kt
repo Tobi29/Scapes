@@ -36,7 +36,7 @@ class BlockCobblestone(materials: VanillaMaterial,
         textures = stoneRegistry.values().asSequence().map {
             it?.let {
                 return@map registry.registerTexture(
-                        "${it.textureRoot()}/raw/${it.texture()}.png",
+                        "${it.textureRoot}/raw/${it.texture}.png",
                         "VanillaBasics:image/terrain/stone/overlay/Cobble.png")
             }
         }.toArray()

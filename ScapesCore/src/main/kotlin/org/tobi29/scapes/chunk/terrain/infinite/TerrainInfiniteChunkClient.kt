@@ -46,7 +46,8 @@ class TerrainInfiniteChunkClient(pos: Vector2i,
                 requested.set(true)
                 terrainClient.changeRequestedChunks(1)
                 terrain2.world.send(
-                        PacketRequestChunk(pos.x, pos.y))
+                        PacketRequestChunk(terrain2.world.plugins.registry,
+                                pos.x, pos.y))
             }
             return true
         }

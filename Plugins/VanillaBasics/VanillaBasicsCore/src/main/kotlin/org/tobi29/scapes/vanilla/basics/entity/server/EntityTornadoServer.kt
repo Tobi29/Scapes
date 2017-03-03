@@ -43,7 +43,8 @@ class EntityTornadoServer(world: WorldServer,
         val random = ThreadLocalRandom.current()
         dir = random.nextDouble() * 360
         time = (random.nextInt(100) + 20).toDouble()
-        positionHandler = MobPositionSenderServer(pos, { world.send(it) })
+        positionHandler = MobPositionSenderServer(registry, pos,
+                { world.send(it) })
     }
 
     override fun write(map: ReadWriteTagMap) {

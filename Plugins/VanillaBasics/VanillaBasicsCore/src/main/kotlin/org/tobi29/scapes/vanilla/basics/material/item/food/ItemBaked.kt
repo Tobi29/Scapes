@@ -47,11 +47,11 @@ class ItemBaked(materials: VanillaMaterial,
     }
 
     override fun texture(data: Int): String {
-        return cropRegistry[data].texture() + "/Baked.png"
+        return "${cropRegistry[data].texture}/Baked.png"
     }
 
     override fun name(item: ItemStack): String {
-        return cropRegistry[item.data()].bakedName()
+        return cropRegistry[item.data()].bakedName
     }
 
     override fun maxStackSize(item: ItemStack): Int {

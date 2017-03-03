@@ -17,26 +17,34 @@
 package org.tobi29.scapes.vanilla.basics
 
 import org.tobi29.scapes.block.GameRegistry
-import org.tobi29.scapes.packets.PacketAbstract
+import org.tobi29.scapes.packets.PacketType
 import org.tobi29.scapes.vanilla.basics.packet.*
 
 internal fun registerPackets(registry: GameRegistry) {
-    registry.getSupplier<GameRegistry, PacketAbstract>("Core", "Packet").run {
-        reg({ PacketDayTimeSync() }, PacketDayTimeSync::class.java,
-                "vanilla.basics.packet.DayTimeSync")
-        reg({ PacketCrafting() }, PacketCrafting::class.java,
-                "vanilla.basics.packet.Crafting")
-        reg({ PacketOpenCrafting() }, PacketOpenCrafting::class.java,
-                "vanilla.basics.packet.OpenCrafting")
-        reg({ PacketAnvil() }, PacketAnvil::class.java,
-                "vanilla.basics.packet.Anvil")
-        reg({ PacketLightning() }, PacketLightning::class.java,
-                "vanilla.basics.packet.Lightning")
-        reg({ PacketNotification() }, PacketNotification::class.java,
-                "vanilla.basics.packet.Notification")
-        reg({ PacketResearch() }, PacketResearch::class.java,
-                "vanilla.basics.packet.Research")
-        reg({ PacketQuern() }, PacketQuern::class.java,
-                "vanilla.basics.packet.Quern")
+    registry.get<PacketType>("Core", "Packet").run {
+        reg("vanilla.basics.packet.DayTimeSync") {
+            PacketType(it, ::PacketDayTimeSync)
+        }
+        reg("vanilla.basics.packet.Crafting") {
+            PacketType(it, ::PacketCrafting)
+        }
+        reg("vanilla.basics.packet.OpenCrafting") {
+            PacketType(it, ::PacketOpenCrafting)
+        }
+        reg("vanilla.basics.packet.Anvil") {
+            PacketType(it, ::PacketAnvil)
+        }
+        reg("vanilla.basics.packet.Lightning") {
+            PacketType(it, ::PacketLightning)
+        }
+        reg("vanilla.basics.packet.Notification") {
+            PacketType(it, ::PacketNotification)
+        }
+        reg("vanilla.basics.packet.Research") {
+            PacketType(it, ::PacketResearch)
+        }
+        reg("vanilla.basics.packet.Quern") {
+            PacketType(it, ::PacketQuern)
+        }
     }
 }

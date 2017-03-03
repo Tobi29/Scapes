@@ -16,10 +16,9 @@
 package org.tobi29.scapes.vanilla.basics
 
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.world.decorator.*
 import org.tobi29.scapes.vanilla.basics.world.tree.*
-import org.tobi29.scapes.vanilla.basics.material.StoneType
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 
 internal fun VanillaBasics.registerDecorators() {
     // Overlays
@@ -31,7 +30,7 @@ internal fun VanillaBasics.registerDecorators() {
         }))
     }
     decorator("Flint") {
-        val data = StoneType.FLINT.data(materials.registry)
+        val data = stoneTypes.FLINT.id
         addLayer(LayerGround(materials.stoneRock,
                 { terrain, x, y, z, random -> data }, 1024, {
             terrain, x, y, z ->
@@ -40,8 +39,8 @@ internal fun VanillaBasics.registerDecorators() {
         }))
     }
     decorator("Gravel") {
-        val data = StoneType.DIRT_STONE.data(materials.registry)
-        val flintData = StoneType.FLINT.data(materials.registry)
+        val data = stoneTypes.DIRT_STONE.id
+        val flintData = stoneTypes.FLINT.id
         val gravelBlock = materials.sand.block(1)
         val airBlock = materials.air.block(0)
         addLayer(LayerRock(materials.stoneRock, materials.stoneRaw, 8

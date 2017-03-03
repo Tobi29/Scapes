@@ -54,7 +54,7 @@ class GuiAnvilInventory(container: EntityAnvilClient,
         val item = pane.add(x.toDouble(), y.toDouble(), 30.0,
                 30.0) { GuiComponentItemButton(it, icon) }
         item.on(GuiEvent.CLICK_LEFT) {
-            player.connection().send(PacketAnvil(container, i))
+            player.connection().send(PacketAnvil(player.registry, container, i))
         }
         return item
     }

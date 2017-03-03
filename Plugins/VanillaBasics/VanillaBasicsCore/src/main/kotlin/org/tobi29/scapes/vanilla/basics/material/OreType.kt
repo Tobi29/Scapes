@@ -17,40 +17,14 @@
 package org.tobi29.scapes.vanilla.basics.material
 
 import org.tobi29.scapes.block.BlockType
+import org.tobi29.scapes.engine.utils.readOnly
 
-class OreType(private val type: BlockType,
-              private val rarity: Int,
-              private val size: Double,
-              private val chance: Int,
-              private val rockChance: Int,
-              private val rockDistance: Int,
-              private val stoneTypes: List<Int>) {
-
-    fun rarity(): Int {
-        return rarity
-    }
-
-    fun size(): Double {
-        return size
-    }
-
-    fun chance(): Int {
-        return chance
-    }
-
-    fun rockChance(): Int {
-        return rockChance
-    }
-
-    fun rockDistance(): Int {
-        return rockDistance
-    }
-
-    fun type(): BlockType {
-        return type
-    }
-
-    fun stoneTypes(): List<Int> {
-        return stoneTypes
-    }
+class OreType(val type: BlockType,
+              val rarity: Int,
+              val size: Double,
+              val chance: Int,
+              val rockChance: Int,
+              val rockDistance: Int,
+              stoneTypes: List<Int>) {
+    val stoneTypes = stoneTypes.readOnly()
 }

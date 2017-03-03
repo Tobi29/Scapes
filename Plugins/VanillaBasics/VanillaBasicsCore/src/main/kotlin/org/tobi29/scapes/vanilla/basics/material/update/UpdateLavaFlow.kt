@@ -21,7 +21,6 @@ import org.tobi29.scapes.block.Update
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
-import org.tobi29.scapes.vanilla.basics.material.StoneType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 
 class UpdateLavaFlow : Update() {
@@ -49,7 +48,7 @@ class UpdateLavaFlow : Update() {
                     if (dataNeed != dataHas || type !== materials.lava) {
                         if (terrain.type(x, y, z) === materials.water) {
                             terrain.typeData(x, y, z, materials.cobblestone,
-                                    StoneType.BASALT.data(materials.registry))
+                                    materials.plugin.stoneTypes.BASALT.id)
                         } else {
                             terrain.typeData(x, y, z, materials.lava, dataNeed)
                         }

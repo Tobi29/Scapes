@@ -136,14 +136,14 @@ class WorldServer(worldFormat: WorldFormat,
         if (entity is MobLivingServer) {
             entityCounts[entity.creatureType()]?.andIncrement
         }
-        send(PacketEntityAdd(entity, plugins.registry()))
+        send(PacketEntityAdd(plugins.registry, entity))
     }
 
     override fun entityRemoved(entity: EntityServer) {
         if (entity is MobLivingServer) {
             entityCounts[entity.creatureType()]?.andDecrement
         }
-        send(PacketEntityDespawn(entity))
+        send(PacketEntityDespawn(plugins.registry, entity))
     }
 
     fun addEntityNew(entity: EntityServer) {
@@ -313,8 +313,8 @@ class WorldServer(worldFormat: WorldFormat,
                   range: Float = 16.0f) {
         if (audio != null) {
             if (!audio.isEmpty()) {
-                send(PacketSoundEffect(audio, position, velocity, pitch,
-                        gain, range))
+                send(PacketSoundEffect(plugins.registry, audio, position,
+                        velocity, pitch, gain, range))
             }
         }
     }

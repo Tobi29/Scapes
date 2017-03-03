@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -32,14 +33,21 @@ class PacketUpdateInventory : PacketAbstract, PacketClient {
     private lateinit var id: String
     private lateinit var tag: TagMap
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(entity: EntityContainerServer,
-                id: String) {
+    constructor(type: PacketType,
+                entity: EntityContainerServer,
+                id: String) : super(type) {
         uuid = entity.getUUID()
         this.id = id
         tag = entity.inventories().access(id) { TagMap { it.write(this) } }
     }
+
+    constructor(registry: GameRegistry,
+                entity: EntityContainerServer,
+                id: String) : this(
+            Packet.make(registry, "core.packet.UpdateInventory"), entity,
+            id)
 
     @Throws(IOException::class)
     override fun sendClient(player: PlayerConnection,

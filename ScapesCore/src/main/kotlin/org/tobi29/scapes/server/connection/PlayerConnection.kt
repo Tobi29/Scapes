@@ -62,7 +62,7 @@ abstract class PlayerConnection(val server: ServerConnection) : PlayConnection<P
         registry = server.plugins.registry()
         events.listenerGlobal<MessageEvent>(this) { event ->
             if (event.level.level >= MessageLevel.CHAT.level) {
-                send(PacketChat(event.message))
+                send(PacketChat(registry, event.message))
             }
 
         }
@@ -110,7 +110,7 @@ abstract class PlayerConnection(val server: ServerConnection) : PlayConnection<P
             isNew = true
         }
         this.entity = entity
-        send(PacketSetWorld(entity.world, entity))
+        send(PacketSetWorld(registry, entity.world, entity))
         entity.world.addPlayer(entity, isNew)
     }
 

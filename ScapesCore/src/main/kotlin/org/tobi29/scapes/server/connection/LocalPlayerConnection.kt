@@ -143,7 +143,7 @@ class LocalPlayerConnection(private val worker: ConnectionWorker,
     override fun disconnect(reason: String,
                             time: Double) {
         removeEntity()
-        receiveClient(PacketDisconnect(reason, time))
-        receiveServer(PacketDisconnectSelf(reason))
+        receiveClient(PacketDisconnect(registry, reason, time))
+        receiveServer(PacketDisconnectSelf(registry, reason))
     }
 }

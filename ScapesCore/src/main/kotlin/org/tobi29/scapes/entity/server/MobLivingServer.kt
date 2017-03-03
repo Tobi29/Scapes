@@ -123,7 +123,7 @@ abstract class MobLivingServer(world: WorldServer,
         }
         if (d != 0.0) {
             onDamage(damage)
-            world.send(PacketMobDamage(this))
+            world.send(PacketMobDamage(registry, this))
         }
     }
 
@@ -144,7 +144,7 @@ abstract class MobLivingServer(world: WorldServer,
             health = 0.0
         }
         onHeal(heal)
-        world.send(PacketMobDamage(this))
+        world.send(PacketMobDamage(registry, this))
     }
 
     val isDead: Boolean

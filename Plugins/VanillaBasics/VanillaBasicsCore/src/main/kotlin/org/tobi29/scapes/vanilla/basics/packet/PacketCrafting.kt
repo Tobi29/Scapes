@@ -16,12 +16,15 @@
 
 package org.tobi29.scapes.vanilla.basics.packet
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.server.InvalidPacketDataException
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
+import org.tobi29.scapes.packets.Packet
 import org.tobi29.scapes.packets.PacketAbstract
 import org.tobi29.scapes.packets.PacketServer
+import org.tobi29.scapes.packets.PacketType
 import org.tobi29.scapes.server.connection.PlayerConnection
 import org.tobi29.scapes.vanilla.basics.material.CraftingRecipe
 import java.io.IOException
@@ -29,11 +32,16 @@ import java.io.IOException
 class PacketCrafting : PacketAbstract, PacketServer {
     private var id = 0
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(id: Int) {
+    constructor(type: PacketType,
+                id: Int) : super(type) {
         this.id = id
     }
+
+    constructor(registry: GameRegistry,
+                id: Int) : this(
+            Packet.make(registry, "vanilla.basics.packet.Crafting"), id)
 
     @Throws(IOException::class)
     override fun sendServer(client: ClientConnection,

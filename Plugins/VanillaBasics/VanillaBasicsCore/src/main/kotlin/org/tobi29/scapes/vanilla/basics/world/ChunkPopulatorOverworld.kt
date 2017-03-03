@@ -87,17 +87,17 @@ class ChunkPopulatorOverworld(world: WorldServer,
                 val ore = gen.randomOreType(plugin, data, random)
                 if (ore != null) {
                     val ores = terrain.genOre(xx, yy, zz, materials.stoneRaw,
-                            ore.type(),
-                            ceil(random.nextDouble() * ore.size()),
-                            ceil(random.nextDouble() * ore.size()),
-                            ceil(random.nextDouble() * ore.size()),
-                            ore.chance(), random)
-                    if (ores > 0 && random.nextInt(ore.rockChance()) == 0) {
+                            ore.type,
+                            ceil(random.nextDouble() * ore.size),
+                            ceil(random.nextDouble() * ore.size),
+                            ceil(random.nextDouble() * ore.size),
+                            ore.chance, random)
+                    if (ores > 0 && random.nextInt(ore.rockChance) == 0) {
                         val xxx = xx + random.nextInt(21) - 10
                         val yyy = yy + random.nextInt(21) - 10
                         val zzz = terrain.highestTerrainBlockZAt(xxx,
                                 yyy) - random.nextInt(4)
-                        if (abs(zzz - zz) < ore.rockDistance()) {
+                        if (abs(zzz - zz) < ore.rockDistance) {
                             val blockType = terrain.type(xxx, yyy, zzz)
                             if (blockType === materials.grass ||
                                     blockType === materials.dirt ||
@@ -111,7 +111,7 @@ class ChunkPopulatorOverworld(world: WorldServer,
                                 }
                                 terrain.genOreRock(xxx, yyy, zzz,
                                         materials.stoneRaw,
-                                        ore.type(),
+                                        ore.type,
                                         gen.it(xxx, yyy, zzz),
                                         clamp(64 - ores shr 2,
                                                 2, 10), size, random)

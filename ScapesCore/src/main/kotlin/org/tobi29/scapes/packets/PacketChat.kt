@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.server.InvalidPacketDataException
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
@@ -27,11 +28,16 @@ import org.tobi29.scapes.server.extension.event.MessageEvent
 class PacketChat : PacketAbstract, PacketBoth {
     private lateinit var text: String
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(text: String) {
+    constructor(type: PacketType,
+                text: String) : super(type) {
         this.text = text
     }
+
+    constructor(registry: GameRegistry,
+                text: String) : this(
+            Packet.make(registry, "core.packet.Chat"), text)
 
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {

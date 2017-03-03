@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.ByteBuffer
 import org.tobi29.scapes.engine.utils.Checksum
@@ -29,17 +30,28 @@ class PacketSkin : PacketAbstract, PacketBoth {
     private lateinit var image: Image
     private lateinit var checksum: Checksum
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(checksum: Checksum) {
+    constructor(type: PacketType,
+                checksum: Checksum) : super(type) {
         this.checksum = checksum
     }
 
-    constructor(image: Image,
-                checksum: Checksum) {
+    constructor(type: PacketType,
+                image: Image,
+                checksum: Checksum) : super(type) {
         this.image = image
         this.checksum = checksum
     }
+
+    constructor(registry: GameRegistry,
+                checksum: Checksum) : this(
+            Packet.make(registry, "core.packet.Skin"), checksum)
+
+    constructor(registry: GameRegistry,
+                image: Image,
+                checksum: Checksum) : this(
+            Packet.make(registry, "core.packet.Skin"), image, checksum)
 
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {
@@ -94,7 +106,7 @@ class PacketSkin : PacketAbstract, PacketBoth {
 
     override fun runServer(player: PlayerConnection) {
         player.server.skin(checksum)?.let { skin ->
-            player.send(PacketSkin(skin.image, checksum))
+            player.send(PacketSkin(type, skin.image, checksum))
         }
     }
 }

@@ -189,12 +189,13 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
             val block = blockL(x, y, z)
             val type = terrain.type(block)
             if (type === terrain2.air) {
-                terrain2.world.send(PacketBlockChangeAir(x + posBlock.x,
-                        y + posBlock.y, z))
+                terrain2.world.send(
+                        PacketBlockChangeAir(terrain2.world.registry,
+                                x + posBlock.x, y + posBlock.y, z))
             } else {
                 val data = terrain.data(block)
-                terrain2.world.send(PacketBlockChange(x + posBlock.x,
-                        y + posBlock.y, z, type.id, data))
+                terrain2.world.send(PacketBlockChange(terrain2.world.registry,
+                        x + posBlock.x, y + posBlock.y, z, type.id, data))
             }
         }
         if (state.id >= TerrainInfiniteChunk.State.LOADED.id) {

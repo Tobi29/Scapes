@@ -16,11 +16,14 @@
 
 package org.tobi29.scapes.vanilla.basics.packet
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
+import org.tobi29.scapes.packets.Packet
 import org.tobi29.scapes.packets.PacketAbstract
 import org.tobi29.scapes.packets.PacketClient
+import org.tobi29.scapes.packets.PacketType
 import org.tobi29.scapes.server.connection.PlayerConnection
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentClimate
 import java.io.IOException
@@ -29,13 +32,20 @@ class PacketDayTimeSync : PacketAbstract, PacketClient {
     private var day = 0L
     private var dayTime = 0.0
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(dayTime: Double,
-                day: Long) {
+    constructor(type: PacketType,
+                dayTime: Double,
+                day: Long) : super(type) {
         this.dayTime = dayTime
         this.day = day
     }
+
+    constructor(registry: GameRegistry,
+                dayTime: Double,
+                day: Long) : this(
+            Packet.make(registry, "vanilla.basics.packet.DayTimeSync"),
+            dayTime, day)
 
     @Throws(IOException::class)
     override fun sendClient(player: PlayerConnection,

@@ -76,9 +76,7 @@ fun VanillaBasics.alloy(alloy: AlloyTypeCreator.() -> Unit) {
 fun VanillaBasics.ore(ore: OreTypeCreator.() -> Unit) {
     val creator = OreTypeCreator(materials)
     ore(creator)
-    val stoneTypes = creator.stoneTypes.map { stoneType ->
-        stoneType.data(materials.registry)
-    }
+    val stoneTypes = creator.stones.map { it.id }
     val oreType = OreType(creator.type, creator.rarity, creator.size,
             creator.chance, creator.rockChance,
             creator.rockDistance, stoneTypes)
@@ -121,7 +119,7 @@ class AlloyTypeCreator {
 }
 
 class OreTypeCreator(materials: VanillaMaterial) {
-    val stoneTypes = ArrayList<StoneType>()
+    val stones = ArrayList<StoneType>()
     var type: BlockType
     var rarity = 4
     var chance = 4
@@ -166,9 +164,10 @@ class CraftingRecipesCreator(val materials: VanillaMaterial,
         craftingRecipe(creator)
         val result = creator.result ?: throw IllegalArgumentException(
                 "Result is not set")
-        val recipe = CraftingRecipe(creator.ingredients.list,
-                creator.requirements.list, result)
-        craftingRegistry.reg(recipe, id)
+        val recipe = craftingRegistry.reg(id) {
+            CraftingRecipe(it, creator.ingredients.list,
+                    creator.requirements.list, result)
+        }
         type.add(recipe)
     }
 }

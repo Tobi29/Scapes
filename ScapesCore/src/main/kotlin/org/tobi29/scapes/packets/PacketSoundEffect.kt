@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -29,21 +30,31 @@ class PacketSoundEffect : PacketAbstract, PacketClient {
     private var pitch = 0.0f
     private var gain = 0.0f
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(audio: String,
+    constructor(type: PacketType,
+                audio: String,
                 position: Vector3d,
                 velocity: Vector3d,
                 pitch: Float,
                 gain: Float,
-                range: Float) : super(position,
-            range.toDouble()) {
+                range: Float) : super(type, position, range.toDouble()) {
         this.position = position
         this.velocity = velocity
         this.audio = audio
         this.pitch = pitch
         this.gain = gain
     }
+
+    constructor(registry: GameRegistry,
+                audio: String,
+                position: Vector3d,
+                velocity: Vector3d,
+                pitch: Float,
+                gain: Float,
+                range: Float) : this(
+            Packet.make(registry, "core.packet.SoundEffect"), audio,
+            position, velocity, pitch, gain, range)
 
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {

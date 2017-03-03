@@ -35,7 +35,7 @@ class GuiResearchTableInventory(container: EntityResearchTableClient,
         selection(research)
 
         research.on(GuiEvent.CLICK_LEFT) {
-            player.connection().send(PacketResearch(container))
+            player.connection().send(PacketResearch(player.registry, container))
         }
     }
 }

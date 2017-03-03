@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -30,21 +31,31 @@ class PacketMobChangeState : PacketAbstract, PacketBoth {
     private var inWater = false
     private var swimming = false
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(uuid: UUID,
+    constructor(type: PacketType,
+                uuid: UUID,
                 pos: Vector3d?,
                 ground: Boolean,
                 slidingWall: Boolean,
                 inWater: Boolean,
-                swimming: Boolean) : super(
-            pos, 32.0, false, false) {
+                swimming: Boolean) : super(type, pos, 32.0, false, false) {
         this.uuid = uuid
         this.ground = ground
         this.slidingWall = slidingWall
         this.inWater = inWater
         this.swimming = swimming
     }
+
+    constructor(registry: GameRegistry,
+                uuid: UUID,
+                pos: Vector3d?,
+                ground: Boolean,
+                slidingWall: Boolean,
+                inWater: Boolean,
+                swimming: Boolean) : this(
+            Packet.make(registry, "core.packet.MobChangeState"), uuid,
+            pos, ground, slidingWall, inWater, swimming)
 
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {

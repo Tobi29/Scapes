@@ -52,7 +52,7 @@ abstract class MobPlayerClientMain(world: WorldClient,
     protected var wallFriction = 2.0
     protected var waterFriction = 8.0
     protected var stepHeight = 1.0
-    protected val sendPositionHandler = MobPositionSenderClient(
+    protected val sendPositionHandler = MobPositionSenderClient(registry,
             this.pos.now()) { world.connection.send(it) }
     private var inputListenerOwner: InputListenerOwner? = null
 
@@ -207,8 +207,8 @@ abstract class MobPlayerClientMain(world: WorldClient,
     @Synchronized fun closeGui(): Boolean {
         if (game.engine.guiStack.remove("10-Menu") != null) {
             game.setHudVisible(true)
-            world.send(PacketInteraction(
-                    PacketInteraction.CLOSE_INVENTORY))
+            world.send(PacketInteraction(world.plugins.registry,
+                    PacketInteraction.CLOSE_INVENTORY, 0))
             return true
         }
         return false

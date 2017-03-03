@@ -48,7 +48,8 @@ class LocalClientConnection(private val worker: ConnectionWorker,
     }
 
     override fun stop() {
-        player.receiveServer(PacketDisconnectSelf("Disconnected"))
+        player.receiveServer(
+                PacketDisconnectSelf(plugins.registry, "Disconnected"))
     }
 
     override suspend fun run(connection: Connection) {
@@ -56,7 +57,9 @@ class LocalClientConnection(private val worker: ConnectionWorker,
             while (!player.isClosed) {
                 connection.increaseTimeout(10000)
                 if (connection.shouldClose) {
-                    player.receiveServer(PacketDisconnectSelf("Disconnected"))
+                    player.receiveServer(
+                            PacketDisconnectSelf(plugins.registry,
+                                    "Disconnected"))
                     break
                 }
                 while (player.queueClient.isNotEmpty()) {

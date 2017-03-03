@@ -55,13 +55,15 @@ open class GuiContainerInventory<out T : EntityContainerClient>(name: String,
 
     protected fun leftClickContainer(id: String,
                                      i: Int) {
-        player.connection().send(PacketInventoryInteraction(container,
-                PacketInventoryInteraction.LEFT, id, i))
+        player.connection().send(
+                PacketInventoryInteraction(player.registry, container,
+                        PacketInventoryInteraction.LEFT, id, i))
     }
 
     protected fun rightClickContainer(id: String,
                                       i: Int) {
-        player.connection().send(PacketInventoryInteraction(container,
-                PacketInventoryInteraction.RIGHT, id, i))
+        player.connection().send(
+                PacketInventoryInteraction(player.registry, container,
+                        PacketInventoryInteraction.RIGHT, id, i))
     }
 }

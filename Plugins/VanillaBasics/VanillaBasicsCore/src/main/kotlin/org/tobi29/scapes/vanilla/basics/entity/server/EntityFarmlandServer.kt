@@ -45,7 +45,7 @@ class EntityFarmlandServer(world: WorldServer,
         map["Time"] = time
         map["Stage"] = stage
         cropType?.let {
-            map["CropType"] = it.data(registry)
+            map["CropType"] = it.id
         }
     }
 
@@ -57,7 +57,7 @@ class EntityFarmlandServer(world: WorldServer,
         map["Time"]?.toFloat()?.let { time = it }
         map["Stage"]?.toByte()?.let { stage = it }
         if (map.containsKey("CropType")) {
-            CropType[registry, map["CropType"]?.toInt()]?.let { cropType = it }
+            map["CropType"]?.toInt()?.let { cropType = CropType[registry, it] }
             updateBlock = true
         } else {
             cropType = null
@@ -81,7 +81,7 @@ class EntityFarmlandServer(world: WorldServer,
                 world.terrain.queue { handler ->
                     handler.typeData(pos.intX(), pos.intY(), pos.intZ() + 1,
                             materials.crop,
-                            stage + (cropType.data(registry) shl 3) - 1)
+                            stage + (cropType.id shl 3) - 1)
                 }
             }
             updateBlock = false
@@ -126,7 +126,7 @@ class EntityFarmlandServer(world: WorldServer,
             time = 0.0f
         } else {
             if (stage < 8) {
-                when (cropType.nutrient()) {
+                when (cropType.nutrient) {
                     1 -> {
                         time += (nutrientB * delta).toFloat()
                         nutrientB = max(nutrientB - 0.0000005 * delta,
@@ -143,13 +143,13 @@ class EntityFarmlandServer(world: WorldServer,
                                 0.0).toFloat()
                     }
                 }
-                while (time >= cropType.time()) {
+                while (time >= cropType.time) {
                     stage++
                     if (stage >= 8) {
                         time = 0.0f
                         stage = 8
                     } else {
-                        time -= cropType.time().toFloat()
+                        time -= cropType.time.toFloat()
                     }
                     updateBlock = true
                 }

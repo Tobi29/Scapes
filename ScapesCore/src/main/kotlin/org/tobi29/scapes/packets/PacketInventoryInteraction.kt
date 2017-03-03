@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -28,25 +29,34 @@ class PacketInventoryInteraction : PacketAbstract, PacketServer {
     private lateinit var uuid: UUID
     private var slot = 0
     private lateinit var id: String
-    private var type = 0.toByte()
+    private var side = 0.toByte()
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(chest: EntityContainerClient,
-                type: Byte,
+    constructor(type: PacketType,
+                chest: EntityContainerClient,
+                side: Byte,
                 id: String,
-                slot: Int) {
+                slot: Int) : super(type) {
         uuid = chest.getUUID()
-        this.type = type
+        this.side = side
         this.id = id
         this.slot = slot
     }
+
+    constructor(registry: GameRegistry,
+                chest: EntityContainerClient,
+                side: Byte,
+                id: String,
+                slot: Int) : this(
+            Packet.make(registry, "core.packet.InventoryInteraction"),
+            chest, side, id, slot)
 
     override fun sendServer(client: ClientConnection,
                             stream: WritableByteStream) {
         stream.putLong(uuid.mostSignificantBits)
         stream.putLong(uuid.leastSignificantBits)
-        stream.put(type.toInt())
+        stream.put(side.toInt())
         stream.putString(id)
         stream.putInt(slot)
     }
@@ -54,7 +64,7 @@ class PacketInventoryInteraction : PacketAbstract, PacketServer {
     override fun parseServer(player: PlayerConnection,
                              stream: ReadableByteStream) {
         uuid = UUID(stream.long, stream.long)
-        type = stream.get()
+        side = stream.get()
         id = stream.string
         slot = stream.int
     }
@@ -71,7 +81,7 @@ class PacketInventoryInteraction : PacketAbstract, PacketServer {
                                         "Hold") { playerI ->
                                     val hold = playerI.item(0)
                                     val item = chestI.item(slot)
-                                    when (type) {
+                                    when (side) {
                                         LEFT -> if (hold.isEmpty) {
                                             chestI.item(slot).take()?.let {
                                                 hold.stack(it)

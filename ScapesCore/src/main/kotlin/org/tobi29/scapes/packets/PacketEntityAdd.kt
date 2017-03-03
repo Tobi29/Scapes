@@ -32,15 +32,20 @@ class PacketEntityAdd : PacketAbstract, PacketClient {
     private var id = 0
     private lateinit var tag: TagMap
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(entity: EntityServer,
-                registry: GameRegistry) : super(
-            entity.getCurrentPos()) {
+    constructor(type: PacketType,
+                entity: EntityServer,
+                registry: GameRegistry) : super(type, entity.getCurrentPos()) {
         uuid = entity.getUUID()
         id = entity.id(registry)
         tag = TagMap { entity.write(this) }
     }
+
+    constructor(registry: GameRegistry,
+                entity: EntityServer) : this(
+            Packet.make(registry, "core.packet.EntityAdd"), entity,
+            registry)
 
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {

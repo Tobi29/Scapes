@@ -15,16 +15,24 @@
  */
 package org.tobi29.scapes.vanilla.basics.packet
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
+import org.tobi29.scapes.packets.Packet
 import org.tobi29.scapes.packets.PacketAbstract
 import org.tobi29.scapes.packets.PacketClient
+import org.tobi29.scapes.packets.PacketType
 import org.tobi29.scapes.server.connection.PlayerConnection
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
 import org.tobi29.scapes.vanilla.basics.gui.GuiCrafting
 
-class PacketOpenCrafting : PacketAbstract(), PacketClient {
+class PacketOpenCrafting : PacketAbstract, PacketClient {
+    constructor(type: PacketType) : super(type)
+
+    constructor(registry: GameRegistry) : this(
+            Packet.make(registry, "vanilla.basics.packet.OpenCrafting"))
+
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {
     }

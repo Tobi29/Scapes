@@ -62,7 +62,7 @@ class BlockWood(materials: VanillaMaterial,
 
     override fun texture(data: Int): String {
         val type = treeRegistry[data]
-        return type.texture() + "/Planks.png"
+        return "${type.texture}/Planks.png"
     }
 
     override fun name(item: ItemStack): String {

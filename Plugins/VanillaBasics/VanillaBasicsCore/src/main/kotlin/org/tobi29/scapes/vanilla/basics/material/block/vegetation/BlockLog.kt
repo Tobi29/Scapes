@@ -119,8 +119,8 @@ class BlockLog(materials: VanillaMaterial,
             if (it == null) {
                 return@map null
             }
-            Pair(registry.registerTexture(it.texture() + "/LogTop.png"),
-                    registry.registerTexture(it.texture() + "/LogSide.png"))
+            Pair(registry.registerTexture("${it.texture}/LogTop.png"),
+                    registry.registerTexture("${it.texture}/LogSide.png"))
         }.toArray()
     }
 
@@ -150,7 +150,7 @@ class BlockLog(materials: VanillaMaterial,
     }
 
     override fun name(item: ItemStack): String {
-        return treeRegistry[item.data()].name()
+        return treeRegistry[item.data()].name
     }
 
     override fun maxStackSize(item: ItemStack): Int {

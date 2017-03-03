@@ -16,11 +16,13 @@
 
 package org.tobi29.scapes.vanilla.basics
 
-import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.vanilla.basics.material.CropType
 
-internal fun registerCropTypes(registry: GameRegistry) {
-    registry.get<CropType>("VanillaBasics", "CropType").run {
-        reg(CropType.WHEAT, "vanilla.basics.crop.Wheat")
+class VanillaBasicsCrops(reg: (String, (Int) -> CropType) -> CropType) {
+    private val ROOT = "VanillaBasics:image/terrain/crops"
+
+    val WHEAT = reg("vanilla.basics.crop.Wheat") {
+        CropType(it, "Wheat", "Bread", ROOT, 4000.0, 0)
     }
 }
+

@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.entity.client
 
-import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.ListenerOwner
@@ -31,18 +30,13 @@ import java.util.*
 
 open class EntityClient(val world: WorldClient,
                         pos: Vector3d) : Entity, ListenerOwner {
-    protected val registry: GameRegistry
-    protected val pos: MutableVector3d
+    val registry = world.registry
+    protected val pos = MutableVector3d(pos)
     override val listenerOwner = ListenerOwnerHandle {
         !world.disposed() && world.hasEntity(this)
     }
     protected var uuid: UUID = UUID.randomUUID()
     protected var metaData = MutableTagMap()
-
-    init {
-        registry = world.registry
-        this.pos = MutableVector3d(pos)
-    }
 
     override fun getUUID(): UUID {
         return uuid

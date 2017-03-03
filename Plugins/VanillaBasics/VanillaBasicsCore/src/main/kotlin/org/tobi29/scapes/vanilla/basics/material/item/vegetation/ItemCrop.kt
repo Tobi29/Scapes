@@ -19,8 +19,8 @@ package org.tobi29.scapes.vanilla.basics.material.item.vegetation
 import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.vanilla.basics.material.CropType
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.ItemResearch
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.item.ItemSimpleData
 
 class ItemCrop(materials: VanillaMaterial,
@@ -31,7 +31,7 @@ class ItemCrop(materials: VanillaMaterial,
     }
 
     override fun texture(data: Int): String {
-        return cropRegistry[data].texture() + "/Drop.png"
+        return "${cropRegistry[data].texture}/Drop.png"
     }
 
     override fun name(item: ItemStack): String {

@@ -163,8 +163,7 @@ class GuiCrafting(private val table: Boolean,
 
             result.on(GuiEvent.CLICK_LEFT) {
                 player.connection().send(
-                        PacketCrafting(recipe.data(
-                                player.connection().plugins.registry())))
+                        PacketCrafting(player.registry, recipe.id))
             }
         }
 

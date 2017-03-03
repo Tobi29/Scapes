@@ -16,17 +16,25 @@
 
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.server.connection.PlayerConnection
 
 class PacketBlockChangeAir : PacketBlockChange {
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(x: Int,
+    constructor(type: PacketType,
+                x: Int,
                 y: Int,
-                z: Int) : super(x, y, z, 0, 0)
+                z: Int) : super(type, x, y, z, 0, 0)
+
+    constructor(registry: GameRegistry,
+                x: Int,
+                y: Int,
+                z: Int) : this(
+            Packet.make(registry, "core.packet.BlockChangeAir"), x, y, z)
 
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {

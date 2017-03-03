@@ -37,12 +37,12 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.math.vector.plus
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
-import org.tobi29.scapes.vanilla.basics.world.ClimateInfoLayer
-import org.tobi29.scapes.vanilla.basics.world.EnvironmentClimate
 import org.tobi29.scapes.vanilla.basics.material.TreeType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.block.CollisionLeaves
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
+import org.tobi29.scapes.vanilla.basics.world.ClimateInfoLayer
+import org.tobi29.scapes.vanilla.basics.world.EnvironmentClimate
 import java.util.*
 
 class BlockLeaves(materials: VanillaMaterial,
@@ -96,7 +96,7 @@ class BlockLeaves(materials: VanillaMaterial,
         val type = treeRegistry[data]
         val random = Random()
         val drops = ArrayList<ItemStack>()
-        if (random.nextInt(type.dropChance()) == 0) {
+        if (random.nextInt(type.dropChance) == 0) {
             if (random.nextInt(3) == 0) {
                 drops.add(ItemStack(materials.sapling, data))
             } else {
@@ -136,14 +136,13 @@ class BlockLeaves(materials: VanillaMaterial,
             val type = treeRegistry[data]
             val temperature = climateGenerator.temperature(x, y, z)
             val mix = clamp(temperature / 30.0, 0.0, 1.0)
-            val colorCold = type.colorCold()
-            val colorWarm = type.colorWarm()
-            var r = mix(colorCold.floatX().toDouble(),
-                    colorWarm.floatX().toDouble(), mix)
+            val colorCold = type.colorCold
+            val colorWarm = type.colorWarm
+            var r = mix(colorCold.x, colorWarm.x, mix)
             if (!type.isEvergreen) {
                 val autumn = climateGenerator.autumnLeaves(y.toDouble())
-                val colorAutumn = type.colorAutumn()
-                r = mix(r, colorAutumn.floatX().toDouble(), autumn)
+                val colorAutumn = type.colorAutumn
+                r = mix(r, colorAutumn.x, autumn)
             }
             return r.toFloat()
         }
@@ -162,14 +161,13 @@ class BlockLeaves(materials: VanillaMaterial,
             val type = treeRegistry[data]
             val temperature = climateGenerator.temperature(x, y, z)
             val mix = clamp(temperature / 30.0, 0.0, 1.0)
-            val colorCold = type.colorCold()
-            val colorWarm = type.colorWarm()
-            var g = mix(colorCold.floatY().toDouble(),
-                    colorWarm.floatY().toDouble(), mix)
+            val colorCold = type.colorCold
+            val colorWarm = type.colorWarm
+            var g = mix(colorCold.y, colorWarm.y, mix)
             if (!type.isEvergreen) {
                 val autumn = climateGenerator.autumnLeaves(y.toDouble())
-                val colorAutumn = type.colorAutumn()
-                g = mix(g, colorAutumn.floatY().toDouble(), autumn)
+                val colorAutumn = type.colorAutumn
+                g = mix(g, colorAutumn.y, autumn)
             }
             return g.toFloat()
         }
@@ -188,14 +186,13 @@ class BlockLeaves(materials: VanillaMaterial,
             val type = treeRegistry[data]
             val temperature = climateGenerator.temperature(x, y, z)
             val mix = clamp(temperature / 30.0, 0.0, 1.0)
-            val colorCold = type.colorCold()
-            val colorWarm = type.colorWarm()
-            var b = mix(colorCold.floatZ().toDouble(),
-                    colorWarm.floatZ().toDouble(), mix)
+            val colorCold = type.colorCold
+            val colorWarm = type.colorWarm
+            var b = mix(colorCold.z, colorWarm.z, mix)
             if (!type.isEvergreen) {
                 val autumn = climateGenerator.autumnLeaves(y.toDouble())
-                val colorAutumn = type.colorAutumn()
-                b = mix(b, colorAutumn.floatZ().toDouble(), autumn)
+                val colorAutumn = type.colorAutumn
+                b = mix(b, colorAutumn.z, autumn)
             }
             return b.toFloat()
         }
@@ -250,23 +247,20 @@ class BlockLeaves(materials: VanillaMaterial,
                     "VanillaBasics:Climate")
             val temperature = climateLayer.temperature(x, y, z)
             val mix = clamp((temperature + 20.0) / 50.0, 0.0, 1.0)
-            val colorCold = type.colorCold()
-            val colorWarm = type.colorWarm()
-            var r = mix(colorCold.floatX().toDouble(),
-                    colorWarm.floatX().toDouble(), mix)
-            var g = mix(colorCold.floatY().toDouble(),
-                    colorWarm.floatY().toDouble(), mix)
-            var b = mix(colorCold.floatZ().toDouble(),
-                    colorWarm.floatZ().toDouble(), mix)
+            val colorCold = type.colorCold
+            val colorWarm = type.colorWarm
+            var r = mix(colorCold.x, colorWarm.x, mix)
+            var g = mix(colorCold.y, colorWarm.y, mix)
+            var b = mix(colorCold.z, colorWarm.z, mix)
             if (!type.isEvergreen) {
                 val environment = terrain.world.environment
                 if (environment is EnvironmentClimate) {
                     val climateGenerator = environment.climate()
                     val autumn = climateGenerator.autumnLeaves(y.toDouble())
-                    val colorAutumn = type.colorAutumn()
-                    r = mix(r, colorAutumn.floatX().toDouble(), autumn)
-                    g = mix(g, colorAutumn.floatY().toDouble(), autumn)
-                    b = mix(b, colorAutumn.floatZ().toDouble(), autumn)
+                    val colorAutumn = type.colorAutumn
+                    r = mix(r, colorAutumn.x, autumn)
+                    g = mix(g, colorAutumn.y, autumn)
+                    b = mix(b, colorAutumn.z, autumn)
                 }
             }
             if (lod) {
@@ -285,11 +279,9 @@ class BlockLeaves(materials: VanillaMaterial,
                 return@map null
             }
             return@map Triple(it,
-                    registry.registerTexture(
-                            it.texture() + "/LeavesFancy.png",
+                    registry.registerTexture("${it.texture}/LeavesFancy.png",
                             ShaderAnimation.LEAVES),
-                    registry.registerTexture(
-                            it.texture() + "/LeavesFast.png"))
+                    registry.registerTexture("${it.texture}/LeavesFast.png"))
         }.toArray()
     }
 
@@ -318,8 +310,8 @@ class BlockLeaves(materials: VanillaMaterial,
                 if (it == null) {
                     return@map null
                 }
-                val colorCold = it.first.colorCold()
-                val colorWarm = it.first.colorWarm()
+                val colorCold = it.first.colorCold
+                val colorWarm = it.first.colorWarm
                 val r = mix(colorCold.x, colorWarm.x, 0.5)
                 val g = mix(colorCold.y, colorWarm.y, 0.5)
                 val b = mix(colorCold.z, colorWarm.z, 0.5)

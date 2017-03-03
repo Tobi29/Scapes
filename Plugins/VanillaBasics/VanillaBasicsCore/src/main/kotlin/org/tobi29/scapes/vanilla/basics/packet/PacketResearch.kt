@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.vanilla.basics.packet
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -22,9 +23,7 @@ import org.tobi29.scapes.engine.utils.io.tag.map
 import org.tobi29.scapes.engine.utils.io.tag.mapMut
 import org.tobi29.scapes.engine.utils.io.tag.set
 import org.tobi29.scapes.engine.utils.io.tag.toBoolean
-import org.tobi29.scapes.packets.PacketAbstract
-import org.tobi29.scapes.packets.PacketEntityMetaData
-import org.tobi29.scapes.packets.PacketServer
+import org.tobi29.scapes.packets.*
 import org.tobi29.scapes.server.connection.PlayerConnection
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityResearchTableClient
@@ -35,11 +34,17 @@ import java.util.*
 class PacketResearch : PacketAbstract, PacketServer {
     private lateinit var uuid: UUID
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(researchTable: EntityResearchTableClient) {
+    constructor(type: PacketType,
+                researchTable: EntityResearchTableClient) : super(type) {
         uuid = researchTable.getUUID()
     }
+
+    constructor(registry: GameRegistry,
+                researchTable: EntityResearchTableClient) : this(
+            Packet.make(registry, "vanilla.basics.packet.Research"),
+            researchTable)
 
     override fun sendServer(client: ClientConnection,
                             stream: WritableByteStream) {
@@ -89,9 +94,12 @@ class PacketResearch : PacketAbstract, PacketServer {
                                                 "Research").mapMut(
                                                 "Finished")[recipe.name] = true
                                         mob.world.send(PacketEntityMetaData(
+                                                player.server.plugins.registry,
                                                 mob, "Vanilla"))
                                         player.send(
-                                                PacketNotification("Research",
+                                                PacketNotification(
+                                                        player.server.plugins.registry,
+                                                        "Research",
                                                         recipe.text))
                                     }
                                 }

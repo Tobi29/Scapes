@@ -15,11 +15,14 @@
  */
 package org.tobi29.scapes.vanilla.basics.packet
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
+import org.tobi29.scapes.packets.Packet
 import org.tobi29.scapes.packets.PacketAbstract
 import org.tobi29.scapes.packets.PacketServer
+import org.tobi29.scapes.packets.PacketType
 import org.tobi29.scapes.server.connection.PlayerConnection
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityAnvilClient
@@ -34,13 +37,20 @@ class PacketAnvil : PacketAbstract, PacketServer {
     private lateinit var uuid: UUID
     private var id = 0
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(anvil: EntityAnvilClient,
-                id: Int) {
+    constructor(type: PacketType,
+                anvil: EntityAnvilClient,
+                id: Int) : super(type) {
         uuid = anvil.getUUID()
         this.id = id
     }
+
+    constructor(registry: GameRegistry,
+                anvil: EntityAnvilClient,
+                id: Int) : this(
+            Packet.make(registry, "vanilla.basics.packet.Anvil"), anvil,
+            id)
 
     @Throws(IOException::class)
     override fun sendServer(client: ClientConnection,

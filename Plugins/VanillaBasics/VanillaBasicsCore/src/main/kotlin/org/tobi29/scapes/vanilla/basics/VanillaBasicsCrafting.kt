@@ -65,7 +65,7 @@ private fun VanillaBasics.registerRecipesBasics(registry: GameRegistry,
     val saw = listOf(materials.flintSaw.example(1),
             materials.metalSaw.example(1))
     val plank = treeRegistry.values().asSequence().filterNotNull().map {
-        ItemStack(materials.wood, it.data(registry))
+        ItemStack(materials.wood, it.id)
     }.toList()
 
     crafting(recipeType) {
@@ -86,8 +86,7 @@ private fun VanillaBasics.registerRecipesBasics(registry: GameRegistry,
             requirements.add(saw)
             result = ItemStack(materials.researchTable, 0)
         }
-        stoneRegistry.values().asSequence().filterNotNull()
-                .map { it.data(registry) }.forEach {
+        stoneRegistry.values().asSequence().filterNotNull().map { it.id }.forEach {
             recipe("vanilla.basics.crafting.basics.Cobblestone" + it, {
                 ingredients.add(ItemStack(materials.stoneRock, it, 9))
                 requirements.add(hammer)
@@ -121,8 +120,7 @@ private fun VanillaBasics.registerRecipesStone(registry: GameRegistry) {
         }
     }
 
-    val flint = ItemStack(materials.stoneRock,
-            StoneType.FLINT.data(registry))
+    val flint = ItemStack(materials.stoneRock, stoneTypes.FLINT.id)
     val hoe = ItemStack(flint)
     createStoneTool(this, hoe, "Hoe")
     val hoeHead = ItemStack(hoe).setData(0)
@@ -231,7 +229,7 @@ private fun VanillaBasics.registerRecipesFood(registry: GameRegistry,
     }
 
     val cobblestones = stoneRegistry.values().asSequence().filterNotNull()
-            .filter { it.resistance() > 0.1 }.map { it.data(registry) }
+            .filter { it.resistance > 0.1 }.map { it.id }
             .map { ItemStack(materials.cobblestone, it, 2) }.toList()
     val pickaxe = listOf(materials.flintPickaxe.example(1),
             materials.metalPickaxe.example(1))
@@ -252,7 +250,7 @@ private fun VanillaBasics.registerRecipesFood(registry: GameRegistry,
             result = ItemStack(materials.quern, 0)
         }
         cropRegistry.values().asSequence().filterNotNull()
-                .map { it.data(registry) }.forEach {
+                .map { it.id }.forEach {
             recipe("vanilla.basics.crafting.food.Dough" + it, {
                 ingredients.add(ItemStack(materials.grain, it, 8))
                 result = ItemStack(materials.dough, it)
@@ -288,7 +286,7 @@ private fun VanillaBasics.registerRecipesMetal(registry: GameRegistry,
         }
     }
     val cobblestones = stoneRegistry.values().asSequence().filterNotNull()
-            .filter { it.resistance() > 0.1 }.map { it.data(registry) }
+            .filter { it.resistance > 0.1 }.map { it.id }
             .map { ItemStack(materials.cobblestone, it, 2) }.toList()
 
     crafting(recipeType) {
@@ -335,8 +333,7 @@ private fun VanillaBasics.registerRecipesIron(registry: GameRegistry,
     }
 
     val plank = treeRegistry.values().asSequence().filterNotNull()
-            .map { ItemStack(materials.wood, it.data(registry)) }
-            .toList()
+            .map { ItemStack(materials.wood, it.id) }.toList()
 
     crafting(recipeType) {
         recipe("vanilla.basics.crafting.iron.Bloomery") {

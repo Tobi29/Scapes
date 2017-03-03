@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteClient
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteServer
 import org.tobi29.scapes.client.connection.ClientConnection
@@ -26,13 +27,19 @@ class PacketRequestChunk : PacketAbstract, PacketBoth {
     private var x = 0
     private var y = 0
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(x: Int,
-                y: Int) {
+    constructor(type: PacketType,
+                x: Int,
+                y: Int) : super(type) {
         this.x = x
         this.y = y
     }
+
+    constructor(registry: GameRegistry,
+                x: Int,
+                y: Int) : this(
+            Packet.make(registry, "core.packet.RequestChunk"), x, y)
 
     override fun sendServer(client: ClientConnection,
                             stream: WritableByteStream) {
@@ -54,11 +61,12 @@ class PacketRequestChunk : PacketAbstract, PacketBoth {
                 if (chunk != null && terrain.isBlockSendable(mob,
                         chunk.posBlock.x, chunk.posBlock.y, chunk.posBlock.z,
                         true)) {
-                    player.send(PacketSendChunk(chunk))
+                    player.send(PacketSendChunk(player.server.plugins.registry,
+                            chunk))
                     return@mob
                 }
             }
-            player.send(PacketRequestChunk(x, y))
+            player.send(PacketRequestChunk(type, x, y))
         }
     }
 

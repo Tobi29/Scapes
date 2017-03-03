@@ -182,8 +182,7 @@ class BlockCrop(materials: VanillaMaterial,
                 return@map null
             }
             return@map (1..8).asSequence().map { i ->
-                registry.registerTexture(
-                        it.texture() + "/Crop" + i + ".png")
+                registry.registerTexture("${it.texture}/Crop$i.png")
             }.toArray()
         }.toArray()
     }
@@ -217,7 +216,7 @@ class BlockCrop(materials: VanillaMaterial,
     }
 
     override fun name(item: ItemStack): String {
-        return cropRegistry[item.data()].name()
+        return cropRegistry[item.data()].name
     }
 
     override fun maxStackSize(item: ItemStack): Int {

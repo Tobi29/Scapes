@@ -20,9 +20,9 @@ import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.vanilla.basics.material.CropType
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.ItemDefaultHeatable
 import org.tobi29.scapes.vanilla.basics.material.ItemResearch
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.item.ItemSimpleData
 
 class ItemDough(materials: VanillaMaterial,
@@ -35,7 +35,7 @@ class ItemDough(materials: VanillaMaterial,
     }
 
     override fun texture(data: Int): String {
-        return cropRegistry[data].texture() + "/Dough.png"
+        return "${cropRegistry[data].texture}/Dough.png"
     }
 
     override fun name(item: ItemStack): String {

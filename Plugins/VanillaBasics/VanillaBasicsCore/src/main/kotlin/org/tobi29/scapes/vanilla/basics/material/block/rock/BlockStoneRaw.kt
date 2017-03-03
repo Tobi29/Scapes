@@ -41,7 +41,7 @@ class BlockStoneRaw(materials: VanillaMaterial,
     override fun registerTextures(registry: TerrainTextureRegistry) {
         textures = (0..types() - 1).asSequence().map {
             val type = stoneRegistry[it]
-            val texture = "${type.textureRoot()}/raw/${type.texture()}.png"
+            val texture = "${type.textureRoot}/raw/${type.texture}.png"
             registry.registerTexture(texture)
         }.toArray()
     }

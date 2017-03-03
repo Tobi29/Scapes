@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -34,15 +35,21 @@ class PacketEntityMetaData : PacketAbstract, PacketClient {
     lateinit var tag: TagMap
         private set
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(entity: EntityServer,
-                category: String) : super(
-            entity.getCurrentPos()) {
+    constructor(type: PacketType,
+                entity: EntityServer,
+                category: String) : super(type, entity.getCurrentPos()) {
         uuid = entity.getUUID()
         this.category = category
         tag = entity.metaData(category).toTag()
     }
+
+    constructor(registry: GameRegistry,
+                entity: EntityServer,
+                category: String) : this(
+            Packet.make(registry, "core.packet.EntityMetaData"), entity,
+            category)
 
     @Throws(IOException::class)
     override fun sendClient(player: PlayerConnection,

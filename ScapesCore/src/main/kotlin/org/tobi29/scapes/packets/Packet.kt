@@ -19,8 +19,17 @@ package org.tobi29.scapes.packets
 import org.tobi29.scapes.block.GameRegistry
 
 interface Packet {
-    fun id(registry: GameRegistry): Int {
-        return registry.getSupplier<Any, Any>("Core", "Packet").id(
-                this)
+    val type: PacketType
+
+    companion object {
+        fun make(registry: GameRegistry,
+                 id: Int): PacketType {
+            return registry.get<PacketType>("Core", "Packet")[id]
+        }
+
+        fun make(registry: GameRegistry,
+                 id:String): PacketType {
+            return registry.get<PacketType>("Core", "Packet")[id]
+        }
     }
 }

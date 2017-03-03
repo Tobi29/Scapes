@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -30,13 +31,14 @@ class PacketMobChangeSpeed : PacketAbstract, PacketBoth {
     private var y: Short = 0
     private var z: Short = 0
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(uuid: UUID,
+    constructor(type: PacketType,
+                uuid: UUID,
                 pos: Vector3d?,
                 x: Double,
                 y: Double,
-                z: Double) : super(pos, 0.0, false, false) {
+                z: Double) : super(type, pos, 0.0, false, false) {
         this.uuid = uuid
         this.x = clamp(x * 100.0, Short.MIN_VALUE.toDouble(),
                 Short.MAX_VALUE.toDouble()).toShort()
@@ -45,6 +47,15 @@ class PacketMobChangeSpeed : PacketAbstract, PacketBoth {
         this.z = clamp(z * 100.0, Short.MIN_VALUE.toDouble(),
                 Short.MAX_VALUE.toDouble()).toShort()
     }
+
+    constructor(registry: GameRegistry,
+                uuid: UUID,
+                pos: Vector3d?,
+                x: Double,
+                y: Double,
+                z: Double) : this(
+            Packet.make(registry, "core.packet.MobChangeSpeed"), uuid,
+            pos, x, y, z)
 
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {

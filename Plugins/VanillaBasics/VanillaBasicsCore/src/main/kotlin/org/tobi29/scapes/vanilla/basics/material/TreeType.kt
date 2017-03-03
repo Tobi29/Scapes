@@ -18,93 +18,39 @@ package org.tobi29.scapes.vanilla.basics.material
 
 import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.vanilla.basics.world.tree.*
+import org.tobi29.scapes.vanilla.basics.world.tree.Tree
 
-class TreeType internal constructor(private val name: String,
+class TreeType internal constructor(val id: Int,
+                                    val name: String,
                                     textureRoot: String,
-                                    private val colorCold: Vector3d,
-                                    private val colorWarm: Vector3d,
-                                    private val colorAutumn: Vector3d,
-                                    private val dropChance: Int,
-                                    private val generator: Tree,
+                                    val colorCold: Vector3d,
+                                    val colorWarm: Vector3d,
+                                    val colorAutumn: Vector3d,
+                                    val dropChance: Int,
+                                    val generator: Tree,
                                     val isEvergreen: Boolean) {
-    private val texture: String
+    val texture = "$textureRoot/${name.replace(" ", "").toLowerCase()}"
 
-    constructor(name: String,
+    constructor(id: Int,
+                name: String,
                 textureRoot: String,
                 colorCold: Vector3d,
                 colorWarm: Vector3d,
                 dropChance: Int,
-                generator: Tree) : this(
-            name, textureRoot, colorCold, colorWarm, Vector3d.ZERO, dropChance,
-            generator, true)
+                generator: Tree) : this(id, name, textureRoot, colorCold,
+            colorWarm, Vector3d.ZERO, dropChance, generator, true)
 
-    constructor(name: String,
+    constructor(id: Int,
+                name: String,
                 textureRoot: String,
                 colorCold: Vector3d,
                 colorWarm: Vector3d,
                 colorAutumn: Vector3d,
                 dropChance: Int,
-                generator: Tree) : this(name, textureRoot, colorCold, colorWarm,
-            colorAutumn, dropChance,
-            generator, false)
-
-    init {
-        texture = "$textureRoot/${name.replace(" ", "").toLowerCase()}"
-    }
-
-    fun name(): String {
-        return name
-    }
-
-    fun texture(): String {
-        return texture
-    }
-
-    fun colorCold(): Vector3d {
-        return colorCold
-    }
-
-    fun colorWarm(): Vector3d {
-        return colorWarm
-    }
-
-    fun colorAutumn(): Vector3d {
-        return colorAutumn
-    }
-
-    fun dropChance(): Int {
-        return dropChance
-    }
-
-    fun generator(): Tree {
-        return generator
-    }
-
-    fun data(registry: GameRegistry): Int {
-        return registry.get<Any>("VanillaBasics", "TreeType")[this]
-    }
+                generator: Tree) : this(id, name, textureRoot, colorCold,
+            colorWarm, colorAutumn, dropChance, generator, false)
 
     companion object {
-        private val ROOT = "VanillaBasics:image/terrain/tree"
-        val OAK = TreeType("Oak", ROOT, Vector3d(0.5, 0.9, 0.4),
-                Vector3d(0.5, 0.8, 0.0), Vector3d(1.0, 0.7, 0.0), 80, TreeOak())
-        val BIRCH = TreeType("Birch", ROOT, Vector3d(0.6, 0.9, 0.5),
-                Vector3d(0.6, 0.8, 0.1), Vector3d(1.0, 0.8, 0.0), 20,
-                TreeBirch())
-        val SPRUCE = TreeType("Spruce", ROOT, Vector3d(0.2, 0.5, 0.2),
-                Vector3d(0.2, 0.5, 0.0), 10, TreeSpruce())
-        val PALM = TreeType("Palm", ROOT, Vector3d(0.5, 0.9, 0.4),
-                Vector3d(0.5, 0.8, 0.0), 3, TreePalm())
-        val MAPLE = TreeType("Maple", ROOT, Vector3d(0.5, 0.9, 0.4),
-                Vector3d(0.5, 0.8, 0.0), Vector3d(1.0, 0.4, 0.0), 70,
-                TreeMaple())
-        val SEQUOIA = TreeType("Sequoia", ROOT, Vector3d(0.2, 0.5, 0.2),
-                Vector3d(0.2, 0.5, 0.0), 200, TreeSequoia())
-        val WILLOW = TreeType("Willow", ROOT, Vector3d(0.5, 0.9, 0.4),
-                Vector3d(0.5, 0.8, 0.0), Vector3d(0.9, 0.7, 0.0), 100,
-                TreeWillow())
-
         operator fun get(registry: GameRegistry,
                          data: Int): TreeType {
             return registry.get<TreeType>("VanillaBasics", "TreeType")[data]

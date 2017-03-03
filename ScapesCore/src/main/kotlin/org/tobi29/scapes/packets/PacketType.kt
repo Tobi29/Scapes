@@ -14,22 +14,11 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.vanilla.basics.material
+package org.tobi29.scapes.packets
 
-import org.tobi29.scapes.block.GameRegistry
-
-class CropType(val id: Int,
-               val name: String,
-               val bakedName: String,
-               textureRoot: String,
-               val time: Double,
-               val nutrient: Int) {
-    val texture = "$textureRoot/${name.replace(" ", "").toLowerCase()}"
-
-    companion object {
-        operator fun get(registry: GameRegistry,
-                         data: Int): CropType {
-            return registry.get<CropType>("VanillaBasics", "CropType")[data]
-        }
-    }
+class PacketType(val id: Int,
+                 private val client: (PacketType) -> Packet,
+                 private val server: (PacketType) -> Packet = client) {
+    fun createClient() = client(this) as PacketClient
+    fun createServer() = server(this) as PacketServer
 }

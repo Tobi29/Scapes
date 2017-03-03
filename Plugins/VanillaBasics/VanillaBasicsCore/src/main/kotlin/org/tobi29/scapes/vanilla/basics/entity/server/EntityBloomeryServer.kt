@@ -108,6 +108,6 @@ class EntityBloomeryServer(
         }
         this.hasBellows = hasBellows
         maximumTemperature = if (hasBellows) Double.POSITIVE_INFINITY else 600.0
-        world.send(PacketEntityChange(this))
+        world.send(PacketEntityChange(registry, this))
     }
 }

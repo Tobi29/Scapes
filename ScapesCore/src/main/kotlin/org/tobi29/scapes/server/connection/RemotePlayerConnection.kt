@@ -156,7 +156,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                             "Player connected: $id ($nickname) on $channel"))
             while (!connection.shouldClose) {
                 if (connection.shouldClose) {
-                    send(PacketDisconnect("Server closed", 5.0))
+                    send(PacketDisconnect(registry, "Server closed", 5.0))
                     channel.queueBundle()
                     channel.aClose()
                     return
@@ -165,7 +165,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                     val currentTime = System.currentTimeMillis()
                     if (pingWait < currentTime) {
                         pingWait = currentTime + 1000
-                        send(PacketPingServer(currentTime))
+                        send(PacketPingServer(registry, currentTime))
                     }
                     while (!sendQueue.isEmpty()) {
                         val packet = sendQueue.poll()
@@ -173,8 +173,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                         // This packet is not registered as it is just for
                         // internal use
                         if (packet !is PacketDisconnectSelf) {
-                            channel.outputStream.putShort(
-                                    packet.id(server.plugins.registry()))
+                            channel.outputStream.putShort(packet.type.id)
                         }
                         packet.sendClient(this, channel.outputStream)
                         if (channel.bundleSize() > 1 shl 10 shl 4) {
@@ -200,7 +199,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                             PacketBundleChannel.FetchResult.BUNDLE -> {
                                 while (channel.inputStream.hasRemaining()) {
                                     val packet = PacketAbstract.make(registry,
-                                            channel.inputStream.short) as PacketServer
+                                            channel.inputStream.short.toInt()).createServer()
                                     packet.parseServer(
                                             this@RemotePlayerConnection,
                                             channel.inputStream)
@@ -273,8 +272,8 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
     override fun disconnect(reason: String,
                             time: Double) {
         removeEntity()
-        send(PacketDisconnect(reason, time))
-        send(PacketDisconnectSelf(reason))
+        send(PacketDisconnect(registry, reason, time))
+        send(PacketDisconnectSelf(registry, reason))
     }
 
     fun updatePing(ping: Long) {

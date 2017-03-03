@@ -77,7 +77,7 @@ class EntityAlloyServer(world: WorldServer,
                     }
                     input.clear()
                     input.setMaterial(materials.mold, 1)
-                    world.send(PacketEntityChange(this))
+                    world.send(PacketEntityChange(registry, this))
                 }
             }
             val output = inventory.item(1)
@@ -89,7 +89,7 @@ class EntityAlloyServer(world: WorldServer,
                 output.setMaterial(materials.ingot, 0)
                 output.metaData("Vanilla")["Temperature"] = temperature
                 materials.ingot.setAlloy(output, metals.drain(1.0))
-                world.send(PacketEntityChange(this))
+                world.send(PacketEntityChange(registry, this))
             }
         }
     }

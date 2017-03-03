@@ -16,24 +16,51 @@
 
 package org.tobi29.scapes.vanilla.basics
 
-import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.vanilla.basics.material.StoneType
 
-internal fun registerStoneTypes(registry: GameRegistry) {
-    registry.get<StoneType>("VanillaBasics", "StoneType").run {
-        reg(StoneType.DIRT_STONE, "vanilla.basics.stone.DirtStone")
-        reg(StoneType.FLINT, "vanilla.basics.stone.Flint")
-        reg(StoneType.CHALK, "vanilla.basics.stone.Chalk")
-        reg(StoneType.CHERT, "vanilla.basics.stone.Chert")
-        reg(StoneType.CLAYSTONE, "vanilla.basics.stone.Claystone")
-        reg(StoneType.CONGLOMERATE, "vanilla.basics.stone.Conglomerate")
-        reg(StoneType.MARBLE, "vanilla.basics.stone.Marble")
-        reg(StoneType.ANDESITE, "vanilla.basics.stone.Andesite")
-        reg(StoneType.BASALT, "vanilla.basics.stone.Basalt")
-        reg(StoneType.DACITE, "vanilla.basics.stone.Dacite")
-        reg(StoneType.RHYOLITE, "vanilla.basics.stone.Rhyolite")
-        reg(StoneType.DIORITE, "vanilla.basics.stone.Diorite")
-        reg(StoneType.GABBRO, "vanilla.basics.stone.Gabbro")
-        reg(StoneType.GRANITE, "vanilla.basics.stone.Granite")
+class VanillaBasicsStones(reg: (String, (Int) -> StoneType) -> StoneType) {
+    private val ROOT = "VanillaBasics:image/terrain/stone"
+
+    val DIRT_STONE = reg("vanilla.basics.stone.DirtStone") {
+        StoneType(it, "Dirt Stone", ROOT, 0.1)
+    }
+    val FLINT = reg("vanilla.basics.stone.Flint") {
+        StoneType(it, "Flint", ROOT, 2.1)
+    }
+    val CHALK = reg("vanilla.basics.stone.Chalk") {
+        StoneType(it, "Chalk", ROOT, 0.4)
+    }
+    val CHERT = reg("vanilla.basics.stone.Chert") {
+        StoneType(it, "Chert", ROOT, 0.4)
+    }
+    val CLAYSTONE = reg("vanilla.basics.stone.Claystone") {
+        StoneType(it, "Claystone", ROOT, 0.4)
+    }
+    val CONGLOMERATE = reg("vanilla.basics.stone.Conglomerate") {
+        StoneType(it, "Conglomerate", ROOT, 0.4)
+    }
+    val MARBLE = reg("vanilla.basics.stone.Marble") {
+        StoneType(it, "Marble", ROOT, 0.6)
+    }
+    val ANDESITE = reg("vanilla.basics.stone.Andesite") {
+        StoneType(it, "Andesite", ROOT, 1.4)
+    }
+    val BASALT = reg("vanilla.basics.stone.Basalt") {
+        StoneType(it, "Basalt", ROOT, 1.4)
+    }
+    val DACITE = reg("vanilla.basics.stone.Dacite") {
+        StoneType(it, "Dacite", ROOT, 1.4)
+    }
+    val RHYOLITE = reg("vanilla.basics.stone.Rhyolite") {
+        StoneType(it, "Rhyolite", ROOT, 1.4)
+    }
+    val DIORITE = reg("vanilla.basics.stone.Diorite") {
+        StoneType(it, "Diorite", ROOT, 1.2)
+    }
+    val GABBRO = reg("vanilla.basics.stone.Gabbro") {
+        StoneType(it, "Gabbro", ROOT, 1.3)
+    }
+    val GRANITE = reg("vanilla.basics.stone.Granite") {
+        StoneType(it, "Granite", ROOT, 1.5)
     }
 }

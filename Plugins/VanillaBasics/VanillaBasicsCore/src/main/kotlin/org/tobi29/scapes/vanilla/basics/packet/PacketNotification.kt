@@ -16,25 +16,35 @@
 
 package org.tobi29.scapes.vanilla.basics.packet
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.client.gui.GuiInGameMessage
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
+import org.tobi29.scapes.packets.Packet
 import org.tobi29.scapes.packets.PacketAbstract
 import org.tobi29.scapes.packets.PacketClient
+import org.tobi29.scapes.packets.PacketType
 import org.tobi29.scapes.server.connection.PlayerConnection
 
 class PacketNotification : PacketAbstract, PacketClient {
     private lateinit var title: String
     private lateinit var text: String
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(title: String,
-                text: String) {
+    constructor(type: PacketType,
+                title: String,
+                text: String) : super(type) {
         this.title = title
         this.text = text
     }
+
+    constructor(registry: GameRegistry,
+                title: String,
+                text: String) : this(
+            Packet.make(registry, "vanilla.basics.packet.Notification"),
+            title, text)
 
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {

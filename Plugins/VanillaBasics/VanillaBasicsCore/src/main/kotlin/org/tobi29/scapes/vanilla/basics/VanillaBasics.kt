@@ -65,6 +65,9 @@ class VanillaBasics : WorldType {
     private val biomeDecoratorOverlays = ConcurrentHashMap<String, BiomeDecorator.() -> Unit>()
     lateinit var materials: VanillaMaterial
     lateinit var particles: VanillaParticle
+    lateinit var cropTypes: VanillaBasicsCrops
+    lateinit var treeTypes: VanillaBasicsTrees
+    lateinit var stoneTypes: VanillaBasicsStones
     private var modelPigShared: MobLivingModelPigShared? = null
     private var modelBellowsShared: EntityModelBellowsShared? = null
     private var locked = false
@@ -170,9 +173,13 @@ class VanillaBasics : WorldType {
                 ::EnvironmentOverworldClient,
                 EnvironmentOverworldServer::class.java,
                 "vanilla.basics.Overworld")
-        registerTreeTypes(registry)
-        registerCropTypes(registry)
-        registerStoneTypes(registry)
+        val cropRegistry = registry.get<CropType>("VanillaBasics", "CropType")
+        cropTypes = VanillaBasicsCrops(cropRegistry::reg)
+        val treeRegistry = registry.get<TreeType>("VanillaBasics", "TreeType")
+        treeTypes = VanillaBasicsTrees(treeRegistry::reg)
+        val stoneRegistry = registry.get<StoneType>("VanillaBasics",
+                "StoneType")
+        stoneTypes = VanillaBasicsStones(stoneRegistry::reg)
         materials = VanillaMaterial(this, registry)
         registerEntities(registry)
         registerUpdates(registry)

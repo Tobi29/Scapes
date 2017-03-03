@@ -67,13 +67,13 @@ abstract class MobPlayerServer(world: WorldServer,
 
     init {
         inventories = InventoryContainer { id ->
-            world.send(PacketUpdateInventory(this, id))
+            world.send(PacketUpdateInventory(registry, this, id))
         }
         inventories.add("Container", Inventory(registry, 40))
         inventories.add("Hold", Inventory(registry, 1))
         viewersMut.add(this)
         val exceptions = listOf(connection)
-        positionSenderOther = MobPositionSenderServer(pos,
+        positionSenderOther = MobPositionSenderServer(registry, pos,
                 { world.send(it, exceptions) })
         positionReceiver = MobPositionReceiver(pos,
                 { this.pos.set(it) },
@@ -105,7 +105,7 @@ abstract class MobPlayerServer(world: WorldServer,
             setSpeed(Vector3d.ZERO)
             setPos(Vector3d(world.spawn + Vector3i(0, 0, 1)))
             health = maxHealth
-            world.send(PacketEntityChange(this))
+            world.send(PacketEntityChange(registry, this))
             onSpawn()
         })
     }
@@ -145,8 +145,8 @@ abstract class MobPlayerServer(world: WorldServer,
     }
 
     override fun createPositionHandler(): MobPositionSenderServer {
-        return MobPositionSenderServer(pos.now(),
-                { packet -> connection.send(packet) })
+        return MobPositionSenderServer(registry, pos.now(),
+                { connection.send(it) })
     }
 
     fun connection(): PlayerConnection {
@@ -213,9 +213,9 @@ abstract class MobPlayerServer(world: WorldServer,
             closeGui()
         }
         currentContainer = gui
-        world.send(PacketEntityChange(gui as EntityServer))
+        world.send(PacketEntityChange(registry, gui as EntityServer))
         gui.addViewer(this)
-        connection.send(PacketOpenGui(gui))
+        connection.send(PacketOpenGui(registry, gui))
     }
 
     fun closeGui() {

@@ -43,7 +43,7 @@ class ItemSeed(materials: VanillaMaterial,
             if (random.nextInt(1) == 0) {
                 terrain.world.getEntities(x, y,
                         z).filterMap<EntityFarmlandServer>().forEach { farmland ->
-                    farmland.seed(CropType.WHEAT)
+                    farmland.seed(materials.plugin.cropTypes.WHEAT)
                 }
             }
         }
@@ -55,7 +55,7 @@ class ItemSeed(materials: VanillaMaterial,
     }
 
     override fun texture(data: Int): String {
-        return cropRegistry[data].texture() + "/Seed.png"
+        return "${cropRegistry[data].texture}/Seed.png"
     }
 
     override fun name(item: ItemStack): String {

@@ -28,6 +28,7 @@ import org.tobi29.scapes.entity.server.MobFlyingBlockServer
 import org.tobi29.scapes.entity.server.MobItemServer
 import org.tobi29.scapes.packets.*
 import org.tobi29.scapes.plugins.WorldType
+import java.io.IOException
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -164,6 +165,7 @@ class GameRegistry(private val idStorage: MutableTagMap) {
                                   private val min: Int,
                                   private val max: Int) {
         private val objects = ConcurrentHashMap<Int, E>()
+        private val objectsByStr = ConcurrentHashMap<String, E>()
         private val ids = ConcurrentHashMap<E, Int>()
         private val values = ArrayList<E?>()
 
@@ -174,6 +176,7 @@ class GameRegistry(private val idStorage: MutableTagMap) {
             }
             val id = idStorage.getID(module, type, name, min, max)
             objects.put(id, element)
+            objectsByStr.put(name, element)
             ids.put(element, id)
             while (values.size <= id) {
                 values.add(null)
@@ -182,12 +185,35 @@ class GameRegistry(private val idStorage: MutableTagMap) {
             return id
         }
 
+        fun reg(name: String,
+                block: (Int) -> E): E {
+            if (locked) {
+                throw IllegalStateException("Initializing already ended")
+            }
+            val id = idStorage.getID(module, type, name, min, max)
+            val element = block(id)
+            objects.put(id, element)
+            objectsByStr.put(name, element)
+            ids.put(element, id)
+            while (values.size <= id) {
+                values.add(null)
+            }
+            values[id] = element
+            return element
+        }
+
         fun values(): List<E?> {
             return values
         }
 
         operator fun get(id: Int): E {
             val `object` = objects[id] ?: throw IllegalArgumentException(
+                    "Invalid id")
+            return `object`
+        }
+
+        operator fun get(id: String): E {
+            val `object` = objectsByStr[id] ?: throw IllegalArgumentException(
                     "Invalid id")
             return `object`
         }
@@ -338,7 +364,6 @@ class GameRegistry(private val idStorage: MutableTagMap) {
 fun GameRegistry.init(worldType: WorldType) {
     val er = getAsymSupplier<WorldServer, EntityServer, WorldClient, EntityClient>(
             "Core", "Entity")
-    val pr = getSupplier<GameRegistry, PacketAbstract>("Core", "Packet")
     val ur = getSupplier<GameRegistry, Update>("Core", "Update")
     er.reg({ throw UnsupportedOperationException() }, {
         worldType.playerSupplier().invoke(it)
@@ -354,68 +379,109 @@ fun GameRegistry.init(worldType: WorldType) {
             "core.mob.Item")
     er.reg({ MobFlyingBlockServer(it) }, { MobFlyingBlockClient(it) },
             MobFlyingBlockServer::class.java, "core.mob.FlyingBlock")
-    pr.reg({ PacketRequestChunk() }, PacketRequestChunk::class.java,
-            "core.packet.RequestChunk")
-    pr.reg({ PacketRequestEntity() }, PacketRequestEntity::class.java,
-            "core.packet.RequestEntity")
-    pr.reg({ PacketSendChunk() }, PacketSendChunk::class.java,
-            "core.packet.SendChunk")
-    pr.reg({ PacketBlockChange() }, PacketBlockChange::class.java,
-            "core.packet.BlockChange")
-    pr.reg({ PacketBlockChangeAir() }, PacketBlockChangeAir::class.java,
-            "core.packet.BlockChangeAir")
-    pr.reg({ PacketEntityAdd() }, PacketEntityAdd::class.java,
-            "core.packet.EntityAdd")
-    pr.reg({ PacketEntityChange() }, PacketEntityChange::class.java,
-            "core.packet.EntityChange")
-    pr.reg({ PacketEntityMetaData() }, PacketEntityMetaData::class.java,
-            "core.packet.EntityMetaData")
-    pr.reg({ PacketMobMoveRelative() }, PacketMobMoveRelative::class.java,
-            "core.packet.MobMoveRelative")
-    pr.reg({ PacketMobMoveAbsolute() }, PacketMobMoveAbsolute::class.java,
-            "core.packet.MobMoveAbsolute")
-    pr.reg({ PacketMobChangeRot() }, PacketMobChangeRot::class.java,
-            "core.packet.MobChangeRot")
-    pr.reg({ PacketMobChangeSpeed() }, PacketMobChangeSpeed::class.java,
-            "core.packet.MobChangeSpeed")
-    pr.reg({ PacketMobChangeState() }, PacketMobChangeState::class.java,
-            "core.packet.MobChangeState")
-    pr.reg({ PacketMobDamage() }, PacketMobDamage::class.java,
-            "core.packet.MobDamage")
-    pr.reg({ PacketEntityDespawn() }, PacketEntityDespawn::class.java,
-            "core.packet.EntityDespawn")
-    pr.reg({ PacketSoundEffect() }, PacketSoundEffect::class.java,
-            "core.packet.SoundEffect")
-    pr.reg({ PacketInteraction() }, PacketInteraction::class.java,
-            "core.packet.Interaction")
-    pr.reg({ PacketInventoryInteraction() },
-            PacketInventoryInteraction::class.java,
-            "core.packet.InventoryInteraction")
-    pr.reg({ PacketPlayerJump() }, PacketPlayerJump::class.java,
-            "core.packet.PlayerJump")
-    pr.reg({ PacketOpenGui() }, PacketOpenGui::class.java,
-            "core.packet.OpenGui")
-    pr.reg({ PacketCloseGui() }, PacketCloseGui::class.java,
-            "core.packet.CloseGui")
-    pr.reg({ PacketUpdateInventory() }, PacketUpdateInventory::class.java,
-            "core.packet.UpdateInventory")
-    pr.reg({ PacketChat() }, PacketChat::class.java, "core.packet.Chat")
-    pr.reg({ PacketItemUse() }, PacketItemUse::class.java,
-            "core.packet.ItemUse")
-    pr.reg({ PacketDisconnect() }, PacketDisconnect::class.java,
-            "core.packet.Disconnect")
-    pr.reg({ PacketSetWorld() }, PacketSetWorld::class.java,
-            "core.packet.SetWorld")
-    pr.reg({ PacketPingClient() }, PacketPingClient::class.java,
-            "core.packet.PingClient")
-    pr.reg({ PacketPingServer() }, PacketPingServer::class.java,
-            "core.packet.PingServer")
-    pr.reg({ PacketSkin() }, PacketSkin::class.java, "core.packet.Skin")
     ur.reg({ UpdateBlockUpdate() }, UpdateBlockUpdate::class.java,
             "core.update.BlockUpdate")
     ur.reg({ UpdateBlockUpdateUpdateTile() },
             UpdateBlockUpdateUpdateTile::class.java,
             "core.update.BlockUpdateUpdateTile")
+    initP(worldType)
+}
+
+fun GameRegistry.initP(worldType: WorldType) {
+    get<PacketType>("Core", "Packet").run {
+        reg("core.packet.RequestChunk") {
+            PacketType(it, ::PacketRequestChunk)
+        }
+        reg("core.packet.RequestEntity") {
+            PacketType(it, ::PacketRequestEntity)
+        }
+        reg("core.packet.SendChunk") {
+            PacketType(it, ::PacketSendChunk)
+        }
+        reg("core.packet.BlockChange") {
+            PacketType(it, ::PacketBlockChange)
+        }
+        reg("core.packet.BlockChangeAir") {
+            PacketType(it, ::PacketBlockChangeAir)
+        }
+        reg("core.packet.EntityAdd") {
+            PacketType(it, ::PacketEntityAdd)
+        }
+        reg("core.packet.EntityChange") {
+            PacketType(it, ::PacketEntityChange)
+        }
+        reg("core.packet.EntityMetaData") {
+            PacketType(it, ::PacketEntityMetaData)
+        }
+        reg("core.packet.MobMoveRelative") {
+            PacketType(it, ::PacketMobMoveRelative)
+        }
+        reg("core.packet.MobMoveAbsolute") {
+            PacketType(it, ::PacketMobMoveAbsolute)
+        }
+        reg("core.packet.MobChangeRot") {
+            PacketType(it, ::PacketMobChangeRot)
+        }
+        reg("core.packet.MobChangeSpeed") {
+            PacketType(it, ::PacketMobChangeSpeed)
+        }
+        reg("core.packet.MobChangeState") {
+            PacketType(it, ::PacketMobChangeState)
+        }
+        reg("core.packet.MobDamage") {
+            PacketType(it, ::PacketMobDamage)
+        }
+        reg("core.packet.EntityDespawn") {
+            PacketType(it, ::PacketEntityDespawn)
+        }
+        reg("core.packet.SoundEffect") {
+            PacketType(it, ::PacketSoundEffect)
+        }
+        reg("core.packet.Interaction") {
+            PacketType(it, ::PacketInteraction)
+        }
+        reg("core.packet.InventoryInteraction") {
+            PacketType(it, ::PacketInventoryInteraction)
+        }
+        reg("core.packet.PlayerJump") {
+            PacketType(it, ::PacketPlayerJump)
+        }
+        reg("core.packet.OpenGui") {
+            PacketType(it, ::PacketOpenGui)
+        }
+        reg("core.packet.CloseGui") {
+            PacketType(it, ::PacketCloseGui)
+        }
+        reg("core.packet.UpdateInventory") {
+            PacketType(it, ::PacketUpdateInventory)
+        }
+        reg("core.packet.Chat") {
+            PacketType(it, ::PacketChat)
+        }
+        reg("core.packet.ItemUse") {
+            PacketType(it, ::PacketItemUse)
+        }
+        reg("core.packet.Disconnect") {
+            PacketType(it, ::PacketDisconnect)
+        }
+        reg("core.packet.DisconnectSelf") {
+            PacketType(it, {
+                throw IOException("This packet should never be received")
+            })
+        }
+        reg("core.packet.SetWorld") {
+            PacketType(it, ::PacketSetWorld)
+        }
+        reg("core.packet.PingClient") {
+            PacketType(it, ::PacketPingClient)
+        }
+        reg("core.packet.PingServer") {
+            PacketType(it, ::PacketPingServer)
+        }
+        reg("core.packet.Skin") {
+            PacketType(it, ::PacketSkin)
+        }
+    }
 }
 
 private fun ReadWriteTagMutableMap.getID(module: String,

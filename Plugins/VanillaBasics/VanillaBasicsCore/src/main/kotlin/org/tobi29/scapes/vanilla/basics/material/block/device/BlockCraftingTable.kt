@@ -47,7 +47,7 @@ class BlockCraftingTable(materials: VanillaMaterial) : VanillaBlock(materials,
                        z: Int,
                        face: Face,
                        player: MobPlayerServer): Boolean {
-        player.connection().send(PacketOpenCrafting())
+        player.connection().send(PacketOpenCrafting(player.registry))
         return true
     }
 

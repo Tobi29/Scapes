@@ -50,7 +50,7 @@ class GuiChatWrite(state: GameStateGameMP,
             if (controller.isPressed(ControllerKey.KEY_ENTER)) {
                 val text = write.text()
                 if (!text.isEmpty()) {
-                    client.send(PacketChat(text))
+                    client.send(PacketChat(client.plugins.registry, text))
                 }
                 player.closeGui()
             }

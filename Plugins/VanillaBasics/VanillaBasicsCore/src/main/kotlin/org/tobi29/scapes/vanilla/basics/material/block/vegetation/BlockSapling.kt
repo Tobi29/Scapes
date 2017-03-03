@@ -174,7 +174,7 @@ class BlockSapling(materials: VanillaMaterial,
             if (it == null) {
                 return@map null
             }
-            registry.registerTexture(it.texture() + "/Sapling.png")
+            registry.registerTexture("${it.texture}/Sapling.png")
         }.toArray()
     }
 

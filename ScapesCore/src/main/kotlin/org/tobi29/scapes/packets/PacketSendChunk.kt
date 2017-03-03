@@ -16,6 +16,7 @@
 package org.tobi29.scapes.packets
 
 import mu.KLogging
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteChunkServer
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteClient
 import org.tobi29.scapes.client.connection.ClientConnection
@@ -31,13 +32,18 @@ class PacketSendChunk : PacketAbstract, PacketClient {
     private var y = 0
     private lateinit var tag: TagMap
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(chunk: TerrainInfiniteChunkServer) {
+    constructor(type: PacketType,
+                chunk: TerrainInfiniteChunkServer) : super(type) {
         x = chunk.pos.x
         y = chunk.pos.y
         tag = TagMap { chunk.write(this, true) }
     }
+
+    constructor(registry: GameRegistry,
+                chunk: TerrainInfiniteChunkServer) : this(
+            Packet.make(registry, "core.packet.SendChunk"), chunk)
 
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {

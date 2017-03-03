@@ -177,13 +177,13 @@ class BlockStoneRock(materials: VanillaMaterial,
         textures = stoneRegistry.values().asSequence().map {
             it?.let {
                 return@map registry.registerTexture(
-                        it.textureRoot() + "/raw/" + it.texture() + ".png")
+                        "${it.textureRoot}/raw/${it.texture}.png")
             }
         }.toArray()
         texturesItem = stoneRegistry.values().asSequence().map {
             it?.let {
                 return@map registry.registerTexture(
-                        "VanillaBasics:image/terrain/stone/rock/" + it.texture() + ".png")
+                        "VanillaBasics:image/terrain/stone/rock/${it.texture}.png")
             }
         }.toArray()
     }

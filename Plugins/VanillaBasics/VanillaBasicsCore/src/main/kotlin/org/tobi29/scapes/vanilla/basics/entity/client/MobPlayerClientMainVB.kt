@@ -108,7 +108,7 @@ class MobPlayerClientMainVB(world: WorldClient,
                 } else if (isOnGround) {
                     speed.setZ(5.1)
                     physicsState.isOnGround = false
-                    connection().send(PacketPlayerJump())
+                    connection().send(PacketPlayerJump(registry))
                 }
             }
             val walk = input.walk()
@@ -139,7 +139,7 @@ class MobPlayerClientMainVB(world: WorldClient,
                 updatePosition()
                 val direction = input.hitDirection()
                 breakParticles(world.terrain, 16, direction)
-                world.send(PacketItemUse(min(
+                world.send(PacketItemUse(registry, min(
                         (System.currentTimeMillis() - punchLeft).toDouble() / leftWeapon().material().hitWait(
                                 leftWeapon()),
                         0.5) * 2.0, true, direction))
@@ -155,7 +155,7 @@ class MobPlayerClientMainVB(world: WorldClient,
                 updatePosition()
                 val direction = input.hitDirection()
                 breakParticles(world.terrain, 16, direction)
-                world.send(PacketItemUse(min(
+                world.send(PacketItemUse(registry, min(
                         (System.currentTimeMillis() - punchRight).toDouble() / rightWeapon().material().hitWait(
                                 rightWeapon()),
                         0.5) * 2.0, false, direction))
@@ -281,25 +281,25 @@ class MobPlayerClientMainVB(world: WorldClient,
         }
         input.events.listener<HotbarChangeLeftEvent>(listenerOwner) { event ->
             inventorySelectLeft = (inventorySelectLeft + event.delta) remP 10
-            world.send(PacketInteraction(
+            world.send(PacketInteraction(registry,
                     PacketInteraction.INVENTORY_SLOT_LEFT,
                     inventorySelectLeft.toByte()))
         }
         input.events.listener<HotbarChangeRightEvent>(listenerOwner) { event ->
             inventorySelectRight = (inventorySelectRight + event.delta) remP 10
-            world.send(PacketInteraction(
+            world.send(PacketInteraction(registry,
                     PacketInteraction.INVENTORY_SLOT_RIGHT,
                     inventorySelectRight.toByte()))
         }
         input.events.listener<HotbarSetLeftEvent>(listenerOwner) { event ->
             inventorySelectLeft = event.value
-            world.send(PacketInteraction(
+            world.send(PacketInteraction(registry,
                     PacketInteraction.INVENTORY_SLOT_LEFT,
                     inventorySelectLeft.toByte()))
         }
         input.events.listener<HotbarSetRightEvent>(listenerOwner) { event ->
             inventorySelectRight = event.value
-            world.send(PacketInteraction(
+            world.send(PacketInteraction(registry,
                     PacketInteraction.INVENTORY_SLOT_RIGHT,
                     inventorySelectRight.toByte()))
         }
@@ -316,7 +316,8 @@ class MobPlayerClientMainVB(world: WorldClient,
                 event.success = true
                 if (!closeGui()) {
                     world.send(
-                            PacketInteraction(PacketInteraction.OPEN_INVENTORY))
+                            PacketInteraction(registry,
+                                    PacketInteraction.OPEN_INVENTORY, 0))
                 }
             }
         }

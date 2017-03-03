@@ -31,16 +31,11 @@ open class EntityServer(val world: WorldServer,
                         pos: Vector3d) : Entity, TagMapWrite {
     protected val spawnListeners: MutableMap<String, () -> Unit> = ConcurrentHashMap()
     protected val updateListeners: MutableMap<String, (Double) -> Unit> = ConcurrentHashMap()
-    protected val registry: GameRegistry
-    protected val pos: MutableVector3d
+    val registry = world.registry
+    protected val pos = MutableVector3d(pos)
     var uuid: UUID = UUID.randomUUID()
         protected set
     protected var metaData = MutableTagMap()
-
-    init {
-        registry = world.registry
-        this.pos = MutableVector3d(pos)
-    }
 
     override fun getUUID(): UUID {
         return uuid

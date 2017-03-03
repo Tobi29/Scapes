@@ -39,7 +39,7 @@ fun WorldClient.getEntity(uuid: UUID?,
     }
     val entity = getEntity(uuid)
     if (entity == null) {
-        send(PacketRequestEntity(uuid))
+        send(PacketRequestEntity(registry, uuid))
     } else {
         consumer(entity)
     }

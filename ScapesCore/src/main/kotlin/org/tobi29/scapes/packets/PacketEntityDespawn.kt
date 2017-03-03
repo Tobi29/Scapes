@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -29,14 +30,19 @@ class PacketEntityDespawn : PacketAbstract, PacketClient {
     private lateinit var uuid: UUID
     private var dead = false
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(entity: EntityServer) {
+    constructor(type: PacketType,
+                entity: EntityServer) : super(type) {
         uuid = entity.getUUID()
         if (entity is MobLivingServer) {
             dead = entity.isDead
         }
     }
+
+    constructor(registry: GameRegistry,
+                entity: EntityServer) : this(
+            Packet.make(registry, "core.packet.EntityDespawn"), entity)
 
     @Throws(IOException::class)
     override fun sendClient(player: PlayerConnection,

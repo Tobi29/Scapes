@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.client.states.GameStateServerDisconnect
 import org.tobi29.scapes.engine.server.ConnectionEndException
@@ -27,13 +28,19 @@ class PacketDisconnect : PacketAbstract, PacketClient {
     private lateinit var reason: String
     private var time = 0.0
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(reason: String,
-                time: Double) {
+    constructor(type: PacketType,
+                reason: String,
+                time: Double) : super(type) {
         this.reason = reason
         this.time = time
     }
+
+    constructor(registry: GameRegistry,
+                reason: String,
+                time: Double) : this(
+            Packet.make(registry, "core.packet.Disconnect"), reason, time)
 
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {

@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -28,13 +29,18 @@ class PacketMobDamage : PacketAbstract, PacketClient {
     private var health = 0.0
     private var maxHealth = 0.0
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(entity: MobLivingServer) : super(entity.getCurrentPos()) {
+    constructor(type: PacketType,
+                entity: MobLivingServer) : super(type, entity.getCurrentPos()) {
         uuid = entity.getUUID()
         health = entity.health()
         maxHealth = entity.maxHealth()
     }
+
+    constructor(registry: GameRegistry,
+                entity: MobLivingServer) : this(
+            Packet.make(registry, "core.packet.MobDamage"), entity)
 
     fun health(): Double {
         return health

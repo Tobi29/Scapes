@@ -16,13 +16,25 @@
 
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.server.ConnectionEndException
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.server.connection.PlayerConnection
 
-class PacketDisconnectSelf(val reason: String) : PacketAbstract(), PacketBoth {
+class PacketDisconnectSelf : PacketAbstract, PacketBoth {
+    val reason: String
+
+    constructor(type: PacketType,
+                reason: String) : super(type) {
+        this.reason = reason
+    }
+
+    constructor(registry: GameRegistry,
+                reason: String) : this(
+            Packet.make(registry, "core.packet.DisconnectSelf"), reason)
+
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {
         throw ConnectionEndException(reason)

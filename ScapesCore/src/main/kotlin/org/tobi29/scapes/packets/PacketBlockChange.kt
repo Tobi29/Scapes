@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -30,20 +31,30 @@ open class PacketBlockChange : PacketAbstract, PacketClient {
     protected var id = 0
     protected var data = 0
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(x: Int,
+    constructor(type: PacketType,
+                x: Int,
                 y: Int,
                 z: Int,
                 id: Int,
-                data: Int) : super(
-            Vector3d(x + 0.5, y + 0.5, z + 0.5), true) {
+                data: Int) : super(type, Vector3d(x + 0.5, y + 0.5, z + 0.5),
+            true) {
         this.x = x
         this.y = y
         this.z = z
         this.id = id
         this.data = data
     }
+
+    constructor(registry: GameRegistry,
+                x: Int,
+                y: Int,
+                z: Int,
+                id: Int,
+                data: Int) : this(
+            Packet.make(registry, "core.packet.BlockChange"), x, y, z, id,
+            data)
 
     @Throws(IOException::class)
     override fun sendClient(player: PlayerConnection,

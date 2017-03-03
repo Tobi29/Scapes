@@ -36,7 +36,7 @@ abstract class BlockStone protected constructor(materials: VanillaMaterial,
                             data: Int): Double {
         return if ("Pickaxe" == item.material().toolType(item) && canBeBroken(
                 item.material().toolLevel(item), data))
-            8.0 * stoneRegistry[data].resistance()
+            8.0 * stoneRegistry[data].resistance
         else
             -1.0
     }
@@ -53,7 +53,7 @@ abstract class BlockStone protected constructor(materials: VanillaMaterial,
     fun canBeBroken(toolLevel: Int,
                     data: Int): Boolean {
         return round(
-                stoneRegistry[data].resistance()) * 10 <= toolLevel
+                stoneRegistry[data].resistance) * 10 <= toolLevel
     }
 
     override fun maxStackSize(item: ItemStack): Int {
@@ -61,6 +61,6 @@ abstract class BlockStone protected constructor(materials: VanillaMaterial,
     }
 
     protected fun stoneName(item: ItemStack): String {
-        return stoneRegistry[item.data()].name()
+        return stoneRegistry[item.data()].name
     }
 }

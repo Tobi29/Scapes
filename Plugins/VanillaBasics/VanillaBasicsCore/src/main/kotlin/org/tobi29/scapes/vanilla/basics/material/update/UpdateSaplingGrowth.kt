@@ -31,7 +31,7 @@ class UpdateSaplingGrowth : Update() {
         val block = terrain.block(x, y, z)
         val data = terrain.data(block)
         terrain.typeData(x, y, z, materials.air, 0)
-        TreeType[materials.registry, data].generator().gen(terrain, x, y, z,
+        TreeType[materials.registry, data].generator.gen(terrain, x, y, z,
                 materials, Random())
     }
 

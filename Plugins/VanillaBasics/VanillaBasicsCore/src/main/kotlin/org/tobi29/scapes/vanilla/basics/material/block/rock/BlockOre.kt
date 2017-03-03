@@ -76,7 +76,7 @@ abstract class BlockOre protected constructor(materials: VanillaMaterial,
         textures = stoneRegistry.values().asSequence().map {
             it?.let {
                 return@map registry.registerTexture(
-                        it.textureRoot() + "/raw/" + it.texture() + ".png", ore)
+                        "${it.textureRoot}/raw/${it.texture}.png", ore)
             }
         }.toArray()
     }

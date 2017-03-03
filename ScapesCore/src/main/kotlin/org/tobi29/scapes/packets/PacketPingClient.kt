@@ -16,17 +16,23 @@
 
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.client.connection.RemoteClientConnection
 import org.tobi29.scapes.server.connection.PlayerConnection
 
 class PacketPingClient : PacketPing {
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(timestamp: Long) : super(timestamp)
+    constructor(type: PacketType,
+                timestamp: Long) : super(type, timestamp)
+
+    constructor(registry: GameRegistry,
+                timestamp: Long) : this(
+            Packet.make(registry, "core.packet.PingClient"), timestamp)
 
     override fun runServer(player: PlayerConnection) {
-        player.send(PacketPingClient(timestamp))
+        player.send(PacketPingClient(type, timestamp))
     }
 
     override fun runClient(client: ClientConnection) {

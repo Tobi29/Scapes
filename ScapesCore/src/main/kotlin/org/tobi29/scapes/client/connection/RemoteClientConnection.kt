@@ -23,7 +23,6 @@ import org.tobi29.scapes.client.states.GameStateMenu
 import org.tobi29.scapes.client.states.GameStateServerDisconnect
 import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.packets.PacketAbstract
-import org.tobi29.scapes.packets.PacketClient
 import org.tobi29.scapes.packets.PacketPingClient
 import org.tobi29.scapes.packets.PacketServer
 import org.tobi29.scapes.plugins.Plugins
@@ -42,7 +41,8 @@ class RemoteClientConnection(private val worker: ConnectionWorker,
 
     override fun start() {
         game.engine.taskExecutor.addTask({
-            send(PacketPingClient(System.currentTimeMillis()))
+            send(PacketPingClient(plugins.registry,
+                    System.currentTimeMillis()))
             downloadDebug.setValue(channel.inputRate / 128.0)
             uploadDebug.setValue(channel.outputRate / 128.0)
             if (isClosed) -1 else 1000
@@ -61,7 +61,7 @@ class RemoteClientConnection(private val worker: ConnectionWorker,
                     val packet = sendQueue.poll()
                     val output = channel.outputStream
                     val pos = output.position()
-                    output.putShort(packet.id(plugins.registry()))
+                    output.putShort(packet.type.id)
                     packet.sendServer(this@RemoteClientConnection, output)
                     val size = output.position() - pos
                     profilerSent.packet(packet, size.toLong())
@@ -83,7 +83,7 @@ class RemoteClientConnection(private val worker: ConnectionWorker,
                             while (bundle.hasRemaining()) {
                                 val packet = PacketAbstract.make(
                                         plugins.registry(),
-                                        bundle.short) as PacketClient
+                                        bundle.short.toInt()).createClient()
                                 val pos = bundle.position()
                                 packet.parseClient(
                                         this@RemoteClientConnection,

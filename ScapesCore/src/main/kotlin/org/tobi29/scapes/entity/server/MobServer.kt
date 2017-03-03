@@ -20,7 +20,10 @@ import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.ThreadLocal
-import org.tobi29.scapes.engine.utils.io.tag.*
+import org.tobi29.scapes.engine.utils.io.tag.ReadWriteTagMap
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.set
+import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
@@ -86,7 +89,7 @@ abstract class MobServer protected constructor(world: WorldServer,
     }
 
     protected open fun createPositionHandler(): MobPositionSenderServer {
-        return MobPositionSenderServer(pos.now(), { world.send(it) })
+        return MobPositionSenderServer(registry, pos.now(), { world.send(it) })
     }
 
     fun speed(): Vector3d {

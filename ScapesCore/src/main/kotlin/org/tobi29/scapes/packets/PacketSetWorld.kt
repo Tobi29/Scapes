@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.chunk.EnvironmentClient
 import org.tobi29.scapes.chunk.EnvironmentServer
 import org.tobi29.scapes.chunk.WorldClient
@@ -37,16 +38,22 @@ class PacketSetWorld : PacketAbstract, PacketClient {
     private lateinit var uuid: UUID
     private var environment = 0
 
-    constructor()
+    constructor(type: PacketType) : super(type)
 
-    constructor(world: WorldServer,
-                player: MobPlayerServer) {
+    constructor(type: PacketType,
+                world: WorldServer,
+                player: MobPlayerServer) : super(type) {
         tag = TagMap { player.write(this) }
         seed = world.seed
         uuid = player.getUUID()
         environment = world.registry.getAsymSupplier<Any, Any, Any, Any>("Core",
                 "Environment").id(world.environment)
     }
+
+    constructor(registry: GameRegistry,
+                world: WorldServer,
+                player: MobPlayerServer) : this(
+            Packet.make(registry, "core.packet.SetWorld"), world, player)
 
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {

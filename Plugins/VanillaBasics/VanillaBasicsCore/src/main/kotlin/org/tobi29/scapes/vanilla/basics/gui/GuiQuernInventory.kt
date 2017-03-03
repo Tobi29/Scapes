@@ -35,7 +35,7 @@ class GuiQuernInventory(container: EntityQuernClient,
         selection(quern)
 
         quern.on(GuiEvent.CLICK_LEFT) {
-            player.connection().send(PacketQuern(container))
+            player.connection().send(PacketQuern(player.registry, container))
         }
     }
 }

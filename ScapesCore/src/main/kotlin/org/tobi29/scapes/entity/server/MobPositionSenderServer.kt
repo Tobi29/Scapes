@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.entity.server
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.angleDiff
 import org.tobi29.scapes.engine.utils.math.clamp
@@ -27,7 +28,8 @@ import org.tobi29.scapes.packets.*
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
-class MobPositionSenderServer(pos: Vector3d,
+class MobPositionSenderServer(private val registry: GameRegistry,
+                              pos: Vector3d,
                               private val packetHandler: (PacketBoth) -> Unit) {
     private val sentPosRelative: MutableVector3d
     private val sentPosAbsolute: MutableVector3d
@@ -103,7 +105,8 @@ class MobPositionSenderServer(pos: Vector3d,
                 sentPosRelative.plusX(x / 500.0)
                 sentPosRelative.plusY(y / 500.0)
                 sentPosRelative.plusZ(z / 500.0)
-                packetHandler(PacketMobMoveRelative(uuid, oldPos, x, y, z))
+                packetHandler(
+                        PacketMobMoveRelative(registry, uuid, oldPos, x, y, z))
             }
             if (abs(sentSpeed.doubleX()) > SPEED_SEND_OFFSET && abs(
                     speed.x) <= SPEED_SEND_OFFSET ||
@@ -133,7 +136,8 @@ class MobPositionSenderServer(pos: Vector3d,
             this.inWater = inWater
             this.swimming = swimming
             packetHandler(
-                    PacketMobChangeState(uuid, oldPos, ground, slidingWall,
+                    PacketMobChangeState(registry, uuid, oldPos, ground,
+                            slidingWall,
                             inWater, swimming))
         }
     }
@@ -151,7 +155,7 @@ class MobPositionSenderServer(pos: Vector3d,
         sentPosRelative.set(pos)
         sentPosAbsolute.set(pos)
         packetHandler(
-                PacketMobMoveAbsolute(uuid, oldPos, pos.x,
+                PacketMobMoveAbsolute(registry, uuid, oldPos, pos.x,
                         pos.y, pos.z))
     }
 
@@ -160,7 +164,7 @@ class MobPositionSenderServer(pos: Vector3d,
                      forced: Boolean,
                      packetHandler: (PacketBoth) -> Unit = this.packetHandler) {
         sentRot.set(rot)
-        packetHandler(PacketMobChangeRot(uuid,
+        packetHandler(PacketMobChangeRot(registry, uuid,
                 if (forced) null else sentPosAbsolute.now(), rot.floatX(),
                 rot.floatY(), rot.floatZ()))
     }
@@ -170,7 +174,7 @@ class MobPositionSenderServer(pos: Vector3d,
                   forced: Boolean,
                   packetHandler: (PacketBoth) -> Unit = this.packetHandler) {
         sentSpeed.set(speed)
-        packetHandler(PacketMobChangeSpeed(uuid,
+        packetHandler(PacketMobChangeSpeed(registry, uuid,
                 if (forced) null else sentPosAbsolute.now(), speed.x,
                 speed.y, speed.z))
     }

@@ -127,7 +127,7 @@ abstract class EntityAbstractFurnaceServer(
         updateWait -= delta
         while (updateWait <= 0.0) {
             updateWait += 0.05
-            world.send(PacketEntityChange(this))
+            world.send(PacketEntityChange(registry, this))
         }
     }
 }

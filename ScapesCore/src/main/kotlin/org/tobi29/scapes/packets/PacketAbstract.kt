@@ -18,14 +18,16 @@ package org.tobi29.scapes.packets
 import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 
-abstract class PacketAbstract(protected val pos: Vector3d? = null,
+abstract class PacketAbstract(override val type: PacketType,
+                              protected val pos: Vector3d? = null,
                               protected val range: Double = 0.0,
                               val isChunkContent: Boolean = false,
                               val isVital: Boolean = true) : Packet {
 
-    protected constructor(pos: Vector3d,
-                          isChunkContent: Boolean) : this(pos,
-            0.0, isChunkContent)
+    protected constructor(type: PacketType,
+                          pos: Vector3d,
+                          isChunkContent: Boolean) : this(type, pos, 0.0,
+            isChunkContent)
 
     fun pos(): Vector3d? {
         return pos
@@ -36,11 +38,9 @@ abstract class PacketAbstract(protected val pos: Vector3d? = null,
     }
 
     companion object {
-
         fun make(registry: GameRegistry,
-                 id: Short): PacketAbstract {
-            return registry.getSupplier<GameRegistry, PacketAbstract>("Core",
-                    "Packet")[id.toInt()](registry)
+                 id: Int): PacketType {
+            return registry.get<PacketType>("Core", "Packet")[id]
         }
     }
 }

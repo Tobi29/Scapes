@@ -16,12 +16,18 @@
 
 package org.tobi29.scapes.packets
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.server.connection.PlayerConnection
 
-class PacketCloseGui : PacketAbstract(), PacketClient {
+class PacketCloseGui : PacketAbstract, PacketClient {
+    constructor(type: PacketType) : super(type)
+
+    constructor(registry: GameRegistry) : this(
+            Packet.make(registry, "core.packet.CloseGui"))
+
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {
     }
