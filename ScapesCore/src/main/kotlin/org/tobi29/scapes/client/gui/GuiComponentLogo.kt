@@ -71,7 +71,7 @@ class GuiComponentLogo(parent: GuiLayoutData,
             } else if (date.dayOfMonth == 1 && date.month == Month.JANUARY) {
                 text = "Happy new\nyear!"
             } else if (date.dayOfMonth == 3 && date.month == Month.MARCH) {
-                text = "${CharArray(1024, { ' ' })}Aspect ratio!?!"
+                text = "${String(CharArray(1024, { ' ' }))}Aspect ratio!?!"
             } else {
                 val random = ThreadLocalRandom.current()
                 text = SPLASHES[random.nextInt(SPLASHES.size)]
