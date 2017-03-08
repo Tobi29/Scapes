@@ -48,17 +48,15 @@ class TerrainInfiniteServer(override val world: WorldServer,
                             internal val populators: Array<ChunkPopulator>,
                             air: BlockType) : TerrainInfinite<EntityServer>(
         zSize, world.taskExecutor, air, air,
-        world.registry.blocks()), TerrainServer.TerrainMutable {
+        world.registry), TerrainServer.TerrainMutable {
     private val blockChanges = ConcurrentLinkedQueue<(TerrainServer.TerrainMutable) -> Unit>()
     private val chunkUnloadQueue = ConcurrentLinkedQueue<TerrainInfiniteChunkServer>()
-    private val chunkManager: TerrainInfiniteChunkManagerServer
-    private val generatorOutput: GeneratorOutput
+    private val chunkManager = TerrainInfiniteChunkManagerServer()
+    private val generatorOutput = GeneratorOutput(zSize)
     private val loadJoiner: ThreadJoiner
     private val updateJoiner: ThreadJoiner
 
     init {
-        chunkManager = TerrainInfiniteChunkManagerServer()
-        generatorOutput = GeneratorOutput(zSize)
         loadJoiner = world.taskExecutor.runThread({ joiner ->
             val requiredChunks = HashSet<Vector2i>()
             val loadingChunks = ArrayList<Vector2i>()

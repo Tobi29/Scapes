@@ -21,6 +21,7 @@ import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.packets.PacketEntityChange
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.item.ItemIngot
@@ -28,10 +29,9 @@ import org.tobi29.scapes.vanilla.basics.util.Alloy
 import org.tobi29.scapes.vanilla.basics.util.readAlloy
 import org.tobi29.scapes.vanilla.basics.util.writeAlloy
 
-class EntityAlloyServer(world: WorldServer,
-                        pos: Vector3d = Vector3d.ZERO) : EntityAbstractContainerServer(
-        "vanilla.basics.entity.Alloy", world, pos,
-        Inventory(world.registry, 2)) {
+class EntityAlloyServer(type: EntityType<*, *>,
+                        world: WorldServer) : EntityAbstractContainerServer(
+        type, world, Vector3d.ZERO, Inventory(world.registry, 2)) {
     private var metals = Alloy()
     private var temperature = 0.0
 

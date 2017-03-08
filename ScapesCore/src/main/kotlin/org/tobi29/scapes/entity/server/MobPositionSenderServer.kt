@@ -42,6 +42,10 @@ class MobPositionSenderServer(private val registry: GameRegistry,
     private var swimming = false
     private var init = false
 
+    constructor(registry: GameRegistry,
+                packetHandler: (PacketBoth) -> Unit) : this(registry,
+            Vector3d.ZERO, packetHandler)
+
     init {
         sentPosRelative = MutableVector3d(pos)
         sentPosAbsolute = MutableVector3d(pos)

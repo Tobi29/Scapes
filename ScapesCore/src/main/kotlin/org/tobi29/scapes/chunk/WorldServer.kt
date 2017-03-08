@@ -48,7 +48,7 @@ class WorldServer(worldFormat: WorldFormat,
                   taskExecutor: TaskExecutor,
                   terrainSupplier: (WorldServer) -> TerrainServer,
                   environmentSupplier: (WorldServer) -> EnvironmentServer) : World<EntityServer>(
-        worldFormat.plugins(), taskExecutor, worldFormat.plugins().registry(),
+        worldFormat.plugins, taskExecutor, worldFormat.plugins.registry,
         seed), TagMapWrite, PlayConnection<PacketClient> {
     private val entityListeners = Collections.newSetFromMap(
             ConcurrentHashMap<(EntityServer) -> Unit, Boolean>())
@@ -67,7 +67,7 @@ class WorldServer(worldFormat: WorldFormat,
     init {
         environment = environmentSupplier(this)
         terrain = terrainSupplier(this)
-        worldFormat.plugins().plugins.forEach { it.worldInit(this) }
+        worldFormat.plugins.plugins.forEach { it.worldInit(this) }
     }
 
     fun connection(): ServerConnection {
@@ -200,36 +200,6 @@ class WorldServer(worldFormat: WorldFormat,
             profilerSection("Tasks") { taskExecutor.tick() }
             tick++
         }
-    }
-
-    fun dropItems(items: List<ItemStack>,
-                  x: Int,
-                  y: Int,
-                  z: Int,
-                  despawntime: Double = 600.0) {
-        val pos = Vector3d(x + 0.5, y + 0.5, z + 0.5)
-        for (item in items) {
-            dropItem(item, pos, despawntime)
-        }
-    }
-
-    fun dropItem(item: ItemStack,
-                 x: Int,
-                 y: Int,
-                 z: Int,
-                 despawntime: Double = 600.0) {
-        dropItem(item, Vector3d(x + 0.5, y + 0.5, z + 0.5), despawntime)
-    }
-
-    fun dropItem(item: ItemStack,
-                 pos: Vector3d,
-                 despawntime: Double = 600.0) {
-        val random = ThreadLocalRandom.current()
-        val entity = MobItemServer(this, pos,
-                Vector3d(-2.0 + random.nextDouble() * 4.0,
-                        -2.0 + random.nextDouble() * 4.0,
-                        random.nextDouble() * 1.0 + 0.5), item, despawntime)
-        addEntityNew(entity)
     }
 
     fun checkBlocked(x1: Int,

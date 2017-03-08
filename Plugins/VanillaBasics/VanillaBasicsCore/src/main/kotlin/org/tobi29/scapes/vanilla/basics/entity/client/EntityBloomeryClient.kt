@@ -24,15 +24,16 @@ import org.tobi29.scapes.engine.utils.io.tag.toBoolean
 import org.tobi29.scapes.engine.utils.math.TWO_PI
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.particle.ParticleEmitterTransparent
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.gui.GuiBloomeryInventory
 import java.util.concurrent.ThreadLocalRandom
 
-class EntityBloomeryClient constructor(world: WorldClient,
-                                       pos: Vector3d = Vector3d.ZERO) : EntityAbstractFurnaceClient(
-        "vanilla.basics.entity.Bloomery", world, pos,
+class EntityBloomeryClient(type: EntityType<*, *>,
+                           world: WorldClient) : EntityAbstractFurnaceClient(
+        type, world, Vector3d.ZERO,
         Inventory(world.registry, 14), 4, 9) {
     private var particleWait = 0.1
     var hasBellows = false

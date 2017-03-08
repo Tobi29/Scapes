@@ -36,7 +36,7 @@ import java.io.IOException
 class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
 
     override fun init() {
-        val gameRegistry = server.plugins.registry()
+        val gameRegistry = server.plugins.registry
         val connection = server.connection
         val group = server.commandRegistry().group("debug")
 

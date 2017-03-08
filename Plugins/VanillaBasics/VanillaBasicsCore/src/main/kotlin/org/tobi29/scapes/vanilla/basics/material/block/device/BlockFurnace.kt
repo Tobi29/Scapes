@@ -29,31 +29,21 @@ import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.entity.server.EntityContainerServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
+import org.tobi29.scapes.vanilla.basics.entity.client.EntityFurnaceClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityFurnaceServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer
 import java.util.*
 
-class BlockFurnace(materials: VanillaMaterial) : VanillaBlockContainer(
-        materials, "vanilla.basics.block.Furnace") {
+class BlockFurnace(materials: VanillaMaterial) : VanillaBlockContainer<EntityFurnaceClient, EntityFurnaceServer>(
+        materials, "vanilla.basics.block.Furnace",
+        materials.plugin.entityTypes.furnace) {
     private var textureTop: TerrainTexture? = null
     private var textureFront1: TerrainTexture? = null
     private var textureFront2: TerrainTexture? = null
     private var textureSide: TerrainTexture? = null
     private var models: Array<BlockModel>? = null
-
-    override fun placeEntity(terrain: TerrainServer,
-                             x: Int,
-                             y: Int,
-                             z: Int): EntityContainerServer {
-        val entity = EntityFurnaceServer(terrain.world,
-                Vector3d(x + 0.5, y + 0.5, z + 0.5))
-        terrain.world.addEntityNew(entity)
-        return entity
-    }
 
     override fun place(terrain: TerrainServer.TerrainMutable,
                        x: Int,
@@ -62,7 +52,7 @@ class BlockFurnace(materials: VanillaMaterial) : VanillaBlockContainer(
                        face: Face,
                        player: MobPlayerServer): Boolean {
         terrain.data(x, y, z, face.data.toInt())
-        return true
+        return super.place(terrain, x, y, z, face, player)
     }
 
     override fun resistance(item: ItemStack,

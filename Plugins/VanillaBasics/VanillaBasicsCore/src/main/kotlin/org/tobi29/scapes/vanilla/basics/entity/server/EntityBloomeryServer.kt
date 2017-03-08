@@ -25,14 +25,14 @@ import org.tobi29.scapes.engine.utils.io.tag.set
 import org.tobi29.scapes.engine.utils.io.tag.toBoolean
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.packets.PacketEntityChange
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 
-class EntityBloomeryServer(
-        world: WorldServer,
-        pos: Vector3d = Vector3d.ZERO
-) : EntityAbstractFurnaceServer("vanilla.basics.entity.Bloomery", world, pos,
-        Inventory(world.registry, 14), 4, 9, 600.0, 1.004, 4.0, 50) {
+class EntityBloomeryServer(type: EntityType<*, *>,
+                           world: WorldServer) : EntityAbstractFurnaceServer(
+        type, world, Vector3d.ZERO, Inventory(world.registry, 14), 4, 9, 600.0,
+        1.004, 4.0, 50) {
     private var hasBellows = false
 
     override fun write(map: ReadWriteTagMap) {

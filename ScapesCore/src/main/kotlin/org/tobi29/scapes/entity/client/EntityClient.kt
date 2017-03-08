@@ -15,69 +15,41 @@
  */
 package org.tobi29.scapes.entity.client
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.utils.ListenerOwner
-import org.tobi29.scapes.engine.utils.ListenerOwnerHandle
-import org.tobi29.scapes.engine.utils.io.tag.*
-import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.io.tag.MutableTagMap
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.entity.Entity
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.model.EntityModel
 import org.tobi29.scapes.packets.PacketEntityMetaData
 import java.util.*
 
-open class EntityClient(id: String,
-                        val world: WorldClient,
-                        pos: Vector3d) : Entity, ListenerOwner {
-    val registry = world.registry
-    override val type = Entity.of(registry, id)
-    protected val pos = MutableVector3d(pos)
-    override val listenerOwner = ListenerOwnerHandle {
-        !world.disposed() && world.hasEntity(this)
-    }
-    protected var uuid: UUID = UUID.randomUUID()
-    protected var metaData = MutableTagMap()
+interface EntityClient : Entity, ListenerOwner {
+    val registry: GameRegistry
+    val world: WorldClient
+    val uuid: UUID
 
-    override fun getUUID(): UUID {
-        return uuid
+    fun setEntityID(uuid: UUID)
+
+    fun read(map: TagMap)
+
+    fun metaData(category: String): MutableTagMap
+
+    fun update(delta: Double) {
     }
 
-    override fun getCurrentPos(): Vector3d {
-        return pos.now()
-    }
-
-    fun setEntityID(uuid: UUID) {
-        this.uuid = uuid
-    }
-
-    fun world(): WorldClient {
-        return world
-    }
-
-    open fun read(map: TagMap) {
-        map["Pos"]?.toMap()?.let { pos.set(it) }
-        map["MetaData"]?.toMap()?.let { metaData = it.toMutTag() }
-    }
-
-    fun metaData(category: String) = metaData.mapMut(category)
-
-    open fun update(delta: Double) {
-    }
-
-    open fun createModel(): EntityModel? {
+    fun createModel(): EntityModel? {
         return null
     }
 
-    fun processPacket(packet: PacketEntityMetaData) {
-        metaData[packet.category] = packet.tag
-    }
+    fun processPacket(packet: PacketEntityMetaData)
 
     companion object {
-
         fun make(id: Int,
                  world: WorldClient): EntityClient {
-            return world.registry.get<EntityType>("Core",
+            return world.registry.get<EntityType<*, *>>("Core",
                     "Entity")[id].createClient(world)
         }
     }

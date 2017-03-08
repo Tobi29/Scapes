@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.chunk
 
-import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
@@ -27,7 +26,7 @@ abstract class World<E : Entity>(val plugins: Plugins,
                                  val taskExecutor: TaskExecutor,
                                  val registry: GameRegistry,
                                  val seed: Long) : EntityContainer<E> {
-    val air: BlockType
+    val air = registry.air
     protected var thread: Thread? = null
     var spawn = Vector3i.ZERO
         protected set
@@ -35,10 +34,6 @@ abstract class World<E : Entity>(val plugins: Plugins,
         protected set
     var gravity = 9.8
         protected set
-
-    init {
-        air = registry.air()
-    }
 
     fun checkThread(): Boolean {
         return Thread.currentThread() === thread

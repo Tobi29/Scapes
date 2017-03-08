@@ -19,7 +19,7 @@ package org.tobi29.scapes.entity.server
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.entity.WieldMode
 
-interface EntityEquippedServer {
+interface EntityEquippedServer : EntityServer {
     fun leftWeapon(): ItemStack
 
     fun rightWeapon(): ItemStack

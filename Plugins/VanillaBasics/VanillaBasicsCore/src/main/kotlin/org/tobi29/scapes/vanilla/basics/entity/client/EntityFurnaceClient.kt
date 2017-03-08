@@ -20,13 +20,13 @@ import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.vanilla.basics.gui.GuiFurnaceInventory
 
-class EntityFurnaceClient constructor(world: WorldClient,
-                                      pos: Vector3d = Vector3d.ZERO) : EntityAbstractFurnaceClient(
-        "vanilla.basics.entity.Furnace", world, pos,
-        Inventory(world.registry, 8), 4, 3) {
+class EntityFurnaceClient(type: EntityType<*, *>,
+                          world: WorldClient) : EntityAbstractFurnaceClient(
+        type, world, Vector3d.ZERO, Inventory(world.registry, 8), 4, 3) {
 
     override fun gui(player: MobPlayerClientMain): Gui? {
         if (player is MobPlayerClientMainVB) {

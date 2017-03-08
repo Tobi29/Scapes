@@ -21,7 +21,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import java.util.*
 
 interface Entity {
-    val type: EntityType
+    val type: EntityType<*, *>
 
     fun getUUID(): UUID
 
@@ -36,9 +36,10 @@ interface Entity {
 
     companion object {
         fun of(registry: GameRegistry,
-               id: Int) = registry.get<EntityType>("Core", "Entity")[id]
+               id: Int) = registry.get<EntityType<*, *>>("Core", "Entity")[id]
 
         fun of(registry: GameRegistry,
-               id: String) = registry.get<EntityType>("Core", "Entity")[id]
+               id: String) = registry.get<EntityType<*, *>>("Core",
+                "Entity")[id]
     }
 }

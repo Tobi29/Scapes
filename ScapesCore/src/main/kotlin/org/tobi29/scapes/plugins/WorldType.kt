@@ -19,8 +19,6 @@ package org.tobi29.scapes.plugins
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.Checksum
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.entity.client.MobPlayerClient
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.server.connection.PlayerConnection
@@ -29,22 +27,10 @@ import org.tobi29.scapes.server.connection.PlayerConnection
  * Basic interface for standalone world-type plugins
  */
 interface WorldType : Dimension {
-    fun playerSupplier(): (WorldClient) -> MobPlayerClient
 
-    fun playerClass(): Class<out MobPlayerServer>
-
-    fun newPlayer(world: WorldClient,
-                  pos: Vector3d,
-                  speed: Vector3d,
-                  xRot: Double,
-                  zRot: Double,
-                  nickname: String): MobPlayerClientMain
+    fun newPlayer(world: WorldClient): MobPlayerClientMain
 
     fun newPlayer(world: WorldServer,
-                  pos: Vector3d,
-                  speed: Vector3d,
-                  xRot: Double,
-                  zRot: Double,
                   nickname: String,
                   skin: Checksum,
                   connection: PlayerConnection): MobPlayerServer

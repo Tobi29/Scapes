@@ -17,9 +17,8 @@ package org.tobi29.scapes.entity.client
 
 import org.tobi29.scapes.block.InventoryContainer
 import org.tobi29.scapes.engine.gui.Gui
-import org.tobi29.scapes.entity.Entity
 
-interface EntityContainerClient : Entity {
+interface EntityContainerClient : EntityClient {
     fun gui(player: MobPlayerClientMain): Gui?
 
     fun inventories(): InventoryContainer

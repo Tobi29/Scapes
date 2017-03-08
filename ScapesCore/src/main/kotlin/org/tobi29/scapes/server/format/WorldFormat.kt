@@ -23,11 +23,9 @@ import org.tobi29.scapes.server.ScapesServer
 import java.io.IOException
 
 interface WorldFormat {
-    fun playerData(): PlayerData
-
-    fun seed(): Long
-
-    fun plugins(): Plugins
+    val playerData: PlayerData
+    val seed: Long
+    val plugins: Plugins
 
     @Throws(IOException::class)
     fun registerWorld(server: ScapesServer,

@@ -58,7 +58,7 @@ class PacketCrafting : PacketAbstract, PacketServer {
     override fun runServer(player: PlayerConnection) {
         val recipe: CraftingRecipe
         try {
-            recipe = CraftingRecipe[player.server.plugins.registry(), id]
+            recipe = CraftingRecipe[player.server.plugins.registry, id]
         } catch (e: IllegalArgumentException) {
             throw InvalidPacketDataException(
                     "Invalid crafting recipe id: " + id)

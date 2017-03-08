@@ -118,12 +118,13 @@ class PacketInteraction : PacketAbstract, PacketBoth {
                     mob.world.send(PacketInteraction(type, mob.getUUID(),
                             INVENTORY_SLOT_RIGHT, data))
                 }
-                OPEN_INVENTORY -> player.send(
-                        PacketOpenGui(player.server.plugins.registry, mob))
+                OPEN_INVENTORY -> {
+                    mob.onOpenInventory()
+                    player.send(
+                            PacketOpenGui(player.server.plugins.registry, mob))
+                }
                 CLOSE_INVENTORY -> {
-                    mob.inventories().modify("Hold") { inventory ->
-                        inventory.item(0).take()?.let { mob.dropItem(it) }
-                    }
+                    mob.onCloseInventory()
                     player.send(
                             PacketCloseGui(player.server.plugins.registry))
                 }

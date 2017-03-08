@@ -36,12 +36,12 @@ import java.util.*
 
 class BasicWorldFormat(private val path: FilePath,
                        map: MutableTagMap) : WorldFormat {
+    override val plugins: Plugins
+    override val playerData: PlayerData
+    override val seed: Long
     private val regionPath: FilePath
     private val idStorage: MutableTagMap
-    private val plugins: Plugins
-    private val playerData: PlayerData
     private val worldsTagStructure: MutableTagMap
-    private val seed: Long
 
     init {
         val security = System.getSecurityManager()
@@ -57,18 +57,6 @@ class BasicWorldFormat(private val path: FilePath,
 
     private fun createPlugins(): Plugins {
         return Plugins(pluginFiles(), idStorage)
-    }
-
-    override fun playerData(): PlayerData {
-        return playerData
-    }
-
-    override fun seed(): Long {
-        return seed
-    }
-
-    override fun plugins(): Plugins {
-        return plugins
     }
 
     @Synchronized override fun registerWorld(server: ScapesServer,

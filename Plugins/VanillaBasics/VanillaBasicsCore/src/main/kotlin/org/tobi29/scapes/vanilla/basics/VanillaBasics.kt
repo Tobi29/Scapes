@@ -23,16 +23,14 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.engine.utils.Checksum
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.readOnly
-import org.tobi29.scapes.entity.client.MobPlayerClient
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.plugins.WorldType
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.connection.PlayerConnection
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
-import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientVB
 import org.tobi29.scapes.vanilla.basics.entity.model.EntityModelBellowsShared
 import org.tobi29.scapes.vanilla.basics.entity.model.MobLivingModelPigShared
 import org.tobi29.scapes.vanilla.basics.entity.particle.*
@@ -68,6 +66,7 @@ class VanillaBasics : WorldType {
     lateinit var cropTypes: VanillaBasicsCrops
     lateinit var treeTypes: VanillaBasicsTrees
     lateinit var stoneTypes: VanillaBasicsStones
+    lateinit var entityTypes: VanillaBasicsEntities
     private lateinit var environmentOverworld: EnvironmentType
     private var modelPigShared: MobLivingModelPigShared? = null
     private var modelBellowsShared: EntityModelBellowsShared? = null
@@ -182,8 +181,9 @@ class VanillaBasics : WorldType {
         val stoneRegistry = registry.get<StoneType>("VanillaBasics",
                 "StoneType")
         stoneTypes = VanillaBasicsStones(stoneRegistry::reg)
+        entityTypes = VanillaBasicsEntities(
+                registry.get<EntityType<*, *>>("Core", "Entity"))
         materials = VanillaMaterial(this, registry)
-        registerEntities(registry)
         registerUpdates(registry)
         registerPackets(registry)
         registerOres()
@@ -249,34 +249,16 @@ class VanillaBasics : WorldType {
         return "assets/scapes/tobi29/vanilla/basics"
     }
 
-    override fun playerSupplier(): (WorldClient) -> MobPlayerClient {
-        return { MobPlayerClientVB(it) }
-    }
-
-    override fun playerClass(): Class<out MobPlayerServer> {
-        return MobPlayerServerVB::class.java
-    }
-
-    override fun newPlayer(world: WorldClient,
-                           pos: Vector3d,
-                           speed: Vector3d,
-                           xRot: Double,
-                           zRot: Double,
-                           nickname: String): MobPlayerClientMain {
-        return MobPlayerClientMainVB(world, pos, speed, xRot, zRot,
-                nickname)
+    override fun newPlayer(world: WorldClient): MobPlayerClientMain {
+        return MobPlayerClientMainVB(entityTypes.player, world)
     }
 
     override fun newPlayer(world: WorldServer,
-                           pos: Vector3d,
-                           speed: Vector3d,
-                           xRot: Double,
-                           zRot: Double,
                            nickname: String,
                            skin: Checksum,
                            connection: PlayerConnection): MobPlayerServer {
-        return MobPlayerServerVB(world, pos, speed, xRot, zRot, nickname,
-                skin, connection)
+        return MobPlayerServerVB(entityTypes.player, world, nickname, skin,
+                connection)
     }
 
     override fun createEnvironment(world: WorldServer): EnvironmentServer {

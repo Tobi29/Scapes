@@ -24,15 +24,16 @@ import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityPhysics
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.MobPositionReceiver
 import org.tobi29.scapes.entity.model.MobModel
 
-abstract class MobClient(id: String,
+abstract class MobClient(type: EntityType<*, *>,
                          world: WorldClient,
                          pos: Vector3d,
                          speed: Vector3d,
-                         protected val collision: AABB) : EntityClient(id,
-        world, pos), MobileEntityClient {
+                         protected val collision: AABB) : EntityAbstractClient(
+        type, world, pos), MobileEntityClient {
     protected val speed: MutableVector3d
     protected val rot = MutableVector3d()
     override val positionReceiver: MobPositionReceiver

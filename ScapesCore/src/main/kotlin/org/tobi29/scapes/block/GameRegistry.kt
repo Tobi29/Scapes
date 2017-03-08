@@ -16,23 +16,13 @@
 package org.tobi29.scapes.block
 
 import org.tobi29.scapes.engine.utils.io.tag.*
-import org.tobi29.scapes.entity.EntityType
-import org.tobi29.scapes.entity.client.EntityBlockBreakClient
-import org.tobi29.scapes.entity.client.MobFlyingBlockClient
-import org.tobi29.scapes.entity.client.MobItemClient
-import org.tobi29.scapes.entity.server.EntityBlockBreakServer
-import org.tobi29.scapes.entity.server.MobFlyingBlockServer
-import org.tobi29.scapes.entity.server.MobItemServer
-import org.tobi29.scapes.packets.*
-import org.tobi29.scapes.plugins.WorldType
-import java.io.IOException
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class GameRegistry(private val idStorage: MutableTagMap) {
     private val registries = ConcurrentHashMap<Pair<String, String>, Registry<*>>()
     private val materialNames = ConcurrentHashMap<String, Material>()
-    private val air: BlockType
+    val air: BlockType
     private var blocks: Array<BlockType?>
     private var materials: Array<Material?>
     private var lockedTypes = false
@@ -98,10 +88,6 @@ class GameRegistry(private val idStorage: MutableTagMap) {
         return blocks
     }
 
-    fun air(): BlockType {
-        return air
-    }
-
     fun registerMaterial(material: Material) {
         if (!lockedTypes) {
             throw IllegalStateException("Early initializing not finished")
@@ -144,8 +130,11 @@ class GameRegistry(private val idStorage: MutableTagMap) {
         private val ids = ConcurrentHashMap<E, Int>()
         private val values = ArrayList<E?>()
 
-        fun reg(name: String,
-                block: (Int) -> E): E {
+        operator fun <T : E> invoke(name: String,
+                                    block: (Int) -> T) = reg(name, block)
+
+        fun <T : E> reg(name: String,
+                        block: (Int) -> T): T {
             if (locked) {
                 throw IllegalStateException("Initializing already ended")
             }
@@ -197,131 +186,6 @@ class GameRegistry(private val idStorage: MutableTagMap) {
                 registry = Registry<Any>(module, type, min, max)
                 registries.put(pair, registry)
             }
-        }
-    }
-}
-
-fun GameRegistry.init(worldType: WorldType) {
-    get<UpdateType>("Core", "Update").run {
-        reg("core.update.BlockUpdate") {
-            org.tobi29.scapes.block.UpdateType(it, ::UpdateBlockUpdate)
-        }
-        reg("core.update.BlockUpdateUpdateTile") {
-            org.tobi29.scapes.block.UpdateType(it,
-                    ::UpdateBlockUpdateUpdateTile)
-        }
-    }
-
-    get<EntityType>("Core", "Entity").run {
-        reg("core.mob.Player") {
-            EntityType(it, { worldType.playerSupplier().invoke(it) },
-                    { throw UnsupportedOperationException() })
-        }
-        reg("core.entity.BlockBreak") {
-            EntityType(it, { EntityBlockBreakClient(it) },
-                    { EntityBlockBreakServer(it) })
-        }
-        reg("core.mob.Item") {
-            EntityType(it, { MobItemClient(it) }, { MobItemServer(it) })
-        }
-        reg("core.mob.FlyingBlock") {
-            EntityType(it, { MobFlyingBlockClient(it) },
-                    { MobFlyingBlockServer(it) })
-        }
-    }
-
-    get<PacketType>("Core", "Packet").run {
-        reg("core.packet.RequestChunk") {
-            PacketType(it, ::PacketRequestChunk)
-        }
-        reg("core.packet.RequestEntity") {
-            PacketType(it, ::PacketRequestEntity)
-        }
-        reg("core.packet.SendChunk") {
-            PacketType(it, ::PacketSendChunk)
-        }
-        reg("core.packet.BlockChange") {
-            PacketType(it, ::PacketBlockChange)
-        }
-        reg("core.packet.BlockChangeAir") {
-            PacketType(it, ::PacketBlockChangeAir)
-        }
-        reg("core.packet.EntityAdd") {
-            PacketType(it, ::PacketEntityAdd)
-        }
-        reg("core.packet.EntityChange") {
-            PacketType(it, ::PacketEntityChange)
-        }
-        reg("core.packet.EntityMetaData") {
-            PacketType(it, ::PacketEntityMetaData)
-        }
-        reg("core.packet.MobMoveRelative") {
-            PacketType(it, ::PacketMobMoveRelative)
-        }
-        reg("core.packet.MobMoveAbsolute") {
-            PacketType(it, ::PacketMobMoveAbsolute)
-        }
-        reg("core.packet.MobChangeRot") {
-            PacketType(it, ::PacketMobChangeRot)
-        }
-        reg("core.packet.MobChangeSpeed") {
-            PacketType(it, ::PacketMobChangeSpeed)
-        }
-        reg("core.packet.MobChangeState") {
-            PacketType(it, ::PacketMobChangeState)
-        }
-        reg("core.packet.MobDamage") {
-            PacketType(it, ::PacketMobDamage)
-        }
-        reg("core.packet.EntityDespawn") {
-            PacketType(it, ::PacketEntityDespawn)
-        }
-        reg("core.packet.SoundEffect") {
-            PacketType(it, ::PacketSoundEffect)
-        }
-        reg("core.packet.Interaction") {
-            PacketType(it, ::PacketInteraction)
-        }
-        reg("core.packet.InventoryInteraction") {
-            PacketType(it, ::PacketInventoryInteraction)
-        }
-        reg("core.packet.PlayerJump") {
-            PacketType(it, ::PacketPlayerJump)
-        }
-        reg("core.packet.OpenGui") {
-            PacketType(it, ::PacketOpenGui)
-        }
-        reg("core.packet.CloseGui") {
-            PacketType(it, ::PacketCloseGui)
-        }
-        reg("core.packet.UpdateInventory") {
-            PacketType(it, ::PacketUpdateInventory)
-        }
-        reg("core.packet.Chat") {
-            PacketType(it, ::PacketChat)
-        }
-        reg("core.packet.ItemUse") {
-            PacketType(it, ::PacketItemUse)
-        }
-        reg("core.packet.Disconnect") {
-            PacketType(it, ::PacketDisconnect)
-        }
-        reg("core.packet.DisconnectSelf") {
-            PacketType(it, {
-                throw IOException("This packet should never be received")
-            })
-        }
-        reg("core.packet.SetWorld") {
-            PacketType(it, ::PacketSetWorld)
-        }
-        reg("core.packet.PingClient") {
-            PacketType(it, ::PacketPingClient)
-        }
-        reg("core.packet.PingServer") {
-            PacketType(it, ::PacketPingServer)
-        }
-        reg("core.packet.Skin") {
-            PacketType(it, ::PacketSkin)
         }
     }
 }

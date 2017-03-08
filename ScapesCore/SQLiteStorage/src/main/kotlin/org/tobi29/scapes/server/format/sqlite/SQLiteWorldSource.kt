@@ -33,14 +33,9 @@ import java.sql.SQLException
 
 class SQLiteWorldSource(private val path: FilePath,
                         private val connection: Connection) : WorldSource {
-    private val database: SQLiteDatabase
+    private val database = SQLiteDatabase(connection)
 
-    constructor(path: FilePath) : this(path,
-            openSave(path))
-
-    init {
-        database = SQLiteDatabase(connection)
-    }
+    constructor(path: FilePath) : this(path, openSave(path))
 
     override fun init(seed: Long,
                       plugins: List<FilePath>) {

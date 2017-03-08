@@ -36,6 +36,7 @@ import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.direction
 import org.tobi29.scapes.entity.CreatureType
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.WieldMode
 import org.tobi29.scapes.entity.client.EntityContainerClient
 import org.tobi29.scapes.entity.client.MobClient
@@ -48,14 +49,11 @@ import org.tobi29.scapes.packets.PacketItemUse
 import org.tobi29.scapes.packets.PacketPlayerJump
 import org.tobi29.scapes.vanilla.basics.gui.GuiPlayerInventory
 
-class MobPlayerClientMainVB(world: WorldClient,
-                            pos: Vector3d,
-                            speed: Vector3d,
-                            xRot: Double,
-                            zRot: Double,
-                            nickname: String) : MobPlayerClientMain(
-        world, pos, speed, AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 100.0, 100.0,
-        Frustum(90.0, 1.0, 0.1, 24.0), nickname), EntityContainerClient {
+class MobPlayerClientMainVB(type: EntityType<*, *>,
+                            world: WorldClient) : MobPlayerClientMain(
+        type, world, Vector3d.ZERO, Vector3d.ZERO,
+        AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 100.0, 100.0,
+        Frustum(90.0, 1.0, 0.1, 24.0), ""), EntityContainerClient {
     private val inventories = InventoryContainer().apply {
         add("Container", Inventory(registry, 40))
         add("Hold", Inventory(registry, 1))
@@ -64,11 +62,6 @@ class MobPlayerClientMainVB(world: WorldClient,
     private var punchRight: Long = -1
     private var chargeLeft = 0.0f
     private var chargeRight = 0.0f
-
-    init {
-        rot.setX(xRot)
-        rot.setZ(zRot)
-    }
 
     internal fun setHotbarSelectLeft(value: Int) {
         inventorySelectLeft = value
@@ -79,7 +72,7 @@ class MobPlayerClientMainVB(world: WorldClient,
     }
 
     override fun update(delta: Double) {
-        super.update(delta)
+        super<MobPlayerClientMain>.update(delta)
         val conditionTag = metaData("Vanilla").map("Condition")
         if (conditionTag?.get("Sleeping")?.toBoolean() ?: false) {
             return

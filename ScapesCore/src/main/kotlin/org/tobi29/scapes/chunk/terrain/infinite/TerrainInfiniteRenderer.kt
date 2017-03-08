@@ -217,46 +217,71 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
                              z: Int) {
         val xx = x shr 4
         val yy = y shr 4
+        val zz = z shr 4
+        val xxx = x - (xx shl 4)
+        val yyy = y - (yy shl 4)
+        val zzz = z - (zz shl 4)
         terrain.chunkC(xx, yy) { chunk ->
             val rendererChunk = chunk.rendererChunk()
-            val zz = z shr 4
-            val xxx = x - (xx shl 4)
-            val yyy = y - (yy shl 4)
-            val zzz = z - (zz shl 4)
-            rendererChunk.setGeometryDirty(zz)
-            if (xxx == 0) {
-                setDirty(xx - 1, yy, zz)
-            } else if (xxx == 15) {
-                setDirty(xx + 1, yy, zz)
+            rendererChunk.dirtyX(zz, xxx, yyy, zzz)
+        }
+    }
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun TerrainInfiniteRendererChunk.dirtyX(zz: Int,
+                                                           xxx: Int,
+                                                           yyy: Int,
+                                                           zzz: Int) {
+        if (xxx == 0) {
+            dirtyY(zz, yyy, zzz, -1)
+        } else if (xxx == 15) {
+            dirtyY(zz, yyy, zzz, 1)
+        }
+        dirtyY(zz, yyy, zzz, 0)
+    }
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun TerrainInfiniteRendererChunk.dirtyY(zz: Int,
+                                                           yyy: Int,
+                                                           zzz: Int,
+                                                           xxxx: Int) {
+        if (yyy == 0) {
+            dirtyZ(zz, zzz, xxxx, -1)
+        } else if (yyy == 15) {
+            dirtyZ(zz, zzz, xxxx, 1)
+        }
+        dirtyZ(zz, zzz, xxxx, 0)
+    }
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun TerrainInfiniteRendererChunk.dirtyZ(zz: Int,
+                                                           zzz: Int,
+                                                           xxxx: Int,
+                                                           yyyy: Int) {
+        if (zzz == 0 && zz > 0) {
+            dirty(zz, xxxx, yyyy, -1)
+        } else if (zzz == 15 && zz < zSections() - 1) {
+            dirty(zz, xxxx, yyyy, 1)
+        }
+        dirty(zz, xxxx, yyyy, 0)
+    }
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun TerrainInfiniteRendererChunk.dirty(zz: Int,
+                                                          xxxx: Int,
+                                                          yyyy: Int,
+                                                          zzzz: Int) {
+        val z = zz + zzzz
+        if (xxxx == 0 && yyyy == 0) {
+            if (z >= 0 && z < zSections()) {
+                setGeometryDirty(z)
             }
-            if (yyy == 0) {
-                setDirty(xx, yy - 1, zz)
-            } else if (yyy == 15) {
-                setDirty(xx, yy + 1, zz)
-            }
-            if (zzz == 15 && zz < rendererChunk.zSections() - 1) {
-                rendererChunk.setGeometryDirty(zz + 1)
-                if (xxx == 0) {
-                    setDirty(xx - 1, yy, zz + 1)
-                } else if (xxx == 15) {
-                    setDirty(xx + 1, yy, zz + 1)
-                }
-                if (yyy == 0) {
-                    setDirty(xx, yy - 1, zz + 1)
-                } else if (yyy == 15) {
-                    setDirty(xx, yy + 1, zz + 1)
-                }
-            } else if (zzz == 0 && zz > 0) {
-                rendererChunk.setGeometryDirty(zz - 1)
-                if (xxx == 0) {
-                    setDirty(xx - 1, yy, zz - 1)
-                } else if (xxx == 15) {
-                    setDirty(xx + 1, yy, zz - 1)
-                }
-                if (yyy == 0) {
-                    setDirty(xx, yy - 1, zz - 1)
-                } else if (yyy == 15) {
-                    setDirty(xx, yy + 1, zz - 1)
+        } else {
+            val pos = chunk().pos
+            terrain.chunkC(pos.x + xxxx, pos.y + yyyy) {
+                val rendererChunk = it.rendererChunk()
+                if (z >= 0 && z < rendererChunk.zSections()) {
+                    rendererChunk.setGeometryDirty(z)
                 }
             }
         }
@@ -378,12 +403,6 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
                 }
             }
         }
-    }
-
-    private fun setDirty(x: Int,
-                         y: Int,
-                         z: Int) {
-        terrain.chunkC(x, y) { it.rendererChunk().setGeometryDirty(z) }
     }
 
     private fun checkLoaded(terrain: TerrainInfiniteClient,

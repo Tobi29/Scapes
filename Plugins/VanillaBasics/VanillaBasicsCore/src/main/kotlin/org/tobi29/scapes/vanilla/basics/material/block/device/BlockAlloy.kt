@@ -26,22 +26,21 @@ import org.tobi29.scapes.chunk.data.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
-import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.PointerPane
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.entity.server.EntityContainerServer
+import org.tobi29.scapes.vanilla.basics.entity.client.EntityAlloyClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityAlloyServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer
 import java.util.*
 
-class BlockAlloy(materials: VanillaMaterial) : VanillaBlockContainer(materials,
-        "vanilla.basics.block.Alloy") {
+class BlockAlloy(materials: VanillaMaterial) : VanillaBlockContainer<EntityAlloyClient, EntityAlloyServer>(
+        materials, "vanilla.basics.block.Alloy",
+        materials.plugin.entityTypes.alloy) {
     private var texture: TerrainTexture? = null
     private var model: BlockModel? = null
 
@@ -142,17 +141,6 @@ class BlockAlloy(materials: VanillaMaterial) : VanillaBlockContainer(materials,
                                 lod: Boolean) {
         model?.addToChunkMesh(mesh, terrain, x, y, z, xx, yy, zz, 1.0, 1.0,
                 1.0, 1.0, lod)
-    }
-
-    override fun placeEntity(terrain: TerrainServer,
-                             x: Int,
-                             y: Int,
-                             z: Int): EntityContainerServer {
-        val entity = EntityAlloyServer(terrain.world,
-                Vector3d(x + 0.5, y + 0.5, z + 0.5))
-        entity.onSpawn()
-        terrain.world.addEntityNew(entity)
-        return entity
     }
 
     override fun registerTextures(registry: TerrainTextureRegistry) {

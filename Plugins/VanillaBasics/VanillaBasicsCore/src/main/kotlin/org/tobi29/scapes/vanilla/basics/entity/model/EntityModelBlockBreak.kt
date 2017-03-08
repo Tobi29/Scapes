@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.entity.model
+package org.tobi29.scapes.vanilla.basics.entity.model
 
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.graphics.GL
@@ -27,7 +27,9 @@ import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.minus
 import org.tobi29.scapes.engine.utils.math.vector.times
-import org.tobi29.scapes.entity.client.EntityBlockBreakClient
+import org.tobi29.scapes.entity.model.EntityModel
+import org.tobi29.scapes.entity.model.EntityModelBlockBreakShared
+import org.tobi29.scapes.vanilla.basics.entity.client.EntityBlockBreakClient
 
 class EntityModelBlockBreak(shared: EntityModelBlockBreakShared,
                             private val entity: EntityBlockBreakClient) : EntityModel {
@@ -58,7 +60,7 @@ class EntityModelBlockBreak(shared: EntityModelBlockBreakShared,
 
     override fun renderUpdate(delta: Double) {
         val factor = min(1.0, delta * 5.0)
-        pos.plus(entity.getCurrentPos().minus(pos.now()).times(factor))
+        pos.plus((entity.getCurrentPos() - pos.now()) * factor)
         pointerPanes.reset()
         val terrain = entity.world.terrain
         val block = terrain.block(pos.intX(), pos.intY(), pos.intZ())

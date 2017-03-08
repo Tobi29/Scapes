@@ -20,8 +20,9 @@ import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.Frustum
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.entity.EntityType
 
-abstract class MobLivingEquippedServer(id: String,
+abstract class MobLivingEquippedServer(type: EntityType<*, *>,
                                        world: WorldServer,
                                        pos: Vector3d,
                                        speed: Vector3d,
@@ -29,6 +30,6 @@ abstract class MobLivingEquippedServer(id: String,
                                        lives: Double,
                                        maxLives: Double,
                                        viewField: Frustum,
-                                       hitField: Frustum) : MobLivingServer(id,
-        world, pos, speed, aabb, lives, maxLives, viewField,
+                                       hitField: Frustum) : MobLivingServer(
+        type, world, pos, speed, aabb, lives, maxLives, viewField,
         hitField), EntityEquippedServer

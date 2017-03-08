@@ -38,8 +38,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 abstract class TerrainInfiniteChunk<E : Entity>(val pos: Vector2i,
                                                 val terrain: TerrainInfinite<E>,
-                                                val zSize: Int,
-                                                protected val blocks: Array<BlockType?>) : TerrainChunk {
+                                                val zSize: Int) : TerrainChunk {
+    protected val blocks = terrain.registry.blocks()
     override val posBlock = Vector3i(pos.x shl 4, pos.y shl 4, 0)
     override val size = Vector3i(16, 16, zSize)
     protected val data = ChunkDatas(lb(zSize shr 4))

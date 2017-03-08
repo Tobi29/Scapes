@@ -26,13 +26,8 @@ import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3i
-import org.tobi29.scapes.engine.utils.math.vector.plus
 import org.tobi29.scapes.engine.utils.readOnly
-import org.tobi29.scapes.entity.CreatureType
-import org.tobi29.scapes.entity.EntityPhysics
-import org.tobi29.scapes.entity.MobPositionReceiver
-import org.tobi29.scapes.entity.getEntities
+import org.tobi29.scapes.entity.*
 import org.tobi29.scapes.packets.PacketEntityChange
 import org.tobi29.scapes.packets.PacketOpenGui
 import org.tobi29.scapes.packets.PacketUpdateInventory
@@ -41,7 +36,8 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.set
 
-abstract class MobPlayerServer(world: WorldServer,
+abstract class MobPlayerServer(type: EntityType<*, *>,
+                               world: WorldServer,
                                pos: Vector3d,
                                speed: Vector3d,
                                aabb: AABB,
@@ -52,7 +48,7 @@ abstract class MobPlayerServer(world: WorldServer,
                                protected val nickname: String,
                                private val skin: Checksum,
                                protected val connection: PlayerConnection) : MobLivingEquippedServer(
-        "core.mob.Player", world, pos, speed, aabb, lives, maxLives, viewField,
+        type, world, pos, speed, aabb, lives, maxLives, viewField,
         hitField), EntityContainerServer {
     protected val positionSenderOther: MobPositionSenderServer
     protected val viewersMut = ArrayList<MobPlayerServer>()
@@ -90,24 +86,6 @@ abstract class MobPlayerServer(world: WorldServer,
                     physicsState.isInWater = inWater
                     physicsState.isSwimming = swimming
                 })
-        onDeath("Local", {
-            inventories.modify<List<ItemStack>>(
-                    "Container") { inventory ->
-                val items = ArrayList<ItemStack>()
-                for (i in 0..inventory.size() - 1) {
-                    inventory.item(i).take()?.let { items.add(it) }
-                }
-                items
-            }.forEach { item -> world.dropItem(item, this.pos.now()) }
-            inventories.modify("Hold") {
-                it.item(0).take()
-            }?.let { world.dropItem(it, this.pos.now()) }
-            setSpeed(Vector3d.ZERO)
-            setPos(Vector3d(world.spawn + Vector3i(0, 0, 1)))
-            health = maxHealth
-            world.send(PacketEntityChange(registry, this))
-            onSpawn()
-        })
     }
 
     abstract fun isActive(): Boolean
@@ -222,6 +200,10 @@ abstract class MobPlayerServer(world: WorldServer,
         currentContainer?.removeViewer(this)
         currentContainer = null
     }
+
+    open fun onOpenInventory() = true
+
+    open fun onCloseInventory() = true
 
     override fun canMoveHere(terrain: TerrainServer,
                              x: Int,

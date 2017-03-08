@@ -21,21 +21,14 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.CreatureType
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.MobLivingEquippedClient
 import org.tobi29.scapes.entity.model.MobLivingModelHuman
 
-class MobZombieClient constructor(world: WorldClient,
-                                  pos: Vector3d = Vector3d.ZERO,
-                                  speed: Vector3d = Vector3d.ZERO,
-                                  xRot: Double = 0.0,
-                                  zRot: Double = 0.0) : MobLivingEquippedClient(
-        "vanilla.basics.mob.Zombie", world, pos, speed,
+class MobZombieClient(type: EntityType<*, *>,
+                      world: WorldClient) : MobLivingEquippedClient(
+        type, world, Vector3d.ZERO, Vector3d.ZERO,
         AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 20.0, 30.0) {
-
-    init {
-        rot.setX(xRot)
-        rot.setZ(zRot)
-    }
 
     override fun onDeath() {
         val texture = world.game.engine.graphics.textures()["VanillaBasics:image/entity/mob/Zombie"]

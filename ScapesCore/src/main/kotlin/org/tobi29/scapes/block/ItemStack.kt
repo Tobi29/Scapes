@@ -27,7 +27,7 @@ class ItemStack(private var material: Material,
     constructor(item: ItemStack) : this(item.material, item.data, item.amount,
             item.metaData.toTag().toMutTag())
 
-    constructor(registry: GameRegistry) : this(registry.air(), 0, 0)
+    constructor(registry: GameRegistry) : this(registry.air, 0, 0)
 
     init {
         registry = material.registry()
@@ -80,8 +80,15 @@ class ItemStack(private var material: Material,
         return this
     }
 
+    fun set(item: ItemStack) {
+        material = item.material
+        data = item.data
+        amount = item.amount
+        metaData = item.metaData.toTag().toMutTag()
+    }
+
     fun clear() {
-        material = registry.air()
+        material = registry.air
         data = 0
         amount = 0
         metaData = MutableTagMap()
@@ -99,7 +106,7 @@ class ItemStack(private var material: Material,
                 amount + this.amount > min(material.maxStackSize(this),
                         add.material.maxStackSize(add)) ||
                 metaData != add.metaData) &&
-                material != registry.air() &&
+                material != registry.air &&
                 this.amount > 0) {
             return 0
         }
@@ -113,7 +120,7 @@ class ItemStack(private var material: Material,
     fun canTake(take: ItemStack,
                 amount: Int): Int {
         if (take.material !== material || take.data != data ||
-                material === registry.air() || this.amount <= 0) {
+                material === registry.air || this.amount <= 0) {
             return 0
         }
         return min(this.amount, amount)
@@ -128,7 +135,7 @@ class ItemStack(private var material: Material,
 
     fun read(map: TagMap) {
         map["Type"]?.toInt()?.let {
-            material = registry.material(it) ?: registry.air()
+            material = registry.material(it) ?: registry.air
         }
         map["Data"]?.toInt()?.let { data = it }
         map["Amount"]?.toInt()?.let { amount = it }
@@ -167,7 +174,7 @@ class ItemStack(private var material: Material,
     fun take(amount: Int = Int.MAX_VALUE): ItemStack? {
         var takeAmount = amount
         takeAmount = min(this.amount, takeAmount)
-        if (material === registry.air() || takeAmount <= 0) {
+        if (material === registry.air || takeAmount <= 0) {
             return null
         }
         val give = ItemStack(this)
@@ -180,7 +187,7 @@ class ItemStack(private var material: Material,
     fun take(take: ItemStack,
              amount: Int = take.amount): ItemStack? {
         if (take.material !== material || take.data != data ||
-                material === registry.air() || this.amount <= 0) {
+                material === registry.air || this.amount <= 0) {
             return null
         }
         val give = ItemStack(this)
@@ -192,14 +199,14 @@ class ItemStack(private var material: Material,
     }
 
     val isEmpty: Boolean
-        get() = amount <= 0 || material === registry.air()
+        get() = amount <= 0 || material === registry.air
 
     fun name(): String {
         return material.name(this)
     }
 
     private fun checkEmpty() {
-        if (amount <= 0 || material === registry.air()) {
+        if (amount <= 0 || material === registry.air) {
             clear()
         }
     }

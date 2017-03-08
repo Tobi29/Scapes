@@ -19,14 +19,11 @@ import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.server.InvalidPacketDataException
-import org.tobi29.scapes.engine.utils.filterMap
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
-import org.tobi29.scapes.entity.server.EntityBlockBreakServer
 import org.tobi29.scapes.server.connection.PlayerConnection
 import java.io.IOException
 
@@ -115,38 +112,9 @@ class PacketItemUse : PacketAbstract, PacketServer {
                                         blockPos.z)
                                 val type = handler.type(block)
                                 val data = handler.data(block)
-                                val punch = br / type.resistance(item, data) *
-                                        strength * strength
-                                if (punch > 0) {
-                                    type.breakSound(item, data)?.let {
-                                        world.playSound(it,
-                                                Vector3d(blockPos),
-                                                Vector3d.ZERO)
-                                    }
-                                    val entityBreak = terrain.getEntities(
-                                            blockPos.x,
-                                            blockPos.y,
-                                            blockPos.z)
-                                            .filterMap<EntityBlockBreakServer>()
-                                            .firstOrNull() ?: run {
-                                        val entityBreak = EntityBlockBreakServer(
-                                                world, Vector3d(blockPos))
-                                        world.addEntityNew(entityBreak)
-                                        entityBreak
-                                    }
-                                    if (entityBreak.punch(world, punch)) {
-                                        if (type.destroy(handler, blockPos.x,
-                                                blockPos.y, blockPos.z, data,
-                                                face, mob, item)) {
-                                            val drops = type.drops(item, data)
-                                            world.dropItems(drops, blockPos.x,
-                                                    blockPos.y, blockPos.z)
-                                            handler.typeData(blockPos.x,
-                                                    blockPos.y, blockPos.z,
-                                                    handler.air, 0)
-                                        }
-                                    }
-                                }
+                                type.punch(handler, blockPos.x, blockPos.y,
+                                        blockPos.z, data, face, mob, item, br,
+                                        strength)
                             }
                         }, "Block-Break",
                                 (item.material().hitWait(item) * 0.05).toLong())

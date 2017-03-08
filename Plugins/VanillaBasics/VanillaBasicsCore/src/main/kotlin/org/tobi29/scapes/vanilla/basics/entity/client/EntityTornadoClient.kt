@@ -26,23 +26,24 @@ import org.tobi29.scapes.engine.utils.math.toRad
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.normalizeSafe
 import org.tobi29.scapes.engine.utils.math.vector.times
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.MobPositionReceiver
-import org.tobi29.scapes.entity.client.EntityClient
+import org.tobi29.scapes.entity.client.EntityAbstractClient
 import org.tobi29.scapes.entity.client.MobileEntityClient
 import org.tobi29.scapes.entity.particle.ParticleEmitter3DBlock
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleEmitterTornado
 import java.util.concurrent.ThreadLocalRandom
 
-class EntityTornadoClient(world: WorldClient,
-                          pos: Vector3d = Vector3d.ZERO) : EntityClient(
-        "vanilla.basics.entity.Tornado", world, pos), MobileEntityClient {
+class EntityTornadoClient(type: EntityType<*, *>,
+                          world: WorldClient) : EntityAbstractClient(
+        type, world,
+        Vector3d.ZERO), MobileEntityClient {
     override val positionReceiver: MobPositionReceiver
     private var puff = 0.0
     private var baseSpin = 0.0f
 
     init {
-        positionReceiver = MobPositionReceiver(pos,
-                { this.pos.set(it) },
+        positionReceiver = MobPositionReceiver({ this.pos.set(it) },
                 { newSpeed -> },
                 { newPos -> },
                 { ground, slidingWall, inWater, swimming -> })

@@ -27,11 +27,14 @@ import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
+import org.tobi29.scapes.vanilla.basics.entity.client.EntityFarmlandClient
+import org.tobi29.scapes.vanilla.basics.entity.server.EntityFarmlandServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
-import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
+import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockEntity
 
-class BlockFarmland(materials: VanillaMaterial) : VanillaBlock(materials,
-        "vanilla.basics.block.Farmland") {
+class BlockFarmland(materials: VanillaMaterial) : VanillaBlockEntity<EntityFarmlandClient, EntityFarmlandServer>(
+        materials, "vanilla.basics.block.Farmland",
+        materials.plugin.entityTypes.farmland) {
     private var textureTop: TerrainTexture? = null
     private var textureSide: TerrainTexture? = null
     private var model: BlockModel? = null

@@ -144,8 +144,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
             setWorld()
             output.putBoolean(false)
             output.putInt(loadingRadius)
-            server.server.plugins.registry().writeIDStorage().writeBinary(
-                    output)
+            server.server.plugins.registry.writeIDStorage().writeBinary(output)
             channel.queueBundle()
             pingWait = System.currentTimeMillis() + 1000
             server.events.fireLocal(

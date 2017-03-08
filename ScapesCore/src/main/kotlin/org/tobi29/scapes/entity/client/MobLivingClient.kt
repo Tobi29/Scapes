@@ -23,18 +23,19 @@ import org.tobi29.scapes.engine.utils.io.tag.toDouble
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.*
 import org.tobi29.scapes.entity.CreatureType
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.model.MobLivingModel
 import org.tobi29.scapes.packets.PacketMobDamage
 import java.util.concurrent.ThreadLocalRandom
 
-abstract class MobLivingClient(id: String,
+abstract class MobLivingClient(type: EntityType<*, *>,
                                world: WorldClient,
                                pos: Vector3d,
                                speed: Vector3d,
                                aabb: AABB,
                                protected var health: Double,
-                               protected var maxHealth: Double) : MobClient(id,
-        world, pos, speed, aabb) {
+                               protected var maxHealth: Double) : MobClient(
+        type, world, pos, speed, aabb) {
     protected var footStep = 0.0
     protected var invincibleTicks = 0.0
 

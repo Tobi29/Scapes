@@ -29,29 +29,18 @@ import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.filterMap
 import org.tobi29.scapes.engine.utils.math.Face
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.entity.server.EntityContainerServer
+import org.tobi29.scapes.vanilla.basics.entity.client.EntityBloomeryClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityBloomeryServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer
 import java.util.*
 
-class BlockBloomery(materials: VanillaMaterial) : VanillaBlockContainer(
-        materials, "vanilla.basics.block.Bloomery") {
+class BlockBloomery(materials: VanillaMaterial) : VanillaBlockContainer<EntityBloomeryClient, EntityBloomeryServer>(
+        materials, "vanilla.basics.block.Bloomery",
+        materials.plugin.entityTypes.bloomery) {
     private var textureSide: TerrainTexture? = null
     private var textureInside: TerrainTexture? = null
     private var model: BlockModel? = null
-
-    override fun placeEntity(terrain: TerrainServer,
-                             x: Int,
-                             y: Int,
-                             z: Int): EntityContainerServer {
-        val entity = EntityBloomeryServer(terrain.world,
-                Vector3d(x + 0.5, y + 0.5, z + 0.5))
-        terrain.world.addEntityNew(entity)
-        entity.updateBellows(terrain)
-        return entity
-    }
 
     override fun resistance(item: ItemStack,
                             data: Int): Double {

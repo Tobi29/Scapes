@@ -27,14 +27,13 @@ import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
-import org.tobi29.scapes.vanilla.basics.entity.server.EntityFarmlandServer
 import org.tobi29.scapes.vanilla.basics.material.CropType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateGrassGrowth
+import org.tobi29.scapes.vanilla.basics.util.dropItem
 import org.tobi29.scapes.vanilla.basics.world.ClimateInfoLayer
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentClimate
 import java.util.*
@@ -66,6 +65,9 @@ class BlockGrass(materials: VanillaMaterial,
                          face: Face,
                          player: MobPlayerServer,
                          item: ItemStack): Boolean {
+        if (!super.destroy(terrain, x, y, z, data, face, player, item)) {
+            return false
+        }
         if ("Hoe" == item.material().toolType(item)) {
             if (data > 0) {
                 if (item.material().toolLevel(item) >= 10) {
@@ -86,8 +88,7 @@ class BlockGrass(materials: VanillaMaterial,
                 }
             } else {
                 terrain.type(x, y, z, materials.farmland)
-                terrain.world.addEntity(EntityFarmlandServer(terrain.world,
-                        Vector3d(x + 0.5, y + 0.5, z + 0.5), 0.5f, 0.5f, 0.5f))
+                materials.farmland.getEntity(terrain, x, y, z).nourish(0.5)
             }
             return false
         }

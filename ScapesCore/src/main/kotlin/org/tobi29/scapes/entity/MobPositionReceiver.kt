@@ -30,6 +30,13 @@ class MobPositionReceiver(pos: Vector3d,
         sentPosRelative = MutableVector3d(pos)
     }
 
+    constructor(positionListener: (Vector3d) -> Unit,
+                speedListener: (Vector3d) -> Unit,
+                rotationListener: (Vector3d) -> Unit,
+                stateListener: (Boolean, Boolean, Boolean, Boolean) -> Unit
+    ) : this(Vector3d.ZERO, positionListener, speedListener, rotationListener,
+            stateListener)
+
     fun receiveMoveRelative(x: Byte,
                             y: Byte,
                             z: Byte) {

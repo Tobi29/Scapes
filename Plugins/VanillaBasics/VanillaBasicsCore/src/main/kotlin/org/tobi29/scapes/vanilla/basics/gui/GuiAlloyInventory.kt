@@ -49,7 +49,7 @@ class GuiAlloyInventory(container: EntityAlloyClient,
 
     private fun updateInfoText() {
         val text = StringBuilder(64)
-        val alloy = container.alloy()
+        val alloy = container.alloy
         if (alloy.metals.isNotEmpty()) {
             text.append("Metal: ").append(alloy.type(
                     container.world.plugins.plugin(

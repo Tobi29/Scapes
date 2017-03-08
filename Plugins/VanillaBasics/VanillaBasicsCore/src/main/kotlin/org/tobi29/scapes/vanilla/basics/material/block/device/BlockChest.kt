@@ -29,29 +29,19 @@ import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.entity.server.EntityContainerServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
+import org.tobi29.scapes.vanilla.basics.entity.client.EntityChestClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityChestServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer
 
-class BlockChest(materials: VanillaMaterial) : VanillaBlockContainer(materials,
-        "vanilla.basics.block.Chest") {
+class BlockChest(materials: VanillaMaterial) : VanillaBlockContainer<EntityChestClient, EntityChestServer>(
+        materials, "vanilla.basics.block.Chest",
+        materials.plugin.entityTypes.chest) {
     private var textureTop: TerrainTexture? = null
     private var textureFront: TerrainTexture? = null
     private var textureSide: TerrainTexture? = null
     private var models: Array<BlockModel>? = null
-
-    override fun placeEntity(terrain: TerrainServer,
-                             x: Int,
-                             y: Int,
-                             z: Int): EntityContainerServer {
-        val entity = EntityChestServer(terrain.world,
-                Vector3d(x + 0.5, y + 0.5, z + 0.5))
-        terrain.world.addEntityNew(entity)
-        return entity
-    }
 
     override fun place(terrain: TerrainServer.TerrainMutable,
                        x: Int,
@@ -63,7 +53,7 @@ class BlockChest(materials: VanillaMaterial) : VanillaBlockContainer(materials,
             return false
         }
         terrain.data(x, y, z, face.data.toInt())
-        return true
+        return super.place(terrain, x, y, z, face, player)
     }
 
     override fun resistance(item: ItemStack,

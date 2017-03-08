@@ -18,9 +18,7 @@ package org.tobi29.scapes.chunk.terrain.infinite
 
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.block.BlockType
-import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.terrain.TerrainClient
-import org.tobi29.scapes.chunk.terrain.TerrainRenderer
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.math.PointerPane
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
@@ -29,12 +27,10 @@ import org.tobi29.scapes.packets.PacketBlockChange
 import java.util.*
 
 class TerrainInfiniteSection : TerrainClient {
-    override val air: BlockType
-        get() = access { it.air }
-    override val world: WorldClient
-        get() = access { it.world }
-    override val renderer: TerrainRenderer
-        get() = access { it.renderer }
+    override val air get() = access { it.air }
+    override val registry get() = access { it.registry }
+    override val world get() = access { it.world }
+    override val renderer get() = access { it.renderer }
     private val chunks = arrayOfNulls<TerrainInfiniteChunkClient?>(9)
     private var terrain: TerrainInfiniteClient? = null
     private var zSize = 0

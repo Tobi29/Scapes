@@ -82,7 +82,7 @@ class RemoteClientConnection(private val worker: ConnectionWorker,
                             val bundle = channel.inputStream
                             while (bundle.hasRemaining()) {
                                 val packet = PacketAbstract.make(
-                                        plugins.registry(),
+                                        plugins.registry,
                                         bundle.short.toInt()).createClient()
                                 val pos = bundle.position()
                                 packet.parseClient(

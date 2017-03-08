@@ -22,9 +22,8 @@ import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.server.MobPlayerServer
-import org.tobi29.scapes.vanilla.basics.entity.server.MobBombServer
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.BlockExplosive
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.block.BlockSimple
 import org.tobi29.scapes.vanilla.basics.util.explosion
 import org.tobi29.scapes.vanilla.basics.util.explosionBlockPush
@@ -55,14 +54,16 @@ class BlockHyperBomb(materials: VanillaMaterial) : BlockSimple(materials,
                                    z: Int,
                                    data: Int) {
         val random = ThreadLocalRandom.current()
-        val entity = MobBombServer(terrain.world,
-                Vector3d(x + 0.5, y + 0.5, z + 0.5),
-                Vector3d(random.nextDouble() * 0.1 - 0.05,
-                        random.nextDouble() * 0.1 - 0.05,
-                        random.nextDouble() * 0.2 + 0.2), this,
-                0.toShort().toInt(),
-                random.nextDouble() * 2.0)
-        terrain.world.addEntityNew(entity)
+        terrain.world.addEntityNew(
+                materials.plugin.entityTypes.bomb.createServer(
+                        terrain.world).apply {
+                    setPos(Vector3d(x + 0.5, y + 0.5, z + 0.5))
+                    setSpeed(Vector3d(random.nextDouble() * 0.1 - 0.05,
+                            random.nextDouble() * 0.1 - 0.05,
+                            random.nextDouble() * 0.2 + 0.2))
+                    setType(ItemStack(this@BlockHyperBomb, 0))
+                    setTime(random.nextDouble() * 2.0)
+                })
     }
 
     override fun destroy(terrain: TerrainServer.TerrainMutable,
@@ -73,14 +74,20 @@ class BlockHyperBomb(materials: VanillaMaterial) : BlockSimple(materials,
                          face: Face,
                          player: MobPlayerServer,
                          item: ItemStack): Boolean {
+        if (!super.destroy(terrain, x, y, z, data, face, player, item)) {
+            return false
+        }
         val random = ThreadLocalRandom.current()
-        terrain.world.addEntity(MobBombServer(terrain.world,
-                Vector3d(x + 0.5, y + 0.5, z + 0.5),
-                Vector3d(random.nextDouble() * 0.1 - 0.05,
-                        random.nextDouble() * 0.1 - 0.05,
-                        random.nextDouble() * 0.2 + 0.2), this,
-                0.toShort().toInt(),
-                6.0))
+        terrain.world.addEntityNew(
+                materials.plugin.entityTypes.bomb.createServer(
+                        terrain.world).apply {
+                    setPos(Vector3d(x + 0.5, y + 0.5, z + 0.5))
+                    setSpeed(Vector3d(random.nextDouble() * 0.1 - 0.05,
+                            random.nextDouble() * 0.1 - 0.05,
+                            random.nextDouble() * 0.2 + 0.2))
+                    setType(ItemStack(this@BlockHyperBomb, 0))
+                    setTime(6.0)
+                })
         return true
     }
 

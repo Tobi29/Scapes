@@ -25,32 +25,21 @@ import org.tobi29.scapes.chunk.data.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
-import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.entity.server.EntityContainerServer
+import org.tobi29.scapes.vanilla.basics.entity.client.EntityForgeClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityForgeServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer
 
-class BlockForge(materials: VanillaMaterial) : VanillaBlockContainer(materials,
-        "vanilla.basics.block.Forge") {
+class BlockForge(materials: VanillaMaterial) : VanillaBlockContainer<EntityForgeClient, EntityForgeServer>(
+        materials, "vanilla.basics.block.Forge",
+        materials.plugin.entityTypes.forge) {
     private var textureOn: TerrainTexture? = null
     private var textureOff: TerrainTexture? = null
     private var modelOn: BlockModel? = null
     private var modelOff: BlockModel? = null
-
-    override fun placeEntity(terrain: TerrainServer,
-                             x: Int,
-                             y: Int,
-                             z: Int): EntityContainerServer {
-        val entity = EntityForgeServer(terrain.world,
-                Vector3d(x + 0.5, y + 0.5, z + 0.5))
-        terrain.world.addEntityNew(entity)
-        return entity
-    }
 
     override fun resistance(item: ItemStack,
                             data: Int): Double {

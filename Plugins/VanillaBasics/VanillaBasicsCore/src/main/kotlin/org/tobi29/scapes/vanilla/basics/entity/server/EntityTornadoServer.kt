@@ -26,15 +26,16 @@ import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.sinTable
 import org.tobi29.scapes.engine.utils.math.toRad
 import org.tobi29.scapes.engine.utils.math.vector.*
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.getEntities
-import org.tobi29.scapes.entity.server.EntityServer
+import org.tobi29.scapes.entity.server.EntityAbstractServer
 import org.tobi29.scapes.entity.server.MobPositionSenderServer
 import org.tobi29.scapes.entity.server.MobServer
 import java.util.concurrent.ThreadLocalRandom
 
-class EntityTornadoServer(world: WorldServer,
-                          pos: Vector3d = Vector3d.ZERO) : EntityServer(
-        "vanilla.basics.entity.Tornado", world, pos) {
+class EntityTornadoServer(type: EntityType<*, *>,
+                          world: WorldServer) : EntityAbstractServer(
+        type, world, Vector3d.ZERO) {
     private val positionHandler: MobPositionSenderServer
     private var time = 0.0
     private var dir = 0.0
@@ -43,8 +44,7 @@ class EntityTornadoServer(world: WorldServer,
         val random = ThreadLocalRandom.current()
         dir = random.nextDouble() * 360
         time = (random.nextInt(100) + 20).toDouble()
-        positionHandler = MobPositionSenderServer(registry, pos,
-                { world.send(it) })
+        positionHandler = MobPositionSenderServer(registry, { world.send(it) })
     }
 
     override fun write(map: ReadWriteTagMap) {

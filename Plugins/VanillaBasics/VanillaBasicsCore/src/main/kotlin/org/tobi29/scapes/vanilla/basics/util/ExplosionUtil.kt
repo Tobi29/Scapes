@@ -27,9 +27,9 @@ import org.tobi29.scapes.engine.utils.math.vector.*
 import org.tobi29.scapes.engine.utils.putAbsent
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.entity.server.EntityServer
-import org.tobi29.scapes.entity.server.MobFlyingBlockServer
 import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.entity.server.MobServer
+import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.BlockExplosive
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
@@ -67,6 +67,7 @@ fun TerrainServer.TerrainMutable.explosionBlockPush(
         blockChance: Double,
         push: Double,
         damage: Double) {
+    val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
     val entities = ArrayList<EntityServer>()
     val locations = LOCATIONS.get()
     val random = ThreadLocalRandom.current()
@@ -134,13 +135,14 @@ fun TerrainServer.TerrainMutable.explosionBlockPush(
                     !type.isTransparent(this, xxx, yyy,
                             zzz) &&
                     random.nextDouble() < blockChance) {
-                entities.add(MobFlyingBlockServer(world,
-                        Vector3d(xxx + 0.5, yyy + 0.5,
-                                zzz + 0.5), Vector3d(
-                        random.nextDouble() * 0.1 - 0.05,
-                        random.nextDouble() * 0.1 - 0.05,
-                        random.nextDouble() * 1 + 2), type,
-                        data))
+                entities.add(plugin.entityTypes.flyingBlock.createServer(
+                        world).apply {
+                    setPos(Vector3d(xxx + 0.5, yyy + 0.5, zzz + 0.5))
+                    setSpeed(Vector3d(random.nextDouble() * 0.1 - 0.05,
+                            random.nextDouble() * 0.1 - 0.05,
+                            random.nextDouble() * 1 + 2))
+                    setType(ItemStack(type, data))
+                })
             }
         }
         typeData(xxx, yyy, zzz, air, 0)

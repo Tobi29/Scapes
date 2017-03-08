@@ -44,28 +44,57 @@ import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
 open class SQLWorldFormat(protected val path: FilePath,
-                          protected val database: SQLDatabase) : WorldFormat {
+                          database: SQLDatabase,
+                          private val useForeignKeys: Boolean = true) : WorldFormat {
+    override val plugins: Plugins
+    override val playerData: PlayerData
+    override val seed: Long
     protected val idStorage: MutableTagMap
+
+    // MetaData
     protected val getMetaData = database.compileQuery("MetaData",
             arrayOf("Value"), "Name")
     protected val replaceMetaData = database.compileReplace("MetaData", "Name",
             "Value")
+
+    // Data
     protected val getData = database.compileQuery("Data", arrayOf("Value"),
             "Name")
     protected val replaceData = database.compileReplace("Data", "Name", "Value")
+
+    // Worlds
     protected val getWorldData = database.compileQuery("Worlds",
             arrayOf("Data"), "World")
     protected val setWorldData = database.compileUpdate("Worlds",
             arrayOf("World"), "Data")
-    protected val insertWorldData = database.compileInsert("Worlds", "World")
-    protected val deleteWorldData = database.compileDelete("Worlds", "World")
-    protected val plugins: Plugins
-    protected val playerData: PlayerData
-    protected val seed: Long
+    protected val insertWorld = database.compileInsert("Worlds", "World")
+    protected val deleteWorld = database.compileDelete("Worlds", "World")
+
+    // Chunks
+    protected val getChunk = database.compileQuery("Chunks", arrayOf("Data"),
+            "World", "X", "Y")
+    protected val replaceChunk = database.compileReplace("Chunks", "World", "X",
+            "Y", "Data")
+    protected val deleteWorldChunks = database.compileDelete("Chunks", "World")
+
+    // Players
+    protected val getPlayer = database.compileQuery("Players",
+            arrayOf("World", "Permissions", "Entity"), "ID")
+    protected val insertPlayer = database.compileInsert("Players",
+            "ID", "Permissions")
+    protected val replacePlayer = database.compileReplace("Players", "ID",
+            "World", "Permissions", "Entity")
+    protected val deletePlayer = database.compileDelete("Players", "ID")
+    protected val checkPlayer = database.compileQuery("Players",
+            arrayOf("1"), "ID")
+    protected val setWorldPlayers = database.compileUpdate("Players",
+            arrayOf("World"), "World")
+
     private val stream = ByteBufferStream()
 
     init {
-        playerData = SQLPlayerData(database, "Players")
+        playerData = SQLPlayerData(getPlayer, insertPlayer, replacePlayer,
+                deletePlayer, checkPlayer)
         checkDatabase(database)
         var rows = getMetaData("Seed")
         if (!rows.isEmpty()) {
@@ -99,23 +128,12 @@ open class SQLWorldFormat(protected val path: FilePath,
         return Plugins(pluginFiles(), idStorage)
     }
 
-    override fun playerData(): PlayerData {
-        return playerData
-    }
-
-    override fun seed(): Long {
-        return seed
-    }
-
-    override fun plugins(): Plugins {
-        return plugins
-    }
-
     @Synchronized override fun registerWorld(server: ScapesServer,
                                              environmentSupplier: Function1<WorldServer, EnvironmentServer>,
                                              name: String,
                                              seed: Long): WorldServer {
-        val format = SQLTerrainInfiniteFormat(database, "Chunks", name)
+        val format = SQLTerrainInfiniteFormat(getChunk.supply(name),
+                replaceChunk.supply(name))
         val world = WorldServer(this, name, seed, server.connection,
                 TaskExecutor(server.taskExecutor(), name),
                 {
@@ -131,7 +149,7 @@ open class SQLWorldFormat(protected val path: FilePath,
                 world.read(readBinary(ByteBufferStream(ByteBuffer.wrap(array))))
             }
         } else {
-            insertWorldData(arrayOf(name))
+            insertWorld(arrayOf(name))
         }
         return world
     }
@@ -151,12 +169,15 @@ open class SQLWorldFormat(protected val path: FilePath,
 
     @Synchronized override fun deleteWorld(name: String): Boolean {
         try {
-            deleteWorldData(name)
+            deleteWorld.invoke(name)
+            if (!useForeignKeys) {
+                deleteWorldChunks(name)
+                setWorldPlayers(arrayOf(name), null)
+            }
         } catch (e: IOException) {
             logger.error { "Error whilst deleting world: $e" }
             return false
         }
-
         return true
     }
 

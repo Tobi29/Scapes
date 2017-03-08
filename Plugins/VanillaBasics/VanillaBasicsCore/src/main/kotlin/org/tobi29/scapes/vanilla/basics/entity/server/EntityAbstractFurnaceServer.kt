@@ -25,13 +25,14 @@ import org.tobi29.scapes.engine.utils.io.tag.set
 import org.tobi29.scapes.engine.utils.io.tag.toDouble
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.packets.PacketEntityChange
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.ItemFuel
 import org.tobi29.scapes.vanilla.basics.material.ItemHeatable
 
 abstract class EntityAbstractFurnaceServer(
-        id: String,
+        type: EntityType<*, *>,
         world: WorldServer,
         pos: Vector3d,
         inventory: Inventory,
@@ -42,7 +43,7 @@ abstract class EntityAbstractFurnaceServer(
         protected val fuelHeat: Double,
         protected val fuelTier: Int,
         private val beforeHeatUpdate: (Inventory, ItemStack) -> Unit = { _, _ -> }
-) : EntityAbstractContainerServer(id, world, pos, inventory) {
+) : EntityAbstractContainerServer(type, world, pos, inventory) {
     protected val fuel = DoubleArray(fuel)
     protected val fuelTemperature = DoubleArray(fuel)
     var temperature = 0.0

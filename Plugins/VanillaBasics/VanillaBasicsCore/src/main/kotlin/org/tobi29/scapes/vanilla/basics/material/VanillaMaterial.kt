@@ -39,7 +39,7 @@ import org.tobi29.scapes.vanilla.basics.material.item.vegetation.ItemSeed
 
 class VanillaMaterial(val plugin: VanillaBasics,
                       val registry: GameRegistry) {
-    val air: BlockType
+    val air = registry.air
     val anvil: BlockType
     val alloy: BlockType
     val baked: Material
@@ -59,7 +59,7 @@ class VanillaMaterial(val plugin: VanillaBasics,
     val cropDrop: Material
     val dirt: BlockType
     val dough: Material
-    val farmland: BlockType
+    val farmland: BlockFarmland
     val flintAxe: ItemFlintTool
     val flintHammer: ItemFlintTool
     val flintHoe: ItemFlintTool
@@ -121,7 +121,6 @@ class VanillaMaterial(val plugin: VanillaBasics,
         val cropRegistry = registry.get<CropType>("VanillaBasics", "CropType")
         val stoneRegistry = registry.get<StoneType>("VanillaBasics",
                 "StoneType")
-        air = registry.air()
         anvil = register(BlockAnvil(this))
         alloy = register(BlockAlloy(this))
         baked = register(ItemBaked(this, cropRegistry))

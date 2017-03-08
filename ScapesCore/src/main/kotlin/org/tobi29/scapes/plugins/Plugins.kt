@@ -18,19 +18,21 @@ package org.tobi29.scapes.plugins
 
 import mu.KLogging
 import org.tobi29.scapes.block.GameRegistry
-import org.tobi29.scapes.block.init
+import org.tobi29.scapes.block.UpdateBlockUpdate
+import org.tobi29.scapes.block.UpdateBlockUpdateUpdateTile
+import org.tobi29.scapes.block.UpdateType
 import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathResource
 import org.tobi29.scapes.engine.utils.io.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.readOnly
+import org.tobi29.scapes.packets.*
 import java.io.IOException
 import java.net.URLClassLoader
 import java.util.*
 
-class Plugins @Throws(IOException::class)
-constructor(files: List<PluginFile>,
-            idStorage: MutableTagMap) {
+class Plugins(files: List<PluginFile>,
+              idStorage: MutableTagMap) {
     val files = files.readOnly()
     private val pluginsMut = ArrayList<Plugin>()
     val plugins = pluginsMut.readOnly()
@@ -91,10 +93,6 @@ constructor(files: List<PluginFile>,
         }
     }
 
-    fun registry(): GameRegistry {
-        return registry
-    }
-
     fun plugin(name: String): Plugin {
         for (plugin in pluginsMut) {
             if (plugin.id() == name) {
@@ -127,7 +125,7 @@ constructor(files: List<PluginFile>,
                 registry.add("Core", "Update", 0, Short.MAX_VALUE.toInt())
                 pluginsMut.forEach { it.registryType(registry) }
             })
-            registry.init(worldType)
+            init(registry)
             pluginsMut.forEach { it.register(registry) }
             pluginsMut.forEach { it.init(registry) }
             registry.lock()
@@ -156,6 +154,113 @@ constructor(files: List<PluginFile>,
                 return listOf(PluginFile(embedded))
             }
             return emptyList()
+        }
+
+        fun init(registry: GameRegistry) {
+            registry.get<UpdateType>("Core", "Update").run {
+                reg("core.update.BlockUpdate") {
+                    UpdateType(it, ::UpdateBlockUpdate)
+                }
+                reg("core.update.BlockUpdateUpdateTile") {
+                    UpdateType(it, ::UpdateBlockUpdateUpdateTile)
+                }
+            }
+
+            registry.get<PacketType>("Core", "Packet").run {
+                reg("core.packet.RequestChunk") {
+                    PacketType(it, ::PacketRequestChunk)
+                }
+                reg("core.packet.RequestEntity") {
+                    PacketType(it, ::PacketRequestEntity)
+                }
+                reg("core.packet.SendChunk") {
+                    PacketType(it, ::PacketSendChunk)
+                }
+                reg("core.packet.BlockChange") {
+                    PacketType(it, ::PacketBlockChange)
+                }
+                reg("core.packet.BlockChangeAir") {
+                    PacketType(it, ::PacketBlockChangeAir)
+                }
+                reg("core.packet.EntityAdd") {
+                    PacketType(it, ::PacketEntityAdd)
+                }
+                reg("core.packet.EntityChange") {
+                    PacketType(it, ::PacketEntityChange)
+                }
+                reg("core.packet.EntityMetaData") {
+                    PacketType(it, ::PacketEntityMetaData)
+                }
+                reg("core.packet.MobMoveRelative") {
+                    PacketType(it, ::PacketMobMoveRelative)
+                }
+                reg("core.packet.MobMoveAbsolute") {
+                    PacketType(it, ::PacketMobMoveAbsolute)
+                }
+                reg("core.packet.MobChangeRot") {
+                    PacketType(it, ::PacketMobChangeRot)
+                }
+                reg("core.packet.MobChangeSpeed") {
+                    PacketType(it, ::PacketMobChangeSpeed)
+                }
+                reg("core.packet.MobChangeState") {
+                    PacketType(it, ::PacketMobChangeState)
+                }
+                reg("core.packet.MobDamage") {
+                    PacketType(it, ::PacketMobDamage)
+                }
+                reg("core.packet.EntityDespawn") {
+                    PacketType(it, ::PacketEntityDespawn)
+                }
+                reg("core.packet.SoundEffect") {
+                    PacketType(it, ::PacketSoundEffect)
+                }
+                reg("core.packet.Interaction") {
+                    PacketType(it, ::PacketInteraction)
+                }
+                reg("core.packet.InventoryInteraction") {
+                    PacketType(it, ::PacketInventoryInteraction)
+                }
+                reg("core.packet.PlayerJump") {
+                    PacketType(it, ::PacketPlayerJump)
+                }
+                reg("core.packet.OpenGui") {
+                    PacketType(it, ::PacketOpenGui)
+                }
+                reg("core.packet.CloseGui") {
+                    PacketType(it, ::PacketCloseGui)
+                }
+                reg("core.packet.UpdateInventory") {
+                    PacketType(it, ::PacketUpdateInventory)
+                }
+                reg("core.packet.Chat") {
+                    PacketType(it, ::PacketChat)
+                }
+                reg("core.packet.ItemUse") {
+                    PacketType(it, ::PacketItemUse)
+                }
+                reg("core.packet.Disconnect") {
+                    PacketType(it, ::PacketDisconnect)
+                }
+                reg("core.packet.DisconnectSelf") {
+                    PacketType(it, {
+                        throw IOException(
+                                "This packet should never be received")
+                    })
+                }
+                reg("core.packet.SetWorld") {
+                    PacketType(it, ::PacketSetWorld)
+                }
+                reg("core.packet.PingClient") {
+                    PacketType(it, ::PacketPingClient)
+                }
+                reg("core.packet.PingServer") {
+                    PacketType(it, ::PacketPingServer)
+                }
+                reg("core.packet.Skin") {
+                    PacketType(it, ::PacketSkin)
+                }
+            }
         }
     }
 }

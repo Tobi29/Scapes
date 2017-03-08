@@ -16,9 +16,8 @@
 package org.tobi29.scapes.entity.server
 
 import org.tobi29.scapes.block.InventoryContainer
-import org.tobi29.scapes.entity.Entity
 
-interface EntityContainerServer : Entity {
+interface EntityContainerServer : EntityServer {
     val viewers: List<MobPlayerServer>
 
     fun inventories(): InventoryContainer

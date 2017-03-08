@@ -16,7 +16,6 @@
 package org.tobi29.scapes.entity.server
 
 import org.tobi29.scapes.block.AABBElement
-import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.ThreadLocal
@@ -24,17 +23,19 @@ import org.tobi29.scapes.engine.utils.io.tag.ReadWriteTagMap
 import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.engine.utils.io.tag.set
 import org.tobi29.scapes.engine.utils.io.tag.toMap
-import org.tobi29.scapes.engine.utils.math.*
+import org.tobi29.scapes.engine.utils.math.AABB
+import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityPhysics
+import org.tobi29.scapes.entity.EntityType
 
-abstract class MobServer(id: String,
+abstract class MobServer(type: EntityType<*, *>,
                          world: WorldServer,
                          pos: Vector3d,
                          speed: Vector3d,
-                         protected val collision: AABB) : EntityServer(id,
-        world, pos) {
+                         protected val collision: AABB) : EntityAbstractServer(
+        type, world, pos) {
     protected val speed: MutableVector3d
     protected val rot = MutableVector3d()
     protected val positionSender: MobPositionSenderServer
@@ -57,17 +58,6 @@ abstract class MobServer(id: String,
     init {
         this.speed = MutableVector3d(speed)
         positionSender = createPositionHandler()
-    }
-
-    fun dropItem(item: ItemStack) {
-        val entity = MobItemServer(world, pos.now(), Vector3d(
-                cos(rot.doubleZ().toRad()) * 10.0 *
-                        cos(rot.doubleX().toRad()),
-                sin(rot.doubleZ().toRad()) * 10.0 *
-                        cos(rot.doubleX().toRad()),
-                sin(rot.doubleX().toRad()) * 0.3 + 0.3),
-                item, Double.NaN)
-        world.addEntityNew(entity)
     }
 
     override fun getAABB(): AABB {
@@ -98,7 +88,7 @@ abstract class MobServer(id: String,
     }
 
     open fun setSpeed(speed: Vector3d) {
-        assert(world.checkThread())
+        assert(world.checkThread() || !world.hasEntity(this))
         this.speed.set(speed)
         positionSender.sendSpeed(uuid, this.speed.now(), true)
     }
@@ -115,13 +105,13 @@ abstract class MobServer(id: String,
     open fun push(x: Double,
                   y: Double,
                   z: Double) {
-        assert(world.checkThread())
+        assert(world.checkThread() || !world.hasEntity(this))
         speed.plusX(x).plusY(y).plusZ(z)
         positionSender.sendSpeed(uuid, speed.now(), true)
     }
 
-    open fun setPos(pos: Vector3d) {
-        assert(world.checkThread())
+    override fun setPos(pos: Vector3d) {
+        assert(world.checkThread() || !world.hasEntity(this))
         synchronized(this.pos) {
             this.pos.set(pos)
             positionSender.sendPos(uuid, this.pos.now(), true)

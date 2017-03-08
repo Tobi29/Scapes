@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.tobi29.scapes.entity.server
+
+package org.tobi29.scapes.vanilla.basics.entity.server
 
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.io.tag.ReadWriteTagMap
@@ -22,11 +23,13 @@ import org.tobi29.scapes.engine.utils.io.tag.set
 import org.tobi29.scapes.engine.utils.io.tag.toDouble
 import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.entity.server.EntityAbstractServer
 import org.tobi29.scapes.packets.PacketEntityChange
 
-class EntityBlockBreakServer(world: WorldServer,
-                             pos: Vector3d = Vector3d.ZERO) : EntityServer(
-        "core.entity.BlockBreak", world, pos) {
+class EntityBlockBreakServer(type: EntityType<*, *>,
+                             world: WorldServer) : EntityAbstractServer(
+        type, world, Vector3d.ZERO) {
     private var progress = 0.0
     private var wait = 0.0
 

@@ -17,11 +17,13 @@ package org.tobi29.scapes.chunk.terrain
 
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.block.BlockType
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.math.PointerPane
 
 interface Terrain {
     val air: BlockType
+    val registry: GameRegistry
 
     fun sunLight(x: Int,
                  y: Int,

@@ -22,16 +22,17 @@ import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.utils.math.TWO_PI
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.particle.ParticleEmitterTransparent
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.gui.GuiForgeInventory
 import java.util.concurrent.ThreadLocalRandom
 
-class EntityForgeClient(world: WorldClient,
-                        pos: Vector3d = Vector3d.ZERO) : EntityAbstractFurnaceClient(
-        "vanilla.basics.entity.Forge", world, pos, Inventory(world.registry, 9),
-        4, 3) {
+class EntityForgeClient(type: EntityType<*, *>,
+                        world: WorldClient) : EntityAbstractFurnaceClient(
+        type, world, Vector3d.ZERO,
+        Inventory(world.registry, 9), 4, 3) {
     private var particleWait = 0.1
 
     override fun gui(player: MobPlayerClientMain): Gui? {

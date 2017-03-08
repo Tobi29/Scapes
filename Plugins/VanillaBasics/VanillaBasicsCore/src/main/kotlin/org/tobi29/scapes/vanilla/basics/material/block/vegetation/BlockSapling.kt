@@ -38,6 +38,7 @@ import org.tobi29.scapes.vanilla.basics.material.TreeType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateSaplingGrowth
+import org.tobi29.scapes.vanilla.basics.util.dropItems
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
@@ -81,6 +82,9 @@ class BlockSapling(materials: VanillaMaterial,
                        z: Int,
                        face: Face,
                        player: MobPlayerServer): Boolean {
+        if (!super.place(terrain, x, y, z, face, player)) {
+            return false
+        }
         if (terrain.type(x, y, z - 1).isSolid(terrain, x, y, z - 1)) {
             val random = ThreadLocalRandom.current()
             terrain.addDelayedUpdate(

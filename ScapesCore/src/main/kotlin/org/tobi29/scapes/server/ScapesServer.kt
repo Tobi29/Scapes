@@ -63,9 +63,9 @@ class ScapesServer(source: WorldSource,
 
     init {
         format = source.open(this)
-        playerData = format.playerData()
-        plugins = format.plugins()
-        seed = format.seed()
+        playerData = format.playerData
+        plugins = format.plugins
+        seed = format.seed
         extensions = ServerExtensions(this)
         extensions.loadExtensions(configMap["Extension"]?.toMap())
         taskExecutor = TaskExecutor(crashHandler, "Server")
@@ -77,9 +77,9 @@ class ScapesServer(source: WorldSource,
         connections.workers(socketTag["WorkerCount"]?.toInt() ?: 1)
         connection = ServerConnection(this, socketTag, ssl)
         extensions.init()
-        format.plugins().init()
-        format.plugins().plugins.forEach { it.initServer(this) }
-        format.plugins().dimensions.forEach { this.registerWorld(it) }
+        format.plugins.init()
+        format.plugins.plugins.forEach { it.initServer(this) }
+        format.plugins.dimensions.forEach { this.registerWorld(it) }
     }
 
     fun shutdownReason(): ShutdownReason {

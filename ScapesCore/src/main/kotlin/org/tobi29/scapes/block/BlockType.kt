@@ -147,6 +147,18 @@ abstract class BlockType protected constructor(registry: GameRegistry,
         return true
     }
 
+    open fun punch(terrain: TerrainServer.TerrainMutable,
+                   x: Int,
+                   y: Int,
+                   z: Int,
+                   data: Int,
+                   face: Face,
+                   player: MobPlayerServer,
+                   item: ItemStack,
+                   br: Double,
+                   strength: Double) {
+    }
+
     open fun destroy(terrain: TerrainServer.TerrainMutable,
                      x: Int,
                      y: Int,

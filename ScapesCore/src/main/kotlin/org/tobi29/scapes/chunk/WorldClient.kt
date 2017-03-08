@@ -55,7 +55,7 @@ class WorldClient(val connection: ClientConnection,
                   playerTag: TagMap,
                   playerID: UUID) : World<EntityClient>(
         connection.plugins, connection.game.engine.taskExecutor,
-        connection.plugins.registry(),
+        connection.plugins.registry,
         seed), PlayConnection<PacketServer> {
     val scene: SceneScapesVoxelWorld
     val player: MobPlayerClientMain
@@ -70,8 +70,7 @@ class WorldClient(val connection: ClientConnection,
     init {
         game = connection.game
         environment = environmentSupplier(this)
-        player = connection.plugins.worldType.newPlayer(this, Vector3d.ZERO,
-                Vector3d.ZERO, 0.0, 0.0, "")
+        player = connection.plugins.worldType.newPlayer(this)
         player.setEntityID(playerID)
         player.read(playerTag)
         terrain = terrainSupplier(this)

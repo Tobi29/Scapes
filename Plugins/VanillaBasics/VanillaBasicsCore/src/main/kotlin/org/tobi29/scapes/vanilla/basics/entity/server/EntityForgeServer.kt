@@ -21,14 +21,13 @@ import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.item.ItemIngot
 
-class EntityForgeServer(
-        world: WorldServer,
-        pos: Vector3d = Vector3d.ZERO
-) : EntityAbstractFurnaceServer("vanilla.basics.entity.Forge", world, pos,
-        Inventory(world.registry, 9), 4, 3,
+class EntityForgeServer(type: EntityType<*, *>,
+                        world: WorldServer) : EntityAbstractFurnaceServer(
+        type, world, Vector3d.ZERO, Inventory(world.registry, 9), 4, 3,
         Double.POSITIVE_INFINITY, 1.006, 5.0, 50, { inventory, item ->
     if (item.amount() == 1) {
         val type = item.material()

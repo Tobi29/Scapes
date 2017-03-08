@@ -22,14 +22,15 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.entity.client.EntityClient
+import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.entity.client.EntityAbstractClient
 import org.tobi29.scapes.entity.client.EntityContainerClient
 
-abstract class EntityAbstractContainerClient(id: String,
+abstract class EntityAbstractContainerClient(type: EntityType<*, *>,
                                              world: WorldClient,
                                              pos: Vector3d,
-                                             inventory: Inventory) : EntityClient(
-        id, world, pos), EntityContainerClient {
+                                             inventory: Inventory) : EntityAbstractClient(
+        type, world, pos), EntityContainerClient {
     protected val inventories: InventoryContainer
 
     init {

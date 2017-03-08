@@ -23,16 +23,14 @@ import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.plus
 import org.tobi29.scapes.entity.CreatureType
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.server.MobLivingEquippedServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import java.util.concurrent.ThreadLocalRandom
 
-class MobZombieServer(world: WorldServer,
-                      pos: Vector3d = Vector3d.ZERO,
-                      speed: Vector3d = Vector3d.ZERO,
-                      xRot: Double = 0.0,
-                      zRot: Double = 0.0) : MobLivingEquippedServer(
-        "vanilla.basics.mob.Zombie", world, pos, speed,
+class MobZombieServer(type: EntityType<*, *>,
+                      world: WorldServer) : MobLivingEquippedServer(
+        type, world, Vector3d.ZERO, Vector3d.ZERO,
         AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 20.0, 30.0,
         Frustum(90.0, 1.0, 0.1, 24.0), Frustum(20.0, 0.5, 0.1, 0.2)) {
     private var soundWait = 0.0
@@ -41,8 +39,6 @@ class MobZombieServer(world: WorldServer,
     private var hitWait = 0.0
 
     init {
-        rot.setX(xRot)
-        rot.setZ(zRot)
         val random = ThreadLocalRandom.current()
         onNotice("Local") { mob ->
             if (mob is MobPlayerServer && !ai.hasMobTarget()) {

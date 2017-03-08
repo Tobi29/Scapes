@@ -41,8 +41,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
     constructor(pos: Vector2i,
                 terrain: TerrainInfiniteServer,
                 zSize: Int,
-                map: TagMap) : super(pos, terrain, zSize,
-            terrain.world.registry.blocks()) {
+                map: TagMap) : super(pos, terrain, zSize) {
         this.terrain2 = terrain
         profilerSection("Load") { read(map) }
         profilerSection("HeightMap") { initHeightMap() }
@@ -52,8 +51,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                 terrain: TerrainInfiniteServer,
                 zSize: Int,
                 generator: ChunkGenerator,
-                output: GeneratorOutput) : super(pos, terrain, zSize,
-            terrain.world.registry.blocks()) {
+                output: GeneratorOutput) : super(pos, terrain, zSize) {
         this.terrain2 = terrain
         profilerSection("Generate") { generate(generator, output) }
         profilerSection("Sunlight") { initSunLight() }
@@ -235,7 +233,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
             if (xy < 0) {
                 xy += 256
             }
-            addDelayedUpdate(Update.make(terrain2.world.plugins.registry(),
+            addDelayedUpdate(Update.make(terrain2.world.plugins.registry,
                     (xy and 0xF) + posBlock.x,
                     (xy ushr 4) + posBlock.y,
                     tag["PosZ"]?.toInt() ?: 0, tag["Delay"]?.toDouble() ?: 0.0,

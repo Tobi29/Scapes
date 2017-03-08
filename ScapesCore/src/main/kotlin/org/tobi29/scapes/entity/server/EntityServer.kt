@@ -15,96 +15,60 @@
  */
 package org.tobi29.scapes.entity.server
 
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.io.tag.*
-import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
+import org.tobi29.scapes.engine.utils.io.tag.MutableTagMap
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.TagMapWrite
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.Entity
 import org.tobi29.scapes.entity.EntityType
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
-open class EntityServer(id: String,
-                        val world: WorldServer,
-                        pos: Vector3d) : Entity, TagMapWrite {
-    protected val spawnListeners: MutableMap<String, () -> Unit> = ConcurrentHashMap()
-    protected val updateListeners: MutableMap<String, (Double) -> Unit> = ConcurrentHashMap()
-    val registry = world.registry
-    override val type = Entity.of(registry, id)
-    protected val pos = MutableVector3d(pos)
-    var uuid: UUID = UUID.randomUUID()
-        protected set
-    protected var metaData = MutableTagMap()
+interface EntityServer : Entity, TagMapWrite {
+    val registry: GameRegistry
+    val world: WorldServer
+    val uuid: UUID
 
-    override fun getUUID(): UUID {
-        return uuid
+    fun setEntityID(uuid: UUID)
+
+    fun setPos(pos: Vector3d)
+
+    fun read(map: TagMap)
+
+    fun metaData(category: String): MutableTagMap
+
+    fun updateListeners(delta: Double)
+
+    fun update(delta: Double) {}
+
+    fun updateTile(terrain: TerrainServer,
+                   x: Int,
+                   y: Int,
+                   z: Int,
+                   data: Int) {
     }
 
-
-    fun setEntityID(uuid: UUID) {
-        this.uuid = uuid
-    }
-
-    fun world(): WorldServer {
-        return world
-    }
-
-    override fun getCurrentPos(): Vector3d {
-        return pos.now()
-    }
-
-    override fun write(map: ReadWriteTagMap) {
-        map["Pos"] = pos.now().toTag()
-        map["MetaData"] = metaData.toTag()
-    }
-
-    open fun read(map: TagMap) {
-        map["Pos"]?.toMap()?.let { pos.set(it) }
-        map["MetaData"]?.toMap()?.let { metaData = it.toMutTag() }
-    }
-
-    fun metaData(category: String) = metaData.mapMut(category)
-
-    fun updateListeners(delta: Double) {
-        updateListeners.values.forEach { it(delta) }
-    }
-
-    open fun update(delta: Double) {
-    }
-
-    open fun updateTile(terrain: TerrainServer,
-                        x: Int,
-                        y: Int,
-                        z: Int,
-                        data: Int) {
-    }
-
-    open fun tickSkip(oldTick: Long,
-                      newTick: Long) {
+    fun tickSkip(oldTick: Long,
+                 newTick: Long) {
     }
 
     fun onSpawn(id: String,
-                listener: () -> Unit) {
-        spawnListeners[id] = listener
-    }
+                listener: () -> Unit)
 
-    fun onSpawn() {
-        spawnListeners.values.forEach { it() }
-    }
+    fun onSpawn()
 
     fun onUpdate(id: String,
                  listener: (Double) -> Unit) {
-        updateListeners[id] = listener
     }
 
-    fun onUnload() {
-    }
+    fun onUnload() {}
 
     companion object {
         fun make(id: Int,
                  world: WorldServer): EntityServer {
-            return world.registry.get<EntityType>("Core",
+            return world.registry.get<EntityType<*, *>>("Core",
                     "Entity")[id].createServer(world)
         }
     }

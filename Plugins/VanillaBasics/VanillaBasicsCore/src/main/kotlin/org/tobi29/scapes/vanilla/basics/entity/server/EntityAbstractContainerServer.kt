@@ -27,17 +27,19 @@ import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.plus
 import org.tobi29.scapes.engine.utils.readOnly
+import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.entity.server.EntityAbstractServer
 import org.tobi29.scapes.entity.server.EntityContainerServer
-import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.packets.PacketUpdateInventory
+import org.tobi29.scapes.vanilla.basics.util.dropItem
 import java.util.*
 
-abstract class EntityAbstractContainerServer(id: String,
+abstract class EntityAbstractContainerServer(type: EntityType<*, *>,
                                              world: WorldServer,
                                              pos: Vector3d,
-                                             inventory: Inventory) : EntityServer(
-        id, world, pos), EntityContainerServer {
+                                             inventory: Inventory) : EntityAbstractServer(
+        type, world, pos), EntityContainerServer {
     protected val inventories: InventoryContainer
     protected val viewersMut = ArrayList<MobPlayerServer>()
     override val viewers = viewersMut.readOnly()
@@ -91,7 +93,7 @@ abstract class EntityAbstractContainerServer(id: String,
             inventories.forEach { inventory ->
                 for (i in 0..inventory.size() - 1) {
                     world.dropItem(inventory.item(i),
-                            pos.now().plus(Vector3d(0.5, 0.5, 0.5)))
+                            pos.now() + Vector3d(0.5, 0.5, 0.5))
                 }
             }
             world.removeEntity(this)

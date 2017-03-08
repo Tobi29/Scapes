@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.vanilla.basics.entity.server
 
+import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.Checksum
 import org.tobi29.scapes.engine.utils.filterMap
@@ -22,27 +23,48 @@ import org.tobi29.scapes.engine.utils.io.tag.map
 import org.tobi29.scapes.engine.utils.io.tag.toBoolean
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.math.vector.Vector3i
+import org.tobi29.scapes.engine.utils.math.vector.plus
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.WieldMode
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
+import org.tobi29.scapes.packets.PacketEntityChange
 import org.tobi29.scapes.server.connection.PlayerConnection
+import org.tobi29.scapes.vanilla.basics.util.dropItem
+import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
-class MobPlayerServerVB(world: WorldServer,
-                        pos: Vector3d,
-                        speed: Vector3d,
-                        xRot: Double,
-                        zRot: Double,
+class MobPlayerServerVB(type: EntityType<*, *>,
+                        world: WorldServer,
                         nickname: String,
                         skin: Checksum,
-                        connection: PlayerConnection) : MobPlayerServer(world,
-        pos, speed, AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 100.0, 100.0,
+                        connection: PlayerConnection) : MobPlayerServer(
+        type, world,
+        Vector3d.ZERO, Vector3d.ZERO, AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9),
+        100.0, 100.0,
         Frustum(90.0, 1.0, 0.1, 24.0), Frustum(50.0, 1.0, 0.1, 2.0), nickname,
         skin, connection) {
     init {
-        rot.setX(xRot)
-        rot.setZ(zRot)
+        onDeath("Local", {
+            inventories.modify<List<ItemStack>>(
+                    "Container") { inventory ->
+                val items = ArrayList<ItemStack>()
+                for (i in 0..inventory.size() - 1) {
+                    inventory.item(i).take()?.let { items.add(it) }
+                }
+                items
+            }.forEach { item -> world.dropItem(item, this.pos.now()) }
+            inventories.modify("Hold") {
+                it.item(0).take()
+            }?.let { world.dropItem(it, this.pos.now()) }
+            setSpeed(Vector3d.ZERO)
+            setPos(Vector3d(world.spawn + Vector3i(0, 0, 1)))
+            health = maxHealth
+            world.send(PacketEntityChange(registry, this))
+            onSpawn()
+        })
     }
 
     override fun wieldMode(): WieldMode {
@@ -102,5 +124,12 @@ class MobPlayerServerVB(world: WorldServer,
     override fun isActive(): Boolean {
         val conditionTag = metaData("Vanilla").map("Condition")
         return !(conditionTag?.get("Sleeping")?.toBoolean() ?: false)
+    }
+
+    override fun onCloseInventory(): Boolean {
+        inventories().modify("Hold") { inventory ->
+            inventory.item(0).take()?.let { dropItem(it) }
+        }
+        return true
     }
 }

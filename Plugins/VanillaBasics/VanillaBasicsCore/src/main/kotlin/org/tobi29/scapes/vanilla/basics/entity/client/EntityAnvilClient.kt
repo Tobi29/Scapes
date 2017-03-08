@@ -20,13 +20,13 @@ import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.vanilla.basics.gui.GuiAnvilInventory
 
-class EntityAnvilClient constructor(world: WorldClient,
-                                    pos: Vector3d = Vector3d.ZERO) : EntityAbstractContainerClient(
-        "vanilla.basics.entity.Anvil", world, pos,
-        Inventory(world.registry, 2)) {
+class EntityAnvilClient(type: EntityType<*, *>,
+                        world: WorldClient) : EntityAbstractContainerClient(
+        type, world, Vector3d.ZERO, Inventory(world.registry, 2)) {
 
     override fun gui(player: MobPlayerClientMain): Gui? {
         if (player is MobPlayerClientMainVB) {

@@ -25,6 +25,7 @@ import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.StoneType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.util.dropItem
 import java.util.*
 
 abstract class BlockOre protected constructor(materials: VanillaMaterial,
@@ -39,6 +40,9 @@ abstract class BlockOre protected constructor(materials: VanillaMaterial,
                          face: Face,
                          player: MobPlayerServer,
                          item: ItemStack): Boolean {
+        if (!super.destroy(terrain, x, y, z, data, face, player, item)) {
+            return false
+        }
         if ("Pickaxe" == item.material().toolType(item) && !canBeBroken(
                 item.material().toolLevel(item), data)) {
             drops(item, data).forEach {

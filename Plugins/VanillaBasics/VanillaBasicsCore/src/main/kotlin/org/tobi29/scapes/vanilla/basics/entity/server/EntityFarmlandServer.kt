@@ -22,18 +22,19 @@ import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.min
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.entity.server.EntityServer
+import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.entity.server.EntityAbstractServer
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.CropType
 
-class EntityFarmlandServer(world: WorldServer,
-                           pos: Vector3d = Vector3d.ZERO,
-                           private var nutrientA: Float = 0.0f,
-                           private var nutrientB: Float = 0.0f,
-                           private var nutrientC: Float = 0.0f) : EntityServer(
-        "vanilla.basics.entity.Farmland", world, pos) {
-    private var time = 0.0f
-    private var stage: Byte = 0
+class EntityFarmlandServer(type: EntityType<*, *>,
+                           world: WorldServer) : EntityAbstractServer(
+        type, world, Vector3d.ZERO) {
+    private var nutrientA = 0.0
+    private var nutrientB = 0.0
+    private var nutrientC = 0.0
+    private var time = 0.0
+    private var stage = 0.toByte()
     private var cropType: CropType? = null
     private var updateBlock = false
 
@@ -51,10 +52,10 @@ class EntityFarmlandServer(world: WorldServer,
 
     override fun read(map: TagMap) {
         super.read(map)
-        map["NutrientA"]?.toFloat()?.let { nutrientA = it }
-        map["NutrientB"]?.toFloat()?.let { nutrientB = it }
-        map["NutrientC"]?.toFloat()?.let { nutrientC = it }
-        map["Time"]?.toFloat()?.let { time = it }
+        map["NutrientA"]?.toDouble()?.let { nutrientA = it }
+        map["NutrientB"]?.toDouble()?.let { nutrientB = it }
+        map["NutrientC"]?.toDouble()?.let { nutrientC = it }
+        map["Time"]?.toDouble()?.let { time = it }
         map["Stage"]?.toByte()?.let { stage = it }
         if (map.containsKey("CropType")) {
             map["CropType"]?.toInt()?.let { cropType = CropType[registry, it] }
@@ -107,46 +108,49 @@ class EntityFarmlandServer(world: WorldServer,
 
     override fun tickSkip(oldTick: Long,
                           newTick: Long) {
-        growth(((newTick - oldTick) / 20.0f).toDouble())
+        growth((newTick - oldTick) / 20.0)
+    }
+
+    fun nourish(a: Double,
+                b: Double = a,
+                c: Double = b) {
+        nutrientA = min(nutrientA + a, 1.0)
+        nutrientB = min(nutrientB + b, 1.0)
+        nutrientC = min(nutrientC + c, 1.0)
     }
 
     fun seed(cropType: CropType) {
         this.cropType = cropType
         stage = 0
-        time = 0.0f
+        time = 0.0
     }
 
     private fun growth(delta: Double) {
-        nutrientA = min(nutrientA + 0.0000002 * delta, 1.0).toFloat()
-        nutrientB = min(nutrientB + 0.0000002 * delta, 1.0).toFloat()
-        nutrientC = min(nutrientC + 0.0000002 * delta, 1.0).toFloat()
+        nourish(0.0000002 * delta)
         val cropType = cropType
         if (cropType == null) {
             stage = 0
-            time = 0.0f
+            time = 0.0
         } else {
             if (stage < 8) {
                 when (cropType.nutrient) {
                     1 -> {
                         time += (nutrientB * delta).toFloat()
-                        nutrientB = max(nutrientB - 0.0000005 * delta,
-                                0.0).toFloat()
+                        nutrientB = max(nutrientB - 0.0000005 * delta, 0.0)
                     }
                     2 -> {
                         time += (nutrientC * delta).toFloat()
-                        nutrientC = max(nutrientC - 0.0000005 * delta,
-                                0.0).toFloat()
+                        nutrientC = max(nutrientC - 0.0000005 * delta, 0.0)
                     }
                     else -> {
                         time += (nutrientA * delta).toFloat()
-                        nutrientA = max(nutrientA - 0.0000005 * delta,
-                                0.0).toFloat()
+                        nutrientA = max(nutrientA - 0.0000005 * delta, 0.0)
                     }
                 }
                 while (time >= cropType.time) {
                     stage++
                     if (stage >= 8) {
-                        time = 0.0f
+                        time = 0.0
                         stage = 8
                     } else {
                         time -= cropType.time.toFloat()

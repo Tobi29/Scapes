@@ -19,7 +19,7 @@ package org.tobi29.scapes.entity.client
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.entity.WieldMode
 
-interface EntityEquippedClient {
+interface EntityEquippedClient : EntityClient {
     fun leftWeapon(): ItemStack
 
     fun rightWeapon(): ItemStack

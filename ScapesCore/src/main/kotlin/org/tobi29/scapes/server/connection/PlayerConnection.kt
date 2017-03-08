@@ -59,7 +59,7 @@ abstract class PlayerConnection(val server: ServerConnection) : PlayConnection<P
     override val listenerOwner = ListenerOwnerHandle { !isClosed }
 
     init {
-        registry = server.plugins.registry()
+        registry = server.plugins.registry
         events.listenerGlobal<MessageEvent>(this) { event ->
             if (event.level.level >= MessageLevel.CHAT.level) {
                 send(PacketChat(registry, event.message))
@@ -105,8 +105,8 @@ abstract class PlayerConnection(val server: ServerConnection) : PlayConnection<P
             }
             val spawnPos = Vector3d(spawnWorld.spawn + Vector3i(0, 0, 1))
             entity = spawnWorld.plugins.worldType.newPlayer(spawnWorld,
-                    spawnPos, Vector3d.ZERO, 0.0, 0.0, name(), skin().checksum,
-                    this)
+                    name(), skin().checksum, this)
+            entity.setPos(spawnPos)
             isNew = true
         }
         this.entity = entity

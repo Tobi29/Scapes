@@ -37,6 +37,7 @@ import org.tobi29.scapes.vanilla.basics.material.ItemFuel
 import org.tobi29.scapes.vanilla.basics.material.TreeType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
+import org.tobi29.scapes.vanilla.basics.util.dropItem
 
 class BlockLog(materials: VanillaMaterial,
                private val treeRegistry: GameRegistry.Registry<TreeType>) : VanillaBlock(
@@ -52,6 +53,9 @@ class BlockLog(materials: VanillaMaterial,
                          face: Face,
                          player: MobPlayerServer,
                          item: ItemStack): Boolean {
+        if (!super.destroy(terrain, x, y, z, data, face, player, item)) {
+            return false
+        }
         if ("Axe" == item.material().toolType(item)) {
             destroy(terrain, Vector3i(x, y, z), data, 512, player, z)
         }

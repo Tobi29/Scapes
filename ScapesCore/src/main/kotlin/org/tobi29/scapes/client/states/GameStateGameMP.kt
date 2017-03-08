@@ -116,7 +116,7 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         client.plugins.init()
         client.plugins.plugins.forEach { it.initClient(this) }
         var time = System.currentTimeMillis()
-        val registry = client.plugins.registry()
+        val registry = client.plugins.registry
         for (type in registry.materials()) {
             type?.registerTextures(terrainTextureRegistry)
         }

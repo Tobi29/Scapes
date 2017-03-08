@@ -34,15 +34,15 @@ import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.PointerPane
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.entity.server.EntityContainerServer
-import org.tobi29.scapes.entity.server.MobFlyingBlockServer
+import org.tobi29.scapes.vanilla.basics.entity.client.EntityAnvilClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityAnvilServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer
 import java.util.*
 
-class BlockAnvil(materials: VanillaMaterial) : VanillaBlockContainer(materials,
-        "vanilla.basics.block.Anvil") {
+class BlockAnvil(materials: VanillaMaterial) : VanillaBlockContainer<EntityAnvilClient, EntityAnvilServer>(
+        materials, "vanilla.basics.block.Anvil",
+        materials.plugin.entityTypes.anvil) {
     private var texture: TerrainTexture? = null
     private var model: BlockModel? = null
 
@@ -139,23 +139,15 @@ class BlockAnvil(materials: VanillaMaterial) : VanillaBlockContainer(materials,
                         z: Int,
                         data: Int) {
         if (!terrain.type(x, y, z - 1).isSolid(terrain, x, y, z - 1)) {
-            val entity = MobFlyingBlockServer(terrain.world,
-                    Vector3d(x + 0.5, y + 0.5, z + 0.5), Vector3d.ZERO,
-                    this, data)
+            val entity = materials.plugin.entityTypes.flyingBlock.createServer(
+                    terrain.world).apply {
+                setPos(Vector3d(x + 0.5, y + 0.5, z + 0.5))
+                setType(ItemStack(this@BlockAnvil, data))
+            }
             terrain.world.addEntityNew(entity)
             terrain.typeData(x, y, z, terrain.air,
                     0.toShort().toInt())
         }
-    }
-
-    override fun placeEntity(terrain: TerrainServer,
-                             x: Int,
-                             y: Int,
-                             z: Int): EntityContainerServer {
-        val entity = EntityAnvilServer(terrain.world,
-                Vector3d(x + 0.5, y + 0.5, z + 0.5))
-        terrain.world.addEntityNew(entity)
-        return entity
     }
 
     override fun registerTextures(registry: TerrainTextureRegistry) {

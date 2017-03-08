@@ -16,7 +16,7 @@
 package org.tobi29.scapes.server.format.sql
 
 import mu.KLogging
-import org.tobi29.scapes.engine.sql.SQLDatabase
+import org.tobi29.scapes.engine.sql.*
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream
 import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
@@ -27,18 +27,12 @@ import org.tobi29.scapes.server.format.PlayerData
 import java.io.IOException
 import java.nio.ByteBuffer
 
-class SQLPlayerData(database: SQLDatabase,
-                    table: String) : PlayerData {
+class SQLPlayerData(private val getPlayer: SQLQuery,
+                    private val insertPlayer: SQLInsert,
+                    private val replacePlayer: SQLReplace,
+                    private val deletePlayer: SQLDelete,
+                    private val checkPlayer: SQLQuery) : PlayerData {
     private val stream = ByteBufferStream()
-    private val getPlayer = database.compileQuery(table,
-            arrayOf("World", "Permissions", "Entity"), "ID")
-    private val insertPlayer = database.compileInsert(table,
-            "ID", "Permissions")
-    private val replacePlayer = database.compileReplace(table, "ID",
-            "World", "Permissions", "Entity")
-    private val deletePlayer = database.compileDelete(table, "ID")
-    private val checkPlayer = database.compileQuery(table,
-            arrayOf("1"), "ID")
 
     @Synchronized override fun player(id: String): PlayerEntry {
         var permissions = 0

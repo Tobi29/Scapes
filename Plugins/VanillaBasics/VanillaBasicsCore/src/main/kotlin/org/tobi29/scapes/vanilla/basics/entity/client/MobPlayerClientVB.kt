@@ -25,28 +25,21 @@ import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.WieldMode
 import org.tobi29.scapes.entity.client.EntityContainerClient
 import org.tobi29.scapes.entity.client.MobPlayerClient
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.model.MobLivingModelHuman
 
-class MobPlayerClientVB constructor(world: WorldClient,
-                                    pos: Vector3d = Vector3d.ZERO,
-                                    speed: Vector3d = Vector3d.ZERO,
-                                    xRot: Double = 0.0,
-                                    zRot: Double = 0.0,
-                                    nickname: String = "") : MobPlayerClient(
-        world, pos, speed, AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 100.0, 100.0,
-        nickname), EntityContainerClient {
-    private val inventories: InventoryContainer
-
-    init {
-        inventories = InventoryContainer()
-        inventories.add("Container", Inventory(registry, 40))
-        inventories.add("Hold", Inventory(registry, 1))
-        rot.setX(xRot)
-        rot.setZ(zRot)
+class MobPlayerClientVB(type: EntityType<*, *>,
+                        world: WorldClient) : MobPlayerClient(
+        type, world, Vector3d.ZERO, Vector3d.ZERO,
+        AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 100.0, 100.0,
+        ""), EntityContainerClient {
+    private val inventories = InventoryContainer().apply {
+        add("Container", Inventory(registry, 40))
+        add("Hold", Inventory(registry, 1))
     }
 
     override fun leftWeapon(): ItemStack {

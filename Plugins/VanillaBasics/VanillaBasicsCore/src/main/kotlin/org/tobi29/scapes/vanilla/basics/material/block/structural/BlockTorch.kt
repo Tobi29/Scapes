@@ -38,6 +38,7 @@ import org.tobi29.scapes.engine.utils.math.vector.plus
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
+import org.tobi29.scapes.vanilla.basics.util.dropItems
 import java.util.*
 
 class BlockTorch(materials: VanillaMaterial) : VanillaBlock(materials,
@@ -79,6 +80,9 @@ class BlockTorch(materials: VanillaMaterial) : VanillaBlock(materials,
                        z: Int,
                        face: Face,
                        player: MobPlayerServer): Boolean {
+        if (!super.place(terrain, x, y, z, face, player)) {
+            return false
+        }
         val ground = face.opposite.delta.plus(Vector3i(x, y, z))
         val flag = terrain.type(ground.x, ground.y,
                 ground.z).isSolid(terrain, ground.x, ground.y,

@@ -31,7 +31,7 @@ class TerrainInfiniteChunkClient(pos: Vector2i,
                                  val terrain2: TerrainInfiniteClient,
                                  zSize: Int,
                                  renderer: TerrainInfiniteRenderer) : TerrainInfiniteChunk<EntityClient>(
-        pos, terrain2, zSize, terrain2.world.registry.blocks()) {
+        pos, terrain2, zSize) {
     private val rendererChunk: TerrainInfiniteRendererChunk
     private val requested = AtomicBoolean(false)
 

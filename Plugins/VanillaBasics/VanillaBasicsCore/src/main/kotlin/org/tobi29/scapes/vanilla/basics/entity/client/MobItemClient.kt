@@ -14,30 +14,34 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.entity.client
+package org.tobi29.scapes.vanilla.basics.entity.client
 
+import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.utils.io.tag.TagMap
-import org.tobi29.scapes.engine.utils.io.tag.toDouble
+import org.tobi29.scapes.engine.utils.io.tag.toMap
+import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.entity.model.EntityModel
-import org.tobi29.scapes.entity.model.EntityModelBlockBreak
+import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.entity.client.MobClient
+import org.tobi29.scapes.entity.model.MobModelItem
 
-class EntityBlockBreakClient(world: WorldClient,
-                             pos: Vector3d = Vector3d.ZERO) : EntityClient(
-        "core.entity.BlockBreak", world, pos) {
-    private var progress = 0.0
+class MobItemClient(type: EntityType<*, *>,
+                    world: WorldClient) : MobClient(
+        type, world, Vector3d.ZERO, Vector3d.ZERO,
+        AABB(-0.2, -0.2, -0.2, 0.2, 0.2, 0.2)) {
+    private val item = ItemStack(world.registry)
 
     override fun read(map: TagMap) {
         super.read(map)
-        map["Progress"]?.toDouble()?.let { progress = it }
+        map["Inventory"]?.toMap()?.let { item.read(it) }
     }
 
-    override fun createModel(): EntityModel? {
-        return EntityModelBlockBreak(world.game.modelBlockBreakShared(), this)
+    override fun createModel(): MobModelItem? {
+        return MobModelItem(this, item)
     }
 
-    fun progress(): Double {
-        return progress
+    fun item(): ItemStack {
+        return item
     }
 }

@@ -35,7 +35,7 @@ class Inventory(private val registry: GameRegistry,
 
     fun add(add: ItemStack): Int {
         for (item in items) {
-            if (item.canStack(add) > 0 && item.material() !== registry.air()) {
+            if (item.canStack(add) > 0 && item.material() !== registry.air) {
                 add.setAmount(add.amount() - item.stack(add))
                 if (add.amount() <= 0) {
                     return add.amount()

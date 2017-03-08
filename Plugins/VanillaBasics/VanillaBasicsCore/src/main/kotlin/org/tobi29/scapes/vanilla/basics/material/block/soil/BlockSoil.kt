@@ -19,7 +19,6 @@ package org.tobi29.scapes.vanilla.basics.material.block.soil
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.entity.server.MobFlyingBlockServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
 import java.util.concurrent.ThreadLocalRandom
@@ -93,12 +92,14 @@ abstract class BlockSoil protected constructor(materials: VanillaMaterial,
             flag = true
         }
         if (sides > 2 && flag) {
-            terrain.world.addEntity(MobFlyingBlockServer(terrain.world,
-                    Vector3d(x.toDouble() + xx.toDouble() + 0.5,
-                            y.toDouble() + yy.toDouble() + 0.5, z + 0.5),
-                    Vector3d(0.0, 0.0, -1.0), this, data))
-            terrain.typeData(x, y, z, terrain.air,
-                    0.toShort().toInt())
+            terrain.world.addEntityNew(
+                    materials.plugin.entityTypes.flyingBlock.createServer(
+                            terrain.world).apply {
+                        setPos(Vector3d(x + xx + 0.5, y + yy + 0.5, z + 0.5))
+                        setSpeed(Vector3d(0.0, 0.0, -1.0))
+                        setType(ItemStack(this@BlockSoil, data))
+                    })
+            terrain.typeData(x, y, z, terrain.air, 0)
         }
     }
 

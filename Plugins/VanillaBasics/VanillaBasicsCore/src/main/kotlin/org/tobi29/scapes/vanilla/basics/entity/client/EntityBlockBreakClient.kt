@@ -16,23 +16,30 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.client
 
-import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.gui.Gui
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.toDouble
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
-import org.tobi29.scapes.entity.client.MobPlayerClientMain
-import org.tobi29.scapes.vanilla.basics.gui.GuiQuernInventory
+import org.tobi29.scapes.entity.client.EntityAbstractClient
+import org.tobi29.scapes.entity.model.EntityModel
+import org.tobi29.scapes.vanilla.basics.entity.model.EntityModelBlockBreak
 
-class EntityQuernClient(type: EntityType<*, *>,
-                        world: WorldClient) : EntityAbstractContainerClient(
-        type, world, Vector3d.ZERO,
-        Inventory(world.registry, 2)) {
+class EntityBlockBreakClient(type: EntityType<*, *>,
+                             world: WorldClient) : EntityAbstractClient(
+        type, world, Vector3d.ZERO) {
+    private var progress = 0.0
 
-    override fun gui(player: MobPlayerClientMain): Gui? {
-        if (player is MobPlayerClientMainVB) {
-            return GuiQuernInventory(this, player, player.game.engine.guiStyle)
-        }
-        return null
+    override fun read(map: TagMap) {
+        super.read(map)
+        map["Progress"]?.toDouble()?.let { progress = it }
+    }
+
+    override fun createModel(): EntityModel? {
+        return EntityModelBlockBreak(world.game.modelBlockBreakShared(), this)
+    }
+
+    fun progress(): Double {
+        return progress
     }
 }

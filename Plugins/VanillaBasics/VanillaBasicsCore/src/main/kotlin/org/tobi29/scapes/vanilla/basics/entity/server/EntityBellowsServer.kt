@@ -16,33 +16,37 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.server
 
+import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.WorldServer
+import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.io.tag.*
+import org.tobi29.scapes.engine.utils.io.tag.ReadWriteTagMap
+import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.tag.set
+import org.tobi29.scapes.engine.utils.io.tag.toDouble
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.entity.server.EntityServer
+import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.entity.server.EntityAbstractServer
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 
-class EntityBellowsServer(world: WorldServer,
-                          pos: Vector3d = Vector3d.ZERO,
-                          face: Face = Face.NONE) : EntityServer(
-        "vanilla.basics.entity.Bellows", world, pos) {
-    var face: Face = face
-        private set
+class EntityBellowsServer(type: EntityType<*, *>,
+                          world: WorldServer) : EntityAbstractServer(
+        type, world, Vector3d.ZERO) {
+    private val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
+    val face get() = parseFace(world.terrain, pos.intX(), pos.intY(),
+            pos.intZ(), plugin.materials.bellows)
     var scale = 0.0
         private set
 
     override fun write(map: ReadWriteTagMap) {
         super.write(map)
         map["Scale"] = scale
-        map["Face"] = face.data
     }
 
     override fun read(map: TagMap) {
         super.read(map)
         map["Scale"]?.toDouble()?.let { scale = it }
-        map["Face"]?.toInt()?.let { face = Face[it] }
     }
 
     override fun update(delta: Double) {
@@ -55,11 +59,25 @@ class EntityBellowsServer(world: WorldServer,
                             z: Int,
                             data: Int) {
         val world = terrain.world
-        val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
         val materials = plugin.materials
         if (terrain.type(pos.intX(), pos.intY(),
                 pos.intZ()) !== materials.bellows) {
             world.removeEntity(this)
+        }
+    }
+
+    companion object {
+        fun parseFace(terrain: Terrain,
+                      x: Int,
+                      y: Int,
+                      z: Int,
+                      type: BlockType): Face {
+            val block = terrain.block(x, y, z)
+            if (terrain.type(block) != type) {
+                return Face.NONE
+            }
+            val data = terrain.data(block)
+            return Face[data]
         }
     }
 }

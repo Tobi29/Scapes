@@ -18,8 +18,9 @@ package org.tobi29.scapes.vanilla.basics.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.entity.client.EntityClient
+import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.entity.client.EntityAbstractClient
 
-class EntityFarmlandClient(world: WorldClient,
-                           pos: Vector3d = Vector3d.ZERO) : EntityClient(
-        "vanilla.basics.entity.Farmland", world, pos)
+class EntityFarmlandClient(type: EntityType<*, *>,
+                           world: WorldClient) : EntityAbstractClient(
+        type, world, Vector3d.ZERO)

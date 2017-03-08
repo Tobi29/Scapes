@@ -16,85 +16,71 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
+import org.tobi29.scapes.engine.utils.StampLock
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.entity.client.EntityClient
 import java.util.*
-import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.AtomicInteger
 
 class TerrainInfiniteChunkManagerClient(private val radius: Int) : TerrainInfiniteChunkManager<EntityClient> {
     private val size: Int
     private val array: Array<TerrainInfiniteChunkClient?>
-    private val lock = AtomicLong()
-    private var x = 0
-    private var y = 0
+    private val lock = StampLock()
+    private val x = AtomicInteger()
+    private val y = AtomicInteger()
 
     init {
         size = (radius shl 1) + 1
         array = arrayOfNulls<TerrainInfiniteChunkClient>(size * size)
     }
 
-    @Synchronized fun add(chunk: TerrainInfiniteChunkClient) {
-        val xx = chunk.pos.x - x
-        val yy = chunk.pos.y - y
-        if (xx in 0..(size - 1) && yy >= 0 && yy < size) {
-            val i = yy * size + xx
-            array[i] = chunk
+    fun add(chunk: TerrainInfiniteChunkClient) {
+        lock.write {
+            val xx = chunk.pos.x - x.get()
+            val yy = chunk.pos.y - y.get()
+            if (xx in 0..(size - 1) && yy >= 0 && yy < size) {
+                val i = yy * size + xx
+                array[i] = chunk
+            }
         }
     }
 
-    @Synchronized fun remove(x: Int,
-                             y: Int): TerrainInfiniteChunkClient? {
-        val xx = x - this.x
-        val yy = y - this.y
-        if (xx in 0..(size - 1) && yy >= 0 && yy < size) {
-            val i = yy * size + xx
-            val chunk = array[i]
-            if (chunk != null) {
-                assert(chunk.pos.x == x)
-                assert(chunk.pos.y == y)
-                array[i] = null
-                return chunk
+    fun remove(x: Int,
+               y: Int): TerrainInfiniteChunkClient? {
+        lock.write {
+            val xx = x - this.x.get()
+            val yy = y - this.y.get()
+            if (xx in 0..(size - 1) && yy >= 0 && yy < size) {
+                val i = yy * size + xx
+                val chunk = array[i]
+                if (chunk != null) {
+                    assert(chunk.pos.x == x)
+                    assert(chunk.pos.y == y)
+                    array[i] = null
+                    return chunk
+                }
             }
+            return null
         }
-        return null
     }
 
     override fun get(x: Int,
                      y: Int): TerrainInfiniteChunkClient? {
-        val stamp = lock.get()
-        run {
-            val xx = x - this.x
-            val yy = y - this.y
+        val value = lock.read {
+            val xx = x - this.x.get()
+            val yy = y - this.y.get()
             if (xx in 0..(size - 1) && yy >= 0 && yy < size) {
                 val i = yy * size + xx
-                val value = array[i]
-                val validate = lock.get()
-                if (stamp == validate && validate and 1L == 0L) {
-                    if (value != null) {
-                        assert(value.pos.x == x)
-                        assert(value.pos.y == y)
-                    }
-                    return value
-                }
+                array[i]
             } else {
-                return null
+                null
             }
         }
-        synchronized(this) {
-            val xx = x - this.x
-            val yy = y - this.y
-            if (xx in 0..(size - 1) && yy >= 0 && yy < size) {
-                val i = yy * size + xx
-                val value = array[i]
-                if (value != null) {
-                    assert(value.pos.x == x)
-                    assert(value.pos.y == y)
-                }
-                return value
-            } else {
-                return null
-            }
+        value?.let {
+            assert(value.pos.x == x)
+            assert(value.pos.y == y)
         }
+        return value
     }
 
     override fun has(x: Int,
@@ -111,10 +97,9 @@ class TerrainInfiniteChunkManagerClient(private val radius: Int) : TerrainInfini
                            removed: (TerrainInfiniteChunkClient) -> Unit): Boolean {
         val xx = x - radius
         val yy = y - radius
-        if (xx != this.x || yy != this.y) {
-            synchronized(this) {
-                lock.incrementAndGet()
-                var xDiff = this.x - xx
+        if (xx != this.x.get() || yy != this.y.get()) {
+            lock.write {
+                var xDiff = this.x.get() - xx
                 val xDiffAbs = abs(xDiff)
                 if (xDiffAbs > 0) {
                     if (xDiffAbs > size) {
@@ -128,9 +113,9 @@ class TerrainInfiniteChunkManagerClient(private val radius: Int) : TerrainInfini
                             shiftXNegative(removed)
                         }
                     }
-                    this.x = xx
+                    this.x.set(xx)
                 }
-                var yDiff = this.y - yy
+                var yDiff = this.y.get() - yy
                 val yDiffAbs = abs(yDiff)
                 if (yDiffAbs > 0) {
                     if (yDiffAbs > size) {
@@ -144,9 +129,8 @@ class TerrainInfiniteChunkManagerClient(private val radius: Int) : TerrainInfini
                             shiftYNegative(removed)
                         }
                     }
-                    this.y = yy
+                    this.y.set(yy)
                 }
-                lock.incrementAndGet()
             }
             return true
         }

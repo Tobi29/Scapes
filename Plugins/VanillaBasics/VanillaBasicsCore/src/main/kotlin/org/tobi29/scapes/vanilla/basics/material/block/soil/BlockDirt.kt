@@ -28,12 +28,10 @@ import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.server.MobPlayerServer
-import org.tobi29.scapes.vanilla.basics.entity.server.EntityFarmlandServer
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.world.ClimateInfoLayer
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentClimate
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 
 class BlockDirt(materials: VanillaMaterial) : BlockSoil(materials,
         "vanilla.basics.block.Dirt") {
@@ -82,10 +80,12 @@ class BlockDirt(materials: VanillaMaterial) : BlockSoil(materials,
                          face: Face,
                          player: MobPlayerServer,
                          item: ItemStack): Boolean {
+        if (!super.destroy(terrain, x, y, z, data, face, player, item)) {
+            return false
+        }
         if ("Hoe" == item.material().toolType(item)) {
             terrain.type(x, y, z, materials.farmland)
-            terrain.world.addEntity(EntityFarmlandServer(terrain.world,
-                    Vector3d(x + 0.5, y + 0.5, z + 0.5), 0.1f, 0.1f, 0.1f))
+            materials.farmland.getEntity(terrain, x, y, z).nourish(0.1)
             return false
         }
         return true

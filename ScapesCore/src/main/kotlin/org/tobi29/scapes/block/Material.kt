@@ -23,8 +23,8 @@ import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
 
-abstract class Material protected constructor(protected val registry: GameRegistry,
-                                              protected val nameID: String) {
+abstract class Material(protected val registry: GameRegistry,
+                        protected val nameID: String) {
     var id = 0
 
     open fun example(data: Int): ItemStack {

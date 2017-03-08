@@ -20,12 +20,12 @@ import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 
-class EntityAnvilServer(world: WorldServer,
-                        pos: Vector3d = Vector3d.ZERO) : EntityAbstractContainerServer(
-        "vanilla.basics.entity.Anvil", world, pos,
-        Inventory(world.registry, 2)) {
+class EntityAnvilServer(type: EntityType<*, *>,
+                        world: WorldServer) : EntityAbstractContainerServer(
+        type, world, Vector3d.ZERO, Inventory(world.registry, 2)) {
 
     public override fun isValidOn(terrain: TerrainServer,
                                   x: Int,

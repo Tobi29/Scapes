@@ -30,17 +30,13 @@ import org.tobi29.scapes.engine.utils.math.vector.*
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.WieldMode
 import org.tobi29.scapes.entity.server.EntityContainerServer
-import org.tobi29.scapes.entity.server.MobItemServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
 import org.tobi29.scapes.packets.PacketEntityMetaData
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.extension.event.MessageEvent
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
-import org.tobi29.scapes.vanilla.basics.entity.server.EntityTornadoServer
-import org.tobi29.scapes.vanilla.basics.entity.server.MobPigServer
-import org.tobi29.scapes.vanilla.basics.entity.server.MobSkeletonServer
-import org.tobi29.scapes.vanilla.basics.entity.server.MobZombieServer
+import org.tobi29.scapes.vanilla.basics.entity.server.MobItemServer
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator
 import org.tobi29.scapes.vanilla.basics.generator.TerrainGenerator
@@ -116,9 +112,11 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                                y: Int,
                                z: Int): MobServer {
                 val random = ThreadLocalRandom.current()
-                return MobZombieServer(terrain.world,
-                        Vector3d(x + 0.5, y + 0.5, z + 1.0), Vector3d.ZERO,
-                        0.0, random.nextDouble() * 360.0)
+                return plugin.entityTypes.zombie.createServer(
+                        terrain.world).apply {
+                    setPos(Vector3d(x + 0.5, y + 0.5, z + 1.0))
+                    setRot(Vector3d(0.0, 0.0, random.nextDouble() * 360.0))
+                }
             }
 
             override fun creatureType(): CreatureType {
@@ -165,9 +163,11 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                                y: Int,
                                z: Int): MobServer {
                 val random = ThreadLocalRandom.current()
-                return MobSkeletonServer(terrain.world,
-                        Vector3d(x + 0.5, y + 0.5, z + 1.0), Vector3d.ZERO,
-                        0.0, random.nextDouble() * 360.0)
+                return plugin.entityTypes.skeleton.createServer(
+                        terrain.world).apply {
+                    setPos(Vector3d(x + 0.5, y + 0.5, z + 1.0))
+                    setRot(Vector3d(0.0, 0.0, random.nextDouble() * 360.0))
+                }
             }
 
             override fun creatureType(): CreatureType {
@@ -207,9 +207,11 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                                y: Int,
                                z: Int): MobServer {
                 val random = ThreadLocalRandom.current()
-                return MobPigServer(terrain.world,
-                        Vector3d(x + 0.5, y + 0.5, z + 0.6875),
-                        Vector3d.ZERO, 0.0, random.nextDouble() * 360.0)
+                return plugin.entityTypes.pig.createServer(
+                        terrain.world).apply {
+                    setPos(Vector3d(x + 0.5, y + 0.5, z + 0.6875))
+                    setRot(Vector3d(0.0, 0.0, random.nextDouble() * 360.0))
+                }
             }
 
             override fun creatureType(): CreatureType {
@@ -250,9 +252,9 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                     itemUpdateWait -= delta
                     while (itemUpdateWait <= 0.0) {
                         itemUpdateWait += 1.0
-                        val type = entity.item().material()
+                        val type = entity.item.material()
                         if (type is ItemHeatable) {
-                            type.heat(entity.item(), temperature, 20.0)
+                            type.heat(entity.item, temperature, 20.0)
                         }
                     }
                 })
@@ -465,11 +467,13 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                 } else if (random.nextInt(
                         (513.0 - weather * 512.0).toInt()) == 0 &&
                         random.nextInt(10000) == 0 && weather > 0.85) {
-                    val entity = EntityTornadoServer(world,
-                            Vector3d(x.toDouble(), y.toDouble(),
-                                    terrain.highestTerrainBlockZAt(x,
-                                            y).toDouble()))
-                    world.addEntityNew(entity)
+                    world.addEntityNew(
+                            materials.plugin.entityTypes.tornado.createServer(
+                                    world).apply {
+                                setPos(Vector3d(x.toDouble(), y.toDouble(),
+                                        terrain.highestTerrainBlockZAt(x,
+                                                y).toDouble()))
+                            })
                 }
             })
         }

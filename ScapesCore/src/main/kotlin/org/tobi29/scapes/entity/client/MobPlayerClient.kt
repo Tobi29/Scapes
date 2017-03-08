@@ -23,15 +23,17 @@ import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.CreatureType
+import org.tobi29.scapes.entity.EntityType
 
-abstract class MobPlayerClient(world: WorldClient,
+abstract class MobPlayerClient(type: EntityType<*, *>,
+                               world: WorldClient,
                                pos: Vector3d,
                                speed: Vector3d,
                                aabb: AABB,
                                lives: Double,
                                maxLives: Double,
                                protected var nickname: String) : MobLivingEquippedClient(
-        "core.mob.Player", world, pos, speed, aabb, lives, maxLives) {
+        type, world, pos, speed, aabb, lives, maxLives) {
     var inventorySelectLeft = 0
     var inventorySelectRight = 9
     protected var skin: Checksum? = null

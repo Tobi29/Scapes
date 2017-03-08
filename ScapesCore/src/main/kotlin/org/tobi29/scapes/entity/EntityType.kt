@@ -21,9 +21,11 @@ import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.entity.server.EntityServer
 
-class EntityType(val id: Int,
-                 private val client: (WorldClient) -> EntityClient,
-                 private val server: (WorldServer) -> EntityServer) {
-    fun createClient(world: WorldClient) = client(world)
-    fun createServer(world: WorldServer) = server(world)
+class EntityType<out C : EntityClient, out S : EntityServer>(
+        val id: Int,
+        private val client: (EntityType<C, S>, WorldClient) -> C,
+        private val server: (EntityType<C, S>, WorldServer) -> S
+) {
+    fun createClient(world: WorldClient) = client(this, world)
+    fun createServer(world: WorldServer) = server(this, world)
 }

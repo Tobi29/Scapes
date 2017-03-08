@@ -17,7 +17,9 @@
 package org.tobi29.scapes.server.format.sql
 
 import mu.KLogging
-import org.tobi29.scapes.engine.sql.SQLDatabase
+import org.tobi29.scapes.engine.sql.SQLQuery
+import org.tobi29.scapes.engine.sql.SQLReplace
+import org.tobi29.scapes.engine.sql.invoke
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream
 import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
@@ -28,14 +30,9 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.util.*
 
-class SQLTerrainInfiniteFormat(database: SQLDatabase,
-                               table: String,
-                               private val world: String) : TerrainInfiniteFormat {
+class SQLTerrainInfiniteFormat(private val getChunk: SQLQuery,
+                               private val replaceChunk: SQLReplace) : TerrainInfiniteFormat {
     private val stream = ByteBufferStream(growth = { it + 1048576 })
-    private val getChunk = database.compileQuery(table, arrayOf("Data"),
-            "World", "X", "Y")
-    private val replaceChunk = database.compileReplace(table, "World", "X", "Y",
-            "Data")
 
     @Synchronized override fun chunkTags(chunks: List<Vector2i>): List<TagMap?> {
         val maps = ArrayList<TagMap?>(chunks.size)
@@ -59,7 +56,7 @@ class SQLTerrainInfiniteFormat(database: SQLDatabase,
             stream.buffer().flip()
             val array = ByteArray(stream.buffer().remaining())
             stream.buffer().get(array)
-            values.add(arrayOf<Any>(world, chunk.first.x, chunk.first.y, array))
+            values.add(arrayOf(chunk.first.x, chunk.first.y, array))
             if (values.size >= 64) {
                 replaceChunk(*values.toTypedArray())
                 values.clear()
@@ -75,7 +72,7 @@ class SQLTerrainInfiniteFormat(database: SQLDatabase,
 
     private fun chunkTag(x: Int,
                          y: Int): TagMap? {
-        val rows = getChunk(world, x, y)
+        val rows = getChunk(x, y)
         if (!rows.isEmpty()) {
             val row = rows[0]
             if (row[0] is ByteArray) {

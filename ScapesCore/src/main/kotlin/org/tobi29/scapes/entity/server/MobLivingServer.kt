@@ -29,6 +29,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.plus
 import org.tobi29.scapes.engine.utils.math.vector.xz
 import org.tobi29.scapes.entity.CreatureType
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.ai.AI
 import org.tobi29.scapes.entity.ai.SimpleAI
 import org.tobi29.scapes.entity.getEntities
@@ -36,7 +37,7 @@ import org.tobi29.scapes.packets.PacketMobDamage
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-abstract class MobLivingServer(id: String,
+abstract class MobLivingServer(type: EntityType<*, *>,
                                world: WorldServer,
                                pos: Vector3d,
                                speed: Vector3d,
@@ -44,8 +45,8 @@ abstract class MobLivingServer(id: String,
                                protected var health: Double,
                                protected var maxHealth: Double,
                                protected val viewField: Frustum,
-                               protected val hitField: Frustum) : MobServer(id,
-        world, pos, speed, aabb) {
+                               protected val hitField: Frustum) : MobServer(
+        type, world, pos, speed, aabb) {
     protected val noticeListeners: MutableMap<String, (MobServer) -> Unit> = ConcurrentHashMap()
     protected val jumpListeners: MutableMap<String, () -> Unit> = ConcurrentHashMap()
     protected val healListeners: MutableMap<String, (Double) -> Unit> = ConcurrentHashMap()

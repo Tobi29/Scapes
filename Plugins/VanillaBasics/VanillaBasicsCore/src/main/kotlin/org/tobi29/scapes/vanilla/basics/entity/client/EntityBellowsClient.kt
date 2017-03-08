@@ -19,27 +19,26 @@ package org.tobi29.scapes.vanilla.basics.entity.client
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.engine.utils.io.tag.toDouble
-import org.tobi29.scapes.engine.utils.io.tag.toInt
-import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.entity.client.EntityClient
+import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.entity.client.EntityAbstractClient
 import org.tobi29.scapes.entity.model.EntityModel
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.entity.model.EntityModelBellows
+import org.tobi29.scapes.vanilla.basics.entity.server.EntityBellowsServer
 
-class EntityBellowsClient(world: WorldClient,
-                          pos: Vector3d = Vector3d.ZERO,
-                          face: Face = Face.NONE) : EntityClient(
-        "vanilla.basics.entity.Bellows", world, pos) {
-    var face: Face = face
-        private set
+class EntityBellowsClient(type: EntityType<*, *>,
+                          world: WorldClient) : EntityAbstractClient(
+        type, world, Vector3d.ZERO) {
+    private val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
+    val face get() = EntityBellowsServer.parseFace(world.terrain, pos.intX(),
+            pos.intY(), pos.intZ(), plugin.materials.bellows)
     var scale = 0.0
         private set
 
     override fun read(map: TagMap) {
         super.read(map)
         map["Scale"]?.toDouble()?.let { scale = it }
-        map["Face"]?.toInt()?.let { face = Face[it] }
     }
 
     override fun update(delta: Double) {

@@ -21,58 +21,63 @@ import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.vanilla.basics.entity.client.*
 import org.tobi29.scapes.vanilla.basics.entity.server.*
 
-internal fun registerEntities(registry: GameRegistry) {
-    registry.get<EntityType>("Core", "Entity").run {
-        reg("vanilla.basics.mob.Pig") {
-            EntityType(it, { MobPigClient(it) }, { MobPigServer(it) })
-        }
-        reg("vanilla.basics.mob.Zombie") {
-            EntityType(it, { MobZombieClient(it) }, { MobZombieServer(it) })
-        }
-        reg("vanilla.basics.mob.Skeleton") {
-            EntityType(it, { MobSkeletonClient(it) }, { MobSkeletonServer(it) })
-        }
-        reg("vanilla.basics.mob.Bomb") {
-            EntityType(it, { MobBombClient(it) }, { MobBombServer(it) })
-        }
-        reg("vanilla.basics.entity.Tornado") {
-            EntityType(it, { EntityTornadoClient(it) },
-                    { EntityTornadoServer(it) })
-        }
-        reg("vanilla.basics.entity.Alloy") {
-            EntityType(it, { EntityAlloyClient(it) }, { EntityAlloyServer(it) })
-        }
-        reg("vanilla.basics.entity.Anvil") {
-            EntityType(it, { EntityAnvilClient(it) }, { EntityAnvilServer(it) })
-        }
-        reg("vanilla.basics.entity.Bellows") {
-            EntityType(it, { EntityBellowsClient(it) },
-                    { EntityBellowsServer(it) })
-        }
-        reg("vanilla.basics.entity.Bloomery") {
-            EntityType(it, { EntityBloomeryClient(it) },
-                    { EntityBloomeryServer(it) })
-        }
-        reg("vanilla.basics.entity.Chest") {
-            EntityType(it, { EntityChestClient(it) }, { EntityChestServer(it) })
-        }
-        reg("vanilla.basics.entity.Forge") {
-            EntityType(it, { EntityForgeClient(it) }, { EntityForgeServer(it) })
-        }
-        reg("vanilla.basics.entity.Furnace") {
-            EntityType(it, { EntityFurnaceClient(it) },
-                    { EntityFurnaceServer(it) })
-        }
-        reg("vanilla.basics.entity.Quern") {
-            EntityType(it, { EntityQuernClient(it) }, { EntityQuernServer(it) })
-        }
-        reg("vanilla.basics.entity.ResearchTable") {
-            EntityType(it, { EntityResearchTableClient(it) },
-                    { EntityResearchTableServer(it) })
-        }
-        reg("vanilla.basics.entity.Farmland") {
-            EntityType(it, { EntityFarmlandClient(it) },
-                    { EntityFarmlandServer(it) })
-        }
+class VanillaBasicsEntities(reg: GameRegistry.Registry<EntityType<*, *>>) {
+    val player = reg("vanilla.basics.mob.Player") {
+        EntityType<MobPlayerClientVB, Nothing>(it, ::MobPlayerClientVB,
+                { _, _ -> throw UnsupportedOperationException() })
+    }
+    val blockBreak = reg("vanilla.basics.entity.BlockBreak") {
+        EntityType(it, ::EntityBlockBreakClient, ::EntityBlockBreakServer)
+    }
+    val item = reg("vanilla.basics.mob.Item") {
+        EntityType(it, ::MobItemClient, ::MobItemServer)
+    }
+    val flyingBlock = reg("vanilla.basics.mob.FlyingBlock") {
+        EntityType(it, ::MobFlyingBlockClient, ::MobFlyingBlockServer)
+    }
+    val pig = reg("vanilla.basics.mob.Pig") {
+        EntityType(it, ::MobPigClient, ::MobPigServer)
+    }
+    val zombie = reg("vanilla.basics.mob.Zombie") {
+        EntityType(it, ::MobZombieClient, ::MobZombieServer)
+    }
+    val skeleton = reg("vanilla.basics.mob.Skeleton") {
+        EntityType(it, ::MobSkeletonClient, ::MobSkeletonServer)
+    }
+    val bomb = reg("vanilla.basics.mob.Bomb") {
+        EntityType(it, ::MobBombClient, ::MobBombServer)
+    }
+    val tornado = reg("vanilla.basics.entity.Tornado") {
+        EntityType(it, ::EntityTornadoClient, ::EntityTornadoServer)
+    }
+    val alloy = reg("vanilla.basics.entity.Alloy") {
+        EntityType(it, ::EntityAlloyClient, ::EntityAlloyServer)
+    }
+    val anvil = reg("vanilla.basics.entity.Anvil") {
+        EntityType(it, ::EntityAnvilClient, ::EntityAnvilServer)
+    }
+    val bellows = reg("vanilla.basics.entity.Bellows") {
+        EntityType(it, ::EntityBellowsClient, ::EntityBellowsServer)
+    }
+    val bloomery = reg("vanilla.basics.entity.Bloomery") {
+        EntityType(it, ::EntityBloomeryClient, ::EntityBloomeryServer)
+    }
+    val chest = reg("vanilla.basics.entity.Chest") {
+        EntityType(it, ::EntityChestClient, ::EntityChestServer)
+    }
+    val forge = reg("vanilla.basics.entity.Forge") {
+        EntityType(it, ::EntityForgeClient, ::EntityForgeServer)
+    }
+    val furnace = reg("vanilla.basics.entity.Furnace") {
+        EntityType(it, ::EntityFurnaceClient, ::EntityFurnaceServer)
+    }
+    val quern = reg("vanilla.basics.entity.Quern") {
+        EntityType(it, ::EntityQuernClient, ::EntityQuernServer)
+    }
+    val researchTable = reg("vanilla.basics.entity.ResearchTable") {
+        EntityType(it, ::EntityResearchTableClient, ::EntityResearchTableServer)
+    }
+    val farmland = reg("vanilla.basics.entity.Farmland") {
+        EntityType(it, ::EntityFarmlandClient, ::EntityFarmlandServer)
     }
 }

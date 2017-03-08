@@ -29,20 +29,22 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.length
 import org.tobi29.scapes.entity.EntityPhysics
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.entity.particle.ParticleEmitterBlock
 import org.tobi29.scapes.packets.PacketInteraction
 import java.util.concurrent.ThreadLocalRandom
 
-abstract class MobPlayerClientMain(world: WorldClient,
+abstract class MobPlayerClientMain(type: EntityType<*, *>,
+                                   world: WorldClient,
                                    pos: Vector3d,
                                    speed: Vector3d,
                                    aabb: AABB,
                                    lives: Double,
                                    maxLives: Double,
                                    private val viewField: Frustum,
-                                   nickname: String) : MobPlayerClient(world,
-        pos, speed, aabb, lives, maxLives, nickname) {
+                                   nickname: String) : MobPlayerClient(type,
+        world, pos, speed, aabb, lives, maxLives, nickname) {
     val game = world.game
     protected lateinit var input: InputMode
     protected var flying = false

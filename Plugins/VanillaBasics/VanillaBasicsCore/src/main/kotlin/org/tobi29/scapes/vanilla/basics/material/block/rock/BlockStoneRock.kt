@@ -37,6 +37,7 @@ import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.StoneType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
+import org.tobi29.scapes.vanilla.basics.util.dropItems
 import java.util.*
 
 class BlockStoneRock(materials: VanillaMaterial,
@@ -88,6 +89,9 @@ class BlockStoneRock(materials: VanillaMaterial,
                        z: Int,
                        face: Face,
                        player: MobPlayerServer): Boolean {
+        if (!super.place(terrain, x, y, z, face, player)) {
+            return false
+        }
         return terrain.type(x, y, z - 1).isSolid(terrain, x, y, z - 1)
     }
 

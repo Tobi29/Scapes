@@ -18,6 +18,7 @@ package org.tobi29.scapes.chunk.terrain.infinite
 
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.block.BlockType
+import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.chunk.lighting.LightingEngine
 import org.tobi29.scapes.chunk.lighting.LightingEngineThreaded
 import org.tobi29.scapes.chunk.terrain.TerrainEntity
@@ -34,22 +35,15 @@ abstract class TerrainInfinite<E : Entity>(val zSize: Int,
                                            taskExecutor: TaskExecutor,
                                            override val air: BlockType,
                                            val voidBlock: BlockType,
-                                           protected val blocks: Array<BlockType?>) : TerrainEntity<E> {
+                                           override val registry: GameRegistry,
+                                           radius: Int = 0x8000000 - 16) : TerrainEntity<E> {
+    protected val blocks = registry.blocks()
     protected val entityMap: MutableMap<UUID, E> = ConcurrentHashMap()
-    protected val cxMin: Int
-    protected val cxMax: Int
-    protected val cyMin: Int
-    protected val cyMax: Int
-    protected val lighting: LightingEngine
-
-    init {
-        val radius = 0x8000000 - 16
-        cxMin = -radius + 1
-        cxMax = radius
-        cyMin = -radius + 1
-        cyMax = radius
-        lighting = LightingEngineThreaded(this, taskExecutor)
-    }
+    protected val cxMin = -radius + 1
+    protected val cxMax = radius
+    protected val cyMin = -radius + 1
+    protected val cyMax = radius
+    protected val lighting = LightingEngineThreaded(this, taskExecutor)
 
     override fun sunLight(x: Int,
                           y: Int,

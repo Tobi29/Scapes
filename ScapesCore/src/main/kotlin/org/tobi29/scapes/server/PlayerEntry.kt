@@ -18,12 +18,7 @@ package org.tobi29.scapes.server
 
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.io.tag.TagMap
-import org.tobi29.scapes.engine.utils.io.tag.set
-import org.tobi29.scapes.engine.utils.io.tag.toMutTag
-import org.tobi29.scapes.engine.utils.io.tag.toTag
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3i
-import org.tobi29.scapes.engine.utils.math.vector.plus
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.server.connection.PlayerConnection
 
@@ -44,14 +39,10 @@ class PlayerEntry(private val permissions: Int,
         if (spawnWorld == null) {
             return null
         }
-        val spawnPos = Vector3d(spawnWorld.spawn + Vector3i(0, 0, 1))
         val entity = spawnWorld.plugins.worldType.newPlayer(
-                spawnWorld, spawnPos, Vector3d.ZERO, 0.0, 0.0,
-                player.name(), player.skin().checksum, player)
-        val entityTag = pos?.let {
-            entityTag.toMutTag().apply { this["Pos"] = it }.toTag()
-        } ?: entityTag
+                spawnWorld, player.name(), player.skin().checksum, player)
         entity.read(entityTag)
+        pos?.let { entity.setPos(it) }
         return entity
     }
 

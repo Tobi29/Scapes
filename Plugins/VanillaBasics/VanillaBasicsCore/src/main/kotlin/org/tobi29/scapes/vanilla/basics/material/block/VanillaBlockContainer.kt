@@ -16,9 +16,76 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block
 
-import org.tobi29.scapes.block.BlockTypeContainer
+import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.engine.utils.math.Face
+import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.entity.client.EntityClient
+import org.tobi29.scapes.entity.client.EntityContainerClient
+import org.tobi29.scapes.entity.server.EntityContainerServer
+import org.tobi29.scapes.entity.server.EntityServer
+import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 
-abstract class VanillaBlockContainer(val materials: VanillaMaterial,
-                                     nameID: String) : BlockTypeContainer(
-        materials.registry, nameID)
+abstract class VanillaBlockEntity<out C : EntityClient, out S : EntityServer>(
+        materials: VanillaMaterial,
+        nameID: String,
+        val entity: EntityType<C, S>
+) : VanillaBlock(materials, nameID) {
+    override fun causesTileUpdate(): Boolean {
+        return true
+    }
+
+    override fun place(terrain: TerrainServer.TerrainMutable,
+                       x: Int,
+                       y: Int,
+                       z: Int,
+                       face: Face,
+                       player: MobPlayerServer): Boolean {
+        if (!super.place(terrain, x, y, z, face, player)) {
+            return false
+        }
+        getEntity(terrain, x, y, z)
+        return true
+    }
+
+    fun getEntity(terrain: TerrainServer,
+                  x: Int,
+                  y: Int,
+                  z: Int): S {
+        return terrain.getEntities(x, y, z).filter { it.type == entity }.map {
+            @Suppress("UNCHECKED_CAST")
+            it as S
+        }.firstOrNull() ?: run {
+            placeEntity(terrain, x, y, z)
+        }
+    }
+
+    protected fun placeEntity(terrain: TerrainServer,
+                              x: Int,
+                              y: Int,
+                              z: Int): S {
+        val entity = entity.createServer(
+                terrain.world).apply {
+            setPos(Vector3d(x + 0.5, y + 0.5, z + 0.5))
+        }
+        terrain.world.addEntityNew(entity)
+        return entity
+    }
+}
+
+abstract class VanillaBlockContainer<out C : EntityContainerClient, out S : EntityContainerServer>(
+        materials: VanillaMaterial,
+        nameID: String,
+        entity: EntityType<C, S>
+) : VanillaBlockEntity<C, S>(materials, nameID, entity) {
+    override fun click(terrain: TerrainServer,
+                       x: Int,
+                       y: Int,
+                       z: Int,
+                       face: Face,
+                       player: MobPlayerServer): Boolean {
+        player.openGui(getEntity(terrain, x, y, z))
+        return true
+    }
+}

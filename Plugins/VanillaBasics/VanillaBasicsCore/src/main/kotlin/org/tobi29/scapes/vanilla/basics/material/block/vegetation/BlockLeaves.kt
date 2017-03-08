@@ -41,6 +41,7 @@ import org.tobi29.scapes.vanilla.basics.material.TreeType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.block.CollisionLeaves
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
+import org.tobi29.scapes.vanilla.basics.util.dropItems
 import org.tobi29.scapes.vanilla.basics.world.ClimateInfoLayer
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentClimate
 import java.util.*
@@ -82,6 +83,9 @@ class BlockLeaves(materials: VanillaMaterial,
                          face: Face,
                          player: MobPlayerServer,
                          item: ItemStack): Boolean {
+        if (!super.destroy(terrain, x, y, z, data, face, player, item)) {
+            return false
+        }
         destroy(terrain, Vector3i(x, y, z), data, 256)
         return true
     }

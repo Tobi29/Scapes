@@ -28,34 +28,31 @@ import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.packets.PacketBlockChange
-import java.util.*
+import kotlin.coroutines.experimental.buildSequence
 
 class TerrainInfiniteClient(override val world: WorldClient,
                             loadingRadius: Int,
                             zSize: Int,
                             taskExecutor: TaskExecutor,
                             air: BlockType) : TerrainInfinite<EntityClient>(
-        zSize, taskExecutor, air, air, world.registry.blocks()), TerrainClient {
+        zSize, taskExecutor, air, air, world.registry), TerrainClient {
     override val renderer: TerrainInfiniteRenderer
     private val sortedLocations: List<Vector2i>
-    private val chunkManager: TerrainInfiniteChunkManagerClient
-    private val loadingRadiusSqr: Int
+    private val chunkManager = TerrainInfiniteChunkManagerClient(loadingRadius)
     private val joiner: Joiner
     private var requestedChunks = 0
 
     init {
-        loadingRadiusSqr = loadingRadius * loadingRadius
-        chunkManager = TerrainInfiniteChunkManagerClient(loadingRadius)
-        val locations = ArrayList<Vector2i>()
-        val loadingRadiusSqr = sqr(loadingRadius)
-        for (yy in -loadingRadius..loadingRadius) {
-            for (xx in -loadingRadius..loadingRadius) {
-                locations.add(Vector2i(xx, yy))
+        sortedLocations = buildSequence {
+            for (yy in -loadingRadius..loadingRadius) {
+                for (xx in -loadingRadius..loadingRadius) {
+                    yield(Vector2i(xx, yy))
+                }
             }
-        }
-        sortedLocations = locations.sortedBy { it.distanceSqr(Vector2i.ZERO) }
+        }.sortedBy { it.distanceSqr(Vector2i.ZERO) }.toList()
         renderer = TerrainInfiniteRenderer(this, loadingRadius.toDouble(),
                 sortedLocations)
+        val loadingRadiusSqr = sqr(loadingRadius)
         joiner = taskExecutor.runThread({ joiner ->
             while (!joiner.marked) {
                 var active = false
@@ -120,7 +117,7 @@ class TerrainInfiniteClient(override val world: WorldClient,
         val z = packet.z()
         chunkC(x shr 4, y shr 4) { chunk ->
             chunk.typeDataG(x, y, z,
-                    world.plugins.registry().block(packet.id()) ?: air,
+                    world.plugins.registry.block(packet.id()) ?: air,
                     packet.data())
         }
     }

@@ -20,22 +20,15 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.CreatureType
+import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.MobLivingClient
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.entity.model.MobLivingModelPig
 
-class MobPigClient(world: WorldClient,
-                   pos: Vector3d = Vector3d.ZERO,
-                   speed: Vector3d = Vector3d.ZERO,
-                   xRot: Double = 0.0,
-                   zRot: Double = 0.0) : MobLivingClient(
-        "vanilla.basics.mob.Pig", world, pos, speed,
+class MobPigClient(type: EntityType<*, *>,
+                   world: WorldClient) : MobLivingClient(
+        type, world, Vector3d.ZERO, Vector3d.ZERO,
         AABB(-0.45, -0.45, -0.6875, 0.45, 0.45, 0.375), 20.0, 30.0) {
-
-    init {
-        rot.setX(xRot)
-        rot.setZ(zRot)
-    }
 
     override fun creatureType(): CreatureType {
         return CreatureType.CREATURE
