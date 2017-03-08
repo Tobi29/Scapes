@@ -139,7 +139,7 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
 
             }
             this["WorldSource"] = TagMap {
-                this["ID"] = "Basic"
+                this["ID"] = "SQLite"
             }
             this["KeyManager"] = TagMap {
                 this["ID"] = "Dummy"
