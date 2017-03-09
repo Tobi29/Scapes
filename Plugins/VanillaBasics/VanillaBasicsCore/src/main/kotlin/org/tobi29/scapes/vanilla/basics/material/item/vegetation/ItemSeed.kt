@@ -32,7 +32,7 @@ class ItemSeed(materials: VanillaMaterial,
         materials, "vanilla.basics.item.Seed") {
     override fun click(entity: MobPlayerServer,
                        item: ItemStack,
-                       terrain: TerrainServer,
+                       terrain: TerrainServer.TerrainMutable,
                        x: Int,
                        y: Int,
                        z: Int,

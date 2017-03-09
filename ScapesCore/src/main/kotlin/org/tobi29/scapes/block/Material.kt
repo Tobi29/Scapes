@@ -37,7 +37,7 @@ abstract class Material(protected val registry: GameRegistry,
 
     open fun click(entity: MobPlayerServer,
                    item: ItemStack,
-                   terrain: TerrainServer,
+                   terrain: TerrainServer.TerrainMutable,
                    x: Int,
                    y: Int,
                    z: Int,

@@ -70,7 +70,7 @@ abstract class ItemMetalTool protected constructor(materials: VanillaMaterial,
 
     override fun click(entity: MobPlayerServer,
                        item: ItemStack,
-                       terrain: TerrainServer,
+                       terrain: TerrainServer.TerrainMutable,
                        x: Int,
                        y: Int,
                        z: Int,

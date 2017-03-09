@@ -23,7 +23,6 @@ import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.server.connection.PlayerConnection
 import java.io.IOException
 
@@ -76,7 +75,7 @@ class PacketItemUse : PacketAbstract, PacketServer {
             throw InvalidPacketDataException("Invalid direction!")
         }
         player.mob { mob ->
-            mob.inventories().modify("Container") { inventory ->
+            mob.inventories().modify("Container") {
                 val world = mob.world
                 val terrain = world.terrain
                 val item: ItemStack
@@ -91,30 +90,29 @@ class PacketItemUse : PacketAbstract, PacketServer {
                 mob.onPunch(strength)
                 val pane = mob.selectedBlock(direction)
                 if (pane != null) {
-                    val blockPos = Vector3i(pane.x, pane.y, pane.z)
+                    val x = pane.x
+                    val y = pane.y
+                    val z = pane.z
                     val face = pane.face
-                    val br = item.material().click(mob, item, terrain,
-                            blockPos.x,
-                            blockPos.y,
-                            blockPos.z, face)
                     var flag = false
                     if (strength < 0.6) {
-                        flag = terrain.type(blockPos.x, blockPos.y,
-                                blockPos.z).click(terrain, blockPos.x,
-                                blockPos.y,
-                                blockPos.z, face, mob)
+                        flag = terrain.type(x, y, z).click(terrain, x, y, z,
+                                face, mob)
                     }
-                    if (!flag && br > 0.0 && strength > 0.0) {
+                    if (!flag && strength > 0.0) {
                         world.taskExecutor.addTaskOnce({
                             terrain.queue { handler ->
-                                val block = handler.block(blockPos.x,
-                                        blockPos.y,
-                                        blockPos.z)
-                                val type = handler.type(block)
-                                val data = handler.data(block)
-                                type.punch(handler, blockPos.x, blockPos.y,
-                                        blockPos.z, data, face, mob, item, br,
-                                        strength)
+                                mob.inventories().modify("Container") {
+                                    val br = item.material().click(mob, item,
+                                            handler, x, y, z, face)
+                                    if (br > 0.0) {
+                                        val block = handler.block(x, y, z)
+                                        val type = handler.type(block)
+                                        val data = handler.data(block)
+                                        type.punch(handler, x, y, z, data, face,
+                                                mob, item, br, strength)
+                                    }
+                                }
                             }
                         }, "Block-Break",
                                 (item.material().hitWait(item) * 0.05).toLong())

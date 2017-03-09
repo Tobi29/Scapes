@@ -62,38 +62,35 @@ abstract class BlockType protected constructor(registry: GameRegistry,
 
     override fun click(entity: MobPlayerServer,
                        item: ItemStack,
-                       terrain: TerrainServer,
+                       terrain: TerrainServer.TerrainMutable,
                        x: Int,
                        y: Int,
                        z: Int,
                        face: Face): Double {
-        val place = face.delta.plus(Vector3i(x, y, z))
-        terrain.queue { handler ->
-            if (handler.type(place.x, place.y,
-                    place.z).isReplaceable(handler, place.x,
-                    place.y,
-                    place.z)) {
-                val aabbs = collision(item.data(), place.x, place.y,
-                        place.z)
-                var flag = true
-                val coll = entity.getAABB()
-                for (element in aabbs) {
-                    if (coll.overlay(
-                            element.aabb) && element.collision.isSolid) {
-                        flag = false
-                    }
+        val place = face.delta + Vector3i(x, y, z)
+        if (terrain.type(place.x, place.y,
+                place.z).isReplaceable(terrain, place.x,
+                place.y,
+                place.z)) {
+            val aabbs = collision(item.data(), place.x, place.y,
+                    place.z)
+            var flag = true
+            val coll = entity.getAABB()
+            for (element in aabbs) {
+                if (coll.overlay(
+                        element.aabb) && element.collision.isSolid) {
+                    flag = false
                 }
-                if (flag) {
-                    entity.inventories().modify(
-                            "Container") { inventory ->
-                        handler.data(place.x, place.y, place.z,
-                                item.data())
-                        if (place(handler, place.x, place.y,
-                                place.z, face, entity)) {
-                            handler.type(place.x, place.y,
-                                    place.z, this)
-                            item.setAmount(item.amount() - 1)
-                        }
+            }
+            if (flag) {
+                entity.inventories().modify("Container") {
+                    terrain.data(place.x, place.y, place.z,
+                            item.data())
+                    if (place(terrain, place.x, place.y,
+                            place.z, face, entity)) {
+                        terrain.type(place.x, place.y,
+                                place.z, this)
+                        item.setAmount(item.amount() - 1)
                     }
                 }
             }

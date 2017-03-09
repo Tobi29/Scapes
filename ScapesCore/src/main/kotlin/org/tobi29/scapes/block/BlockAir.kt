@@ -41,7 +41,7 @@ class BlockAir(registry: GameRegistry) : BlockType(registry, "core.block.Air") {
 
     override fun click(entity: MobPlayerServer,
                        item: ItemStack,
-                       terrain: TerrainServer,
+                       terrain: TerrainServer.TerrainMutable,
                        x: Int,
                        y: Int,
                        z: Int,

@@ -37,7 +37,7 @@ class ItemFertilizer(materials: VanillaMaterial) : VanillaItem(materials,
 
     override fun click(entity: MobPlayerServer,
                        item: ItemStack,
-                       terrain: TerrainServer,
+                       terrain: TerrainServer.TerrainMutable,
                        x: Int,
                        y: Int,
                        z: Int,
