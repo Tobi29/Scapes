@@ -18,7 +18,7 @@ buildscript {
     def kotlinVersion = "1.1.0"
     def dokkaVersion = "0.9.13"
     def junitPlatformVersion = "1.0.0-M3"
-    def androidBuildVersion = "2.3.0-beta4"
+    def androidBuildVersion = "2.3.0"
     def shadowVersion = "1.2.4"
 
     repositories {
@@ -82,6 +82,7 @@ ext {
     kotlinLogging = "io.github.microutils:kotlin-logging:$kotlinLoggingVersion"
     slf4jAPI = "org.slf4j:slf4j-api:$slf4jVersion"
     slf4jSimple = "org.slf4j:slf4j-simple:$slf4jVersion"
+    slf4jAndroid = "org.slf4j:slf4j-android:$slf4jVersion"
     kotlinSTD = "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     kotlinTest = "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
     lwjgl = "org.lwjgl:lwjgl:$lwjglVersion"
