@@ -63,6 +63,14 @@
 -keep class org.threeten.bp.zone.TzdbZoneRulesProvider
 
 # Tika
+-dontwarn org.apache.tika.Tika
+-dontwarn org.apache.tika.config.TikaConfig
+-dontwarn org.apache.tika.detect.NNExampleModelDetector
+-dontwarn org.apache.tika.detect.TrainedModelDetector
+-dontwarn org.apache.tika.io.TemporaryResources
+-dontwarn org.apache.tika.io.TemporaryResources$1
+-dontwarn org.apache.tika.io.TikaInputStream
+-dontwarn org.apache.tika.parser.ParsingReader
 -keep class org.apache.tika.mime.MimeTypes
 -keep class org.apache.tika.mime.MimeTypesReader
 -dontnote org.apache.tika.utils.CharsetUtils
@@ -77,6 +85,13 @@
 # Scapes
 -dontwarn org.tobi29.scapes.vanilla.basics.material.block.rock.BlockStoneRock$createModels$1$1$2
 -dontwarn org.tobi29.scapes.vanilla.basics.material.block.vegetation.BlockCrop$createModels$1$1$2
+-dontwarn org.tobi29.scapes.vanilla.basics.VanillaBasics$register$1$1$1
+-dontwarn org.tobi29.scapes.vanilla.basics.packet.PacketResearch$runServer$1$1$1$$special$$inlined$mapMut$1
+-dontwarn org.tobi29.scapes.vanilla.basics.packet.PacketResearch$runServer$1$1$1$$special$$inlined$mapMut$2
+-dontwarn org.tobi29.scapes.vanilla.basics.packet.PacketResearch$runServer$1$1$1$$special$$inlined$mapMut$3
+-dontwarn org.tobi29.scapes.vanilla.basics.packet.PacketResearch$runServer$1$1$1$$special$$inlined$mapMut$4
+-dontwarn org.tobi29.scapes.vanilla.basics.packet.PacketResearch$runServer$1$1$1$$special$$inlined$mapMut$5
+-dontwarn org.tobi29.scapes.vanilla.basics.packet.PacketResearch$runServer$1$1$1$$special$$inlined$mapMut$6
 -dontwarn java.util.concurrent.ConcurrentHashMap$KeySetView
 -dontwarn org.tobi29.scapes.server.extension.base.DebugCommandsExtension$init$4$1$1
 -dontwarn org.tobi29.scapes.engine.server.ControlPanelProtocol

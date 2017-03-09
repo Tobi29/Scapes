@@ -16,13 +16,6 @@
 apply plugin: "com.android.application"
 apply plugin: "kotlin-android"
 
-repositories {
-    jcenter()
-    maven {
-        url "https://dl.bintray.com/kotlin/kotlin-eap-1.1"
-    }
-}
-
 android {
     compileSdkVersion = 25
     buildToolsVersion = androidBuildToolsVersion
@@ -76,19 +69,16 @@ dependencies {
     compile rootProject.ext.scapesEngineAndroidSQLite
     compile rootProject.ext.scapesEngineAndroidSSLProvider
     compile rootProject.ext.scapesEngineAndroidSysTrace
+    compile rootProject.ext.scapesEngineOpenALSounds
     compile rootProject.ext.kotlinLogging
-    compile rootProject.ext.slf4jAPI
+    compile rootProject.ext.slf4jAndroid
     compile rootProject.ext.kotlinSTD
-
-    compile project(":Plugins:VanillaBasics")
+    compile project(":Plugins:VanillaBasics:VanillaBasicsCore")
 }
 
-buildscript {
-    repositories {
-        jcenter()
-    }
-
-    dependencies {
-        classpath "com.android.tools.build:gradle:2.2.0"
-    }
+configurations.all {
+    // tika-core 1.13 and later crashes on Android
+    // https://issues.apache.org/jira/browse/TIKA-1981
+    resolutionStrategy.force "org.apache.tika:tika-core:1.14",
+            "org.apache.tika:tika-core:1.12"
 }
