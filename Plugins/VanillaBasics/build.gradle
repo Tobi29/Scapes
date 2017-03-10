@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.gradle.api.internal.plugins.DslObject
 
 apply plugin: "maven"
 
@@ -27,12 +27,6 @@ dependencies {
     embed project(":ScapesCore")
     embed project(":Plugins:VanillaBasics:VanillaBasicsCore")
 }
-
-task install(type: Upload)
-
-tasks.install.configuration = project.configurations.archives
-tasks.install.description =
-        "Installs the \'archives\' artifacts into the local Maven repository."
 
 task jar(type: ShadowJar, dependsOn: project.configurations.embed) {
     group = "build"
@@ -51,6 +45,16 @@ task jar(type: ShadowJar, dependsOn: project.configurations.embed) {
         exclude(project(":ScapesCore"))
     }
 }
+
+task install(type: Upload)
+
+tasks.install.configuration = project.configurations.archives
+def repositories = (MavenRepositoryHandlerConvention) (new DslObject(
+        tasks.install.repositories)).convention.
+        getPlugin(MavenRepositoryHandlerConvention.class)
+repositories.mavenInstaller()
+tasks.install.description =
+        "Installs the \'archives\' artifacts into the local Maven repository."
 
 artifacts {
     archives jar
