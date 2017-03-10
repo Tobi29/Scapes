@@ -14,33 +14,46 @@
  * limitations under the License.
  */
 
+
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-apply from: "$rootDir/resources/scapesenginemodulekotlin.gradle"
+apply plugin: "maven"
 
-dependencies {
-    compileOnly project(":ScapesCore")
-    compileOnly project(":Plugins:VanillaBasics:VanillaBasicsCore")
+configurations {
+    embed
 }
 
-def oldJarTask = tasks.jar
-task jar(type: ShadowJar, dependsOn: oldJarTask.dependsOn, overwrite: true) {
-    group = oldJarTask.group
-    description = oldJarTask.description
-    from sourceSets.main.output
+dependencies {
+    embed project(":ScapesCore")
+    embed project(":Plugins:VanillaBasics:VanillaBasicsCore")
+}
+
+task install(type: Upload)
+
+tasks.install.configuration = project.configurations.archives
+tasks.install.description =
+        "Installs the \'archives\' artifacts into the local Maven repository."
+
+task jar(type: ShadowJar, dependsOn: project.configurations.embed) {
+    group = "build"
+    description = "Assembles a jar archive containing the main classes."
     from {
-        (project.configurations.compileOnly + project.configurations.runtime -
+        (project.configurations.embed -
                 (project(":ScapesCore").configurations.getByName("runtime") +
                         files(project(":ScapesCore").tasks.getByName("jar")))).
                 collect { it.isDirectory() ? it : zipTree(it) }
     }
+    from(file("plugin")) { into "scapes/plugin" }
     mergeServiceFiles()
     relocate("org.tobi29.scapes.vanilla.basics",
             "scapes.plugin.tobi29.vanilla.basics")
     dependencies {
-        exclude(project(':ScapesCore'))
+        exclude(project(":ScapesCore"))
     }
 }
 
-tasks.assemble.dependsOn tasks.jar
-tasks.install.dependsOn tasks.jar
+artifacts {
+    archives jar
+}
+
+tasks.build.dependsOn tasks.jar
