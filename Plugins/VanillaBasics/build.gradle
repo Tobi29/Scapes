@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+plugins {
+    id "com.dorongold.task-tree" version "1.3"
+}
+
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 apply from: "$rootDir/resources/scapesenginemodulekotlin.gradle"
@@ -42,5 +46,5 @@ task jar(type: ShadowJar, dependsOn: oldJarTask.dependsOn, overwrite: true) {
     }
 }
 
-tasks.build.dependsOn tasks.jar
+tasks.assemble.dependsOn tasks.jar
 
