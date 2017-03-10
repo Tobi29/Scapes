@@ -28,12 +28,12 @@ task jar(type: ShadowJar, dependsOn: oldJarTask.dependsOn, overwrite: true) {
     group = oldJarTask.group
     description = oldJarTask.description
     from sourceSets.main.output
-    from((project.configurations.runtime -
-            (project(":ScapesCore").configurations.getByName("runtime") +
-                    files(project(":ScapesCore").tasks.getByName("jar")))).
-            collect {
-                it.isDirectory() ? it : zipTree(it)
-            })
+    from {
+        (project.configurations.runtime -
+                (project(":ScapesCore").configurations.getByName("runtime") +
+                        files(project(":ScapesCore").tasks.getByName("jar")))).
+                collect { it.isDirectory() ? it : zipTree(it) }
+    }
     mergeServiceFiles()
     relocate("org.tobi29.scapes.vanilla.basics",
             "scapes.plugin.tobi29.vanilla.basics")
@@ -41,3 +41,6 @@ task jar(type: ShadowJar, dependsOn: oldJarTask.dependsOn, overwrite: true) {
         exclude(project(':ScapesCore'))
     }
 }
+
+tasks.build.dependsOn tasks.jar
+
