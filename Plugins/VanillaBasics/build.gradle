@@ -43,4 +43,4 @@ task jar(type: ShadowJar, dependsOn: oldJarTask.dependsOn, overwrite: true) {
 }
 
 tasks.assemble.dependsOn tasks.jar
-
+tasks.install.dependsOn tasks.jar
