@@ -143,5 +143,9 @@ class ScapesEngineApplication implements Plugin<Project> {
         // Full deploy task
         def deployTask = target.tasks.create("deploy", Task)
         deployTask.group = "Deployment"
+
+        // Full fatJar task
+        def fatJarTask = target.tasks.create("fatJar", Task)
+        fatJarTask.group = "Deployment"
     }
 }
