@@ -19,8 +19,8 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 apply from: "$rootDir/resources/scapesenginemodulekotlin.gradle"
 
 dependencies {
-    compile project(":ScapesCore")
-    compile project(":Plugins:VanillaBasics:VanillaBasicsCore")
+    compileOnly project(":ScapesCore")
+    compileOnly project(":Plugins:VanillaBasics:VanillaBasicsCore")
 }
 
 def oldJarTask = tasks.jar
@@ -29,7 +29,7 @@ task jar(type: ShadowJar, dependsOn: oldJarTask.dependsOn, overwrite: true) {
     description = oldJarTask.description
     from sourceSets.main.output
     from {
-        (project.configurations.runtime -
+        (project.configurations.compileOnly + project.configurations.runtime -
                 (project(":ScapesCore").configurations.getByName("runtime") +
                         files(project(":ScapesCore").tasks.getByName("jar")))).
                 collect { it.isDirectory() ? it : zipTree(it) }
