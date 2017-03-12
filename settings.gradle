@@ -24,9 +24,3 @@ include "Plugins:VanillaBasics:VanillaBasicsGenerator"
 include "Tools:ControlPanel"
 include "Tools:VanillaTerrain"
 // includeBuild("../ScapesEngine")
-
-if (androidEnable == "true") {
-    include "ScapesAndroid"
-    // includeBuild("../ScapesEngineAndroid")
-}
-
