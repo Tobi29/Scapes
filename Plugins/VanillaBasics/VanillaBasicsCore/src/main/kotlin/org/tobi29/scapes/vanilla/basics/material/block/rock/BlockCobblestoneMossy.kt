@@ -16,15 +16,15 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.rock
 
-import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.vanilla.basics.material.StoneType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 
 class BlockCobblestoneMossy(materials: VanillaMaterial,
-                            stoneRegistry: GameRegistry.Registry<StoneType>) : BlockStone(
+                            stoneRegistry: Registries.Registry<StoneType>) : BlockStone(
         materials, "vanilla.basics.block.CobblestoneMossy", stoneRegistry) {
 
     override fun drops(item: ItemStack,

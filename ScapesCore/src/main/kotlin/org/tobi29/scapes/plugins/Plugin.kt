@@ -17,6 +17,7 @@
 package org.tobi29.scapes.plugins
 
 import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.client.states.GameStateGameMP
@@ -26,7 +27,7 @@ import org.tobi29.scapes.server.ScapesServer
  * Basic interface for generic plugins
  */
 interface Plugin {
-    fun registryType(registry: GameRegistry.RegistryAdder)
+    fun registryType(registry: Registries.RegistryAdder)
 
     fun register(registry: GameRegistry)
 

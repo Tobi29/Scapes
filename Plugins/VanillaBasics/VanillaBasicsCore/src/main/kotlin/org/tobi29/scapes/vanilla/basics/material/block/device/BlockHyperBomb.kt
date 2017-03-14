@@ -37,8 +37,10 @@ class BlockHyperBomb(materials: VanillaMaterial) : BlockSimple(materials,
                          y: Int,
                          z: Int) {
         terrain.queue { handle ->
-            handle.explosionBlockPush(x + 0.5, y + 0.5, z + 0.5, 8.0, 0.2,
-                    0.1, 64.0, 48.0)
+            //handle.explosionBlockPush(x + 0.5, y + 0.5, z + 0.5, 8.0, 0.2,
+            //        0.1, 64.0, 48.0)
+            handle.explosionBlockPush(x + 0.5, y + 0.5, z + 0.5, 128.0, 0.0,
+                    0.0, 0.0, 0.0)
         }
     }
 

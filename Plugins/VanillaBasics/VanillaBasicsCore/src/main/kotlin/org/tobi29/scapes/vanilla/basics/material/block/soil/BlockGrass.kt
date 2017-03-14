@@ -40,7 +40,7 @@ import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
 class BlockGrass(materials: VanillaMaterial,
-                 private val cropRegistry: GameRegistry.Registry<CropType>) : VanillaBlock(
+                 private val cropRegistry: Registries.Registry<CropType>) : VanillaBlock(
         materials, "vanilla.basics.block.Grass") {
     private var textureTop: TerrainTexture? = null
     private var textureSide1Dirt: TerrainTexture? = null

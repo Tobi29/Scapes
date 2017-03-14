@@ -17,6 +17,7 @@
 package org.tobi29.scapes.vanilla.basics
 
 import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.EnvironmentServer
 import org.tobi29.scapes.chunk.EnvironmentType
 import org.tobi29.scapes.chunk.WorldClient
@@ -159,7 +160,7 @@ class VanillaBasics : WorldType {
                 "Models not available")
     }
 
-    override fun registryType(registry: GameRegistry.RegistryAdder) {
+    override fun registryType(registry: Registries.RegistryAdder) {
         registry.add("VanillaBasics", "TreeType", 0, Short.MAX_VALUE.toInt())
         registry.add("VanillaBasics", "CropType", 0, Short.MAX_VALUE.toInt())
         registry.add("VanillaBasics", "StoneType", 0, Short.MAX_VALUE.toInt())

@@ -32,11 +32,8 @@ import org.tobi29.scapes.engine.input.*
 import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath
 import org.tobi29.scapes.engine.utils.io.filesystem.createDirectories
-import org.tobi29.scapes.engine.utils.io.filesystem.path
-import org.tobi29.scapes.engine.utils.io.filesystem.read
 import org.tobi29.scapes.engine.utils.io.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.io.tag.TagMap
-import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
 import org.tobi29.scapes.engine.utils.io.tag.mapMut
 import org.tobi29.scapes.engine.utils.io.tag.set
 import org.tobi29.scapes.engine.utils.readOnly

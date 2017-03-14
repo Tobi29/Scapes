@@ -16,12 +16,12 @@
 
 package org.tobi29.scapes.vanilla.basics
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.vanilla.basics.entity.client.*
 import org.tobi29.scapes.vanilla.basics.entity.server.*
 
-class VanillaBasicsEntities(reg: GameRegistry.Registry<EntityType<*, *>>) {
+class VanillaBasicsEntities(reg: Registries.Registry<EntityType<*, *>>) {
     val player = reg("vanilla.basics.mob.Player") {
         EntityType<MobPlayerClientVB, Nothing>(it, ::MobPlayerClientVB,
                 { _, _ -> throw UnsupportedOperationException() })

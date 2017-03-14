@@ -324,9 +324,9 @@ class TerrainInfiniteSection : TerrainClient {
         throw UnsupportedOperationException("Terrain not disposable")
     }
 
-    override fun type(block: Long): BlockType {
+    override fun type(id: Int): BlockType {
         access { terrain ->
-            return terrain.type(block)
+            return terrain.type(id)
         }
     }
 

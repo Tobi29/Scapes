@@ -41,7 +41,7 @@ import org.tobi29.scapes.vanilla.basics.util.dropItems
 import java.util.*
 
 class BlockStoneRock(materials: VanillaMaterial,
-                     private val stoneRegistry: GameRegistry.Registry<StoneType>) : VanillaBlock(
+                     private val stoneRegistry: Registries.Registry<StoneType>) : VanillaBlock(
         materials, "vanilla.basics.block.StoneRock") {
     private var textures: Array<TerrainTexture?>? = null
     private var texturesItem: Array<TerrainTexture?>? = null

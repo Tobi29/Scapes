@@ -47,7 +47,7 @@ import org.tobi29.scapes.vanilla.basics.world.EnvironmentClimate
 import java.util.*
 
 class BlockLeaves(materials: VanillaMaterial,
-                  private val treeRegistry: GameRegistry.Registry<TreeType>) : VanillaBlock(
+                  private val treeRegistry: Registries.Registry<TreeType>) : VanillaBlock(
         materials, "vanilla.basics.block.Leaves") {
     private var textures: Array<Triple<TreeType, TerrainTexture, TerrainTexture>?>? = null
     private var modelsFancy: Array<BlockModel?>? = null

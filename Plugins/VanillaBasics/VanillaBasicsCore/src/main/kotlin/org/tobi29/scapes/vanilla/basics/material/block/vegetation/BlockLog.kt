@@ -16,8 +16,8 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.vegetation
 
-import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.block.TerrainTexture
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.block.models.BlockModel
@@ -40,7 +40,7 @@ import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
 import org.tobi29.scapes.vanilla.basics.util.dropItem
 
 class BlockLog(materials: VanillaMaterial,
-               private val treeRegistry: GameRegistry.Registry<TreeType>) : VanillaBlock(
+               private val treeRegistry: Registries.Registry<TreeType>) : VanillaBlock(
         materials, "vanilla.basics.block.Log"), ItemFuel {
     private var textures: Array<Pair<TerrainTexture, TerrainTexture>?>? = null
     private var models: Array<BlockModel?>? = null

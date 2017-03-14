@@ -86,9 +86,14 @@ interface Terrain {
                      range: Int,
                      pool: Pool<PointerPane>)
 
-    fun type(block: Long): BlockType
+    fun type(block: Long): BlockType {
+        val id = (block shr 32).toInt()
+        return type(id)
+    }
 
     fun data(block: Long): Int {
         return (block and 0xFFFFFFFF).toInt()
     }
+
+    fun type(id: Int): BlockType
 }

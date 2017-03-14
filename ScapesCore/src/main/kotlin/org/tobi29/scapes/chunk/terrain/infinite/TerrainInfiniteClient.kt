@@ -116,9 +116,7 @@ class TerrainInfiniteClient(override val world: WorldClient,
         val y = packet.y()
         val z = packet.z()
         chunkC(x shr 4, y shr 4) { chunk ->
-            chunk.typeDataG(x, y, z,
-                    world.plugins.registry.block(packet.id()) ?: air,
-                    packet.data())
+            chunk.typeDataG(x, y, z, type(packet.id()), packet.data())
         }
     }
 

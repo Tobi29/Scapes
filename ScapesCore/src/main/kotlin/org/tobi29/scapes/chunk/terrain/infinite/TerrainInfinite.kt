@@ -19,14 +19,15 @@ package org.tobi29.scapes.chunk.terrain.infinite
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Material
 import org.tobi29.scapes.chunk.lighting.LightingEngine
 import org.tobi29.scapes.chunk.lighting.LightingEngineThreaded
 import org.tobi29.scapes.chunk.terrain.TerrainEntity
 import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.math.PointerPane
 import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
+import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.Entity
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -37,7 +38,9 @@ abstract class TerrainInfinite<E : Entity>(val zSize: Int,
                                            val voidBlock: BlockType,
                                            override val registry: GameRegistry,
                                            radius: Int = 0x8000000 - 16) : TerrainEntity<E> {
-    protected val blocks = registry.blocks()
+    protected val materials = registry.get<Material>("Core", "Material")
+    internal val blocks = materials.values.asSequence()
+            .map { it as? BlockType }.toArray()
     protected val entityMap: MutableMap<UUID, E> = ConcurrentHashMap()
     protected val cxMin = -radius + 1
     protected val cxMax = radius
@@ -261,10 +264,9 @@ abstract class TerrainInfinite<E : Entity>(val zSize: Int,
         entityMap.remove(entity.getUUID())
     }
 
-    override fun type(block: Long): BlockType {
-        val id = (block shr 32).toInt()
+    override fun type(id: Int): BlockType {
         return blocks[id] ?: throw IllegalArgumentException(
-                "Invalid block id: $id")
+                "Non-block material: $id")
     }
 
     abstract fun hasChunk(x: Int,
@@ -280,10 +282,5 @@ abstract class TerrainInfinite<E : Entity>(val zSize: Int,
 
     fun lighting(): LightingEngine {
         return lighting
-    }
-
-    companion object {
-        protected val AABBS = ThreadLocal { Pool { AABBElement() } }
-        protected val POINTER_PANES = ThreadLocal { Pool { PointerPane() } }
     }
 }

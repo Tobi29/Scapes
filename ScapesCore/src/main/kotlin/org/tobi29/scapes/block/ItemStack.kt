@@ -22,16 +22,12 @@ class ItemStack(private var material: Material,
                 private var data: Int,
                 private var amount: Int = 1,
                 private var metaData: MutableTagMap = MutableTagMap()) {
-    private val registry: GameRegistry
+    private val registry = material.registry()
 
     constructor(item: ItemStack) : this(item.material, item.data, item.amount,
             item.metaData.toTag().toMutTag())
 
     constructor(registry: GameRegistry) : this(registry.air, 0, 0)
-
-    init {
-        registry = material.registry()
-    }
 
     constructor(material: Material,
                 data: Int,
@@ -135,7 +131,7 @@ class ItemStack(private var material: Material,
 
     fun read(map: TagMap) {
         map["Type"]?.toInt()?.let {
-            material = registry.material(it) ?: registry.air
+            material = registry.get<Material>("Core", "Material")[it]
         }
         map["Data"]?.toInt()?.let { data = it }
         map["Amount"]?.toInt()?.let { amount = it }

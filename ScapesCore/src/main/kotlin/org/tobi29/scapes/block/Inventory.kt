@@ -20,11 +20,7 @@ import org.tobi29.scapes.engine.utils.io.tag.*
 
 class Inventory(private val registry: GameRegistry,
                 size: Int) {
-    private val items: Array<ItemStack>
-
-    init {
-        items = Array(size, { ItemStack(registry) })
-    }
+    private val items = Array(size, { ItemStack(registry) })
 
     constructor(inventory: Inventory) : this(inventory.registry,
             inventory.items.size) {

@@ -16,8 +16,8 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item.food
 
-import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.engine.utils.io.tag.set
 import org.tobi29.scapes.engine.utils.io.tag.syncMapMut
 import org.tobi29.scapes.engine.utils.io.tag.toDouble
@@ -27,7 +27,7 @@ import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.item.ItemSimpleData
 
 class ItemBaked(materials: VanillaMaterial,
-                private val cropRegistry: GameRegistry.Registry<CropType>) : ItemSimpleData(
+                private val cropRegistry: Registries.Registry<CropType>) : ItemSimpleData(
         materials, "vanilla.basics.item.Baked") {
     override fun click(entity: MobPlayerServer,
                        item: ItemStack) {

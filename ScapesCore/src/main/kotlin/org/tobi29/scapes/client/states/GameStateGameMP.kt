@@ -19,6 +19,7 @@ package org.tobi29.scapes.client.states
 import kotlinx.coroutines.experimental.yield
 import mu.KLogging
 import org.tobi29.scapes.Debug
+import org.tobi29.scapes.block.Material
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.client.ChatHistory
 import org.tobi29.scapes.client.Playlist
@@ -117,13 +118,14 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         client.plugins.plugins.forEach { it.initClient(this) }
         var time = System.currentTimeMillis()
         val registry = client.plugins.registry
-        for (type in registry.materials()) {
+        val materials = registry.get<Material>("Core", "Material")
+        for (type in materials.values) {
             type?.registerTextures(terrainTextureRegistry)
         }
         val size = terrainTextureRegistry.init()
         terrainTextureRegistry.initTexture(4)
         time = System.currentTimeMillis() - time
-        for (type in registry.materials()) {
+        for (type in materials.values) {
             type?.createModels(terrainTextureRegistry)
         }
         logger.info { "Loaded terrain models with $size textures in ${time}ms." }

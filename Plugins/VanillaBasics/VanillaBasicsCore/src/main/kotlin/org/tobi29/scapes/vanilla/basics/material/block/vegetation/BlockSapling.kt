@@ -43,7 +43,7 @@ import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
 class BlockSapling(materials: VanillaMaterial,
-                   private val treeRegistry: GameRegistry.Registry<TreeType>) : VanillaBlock(
+                   private val treeRegistry: Registries.Registry<TreeType>) : VanillaBlock(
         materials, "vanilla.basics.block.Sapling") {
     private var textures: Array<TerrainTexture?>? = null
     private var models: Array<BlockModel?>? = null

@@ -16,15 +16,15 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item.vegetation
 
-import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.vanilla.basics.material.CropType
 import org.tobi29.scapes.vanilla.basics.material.ItemResearch
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.item.ItemSimpleData
 
 class ItemCrop(materials: VanillaMaterial,
-               private val cropRegistry: GameRegistry.Registry<CropType>) : ItemSimpleData(
+               private val cropRegistry: Registries.Registry<CropType>) : ItemSimpleData(
         materials, "vanilla.basics.item.Crop"), ItemResearch {
     override fun types(): Int {
         return cropRegistry.values().size

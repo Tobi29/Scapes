@@ -119,6 +119,7 @@ class Plugins(files: List<PluginFile>,
     fun init() {
         if (!init) {
             registry.registryTypes({ registry ->
+                registry.add("Core", "Material", 0, Short.MAX_VALUE.toInt())
                 registry.add("Core", "Entity", 0, Int.MAX_VALUE)
                 registry.add("Core", "Environment", 0, Int.MAX_VALUE)
                 registry.add("Core", "Packet", 0, Short.MAX_VALUE.toInt())
@@ -157,6 +158,8 @@ class Plugins(files: List<PluginFile>,
         }
 
         fun init(registry: GameRegistry) {
+            registry.registerMaterial(registry.air)
+
             registry.get<UpdateType>("Core", "Update").run {
                 reg("core.update.BlockUpdate") {
                     UpdateType(it, ::UpdateBlockUpdate)

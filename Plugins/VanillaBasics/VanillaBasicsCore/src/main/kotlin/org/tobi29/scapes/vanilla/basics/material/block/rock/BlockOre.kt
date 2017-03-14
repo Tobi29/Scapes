@@ -16,8 +16,8 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.rock
 
-import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.math.Face
@@ -28,9 +28,9 @@ import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.util.dropItem
 import java.util.*
 
-abstract class BlockOre protected constructor(materials: VanillaMaterial,
-                                              nameID: String,
-                                              stoneRegistry: GameRegistry.Registry<StoneType>) : BlockStone(
+abstract class BlockOre(materials: VanillaMaterial,
+                        nameID: String,
+                        stoneRegistry: Registries.Registry<StoneType>) : BlockStone(
         materials, nameID, stoneRegistry) {
     override fun destroy(terrain: TerrainServer.TerrainMutable,
                          x: Int,

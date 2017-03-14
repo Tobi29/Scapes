@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.chunk
 
-import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.utils.Sync
@@ -28,7 +27,10 @@ import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.entity.CreatureType
-import org.tobi29.scapes.entity.server.*
+import org.tobi29.scapes.entity.server.EntityServer
+import org.tobi29.scapes.entity.server.MobLivingServer
+import org.tobi29.scapes.entity.server.MobPlayerServer
+import org.tobi29.scapes.entity.server.MobServer
 import org.tobi29.scapes.packets.PacketClient
 import org.tobi29.scapes.packets.PacketEntityAdd
 import org.tobi29.scapes.packets.PacketEntityDespawn
@@ -38,7 +40,6 @@ import org.tobi29.scapes.server.connection.ServerConnection
 import org.tobi29.scapes.server.format.WorldFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.atomic.AtomicInteger
 
 class WorldServer(worldFormat: WorldFormat,

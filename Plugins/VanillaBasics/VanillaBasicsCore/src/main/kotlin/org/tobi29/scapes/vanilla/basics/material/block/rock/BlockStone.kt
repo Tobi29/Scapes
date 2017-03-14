@@ -16,16 +16,16 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.rock
 
-import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.vanilla.basics.material.StoneType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.block.BlockSimpleData
 
-abstract class BlockStone protected constructor(materials: VanillaMaterial,
-                                                nameID: String,
-                                                protected val stoneRegistry: GameRegistry.Registry<StoneType>) : BlockSimpleData(
+abstract class BlockStone(materials: VanillaMaterial,
+                          nameID: String,
+                          protected val stoneRegistry: Registries.Registry<StoneType>) : BlockSimpleData(
         materials, nameID) {
 
     override fun types(): Int {

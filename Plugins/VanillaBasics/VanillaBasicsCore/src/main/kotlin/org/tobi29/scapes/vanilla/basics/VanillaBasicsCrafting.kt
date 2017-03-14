@@ -18,6 +18,7 @@ package org.tobi29.scapes.vanilla.basics
 
 import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.engine.utils.io.tag.map
 import org.tobi29.scapes.engine.utils.io.tag.toBoolean
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
@@ -40,8 +41,8 @@ internal fun VanillaBasics.registerRecipes(registry: GameRegistry) {
 }
 
 private fun VanillaBasics.registerRecipesBasics(registry: GameRegistry,
-                                                treeRegistry: GameRegistry.Registry<TreeType>,
-                                                stoneRegistry: GameRegistry.Registry<StoneType>) {
+                                                treeRegistry: Registries.Registry<TreeType>,
+                                                stoneRegistry: Registries.Registry<StoneType>) {
     val recipeType = object : CraftingRecipeType() {
         override fun name(): String {
             return "Basics"
@@ -206,8 +207,8 @@ private fun VanillaBasics.registerRecipesStone(registry: GameRegistry) {
 }
 
 private fun VanillaBasics.registerRecipesFood(registry: GameRegistry,
-                                              cropRegistry: GameRegistry.Registry<CropType>,
-                                              stoneRegistry: GameRegistry.Registry<StoneType>) {
+                                              cropRegistry: Registries.Registry<CropType>,
+                                              stoneRegistry: Registries.Registry<StoneType>) {
     val recipeType = object : CraftingRecipeType() {
         override fun name(): String {
             return "Food"
@@ -265,7 +266,7 @@ private fun VanillaBasics.registerRecipesFood(registry: GameRegistry,
 }
 
 private fun VanillaBasics.registerRecipesMetal(registry: GameRegistry,
-                                               stoneRegistry: GameRegistry.Registry<StoneType>) {
+                                               stoneRegistry: Registries.Registry<StoneType>) {
     val recipeType = object : CraftingRecipeType() {
         override fun name(): String {
             return "Metal"
@@ -311,7 +312,7 @@ private fun VanillaBasics.registerRecipesMetal(registry: GameRegistry,
 }
 
 private fun VanillaBasics.registerRecipesIron(registry: GameRegistry,
-                                              treeRegistry: GameRegistry.Registry<TreeType>) {
+                                              treeRegistry: Registries.Registry<TreeType>) {
     val recipeType = object : CraftingRecipeType() {
         override fun name(): String {
             return "Iron"

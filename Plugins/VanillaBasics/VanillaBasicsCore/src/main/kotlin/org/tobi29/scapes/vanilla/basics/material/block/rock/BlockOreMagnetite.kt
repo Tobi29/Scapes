@@ -16,13 +16,13 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.rock
 
-import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.vanilla.basics.material.StoneType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 
 class BlockOreMagnetite(materials: VanillaMaterial,
-                        stoneRegistry: GameRegistry.Registry<StoneType>) : BlockOre(
+                        stoneRegistry: Registries.Registry<StoneType>) : BlockOre(
         materials, "vanilla.basics.block.OreMagnetite", stoneRegistry) {
     override fun dropsOre(item: ItemStack,
                           data: Int): List<ItemStack> {
