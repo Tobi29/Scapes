@@ -15,7 +15,7 @@
  */
 
 buildscript {
-    def kotlinVersion = "1.1.0"
+    def kotlinVersion = "1.1.1"
     def dokkaVersion = "0.9.13"
     def junitPlatformVersion = "1.0.0-M3"
     def shadowVersion = "1.2.4"
@@ -59,22 +59,22 @@ allprojects {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = "3.4"
+    gradleVersion = "3.4.1"
     distributionUrl =
             "https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }
 
 ext {
-    kotlinVersion = "1.1.0"
+    kotlinVersion = "1.1.1"
     kotlinLoggingVersion = "1.4.3"
-    slf4jVersion = "1.7.23"
+    slf4jVersion = "1.7.24"
     spekVersion = "f871624307"
     swtVersion = "4.6"
     lwjglVersion = "3.1.1"
-    log4jVersion = "2.8"
-    commonsCLIVersion = "1.3.1"
-    jnaVersion = "4.3.0"
-    scapesEngineVersion = "4e5f13a8d0"
+    log4jVersion = "2.8.1"
+    commonsCLIVersion = "1.4"
+    jnaVersion = "4.4.0"
+    scapesEngineVersion = "7e6ed339df"
 
     kotlinLogging = "io.github.microutils:kotlin-logging:$kotlinLoggingVersion"
     slf4jAPI = "org.slf4j:slf4j-api:$slf4jVersion"
