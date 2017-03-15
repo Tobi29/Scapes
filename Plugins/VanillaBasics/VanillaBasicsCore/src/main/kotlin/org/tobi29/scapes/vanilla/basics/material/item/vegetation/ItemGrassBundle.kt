@@ -18,11 +18,11 @@ package org.tobi29.scapes.vanilla.basics.material.item.vegetation
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.vanilla.basics.material.ItemFuel
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.item.ItemSimpleData
 
-class ItemGrassBundle(materials: VanillaMaterial) : ItemSimpleData(materials,
-        "vanilla.basics.item.GrassBundle"), ItemFuel {
+class ItemGrassBundle(type: VanillaMaterialType) : ItemSimpleData(
+        type), ItemFuel {
     override fun types(): Int {
         return 2
     }

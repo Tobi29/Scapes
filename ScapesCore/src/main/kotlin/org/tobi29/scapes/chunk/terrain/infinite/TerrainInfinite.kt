@@ -16,164 +16,42 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
-import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.block.BlockType
-import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.Material
-import org.tobi29.scapes.chunk.lighting.LightingEngine
-import org.tobi29.scapes.chunk.lighting.LightingEngineThreaded
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.terrain.TerrainEntity
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.math.PointerPane
-import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.Entity
+import org.tobi29.scapes.terrain.infinite.TerrainInfiniteBase
+import org.tobi29.scapes.terrain.infinite.TerrainInfiniteChunkManager
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-abstract class TerrainInfinite<E : Entity>(val zSize: Int,
-                                           taskExecutor: TaskExecutor,
-                                           override val air: BlockType,
-                                           val voidBlock: BlockType,
-                                           override val registry: GameRegistry,
-                                           radius: Int = 0x8000000 - 16) : TerrainEntity<E> {
+abstract class TerrainInfinite<E : Entity, C : TerrainInfiniteChunk<E>>(
+        zSize: Int,
+        taskExecutor: TaskExecutor,
+        air: BlockType,
+        voidBlock: BlockType,
+        registry: Registries,
+        chunkManager: TerrainInfiniteChunkManager<C>,
+        radius: Int = 0x8000000 - 16) : TerrainInfiniteBase<BlockType, C>(
+        zSize, taskExecutor, air, voidBlock,
+        registry.get<Material>("Core", "Material").values.asSequence()
+                .map { it as? BlockType }.toArray(), chunkManager,
+        radius), TerrainEntity<E> {
     protected val materials = registry.get<Material>("Core", "Material")
-    internal val blocks = materials.values.asSequence()
+    override val blocks: Array<out BlockType?> = materials.values.asSequence()
             .map { it as? BlockType }.toArray()
     protected val entityMap: MutableMap<UUID, E> = ConcurrentHashMap()
-    protected val cxMin = -radius + 1
-    protected val cxMax = radius
-    protected val cyMin = -radius + 1
-    protected val cyMax = radius
-    protected val lighting = LightingEngineThreaded(this, taskExecutor)
 
-    override fun sunLight(x: Int,
-                          y: Int,
-                          z: Int,
-                          light: Int) {
-        if (z < 0 || z >= zSize) {
-            return
-        }
-        chunk(x shr 4, y shr 4, { it.sunLightG(x, y, z, light) })
-    }
-
-    override fun blockLight(x: Int,
-                            y: Int,
-                            z: Int,
-                            light: Int) {
-        if (z < 0 || z >= zSize) {
-            return
-        }
-        chunk(x shr 4, y shr 4, { it.blockLightG(x, y, z, light) })
-    }
-
-    override fun block(x: Int,
-                       y: Int,
-                       z: Int): Long {
-        if (z < 0 || z >= zSize) {
-            return voidBlock.id.toLong() shl 32
-        }
-        return chunk(x shr 4, y shr 4) {
-            it.blockG(x, y, z)
-        } ?: (voidBlock.id.toLong() shl 32)
-    }
-
-    override fun type(x: Int,
-                      y: Int,
-                      z: Int): BlockType {
-        if (z < 0 || z >= zSize) {
-            return voidBlock
-        }
-        return chunk(x shr 4, y shr 4) { it.typeG(x, y, z) } ?: voidBlock
-    }
-
-    override fun light(x: Int,
-                       y: Int,
-                       z: Int): Int {
-        if (z < 0 || z >= zSize) {
-            return 0
-        }
-        return chunk(x shr 4, y shr 4) { it.lightG(x, y, z) } ?: 0
-    }
-
-    override fun sunLight(x: Int,
-                          y: Int,
-                          z: Int): Int {
-        if (z < 0 || z >= zSize) {
-            return 0
-        }
-        return chunk(x shr 4, y shr 4) { it.sunLightG(x, y, z) } ?: 0
-    }
-
-    override fun blockLight(x: Int,
-                            y: Int,
-                            z: Int): Int {
-        if (z < 0 || z >= zSize) {
-            return 0
-        }
-        return chunk(x shr 4, y shr 4) { it.blockLightG(x, y, z) } ?: 0
-    }
-
-    override fun highestBlockZAt(x: Int,
-                                 y: Int): Int {
-        return chunk(x shr 4, y shr 4) { it.highestBlockZAtG(x, y) } ?: 1
-    }
-
-    override fun highestTerrainBlockZAt(x: Int,
-                                        y: Int): Int {
-        return chunk(x shr 4, y shr 4) { chunk ->
-            chunk.highestTerrainBlockZAtG(x, y)
-        } ?: 1
-    }
-
-    override fun isBlockLoaded(x: Int,
-                               y: Int,
-                               z: Int): Boolean {
-        if (z < 0 || z >= zSize) {
-            return false
-        }
-        return chunkNoLoad(x shr 4, y shr 4)?.isLoaded ?: false
-    }
-
-    override fun isBlockTicking(x: Int,
-                                y: Int,
-                                z: Int): Boolean {
-        return chunkNoLoad(x shr 4, y shr 4)?.isLoaded ?: false
-    }
-
-    override fun collisions(minX: Int,
-                            minY: Int,
-                            minZ: Int,
-                            maxX: Int,
-                            maxY: Int,
-                            maxZ: Int,
-                            pool: Pool<AABBElement>) {
-        val minZZ = clamp(minZ, 0, zSize)
-        val maxZZ = clamp(maxZ, 0, zSize)
-        for (x in minX..maxX) {
-            for (y in minY..maxY) {
-                val chunk = chunkNoLoad(x shr 4, y shr 4)
-                if (chunk != null && chunk.isLoaded) {
-                    for (z in minZZ..maxZZ) {
-                        if (z in 0..(zSize - 1)) {
-                            chunk.typeG(x, y, z).addCollision(pool, this, x,
-                                    y, z)
-                        }
-                    }
-                } else {
-                    pool.push().set(x.toDouble(), y.toDouble(),
-                            minZZ.toDouble(), x + 1.0, y + 1.0, maxZZ + 1.0)
-                }
-            }
-        }
-    }
-
-    override fun pointerPanes(x: Int,
-                              y: Int,
-                              z: Int,
-                              range: Int,
-                              pool: Pool<PointerPane>) {
+    fun pointerPanes(x: Int,
+                     y: Int,
+                     z: Int,
+                     range: Int,
+                     pool: Pool<PointerPane>) {
         (x - range..x + range).forEach { xx ->
             (y - range..y + range).forEach { yy ->
                 chunk(xx shr 4, yy shr 4) { chunk ->
@@ -194,8 +72,7 @@ abstract class TerrainInfinite<E : Entity>(val zSize: Int,
         val pos = entity.getCurrentPos()
         val x = pos.intX() shr 4
         val y = pos.intY() shr 4
-        if (chunk(x, y,
-                { it.removeEntity(entity) }) ?: false) {
+        if (chunk(x, y, { it.removeEntity(entity) }) ?: false) {
             return true
         }
         for (chunk in loadedChunks()) {
@@ -262,25 +139,5 @@ abstract class TerrainInfinite<E : Entity>(val zSize: Int,
 
     override fun entityRemoved(entity: E) {
         entityMap.remove(entity.getUUID())
-    }
-
-    override fun type(id: Int): BlockType {
-        return blocks[id] ?: throw IllegalArgumentException(
-                "Non-block material: $id")
-    }
-
-    abstract fun hasChunk(x: Int,
-                          y: Int): Boolean
-
-    abstract fun chunk(x: Int,
-                       y: Int): TerrainInfiniteChunk<E>?
-
-    abstract fun chunkNoLoad(x: Int,
-                             y: Int): TerrainInfiniteChunk<E>?
-
-    abstract fun loadedChunks(): Sequence<TerrainInfiniteChunk<E>>
-
-    fun lighting(): LightingEngine {
-        return lighting
     }
 }

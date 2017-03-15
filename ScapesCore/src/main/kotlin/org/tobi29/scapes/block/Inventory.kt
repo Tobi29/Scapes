@@ -17,12 +17,13 @@
 package org.tobi29.scapes.block
 
 import org.tobi29.scapes.engine.utils.io.tag.*
+import org.tobi29.scapes.plugins.Plugins
 
-class Inventory(private val registry: GameRegistry,
+class Inventory(private val plugins: Plugins,
                 size: Int) {
-    private val items = Array(size, { ItemStack(registry) })
+    private val items = Array(size, { ItemStack(plugins) })
 
-    constructor(inventory: Inventory) : this(inventory.registry,
+    constructor(inventory: Inventory) : this(inventory.plugins,
             inventory.items.size) {
         for (i in items.indices) {
             items[i] = ItemStack(inventory.items[i])
@@ -31,7 +32,7 @@ class Inventory(private val registry: GameRegistry,
 
     fun add(add: ItemStack): Int {
         for (item in items) {
-            if (item.canStack(add) > 0 && item.material() !== registry.air) {
+            if (item.canStack(add) > 0 && item.material() != plugins.air) {
                 add.setAmount(add.amount() - item.stack(add))
                 if (add.amount() <= 0) {
                     return add.amount()

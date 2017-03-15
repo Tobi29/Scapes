@@ -36,7 +36,7 @@ import java.io.IOException
 class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
 
     override fun init() {
-        val gameRegistry = server.plugins.registry
+        val plugins = server.plugins
         val connection = server.connection
         val group = server.commandRegistry().group("debug")
 
@@ -53,7 +53,7 @@ class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
             commands.add({
                 val player = requireGet({ connection.playerByName(it) },
                         playerName)
-                val material = requireGet({ gameRegistry.material(it) },
+                val material = requireGet({ plugins.materialResolver[it] },
                         materialName)
                 val item = ItemStack(material, data, amount)
                 player.mob({ mob ->

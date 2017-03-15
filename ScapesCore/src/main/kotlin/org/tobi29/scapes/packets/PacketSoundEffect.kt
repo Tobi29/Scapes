@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.packets
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -46,7 +46,7 @@ class PacketSoundEffect : PacketAbstract, PacketClient {
         this.gain = gain
     }
 
-    constructor(registry: GameRegistry,
+    constructor(registry: Registries,
                 audio: String,
                 position: Vector3d,
                 velocity: Vector3d,

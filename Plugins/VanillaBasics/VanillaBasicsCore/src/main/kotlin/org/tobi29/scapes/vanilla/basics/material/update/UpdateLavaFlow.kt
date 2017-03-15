@@ -17,7 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.material.update
 
 import org.tobi29.scapes.block.BlockType
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.block.Update
 import org.tobi29.scapes.block.UpdateType
 import org.tobi29.scapes.chunk.terrain.TerrainServer
@@ -26,7 +26,7 @@ import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 
 class UpdateLavaFlow(type: UpdateType) : Update(type) {
-    constructor(registry: GameRegistry) : this(
+    constructor(registry: Registries) : this(
             of(registry, "vanilla.basics.update.LavaFlow"))
 
     private fun flow(terrain: TerrainServer.TerrainMutable,

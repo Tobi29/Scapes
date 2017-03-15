@@ -17,17 +17,12 @@
 package org.tobi29.scapes.vanilla.basics.material.block.rock
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.engine.utils.toArray
-import org.tobi29.scapes.vanilla.basics.material.StoneType
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import java.util.*
 
-class BlockStoneRaw(materials: VanillaMaterial,
-                    stoneRegistry: Registries.Registry<StoneType>) : BlockStone(
-        materials, "vanilla.basics.block.StoneRaw", stoneRegistry) {
-
+class BlockStoneRaw(type: VanillaMaterialType) : BlockStone(type) {
     override fun drops(item: ItemStack,
                        data: Int): List<ItemStack> {
         if ("Pickaxe" == item.material().toolType(item) && canBeBroken(

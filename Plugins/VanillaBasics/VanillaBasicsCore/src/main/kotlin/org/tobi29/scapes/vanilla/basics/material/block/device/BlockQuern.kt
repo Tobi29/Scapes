@@ -20,7 +20,7 @@ import org.tobi29.scapes.block.TerrainTexture
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock
-import org.tobi29.scapes.chunk.data.ChunkMesh
+import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.engine.graphics.GL
@@ -28,12 +28,11 @@ import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityQuernClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityQuernServer
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer
 
-class BlockQuern(materials: VanillaMaterial) : VanillaBlockContainer<EntityQuernClient, EntityQuernServer>(
-        materials, "vanilla.basics.block.Quern",
-        materials.plugin.entityTypes.quern) {
+class BlockQuern(type: VanillaMaterialType) : VanillaBlockContainer<EntityQuernClient, EntityQuernServer>(
+        type, type.materials.plugin.entityTypes.quern) {
     private var textureTop: TerrainTexture? = null
     private var textureSide: TerrainTexture? = null
     private var textureBottom: TerrainTexture? = null

@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -43,7 +43,7 @@ class PacketUpdateInventory : PacketAbstract, PacketClient {
         tag = entity.inventories().access(id) { TagMap { it.write(this) } }
     }
 
-    constructor(registry: GameRegistry,
+    constructor(registry: Registries,
                 entity: EntityContainerServer,
                 id: String) : this(
             Packet.make(registry, "core.packet.UpdateInventory"), entity,

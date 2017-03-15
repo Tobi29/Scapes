@@ -16,20 +16,21 @@
 package org.tobi29.scapes.vanilla.basics.material.item.vegetation
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.filterMap
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityFarmlandServer
 import org.tobi29.scapes.vanilla.basics.material.CropType
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.item.ItemSimpleData
 import java.util.concurrent.ThreadLocalRandom
 
-class ItemSeed(materials: VanillaMaterial,
-               private val cropRegistry: Registries.Registry<CropType>) : ItemSimpleData(
-        materials, "vanilla.basics.item.Seed") {
+class ItemSeed(type: VanillaMaterialType) : ItemSimpleData(
+        type) {
+    val cropRegistry = plugins.registry.get<CropType>("VanillaBasics",
+            "CropType")
+
     override fun click(entity: MobPlayerServer,
                        item: ItemStack,
                        terrain: TerrainServer.TerrainMutable,

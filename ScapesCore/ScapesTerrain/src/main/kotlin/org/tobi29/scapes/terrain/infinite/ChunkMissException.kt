@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.chunk.terrain.infinite
+package org.tobi29.scapes.terrain.infinite
 
 class ChunkMissException(message: String) : RuntimeException(message)

@@ -17,11 +17,9 @@
 package org.tobi29.scapes.vanilla.basics.material.item
 
 import org.tobi29.scapes.block.Material
-import org.tobi29.scapes.vanilla.basics.VanillaBasics
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
-abstract class VanillaItem(val materials: VanillaMaterial,
-                           nameID: String) : Material(
-        materials.registry, nameID) {
-    val plugin: VanillaBasics = materials.plugin
+abstract class VanillaItem(type: VanillaMaterialType) : Material(type.type) {
+    val materials = type.materials
+    val plugin = materials.plugin
 }

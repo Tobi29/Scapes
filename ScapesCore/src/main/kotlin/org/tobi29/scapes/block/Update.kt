@@ -68,13 +68,13 @@ abstract class Update(val type: UpdateType) {
                            terrain: TerrainServer): Boolean
 
     companion object {
-        fun of(registry: GameRegistry,
+        fun of(registry: Registries,
                id: Int) = registry.get<UpdateType>("Core", "Update")[id]
 
-        fun of(registry: GameRegistry,
+        fun of(registry: Registries,
                id: String) = registry.get<UpdateType>("Core", "Update")[id]
 
-        fun make(registry: GameRegistry,
+        fun make(registry: Registries,
                  x: Int,
                  y: Int,
                  z: Int,

@@ -31,7 +31,7 @@ class MobFlyingBlockServer(type: EntityType<*, *>,
                            world: WorldServer) : MobServer(
         type, world, Vector3d.ZERO, Vector3d.ZERO,
         AABB(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)) {
-    private val item = ItemStack(registry)
+    private val item = ItemStack(world.plugins)
     private var time = 0.0
 
     fun setType(item: ItemStack) {

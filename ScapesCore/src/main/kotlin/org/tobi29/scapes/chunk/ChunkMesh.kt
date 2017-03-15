@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.tobi29.scapes.chunk.data
+
+package org.tobi29.scapes.chunk
 
 import org.tobi29.scapes.block.models.SmoothLight
 import org.tobi29.scapes.chunk.terrain.TerrainClient
@@ -25,7 +26,7 @@ import org.tobi29.scapes.engine.graphics.VertexType
 import org.tobi29.scapes.engine.utils.math.*
 import java.util.*
 
-class ChunkMesh(private val arrays: ChunkMesh.VertexArrays) {
+class ChunkMesh(private val arrays: VertexArrays) {
     private val triple = SmoothLight.FloatTriple()
     private val aabb = AABB(Double.NaN, Double.NaN, Double.NaN, Double.NaN,
             Double.NaN, Double.NaN)

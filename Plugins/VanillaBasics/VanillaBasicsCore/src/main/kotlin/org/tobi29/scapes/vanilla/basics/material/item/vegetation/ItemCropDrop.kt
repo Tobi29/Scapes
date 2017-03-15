@@ -17,15 +17,16 @@
 package org.tobi29.scapes.vanilla.basics.material.item.vegetation
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.vanilla.basics.material.CropType
 import org.tobi29.scapes.vanilla.basics.material.ItemResearch
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.item.ItemSimpleData
 
-class ItemCrop(materials: VanillaMaterial,
-               private val cropRegistry: Registries.Registry<CropType>) : ItemSimpleData(
-        materials, "vanilla.basics.item.Crop"), ItemResearch {
+class ItemCropDrop(type: VanillaMaterialType) : ItemSimpleData(
+        type), ItemResearch {
+    val cropRegistry = plugins.registry.get<CropType>("VanillaBasics",
+            "CropType")
+
     override fun types(): Int {
         return cropRegistry.values().size
     }
@@ -43,7 +44,7 @@ class ItemCrop(materials: VanillaMaterial,
     }
 
     override fun identifiers(item: ItemStack): Array<String> {
-        return arrayOf("vanilla.basics.item.Crop",
-                "vanilla.basics.item.Crop." + materials.crop.name(item))
+        return arrayOf("vanilla.basics.item.CropDrop",
+                "vanilla.basics.item.CropDrop." + materials.crop.name(item))
     }
 }

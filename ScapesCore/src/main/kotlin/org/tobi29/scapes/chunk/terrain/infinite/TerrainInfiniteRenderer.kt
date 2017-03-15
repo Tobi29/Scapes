@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
-import org.tobi29.scapes.chunk.data.ChunkMesh
+import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.TerrainRenderer
 import org.tobi29.scapes.engine.graphics.*
@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
                               chunkDistance: Double,
                               private val sortedLocations: List<Vector2i>) : TerrainRenderer {
-    private val chunkDistanceMax: Double
+    private val chunkDistanceMax = chunkDistance * 16.0 - 16.0
     private val chunks = ArrayList<TerrainInfiniteRendererChunk>()
     private val frame: Model
     private val taskLock = TaskLock()
@@ -54,7 +54,6 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
     private var cullingPool2 = Pool({ VisibleUpdate() })
 
     init {
-        chunkDistanceMax = chunkDistance * 16.0 - 16.0
         val min = 0.001f
         val max = 0.999f
         frame = createVI(terrain.world.game.engine,
@@ -111,7 +110,6 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
         val terrainChunk = chunk.chunk()
         val x = terrainChunk.pos.x
         val y = terrainChunk.pos.y
-        val terrain = terrainChunk.terrain2
         if (!checkLoaded(terrain, x - 1, y - 1)) {
             return false
         }
@@ -448,7 +446,7 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
             if (terrainChunk.isEmpty(i)) {
                 chunk.setSolid(i, false)
             } else {
-                val terrain = chunk.chunk().terrain2
+                val terrain = chunk.chunk().terrain
                 val air = terrain.air
                 section.init(terrain, terrainChunk.pos)
                 val bx = terrainChunk.posBlock.x

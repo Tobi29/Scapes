@@ -20,8 +20,7 @@ import org.tobi29.scapes.block.TerrainTexture
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelComplex
-import org.tobi29.scapes.chunk.data.ChunkMesh
-import org.tobi29.scapes.chunk.terrain.Terrain
+import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.TerrainServer
@@ -31,13 +30,12 @@ import org.tobi29.scapes.engine.utils.filterMap
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityBloomeryClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityBloomeryServer
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer
 import java.util.*
 
-class BlockBloomery(materials: VanillaMaterial) : VanillaBlockContainer<EntityBloomeryClient, EntityBloomeryServer>(
-        materials, "vanilla.basics.block.Bloomery",
-        materials.plugin.entityTypes.bloomery) {
+class BlockBloomery(type: VanillaMaterialType) : VanillaBlockContainer<EntityBloomeryClient, EntityBloomeryServer>(
+        type, type.materials.plugin.entityTypes.bloomery) {
     private var textureSide: TerrainTexture? = null
     private var textureInside: TerrainTexture? = null
     private var model: BlockModel? = null
@@ -66,12 +64,7 @@ class BlockBloomery(materials: VanillaMaterial) : VanillaBlockContainer<EntityBl
         return textureSide
     }
 
-    override fun isTransparent(terrain: Terrain,
-                               x: Int,
-                               y: Int,
-                               z: Int): Boolean {
-        return true
-    }
+    override fun isTransparent(data: Int) = true
 
     override fun connectStage(terrain: TerrainClient,
                               x: Int,

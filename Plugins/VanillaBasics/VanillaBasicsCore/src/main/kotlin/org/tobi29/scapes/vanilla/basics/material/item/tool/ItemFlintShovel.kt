@@ -16,11 +16,9 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item.tool
 
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
-class ItemFlintShovel(materials: VanillaMaterial) : ItemFlintTool(materials,
-        "vanilla.basics.item.FlintShovel") {
-
+class ItemFlintShovel(type: VanillaMaterialType) : ItemMetalTool(type) {
     override fun type(): String {
         return "Shovel"
     }

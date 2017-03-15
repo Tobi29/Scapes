@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.vanilla.basics
 
-import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.EnvironmentServer
 import org.tobi29.scapes.chunk.EnvironmentType
@@ -28,6 +27,7 @@ import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.server.MobPlayerServer
+import org.tobi29.scapes.plugins.Plugins
 import org.tobi29.scapes.plugins.WorldType
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.connection.PlayerConnection
@@ -167,7 +167,8 @@ class VanillaBasics : WorldType {
         registry.add("VanillaBasics", "CraftingRecipe", 0, Int.MAX_VALUE)
     }
 
-    override fun register(registry: GameRegistry) {
+    override fun register(plugins: Plugins) {
+        val registry = plugins.registry
         registry.get<EnvironmentType>("Core", "Environment").run {
             environmentOverworld = reg("vanilla.basics.Overworld") {
                 EnvironmentType(it, ::EnvironmentOverworldClient, { t, w ->
@@ -184,7 +185,7 @@ class VanillaBasics : WorldType {
         stoneTypes = VanillaBasicsStones(stoneRegistry::reg)
         entityTypes = VanillaBasicsEntities(
                 registry.get<EntityType<*, *>>("Core", "Entity"))
-        materials = VanillaMaterial(this, registry)
+        materials = VanillaMaterial(this, plugins)
         registerUpdates(registry)
         registerPackets(registry)
         registerOres()
@@ -193,7 +194,7 @@ class VanillaBasics : WorldType {
         registerDecorators()
     }
 
-    override fun init(registry: GameRegistry) {
+    override fun init(registry: Registries) {
         biomeDecoratorOverlays.values.forEach { it ->
             biomeDecorators.values.forEach { i ->
                 if (i.isEmpty()) {

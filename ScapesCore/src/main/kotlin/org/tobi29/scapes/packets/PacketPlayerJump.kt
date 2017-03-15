@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.packets
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -26,7 +26,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection
 class PacketPlayerJump : PacketAbstract, PacketServer {
     constructor(type: PacketType) : super(type)
 
-    constructor(registry: GameRegistry) : this(
+    constructor(registry: Registries) : this(
             Packet.make(registry, "core.packet.PlayerJump"))
 
     override fun sendServer(client: ClientConnection,

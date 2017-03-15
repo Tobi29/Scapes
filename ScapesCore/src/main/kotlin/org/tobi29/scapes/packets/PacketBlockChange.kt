@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.packets
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -47,7 +47,7 @@ open class PacketBlockChange : PacketAbstract, PacketClient {
         this.data = data
     }
 
-    constructor(registry: GameRegistry,
+    constructor(registry: Registries,
                 x: Int,
                 y: Int,
                 z: Int,

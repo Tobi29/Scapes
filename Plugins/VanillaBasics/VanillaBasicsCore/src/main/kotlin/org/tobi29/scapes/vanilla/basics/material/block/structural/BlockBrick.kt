@@ -18,12 +18,10 @@ package org.tobi29.scapes.vanilla.basics.material.block.structural
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.block.TerrainTextureRegistry
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.BlockSimple
 
-class BlockBrick(materials: VanillaMaterial) : BlockSimple(materials,
-        "vanilla.basics.block.Brick") {
-
+class BlockBrick(type: VanillaMaterialType) : BlockSimple(type) {
     override fun resistance(item: ItemStack,
                             data: Int): Double {
         return (if ("Pickaxe" == item.material().toolType(

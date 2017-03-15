@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.block
 
-import org.tobi29.scapes.chunk.data.ChunkMesh
+import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
@@ -30,7 +30,7 @@ import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
 import java.util.*
 
-class BlockAir(registry: GameRegistry) : BlockType(registry, "core.block.Air") {
+class BlockAir(type: MaterialType) : BlockType(type) {
 
     override fun addPointerCollision(data: Int,
                                      pointerPanes: Pool<PointerPane>,
@@ -100,26 +100,11 @@ class BlockAir(registry: GameRegistry) : BlockType(registry, "core.block.Air") {
         return null
     }
 
-    override fun isSolid(terrain: Terrain,
-                         x: Int,
-                         y: Int,
-                         z: Int): Boolean {
-        return false
-    }
+    override fun isSolid(data: Int) = false
 
-    override fun isTransparent(terrain: Terrain,
-                               x: Int,
-                               y: Int,
-                               z: Int): Boolean {
-        return true
-    }
+    override fun isTransparent(data: Int) = true
 
-    override fun lightTrough(terrain: Terrain,
-                             x: Int,
-                             y: Int,
-                             z: Int): Byte {
-        return -1
-    }
+    override fun lightTrough(data: Int) = -1
 
     override fun connectStage(terrain: TerrainClient,
                               x: Int,
@@ -142,10 +127,6 @@ class BlockAir(registry: GameRegistry) : BlockType(registry, "core.block.Air") {
                                 lod: Boolean) {
     }
 
-    override fun itemID(): Int {
-        return 0
-    }
-
     override fun registerTextures(registry: TerrainTextureRegistry) {
     }
 
@@ -162,11 +143,7 @@ class BlockAir(registry: GameRegistry) : BlockType(registry, "core.block.Air") {
                                  shader: Shader) {
     }
 
-    override fun name(item: ItemStack): String {
-        return ""
-    }
+    override fun name(item: ItemStack) = ""
 
-    override fun maxStackSize(item: ItemStack): Int {
-        return Int.MAX_VALUE
-    }
+    override fun maxStackSize(item: ItemStack) = Int.MAX_VALUE
 }

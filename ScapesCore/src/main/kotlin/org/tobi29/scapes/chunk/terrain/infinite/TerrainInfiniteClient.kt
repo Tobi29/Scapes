@@ -20,6 +20,7 @@ import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.engine.utils.math.sqr
+import org.tobi29.scapes.engine.utils.math.vector.MutableVector2i
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
 import org.tobi29.scapes.engine.utils.math.vector.lengthSqr
@@ -28,19 +29,29 @@ import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.packets.PacketBlockChange
+import org.tobi29.scapes.terrain.infinite.TerrainInfiniteChunkManagerStatic
 import kotlin.coroutines.experimental.buildSequence
 
-class TerrainInfiniteClient(override val world: WorldClient,
-                            loadingRadius: Int,
-                            zSize: Int,
-                            taskExecutor: TaskExecutor,
-                            air: BlockType) : TerrainInfinite<EntityClient>(
-        zSize, taskExecutor, air, air, world.registry), TerrainClient {
+class TerrainInfiniteClient private constructor(override val world: WorldClient,
+                                                loadingRadius: Int,
+                                                zSize: Int,
+                                                taskExecutor: TaskExecutor,
+                                                air: BlockType,
+                                                private val center: MutableVector2i) : TerrainInfinite<EntityClient, TerrainInfiniteChunkClient>(
+        zSize, taskExecutor, air, air, world.registry,
+        TerrainInfiniteChunkManagerStatic<TerrainInfiniteChunkClient>(
+                center, loadingRadius)), TerrainClient {
     override val renderer: TerrainInfiniteRenderer
     private val sortedLocations: List<Vector2i>
-    private val chunkManager = TerrainInfiniteChunkManagerClient(loadingRadius)
     private val joiner: Joiner
     private var requestedChunks = 0
+
+    constructor(world: WorldClient,
+                loadingRadius: Int,
+                zSize: Int,
+                taskExecutor: TaskExecutor,
+                air: BlockType) : this(world, loadingRadius, zSize,
+            taskExecutor, air, MutableVector2i())
 
     init {
         sortedLocations = buildSequence {
@@ -93,11 +104,12 @@ class TerrainInfiniteClient(override val world: WorldClient,
         profilerSection("Chunks") {
             chunkManager.stream().forEach { it.updateClient(delta) }
         }
-        profilerSection("Center") {
+        profilerSection("ChunkManager") {
             val pos = world.player.getCurrentPos()
             val xx = pos.intX() shr 4
             val yy = pos.intY() shr 4
-            if (chunkManager.setCenter(xx, yy) { it.dispose() }) {
+            center.set(xx, yy)
+            if (chunkManager.update()) {
                 joiner.wake()
             }
         }
@@ -137,25 +149,8 @@ class TerrainInfiniteClient(override val world: WorldClient,
         world.entityRemoved(entity)
     }
 
-    override fun hasChunk(x: Int,
-                          y: Int): Boolean {
-        return chunkManager.has(x, y)
-    }
-
-    override fun chunk(x: Int,
-                       y: Int): TerrainInfiniteChunkClient? {
-        return chunkManager[x, y]
-    }
-
-    override fun chunkNoLoad(x: Int,
-                             y: Int): TerrainInfiniteChunkClient? {
-        return chunkManager[x, y]
-    }
-
-    override fun loadedChunks() = chunkManager.stream()
-
-    fun addChunk(x: Int,
-                 y: Int): TerrainInfiniteChunkClient? {
+    override fun addChunk(x: Int,
+                          y: Int): TerrainInfiniteChunkClient? {
         if (x < cxMin || x > cxMax || y < cyMin || y > cyMax) {
             return null
         }

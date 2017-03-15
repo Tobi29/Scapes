@@ -24,7 +24,6 @@ import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.generator.GeneratorOutput
-import org.tobi29.scapes.chunk.terrain.TerrainChunk
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.io.tag.TagMap
 import org.tobi29.scapes.engine.utils.limit
@@ -36,6 +35,8 @@ import org.tobi29.scapes.engine.utils.task.ThreadJoiner
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.server.format.TerrainInfiniteFormat
+import org.tobi29.scapes.terrain.TerrainChunk
+import org.tobi29.scapes.terrain.infinite.TerrainInfiniteChunkManagerDynamic
 import java.io.IOException
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -46,12 +47,12 @@ class TerrainInfiniteServer(override val world: WorldServer,
                             private val format: TerrainInfiniteFormat,
                             override val generator: ChunkGenerator,
                             internal val populators: Array<ChunkPopulator>,
-                            air: BlockType) : TerrainInfinite<EntityServer>(
+                            air: BlockType) : TerrainInfinite<EntityServer, TerrainInfiniteChunkServer>(
         zSize, world.taskExecutor, air, air,
-        world.registry), TerrainServer.TerrainMutable {
+        world.registry,
+        TerrainInfiniteChunkManagerDynamic<TerrainInfiniteChunkServer>()), TerrainServer.TerrainMutable {
     private val blockChanges = ConcurrentLinkedQueue<(TerrainServer.TerrainMutable) -> Unit>()
     private val chunkUnloadQueue = ConcurrentLinkedQueue<TerrainInfiniteChunkServer>()
-    private val chunkManager = TerrainInfiniteChunkManagerServer()
     private val generatorOutput = GeneratorOutput(zSize)
     private val loadJoiner: ThreadJoiner
     private val updateJoiner: ThreadJoiner
@@ -114,7 +115,7 @@ class TerrainInfiniteServer(override val world: WorldServer,
                                 TerrainInfiniteChunkServer::finish)
                         val time = System.currentTimeMillis() - 2000
                         chunkManager.stream().filter { chunk ->
-                            chunk.lastAccess() < time && !requiredChunks.contains(
+                            chunk.lastAccess < time && !requiredChunks.contains(
                                     chunk.pos)
                         }.forEach { chunkUnloadQueue.add(it) }
                         chunkManager.stream().forEach { it.updateAdjacent() }
@@ -167,30 +168,8 @@ class TerrainInfiniteServer(override val world: WorldServer,
         world.entityRemoved(entity)
     }
 
-    override fun hasChunk(x: Int,
-                          y: Int): Boolean {
-        return chunkManager.has(x, y)
-    }
-
-    override fun chunk(x: Int,
-                       y: Int): TerrainInfiniteChunkServer? {
-        val chunk = chunkManager[x, y]
-        if (chunk != null) {
-            chunk.accessed()
-            return chunk
-        }
-        return addChunk(x, y)
-    }
-
-    override fun chunkNoLoad(x: Int,
-                             y: Int): TerrainInfiniteChunkServer? {
-        return chunkManager[x, y]
-    }
-
-    override fun loadedChunks() = chunkManager.stream()
-
-    fun addChunk(x: Int,
-                 y: Int): TerrainInfiniteChunkServer? {
+    override fun addChunk(x: Int,
+                          y: Int): TerrainInfiniteChunkServer? {
         return addChunks(listOf(Vector2i(x, y)))[0]
     }
 
@@ -252,7 +231,7 @@ class TerrainInfiniteServer(override val world: WorldServer,
             val random = ThreadLocalRandom.current()
             for (spawner in spawners) {
                 if (world.mobs(
-                        spawner.creatureType()) < chunkManager.chunks() * spawner.mobsPerChunk()) {
+                        spawner.creatureType()) < chunkManager.chunks * spawner.mobsPerChunk()) {
                     for (chunk in chunkManager.stream()) {
                         if (random.nextInt(
                                 spawner.chunkChance()) == 0 && chunk.isLoaded) {
@@ -286,6 +265,9 @@ class TerrainInfiniteServer(override val world: WorldServer,
                     }
                 }
             }
+        }
+        profilerSection("ChunkManager") {
+            chunkManager.update()
         }
     }
 
@@ -453,7 +435,7 @@ class TerrainInfiniteServer(override val world: WorldServer,
         val x = chunk.pos.x
         val y = chunk.pos.y
         chunkManager.remove(x, y)
-        val tagStructure = chunk.dispose()
+        val tagStructure = chunk.disposeAndWrite()
         while (chunkUnloadQueue.remove(chunk)) {
             logger.warn { "Chunk queued for unloading twice!" }
         }

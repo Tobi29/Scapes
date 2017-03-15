@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.entity.server
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.angleDiff
 import org.tobi29.scapes.engine.utils.math.clamp
@@ -28,7 +28,7 @@ import org.tobi29.scapes.packets.*
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
-class MobPositionSenderServer(private val registry: GameRegistry,
+class MobPositionSenderServer(private val registry: Registries,
                               pos: Vector3d,
                               private val packetHandler: (PacketBoth) -> Unit) {
     private val sentPosRelative: MutableVector3d
@@ -42,7 +42,7 @@ class MobPositionSenderServer(private val registry: GameRegistry,
     private var swimming = false
     private var init = false
 
-    constructor(registry: GameRegistry,
+    constructor(registry: Registries,
                 packetHandler: (PacketBoth) -> Unit) : this(registry,
             Vector3d.ZERO, packetHandler)
 

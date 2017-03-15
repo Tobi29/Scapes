@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteClient
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteServer
 import org.tobi29.scapes.client.connection.ClientConnection
@@ -36,7 +36,7 @@ class PacketRequestChunk : PacketAbstract, PacketBoth {
         this.y = y
     }
 
-    constructor(registry: GameRegistry,
+    constructor(registry: Registries,
                 x: Int,
                 y: Int) : this(
             Packet.make(registry, "core.packet.RequestChunk"), x, y)

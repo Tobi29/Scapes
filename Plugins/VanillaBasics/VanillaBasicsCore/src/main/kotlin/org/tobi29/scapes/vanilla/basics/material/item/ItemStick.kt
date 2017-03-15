@@ -23,10 +23,9 @@ import org.tobi29.scapes.block.models.ItemModel
 import org.tobi29.scapes.block.models.ItemModelSimple
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
-class ItemStick(materials: VanillaMaterial) : VanillaItem(materials,
-        "vanilla.basics.item.Stick") {
+class ItemStick(type: VanillaMaterialType) : VanillaItem(type) {
     private var texture: TerrainTexture? = null
     private var model: ItemModel? = null
 

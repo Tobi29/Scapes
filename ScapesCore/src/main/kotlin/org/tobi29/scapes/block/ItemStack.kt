@@ -17,17 +17,18 @@ package org.tobi29.scapes.block
 
 import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.min
+import org.tobi29.scapes.plugins.Plugins
 
 class ItemStack(private var material: Material,
                 private var data: Int,
                 private var amount: Int = 1,
                 private var metaData: MutableTagMap = MutableTagMap()) {
-    private val registry = material.registry()
+    private val plugins = material.plugins
 
     constructor(item: ItemStack) : this(item.material, item.data, item.amount,
             item.metaData.toTag().toMutTag())
 
-    constructor(registry: GameRegistry) : this(registry.air, 0, 0)
+    constructor(plugins: Plugins) : this(plugins.air, 0, 0)
 
     constructor(material: Material,
                 data: Int,
@@ -84,7 +85,7 @@ class ItemStack(private var material: Material,
     }
 
     fun clear() {
-        material = registry.air
+        material = plugins.air
         data = 0
         amount = 0
         metaData = MutableTagMap()
@@ -102,7 +103,7 @@ class ItemStack(private var material: Material,
                 amount + this.amount > min(material.maxStackSize(this),
                         add.material.maxStackSize(add)) ||
                 metaData != add.metaData) &&
-                material != registry.air &&
+                material != plugins.air &&
                 this.amount > 0) {
             return 0
         }
@@ -116,14 +117,14 @@ class ItemStack(private var material: Material,
     fun canTake(take: ItemStack,
                 amount: Int): Int {
         if (take.material !== material || take.data != data ||
-                material === registry.air || this.amount <= 0) {
+                material === plugins.air || this.amount <= 0) {
             return 0
         }
         return min(this.amount, amount)
     }
 
     fun write(map: ReadWriteTagMap) {
-        map["Type"] = material.itemID()
+        map["Type"] = material.id
         map["Data"] = data
         map["Amount"] = amount
         map["MetaData"] = metaData.toTag()
@@ -131,7 +132,7 @@ class ItemStack(private var material: Material,
 
     fun read(map: TagMap) {
         map["Type"]?.toInt()?.let {
-            material = registry.get<Material>("Core", "Material")[it]
+            material = plugins.registry.get<Material>("Core", "Material")[it]
         }
         map["Data"]?.toInt()?.let { data = it }
         map["Amount"]?.toInt()?.let { amount = it }
@@ -170,7 +171,7 @@ class ItemStack(private var material: Material,
     fun take(amount: Int = Int.MAX_VALUE): ItemStack? {
         var takeAmount = amount
         takeAmount = min(this.amount, takeAmount)
-        if (material === registry.air || takeAmount <= 0) {
+        if (material == plugins.air || takeAmount <= 0) {
             return null
         }
         val give = ItemStack(this)
@@ -182,8 +183,8 @@ class ItemStack(private var material: Material,
 
     fun take(take: ItemStack,
              amount: Int = take.amount): ItemStack? {
-        if (take.material !== material || take.data != data ||
-                material === registry.air || this.amount <= 0) {
+        if (take.material != material || take.data != data ||
+                material == plugins.air || this.amount <= 0) {
             return null
         }
         val give = ItemStack(this)
@@ -195,14 +196,14 @@ class ItemStack(private var material: Material,
     }
 
     val isEmpty: Boolean
-        get() = amount <= 0 || material === registry.air
+        get() = amount <= 0 || material == plugins.air
 
     fun name(): String {
         return material.name(this)
     }
 
     private fun checkEmpty() {
-        if (amount <= 0 || material === registry.air) {
+        if (amount <= 0 || material == plugins.air) {
             clear()
         }
     }

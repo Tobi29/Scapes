@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.block
 
-import org.tobi29.scapes.chunk.data.ChunkMesh
+import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
@@ -29,11 +29,10 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.math.vector.plus
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
+import org.tobi29.scapes.terrain.VoxelType
 import java.util.*
 
-abstract class BlockType protected constructor(registry: GameRegistry,
-                                               nameID: String) : Material(
-        registry, nameID) {
+abstract class BlockType(type: MaterialType) : Material(type), VoxelType {
     fun block(data: Int): Long {
         return (id.toLong() shl 32) or data.toLong()
     }
@@ -226,35 +225,6 @@ abstract class BlockType protected constructor(registry: GameRegistry,
     open val isLiquid: Boolean
         get() = false
 
-    open fun isSolid(terrain: Terrain,
-                     x: Int,
-                     y: Int,
-                     z: Int): Boolean {
-        return true
-    }
-
-    open fun isTransparent(terrain: Terrain,
-                           x: Int,
-                           y: Int,
-                           z: Int): Boolean {
-        return false
-    }
-
-    open fun lightEmit(terrain: Terrain,
-                       x: Int,
-                       y: Int,
-                       z: Int,
-                       data: Int): Byte {
-        return 0
-    }
-
-    open fun lightTrough(terrain: Terrain,
-                         x: Int,
-                         y: Int,
-                         z: Int): Byte {
-        return -15
-    }
-
     open fun connectStage(terrain: TerrainClient,
                           x: Int,
                           y: Int,
@@ -280,10 +250,6 @@ abstract class BlockType protected constructor(registry: GameRegistry,
                     y: Int,
                     z: Int,
                     data: Int) {
-    }
-
-    open fun causesTileUpdate(): Boolean {
-        return false
     }
 
     companion object {

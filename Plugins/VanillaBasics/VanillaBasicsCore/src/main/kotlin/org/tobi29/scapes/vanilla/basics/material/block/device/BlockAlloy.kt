@@ -22,7 +22,7 @@ import org.tobi29.scapes.block.TerrainTexture
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelComplex
-import org.tobi29.scapes.chunk.data.ChunkMesh
+import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
@@ -34,13 +34,12 @@ import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.PointerPane
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityAlloyClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityAlloyServer
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer
 import java.util.*
 
-class BlockAlloy(materials: VanillaMaterial) : VanillaBlockContainer<EntityAlloyClient, EntityAlloyServer>(
-        materials, "vanilla.basics.block.Alloy",
-        materials.plugin.entityTypes.alloy) {
+class BlockAlloy(type: VanillaMaterialType) : VanillaBlockContainer<EntityAlloyClient, EntityAlloyServer>(
+        type, type.materials.plugin.entityTypes.alloy) {
     private var texture: TerrainTexture? = null
     private var model: BlockModel? = null
 
@@ -106,19 +105,9 @@ class BlockAlloy(materials: VanillaMaterial) : VanillaBlockContainer<EntityAlloy
         return texture
     }
 
-    override fun isTransparent(terrain: Terrain,
-                               x: Int,
-                               y: Int,
-                               z: Int): Boolean {
-        return true
-    }
+    override fun isTransparent(data: Int) = true
 
-    override fun lightTrough(terrain: Terrain,
-                             x: Int,
-                             y: Int,
-                             z: Int): Byte {
-        return -1
-    }
+    override fun lightTrough(data: Int) = -1
 
     override fun connectStage(terrain: TerrainClient,
                               x: Int,

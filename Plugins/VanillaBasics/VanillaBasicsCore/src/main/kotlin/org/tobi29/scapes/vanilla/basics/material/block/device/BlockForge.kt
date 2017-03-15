@@ -21,8 +21,7 @@ import org.tobi29.scapes.block.TerrainTexture
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock
-import org.tobi29.scapes.chunk.data.ChunkMesh
-import org.tobi29.scapes.chunk.terrain.Terrain
+import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.engine.graphics.GL
@@ -30,12 +29,11 @@ import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityForgeClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityForgeServer
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer
 
-class BlockForge(materials: VanillaMaterial) : VanillaBlockContainer<EntityForgeClient, EntityForgeServer>(
-        materials, "vanilla.basics.block.Forge",
-        materials.plugin.entityTypes.forge) {
+class BlockForge(type: VanillaMaterialType) : VanillaBlockContainer<EntityForgeClient, EntityForgeServer>(
+        type, type.materials.plugin.entityTypes.forge) {
     private var textureOn: TerrainTexture? = null
     private var textureOff: TerrainTexture? = null
     private var modelOn: BlockModel? = null
@@ -65,13 +63,7 @@ class BlockForge(materials: VanillaMaterial) : VanillaBlockContainer<EntityForge
         return if (data > 0) textureOn else textureOff
     }
 
-    override fun lightEmit(terrain: Terrain,
-                           x: Int,
-                           y: Int,
-                           z: Int,
-                           data: Int): Byte {
-        return if (data > 0) 15.toByte() else 0
-    }
+    override fun lightEmit(data: Int) = if (data > 0) 15.toByte() else 0
 
     override fun addToChunkMesh(mesh: ChunkMesh,
                                 meshAlpha: ChunkMesh,

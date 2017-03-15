@@ -17,18 +17,17 @@
 package org.tobi29.scapes.vanilla.basics.material.item.food
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.vanilla.basics.material.CropType
 import org.tobi29.scapes.vanilla.basics.material.ItemDefaultHeatable
 import org.tobi29.scapes.vanilla.basics.material.ItemResearch
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.item.ItemSimpleData
 
-class ItemDough(materials: VanillaMaterial,
-                private val cropRegistry: Registries.Registry<CropType>) : ItemSimpleData(
-        materials,
-        "vanilla.basics.item.Dough"), ItemDefaultHeatable, ItemResearch {
+class ItemDough(type: VanillaMaterialType) : ItemSimpleData(
+        type), ItemDefaultHeatable, ItemResearch {
+    val cropRegistry = plugins.registry.get<CropType>("VanillaBasics",
+            "CropType")
 
     override fun types(): Int {
         return cropRegistry.values().size

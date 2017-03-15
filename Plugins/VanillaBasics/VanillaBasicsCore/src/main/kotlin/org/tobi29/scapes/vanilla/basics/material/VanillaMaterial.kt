@@ -15,9 +15,10 @@
  */
 package org.tobi29.scapes.vanilla.basics.material
 
-import org.tobi29.scapes.block.BlockType
-import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.Material
+import org.tobi29.scapes.block.MaterialType
+import org.tobi29.scapes.plugins.Plugins
+import org.tobi29.scapes.plugins.reg
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.block.BlockLava
 import org.tobi29.scapes.vanilla.basics.material.block.BlockSnow
@@ -33,174 +34,110 @@ import org.tobi29.scapes.vanilla.basics.material.block.vegetation.*
 import org.tobi29.scapes.vanilla.basics.material.item.*
 import org.tobi29.scapes.vanilla.basics.material.item.food.*
 import org.tobi29.scapes.vanilla.basics.material.item.tool.*
-import org.tobi29.scapes.vanilla.basics.material.item.vegetation.ItemCrop
+import org.tobi29.scapes.vanilla.basics.material.item.vegetation.ItemCropDrop
 import org.tobi29.scapes.vanilla.basics.material.item.vegetation.ItemGrassBundle
 import org.tobi29.scapes.vanilla.basics.material.item.vegetation.ItemSeed
 
 class VanillaMaterial(val plugin: VanillaBasics,
-                      val registry: GameRegistry) {
-    val air = registry.air
-    val anvil: BlockType
-    val alloy: BlockType
-    val baked: Material
-    val bedrock: BlockType
-    val bellows: BlockType
-    val bloomery: BlockType
-    val brick: BlockType
-    val bush: BlockType
-    val chest: BlockType
-    val coal: Material
-    val cobblestone: BlockType
-    val cobblestoneCracked: BlockType
-    val cobblestoneMossy: BlockType
-    val cookedMeat: Material
-    val craftingTable: BlockType
-    val crop: BlockType
-    val cropDrop: Material
-    val dirt: BlockType
-    val dough: Material
-    val farmland: BlockFarmland
-    val flintAxe: ItemFlintTool
-    val flintHammer: ItemFlintTool
-    val flintHoe: ItemFlintTool
-    val flintPickaxe: ItemFlintTool
-    val flintSaw: ItemFlintTool
-    val flintShovel: ItemFlintTool
-    val flintSword: ItemFlintTool
-    val flower: BlockType
-    val forge: BlockType
-    val fertilizer: Material
-    val furnace: BlockType
-    val grain: Material
-    val glass: BlockType
-    val grass: BlockType
-    val grassBundle: Material
-    val hyperBomb: BlockType
-    val ingot: ItemIngot
-    val lava: BlockType
-    val leaves: BlockType
-    val log: BlockType
-    val meat: Material
-    val metalAxe: ItemMetalTool
-    val metalHammer: ItemMetalTool
-    val metalHoe: ItemMetalTool
-    val metalPickaxe: ItemMetalTool
-    val metalSaw: ItemMetalTool
-    val metalShovel: ItemMetalTool
-    val metalSword: ItemMetalTool
-    val mold: Material
-    val oreBismuthinite: BlockType
-    val oreCassiterite: BlockType
-    val oreChalcocite: BlockType
-    val oreChunk: Material
-    val oreCoal: BlockType
-    val oreGold: BlockType
-    val oreMagnetite: BlockType
-    val orePyrite: BlockType
-    val oreSilver: BlockType
-    val oreSphalerite: BlockType
-    val quern: BlockType
-    val researchTable: BlockType
-    val sand: BlockType
-    val sandstone: BlockType
-    val sapling: BlockType
-    val snow: BlockType
-    val stick: Material
-    val stoneRaw: BlockType
-    val stoneTotem: BlockType
-    val straw: BlockType
-    val stoneRock: BlockType
-    val seed: Material
-    val string: Material
-    val torch: BlockType
-    val water: BlockType
-    val wood: BlockType
+                      val plugins: Plugins) {
+    val air = plugins.air
+    val anvil = reg("vanilla.basics.block.Anvil", ::BlockAnvil)
+    val alloy = reg("vanilla.basics.block.Alloy", ::BlockAlloy)
+    val baked = reg("vanilla.basics.item.Baked", ::ItemBaked)
+    val bedrock = reg("vanilla.basics.block.Bedrock", ::BlockBedrock)
+    val bellows = reg("vanilla.basics.block.Bellows", ::BlockBellows)
+    val bloomery = reg("vanilla.basics.block.Bloomery", ::BlockBloomery)
+    val brick = reg("vanilla.basics.block.Brick", ::BlockBrick)
+    val bush = reg("vanilla.basics.block.Bush", ::BlockBush)
+    val chest = reg("vanilla.basics.block.Chest", ::BlockChest)
+    val coal = reg("vanilla.basics.item.Coal", ::ItemCoal)
+    val cobblestone = reg("vanilla.basics.block.Cobblestone",
+            ::BlockCobblestone)
+    val cobblestoneCracked = reg("vanilla.basics.block.",
+            ::BlockCobblestoneCracked)
+    val cobblestoneMossy = reg("vanilla.basics.block.CobblestoneMossy",
+            ::BlockCobblestoneMossy)
+    val cookedMeat = reg("vanilla.basics.item.CookedMeat", ::ItemCookedMeat)
+    val craftingTable = reg("vanilla.basics.block.CraftingTable",
+            ::BlockCraftingTable)
+    val crop = reg("vanilla.basics.block.Crop", ::BlockCrop)
+    val cropDrop = reg("vanilla.basics.item.CropDrop", ::ItemCropDrop)
+    val dirt = reg("vanilla.basics.block.Dirt", ::BlockDirt)
+    val dough = reg("vanilla.basics.item.Dough", ::ItemDough)
+    val farmland = reg("vanilla.basics.block.Farmland", ::BlockFarmland)
+    val flintAxe = reg("vanilla.basics.item.FlintAxe", ::ItemFlintAxe)
+    val flintHammer = reg("vanilla.basics.item.FlintHammer", ::ItemFlintHammer)
+    val flintHoe = reg("vanilla.basics.item.FlintHoe", ::ItemFlintHoe)
+    val flintPickaxe = reg("vanilla.basics.item.FlintPickaxe",
+            ::ItemFlintPickaxe)
+    val flintSaw = reg("vanilla.basics.item.FlintSaw", ::ItemFlintSaw)
+    val flintShovel = reg("vanilla.basics.item.FlintShovel", ::ItemFlintShovel)
+    val flintSword = reg("vanilla.basics.item.FlintSword", ::ItemFlintSword)
+    val flower = reg("vanilla.basics.block.Flower", ::BlockFlower)
+    val forge = reg("vanilla.basics.block.Forge", ::BlockForge)
+    val fertilizer = reg("vanilla.basics.item.Fertilizer", ::ItemFertilizer)
+    val furnace = reg("vanilla.basics.block.Furnace", ::BlockFurnace)
+    val grain = reg("vanilla.basics.item.Grain", ::ItemGrain)
+    val glass = reg("vanilla.basics.block.Glass", ::BlockGlass)
+    val grass = reg("vanilla.basics.block.Grass", ::BlockGrass)
+    val grassBundle = reg("vanilla.basics.item.GrassBundle", ::ItemGrassBundle)
+    val hyperBomb = reg("vanilla.basics.block.HyperBomb", ::BlockHyperBomb)
+    val ingot = reg("vanilla.basics.item.Ingot", ::ItemIngot)
+    val lava = reg("vanilla.basics.block.Lava", ::BlockLava)
+    val leaves = reg("vanilla.basics.block.Leaves", ::BlockLeaves)
+    val log = reg("vanilla.basics.block.Log", ::BlockLog)
+    val meat = reg("vanilla.basics.item.Meat", ::ItemMeat)
+    val metalAxe = reg("vanilla.basics.item.MetalAxe", ::ItemMetalAxe)
+    val metalHammer = reg("vanilla.basics.item.MetalHammer", ::ItemMetalHammer)
+    val metalHoe = reg("vanilla.basics.item.MetalHoe", ::ItemMetalHoe)
+    val metalPickaxe = reg("vanilla.basics.item.MetalPickaxe",
+            ::ItemMetalPickaxe)
+    val metalSaw = reg("vanilla.basics.item.MetalSaw", ::ItemMetalSaw)
+    val metalShovel = reg("vanilla.basics.item.MetalShovel", ::ItemMetalShovel)
+    val metalSword = reg("vanilla.basics.item.MetalSword", ::ItemMetalSword)
+    val mold = reg("vanilla.basics.item.Mold", ::ItemMold)
+    val oreBismuthinite = reg("vanilla.basics.block.OreBismuthinite",
+            ::BlockOreBismuthinite)
+    val oreCassiterite = reg("vanilla.basics.block.OreCassiterite",
+            ::BlockOreCassiterite)
+    val oreChalcocite = reg("vanilla.basics.block.OreChalcocite",
+            ::BlockOreChalcocite)
+    val oreChunk = reg("vanilla.basics.item.OreChunk", ::ItemOreChunk)
+    val oreCoal = reg("vanilla.basics.block.OreCoal", ::BlockOreCoal)
+    val oreGold = reg("vanilla.basics.block.OreGold", ::BlockOreGold)
+    val oreMagnetite = reg("vanilla.basics.block.OreMagnetite",
+            ::BlockOreMagnetite)
+    val orePyrite = reg("vanilla.basics.block.OrePyrite", ::BlockOrePyrite)
+    val oreSilver = reg("vanilla.basics.block.OreSilver", ::BlockOreSilver)
+    val oreSphalerite = reg("vanilla.basics.block.OreSphalerite",
+            ::BlockOreSphalerite)
+    val quern = reg("vanilla.basics.block.Quern", ::BlockQuern)
+    val researchTable = reg("vanilla.basics.block.ResearchTable",
+            ::BlockResearchTable)
+    val sand = reg("vanilla.basics.block.Sand", ::BlockSand)
+    val sandstone = reg("vanilla.basics.block.Sandstone", ::BlockSandstone)
+    val sapling = reg("vanilla.basics.block.Sapling", ::BlockSapling)
+    val snow = reg("vanilla.basics.block.Snow", ::BlockSnow)
+    val stick = reg("vanilla.basics.item.Stick", ::ItemStick)
+    val stoneRaw = reg("vanilla.basics.block.StoneRaw", ::BlockStoneRaw)
+    val stoneTotem = reg("vanilla.basics.block.StoneTotem", ::BlockStoneTotem)
+    val straw = reg("vanilla.basics.block.Straw", ::BlockStraw)
+    val stoneRock = reg("vanilla.basics.block.StoneRock", ::BlockStoneRock)
+    val seed = reg("vanilla.basics.item.Seed", ::ItemSeed)
+    val string = reg("vanilla.basics.item.String", ::ItemString)
+    val torch = reg("vanilla.basics.block.Torch", ::BlockTorch)
+    val water = reg("vanilla.basics.block.Water", ::BlockWater)
+    val wood = reg("vanilla.basics.block.Wood", ::BlockWood)
 
-    init {
-        val treeRegistry = registry.get<TreeType>("VanillaBasics", "TreeType")
-        val cropRegistry = registry.get<CropType>("VanillaBasics", "CropType")
-        val stoneRegistry = registry.get<StoneType>("VanillaBasics",
-                "StoneType")
-        anvil = register(BlockAnvil(this))
-        alloy = register(BlockAlloy(this))
-        baked = register(ItemBaked(this, cropRegistry))
-        bedrock = register(BlockBedrock(this))
-        bellows = register(BlockBellows(this))
-        bloomery = register(BlockBloomery(this))
-        brick = register(BlockBrick(this))
-        bush = register(BlockBush(this))
-        chest = register(BlockChest(this))
-        coal = register(ItemCoal(this))
-        cobblestone = register(BlockCobblestone(this, stoneRegistry))
-        cobblestoneCracked = register(
-                BlockCobblestoneCracked(this, stoneRegistry))
-        cobblestoneMossy = register(BlockCobblestoneMossy(this, stoneRegistry))
-        cookedMeat = register(ItemCookedMeat(this))
-        craftingTable = register(BlockCraftingTable(this))
-        crop = register(BlockCrop(this, cropRegistry))
-        cropDrop = register(ItemCrop(this, cropRegistry))
-        dirt = register(BlockDirt(this))
-        dough = register(ItemDough(this, cropRegistry))
-        farmland = register(BlockFarmland(this))
-        flower = register(BlockFlower(this))
-        forge = register(BlockForge(this))
-        fertilizer = register(ItemFertilizer(this))
-        furnace = register(BlockFurnace(this))
-        grain = register(ItemGrain(this, cropRegistry))
-        glass = register(BlockGlass(this))
-        grass = register(BlockGrass(this, cropRegistry))
-        grassBundle = register(ItemGrassBundle(this))
-        hyperBomb = register(BlockHyperBomb(this))
-        ingot = register(ItemIngot(this))
-        lava = register(BlockLava(this))
-        leaves = register(BlockLeaves(this, treeRegistry))
-        log = register(BlockLog(this, treeRegistry))
-        meat = register(ItemMeat(this))
-        metalAxe = register(ItemMetalAxe(this))
-        metalHammer = register(ItemMetalHammer(this))
-        metalHoe = register(ItemMetalHoe(this))
-        metalPickaxe = register(ItemMetalPickaxe(this))
-        metalSaw = register(ItemMetalSaw(this))
-        metalShovel = register(ItemMetalShovel(this))
-        metalSword = register(ItemMetalSword(this))
-        mold = register(ItemMold(this))
-        oreBismuthinite = register(BlockOreBismuthinite(this, stoneRegistry))
-        oreCassiterite = register(BlockOreCassiterite(this, stoneRegistry))
-        oreChalcocite = register(BlockOreChalcocite(this, stoneRegistry))
-        oreChunk = register(ItemOreChunk(this))
-        oreCoal = register(BlockOreCoal(this, stoneRegistry))
-        oreGold = register(BlockOreGold(this, stoneRegistry))
-        oreMagnetite = register(BlockOreMagnetite(this, stoneRegistry))
-        orePyrite = register(BlockOrePyrite(this, stoneRegistry))
-        oreSilver = register(BlockOreSilver(this, stoneRegistry))
-        oreSphalerite = register(BlockOreSphalerite(this, stoneRegistry))
-        quern = register(BlockQuern(this))
-        researchTable = register(BlockResearchTable(this))
-        sand = register(BlockSand(this))
-        sandstone = register(BlockSandstone(this))
-        sapling = register(BlockSapling(this, treeRegistry))
-        snow = register(BlockSnow(this))
-        stick = register(ItemStick(this))
-        straw = register(BlockStraw(this))
-        flintAxe = register(ItemFlintAxe(this))
-        flintHammer = register(ItemFlintHammer(this))
-        flintHoe = register(ItemFlintHoe(this))
-        flintPickaxe = register(ItemFlintPickaxe(this))
-        stoneRaw = register(BlockStoneRaw(this, stoneRegistry))
-        stoneRock = register(BlockStoneRock(this, stoneRegistry))
-        stoneTotem = register(BlockStoneTotem(this, stoneRegistry))
-        flintSaw = register(ItemFlintSaw(this))
-        flintShovel = register(ItemFlintShovel(this))
-        flintSword = register(ItemFlintSword(this))
-        seed = register(ItemSeed(this, cropRegistry))
-        string = register(ItemString(this))
-        torch = register(BlockTorch(this))
-        water = register(BlockWater(this))
-        wood = register(BlockWood(this, treeRegistry))
-    }
+    private fun <M : Material> reg(name: String,
+                                   block: (VanillaMaterialType) -> M) =
+            plugins.registry.get<Material>("Core", "Material").reg(name,
+                    plugins) { block(VanillaMaterialType(it, this)) }
+}
 
-    private fun <M : Material> register(material: M): M {
-        registry.registerMaterial(material)
-        return material
-    }
+data class VanillaMaterialType(val type: MaterialType,
+                               val materials: VanillaMaterial) {
+    val plugins get() = type.plugins
+    val id get() = type.id
+    val name get() = type.name
 }

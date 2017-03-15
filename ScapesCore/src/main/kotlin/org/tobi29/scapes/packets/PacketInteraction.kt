@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.server.InvalidPacketDataException
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
@@ -47,12 +47,12 @@ class PacketInteraction : PacketAbstract, PacketBoth {
         this.data = data
     }
 
-    constructor(registry: GameRegistry,
+    constructor(registry: Registries,
                 side: Byte,
                 data: Byte) : this(
             Packet.make(registry, "core.packet.Interaction"), side, data)
 
-    constructor(registry: GameRegistry,
+    constructor(registry: Registries,
                 uuid: UUID,
                 side: Byte,
                 data: Byte) : this(

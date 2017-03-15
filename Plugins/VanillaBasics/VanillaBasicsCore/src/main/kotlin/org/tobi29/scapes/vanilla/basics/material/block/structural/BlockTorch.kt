@@ -22,11 +22,8 @@ import org.tobi29.scapes.block.TerrainTexture
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelComplex
-import org.tobi29.scapes.chunk.data.ChunkMesh
-import org.tobi29.scapes.chunk.terrain.Terrain
-import org.tobi29.scapes.chunk.terrain.TerrainClient
-import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
-import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.chunk.ChunkMesh
+import org.tobi29.scapes.chunk.terrain.*
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.Pool
@@ -36,13 +33,12 @@ import org.tobi29.scapes.engine.utils.math.PointerPane
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.math.vector.plus
 import org.tobi29.scapes.entity.server.MobPlayerServer
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
 import org.tobi29.scapes.vanilla.basics.util.dropItems
 import java.util.*
 
-class BlockTorch(materials: VanillaMaterial) : VanillaBlock(materials,
-        "vanilla.basics.block.Torch") {
+class BlockTorch(type: VanillaMaterialType) : VanillaBlock(type) {
     private var textureTop: TerrainTexture? = null
     private var textureSide: TerrainTexture? = null
     private var models: Array<BlockModel>? = null
@@ -83,17 +79,14 @@ class BlockTorch(materials: VanillaMaterial) : VanillaBlock(materials,
         if (!super.place(terrain, x, y, z, face, player)) {
             return false
         }
-        val ground = face.opposite.delta.plus(Vector3i(x, y, z))
-        val flag = terrain.type(ground.x, ground.y,
-                ground.z).isSolid(terrain, ground.x, ground.y,
-                ground.z) && !terrain.type(ground.x, ground.y,
-                ground.z).isTransparent(terrain, ground.x,
-                ground.y,
-                ground.z)
-        if (flag) {
+        val ground = face.opposite.delta + Vector3i(x, y, z)
+        if (terrain.block(ground.x, ground.y, ground.z) {
+            isSolid(it) && !isTransparent(it)
+        }) {
             terrain.data(x, y, z, face.data.toInt())
+            return true
         }
-        return flag
+        return false
     }
 
     override fun resistance(item: ItemStack,
@@ -120,34 +113,13 @@ class BlockTorch(materials: VanillaMaterial) : VanillaBlock(materials,
         return textureSide
     }
 
-    override fun isSolid(terrain: Terrain,
-                         x: Int,
-                         y: Int,
-                         z: Int): Boolean {
-        return false
-    }
+    override fun isSolid(data: Int) = false
 
-    override fun isTransparent(terrain: Terrain,
-                               x: Int,
-                               y: Int,
-                               z: Int): Boolean {
-        return true
-    }
+    override fun isTransparent(data: Int) = true
 
-    override fun lightEmit(terrain: Terrain,
-                           x: Int,
-                           y: Int,
-                           z: Int,
-                           data: Int): Byte {
-        return 15
-    }
+    override fun lightEmit(data: Int) = 15.toByte()
 
-    override fun lightTrough(terrain: Terrain,
-                             x: Int,
-                             y: Int,
-                             z: Int): Byte {
-        return -1
-    }
+    override fun lightTrough(data: Int) = -1
 
     override fun connectStage(terrain: TerrainClient,
                               x: Int,
@@ -180,12 +152,9 @@ class BlockTorch(materials: VanillaMaterial) : VanillaBlock(materials,
                         z: Int,
                         data: Int) {
         val ground = Face[data].opposite.delta + Vector3i(x, y, z)
-        if (!terrain.type(ground.x, ground.y, ground.z).isSolid(
-                terrain, ground.x, ground.y,
-                ground.z) || terrain.type(ground.x, ground.y,
-                ground.z).isTransparent(terrain, ground.x,
-                ground.y,
-                ground.z)) {
+        if (terrain.block(ground.x, ground.y, ground.z) {
+            !isSolid(it) || isTransparent(it)
+        }) {
             terrain.world.dropItems(drops(ItemStack(materials.air, 0), data), x,
                     y, z)
             terrain.typeData(x, y, z, terrain.air, 0)
@@ -206,12 +175,16 @@ class BlockTorch(materials: VanillaMaterial) : VanillaBlock(materials,
     override fun createModels(registry: TerrainTextureRegistry) {
         val modelsList = ArrayList<BlockModel>(6)
         var shapes: MutableList<BlockModelComplex.Shape> = ArrayList()
-        var shape: BlockModelComplex.Shape = BlockModelComplex.ShapeBox(
-                textureTop, textureSide,
-                textureSide, textureSide, textureSide, textureSide, -1.0,
-                -1.0, -8.0, 1.0, 1.0, 2.0, 1.0, 1.0, 1.0, 1.0)
+        var shape: BlockModelComplex.Shape
+        shape = BlockModelComplex.ShapeBox(textureTop, textureSide,
+                textureSide, textureSide, textureSide, textureSide, -1.0, -1.0,
+                -8.0, 1.0, 1.0, 2.0, 1.0, 1.0, 1.0, 1.0)
         shapes.add(shape)
         modelsList += BlockModelComplex(registry, shapes, 0.0625)
+        shape = BlockModelComplex.ShapeBox(textureTop, textureSide,
+                textureSide, textureSide, textureSide, textureSide, -1.0, -1.0,
+                -8.0, 1.0, 1.0, 2.0, 1.0, 1.0, 1.0, 1.0)
+        shapes.add(shape)
         modelsList += BlockModelComplex(registry, shapes, 0.0625)
         shapes = ArrayList<BlockModelComplex.Shape>()
         shape = BlockModelComplex.ShapeBox(textureTop, textureSide,

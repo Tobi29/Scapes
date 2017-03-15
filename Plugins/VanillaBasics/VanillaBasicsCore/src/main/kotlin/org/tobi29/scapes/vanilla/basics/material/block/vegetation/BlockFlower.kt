@@ -24,11 +24,8 @@ import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelComplex
 import org.tobi29.scapes.block.models.ItemModel
 import org.tobi29.scapes.block.models.ItemModelSimple
-import org.tobi29.scapes.chunk.data.ChunkMesh
-import org.tobi29.scapes.chunk.terrain.Terrain
-import org.tobi29.scapes.chunk.terrain.TerrainClient
-import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
-import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.chunk.ChunkMesh
+import org.tobi29.scapes.chunk.terrain.*
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.Pool
@@ -37,13 +34,12 @@ import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.PointerPane
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
 import org.tobi29.scapes.vanilla.basics.util.dropItems
 import java.util.*
 
-class BlockFlower(materials: VanillaMaterial) : VanillaBlock(materials,
-        "vanilla.basics.block.Flower") {
+class BlockFlower(type: VanillaMaterialType) : VanillaBlock(type) {
     private var textures: Array<TerrainTexture>? = null
     private var models: Array<BlockModel>? = null
     private var modelsItem: Array<ItemModel>? = null
@@ -91,7 +87,7 @@ class BlockFlower(materials: VanillaMaterial) : VanillaBlock(materials,
         if (!super.place(terrain, x, y, z, face, player)) {
             return false
         }
-        return terrain.type(x, y, z - 1).isSolid(terrain, x, y, z - 1)
+        return terrain.isSolid(x, y, z - 1)
     }
 
     override fun resistance(item: ItemStack,
@@ -115,26 +111,11 @@ class BlockFlower(materials: VanillaMaterial) : VanillaBlock(materials,
         return textures?.get(data)
     }
 
-    override fun isSolid(terrain: Terrain,
-                         x: Int,
-                         y: Int,
-                         z: Int): Boolean {
-        return false
-    }
+    override fun isSolid(data: Int) = false
 
-    override fun isTransparent(terrain: Terrain,
-                               x: Int,
-                               y: Int,
-                               z: Int): Boolean {
-        return true
-    }
+    override fun isTransparent(data: Int) = true
 
-    override fun lightTrough(terrain: Terrain,
-                             x: Int,
-                             y: Int,
-                             z: Int): Byte {
-        return -1
-    }
+    override fun lightTrough(data: Int) = -1
 
     override fun connectStage(terrain: TerrainClient,
                               x: Int,
@@ -164,7 +145,7 @@ class BlockFlower(materials: VanillaMaterial) : VanillaBlock(materials,
                         y: Int,
                         z: Int,
                         data: Int) {
-        if (!terrain.type(x, y, z - 1).isSolid(terrain, x, y, z - 1)) {
+        if (!terrain.isSolid(x, y, z - 1)) {
             terrain.world.dropItems(drops(ItemStack(materials.air, 0), data), x,
                     y, z)
             terrain.typeData(x, y, z, terrain.air, 0)

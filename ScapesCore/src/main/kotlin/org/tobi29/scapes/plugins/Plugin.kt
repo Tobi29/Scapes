@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.plugins
 
-import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldServer
@@ -29,9 +28,9 @@ import org.tobi29.scapes.server.ScapesServer
 interface Plugin {
     fun registryType(registry: Registries.RegistryAdder)
 
-    fun register(registry: GameRegistry)
+    fun register(plugins: Plugins)
 
-    fun init(registry: GameRegistry)
+    fun init(registry: Registries)
 
     fun initServer(server: ScapesServer)
 

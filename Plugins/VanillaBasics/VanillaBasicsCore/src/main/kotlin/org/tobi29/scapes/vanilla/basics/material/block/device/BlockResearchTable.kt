@@ -20,7 +20,7 @@ import org.tobi29.scapes.block.TerrainTexture
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock
-import org.tobi29.scapes.chunk.data.ChunkMesh
+import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.engine.graphics.GL
@@ -28,12 +28,11 @@ import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityResearchTableClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityResearchTableServer
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer
 
-class BlockResearchTable(materials: VanillaMaterial) : VanillaBlockContainer<EntityResearchTableClient, EntityResearchTableServer>(
-        materials, "vanilla.basics.block.ResearchTable",
-        materials.plugin.entityTypes.researchTable) {
+class BlockResearchTable(type: VanillaMaterialType) : VanillaBlockContainer<EntityResearchTableClient, EntityResearchTableServer>(
+        type, type.materials.plugin.entityTypes.researchTable) {
     private var textureTop: TerrainTexture? = null
     private var textureSide1: TerrainTexture? = null
     private var textureSide2: TerrainTexture? = null

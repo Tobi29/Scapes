@@ -24,12 +24,13 @@ import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityBlockBreakServer
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.util.dropItems
 
-abstract class VanillaBlock(val materials: VanillaMaterial,
-                            nameID: String) : BlockType(materials.registry,
-        nameID) {
+abstract class VanillaBlock(type: VanillaMaterialType) : BlockType(type.type) {
+    val materials = type.materials
+    val plugin = materials.plugin
+
     override fun destroy(terrain: TerrainServer.TerrainMutable,
                          x: Int,
                          y: Int,

@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.vanilla.basics.packet
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -41,7 +41,7 @@ class PacketResearch : PacketAbstract, PacketServer {
         uuid = researchTable.getUUID()
     }
 
-    constructor(registry: GameRegistry,
+    constructor(registry: Registries,
                 researchTable: EntityResearchTableClient) : this(
             Packet.make(registry, "vanilla.basics.packet.Research"),
             researchTable)
@@ -78,7 +78,7 @@ class PacketResearch : PacketAbstract, PacketServer {
                                 mob.metaData("Vanilla").mapMut(
                                         "Research").mapMut(
                                         "Items")[Integer.toHexString(
-                                        material.itemID())] = true
+                                        material.id)] = true
                             }
                             plugin.researchRecipes.forEach { recipe ->
                                 if (!(mob.metaData("Vanilla").map(

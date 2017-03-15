@@ -22,7 +22,7 @@ import org.tobi29.scapes.block.TerrainTexture
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelComplex
-import org.tobi29.scapes.chunk.data.ChunkMesh
+import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
@@ -36,13 +36,12 @@ import org.tobi29.scapes.engine.utils.math.PointerPane
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityAnvilClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityAnvilServer
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer
 import java.util.*
 
-class BlockAnvil(materials: VanillaMaterial) : VanillaBlockContainer<EntityAnvilClient, EntityAnvilServer>(
-        materials, "vanilla.basics.block.Anvil",
-        materials.plugin.entityTypes.anvil) {
+class BlockAnvil(type: VanillaMaterialType) : VanillaBlockContainer<EntityAnvilClient, EntityAnvilServer>(
+        type, type.materials.plugin.entityTypes.anvil) {
     private var texture: TerrainTexture? = null
     private var model: BlockModel? = null
 
@@ -103,12 +102,7 @@ class BlockAnvil(materials: VanillaMaterial) : VanillaBlockContainer<EntityAnvil
         return texture
     }
 
-    override fun isTransparent(terrain: Terrain,
-                               x: Int,
-                               y: Int,
-                               z: Int): Boolean {
-        return true
-    }
+    override fun isTransparent(data: Int) = true
 
     override fun connectStage(terrain: TerrainClient,
                               x: Int,
@@ -138,7 +132,8 @@ class BlockAnvil(materials: VanillaMaterial) : VanillaBlockContainer<EntityAnvil
                         y: Int,
                         z: Int,
                         data: Int) {
-        if (!terrain.type(x, y, z - 1).isSolid(terrain, x, y, z - 1)) {
+        val block = terrain.block(x, y, z - 1)
+        if (!terrain.type(block).isSolid(data)) {
             val entity = materials.plugin.entityTypes.flyingBlock.createServer(
                     terrain.world).apply {
                 setPos(Vector3d(x + 0.5, y + 0.5, z + 0.5))

@@ -19,6 +19,7 @@ package org.tobi29.scapes.vanilla.basics.entity.server
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.plus
@@ -56,14 +57,14 @@ class MobPigServer(type: EntityType<*, *>,
                              x: Int,
                              y: Int,
                              z: Int): Boolean {
-        if (terrain.light(x, y, z) >= 7) {
-            if (!terrain.type(x, y, z).isSolid(terrain, x, y, z) &&
-                    terrain.type(x, y, z).isTransparent(terrain, x, y, z) &&
-                    terrain.type(x, y, z - 1).isSolid(terrain, x, y, z - 1) &&
-                    !terrain.type(x, y, z - 1).isTransparent(terrain, x, y,
-                            z - 1)) {
-                return true
-            }
+        if (terrain.light(x, y, z) >= 7 &&
+                terrain.block(x, y, z) {
+                    !isSolid(it) && isTransparent(it)
+                } &&
+                terrain.block(x, y, z - 1) {
+                    isSolid(it) && !isTransparent(it)
+                }) {
+            return true
         }
         return false
     }

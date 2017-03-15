@@ -158,7 +158,7 @@ class CraftingRecipesCreator(val materials: VanillaMaterial,
                              val type: CraftingRecipeType) {
     fun recipe(id: String,
                craftingRecipe: CraftingRecipeCreator.() -> Unit) {
-        val craftingRegistry = materials.registry.get<CraftingRecipe>(
+        val craftingRegistry = materials.plugins.registry.get<CraftingRecipe>(
                 "VanillaBasics", "CraftingRecipe")
         val creator = CraftingRecipeCreator()
         craftingRecipe(creator)

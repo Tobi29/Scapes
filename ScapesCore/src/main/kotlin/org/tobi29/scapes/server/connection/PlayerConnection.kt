@@ -17,7 +17,7 @@
 package org.tobi29.scapes.server.connection
 
 import org.tobi29.scapes.Debug
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.connection.PlayConnection
@@ -40,7 +40,7 @@ import java.io.IOException
 
 abstract class PlayerConnection(val server: ServerConnection) : PlayConnection<PacketClient>, Executor {
     override val events = EventDispatcher(server.events)
-    protected val registry: GameRegistry
+    protected val registry: Registries
     protected var entity: MobPlayerServer? = null
     protected var skin: ServerSkin? = null
     protected var id: String? = null

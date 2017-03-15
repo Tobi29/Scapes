@@ -21,8 +21,7 @@ import org.tobi29.scapes.block.TerrainTexture
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock
-import org.tobi29.scapes.chunk.data.ChunkMesh
-import org.tobi29.scapes.chunk.terrain.Terrain
+import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.TerrainServer
@@ -32,12 +31,11 @@ import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityChestClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityChestServer
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer
 
-class BlockChest(materials: VanillaMaterial) : VanillaBlockContainer<EntityChestClient, EntityChestServer>(
-        materials, "vanilla.basics.block.Chest",
-        materials.plugin.entityTypes.chest) {
+class BlockChest(type: VanillaMaterialType) : VanillaBlockContainer<EntityChestClient, EntityChestServer>(
+        type, type.materials.plugin.entityTypes.chest) {
     private var textureTop: TerrainTexture? = null
     private var textureFront: TerrainTexture? = null
     private var textureSide: TerrainTexture? = null
@@ -80,12 +78,7 @@ class BlockChest(materials: VanillaMaterial) : VanillaBlockContainer<EntityChest
         return textureSide
     }
 
-    override fun isTransparent(terrain: Terrain,
-                               x: Int,
-                               y: Int,
-                               z: Int): Boolean {
-        return true
-    }
+    override fun isTransparent(data: Int) = true
 
     override fun addToChunkMesh(mesh: ChunkMesh,
                                 meshAlpha: ChunkMesh,

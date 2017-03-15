@@ -17,10 +17,7 @@
 package org.tobi29.scapes.plugins
 
 import mu.KLogging
-import org.tobi29.scapes.block.GameRegistry
-import org.tobi29.scapes.block.UpdateBlockUpdate
-import org.tobi29.scapes.block.UpdateBlockUpdateUpdateTile
-import org.tobi29.scapes.block.UpdateType
+import org.tobi29.scapes.block.*
 import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathResource
@@ -38,7 +35,11 @@ class Plugins(files: List<PluginFile>,
     val plugins = pluginsMut.readOnly()
     private val dimensionsMut = ArrayList<Dimension>()
     val dimensions = dimensionsMut.readOnly()
-    val registry: GameRegistry
+    val registry: Registries
+    lateinit var air: BlockAir
+        private set
+    lateinit var materialResolver: Map<String, Material>
+        private set
     private val classLoader: URLClassLoader?
     private var worldTypeMut: WorldType? = null
     val worldType: WorldType
@@ -63,7 +64,7 @@ class Plugins(files: List<PluginFile>,
         if (worldTypeMut == null) {
             throw IOException("No world type found")
         }
-        registry = GameRegistry(idStorage)
+        registry = Registries(idStorage)
     }
 
     @Throws(IOException::class)
@@ -127,9 +128,16 @@ class Plugins(files: List<PluginFile>,
                 pluginsMut.forEach { it.registryType(registry) }
             })
             init(registry)
-            pluginsMut.forEach { it.register(registry) }
+            registry.get<Material>("Core", "Material").run {
+                air = reg("core.block.Air", 0) {
+                    BlockAir(MaterialType(this@Plugins, it, "core.block.Air"))
+                }
+            }
+            pluginsMut.forEach { it.register(this) }
             pluginsMut.forEach { it.init(registry) }
             registry.lock()
+            materialResolver = assembleMaterialResolver(
+                    registry.get<Material>("Core", "Material"))
             init = true
         }
     }
@@ -157,9 +165,7 @@ class Plugins(files: List<PluginFile>,
             return emptyList()
         }
 
-        fun init(registry: GameRegistry) {
-            registry.registerMaterial(registry.air)
-
+        fun init(registry: Registries) {
             registry.get<UpdateType>("Core", "Update").run {
                 reg("core.update.BlockUpdate") {
                     UpdateType(it, ::UpdateBlockUpdate)
@@ -265,5 +271,18 @@ class Plugins(files: List<PluginFile>,
                 }
             }
         }
+
+        fun assembleMaterialResolver(registry: Registries.Registry<Material>) =
+                registry.values.asSequence().filterNotNull().flatMap { material ->
+                    val nameID = material.nameID
+                    sequenceOf(Pair(nameID, material),
+                            Pair(nameID.substring(nameID.lastIndexOf('.') + 1,
+                                    nameID.length), material))
+                }.toMap()
     }
 }
+
+fun <T : Material> Registries.Registry<Material>.reg(name: String,
+                                                     plugins: Plugins,
+                                                     block: (MaterialType) -> T) = reg(
+        name) { block(MaterialType(plugins, it, name)) }

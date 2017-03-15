@@ -65,8 +65,8 @@ abstract class MobPlayerServer(type: EntityType<*, *>,
         inventories = InventoryContainer { id ->
             world.send(PacketUpdateInventory(registry, this, id))
         }
-        inventories.add("Container", Inventory(registry, 40))
-        inventories.add("Hold", Inventory(registry, 1))
+        inventories.add("Container", Inventory(world.plugins, 40))
+        inventories.add("Hold", Inventory(world.plugins, 1))
         viewersMut.add(this)
         val exceptions = listOf(connection)
         positionSenderOther = MobPositionSenderServer(registry, pos,

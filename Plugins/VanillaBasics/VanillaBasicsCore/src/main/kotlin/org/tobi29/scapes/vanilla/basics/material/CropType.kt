@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 
 class CropType(val id: Int,
                val name: String,
@@ -27,7 +27,7 @@ class CropType(val id: Int,
     val texture = "$textureRoot/${name.replace(" ", "").toLowerCase()}"
 
     companion object {
-        operator fun get(registry: GameRegistry,
+        operator fun get(registry: Registries,
                          data: Int): CropType {
             return registry.get<CropType>("VanillaBasics", "CropType")[data]
         }

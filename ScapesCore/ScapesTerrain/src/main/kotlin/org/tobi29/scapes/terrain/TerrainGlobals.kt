@@ -13,23 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.tobi29.scapes.chunk.terrain
 
-import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.entity.client.EntityClient
-import org.tobi29.scapes.packets.PacketBlockChange
+package org.tobi29.scapes.terrain
 
-interface TerrainClient : TerrainEntity<EntityClient> {
-    val world: WorldClient
-    val renderer: TerrainRenderer
+interface TerrainGlobals<out B : VoxelType> {
+    val air: B
+    val blocks: Array<out B?>
 
-    fun update(delta: Double)
+    fun sunLightReduction(x: Int,
+                          y: Int): Int
 
-    fun toggleStaticRenderDistance()
+    fun type(block: Long): B {
+        val id = (block shr 32).toInt()
+        return type(id)
+    }
 
-    fun reloadGeometry()
+    fun data(block: Long): Int {
+        return (block and 0xFFFFFFFF).toInt()
+    }
 
-    fun process(packet: PacketBlockChange)
-
-    fun dispose()
+    fun type(id: Int): B
 }

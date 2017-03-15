@@ -34,14 +34,13 @@ import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
 import org.tobi29.scapes.vanilla.basics.material.AlloyType
 import org.tobi29.scapes.vanilla.basics.material.ItemMetal
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.item.VanillaItem
 import org.tobi29.scapes.vanilla.basics.util.createTool
 import java.util.concurrent.ConcurrentHashMap
 
-abstract class ItemMetalTool protected constructor(materials: VanillaMaterial,
-                                                   nameID: String) : VanillaItem(
-        materials, nameID), ItemMetal {
+abstract class ItemMetalTool(type: VanillaMaterialType) : VanillaItem(
+        type), ItemMetal {
     private val modelsHead = ConcurrentHashMap<AlloyType, ItemModel>()
     private val modelsBuilt = ConcurrentHashMap<AlloyType, ItemModel>()
     private var textureHead: TerrainTexture? = null

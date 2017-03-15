@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.entity.particle
 
+import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.AABB
@@ -82,9 +83,9 @@ class ParticleEmitter3DBlock(system: ParticleSystem) : ParticleEmitter<ParticleI
                 val x = instance.pos.intX()
                 val y = instance.pos.intY()
                 val z = instance.pos.intZ()
-                val type = terrain.type(x, y, z)
-                if (!type.isSolid(world.terrain, x, y, z) || type.isTransparent(
-                        world.terrain, x, y, z)) {
+                if (terrain.block(x, y, z) {
+                    !isSolid(it) || isTransparent(it)
+                }) {
                     val posRenderX = (instance.pos.doubleX() - cam.position.doubleX()).toFloat()
                     val posRenderY = (instance.pos.doubleY() - cam.position.doubleY()).toFloat()
                     val posRenderZ = (instance.pos.doubleZ() - cam.position.doubleZ()).toFloat()
@@ -94,8 +95,8 @@ class ParticleEmitter3DBlock(system: ParticleSystem) : ParticleEmitter<ParticleI
                     matrix.rotate(instance.rotation.floatZ(), 0f, 0f, 1f)
                     matrix.rotate(instance.rotation.floatX(), 1f, 0f, 0f)
                     gl.setAttribute2f(4,
-                            world.terrain.blockLight(x, y, z) / 15.0f,
-                            world.terrain.sunLight(x, y, z) / 15.0f)
+                            terrain.blockLight(x, y, z) / 15.0f,
+                            terrain.sunLight(x, y, z) / 15.0f)
                     instance.item.material().render(instance.item, gl, s)
                     matrixStack.pop()
                 }

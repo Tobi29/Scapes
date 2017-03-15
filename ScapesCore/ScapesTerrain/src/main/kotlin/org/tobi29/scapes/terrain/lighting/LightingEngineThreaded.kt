@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.tobi29.scapes.chunk.lighting
 
-import org.tobi29.scapes.chunk.terrain.Terrain
+package org.tobi29.scapes.terrain.lighting
+
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.math.max
@@ -24,9 +24,10 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
+import org.tobi29.scapes.terrain.TerrainBase
 import java.util.concurrent.ConcurrentLinkedQueue
 
-class LightingEngineThreaded(private val terrain: Terrain,
+class LightingEngineThreaded(private val terrain: TerrainBase<*>,
                              taskExecutor: TaskExecutor) : LightingEngine {
     private val updates = ConcurrentLinkedQueue<Vector3i>()
     private val joiner: Joiner
@@ -62,10 +63,8 @@ class LightingEngineThreaded(private val terrain: Terrain,
                             update.z)
                     val type = terrain.type(block)
                     val data = terrain.data(block)
-                    val lightTrough = type.lightTrough(terrain, update.x,
-                            update.y, update.z)
-                    var light = type.lightEmit(terrain, update.x,
-                            update.y, update.z, data)
+                    val lightTrough = type.lightTrough(data)
+                    var light = type.lightEmit(data)
                     light = max(
                             terrain.blockLight(update.x - 1, update.y,
                                     update.z) + lightTrough,
@@ -128,10 +127,11 @@ class LightingEngineThreaded(private val terrain: Terrain,
             for (update in updatesTake) {
                 if (terrain.isBlockLoaded(update.x, update.y,
                         update.z)) {
-                    val type = terrain.type(update.x, update.y,
+                    val block = terrain.block(update.x, update.y,
                             update.z)
-                    val lightTrough = type.lightTrough(terrain, update.x,
-                            update.y, update.z)
+                    val type = terrain.type(block)
+                    val data = terrain.data(block)
+                    val lightTrough = type.lightTrough(data)
                     var light = calcSunLightAt(update.x, update.y,
                             update.z)
                     light = max(
@@ -190,10 +190,11 @@ class LightingEngineThreaded(private val terrain: Terrain,
         var sunLight: Byte = 15
         var zz = terrain.highestBlockZAt(x, y)
         while (zz >= z && zz >= 0) {
-            val type = terrain.type(x, y, zz)
-            if (type.isSolid(terrain, x, y, zz) || !type.isTransparent(terrain,
-                    x, y, zz)) {
-                sunLight = clamp(sunLight + type.lightTrough(terrain, x, y, zz),
+            val block = terrain.block(x, y, zz)
+            val type = terrain.type(block)
+            val data = terrain.data(block)
+            if (type.isSolid(data) || !type.isTransparent(data)) {
+                sunLight = clamp(sunLight + type.lightTrough(data),
                         0, 15).toByte()
             }
             zz--

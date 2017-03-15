@@ -24,12 +24,12 @@ import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.ItemDefaultHeatable
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.item.ItemSimpleData
 
-class ItemMeat(materials: VanillaMaterial) : ItemSimpleData(materials,
-        "vanilla.basics.item.Meat"), ItemDefaultHeatable {
+class ItemMeat(type: VanillaMaterialType) : ItemSimpleData(
+        type), ItemDefaultHeatable {
     override fun click(entity: MobPlayerServer,
                        item: ItemStack) {
         entity.metaData("Vanilla").syncMapMut("Condition") { conditionTag ->

@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 
 abstract class PacketAbstract(override val type: PacketType,
@@ -38,7 +38,7 @@ abstract class PacketAbstract(override val type: PacketType,
     }
 
     companion object {
-        fun make(registry: GameRegistry,
+        fun make(registry: Registries,
                  id: Int): PacketType {
             return registry.get<PacketType>("Core", "Packet")[id]
         }

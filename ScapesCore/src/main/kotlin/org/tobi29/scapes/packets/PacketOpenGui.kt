@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -34,7 +34,7 @@ class PacketOpenGui : PacketAbstract, PacketClient {
         uuid = entity.getUUID()
     }
 
-    constructor(registry: GameRegistry,
+    constructor(registry: Registries,
                 entity: EntityContainerServer) : this(
             Packet.make(registry, "core.packet.OpenGui"), entity)
 

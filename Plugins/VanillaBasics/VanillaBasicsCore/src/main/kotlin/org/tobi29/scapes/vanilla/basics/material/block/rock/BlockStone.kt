@@ -17,16 +17,14 @@
 package org.tobi29.scapes.vanilla.basics.material.block.rock
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.vanilla.basics.material.StoneType
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.BlockSimpleData
 
-abstract class BlockStone(materials: VanillaMaterial,
-                          nameID: String,
-                          protected val stoneRegistry: Registries.Registry<StoneType>) : BlockSimpleData(
-        materials, nameID) {
+abstract class BlockStone(type: VanillaMaterialType) : BlockSimpleData(type) {
+    protected val stoneRegistry = plugins.registry.get<StoneType>(
+            "VanillaBasics", "StoneType")
 
     override fun types(): Int {
         return stoneRegistry.values().size

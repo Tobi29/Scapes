@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.ByteBuffer
 import org.tobi29.scapes.engine.utils.Checksum
@@ -44,11 +44,11 @@ class PacketSkin : PacketAbstract, PacketBoth {
         this.checksum = checksum
     }
 
-    constructor(registry: GameRegistry,
+    constructor(registry: Registries,
                 checksum: Checksum) : this(
             Packet.make(registry, "core.packet.Skin"), checksum)
 
-    constructor(registry: GameRegistry,
+    constructor(registry: Registries,
                 image: Image,
                 checksum: Checksum) : this(
             Packet.make(registry, "core.packet.Skin"), image, checksum)

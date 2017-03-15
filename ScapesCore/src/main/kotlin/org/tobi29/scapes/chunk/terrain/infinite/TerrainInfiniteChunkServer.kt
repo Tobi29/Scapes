@@ -30,19 +30,20 @@ import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.entity.server.MobServer
 import org.tobi29.scapes.packets.PacketBlockChange
 import org.tobi29.scapes.packets.PacketBlockChangeAir
+import org.tobi29.scapes.terrain.infinite.TerrainInfiniteBaseChunk
+import org.tobi29.scapes.terrain.infinite.chunk
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
 class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
-    private val terrain2: TerrainInfiniteServer
+    private val terrain: TerrainInfiniteServer
     private val delayedUpdates = ArrayList<Update>()
-    private var lastAccess = System.currentTimeMillis()
 
     constructor(pos: Vector2i,
                 terrain: TerrainInfiniteServer,
                 zSize: Int,
                 map: TagMap) : super(pos, terrain, zSize) {
-        this.terrain2 = terrain
+        this.terrain = terrain
         profilerSection("Load") { read(map) }
         profilerSection("HeightMap") { initHeightMap() }
     }
@@ -52,18 +53,10 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                 zSize: Int,
                 generator: ChunkGenerator,
                 output: GeneratorOutput) : super(pos, terrain, zSize) {
-        this.terrain2 = terrain
+        this.terrain = terrain
         profilerSection("Generate") { generate(generator, output) }
         profilerSection("Sunlight") { initSunLight() }
         profilerSection("HeightMap") { initHeightMap() }
-    }
-
-    internal fun accessed() {
-        lastAccess = System.currentTimeMillis()
-    }
-
-    fun lastAccess(): Long {
-        return lastAccess
     }
 
     fun updateServer(delta: Double) {
@@ -79,7 +72,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                     removeEntity(entity)
                     return@forEach
                 } else if (entity.creatureType().doesDespawn()) {
-                    val player = terrain2.world.nearestPlayer(
+                    val player = terrain.world.nearestPlayer(
                             entity.getCurrentPos())
                     if (player != null) {
                         if (entity.getCurrentPos().distanceSqr(
@@ -98,15 +91,15 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
             val y = pos.intY() shr 4
             if ((x != this.pos.x || y != this.pos.y) && unmapEntity(
                     entity)) {
-                if (terrain.chunk(x, y, { chunk ->
+                if (terrain.chunk(x, y) { chunk ->
                     chunk.mapEntity(entity)
                     true
-                }) == null) {
+                } == null) {
                     terrain.entityRemoved(entity)
                 }
             }
         }
-        if (state.id >= TerrainInfiniteChunk.State.LOADED.id) {
+        if (state.id >= TerrainInfiniteBaseChunk.State.LOADED.id) {
             synchronized(delayedUpdates) {
                 var i = 0
                 while (i < delayedUpdates.size) {
@@ -116,8 +109,8 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                             delayedUpdates.removeAt(i--)
                             if (update.isValidOn(
                                     typeG(update.x(), update.y(), update.z()),
-                                    terrain2)) {
-                                update.run(terrain2)
+                                    terrain)) {
+                                update.run(terrain)
                             }
                         }
                         i++
@@ -132,13 +125,13 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                 val y = random.nextInt(16)
                 val z = random.nextInt(zSize)
                 val block = blockL(x, y, z)
-                terrain.type(block).update(terrain2, x + posBlock.x,
+                terrain.type(block).update(terrain, x + posBlock.x,
                         y + posBlock.y, z, terrain.data(block))
             }
         }
     }
 
-    fun dispose(): TagMap {
+    fun disposeAndWrite(): TagMap {
         entitiesMut.values.forEach { terrain.entityRemoved(it) }
         return TagMap { write(this, false) }
     }
@@ -158,7 +151,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                 if (update.x() == x && update.y() == y && update.z() == z) {
                     if (update.isValidOn(
                             typeG(update.x(), update.y(), update.z()),
-                            terrain2)) {
+                            terrain)) {
                         if (update::class.java == clazz) {
                             return true
                         }
@@ -177,26 +170,26 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                         updateTile: Boolean) {
         if (updateTile) {
             addDelayedUpdate(
-                    UpdateBlockUpdateUpdateTile(terrain2.world.registry).set(
+                    UpdateBlockUpdateUpdateTile(terrain.world.registry).set(
                             x + posBlock.x, y + posBlock.y, z, 0.0))
         } else {
-            addDelayedUpdate(UpdateBlockUpdate(terrain2.world.registry).set(
+            addDelayedUpdate(UpdateBlockUpdate(terrain.world.registry).set(
                     x + posBlock.x, y + posBlock.y, z, 0.0))
         }
-        if (state.id >= TerrainInfiniteChunk.State.SENDABLE.id) {
+        if (state.id >= TerrainInfiniteBaseChunk.State.SENDABLE.id) {
             val block = blockL(x, y, z)
             val type = terrain.type(block)
-            if (type === terrain2.air) {
-                terrain2.world.send(
-                        PacketBlockChangeAir(terrain2.world.registry,
+            if (type === terrain.air) {
+                terrain.world.send(
+                        PacketBlockChangeAir(terrain.world.registry,
                                 x + posBlock.x, y + posBlock.y, z))
             } else {
                 val data = terrain.data(block)
-                terrain2.world.send(PacketBlockChange(terrain2.world.registry,
+                terrain.world.send(PacketBlockChange(terrain.world.registry,
                         x + posBlock.x, y + posBlock.y, z, type.id, data))
             }
         }
-        if (state.id >= TerrainInfiniteChunk.State.LOADED.id) {
+        if (state.id >= TerrainInfiniteBaseChunk.State.LOADED.id) {
             terrain.lighting().updateLight(x + posBlock.x,
                     y + posBlock.y, z)
         }
@@ -217,11 +210,11 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
         map["Entities"]?.toList()?.asSequence()?.mapNotNull(
                 Tag::toMap)?.forEach { tag ->
             tag["ID"]?.toInt()?.let {
-                val entity = EntityServer.make(it, terrain2.world)
+                val entity = EntityServer.make(it, terrain.world)
                 tag["UUID"]?.toUUID()?.let { entity.setEntityID(it) }
                 tag["Data"]?.toMap()?.let { entity.read(it) }
                 addEntity(entity)
-                val newTick = terrain2.world.tick
+                val newTick = terrain.world.tick
                 if (newTick > oldTick) {
                     entity.tickSkip(oldTick, newTick)
                 }
@@ -233,14 +226,14 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
             if (xy < 0) {
                 xy += 256
             }
-            addDelayedUpdate(Update.make(terrain2.world.plugins.registry,
+            addDelayedUpdate(Update.make(terrain.world.plugins.registry,
                     (xy and 0xF) + posBlock.x,
                     (xy ushr 4) + posBlock.y,
                     tag["PosZ"]?.toInt() ?: 0, tag["Delay"]?.toDouble() ?: 0.0,
                     tag["ID"]?.toInt() ?: 0))
         }
         if (map["Populated"]?.toBoolean() ?: false) {
-            state = TerrainInfiniteChunk.State.POPULATED
+            state = TerrainInfiniteBaseChunk.State.POPULATED
         }
         map["MetaData"]?.toMap()?.let { metaData = it.toMutTag() }
         initHeightMap()
@@ -248,7 +241,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
 
     fun write(map: ReadWriteTagMap,
               packet: Boolean) {
-        val tick = terrain2.world.tick
+        val tick = terrain.world.tick
         lockWrite {
             bID.compress()
             bData.compress()
@@ -260,7 +253,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
         map["MetaData"] = metaData.toTag()
         if (!packet) {
             map["Tick"] = tick
-            val registry = terrain2.world.registry
+            val registry = terrain.world.registry
             map["Entities"] = TagList {
                 entitiesMut.values.forEach { entity ->
                     add(TagMap {
@@ -275,7 +268,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                     delayedUpdates.asSequence().filter { update ->
                         update.isValidOn(
                                 typeG(update.x(), update.y(), update.z()),
-                                terrain2)
+                                terrain)
                     }.forEach { update ->
                         add(TagMap {
                             this["ID"] = update.type.id
@@ -286,7 +279,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                     }
                 }
             }
-            map["Populated"] = state.id >= TerrainInfiniteChunk.State.POPULATED.id
+            map["Populated"] = state.id >= TerrainInfiniteBaseChunk.State.POPULATED.id
         }
     }
 
@@ -309,7 +302,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                             }
                         }
                     }
-                    val registry = terrain2.world.registry
+                    val registry = terrain.world.registry
                     output.updates.forEach { addDelayedUpdate(it(registry)) }
                     output.updates.clear()
                 }
@@ -318,9 +311,9 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
     }
 
     fun populate() {
-        state = TerrainInfiniteChunk.State.POPULATING
-        terrain2.queue({ handle ->
-            terrain2.populators.forEach { pop ->
+        state = TerrainInfiniteBaseChunk.State.POPULATING
+        terrain.queue({ handle ->
+            terrain.populators.forEach { pop ->
                 pop.populate(handle, this)
             }
             updateSunLight()
@@ -329,51 +322,51 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                 bData.compress()
                 bLight.compress()
             }
-            state = TerrainInfiniteChunk.State.POPULATED
+            state = TerrainInfiniteBaseChunk.State.POPULATED
         })
     }
 
     fun finish() {
-        terrain2.queue({ handle ->
-            terrain2.populators.forEach { pop ->
+        terrain.queue({ handle ->
+            terrain.populators.forEach { pop ->
                 pop.load(handle, this)
             }
-            state = TerrainInfiniteChunk.State.BORDER
-            terrain2.updateAdjacent(pos.x, pos.y)
+            state = TerrainInfiniteBaseChunk.State.BORDER
+            terrain.updateAdjacent(pos.x, pos.y)
         })
     }
 
     val isSendable: Boolean
-        get() = state.id >= TerrainInfiniteChunk.State.SENDABLE.id
+        get() = state.id >= TerrainInfiniteBaseChunk.State.SENDABLE.id
 
     fun shouldPopulate(): Boolean {
-        return state == TerrainInfiniteChunk.State.SHOULD_POPULATE
+        return state == TerrainInfiniteBaseChunk.State.SHOULD_POPULATE
     }
 
     fun shouldFinish(): Boolean {
-        return state == TerrainInfiniteChunk.State.POPULATED
+        return state == TerrainInfiniteBaseChunk.State.POPULATED
     }
 
     fun updateAdjacent() {
-        if (terrain2.checkBorder(this, 1)) {
-            if (state == TerrainInfiniteChunk.State.BORDER) {
-                state = TerrainInfiniteChunk.State.LOADED
-                terrain2.updateAdjacent(pos.x, pos.y)
-            } else if (state == TerrainInfiniteChunk.State.NEW) {
-                state = TerrainInfiniteChunk.State.SHOULD_POPULATE
+        if (terrain.checkBorder(this, 1)) {
+            if (state == TerrainInfiniteBaseChunk.State.BORDER) {
+                state = TerrainInfiniteBaseChunk.State.LOADED
+                terrain.updateAdjacent(pos.x, pos.y)
+            } else if (state == TerrainInfiniteBaseChunk.State.NEW) {
+                state = TerrainInfiniteBaseChunk.State.SHOULD_POPULATE
             }
-            if (terrain2.checkLoaded(this, 1)) {
-                if (state == TerrainInfiniteChunk.State.LOADED) {
-                    state = TerrainInfiniteChunk.State.SENDABLE
-                    terrain2.updateAdjacent(pos.x, pos.y)
+            if (terrain.checkLoaded(this, 1)) {
+                if (state == TerrainInfiniteBaseChunk.State.LOADED) {
+                    state = TerrainInfiniteBaseChunk.State.SENDABLE
+                    terrain.updateAdjacent(pos.x, pos.y)
                 }
-            } else if (state == TerrainInfiniteChunk.State.SENDABLE) {
-                state = TerrainInfiniteChunk.State.LOADED
-                terrain2.updateAdjacent(pos.x, pos.y)
+            } else if (state == TerrainInfiniteBaseChunk.State.SENDABLE) {
+                state = TerrainInfiniteBaseChunk.State.LOADED
+                terrain.updateAdjacent(pos.x, pos.y)
             }
-        } else if (state.id >= TerrainInfiniteChunk.State.LOADED.id) {
-            state = TerrainInfiniteChunk.State.BORDER
-            terrain2.updateAdjacent(pos.x, pos.y)
+        } else if (state.id >= TerrainInfiniteBaseChunk.State.LOADED.id) {
+            state = TerrainInfiniteBaseChunk.State.BORDER
+            terrain.updateAdjacent(pos.x, pos.y)
         }
     }
 }

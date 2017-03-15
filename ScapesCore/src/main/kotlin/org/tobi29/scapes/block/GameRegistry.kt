@@ -20,25 +20,6 @@ import org.tobi29.scapes.engine.utils.readOnly
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-class GameRegistry(idStorage: MutableTagMap) : Registries(idStorage) {
-    private val materialNames = ConcurrentHashMap<String, Material>()
-    val air = BlockAir(this)
-
-    fun material(name: String): Material? {
-        return materialNames[name]
-    }
-
-    fun registerMaterial(material: Material) {
-        val nameID = material.nameID()
-        val materials = get<Material>("Core", "Material")
-        materials.reg(nameID) { material.apply { id = it } }
-        materialNames.put(nameID, material)
-        materialNames.put(
-                nameID.substring(nameID.lastIndexOf('.') + 1, nameID.length),
-                material)
-    }
-}
-
 open class Registries(private val idStorage: MutableTagMap) {
     private val registries = ConcurrentHashMap<Pair<String, String>, Registry<*>>()
     private var lockedTypes = false

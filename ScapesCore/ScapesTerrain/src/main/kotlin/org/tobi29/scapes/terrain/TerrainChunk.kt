@@ -13,9 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.tobi29.scapes.chunk.terrain
 
-import org.tobi29.scapes.entity.Entity
-import org.tobi29.scapes.entity.EntityContainer
+package org.tobi29.scapes.terrain
 
-interface TerrainEntity<E : Entity> : Terrain, EntityContainer<E>
+import org.tobi29.scapes.engine.utils.io.tag.MutableTagMap
+import org.tobi29.scapes.engine.utils.math.vector.Vector3i
+
+interface TerrainChunk {
+    val posBlock: Vector3i
+    val size: Vector3i
+
+    fun metaData(id: String): MutableTagMap
+}

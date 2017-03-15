@@ -17,15 +17,15 @@
 package org.tobi29.scapes.vanilla.basics.material.block.structural
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.vanilla.basics.material.ItemFuel
 import org.tobi29.scapes.vanilla.basics.material.TreeType
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.BlockSimpleDataTextured
 
-class BlockWood(materials: VanillaMaterial,
-                private val treeRegistry: Registries.Registry<TreeType>) : BlockSimpleDataTextured(
-        materials, "vanilla.basics.block.Wood"), ItemFuel {
+class BlockWood(type: VanillaMaterialType) : BlockSimpleDataTextured(
+        type), ItemFuel {
+    private val treeRegistry = plugins.registry.get<TreeType>("VanillaBasics",
+            "TreeType")
 
     override fun resistance(item: ItemStack,
                             data: Int): Double {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.chunk.data
+package org.tobi29.scapes.terrain.data
 
 import org.tobi29.scapes.engine.utils.io.tag.*
 import java.util.*

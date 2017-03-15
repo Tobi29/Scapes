@@ -25,13 +25,14 @@ import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.entity.client.MobClient
 import org.tobi29.scapes.packets.PacketRequestChunk
+import org.tobi29.scapes.terrain.infinite.TerrainInfiniteBaseChunk
 import java.util.concurrent.atomic.AtomicBoolean
 
 class TerrainInfiniteChunkClient(pos: Vector2i,
-                                 val terrain2: TerrainInfiniteClient,
+                                 val terrain: TerrainInfiniteClient,
                                  zSize: Int,
                                  renderer: TerrainInfiniteRenderer) : TerrainInfiniteChunk<EntityClient>(
-        pos, terrain2, zSize) {
+        pos, terrain, zSize) {
     private val rendererChunk: TerrainInfiniteRendererChunk
     private val requested = AtomicBoolean(false)
 
@@ -40,13 +41,13 @@ class TerrainInfiniteChunkClient(pos: Vector2i,
     }
 
     fun checkLoaded(): Boolean {
-        if (state.id < TerrainInfiniteChunk.State.LOADED.id) {
-            val terrainClient = terrain2
+        if (state.id < TerrainInfiniteBaseChunk.State.LOADED.id) {
+            val terrainClient = terrain
             if (!requested.get() && terrainClient.requestedChunks() < 3) {
                 requested.set(true)
                 terrainClient.changeRequestedChunks(1)
-                terrain2.world.send(
-                        PacketRequestChunk(terrain2.world.plugins.registry,
+                terrain.world.send(
+                        PacketRequestChunk(terrain.world.plugins.registry,
                                 pos.x, pos.y))
             }
             return true
@@ -55,7 +56,7 @@ class TerrainInfiniteChunkClient(pos: Vector2i,
     }
 
     fun setLoaded() {
-        state = TerrainInfiniteChunk.State.LOADED
+        state = TerrainInfiniteBaseChunk.State.LOADED
     }
 
     fun updateClient(delta: Double) {
@@ -70,7 +71,7 @@ class TerrainInfiniteChunkClient(pos: Vector2i,
                 val y = pos.intY() shr 4
                 if ((x != this.pos.x || y != this.pos.y) && unmapEntity(
                         entity)) {
-                    if (terrain2.chunkC(x, y, { chunk ->
+                    if (terrain.chunkC(x, y, { chunk ->
                         chunk.mapEntity(entity)
                         true
                     }) == null) {
@@ -81,7 +82,7 @@ class TerrainInfiniteChunkClient(pos: Vector2i,
         }
     }
 
-    fun dispose() {
+    override fun dispose() {
         entitiesMut.values.forEach { terrain.entityRemoved(it) }
     }
 
@@ -89,21 +90,17 @@ class TerrainInfiniteChunkClient(pos: Vector2i,
                         y: Int,
                         z: Int,
                         updateTile: Boolean) {
-        terrain2.renderer.blockChange(x + posBlock.x,
-                y + posBlock.y,
-                z)
-        if (state.id >= TerrainInfiniteChunk.State.LOADED.id) {
-            terrain.lighting().updateLight(x + posBlock.x,
-                    y + posBlock.y, z)
+        terrain.renderer.blockChange(x + posBlock.x, y + posBlock.y, z)
+        if (state.id >= TerrainInfiniteBaseChunk.State.LOADED.id) {
+            terrain.lighting().updateLight(x + posBlock.x, y + posBlock.y, z)
         }
     }
 
     override fun updateLight(x: Int,
                              y: Int,
                              z: Int) {
-        terrain2.renderer.blockChange(x + posBlock.x,
-                y + posBlock.y,
-                z)
+        terrain.renderer.blockChange(x + posBlock.x,
+                y + posBlock.y, z)
     }
 
     fun rendererChunk(): TerrainInfiniteRendererChunk {

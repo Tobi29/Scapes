@@ -20,7 +20,7 @@ import org.tobi29.scapes.block.*
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelComplex
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock
-import org.tobi29.scapes.chunk.data.ChunkMesh
+import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
@@ -38,7 +38,7 @@ import org.tobi29.scapes.engine.utils.math.vector.plus
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.TreeType
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.CollisionLeaves
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
 import org.tobi29.scapes.vanilla.basics.util.dropItems
@@ -46,9 +46,9 @@ import org.tobi29.scapes.vanilla.basics.world.ClimateInfoLayer
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentClimate
 import java.util.*
 
-class BlockLeaves(materials: VanillaMaterial,
-                  private val treeRegistry: Registries.Registry<TreeType>) : VanillaBlock(
-        materials, "vanilla.basics.block.Leaves") {
+class BlockLeaves(type: VanillaMaterialType) : VanillaBlock(type) {
+    private val treeRegistry = plugins.registry.get<TreeType>("VanillaBasics",
+            "TreeType")
     private var textures: Array<Triple<TreeType, TerrainTexture, TerrainTexture>?>? = null
     private var modelsFancy: Array<BlockModel?>? = null
     private var modelsFast: Array<BlockModel?>? = null
@@ -212,19 +212,9 @@ class BlockLeaves(materials: VanillaMaterial,
         return textures?.get(data)?.second
     }
 
-    override fun isTransparent(terrain: Terrain,
-                               x: Int,
-                               y: Int,
-                               z: Int): Boolean {
-        return true
-    }
+    override fun isTransparent(data: Int) = true
 
-    override fun lightTrough(terrain: Terrain,
-                             x: Int,
-                             y: Int,
-                             z: Int): Byte {
-        return -2
-    }
+    override fun lightTrough(data: Int) = -2
 
     override fun connectStage(terrain: TerrainClient,
                               x: Int,

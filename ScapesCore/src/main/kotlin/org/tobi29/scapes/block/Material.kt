@@ -22,10 +22,12 @@ import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
+import org.tobi29.scapes.plugins.Plugins
 
-abstract class Material(protected val registry: GameRegistry,
-                        protected val nameID: String) {
-    var id = 0
+abstract class Material(type: MaterialType) {
+    val plugins = type.plugins
+    val nameID = type.name
+    val id = type.id
 
     open fun example(data: Int): ItemStack {
         return ItemStack(this, data)
@@ -49,18 +51,6 @@ abstract class Material(protected val registry: GameRegistry,
                    item: ItemStack,
                    hit: MobServer): Double {
         return 0.0
-    }
-
-    fun nameID(): String {
-        return nameID
-    }
-
-    fun registry(): GameRegistry {
-        return registry
-    }
-
-    open fun itemID(): Int {
-        return id
     }
 
     open fun toolLevel(item: ItemStack): Int {
@@ -107,3 +97,7 @@ abstract class Material(protected val registry: GameRegistry,
 
     abstract fun maxStackSize(item: ItemStack): Int
 }
+
+data class MaterialType(val plugins: Plugins,
+                        val id: Int,
+                        val name: String)

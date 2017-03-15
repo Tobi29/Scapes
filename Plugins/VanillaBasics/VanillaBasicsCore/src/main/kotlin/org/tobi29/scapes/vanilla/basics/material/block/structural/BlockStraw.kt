@@ -17,19 +17,15 @@
 package org.tobi29.scapes.vanilla.basics.material.block.structural
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.entity.server.MobPlayerServer
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.BlockSimpleDataTextured
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateStrawDry
 import java.util.concurrent.ThreadLocalRandom
 
-class BlockStraw(materials: VanillaMaterial) : BlockSimpleDataTextured(
-        materials,
-        "vanilla.basics.block.Straw") {
-
+class BlockStraw(type: VanillaMaterialType) : BlockSimpleDataTextured(type) {
     override fun place(terrain: TerrainServer.TerrainMutable,
                        x: Int,
                        y: Int,
@@ -62,12 +58,7 @@ class BlockStraw(materials: VanillaMaterial) : BlockSimpleDataTextured(
         return "VanillaBasics:sound/blocks/Foliage.ogg"
     }
 
-    override fun lightTrough(terrain: Terrain,
-                             x: Int,
-                             y: Int,
-                             z: Int): Byte {
-        return -5
-    }
+    override fun lightTrough(data: Int) = -5
 
     override fun name(item: ItemStack): String {
         when (item.data()) {

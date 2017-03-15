@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.entity.particle
 
+import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.*
@@ -92,9 +93,9 @@ class ParticleEmitterTransparent(system: ParticleSystem,
             val x = instance.posRender.intX()
             val y = instance.posRender.intY()
             val z = instance.posRender.intZ()
-            val type = terrain.type(x, y, z)
-            if (!type.isSolid(terrain, x, y, z) || type.isTransparent(terrain,
-                    x, y, z)) {
+            if (terrain.block(x, y, z) {
+                !isSolid(it) || isTransparent(it)
+            }) {
                 val posRenderX = (instance.posRender.x - camPos.x).toFloat()
                 val posRenderY = (instance.posRender.y - camPos.y).toFloat()
                 val posRenderZ = (instance.posRender.z - camPos.z).toFloat()

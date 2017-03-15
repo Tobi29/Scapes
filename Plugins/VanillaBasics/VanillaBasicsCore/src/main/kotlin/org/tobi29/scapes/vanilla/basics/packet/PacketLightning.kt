@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.packet
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -46,7 +46,7 @@ class PacketLightning : PacketAbstract, PacketClient {
         this.z = z
     }
 
-    constructor(registry: GameRegistry,
+    constructor(registry: Registries,
                 x: Double,
                 y: Double,
                 z: Double) : this(

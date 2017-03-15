@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.entity.client
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.utils.ListenerOwner
 import org.tobi29.scapes.engine.utils.io.tag.MutableTagMap
@@ -27,7 +27,7 @@ import org.tobi29.scapes.packets.PacketEntityMetaData
 import java.util.*
 
 interface EntityClient : Entity, ListenerOwner {
-    val registry: GameRegistry
+    val registry: Registries
     val world: WorldClient
     val uuid: UUID
 

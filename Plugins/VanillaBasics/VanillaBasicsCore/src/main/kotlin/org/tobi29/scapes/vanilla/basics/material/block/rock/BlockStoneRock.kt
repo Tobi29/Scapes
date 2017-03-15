@@ -16,12 +16,15 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.rock
 
-import org.tobi29.scapes.block.*
+import org.tobi29.scapes.block.AABBElement
+import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.TerrainTexture
+import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelComplex
 import org.tobi29.scapes.block.models.ItemModel
 import org.tobi29.scapes.block.models.ItemModelSimple
-import org.tobi29.scapes.chunk.data.ChunkMesh
+import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
@@ -35,14 +38,14 @@ import org.tobi29.scapes.engine.utils.math.PointerPane
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.StoneType
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
 import org.tobi29.scapes.vanilla.basics.util.dropItems
 import java.util.*
 
-class BlockStoneRock(materials: VanillaMaterial,
-                     private val stoneRegistry: Registries.Registry<StoneType>) : VanillaBlock(
-        materials, "vanilla.basics.block.StoneRock") {
+class BlockStoneRock(type: VanillaMaterialType) : VanillaBlock(type) {
+    private val stoneRegistry = plugins.registry.get<StoneType>("VanillaBasics",
+            "StoneType")
     private var textures: Array<TerrainTexture?>? = null
     private var texturesItem: Array<TerrainTexture?>? = null
     private var models: Array<Array<BlockModel>>? = null
@@ -92,7 +95,8 @@ class BlockStoneRock(materials: VanillaMaterial,
         if (!super.place(terrain, x, y, z, face, player)) {
             return false
         }
-        return terrain.type(x, y, z - 1).isSolid(terrain, x, y, z - 1)
+        val block = terrain.block(x, y, z - 1)
+        return terrain.type(block).isSolid(terrain.data(block))
     }
 
     override fun resistance(item: ItemStack,
@@ -118,26 +122,11 @@ class BlockStoneRock(materials: VanillaMaterial,
         return textures?.get(data)
     }
 
-    override fun isSolid(terrain: Terrain,
-                         x: Int,
-                         y: Int,
-                         z: Int): Boolean {
-        return false
-    }
+    override fun isSolid(data: Int) = false
 
-    override fun isTransparent(terrain: Terrain,
-                               x: Int,
-                               y: Int,
-                               z: Int): Boolean {
-        return true
-    }
+    override fun isTransparent(data: Int) = true
 
-    override fun lightTrough(terrain: Terrain,
-                             x: Int,
-                             y: Int,
-                             z: Int): Byte {
-        return -1
-    }
+    override fun lightTrough(data: Int) = -1
 
     override fun connectStage(terrain: TerrainClient,
                               x: Int,
@@ -170,7 +159,8 @@ class BlockStoneRock(materials: VanillaMaterial,
                         y: Int,
                         z: Int,
                         data: Int) {
-        if (!terrain.type(x, y, z - 1).isSolid(terrain, x, y, z - 1)) {
+        val block = terrain.block(x, y, z - 1)
+        if (!terrain.type(block).isSolid(terrain.data(block))) {
             terrain.world.dropItems(drops(ItemStack(materials.air, 0), data), x,
                     y, z)
             terrain.typeData(x, y, z, terrain.air, 0)

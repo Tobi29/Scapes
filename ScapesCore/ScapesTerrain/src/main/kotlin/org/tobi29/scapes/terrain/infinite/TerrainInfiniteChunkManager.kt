@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.chunk.lighting
+package org.tobi29.scapes.terrain.infinite
 
-interface LightingEngine {
-    fun updateLight(x: Int,
-                    y: Int,
-                    z: Int)
+interface TerrainInfiniteChunkManager<C : TerrainInfiniteBaseChunk<*>> {
+    fun add(chunk: C)
 
-    fun dispose()
+    fun remove(x: Int,
+               y: Int): C?
+
+    operator fun get(x: Int,
+                     y: Int): C?
+
+    fun has(x: Int,
+            y: Int): Boolean
+
+    fun stream(): Sequence<C>
+
+    val chunks get() = stream().count()
+
+    fun update()=false
 }

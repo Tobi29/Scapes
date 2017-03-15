@@ -24,10 +24,9 @@ import org.tobi29.scapes.block.models.ItemModelSimple
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.vanilla.basics.material.ItemFuel
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
-class ItemCoal(materials: VanillaMaterial) : VanillaItem(materials,
-        "vanilla.basics.item.Coal"), ItemFuel {
+class ItemCoal(type: VanillaMaterialType) : VanillaItem(type), ItemFuel {
     private var texture: TerrainTexture? = null
     private var model: ItemModel? = null
 

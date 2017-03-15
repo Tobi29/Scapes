@@ -129,11 +129,10 @@ fun TerrainServer.TerrainMutable.explosionBlockPush(
         } else {
             if (random.nextDouble() < dropChance) {
                 world.dropItems(type.drops(
-                        ItemStack(world.registry),
+                        ItemStack(world.plugins),
                         data), xxx, yyy, zzz)
-            } else if (type.isSolid(this, xxx, yyy, zzz) &&
-                    !type.isTransparent(this, xxx, yyy,
-                            zzz) &&
+            } else if (type.isSolid(data) &&
+                    !type.isTransparent(data) &&
                     random.nextDouble() < blockChance) {
                 entities.add(plugin.entityTypes.flyingBlock.createServer(
                         world).apply {

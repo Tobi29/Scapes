@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
-import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.engine.utils.Pool
@@ -28,7 +27,7 @@ import java.util.*
 
 class TerrainInfiniteSection : TerrainClient {
     override val air get() = access { it.air }
-    override val registry get() = access { it.registry }
+    override val blocks get() = access { it.blocks }
     override val world get() = access { it.world }
     override val renderer get() = access { it.renderer }
     private val chunks = arrayOfNulls<TerrainInfiniteChunkClient?>(9)
@@ -207,23 +206,11 @@ class TerrainInfiniteSection : TerrainClient {
         }
     }
 
-    override fun collisions(minX: Int,
-                            minY: Int,
-                            minZ: Int,
-                            maxX: Int,
-                            maxY: Int,
-                            maxZ: Int,
-                            pool: Pool<AABBElement>) {
-        access { terrain ->
-            terrain.collisions(minX, minY, minZ, maxX, maxY, maxZ, pool)
-        }
-    }
-
-    override fun pointerPanes(x: Int,
-                              y: Int,
-                              z: Int,
-                              range: Int,
-                              pool: Pool<PointerPane>) {
+    fun pointerPanes(x: Int,
+                     y: Int,
+                     z: Int,
+                     range: Int,
+                     pool: Pool<PointerPane>) {
         access { terrain ->
             terrain.pointerPanes(x, y, z, range, pool)
         }

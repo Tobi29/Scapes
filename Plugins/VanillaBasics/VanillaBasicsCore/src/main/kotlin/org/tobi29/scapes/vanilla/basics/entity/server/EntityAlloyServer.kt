@@ -31,7 +31,7 @@ import org.tobi29.scapes.vanilla.basics.util.writeAlloy
 
 class EntityAlloyServer(type: EntityType<*, *>,
                         world: WorldServer) : EntityAbstractContainerServer(
-        type, world, Vector3d.ZERO, Inventory(world.registry, 2)) {
+        type, world, Vector3d.ZERO, Inventory(world.plugins, 2)) {
     private var metals = Alloy()
     private var temperature = 0.0
 

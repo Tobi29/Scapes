@@ -15,8 +15,8 @@
  */
 package org.tobi29.scapes.chunk.generator
 
-import org.tobi29.scapes.chunk.terrain.TerrainChunk
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.terrain.TerrainChunk
 
 interface ChunkPopulator {
     fun populate(terrain: TerrainServer.TerrainMutable,

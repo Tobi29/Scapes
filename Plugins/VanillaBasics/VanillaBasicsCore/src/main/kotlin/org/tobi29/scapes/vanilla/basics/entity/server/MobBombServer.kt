@@ -28,7 +28,7 @@ import org.tobi29.scapes.vanilla.basics.material.BlockExplosive
 class MobBombServer(type: EntityType<*, *>,
                     world: WorldServer) : MobServer(type, world, Vector3d.ZERO,
         Vector3d.ZERO, AABB(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)) {
-    private val item = ItemStack(world.registry)
+    private val item = ItemStack(world.plugins)
     private var time = 0.0
 
     init {

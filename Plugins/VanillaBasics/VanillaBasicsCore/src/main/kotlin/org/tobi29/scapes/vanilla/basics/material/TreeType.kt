@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.vanilla.basics.world.tree.Tree
 
@@ -51,7 +51,7 @@ class TreeType internal constructor(val id: Int,
             colorWarm, colorAutumn, dropChance, generator, false)
 
     companion object {
-        operator fun get(registry: GameRegistry,
+        operator fun get(registry: Registries,
                          data: Int): TreeType {
             return registry.get<TreeType>("VanillaBasics", "TreeType")[data]
         }

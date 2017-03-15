@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.vanilla.basics.packet
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -46,7 +46,7 @@ class PacketAnvil : PacketAbstract, PacketServer {
         this.id = id
     }
 
-    constructor(registry: GameRegistry,
+    constructor(registry: Registries,
                 anvil: EntityAnvilClient,
                 id: Int) : this(
             Packet.make(registry, "vanilla.basics.packet.Anvil"), anvil,

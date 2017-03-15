@@ -17,6 +17,7 @@ package org.tobi29.scapes.entity.particle
 
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.chunk.terrain.TerrainClient
+import org.tobi29.scapes.chunk.terrain.collisions
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.math.*

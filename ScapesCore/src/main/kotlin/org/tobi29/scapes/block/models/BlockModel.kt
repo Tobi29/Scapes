@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.block.models
 
-import org.tobi29.scapes.chunk.data.ChunkMesh
+import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 
 interface BlockModel : ItemModel {

@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -45,7 +45,7 @@ class PacketEntityMetaData : PacketAbstract, PacketClient {
         tag = entity.metaData(category).toTag()
     }
 
-    constructor(registry: GameRegistry,
+    constructor(registry: Registries,
                 entity: EntityServer,
                 category: String) : this(
             Packet.make(registry, "core.packet.EntityMetaData"), entity,

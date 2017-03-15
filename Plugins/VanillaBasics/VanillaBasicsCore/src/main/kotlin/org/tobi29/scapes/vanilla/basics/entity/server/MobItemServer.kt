@@ -30,7 +30,7 @@ class MobItemServer(type: EntityType<*, *>,
                     world: WorldServer) : MobServer(
         type, world, Vector3d.ZERO, Vector3d.ZERO,
         AABB(-0.2, -0.2, -0.2, 0.2, 0.2, 0.2)) {
-    val item = ItemStack(registry)
+    val item = ItemStack(world.plugins)
     private var pickupwait = 1.0
     private var stackwait = 0.0
     var despawntime = Double.NaN
@@ -61,9 +61,7 @@ class MobItemServer(type: EntityType<*, *>,
                 aabb.overlay(it.getAABB())
             }.forEach { entity ->
                 world.playSound("Scapes:sound/entity/mob/Item.ogg", this)
-                entity.inventories().modify("Container") { inventory ->
-                    item.setAmount(item.amount() - inventory.add(item))
-                }
+                entity.inventories().modify("Container") { it.add(item) }
             }
             stackwait -= delta
             if (stackwait <= 0) {
@@ -76,7 +74,7 @@ class MobItemServer(type: EntityType<*, *>,
         } else {
             pickupwait -= delta
         }
-        if (item.amount() <= 0 || item.material() === registry.air) {
+        if (item.amount() <= 0 || item.material() == world.plugins.air) {
             world.removeEntity(this)
         }
         if (!despawntime.isNaN()) {

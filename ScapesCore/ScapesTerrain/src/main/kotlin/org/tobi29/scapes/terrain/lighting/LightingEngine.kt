@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.tobi29.scapes.chunk.terrain
 
-import org.tobi29.scapes.engine.utils.io.tag.MutableTagMap
-import org.tobi29.scapes.engine.utils.math.vector.Vector3i
+package org.tobi29.scapes.terrain.lighting
 
-interface TerrainChunk {
-    val posBlock: Vector3i
-    val size: Vector3i
+interface LightingEngine {
+    fun updateLight(x: Int,
+                    y: Int,
+                    z: Int)
 
-    fun metaData(id: String): MutableTagMap
+    fun dispose()
 }

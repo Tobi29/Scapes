@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.entity.client
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.angleDiff
 import org.tobi29.scapes.engine.utils.math.max
@@ -27,7 +27,7 @@ import org.tobi29.scapes.packets.*
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
-class MobPositionSenderClient(private val registry: GameRegistry,
+class MobPositionSenderClient(private val registry: Registries,
                               pos: Vector3d,
                               private val packetHandler: (PacketBoth) -> Unit) {
     private val sentPos: MutableVector3d

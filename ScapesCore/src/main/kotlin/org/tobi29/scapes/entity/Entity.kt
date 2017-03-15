@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.entity
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import java.util.*
@@ -35,10 +35,10 @@ interface Entity {
     }
 
     companion object {
-        fun of(registry: GameRegistry,
+        fun of(registry: Registries,
                id: Int) = registry.get<EntityType<*, *>>("Core", "Entity")[id]
 
-        fun of(registry: GameRegistry,
+        fun of(registry: Registries,
                id: String) = registry.get<EntityType<*, *>>("Core",
                 "Entity")[id]
     }

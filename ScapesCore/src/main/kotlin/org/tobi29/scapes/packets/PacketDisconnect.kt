@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.packets
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.client.states.GameStateServerDisconnect
 import org.tobi29.scapes.engine.server.ConnectionEndException
@@ -37,7 +37,7 @@ class PacketDisconnect : PacketAbstract, PacketClient {
         this.time = time
     }
 
-    constructor(registry: GameRegistry,
+    constructor(registry: Registries,
                 reason: String,
                 time: Double) : this(
             Packet.make(registry, "core.packet.Disconnect"), reason, time)

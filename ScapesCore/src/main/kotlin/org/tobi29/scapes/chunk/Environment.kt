@@ -16,13 +16,13 @@
 
 package org.tobi29.scapes.chunk
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 
 object Environment {
-    fun of(registry: GameRegistry,
+    fun of(registry: Registries,
            id: Int) = registry.get<EnvironmentType>("Core", "Environment")[id]
 
-    fun of(registry: GameRegistry,
+    fun of(registry: Registries,
            id: String) = registry.get<EnvironmentType>("Core",
             "Environment")[id]
 }

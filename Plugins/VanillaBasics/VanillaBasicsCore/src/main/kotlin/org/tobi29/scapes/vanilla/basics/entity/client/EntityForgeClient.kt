@@ -32,7 +32,7 @@ import java.util.concurrent.ThreadLocalRandom
 class EntityForgeClient(type: EntityType<*, *>,
                         world: WorldClient) : EntityAbstractFurnaceClient(
         type, world, Vector3d.ZERO,
-        Inventory(world.registry, 9), 4, 3) {
+        Inventory(world.plugins, 9), 4, 3) {
     private var particleWait = 0.1
 
     override fun gui(player: MobPlayerClientMain): Gui? {

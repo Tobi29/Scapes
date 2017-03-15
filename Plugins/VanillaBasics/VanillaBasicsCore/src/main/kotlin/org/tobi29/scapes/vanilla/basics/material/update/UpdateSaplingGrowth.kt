@@ -17,7 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.material.update
 
 import org.tobi29.scapes.block.BlockType
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.block.Update
 import org.tobi29.scapes.block.UpdateType
 import org.tobi29.scapes.chunk.terrain.TerrainServer
@@ -26,7 +26,7 @@ import org.tobi29.scapes.vanilla.basics.material.TreeType
 import java.util.*
 
 class UpdateSaplingGrowth(type: UpdateType) : Update(type) {
-    constructor(registry: GameRegistry) : this(
+    constructor(registry: Registries) : this(
             of(registry, "vanilla.basics.update.SaplingGrowth"))
 
     override fun run(terrain: TerrainServer.TerrainMutable) {
@@ -36,8 +36,8 @@ class UpdateSaplingGrowth(type: UpdateType) : Update(type) {
         val block = terrain.block(x, y, z)
         val data = terrain.data(block)
         terrain.typeData(x, y, z, materials.air, 0)
-        TreeType[materials.registry, data].generator.gen(terrain, x, y, z,
-                materials, Random())
+        TreeType[materials.plugins.registry, data].generator.gen(terrain, x, y,
+                z, materials, Random())
     }
 
     override fun isValidOn(type: BlockType,

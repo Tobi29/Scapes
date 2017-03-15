@@ -19,7 +19,7 @@ package org.tobi29.scapes.vanilla.basics.material.block
 import org.tobi29.scapes.block.*
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelLiquid
-import org.tobi29.scapes.chunk.data.ChunkMesh
+import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
@@ -30,13 +30,12 @@ import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.PointerPane
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateWaterFlow
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
-class BlockWater(materials: VanillaMaterial) : VanillaBlock(materials,
-        "vanilla.basics.block.Water") {
+class BlockWater(type: VanillaMaterialType) : VanillaBlock(type) {
     private var textureStill: TerrainTexture? = null
     private var textureFlow: TerrainTexture? = null
     private var model: BlockModel? = null
@@ -100,19 +99,9 @@ class BlockWater(materials: VanillaMaterial) : VanillaBlock(materials,
     override val isLiquid: Boolean
         get() = true
 
-    override fun isSolid(terrain: Terrain,
-                         x: Int,
-                         y: Int,
-                         z: Int): Boolean {
-        return false
-    }
+    override fun isSolid(data: Int) = false
 
-    override fun lightTrough(terrain: Terrain,
-                             x: Int,
-                             y: Int,
-                             z: Int): Byte {
-        return -1
-    }
+    override fun lightTrough(data: Int) = -1
 
     override fun connectStage(terrain: TerrainClient,
                               x: Int,

@@ -18,15 +18,13 @@ package org.tobi29.scapes.vanilla.basics.material.block.soil
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.chunk.terrain.isSolid
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
 import java.util.concurrent.ThreadLocalRandom
 
-abstract class BlockSoil protected constructor(materials: VanillaMaterial,
-                                               nameID: String) : VanillaBlock(
-        materials, nameID) {
-
+abstract class BlockSoil(type: VanillaMaterialType) : VanillaBlock(type) {
     override fun footStepSound(data: Int): String {
         return "VanillaBasics:sound/footsteps/Dirt.ogg"
     }
@@ -45,30 +43,27 @@ abstract class BlockSoil protected constructor(materials: VanillaMaterial,
         var xx = 0
         var yy = 0
         var flag = false
-        if (terrain.type(x, y, z - 1).isSolid(terrain, x, y, z - 1)) {
+        if (terrain.isSolid(x, y, z - 1)) {
             val random = ThreadLocalRandom.current()
-            if (!terrain.type(x - 1, y, z).isSolid(terrain, x - 1, y, z)) {
+            if (!terrain.isSolid(x - 1, y, z)) {
                 sides++
-                if (!terrain.type(x - 1, y, z - 1).isSolid(terrain, x - 1, y,
-                        z - 1)) {
+                if (!terrain.isSolid(x - 1, y, z - 1)) {
                     xx = -1
                     flag = true
                 }
             }
-            if (!terrain.type(x + 1, y, z).isSolid(terrain, x + 1, y, z)) {
+            if (!terrain.isSolid(x + 1, y, z)) {
                 sides++
-                if (!terrain.type(x + 1, y, z - 1).isSolid(terrain, x + 1, y,
-                        z - 1)) {
+                if (!terrain.isSolid(x + 1, y, z - 1)) {
                     if (xx == 0 || random.nextBoolean()) {
                         xx = 1
                     }
                     flag = true
                 }
             }
-            if (!terrain.type(x, y - 1, z).isSolid(terrain, x, y - 1, z)) {
+            if (!terrain.isSolid(x, y - 1, z)) {
                 sides++
-                if (!terrain.type(x, y - 1, z - 1).isSolid(terrain, x, y - 1,
-                        z - 1)) {
+                if (!terrain.isSolid(x, y - 1, z - 1)) {
                     if (xx == 0 || random.nextBoolean()) {
                         xx = 0
                         yy = -1
@@ -76,10 +71,9 @@ abstract class BlockSoil protected constructor(materials: VanillaMaterial,
                     flag = true
                 }
             }
-            if (!terrain.type(x, y + 1, z).isSolid(terrain, x, y + 1, z)) {
+            if (!terrain.isSolid(x, y + 1, z)) {
                 sides++
-                if (!terrain.type(x, y + 1, z - 1).isSolid(terrain, x, y + 1,
-                        z - 1)) {
+                if (!terrain.isSolid(x, y + 1, z - 1)) {
                     if (xx == 0 && yy == 0 || random.nextBoolean()) {
                         xx = 0
                         yy = 1

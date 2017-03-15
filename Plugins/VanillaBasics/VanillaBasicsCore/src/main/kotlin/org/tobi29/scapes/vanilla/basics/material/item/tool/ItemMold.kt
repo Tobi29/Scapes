@@ -19,11 +19,11 @@ package org.tobi29.scapes.vanilla.basics.material.item.tool
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.vanilla.basics.material.ItemDefaultHeatable
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.item.ItemSimpleData
 
-class ItemMold(materials: VanillaMaterial) : ItemSimpleData(materials,
-        "vanilla.basics.item.Mold"), ItemDefaultHeatable {
+class ItemMold(type: VanillaMaterialType) : ItemSimpleData(
+        type), ItemDefaultHeatable {
     override fun types(): Int {
         return 2
     }

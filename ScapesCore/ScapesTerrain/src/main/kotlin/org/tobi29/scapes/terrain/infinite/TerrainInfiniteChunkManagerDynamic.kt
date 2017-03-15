@@ -14,25 +14,24 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.chunk.terrain.infinite
+package org.tobi29.scapes.terrain.infinite
 
 import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
-import org.tobi29.scapes.entity.server.EntityServer
 import java.util.concurrent.ConcurrentHashMap
 
-class TerrainInfiniteChunkManagerServer : TerrainInfiniteChunkManager<EntityServer> {
-    private val chunks = ConcurrentHashMap<ChunkLabel, TerrainInfiniteChunkServer>()
-    private var lastLookup: TerrainInfiniteChunkServer? = null
+class TerrainInfiniteChunkManagerDynamic<C : TerrainInfiniteBaseChunk<*>> : TerrainInfiniteChunkManager<C> {
+    private val map = ConcurrentHashMap<ChunkLabel, C>()
+    private var lastLookup: C? = null
 
-    fun add(chunk: TerrainInfiniteChunkServer) {
-        chunks.put(ChunkLabel(chunk.pos), chunk)
+    override fun add(chunk: C) {
+        map.put(ChunkLabel(chunk.pos), chunk)
     }
 
-    fun remove(x: Int,
-               y: Int): TerrainInfiniteChunkServer? {
+    override fun remove(x: Int,
+                        y: Int): C? {
         val label = LABEL.get().set(x, y)
-        val chunk = chunks.remove(label)
+        val chunk = map.remove(label)
         if (chunk === lastLookup) {
             lastLookup = null
         }
@@ -40,7 +39,7 @@ class TerrainInfiniteChunkManagerServer : TerrainInfiniteChunkManager<EntityServ
     }
 
     override fun get(x: Int,
-                     y: Int): TerrainInfiniteChunkServer? {
+                     y: Int): C? {
         val lastChunk = lastLookup
         if (lastChunk != null) {
             if (lastChunk.pos.x == x && lastChunk.pos.y == y) {
@@ -48,7 +47,7 @@ class TerrainInfiniteChunkManagerServer : TerrainInfiniteChunkManager<EntityServ
             }
         }
         val label = LABEL.get().set(x, y)
-        val chunk = chunks[label]
+        val chunk = map[label]
         lastLookup = chunk
         if (chunk == null) {
             return null
@@ -60,16 +59,14 @@ class TerrainInfiniteChunkManagerServer : TerrainInfiniteChunkManager<EntityServ
     override fun has(x: Int,
                      y: Int): Boolean {
         val label = LABEL.get().set(x, y)
-        return chunks.containsKey(label)
+        return map.containsKey(label)
     }
 
-    override fun stream(): Sequence<TerrainInfiniteChunkServer> {
-        return chunks.values.asSequence()
+    override fun stream(): Sequence<C> {
+        return map.values.asSequence()
     }
 
-    fun chunks(): Int {
-        return chunks.size
-    }
+    override val chunks get() = map.size
 
     private data class ChunkLabel(var x: Int,
                                   var y: Int) {

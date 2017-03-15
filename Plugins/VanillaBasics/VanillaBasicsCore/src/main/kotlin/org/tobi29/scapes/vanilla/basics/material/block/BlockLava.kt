@@ -22,7 +22,7 @@ import org.tobi29.scapes.block.TerrainTexture
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelLiquid
-import org.tobi29.scapes.chunk.data.ChunkMesh
+import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
@@ -33,13 +33,12 @@ import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.PointerPane
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateLavaFlow
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
-class BlockLava(materials: VanillaMaterial) : VanillaBlock(materials,
-        "vanilla.basics.block.Lava") {
+class BlockLava(type: VanillaMaterialType) : VanillaBlock(type) {
     private var textureStill: TerrainTexture? = null
     private var textureFlow: TerrainTexture? = null
     private var model: BlockModel? = null
@@ -103,27 +102,11 @@ class BlockLava(materials: VanillaMaterial) : VanillaBlock(materials,
     override val isLiquid: Boolean
         get() = true
 
-    override fun isSolid(terrain: Terrain,
-                         x: Int,
-                         y: Int,
-                         z: Int): Boolean {
-        return false
-    }
+    override fun isSolid(data: Int) = false
 
-    override fun lightEmit(terrain: Terrain,
-                           x: Int,
-                           y: Int,
-                           z: Int,
-                           data: Int): Byte {
-        return 15
-    }
+    override fun lightEmit(data: Int) = 15.toByte()
 
-    override fun lightTrough(terrain: Terrain,
-                             x: Int,
-                             y: Int,
-                             z: Int): Byte {
-        return -4
-    }
+    override fun lightTrough(data: Int) = -4
 
     override fun connectStage(terrain: TerrainClient,
                               x: Int,

@@ -32,13 +32,11 @@ import org.tobi29.scapes.engine.utils.math.tanh
 import org.tobi29.scapes.entity.WieldMode
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.item.VanillaItem
 import org.tobi29.scapes.vanilla.basics.util.createStoneTool
 
-abstract class ItemFlintTool protected constructor(materials: VanillaMaterial,
-                                                   nameID: String) : VanillaItem(
-        materials, nameID) {
+abstract class ItemFlintTool(type: VanillaMaterialType) : VanillaItem(type) {
     private var textureHead: TerrainTexture? = null
     private var textureBuilt: TerrainTexture? = null
     private var modelHead: ItemModel? = null

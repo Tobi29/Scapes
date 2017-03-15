@@ -17,12 +17,10 @@
 package org.tobi29.scapes.vanilla.basics.material.block.rock
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.BlockSimpleDataTextured
 
-class BlockSandstone(materials: VanillaMaterial) : BlockSimpleDataTextured(materials,
-        "vanilla.basics.block.Sandstone") {
-
+class BlockSandstone(type: VanillaMaterialType) : BlockSimpleDataTextured(type) {
     override fun resistance(item: ItemStack,
                             data: Int): Double {
         return (if ("Pickaxe" == item.material().toolType(

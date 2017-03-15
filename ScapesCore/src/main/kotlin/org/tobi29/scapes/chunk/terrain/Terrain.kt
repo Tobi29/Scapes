@@ -15,85 +15,96 @@
  */
 package org.tobi29.scapes.chunk.terrain
 
-import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.block.BlockType
-import org.tobi29.scapes.block.GameRegistry
-import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.utils.math.PointerPane
+import org.tobi29.scapes.block.Update
+import org.tobi29.scapes.chunk.MobSpawner
+import org.tobi29.scapes.chunk.WorldClient
+import org.tobi29.scapes.chunk.WorldServer
+import org.tobi29.scapes.chunk.generator.ChunkGenerator
+import org.tobi29.scapes.entity.Entity
+import org.tobi29.scapes.entity.EntityContainer
+import org.tobi29.scapes.entity.client.EntityClient
+import org.tobi29.scapes.entity.server.EntityServer
+import org.tobi29.scapes.entity.server.MobPlayerServer
+import org.tobi29.scapes.packets.PacketBlockChange
+import org.tobi29.scapes.terrain.TerrainBase
+import org.tobi29.scapes.terrain.TerrainChunk
 
-interface Terrain {
-    val air: BlockType
-    val registry: GameRegistry
+typealias Terrain = TerrainBase<BlockType>
 
-    fun sunLight(x: Int,
+interface TerrainEntity<E : Entity> : Terrain, EntityContainer<E>
+
+interface TerrainClient : TerrainEntity<EntityClient> {
+    val world: WorldClient
+    val renderer: TerrainRenderer
+
+    fun update(delta: Double)
+
+    fun toggleStaticRenderDistance()
+
+    fun reloadGeometry()
+
+    fun process(packet: PacketBlockChange)
+
+    fun dispose()
+}
+
+interface TerrainServer : TerrainEntity<EntityServer> {
+    val world: WorldServer
+    val generator: ChunkGenerator
+
+    fun update(delta: Double,
+               spawners: Collection<MobSpawner>)
+
+    fun queue(blockChanges: (TerrainServer.TerrainMutable) -> Unit)
+
+    fun queue(blockChanges: TerrainServer.BlockChanges) {
+        queue { blockChanges.run(it) }
+    }
+
+    fun addDelayedUpdate(update: Update)
+
+    fun hasDelayedUpdate(x: Int,
+                         y: Int,
+                         z: Int,
+                         clazz: Class<out Update>): Boolean
+
+    fun isBlockSendable(player: MobPlayerServer,
+                        x: Int,
+                        y: Int,
+                        z: Int,
+                        chunkContent: Boolean): Boolean
+
+    fun chunks(consumer: (TerrainChunk) -> Unit)
+
+    fun dispose()
+
+    interface BlockChanges {
+        fun run(handler: TerrainMutable)
+    }
+
+    interface TerrainMutable : TerrainServer {
+        fun block(x: Int,
+                  y: Int,
+                  z: Int,
+                  block: Long) {
+            typeData(x, y, z, type(block), data(block))
+        }
+
+        fun type(x: Int,
                  y: Int,
                  z: Int,
-                 light: Int)
+                 type: BlockType)
 
-    fun blockLight(x: Int,
-                   y: Int,
-                   z: Int,
-                   light: Int)
-
-    fun block(x: Int,
-              y: Int,
-              z: Int): Long
-
-    fun type(x: Int,
-             y: Int,
-             z: Int): BlockType
-
-    fun light(x: Int,
-              y: Int,
-              z: Int): Int
-
-    fun sunLight(x: Int,
+        fun data(x: Int,
                  y: Int,
-                 z: Int): Int
+                 z: Int,
+                 data: Int)
 
-    fun blockLight(x: Int,
-                   y: Int,
-                   z: Int): Int
-
-    fun sunLightReduction(x: Int,
-                          y: Int): Int
-
-    fun highestBlockZAt(x: Int,
-                        y: Int): Int
-
-    fun highestTerrainBlockZAt(x: Int,
-                               y: Int): Int
-
-    fun isBlockLoaded(x: Int,
-                      y: Int,
-                      z: Int): Boolean
-
-    fun isBlockTicking(x: Int,
-                       y: Int,
-                       z: Int): Boolean
-
-    fun collisions(minX: Int,
-                   minY: Int,
-                   minZ: Int,
-                   maxX: Int,
-                   maxY: Int,
-                   maxZ: Int,
-                   pool: Pool<AABBElement>)
-
-    fun pointerPanes(x: Int,
+        fun typeData(x: Int,
                      y: Int,
                      z: Int,
-                     range: Int,
-                     pool: Pool<PointerPane>)
-
-    fun type(block: Long): BlockType {
-        val id = (block shr 32).toInt()
-        return type(id)
+                     block: BlockType,
+                     data: Int)
     }
-
-    fun data(block: Long): Int {
-        return (block and 0xFFFFFFFF).toInt()
-    }
-
-    fun type(id: Int): BlockType
 }

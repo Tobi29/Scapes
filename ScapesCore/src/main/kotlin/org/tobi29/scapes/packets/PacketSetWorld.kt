@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.EnvironmentClient
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldServer
@@ -48,7 +48,7 @@ class PacketSetWorld : PacketAbstract, PacketClient {
         environment = world.environment.type.id
     }
 
-    constructor(registry: GameRegistry,
+    constructor(registry: Registries,
                 world: WorldServer,
                 player: MobPlayerServer) : this(
             Packet.make(registry, "core.packet.SetWorld"), world, player)

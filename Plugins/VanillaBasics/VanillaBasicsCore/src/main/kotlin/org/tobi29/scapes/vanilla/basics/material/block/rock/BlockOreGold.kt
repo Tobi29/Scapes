@@ -17,13 +17,9 @@
 package org.tobi29.scapes.vanilla.basics.material.block.rock
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.Registries
-import org.tobi29.scapes.vanilla.basics.material.StoneType
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
-class BlockOreGold(materials: VanillaMaterial,
-                   stoneRegistry: Registries.Registry<StoneType>) : BlockOre(
-        materials, "vanilla.basics.block.OreGold", stoneRegistry) {
+class BlockOreGold(type: VanillaMaterialType) : BlockOre(type) {
     override fun dropsOre(item: ItemStack,
                           data: Int): List<ItemStack> {
         return listOf(ItemStack(materials.oreChunk, 7))

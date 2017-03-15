@@ -18,6 +18,7 @@ package org.tobi29.scapes.vanilla.basics.world.tree
 
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.engine.utils.math.PI
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.math.sinTable
@@ -50,8 +51,9 @@ object TreeUtil {
                     z: Int,
                     type: BlockType,
                     data: Short) {
-        if (terrain.type(x, y, z).isReplaceable(terrain, x, y,
-                z) || terrain.type(x, y, z).isTransparent(terrain, x, y, z)) {
+        if (terrain.block(x, y, z) {
+            isReplaceable(terrain, x, y, z) || isTransparent(it)
+        }) {
             terrain.typeData(x, y, z, type, data.toInt())
         }
     }

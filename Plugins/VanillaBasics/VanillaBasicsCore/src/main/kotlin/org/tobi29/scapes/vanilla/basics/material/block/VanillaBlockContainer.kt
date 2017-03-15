@@ -25,13 +25,12 @@ import org.tobi29.scapes.entity.client.EntityContainerClient
 import org.tobi29.scapes.entity.server.EntityContainerServer
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
 abstract class VanillaBlockEntity<out C : EntityClient, out S : EntityServer>(
-        materials: VanillaMaterial,
-        nameID: String,
+        type: VanillaMaterialType,
         val entity: EntityType<C, S>
-) : VanillaBlock(materials, nameID) {
+) : VanillaBlock(type) {
     override fun causesTileUpdate(): Boolean {
         return true
     }
@@ -75,10 +74,9 @@ abstract class VanillaBlockEntity<out C : EntityClient, out S : EntityServer>(
 }
 
 abstract class VanillaBlockContainer<out C : EntityContainerClient, out S : EntityContainerServer>(
-        materials: VanillaMaterial,
-        nameID: String,
+        type: VanillaMaterialType,
         entity: EntityType<C, S>
-) : VanillaBlockEntity<C, S>(materials, nameID, entity) {
+) : VanillaBlockEntity<C, S>(type, entity) {
     override fun click(terrain: TerrainServer,
                        x: Int,
                        y: Int,

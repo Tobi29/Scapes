@@ -16,11 +16,11 @@
 
 package org.tobi29.scapes.vanilla.basics
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.block.UpdateType
 import org.tobi29.scapes.vanilla.basics.material.update.*
 
-internal fun registerUpdates(registry: GameRegistry) {
+internal fun registerUpdates(registry: Registries) {
     registry.get<UpdateType>("Core", "Update").run {
         reg("vanilla.basics.update.WaterFlow") {
             UpdateType(it, ::UpdateWaterFlow)

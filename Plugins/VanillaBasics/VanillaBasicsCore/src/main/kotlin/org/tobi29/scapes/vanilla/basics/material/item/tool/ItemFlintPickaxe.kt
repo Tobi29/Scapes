@@ -18,11 +18,9 @@ package org.tobi29.scapes.vanilla.basics.material.item.tool
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.entity.server.MobPlayerServer
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
-class ItemFlintPickaxe(materials: VanillaMaterial) : ItemFlintTool(materials,
-        "vanilla.basics.item.FlintPickaxe") {
-
+class ItemFlintPickaxe(type: VanillaMaterialType) : ItemMetalTool(type) {
     override fun click(entity: MobPlayerServer,
                        item: ItemStack) {
         if (item.data() == 0) {

@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -47,7 +47,7 @@ class PacketMobChangeState : PacketAbstract, PacketBoth {
         this.swimming = swimming
     }
 
-    constructor(registry: GameRegistry,
+    constructor(registry: Registries,
                 uuid: UUID,
                 pos: Vector3d?,
                 ground: Boolean,

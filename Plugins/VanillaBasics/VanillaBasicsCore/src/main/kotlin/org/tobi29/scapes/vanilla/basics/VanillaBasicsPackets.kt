@@ -16,11 +16,11 @@
 
 package org.tobi29.scapes.vanilla.basics
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.packets.PacketType
 import org.tobi29.scapes.vanilla.basics.packet.*
 
-internal fun registerPackets(registry: GameRegistry) {
+internal fun registerPackets(registry: Registries) {
     registry.get<PacketType>("Core", "Packet").run {
         reg("vanilla.basics.packet.DayTimeSync") {
             PacketType(it, ::PacketDayTimeSync)

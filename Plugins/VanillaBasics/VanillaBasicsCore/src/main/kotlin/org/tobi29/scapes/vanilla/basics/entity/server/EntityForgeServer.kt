@@ -27,7 +27,7 @@ import org.tobi29.scapes.vanilla.basics.material.item.ItemIngot
 
 class EntityForgeServer(type: EntityType<*, *>,
                         world: WorldServer) : EntityAbstractFurnaceServer(
-        type, world, Vector3d.ZERO, Inventory(world.registry, 9), 4, 3,
+        type, world, Vector3d.ZERO, Inventory(world.plugins, 9), 4, 3,
         Double.POSITIVE_INFINITY, 1.006, 5.0, 50, { inventory, item ->
     if (item.amount() == 1) {
         val type = item.material()

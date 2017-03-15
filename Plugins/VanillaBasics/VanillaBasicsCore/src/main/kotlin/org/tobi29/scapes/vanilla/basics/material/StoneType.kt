@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 
 class StoneType(val id: Int,
                 val name: String,
@@ -25,7 +25,7 @@ class StoneType(val id: Int,
     val texture = name.replace(" ", "")
 
     companion object {
-        operator fun get(registry: GameRegistry,
+        operator fun get(registry: Registries,
                          data: Int): StoneType {
             return registry.get<StoneType>("VanillaBasics", "StoneType")[data]
         }

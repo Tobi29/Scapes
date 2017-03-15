@@ -55,8 +55,8 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
         AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 100.0, 100.0,
         Frustum(90.0, 1.0, 0.1, 24.0), ""), EntityContainerClient {
     private val inventories = InventoryContainer().apply {
-        add("Container", Inventory(registry, 40))
-        add("Hold", Inventory(registry, 1))
+        add("Container", Inventory(world.plugins, 40))
+        add("Hold", Inventory(world.plugins, 1))
     }
     private var punchLeft: Long = -1
     private var punchRight: Long = -1

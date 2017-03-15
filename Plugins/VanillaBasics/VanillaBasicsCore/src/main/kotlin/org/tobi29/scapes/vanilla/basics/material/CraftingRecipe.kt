@@ -16,9 +16,9 @@
 
 package org.tobi29.scapes.vanilla.basics.material
 
-import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.engine.utils.readOnly
 import java.util.*
 
@@ -80,7 +80,7 @@ class CraftingRecipe(val id: Int,
     }
 
     companion object {
-        operator fun get(registry: GameRegistry,
+        operator fun get(registry: Registries,
                          data: Int): CraftingRecipe {
             return registry.get<CraftingRecipe>("VanillaBasics",
                     "CraftingRecipe")[data]

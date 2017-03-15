@@ -14,27 +14,29 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.chunk.terrain.infinite
+package org.tobi29.scapes.terrain.infinite
 
 import org.tobi29.scapes.engine.utils.StampLock
 import org.tobi29.scapes.engine.utils.math.abs
-import org.tobi29.scapes.entity.client.EntityClient
+import org.tobi29.scapes.engine.utils.math.vector.MutableVector2i
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
-class TerrainInfiniteChunkManagerClient(private val radius: Int) : TerrainInfiniteChunkManager<EntityClient> {
+class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
+        private val center: MutableVector2i,
+        private val radius: Int) : TerrainInfiniteChunkManager<C> {
     private val size: Int
-    private val array: Array<TerrainInfiniteChunkClient?>
+    private val array: Array<TerrainInfiniteBaseChunk<*>?>
     private val lock = StampLock()
     private val x = AtomicInteger()
     private val y = AtomicInteger()
 
     init {
         size = (radius shl 1) + 1
-        array = arrayOfNulls<TerrainInfiniteChunkClient>(size * size)
+        array = arrayOfNulls(size * size)
     }
 
-    fun add(chunk: TerrainInfiniteChunkClient) {
+    override fun add(chunk: C) {
         lock.write {
             val xx = chunk.pos.x - x.get()
             val yy = chunk.pos.y - y.get()
@@ -45,8 +47,8 @@ class TerrainInfiniteChunkManagerClient(private val radius: Int) : TerrainInfini
         }
     }
 
-    fun remove(x: Int,
-               y: Int): TerrainInfiniteChunkClient? {
+    override fun remove(x: Int,
+                        y: Int): C? {
         lock.write {
             val xx = x - this.x.get()
             val yy = y - this.y.get()
@@ -57,7 +59,8 @@ class TerrainInfiniteChunkManagerClient(private val radius: Int) : TerrainInfini
                     assert(chunk.pos.x == x)
                     assert(chunk.pos.y == y)
                     array[i] = null
-                    return chunk
+                    @Suppress("UNCHECKED_CAST")
+                    return chunk as C
                 }
             }
             return null
@@ -65,7 +68,7 @@ class TerrainInfiniteChunkManagerClient(private val radius: Int) : TerrainInfini
     }
 
     override fun get(x: Int,
-                     y: Int): TerrainInfiniteChunkClient? {
+                     y: Int): C? {
         val value = lock.read {
             val xx = x - this.x.get()
             val yy = y - this.y.get()
@@ -80,7 +83,8 @@ class TerrainInfiniteChunkManagerClient(private val radius: Int) : TerrainInfini
             assert(value.pos.x == x)
             assert(value.pos.y == y)
         }
-        return value
+        @Suppress("UNCHECKED_CAST")
+        return value as C?
     }
 
     override fun has(x: Int,
@@ -88,13 +92,16 @@ class TerrainInfiniteChunkManagerClient(private val radius: Int) : TerrainInfini
         return get(x, y) != null
     }
 
-    override fun stream(): Sequence<TerrainInfiniteChunkClient> {
-        return array.asSequence().filterNotNull()
+    override fun stream(): Sequence<C> {
+        return array.asSequence().filterNotNull().map {
+            @Suppress("UNCHECKED_CAST")
+            it as C
+        }
     }
 
-    internal fun setCenter(x: Int,
-                           y: Int,
-                           removed: (TerrainInfiniteChunkClient) -> Unit): Boolean {
+    override fun update(): Boolean {
+        val x = center.x
+        val y = center.y
         val xx = x - radius
         val yy = y - radius
         if (xx != this.x.get() || yy != this.y.get()) {
@@ -106,11 +113,11 @@ class TerrainInfiniteChunkManagerClient(private val radius: Int) : TerrainInfini
                         clear()
                     } else {
                         for (i in 0..xDiff - 1) {
-                            shiftXPositive(removed)
+                            shiftXPositive()
                         }
                         xDiff = -xDiff
                         for (i in 0..xDiff - 1) {
-                            shiftXNegative(removed)
+                            shiftXNegative()
                         }
                     }
                     this.x.set(xx)
@@ -122,11 +129,11 @@ class TerrainInfiniteChunkManagerClient(private val radius: Int) : TerrainInfini
                         clear()
                     } else {
                         for (i in 0..yDiff - 1) {
-                            shiftYPositive(removed)
+                            shiftYPositive()
                         }
                         yDiff = -yDiff
                         for (i in 0..yDiff - 1) {
-                            shiftYNegative(removed)
+                            shiftYNegative()
                         }
                     }
                     this.y.set(yy)
@@ -141,58 +148,58 @@ class TerrainInfiniteChunkManagerClient(private val radius: Int) : TerrainInfini
         Arrays.fill(array, null)
     }
 
-    private fun shiftXPositive(removed: (TerrainInfiniteChunkClient) -> Unit) {
+    private fun shiftXPositive() {
         var i = 0
         while (i < array.size) {
             val chunk = array[i]
-            chunk?.let { removed(it); array[i] = null }
+            chunk?.let { it.dispose(); array[i] = null }
             i += size
         }
         i = size - 1
         while (i < array.size) {
             val chunk = array[i]
-            chunk?.let { removed(it); array[i] = null }
+            chunk?.let { it.dispose(); array[i] = null }
             i += size
         }
         System.arraycopy(array, 0, array, 1, array.size - 1)
     }
 
-    private fun shiftXNegative(removed: (TerrainInfiniteChunkClient) -> Unit) {
+    private fun shiftXNegative() {
         var i = 0
         while (i < array.size) {
             val chunk = array[i]
-            chunk?.let { removed(it); array[i] = null }
+            chunk?.let { it.dispose(); array[i] = null }
             i += size
         }
         i = size - 1
         while (i < array.size) {
             val chunk = array[i]
-            chunk?.let { removed(it); array[i] = null }
+            chunk?.let { it.dispose(); array[i] = null }
             i += size
         }
         System.arraycopy(array, 1, array, 0, array.size - 1)
     }
 
-    private fun shiftYPositive(removed: (TerrainInfiniteChunkClient) -> Unit) {
+    private fun shiftYPositive() {
         for (i in 0..size - 1) {
             val chunk = array[i]
-            chunk?.let { removed(it); array[i] = null }
+            chunk?.let { it.dispose(); array[i] = null }
         }
         for (i in array.size - size..array.size - 1) {
             val chunk = array[i]
-            chunk?.let { removed(it); array[i] = null }
+            chunk?.let { it.dispose(); array[i] = null }
         }
         System.arraycopy(array, 0, array, size, array.size - size)
     }
 
-    private fun shiftYNegative(removed: (TerrainInfiniteChunkClient) -> Unit) {
+    private fun shiftYNegative() {
         for (i in 0..size - 1) {
             val chunk = array[i]
-            chunk?.let { removed(it); array[i] = null }
+            chunk?.let { it.dispose(); array[i] = null }
         }
         for (i in array.size - size..array.size - 1) {
             val chunk = array[i]
-            chunk?.let { removed(it); array[i] = null }
+            chunk?.let { it.dispose(); array[i] = null }
         }
         System.arraycopy(array, size, array, 0, array.size - size)
     }

@@ -17,10 +17,9 @@
 package org.tobi29.scapes.vanilla.basics.material.item
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
-class ItemString(materials: VanillaMaterial) : ItemSimpleData(materials,
-        "vanilla.basics.item.String") {
+class ItemString(type: VanillaMaterialType) : ItemSimpleData(type) {
     override fun types(): Int {
         return 2
     }

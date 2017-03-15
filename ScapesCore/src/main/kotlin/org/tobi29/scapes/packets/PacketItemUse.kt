@@ -15,8 +15,8 @@
  */
 package org.tobi29.scapes.packets
 
-import org.tobi29.scapes.block.GameRegistry
 import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.server.InvalidPacketDataException
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
@@ -42,7 +42,7 @@ class PacketItemUse : PacketAbstract, PacketServer {
         this.direction = direction
     }
 
-    constructor(registry: GameRegistry,
+    constructor(registry: Registries,
                 strength: Double,
                 side: Boolean,
                 direction: Vector2d) : this(

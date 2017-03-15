@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.packets
 
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.client.connection.RemoteClientConnection
 import org.tobi29.scapes.server.connection.PlayerConnection
@@ -27,7 +27,7 @@ class PacketPingClient : PacketPing {
     constructor(type: PacketType,
                 timestamp: Long) : super(type, timestamp)
 
-    constructor(registry: GameRegistry,
+    constructor(registry: Registries,
                 timestamp: Long) : this(
             Packet.make(registry, "core.packet.PingClient"), timestamp)
 

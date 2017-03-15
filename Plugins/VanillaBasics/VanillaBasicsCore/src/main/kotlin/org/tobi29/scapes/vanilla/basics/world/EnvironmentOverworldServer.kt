@@ -22,8 +22,8 @@ import org.tobi29.scapes.chunk.MobSpawner
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
-import org.tobi29.scapes.chunk.terrain.TerrainChunk
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.engine.utils.io.tag.*
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.*
@@ -35,6 +35,7 @@ import org.tobi29.scapes.entity.server.MobServer
 import org.tobi29.scapes.packets.PacketEntityMetaData
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.extension.event.MessageEvent
+import org.tobi29.scapes.terrain.TerrainChunk
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.entity.server.MobItemServer
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
@@ -89,20 +90,17 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                                   x: Int,
                                   y: Int,
                                   z: Int): Boolean {
-                if (terrain.light(x, y, z) < 7) {
-                    if (!terrain.type(x, y, z).isSolid(terrain, x, y, z) &&
-                            terrain.type(x, y, z).isTransparent(terrain, x, y,
-                                    z) &&
-                            !terrain.type(x, y, z + 1).isSolid(terrain, x, y,
-                                    z + 1) &&
-                            terrain.type(x, y, z + 1).isTransparent(terrain, x,
-                                    y, z + 1) &&
-                            terrain.type(x, y, z - 1).isSolid(terrain, x, y,
-                                    z - 1) &&
-                            !terrain.type(x, y, z - 1).isTransparent(terrain, x,
-                                    y, z - 1)) {
-                        return true
-                    }
+                if (terrain.light(x, y, z) < 7 &&
+                        terrain.block(x, y, z) {
+                            !isSolid(it) && isTransparent(it)
+                        } &&
+                        terrain.block(x, y, z + 1) {
+                            !isSolid(it) && isTransparent(it)
+                        } &&
+                        terrain.block(x, y, z - 1) {
+                            isSolid(it) && !isTransparent(it)
+                        }) {
+                    return true
                 }
                 return false
             }
@@ -140,20 +138,17 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                                   x: Int,
                                   y: Int,
                                   z: Int): Boolean {
-                if (terrain.light(x, y, z) < 7) {
-                    if (!terrain.type(x, y, z).isSolid(terrain, x, y, z) &&
-                            terrain.type(x, y, z).isTransparent(terrain, x, y,
-                                    z) &&
-                            !terrain.type(x, y, z + 1).isSolid(terrain, x, y,
-                                    z + 1) &&
-                            terrain.type(x, y, z + 1).isTransparent(terrain, x,
-                                    y, z + 1) &&
-                            terrain.type(x, y, z - 1).isSolid(terrain, x, y,
-                                    z - 1) &&
-                            !terrain.type(x, y, z - 1).isTransparent(terrain, x,
-                                    y, z - 1)) {
-                        return true
-                    }
+                if (terrain.light(x, y, z) < 7 &&
+                        terrain.block(x, y, z) {
+                            !isSolid(it) && isTransparent(it)
+                        } &&
+                        terrain.block(x, y, z + 1) {
+                            !isSolid(it) && isTransparent(it)
+                        } &&
+                        terrain.block(x, y, z - 1) {
+                            isSolid(it) && !isTransparent(it)
+                        }) {
+                    return true
                 }
                 return false
             }
@@ -191,13 +186,14 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                                   x: Int,
                                   y: Int,
                                   z: Int): Boolean {
-                if (terrain.light(x, y, z) >= 7) {
-                    if (!terrain.type(x, y, z).isSolid(terrain, x, y, z) &&
-                            terrain.type(x, y, z).isTransparent(terrain, x, y,
-                                    z) &&
-                            terrain.type(x, y, z - 1) === materials.grass) {
-                        return true
-                    }
+                if (terrain.light(x, y, z) >= 7 &&
+                        terrain.block(x, y, z) {
+                            !isSolid(it) && isTransparent(it)
+                        } &&
+                        terrain.block(x, y, z - 1) {
+                            isSolid(it) && !isTransparent(it)
+                        }) {
+                    return true
                 }
                 return false
             }

@@ -17,15 +17,16 @@
 package org.tobi29.scapes.vanilla.basics.material.update
 
 import org.tobi29.scapes.block.BlockType
-import org.tobi29.scapes.block.GameRegistry
+import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.block.Update
 import org.tobi29.scapes.block.UpdateType
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.chunk.terrain.isTransparent
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentOverworldServer
 
 class UpdateGrassGrowth(type: UpdateType) : Update(type) {
-    constructor(registry: GameRegistry) : this(
+    constructor(registry: Registries) : this(
             of(registry, "vanilla.basics.update.GrassGrowth"))
 
     override fun run(terrain: TerrainServer.TerrainMutable) {
@@ -46,8 +47,7 @@ class UpdateGrassGrowth(type: UpdateType) : Update(type) {
             val humidity = climateGenerator.humidity(x, y, z)
             if (humidity > 0.2 && (terrain.blockLight(x, y,
                     z + 1) > 8 || terrain.sunLight(x, y, z + 1) > 8) &&
-                    terrain.type(x, y, z + 1).isTransparent(terrain, x, y,
-                            z + 1)) {
+                    terrain.isTransparent(x, y, z + 1)) {
                 terrain.typeData(x, y, z, materials.grass, 0.toShort().toInt())
             }
         }

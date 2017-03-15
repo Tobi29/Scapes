@@ -18,6 +18,7 @@ package org.tobi29.scapes.chunk
 import mu.KLogging
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
+import org.tobi29.scapes.chunk.terrain.isTransparent
 import org.tobi29.scapes.client.InputModeChangeEvent
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.connection.ClientConnection
@@ -303,7 +304,7 @@ class WorldClient(val connection: ClientConnection,
             val x = floor(x1 + dx * i)
             val y = floor(y1 + dy * i)
             val z = floor(z1 + dz * i)
-            if (!terrain.type(x, y, z).isTransparent(terrain, x, y, z)) {
+            if (!terrain.isTransparent(x, y, z)) {
                 return true
             }
             i += step

@@ -26,7 +26,7 @@ import org.tobi29.scapes.vanilla.basics.gui.GuiFurnaceInventory
 
 class EntityFurnaceClient(type: EntityType<*, *>,
                           world: WorldClient) : EntityAbstractFurnaceClient(
-        type, world, Vector3d.ZERO, Inventory(world.registry, 8), 4, 3) {
+        type, world, Vector3d.ZERO, Inventory(world.plugins, 8), 4, 3) {
 
     override fun gui(player: MobPlayerClientMain): Gui? {
         if (player is MobPlayerClientMainVB) {

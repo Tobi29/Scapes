@@ -31,7 +31,7 @@ import org.tobi29.scapes.vanilla.basics.VanillaBasics
 
 class EntityBloomeryServer(type: EntityType<*, *>,
                            world: WorldServer) : EntityAbstractFurnaceServer(
-        type, world, Vector3d.ZERO, Inventory(world.registry, 14), 4, 9, 600.0,
+        type, world, Vector3d.ZERO, Inventory(world.plugins, 14), 4, 9, 600.0,
         1.004, 4.0, 50) {
     private var hasBellows = false
 

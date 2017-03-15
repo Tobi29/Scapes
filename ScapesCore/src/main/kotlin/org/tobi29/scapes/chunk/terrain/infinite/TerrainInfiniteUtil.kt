@@ -18,9 +18,9 @@ package org.tobi29.scapes.chunk.terrain.infinite
 
 import org.tobi29.scapes.entity.Entity
 
-inline fun <E : Entity, R> TerrainInfinite<E>.chunk(x: Int,
-                                                    y: Int,
-                                                    consumer: (TerrainInfiniteChunk<E>) -> R): R? {
+inline fun <E : Entity, C : TerrainInfiniteChunk<E>, R> TerrainInfinite<E, C>.chunk(x: Int,
+                                                                                    y: Int,
+                                                                                    consumer: (C) -> R): R? {
     chunk(x, y)?.let { consumer(it)?.let { return it } }
     return null
 }

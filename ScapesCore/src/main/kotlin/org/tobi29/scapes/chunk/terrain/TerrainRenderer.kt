@@ -18,6 +18,7 @@ package org.tobi29.scapes.chunk.terrain
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.graphics.Cam
+import java.util.concurrent.ConcurrentHashMap
 
 interface TerrainRenderer {
     fun renderUpdate(cam: Cam)
@@ -38,4 +39,36 @@ interface TerrainRenderer {
                     z: Int)
 
     fun actualRenderDistance(): Double
+}
+
+class TerrainRenderInfo(
+        layers: Map<String, () -> TerrainRenderInfo.InfoLayer>) {
+    private val layers = ConcurrentHashMap<String, InfoLayer>()
+
+    init {
+        layers.forEach { this.layers.put(it.key, it.value()) }
+    }
+
+    fun init(x: Int,
+             y: Int,
+             z: Int,
+             xSize: Int,
+             ySize: Int,
+             zSize: Int) {
+        layers.values.forEach { it.init(x, y, z, xSize, ySize, zSize) }
+    }
+
+    operator fun <E : InfoLayer> get(name: String): E {
+        @Suppress("UNCHECKED_CAST")
+        return layers[name] as E
+    }
+
+    interface InfoLayer {
+        fun init(x: Int,
+                 y: Int,
+                 z: Int,
+                 xSize: Int,
+                 ySize: Int,
+                 zSize: Int)
+    }
 }

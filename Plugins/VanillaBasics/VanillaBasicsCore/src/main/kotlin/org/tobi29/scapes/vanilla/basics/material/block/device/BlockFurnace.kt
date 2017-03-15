@@ -21,8 +21,7 @@ import org.tobi29.scapes.block.TerrainTexture
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock
-import org.tobi29.scapes.chunk.data.ChunkMesh
-import org.tobi29.scapes.chunk.terrain.Terrain
+import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.TerrainServer
@@ -32,13 +31,12 @@ import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityFurnaceClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityFurnaceServer
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer
 import java.util.*
 
-class BlockFurnace(materials: VanillaMaterial) : VanillaBlockContainer<EntityFurnaceClient, EntityFurnaceServer>(
-        materials, "vanilla.basics.block.Furnace",
-        materials.plugin.entityTypes.furnace) {
+class BlockFurnace(type: VanillaMaterialType) : VanillaBlockContainer<EntityFurnaceClient, EntityFurnaceServer>(
+        type, type.materials.plugin.entityTypes.furnace) {
     private var textureTop: TerrainTexture? = null
     private var textureFront1: TerrainTexture? = null
     private var textureFront2: TerrainTexture? = null
@@ -79,13 +77,7 @@ class BlockFurnace(materials: VanillaMaterial) : VanillaBlockContainer<EntityFur
         return textureSide
     }
 
-    override fun lightEmit(terrain: Terrain,
-                           x: Int,
-                           y: Int,
-                           z: Int,
-                           data: Int): Byte {
-        return if (data > 0) 15.toByte() else 0
-    }
+    override fun lightEmit(data: Int) = if (data > 0) 15.toByte() else 0
 
     override fun addToChunkMesh(mesh: ChunkMesh,
                                 meshAlpha: ChunkMesh,

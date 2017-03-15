@@ -16,6 +16,7 @@
 package org.tobi29.scapes.chunk
 
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.chunk.terrain.isTransparent
 import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.utils.Sync
 import org.tobi29.scapes.engine.utils.io.tag.*
@@ -218,7 +219,7 @@ class WorldServer(worldFormat: WorldFormat,
             val x = floor(x1 + dx * i)
             val y = floor(y1 + dy * i)
             val z = floor(z1 + dz * i)
-            if (!terrain.type(x, y, z).isTransparent(terrain, x, y, z)) {
+            if (!terrain.isTransparent(x, y, z)) {
                 return true
             }
             i += step

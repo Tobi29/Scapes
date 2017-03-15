@@ -20,11 +20,11 @@ import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.vanilla.basics.material.ItemDefaultHeatable
 import org.tobi29.scapes.vanilla.basics.material.ItemResearch
 import org.tobi29.scapes.vanilla.basics.material.MetalType
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.util.createIngot
 
-class ItemOreChunk(materials: VanillaMaterial) : ItemSimpleData(materials,
-        "vanilla.basics.item.OreChunk"), ItemDefaultHeatable, ItemResearch {
+class ItemOreChunk(type: VanillaMaterialType) : ItemSimpleData(
+        type), ItemDefaultHeatable, ItemResearch {
     override fun name(item: ItemStack): String {
         val name = StringBuilder(50)
         name.append(oreName(item))

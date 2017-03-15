@@ -14,16 +14,10 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.chunk.terrain.infinite
+apply from: "$rootDir/resources/scapesenginemodulekotlin.gradle"
 
-import org.tobi29.scapes.entity.Entity
+version = "0.0.0"
 
-interface TerrainInfiniteChunkManager<E : Entity> {
-    operator fun get(x: Int,
-                     y: Int): TerrainInfiniteChunk<E>?
-
-    fun has(x: Int,
-            y: Int): Boolean
-
-    fun stream(): Sequence<TerrainInfiniteChunk<E>>
+dependencies {
+    compile rootProject.ext.scapesEngineUtils
 }

@@ -24,11 +24,9 @@ import org.tobi29.scapes.block.models.ItemModelSimple
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.toArray
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
-abstract class ItemSimpleData protected constructor(materials: VanillaMaterial,
-                                                    nameID: String) : VanillaItem(
-        materials, nameID) {
+abstract class ItemSimpleData(type: VanillaMaterialType) : VanillaItem(type) {
     protected var textures: Array<TerrainTexture?>? = null
     protected var models: Array<ItemModel?>? = null
 

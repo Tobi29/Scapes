@@ -27,11 +27,10 @@ import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateSaplingGrowth
 
-class ItemFertilizer(materials: VanillaMaterial) : VanillaItem(materials,
-        "vanilla.basics.item.Fertilizer") {
+class ItemFertilizer(type: VanillaMaterialType) : VanillaItem(type) {
     private var texture: TerrainTexture? = null
     private var model: ItemModel? = null
 

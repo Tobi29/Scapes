@@ -26,7 +26,7 @@ import org.tobi29.scapes.vanilla.basics.gui.GuiResearchTableInventory
 
 class EntityResearchTableClient(type: EntityType<*, *>,
                                 world: WorldClient) : EntityAbstractContainerClient(
-        type, world, Vector3d.ZERO, Inventory(world.registry, 2)) {
+        type, world, Vector3d.ZERO, Inventory(world.plugins, 2)) {
 
     override fun gui(player: MobPlayerClientMain): Gui? {
         if (player is MobPlayerClientMainVB) {

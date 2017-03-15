@@ -23,24 +23,21 @@ import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.BlockExplosive
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.BlockSimple
 import org.tobi29.scapes.vanilla.basics.util.explosion
 import org.tobi29.scapes.vanilla.basics.util.explosionBlockPush
 import java.util.concurrent.ThreadLocalRandom
 
-class BlockHyperBomb(materials: VanillaMaterial) : BlockSimple(materials,
-        "vanilla.basics.block.HyperBomb"), BlockExplosive {
-
+class BlockHyperBomb(type: VanillaMaterialType) : BlockSimple(
+        type), BlockExplosive {
     override fun explode(terrain: TerrainServer,
                          x: Int,
                          y: Int,
                          z: Int) {
         terrain.queue { handle ->
-            //handle.explosionBlockPush(x + 0.5, y + 0.5, z + 0.5, 8.0, 0.2,
-            //        0.1, 64.0, 48.0)
-            handle.explosionBlockPush(x + 0.5, y + 0.5, z + 0.5, 128.0, 0.0,
-                    0.0, 0.0, 0.0)
+            handle.explosionBlockPush(x + 0.5, y + 0.5, z + 0.5, 8.0, 0.2,
+                    0.1, 64.0, 48.0)
         }
     }
 

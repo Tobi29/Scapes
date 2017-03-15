@@ -51,10 +51,10 @@ class MobZombieClient(type: EntityType<*, *>,
     }
 
     override fun leftWeapon(): ItemStack {
-        return ItemStack(registry)
+        return ItemStack(world.plugins)
     }
 
     override fun rightWeapon(): ItemStack {
-        return ItemStack(registry)
+        return ItemStack(world.plugins)
     }
 }

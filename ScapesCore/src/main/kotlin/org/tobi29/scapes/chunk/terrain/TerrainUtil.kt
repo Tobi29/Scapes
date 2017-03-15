@@ -16,6 +16,8 @@
 
 package org.tobi29.scapes.chunk.terrain
 
+import org.tobi29.scapes.block.AABBElement
+import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.math.*
@@ -50,5 +52,59 @@ fun Terrain.selectBlock(pos: Vector3d,
     pointerPanes.reset()
     return closest
 }
+
+fun Terrain.collisions(minX: Int,
+                       minY: Int,
+                       minZ: Int,
+                       maxX: Int,
+                       maxY: Int,
+                       maxZ: Int,
+                       pool: Pool<AABBElement>) {
+    for (x in minX..maxX) {
+        for (y in minY..maxY) {
+            for (z in minZ..maxZ) {
+                block(x, y, z) { addCollision(pool, this@collisions, x, y, z) }
+            }
+        }
+    }
+}
+
+fun Terrain.pointerPanes(x: Int,
+                         y: Int,
+                         z: Int,
+                         range: Int,
+                         pool: Pool<PointerPane>) {
+    for (xx in x - range..x + range) {
+        for (yy in y - range..y + range) {
+            for (zz in z - range..z + range) {
+                block(xx, yy, zz) {
+                    addPointerCollision(it, pool, xx, yy, zz)
+                }
+            }
+        }
+    }
+}
+
+fun Terrain.isSolid(x: Int,
+                    y: Int,
+                    z: Int) = block(x, y, z, BlockType::isSolid)
+
+fun Terrain.isTransparent(x: Int,
+                          y: Int,
+                          z: Int) = block(x, y, z, BlockType::isTransparent)
+
+fun Terrain.lightEmit(x: Int,
+                      y: Int,
+                      z: Int) = block(x, y, z, BlockType::lightEmit)
+
+fun Terrain.lightTrough(x: Int,
+                        y: Int,
+                        z: Int) = block(x, y, z, BlockType::lightTrough)
+
+inline fun <R> Terrain.block(x: Int,
+                             y: Int,
+                             z: Int,
+                             block: BlockType.(Int) -> R) =
+        block(x, y, z).let { block(type(it), data(it)) }
 
 private val POINTER_PANES = ThreadLocal { Pool { PointerPane() } }

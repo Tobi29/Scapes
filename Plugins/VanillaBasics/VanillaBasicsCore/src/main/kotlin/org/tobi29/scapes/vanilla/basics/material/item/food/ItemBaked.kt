@@ -17,18 +17,18 @@
 package org.tobi29.scapes.vanilla.basics.material.item.food
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.engine.utils.io.tag.set
 import org.tobi29.scapes.engine.utils.io.tag.syncMapMut
 import org.tobi29.scapes.engine.utils.io.tag.toDouble
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.CropType
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.item.ItemSimpleData
 
-class ItemBaked(materials: VanillaMaterial,
-                private val cropRegistry: Registries.Registry<CropType>) : ItemSimpleData(
-        materials, "vanilla.basics.item.Baked") {
+class ItemBaked(type: VanillaMaterialType) : ItemSimpleData(type) {
+    val cropRegistry = plugins.registry.get<CropType>("VanillaBasics",
+            "CropType")
+
     override fun click(entity: MobPlayerServer,
                        item: ItemStack) {
         entity.metaData("Vanilla").syncMapMut("Condition") { conditionTag ->

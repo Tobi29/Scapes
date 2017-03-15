@@ -49,8 +49,10 @@ object SmoothLight {
             val xx = x - (offset shr 2 and 1)
             val yy = y - (offset shr 1 and 1)
             val zz = z - (offset and 1)
-            val type = terrain.type(xx, yy, zz)
-            if (!type.isSolid(terrain, xx, yy, zz)) {
+            val block = terrain.block(xx, yy, zz)
+            val type = terrain.type(block)
+            val data = terrain.data(block)
+            if (!type.isSolid(data)) {
                 var tempLight = terrain.blockLight(xx, yy, zz).toFloat()
                 if (tempLight > 0) {
                     light += tempLight.toInt()

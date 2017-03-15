@@ -16,21 +16,25 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.soil
 
-import org.tobi29.scapes.block.*
+import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.ShaderAnimation
+import org.tobi29.scapes.block.TerrainTexture
+import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelComplex
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock
-import org.tobi29.scapes.chunk.data.ChunkMesh
+import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.chunk.terrain.isTransparent
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.CropType
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateGrassGrowth
 import org.tobi29.scapes.vanilla.basics.util.dropItem
@@ -39,9 +43,9 @@ import org.tobi29.scapes.vanilla.basics.world.EnvironmentClimate
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
-class BlockGrass(materials: VanillaMaterial,
-                 private val cropRegistry: Registries.Registry<CropType>) : VanillaBlock(
-        materials, "vanilla.basics.block.Grass") {
+class BlockGrass(type: VanillaMaterialType) : VanillaBlock(type) {
+    private val cropRegistry = plugins.registry.get<CropType>("VanillaBasics",
+            "CropType")
     private var textureTop: TerrainTexture? = null
     private var textureSide1Dirt: TerrainTexture? = null
     private var textureSide1Sand: TerrainTexture? = null
@@ -255,8 +259,7 @@ class BlockGrass(materials: VanillaMaterial,
                         z: Int,
                         data: Int) {
         if (terrain.blockLight(x, y, z + 1) <= 0 && terrain.sunLight(x, y,
-                z + 1) <= 0 || !terrain.type(x, y, z + 1).isTransparent(terrain,
-                x, y, z + 1)) {
+                z + 1) <= 0 || !terrain.isTransparent(x, y, z + 1)) {
             terrain.typeData(x, y, z, materials.dirt, 0)
         }
         if (terrain.highestTerrainBlockZAt(x,
