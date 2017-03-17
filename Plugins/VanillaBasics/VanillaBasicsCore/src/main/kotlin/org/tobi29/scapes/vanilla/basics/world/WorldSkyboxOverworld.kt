@@ -245,7 +245,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                 climateGenerator.humidity(pos.intX(), pos.intY(),
                         pos.intZ()))
         weatherDebug?.setValue(weather)
-        biomeDebug?.setValue(biomeGenerator[pos.x, pos.y])
+        biomeDebug?.setValue(biomeGenerator.get(pos.x, pos.y))
         val conditionTag = player.metaData("Vanilla").map("Condition")
         conditionTag?.get("Stamina")?.toDouble()?.let {
             staminaDebug?.setValue(it)

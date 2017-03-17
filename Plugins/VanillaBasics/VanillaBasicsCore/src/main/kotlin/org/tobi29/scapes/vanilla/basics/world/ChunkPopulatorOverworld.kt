@@ -121,7 +121,8 @@ class ChunkPopulatorOverworld(world: WorldServer,
                 }
             }
         }
-        val biome = biomes[biomeGenerator[(x + dx / 2).toDouble(), (y + dy / 2).toDouble()]]
+        val biome = biomes[biomeGenerator.get((x + (dx shr 1)).toDouble(),
+                (y + (dy shr 1)).toDouble())]
         if (biome != null && biome.decorators.isNotEmpty()) {
             val decorator = biome.decorators[biome.noise.getInt(x + dx / 2,
                     y + dy / 2)]

@@ -18,14 +18,10 @@ package org.tobi29.scapes.vanilla.basics.generator
 
 class BiomeGenerator(climateGenerator: ClimateGenerator,
                      private val terrainGenerator: TerrainGenerator) {
-    private val climateGenerator: ClimateGenerator
+    private val climateGenerator = climateGenerator.at(-100, 0.0)
 
-    init {
-        this.climateGenerator = climateGenerator.at(-100, 0.0)
-    }
-
-    operator fun get(x: Double,
-                     y: Double): Biome {
+    fun get(x: Double,
+            y: Double): Biome {
         val humidity3 = climateGenerator.humidity3(x, y)
         val temperature2 = climateGenerator.temperature2D(x, y, humidity3)
         val riverHumidity = climateGenerator.riverHumidity(x, y)
@@ -108,8 +104,8 @@ class BiomeGenerator(climateGenerator: ClimateGenerator,
         TROPIC
     }
 
-    enum class Biome constructor(private val zone: Zone,
-                                 val isValidSpawn: Boolean) {
+    enum class Biome(val zone: Zone,
+                     val isValidSpawn: Boolean) {
         POLAR(Zone.ARCTIC, false),
         TUNDRA(Zone.ARCTIC, false),
         TAIGA(Zone.ARCTIC, false),
@@ -126,10 +122,6 @@ class BiomeGenerator(climateGenerator: ClimateGenerator,
         OASIS(Zone.SUBTROPIC, true),
         OCEAN_SUBTROPIC(Zone.SUBTROPIC, false),
         RAINFOREST(Zone.TROPIC, false),
-        OCEAN_TROPIC(Zone.TROPIC, false);
-
-        fun zone(): Zone {
-            return zone
-        }
+        OCEAN_TROPIC(Zone.TROPIC, false)
     }
 }

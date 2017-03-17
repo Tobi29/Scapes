@@ -18,41 +18,23 @@ package org.tobi29.scapes.vanilla.basics.generator
 
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.noise.value.SimplexNoise
-import org.tobi29.scapes.engine.utils.math.noise.value.ValueNoise
 import java.util.*
 
 class TerrainGenerator(random: Random) {
-    private val terrainNoise: ValueNoise
-    private val oceanNoise: ValueNoise
-    private val mountainNoise: ValueNoise
-    private val mountainCarveNoise: ValueNoise
-    private val mountainHeightNoise: ValueNoise
-    private val volcanoNoise: ValueNoise
-    private val volcanoHeightNoise: ValueNoise
-    private val riverNoise: ValueNoise
-    private val canyonNoise: ValueNoise
-    private val canyonDepthNoise: ValueNoise
-    private val caveRiverNoise: ValueNoise
-    private val caveNoise: ValueNoise
-    private val caveHeightNoise: ValueNoise
-    private val magmaNoise: ValueNoise
-
-    init {
-        terrainNoise = SimplexNoise(random.nextLong())
-        oceanNoise = SimplexNoise(random.nextLong())
-        mountainNoise = SimplexNoise(random.nextLong())
-        mountainCarveNoise = SimplexNoise(random.nextLong())
-        mountainHeightNoise = SimplexNoise(random.nextLong())
-        volcanoNoise = SimplexNoise(random.nextLong())
-        volcanoHeightNoise = SimplexNoise(random.nextLong())
-        riverNoise = SimplexNoise(random.nextLong())
-        canyonNoise = SimplexNoise(random.nextLong())
-        canyonDepthNoise = SimplexNoise(random.nextLong())
-        caveRiverNoise = SimplexNoise(random.nextLong())
-        caveNoise = SimplexNoise(random.nextLong())
-        caveHeightNoise = SimplexNoise(random.nextLong())
-        magmaNoise = SimplexNoise(random.nextLong())
-    }
+    private val terrainNoise = SimplexNoise(random.nextLong())
+    private val oceanNoise = SimplexNoise(random.nextLong())
+    private val mountainNoise = SimplexNoise(random.nextLong())
+    private val mountainCarveNoise = SimplexNoise(random.nextLong())
+    private val mountainHeightNoise = SimplexNoise(random.nextLong())
+    private val volcanoNoise = SimplexNoise(random.nextLong())
+    private val volcanoHeightNoise = SimplexNoise(random.nextLong())
+    private val riverNoise = SimplexNoise(random.nextLong())
+    private val canyonNoise = SimplexNoise(random.nextLong())
+    private val canyonDepthNoise = SimplexNoise(random.nextLong())
+    private val caveRiverNoise = SimplexNoise(random.nextLong())
+    private val caveNoise = SimplexNoise(random.nextLong())
+    private val caveHeightNoise = SimplexNoise(random.nextLong())
+    private val magmaNoise = SimplexNoise(random.nextLong())
 
     fun generate(x: Double,
                  y: Double,

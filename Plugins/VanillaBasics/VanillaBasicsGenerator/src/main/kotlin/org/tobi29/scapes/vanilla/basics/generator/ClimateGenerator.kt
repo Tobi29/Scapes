@@ -18,12 +18,11 @@ package org.tobi29.scapes.vanilla.basics.generator
 
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.noise.value.SimplexNoise
-import org.tobi29.scapes.engine.utils.math.noise.value.ValueNoise
 import java.util.*
 
-class ClimateGenerator private constructor(private val temperatureNoise: ValueNoise,
-                                           private val humidityNoise: ValueNoise,
-                                           private val weatherNoise: ValueNoise,
+class ClimateGenerator private constructor(private val temperatureNoise: SimplexNoise,
+                                           private val humidityNoise: SimplexNoise,
+                                           private val weatherNoise: SimplexNoise,
                                            private val terrainGenerator: TerrainGenerator) {
     private var day: Long = 0
     private var dayTime = 0.0

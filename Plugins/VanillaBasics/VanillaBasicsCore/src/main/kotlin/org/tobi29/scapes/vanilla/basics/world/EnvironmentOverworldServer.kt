@@ -317,7 +317,8 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
         var flag = false
         while (!flag) {
             if (!terrainGenerator.isValidSpawn(x.toDouble(),
-                    y.toDouble()) || !biomeGenerator[x.toDouble(), y.toDouble()].isValidSpawn) {
+                    y.toDouble()) || !biomeGenerator.get(x.toDouble(),
+                    y.toDouble()).isValidSpawn) {
                 x += 512
             } else {
                 flag = true

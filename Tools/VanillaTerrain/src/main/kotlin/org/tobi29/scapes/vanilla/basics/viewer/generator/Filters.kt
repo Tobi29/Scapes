@@ -57,7 +57,7 @@ fun biome(
         override fun color(x: Double,
                            y: Double,
                            o: TerrainViewerCanvas.Output) {
-            val biome = biomeGenerator[x, y]
+            val biome = biomeGenerator.get(x, y)
             when (biome) {
                 BiomeGenerator.Biome.POLAR -> {
                     o.h = 0.0
@@ -154,7 +154,7 @@ fun biome(
 
         override fun tooltip(x: Double,
                              y: Double): String? {
-            return biomeGenerator[x, y].toString()
+            return biomeGenerator.get(x, y).toString()
         }
     }
 }
