@@ -96,55 +96,52 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
         val spreadPools = SPREAD_POOLS.get()
         var spreads = spreadPools.first
         var newSpreads = spreadPools.second
-        for (x in 0..15) {
-            for (y in 0..15) {
-                var sunLight: Byte = 15
-                var spread: Int
-                if (x in 1..14 && y > 0 && y < 15) {
-                    spread = heightMap[y shl 4 or x - 1]
-                    spread = max(heightMap[y shl 4 or x + 1], spread)
-                    spread = max(heightMap[y - 1 shl 4 or x], spread)
-                    spread = max(heightMap[y + 1 shl 4 or x], spread)
-                    spread--
-                } else {
-                    spread = -1
-                }
-                val light = heightMap[y shl 4 or x]
-                for (z in max(light, spread) downTo 0) {
-                    if (z < light) {
-                        val block = blockL(x, y, z)
-                        val type = parentTerrain.type(block)
-                        if (type != parentTerrain.air) {
-                            val data = parentTerrain.data(block)
-                            if (type.isSolid(data) || !type.isTransparent(
-                                    data)) {
-                                sunLight = clamp(
-                                        sunLight + type.lightTrough(data), 0,
-                                        15).toByte()
+        lockWrite {
+            for (x in 0..15) {
+                for (y in 0..15) {
+                    var sunLight: Byte = 15
+                    var spread: Int
+                    if (x in 1..14 && y > 0 && y < 15) {
+                        spread = heightMap[y shl 4 or x - 1]
+                        spread = max(heightMap[y shl 4 or x + 1], spread)
+                        spread = max(heightMap[y - 1 shl 4 or x], spread)
+                        spread = max(heightMap[y + 1 shl 4 or x], spread)
+                        spread--
+                    } else {
+                        spread = -1
+                    }
+                    val light = heightMap[y shl 4 or x]
+                    for (z in max(light, spread) downTo 0) {
+                        if (z < light) {
+                            val id = bID.getData(x, y, z, 0)
+                            if (id != 0) {
+                                val type = type(id)
+                                val data = bData.getData(x, y, z, 0)
+                                if (type.isSolid(data) || !type.isTransparent(
+                                        data)) {
+                                    sunLight = clamp(
+                                            sunLight + type.lightTrough(data),
+                                            0, 15).toByte()
+                                }
                             }
-                        }
-                        lockWrite {
                             bLight.setData(x, y, z, 0, sunLight.toInt())
                         }
-                    }
-                    if (z < spread && sunLight > 0) {
-                        spreads.push().set(x - 1, y, z, sunLight.toInt())
-                        spreads.push().set(x + 1, y, z, sunLight.toInt())
-                        spreads.push().set(x, y - 1, z, sunLight.toInt())
-                        spreads.push().set(x, y + 1, z, sunLight.toInt())
+                        if (z < spread && sunLight > 0) {
+                            spreads.push().set(x - 1, y, z, sunLight.toInt())
+                            spreads.push().set(x + 1, y, z, sunLight.toInt())
+                            spreads.push().set(x, y - 1, z, sunLight.toInt())
+                            spreads.push().set(x, y + 1, z, sunLight.toInt())
+                        }
                     }
                 }
             }
-        }
-        while (spreads.isNotEmpty()) {
-            for (s in spreads) {
-                if (s.x in 0..15 && s.y >= 0 && s.y < 16 && s.z >= 0 &&
-                        s.z < zSize) {
-                    val block = blockL(s.x, s.y, s.z)
-                    val type = parentTerrain.type(block)
-                    val data = parentTerrain.data(block)
-                    s.l = clamp(s.l + type.lightTrough(data), 0, 15)
-                    lockWrite {
+            while (spreads.isNotEmpty()) {
+                for (s in spreads) {
+                    if (s.x in 0..15 && s.y >= 0 && s.y < 16 && s.z >= 0 &&
+                            s.z < zSize) {
+                        val type = type(bID.getData(s.x, s.y, s.z, 0))
+                        val data = bData.getData(s.x, s.y, s.z, 0)
+                        s.l = clamp(s.l + type.lightTrough(data), 0, 15)
                         if (s.l > bLight.getData(s.x, s.y, s.z, 0)) {
                             bLight.setData(s.x, s.y, s.z, 0, s.l)
                             newSpreads.push().set(s.x - 1, s.y, s.z, s.l)
@@ -156,31 +153,35 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
                         }
                     }
                 }
+                val swapUpdates = spreads
+                swapUpdates.reset()
+                spreads = newSpreads
+                newSpreads = swapUpdates
             }
-            val swapUpdates = spreads
-            swapUpdates.reset()
-            spreads = newSpreads
-            newSpreads = swapUpdates
         }
     }
 
     protected fun initSunLight() {
-        for (x in 0..15) {
-            for (y in 0..15) {
-                var sunLight: Byte = 15
-                var z = zSize - 1
-                while (z >= 0 && sunLight > 0) {
-                    val block = blockL(x, y, z)
-                    val type = parentTerrain.type(block)
-                    if (type != parentTerrain.air) {
-                        val data = parentTerrain.data(block)
-                        if (type.isSolid(data) || !type.isTransparent(data)) {
-                            sunLight = clamp(sunLight + type.lightTrough(data),
-                                    0, 15).toByte()
+        lockWrite {
+            for (x in 0..15) {
+                for (y in 0..15) {
+                    var sunLight: Byte = 15
+                    var z = zSize - 1
+                    while (z >= 0 && sunLight > 0) {
+                        val id = bID.getData(x, y, z, 0)
+                        if (id != 0) {
+                            val type = type(id)
+                            val data = bData.getData(x, y, z, 0)
+                            if (type.isSolid(data) || !type.isTransparent(
+                                    data)) {
+                                sunLight = clamp(
+                                        sunLight + type.lightTrough(data), 0,
+                                        15).toByte()
+                            }
                         }
+                        bLight.setData(x, y, z, 0, sunLight.toInt())
+                        z--
                     }
-                    lockWrite { bLight.setData(x, y, z, 0, sunLight.toInt()) }
-                    z--
                 }
             }
         }
