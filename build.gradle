@@ -126,6 +126,8 @@ ext {
             "com.github.Tobi29.ScapesEngine:JVMSSLProvider:$scapesEngineVersion"
     scapesEngineSQLite =
             "com.github.Tobi29.ScapesEngine:SQLite:$scapesEngineVersion"
+    scapesEngineSQLJet =
+            "com.github.Tobi29.ScapesEngine:SQLJet:$scapesEngineVersion"
     scapesEngineMariaDB =
             "com.github.Tobi29.ScapesEngine:MariaDB:$scapesEngineVersion"
     scapesEngineMBeansCPUReader =
