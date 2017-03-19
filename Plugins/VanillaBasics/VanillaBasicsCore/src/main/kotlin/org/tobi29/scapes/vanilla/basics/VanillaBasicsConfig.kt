@@ -19,6 +19,7 @@ package org.tobi29.scapes.vanilla.basics
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
+import org.tobi29.scapes.vanilla.basics.generator.StoneType
 import org.tobi29.scapes.vanilla.basics.material.*
 import org.tobi29.scapes.vanilla.basics.world.decorator.BiomeDecorator
 import java.util.*

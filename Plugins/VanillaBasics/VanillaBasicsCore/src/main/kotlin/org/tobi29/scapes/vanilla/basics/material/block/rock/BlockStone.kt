@@ -18,7 +18,7 @@ package org.tobi29.scapes.vanilla.basics.material.block.rock
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.engine.utils.math.round
-import org.tobi29.scapes.vanilla.basics.material.StoneType
+import org.tobi29.scapes.vanilla.basics.generator.StoneType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.BlockSimpleData
 

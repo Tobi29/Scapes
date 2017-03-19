@@ -17,12 +17,12 @@ package org.tobi29.scapes.server.format.basic
 
 import mu.KLogging
 import org.tobi29.scapes.engine.utils.io.filesystem.*
-import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
 import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
-import org.tobi29.scapes.engine.utils.io.tag.set
-import org.tobi29.scapes.engine.utils.io.tag.toInt
-import org.tobi29.scapes.engine.utils.io.tag.toMap
+import org.tobi29.scapes.engine.utils.tag.set
+import org.tobi29.scapes.engine.utils.tag.toInt
+import org.tobi29.scapes.engine.utils.tag.toMap
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.server.PlayerEntry
 import org.tobi29.scapes.server.format.PlayerData

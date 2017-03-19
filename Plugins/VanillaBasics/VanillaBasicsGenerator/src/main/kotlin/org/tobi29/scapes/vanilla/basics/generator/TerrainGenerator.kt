@@ -17,7 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.generator
 
 import org.tobi29.scapes.engine.utils.math.*
-import org.tobi29.scapes.engine.utils.math.noise.value.SimplexNoise
+import org.tobi29.scapes.engine.utils.generation.value.SimplexNoise
 import java.util.*
 
 class TerrainGenerator(random: Random) {

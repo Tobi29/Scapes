@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.terrain
 
-import org.tobi29.scapes.engine.utils.io.tag.MutableTagMap
+import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 
 interface TerrainChunk {

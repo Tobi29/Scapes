@@ -16,10 +16,10 @@
 
 package org.tobi29.scapes.terrain.data
 
-import org.tobi29.scapes.engine.utils.io.tag.ReadWriteTagList
-import org.tobi29.scapes.engine.utils.io.tag.Tag
-import org.tobi29.scapes.engine.utils.io.tag.TagMap
-import org.tobi29.scapes.engine.utils.io.tag.toMap
+import org.tobi29.scapes.engine.utils.tag.ReadWriteTagList
+import org.tobi29.scapes.engine.utils.tag.Tag
+import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.scapes.engine.utils.tag.toMap
 
 class ChunkData(private val xSectionBits: Int,
                 private val ySectionBits: Int,

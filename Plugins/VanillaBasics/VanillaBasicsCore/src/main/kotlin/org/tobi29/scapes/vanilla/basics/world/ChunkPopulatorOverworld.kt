@@ -19,11 +19,11 @@ package org.tobi29.scapes.vanilla.basics.world
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.math.abs
-import org.tobi29.scapes.engine.utils.math.ceil
-import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.math.max
-import org.tobi29.scapes.engine.utils.math.noise.layer.*
+import org.tobi29.scapes.engine.utils.math.*
+import org.tobi29.scapes.engine.utils.generation.layer.RandomPermutation
+import org.tobi29.scapes.engine.utils.generation.layer.random
+import org.tobi29.scapes.engine.utils.generation.layer.randomOffset
+import org.tobi29.scapes.engine.utils.generation.value.SimplexNoise
 import org.tobi29.scapes.terrain.TerrainChunk
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
@@ -71,7 +71,7 @@ class ChunkPopulatorOverworld(world: WorldServer,
                 terrain.placeRandomRuin(xx, yy, zz, materials,
                         gen.it(xx + random.nextInt(200) - 100,
                                 yy + random.nextInt(200) - 100,
-                                zz - random.nextInt(100)), random)
+                                zz - random.nextInt(100)).id, random)
             }
             val xx = x + (dx shr 1)
             val yy = y + (dy shr 1)
@@ -83,7 +83,7 @@ class ChunkPopulatorOverworld(world: WorldServer,
             if (type == materials.stoneRaw &&
                     gen.it(xx + random.nextInt(21) - 10,
                             yy + random.nextInt(21) - 10,
-                            zz + random.nextInt(9) - 4) != data) {
+                            zz + random.nextInt(9) - 4).id != data) {
                 val ore = gen.randomOreType(plugin, data, random)
                 if (ore != null) {
                     val ores = terrain.genOre(xx, yy, zz, materials.stoneRaw,
@@ -110,11 +110,10 @@ class ChunkPopulatorOverworld(world: WorldServer,
                                     size = random.nextDouble() * 2.0 + 2.0
                                 }
                                 terrain.genOreRock(xxx, yyy, zzz,
-                                        materials.stoneRaw,
-                                        ore.type,
-                                        gen.it(xxx, yyy, zzz),
-                                        clamp(64 - ores shr 2,
-                                                2, 10), size, random)
+                                        materials.stoneRaw, ore.type,
+                                        gen.it(xxx, yyy, zzz).id,
+                                        clamp(64 - ores shr 2, 2, 10), size,
+                                        random)
                             }
                         }
                     }
@@ -123,9 +122,7 @@ class ChunkPopulatorOverworld(world: WorldServer,
         }
         val biome = biomes[biomeGenerator.get((x + (dx shr 1)).toDouble(),
                 (y + (dy shr 1)).toDouble())]
-        if (biome != null && biome.decorators.isNotEmpty()) {
-            val decorator = biome.decorators[biome.noise.getInt(x + dx / 2,
-                    y + dy / 2)]
+        biome?.biomeDecorator(x + dx / 2, y + dy / 2)?.let { decorator ->
             for (yyy in 0..dy - 1) {
                 val yyyy = yyy + y
                 for (xxx in 0..dx - 1) {
@@ -144,8 +141,10 @@ class ChunkPopulatorOverworld(world: WorldServer,
 
     private class BiomeDecoratorChooser(collection: Sequence<BiomeDecorator>,
                                         random: Random) {
-        val noise: RandomNoiseLayer
-        val decorators: Array<BiomeDecorator>
+        private val base = RandomPermutation(random)
+        private val swirl = SimplexNoise(random.nextLong())
+        private val noise = RandomPermutation(random)
+        private val decorators: Array<BiomeDecorator>
 
         init {
             val decorators = ArrayList<BiomeDecorator>()
@@ -155,12 +154,20 @@ class ChunkPopulatorOverworld(world: WorldServer,
                 }
             }
             this.decorators = decorators.toTypedArray()
-            val base = RandomNoiseRandomLayer(random.nextLong(),
-                    decorators.size)
-            val zoom = RandomNoiseZoomLayer(base, 1024.0)
-            val noise = RandomNoiseSimplexNoiseLayer(zoom, random.nextLong(),
-                    512.0)
-            this.noise = RandomNoiseNoiseLayer(noise, random.nextLong(), 3)
+        }
+
+        fun biomeDecorator(x: Int,
+                           y: Int) = run {
+            noise.randomOffset(3, x, y) { x, y ->
+                swirl.randomOffset(512.0, x.toDouble(),
+                        y.toDouble()) { x, y ->
+                    if (decorators.isEmpty()) {
+                        return@run null
+                    }
+                    decorators[base.random(decorators.size, floor(x) shr 10,
+                            floor(y) shr 10)]
+                }
+            }
         }
     }
 }

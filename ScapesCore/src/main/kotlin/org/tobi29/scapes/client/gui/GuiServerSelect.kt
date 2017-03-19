@@ -31,10 +31,10 @@ import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.utils.ByteBuffer
-import org.tobi29.scapes.engine.utils.io.tag.TagMap
-import org.tobi29.scapes.engine.utils.io.tag.listMut
-import org.tobi29.scapes.engine.utils.io.tag.mapMut
-import org.tobi29.scapes.engine.utils.io.tag.toMap
+import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.scapes.engine.utils.tag.listMut
+import org.tobi29.scapes.engine.utils.tag.mapMut
+import org.tobi29.scapes.engine.utils.tag.toMap
 import java.io.IOException
 import java.nio.channels.SelectionKey
 

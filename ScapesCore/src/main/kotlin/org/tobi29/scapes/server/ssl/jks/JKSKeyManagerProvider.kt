@@ -18,9 +18,9 @@ package org.tobi29.scapes.server.ssl.jks
 
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.read
-import org.tobi29.scapes.engine.utils.io.tag.TagMap
-import org.tobi29.scapes.engine.utils.keyManagers
-import org.tobi29.scapes.engine.utils.keyStore
+import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.scapes.engine.utils.io.keyManagers
+import org.tobi29.scapes.engine.utils.io.keyStore
 import org.tobi29.scapes.server.ssl.spi.KeyManagerProvider
 import java.io.IOException
 import java.security.KeyStoreException

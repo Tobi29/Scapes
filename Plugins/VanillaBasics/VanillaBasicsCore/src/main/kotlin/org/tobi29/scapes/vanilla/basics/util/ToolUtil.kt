@@ -17,7 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.util
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.io.tag.set
+import org.tobi29.scapes.engine.utils.tag.set
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.item.ItemIngot
 

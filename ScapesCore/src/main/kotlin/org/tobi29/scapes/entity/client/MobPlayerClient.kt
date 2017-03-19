@@ -18,10 +18,10 @@ package org.tobi29.scapes.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.utils.Checksum
-import org.tobi29.scapes.engine.utils.io.tag.TagMap
-import org.tobi29.scapes.engine.utils.io.tag.toMap
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.scapes.engine.utils.toChecksum
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.EntityType
 
@@ -57,6 +57,6 @@ abstract class MobPlayerClient(type: EntityType<*, *>,
     override fun read(map: TagMap) {
         super.read(map)
         map["Nickname"]?.toString()?.let { nickname = it }
-        map["SkinChecksum"]?.toMap()?.let { skin = Checksum(it) }
+        map["SkinChecksum"]?.toChecksum()?.let { skin = it }
     }
 }

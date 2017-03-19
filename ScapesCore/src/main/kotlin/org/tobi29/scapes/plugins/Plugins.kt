@@ -21,7 +21,7 @@ import org.tobi29.scapes.block.*
 import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathResource
-import org.tobi29.scapes.engine.utils.io.tag.MutableTagMap
+import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.packets.*
 import java.io.IOException

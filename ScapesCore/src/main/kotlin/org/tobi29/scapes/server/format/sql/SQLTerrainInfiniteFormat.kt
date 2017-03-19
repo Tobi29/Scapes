@@ -21,7 +21,7 @@ import org.tobi29.scapes.engine.sql.SQLQuery
 import org.tobi29.scapes.engine.sql.SQLReplace
 import org.tobi29.scapes.engine.sql.invoke
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream
-import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
 import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i

@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.terrain.data
 
-import org.tobi29.scapes.engine.utils.io.tag.*
+import org.tobi29.scapes.engine.utils.tag.*
 
 class ChunkArraySection1x8(private val xSizeBits: Int,
                            private val ySizeBits: Int,

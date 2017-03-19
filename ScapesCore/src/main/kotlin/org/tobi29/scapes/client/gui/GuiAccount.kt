@@ -21,7 +21,7 @@ import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.input.FileType
-import org.tobi29.scapes.engine.utils.io.Algorithm
+import org.tobi29.scapes.engine.utils.Algorithm
 import org.tobi29.scapes.engine.utils.io.checksum
 import org.tobi29.scapes.engine.utils.io.filesystem.write
 import org.tobi29.scapes.engine.utils.io.process

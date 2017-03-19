@@ -19,9 +19,9 @@ package org.tobi29.scapes.server.connection
 import kotlinx.coroutines.experimental.yield
 import mu.KLogging
 import org.tobi29.scapes.engine.server.*
+import org.tobi29.scapes.engine.utils.Algorithm
 import org.tobi29.scapes.engine.utils.ByteBuffer
 import org.tobi29.scapes.engine.utils.graphics.Image
-import org.tobi29.scapes.engine.utils.io.Algorithm
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.engine.utils.io.checksum
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath

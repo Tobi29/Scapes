@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.block
 
-import org.tobi29.scapes.engine.utils.io.tag.*
+import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.engine.utils.readOnly
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap

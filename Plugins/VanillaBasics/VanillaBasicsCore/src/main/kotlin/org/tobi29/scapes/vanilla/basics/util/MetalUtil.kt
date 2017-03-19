@@ -16,10 +16,10 @@
 
 package org.tobi29.scapes.vanilla.basics.util
 
-import org.tobi29.scapes.engine.utils.io.tag.ReadWriteTagMap
-import org.tobi29.scapes.engine.utils.io.tag.TagMap
-import org.tobi29.scapes.engine.utils.io.tag.set
-import org.tobi29.scapes.engine.utils.io.tag.toDouble
+import org.tobi29.scapes.engine.utils.tag.ReadWriteTagMap
+import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.scapes.engine.utils.tag.set
+import org.tobi29.scapes.engine.utils.tag.toDouble
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.engine.utils.reduceOrNull

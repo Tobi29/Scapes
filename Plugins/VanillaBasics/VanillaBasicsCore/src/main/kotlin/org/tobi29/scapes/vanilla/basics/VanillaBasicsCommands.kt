@@ -18,8 +18,8 @@ package org.tobi29.scapes.vanilla.basics
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.engine.utils.hash
-import org.tobi29.scapes.engine.utils.io.tag.set
-import org.tobi29.scapes.engine.utils.io.tag.syncMapMut
+import org.tobi29.scapes.engine.utils.tag.set
+import org.tobi29.scapes.engine.utils.tag.syncMapMut
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.command.*
 import org.tobi29.scapes.vanilla.basics.util.createIngot

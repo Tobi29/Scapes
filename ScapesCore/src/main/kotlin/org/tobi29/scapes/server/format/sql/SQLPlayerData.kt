@@ -18,7 +18,7 @@ package org.tobi29.scapes.server.format.sql
 import mu.KLogging
 import org.tobi29.scapes.engine.sql.*
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream
-import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
 import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
 import org.tobi29.scapes.entity.server.MobPlayerServer

@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.server.format
 
-import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 
 interface TerrainInfiniteFormat {

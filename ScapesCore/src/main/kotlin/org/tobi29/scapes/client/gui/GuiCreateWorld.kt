@@ -28,7 +28,7 @@ import org.tobi29.scapes.engine.utils.hash
 import org.tobi29.scapes.engine.utils.io.BufferedReadChannelStream
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.zipFile
-import org.tobi29.scapes.engine.utils.io.use
+import org.tobi29.scapes.engine.utils.use
 import org.tobi29.scapes.plugins.PluginFile
 import java.io.IOException
 import java.nio.channels.Channels

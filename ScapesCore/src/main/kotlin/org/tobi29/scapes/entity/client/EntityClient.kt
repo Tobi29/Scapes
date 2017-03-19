@@ -18,8 +18,8 @@ package org.tobi29.scapes.entity.client
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.utils.ListenerOwner
-import org.tobi29.scapes.engine.utils.io.tag.MutableTagMap
-import org.tobi29.scapes.engine.utils.io.tag.TagMap
+import org.tobi29.scapes.engine.utils.tag.MutableTagMap
+import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.entity.Entity
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.model.EntityModel

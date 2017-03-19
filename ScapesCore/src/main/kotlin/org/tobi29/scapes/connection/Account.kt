@@ -18,15 +18,11 @@ package org.tobi29.scapes.connection
 
 import mu.KLogging
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException
-import org.tobi29.scapes.engine.utils.extractPublic
-import org.tobi29.scapes.engine.utils.io.ByteStreamInputStream
-import org.tobi29.scapes.engine.utils.io.ByteStreamOutputStream
+import org.tobi29.scapes.engine.utils.io.*
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.exists
 import org.tobi29.scapes.engine.utils.io.filesystem.read
 import org.tobi29.scapes.engine.utils.io.filesystem.write
-import org.tobi29.scapes.engine.utils.readPrivate
-import org.tobi29.scapes.engine.utils.writePrivate
 import java.io.IOException
 import java.security.KeyPair
 import java.security.KeyPairGenerator

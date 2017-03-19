@@ -74,7 +74,7 @@ ext {
     log4jVersion = "2.8.1"
     commonsCLIVersion = "1.4"
     jnaVersion = "4.4.0"
-    scapesEngineVersion = "5f3f230bfd"
+    scapesEngineVersion = "cd56d6dad5"
 
     kotlinLogging = "io.github.microutils:kotlin-logging:$kotlinLoggingVersion"
     slf4jAPI = "org.slf4j:slf4j-api:$slf4jVersion"
@@ -140,6 +140,8 @@ ext {
             "com.github.Tobi29.ScapesEngine:CodecWAV:$scapesEngineVersion"
     scapesEngineFileSystems =
             "com.github.Tobi29.ScapesEngine:FileSystems:$scapesEngineVersion"
+    scapesEngineGenerationUtils =
+            "com.github.Tobi29.ScapesEngine:GenerationUtils:$scapesEngineVersion"
     scapesEngineGraphicsUtils =
             "com.github.Tobi29.ScapesEngine:GraphicsUtils:$scapesEngineVersion"
     scapesEngineTestAssertions =

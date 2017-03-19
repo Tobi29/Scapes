@@ -23,5 +23,6 @@ dependencies {
     compile rootProject.ext.scapesEngineEngine
     compile rootProject.ext.scapesEngineServerFramework
     compile rootProject.ext.scapesEngineSQLFramework
+    compile rootProject.ext.scapesEngineGenerationUtils
     compile rootProject.ext.commonsCLI
 }

@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics
 
-import org.tobi29.scapes.vanilla.basics.material.StoneType
+import org.tobi29.scapes.vanilla.basics.generator.StoneType
 
 class VanillaBasicsStones(reg: (String, (Int) -> StoneType) -> StoneType) {
     private val ROOT = "VanillaBasics:image/terrain/stone"

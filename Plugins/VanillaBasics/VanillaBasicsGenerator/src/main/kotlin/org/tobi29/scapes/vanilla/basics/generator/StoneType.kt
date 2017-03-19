@@ -14,20 +14,11 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.vanilla.basics.material
-
-import org.tobi29.scapes.block.Registries
+package org.tobi29.scapes.vanilla.basics.generator
 
 class StoneType(val id: Int,
                 val name: String,
                 val textureRoot: String,
                 val resistance: Double) {
     val texture = name.replace(" ", "")
-
-    companion object {
-        operator fun get(registry: Registries,
-                         data: Int): StoneType {
-            return registry.get<StoneType>("VanillaBasics", "StoneType")[data]
-        }
-    }
 }

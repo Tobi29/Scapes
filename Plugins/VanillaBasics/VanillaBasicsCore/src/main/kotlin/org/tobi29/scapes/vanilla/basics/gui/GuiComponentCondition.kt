@@ -20,8 +20,8 @@ import org.tobi29.scapes.client.gui.GuiComponentBar
 import org.tobi29.scapes.engine.gui.GuiComponentGroup
 import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
 import org.tobi29.scapes.engine.gui.GuiLayoutData
-import org.tobi29.scapes.engine.utils.io.tag.map
-import org.tobi29.scapes.engine.utils.io.tag.toDouble
+import org.tobi29.scapes.engine.utils.tag.map
+import org.tobi29.scapes.engine.utils.tag.toDouble
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 
 class GuiComponentCondition(parent: GuiLayoutData,

@@ -37,6 +37,7 @@ import org.tobi29.scapes.vanilla.basics.entity.model.MobLivingModelPigShared
 import org.tobi29.scapes.vanilla.basics.entity.particle.*
 import org.tobi29.scapes.vanilla.basics.entity.server.MobPlayerServerVB
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
+import org.tobi29.scapes.vanilla.basics.generator.StoneType
 import org.tobi29.scapes.vanilla.basics.material.*
 import org.tobi29.scapes.vanilla.basics.world.ClimateInfoLayer
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentOverworldClient

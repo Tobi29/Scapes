@@ -18,13 +18,13 @@ package org.tobi29.scapes.vanilla.basics
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.block.Registries
-import org.tobi29.scapes.engine.utils.io.tag.map
-import org.tobi29.scapes.engine.utils.io.tag.toBoolean
+import org.tobi29.scapes.engine.utils.tag.map
+import org.tobi29.scapes.engine.utils.tag.toBoolean
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.CraftingRecipeType
 import org.tobi29.scapes.vanilla.basics.material.CropType
-import org.tobi29.scapes.vanilla.basics.material.StoneType
+import org.tobi29.scapes.vanilla.basics.generator.StoneType
 import org.tobi29.scapes.vanilla.basics.material.TreeType
 import org.tobi29.scapes.vanilla.basics.util.createStoneTool
 

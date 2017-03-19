@@ -19,13 +19,13 @@ package org.tobi29.scapes.terrain.infinite
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.StampLock
 import org.tobi29.scapes.engine.utils.ThreadLocal
-import org.tobi29.scapes.engine.utils.io.tag.MutableTagMap
-import org.tobi29.scapes.engine.utils.io.tag.mapMut
 import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.math.lb
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
+import org.tobi29.scapes.engine.utils.tag.MutableTagMap
+import org.tobi29.scapes.engine.utils.tag.mapMut
 import org.tobi29.scapes.terrain.TerrainChunk
 import org.tobi29.scapes.terrain.TerrainGlobals
 import org.tobi29.scapes.terrain.VoxelType

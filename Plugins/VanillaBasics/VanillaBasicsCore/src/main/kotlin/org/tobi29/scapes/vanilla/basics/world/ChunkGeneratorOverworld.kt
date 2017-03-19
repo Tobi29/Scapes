@@ -21,10 +21,9 @@ import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.GeneratorOutput
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.math.noise.layer.*
 import org.tobi29.scapes.engine.utils.reduceOrNull
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
-import org.tobi29.scapes.vanilla.basics.generator.TerrainGenerator
+import org.tobi29.scapes.vanilla.basics.generator.*
 import org.tobi29.scapes.vanilla.basics.material.OreType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateLavaFlow
@@ -34,60 +33,44 @@ class ChunkGeneratorOverworld(random: Random,
                               private val terrainGenerator: TerrainGenerator,
                               private val materials: VanillaMaterial) : ChunkGenerator {
     private val random = Random()
-    private val sandLayer: RandomNoiseLayer
-    private val sandstoneLayer: RandomNoiseLayer
-    private val stoneLayers: Array<RandomNoiseLayer>
-    private val layer = TerrainGenerator.TerrainGeneratorLayer()
     private val generator = TerrainGenerator.TerrainGeneratorOutput()
+    private val layer = TerrainGenerator.TerrainGeneratorLayer()
+    private val beachGenerator = BeachGenerator(random)
+    private val stoneGenerator: StoneGenerator
+    private val sandstoneGenerator = SandstoneGenerator(random)
     private val sandstoneLayers: IntArray
     private val seedInt: Long
 
     init {
         val stoneTypes = materials.plugin.stoneTypes
-        val stoneLayers = arrayOf(
-                intArrayOf(stoneTypes.GRANITE.id,
-                        stoneTypes.GABBRO.id,
-                        stoneTypes.DIORITE.id),
-                intArrayOf(stoneTypes.ANDESITE.id,
-                        stoneTypes.BASALT.id,
-                        stoneTypes.DACITE.id,
-                        stoneTypes.RHYOLITE.id,
-                        stoneTypes.MARBLE.id,
-                        stoneTypes.GRANITE.id,
-                        stoneTypes.GABBRO.id,
-                        stoneTypes.DIORITE.id),
-                intArrayOf(stoneTypes.ANDESITE.id,
-                        stoneTypes.BASALT.id,
-                        stoneTypes.DACITE.id,
-                        stoneTypes.RHYOLITE.id,
-                        stoneTypes.DIRT_STONE.id),
-                intArrayOf(stoneTypes.DIRT_STONE.id,
-                        stoneTypes.CHALK.id,
-                        stoneTypes.CLAYSTONE.id,
-                        stoneTypes.CHERT.id,
-                        stoneTypes.CONGLOMERATE.id))
+        val stoneLayers = sequenceOf(
+                sequenceOf(stoneTypes.GRANITE,
+                        stoneTypes.GABBRO,
+                        stoneTypes.DIORITE),
+                sequenceOf(stoneTypes.ANDESITE,
+                        stoneTypes.BASALT,
+                        stoneTypes.DACITE,
+                        stoneTypes.RHYOLITE,
+                        stoneTypes.MARBLE,
+                        stoneTypes.GRANITE,
+                        stoneTypes.GABBRO,
+                        stoneTypes.DIORITE),
+                sequenceOf(stoneTypes.ANDESITE,
+                        stoneTypes.BASALT,
+                        stoneTypes.DACITE,
+                        stoneTypes.RHYOLITE,
+                        stoneTypes.DIRT_STONE),
+                sequenceOf(stoneTypes.DIRT_STONE,
+                        stoneTypes.CHALK,
+                        stoneTypes.CLAYSTONE,
+                        stoneTypes.CHERT,
+                        stoneTypes.CONGLOMERATE))
+        stoneGenerator = StoneGenerator(random, stoneLayers)
         seedInt = random.nextInt().toLong() shl 32
         sandstoneLayers = IntArray(512)
         for (i in sandstoneLayers.indices) {
             sandstoneLayers[i] = random.nextInt(6)
         }
-        val sandBase = RandomNoiseRandomLayer(random.nextLong(), 6)
-        val sandZoom = RandomNoiseZoomLayer(sandBase, 1024.0)
-        val sandNoise = RandomNoiseSimplexNoiseLayer(sandZoom,
-                random.nextLong(), 128.0)
-        sandLayer = RandomNoiseNoiseLayer(sandNoise, random.nextLong(), 2)
-        this.stoneLayers = stoneLayers.map {
-            val stoneBase = RandomNoiseRandomLayer(random.nextLong(), it.size)
-            val stoneFilter = RandomNoiseFilterLayer(stoneBase, *it)
-            val stoneZoom = RandomNoiseZoomLayer(stoneFilter, 2048.0)
-            RandomNoiseSimplexNoiseLayer(stoneZoom, random.nextLong(), 1024.0)
-        }.toTypedArray()
-        val sandstoneBase = RandomNoiseRandomLayer(random.nextLong(), 4)
-        val sandstoneZoom = RandomNoiseZoomLayer(sandstoneBase, 2048.0)
-        val sandstoneNoise = RandomNoiseSimplexNoiseLayer(sandstoneZoom,
-                random.nextLong(), 1024.0)
-        sandstoneLayer = RandomNoiseNoiseLayer(sandstoneNoise,
-                random.nextLong(), 3)
     }
 
     fun randomOreType(plugin: VanillaBasics,
@@ -110,21 +93,21 @@ class ChunkGeneratorOverworld(random: Random,
 
     fun it(xxx: Int,
            yyy: Int,
-           zzz: Int): Int {
+           zzz: Int): StoneType {
         var zzz = zzz
         val terrainFactor = terrainGenerator.generateTerrainFactorLayer(
                 xxx.toDouble(), yyy.toDouble())
         zzz += (terrainGenerator.generateMountainFactorLayer(xxx.toDouble(),
                 yyy.toDouble(), terrainFactor) * 300).toInt()
         if (zzz <= 96) {
-            return stoneLayers[0].getInt(xxx, yyy)
+            return stoneGenerator.stoneType(xxx, yyy, 0)
         } else if (zzz <= 240) {
-            return stoneLayers[1].getInt(xxx, yyy)
+            return stoneGenerator.stoneType(xxx, yyy, 1)
         } else if (terrainGenerator.generateVolcanoFactorLayer(xxx.toDouble(),
                 yyy.toDouble()) > 0.4f) {
-            return stoneLayers[2].getInt(xxx, yyy)
+            return stoneGenerator.stoneType(xxx, yyy, 2)
         } else {
-            return stoneLayers[3].getInt(xxx, yyy)
+            return stoneGenerator.stoneType(xxx, yyy, 3)
         }
     }
 
@@ -143,9 +126,9 @@ class ChunkGeneratorOverworld(random: Random,
                           output: GeneratorOutput) {
         terrainGenerator.generate(x.toDouble(), y.toDouble(), layer)
         terrainGenerator.generate(x.toDouble(), y.toDouble(), layer, generator)
-        var stoneType: Int
-        val sandType = if (generator.beach) sandLayer.getInt(x, y) else 4
-        val sandstone = sandstoneLayer.getInt(x, y) == 0
+        var stoneType: StoneType
+        val sandType = if (generator.beach) beachGenerator.sandType(x, y) else 4
+        val sandstone = sandstoneGenerator.sandstone(x, y)
         val stoneTypeZShift = random.nextInt(
                 6) - (generator.mountainFactor * 300).toInt()
         var lastFree = clamp(generator.height.toInt(),
@@ -154,13 +137,13 @@ class ChunkGeneratorOverworld(random: Random,
         val riverBedLevel = waterLevel - 14
         var zzzShifted = lastFree + stoneTypeZShift
         if (zzzShifted <= 96) {
-            stoneType = stoneLayers[0].getInt(x, y)
+            stoneType = stoneGenerator.stoneType(x, y, 0)
         } else if (zzzShifted <= 240) {
-            stoneType = stoneLayers[1].getInt(x, y)
+            stoneType = stoneGenerator.stoneType(x, y, 1)
         } else if (generator.volcanoFactor > 0.4f) {
-            stoneType = stoneLayers[2].getInt(x, y)
+            stoneType = stoneGenerator.stoneType(x, y, 2)
         } else {
-            stoneType = stoneLayers[3].getInt(x, y)
+            stoneType = stoneGenerator.stoneType(x, y, 3)
         }
         for (zz in dz - 1 downTo lastFree + 1) {
             output.type(zz, materials.air)
@@ -169,9 +152,9 @@ class ChunkGeneratorOverworld(random: Random,
         for (zz in lastFree downTo z) {
             zzzShifted = zz + stoneTypeZShift
             if (zzzShifted == 240) {
-                stoneType = stoneLayers[1].getInt(x, y)
+                stoneType = stoneGenerator.stoneType(x, y, 1)
             } else if (zzzShifted == 96) {
-                stoneType = stoneLayers[0].getInt(x, y)
+                stoneType = stoneGenerator.stoneType(x, y, 0)
             }
             var type: BlockType
             var data = 0
@@ -242,7 +225,7 @@ class ChunkGeneratorOverworld(random: Random,
                         type = materials.sandstone
                         data = sandstoneLayers[zz]
                     } else {
-                        data = stoneType
+                        data = stoneType.id
                     }
                 }
             } else {

@@ -16,10 +16,10 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
-import org.tobi29.scapes.engine.utils.io.tag.TagMap
-import org.tobi29.scapes.engine.utils.io.tag.toList
-import org.tobi29.scapes.engine.utils.io.tag.toMap
-import org.tobi29.scapes.engine.utils.io.tag.toMutTag
+import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.scapes.engine.utils.tag.toList
+import org.tobi29.scapes.engine.utils.tag.toMap
+import org.tobi29.scapes.engine.utils.tag.toMutTag
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.entity.client.EntityClient
