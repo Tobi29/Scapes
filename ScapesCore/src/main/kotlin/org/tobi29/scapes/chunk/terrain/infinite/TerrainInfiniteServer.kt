@@ -25,12 +25,11 @@ import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.generator.GeneratorOutput
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.limit
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.*
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
+import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.task.ThreadJoiner
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
@@ -101,14 +100,14 @@ class TerrainInfiniteServer(override val world: WorldServer,
                         if (loadingChunks.size > 64) {
                             newChunks = loadingChunks.asSequence().sortedBy {
                                 it.distanceSqr(loadArea)
-                            }.limit(32).toList()
+                            }.take(32).toList()
                         } else {
-                            newChunks = loadingChunks.asSequence().limit(
+                            newChunks = loadingChunks.asSequence().take(
                                     32).toList()
                         }
                         addChunks(newChunks)
                         chunkManager.stream().filter(
-                                { it.shouldPopulate() }).limit(
+                                { it.shouldPopulate() }).take(
                                 32).forEach({ it.populate() })
                         chunkManager.stream().filter(
                                 TerrainInfiniteChunkServer::shouldFinish).forEach(
