@@ -31,7 +31,7 @@ import org.tobi29.scapes.terrain.TerrainGlobals
 import org.tobi29.scapes.terrain.VoxelType
 import org.tobi29.scapes.terrain.data.ChunkArraySection1x16
 import org.tobi29.scapes.terrain.data.ChunkArraySection2x4
-import org.tobi29.scapes.terrain.data.ChunkData
+import org.tobi29.scapes.terrain.data.ChunkDataStruct
 
 abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
                                                        val parentTerrain: TerrainGlobals<B>,
@@ -113,10 +113,10 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
                     val light = heightMap[y shl 4 or x]
                     for (z in max(light, spread) downTo 0) {
                         if (z < light) {
-                            val id = bID.getData(x, y, z, 0)
+                            val id = id(x, y, z)
                             if (id != 0) {
                                 val type = type(id)
-                                val data = bData.getData(x, y, z, 0)
+                                val data = data(x, y, z)
                                 if (type.isSolid(data) || !type.isTransparent(
                                         data)) {
                                     sunLight = clamp(
@@ -124,7 +124,7 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
                                             0, 15).toByte()
                                 }
                             }
-                            bLight.setData(x, y, z, 0, sunLight.toInt())
+                            setSunLight(x, y, z, sunLight.toInt())
                         }
                         if (z < spread && sunLight > 0) {
                             spreads.push().set(x - 1, y, z, sunLight.toInt())
@@ -139,11 +139,11 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
                 for (s in spreads) {
                     if (s.x in 0..15 && s.y >= 0 && s.y < 16 && s.z >= 0 &&
                             s.z < zSize) {
-                        val type = type(bID.getData(s.x, s.y, s.z, 0))
-                        val data = bData.getData(s.x, s.y, s.z, 0)
+                        val type = type(id(s.x, s.y, s.z))
+                        val data = data(s.x, s.y, s.z)
                         s.l = clamp(s.l + type.lightTrough(data), 0, 15)
-                        if (s.l > bLight.getData(s.x, s.y, s.z, 0)) {
-                            bLight.setData(s.x, s.y, s.z, 0, s.l)
+                        if (s.l > sunLight(s.x, s.y, s.z)) {
+                            setSunLight(s.x, s.y, s.z, s.l)
                             newSpreads.push().set(s.x - 1, s.y, s.z, s.l)
                             newSpreads.push().set(s.x + 1, s.y, s.z, s.l)
                             newSpreads.push().set(s.x, s.y - 1, s.z, s.l)
@@ -168,10 +168,10 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
                     var sunLight: Byte = 15
                     var z = zSize - 1
                     while (z >= 0 && sunLight > 0) {
-                        val id = bID.getData(x, y, z, 0)
+                        val id = id(x, y, z)
                         if (id != 0) {
                             val type = type(id)
-                            val data = bData.getData(x, y, z, 0)
+                            val data = data(x, y, z)
                             if (type.isSolid(data) || !type.isTransparent(
                                     data)) {
                                 sunLight = clamp(
@@ -179,7 +179,7 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
                                         15).toByte()
                             }
                         }
-                        bLight.setData(x, y, z, 0, sunLight.toInt())
+                        setSunLight(x, y, z, sunLight.toInt())
                         z--
                     }
                 }
@@ -194,7 +194,14 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
 
     fun isEmpty(i: Int): Boolean {
         val j = i shl 4
-        return lockRead { bID.isEmpty(0, 0, j, 15, 15, j + 15) }
+        lockRead {
+            struct.forIn(idData, 0, 0, j, 15, 15, j + 15) {
+                if (!it.isEmpty) {
+                    return false
+                }
+            }
+        }
+        return true
     }
 
     fun highestBlockZAtG(x: Int,
@@ -240,8 +247,7 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
                z: Int): Long {
         checkCoords(x, y, z)
         return lockRead {
-            (bID.getData(x, y, z, 0).toLong() shl 32) or bData.getData(x,
-                    y, z, 0).toLong()
+            (id(x, y, z).toLong() shl 32) or data(x, y, z).toLong()
         }
     }
 
@@ -255,7 +261,7 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
               y: Int,
               z: Int): B {
         checkCoords(x, y, z)
-        return type(lockRead { bID.getData(x, y, z, 0) })
+        return type(lockRead { id(x, y, z) })
     }
 
     fun lightG(x: Int,
@@ -269,11 +275,9 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
                z: Int): Int {
         checkCoords(x, y, z)
         return lockRead {
-            max(bLight.getData(x, y, z, 1),
-                    bLight.getData(x, y, z,
-                            0) - parentTerrain.sunLightReduction(
-                            x + posBlock.x,
-                            y + posBlock.y))
+            max(blockLight(x, y, z),
+                    sunLight(x, y, z) - parentTerrain.sunLightReduction(
+                            x + posBlock.x, y + posBlock.y))
         }
     }
 
@@ -287,7 +291,7 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
                   y: Int,
                   z: Int): Int {
         checkCoords(x, y, z)
-        return lockRead { bLight.getData(x, y, z, 0) }
+        return lockRead { sunLight(x, y, z) }
     }
 
     fun blockLightG(x: Int,
@@ -300,7 +304,7 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
                     y: Int,
                     z: Int): Int {
         checkCoords(x, y, z)
-        return lockRead { bLight.getData(x, y, z, 1) }
+        return lockRead { blockLight(x, y, z) }
     }
 
     fun blockTypeG(x: Int,
@@ -315,9 +319,9 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
                    z: Int,
                    type: B) {
         checkCoords(x, y, z)
-        val oldType = type(lockRead { bID.getData(x, y, z, 0) })
+        val oldType = type(lockRead { id(x, y, z) })
         if (oldType !== type) {
-            lockWrite { bID.setData(x, y, z, 0, type.id) }
+            lockWrite { setID(x, y, z, type.id) }
             updateHeightMap(x, y, z, type)
             update(x, y, z, oldType.causesTileUpdate())
         }
@@ -337,13 +341,13 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
                   type: B,
                   data: Int) {
         checkCoords(x, y, z)
-        val oldType = type(lockRead { bID.getData(x, y, z, 0) })
+        val oldType = type(lockRead { id(x, y, z) })
         if (oldType !== type || lockRead {
-            bData.getData(x, y, z, 0)
+            data(x, y, z)
         } != data) {
             lockWrite {
-                bID.setData(x, y, z, 0, type.id)
-                bData.setData(x, y, z, 0, data)
+                setID(x, y, z, type.id)
+                setData(x, y, z, data)
             }
             updateHeightMap(x, y, z, type)
             update(x, y, z, oldType.causesTileUpdate())
@@ -362,10 +366,10 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
               z: Int,
               data: Int) {
         checkCoords(x, y, z)
-        if (lockRead { bData.getData(x, y, z, 0) } != data) {
+        if (lockRead { data(x, y, z) } != data) {
             val oldType = type(lockWrite {
-                bData.setData(x, y, z, 0, data)
-                bID.getData(x, y, z, 0)
+                setData(x, y, z, data)
+                id(x, y, z)
             })
             update(x, y, z, oldType.causesTileUpdate())
         }
@@ -383,7 +387,7 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
                   z: Int,
                   light: Int) {
         checkCoords(x, y, z)
-        lockWrite { bLight.setData(x, y, z, 0, light) }
+        lockWrite { setSunLight(x, y, z, light) }
         updateLight(x, y, z)
     }
 
@@ -399,7 +403,7 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
                     z: Int,
                     light: Int) {
         checkCoords(x, y, z)
-        lockWrite { bLight.setData(x, y, z, 1, light) }
+        lockWrite { setBlockLight(x, y, z, light) }
         updateLight(x, y, z)
     }
 
@@ -409,7 +413,7 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
         for (x in 0..15) {
             for (y in 0..15) {
                 for (z in zSize - 1 downTo 1) {
-                    if (lockRead { bID.getData(x, y, z, 0) } != 0) {
+                    if (lockRead { id(x, y, z) } != 0) {
                         heightMap[y shl 4 or x] = z
                         break
                     }
@@ -428,7 +432,7 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
         } else if (height == z && type === parentTerrain.air) {
             var zzz = 0
             for (zz in height downTo 0) {
-                if (lockRead { bID.getData(x, y, zz, 0) } != 0) {
+                if (lockRead { id(x, y, zz) } != 0) {
                     zzz = zz
                     break
                 }
@@ -446,20 +450,75 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
         LOADED(5),
         SENDABLE(6);
 
-        val id: Byte
-
-        init {
-            this.id = id.toByte()
-        }
+        val id = id.toByte()
     }
 
     protected class ChunkDatas(zBits: Int) {
-        val bID = ChunkData(0, 0, zBits, 4, 4, 4,
-                ::ChunkArraySection1x16)
-        val bData = ChunkData(0, 0, zBits, 4, 4, 4,
-                ::ChunkArraySection1x16)
-        val bLight = ChunkData(0, 0, zBits, 4, 4, 4,
-                ::ChunkArraySection2x4)
+        val struct = ChunkDataStruct(0, 0, zBits, 4, 4, 4)
+        val idData = struct.createData(::ChunkArraySection1x16)
+        val dataData = struct.createData(::ChunkArraySection1x16)
+        val lightData = struct.createData(::ChunkArraySection2x4)
+
+        fun id(x: Int,
+               y: Int,
+               z: Int) =
+                struct.getSection(idData, x, y, z) { x, y, z ->
+                    getData(x, y, z)
+                }
+
+        fun setID(x: Int,
+                  y: Int,
+                  z: Int,
+                  value: Int) =
+                struct.getSection(idData, x, y, z) { x, y, z ->
+                    setData(x, y, z, value)
+                }
+
+        fun data(x: Int,
+                 y: Int,
+                 z: Int) =
+                struct.getSection(dataData, x, y, z) { x, y, z ->
+                    getData(x, y, z)
+                }
+
+        fun setData(x: Int,
+                    y: Int,
+                    z: Int,
+                    value: Int) =
+                struct.getSection(dataData, x, y, z) { x, y, z ->
+                    setData(x, y, z, value)
+                }
+
+        fun sunLight(x: Int,
+                     y: Int,
+                     z: Int) =
+                struct.getSection(lightData, x, y, z) { x, y, z ->
+                    getData(x, y, z, false)
+                }
+
+        fun setSunLight(x: Int,
+                        y: Int,
+                        z: Int,
+                        value: Int) =
+                struct.getSection(lightData, x, y,
+                        z) { x, y, z ->
+                    setData(x, y, z, false, value)
+                }
+
+        fun blockLight(x: Int,
+                       y: Int,
+                       z: Int) =
+                struct.getSection(lightData, x, y, z) { x, y, z ->
+                    getData(x, y, z, true)
+                }
+
+        fun setBlockLight(x: Int,
+                          y: Int,
+                          z: Int,
+                          value: Int) =
+                struct.getSection(lightData, x, y, z) { x, y, z ->
+                    setData(x, y, z, true, value)
+                }
     }
 
     private class LightSpread {

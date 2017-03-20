@@ -21,6 +21,7 @@ import org.tobi29.scapes.block.UpdateBlockUpdate
 import org.tobi29.scapes.block.UpdateBlockUpdateUpdateTile
 import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.GeneratorOutput
+import org.tobi29.scapes.engine.utils.andNull
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
@@ -202,9 +203,24 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
 
     fun read(map: TagMap) {
         lockWrite {
-            map["BlockID"]?.toList()?.let { bID.read(it) }
-            map["BlockData"]?.toList()?.let { bData.read(it) }
-            map["BlockLight"]?.toList()?.let { bLight.read(it) }
+            map["BlockID"]?.toList()?.let {
+                (idData.asSequence() zip it.asSequence().mapNotNull(
+                        Tag::toMap).andNull()).forEach { (data, tag) ->
+                    data.read(tag)
+                }
+            }
+            map["BlockData"]?.toList()?.let {
+                (dataData.asSequence() zip it.asSequence().mapNotNull(
+                        Tag::toMap).andNull()).forEach { (data, tag) ->
+                    data.read(tag)
+                }
+            }
+            map["BlockLight"]?.toList()?.let {
+                (lightData.asSequence() zip it.asSequence().mapNotNull(
+                        Tag::toMap).andNull()).forEach { (data, tag) ->
+                    data.read(tag)
+                }
+            }
         }
         val oldTick = map["Tick"]?.toLong() ?: 0L
         map["Entities"]?.toList()?.asSequence()?.mapNotNull(
@@ -243,12 +259,15 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
               packet: Boolean) {
         val tick = terrain.world.tick
         lockWrite {
-            bID.compress()
-            bData.compress()
-            bLight.compress()
-            map["BlockID"] = TagList { bID.write(this) }
-            map["BlockData"] = TagList { bData.write(this) }
-            map["BlockLight"] = TagList { bLight.write(this) }
+            idData.forEach { it.compress() }
+            dataData.forEach { it.compress() }
+            lightData.forEach { it.compress() }
+            map["BlockID"] =
+                    TagList(idData.asSequence().map { it.toTag() })
+            map["BlockData"] =
+                    TagList(dataData.asSequence().map { it.toTag() })
+            map["BlockLight"] =
+                    TagList(lightData.asSequence().map { it.toTag() })
         }
         map["MetaData"] = metaData.toTag()
         if (!packet) {
@@ -295,10 +314,10 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                     for (z in 0..zSize - 1) {
                         val type = output.type[z]
                         if (type != 0) {
-                            bID.setData(x, y, z, 0, type)
+                            setID(x, y, z, type)
                             val data = output.data[z]
                             if (data != 0) {
-                                bData.setData(x, y, z, 0, data)
+                                setData(x, y, z, data)
                             }
                         }
                     }
@@ -318,9 +337,9 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
             }
             updateSunLight()
             lockWrite {
-                bID.compress()
-                bData.compress()
-                bLight.compress()
+                idData.forEach { it.compress() }
+                dataData.forEach { it.compress() }
+                lightData.forEach { it.compress() }
             }
             state = TerrainInfiniteBaseChunk.State.POPULATED
         })

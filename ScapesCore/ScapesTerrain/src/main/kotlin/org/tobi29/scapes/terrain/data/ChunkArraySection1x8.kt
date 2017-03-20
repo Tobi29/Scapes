@@ -20,38 +20,32 @@ import org.tobi29.scapes.engine.utils.tag.*
 
 class ChunkArraySection1x8(private val xSizeBits: Int,
                            private val ySizeBits: Int,
-                           zSizeBits: Int) : ChunkArraySection {
-    private val size: Int
+                           zSizeBits: Int) : TagMapWrite {
+    private val size = 1 shl xSizeBits + ySizeBits + zSizeBits
     private var data: ByteArray? = null
     private var defaultValue: Byte = 0
     private var changed = false
 
-    init {
-        size = 1 shl xSizeBits + ySizeBits + zSizeBits
+    fun getData(x: Int,
+                y: Int,
+                z: Int): Int {
+        return getData(z shl ySizeBits or y shl xSizeBits or x)
     }
 
-    override fun getData(x: Int,
-                         y: Int,
-                         z: Int,
-                         offset: Int): Int {
-        return getData((z shl ySizeBits or y shl xSizeBits or x) + offset)
-    }
-
-    override fun getData(offset: Int): Int {
+    fun getData(offset: Int): Int {
         val data = this.data ?: return defaultValue.toInt()
         return data[offset].toInt()
     }
 
-    override fun setData(x: Int,
-                         y: Int,
-                         z: Int,
-                         offset: Int,
-                         value: Int) {
-        setData((z shl ySizeBits or y shl xSizeBits or x) + offset, value)
+    fun setData(x: Int,
+                y: Int,
+                z: Int,
+                value: Int) {
+        setData(z shl ySizeBits or y shl xSizeBits or x, value)
     }
 
-    override fun setData(offset: Int,
-                         value: Int) {
+    fun setData(offset: Int,
+                value: Int) {
         var data = this.data
         val bValue = value.toByte()
         if (data == null) {
@@ -67,15 +61,17 @@ class ChunkArraySection1x8(private val xSizeBits: Int,
             this.data = data
             changed = true
         } else {
+            if (bValue == data[offset]) {
+                return
+            }
             data[offset] = bValue
             changed = true
         }
     }
 
-    override val isEmpty: Boolean
-        get() = data == null && defaultValue == 0.toByte()
+    val isEmpty get() = data == null && defaultValue == 0.toByte()
 
-    override fun compress(): Boolean {
+    fun compress(): Boolean {
         val data = this.data ?: return true
         if (!changed) {
             return false
@@ -106,7 +102,7 @@ class ChunkArraySection1x8(private val xSizeBits: Int,
         }
     }
 
-    override fun read(map: TagMap?) {
+    fun read(map: TagMap?) {
         if (map == null) {
             defaultValue = 0
             data = null

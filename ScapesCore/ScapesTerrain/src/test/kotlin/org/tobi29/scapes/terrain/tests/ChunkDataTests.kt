@@ -24,7 +24,7 @@ import org.tobi29.scapes.engine.test.assertions.shouldEqual
 import org.tobi29.scapes.terrain.data.ChunkArraySection1x16
 import org.tobi29.scapes.terrain.data.ChunkArraySection1x8
 import org.tobi29.scapes.terrain.data.ChunkArraySection2x4
-import org.tobi29.scapes.terrain.data.ChunkData
+import org.tobi29.scapes.terrain.data.ChunkDataStruct
 import java.util.*
 
 object ChunkDataTests : Spek({
@@ -37,8 +37,9 @@ object ChunkDataTests : Spek({
             val ySizeBits = 2
             val zSizeBits = 2
             val random = Random(0)
-            val chunkData = ChunkData(xSectionBits, ySectionBits, zSectionBits,
-                    xSizeBits, ySizeBits, zSizeBits, ::ChunkArraySection2x4)
+            val struct = ChunkDataStruct(xSectionBits, ySectionBits,
+                    zSectionBits, xSizeBits, ySizeBits, zSizeBits)
+            val data = struct.createData(::ChunkArraySection2x4)
             val xSize = 1 shl xSizeBits + xSectionBits
             val ySize = 1 shl ySizeBits + ySectionBits
             val zSize = 1 shl zSizeBits + zSectionBits
@@ -47,8 +48,17 @@ object ChunkDataTests : Spek({
                     for (x in 0..xSize - 1) {
                         val value1 = random.nextInt(0x10)
                         val value2 = random.nextInt(0x10)
-                        chunkData.setData(x, y, z, 0, value1)
-                        chunkData.setData(x, y, z, 1, value2)
+                        if (random.nextBoolean()) {
+                            struct.getSection(data, x, y, z) { x, y, z ->
+                                setData(x, y, z, false, value1)
+                                setData(x, y, z, true, value2)
+                            }
+                        } else {
+                            struct.getSection(data, x, y, z) { x, y, z ->
+                                setData(x, y, z, true, value2)
+                                setData(x, y, z, false, value1)
+                            }
+                        }
                     }
                 }
             }
@@ -58,9 +68,14 @@ object ChunkDataTests : Spek({
                     for (y in 0..ySize - 1) {
                         for (x in 0..xSize - 1) {
                             val requirement1 = random.nextInt(0x10)
-                            val value1 = chunkData.getData(x, y, z, 0)
+                            val value1 = struct.getSection(data, x, y,
+                                    z) { x, y, z -> getData(x, y, z, false) }
                             val requirement2 = random.nextInt(0x10)
-                            val value2 = chunkData.getData(x, y, z, 1)
+                            val value2 = struct.getSection(data, x, y,
+                                    z) { x, y, z -> getData(x, y, z, true) }
+                            // We do not need this here, but we need to keep
+                            // the seeding consistent
+                            random.nextBoolean()
                             value1 shouldEqual requirement1
                             value2 shouldEqual requirement2
                         }
@@ -78,8 +93,9 @@ object ChunkDataTests : Spek({
             val ySizeBits = 2
             val zSizeBits = 2
             val random = Random(0)
-            val chunkData = ChunkData(xSectionBits, ySectionBits, zSectionBits,
-                    xSizeBits, ySizeBits, zSizeBits, ::ChunkArraySection1x8)
+            val struct = ChunkDataStruct(xSectionBits, ySectionBits,
+                    zSectionBits, xSizeBits, ySizeBits, zSizeBits)
+            val data = struct.createData(::ChunkArraySection1x8)
             val xSize = 1 shl xSizeBits + xSectionBits
             val ySize = 1 shl ySizeBits + ySectionBits
             val zSize = 1 shl zSizeBits + zSectionBits
@@ -87,7 +103,9 @@ object ChunkDataTests : Spek({
                 for (y in 0..ySize - 1) {
                     for (x in 0..xSize - 1) {
                         val value = random.nextInt(0x100).toByte()
-                        chunkData.setData(x, y, z, 0, value.toInt())
+                        struct.getSection(data, x, y, z) { x, y, z ->
+                            setData(x, y, z, value.toInt())
+                        }
                     }
                 }
             }
@@ -97,7 +115,10 @@ object ChunkDataTests : Spek({
                     for (y in 0..ySize - 1) {
                         for (x in 0..xSize - 1) {
                             val requirement = random.nextInt(0x100).toByte()
-                            val value = chunkData.getData(x, y, z, 0).toByte()
+                            val value = struct.getSection(data, x, y,
+                                    z) { x, y, z ->
+                                getData(x, y, z)
+                            }.toByte()
                             value shouldEqual requirement
                         }
                     }
@@ -114,8 +135,9 @@ object ChunkDataTests : Spek({
             val ySizeBits = 2
             val zSizeBits = 2
             val random = Random(0)
-            val chunkData = ChunkData(xSectionBits, ySectionBits, zSectionBits,
-                    xSizeBits, ySizeBits, zSizeBits, ::ChunkArraySection1x16)
+            val struct = ChunkDataStruct(xSectionBits, ySectionBits,
+                    zSectionBits, xSizeBits, ySizeBits, zSizeBits)
+            val data = struct.createData(::ChunkArraySection1x16)
             val xSize = 1 shl xSizeBits + xSectionBits
             val ySize = 1 shl ySizeBits + ySectionBits
             val zSize = 1 shl zSizeBits + zSectionBits
@@ -123,7 +145,9 @@ object ChunkDataTests : Spek({
                 for (y in 0..ySize - 1) {
                     for (x in 0..xSize - 1) {
                         val value = random.nextInt(0x10000).toShort()
-                        chunkData.setData(x, y, z, 0, value.toInt())
+                        struct.getSection(data, x, y, z) { x, y, z ->
+                            setData(x, y, z, value.toInt())
+                        }
                     }
                 }
             }
@@ -133,7 +157,10 @@ object ChunkDataTests : Spek({
                     for (y in 0..ySize - 1) {
                         for (x in 0..xSize - 1) {
                             val requirement = random.nextInt(0x10000).toShort()
-                            val value = chunkData.getData(x, y, z, 0).toShort()
+                            val value = struct.getSection(data, x, y,
+                                    z) { x, y, z ->
+                                getData(x, y, z)
+                            }.toShort()
                             value shouldEqual requirement
                         }
                     }

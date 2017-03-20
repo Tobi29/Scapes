@@ -21,66 +21,48 @@ import java.util.*
 
 class ChunkArraySection2x4(private val xSizeBits: Int,
                            private val ySizeBits: Int,
-                           zSizeBits: Int) : ChunkArraySection {
-    private val size: Int
+                           zSizeBits: Int) : TagMapWrite {
+    private val size = 1 shl xSizeBits + ySizeBits + zSizeBits
     private var data: ByteArray? = null
     private var defaultValue: Byte = 0
     private var changed = false
 
-    init {
-        size = 1 shl xSizeBits + ySizeBits + zSizeBits
+    fun getData(x: Int,
+                y: Int,
+                z: Int,
+                second: Boolean): Int {
+        return getData(z shl ySizeBits or y shl xSizeBits or x, second)
     }
 
-    override fun getData(x: Int,
-                         y: Int,
-                         z: Int,
-                         offset: Int): Int {
-        return getData((z shl ySizeBits or y shl xSizeBits or x shl 1) + offset)
-    }
-
-    override fun getData(offset: Int): Int {
+    fun getData(offset: Int,
+                second: Boolean): Int {
         val data = this.data
-        if (offset and 1 == 0) {
-            if (data == null) {
-                return (defaultValue.toInt() and 0xF)
-            }
-            return (data[offset shr 1].toInt() and 0xF)
-        } else {
+        if (second) {
             if (data == null) {
                 return (defaultValue.toInt() and 0xF0).ushr(4)
             }
-            return (data[offset shr 1].toInt() and 0xF0).ushr(4)
+            return (data[offset].toInt() and 0xF0).ushr(4)
+        } else {
+            if (data == null) {
+                return (defaultValue.toInt() and 0xF)
+            }
+            return (data[offset].toInt() and 0xF)
         }
     }
 
-    override fun setData(x: Int,
-                         y: Int,
-                         z: Int,
-                         offset: Int,
-                         value: Int) {
-        setData((z shl ySizeBits or y shl xSizeBits or x shl 1) + offset, value)
+    fun setData(x: Int,
+                y: Int,
+                z: Int,
+                second: Boolean,
+                value: Int) {
+        setData(z shl ySizeBits or y shl xSizeBits or x, second, value)
     }
 
-    override fun setData(offset: Int,
-                         value: Int) {
+    fun setData(offset: Int,
+                second: Boolean,
+                value: Int) {
         var data = this.data
-        if (offset and 1 == 0) {
-            val offset2 = offset shr 1
-            if (data == null) {
-                if (value == defaultValue.toInt() and 0xF) {
-                    return
-                }
-                data = ByteArray(size)
-                Arrays.fill(data, defaultValue)
-                data[offset2] = (data[offset2].toInt() and 0xF0 or value).toByte()
-                this.data = data
-                changed = true
-            } else {
-                data[offset2] = (data[offset2].toInt() and 0xF0 or value).toByte()
-                changed = true
-            }
-        } else {
-            val offset2 = offset shr 1
+        if (second) {
             val value2 = value shl 4
             if (data == null) {
                 if (value2 == defaultValue.toInt() and 0xF0) {
@@ -88,20 +70,33 @@ class ChunkArraySection2x4(private val xSizeBits: Int,
                 }
                 data = ByteArray(size)
                 Arrays.fill(data, defaultValue)
-                data[offset2] = (data[offset2].toInt() and 0xF or value2).toByte()
+                data[offset] = (data[offset].toInt() and 0xF or value2).toByte()
                 this.data = data
                 changed = true
             } else {
-                data[offset2] = (data[offset2].toInt() and 0xF or value2).toByte()
+                data[offset] = (data[offset].toInt() and 0xF or value2).toByte()
+                changed = true
+            }
+        } else {
+            if (data == null) {
+                if (value == defaultValue.toInt() and 0xF) {
+                    return
+                }
+                data = ByteArray(size)
+                Arrays.fill(data, defaultValue)
+                data[offset] = (data[offset].toInt() and 0xF0 or value).toByte()
+                this.data = data
+                changed = true
+            } else {
+                data[offset] = (data[offset].toInt() and 0xF0 or value).toByte()
                 changed = true
             }
         }
     }
 
-    override val isEmpty: Boolean
-        get() = data == null && defaultValue == 0.toByte()
+    val isEmpty get() = data == null && defaultValue == 0.toByte()
 
-    override fun compress(): Boolean {
+    fun compress(): Boolean {
         val data = this.data ?: return true
         if (!changed) {
             return false
@@ -132,7 +127,7 @@ class ChunkArraySection2x4(private val xSizeBits: Int,
         }
     }
 
-    override fun read(map: TagMap?) {
+    fun read(map: TagMap?) {
         if (map == null) {
             defaultValue = 0
             data = null

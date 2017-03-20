@@ -16,12 +16,10 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toList
-import org.tobi29.scapes.engine.utils.tag.toMap
-import org.tobi29.scapes.engine.utils.tag.toMutTag
+import org.tobi29.scapes.engine.utils.andNull
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
+import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.entity.client.MobClient
 import org.tobi29.scapes.packets.PacketRequestChunk
@@ -33,12 +31,8 @@ class TerrainInfiniteChunkClient(pos: Vector2i,
                                  zSize: Int,
                                  renderer: TerrainInfiniteRenderer) : TerrainInfiniteChunk<EntityClient>(
         pos, terrain, zSize) {
-    private val rendererChunk: TerrainInfiniteRendererChunk
+    private val rendererChunk = TerrainInfiniteRendererChunk(this, renderer)
     private val requested = AtomicBoolean(false)
-
-    init {
-        rendererChunk = TerrainInfiniteRendererChunk(this, renderer)
-    }
 
     fun checkLoaded(): Boolean {
         if (state.id < TerrainInfiniteBaseChunk.State.LOADED.id) {
@@ -113,9 +107,24 @@ class TerrainInfiniteChunkClient(pos: Vector2i,
 
     fun read(map: TagMap) {
         lockWrite {
-            map["BlockID"]?.toList()?.let { bID.read(it) }
-            map["BlockData"]?.toList()?.let { bData.read(it) }
-            map["BlockLight"]?.toList()?.let { bLight.read(it) }
+            map["BlockID"]?.toList()?.let {
+                (idData.asSequence() zip it.asSequence().mapNotNull(
+                        Tag::toMap).andNull()).forEach { (data, tag) ->
+                    data.read(tag)
+                }
+            }
+            map["BlockData"]?.toList()?.let {
+                (dataData.asSequence() zip it.asSequence().mapNotNull(
+                        Tag::toMap).andNull()).forEach { (data, tag) ->
+                    data.read(tag)
+                }
+            }
+            map["BlockLight"]?.toList()?.let {
+                (lightData.asSequence() zip it.asSequence().mapNotNull(
+                        Tag::toMap).andNull()).forEach { (data, tag) ->
+                    data.read(tag)
+                }
+            }
         }
         map["MetaData"]?.toMap()?.let { metaData = it.toMutTag() }
         initHeightMap()

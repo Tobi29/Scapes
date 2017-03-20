@@ -16,103 +16,55 @@
 
 package org.tobi29.scapes.terrain.data
 
-import org.tobi29.scapes.engine.utils.tag.ReadWriteTagList
-import org.tobi29.scapes.engine.utils.tag.Tag
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toMap
+@Suppress("NOTHING_TO_INLINE")
+class ChunkDataStruct(val xSectionBits: Int,
+                      val ySectionBits: Int,
+                      val zSectionBits: Int,
+                      val xSizeBits: Int,
+                      val ySizeBits: Int,
+                      val zSizeBits: Int) {
+    val xSize = (1 shl xSizeBits) - 1
+    val ySize = (1 shl ySizeBits) - 1
+    val zSize = (1 shl zSizeBits) - 1
 
-class ChunkData(private val xSectionBits: Int,
-                private val ySectionBits: Int,
-                private val zSectionBits: Int,
-                private val xSizeBits: Int,
-                private val ySizeBits: Int,
-                private val zSizeBits: Int,
-                private val data: Array<ChunkArraySection>) {
-    private val xSize: Int
-    private val ySize: Int
-    private val zSize: Int
-
-    init {
-        xSize = (1 shl xSizeBits) - 1
-        ySize = (1 shl ySizeBits) - 1
-        zSize = (1 shl zSizeBits) - 1
+    inline fun <D, R> getSection(data: Array<out D>,
+                                 x: Int,
+                                 y: Int,
+                                 z: Int,
+                                 block: D.(Int, Int, Int) -> R): R {
+        return getSection(data, x, y, z).let {
+            block(it, x and xSize, y and ySize, z and zSize)
+        }
     }
 
-    fun section(xOffset: Int,
-                yOffset: Int,
-                zOffset: Int): ChunkArraySection {
-        return section(
+    inline fun <D> getSection(data: Array<out D>,
+                              x: Int,
+                              y: Int,
+                              z: Int): D {
+        return section(data, x shr xSizeBits, y shr ySizeBits, z shr zSizeBits)
+    }
+
+    inline fun <D> section(data: Array<out D>,
+                           xOffset: Int,
+                           yOffset: Int,
+                           zOffset: Int): D {
+        return section(data,
                 zOffset shl ySectionBits or yOffset shl xSectionBits or xOffset)
     }
 
-    fun section(offset: Int): ChunkArraySection {
-        if (offset < 0 || offset >= data.size) {
-            throw IllegalArgumentException("Offset out of range: $offset")
-        }
+    inline fun <D> section(data: Array<out D>,
+                           offset: Int): D {
         return data[offset]
     }
 
-    fun getData(x: Int,
-                y: Int,
-                z: Int,
-                offset: Int): Int {
-        return getData(x shr xSizeBits, y shr ySizeBits, z shr zSizeBits,
-                x and xSize, y and ySize, z and zSize, offset)
-    }
-
-    private fun getData(xOffset: Int,
-                        yOffset: Int,
-                        zOffset: Int,
-                        x: Int,
-                        y: Int,
-                        z: Int,
-                        offset: Int): Int {
-        return section(xOffset, yOffset, zOffset).getData(x, y, z, offset)
-    }
-
-    fun setData(x: Int,
-                y: Int,
-                z: Int,
-                offset: Int,
-                value: Int) {
-        setData(x shr xSizeBits, y shr ySizeBits, z shr zSizeBits, x and xSize,
-                y and ySize, z and zSize, offset, value)
-    }
-
-    private fun setData(xOffset: Int,
-                        yOffset: Int,
-                        zOffset: Int,
-                        x: Int,
-                        y: Int,
-                        z: Int,
-                        offset: Int,
-                        value: Int) {
-        section(xOffset, yOffset, zOffset).setData(x, y, z, offset, value)
-    }
-
-    fun write(list: ReadWriteTagList) {
-        data.asSequence().map { TagMap { it.write(this) } }.forEach {
-            list.add(it)
-        }
-    }
-
-    fun read(tags: List<Tag>) {
-        val iterator = tags.asSequence().mapNotNull(Tag::toMap).iterator()
-        for (i in data.indices) {
-            if (iterator.hasNext()) {
-                data[i].read(iterator.next())
-            } else {
-                data[i].read(null)
-            }
-        }
-    }
-
-    fun isEmpty(xMin: Int,
-                yMin: Int,
-                zMin: Int,
-                xMax: Int,
-                yMax: Int,
-                zMax: Int): Boolean {
+    inline fun <D> forIn(data: Array<D>,
+                         xMin: Int,
+                         yMin: Int,
+                         zMin: Int,
+                         xMax: Int,
+                         yMax: Int,
+                         zMax: Int,
+                         block: (D) -> Unit) {
         val xMinS = xMin shr xSizeBits
         val yMinS = yMin shr ySizeBits
         val zMinS = zMin shr zSizeBits
@@ -122,30 +74,14 @@ class ChunkData(private val xSectionBits: Int,
         for (z in zMinS..zMaxS) {
             for (y in yMinS..yMaxS) {
                 for (x in xMinS..xMaxS) {
-                    if (!section(x, y, z).isEmpty) {
-                        return false
-                    }
+                    block(section(data, x, y, z))
                 }
             }
         }
-        return true
     }
 
-    fun compress() {
-        data.forEach { it.compress() }
-    }
-}
-
-inline fun ChunkData(xSectionBits: Int,
-                     ySectionBits: Int,
-                     zSectionBits: Int,
-                     xSizeBits: Int,
-                     ySizeBits: Int,
-                     zSizeBits: Int,
-                     supplier: (Int, Int, Int) -> ChunkArraySection): ChunkData {
-    val array = Array(1 shl xSectionBits + ySectionBits + zSectionBits) {
-        supplier(xSizeBits, ySizeBits, zSizeBits)
-    }
-    return ChunkData(xSectionBits, ySectionBits, zSectionBits, xSizeBits,
-            ySizeBits, zSizeBits, array)
+    inline fun <reified D> createData(supplier: (Int, Int, Int) -> D) =
+            Array(1 shl xSectionBits + ySectionBits + zSectionBits) {
+                supplier(xSizeBits, ySizeBits, zSizeBits)
+            }
 }
