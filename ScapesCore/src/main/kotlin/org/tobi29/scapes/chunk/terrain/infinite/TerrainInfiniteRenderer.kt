@@ -177,8 +177,7 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
                 }
             }
             chunkDistance = min(chunkDistance,
-                    sqrt(sqr(offsetX + pos.x) + sqr(
-                            offsetY + pos.y) - 2.0) * 16.0)
+                    sqrt(sqr(offsetX + pos.x) + sqr(offsetY + pos.y)) * 16.0)
         }
     }
 
@@ -517,7 +516,8 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
                         val vao: Pair<Model, AABB>?
                         val vaoAlpha: Pair<Model, AABB>?
                         if (mesh.size() > 0) {
-                            vao = Pair(mesh.finish(engine), mesh.aabb())
+                            vao = Pair(mesh.finish(engine),
+                                    AABB(0.0, 0.0, 0.0, 16.0, 16.0, 16.0))
                         } else {
                             vao = null
                         }
