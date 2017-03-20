@@ -20,7 +20,6 @@ import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.input.ControllerBasic
 import org.tobi29.scapes.engine.input.ControllerTouch
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector2d
-import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -42,15 +41,12 @@ class GuiControllerTouch(engine: ScapesEngine,
                 val guiPos = finger.cursor.currentGuiPos()
                 finger.dragX = guiPos.x
                 finger.dragY = guiPos.y
-                engine.guiStack.fireEvent(
-                        GuiComponentEvent(guiPos.x, guiPos.y),
-                        { component, event -> true })?.let { component ->
+                engine.guiStack.fireEvent(GuiComponentEvent(guiPos.x, guiPos.y),
+                        { _, _ -> true })?.let { component ->
                     if (!fingers.values.any { it.dragging == component }) {
                         finger.dragging = component
                         component.gui.sendNewEvent(GuiEvent.PRESS_LEFT,
-                                GuiComponentEvent(
-                                        guiPos.x,
-                                        guiPos.y),
+                                GuiComponentEvent(guiPos.x, guiPos.y),
                                 component)
                     }
                 }
@@ -63,22 +59,18 @@ class GuiControllerTouch(engine: ScapesEngine,
         fingers.keys.asSequence().filter {
             !newFingers.containsKey(it)
         }.forEach { tracker ->
-            val finger = fingers.remove(tracker)
-            val component = finger?.dragging
-            if (finger != null && component != null) {
-                val guiPos = finger.cursor.currentGuiPos()
-                if (System.currentTimeMillis() - finger.start < 250) {
-                    component.gui.sendNewEvent(GuiEvent.CLICK_LEFT,
-                            GuiComponentEvent(guiPos.x,
-                                    guiPos.y), component)
-                } else {
-                    component.gui.sendNewEvent(GuiEvent.CLICK_RIGHT,
-                            GuiComponentEvent(guiPos.x,
-                                    guiPos.y), component)
+            fingers.remove(tracker)?.let { finger ->
+                finger.dragging?.let { component ->
+                    val guiPos = finger.cursor.currentGuiPos()
+                    if (!finger.clicked) {
+                        finger.clicked = true
+                        component.gui.sendNewEvent(GuiEvent.CLICK_LEFT,
+                                GuiComponentEvent(guiPos.x, guiPos.y),
+                                component)
+                    }
+                    component.gui.sendNewEvent(GuiEvent.DROP_LEFT,
+                            GuiComponentEvent(guiPos.x, guiPos.y), component)
                 }
-                component.gui.sendNewEvent(GuiEvent.DROP_LEFT,
-                        GuiComponentEvent(guiPos.x,
-                                guiPos.y), component)
             }
         }
         clicks = newClicks
@@ -107,37 +99,36 @@ class GuiControllerTouch(engine: ScapesEngine,
     }
 
     private fun handleFinger(finger: Finger) {
-        finger.cursor.set(finger.tracker.now(),
-                finger.tracker.now())
-        val component = finger.dragging
-        if (component != null) {
+        finger.cursor.set(finger.tracker.now(), finger.tracker.now())
+        finger.dragging?.let { component ->
             val guiPos = finger.cursor.currentGuiPos()
             val relativeX = guiPos.x - finger.dragX
             val relativeY = guiPos.y - finger.dragY
             finger.dragX = guiPos.x
             finger.dragY = guiPos.y
             component.gui.sendNewEvent(GuiEvent.DRAG_LEFT,
-                    GuiComponentEvent(guiPos.x,
-                            guiPos.y, relativeX, relativeY),
+                    GuiComponentEvent(guiPos.x, guiPos.y, relativeX, relativeY),
                     component)
             val source = finger.source
             engine.guiStack.fireRecursiveEvent(GuiEvent.SCROLL,
-                    GuiComponentEvent(source.x, source.y,
-                            relativeX, relativeY))
+                    GuiComponentEvent(source.x, source.y, relativeX, relativeY))
+            if (System.nanoTime() - finger.start >= 250000000L && !finger.clicked) {
+                finger.clicked = true
+                finger.dragging?.let { component ->
+                    component.gui.sendNewEvent(GuiEvent.CLICK_RIGHT,
+                            GuiComponentEvent(guiPos.x, guiPos.y), component)
+                }
+            }
         }
     }
 
     private class Finger(val tracker: MutableVector2d) {
-        var source: Vector2d
-        var start: Long
+        var source = tracker.now()
+        var start = System.nanoTime()
         var cursor = GuiCursor()
         var dragging: GuiComponent? = null
         var dragX: Double = 0.0
         var dragY: Double = 0.0
-
-        init {
-            source = tracker.now()
-            start = System.currentTimeMillis()
-        }
+        var clicked = false
     }
 }
