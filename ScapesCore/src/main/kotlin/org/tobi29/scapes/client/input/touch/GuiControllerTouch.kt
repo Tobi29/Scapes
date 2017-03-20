@@ -21,7 +21,6 @@ import org.tobi29.scapes.engine.input.ControllerBasic
 import org.tobi29.scapes.engine.input.ControllerTouch
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector2d
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
-import org.tobi29.scapes.engine.utils.math.vector.times
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -32,8 +31,6 @@ class GuiControllerTouch(engine: ScapesEngine,
     private var clicks: List<Pair<GuiCursor, ControllerBasic.PressEvent>> = emptyList()
 
     override fun update(delta: Double) {
-        //val ratio = 540.0 / engine.container.containerHeight()
-        val ratio = 1.0
         val newClicks = ArrayList<Pair<GuiCursor, ControllerBasic.PressEvent>>()
         val newFingers = ConcurrentHashMap<ControllerTouch.Tracker, Finger>()
         controller.fingers().forEach { tracker ->
@@ -41,7 +38,7 @@ class GuiControllerTouch(engine: ScapesEngine,
             if (fetch == null) {
                 fetch = Finger(tracker.pos)
                 val finger = fetch
-                handleFinger(finger, ratio)
+                handleFinger(finger)
                 val guiPos = finger.cursor.currentGuiPos()
                 finger.dragX = guiPos.x
                 finger.dragY = guiPos.y
@@ -59,7 +56,7 @@ class GuiControllerTouch(engine: ScapesEngine,
                 }
                 fingers.put(tracker, finger)
             } else {
-                handleFinger(fetch, ratio)
+                handleFinger(fetch)
             }
             newFingers.put(tracker, fetch)
         }
@@ -109,10 +106,9 @@ class GuiControllerTouch(engine: ScapesEngine,
         return false
     }
 
-    private fun handleFinger(finger: Finger,
-                             ratio: Double) {
+    private fun handleFinger(finger: Finger) {
         finger.cursor.set(finger.tracker.now(),
-                finger.tracker.now().times(ratio))
+                finger.tracker.now())
         val component = finger.dragging
         if (component != null) {
             val guiPos = finger.cursor.currentGuiPos()
@@ -124,7 +120,7 @@ class GuiControllerTouch(engine: ScapesEngine,
                     GuiComponentEvent(guiPos.x,
                             guiPos.y, relativeX, relativeY),
                     component)
-            val source = finger.source.times(ratio)
+            val source = finger.source
             engine.guiStack.fireRecursiveEvent(GuiEvent.SCROLL,
                     GuiComponentEvent(source.x, source.y,
                             relativeX, relativeY))
