@@ -19,7 +19,7 @@ package org.tobi29.scapes.vanilla.basics.material.item.tool
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
-class ItemFlintSword(type: VanillaMaterialType) : ItemMetalTool(type) {
+class ItemFlintSword(type: VanillaMaterialType) : ItemFlintTool(type) {
     override fun isWeapon(item: ItemStack): Boolean {
         return true
     }

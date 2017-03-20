@@ -20,7 +20,7 @@ import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
-class ItemFlintHammer(type: VanillaMaterialType) : ItemMetalTool(type) {
+class ItemFlintHammer(type: VanillaMaterialType) : ItemFlintTool(type) {
     override fun click(entity: MobPlayerServer,
                        item: ItemStack) {
         if (item.data() == 0) {
