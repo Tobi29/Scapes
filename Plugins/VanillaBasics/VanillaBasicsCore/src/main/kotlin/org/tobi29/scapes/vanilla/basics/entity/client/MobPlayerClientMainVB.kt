@@ -28,13 +28,13 @@ import org.tobi29.scapes.client.input.InputMode
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.engine.utils.ListenerOwner
+import org.tobi29.scapes.engine.utils.math.*
+import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.math.vector.direction
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.map
 import org.tobi29.scapes.engine.utils.tag.toBoolean
 import org.tobi29.scapes.engine.utils.tag.toMap
-import org.tobi29.scapes.engine.utils.math.*
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.direction
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.WieldMode
@@ -65,10 +65,14 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
 
     internal fun setHotbarSelectLeft(value: Int) {
         inventorySelectLeft = value
+        world.send(PacketInteraction(registry,
+                PacketInteraction.INVENTORY_SLOT_LEFT, value.toByte()))
     }
 
     internal fun setHotbarSelectRight(value: Int) {
         inventorySelectRight = value
+        world.send(PacketInteraction(registry,
+                PacketInteraction.INVENTORY_SLOT_RIGHT, value.toByte()))
     }
 
     override fun update(delta: Double) {
@@ -273,28 +277,16 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
             }
         }
         input.events.listener<HotbarChangeLeftEvent>(listenerOwner) { event ->
-            inventorySelectLeft = (inventorySelectLeft + event.delta) remP 10
-            world.send(PacketInteraction(registry,
-                    PacketInteraction.INVENTORY_SLOT_LEFT,
-                    inventorySelectLeft.toByte()))
+            setHotbarSelectLeft((inventorySelectLeft + event.delta) remP 10)
         }
         input.events.listener<HotbarChangeRightEvent>(listenerOwner) { event ->
-            inventorySelectRight = (inventorySelectRight + event.delta) remP 10
-            world.send(PacketInteraction(registry,
-                    PacketInteraction.INVENTORY_SLOT_RIGHT,
-                    inventorySelectRight.toByte()))
+            setHotbarSelectRight((inventorySelectRight + event.delta) remP 10)
         }
         input.events.listener<HotbarSetLeftEvent>(listenerOwner) { event ->
-            inventorySelectLeft = event.value
-            world.send(PacketInteraction(registry,
-                    PacketInteraction.INVENTORY_SLOT_LEFT,
-                    inventorySelectLeft.toByte()))
+            setHotbarSelectLeft(event.value remP 10)
         }
         input.events.listener<HotbarSetRightEvent>(listenerOwner) { event ->
-            inventorySelectRight = event.value
-            world.send(PacketInteraction(registry,
-                    PacketInteraction.INVENTORY_SLOT_RIGHT,
-                    inventorySelectRight.toByte()))
+            setHotbarSelectRight(event.value remP 10)
         }
         input.events.listener<MenuOpenEvent>(listenerOwner) { event ->
             if (currentGui() !is GuiChatWrite) {
