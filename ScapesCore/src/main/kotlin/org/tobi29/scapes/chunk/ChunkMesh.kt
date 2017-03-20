@@ -54,8 +54,7 @@ class ChunkMesh(private val arrays: VertexArrays) {
                   lod: Boolean,
                   anim: Byte) {
         addVertex(terrain, side, x, y, z, xx, yy, zz, Double.NaN,
-                Double.NaN,
-                Double.NaN, tx, ty, r, g, b, a, lod, anim)
+                Double.NaN, Double.NaN, tx, ty, r, g, b, a, lod, anim)
     }
 
     fun addVertex(terrain: TerrainClient,
@@ -129,12 +128,12 @@ class ChunkMesh(private val arrays: VertexArrays) {
         arrays.lightArray[i++] = light.toFloat()
         arrays.lightArray[i] = sunLight.toFloat()
         arrays.animationArray[pos++] = anim.toInt()
-        aabb.minX = min(aabb.minX, xx)
-        aabb.minY = min(aabb.minY, yy)
-        aabb.minZ = min(aabb.minZ, zz)
-        aabb.maxX = max(aabb.maxX, xx)
-        aabb.maxY = max(aabb.maxY, yy)
-        aabb.maxZ = max(aabb.maxZ, zz)
+        aabb.minX = if (aabb.minX.isNaN()) xx else min(aabb.minX, xx)
+        aabb.minY = if (aabb.minY.isNaN()) yy else min(aabb.minY, yy)
+        aabb.minZ = if (aabb.minZ.isNaN()) zz else min(aabb.minZ, zz)
+        aabb.maxX = if (aabb.maxX.isNaN()) xx else max(aabb.maxX, xx)
+        aabb.maxY = if (aabb.maxY.isNaN()) yy else max(aabb.maxY, yy)
+        aabb.maxZ = if (aabb.maxZ.isNaN()) zz else max(aabb.maxZ, zz)
         remaining--
     }
 
