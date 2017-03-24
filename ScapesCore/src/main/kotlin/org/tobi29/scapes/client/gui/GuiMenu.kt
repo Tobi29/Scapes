@@ -29,11 +29,15 @@ open class GuiMenu(state: GameState,
     protected val controls: GuiComponentGroup
 
     fun <T : GuiComponent> addControl(child: (GuiLayoutDataFlow) -> T) =
-            addControl(0, child)
+            addControl(50, child)
 
-    fun <T : GuiComponent> addControl(priority: Long,
+    fun <T : GuiComponent> addControl(priority: Int,
                                       child: (GuiLayoutDataFlow) -> T): T {
-        return controls.addVert(5.0, 5.0, 5.0, 5.0, -1.0, 30.0, priority, child)
+        if (priority < 0 || priority > 100) {
+            throw IllegalArgumentException("Priority out of bounds: $priority")
+        }
+        return controls.addVert(5.0, 5.0, 5.0, 5.0, -1.0, 30.0,
+                Long.MIN_VALUE + priority, child)
     }
 
     init {
@@ -49,7 +53,6 @@ open class GuiMenu(state: GameState,
         }.viewport
         view.addVert(24.0, 6.0, 24.0, 6.0, -1.0, 2.0, Long.MIN_VALUE + 400,
                 ::GuiComponentSeparator)
-
         controls = view.addVert(0.0, 0.0, 0.0, 0.0, -1.0, -1.0,
                 Long.MIN_VALUE + 200) {
             GuiComponentMenuControls(it)
