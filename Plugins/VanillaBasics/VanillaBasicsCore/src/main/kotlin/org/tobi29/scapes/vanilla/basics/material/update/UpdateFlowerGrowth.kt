@@ -34,9 +34,9 @@ class UpdateFlowerGrowth(type: UpdateType) : Update(type) {
                 "VanillaBasics") as VanillaBasics
         val materials = plugin.materials
         val type = terrain.type(x, y, z)
-        if (type === materials.air) {
+        if (type == materials.air) {
             if (terrain.sunLight(x, y, z) >= 12 && terrain.type(x, y,
-                    z - 1) === materials.grass) {
+                    z - 1) == materials.grass) {
                 var flowers = 0
                 val datas = ArrayList<Int>()
                 for (xx in -4..4) {
@@ -61,9 +61,9 @@ class UpdateFlowerGrowth(type: UpdateType) : Update(type) {
                             datas[Random().nextInt(datas.size)])
                 }
             }
-        } else if (type === materials.snow) {
+        } else if (type == materials.snow) {
             if (terrain.sunLight(x, y, z) >= 12 && terrain.type(x, y,
-                    z - 1) === materials.grass) {
+                    z - 1) == materials.grass) {
                 val random = ThreadLocalRandom.current()
                 terrain.addDelayedUpdate(
                         UpdateFlowerGrowth(this.type).set(x, y, z,

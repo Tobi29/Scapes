@@ -42,7 +42,7 @@ class LayerRock constructor(private val material: BlockType,
             val z = terrain.highestTerrainBlockZAt(x, y)
             val zz = z - random.nextInt(depthDelta) - depthMin
             val ground = terrain.block(x, y, zz)
-            if (terrain.type(ground) === stone) {
+            if (terrain.type(ground) == stone) {
                 if (check(terrain, x, y, z)) {
                     terrain.typeData(x, y, z, material, terrain.data(ground))
                 }

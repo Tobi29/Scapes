@@ -34,6 +34,6 @@ class EntityChestServer(type: EntityType<*, *>,
         val plugin = terrain.world.plugins.plugin(
                 "VanillaBasics") as VanillaBasics
         val materials = plugin.materials
-        return terrain.type(x, y, z) === materials.chest
+        return terrain.type(x, y, z) == materials.chest
     }
 }

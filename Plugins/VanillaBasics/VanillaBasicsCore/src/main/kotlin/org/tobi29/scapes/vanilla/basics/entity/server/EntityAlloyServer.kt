@@ -18,9 +18,9 @@ package org.tobi29.scapes.vanilla.basics.entity.server
 import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.packets.PacketEntityChange
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
@@ -55,7 +55,7 @@ class EntityAlloyServer(type: EntityType<*, *>,
         val plugin = terrain.world.plugins.plugin(
                 "VanillaBasics") as VanillaBasics
         val materials = plugin.materials
-        return terrain.type(x, y, z) === materials.alloy
+        return terrain.type(x, y, z) == materials.alloy
     }
 
     override fun update(delta: Double) {
@@ -83,7 +83,7 @@ class EntityAlloyServer(type: EntityType<*, *>,
             }
             val output = inventory.item(1)
             val outputType = output.material()
-            if (outputType === materials.mold && output.data() == 1) {
+            if (outputType == materials.mold && output.data() == 1) {
                 input.metaData("Vanilla")["Temperature"]?.toDouble()?.let {
                     temperature = max(temperature, it)
                 }

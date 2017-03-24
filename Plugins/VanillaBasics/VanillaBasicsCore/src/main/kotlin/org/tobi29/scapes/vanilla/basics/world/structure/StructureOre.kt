@@ -42,7 +42,7 @@ fun TerrainServer.TerrainMutable.genOre(x: Int,
                         sqr(yy.toDouble() / sizeY) +
                         sqr(zz.toDouble() / sizeZ) < random.nextDouble() * 0.1 + 0.9) {
                     if (random.nextInt(chance) == 0) {
-                        if (type(xxx, yyy, zzz) === stone) {
+                        if (type(xxx, yyy, zzz) == stone) {
                             type(xxx, yyy, zzz, ore)
                             ores++
                         }

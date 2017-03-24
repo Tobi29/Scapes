@@ -67,7 +67,7 @@ class PacketQuern : PacketAbstract, PacketServer {
                         val materials = plugin.materials
                         quern.inventories().modify("Container") { inventory ->
                             val item = inventory.item(0)
-                            if (item.material() === materials.cropDrop) {
+                            if (item.material() == materials.cropDrop) {
                                 item.setMaterial(materials.grain)
                                 item.setAmount(item.amount() shl 2)
                             }

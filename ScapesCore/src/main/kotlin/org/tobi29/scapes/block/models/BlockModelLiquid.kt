@@ -403,10 +403,10 @@ class BlockModelLiquid(private val block: BlockType,
                                block: BlockType,
                                offset: Int,
                                steps: Double): Double {
-            if (terrain.type(x, y, z + 1) === block ||
-                    terrain.type(x - 1, y, z + 1) === block ||
-                    terrain.type(x - 1, y - 1, z + 1) === block ||
-                    terrain.type(x, y - 1, z + 1) === block) {
+            if (terrain.type(x, y, z + 1) == block ||
+                    terrain.type(x - 1, y, z + 1) == block ||
+                    terrain.type(x - 1, y - 1, z + 1) == block ||
+                    terrain.type(x, y - 1, z + 1) == block) {
                 return 3.0
             }
             val block1 = terrain.block(x, y, z)
@@ -418,10 +418,10 @@ class BlockModelLiquid(private val block: BlockType,
             val block4 = terrain.block(x, y - 1, z)
             val other4 = terrain.type(block4) == block
             if (!other1 || !other2 || !other3 || !other4) {
-                val bottom1 = terrain.type(x, y, z - 1) === block
-                val bottom2 = terrain.type(x - 1, y, z - 1) === block
-                val bottom3 = terrain.type(x - 1, y - 1, z - 1) === block
-                val bottom4 = terrain.type(x, y - 1, z - 1) === block
+                val bottom1 = terrain.type(x, y, z - 1) == block
+                val bottom2 = terrain.type(x - 1, y, z - 1) == block
+                val bottom3 = terrain.type(x - 1, y - 1, z - 1) == block
+                val bottom4 = terrain.type(x, y - 1, z - 1) == block
                 if (bottom1 && !other1 || bottom2 && !other2 ||
                         bottom3 && !other3 || bottom4 && !other4) {
                     return 2.0

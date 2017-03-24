@@ -34,6 +34,6 @@ class EntityQuernServer(type: EntityType<*, *>,
         val plugin = terrain.world.plugins.plugin(
                 "VanillaBasics") as VanillaBasics
         val materials = plugin.materials
-        return terrain.type(x, y, z) === materials.quern
+        return terrain.type(x, y, z) == materials.quern
     }
 }

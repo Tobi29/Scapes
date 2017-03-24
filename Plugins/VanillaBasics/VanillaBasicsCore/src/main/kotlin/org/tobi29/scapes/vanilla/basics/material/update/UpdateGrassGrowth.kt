@@ -34,14 +34,14 @@ class UpdateGrassGrowth(type: UpdateType) : Update(type) {
                 "VanillaBasics") as VanillaBasics
         val materials = plugin.materials
         val type = terrain.type(x, y, z)
-        if (type === materials.grass) {
+        if (type == materials.grass) {
             val environment = terrain.world.environment as EnvironmentOverworldServer
             val climateGenerator = environment.climate()
             val humidity = climateGenerator.humidity(x, y, z)
             if (humidity < 0.2) {
                 terrain.type(x, y, z, materials.dirt)
             }
-        } else if (type === materials.dirt) {
+        } else if (type == materials.dirt) {
             val environment = terrain.world.environment as EnvironmentOverworldServer
             val climateGenerator = environment.climate()
             val humidity = climateGenerator.humidity(x, y, z)
@@ -58,6 +58,6 @@ class UpdateGrassGrowth(type: UpdateType) : Update(type) {
         val plugin = terrain.world.plugins.plugin(
                 "VanillaBasics") as VanillaBasics
         val materials = plugin.materials
-        return type === materials.grass || type === materials.dirt
+        return type == materials.grass || type == materials.dirt
     }
 }

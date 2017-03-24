@@ -79,6 +79,6 @@ class EntityForgeServer(type: EntityType<*, *>,
         val plugin = terrain.world.plugins.plugin(
                 "VanillaBasics") as VanillaBasics
         val materials = plugin.materials
-        return terrain.type(x, y, z) === materials.forge
+        return terrain.type(x, y, z) == materials.forge
     }
 }

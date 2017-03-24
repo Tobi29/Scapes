@@ -28,9 +28,6 @@ import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.graphics.BlendingMode
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.mapMut
-import org.tobi29.scapes.engine.utils.tag.toBoolean
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.engine.utils.math.max
@@ -39,6 +36,9 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.readOnly
+import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.scapes.engine.utils.tag.mapMut
+import org.tobi29.scapes.engine.utils.tag.toBoolean
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.entity.client.MobClient
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
@@ -108,7 +108,7 @@ class WorldClient(val connection: ClientConnection,
     }
 
     override fun hasEntity(entity: EntityClient): Boolean {
-        return player === entity || terrain.hasEntity(entity)
+        return player == entity || terrain.hasEntity(entity)
     }
 
     override fun getEntity(uuid: UUID): EntityClient? {

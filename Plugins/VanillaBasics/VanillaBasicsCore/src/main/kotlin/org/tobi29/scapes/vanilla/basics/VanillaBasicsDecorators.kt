@@ -25,8 +25,8 @@ internal fun VanillaBasics.registerDecorators() {
     decorator("Rocks") {
         addLayer(LayerRock(materials.stoneRock, materials.stoneRaw, 256, {
             terrain, x, y, z ->
-            terrain.type(x, y, z - 1) === materials.grass && terrain.type(x, y,
-                    z) === materials.air
+            terrain.type(x, y, z - 1) == materials.grass && terrain.type(x, y,
+                    z) == materials.air
         }))
     }
     decorator("Flint") {
@@ -34,8 +34,8 @@ internal fun VanillaBasics.registerDecorators() {
         addLayer(LayerGround(materials.stoneRock,
                 { terrain, x, y, z, random -> data }, 1024, {
             terrain, x, y, z ->
-            terrain.type(x, y, z - 1) === materials.grass && terrain.type(x, y,
-                    z) === materials.air
+            terrain.type(x, y, z - 1) == materials.grass && terrain.type(x, y,
+                    z) == materials.air
         }))
     }
     decorator("Gravel") {
@@ -195,9 +195,9 @@ fun BiomeDecorator.addShrubs(m: VanillaMaterial,
     for (i in 0..19) {
         addLayer(LayerPatch(m.flower, i, 16, density shr 4,
                 (1 shl 23) / density
-        ) { terrain, x, y, z -> terrain.type(x, y, z - 1) === m.grass })
+        ) { terrain, x, y, z -> terrain.type(x, y, z - 1) == m.grass })
     }
     addLayer(
             LayerPatch(m.bush, 0, 16, density shr 3, (1 shl 18) / density
-            ) { terrain, x, y, z -> terrain.type(x, y, z - 1) === m.grass })
+            ) { terrain, x, y, z -> terrain.type(x, y, z - 1) == m.grass })
 }

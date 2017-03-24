@@ -35,6 +35,6 @@ class EntityFurnaceServer(type: EntityType<*, *>,
         val plugin = terrain.world.plugins.plugin(
                 "VanillaBasics") as VanillaBasics
         val materials = plugin.materials
-        return terrain.type(x, y, z) === materials.furnace
+        return terrain.type(x, y, z) == materials.furnace
     }
 }

@@ -42,7 +42,7 @@ class ItemFertilizer(type: VanillaMaterialType) : VanillaItem(type) {
                        z: Int,
                        face: Face): Double {
         val type = terrain.type(x, y, z)
-        if (type === materials.sapling) {
+        if (type == materials.sapling) {
             terrain.addDelayedUpdate(
                     UpdateSaplingGrowth(terrain.world.registry).set(x, y, z,
                             3.0))

@@ -19,11 +19,11 @@ package org.tobi29.scapes.vanilla.basics.world
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.generation.layer.RandomPermutation
 import org.tobi29.scapes.engine.utils.generation.layer.random
 import org.tobi29.scapes.engine.utils.generation.layer.randomOffset
 import org.tobi29.scapes.engine.utils.generation.value.SimplexNoise
+import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.terrain.TerrainChunk
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
@@ -99,10 +99,10 @@ class ChunkPopulatorOverworld(world: WorldServer,
                                 yyy) - random.nextInt(4)
                         if (abs(zzz - zz) < ore.rockDistance) {
                             val blockType = terrain.type(xxx, yyy, zzz)
-                            if (blockType === materials.grass ||
-                                    blockType === materials.dirt ||
-                                    blockType === materials.sand ||
-                                    blockType === materials.stoneRaw) {
+                            if (blockType == materials.grass ||
+                                    blockType == materials.dirt ||
+                                    blockType == materials.sand ||
+                                    blockType == materials.stoneRaw) {
                                 val size: Double
                                 if (random.nextInt(30) == 0) {
                                     size = random.nextDouble() * 4.0 + 3.0

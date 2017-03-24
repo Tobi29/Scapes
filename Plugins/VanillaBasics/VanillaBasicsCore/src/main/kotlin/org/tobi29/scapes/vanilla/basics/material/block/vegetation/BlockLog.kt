@@ -169,7 +169,7 @@ class BlockLog(type: VanillaMaterialType) : VanillaBlock(type), ItemFuel {
         val block = terrain.block(pos.x, pos.y, pos.z)
         val type = terrain.type(block)
         val d = terrain.data(block)
-        if (type === materials.leaves && d == data) {
+        if (type == materials.leaves && d == data) {
             type.destroy(terrain, pos.x, pos.y, pos.z, d,
                     Face.NONE, player, ItemStack(materials.air, 0))
         }

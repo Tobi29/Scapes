@@ -135,7 +135,7 @@ class BlockSnow(type: VanillaMaterialType) : VanillaBlock(type) {
                         z: Int,
                         data: Int) {
         val type = terrain.type(x, y, z - 1)
-        if (type === materials.air || type === materials.snow ||
+        if (type == materials.air || type == materials.snow ||
                 type.isLiquid) {
             terrain.typeData(x, y, z, terrain.air, 0)
         }

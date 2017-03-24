@@ -461,7 +461,7 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
                             for (zzz in 0..15) {
                                 val bzz = bz + zzz
                                 val type = terrainChunk.typeL(xxx, yyy, bzz)
-                                if (type === air) {
+                                if (type == air) {
                                     solid = false
                                 } else {
                                     empty = false

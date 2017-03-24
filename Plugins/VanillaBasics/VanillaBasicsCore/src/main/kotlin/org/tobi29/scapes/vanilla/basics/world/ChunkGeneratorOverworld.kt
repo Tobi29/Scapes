@@ -220,7 +220,7 @@ class ChunkGeneratorOverworld(random: Random,
                         type = materials.stoneRaw
                     }
                 }
-                if (type === materials.stoneRaw) {
+                if (type == materials.stoneRaw) {
                     if (sandstone && zz > 240) {
                         type = materials.sandstone
                         data = sandstoneLayers[zz]

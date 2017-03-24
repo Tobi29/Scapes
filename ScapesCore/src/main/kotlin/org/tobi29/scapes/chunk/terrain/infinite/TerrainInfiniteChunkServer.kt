@@ -180,7 +180,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
         if (state.id >= TerrainInfiniteBaseChunk.State.SENDABLE.id) {
             val block = blockL(x, y, z)
             val type = terrain.type(block)
-            if (type === terrain.air) {
+            if (type == terrain.air) {
                 terrain.world.send(
                         PacketBlockChangeAir(terrain.world.registry,
                                 x + posBlock.x, y + posBlock.y, z))

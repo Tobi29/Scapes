@@ -429,7 +429,7 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
         val height = heightMap[y shl 4 or x]
         if (z > height && type !== parentTerrain.air) {
             heightMap[y shl 4 or x] = z
-        } else if (height == z && type === parentTerrain.air) {
+        } else if (height == z && type == parentTerrain.air) {
             var zzz = 0
             for (zz in height downTo 0) {
                 if (lockRead { id(x, y, zz) } != 0) {

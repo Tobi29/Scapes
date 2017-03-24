@@ -230,7 +230,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
         var charge: Double
         var charge2: Double
         var item: ItemStack
-        if (wieldMode === WieldMode.RIGHT) {
+        if (wieldMode == WieldMode.RIGHT) {
             item = entity.rightWeapon()
             charge = armDirRightRender
             charge2 = armDirRight2 * 0.4
@@ -239,7 +239,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
             charge = armDirLeftRender
             charge2 = armDirLeft2
         }
-        if (item.material() === world.air) {
+        if (item.material() == world.air) {
             matrix.rotate((lazyNameDir * 60.0).toFloat(), 0f, 1f, 0f)
             matrix.rotate((-swingDir * 60.0).toFloat(), 1f, 0f, 0f)
             rot = sinTable(charge * PI)
@@ -249,7 +249,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                     1f,
                     0f, 0f)
         } else {
-            if (wieldMode === WieldMode.DUAL) {
+            if (wieldMode == WieldMode.DUAL) {
                 matrix.rotate(lazyNameDir.toFloat() * 60, 0f, 1f, 0f)
                 matrix.rotate((-swingDir).toFloat() * 30, 1f, 0f, 0f)
             } else {
@@ -260,7 +260,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                 if (rot < 0 && charge > 0.0) {
                     rot /= 4.0
                 }
-                if (wieldMode === WieldMode.RIGHT) {
+                if (wieldMode == WieldMode.RIGHT) {
                     rot = -rot
                 }
                 matrix.rotate((rot * -60.0).toFloat(), 0.0f, 0.0f, 1.0f)
@@ -277,9 +277,9 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                     matrix.rotate(center * 30.0f, 0.0f, 1.0f, 0.0f)
                 }
             }
-            if (wieldMode === WieldMode.LEFT) {
+            if (wieldMode == WieldMode.LEFT) {
                 matrix.rotate(-20.0f, 0f, 1f, 0f)
-            } else if (wieldMode === WieldMode.RIGHT) {
+            } else if (wieldMode == WieldMode.RIGHT) {
                 matrix.rotate(-50.0f, 0f, 1f, 0f)
                 matrix.rotate(-2.0f, 1f, 0f, 0f)
             }
@@ -304,7 +304,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
         matrixStack.pop()
         matrix = matrixStack.push()
         matrix.translate(0.25f, 0f, 0.25f)
-        if (wieldMode === WieldMode.LEFT) {
+        if (wieldMode == WieldMode.LEFT) {
             item = entity.leftWeapon()
             charge = armDirLeftRender
             charge2 = armDirLeft2 * 0.4
@@ -313,7 +313,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
             charge = armDirRightRender
             charge2 = armDirRight2
         }
-        if (item.material() === world.air) {
+        if (item.material() == world.air) {
             matrix.rotate((lazyNameDir * -60.0).toFloat(), 0f, 1f, 0f)
             matrix.rotate((swingDir * 60.0).toFloat(), 1f, 0f, 0f)
             rot = sinTable(charge * PI)
@@ -323,7 +323,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                     1f,
                     0f, 0f)
         } else {
-            if (wieldMode === WieldMode.DUAL) {
+            if (wieldMode == WieldMode.DUAL) {
                 matrix.rotate(lazyNameDir.toFloat() * -60, 0f, 1f, 0f)
                 matrix.rotate(swingDir.toFloat() * 30, 1f, 0f, 0f)
             } else {
@@ -334,7 +334,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                 if (rot < 0.0f && charge > 0.0) {
                     rot /= 4.0
                 }
-                if (wieldMode === WieldMode.LEFT) {
+                if (wieldMode == WieldMode.LEFT) {
                     rot = -rot
                 }
                 matrix.rotate((rot * 60.0).toFloat(), 0.0f, 0.0f, 1.0f)
@@ -351,9 +351,9 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                     matrix.rotate(center * -30.0f, 0.0f, 1.0f, 0.0f)
                 }
             }
-            if (wieldMode === WieldMode.RIGHT) {
+            if (wieldMode == WieldMode.RIGHT) {
                 matrix.rotate(20.0f, 0f, 1f, 0f)
-            } else if (wieldMode === WieldMode.LEFT) {
+            } else if (wieldMode == WieldMode.LEFT) {
                 matrix.rotate(50.0f, 0f, 1f, 0f)
                 matrix.rotate(-2.0f, 1f, 0f, 0f)
             }

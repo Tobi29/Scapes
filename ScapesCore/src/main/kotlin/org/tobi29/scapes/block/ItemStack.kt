@@ -15,8 +15,8 @@
  */
 package org.tobi29.scapes.block
 
-import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.engine.utils.math.min
+import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.plugins.Plugins
 
 class ItemStack(private var material: Material,
@@ -117,7 +117,7 @@ class ItemStack(private var material: Material,
     fun canTake(take: ItemStack,
                 amount: Int): Int {
         if (take.material !== material || take.data != data ||
-                material === plugins.air || this.amount <= 0) {
+                material == plugins.air || this.amount <= 0) {
             return 0
         }
         return min(this.amount, amount)

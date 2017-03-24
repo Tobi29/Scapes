@@ -234,7 +234,7 @@ class BlockGrass(type: VanillaMaterialType) : VanillaBlock(type) {
                         zz, 1.0, 1.0, 1.0, 1.0, lod)
             }
             if (data > 0) {
-                if (terrain.type(x, y, z + 1) === materials.air) {
+                if (terrain.type(x, y, z + 1) == materials.air) {
                     modelsTallGrass?.get(data - 1)?.addToChunkMesh(mesh,
                             terrain, x, y, z + 1, xx, yy, zz + 1,
                             grassR, grassG, grassB, 1.0, lod)

@@ -34,6 +34,6 @@ class EntityAnvilServer(type: EntityType<*, *>,
         val plugin = terrain.world.plugins.plugin(
                 "VanillaBasics") as VanillaBasics
         val materials = plugin.materials
-        return terrain.type(x, y, z) === materials.anvil
+        return terrain.type(x, y, z) == materials.anvil
     }
 }

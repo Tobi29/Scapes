@@ -45,6 +45,6 @@ class UpdateSaplingGrowth(type: UpdateType) : Update(type) {
         val plugin = terrain.world.plugins.plugin(
                 "VanillaBasics") as VanillaBasics
         val materials = plugin.materials
-        return type === materials.sapling
+        return type == materials.sapling
     }
 }

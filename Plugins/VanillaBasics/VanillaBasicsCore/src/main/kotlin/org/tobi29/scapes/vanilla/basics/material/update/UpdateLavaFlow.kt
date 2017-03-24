@@ -102,6 +102,6 @@ class UpdateLavaFlow(type: UpdateType) : Update(type) {
         val plugin = terrain.world.plugins.plugin(
                 "VanillaBasics") as VanillaBasics
         val materials = plugin.materials
-        return type === materials.lava
+        return type == materials.lava
     }
 }

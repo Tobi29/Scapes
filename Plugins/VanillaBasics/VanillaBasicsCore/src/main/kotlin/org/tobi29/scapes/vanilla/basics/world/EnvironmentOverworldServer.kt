@@ -24,9 +24,9 @@ import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.chunk.terrain.block
-import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.*
+import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.WieldMode
 import org.tobi29.scapes.entity.server.EntityContainerServer
@@ -560,20 +560,20 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                     val spaceData = chunk.data(spaceBlock)
                     val groundType = chunk.type(xxx, yyy, z - 1)
                     if (humidity > 0.2) {
-                        if (groundType === materials.dirt) {
+                        if (groundType == materials.dirt) {
                             chunk.typeData(xxx, yyy, z - 1, materials.grass,
                                     random.nextInt(4))
-                        } else if (groundType === materials.grass && random.nextInt(
+                        } else if (groundType == materials.grass && random.nextInt(
                                 20) == 0) {
                             chunk.data(xxx, yyy, z - 1, random.nextInt(9))
                         }
                     } else {
-                        if (groundType === materials.grass) {
+                        if (groundType == materials.grass) {
                             chunk.typeData(xxx, yyy, z - 1, materials.dirt, 0)
                         }
                     }
                     if (temperature > 1.0) {
-                        if (spaceType === materials.snow) {
+                        if (spaceType == materials.snow) {
                             if (spaceData < 8) {
                                 chunk.data(xxx, yyy, z, spaceData + 1)
                             } else {
@@ -584,11 +584,11 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                         val weather = climateGenerator.weather(xxx.toDouble(),
                                 yyy.toDouble())
                         if (temperature < 0.0 && (weather > 0.5 || chance == 1)) {
-                            if (spaceType === materials.air ||
-                                    spaceType === materials.flower ||
-                                    spaceType === materials.stoneRock) {
+                            if (spaceType == materials.air ||
+                                    spaceType == materials.flower ||
+                                    spaceType == materials.stoneRock) {
                                 chunk.typeData(xxx, yyy, z, materials.snow, 8)
-                            } else if (spaceType === materials.snow && spaceData > 0) {
+                            } else if (spaceType == materials.snow && spaceData > 0) {
                                 chunk.data(xxx, yyy, z, spaceData - 1)
                             }
                         }
