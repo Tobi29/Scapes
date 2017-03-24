@@ -32,7 +32,7 @@ import java.security.KeyPair
 class GuiAccount(state: GameState,
                  previous: Gui,
                  account: Account,
-                 style: GuiStyle) : GuiMenu(state, "Account", "Save", style) {
+                 style: GuiStyle) : GuiMenuSingle(state, "Account", "Save", style) {
     private var keyPair: KeyPair
     private var nickname = ""
 

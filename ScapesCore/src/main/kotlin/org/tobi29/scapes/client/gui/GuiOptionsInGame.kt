@@ -23,7 +23,7 @@ import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiStyle
 
 class GuiOptionsInGame(state: GameStateGameMP,
-                       style: GuiStyle) : GuiMenu(state,
+                       style: GuiStyle) : GuiMenuSingle(state,
         "Options", style) {
     init {
         val musicVolume = row(pane) {

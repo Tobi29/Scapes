@@ -27,7 +27,7 @@ import org.tobi29.scapes.engine.utils.tag.toBoolean
 
 class GuiShaderSettings(state: GameState,
                         previous: Gui,
-                        style: GuiStyle) : GuiMenu(
+                        style: GuiStyle) : GuiMenuSingle(
         state, "Shader Settings", previous, style) {
     init {
         val scapesTag = state.engine.configMap.mapMut("Scapes")

@@ -28,7 +28,7 @@ import org.tobi29.scapes.engine.utils.math.round
 
 class GuiVideoSettings(state: GameState,
                        previous: Gui,
-                       style: GuiStyle) : GuiMenu(
+                       style: GuiStyle) : GuiMenuSingle(
         state, "Video Settings", previous, style) {
     init {
         val scapesTag = state.engine.configMap.mapMut("Scapes")

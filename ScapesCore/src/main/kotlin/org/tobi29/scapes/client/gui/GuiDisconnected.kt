@@ -25,7 +25,7 @@ import org.tobi29.scapes.engine.utils.math.floor
 
 class GuiDisconnected(state: GameState,
                       message: String,
-                      style: GuiStyle) : GuiMenu(
+                      style: GuiStyle) : GuiMenuSingle(
         state, "Error", style) {
     private val reconnectTimer: GuiComponentText
 

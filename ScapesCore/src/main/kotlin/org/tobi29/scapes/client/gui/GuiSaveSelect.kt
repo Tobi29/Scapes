@@ -35,8 +35,8 @@ import java.io.IOException
 class GuiSaveSelect(state: GameState,
                     previous: Gui,
                     private val scene: SceneMenu,
-                    style: GuiStyle) : GuiMenu(state, "Singleplayer", previous,
-        style) {
+                    style: GuiStyle) : GuiMenuDouble(state, "Singleplayer",
+        "Create", "Back", previous, style) {
     private val saves: SaveStorage
     private val scrollPane: GuiComponentScrollPaneViewport
 
@@ -47,12 +47,9 @@ class GuiSaveSelect(state: GameState,
         scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {
             GuiComponentScrollPane(it, 70)
         }.viewport
-        val create = addControl(60) { button(it, "Create") }
         updateSaves()
 
-        selection(-1, create)
-
-        create.on(GuiEvent.CLICK_LEFT) { event ->
+        save.on(GuiEvent.CLICK_LEFT) { event ->
             try {
                 val path = state.engine.home.resolve("plugins")
                 val plugins = Plugins.installed(path)

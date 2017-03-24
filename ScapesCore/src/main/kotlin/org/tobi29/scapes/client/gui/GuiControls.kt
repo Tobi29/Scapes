@@ -30,7 +30,7 @@ import org.tobi29.scapes.engine.utils.math.round
 abstract class GuiControls(state: GameState,
                            previous: Gui,
                            game: ScapesClient,
-                           style: GuiStyle) : GuiMenu(
+                           style: GuiStyle) : GuiMenuSingle(
         state, "Controls", "Save", style) {
     protected val scrollPane: GuiComponentScrollPaneViewport
 

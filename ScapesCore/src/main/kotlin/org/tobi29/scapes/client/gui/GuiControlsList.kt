@@ -24,7 +24,7 @@ import org.tobi29.scapes.engine.gui.GuiStyle
 
 class GuiControlsList(state: GameState,
                       previous: Gui,
-                      style: GuiStyle) : GuiMenu(
+                      style: GuiStyle) : GuiMenuSingle(
         state, "Controls", previous, style) {
     init {
         (state.engine.game as ScapesClient).inputModes.forEach { inputMode ->

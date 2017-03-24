@@ -18,48 +18,27 @@ package org.tobi29.scapes.client.gui
 
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
+import org.tobi29.scapes.engine.utils.math.Face
+import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 
 open class GuiMenu(state: GameState,
                    title: String,
-                   back: String,
                    style: GuiStyle) : GuiDesktop(state, style) {
-    protected val view: GuiComponentMenuPane
+    protected val view: GuiComponentVisiblePane
     protected val pane: GuiComponentScrollPaneViewport
-    protected val back: GuiComponentTextButton
+    protected val controls: GuiComponentGroup
 
-    protected constructor(state: GameState,
-                          title: String,
-                          previous: Gui,
-                          style: GuiStyle) : this(state, title, "Back",
-            previous, style)
+    fun <T : GuiComponent> addControl(child: (GuiLayoutDataFlow) -> T) =
+            addControl(0, child)
 
-    protected constructor(state: GameState,
-                          title: String,
-                          style: GuiStyle) : this(
-            state, title, "Back", style)
-
-    protected constructor(state: GameState,
-                          title: String,
-                          back: String,
-                          previous: Gui,
-                          style: GuiStyle) : this(state, title, back, style) {
-        on(GuiAction.BACK) { state.engine.guiStack.swap(this, previous) }
-    }
-
-    fun <T : GuiComponent> addControl(priority: Int,
-                                      child: (GuiLayoutDataMenuControl) -> T): T {
-        if (priority < 0 || priority > 100) {
-            throw IllegalArgumentException("Priority out of bounds: $priority")
-        }
-        return view.addControl(112.0, 5.0, 112.0, 5.0, -1.0, 30.0, 5.0,
-                5.0, 5.0, 5.0, -1.0, 30.0, Long.MIN_VALUE + priority, child)
+    fun <T : GuiComponent> addControl(priority: Long,
+                                      child: (GuiLayoutDataFlow) -> T): T {
+        return controls.addVert(5.0, 5.0, 5.0, 5.0, -1.0, 30.0, priority, child)
     }
 
     init {
         spacer()
-        view = addHori(0.0, 0.0, 400.0, -1.0) {
-            GuiComponentMenuPane(it, 540.0)
-        }
+        view = addHori(0.0, 0.0, 400.0, -1.0, ::GuiComponentVisiblePane)
         spacer()
         view.addVert(16.0, 14.0, -1.0, 32.0) {
             GuiComponentText(it, title)
@@ -70,16 +49,43 @@ open class GuiMenu(state: GameState,
         }.viewport
         view.addVert(24.0, 6.0, 24.0, 6.0, -1.0, 2.0, Long.MIN_VALUE + 400,
                 ::GuiComponentSeparator)
-        view.addControl(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 48.0,
-                0.0, Long.MIN_VALUE + 300, ::GuiComponentGroup)
-        view.addControl(0.0, 0.0, 0.0, 0.0, 0.0, 6.0, 0.0, 0.0, 0.0, 0.0, 48.0,
-                0.0, Long.MIN_VALUE, ::GuiComponentGroup)
-        this.back = addControl(50) { button(it, back) }
 
-        selection(this.back)
-
-        this.back.on(GuiEvent.CLICK_LEFT) { event ->
-            fireAction(GuiAction.BACK)
+        controls = view.addVert(0.0, 0.0, 0.0, 0.0, -1.0, -1.0,
+                Long.MIN_VALUE + 200) {
+            GuiComponentMenuControls(it)
         }
     }
+
+    fun controlSelection(vararg components: GuiComponent) {
+        components.forEach { component ->
+            selection({ if (!compactControls()) Face.NONE else Face.SOUTH },
+                    component)
+        }
+        selection({ if (compactControls()) Face.NONE else Face.NORTH },
+                *components)
+    }
+
+    private inner class GuiComponentMenuControls(
+            parent: GuiLayoutData
+    ) : GuiComponentGroup(parent) {
+        init {
+            parent.preferredSize = { size, maxSize ->
+                val layout = layoutManager(mangleSize(size, maxSize))
+                layout.layout()
+                layout.size()
+            }
+        }
+
+        override fun newLayoutManager(size: Vector2d): GuiLayoutManager {
+            return if (compactControls()) {
+                GuiLayoutManagerHorizontal(Vector2d(24.0, 0.0),
+                        Vector2d(size.x - 48.0, 40.0), components)
+            } else {
+                GuiLayoutManagerVertical(Vector2d(56.0, 0.0),
+                        Vector2d(size.x - 112.0, size.y), components)
+            }
+        }
+    }
+
+    private fun compactControls() = view.size()?.let { it.y < 540.0 } ?: false
 }

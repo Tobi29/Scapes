@@ -22,38 +22,33 @@ import org.tobi29.scapes.engine.gui.GuiAction
 import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiStyle
 
-open class GuiMenuDouble(state: GameState,
+open class GuiMenuSingle(state: GameState,
                          title: String,
-                         save: String,
                          back: String,
                          style: GuiStyle) : GuiMenu(state, title, style) {
-    protected val save = addControl { button(it, save) }
     protected val back = addControl { button(it, back) }
 
     protected constructor(state: GameState,
                           title: String,
                           previous: Gui,
-                          style: GuiStyle) : this(state, title, "Save", "Back",
+                          style: GuiStyle) : this(state, title, "Back",
             previous, style)
 
     protected constructor(state: GameState,
                           title: String,
                           style: GuiStyle) : this(
-            state, title, "Save", "Back", style)
+            state, title, "Back", style)
 
     protected constructor(state: GameState,
                           title: String,
-                          save: String,
                           back: String,
                           previous: Gui,
-                          style: GuiStyle) : this(
-            state, title, save, back, style) {
-        on(GuiAction.BACK
-        ) { state.engine.guiStack.swap(this, previous) }
+                          style: GuiStyle) : this(state, title, back, style) {
+        on(GuiAction.BACK) { state.engine.guiStack.swap(this, previous) }
     }
 
     init {
-        controlSelection(this.save, this.back)
+        controlSelection(this.back)
 
         this.back.on(GuiEvent.CLICK_LEFT) { fireAction(GuiAction.BACK) }
     }

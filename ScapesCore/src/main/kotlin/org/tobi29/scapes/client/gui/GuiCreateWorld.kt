@@ -120,7 +120,7 @@ class GuiCreateWorld(state: GameState,
                                   previous: GuiCreateWorld,
                                   parent: String,
                                   plugins: List<PluginFile>,
-                                  style: GuiStyle) : GuiMenu(
+                                  style: GuiStyle) : GuiMenuSingle(
             state, "Addons", "Apply", previous, style) {
         init {
             val scrollPane = pane.addVert(16.0, 5.0, -1.0, 350.0

@@ -24,7 +24,7 @@ import org.tobi29.scapes.engine.gui.GuiStyle
 class GuiInGameMessage(state: GameStateGameMP,
                        title: String,
                        message: String,
-                       style: GuiStyle) : GuiMenu(state, title, style) {
+                       style: GuiStyle) : GuiMenuSingle(state, title, style) {
     init {
         pane.addVert(16.0, 5.0, -1.0, 18.0) {
             GuiComponentText(it, message)

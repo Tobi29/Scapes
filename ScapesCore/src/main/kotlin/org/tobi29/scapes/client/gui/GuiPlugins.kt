@@ -36,7 +36,7 @@ import java.nio.channels.Channels
 
 class GuiPlugins(state: GameState,
                  previous: Gui,
-                 style: GuiStyle) : GuiMenu(
+                 style: GuiStyle) : GuiMenuDouble(
         state, "Plugins", previous, style) {
     private val path: FilePath
     private val scrollPane: GuiComponentScrollPaneViewport
@@ -46,12 +46,9 @@ class GuiPlugins(state: GameState,
         scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {
             GuiComponentScrollPane(it, 70)
         }.viewport
-        val add = addControl(60) { button(it, "Add") }
         updatePlugins()
 
-        selection(-1, add)
-
-        add.on(GuiEvent.CLICK_LEFT) { event ->
+        save.on(GuiEvent.CLICK_LEFT) { event ->
             try {
                 state.engine.container.openFileDialog(
                         FileType("*.jar", "Jar Archive"),

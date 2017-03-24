@@ -17,7 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.gui
 
 import org.tobi29.scapes.client.gui.GuiComponentItemButton
-import org.tobi29.scapes.client.gui.GuiMenu
+import org.tobi29.scapes.client.gui.GuiMenuSingle
 import org.tobi29.scapes.client.gui.GuiUtils
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
@@ -30,7 +30,7 @@ import java.util.*
 
 open class GuiInventory(name: String,
                         protected val player: MobPlayerClientMainVB,
-                        style: GuiStyle) : GuiMenu(player.game, name, style) {
+                        style: GuiStyle) : GuiMenuSingle(player.game, name, style) {
     protected val topPane = pane.addVert(0.0, 0.0, -1.0, -1.0,
             ::GuiComponentGroup)
     protected val inventoryPane = pane.addVert(16.0, 5.0, 350.0, 150.0,

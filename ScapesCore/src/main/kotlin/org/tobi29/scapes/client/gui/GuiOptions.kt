@@ -26,7 +26,7 @@ import java.io.IOException
 
 class GuiOptions(state: GameState,
                  previous: Gui,
-                 style: GuiStyle) : GuiMenu(
+                 style: GuiStyle) : GuiMenuSingle(
         state, "Options", previous, style) {
 
     init {

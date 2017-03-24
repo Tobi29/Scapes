@@ -41,8 +41,8 @@ import java.nio.channels.SelectionKey
 class GuiServerSelect(state: GameState,
                       previous: Gui,
                       private val scene: SceneMenu,
-                      style: GuiStyle) : GuiMenu(state, "Multiplayer", previous,
-        style) {
+                      style: GuiStyle) : GuiMenuDouble(state, "Multiplayer",
+        previous, style) {
     private val servers = state.engine.configMap.mapMut("Scapes").listMut(
             "Servers")
     private val scrollPane: GuiComponentScrollPaneViewport
@@ -51,11 +51,8 @@ class GuiServerSelect(state: GameState,
         scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {
             GuiComponentScrollPane(it, 70)
         }.viewport
-        val add = addControl(60) { button(it, "Add") }
 
-        selection(-1, add)
-
-        add.on(GuiEvent.CLICK_LEFT) { event ->
+        save.on(GuiEvent.CLICK_LEFT) { event ->
             state.engine.guiStack.add("10-Menu",
                     GuiAddServer(state, this, style))
         }

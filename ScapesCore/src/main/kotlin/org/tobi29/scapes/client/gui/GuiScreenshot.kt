@@ -26,7 +26,7 @@ import org.tobi29.scapes.engine.resource.Resource
 class GuiScreenshot(state: GameState,
                     previous: Gui,
                     texture: Resource<Texture>,
-                    style: GuiStyle) : GuiMenu(state, "Screenshots", previous,
+                    style: GuiStyle) : GuiMenuSingle(state, "Screenshots", previous,
         style) {
     init {
         val tex = texture.get()

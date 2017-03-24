@@ -27,8 +27,8 @@ import java.io.IOException
 
 class GuiPlaylists(state: GameState,
                    previous: Gui,
-                   style: GuiStyle) : GuiMenu(
-        state, "Playlists", previous, style) {
+                   style: GuiStyle) : GuiMenuDouble(
+        state, "Playlists", "Add", "Back", previous, style) {
     private val scrollPane: GuiComponentScrollPaneViewport
     private var playlist = ""
 
@@ -41,15 +41,12 @@ class GuiPlaylists(state: GameState,
         scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {
             GuiComponentScrollPane(it, 70)
         }.viewport
-        val add = addControl(60) { button(it, "Add") }
         updateTitles("day")
-
-        selection(add)
 
         day.on(GuiEvent.CLICK_LEFT) { event -> updateTitles("day") }
         night.on(GuiEvent.CLICK_LEFT) { event -> updateTitles("night") }
         battle.on(GuiEvent.CLICK_LEFT) { event -> updateTitles("battle") }
-        add.on(GuiEvent.CLICK_LEFT) { event ->
+        save.on(GuiEvent.CLICK_LEFT) { event ->
             try {
                 val directory = state.engine.home.resolve(
                         "playlists").resolve(playlist)

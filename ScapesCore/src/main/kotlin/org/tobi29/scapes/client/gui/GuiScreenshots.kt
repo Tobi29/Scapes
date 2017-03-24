@@ -26,7 +26,7 @@ import java.io.IOException
 
 class GuiScreenshots(state: GameState,
                      previous: Gui,
-                     style: GuiStyle) : GuiMenu(
+                     style: GuiStyle) : GuiMenuSingle(
         state, "Screenshots", previous, style) {
     private val scrollPane: GuiComponentScrollPaneViewport
 
