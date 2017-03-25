@@ -65,7 +65,7 @@ class GuiComponentHotbarButton(parent: GuiLayoutData,
     public override fun updateMesh(renderer: GuiRenderer,
                                    size: Vector2d) {
         super.updateMesh(renderer, size)
-        model = createVCTI(engine,
+        model = engine.graphics.createVCTI(
                 floatArrayOf(0.0f, size.floatY() - 32.0f, 0.0f, size.floatY(),
                         size.floatY() - 32.0f, 0.0f, 0.0f, -32.0f, 0.0f,
                         size.floatY(), -32.0f, 0.0f),

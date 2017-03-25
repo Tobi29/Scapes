@@ -203,7 +203,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                 world.terrain.sunLight(pos.intX(), pos.intY(),
                         pos.intZ()) / 15.0f)
         texture.get().bind(gl)
-        val matrixStack = gl.matrixStack()
+        val matrixStack = gl.matrixStack
         var matrix = matrixStack.push()
         matrix.translate(posRenderX, posRenderY, posRenderZ)
         matrix.rotate(yaw - 90.0, 0.0f, 0.0f, 1.0f)

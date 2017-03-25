@@ -27,8 +27,8 @@ open class GuiDesktop(state: GameState,
 
     override fun baseSize(): Vector2d {
         val container = engine.container
-        val width = container.containerWidth().toDouble()
-        val height = container.containerHeight().toDouble()
+        val width = container.containerWidth.toDouble()
+        val height = container.containerHeight.toDouble()
         val scale = min(540.0 / height, 1.0)
         return Vector2d(width * scale, height * scale)
     }

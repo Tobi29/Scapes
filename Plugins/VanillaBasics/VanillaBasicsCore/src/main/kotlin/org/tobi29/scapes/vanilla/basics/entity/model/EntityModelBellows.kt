@@ -85,7 +85,7 @@ class EntityModelBellows(shared: EntityModelBellowsShared,
                         pos.intZ()) / 15.0f,
                 world.terrain.sunLight(pos.intX(), pos.intY(),
                         pos.intZ()) / 15.0f)
-        val matrixStack = gl.matrixStack()
+        val matrixStack = gl.matrixStack
         var matrix = matrixStack.push()
         matrix.translate(posRenderX, posRenderY, posRenderZ)
         matrix = matrixStack.push()

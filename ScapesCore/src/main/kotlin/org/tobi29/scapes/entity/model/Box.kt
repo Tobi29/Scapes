@@ -65,7 +65,7 @@ class Box constructor(engine: ScapesEngine,
         } else {
             indices = INDICES_NO_CULL
         }
-        model = createVTNI(engine,
+        model = engine.graphics.createVTNI(
                 floatArrayOf(minX, maxY, maxZ, maxX, maxY, maxZ, maxX, maxY,
                         minZ, minX, maxY, minZ, minX, minY, maxZ, minX, minY,
                         minZ, maxX, minY, minZ, maxX, minY, maxZ, minX, minY,

@@ -63,7 +63,7 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
                 index[j] = j
                 j++
             }
-            createVNI(system.world.game.engine, vertex, normal, index,
+            system.world.game.engine.graphics.createVNI(vertex, normal, index,
                     RenderType.LINES)
         }
         for (i in models.indices) {
@@ -91,8 +91,8 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
                 index[j] = j
                 j++
             }
-            models[i] = createVNI(system.world.game.engine, vertex, normal,
-                    index, RenderType.LINES)
+            models[i] = system.world.game.engine.graphics.createVNI(vertex,
+                    normal, index, RenderType.LINES)
         }
     }
 
@@ -182,7 +182,7 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
             }
             val world = system.world
             val terrain = world.terrain
-            gl.textures().unbind(gl)
+            gl.textures.unbind(gl)
             val s = shader.get()
             for (instance in instances) {
                 if (instance.state != ParticleInstance.State.ALIVE) {
@@ -197,7 +197,7 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
                     val posRenderX = (instance.pos.doubleX() - cam.position.doubleX()).toFloat()
                     val posRenderY = (instance.pos.doubleY() - cam.position.doubleY()).toFloat()
                     val posRenderZ = (instance.pos.doubleZ() - cam.position.doubleZ()).toFloat()
-                    val matrixStack = gl.matrixStack()
+                    val matrixStack = gl.matrixStack
                     val matrix = matrixStack.push()
                     matrix.translate(posRenderX, posRenderY, posRenderZ)
                     models[instance.vao].render(gl, s)

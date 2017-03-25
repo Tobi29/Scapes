@@ -27,7 +27,7 @@ class GuiHud(state: GameState,
     private val textureCross = gui.engine.graphics.textures["Scapes:image/gui/Cross"]
 
     init {
-        cross = createVCTI(state.engine,
+        cross = engine.graphics.createVCTI(
                 floatArrayOf(-CROSS_SIZE, -CROSS_SIZE, 0.0f, CROSS_SIZE,
                         -CROSS_SIZE, 0.0f, CROSS_SIZE, CROSS_SIZE, 0.0f,
                         -CROSS_SIZE, CROSS_SIZE, 0.0f),
@@ -44,7 +44,7 @@ class GuiHud(state: GameState,
                         delta: Double) {
         super.render(gl, shader, size, pixelSize, delta)
         if (visible) {
-            val matrixStack = gl.matrixStack()
+            val matrixStack = gl.matrixStack
             val matrix = matrixStack.push()
             matrix.translate((size.x * 0.5).toFloat(), (size.y * 0.5).toFloat(),
                     0.0f)

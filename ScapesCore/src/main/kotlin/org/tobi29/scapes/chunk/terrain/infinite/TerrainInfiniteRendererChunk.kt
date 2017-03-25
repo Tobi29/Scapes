@@ -60,7 +60,7 @@ class TerrainInfiniteRendererChunk(private val chunk: TerrainInfiniteChunkClient
                cam: Cam) {
         val relativeX = chunk.posBlock.x - cam.position.doubleX()
         val relativeY = chunk.posBlock.y - cam.position.doubleY()
-        val matrixStack = gl.matrixStack()
+        val matrixStack = gl.matrixStack
         for (i in vao.indices) {
             val relativeZ = (i shl 4) - cam.position.doubleZ()
             val distance = sqr(relativeX + 8) +
@@ -95,7 +95,7 @@ class TerrainInfiniteRendererChunk(private val chunk: TerrainInfiniteChunkClient
                     cam: Cam) {
         val relativeX = chunk.posBlock.x - cam.position.doubleX()
         val relativeY = chunk.posBlock.y - cam.position.doubleY()
-        val matrixStack = gl.matrixStack()
+        val matrixStack = gl.matrixStack
         for (i in vao.indices) {
             val vao = this.vao[i]
             if (vao != null && vao.modelAlpha != null) {
@@ -127,7 +127,7 @@ class TerrainInfiniteRendererChunk(private val chunk: TerrainInfiniteChunkClient
                     frame: Model,
                     shader: Shader,
                     cam: Cam) {
-        val matrixStack = gl.matrixStack()
+        val matrixStack = gl.matrixStack
         for (i in vao.indices) {
             val vao = this.vao[i]
             if (vao != null && vao.model != null) {

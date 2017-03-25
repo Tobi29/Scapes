@@ -57,8 +57,8 @@ class GuiComponentBar(parent: GuiLayoutData,
         } else {
             value += (clamp(newValue, 0.0, 1.0) - value) * factor
         }
-        gl.textures().unbind(gl)
-        val matrixStack = gl.matrixStack()
+        gl.textures.unbind(gl)
+        val matrixStack = gl.matrixStack
         var matrix = matrixStack.push()
         matrix.scale(value.toFloat(), 1.0f, 1.0f)
         model1?.render(gl, shader)
@@ -78,7 +78,7 @@ class GuiComponentBar(parent: GuiLayoutData,
         var r2 = r1 * 0.5f
         var g2 = g1 * 0.5f
         var b2 = b1 * 0.5f
-        model1 = createVCTI(engine,
+        model1 = engine.graphics.createVCTI(
                 floatArrayOf(0.0f, size.floatY(), 0.0f, size.floatX(),
                         size.floatY(), 0.0f, 0.0f, 0.0f, 0.0f, size.floatX(),
                         0.0f, 0.0f),
@@ -92,7 +92,7 @@ class GuiComponentBar(parent: GuiLayoutData,
         r2 *= 0.4f
         g2 *= 0.4f
         b2 *= 0.4f
-        model2 = createVCTI(engine,
+        model2 = engine.graphics.createVCTI(
                 floatArrayOf(0.0f, size.floatY(), 0.0f, size.floatX(),
                         size.floatY(), 0.0f, 0.0f, 0.0f, 0.0f, size.floatX(),
                         0.0f, 0.0f),

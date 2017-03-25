@@ -89,7 +89,7 @@ class ParticleEmitter3DBlock(system: ParticleSystem) : ParticleEmitter<ParticleI
                     val posRenderX = (instance.pos.doubleX() - cam.position.doubleX()).toFloat()
                     val posRenderY = (instance.pos.doubleY() - cam.position.doubleY()).toFloat()
                     val posRenderZ = (instance.pos.doubleZ() - cam.position.doubleZ()).toFloat()
-                    val matrixStack = gl.matrixStack()
+                    val matrixStack = gl.matrixStack
                     val matrix = matrixStack.push()
                     matrix.translate(posRenderX, posRenderY, posRenderZ)
                     matrix.rotate(instance.rotation.floatZ(), 0f, 0f, 1f)

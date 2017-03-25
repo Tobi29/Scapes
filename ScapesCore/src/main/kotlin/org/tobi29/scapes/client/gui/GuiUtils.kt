@@ -55,7 +55,7 @@ object GuiUtils {
             return
         }
         if (item.amount() > 0) {
-            val matrixStack = gl.matrixStack()
+            val matrixStack = gl.matrixStack
             var matrix = matrixStack.push()
             matrix.translate(x + width / 4.0f, y + height / 4.0f, 4f)
             matrix.scale(width / 2.0f, height / 2.0f, 4f)

@@ -32,7 +32,7 @@ class AnimatedTerrainTexture(buffer: ByteBuffer,
                              engine: ScapesEngine,
                              texture: () -> Texture) : TerrainTexture(
         null, width, width, shaderAnimation, texture) {
-    private val frames: Array<Array<ByteBuffer?>>
+    private val frames: Array<Array<ByteBuffer>>
     private val newFrame = AtomicInteger(-1)
     private var spin = 0.0
 

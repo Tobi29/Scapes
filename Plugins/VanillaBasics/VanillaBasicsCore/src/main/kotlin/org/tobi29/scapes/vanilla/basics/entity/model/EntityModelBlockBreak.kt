@@ -86,7 +86,7 @@ class EntityModelBlockBreak(shared: EntityModelBlockBreakShared,
                         pos.intZ()) / 15.0f)
         texture[i - 1].get().bind(gl)
         for (pane in pointerPanes) {
-            val matrixStack = gl.matrixStack()
+            val matrixStack = gl.matrixStack
             val matrix = matrixStack.push()
             matrix.translate(
                     (posRenderX - 0.5 + (pane.aabb.minX + pane.aabb.maxX) / 2).toFloat(),

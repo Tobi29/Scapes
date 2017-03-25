@@ -101,7 +101,7 @@ open class GuiInventory(name: String,
         val cursorY: Double
         val cursor = engine.guiController.cursors().firstOrNull()
         if (cursor != null) {
-            val guiPos = cursor.currentGuiPos()
+            val guiPos = cursor.currentPos()
             cursorX = guiPos.x
             cursorY = guiPos.y
         } else {
@@ -111,8 +111,8 @@ open class GuiInventory(name: String,
         gl.matrixStack.push { matrix ->
             matrix.identity()
             matrix.modelViewProjection().orthogonal(0.0f, 0.0f,
-                    engine.container.containerWidth().toFloat(),
-                    engine.container.containerHeight().toFloat())
+                    gl.contentWidth().toFloat(),
+                    gl.contentHeight().toFloat())
             player.inventories().access("Hold") { inventory ->
                 GuiUtils.items(cursorX.toFloat(), cursorY.toFloat(), 60.0f,
                         60.0f, inventory.item(0), gl, shader, style.font,

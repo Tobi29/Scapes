@@ -77,7 +77,7 @@ class MobModelItem(private val entity: MobClient,
                 pos.intZ()) / 15.0f,
                 world.terrain.sunLight(pos.intX(), pos.intY(),
                         pos.intZ()) / 15.0f)
-        val matrixStack = gl.matrixStack()
+        val matrixStack = gl.matrixStack
         val matrix = matrixStack.push()
         matrix.translate(posRenderX, posRenderY, posRenderZ)
         matrix.scale(0.4f, 0.4f, 0.4f)

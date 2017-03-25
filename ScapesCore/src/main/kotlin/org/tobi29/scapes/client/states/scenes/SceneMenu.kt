@@ -24,12 +24,12 @@ import org.tobi29.scapes.engine.utils.chain
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurOffset
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurWeight
-import org.tobi29.scapes.engine.utils.use
 import org.tobi29.scapes.engine.utils.join
 import org.tobi29.scapes.engine.utils.math.PI
 import org.tobi29.scapes.engine.utils.math.cos
 import org.tobi29.scapes.engine.utils.math.remP
 import org.tobi29.scapes.engine.utils.math.round
+import org.tobi29.scapes.engine.utils.use
 import org.tobi29.scapes.server.format.WorldSource
 import java.io.IOException
 import java.util.concurrent.ThreadLocalRandom
@@ -62,7 +62,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
         }
         val shaderTextured = gl.engine.graphics.loadShader(
                 "Engine:shader/Textured")
-        val model = createVTI(engine,
+        val model = engine.graphics.createVTI(
                 floatArrayOf(-1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f,
                         -1.0f, -1.0f, 1.0f, -1.0f, -1.0f),
                 floatArrayOf(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f),

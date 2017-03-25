@@ -25,12 +25,12 @@ import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
 import org.tobi29.scapes.engine.sound.StaticAudio
 import org.tobi29.scapes.engine.utils.chain
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.tag.map
-import org.tobi29.scapes.engine.utils.tag.toBoolean
-import org.tobi29.scapes.engine.utils.tag.toDouble
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.plus
+import org.tobi29.scapes.engine.utils.tag.map
+import org.tobi29.scapes.engine.utils.tag.toBoolean
+import org.tobi29.scapes.engine.utils.tag.toDouble
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleEmitterRain
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleEmitterSnow
@@ -79,12 +79,12 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
         val seed = world.seed
         fbo = world.game.engine.graphics.createFramebuffer(512, 512, 1,
                 false, false, true, TextureFilter.LINEAR)
-        billboardMesh = createVTI(world.game.engine,
+        billboardMesh = world.game.engine.graphics.createVTI(
                 floatArrayOf(1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f,
                         -1.0f, 1.0f, 1.0f, -1.0f, 1.0f),
                 floatArrayOf(0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f),
                 intArrayOf(0, 1, 2, 0, 2, 3), RenderType.TRIANGLES)
-        cloudTextureMesh = createVTI(world.game.engine,
+        cloudTextureMesh = world.game.engine.graphics.createVTI(
                 floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
                         0.0f, 0.0f, 1.0f, 0.0f),
                 floatArrayOf(0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f),
@@ -358,7 +358,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
         val shaderTextured = gl.engine.graphics.loadShader(
                 "Engine:shader/Textured")
         val render: () -> Unit = {
-            val matrixStack = gl.matrixStack()
+            val matrixStack = gl.matrixStack
             val skyLight = (15.0 - climateGenerator.sunLightReduction(
                     scene.cam().position.intX().toDouble(),
                     scene.cam().position.intY().toDouble())).toFloat() / 15.0f
@@ -370,7 +370,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                     cam.position.doubleX(),
                     cam.position.doubleY()) * RAD_2_DEG)
             // Sky
-            gl.textures().unbind(gl)
+            gl.textures.unbind(gl)
             gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f)
             val sSkybox = shaderSkybox.get()
             sSkybox.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB())
@@ -421,7 +421,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
             // Clouds
             fbo.texturesColor[0].bind(gl)
             cloudMesh.render(gl, sSkybox)
-            gl.textures().unbind(gl)
+            gl.textures.unbind(gl)
             // Bottom
             skyboxBottomMesh.render(gl, sSkybox)
         }

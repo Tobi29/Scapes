@@ -143,7 +143,7 @@ class ItemModelSimple(private val texture: TerrainTexture?,
             return
         }
         texture.texture().bind(gl)
-        val matrixStack = gl.matrixStack()
+        val matrixStack = gl.matrixStack
         val matrix = matrixStack.push()
         matrix.rotate(315.0f, 0.0f, 1.0f, 0.0f)
         model.render(gl, shader)

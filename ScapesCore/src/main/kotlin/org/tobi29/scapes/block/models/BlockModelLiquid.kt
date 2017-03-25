@@ -283,7 +283,7 @@ class BlockModelLiquid(private val block: BlockType,
     override fun renderInventory(gl: GL,
                                  shader: Shader) {
         registry.texture.bind(gl)
-        val matrixStack = gl.matrixStack()
+        val matrixStack = gl.matrixStack
         val matrix = matrixStack.push()
         matrix.translate(0.5f, 0.5f, 0.5f)
         matrix.rotate(57.5f, 1.0f, 0.0f, 0.0f)

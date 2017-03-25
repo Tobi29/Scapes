@@ -56,7 +56,7 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
     init {
         val min = 0.001f
         val max = 0.999f
-        frame = createVI(terrain.world.game.engine,
+        frame = terrain.world.game.engine.graphics.createVI(
                 floatArrayOf(min, min, min, max, min, min, max, max, min, min,
                         max, min, min, min, max, max, min, max, max, max, max,
                         min, max, max),
@@ -191,7 +191,7 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
         }
         chunks.forEach { it.render(gl, shader1, shader2, cam) }
         if (debug) {
-            gl.textures().unbind(gl)
+            gl.textures.unbind(gl)
             chunks.forEach { it.renderFrame(gl, frame, shader1, cam) }
         }
     }

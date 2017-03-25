@@ -38,7 +38,7 @@ class GuiControllerTouch(engine: ScapesEngine,
                 fetch = Finger(tracker.pos)
                 val finger = fetch
                 handleFinger(finger)
-                val guiPos = finger.cursor.currentGuiPos()
+                val guiPos = finger.cursor.currentPos()
                 finger.dragX = guiPos.x
                 finger.dragY = guiPos.y
                 engine.guiStack.fireEvent(GuiComponentEvent(guiPos.x, guiPos.y),
@@ -61,7 +61,7 @@ class GuiControllerTouch(engine: ScapesEngine,
         }.forEach { tracker ->
             fingers.remove(tracker)?.let { finger ->
                 finger.dragging?.let { component ->
-                    val guiPos = finger.cursor.currentGuiPos()
+                    val guiPos = finger.cursor.currentPos()
                     if (!finger.clicked) {
                         finger.clicked = true
                         component.gui.sendNewEvent(GuiEvent.CLICK_LEFT,
@@ -99,9 +99,9 @@ class GuiControllerTouch(engine: ScapesEngine,
     }
 
     private fun handleFinger(finger: Finger) {
-        finger.cursor.set(finger.tracker.now(), finger.tracker.now())
+        finger.cursor.set(finger.tracker.now())
         finger.dragging?.let { component ->
-            val guiPos = finger.cursor.currentGuiPos()
+            val guiPos = finger.cursor.currentPos()
             val relativeX = guiPos.x - finger.dragX
             val relativeY = guiPos.y - finger.dragY
             finger.dragX = guiPos.x

@@ -32,11 +32,11 @@ import org.tobi29.scapes.engine.input.*
 import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath
 import org.tobi29.scapes.engine.utils.io.filesystem.createDirectories
+import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.mapMut
 import org.tobi29.scapes.engine.utils.tag.set
-import org.tobi29.scapes.engine.utils.readOnly
 import java.io.IOException
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -91,7 +91,7 @@ class ScapesClient(engine: ScapesEngine,
     override fun initLate() {
         if (!engine.configMap.containsKey("Scapes")) {
             engine.configMap["Scapes"] = TagMap {
-                val lightDefaults = engine.container.formFactor() == Container.FormFactor.PHONE
+                val lightDefaults = engine.container.formFactor == Container.FormFactor.PHONE
                 if (lightDefaults) {
                     this["Animations"] = false
                     this["Bloom"] = false
