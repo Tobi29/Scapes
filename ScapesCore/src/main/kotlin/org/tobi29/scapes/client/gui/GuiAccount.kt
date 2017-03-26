@@ -32,7 +32,7 @@ import java.security.KeyPair
 class GuiAccount(state: GameState,
                  previous: Gui,
                  account: Account,
-                 style: GuiStyle) : GuiMenuSingle(state, "Account", "Save", style) {
+                 style: GuiStyle) : GuiMenu(state, "Account", style) {
     private var keyPair: KeyPair
     private var nickname = ""
 
@@ -57,8 +57,12 @@ class GuiAccount(state: GameState,
         pane.addVert(16.0, 5.0, -1.0, 18.0) {
             GuiComponentText(it, "Nickname:")
         }
-        val nickname = row(pane) {
+        val nicknameRow = row(pane)
+        val nickname = nicknameRow.addHori(5.0, 5.0, -1.0, -1.0) {
             GuiComponentTextField(it, 18, this.nickname)
+        }
+        val nicknameHelp = nicknameRow.addHori(5.0, 5.0, 30.0, -1.0) {
+            GuiComponentTextButton(it, 18, "?")
         }
         val skin = rowCenter(pane) { button(it, "Skin") }
         val error = pane.addVert(16.0, 5.0, -1.0, 18.0) {
@@ -69,10 +73,10 @@ class GuiAccount(state: GameState,
         selection(nickname)
         selection(skin)
 
-        keyCopy.on(GuiEvent.CLICK_LEFT) { event ->
+        keyCopy.on(GuiEvent.CLICK_LEFT) {
             state.engine.container.clipboardCopy(Account.key(keyPair))
         }
-        keyPaste.on(GuiEvent.CLICK_LEFT) { event ->
+        keyPaste.on(GuiEvent.CLICK_LEFT) {
             val str = state.engine.container.clipboardPaste()
             val keyPair = Account.key(str.replace(REPLACE, ""))
             if (keyPair != null) {
@@ -84,26 +88,40 @@ class GuiAccount(state: GameState,
                 error.text = "Invalid key!"
             }
         }
-        keyCopyID.on(GuiEvent.CLICK_LEFT
-        ) { event ->
+        keyCopyID.on(GuiEvent.CLICK_LEFT) {
             state.engine.container.clipboardCopy(
                     checksum(keyPair.public.encoded,
                             Algorithm.SHA1).toString())
         }
-        skin.on(GuiEvent.CLICK_LEFT) { event ->
+        nicknameHelp.on(GuiEvent.CLICK_LEFT) {
+            state.engine.guiStack.swap(this,
+                    GuiMessage(state, this, "Nickname", """
+The nickname is displayed as your name
+on servers, it can be changed at any time
+if needed, without changing your identity.
+
+A valid nickname must be between
+6 and 20 characters long and may only
+consist of letters and digits.
+""", style))
+        }
+        skin.on(GuiEvent.CLICK_LEFT) {
             try {
                 val path = state.engine.home.resolve("Skin.png")
                 state.engine.container.openFileDialog(FileType.IMAGE,
-                        "Import skin", false
-                ) { name, input -> write(path) { process(input, put(it)) } }
+                        "Import skin", false) { _, input ->
+                    write(path) { process(input, put(it)) }
+                }
             } catch (e: IOException) {
                 logger.warn { "Failed to import skin: $e" }
             }
         }
-        on(GuiAction.BACK) {
+
+        val save = addControl { button(it, "Save") }
+        save.on(GuiEvent.CLICK_LEFT) {
             this.nickname = nickname.text()
-            if (!Account.valid(this.nickname)) {
-                error.text = "Invalid Nickname!"
+            Account.isNameValid(this.nickname)?.let { invalid ->
+                error.text = "Invalid Nickname:\n$invalid"
                 return@on
             }
             try {
@@ -114,6 +132,14 @@ class GuiAccount(state: GameState,
             }
 
             state.engine.guiStack.swap(this, previous)
+        }
+        if (account.valid()) {
+            val back = addControl { button(it, "Back") }
+            back.on(GuiEvent.CLICK_LEFT) { fireAction(GuiAction.BACK) }
+            on(GuiAction.BACK) { state.engine.guiStack.swap(this, previous) }
+            controlSelection(save, back)
+        } else {
+            controlSelection(save)
         }
     }
 
