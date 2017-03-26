@@ -28,6 +28,6 @@ class GuiMessage(state: GameState,
                  style: GuiStyle) : GuiMenuSingle(state, title,
         previous, style) {
     init {
-        pane.add(16.0, 80.0, -1.0, 18.0) { GuiComponentText(it, message) }
+        pane.addVert(16.0, 5.0, -1.0, 18.0) { GuiComponentText(it, message) }
     }
 }
