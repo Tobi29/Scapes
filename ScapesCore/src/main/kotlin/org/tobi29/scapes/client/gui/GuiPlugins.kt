@@ -37,7 +37,7 @@ import java.nio.channels.Channels
 class GuiPlugins(state: GameState,
                  previous: Gui,
                  style: GuiStyle) : GuiMenuDouble(
-        state, "Plugins", previous, style) {
+        state, "Plugins", "Add", "Back", previous, style) {
     private val path: FilePath
     private val scrollPane: GuiComponentScrollPaneViewport
 

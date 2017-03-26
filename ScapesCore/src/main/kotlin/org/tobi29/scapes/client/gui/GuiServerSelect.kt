@@ -42,7 +42,7 @@ class GuiServerSelect(state: GameState,
                       previous: Gui,
                       private val scene: SceneMenu,
                       style: GuiStyle) : GuiMenuDouble(state, "Multiplayer",
-        previous, style) {
+        "Add", "Back", previous, style) {
     private val servers = state.engine.configMap.mapMut("Scapes").listMut(
             "Servers")
     private val scrollPane: GuiComponentScrollPaneViewport
