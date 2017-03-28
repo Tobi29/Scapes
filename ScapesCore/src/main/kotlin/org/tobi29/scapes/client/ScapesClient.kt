@@ -30,6 +30,8 @@ import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.gui.GuiNotificationSimple
 import org.tobi29.scapes.engine.input.*
 import org.tobi29.scapes.engine.server.ConnectionManager
+import org.tobi29.scapes.engine.utils.io.filesystem.FileCache
+import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath
 import org.tobi29.scapes.engine.utils.io.filesystem.createDirectories
 import org.tobi29.scapes.engine.utils.readOnly
@@ -37,11 +39,12 @@ import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.mapMut
 import org.tobi29.scapes.engine.utils.tag.set
-import java.io.IOException
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class ScapesClient(engine: ScapesEngine,
+                   val home: FilePath,
+                   val pluginCache: FilePath,
                    private val savesSupplier: (ScapesClient) -> SaveStorage) : Game(
         engine) {
     val connection = ConnectionManager(engine.taskExecutor, 10)
@@ -65,22 +68,19 @@ class ScapesClient(engine: ScapesEngine,
     override val version = VERSION
 
     override fun initEarly() {
-        try {
-            val path = engine.home
-            val playlistsPath = path.resolve("playlists")
-            createDirectories(playlistsPath.resolve("day"))
-            createDirectories(playlistsPath.resolve("night"))
-            createDirectories(playlistsPath.resolve("battle"))
-            createDirectories(path.resolve("plugins"))
-            val files = engine.files
-            files.registerFileSystem("Scapes",
-                    ClasspathPath(this::class.java.classLoader,
-                            "assets/scapes/tobi29"))
-            saves = savesSupplier(this)
-        } catch (e: IOException) {
-            engine.crash(e)
-        }
-
+        val playlistsPath = home.resolve("playlists")
+        createDirectories(playlistsPath.resolve("day"))
+        createDirectories(playlistsPath.resolve("night"))
+        createDirectories(playlistsPath.resolve("battle"))
+        createDirectories(home.resolve("plugins"))
+        createDirectories(home.resolve("screenshots"))
+        createDirectories(pluginCache)
+        FileCache.check(pluginCache)
+        val files = engine.files
+        files.registerFileSystem("Scapes",
+                ClasspathPath(this::class.java.classLoader,
+                        "assets/scapes/tobi29"))
+        saves = savesSupplier(this)
     }
 
     override fun init() {

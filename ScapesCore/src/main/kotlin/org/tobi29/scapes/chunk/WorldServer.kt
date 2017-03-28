@@ -19,12 +19,12 @@ import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.chunk.terrain.isTransparent
 import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.utils.Sync
-import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.engine.utils.math.sqrt
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
+import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.entity.CreatureType
@@ -47,10 +47,10 @@ class WorldServer(worldFormat: WorldFormat,
                   val id: String,
                   seed: Long,
                   val connection: ServerConnection,
-                  taskExecutor: TaskExecutor,
                   terrainSupplier: (WorldServer) -> TerrainServer,
                   environmentSupplier: (WorldServer) -> EnvironmentServer) : World<EntityServer>(
-        worldFormat.plugins, taskExecutor, worldFormat.plugins.registry,
+        worldFormat.plugins, connection.server.taskExecutor,
+        worldFormat.plugins.registry,
         seed), TagMapWrite, PlayConnection<PacketClient> {
     private val entityListeners = Collections.newSetFromMap(
             ConcurrentHashMap<(EntityServer) -> Unit, Boolean>())

@@ -22,8 +22,13 @@ import org.tobi29.scapes.VERSION
 import org.tobi29.scapes.client.SaveStorage
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.ScapesEngine
-import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.io.filesystem.path
+import org.tobi29.scapes.engine.utils.io.filesystem.*
+import org.tobi29.scapes.engine.utils.io.tag.json.readJSON
+import org.tobi29.scapes.engine.utils.io.tag.json.writeJSON
+import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.scapes.engine.utils.tag.toMutTag
+import org.tobi29.scapes.engine.utils.tag.toTag
+import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.plugins.Sandbox
 import org.tobi29.scapes.server.format.sqlite.SQLiteSaveStorage
 import org.tobi29.scapes.server.shell.ScapesServerHeadless
@@ -89,18 +94,30 @@ fun main(args: Array<String>) {
     }
     when (mode) {
         "client" -> {
-            val saves: (ScapesClient) -> SaveStorage = { scapes ->
+            val config = home.resolve("ScapesEngine.json")
+            val cache = home.resolve("cache")
+            val pluginCache = cache.resolve("plugins")
+            var engine: ScapesEngine? = null
+            val crashHandler = ScapesEngine.crashHandler(home, { engine })
+            val taskExecutor = TaskExecutor(crashHandler, "Engine")
+            val configMap = readConfig(config).toMutTag()
+            val saves: (ScapesClient) -> SaveStorage = {
                 SQLiteSaveStorage(home.resolve("saves"))
             }
             var backend = ScapesEngine.loadBackend()
             if (commandLine.hasOption('t')) {
                 backend = ScapesEngine.emulateTouch(backend)
             }
-            val engine = ScapesEngine(
-                    { ScapesClient(it, saves) },
-                    backend,
-                    home, Debug.enabled())
-            System.exit(engine.run())
+            engine = ScapesEngine(
+                    { ScapesClient(it, home, pluginCache, saves) }, backend,
+                    taskExecutor, configMap, Debug.enabled())
+            val exit = engine.run()
+            try {
+                write(config) { configMap.toTag().writeJSON(it) }
+            } catch (e: IOException) {
+                System.err.println("Failed to store config file: $e")
+            }
+            System.exit(exit)
         }
         "server" -> {
             val config: FilePath
@@ -126,3 +143,15 @@ fun main(args: Array<String>) {
         }
     }
 }
+
+private fun readConfig(path: FilePath) =
+        try {
+            if (exists(path)) {
+                read(path, ::readJSON)
+            } else {
+                TagMap()
+            }
+        } catch (e: IOException) {
+            System.err.println("Failed to load config file: $e")
+            TagMap()
+        }

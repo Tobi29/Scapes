@@ -17,6 +17,7 @@
 package org.tobi29.scapes.client.gui
 
 import mu.KLogging
+import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.input.FileType
@@ -29,6 +30,7 @@ class GuiPlaylists(state: GameState,
                    previous: Gui,
                    style: GuiStyle) : GuiMenuDouble(
         state, "Playlists", "Add", "Back", previous, style) {
+    private val game = engine.game as ScapesClient
     private val scrollPane: GuiComponentScrollPaneViewport
     private var playlist = ""
 
@@ -48,7 +50,7 @@ class GuiPlaylists(state: GameState,
         battle.on(GuiEvent.CLICK_LEFT) { event -> updateTitles("battle") }
         save.on(GuiEvent.CLICK_LEFT) { event ->
             try {
-                val directory = state.engine.home.resolve(
+                val directory = game.home.resolve(
                         "playlists").resolve(playlist)
                 state.engine.container.openFileDialog(FileType.MUSIC,
                         "Import music", true) { name, input ->
@@ -67,7 +69,7 @@ class GuiPlaylists(state: GameState,
         scrollPane.removeAll()
         this.playlist = playlist
         try {
-            val path = state.engine.home.resolve("playlists").resolve(playlist)
+            val path = game.home.resolve("playlists").resolve(playlist)
             listRecursive(path) {
                 filter {
                     isRegularFile(it) && isNotHidden(it)

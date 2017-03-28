@@ -21,6 +21,7 @@ import org.tobi29.scapes.client.gui.GuiControlsDefault
 import org.tobi29.scapes.client.input.InputMode
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
+import org.tobi29.scapes.engine.graphics.GraphicsSystem
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiController
 import org.tobi29.scapes.engine.gui.GuiControllerMouse
@@ -30,13 +31,16 @@ import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.engine.input.ControllerKeyReference
 import org.tobi29.scapes.engine.utils.EventDispatcher
 import org.tobi29.scapes.engine.utils.ListenerOwnerHandle
+import org.tobi29.scapes.engine.utils.graphics.encodePNG
+import org.tobi29.scapes.engine.utils.io.filesystem.write
+import org.tobi29.scapes.engine.utils.math.vector.Vector2d
+import org.tobi29.scapes.engine.utils.math.vector.times
 import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.tag.mapMut
 import org.tobi29.scapes.engine.utils.tag.set
 import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.math.vector.Vector2d
-import org.tobi29.scapes.engine.utils.math.vector.times
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
+import java.io.IOException
 
 class InputModeKeyboard(engine: ScapesEngine,
                         private val controller: ControllerDefault,
@@ -170,6 +174,22 @@ class InputModeKeyboard(engine: ScapesEngine,
                     events.fire(MobPlayerClientMain.HotbarSetRightEvent(
                             hotbar.indexOf(hotbarSet)))
                 }
+            }
+            if (event.key == ControllerKey.KEY_F2) {
+                engine.graphics.requestScreenshot { image ->
+                    engine.taskExecutor.runTask({
+                        val game = engine.game as ScapesClient
+                        val path = game.home.resolve("screenshots").resolve(
+                                "${System.currentTimeMillis()}.png")
+                        try {
+                            write(path) { encodePNG(image, it, 9, false) }
+                        } catch (e: IOException) {
+                            GraphicsSystem.logger.error { "Error saving screenshot: $e" }
+                        }
+                    }, "Write-Screenshot")
+                }
+                event.muted = true
+                return@listener
             }
         }
     }

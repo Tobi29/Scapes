@@ -22,7 +22,6 @@ import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.connection.ServerInfo
 import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.server.SSLHandle
-import org.tobi29.scapes.engine.utils.Crashable
 import org.tobi29.scapes.engine.utils.EventDispatcher
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toInt
@@ -44,11 +43,11 @@ class ScapesServer(source: WorldSource,
                    configMap: TagMap,
                    val serverInfo: ServerInfo,
                    ssl: SSLHandle,
-                   crashHandler: Crashable) {
+                   taskExecutor: TaskExecutor) {
+    val taskExecutor = TaskExecutor(taskExecutor, "Server")
     val connections: ConnectionManager
     val connection: ServerConnection
     val plugins: Plugins
-    val taskExecutor: TaskExecutor
     val seed: Long
     val extensions: ServerExtensions
     val events = EventDispatcher()
@@ -68,7 +67,6 @@ class ScapesServer(source: WorldSource,
         seed = format.seed
         extensions = ServerExtensions(this)
         extensions.loadExtensions(configMap["Extension"]?.toMap())
-        taskExecutor = TaskExecutor(crashHandler, "Server")
         commandRegistry = CommandRegistry()
         val serverTag = configMap["Server"]?.toMap()
         val socketTag = serverTag?.get("Socket")?.toMap() ?: TagMap()

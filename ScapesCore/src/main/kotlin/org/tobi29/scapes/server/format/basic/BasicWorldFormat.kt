@@ -22,7 +22,6 @@ import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteServer
 import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.tag.*
-import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.plugins.PluginFile
 import org.tobi29.scapes.plugins.Plugins
 import org.tobi29.scapes.server.ScapesServer
@@ -76,13 +75,10 @@ class BasicWorldFormat(private val path: FilePath,
                     }
                     null
                 }) ?: throw IOException("Unable to create world")
-        val world = WorldServer(this, name, seed, server.connection,
-                TaskExecutor(server.taskExecutor(), name),
-                {
-                    TerrainInfiniteServer(it, 512, format,
-                            it.environment.generator(),
-                            arrayOf(it.environment.populator()), it.air)
-                }, environmentSupplier)
+        val world = WorldServer(this, name, seed, server.connection, {
+            TerrainInfiniteServer(it, 512, format, it.environment.generator(),
+                    arrayOf(it.environment.populator()), it.air)
+        }, environmentSupplier)
         worldsTagStructure[name]?.toMap()?.let { world.read(it) }
         return world
     }

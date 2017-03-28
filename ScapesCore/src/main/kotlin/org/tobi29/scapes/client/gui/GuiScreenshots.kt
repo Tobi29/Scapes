@@ -17,6 +17,7 @@
 package org.tobi29.scapes.client.gui
 
 import mu.KLogging
+import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.resource.Resource
@@ -31,11 +32,12 @@ class GuiScreenshots(state: GameState,
     private val scrollPane: GuiComponentScrollPaneViewport
 
     init {
+        val game = engine.game as ScapesClient
         scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {
             GuiComponentScrollPane(it, 70)
         }.viewport
         try {
-            val path = state.engine.home.resolve("screenshots")
+            val path = game.home.resolve("screenshots")
             val files = listRecursive(path,
                     { isRegularFile(it) && isNotHidden(it) })
             files.asSequence().sorted().forEach { file ->

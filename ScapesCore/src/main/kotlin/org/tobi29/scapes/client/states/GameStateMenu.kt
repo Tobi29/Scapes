@@ -17,6 +17,7 @@
 package org.tobi29.scapes.client.states
 
 import mu.KLogging
+import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.gui.GuiAccount
 import org.tobi29.scapes.client.gui.GuiGenerateAccount
 import org.tobi29.scapes.client.gui.GuiMainMenu
@@ -39,8 +40,9 @@ class GameStateMenu(engine: ScapesEngine) : GameState(engine) {
     }
 
     override fun init() {
+        val game = engine.game as ScapesClient
         val style = engine.guiStyle
-        val file = engine.home.resolve("Account.properties")
+        val file = game.home.resolve("Account.properties")
         val account = try {
             Account.read(file)
         } catch (e: IOException) {

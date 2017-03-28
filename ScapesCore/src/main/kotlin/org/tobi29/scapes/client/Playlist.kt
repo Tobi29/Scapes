@@ -25,7 +25,8 @@ import java.security.AccessController
 import java.security.PrivilegedAction
 import java.util.concurrent.ThreadLocalRandom
 
-class Playlist(private val engine: ScapesEngine) {
+class Playlist(private val path: FilePath,
+               private val engine: ScapesEngine) {
     private var currentMusic: Music? = null
     private var musicWait = 5.0
 
@@ -60,8 +61,7 @@ class Playlist(private val engine: ScapesEngine) {
         if (engine.config.volume("music") <= 0.0) {
             return
         }
-        val title = playMusic(
-                engine.home.resolve("playlists").resolve(music.dirName))
+        val title = playMusic(path.resolve(music.dirName))
         if (title != null) {
             val fileName = title.fileName.toString()
             val index = fileName.lastIndexOf('.')

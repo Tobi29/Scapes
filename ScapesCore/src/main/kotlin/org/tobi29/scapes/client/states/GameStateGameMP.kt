@@ -23,6 +23,7 @@ import org.tobi29.scapes.block.Material
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.client.ChatHistory
 import org.tobi29.scapes.client.Playlist
+import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.client.gui.GuiHud
 import org.tobi29.scapes.client.gui.GuiWidgetConnectionProfiler
@@ -58,8 +59,9 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
     private var init = false
 
     init {
+        val game = engine.game as ScapesClient
         chatHistory = ChatHistory()
-        playlist = Playlist(engine)
+        playlist = Playlist(game.home.resolve("playlists"), engine)
         client = clientSupplier(this)
         terrainTextureRegistry = TerrainTextureRegistry(engine)
         particleTransparentAtlas = ParticleTransparentAtlas(engine)

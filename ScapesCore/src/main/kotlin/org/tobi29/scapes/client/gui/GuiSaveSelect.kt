@@ -41,7 +41,7 @@ class GuiSaveSelect(state: GameState,
     private val scrollPane: GuiComponentScrollPaneViewport
 
     init {
-        val game = state.engine.game as ScapesClient
+        val game = engine.game as ScapesClient
         saves = game.saves()
 
         scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {
@@ -51,7 +51,7 @@ class GuiSaveSelect(state: GameState,
 
         save.on(GuiEvent.CLICK_LEFT) { event ->
             try {
-                val path = state.engine.home.resolve("plugins")
+                val path = game.home.resolve("plugins")
                 val plugins = Plugins.installed(path)
                 val worldTypes = plugins.asSequence()
                         .filter { plugin -> "WorldType" == plugin.parent() }

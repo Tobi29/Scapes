@@ -17,6 +17,7 @@
 package org.tobi29.scapes.client.gui
 
 import mu.KLogging
+import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
@@ -37,6 +38,7 @@ class GuiAccount(state: GameState,
     private var nickname = ""
 
     init {
+        val game = engine.game as ScapesClient
         keyPair = account.keyPair()
         nickname = account.nickname()
         pane.addVert(16.0, 5.0, -1.0, 18.0) { GuiComponentText(it, "Key:") }
@@ -107,7 +109,7 @@ consist of letters and digits.
         }
         skin.on(GuiEvent.CLICK_LEFT) {
             try {
-                val path = state.engine.home.resolve("Skin.png")
+                val path = game.home.resolve("Skin.png")
                 state.engine.container.openFileDialog(FileType.IMAGE,
                         "Import skin", false) { _, input ->
                     write(path) { process(input, put(it)) }
@@ -126,7 +128,7 @@ consist of letters and digits.
             }
             try {
                 Account(keyPair, this.nickname).write(
-                        state.engine.home.resolve("Account.properties"))
+                        game.home.resolve("Account.properties"))
             } catch (e: IOException) {
                 logger.error { "Failed to write account file: $e" }
             }

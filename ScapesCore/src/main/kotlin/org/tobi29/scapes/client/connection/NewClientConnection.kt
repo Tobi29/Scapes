@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.client.connection
 
+import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.connection.ConnectionInfo
 import org.tobi29.scapes.connection.ConnectionType
@@ -28,6 +29,7 @@ import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.engine.utils.io.filesystem.FileCache
+import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.exists
 import org.tobi29.scapes.engine.utils.io.filesystem.read
 import org.tobi29.scapes.engine.utils.io.process
@@ -51,6 +53,8 @@ object NewClientConnection {
                     account: Account,
                     loadingDistance: Int,
                     progress: (String) -> Unit): Pair<Plugins, Int>? {
+        val game = engine.game as ScapesClient
+
         // Send header
         channel.outputStream.put(ConnectionInfo.header())
         channel.outputStream.put(ConnectionType.PLAY.data().toInt())
@@ -109,8 +113,8 @@ object NewClientConnection {
             if (embedded != null) {
                 plugins.add(embedded)
             } else {
-                val location = FileCache.Location("plugins", checksum)
-                val file = engine.fileCache.retrieve(location)
+                val location = FileCache.Location(checksum)
+                val file = FileCache.retrieve(game.pluginCache, location)
                 if (file != null) {
                     plugins.add(PluginFile(file))
                 } else {
@@ -146,8 +150,8 @@ object NewClientConnection {
             val request = pluginRequests[0]
             if (channel.inputStream.boolean) {
                 pluginStream.buffer().flip()
-                val file = engine.fileCache.retrieve(
-                        engine.fileCache.store(pluginStream, "plugins"))
+                val file = FileCache.retrieve(game.pluginCache,
+                        FileCache.store(game.pluginCache, pluginStream))
                 pluginStream.buffer().clear()
                 if (file == null) {
                     throw IllegalStateException(
@@ -161,7 +165,7 @@ object NewClientConnection {
             }
         }
         channel.outputStream.putInt(loadingDistance)
-        sendSkin(channel.outputStream, engine)
+        sendSkin(game.home.resolve("Skin.png"), channel.outputStream, engine)
         channel.queueBundle()
 
         // Receive server info
@@ -180,9 +184,9 @@ object NewClientConnection {
         return Pair(plugins2, loadingDistanceServer)
     }
 
-    private fun sendSkin(output: WritableByteStream,
+    private fun sendSkin(path: FilePath,
+                         output: WritableByteStream,
                          engine: ScapesEngine) {
-        val path = engine.home.resolve("Skin.png")
         val image = if (exists(path)) {
             read(path) { decodePNG(it) }
         } else {

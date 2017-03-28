@@ -29,10 +29,10 @@ import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.server.SSLHandle
 import org.tobi29.scapes.engine.server.SSLProvider
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException
+import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toDouble
 import org.tobi29.scapes.engine.utils.tag.toMap
-import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.connection.LocalPlayerConnection
 import org.tobi29.scapes.server.format.WorldSource
@@ -42,6 +42,7 @@ import java.io.IOException
 class GameStateLoadSP(private var source: WorldSource?,
                       engine: ScapesEngine,
                       private val scene: Scene) : GameState(engine) {
+    private val game = engine.game as ScapesClient
     private var step = 0
     private var server: ScapesServer? = null
     private var gui: GuiLoading? = null
@@ -97,7 +98,7 @@ class GameStateLoadSP(private var source: WorldSource?,
                     }
 
                     server = ScapesServer(source, serverConfigMap, serverInfo,
-                            ssl, engine)
+                            ssl, engine.taskExecutor)
                     step++
                 }
                 1 -> {
@@ -107,14 +108,14 @@ class GameStateLoadSP(private var source: WorldSource?,
                     val loadingRadius = round(
                             engine.configMap["Scapes"]?.toMap()?.get(
                                     "RenderDistance")?.toDouble() ?: 0.0) + 16
-                    val account = Account[engine.home.resolve(
+                    val account = Account[game.home.resolve(
                             "Account.properties")]
                     gui?.setProgress("Loading world...", 1.0)
 
                     server.connections.addConnection { worker, connection ->
                         val player = LocalPlayerConnection(worker,
                                 server.connection, loadingRadius)
-                        (engine.game as ScapesClient).connection.addConnection { worker, connection ->
+                        game.connection.addConnection { worker, connection ->
                             val game = GameStateGameSP({
                                 LocalClientConnection(worker, it,
                                         player, server.plugins, loadingRadius,

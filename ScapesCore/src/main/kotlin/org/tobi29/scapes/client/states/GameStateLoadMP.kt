@@ -31,9 +31,9 @@ import org.tobi29.scapes.engine.server.PacketBundleChannel
 import org.tobi29.scapes.engine.server.RemoteAddress
 import org.tobi29.scapes.engine.server.SSLProvider
 import org.tobi29.scapes.engine.server.connect
+import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.tag.toDouble
 import org.tobi29.scapes.engine.utils.tag.toMap
-import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.task.Joiner
 import java.io.IOException
 import java.nio.channels.SelectionKey
@@ -45,6 +45,7 @@ class GameStateLoadMP(private val address: RemoteAddress,
     private var gui: GuiLoading? = null
 
     override fun init() {
+        val game = engine.game as ScapesClient
         gui = GuiLoading(this, engine.guiStyle).apply {
             setProgress("Connecting...", 0.0)
             engine.guiStack.add("20-Progress", this)
@@ -61,7 +62,7 @@ class GameStateLoadMP(private val address: RemoteAddress,
                             e.message ?: "", engine))
         }
 
-        (engine.game as ScapesClient).connection.addConnection { worker, connection ->
+        game.connection.addConnection { worker, connection ->
             val channel = try {
                 connect(worker, address)
             } catch (e: Exception) {
@@ -106,7 +107,7 @@ class GameStateLoadMP(private val address: RemoteAddress,
                 val loadingRadius = round(
                         engine.configMap["Scapes"]?.toMap()?.get(
                                 "RenderDistance")?.toDouble() ?: 0.0) + 16
-                val account = Account[engine.home.resolve(
+                val account = Account[game.home.resolve(
                         "Account.properties")]
                 val (plugins, loadingDistanceServer) = NewClientConnection.run(
                         bundleChannel, engine, account, loadingRadius,

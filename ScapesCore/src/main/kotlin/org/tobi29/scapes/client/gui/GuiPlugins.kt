@@ -17,6 +17,7 @@
 package org.tobi29.scapes.client.gui
 
 import mu.KLogging
+import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.graphics.TextureFilter
 import org.tobi29.scapes.engine.graphics.TextureWrap
@@ -42,7 +43,8 @@ class GuiPlugins(state: GameState,
     private val scrollPane: GuiComponentScrollPaneViewport
 
     init {
-        path = state.engine.home.resolve("plugins")
+        val game = engine.game as ScapesClient
+        path = game.home.resolve("plugins")
         scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {
             GuiComponentScrollPane(it, 70)
         }.viewport

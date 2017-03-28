@@ -17,6 +17,7 @@
 package org.tobi29.scapes.server.connection
 
 import kotlinx.coroutines.experimental.yield
+import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.connection.LocalClientConnection
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.server.Connection
@@ -65,7 +66,8 @@ class LocalPlayerConnection(private val worker: ConnectionWorker,
               account: Account): String? {
         this.workerClient = workerClient
         val engine = client.game.engine
-        val path = engine.home.resolve("Skin.png")
+        val game = engine.game as ScapesClient
+        val path = game.home.resolve("Skin.png")
         val image = if (exists(path)) {
             read(path) { decodePNG(it) }
         } else {

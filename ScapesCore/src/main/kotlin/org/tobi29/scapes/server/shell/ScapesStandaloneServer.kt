@@ -23,12 +23,12 @@ import org.tobi29.scapes.engine.utils.Crashable
 import org.tobi29.scapes.engine.utils.EventDispatcher
 import org.tobi29.scapes.engine.utils.ListenerOwnerHandle
 import org.tobi29.scapes.engine.utils.io.filesystem.*
-import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.engine.utils.io.tag.json.readJSON
 import org.tobi29.scapes.engine.utils.io.tag.json.writeJSON
-import org.tobi29.scapes.engine.utils.use
+import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
+import org.tobi29.scapes.engine.utils.use
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.command.Executor
 import org.tobi29.scapes.server.format.WorldSource
@@ -37,6 +37,7 @@ import org.tobi29.scapes.server.ssl.spi.KeyManagerProvider
 import java.io.IOException
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.system.exitProcess
 
 abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashable {
     protected val taskExecutor = TaskExecutor(this, "Server-Shell")
@@ -94,7 +95,8 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
         val serverTag = configMap["Server"]?.toMap()
         val serverInfo = ServerInfo(serverTag?.get("ServerName").toString(),
                 config.resolve(serverTag?.get("ServerIcon").toString()))
-        server = ScapesServer(source, configMap, serverInfo, ssl, this)
+        server = ScapesServer(source, configMap, serverInfo, ssl,
+                TaskExecutor(this, "Shell"))
         val connection = server.connection
         val executor = object : Executor {
             override val events = EventDispatcher()
@@ -149,7 +151,7 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
         return map
     }
 
-    override fun crash(e: Throwable) {
+    override fun crash(e: Throwable): Nothing {
         logger.error(e) { "Stopping due to a crash" }
         val debugValues = ConcurrentHashMap<String, String>()
         try {
@@ -157,7 +159,7 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
         } catch (e1: IOException) {
             logger.warn { "Failed to write crash report: $e1" }
         }
-        System.exit(1)
+        exitProcess(1)
     }
 
     companion object : KLogging() {
