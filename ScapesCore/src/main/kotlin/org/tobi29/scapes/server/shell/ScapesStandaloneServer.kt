@@ -95,8 +95,7 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
         val serverTag = configMap["Server"]?.toMap()
         val serverInfo = ServerInfo(serverTag?.get("ServerName").toString(),
                 config.resolve(serverTag?.get("ServerIcon").toString()))
-        server = ScapesServer(source, configMap, serverInfo, ssl,
-                TaskExecutor(this, "Shell"))
+        server = ScapesServer(source, configMap, serverInfo, ssl, taskExecutor)
         val connection = server.connection
         val executor = object : Executor {
             override val events = EventDispatcher()
