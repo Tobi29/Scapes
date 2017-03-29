@@ -83,7 +83,7 @@ class GuiMainMenu(state: GameState,
             state.engine.guiStack.add("10-Menu",
                     GuiScreenshots(state, this, style))
         }
-        quit.on(GuiEvent.CLICK_LEFT) { event -> state.engine.stop() }
+        quit.on(GuiEvent.CLICK_LEFT) { event -> state.engine.container.stop() }
         version.on(GuiEvent.CLICK_LEFT) { event ->
             state.engine.guiStack.add("10-Menu", GuiCredits(state, this, style))
         }

@@ -84,11 +84,6 @@ class ScapesClient(engine: ScapesEngine,
     }
 
     override fun init() {
-        connection.workers(1)
-        engine.switchState(GameStateStartup(engine) { GameStateMenu(engine) })
-    }
-
-    override fun initLate() {
         if (!engine.configMap.containsKey("Scapes")) {
             engine.configMap["Scapes"] = TagMap {
                 val lightDefaults = engine.container.formFactor == Container.FormFactor.PHONE
@@ -116,7 +111,15 @@ class ScapesClient(engine: ScapesEngine,
                 }
             }
         }
+        connection.workers(1)
+        engine.switchState(GameStateStartup(engine) { GameStateMenu(engine) })
+    }
+
+    override fun start() {
         loadInput()
+    }
+
+    override fun halt() {
     }
 
     override fun step(delta: Double) {

@@ -21,18 +21,22 @@ import org.tobi29.scapes.Debug
 import org.tobi29.scapes.VERSION
 import org.tobi29.scapes.client.SaveStorage
 import org.tobi29.scapes.client.ScapesClient
+import org.tobi29.scapes.engine.Container
 import org.tobi29.scapes.engine.ScapesEngine
-import org.tobi29.scapes.engine.utils.io.filesystem.*
+import org.tobi29.scapes.engine.graphics.GraphicsCheckException
+import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
+import org.tobi29.scapes.engine.utils.io.filesystem.exists
+import org.tobi29.scapes.engine.utils.io.filesystem.path
+import org.tobi29.scapes.engine.utils.io.filesystem.read
 import org.tobi29.scapes.engine.utils.io.tag.json.readJSON
-import org.tobi29.scapes.engine.utils.io.tag.json.writeJSON
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toMutTag
-import org.tobi29.scapes.engine.utils.tag.toTag
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.plugins.Sandbox
 import org.tobi29.scapes.server.format.sqlite.SQLiteSaveStorage
 import org.tobi29.scapes.server.shell.ScapesServerHeadless
 import java.io.IOException
+import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
     val options = Options()
@@ -111,13 +115,21 @@ fun main(args: Array<String>) {
             engine = ScapesEngine(
                     { ScapesClient(it, home, pluginCache, saves) }, backend,
                     taskExecutor, configMap, Debug.enabled())
-            val exit = engine.run()
             try {
-                write(config) { configMap.toTag().writeJSON(it) }
-            } catch (e: IOException) {
-                System.err.println("Failed to store config file: $e")
+                engine.start()
+                try {
+                    engine.container.run()
+                } catch (e: GraphicsCheckException) {
+                    ScapesEngine.logger.error(
+                            e) { "Failed to initialize graphics" }
+                    engine.container.message(Container.MessageType.ERROR,
+                            engine.game.name,
+                            "Unable to initialize graphics:\n${e.message}")
+                    exitProcess(1)
+                }
+            } finally {
+                engine.dispose()
             }
-            System.exit(exit)
         }
         "server" -> {
             val config: FilePath
