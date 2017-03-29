@@ -74,7 +74,7 @@ ext {
     log4jVersion = "2.8.1"
     commonsCLIVersion = "1.4"
     jnaVersion = "4.4.0"
-    scapesEngineVersion = "0a6d1d2003"
+    scapesEngineVersion = "552c9f6827"
 
     kotlinLogging = "io.github.microutils:kotlin-logging:$kotlinLoggingVersion"
     slf4jAPI = "org.slf4j:slf4j-api:$slf4jVersion"

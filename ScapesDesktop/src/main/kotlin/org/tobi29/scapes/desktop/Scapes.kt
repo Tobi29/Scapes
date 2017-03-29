@@ -22,7 +22,9 @@ import org.tobi29.scapes.VERSION
 import org.tobi29.scapes.client.SaveStorage
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.Container
+import org.tobi29.scapes.engine.ContainerEmulateTouch
 import org.tobi29.scapes.engine.ScapesEngine
+import org.tobi29.scapes.engine.backends.lwjgl3.glfw.ContainerGLFW
 import org.tobi29.scapes.engine.graphics.GraphicsCheckException
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.exists
@@ -108,9 +110,10 @@ fun main(args: Array<String>) {
             val saves: (ScapesClient) -> SaveStorage = {
                 SQLiteSaveStorage(home.resolve("saves"))
             }
-            var backend = ScapesEngine.loadBackend()
+            var backend: (ScapesEngine) -> Container = { ContainerGLFW(it) }
             if (commandLine.hasOption('t')) {
-                backend = ScapesEngine.emulateTouch(backend)
+                val parentBackend = backend
+                backend = { ContainerEmulateTouch(parentBackend(it)) }
             }
             engine = ScapesEngine(
                     { ScapesClient(it, home, pluginCache, saves) }, backend,
