@@ -17,11 +17,15 @@
 package org.tobi29.scapes.client.input
 
 import org.tobi29.scapes.chunk.WorldClient
+import org.tobi29.scapes.client.gui.GuiMessage
 import org.tobi29.scapes.engine.GameState
+import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiController
+import org.tobi29.scapes.engine.gui.GuiControllerDummy
 import org.tobi29.scapes.engine.utils.EventDispatcher
 import org.tobi29.scapes.engine.utils.ListenerOwner
+import org.tobi29.scapes.engine.utils.ListenerOwnerHandle
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 
 interface InputMode : ListenerOwner {
@@ -49,4 +53,27 @@ interface InputMode : ListenerOwner {
     fun jump(): Boolean
 
     fun guiController(): GuiController
+}
+
+class InputModeDummy(private val engine: ScapesEngine) : InputMode {
+    override val events = EventDispatcher()
+    override val listenerOwner = ListenerOwnerHandle()
+
+    override fun poll(delta: Double) = false
+
+    override fun createControlsGUI(state: GameState,
+                                   prev: Gui) =
+            GuiMessage(state, prev, "", "", prev.style)
+
+    override fun walk() = Vector2d.ZERO
+
+    override fun hitDirection() = Vector2d.ZERO
+
+    override fun left() = false
+
+    override fun right() = false
+
+    override fun jump() = false
+
+    override fun guiController() = GuiControllerDummy(engine)
 }

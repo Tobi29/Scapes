@@ -22,17 +22,15 @@ import org.tobi29.scapes.VERSION
 import org.tobi29.scapes.client.SaveStorage
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.Container
-import org.tobi29.scapes.engine.ContainerEmulateTouch
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.ContainerGLFW
 import org.tobi29.scapes.engine.graphics.GraphicsCheckException
-import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.io.filesystem.exists
-import org.tobi29.scapes.engine.utils.io.filesystem.path
-import org.tobi29.scapes.engine.utils.io.filesystem.read
+import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.io.tag.json.readJSON
+import org.tobi29.scapes.engine.utils.io.tag.json.writeJSON
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toMutTag
+import org.tobi29.scapes.engine.utils.tag.toTag
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.plugins.Sandbox
 import org.tobi29.scapes.server.format.sqlite.SQLiteSaveStorage
@@ -110,10 +108,9 @@ fun main(args: Array<String>) {
             val saves: (ScapesClient) -> SaveStorage = {
                 SQLiteSaveStorage(home.resolve("saves"))
             }
-            var backend: (ScapesEngine) -> Container = { ContainerGLFW(it) }
-            if (commandLine.hasOption('t')) {
-                val parentBackend = backend
-                backend = { ContainerEmulateTouch(parentBackend(it)) }
+            val emulateTouch = commandLine.hasOption('t')
+            val backend: (ScapesEngine) -> Container = {
+                ContainerGLFW(it, emulateTouch)
             }
             engine = ScapesEngine(
                     { ScapesClient(it, home, pluginCache, saves) }, backend,
@@ -133,6 +130,7 @@ fun main(args: Array<String>) {
             } finally {
                 engine.dispose()
             }
+            writeConfig(config, configMap.toTag())
         }
         "server" -> {
             val config: FilePath
@@ -150,7 +148,6 @@ fun main(args: Array<String>) {
                 System.exit(200)
                 return
             }
-
         }
         else -> {
             System.err.println("Unknown mode: " + mode)
@@ -169,4 +166,12 @@ private fun readConfig(path: FilePath) =
         } catch (e: IOException) {
             System.err.println("Failed to load config file: $e")
             TagMap()
+        }
+
+private fun writeConfig(path: FilePath,
+                        config: TagMap) =
+        try {
+            write(path) { config.writeJSON(it) }
+        } catch (e: IOException) {
+            System.err.println("Failed to store config file: $e")
         }

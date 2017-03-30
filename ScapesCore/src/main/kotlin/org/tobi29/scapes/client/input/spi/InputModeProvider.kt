@@ -23,6 +23,5 @@ import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 
 interface InputModeProvider {
     fun get(engine: ScapesEngine,
-            controller: Controller,
-            configMap: MutableTagMap): InputMode?
+            controller: Controller): ((MutableTagMap) -> InputMode)?
 }

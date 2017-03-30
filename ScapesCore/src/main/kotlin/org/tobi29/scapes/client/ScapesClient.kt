@@ -18,6 +18,7 @@ package org.tobi29.scapes.client
 import mu.KLogging
 import org.tobi29.scapes.VERSION
 import org.tobi29.scapes.client.input.InputMode
+import org.tobi29.scapes.client.input.InputModeDummy
 import org.tobi29.scapes.client.input.gamepad.InputModeGamepad
 import org.tobi29.scapes.client.input.keyboard.InputModeKeyboard
 import org.tobi29.scapes.client.input.spi.InputModeProvider
@@ -34,7 +35,6 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FileCache
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath
 import org.tobi29.scapes.engine.utils.io.filesystem.createDirectories
-import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.mapMut
@@ -48,9 +48,9 @@ class ScapesClient(engine: ScapesEngine,
                    private val savesSupplier: (ScapesClient) -> SaveStorage) : Game(
         engine) {
     val connection = ConnectionManager(engine.taskExecutor, 10)
-    private val inputModesMut = Collections.newSetFromMap<InputMode>(
-            ConcurrentHashMap())
-    val inputModes = inputModesMut.readOnly()
+    private val inputModesMut = ConcurrentHashMap<Controller, (MutableTagMap) -> InputMode>()
+    var inputModes = emptyList<InputMode>()
+        private set
     private lateinit var saves: SaveStorage
     private lateinit var inputMode: InputMode
     private var freezeInputMode = false
@@ -113,6 +113,16 @@ class ScapesClient(engine: ScapesEngine,
         }
         connection.workers(1)
         engine.switchState(GameStateStartup(engine) { GameStateMenu(engine) })
+        engine.events.listener<ControllerAddEvent>(this) { event ->
+            loadService(engine, event.controller)?.let {
+                inputModesMut[event.controller] = it
+                loadInput()
+            }
+        }
+        engine.events.listener<ControllerRemoveEvent>(this) { event ->
+            inputModesMut.remove(event.controller)
+            loadInput()
+        }
     }
 
     override fun start() {
@@ -123,11 +133,8 @@ class ScapesClient(engine: ScapesEngine,
     }
 
     override fun step(delta: Double) {
-        if (engine.container.joysticksChanged()) {
-            loadInput()
-        }
         var newInputMode: InputMode? = null
-        for (inputMode in inputModesMut) {
+        for (inputMode in inputModes) {
             if (inputMode.poll(delta)) {
                 newInputMode = inputMode
             }
@@ -145,39 +152,25 @@ class ScapesClient(engine: ScapesEngine,
     }
 
     override fun dispose() {
+        super.dispose()
         connection.stop()
     }
 
     fun loadInput() {
         logger.info { "Loading input" }
         val configMap = engine.configMap.mapMut("Scapes").mapMut("Input")
-        inputModesMut.clear()
-        val controller = engine.container.controller()
-        if (controller != null) {
-            loadService(engine, controller,
-                    configMap)?.let { inputModesMut.add(it) }
-        }
-        val touch = engine.container.touch()
-        if (touch != null) {
-            loadService(engine, touch, configMap)?.let {
-                inputModesMut.add(it)
-            }
-        }
-        for (joystick in engine.container.joysticks()) {
-            loadService(engine, joystick, configMap)?.let {
-                inputModesMut.add(it)
-            }
-        }
-        if (inputModesMut.isEmpty()) {
-            throw InputException("No input mode available")
-        }
-        changeInput(inputModesMut.first())
+        inputModes = inputModesMut.values.asSequence().map {
+            it(configMap)
+        }.toList()
+        changeInput(inputModes.firstOrNull() ?: InputModeDummy(engine))
     }
 
     private fun changeInput(inputMode: InputMode) {
-        this.inputMode = inputMode
-        engine.guiController = inputMode.guiController()
-        engine.events.fire(InputModeChangeEvent(inputMode))
+        synchronized(inputModesMut) {
+            this.inputMode = inputMode
+            engine.guiController = inputMode.guiController()
+            engine.events.fire(InputModeChangeEvent(inputMode))
+        }
     }
 
     fun setFreezeInputMode(freezeInputMode: Boolean) {
@@ -186,26 +179,21 @@ class ScapesClient(engine: ScapesEngine,
 
     companion object : KLogging() {
         private fun loadService(engine: ScapesEngine,
-                                controller: Controller,
-                                configMap: MutableTagMap): InputMode? {
+                                controller: Controller): ((MutableTagMap) -> InputMode)? {
             for (provider in ServiceLoader.load(
                     InputModeProvider::class.java)) {
                 try {
-                    val inputMode = provider.get(engine, controller, configMap)
-                    if (inputMode != null) {
-                        logger.debug { "Loaded input mode: ${provider::class.java.name}" }
-                        return inputMode
-                    }
+                    provider.get(engine, controller)?.let { return it }
                 } catch (e: ServiceConfigurationError) {
                     logger.warn { "Unable to load input mode provider: $e" }
                 }
             }
             if (controller is ControllerDefault) {
-                return InputModeKeyboard(engine, controller, configMap)
+                return { InputModeKeyboard(engine, controller, it) }
             } else if (controller is ControllerJoystick) {
-                return InputModeGamepad(engine, controller, configMap)
+                return { InputModeGamepad(engine, controller, it) }
             } else if (controller is ControllerTouch) {
-                return InputModeTouch(engine, controller)
+                return { InputModeTouch(engine, controller) }
             }
             return null
         }

@@ -228,9 +228,8 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
     fun setInputMode(input: InputMode) {
         inputListenerOwner?.invalidate()
         val inputListenerOwner = InputListenerOwner()
-        val inputGui = game.input()
-        inputGui.removeAll()
-        input.createInGameGUI(inputGui, world)
+        game.inputGui.removeAll()
+        input.createInGameGUI(game.inputGui, world)
         inputMode(input, inputListenerOwner)
         this.input = input
         this.inputListenerOwner = inputListenerOwner

@@ -290,7 +290,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                 "sound.Weather", 1.0f, 0.0f)
         val player = world.player
         if (player is MobPlayerClientMainVB) {
-            val hud = player.game.hud().addHori(0.0, 0.0, -1.0, -1.0,
+            val hud = player.game.hud.addHori(0.0, 0.0, -1.0, -1.0,
                     ::GuiComponentGroup)
             hud.spacer()
             val hudSlab = hud.addVert(0.0, 0.0, -1.0, 76.0,

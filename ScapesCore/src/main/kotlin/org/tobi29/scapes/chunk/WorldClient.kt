@@ -272,7 +272,7 @@ class WorldClient(val connection: ClientConnection,
             terrain.renderer.render(gl, sTerrain1, sTerrain2, cam,
                     debug)
             gl.setBlending(BlendingMode.NORMAL)
-            if (game.hud().visible) {
+            if (game.hud.visible) {
                 playerModel?.render(gl, this, cam, sEntity)
             }
             val aabb = AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)

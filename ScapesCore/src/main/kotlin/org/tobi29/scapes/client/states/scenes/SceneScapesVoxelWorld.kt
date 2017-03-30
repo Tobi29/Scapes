@@ -29,12 +29,12 @@ import org.tobi29.scapes.engine.utils.chain
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurOffset
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurWeight
-import org.tobi29.scapes.engine.utils.tag.toBoolean
-import org.tobi29.scapes.engine.utils.tag.toMap
 import org.tobi29.scapes.engine.utils.join
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.plus
+import org.tobi29.scapes.engine.utils.tag.toBoolean
+import org.tobi29.scapes.engine.utils.tag.toMap
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.particle.*
 import org.tobi29.scapes.entity.skin.ClientSkinStorage
@@ -90,10 +90,10 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
         particles.register(ParticleEmitterTransparent(particles,
                 world.game.particleTransparentAtlas().texture))
 
-        val hud = world.game.hud()
-        hud.removeAll()
-        hud.add(8.0, 434.0, -1.0, -1.0
-        ) { GuiComponentChat(it, world.game.chatHistory()) }
+        world.game.hud.removeAll()
+        world.game.hud.add(8.0, 434.0, -1.0, -1.0) {
+            GuiComponentChat(it, world.game.chatHistory)
+        }
         skybox.init()
     }
 

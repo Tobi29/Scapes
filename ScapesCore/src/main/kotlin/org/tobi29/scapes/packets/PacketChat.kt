@@ -50,7 +50,7 @@ class PacketChat : PacketAbstract, PacketBoth {
     }
 
     override fun runClient(client: ClientConnection) {
-        client.game.chatHistory().addLine(text)
+        client.game.chatHistory.addLine(text)
     }
 
     override fun sendServer(client: ClientConnection,

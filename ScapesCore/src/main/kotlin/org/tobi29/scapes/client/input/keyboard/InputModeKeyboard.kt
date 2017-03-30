@@ -16,9 +16,11 @@
 
 package org.tobi29.scapes.client.input.keyboard
 
+import org.tobi29.scapes.Debug
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.gui.GuiControlsDefault
 import org.tobi29.scapes.client.input.InputMode
+import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.GraphicsSystem
@@ -43,7 +45,7 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import java.io.IOException
 
 class InputModeKeyboard(engine: ScapesEngine,
-                        private val controller: ControllerDefault,
+                        val controller: ControllerDefault,
                         configMap: MutableTagMap) : InputMode {
     override val events = EventDispatcher()
     override val listenerOwner = ListenerOwnerHandle()
@@ -175,6 +177,14 @@ class InputModeKeyboard(engine: ScapesEngine,
                             hotbar.indexOf(hotbarSet)))
                 }
             }
+            if (event.key == ControllerKey.KEY_F1) {
+                val state = engine.getState()
+                if (state is GameStateGameMP) {
+                    state.setHudVisible(!state.hud.visible)
+                    event.muted = true
+                    return@listener
+                }
+            }
             if (event.key == ControllerKey.KEY_F2) {
                 engine.graphics.requestScreenshot { image ->
                     engine.taskExecutor.runTask({
@@ -190,6 +200,14 @@ class InputModeKeyboard(engine: ScapesEngine,
                 }
                 event.muted = true
                 return@listener
+            }
+            if (Debug.enabled() && event.key == ControllerKey.KEY_F6) {
+                val state = engine.getState()
+                if (state is GameStateGameMP) {
+                    state.debugWidget.visible = !state.debugWidget.visible
+                    event.muted = true
+                    return@listener
+                }
             }
         }
     }

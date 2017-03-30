@@ -18,7 +18,6 @@ package org.tobi29.scapes.client.states
 
 import kotlinx.coroutines.experimental.yield
 import mu.KLogging
-import org.tobi29.scapes.Debug
 import org.tobi29.scapes.block.Material
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.client.ChatHistory
@@ -34,7 +33,6 @@ import org.tobi29.scapes.engine.graphics.Scene
 import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
-import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.entity.model.EntityModelBlockBreakShared
 import org.tobi29.scapes.entity.model.MobLivingModelHumanShared
 import org.tobi29.scapes.entity.particle.ParticleTransparentAtlas
@@ -43,12 +41,12 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
                            private val loadScene: Scene,
                            engine: ScapesEngine) : GameState(engine) {
     internal val client: ClientConnection
-    internal val playlist: Playlist
-    private val chatHistory: ChatHistory
-    private val hud: GuiHud
-    private val inputGui: Gui
-    private val debug: Gui
-    private val debugWidget: GuiWidgetDebugClient
+    val playlist: Playlist
+    val chatHistory: ChatHistory
+    val hud: GuiHud
+    val inputGui: Gui
+    val debug: Gui
+    val debugWidget: GuiComponentWidget
     private val connectionSentProfiler: GuiWidgetDebugValues
     private val connectionReceivedProfiler: GuiWidgetDebugValues
     private val terrainTextureRegistry: TerrainTextureRegistry
@@ -150,14 +148,6 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         get() = !(scene?.world()?.player?.hasGui() ?: false)
 
     override fun step(delta: Double) {
-        engine.controller?.let { controller ->
-            if (controller.isPressed(ControllerKey.KEY_F1)) {
-                setHudVisible(!hud.visible)
-            }
-            if (Debug.enabled() && controller.isPressed(ControllerKey.KEY_F6)) {
-                debugWidget.visible = !debugWidget.visible
-            }
-        }
         chatHistory.update()
         scene?.world()?.player?.let { playlist.update(it, delta) }
         scene?.world()?.update(delta)
@@ -183,25 +173,9 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         return modelBlockBreakShared
     }
 
-    fun chatHistory(): ChatHistory {
-        return chatHistory
-    }
-
-    fun playlist(): Playlist {
-        return playlist
-    }
-
     fun setHudVisible(visible: Boolean) {
         hud.visible = visible
         inputGui.visible = visible
-    }
-
-    fun hud(): GuiHud {
-        return hud
-    }
-
-    fun input(): Gui {
-        return inputGui
     }
 
     private inner class GuiWidgetDebugClient(parent: GuiLayoutData) : GuiComponentWidget(

@@ -25,6 +25,7 @@ import org.tobi29.scapes.client.Playlist
 import org.tobi29.scapes.client.gui.GuiChatWrite
 import org.tobi29.scapes.client.gui.GuiPause
 import org.tobi29.scapes.client.input.InputMode
+import org.tobi29.scapes.client.input.keyboard.InputModeKeyboard
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.engine.utils.ListenerOwner
@@ -84,15 +85,15 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
         if (!hasGui()) {
             // Debug
             if (Debug.enabled()) {
-                game.engine.controller?.let { controllerDefault ->
-                    if (controllerDefault.isPressed(ControllerKey.KEY_F5)) {
+                (input as? InputModeKeyboard)?.controller?.let { controller ->
+                    if (controller.isPressed(ControllerKey.KEY_F5)) {
                         flying = !flying
                     }
                     if (flying) {
-                        if (controllerDefault.isDown(ControllerKey.KEY_Q)) {
+                        if (controller.isDown(ControllerKey.KEY_Q)) {
                             speed.plusZ(60.0 * delta)
                         }
-                        if (controllerDefault.isDown(ControllerKey.KEY_C)) {
+                        if (controller.isDown(ControllerKey.KEY_C)) {
                             speed.plusZ(-60.0 * delta)
                         }
                     }
@@ -202,7 +203,7 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
     override fun onNotice(notice: MobClient) {
         if (notice is MobLivingClient) {
             if (notice.creatureType() == CreatureType.MONSTER) {
-                game.playlist().setMusic(Playlist.Music.BATTLE)
+                game.playlist.setMusic(Playlist.Music.BATTLE)
             }
         }
     }
