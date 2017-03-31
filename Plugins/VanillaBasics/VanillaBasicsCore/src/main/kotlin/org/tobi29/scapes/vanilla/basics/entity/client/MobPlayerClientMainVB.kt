@@ -279,15 +279,19 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
         }
         input.events.listener<HotbarChangeLeftEvent>(listenerOwner) { event ->
             setHotbarSelectLeft((inventorySelectLeft + event.delta) remP 10)
+            event.success = true
         }
         input.events.listener<HotbarChangeRightEvent>(listenerOwner) { event ->
             setHotbarSelectRight((inventorySelectRight + event.delta) remP 10)
+            event.success = true
         }
         input.events.listener<HotbarSetLeftEvent>(listenerOwner) { event ->
             setHotbarSelectLeft(event.value remP 10)
+            event.success = true
         }
         input.events.listener<HotbarSetRightEvent>(listenerOwner) { event ->
             setHotbarSelectRight(event.value remP 10)
+            event.success = true
         }
         input.events.listener<MenuOpenEvent>(listenerOwner) { event ->
             if (currentGui() !is GuiChatWrite) {

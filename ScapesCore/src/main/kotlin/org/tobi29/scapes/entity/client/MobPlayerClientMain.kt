@@ -240,13 +240,21 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
 
     class InputDirectionEvent(val direction: Vector2d)
 
-    class HotbarChangeLeftEvent(val delta: Int)
+    class HotbarChangeLeftEvent(val delta: Int) {
+        var success: Boolean = true
+    }
 
-    class HotbarChangeRightEvent(val delta: Int)
+    class HotbarChangeRightEvent(val delta: Int) {
+        var success: Boolean = true
+    }
 
-    class HotbarSetLeftEvent(val value: Int)
+    class HotbarSetLeftEvent(val value: Int) {
+        var success: Boolean = true
+    }
 
-    class HotbarSetRightEvent(val value: Int)
+    class HotbarSetRightEvent(val value: Int) {
+        var success: Boolean = true
+    }
 
     class MenuOpenEvent {
         var success: Boolean = true

@@ -26,13 +26,14 @@ import org.tobi29.scapes.engine.gui.PressEvent
 import org.tobi29.scapes.engine.input.ControllerJoystick
 import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.engine.input.ControllerKeyReference
+import org.tobi29.scapes.engine.input.isDown
 import org.tobi29.scapes.engine.utils.EventDispatcher
 import org.tobi29.scapes.engine.utils.ListenerOwnerHandle
-import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.engine.utils.math.mix
 import org.tobi29.scapes.engine.utils.math.sqrNoAbs
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.engine.utils.math.vector.times
+import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 
 class InputModeGamepad(engine: ScapesEngine,
@@ -44,11 +45,11 @@ class InputModeGamepad(engine: ScapesEngine,
     private val guiController: GuiController
     private val axisWalkX: Int
     private val axisWalkY: Int
-    private val jump: ControllerKeyReference
+    private val jump: ControllerKeyReference?
     private val axisCameraX: Int
     private val axisCameraY: Int
-    private val left: ControllerKeyReference
-    private val right: ControllerKeyReference
+    private val left: ControllerKeyReference?
+    private val right: ControllerKeyReference?
     private val cameraSensitivity: Double
 
     init {
@@ -94,55 +95,106 @@ class InputModeGamepad(engine: ScapesEngine,
         val chat = ControllerKeyReference.valueOf(menuTag["Chat"].toString())
 
         val hotbarTag = tagMap.mapMut("Hotbar")
+        val hotbarAddRight = ControllerKeyReference.valueOf(
+                hotbarTag["AddRight"].toString())
+        val hotbarSubtractRight = ControllerKeyReference.valueOf(
+                hotbarTag["SubtractRight"].toString())
+        val hotbarAddLeft = ControllerKeyReference.valueOf(
+                hotbarTag["AddLeft"].toString())
+        val hotbarSubtractLeft = ControllerKeyReference.valueOf(
+                hotbarTag["SubtractLeft"].toString())
         val hotbarAdd = ControllerKeyReference.valueOf(
                 hotbarTag["Add"].toString())
         val hotbarSubtract = ControllerKeyReference.valueOf(
                 hotbarTag["Subtract"].toString())
-        val hotbarLeft = ControllerKeyReference.valueOf(
-                hotbarTag["Left"].toString())
 
+        val references = arrayOf(menu, inventory, chat, hotbarAddRight,
+                hotbarSubtractRight, hotbarAddLeft, hotbarSubtractLeft,
+                hotbarAdd, hotbarSubtract)
         guiController.events.listener<PressEvent>(this) { event ->
             if (event.muted) {
                 return@listener
             }
-            if (menu.isPressed(event.key, controller)) {
-                if (MobPlayerClientMain.MenuOpenEvent().apply {
-                    events.fire(this)
-                }.success) {
-                    event.muted = true
-                    return@listener
+            val pressed = ControllerKeyReference.isPressed(event.key,
+                    controller, *references)
+            when (pressed) {
+                menu -> {
+                    if (MobPlayerClientMain.MenuOpenEvent().apply {
+                        events.fire(this)
+                    }.success) {
+                        event.muted = true
+                        return@listener
+                    }
                 }
-            }
-            if (inventory.isPressed(event.key, controller)) {
-                if (MobPlayerClientMain.MenuInventoryEvent().apply {
-                    events.fire(this)
-                }.success) {
-                    event.muted = true
-                    return@listener
+                inventory -> {
+                    if (MobPlayerClientMain.MenuInventoryEvent().apply {
+                        events.fire(this)
+                    }.success) {
+                        event.muted = true
+                        return@listener
+                    }
                 }
-            }
-            if (chat.isPressed(event.key, controller)) {
-                if (MobPlayerClientMain.MenuChatEvent().apply {
-                    events.fire(this)
-                }.success) {
-                    event.muted = true
-                    return@listener
+                chat -> {
+                    if (MobPlayerClientMain.MenuChatEvent().apply {
+                        events.fire(this)
+                    }.success) {
+                        event.muted = true
+                        return@listener
+                    }
                 }
-            }
-            if (hotbarLeft.isDown(controller)) {
-                if (hotbarAdd.isPressed(event.key, controller)) {
-                    events.fire(MobPlayerClientMain.HotbarChangeLeftEvent(1))
+                hotbarAddRight -> {
+                    if (MobPlayerClientMain.HotbarChangeRightEvent(1).apply {
+                        events.fire(this)
+                    }.success) {
+                        event.muted = true
+                        return@listener
+                    }
                 }
-                if (hotbarSubtract.isPressed(event.key, controller)) {
-                    events.fire(MobPlayerClientMain.HotbarChangeLeftEvent(-1))
+                hotbarSubtractRight -> {
+                    if (MobPlayerClientMain.HotbarChangeRightEvent(-1).apply {
+                        events.fire(this)
+                    }.success) {
+                        event.muted = true
+                        return@listener
+                    }
                 }
-            }
-            if (!hotbarLeft.isDown(controller)) {
-                if (hotbarAdd.isPressed(event.key, controller)) {
-                    events.fire(MobPlayerClientMain.HotbarChangeRightEvent(1))
+                hotbarAddLeft -> {
+                    if (MobPlayerClientMain.HotbarChangeLeftEvent(1).apply {
+                        events.fire(this)
+                    }.success) {
+                        event.muted = true
+                        return@listener
+                    }
                 }
-                if (hotbarSubtract.isPressed(event.key, controller)) {
-                    events.fire(MobPlayerClientMain.HotbarChangeRightEvent(-1))
+                hotbarSubtractLeft -> {
+                    if (MobPlayerClientMain.HotbarChangeLeftEvent(-1).apply {
+                        events.fire(this)
+                    }.success) {
+                        event.muted = true
+                        return@listener
+                    }
+                }
+                hotbarAdd -> {
+                    if (MobPlayerClientMain.HotbarChangeRightEvent(1).apply {
+                        events.fire(this)
+                    }.success or MobPlayerClientMain.HotbarChangeLeftEvent(
+                            1).apply {
+                        events.fire(this)
+                    }.success) {
+                        event.muted = true
+                        return@listener
+                    }
+                }
+                hotbarSubtract -> {
+                    if (MobPlayerClientMain.HotbarChangeRightEvent(-1).apply {
+                        events.fire(this)
+                    }.success or MobPlayerClientMain.HotbarChangeLeftEvent(
+                            -1).apply {
+                        events.fire(this)
+                    }.success) {
+                        event.muted = true
+                        return@listener
+                    }
                 }
             }
         }
@@ -152,7 +204,7 @@ class InputModeGamepad(engine: ScapesEngine,
         val movementTag = tagMap.mapMut("Movement")
         check("X", 0, movementTag)
         check("Y", 1, movementTag)
-        check("Jump", ControllerKey.BUTTON_0, movementTag)
+        check("Jump", ControllerKey.BUTTON_A, movementTag)
 
         val cameraTag = tagMap.mapMut("Camera")
         check("X", 3, cameraTag)
@@ -160,30 +212,49 @@ class InputModeGamepad(engine: ScapesEngine,
         check("Sensitivity", 1.0, cameraTag)
 
         val guiTag = tagMap.mapMut("GUI")
-        check("Primary", ControllerKey.BUTTON_0, guiTag)
-        check("Secondary", ControllerKey.BUTTON_1, guiTag)
+        check("Primary", ControllerKey.BUTTON_A, guiTag)
+        check("Secondary", ControllerKey.BUTTON_B, guiTag)
         check("Up", ControllerKey.AXIS_NEG_1, guiTag)
         check("Down", ControllerKey.AXIS_1, guiTag)
         check("Left", ControllerKey.AXIS_NEG_0, guiTag)
         check("Right", ControllerKey.AXIS_0, guiTag)
 
         val actionTag = tagMap.mapMut("Action")
-        check("Left", ControllerKey.AXIS_2, actionTag)
-        check("Right", ControllerKey.AXIS_5, actionTag)
+        check("Left", ControllerKey.BUTTON_TRIGGER_LEFT, actionTag)
+        check("Right", ControllerKey.BUTTON_TRIGGER_RIGHT, actionTag)
 
         val menuTag = tagMap.mapMut("Menu")
-        check("Inventory", ControllerKey.BUTTON_7, menuTag)
-        check("Menu", ControllerKey.BUTTON_10, menuTag)
-        check("Chat", ControllerKey.BUTTON_6, menuTag)
+        check("Inventory", ControllerKey.BUTTON_SELECT, menuTag)
+        check("Menu", ControllerKey.BUTTON_START, menuTag)
+        check("Chat", ControllerKey.BUTTON_DPAD_DOWN, menuTag)
 
         val hotbarTag = tagMap.mapMut("Hotbar")
-        check("Add", ControllerKey.BUTTON_5, hotbarTag)
-        check("Subtract", ControllerKey.BUTTON_4, hotbarTag)
-        check("Left", ControllerKey.BUTTON_2, hotbarTag)
+        check("AddRight", ControllerKey.BUTTON_BUMPER_RIGHT, hotbarTag)
+        check("SubtractRight", ControllerKey.BUTTON_BUMPER_LEFT, hotbarTag)
+        check("AddLeft",
+                ControllerKeyReference(ControllerKey.BUTTON_BUMPER_RIGHT,
+                        ControllerKey.BUTTON_X), hotbarTag)
+        check("SubtractLeft",
+                ControllerKeyReference(ControllerKey.BUTTON_BUMPER_LEFT,
+                        ControllerKey.BUTTON_X), hotbarTag)
+        check("Add",
+                ControllerKeyReference(ControllerKey.BUTTON_BUMPER_RIGHT,
+                        ControllerKey.BUTTON_Y), hotbarTag)
+        check("Subtract",
+                ControllerKeyReference(ControllerKey.BUTTON_BUMPER_LEFT,
+                        ControllerKey.BUTTON_Y), hotbarTag)
     }
 
     private fun check(id: String,
                       def: ControllerKey,
+                      tagMap: MutableTagMap) {
+        if (!tagMap.containsKey(id)) {
+            tagMap[id] = def.toString()
+        }
+    }
+
+    private fun check(id: String,
+                      def: ControllerKeyReference,
                       tagMap: MutableTagMap) {
         if (!tagMap.containsKey(id)) {
             tagMap[id] = def.toString()

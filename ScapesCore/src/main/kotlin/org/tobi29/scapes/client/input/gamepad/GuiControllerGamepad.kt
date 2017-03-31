@@ -19,19 +19,16 @@ import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.gui.GuiAction
 import org.tobi29.scapes.engine.gui.GuiController
 import org.tobi29.scapes.engine.gui.GuiCursor
-import org.tobi29.scapes.engine.input.ControllerBasic
-import org.tobi29.scapes.engine.input.ControllerJoystick
-import org.tobi29.scapes.engine.input.ControllerKey
-import org.tobi29.scapes.engine.input.ControllerKeyReference
+import org.tobi29.scapes.engine.input.*
 
 class GuiControllerGamepad(engine: ScapesEngine,
                            private val controller: ControllerJoystick,
-                           private val primaryButton: ControllerKeyReference,
-                           private val secondaryButton: ControllerKeyReference,
-                           private val upButton: ControllerKeyReference,
-                           private val downButton: ControllerKeyReference,
-                           private val leftButton: ControllerKeyReference,
-                           private val rightButton: ControllerKeyReference) : GuiController(
+                           private val primaryButton: ControllerKeyReference?,
+                           private val secondaryButton: ControllerKeyReference?,
+                           private val upButton: ControllerKeyReference?,
+                           private val downButton: ControllerKeyReference?,
+                           private val leftButton: ControllerKeyReference?,
+                           private val rightButton: ControllerKeyReference?) : GuiController(
         engine) {
 
     override fun update(delta: Double) {

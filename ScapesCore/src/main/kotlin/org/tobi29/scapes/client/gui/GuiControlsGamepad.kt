@@ -66,8 +66,11 @@ class GuiControlsGamepad(state: GameState,
 
         val hotbarTag = tagMap.mapMut("Hotbar")
         addText("Hotbar")
-        addButton("Right", "Add", hotbarTag, controller)
-        addButton("Left", "Subtract", hotbarTag, controller)
-        addButton("Left Hand", "Left", hotbarTag, controller)
+        addButton("Right Hand Right", "AddRight", hotbarTag, controller)
+        addButton("Right Hand Left", "SubtractRight", hotbarTag, controller)
+        addButton("Left Hand Right", "AddLeft", hotbarTag, controller)
+        addButton("Left Hand Left", "SubtractLeft", hotbarTag, controller)
+        addButton("Both Right", "Add", hotbarTag, controller)
+        addButton("Both Left", "Subtract", hotbarTag, controller)
     }
 }

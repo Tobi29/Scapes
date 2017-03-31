@@ -37,7 +37,7 @@ class GuiComponentControlsButton(parent: GuiLayoutData,
     private val text: GuiComponentText
     private val keys = ArrayList<ControllerKey>()
     private var editing: Byte = 0
-    private var key: ControllerKeyReference
+    private var key: ControllerKeyReference?
 
     init {
         text = addSubHori(4.0, 0.0, -1.0,
@@ -73,7 +73,7 @@ class GuiComponentControlsButton(parent: GuiLayoutData,
         } else {
             text.append(name)
             text.append(": ")
-            text.append(key.humanName())
+            text.append(key?.humanName() ?: "Not set")
         }
         this.text.text = text.toString()
     }
