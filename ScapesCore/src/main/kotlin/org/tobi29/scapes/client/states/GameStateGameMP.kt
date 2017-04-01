@@ -47,13 +47,13 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
     val inputGui: Gui
     val debug: Gui
     val debugWidget: GuiComponentWidget
+    protected val terrainTextureRegistry: TerrainTextureRegistry
+    protected val particleTransparentAtlas: ParticleTransparentAtlas
+    protected var scene: SceneScapesVoxelWorld? = null
     private val connectionSentProfiler: GuiWidgetDebugValues
     private val connectionReceivedProfiler: GuiWidgetDebugValues
-    private val terrainTextureRegistry: TerrainTextureRegistry
-    private val particleTransparentAtlas: ParticleTransparentAtlas
     private val modelHumanShared: MobLivingModelHumanShared
     private val modelBlockBreakShared: EntityModelBlockBreakShared
-    private var scene: SceneScapesVoxelWorld? = null
     private var init = false
 
     init {
@@ -103,8 +103,8 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         client.stop()
         terrainTextureRegistry.texture.markDisposed()
         engine.sounds.stop("music")
-        client.plugins.dispose()
         client.plugins.removeFileSystems(engine.files)
+        client.plugins.dispose()
         engine.graphics.textures.clearCache()
         logger.info { "Stopped game!" }
     }

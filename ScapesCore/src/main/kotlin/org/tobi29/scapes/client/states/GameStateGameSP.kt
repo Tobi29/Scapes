@@ -31,6 +31,8 @@ class GameStateGameSP(clientSupplier: (GameStateGameMP) -> ClientConnection,
                       engine: ScapesEngine) : GameStateGameMP(clientSupplier,
         loadScene, engine) {
     override fun dispose() {
+        this.scene?.dispose()
+        client.plugins.removeFileSystems(engine.files)
         try {
             server.stop(ScapesServer.ShutdownReason.STOP)
         } catch (e: IOException) {
@@ -44,7 +46,11 @@ class GameStateGameSP(clientSupplier: (GameStateGameMP) -> ClientConnection,
         }
 
         logger.info { "Stopped internal server!" }
-        super.dispose()
+        client.stop()
+        terrainTextureRegistry.texture.markDisposed()
+        engine.sounds.stop("music")
+        engine.graphics.textures.clearCache()
+        logger.info { "Stopped game!" }
     }
 
     override fun step(delta: Double) {
