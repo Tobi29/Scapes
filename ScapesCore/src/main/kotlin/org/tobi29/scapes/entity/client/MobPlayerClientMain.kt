@@ -17,6 +17,7 @@
 package org.tobi29.scapes.entity.client
 
 import org.tobi29.scapes.block.AABBElement
+import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.client.connection.ClientConnection
@@ -94,6 +95,7 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
             isHeadInWater = world.terrain.type(pos.intX(), pos.intY(),
                     floor(pos.doubleZ() + 0.7)).isLiquid
             aabbs.reset()
+            aabbs.forAllObjects { it.collision = BlockType.STANDARD_COLLISION }
         }
         sendPositionHandler.submitUpdate(uuid, pos.now(), speed.now(),
                 rot.now(), physicsState.isOnGround, physicsState.slidingWall,

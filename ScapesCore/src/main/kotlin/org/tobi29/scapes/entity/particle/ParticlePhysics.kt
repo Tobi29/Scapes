@@ -16,6 +16,7 @@
 package org.tobi29.scapes.entity.particle
 
 import org.tobi29.scapes.block.AABBElement
+import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.collisions
 import org.tobi29.scapes.engine.utils.Pool
@@ -81,6 +82,7 @@ object ParticlePhysics {
                     1.0 + groundFriction.toDouble() * delta * gravitation.toDouble())
         }
         collisions.reset()
+        collisions.forAllObjects { it.collision = BlockType.STANDARD_COLLISION }
         return ground
     }
 
