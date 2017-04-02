@@ -64,9 +64,9 @@ class PacketLightning : PacketAbstract, PacketClient {
     @Throws(IOException::class)
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        x = stream.double
-        y = stream.double
-        z = stream.double
+        x = stream.getDouble()
+        y = stream.getDouble()
+        z = stream.getDouble()
     }
 
     override fun runClient(client: ClientConnection) {

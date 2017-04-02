@@ -57,7 +57,7 @@ object NewClientConnection {
 
         // Send header
         channel.outputStream.put(ConnectionInfo.header())
-        channel.outputStream.put(ConnectionType.PLAY.data().toInt())
+        channel.outputStream.put(ConnectionType.PLAY.data())
         channel.queueBundle()
 
         // Send account info
@@ -88,21 +88,21 @@ object NewClientConnection {
         } catch (e: InvalidKeyException) {
             throw IOException(e)
         }
-        val length = channel.inputStream.int
+        val length = channel.inputStream.getInt()
         val plugins = ArrayList<PluginFile?>(length)
         val pluginRequests = ArrayList<Int>(length)
         for (i in 0..length - 1) {
-            val id = channel.inputStream.string
+            val id = channel.inputStream.getString()
             val version: Version
             val scapesVersion: Version
             try {
-                version = versionParse(channel.inputStream.string)
-                scapesVersion = versionParse(channel.inputStream.string)
+                version = versionParse(channel.inputStream.getString())
+                scapesVersion = versionParse(channel.inputStream.getString())
             } catch (e: VersionException) {
                 throw IOException(e)
             }
 
-            val checksum = channel.inputStream.byteArray
+            val checksum = channel.inputStream.getByteArray()
             val embedded = Plugins.embedded().asSequence()
                     .filter { it.id() == id }
                     .filter {
@@ -136,8 +136,8 @@ object NewClientConnection {
         if (channel.receive()) {
             return null
         }
-        if (channel.inputStream.boolean) {
-            throw ConnectionCloseException(channel.inputStream.string)
+        if (channel.inputStream.getBoolean()) {
+            throw ConnectionCloseException(channel.inputStream.getString())
         }
         var pluginI = 0
         val pluginL = pluginRequests.size
@@ -148,7 +148,7 @@ object NewClientConnection {
                 return null
             }
             val request = pluginRequests[0]
-            if (channel.inputStream.boolean) {
+            if (channel.inputStream.getBoolean()) {
                 pluginStream.buffer().flip()
                 val file = FileCache.retrieve(game.pluginCache,
                         FileCache.store(game.pluginCache, pluginStream))
@@ -173,10 +173,10 @@ object NewClientConnection {
         if (channel.receive()) {
             return null
         }
-        if (channel.inputStream.boolean) {
-            throw ConnectionCloseException(channel.inputStream.string)
+        if (channel.inputStream.getBoolean()) {
+            throw ConnectionCloseException(channel.inputStream.getString())
         }
-        val loadingDistanceServer = channel.inputStream.int
+        val loadingDistanceServer = channel.inputStream.getInt()
         val idStorage = readBinary(channel.inputStream)
         val plugins2 = Plugins(plugins.map {
             it ?: throw IllegalStateException("Failed to receive plugin")

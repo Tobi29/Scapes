@@ -19,9 +19,9 @@ import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
 import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
+import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toTag
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.server.connection.PlayerConnection
@@ -63,8 +63,8 @@ class PacketEntityMetaData : PacketAbstract, PacketClient {
     @Throws(IOException::class)
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.long, stream.long)
-        category = stream.string
+        uuid = UUID(stream.getLong(), stream.getLong())
+        category = stream.getString()
         tag = readBinary(stream)
     }
 

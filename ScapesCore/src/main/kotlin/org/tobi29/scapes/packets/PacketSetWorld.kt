@@ -24,9 +24,9 @@ import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
 import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
+import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.server.connection.PlayerConnection
 import java.util.*
@@ -65,9 +65,9 @@ class PacketSetWorld : PacketAbstract, PacketClient {
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
         tag = readBinary(stream)
-        seed = stream.long
-        uuid = UUID(stream.long, stream.long)
-        environment = stream.int
+        seed = stream.getLong()
+        uuid = UUID(stream.getLong(), stream.getLong())
+        environment = stream.getInt()
     }
 
     override fun runClient(client: ClientConnection) {

@@ -45,8 +45,8 @@ class PacketBlockChangeAir : PacketBlockChange {
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        x = stream.int
-        y = stream.int
-        z = stream.int
+        x = stream.getInt()
+        y = stream.getInt()
+        z = stream.getInt()
     }
 }

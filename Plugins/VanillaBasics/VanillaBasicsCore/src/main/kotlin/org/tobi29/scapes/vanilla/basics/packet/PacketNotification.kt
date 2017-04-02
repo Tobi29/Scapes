@@ -54,8 +54,8 @@ class PacketNotification : PacketAbstract, PacketClient {
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        title = stream.string
-        text = stream.string
+        title = stream.getString()
+        text = stream.getString()
     }
 
     override fun runClient(client: ClientConnection) {

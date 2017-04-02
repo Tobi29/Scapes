@@ -23,6 +23,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.client.MobileEntityClient
 import org.tobi29.scapes.server.connection.PlayerConnection
 import java.util.*
+import kotlin.experimental.or
 
 class PacketMobChangeState : PacketAbstract, PacketBoth {
     private lateinit var uuid: UUID
@@ -61,14 +62,16 @@ class PacketMobChangeState : PacketAbstract, PacketBoth {
                             stream: WritableByteStream) {
         stream.putLong(uuid.mostSignificantBits)
         stream.putLong(uuid.leastSignificantBits)
-        val b = (if (ground) 1 else 0) or (if (slidingWall) 2 else 0) or (if (inWater) 4 else 0) or
+        val b = (if (ground) 1.toByte() else 0) or
+                (if (slidingWall) 2 else 0) or
+                (if (inWater) 4 else 0) or
                 if (swimming) 8 else 0
         stream.put(b)
     }
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.long, stream.long)
+        uuid = UUID(stream.getLong(), stream.getLong())
         val value = stream.get().toInt()
         ground = value and 1 == 1
         slidingWall = value and 2 == 2
@@ -87,7 +90,9 @@ class PacketMobChangeState : PacketAbstract, PacketBoth {
 
     override fun sendServer(client: ClientConnection,
                             stream: WritableByteStream) {
-        val b = (if (ground) 1 else 0) or (if (slidingWall) 2 else 0) or (if (inWater) 4 else 0) or
+        val b = (if (ground) 1.toByte() else 0) or
+                (if (slidingWall) 2 else 0) or
+                (if (inWater) 4 else 0) or
                 if (swimming) 8 else 0
         stream.put(b)
     }

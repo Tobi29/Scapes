@@ -103,10 +103,10 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
             val challengeReceived = ByteArray(challenge.size)
             input[challengeReceived]
             nickname = input.getString(1 shl 10)
-            var length = input.int
+            var length = input.getInt()
             val requests = ArrayList<Int>(length)
             while (length-- > 0) {
-                requests.add(input.int)
+                requests.add(input.getInt())
             }
             val response2 = generateResponse(
                     Arrays.equals(challengeReceived, challenge))
@@ -127,7 +127,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
             if (channel.receive()) {
                 return
             }
-            loadingRadius = clamp(input.int, 10,
+            loadingRadius = clamp(input.getInt(), 10,
                     server.server.maxLoadingRadius())
             val buffer = ByteBuffer(64 * 64 * 4)
             input[buffer]
@@ -172,7 +172,8 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                         // This packet is not registered as it is just for
                         // internal use
                         if (packet !is PacketDisconnectSelf) {
-                            channel.outputStream.putShort(packet.type.id)
+                            channel.outputStream.putShort(
+                                    packet.type.id.toShort())
                         }
                         packet.sendClient(this, channel.outputStream)
                         if (channel.bundleSize() > 1 shl 10 shl 4) {
@@ -198,7 +199,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                             PacketBundleChannel.FetchResult.BUNDLE -> {
                                 while (channel.inputStream.hasRemaining()) {
                                     val packet = PacketAbstract.make(registry,
-                                            channel.inputStream.short.toInt()).createServer()
+                                            channel.inputStream.getShort().toInt()).createServer()
                                     packet.parseServer(
                                             this@RemotePlayerConnection,
                                             channel.inputStream)

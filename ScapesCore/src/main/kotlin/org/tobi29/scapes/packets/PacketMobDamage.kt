@@ -60,9 +60,9 @@ class PacketMobDamage : PacketAbstract, PacketClient {
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.long, stream.long)
-        health = stream.double
-        maxHealth = stream.double
+        uuid = UUID(stream.getLong(), stream.getLong())
+        health = stream.getDouble()
+        maxHealth = stream.getDouble()
     }
 
     override fun runClient(client: ClientConnection) {

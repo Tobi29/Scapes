@@ -57,14 +57,14 @@ class PacketMobMoveRelative : PacketAbstract, PacketBoth {
                             stream: WritableByteStream) {
         stream.putLong(uuid.mostSignificantBits)
         stream.putLong(uuid.leastSignificantBits)
-        stream.put(x.toInt())
-        stream.put(y.toInt())
-        stream.put(z.toInt())
+        stream.put(x)
+        stream.put(y)
+        stream.put(z)
     }
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.long, stream.long)
+        uuid = UUID(stream.getLong(), stream.getLong())
         x = stream.get()
         y = stream.get()
         z = stream.get()
@@ -80,9 +80,9 @@ class PacketMobMoveRelative : PacketAbstract, PacketBoth {
 
     override fun sendServer(client: ClientConnection,
                             stream: WritableByteStream) {
-        stream.put(x.toInt())
-        stream.put(y.toInt())
-        stream.put(z.toInt())
+        stream.put(x)
+        stream.put(y)
+        stream.put(z)
     }
 
     override fun parseServer(player: PlayerConnection,

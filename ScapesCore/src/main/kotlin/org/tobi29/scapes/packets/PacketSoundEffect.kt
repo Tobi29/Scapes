@@ -71,13 +71,13 @@ class PacketSoundEffect : PacketAbstract, PacketClient {
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        audio = stream.string
-        position = Vector3d(stream.double, stream.double,
-                stream.double)
-        velocity = Vector3d(stream.double, stream.double,
-                stream.double)
-        pitch = stream.float
-        gain = stream.float
+        audio = stream.getString()
+        position = Vector3d(stream.getDouble(), stream.getDouble(),
+                stream.getDouble())
+        velocity = Vector3d(stream.getDouble(), stream.getDouble(),
+                stream.getDouble())
+        pitch = stream.getFloat()
+        gain = stream.getFloat()
     }
 
     override fun runClient(client: ClientConnection) {

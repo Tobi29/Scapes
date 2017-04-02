@@ -64,10 +64,10 @@ class PacketMobMoveAbsolute : PacketAbstract, PacketBoth {
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.long, stream.long)
-        x = stream.double
-        y = stream.double
-        z = stream.double
+        uuid = UUID(stream.getLong(), stream.getLong())
+        x = stream.getDouble()
+        y = stream.getDouble()
+        z = stream.getDouble()
     }
 
     override fun runClient(client: ClientConnection) {
@@ -87,9 +87,9 @@ class PacketMobMoveAbsolute : PacketAbstract, PacketBoth {
 
     override fun parseServer(player: PlayerConnection,
                              stream: ReadableByteStream) {
-        x = stream.double
-        y = stream.double
-        z = stream.double
+        x = stream.getDouble()
+        y = stream.getDouble()
+        z = stream.getDouble()
     }
 
     override fun runServer(player: PlayerConnection) {

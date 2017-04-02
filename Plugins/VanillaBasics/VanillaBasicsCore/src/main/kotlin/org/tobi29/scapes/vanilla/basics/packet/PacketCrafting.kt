@@ -52,7 +52,7 @@ class PacketCrafting : PacketAbstract, PacketServer {
     @Throws(IOException::class)
     override fun parseServer(player: PlayerConnection,
                              stream: ReadableByteStream) {
-        id = stream.int
+        id = stream.getInt()
     }
 
     override fun runServer(player: PlayerConnection) {

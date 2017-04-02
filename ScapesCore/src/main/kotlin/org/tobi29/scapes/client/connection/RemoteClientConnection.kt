@@ -61,7 +61,7 @@ class RemoteClientConnection(private val worker: ConnectionWorker,
                     val packet = sendQueue.poll()
                     val output = channel.outputStream
                     val pos = output.position()
-                    output.putShort(packet.type.id)
+                    output.putShort(packet.type.id.toShort())
                     packet.sendServer(this@RemoteClientConnection, output)
                     val size = output.position() - pos
                     profilerSent.packet(packet, size.toLong())
@@ -83,7 +83,7 @@ class RemoteClientConnection(private val worker: ConnectionWorker,
                             while (bundle.hasRemaining()) {
                                 val packet = PacketAbstract.make(
                                         plugins.registry,
-                                        bundle.short.toInt()).createClient()
+                                        bundle.getShort().toInt()).createClient()
                                 val pos = bundle.position()
                                 packet.parseClient(
                                         this@RemoteClientConnection,

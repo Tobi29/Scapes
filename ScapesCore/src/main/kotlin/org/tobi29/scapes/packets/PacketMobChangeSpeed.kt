@@ -61,17 +61,17 @@ class PacketMobChangeSpeed : PacketAbstract, PacketBoth {
                             stream: WritableByteStream) {
         stream.putLong(uuid.mostSignificantBits)
         stream.putLong(uuid.leastSignificantBits)
-        stream.putShort(x.toInt())
-        stream.putShort(y.toInt())
-        stream.putShort(z.toInt())
+        stream.putShort(x)
+        stream.putShort(y)
+        stream.putShort(z)
     }
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.long, stream.long)
-        x = stream.short
-        y = stream.short
-        z = stream.short
+        uuid = UUID(stream.getLong(), stream.getLong())
+        x = stream.getShort()
+        y = stream.getShort()
+        z = stream.getShort()
     }
 
     override fun runClient(client: ClientConnection) {
@@ -85,16 +85,16 @@ class PacketMobChangeSpeed : PacketAbstract, PacketBoth {
 
     override fun sendServer(client: ClientConnection,
                             stream: WritableByteStream) {
-        stream.putShort(x.toInt())
-        stream.putShort(y.toInt())
-        stream.putShort(z.toInt())
+        stream.putShort(x)
+        stream.putShort(y)
+        stream.putShort(z)
     }
 
     override fun parseServer(player: PlayerConnection,
                              stream: ReadableByteStream) {
-        x = stream.short
-        y = stream.short
-        z = stream.short
+        x = stream.getShort()
+        y = stream.getShort()
+        z = stream.getShort()
     }
 
     override fun runServer(player: PlayerConnection) {

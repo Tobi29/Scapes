@@ -64,10 +64,10 @@ class PacketMobChangeRot : PacketAbstract, PacketBoth {
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.long, stream.long)
-        x = stream.float
-        y = stream.float
-        z = stream.float
+        uuid = UUID(stream.getLong(), stream.getLong())
+        x = stream.getFloat()
+        y = stream.getFloat()
+        z = stream.getFloat()
     }
 
     override fun runClient(client: ClientConnection) {
@@ -89,9 +89,9 @@ class PacketMobChangeRot : PacketAbstract, PacketBoth {
 
     override fun parseServer(player: PlayerConnection,
                              stream: ReadableByteStream) {
-        x = stream.float
-        y = stream.float
-        z = stream.float
+        x = stream.getFloat()
+        y = stream.getFloat()
+        z = stream.getFloat()
     }
 
     override fun runServer(player: PlayerConnection) {

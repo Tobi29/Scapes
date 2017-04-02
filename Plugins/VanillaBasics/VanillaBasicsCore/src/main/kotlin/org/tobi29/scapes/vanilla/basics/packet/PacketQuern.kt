@@ -54,7 +54,7 @@ class PacketQuern : PacketAbstract, PacketServer {
     @Throws(IOException::class)
     override fun parseServer(player: PlayerConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.long, stream.long)
+        uuid = UUID(stream.getLong(), stream.getLong())
     }
 
     override fun runServer(player: PlayerConnection) {

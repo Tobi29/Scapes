@@ -49,8 +49,8 @@ class PacketRequestChunk : PacketAbstract, PacketBoth {
 
     override fun parseServer(player: PlayerConnection,
                              stream: ReadableByteStream) {
-        x = stream.int
-        y = stream.int
+        x = stream.getInt()
+        y = stream.getInt()
     }
 
     override fun runServer(player: PlayerConnection) {
@@ -78,8 +78,8 @@ class PacketRequestChunk : PacketAbstract, PacketBoth {
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        x = stream.int
-        y = stream.int
+        x = stream.getInt()
+        y = stream.getInt()
     }
 
     override fun runClient(client: ClientConnection) {

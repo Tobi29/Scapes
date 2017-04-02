@@ -56,17 +56,17 @@ class PacketInventoryInteraction : PacketAbstract, PacketServer {
                             stream: WritableByteStream) {
         stream.putLong(uuid.mostSignificantBits)
         stream.putLong(uuid.leastSignificantBits)
-        stream.put(side.toInt())
+        stream.put(side)
         stream.putString(id)
         stream.putInt(slot)
     }
 
     override fun parseServer(player: PlayerConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.long, stream.long)
+        uuid = UUID(stream.getLong(), stream.getLong())
         side = stream.get()
-        id = stream.string
-        slot = stream.int
+        id = stream.getString()
+        slot = stream.getInt()
     }
 
     override fun runServer(player: PlayerConnection) {

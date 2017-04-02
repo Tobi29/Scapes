@@ -123,7 +123,7 @@ class GuiServerSelect(state: GameState,
                             state.engine.taskExecutor, ssl, true)
                     val output = bundleChannel.outputStream
                     output.put(ConnectionInfo.header())
-                    output.put(ConnectionType.GET_INFO.data().toInt())
+                    output.put(ConnectionType.GET_INFO.data())
                     bundleChannel.queueBundle()
                     if (bundleChannel.receive()) {
                         return@addConnection

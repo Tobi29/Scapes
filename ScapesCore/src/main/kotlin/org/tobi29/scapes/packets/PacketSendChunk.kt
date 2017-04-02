@@ -22,9 +22,9 @@ import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteClient
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
 import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
+import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.server.connection.PlayerConnection
 
 class PacketSendChunk : PacketAbstract, PacketClient {
@@ -54,8 +54,8 @@ class PacketSendChunk : PacketAbstract, PacketClient {
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        x = stream.int
-        y = stream.int
+        x = stream.getInt()
+        y = stream.getInt()
         tag = readBinary(stream)
     }
 

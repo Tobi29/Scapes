@@ -63,8 +63,8 @@ class PacketAnvil : PacketAbstract, PacketServer {
     @Throws(IOException::class)
     override fun parseServer(player: PlayerConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.long, stream.long)
-        id = stream.int
+        uuid = UUID(stream.getLong(), stream.getLong())
+        id = stream.getInt()
     }
 
     override fun runServer(player: PlayerConnection) {

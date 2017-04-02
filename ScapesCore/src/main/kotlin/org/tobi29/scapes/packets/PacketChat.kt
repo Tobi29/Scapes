@@ -46,7 +46,7 @@ class PacketChat : PacketAbstract, PacketBoth {
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        text = stream.string
+        text = stream.getString()
     }
 
     override fun runClient(client: ClientConnection) {

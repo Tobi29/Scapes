@@ -54,7 +54,7 @@ class PacketResearch : PacketAbstract, PacketServer {
 
     override fun parseServer(player: PlayerConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.long, stream.long)
+        uuid = UUID(stream.getLong(), stream.getLong())
     }
 
     override fun runServer(player: PlayerConnection) {

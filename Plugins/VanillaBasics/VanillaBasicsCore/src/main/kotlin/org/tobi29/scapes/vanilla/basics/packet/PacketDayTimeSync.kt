@@ -57,8 +57,8 @@ class PacketDayTimeSync : PacketAbstract, PacketClient {
     @Throws(IOException::class)
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        dayTime = stream.float.toDouble()
-        day = stream.long
+        dayTime = stream.getFloat().toDouble()
+        day = stream.getLong()
     }
 
     override fun runClient(client: ClientConnection) {

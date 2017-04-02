@@ -46,7 +46,7 @@ class PacketOpenGui : PacketAbstract, PacketClient {
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.long, stream.long)
+        uuid = UUID(stream.getLong(), stream.getLong())
     }
 
     override fun runClient(client: ClientConnection) {

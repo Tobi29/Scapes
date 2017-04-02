@@ -38,7 +38,7 @@ abstract class PacketPing : PacketAbstract, PacketBoth {
 
     override fun parseServer(player: PlayerConnection,
                              stream: ReadableByteStream) {
-        timestamp = stream.long
+        timestamp = stream.getLong()
     }
 
     override fun sendClient(player: PlayerConnection,
@@ -48,7 +48,7 @@ abstract class PacketPing : PacketAbstract, PacketBoth {
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        timestamp = stream.long
+        timestamp = stream.getLong()
     }
 
     override val isImmediate get() = true

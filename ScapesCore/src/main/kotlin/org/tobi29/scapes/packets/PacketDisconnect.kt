@@ -50,8 +50,8 @@ class PacketDisconnect : PacketAbstract, PacketClient {
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        reason = stream.string
-        time = stream.double
+        reason = stream.getString()
+        time = stream.getDouble()
     }
 
     override fun runClient(client: ClientConnection) {

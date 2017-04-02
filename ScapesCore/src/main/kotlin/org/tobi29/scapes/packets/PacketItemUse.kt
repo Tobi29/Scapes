@@ -61,9 +61,9 @@ class PacketItemUse : PacketAbstract, PacketServer {
     @Throws(IOException::class)
     override fun parseServer(player: PlayerConnection,
                              stream: ReadableByteStream) {
-        strength = stream.double
-        side = stream.boolean
-        direction = Vector2d(stream.double, stream.double)
+        strength = stream.getDouble()
+        side = stream.getBoolean()
+        direction = Vector2d(stream.getDouble(), stream.getDouble())
     }
 
     override fun runServer(player: PlayerConnection) {

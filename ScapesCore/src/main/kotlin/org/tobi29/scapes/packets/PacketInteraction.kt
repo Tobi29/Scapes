@@ -63,13 +63,13 @@ class PacketInteraction : PacketAbstract, PacketBoth {
                             stream: WritableByteStream) {
         stream.putLong(uuid.mostSignificantBits)
         stream.putLong(uuid.leastSignificantBits)
-        stream.put(side.toInt())
-        stream.put(data.toInt())
+        stream.put(side)
+        stream.put(data)
     }
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.long, stream.long)
+        uuid = UUID(stream.getLong(), stream.getLong())
         side = stream.get()
         data = stream.get()
     }
@@ -87,8 +87,8 @@ class PacketInteraction : PacketAbstract, PacketBoth {
 
     override fun sendServer(client: ClientConnection,
                             stream: WritableByteStream) {
-        stream.put(side.toInt())
-        stream.put(data.toInt())
+        stream.put(side)
+        stream.put(data)
     }
 
     override fun parseServer(player: PlayerConnection,

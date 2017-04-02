@@ -55,8 +55,8 @@ class PacketEntityDespawn : PacketAbstract, PacketClient {
     @Throws(IOException::class)
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.long, stream.long)
-        dead = stream.boolean
+        uuid = UUID(stream.getLong(), stream.getLong())
+        dead = stream.getBoolean()
     }
 
     override fun runClient(client: ClientConnection) {

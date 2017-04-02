@@ -62,18 +62,18 @@ open class PacketBlockChange : PacketAbstract, PacketClient {
         stream.putInt(x)
         stream.putInt(y)
         stream.putInt(z)
-        stream.putShort(id)
-        stream.putShort(data)
+        stream.putShort(id.toShort())
+        stream.putShort(data.toShort())
     }
 
     @Throws(IOException::class)
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        x = stream.int
-        y = stream.int
-        z = stream.int
-        id = stream.short.toInt()
-        data = stream.short.toInt()
+        x = stream.getInt()
+        y = stream.getInt()
+        z = stream.getInt()
+        id = stream.getShort().toInt()
+        data = stream.getShort().toInt()
     }
 
     override fun runClient(client: ClientConnection) {
