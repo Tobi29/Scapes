@@ -37,11 +37,6 @@ artifacts {
 
 dependencies {
     testCompile rootProject.ext.scapesEngineTestAssertions
-
-    testRuntime(rootProject.ext.spekEngine) {
-        exclude group: "org.junit.platform"
-        exclude group: "org.jetbrains.kotlin"
-    }
 }
 
 eclipse.project {
