@@ -35,6 +35,7 @@ import org.tobi29.scapes.engine.input.isDown
 import org.tobi29.scapes.engine.utils.EventDispatcher
 import org.tobi29.scapes.engine.utils.ListenerOwnerHandle
 import org.tobi29.scapes.engine.utils.graphics.encodePNG
+import org.tobi29.scapes.engine.utils.io.filesystem.path
 import org.tobi29.scapes.engine.utils.io.filesystem.write
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.engine.utils.math.vector.times
@@ -278,6 +279,26 @@ class InputModeKeyboard(engine: ScapesEngine,
                 }
                 event.muted = true
                 return@listener
+            }
+            if (event.key == ControllerKey.KEY_F3) {
+                val shift = controller.isDown(ControllerKey.KEY_SHIFT_LEFT)
+                val control = controller.isDown(ControllerKey.KEY_CONTROL_LEFT)
+                if (shift && control) {
+                    ScapesEngine.crashReport(path("."), { engine },
+                            Throwable("Debug report"))
+                    event.muted = true
+                    return@listener
+                } else if (Debug.enabled()) {
+                    if (shift) {
+                        engine.profiler.visible = !engine.profiler.visible
+                    } else if (control) {
+                        engine.performance.visible = !engine.performance.visible
+                    } else {
+                        engine.debugValues.visible = !engine.debugValues.visible
+                    }
+                    event.muted = true
+                    return@listener
+                }
             }
             if (Debug.enabled() && event.key == ControllerKey.KEY_F6) {
                 val state = engine.getState()
