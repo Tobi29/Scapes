@@ -114,7 +114,7 @@ fun main(args: Array<String>) {
             }
             engine = ScapesEngine(
                     { ScapesClient(it, home, pluginCache, saves) }, backend,
-                    taskExecutor, configMap, Debug.enabled())
+                    taskExecutor, configMap)
             try {
                 engine.start()
                 try {
