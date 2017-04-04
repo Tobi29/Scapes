@@ -30,7 +30,7 @@ class GuiScreenshot(state: GameState,
         style) {
     init {
         val tex = texture.get()
-        pane.add(16.0, 80.0, 368.0,
+        pane.add(16.0, 5.0, 368.0,
                 (tex.height().toDouble() / tex.width() * 368).toInt().toDouble()
         ) { GuiComponentImage(it, texture) }
     }
