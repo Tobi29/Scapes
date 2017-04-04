@@ -92,8 +92,6 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         }
     }
 
-    override val tps = 240.0
-
     fun client(): ClientConnection {
         return client
     }
