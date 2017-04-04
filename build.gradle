@@ -69,7 +69,7 @@ ext {
     kotlinLoggingVersion = "1.4.4"
     slf4jVersion = "1.7.25"
     spekVersion = "1.1.0"
-    swtVersion = "4.6.3"
+    swtVersion = "4.6"
     lwjglVersion = "3.1.1"
     log4jVersion = "2.8.1"
     commonsCLIVersion = "1.4"
