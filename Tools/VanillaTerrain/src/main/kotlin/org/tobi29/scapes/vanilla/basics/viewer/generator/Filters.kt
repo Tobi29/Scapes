@@ -184,6 +184,20 @@ fun climate(
     }
 }
 
+fun autumn(
+        climateGenerator: ClimateGenerator): TerrainViewerCanvas.ColorSupplier {
+    return object : TerrainViewerCanvas.ColorSupplier {
+        override fun color(x: Double,
+                           y: Double,
+                           o: TerrainViewerCanvas.Output) {
+            val autumn = climateGenerator.autumnLeaves(y)
+            o.h = 0.3 - autumn * 0.3
+            o.s = 0.8
+            o.v = 0.9
+        }
+    }
+}
+
 fun mix(
         a: TerrainViewerCanvas.ColorSupplier,
         b: TerrainViewerCanvas.ColorSupplier,

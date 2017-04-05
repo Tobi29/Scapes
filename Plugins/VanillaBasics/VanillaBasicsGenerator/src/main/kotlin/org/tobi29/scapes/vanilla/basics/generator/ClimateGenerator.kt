@@ -310,22 +310,19 @@ class ClimateGenerator private constructor(private val temperatureNoise: Simplex
     }
 
     fun autumnLeaves(y: Double): Double {
-        var yy = y / SCALE / 4.0 % 1.0
-        if (yy < 0.0) {
-            yy++
-        }
+        val yy = y / SCALE / 2.0 remP 1.0
         var factor = yy % 0.5
         if (factor > 0.25) {
             factor = 0.5 - factor
         }
-        factor = min(factor * 5.0, 1.0)
+        factor = min(factor * 7.0, 1.0)
         if (yy > 0.5) {
             return clamp(
-                    -cosTable(season() * TWO_PI) * 20 - 18,
+                    -cosTable(season() * TWO_PI) * 18.0 - 16.0,
                     0.0, 1.0) * factor
         } else {
             return clamp(-cosTable(
-                    (season() + 0.5) * TWO_PI) * 20 - 18, 0.0,
+                    (season() + 0.5) * TWO_PI) * 18.0 - 16.0, 0.0,
                     1.0) * factor
         }
     }

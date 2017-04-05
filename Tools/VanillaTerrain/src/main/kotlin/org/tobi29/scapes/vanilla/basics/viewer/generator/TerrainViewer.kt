@@ -45,6 +45,7 @@ class TerrainViewer : MultiDocumentApplication("Scapes Terrain Viewer",
         view.action("Terrain") { openNewTab(composite, openTerrain()) }
         view.action("Biome") { openNewTab(composite, openBiome()) }
         view.action("Climate") { openNewTab(composite, openClimate()) }
+        view.action("Autumn") { openNewTab(composite, openAutumn()) }
     }
 
     fun openTerrain(): Document {
@@ -69,5 +70,14 @@ class TerrainViewer : MultiDocumentApplication("Scapes Terrain Viewer",
         val climateGenerator = ClimateGenerator(random, terrainGenerator)
         return TerrainViewerAnimatedDocument({ climate(climateGenerator) },
                 { climateGenerator.add(1.0) })
+    }
+
+    fun openAutumn(): Document {
+        val random = Random()
+        val terrainGenerator = TerrainGenerator(random)
+        val climateGenerator = ClimateGenerator(random, terrainGenerator)
+        return TerrainViewerAnimatedDocument({
+            mix(climate(climateGenerator), autumn(climateGenerator), 0.8)
+        }, { climateGenerator.add(1.0) })
     }
 }
