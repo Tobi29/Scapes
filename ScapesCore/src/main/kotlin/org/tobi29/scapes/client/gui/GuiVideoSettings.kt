@@ -16,14 +16,12 @@
 
 package org.tobi29.scapes.client.gui
 
+import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton
 import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.engine.utils.tag.mapMut
-import org.tobi29.scapes.engine.utils.tag.set
-import org.tobi29.scapes.engine.utils.tag.toDouble
 import org.tobi29.scapes.engine.utils.math.round
 
 class GuiVideoSettings(state: GameState,
@@ -31,10 +29,10 @@ class GuiVideoSettings(state: GameState,
                        style: GuiStyle) : GuiMenuSingle(
         state, "Video Settings", previous, style) {
     init {
-        val scapesTag = state.engine.configMap.mapMut("Scapes")
+        val scapes = state.engine.game as ScapesClient
         val viewDistance = row(pane) {
             slider(it, "View distance",
-                    ((scapesTag["RenderDistance"]?.toDouble() ?: 128.0) - 10.0) / 246.0) { text, value ->
+                    (scapes.renderDistance - 10.0) / 246.0) { text, value ->
                 text + ": " + round(10.0 + value * 246.0) + 'm'
             }
         }
@@ -47,10 +45,8 @@ class GuiVideoSettings(state: GameState,
         }
         val resolutionMultiplier = row(pane) {
             slider(it, "Resolution", reverseResolution(
-                    state.engine.config.resolutionMultiplier)) { text, value ->
-                text + ": " +
-                        round(resolution(value) * 100.0) +
-                        '%'
+                    scapes.resolutionMultiplier)) { text, value ->
+                text + ": " + round(resolution(value) * 100.0) + '%'
             }
         }
 
@@ -59,14 +55,14 @@ class GuiVideoSettings(state: GameState,
         selection(fullscreen)
         selection(resolutionMultiplier)
 
-        viewDistance.on(GuiEvent.CHANGE) { event ->
-            scapesTag["RenderDistance"] = 10.0 + viewDistance.value() * 246.0
+        viewDistance.on(GuiEvent.CHANGE) {
+            scapes.renderDistance = 10.0 + viewDistance.value() * 246.0
         }
-        shader.on(GuiEvent.CLICK_LEFT) { event ->
+        shader.on(GuiEvent.CLICK_LEFT) {
             state.engine.guiStack.add("10-Menu",
                     GuiShaderSettings(state, this, style))
         }
-        fullscreen.on(GuiEvent.CLICK_LEFT) { event ->
+        fullscreen.on(GuiEvent.CLICK_LEFT) {
             if (!state.engine.config.fullscreen) {
                 fullscreen.setText("Fullscreen: ON")
                 state.engine.config.fullscreen = true
@@ -76,8 +72,8 @@ class GuiVideoSettings(state: GameState,
             }
             state.engine.container.updateContainer()
         }
-        resolutionMultiplier.on(GuiEvent.CHANGE) { event ->
-            state.engine.config.resolutionMultiplier = resolution(
+        resolutionMultiplier.on(GuiEvent.CHANGE) {
+            scapes.resolutionMultiplier = resolution(
                     resolutionMultiplier.value())
         }
     }

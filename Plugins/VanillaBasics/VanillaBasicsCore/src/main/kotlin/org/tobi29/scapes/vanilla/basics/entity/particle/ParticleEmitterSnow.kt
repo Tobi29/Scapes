@@ -94,11 +94,11 @@ class ParticleEmitterSnow(system: ParticleSystem,
                     player.rightWeapon().material().playerLight(
                             player.rightWeapon()))
             val s = shader.get()
-            s.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB())
-            s.setUniform1f(5, scene.fogDistance() * scene.renderDistance())
-            s.setUniform1i(6, 1)
-            s.setUniform1f(7, sunLightReduction)
-            s.setUniform1f(8, playerLight)
+            s.setUniform3f(gl, 4, scene.fogR(), scene.fogG(), scene.fogB())
+            s.setUniform1f(gl, 5, scene.fogDistance() * scene.renderDistance())
+            s.setUniform1i(gl, 6, 1)
+            s.setUniform1f(gl, 7, sunLightReduction)
+            s.setUniform1f(gl, 8, playerLight)
             render(s)
         }
     }

@@ -16,41 +16,39 @@
 
 package org.tobi29.scapes.client.gui
 
+import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton
 import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.engine.utils.tag.mapMut
-import org.tobi29.scapes.engine.utils.tag.set
-import org.tobi29.scapes.engine.utils.tag.toBoolean
 
 class GuiShaderSettings(state: GameState,
                         previous: Gui,
                         style: GuiStyle) : GuiMenuSingle(
         state, "Shader Settings", previous, style) {
     init {
-        val scapesTag = state.engine.configMap.mapMut("Scapes")
+        val scapes = state.engine.game as ScapesClient
         val animations: GuiComponentTextButton
-        if (scapesTag["Animations"]?.toBoolean() ?: false) {
+        if (scapes.animations) {
             animations = row(pane) { button(it, "Animations: ON") }
         } else {
             animations = row(pane) { button(it, "Animations: OFF") }
         }
         val bloom: GuiComponentTextButton
-        if (scapesTag["Bloom"]?.toBoolean() ?: false) {
+        if (scapes.bloom) {
             bloom = row(pane) { button(it, "Bloom: ON") }
         } else {
             bloom = row(pane) { button(it, "Bloom: OFF") }
         }
         val autoExposure: GuiComponentTextButton
-        if (scapesTag["AutoExposure"]?.toBoolean() ?: false) {
+        if (scapes.autoExposure) {
             autoExposure = row(pane) { button(it, "Auto Exposure: ON") }
         } else {
             autoExposure = row(pane) { button(it, "Auto Exposure: OFF") }
         }
         val fxaa: GuiComponentTextButton
-        if (scapesTag["FXAA"]?.toBoolean() ?: false) {
+        if (scapes.fxaa) {
             fxaa = row(pane) { button(it, "FXAA: ON") }
         } else {
             fxaa = row(pane) { button(it, "FXAA: OFF") }
@@ -61,40 +59,40 @@ class GuiShaderSettings(state: GameState,
         selection(autoExposure)
         selection(fxaa)
 
-        animations.on(GuiEvent.CLICK_LEFT) { event ->
-            if (scapesTag["Animations"]?.toBoolean() ?: false) {
+        animations.on(GuiEvent.CLICK_LEFT) {
+            if (scapes.animations) {
                 animations.setText("Animations: OFF")
-                scapesTag["Animations"] = false
+                scapes.animations = false
             } else {
                 animations.setText("Animations: ON")
-                scapesTag["Animations"] = true
+                scapes.animations = true
             }
         }
-        bloom.on(GuiEvent.CLICK_LEFT) { event ->
-            if (scapesTag["Bloom"]?.toBoolean() ?: false) {
+        bloom.on(GuiEvent.CLICK_LEFT) {
+            if (scapes.bloom) {
                 bloom.setText("Bloom: OFF")
-                scapesTag["Bloom"] = false
+                scapes.bloom = false
             } else {
                 bloom.setText("Bloom: ON")
-                scapesTag["Bloom"] = true
+                scapes.bloom = true
             }
         }
-        autoExposure.on(GuiEvent.CLICK_LEFT) { event ->
-            if (scapesTag["AutoExposure"]?.toBoolean() ?: false) {
+        autoExposure.on(GuiEvent.CLICK_LEFT) {
+            if (scapes.autoExposure) {
                 autoExposure.setText("Auto Exposure: OFF")
-                scapesTag["AutoExposure"] = false
+                scapes.autoExposure = false
             } else {
                 autoExposure.setText("Auto Exposure: ON")
-                scapesTag["AutoExposure"] = true
+                scapes.autoExposure = true
             }
         }
-        fxaa.on(GuiEvent.CLICK_LEFT) { event ->
-            if (scapesTag["FXAA"]?.toBoolean() ?: false) {
+        fxaa.on(GuiEvent.CLICK_LEFT) {
+            if (scapes.fxaa) {
                 fxaa.setText("FXAA: OFF")
-                scapesTag["FXAA"] = false
+                scapes.fxaa = false
             } else {
                 fxaa.setText("FXAA: ON")
-                scapesTag["FXAA"] = true
+                scapes.fxaa = true
             }
         }
     }

@@ -69,11 +69,11 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
                 intArrayOf(0, 1, 2, 2, 1, 3), RenderType.TRIANGLES)
 
         val f1 = gl.engine.graphics.createFramebuffer(
-                gl.sceneWidth(), gl.sceneHeight(), 1, false, false, false)
+                gl.contentWidth(), gl.contentHeight(), 1, false, false, false)
         val f2 = gl.engine.graphics.createFramebuffer(
-                gl.sceneWidth(), gl.sceneHeight(), 1, false, false, false)
+                gl.contentWidth(), gl.contentHeight(), 1, false, false, false)
         val f3 = gl.engine.graphics.createFramebuffer(
-                gl.sceneWidth(), gl.sceneHeight(), 1, false, false, false,
+                gl.contentWidth(), gl.contentHeight(), 1, false, false, false,
                 TextureFilter.LINEAR)
         val render = gl.into(f1) {
             gl.clearDepth()
@@ -81,8 +81,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
             if (save != null) {
                 changeBackground(save)
             }
-            cam.setPerspective(gl.sceneWidth().toFloat() / gl.sceneHeight(),
-                    90.0f)
+            cam.setPerspective(gl.aspectRatio().toFloat(), 90.0f)
             cam.setView(0.0f, yaw, 0.0f)
             gl.matrixStack.push { matrix ->
                 gl.enableCulling()
@@ -90,8 +89,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
                 gl.setBlending(BlendingMode.NORMAL)
                 matrix.identity()
                 matrix.modelViewProjection().perspective(cam.fov,
-                        gl.sceneWidth().toFloat() / gl.sceneHeight().toFloat(),
-                        cam.near, cam.far)
+                        gl.aspectRatio().toFloat(), cam.near, cam.far)
                 matrix.modelViewProjection().camera(cam)
                 matrix.modelView().camera(cam)
                 for (i in 0..5) {
@@ -126,7 +124,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
 
     private fun blur(gl: GL,
                      processor: ShaderPreprocessor) {
-        val space = gl.sceneSpace()
+        val space = gl.contentSpace()
         val samples = round(space * 8.0) + 8
         val blurOffsets = gaussianBlurOffset(samples, 0.04f)
         val blurWeights = gaussianBlurWeight(samples) { cos(it * PI) }
@@ -149,7 +147,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
 
     protected open fun loadTextures() {
         val game = engine.game as ScapesClient
-        val saves = game.saves()
+        val saves = game.saves
         val random = ThreadLocalRandom.current()
         try {
             val list = saves.list().toList()

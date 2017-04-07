@@ -45,7 +45,7 @@ class GuiCreateWorld(state: GameState,
 
     init {
         val game = state.engine.game as ScapesClient
-        val saves = game.saves()
+        val saves = game.saves
         pane.addVert(16.0, 5.0, -1.0, 18.0) {
             GuiComponentText(it, "Name:")
         }

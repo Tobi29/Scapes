@@ -31,9 +31,9 @@ import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.utils.ByteBuffer
+import org.tobi29.scapes.engine.utils.tag.MutableTagList
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.listMut
-import org.tobi29.scapes.engine.utils.tag.mapMut
 import org.tobi29.scapes.engine.utils.tag.toMap
 import java.io.IOException
 import java.nio.channels.SelectionKey
@@ -43,11 +43,13 @@ class GuiServerSelect(state: GameState,
                       private val scene: SceneMenu,
                       style: GuiStyle) : GuiMenuDouble(state, "Multiplayer",
         "Add", "Back", previous, style) {
-    private val servers = state.engine.configMap.mapMut("Scapes").listMut(
-            "Servers")
+    private val servers: MutableTagList
     private val scrollPane: GuiComponentScrollPaneViewport
 
     init {
+        val scapes = state.engine.game as ScapesClient
+        servers = scapes.configMap.listMut("Servers")
+
         scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {
             GuiComponentScrollPane(it, 70)
         }.viewport

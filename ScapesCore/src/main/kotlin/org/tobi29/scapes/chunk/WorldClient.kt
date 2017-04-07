@@ -28,17 +28,12 @@ import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.graphics.BlendingMode
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.AABB
-import org.tobi29.scapes.engine.utils.math.floor
-import org.tobi29.scapes.engine.utils.math.max
-import org.tobi29.scapes.engine.utils.math.sqrt
+import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.mapMut
-import org.tobi29.scapes.engine.utils.tag.toBoolean
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.entity.client.MobClient
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
@@ -83,7 +78,7 @@ class WorldClient(val connection: ClientConnection,
         game.engine.events.listener<InputModeChangeEvent>(player) { event ->
             player.setInputMode(event.inputMode)
         }
-        player.setInputMode(game.inputMode())
+        player.setInputMode(game.inputMode)
 
         logger.info { "Received player entity: $player with id: $playerID" }
     }
@@ -184,11 +179,11 @@ class WorldClient(val connection: ClientConnection,
     fun addToPipeline(gl: GL,
                       cam: Cam,
                       debug: Boolean): () -> Unit {
-        val width = gl.sceneWidth()
-        val height = gl.sceneHeight()
-
-        val scapesTag = game.engine.configMap.mapMut("Scapes")
-        val animations = scapesTag["Animations"]?.toBoolean() ?: false
+        val scapes = game.engine.game as ScapesClient
+        val resolutionMultiplier = scapes.resolutionMultiplier
+        val width = round(gl.contentWidth() * resolutionMultiplier)
+        val height = round(gl.contentHeight() * resolutionMultiplier)
+        val animations = scapes.animations
 
         val shaderTerrain1 = gl.engine.graphics.loadShader(
                 "Scapes:shader/Terrain") {
@@ -235,38 +230,38 @@ class WorldClient(val connection: ClientConnection,
                     cam.position.doubleX(),
                     cam.position.doubleY())
             val sTerrain1 = shaderTerrain1.get()
-            sTerrain1.setUniform3f(4, scene.fogR(), scene.fogG(),
+            sTerrain1.setUniform3f(gl, 4, scene.fogR(), scene.fogG(),
                     scene.fogB())
-            sTerrain1.setUniform1f(5,
+            sTerrain1.setUniform1f(gl, 5,
                     scene.fogDistance() * scene.renderDistance())
-            sTerrain1.setUniform1i(6, 1)
-            sTerrain1.setUniform1f(7, time)
-            sTerrain1.setUniform1f(8, sunLightReduction)
-            sTerrain1.setUniform3f(9, sunlightNormal.floatX(),
+            sTerrain1.setUniform1i(gl, 6, 1)
+            sTerrain1.setUniform1f(gl, 7, time)
+            sTerrain1.setUniform1f(gl, 8, sunLightReduction)
+            sTerrain1.setUniform3f(gl, 9, sunlightNormal.floatX(),
                     sunlightNormal.floatY(), sunlightNormal.floatZ())
-            sTerrain1.setUniform1f(10, playerLight)
+            sTerrain1.setUniform1f(gl, 10, playerLight)
             val sTerrain2 = shaderTerrain2.get()
-            sTerrain2.setUniform3f(4, scene.fogR(), scene.fogG(),
+            sTerrain2.setUniform3f(gl, 4, scene.fogR(), scene.fogG(),
                     scene.fogB())
-            sTerrain2.setUniform1f(5,
+            sTerrain2.setUniform1f(gl, 5,
                     scene.fogDistance() * scene.renderDistance())
-            sTerrain2.setUniform1i(6, 1)
-            sTerrain2.setUniform1f(7, time)
-            sTerrain2.setUniform1f(8, sunLightReduction)
-            sTerrain2.setUniform3f(9, sunlightNormal.floatX(),
+            sTerrain2.setUniform1i(gl, 6, 1)
+            sTerrain2.setUniform1f(gl, 7, time)
+            sTerrain2.setUniform1f(gl, 8, sunLightReduction)
+            sTerrain2.setUniform3f(gl, 9, sunlightNormal.floatX(),
                     sunlightNormal.floatY(), sunlightNormal.floatZ())
-            sTerrain2.setUniform1f(10, playerLight)
+            sTerrain2.setUniform1f(gl, 10, playerLight)
             val sEntity = shaderEntity.get()
-            sEntity.setUniform3f(4, scene.fogR(), scene.fogG(),
+            sEntity.setUniform3f(gl, 4, scene.fogR(), scene.fogG(),
                     scene.fogB())
-            sEntity.setUniform1f(5,
+            sEntity.setUniform1f(gl, 5,
                     scene.fogDistance() * scene.renderDistance())
-            sEntity.setUniform1i(6, 1)
-            sEntity.setUniform1f(7, time)
-            sEntity.setUniform1f(8, sunLightReduction)
-            sEntity.setUniform3f(9, sunlightNormal.floatX(),
+            sEntity.setUniform1i(gl, 6, 1)
+            sEntity.setUniform1f(gl, 7, time)
+            sEntity.setUniform1f(gl, 8, sunLightReduction)
+            sEntity.setUniform3f(gl, 9, sunlightNormal.floatX(),
                     sunlightNormal.floatY(), sunlightNormal.floatZ())
-            sEntity.setUniform1f(10, playerLight)
+            sEntity.setUniform1f(gl, 10, playerLight)
             gl.setBlending(BlendingMode.NONE)
             scene.terrainTextureRegistry().texture.bind(gl)
             terrain.renderer.render(gl, sTerrain1, sTerrain2, cam,

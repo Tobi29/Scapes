@@ -373,9 +373,10 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
             gl.textures.unbind(gl)
             gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f)
             val sSkybox = shaderSkybox.get()
-            sSkybox.setUniform3f(4, scene.fogR(), scene.fogG(), scene.fogB())
-            sSkybox.setUniform1f(5, scene.fogDistance())
-            sSkybox.setUniform4f(6, skyboxLight * skyboxLight, skyboxLight,
+            sSkybox.setUniform3f(gl, 4, scene.fogR(), scene.fogG(),
+                    scene.fogB())
+            sSkybox.setUniform1f(gl, 5, scene.fogDistance())
+            sSkybox.setUniform4f(gl, 6, skyboxLight * skyboxLight, skyboxLight,
                     skyboxLight, 1.0f)
             skyboxMesh.render(gl, sSkybox)
             val sGlow = shaderGlow.get()
@@ -386,7 +387,8 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                 val brightness = max(
                         1.0f - skyLight - random.nextFloat() * 0.1f,
                         0.0f)
-                sGlow.setUniform4f(4, brightness, brightness, brightness, 1.0f)
+                sGlow.setUniform4f(gl, 4, brightness, brightness, brightness,
+                        1.0f)
                 val matrix = matrixStack.push()
                 matrix.rotateAccurate(sunAzimuth + 180.0, 0.0f, 0.0f, 1.0f)
                 matrix.rotateAccurate(-sunElevation, 1.0f, 0.0f, 0.0f)
@@ -400,11 +402,11 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
             matrix.rotateAccurate(sunAzimuth + 180.0f, 0.0f, 0.0f, 1.0f)
             matrix.rotateAccurate(-sunElevation, 1.0f, 0.0f, 0.0f)
             matrix.scale(1.0f, 1.0f, 1.0f)
-            sGlow.setUniform4f(4, fogR * 1.0f, fogG * 1.1f, fogB * 1.1f,
+            sGlow.setUniform4f(gl, 4, fogR * 1.0f, fogG * 1.1f, fogB * 1.1f,
                     1.0f)
             billboardMesh.render(gl, sGlow)
             matrix.scale(0.2f, 1.0f, 0.2f)
-            sGlow.setUniform4f(4, fogR * 1.6f, fogG * 1.6f, fogB * 1.3f,
+            sGlow.setUniform4f(gl, 4, fogR * 1.6f, fogG * 1.6f, fogB * 1.3f,
                     1.0f)
             billboardMesh.render(gl, sGlow)
             matrixStack.pop()
@@ -437,9 +439,9 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                 matrix.identity()
                 matrix.modelViewProjection().orthogonal(0.0f, 0.0f, 1.0f, 1.0f)
                 val sClouds = shaderClouds.get()
-                sClouds.setUniform1f(4, cloudTime)
-                sClouds.setUniform1f(5, weather.toFloat())
-                sClouds.setUniform2f(6,
+                sClouds.setUniform1f(gl, 4, cloudTime)
+                sClouds.setUniform1f(gl, 5, weather.toFloat())
+                sClouds.setUniform2f(gl, 6,
                         (scene.cam().position.doubleX() / 2048.0 % 1024.0).toFloat(),
                         (scene.cam().position.doubleY() / 2048.0 % 1024.0).toFloat())
                 cloudTextureMesh.render(gl, sClouds)

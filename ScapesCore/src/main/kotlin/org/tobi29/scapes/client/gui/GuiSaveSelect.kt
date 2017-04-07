@@ -42,7 +42,7 @@ class GuiSaveSelect(state: GameState,
 
     init {
         val game = engine.game as ScapesClient
-        saves = game.saves()
+        saves = game.saves
 
         scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {
             GuiComponentScrollPane(it, 70)

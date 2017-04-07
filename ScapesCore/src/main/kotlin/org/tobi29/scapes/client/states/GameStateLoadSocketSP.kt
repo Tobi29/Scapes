@@ -31,7 +31,6 @@ import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toDouble
 import org.tobi29.scapes.engine.utils.tag.toMap
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.format.WorldSource
@@ -44,7 +43,7 @@ class GameStateLoadSocketSP(private var source: WorldSource?,
                             engine: ScapesEngine,
                             private val scene: Scene) : GameState(
         engine) {
-    private val game = engine.game as ScapesClient
+    private val scapes = engine.game as ScapesClient
     private var step = 0
     private var server: ScapesServer? = null
     private var gui: GuiLoading? = null
@@ -81,8 +80,8 @@ class GameStateLoadSocketSP(private var source: WorldSource?,
             when (step) {
                 0 -> {
                     gui?.setProgress("Creating server...", 0.0)
-                    val serverConfigMap = (engine.configMap["Scapes"]?.toMap()?.get(
-                            "IntegratedServer")?.toMap() ?: TagMap())
+                    val serverConfigMap =
+                            scapes.configMap["IntegratedServer"]?.toMap() ?: TagMap()
                     val panorama = source.panorama()
                     val serverInfo: ServerInfo
                     if (panorama != null) {
@@ -125,7 +124,7 @@ class GameStateLoadSocketSP(private var source: WorldSource?,
                                         e.message ?: "", engine))
                     }
 
-                    game.connection.addConnection { worker, connection ->
+                    scapes.connection.addConnection { worker, connection ->
                         val channel = try {
                             connect(worker, address)
                         } catch (e: Exception) {
@@ -142,9 +141,8 @@ class GameStateLoadSocketSP(private var source: WorldSource?,
                                     RemoteAddress(address), channel,
                                     engine.taskExecutor, ssl, true)
                             val loadingRadius = round(
-                                    engine.configMap["Scapes"]?.toMap()?.get(
-                                            "RenderDistance")?.toDouble() ?: 0.0) + 16
-                            val account = Account[game.home.resolve(
+                                    scapes.renderDistance) + 16
+                            val account = Account[scapes.home.resolve(
                                     "Account.properties")]
                             val (plugins, loadingDistanceServer) = NewClientConnection.run(
                                     bundleChannel, engine, account,

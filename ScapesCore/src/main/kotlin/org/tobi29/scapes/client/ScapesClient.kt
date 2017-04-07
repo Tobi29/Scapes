@@ -24,7 +24,6 @@ import org.tobi29.scapes.client.input.keyboard.InputModeKeyboard
 import org.tobi29.scapes.client.input.spi.InputModeProvider
 import org.tobi29.scapes.client.input.touch.InputModeTouch
 import org.tobi29.scapes.client.states.GameStateMenu
-import org.tobi29.scapes.engine.Container
 import org.tobi29.scapes.engine.Game
 import org.tobi29.scapes.engine.GameStateStartup
 import org.tobi29.scapes.engine.ScapesEngine
@@ -35,37 +34,38 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FileCache
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath
 import org.tobi29.scapes.engine.utils.io.filesystem.createDirectories
-import org.tobi29.scapes.engine.utils.tag.MutableTagMap
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.mapMut
-import org.tobi29.scapes.engine.utils.tag.set
+import org.tobi29.scapes.engine.utils.tag.*
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class ScapesClient(engine: ScapesEngine,
                    val home: FilePath,
                    val pluginCache: FilePath,
-                   private val savesSupplier: (ScapesClient) -> SaveStorage) : Game(
+                   private val savesSupplier: (ScapesClient) -> SaveStorage,
+                   lightDefaults: Boolean = false) : Game(
         engine) {
+    override val name = "Scapes"
+    override val id = "Scapes"
+    override val version = VERSION
+    val configMap = engine.configMap.mapMut("Scapes")
     val connection = ConnectionManager(engine.taskExecutor, 10)
     private val inputModesMut = ConcurrentHashMap<Controller, (MutableTagMap) -> InputMode>()
     var inputModes = emptyList<InputMode>()
         private set
-    private lateinit var saves: SaveStorage
-    private lateinit var inputMode: InputMode
+    lateinit var saves: SaveStorage
+        private set
+    lateinit var inputMode: InputMode
+        private set
     private var freezeInputMode = false
 
-    fun saves(): SaveStorage {
-        return saves
-    }
-
-    fun inputMode(): InputMode {
-        return inputMode
-    }
-
-    override val name = "Scapes"
-    override val id = "Scapes"
-    override val version = VERSION
+    var animations by configMap.tagBoolean("Animations", !lightDefaults)
+    var bloom by configMap.tagBoolean("Bloom", !lightDefaults)
+    var autoExposure by configMap.tagBoolean("AutoExposure", !lightDefaults)
+    var fxaa by configMap.tagBoolean("FXAA", !lightDefaults)
+    var renderDistance by configMap.tagDouble("RenderDistance",
+            if (lightDefaults) 64.0 else 128.0)
+    var resolutionMultiplier by configMap.tagDouble("ResolutionMultiplier",
+            if (lightDefaults) 0.5 else 1.0)
 
     override fun initEarly() {
         val playlistsPath = home.resolve("playlists")
@@ -84,29 +84,13 @@ class ScapesClient(engine: ScapesEngine,
     }
 
     override fun init() {
-        if (!engine.configMap.containsKey("Scapes")) {
-            engine.configMap["Scapes"] = TagMap {
-                val lightDefaults = engine.container.formFactor == Container.FormFactor.PHONE
-                if (lightDefaults) {
-                    this["Animations"] = false
-                    this["Bloom"] = false
-                    this["AutoExposure"] = false
-                    this["FXAA"] = false
-                    this["RenderDistance"] = 64.0
-                } else {
-                    this["Animations"] = true
-                    this["Bloom"] = true
-                    this["AutoExposure"] = true
-                    this["FXAA"] = true
-                    this["RenderDistance"] = 128.0
-                }
-                this["IntegratedServer"] = TagMap {
-                    this["Server"] = TagMap {
-                        this["MaxLoadingRadius"] = 288
-                        this["Socket"] = TagMap {
-                            this["MaxPlayers"] = 5
-                            this["WorkerCount"] = 1
-                        }
+        if (!configMap.containsKey("IntegratedServer")) {
+            configMap["IntegratedServer"] = TagMap {
+                this["Server"] = TagMap {
+                    this["MaxLoadingRadius"] = 288
+                    this["Socket"] = TagMap {
+                        this["MaxPlayers"] = 5
+                        this["WorkerCount"] = 1
                     }
                 }
             }
@@ -158,7 +142,7 @@ class ScapesClient(engine: ScapesEngine,
 
     fun loadInput() {
         logger.info { "Loading input" }
-        val configMap = engine.configMap.mapMut("Scapes").mapMut("Input")
+        val configMap = configMap.mapMut("Input")
         inputModes = inputModesMut.values.asSequence().map {
             it(configMap)
         }.toList()

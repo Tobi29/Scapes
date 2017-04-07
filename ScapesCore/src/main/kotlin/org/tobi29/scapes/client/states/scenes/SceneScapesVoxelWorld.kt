@@ -19,6 +19,7 @@ import mu.KLogging
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldSkybox
+import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.gui.GuiComponentChat
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.client.states.GameStateGameSP
@@ -33,8 +34,6 @@ import org.tobi29.scapes.engine.utils.join
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.plus
-import org.tobi29.scapes.engine.utils.tag.toBoolean
-import org.tobi29.scapes.engine.utils.tag.toMap
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.particle.*
 import org.tobi29.scapes.entity.skin.ClientSkinStorage
@@ -98,15 +97,16 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
     }
 
     override fun appendToPipeline(gl: GL): () -> Unit {
-        val width = gl.sceneWidth()
-        val height = gl.sceneHeight()
-        val scapesTag = world.game.engine.configMap["Scapes"]?.toMap()
-        val fxaa = scapesTag?.get("FXAA")?.toBoolean() ?: false
-        val bloom = scapesTag?.get("Bloom")?.toBoolean() ?: false
-        val exposure = scapesTag?.get("AutoExposure")?.toBoolean() ?: false
+        val scapes = engine.game as ScapesClient
+        val resolutionMultiplier = scapes.resolutionMultiplier
+        val width = round(gl.contentWidth() * resolutionMultiplier)
+        val height = round(gl.contentHeight() * resolutionMultiplier)
+        val fxaa = scapes.fxaa
+        val bloom = scapes.bloom
+        val exposure = scapes.autoExposure
 
         val sceneBuffer = gl.engine.graphics.createFramebuffer(
-                gl.sceneWidth(), gl.sceneHeight(), 1, true, true, false,
+                width, height, 1, true, true, false,
                 TextureFilter.LINEAR)
         val renderScene = render(gl)
         val render = if (fxaa) {
@@ -118,7 +118,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                 }
             }
             val fxaaBuffer = gl.engine.graphics.createFramebuffer(
-                    gl.sceneWidth(), gl.sceneHeight(), 1, true, true, false,
+                    width, height, 1, true, true, false,
                     TextureFilter.LINEAR)
             val render = gl.into(fxaaBuffer) {
                 gl.clearDepth()
@@ -129,7 +129,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                         gl.activeTexture(3)
                         textureNoise.get().bind(gl)
                         gl.activeTexture(0)
-                        setUniform1i(4, 3)
+                        setUniform1i(gl, 4, 3)
                     })
             chain(render, pp)
         } else {
@@ -163,7 +163,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                 }
             }
             val compositeBuffer = gl.engine.graphics.createFramebuffer(
-                    gl.sceneWidth(), gl.sceneHeight(), 2, true, true, false,
+                    width, height, 2, true, true, false,
                     TextureFilter.LINEAR)
             val pp1 = gl.into(compositeBuffer,
                     postProcess(gl, shaderComposite1, sceneBuffer))
@@ -174,11 +174,11 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                     exposureFBO.texturesColor[0].bind(gl)
                     gl.activeTexture(0)
                 }
-                setUniform1f(6, brightness)
-                setUniform1f(7,
+                setUniform1f(gl, 6, brightness)
+                setUniform1f(gl, 7,
                         pow(2.0, skybox.exposure().toDouble()).toFloat())
-                setUniform1i(8, 2)
-                setUniform1i(9, 3)
+                setUniform1i(gl, 8, 2)
+                setUniform1i(gl, 9, 3)
             }
             chain(pp1, pp2)
         } else {
@@ -198,11 +198,11 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                     exposureFBO.texturesColor[0].bind(gl)
                     gl.activeTexture(0)
                 }
-                setUniform1f(6, brightness)
-                setUniform1f(7,
+                setUniform1f(gl, 6, brightness)
+                setUniform1f(gl, 7,
                         pow(2.0, skybox.exposure().toDouble()).toFloat())
-                setUniform1i(8, 2)
-                setUniform1i(9, 3)
+                setUniform1i(gl, 8, 2)
+                setUniform1i(gl, 9, 3)
             }
         }
         if (exposureFBO != null) {
@@ -219,7 +219,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                     sceneBuffer) {
                 exposureSync.tick()
                 val delta = exposureSync.delta()
-                setUniform1f(4, (delta * 0.5).toFloat())
+                setUniform1f(gl, 4, (delta * 0.5).toFloat())
             })
             return chain(render, pp, exp)
         } else {
@@ -276,7 +276,11 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
     }
 
     fun render(gl: GL): () -> Unit {
-        val render = renderWorld(gl, cam)
+        val resolutionMultiplier =
+                (engine.game as ScapesClient).resolutionMultiplier
+        val width = round(gl.contentWidth() * resolutionMultiplier)
+        val height = round(gl.contentHeight() * resolutionMultiplier)
+        val render = renderWorld(gl, cam, width, height)
         return {
             val player = world.player
             val playerModel = world.playerModel
@@ -305,8 +309,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                             player.viewOffset()),
                     player.speed(),
                     pitch.toFloat(), yaw.toFloat(), tilt.toFloat())
-            cam.setPerspective(gl.sceneWidth().toFloat() / gl.sceneHeight(),
-                    fov)
+            cam.setPerspective(gl.aspectRatio().toFloat(), fov)
             engine.sounds.setListener(cam.position.now(), player.rot(),
                     player.speed())
             terrainTextureRegistry.render(gl)
@@ -396,8 +399,8 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
 
     fun renderWorld(gl: GL,
                     cam: Cam,
-                    width: Int = gl.sceneWidth(),
-                    height: Int = gl.sceneHeight()): () -> Unit {
+                    width: Int,
+                    height: Int): () -> Unit {
         val skyboxFBO = gl.engine.graphics.createFramebuffer(width, height, 1,
                 false, true, false)
         val shaderTextured = gl.engine.graphics.loadShader(
@@ -411,8 +414,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                 gl.setBlending(BlendingMode.NORMAL)
                 matrix.identity()
                 matrix.modelViewProjection().perspective(cam.fov,
-                        gl.sceneWidth().toFloat() / gl.sceneHeight().toFloat(),
-                        cam.near, cam.far)
+                        gl.aspectRatio().toFloat(), cam.near, cam.far)
                 matrix.modelViewProjection().camera(cam)
                 matrix.modelView().camera(cam)
                 renderSkybox()
@@ -438,8 +440,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                 gl.setBlending(BlendingMode.NORMAL)
                 matrix.identity()
                 matrix.modelViewProjection().perspective(cam.fov,
-                        gl.sceneWidth().toFloat() / gl.sceneHeight().toFloat(),
-                        cam.near, cam.far)
+                        gl.aspectRatio().toFloat(), cam.near, cam.far)
                 matrix.modelViewProjection().camera(cam)
                 matrix.modelView().camera(cam)
                 renderWorld()
