@@ -45,6 +45,7 @@ fun main(args: Array<String>) {
         addOption("v", "version", false, "Print version and exit")
         addOption("m", "mode", true, "Specify which mode to run")
         addOption("d", "debug", false, "Run in debug mode")
+        addOption("s", "gles", false, "Use OpenGL ES")
         addOption("r", "socketsp", false, "Use network socket for singleplayer")
         addOption("t", "touch", false, "Emulate touch interface")
         addOption("c", "config", true, "Config directory for server")
@@ -108,9 +109,10 @@ fun main(args: Array<String>) {
             val saves: (ScapesClient) -> SaveStorage = {
                 SQLiteSaveStorage(home.resolve("saves"))
             }
+            val useGLES = commandLine.hasOption('s')
             val emulateTouch = commandLine.hasOption('t')
             val backend: (ScapesEngine) -> Container = {
-                ContainerGLFW(it, emulateTouch)
+                ContainerGLFW(it, emulateTouch, useGLES = useGLES)
             }
             engine = ScapesEngine(
                     { ScapesClient(it, home, pluginCache, saves) }, backend,
