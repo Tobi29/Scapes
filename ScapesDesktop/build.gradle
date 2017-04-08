@@ -34,7 +34,7 @@ application {
 
 dependencies {
     compile project(":ScapesCore")
-    compile project(":ScapesCore:SQLiteStorage")
+    compile project(":SQLiteStorage")
     compile rootProject.ext.scapesEngineGLFWBackend
 
     runtime rootProject.ext.scapesEngineNIOFileSystem

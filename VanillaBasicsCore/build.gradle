@@ -20,5 +20,5 @@ version = "0.0.0"
 
 dependencies {
     compile project(":ScapesCore")
-    compile project(":Plugins:VanillaBasics:VanillaBasicsGenerator")
+    compile project(":VanillaBasicsGenerator")
 }

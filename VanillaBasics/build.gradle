@@ -25,7 +25,7 @@ configurations {
 
 dependencies {
     embed project(":ScapesCore")
-    embed project(":Plugins:VanillaBasics:VanillaBasicsCore")
+    embed project(":VanillaBasicsCore")
 }
 
 task jar(type: ShadowJar, dependsOn: project.configurations.embed) {

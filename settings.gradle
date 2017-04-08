@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
+// Scapes core
 include "ScapesCore"
-include "ScapesCore:ScapesTerrain"
-include "ScapesCore:MariaDBStorage"
-include "ScapesCore:SQLiteStorage"
-include "ScapesCore:SQLJetStorage"
+include "ScapesTerrain"
+include "MariaDBStorage"
+include "SQLiteStorage"
+include "SQLJetStorage"
 include "ScapesDesktop"
-include "Plugins:VanillaBasics"
-include "Plugins:VanillaBasics:VanillaBasicsCore"
-include "Plugins:VanillaBasics:VanillaBasicsGenerator"
-include "Tools:ControlPanel"
-include "Tools:VanillaTerrain"
+
+// Vanilla basics
+include "VanillaBasics"
+include "VanillaBasicsCore"
+include "VanillaBasicsGenerator"
+
+// Tools
+include "ControlPanel"
+include "VanillaTerrain"
+
 // includeBuild("../ScapesEngine")
