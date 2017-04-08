@@ -17,9 +17,9 @@
 package org.tobi29.scapes.terrain.infinite
 
 import org.tobi29.scapes.engine.utils.StampLock
+import org.tobi29.scapes.engine.utils.fill
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector2i
-import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
 class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
@@ -145,7 +145,7 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
     }
 
     private fun clear() {
-        Arrays.fill(array, null)
+        array.fill { null }
     }
 
     private fun shiftXPositive() {

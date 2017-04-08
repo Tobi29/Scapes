@@ -21,6 +21,7 @@ import mu.KLogging
 import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.utils.Algorithm
 import org.tobi29.scapes.engine.utils.ByteBuffer
+import org.tobi29.scapes.engine.utils.equals
 import org.tobi29.scapes.engine.utils.graphics.Image
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.engine.utils.io.checksum
@@ -108,8 +109,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
             while (length-- > 0) {
                 requests.add(input.getInt())
             }
-            val response2 = generateResponse(
-                    Arrays.equals(challengeReceived, challenge))
+            val response2 = generateResponse(challengeReceived equals challenge)
             if (response2 != null) {
                 output.putBoolean(true)
                 output.putString(response2)

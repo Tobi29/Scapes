@@ -19,9 +19,9 @@ package org.tobi29.scapes.chunk.terrain.infinite
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Model
 import org.tobi29.scapes.engine.graphics.Shader
+import org.tobi29.scapes.engine.utils.fill
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.sqr
-import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 class TerrainInfiniteRendererChunk(private val chunk: TerrainInfiniteChunkClient,
@@ -201,7 +201,7 @@ class TerrainInfiniteRendererChunk(private val chunk: TerrainInfiniteChunkClient
     }
 
     fun resetPrepareVisible() {
-        Arrays.fill(prepareVisible, false)
+        prepareVisible.fill { false }
     }
 
     fun setPrepareVisible(i: Int) {
@@ -224,7 +224,7 @@ class TerrainInfiniteRendererChunk(private val chunk: TerrainInfiniteChunkClient
     }
 
     fun setCulled(value: Boolean) {
-        Arrays.fill(culled, value)
+        culled.fill { value }
     }
 
     fun setCulled(i: Int,
@@ -254,11 +254,11 @@ class TerrainInfiniteRendererChunk(private val chunk: TerrainInfiniteChunkClient
     }
 
     fun reset() {
-        Arrays.fill(vao, null)
-        Arrays.fill(solid, true)
+        vao.fill { null }
+        solid.fill { true }
         geometryDirty.forEach { it.set(true) }
-        Arrays.fill(geometryInit, false)
-        Arrays.fill(culled, false)
+        geometryInit.fill { false }
+        culled.fill { false }
         renderer.addToQueue(this)
     }
 }

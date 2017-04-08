@@ -17,7 +17,6 @@
 package org.tobi29.scapes.terrain.data
 
 import org.tobi29.scapes.engine.utils.tag.*
-import java.util.*
 
 class ChunkArraySection2x4(private val xSizeBits: Int,
                            private val ySizeBits: Int,
@@ -68,8 +67,7 @@ class ChunkArraySection2x4(private val xSizeBits: Int,
                 if (value2 == defaultValue.toInt() and 0xF0) {
                     return
                 }
-                data = ByteArray(size)
-                Arrays.fill(data, defaultValue)
+                data = ByteArray(size) { defaultValue }
                 data[offset] = (data[offset].toInt() and 0xF or value2).toByte()
                 this.data = data
                 changed = true
@@ -82,8 +80,7 @@ class ChunkArraySection2x4(private val xSizeBits: Int,
                 if (value == defaultValue.toInt() and 0xF) {
                     return
                 }
-                data = ByteArray(size)
-                Arrays.fill(data, defaultValue)
+                data = ByteArray(size) { defaultValue }
                 data[offset] = (data[offset].toInt() and 0xF0 or value).toByte()
                 this.data = data
                 changed = true

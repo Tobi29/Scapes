@@ -19,6 +19,7 @@ package org.tobi29.scapes.chunk.terrain.infinite
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.engine.utils.Pool
+import org.tobi29.scapes.engine.utils.fill
 import org.tobi29.scapes.engine.utils.math.PointerPane
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.entity.client.EntityClient
@@ -58,7 +59,7 @@ class TerrainInfiniteSection : TerrainClient {
         zSize = 0
         x = 0
         y = 0
-        Arrays.fill(chunks, null)
+        chunks.fill { null }
     }
 
     override fun sunLight(x: Int,

@@ -80,11 +80,7 @@ class ParticleEmitterTransparent(system: ParticleSystem,
             }
             instance.posRender = instance.pos.now()
         }
-        Arrays.sort(instancesSorted) { instance1, instance2 ->
-            val distance1 = instance1.posRender.distanceSqr(camPos)
-            val distance2 = instance2.posRender.distanceSqr(camPos)
-            if (distance1 == distance2) 0 else if (distance1 < distance2) 1 else -1
-        }
+        instancesSorted.sortByDescending { it.posRender.distanceSqr(camPos) }
         var count = 0
         for (instance in instancesSorted) {
             if (instance.state != ParticleInstance.State.ALIVE) {

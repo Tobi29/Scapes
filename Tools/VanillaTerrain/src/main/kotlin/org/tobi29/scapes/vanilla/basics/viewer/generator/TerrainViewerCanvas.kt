@@ -31,7 +31,6 @@ import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
@@ -60,8 +59,7 @@ class TerrainViewerCanvas(parent: Composite,
     init {
         this.scale = scale.toDouble()
         taskExecutor = application.taskExecutor
-        val data = ByteArray(3 shl CHUNK_BITS shl CHUNK_BITS)
-        Arrays.fill(data, 0x44.toByte())
+        val data = ByteArray(3 shl CHUNK_BITS shl CHUNK_BITS) { 0x44.toByte() }
         val palette = PaletteData(0xFF0000, 0xFF00, 0xFF)
         val imageData = ImageData(CHUNK_SIZE, CHUNK_SIZE, 24, palette, 1, data)
         emptyImage = Image(display, imageData)
