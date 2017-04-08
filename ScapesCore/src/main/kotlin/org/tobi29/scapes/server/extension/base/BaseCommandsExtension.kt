@@ -17,7 +17,6 @@
 package org.tobi29.scapes.server.extension.base
 
 import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.join
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.command.requireGet
@@ -41,7 +40,7 @@ class BaseCommandsExtension(server: ScapesServer) : ServerExtension(server) {
             val message: String
             if (args.hasOption('r')) {
                 requirePermission(executor, 8, 'r')
-                message = join(args.args, delimiter = " ")
+                message = args.args.joinToString(separator = " ")
             } else {
                 val name: String
                 val nameOption = args.option('n')
@@ -51,7 +50,7 @@ class BaseCommandsExtension(server: ScapesServer) : ServerExtension(server) {
                 } else {
                     name = executor.name()
                 }
-                message = "<$name> ${join(args.args, delimiter = " ")}"
+                message = "<$name> ${args.args.joinToString(separator = " ")}"
             }
             commands.add {
                 server.events.fireLocal(
@@ -68,7 +67,7 @@ class BaseCommandsExtension(server: ScapesServer) : ServerExtension(server) {
             val message: String
             if (args.hasOption('r')) {
                 requirePermission(executor, 8, 'r')
-                message = join(args.args, delimiter = " ")
+                message = args.args.joinToString(separator = " ")
             } else {
                 val name: String
                 val nameOption = args.option('n')
@@ -78,7 +77,7 @@ class BaseCommandsExtension(server: ScapesServer) : ServerExtension(server) {
                 } else {
                     name = executor.name()
                 }
-                message = "[$name] ${join(args.args, delimiter = " ")}"
+                message = "[$name] ${args.args.joinToString(separator = " ")}"
             }
             commands.add {
                 val target = requireGet({ connection.playerByName(it) },

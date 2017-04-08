@@ -19,7 +19,6 @@ package org.tobi29.scapes.server.command
 import org.apache.commons.cli.CommandLine
 import org.apache.commons.cli.Option
 import org.apache.commons.cli.Options
-import org.tobi29.scapes.engine.utils.join
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.readOnly
 import java.util.*
@@ -161,14 +160,16 @@ fun getDouble(value: String): Double {
 fun getVector3d(values: Array<String>): Vector3d {
     if (values.size != 3) {
         throw Command.CommandException(253,
-                "Unable to parse vector3d: ${join(*values, delimiter = " ")}")
+                "Unable to parse vector3d: ${values.joinToString(
+                        separator = " ")}")
     }
     try {
         return Vector3d(values[0].toDouble(), values[1].toDouble(),
                 values[2].toDouble())
     } catch (e: NumberFormatException) {
         throw Command.CommandException(253,
-                "Unable to parse vector3d: ${join(*values, delimiter = " ")}")
+                "Unable to parse vector3d: ${values.joinToString(
+                        separator = " ")}")
     }
 }
 

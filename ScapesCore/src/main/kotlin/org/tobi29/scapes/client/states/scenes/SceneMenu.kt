@@ -128,12 +128,9 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
         val samples = round(space * 8.0) + 8
         val blurOffsets = gaussianBlurOffset(samples, 0.04f)
         val blurWeights = gaussianBlurWeight(samples) { cos(it * PI) }
-        val blurLength = blurOffsets.size
-        val blurOffset = join(*blurOffsets)
-        val blurWeight = join(*blurWeights)
-        processor.supplyProperty("BLUR_OFFSET", blurOffset)
-        processor.supplyProperty("BLUR_WEIGHT", blurWeight)
-        processor.supplyProperty("BLUR_LENGTH", blurLength)
+        processor.supplyProperty("BLUR_OFFSET", blurOffsets.joinToString())
+        processor.supplyProperty("BLUR_WEIGHT", blurWeights.joinToString())
+        processor.supplyProperty("BLUR_LENGTH", blurOffsets.size)
     }
 
     @Throws(IOException::class)

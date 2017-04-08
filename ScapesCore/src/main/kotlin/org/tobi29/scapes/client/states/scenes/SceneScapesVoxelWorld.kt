@@ -30,7 +30,6 @@ import org.tobi29.scapes.engine.utils.chain
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurOffset
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurWeight
-import org.tobi29.scapes.engine.utils.join
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.plus
@@ -482,8 +481,8 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                 pow(cos(it * PI), 0.1)
             }
             BLUR_LENGTH = blurOffset.size
-            BLUR_OFFSET = join(*blurOffset)
-            BLUR_WEIGHT = join(*blurWeight)
+            BLUR_OFFSET = blurOffset.joinToString()
+            BLUR_WEIGHT = blurWeight.joinToString()
             val sampleOffset = gaussianBlurOffset(11, 0.5f)
             val sampleWeight = gaussianBlurWeight(11) {
                 pow(cos(it * PI), 0.1)
@@ -492,8 +491,8 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                 sampleOffset[i] = sampleOffset[i] + 0.5f
             }
             SAMPLE_LENGTH = sampleOffset.size
-            SAMPLE_OFFSET = join(*sampleOffset)
-            SAMPLE_WEIGHT = join(*sampleWeight)
+            SAMPLE_OFFSET = sampleOffset.joinToString()
+            SAMPLE_WEIGHT = sampleWeight.joinToString()
         }
     }
 }
