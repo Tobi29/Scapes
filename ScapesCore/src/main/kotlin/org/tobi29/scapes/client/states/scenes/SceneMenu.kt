@@ -67,13 +67,14 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
                 floatArrayOf(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f),
                 intArrayOf(0, 1, 2, 2, 1, 3), RenderType.TRIANGLES)
 
-        val f1 = gl.engine.graphics.createFramebuffer(
-                gl.contentWidth(), gl.contentHeight(), 1, false, false, false)
-        val f2 = gl.engine.graphics.createFramebuffer(
-                gl.contentWidth(), gl.contentHeight(), 1, false, false, false)
-        val f3 = gl.engine.graphics.createFramebuffer(
-                gl.contentWidth(), gl.contentHeight(), 1, false, false, false,
-                TextureFilter.LINEAR)
+        val width = gl.contentWidth() / 8
+        val height = gl.contentHeight() / 8
+        val f1 = gl.engine.graphics.createFramebuffer(width, height, 1, false,
+                false, false)
+        val f2 = gl.engine.graphics.createFramebuffer(width, height, 1, false,
+                false, false)
+        val f3 = gl.engine.graphics.createFramebuffer(width, height, 1, false,
+                false, false, TextureFilter.LINEAR)
         val render = gl.into(f1) {
             gl.clearDepth()
             val save = save.getAndSet(null)
@@ -123,7 +124,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
 
     private fun blur(gl: GL,
                      processor: ShaderPreprocessor) {
-        val space = gl.contentSpace()
+        val space = gl.contentSpace() / 8.0
         val samples = round(space * 8.0) + 8
         val blurOffsets = gaussianBlurOffset(samples, 0.04f)
         val blurWeights = gaussianBlurWeight(samples) { cos(it * PI) }
