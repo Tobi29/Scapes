@@ -42,12 +42,12 @@ class PluginClassLoader(
         // privileged actions instead for e.g. reading save data
 
         // Allow using plugin jars for assets
-        logger.info { "Plugin permission: Get classloader" }
+        logger.debug { "Plugin permission: Get classloader" }
         permissions.add(RuntimePermission("getClassLoader"))
 
         // Allow kotlin reflection (Not actual reflection, just reading,
         // e.g. class names)
-        logger.info { "Plugin permission: Property read kotlin.test.is.pre.release" }
+        logger.debug { "Plugin permission: Property read kotlin.test.is.pre.release" }
         permissions.add(
                 PropertyPermission("kotlin.test.is.pre.release", "read"))
 
@@ -55,12 +55,12 @@ class PluginClassLoader(
         // TODO: We may want to make a whitelist to only allow useful jars
         (PluginClassLoader::class.java.classLoader as? URLClassLoader)?.let { rootClassLoader ->
             rootClassLoader.urLs.asSequence().mapNotNull { it.file }.map {
-                logger.info { "Plugin permission: File read ($it)" }
+                logger.debug { "Plugin permission: File read ($it)" }
                 FilePermission(it, "read")
             }.forEach { permissions.add(it) }
         }
         path.asSequence().map { it.toAbsolutePath() }.map {
-            logger.info { "Plugin permission: File read ($it)" }
+            logger.debug { "Plugin permission: File read ($it)" }
             FilePermission(it.toString(), "read")
         }.forEach { permissions.add(it) }
 
