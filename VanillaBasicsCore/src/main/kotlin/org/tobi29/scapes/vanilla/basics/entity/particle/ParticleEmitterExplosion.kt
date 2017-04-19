@@ -21,9 +21,9 @@ import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.TWO_PI
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.entity.particle.*
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
-import java.util.concurrent.ThreadLocalRandom
 
 class ParticleEmitterExplosion(system: ParticleSystem) : ParticleEmitter<ParticleInstanceExplosion>(
         system, Array(256, { ParticleInstanceExplosion() })) {
@@ -45,7 +45,7 @@ class ParticleEmitterExplosion(system: ParticleSystem) : ParticleEmitter<Particl
             }
             instance.time -= delta.toFloat()
             if (instance.time <= 0.0) {
-                val random = ThreadLocalRandom.current()
+                val random = threadLocalRandom()
                 smoke(emitter, instance.pos.now(), instance.speed.now(),
                         plugin.particles.smoke,
                         random.nextFloat() * 8.0f + 12.0f)
@@ -88,7 +88,7 @@ class ParticleEmitterExplosion(system: ParticleSystem) : ParticleEmitter<Particl
                           speed: Vector3d,
                           texture: ParticleTransparentTexture) {
             emitter.add { instance ->
-                val random = ThreadLocalRandom.current()
+                val random = threadLocalRandom()
                 instance.pos.set(pos)
                 instance.speed.set(speed)
                 instance.time = 1.0f
@@ -114,7 +114,7 @@ class ParticleEmitterExplosion(system: ParticleSystem) : ParticleEmitter<Particl
                           texture: ParticleTransparentTexture,
                           time: Float) {
             emitter.add { instance ->
-                val random = ThreadLocalRandom.current()
+                val random = threadLocalRandom()
                 instance.pos.set(pos)
                 instance.speed.set(speed)
                 instance.time = time

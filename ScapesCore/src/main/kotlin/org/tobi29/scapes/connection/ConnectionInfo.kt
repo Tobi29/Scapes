@@ -21,6 +21,6 @@ object ConnectionInfo {
             'p'.toByte(), 'e'.toByte(), 's'.toByte())
 
     fun header(): ByteArray {
-        return HEADER.clone()
+        return HEADER.copyOf()
     }
 }

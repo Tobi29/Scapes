@@ -29,7 +29,7 @@ class ExtensionPing(application: Application,
         composite, connection) {
     init {
         val label = Text(composite.status, SWT.NONE)
-        application.taskExecutor.addTask({
+        application.loop.addTask({
             label.ifPresent {
                 label.text = connection.ping.toString()
                 return@addTask 1000

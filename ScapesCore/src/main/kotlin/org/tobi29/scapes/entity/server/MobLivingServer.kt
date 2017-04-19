@@ -19,23 +19,22 @@ import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.chunk.terrain.selectBlock
 import org.tobi29.scapes.engine.utils.filterMap
-import org.tobi29.scapes.engine.utils.tag.ReadWriteTagMap
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.set
-import org.tobi29.scapes.engine.utils.tag.toDouble
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.plus
 import org.tobi29.scapes.engine.utils.math.vector.xz
+import org.tobi29.scapes.engine.utils.tag.ReadWriteTagMap
+import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.scapes.engine.utils.tag.set
+import org.tobi29.scapes.engine.utils.tag.toDouble
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.ai.AI
 import org.tobi29.scapes.entity.ai.SimpleAI
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.packets.PacketMobDamage
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 abstract class MobLivingServer(type: EntityType<*, *>,
                                world: WorldServer,

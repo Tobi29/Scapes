@@ -19,10 +19,9 @@ package org.tobi29.scapes.server.connection
 import org.tobi29.scapes.connection.ConnectionInfo
 import org.tobi29.scapes.connection.ConnectionType
 import org.tobi29.scapes.engine.server.*
-import org.tobi29.scapes.engine.utils.Checksum
+import org.tobi29.scapes.engine.utils.*
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toInt
-import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.entity.skin.ServerSkin
 import org.tobi29.scapes.packets.PacketClient
 import org.tobi29.scapes.plugins.Plugins
@@ -30,25 +29,20 @@ import org.tobi29.scapes.server.ControlPanel
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.command.Executor
 import org.tobi29.scapes.server.extension.event.NewConnectionEvent
-import java.io.IOException
 import java.nio.channels.SelectionKey
 import java.nio.channels.SocketChannel
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 class ServerConnection(val server: ScapesServer,
                        configMap: TagMap,
                        ssl: SSLHandle) : ConnectionListenWorker(
         server.connections, ConnectionInfo.header(), ssl) {
-    val events = server.events
     private val mayPlayers: Int
     private val controlPassword: String?
     val plugins: Plugins
     private val playersMut = ConcurrentHashMap<String, PlayerConnection>()
     val players = playersMut.values.readOnly()
     private val playerByName = ConcurrentHashMap<String, PlayerConnection>()
-    private val executors = Collections.newSetFromMap<Executor>(
-            ConcurrentHashMap<Executor, Boolean>())
+    private val executors = ConcurrentHashSet<Executor>()
     private var allowsJoin = true
     private var allowsCreation = true
 

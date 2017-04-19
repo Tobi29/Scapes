@@ -19,20 +19,15 @@ import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.utils.ThreadLocal
-import org.tobi29.scapes.engine.utils.filterMap
+import org.tobi29.scapes.engine.utils.*
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.*
-import org.tobi29.scapes.engine.utils.putAbsent
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.entity.server.MobServer
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.BlockExplosive
-import java.util.*
-import java.util.concurrent.ThreadLocalRandom
 
 private val LOCATIONS = ThreadLocal { Pool { Location() } }
 
@@ -70,7 +65,7 @@ fun TerrainServer.TerrainMutable.explosionBlockPush(
     val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
     val entities = ArrayList<EntityServer>()
     val locations = LOCATIONS.get()
-    val random = ThreadLocalRandom.current()
+    val random = threadLocalRandom()
     val step = 2.0 / PI / size
     var pitch = 0.0
     val set = HashMap<Location, Location>()
@@ -147,7 +142,7 @@ fun TerrainServer.TerrainMutable.explosionBlockPush(
         typeData(xxx, yyy, zzz, air, 0)
     }
     locations.reset()
-    world.taskExecutor.addTaskOnce({
+    world.loop.addTaskOnce({
         entities.forEach { world.addEntityNew(it) }
         world.explosionEntities(x, y, z, size, push, damage)
     }, "Explosion-Entities")

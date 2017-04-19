@@ -18,7 +18,6 @@ package org.tobi29.scapes.server.ssl.spi
 
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.tag.TagMap
-import java.io.IOException
 import javax.net.ssl.KeyManager
 
 interface KeyManagerProvider {
@@ -26,7 +25,7 @@ interface KeyManagerProvider {
 
     fun configID(): String
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     operator fun get(path: FilePath,
                      configMap: TagMap): Array<KeyManager>
 }

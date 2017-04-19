@@ -17,15 +17,16 @@ package org.tobi29.scapes.chunk
 
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
-import org.tobi29.scapes.engine.utils.task.TaskExecutor
+import org.tobi29.scapes.engine.utils.task.UpdateLoop
 import org.tobi29.scapes.entity.Entity
 import org.tobi29.scapes.entity.EntityContainer
 import org.tobi29.scapes.plugins.Plugins
 
 abstract class World<E : Entity>(val plugins: Plugins,
-                                 val taskExecutor: TaskExecutor,
+                                 val loop: UpdateLoop,
                                  val registry: Registries,
                                  val seed: Long) : EntityContainer<E> {
+    val taskExecutor = loop.executor
     val air = plugins.air
     protected var thread: Thread? = null
     var spawn = Vector3i.ZERO

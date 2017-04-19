@@ -19,9 +19,8 @@ import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.input.ControllerBasic
 import org.tobi29.scapes.engine.input.ControllerTouch
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector2d
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 class GuiControllerTouch(engine: ScapesEngine,
                          private val controller: ControllerTouch) : GuiController(

@@ -19,8 +19,8 @@ package org.tobi29.scapes.vanilla.basics.util
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleEmitterExplosion
-import java.util.concurrent.ThreadLocalRandom
 
 fun WorldClient.explosion(pos: Vector3d,
                           speed: Vector3d,
@@ -31,7 +31,7 @@ fun WorldClient.explosion(pos: Vector3d,
     val speedFactor = sqrt(size)
     for (i in 0..count - 1) {
         emitter.add { instance ->
-            val random = ThreadLocalRandom.current()
+            val random = threadLocalRandom()
             val dirZ = random.nextDouble() * TWO_PI
             val dirX = random.nextDouble() * PI - HALF_PI
             val dirSpeed = (random.nextDouble() + 20.0) * speedFactor

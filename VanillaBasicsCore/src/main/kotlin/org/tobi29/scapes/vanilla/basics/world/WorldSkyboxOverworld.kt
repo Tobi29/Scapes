@@ -23,14 +23,18 @@ import org.tobi29.scapes.engine.gui.GuiComponentGroup
 import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
 import org.tobi29.scapes.engine.sound.StaticAudio
+import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.engine.utils.chain
 import org.tobi29.scapes.engine.utils.graphics.Cam
+import org.tobi29.scapes.engine.utils.graphics.hsvToRGB
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.plus
+import org.tobi29.scapes.engine.utils.math.vector.times
 import org.tobi29.scapes.engine.utils.tag.map
 import org.tobi29.scapes.engine.utils.tag.toBoolean
 import org.tobi29.scapes.engine.utils.tag.toDouble
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleEmitterRain
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleEmitterSnow
@@ -38,8 +42,6 @@ import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator
 import org.tobi29.scapes.vanilla.basics.gui.GuiComponentCondition
 import org.tobi29.scapes.vanilla.basics.gui.GuiComponentHotbar
-import java.util.*
-import java.util.concurrent.ThreadLocalRandom
 
 class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                            private val biomeGenerator: BiomeGenerator,
@@ -123,9 +125,9 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                 rad = dir.toRad()
                 x = cos(rad)
                 y = sin(rad)
-                skyboxMesh.color(COLORS[0][0], COLORS[0][1], COLORS[0][2], 1.0)
+                skyboxMesh.color(COLORS[0].x, COLORS[0].y, COLORS[0].z, 1.0)
                 skyboxMesh.vertex(0.0, 0.0, 0.1)
-                skyboxMesh.color(COLORS[1][0], COLORS[1][1], COLORS[1][2], 1.0)
+                skyboxMesh.color(COLORS[1].x, COLORS[1].y, COLORS[1].z, 1.0)
                 skyboxMesh.vertex(x, y, 0.0)
                 skyboxMesh.vertex(lastX, lastY, 0.0)
                 skyboxMesh.vertex(lastX, lastY, 0.0)
@@ -140,20 +142,18 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
         lastX = 1.0
         lastY = 0.0
         val skyboxBottomMesh = Mesh(true)
-        skyboxBottomMesh.color(COLORS[1][0], COLORS[1][1], COLORS[1][2], 1.0)
+        skyboxBottomMesh.color(COLORS[1].x, COLORS[1].y, COLORS[1].z, 1.0)
         var dir = -22.5
         while (dir < 360.0) {
             rad = dir.toRad()
             x = cos(rad)
             y = sin(rad)
             skyboxBottomMesh.vertex(lastX, lastY, -0.1)
-            skyboxBottomMesh.color(COLORS[1][0], COLORS[1][1], COLORS[1][2],
-                    0.0)
+            skyboxBottomMesh.color(COLORS[1].x, COLORS[1].y, COLORS[1].z, 0.0)
             skyboxBottomMesh.vertex(lastX, lastY, 0.0)
             skyboxBottomMesh.vertex(x, y, 0.0)
             skyboxBottomMesh.vertex(x, y, 0.0)
-            skyboxBottomMesh.color(COLORS[1][0], COLORS[1][1], COLORS[1][2],
-                    1.0)
+            skyboxBottomMesh.color(COLORS[1].x, COLORS[1].y, COLORS[1].z, 1.0)
             skyboxBottomMesh.vertex(x, y, -0.1)
             skyboxBottomMesh.vertex(lastX, lastY, -0.1)
             skyboxBottomMesh.vertex(lastX, lastY, -0.1)
@@ -166,12 +166,14 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
         this.skyboxBottomMesh = skyboxBottomMesh.finish(world.game.engine)
         val starMesh = Mesh()
         val random = Random(seed)
-        for (i in 0..999) {
+        for (i in 0..1999) {
             addStar(0.001 + sqr(random.nextDouble()) * 0.009,
-                    random.nextInt(COLORS.size), starMesh, random)
+                    random.nextInt(COLORS.size),
+                    sqr(random.nextDouble()), starMesh, random)
         }
-        for (i in 0..9) {
-            addStar(0.01 + random.nextDouble() * 0.02, 0, starMesh, random)
+        for (i in 0..19) {
+            addStar(0.01 + random.nextDouble() * 0.02, 0,
+                    sqr(random.nextDouble()), starMesh, random)
         }
         this.starMesh = starMesh.finish(world.game.engine)
     }
@@ -209,7 +211,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                         ParticleEmitterRain::class.java)
                 for (i in 0..amount - 1) {
                     emitter.add { instance ->
-                        val random = ThreadLocalRandom.current()
+                        val random = threadLocalRandom()
                         instance.pos.set(random.nextFloat() * 32.0f - 16.0f,
                                 random.nextFloat() * 32.0f - 16.0f, 0.0f)
                         instance.pos.plus(weatherPos)
@@ -225,7 +227,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                         ParticleEmitterSnow::class.java)
                 for (i in 0..amount - 1) {
                     emitter.add { instance ->
-                        val random = ThreadLocalRandom.current()
+                        val random = threadLocalRandom()
                         instance.pos.set(random.nextFloat() * 32.0f - 16.0f,
                                 random.nextFloat() * 32.0f - 16.0f, 0.0f)
                         instance.pos.plus(weatherPos)
@@ -317,9 +319,10 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
         } else {
             fogBrightness -= (fogBrightness * factor).toFloat()
         }
-        val skyLight = (15.0 - climateGenerator.sunLightReduction(
-                scene.cam().position.intX().toDouble(),
-                scene.cam().position.intY().toDouble())).toFloat() / 15.0f
+        val sunElevation = (climateGenerator.sunElevation(
+                cam.position.doubleX(),
+                cam.position.doubleY()) * RAD_2_DEG)
+        val skyLight = clamp(sunElevation / 50.0 + 0.5, 0.03, 1.0).toFloat()
         if (player.isHeadInWater) {
             val pos = player.getCurrentPos()
             val light = clamp(world.terrain.light(pos.intX(), pos.intY(),
@@ -355,20 +358,17 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                 "VanillaBasics:shader/Glow")
         val shaderClouds = gl.engine.graphics.loadShader(
                 "VanillaBasics:shader/Clouds")
-        val shaderTextured = gl.engine.graphics.loadShader(
-                "Engine:shader/Textured")
+        val shaderTextured = gl.engine.graphics.loadShader(SHADER_TEXTURED)
         val render: () -> Unit = {
             val matrixStack = gl.matrixStack
-            val skyLight = (15.0 - climateGenerator.sunLightReduction(
-                    scene.cam().position.intX().toDouble(),
-                    scene.cam().position.intY().toDouble())).toFloat() / 15.0f
-            val skyboxLight = skyLight * fogBrightness
             val sunElevation = (climateGenerator.sunElevation(
                     cam.position.doubleX(),
                     cam.position.doubleY()) * RAD_2_DEG)
             val sunAzimuth = (climateGenerator.sunAzimuth(
                     cam.position.doubleX(),
                     cam.position.doubleY()) * RAD_2_DEG)
+            val skyLight = clamp(sunElevation / 50.0 + 0.4, 0.0, 1.0).toFloat()
+            val skyboxLight = skyLight * fogBrightness
             // Sky
             gl.textures.unbind(gl)
             gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f)
@@ -380,13 +380,12 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                     skyboxLight, 1.0f)
             skyboxMesh.render(gl, sSkybox)
             val sGlow = shaderGlow.get()
+            gl.setBlending(BlendingMode.ADD)
             // Stars
             if (skyLight < 1.0f) {
-                val random = ThreadLocalRandom.current()
-                gl.setBlending(BlendingMode.ADD)
+                val random = threadLocalRandom()
                 val brightness = max(
-                        1.0f - skyLight - random.nextFloat() * 0.1f,
-                        0.0f)
+                        1.0f - skyLight - random.nextFloat() * 0.3f, 0.0f)
                 sGlow.setUniform4f(gl, 4, brightness, brightness, brightness,
                         1.0f)
                 val matrix = matrixStack.push()
@@ -394,12 +393,10 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                 matrix.rotateAccurate(-sunElevation, 1.0f, 0.0f, 0.0f)
                 starMesh.render(gl, sGlow)
                 matrixStack.pop()
-            } else {
-                gl.setBlending(BlendingMode.ADD)
             }
             // Sun
             var matrix = matrixStack.push()
-            matrix.rotateAccurate(sunAzimuth + 180.0f, 0.0f, 0.0f, 1.0f)
+            matrix.rotateAccurate(sunAzimuth + 180.0, 0.0f, 0.0f, 1.0f)
             matrix.rotateAccurate(-sunElevation, 1.0f, 0.0f, 0.0f)
             matrix.scale(1.0f, 1.0f, 1.0f)
             sGlow.setUniform4f(gl, 4, fogR * 1.0f, fogG * 1.1f, fogB * 1.1f,
@@ -477,17 +474,18 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
 
     companion object {
         private val STAR_COLORS = arrayOf(
-                doubleArrayOf(0.8, 0.8, 0.8),
-                doubleArrayOf(0.8, 0.5, 0.5),
-                doubleArrayOf(0.8, 0.6, 0.6),
-                doubleArrayOf(0.6, 0.6, 0.8),
-                doubleArrayOf(0.5, 0.5, 0.8))
+                hsvToRGB(Vector3d(0.00, 0.00, 1.0)),
+                hsvToRGB(Vector3d(0.00, 0.25, 1.0)),
+                hsvToRGB(Vector3d(0.00, 0.70, 1.0)),
+                hsvToRGB(Vector3d(0.66, 0.10, 1.0)),
+                hsvToRGB(Vector3d(0.66, 0.15, 1.0)))
         private val COLORS = arrayOf(
-                doubleArrayOf(0.0, 0.3, 0.8),
-                doubleArrayOf(0.2, 0.7, 1.0))
+                hsvToRGB(Vector3d(0.62, 0.70, 0.30)),
+                hsvToRGB(Vector3d(0.56, 0.80, 0.90)))
 
         private fun addStar(size: Double,
                             color: Int,
+                            brightness: Double,
                             starMesh: Mesh,
                             random: Random) {
             var pos1 = random.nextDouble() * 2.0 - 1.0
@@ -506,8 +504,8 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
             val sinATan1 = sin(aTan1)
             val cosATan2 = cos(aTan2)
             val sinATan2 = sin(aTan2)
-            starMesh.color(STAR_COLORS[color][0], STAR_COLORS[color][1],
-                    STAR_COLORS[color][2], 1.0)
+            val starColor = STAR_COLORS[color] * brightness
+            starMesh.color(starColor.x, starColor.y, starColor.z, 1.0)
             for (vertex in 0..3) {
                 var xx = ((vertex and 2) - 1).toDouble()
                 var yy = ((vertex + 1 and 2) - 1).toDouble()

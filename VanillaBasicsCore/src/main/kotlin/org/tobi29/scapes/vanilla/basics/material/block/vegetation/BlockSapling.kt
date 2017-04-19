@@ -32,6 +32,7 @@ import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.PointerPane
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.TreeType
@@ -39,8 +40,6 @@ import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateSaplingGrowth
 import org.tobi29.scapes.vanilla.basics.util.dropItems
-import java.util.*
-import java.util.concurrent.ThreadLocalRandom
 
 class BlockSapling(type: VanillaMaterialType) : VanillaBlock(type) {
     private val treeRegistry = plugins.registry.get<TreeType>("VanillaBasics",
@@ -86,7 +85,7 @@ class BlockSapling(type: VanillaMaterialType) : VanillaBlock(type) {
             return false
         }
         if (terrain.isSolid(x, y, z - 1)) {
-            val random = ThreadLocalRandom.current()
+            val random = threadLocalRandom()
             terrain.addDelayedUpdate(
                     UpdateSaplingGrowth(terrain.world.registry).set(x, y, z,
                             random.nextDouble() * 3600.0 + 3600.0))

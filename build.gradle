@@ -59,7 +59,7 @@ allprojects {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = "3.4.1"
+    gradleVersion = "3.5"
     distributionUrl =
             "https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }
@@ -107,8 +107,6 @@ ext {
             "com.github.Tobi29.ScapesEngine:Engine:$scapesEngineVersion"
     scapesEngineUtils =
             "com.github.Tobi29.ScapesEngine:Utils:$scapesEngineVersion"
-    scapesEngineTagStructureBinary =
-            "com.github.Tobi29.ScapesEngine:TagStructureBinary:$scapesEngineVersion"
     scapesEngineTagStructureJSON =
             "com.github.Tobi29.ScapesEngine:TagStructureJSON:$scapesEngineVersion"
     scapesEngineSWTUtils =
@@ -143,6 +141,8 @@ ext {
             "com.github.Tobi29.ScapesEngine:GenerationUtils:$scapesEngineVersion"
     scapesEngineGraphicsUtils =
             "com.github.Tobi29.ScapesEngine:GraphicsUtils:$scapesEngineVersion"
+    scapesEngineThreadUtils =
+            "com.github.Tobi29.ScapesEngine:ThreadUtils:$scapesEngineVersion"
     scapesEngineTestAssertions =
             "com.github.Tobi29.ScapesEngine:TestAssertions:$scapesEngineVersion"
     scapesEngineOpenALSounds =

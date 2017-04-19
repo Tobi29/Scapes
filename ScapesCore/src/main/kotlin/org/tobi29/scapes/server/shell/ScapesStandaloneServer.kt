@@ -15,28 +15,23 @@
  */
 package org.tobi29.scapes.server.shell
 
-import mu.KLogging
 import org.tobi29.scapes.connection.ServerInfo
 import org.tobi29.scapes.engine.server.SSLHandle
 import org.tobi29.scapes.engine.server.SSLProvider
-import org.tobi29.scapes.engine.utils.Crashable
-import org.tobi29.scapes.engine.utils.EventDispatcher
-import org.tobi29.scapes.engine.utils.ListenerOwnerHandle
+import org.tobi29.scapes.engine.utils.*
 import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.io.tag.json.readJSON
 import org.tobi29.scapes.engine.utils.io.tag.json.writeJSON
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
-import org.tobi29.scapes.engine.utils.use
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.command.Executor
 import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.format.spi.WorldSourceProvider
 import org.tobi29.scapes.server.ssl.spi.KeyManagerProvider
-import java.io.IOException
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.system.exitProcess
 
 abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashable {
@@ -45,9 +40,11 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
     private val shutdownHook = Thread { joinable.joiner.join() }
     protected lateinit var server: ScapesServer
 
+    protected abstract fun ListenerRegistrar.listeners()
+
     protected abstract fun init(executor: Executor): () -> Unit
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     fun run(path: FilePath) {
         RUNTIME.addShutdownHook(shutdownHook)
         try {
@@ -88,7 +85,7 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
         }
     }
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     protected fun start(source: WorldSource,
                         configMap: TagMap,
                         ssl: SSLHandle): () -> Unit {
@@ -98,8 +95,8 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
         server = ScapesServer(source, configMap, serverInfo, ssl, taskExecutor)
         val connection = server.connection
         val executor = object : Executor {
-            override val events = EventDispatcher()
-            override val listenerOwner = ListenerOwnerHandle { !server.stopped }
+            override val events = EventDispatcher(
+                    server.events) { listeners() }.apply { enable() }
 
             override fun playerName(): String? {
                 return null
@@ -120,7 +117,7 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
         return init(executor)
     }
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     private fun loadConfig(path: FilePath): TagMap {
         if (exists(path)) {
             return read(path, ::readJSON)
@@ -164,7 +161,7 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
     companion object : KLogging() {
         private val RUNTIME = Runtime.getRuntime()
 
-        @Throws(IOException::class)
+        // TODO: @Throws(IOException::class)
         private fun loadWorldSource(id: String): WorldSourceProvider {
             for (provider in ServiceLoader.load(
                     WorldSourceProvider::class.java)) {
@@ -181,7 +178,7 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
             throw IOException("No world source found for: " + id)
         }
 
-        @Throws(IOException::class)
+        // TODO: @Throws(IOException::class)
         private fun loadKeyManager(id: String): KeyManagerProvider {
             for (provider in ServiceLoader.load(
                     KeyManagerProvider::class.java)) {

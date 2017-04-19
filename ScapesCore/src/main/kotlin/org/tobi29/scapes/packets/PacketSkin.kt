@@ -18,13 +18,13 @@ package org.tobi29.scapes.packets
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.Algorithm
-import org.tobi29.scapes.engine.utils.ByteBuffer
 import org.tobi29.scapes.engine.utils.Checksum
 import org.tobi29.scapes.engine.utils.graphics.Image
+import org.tobi29.scapes.engine.utils.io.ByteBuffer
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
+import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.server.connection.PlayerConnection
-import java.io.IOException
 
 class PacketSkin : PacketAbstract, PacketBoth {
     private lateinit var image: Image

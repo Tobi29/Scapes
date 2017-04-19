@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.entity
 
-import java.util.*
+import org.tobi29.scapes.engine.utils.UUID
 
 interface EntityContainer<E : Entity> {
     fun addEntity(entity: E): Boolean

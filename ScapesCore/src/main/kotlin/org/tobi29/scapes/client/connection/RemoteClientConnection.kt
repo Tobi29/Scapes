@@ -17,17 +17,17 @@
 package org.tobi29.scapes.client.connection
 
 import kotlinx.coroutines.experimental.yield
-import mu.KLogging
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.client.states.GameStateMenu
 import org.tobi29.scapes.client.states.GameStateServerDisconnect
 import org.tobi29.scapes.engine.server.*
+import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
+import org.tobi29.scapes.engine.utils.IOException
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.packets.PacketAbstract
 import org.tobi29.scapes.packets.PacketPingClient
 import org.tobi29.scapes.packets.PacketServer
 import org.tobi29.scapes.plugins.Plugins
-import java.io.IOException
-import java.util.concurrent.ConcurrentLinkedQueue
 
 class RemoteClientConnection(private val worker: ConnectionWorker,
                              game: GameStateGameMP,
@@ -40,7 +40,7 @@ class RemoteClientConnection(private val worker: ConnectionWorker,
     private var pingHandler: (Long) -> Unit = {}
 
     override fun start() {
-        game.engine.taskExecutor.addTask({
+        game.engine.loop.addTask({
             send(PacketPingClient(plugins.registry,
                     System.currentTimeMillis()))
             downloadDebug.setValue(channel.inputRate / 128.0)

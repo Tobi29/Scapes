@@ -18,7 +18,6 @@ package org.tobi29.scapes.vanilla.basics.entity.client
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.math.TWO_PI
 import org.tobi29.scapes.engine.utils.math.cosTable
 import org.tobi29.scapes.engine.utils.math.sinTable
@@ -26,13 +25,14 @@ import org.tobi29.scapes.engine.utils.math.toRad
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.normalizeSafe
 import org.tobi29.scapes.engine.utils.math.vector.times
+import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.MobPositionReceiver
 import org.tobi29.scapes.entity.client.EntityAbstractClient
 import org.tobi29.scapes.entity.client.MobileEntityClient
 import org.tobi29.scapes.entity.particle.ParticleEmitter3DBlock
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleEmitterTornado
-import java.util.concurrent.ThreadLocalRandom
 
 class EntityTornadoClient(type: EntityType<*, *>,
                           world: WorldClient) : EntityAbstractClient(
@@ -61,7 +61,7 @@ class EntityTornadoClient(type: EntityType<*, *>,
         puff -= delta
         while (puff <= 0.0) {
             puff += 0.05
-            val random = ThreadLocalRandom.current()
+            val random = threadLocalRandom()
             val spin = random.nextFloat() * 360.0f
             val emitter = world.scene.particles().emitter(
                     ParticleEmitterTornado::class.java)
@@ -107,7 +107,7 @@ class EntityTornadoClient(type: EntityType<*, *>,
                 val emitter2 = world.scene.particles().emitter(
                         ParticleEmitter3DBlock::class.java)
                 emitter2.add { instance ->
-                    val random2 = ThreadLocalRandom.current()
+                    val random2 = threadLocalRandom()
                     val dir = random2.nextDouble() * TWO_PI
                     val dirSpeed = random2.nextDouble() * 12.0 + 20.0
                     val dirSpeedX = cosTable(dir) * cosTable(dir) * dirSpeed

@@ -18,7 +18,7 @@ package org.tobi29.scapes.chunk
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.chunk.terrain.isTransparent
 import org.tobi29.scapes.connection.PlayConnection
-import org.tobi29.scapes.engine.utils.Sync
+import org.tobi29.scapes.engine.utils.*
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.engine.utils.math.sqrt
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
@@ -27,6 +27,7 @@ import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
+import org.tobi29.scapes.engine.utils.task.UpdateLoop
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobLivingServer
@@ -39,9 +40,6 @@ import org.tobi29.scapes.packets.PacketSoundEffect
 import org.tobi29.scapes.server.connection.PlayerConnection
 import org.tobi29.scapes.server.connection.ServerConnection
 import org.tobi29.scapes.server.format.WorldFormat
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicInteger
 
 class WorldServer(worldFormat: WorldFormat,
                   val id: String,
@@ -49,20 +47,17 @@ class WorldServer(worldFormat: WorldFormat,
                   val connection: ServerConnection,
                   terrainSupplier: (WorldServer) -> TerrainServer,
                   environmentSupplier: (WorldServer) -> EnvironmentServer) : World<EntityServer>(
-        worldFormat.plugins, connection.server.taskExecutor,
+        worldFormat.plugins, UpdateLoop(connection.server.taskExecutor),
         worldFormat.plugins.registry,
         seed), TagMapWrite, PlayConnection<PacketClient> {
-    private val entityListeners = Collections.newSetFromMap(
-            ConcurrentHashMap<(EntityServer) -> Unit, Boolean>())
-    private val spawners = Collections.newSetFromMap(
-            ConcurrentHashMap<MobSpawner, Boolean>())
+    private val entityListeners = ConcurrentHashSet<(EntityServer) -> Unit>()
+    private val spawners = ConcurrentHashSet<MobSpawner>()
     val terrain: TerrainServer
     val environment: EnvironmentServer
     private val sync = Sync(20.0, 5000000000L, true, "Server-Update")
     private val players = ConcurrentHashMap<String, MobPlayerServer>()
     private var joiner: Joiner? = null
-    private val entityCounts: Map<CreatureType, AtomicInteger> = EnumMap<CreatureType, AtomicInteger>(
-            CreatureType::class.java).apply {
+    private val entityCounts: Map<CreatureType, AtomicInteger> = EnumMap<CreatureType, AtomicInteger>().apply {
         CreatureType.values().forEach { put(it, AtomicInteger()) }
     }
 
@@ -199,7 +194,7 @@ class WorldServer(worldFormat: WorldFormat,
             profilerSection("Environment") {
                 environment.tick(delta)
             }
-            profilerSection("Tasks") { taskExecutor.tick() }
+            profilerSection("Tasks") { loop.tick() }
             tick++
         }
     }

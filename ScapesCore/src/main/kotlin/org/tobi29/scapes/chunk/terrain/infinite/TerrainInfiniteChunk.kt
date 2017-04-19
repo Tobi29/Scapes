@@ -18,14 +18,14 @@ package org.tobi29.scapes.chunk.terrain.infinite
 
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainEntity
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
+import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.entity.Entity
 import org.tobi29.scapes.terrain.TerrainChunk
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteBaseChunk
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 abstract class TerrainInfiniteChunk<E : Entity>(pos: Vector2i,
                                                 private val entityTerrain: TerrainEntity<E>,

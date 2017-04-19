@@ -48,7 +48,7 @@ class ExtensionStat(application: Application,
                 graphs.memory.addStamp(memory.toDouble())
             }
         }
-        application.taskExecutor.addTask({
+        application.loop.addTask({
             graphs.ifPresent {
                 connection.send("Stats", TagMap())
                 return@addTask 250

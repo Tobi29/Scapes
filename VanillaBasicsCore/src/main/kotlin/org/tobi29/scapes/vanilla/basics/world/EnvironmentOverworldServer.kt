@@ -24,9 +24,11 @@ import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.chunk.terrain.block
+import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.*
 import org.tobi29.scapes.engine.utils.tag.*
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.WieldMode
 import org.tobi29.scapes.entity.server.EntityContainerServer
@@ -45,8 +47,6 @@ import org.tobi29.scapes.vanilla.basics.material.ItemHeatable
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.packet.PacketDayTimeSync
 import org.tobi29.scapes.vanilla.basics.packet.PacketLightning
-import java.util.*
-import java.util.concurrent.ThreadLocalRandom
 
 class EnvironmentOverworldServer(override val type: EnvironmentType,
                                  private val world: WorldServer,
@@ -109,7 +109,7 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                                x: Int,
                                y: Int,
                                z: Int): MobServer {
-                val random = ThreadLocalRandom.current()
+                val random = threadLocalRandom()
                 return plugin.entityTypes.zombie.createServer(
                         terrain.world).apply {
                     setPos(Vector3d(x + 0.5, y + 0.5, z + 1.0))
@@ -157,7 +157,7 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                                x: Int,
                                y: Int,
                                z: Int): MobServer {
-                val random = ThreadLocalRandom.current()
+                val random = threadLocalRandom()
                 return plugin.entityTypes.skeleton.createServer(
                         terrain.world).apply {
                     setPos(Vector3d(x + 0.5, y + 0.5, z + 1.0))
@@ -202,7 +202,7 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                                x: Int,
                                y: Int,
                                z: Int): MobServer {
-                val random = ThreadLocalRandom.current()
+                val random = threadLocalRandom()
                 return plugin.entityTypes.pig.createServer(
                         terrain.world).apply {
                     setPos(Vector3d(x + 0.5, y + 0.5, z + 0.6875))
@@ -291,9 +291,10 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                     }
                 })
                 entity.onDeath("VanillaBasics:DeathMessage", {
-                    world.connection.events.fireLocal(
+                    world.connection.server.events.fire(
                             MessageEvent(entity.connection(), MessageLevel.CHAT,
-                                    "${entity.nickname()} died!"))
+                                    "${entity.nickname()} died!",
+                                    targetWorld = world))
                 })
             }
         })
@@ -341,11 +342,11 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
     }
 
     override fun tick(delta: Double) {
-        climateGenerator.add(0.000277777777778 * delta)
+        climateGenerator.add(0.0277777777778 * delta)
         playerUpdateWait -= delta
         while (playerUpdateWait <= 0.0) {
             playerUpdateWait += 0.25
-            val random = ThreadLocalRandom.current()
+            val random = threadLocalRandom()
             world.players().forEach {
                 val health = it.health()
                 val maxHealth = it.maxHealth()
@@ -448,7 +449,7 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
             if (simulationCount >= Long.MAX_VALUE - 10) {
                 simulationCount = 0
             }
-            val random = ThreadLocalRandom.current()
+            val random = threadLocalRandom()
             val terrain = world.terrain
             world.terrain.chunks({ chunk ->
                 simulateSeason(terrain, chunk)
@@ -504,7 +505,7 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
             count = 1
         } else {
             val delta = simulationCount - chunkSimulationCount
-            val random = ThreadLocalRandom.current()
+            val random = threadLocalRandom()
             if (delta < 180 + random.nextInt(40)) {
                 return
             }
@@ -524,7 +525,7 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                                dx: Int,
                                dy: Int,
                                chance: Int) {
-        val random = ThreadLocalRandom.current()
+        val random = threadLocalRandom()
         val humidity00 = climateGenerator.humidity(x.toDouble(), y.toDouble())
         val temperature00 = climateGenerator.temperature(x.toDouble(),
                 y.toDouble())

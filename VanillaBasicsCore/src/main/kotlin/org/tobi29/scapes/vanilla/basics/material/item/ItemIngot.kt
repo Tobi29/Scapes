@@ -22,12 +22,12 @@ import org.tobi29.scapes.block.models.ItemModel
 import org.tobi29.scapes.block.models.ItemModelSimple
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.vanilla.basics.material.AlloyType
 import org.tobi29.scapes.vanilla.basics.material.ItemMetal
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.util.Alloy
-import java.util.concurrent.ConcurrentHashMap
 
 class ItemIngot(type: VanillaMaterialType) : VanillaItem(type), ItemMetal {
     private val modelsShaped = ConcurrentHashMap<AlloyType, ItemModel>()

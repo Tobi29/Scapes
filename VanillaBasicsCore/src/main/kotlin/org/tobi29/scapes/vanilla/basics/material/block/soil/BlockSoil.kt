@@ -20,9 +20,9 @@ import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.chunk.terrain.isSolid
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
-import java.util.concurrent.ThreadLocalRandom
 
 abstract class BlockSoil(type: VanillaMaterialType) : VanillaBlock(type) {
     override fun footStepSound(data: Int): String {
@@ -44,7 +44,7 @@ abstract class BlockSoil(type: VanillaMaterialType) : VanillaBlock(type) {
         var yy = 0
         var flag = false
         if (terrain.isSolid(x, y, z - 1)) {
-            val random = ThreadLocalRandom.current()
+            val random = threadLocalRandom()
             if (!terrain.isSolid(x - 1, y, z)) {
                 sides++
                 if (!terrain.isSolid(x - 1, y, z - 1)) {

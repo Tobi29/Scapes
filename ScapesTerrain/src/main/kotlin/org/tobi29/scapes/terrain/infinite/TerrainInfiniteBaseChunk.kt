@@ -47,11 +47,15 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
     var lastAccess = System.currentTimeMillis()
         internal set
 
-    protected inline fun <R> lockRead(block: ChunkDatas.() -> R): R {
+    protected inline fun <R> lockRead(crossinline block: ChunkDatas.() -> R): R {
+        // Accessing data in the lambda causes IllegalAccessError
+        val data = data
         return lock.read { block(data) }
     }
 
-    protected inline fun <R> lockWrite(block: ChunkDatas.() -> R): R {
+    protected inline fun <R> lockWrite(crossinline block: ChunkDatas.() -> R): R {
+        // Accessing data in the lambda causes IllegalAccessError
+        val data = data
         return lock.write { block(data) }
     }
 
@@ -194,14 +198,16 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
 
     fun isEmpty(i: Int): Boolean {
         val j = i shl 4
+        var flag = true
         lockRead {
             struct.forIn(idData, 0, 0, j, 15, 15, j + 15) {
                 if (!it.isEmpty) {
-                    return false
+                    flag = false
+                    return@forIn
                 }
             }
         }
-        return true
+        return flag
     }
 
     fun highestBlockZAtG(x: Int,

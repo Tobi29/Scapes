@@ -20,7 +20,6 @@ import org.tobi29.scapes.engine.gui.GuiComponent
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityChestClient
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
-import java.util.*
 
 class GuiChestInventory(container: EntityChestClient,
                         player: MobPlayerClientMainVB,

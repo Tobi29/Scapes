@@ -17,6 +17,7 @@
 package org.tobi29.scapes.terrain.lighting
 
 import org.tobi29.scapes.engine.utils.Pool
+import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
 import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3i
@@ -25,7 +26,6 @@ import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.terrain.TerrainBase
-import java.util.concurrent.ConcurrentLinkedQueue
 
 class LightingEngineThreaded(private val terrain: TerrainBase<*>,
                              taskExecutor: TaskExecutor) : LightingEngine {

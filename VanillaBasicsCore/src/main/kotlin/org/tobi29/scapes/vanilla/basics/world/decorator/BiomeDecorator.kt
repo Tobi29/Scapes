@@ -17,8 +17,8 @@
 package org.tobi29.scapes.vanilla.basics.world.decorator
 
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
-import java.util.*
 
 class BiomeDecorator {
     private val layers = ArrayList<Layer>()

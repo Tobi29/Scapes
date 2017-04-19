@@ -17,6 +17,7 @@ package org.tobi29.scapes.vanilla.basics.packet
 
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
+import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.packets.Packet
@@ -27,8 +28,6 @@ import org.tobi29.scapes.server.connection.PlayerConnection
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityQuernClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityQuernServer
-import java.io.IOException
-import java.util.*
 
 class PacketQuern : PacketAbstract, PacketServer {
     private lateinit var uuid: UUID
@@ -44,14 +43,14 @@ class PacketQuern : PacketAbstract, PacketServer {
                 quern: EntityQuernClient) : this(
             Packet.make(registry, "vanilla.basics.packet.Quern"), quern)
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     override fun sendServer(client: ClientConnection,
                             stream: WritableByteStream) {
         stream.putLong(uuid.mostSignificantBits)
         stream.putLong(uuid.leastSignificantBits)
     }
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     override fun parseServer(player: PlayerConnection,
                              stream: ReadableByteStream) {
         uuid = UUID(stream.getLong(), stream.getLong())

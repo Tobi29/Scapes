@@ -33,7 +33,6 @@ import org.tobi29.scapes.vanilla.basics.entity.client.EntityBellowsClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityBellowsServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockEntity
-import java.util.*
 
 class BlockBellows(type: VanillaMaterialType) : VanillaBlockEntity<EntityBellowsClient, EntityBellowsServer>(
         type, type.materials.plugin.entityTypes.bellows) {

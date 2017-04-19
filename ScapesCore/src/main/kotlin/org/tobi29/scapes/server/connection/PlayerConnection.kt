@@ -17,12 +17,10 @@
 package org.tobi29.scapes.server.connection
 
 import org.tobi29.scapes.Debug
-import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.utils.EventDispatcher
-import org.tobi29.scapes.engine.utils.ListenerOwnerHandle
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
@@ -36,11 +34,9 @@ import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.command.Executor
 import org.tobi29.scapes.server.extension.event.MessageEvent
 import org.tobi29.scapes.server.extension.event.PlayerAuthenticateEvent
-import java.io.IOException
 
 abstract class PlayerConnection(val server: ServerConnection) : PlayConnection<PacketClient>, Executor {
-    override val events = EventDispatcher(server.events)
-    protected val registry: Registries
+    protected val registry = server.plugins.registry
     protected var entity: MobPlayerServer? = null
     protected var skin: ServerSkin? = null
     protected var id: String? = null
@@ -56,21 +52,20 @@ abstract class PlayerConnection(val server: ServerConnection) : PlayConnection<P
             }
             return field
         }
-    override val listenerOwner = ListenerOwnerHandle { !isClosed }
-
-    init {
-        registry = server.plugins.registry
-        events.listenerGlobal<MessageEvent>(this) { event ->
+    override val events = EventDispatcher(server.server.events) {
+        listen<MessageEvent>({
+            (it.target == null || it.target == this@PlayerConnection) &&
+                    (it.targetWorld == null || it.targetWorld == entity?.world)
+        }) { event ->
             if (event.level.level >= MessageLevel.CHAT.level) {
                 send(PacketChat(registry, event.message))
             }
-
         }
-    }
+    }.apply { enable() }
 
     fun mob(consumer: (MobPlayerServer) -> Unit) {
         entity?.let {
-            it.world.taskExecutor.addTaskOnce({ consumer(it) }, "Player-Mob")
+            it.world.loop.addTaskOnce({ consumer(it) }, "Player-Mob")
         }
     }
 
@@ -134,7 +129,7 @@ abstract class PlayerConnection(val server: ServerConnection) : PlayConnection<P
         }
         Account.isNameValid(nickname)?.let { return it }
         val event = PlayerAuthenticateEvent(this)
-        server.server.events.fire(event)
+        events.fire(event)
         if (!event.success) {
             return event.reason
         }
@@ -165,7 +160,7 @@ abstract class PlayerConnection(val server: ServerConnection) : PlayConnection<P
         transmit(packet)
     }
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     protected abstract fun transmit(packet: PacketClient)
 
     protected fun removeEntity() {
@@ -174,6 +169,11 @@ abstract class PlayerConnection(val server: ServerConnection) : PlayConnection<P
             entity.world.removePlayer(entity)
             save()
         }
+    }
+
+    protected fun close() {
+        removeEntity()
+        events.disable()
     }
 
     override fun playerName(): String? {

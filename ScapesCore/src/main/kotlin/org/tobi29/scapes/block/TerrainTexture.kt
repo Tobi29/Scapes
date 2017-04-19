@@ -19,8 +19,7 @@ package org.tobi29.scapes.block
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Texture
 import org.tobi29.scapes.engine.graphics.TextureAtlasEngineEntry
-
-import java.nio.ByteBuffer
+import org.tobi29.scapes.engine.utils.io.ByteBuffer
 
 open class TerrainTexture(buffer: ByteBuffer?,
                           width: Int,

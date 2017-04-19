@@ -23,8 +23,8 @@ import org.tobi29.scapes.engine.graphics.Model
 import org.tobi29.scapes.engine.graphics.ModelAttribute
 import org.tobi29.scapes.engine.graphics.RenderType
 import org.tobi29.scapes.engine.graphics.VertexType
+import org.tobi29.scapes.engine.utils.copy
 import org.tobi29.scapes.engine.utils.math.*
-import java.util.*
 
 class ChunkMesh(private val arrays: VertexArrays) {
     private val triple = SmoothLight.FloatTriple()
@@ -144,19 +144,12 @@ class ChunkMesh(private val arrays: VertexArrays) {
         val newNormalArray = FloatArray(size * 3)
         val newLightArray = FloatArray(size shl 1)
         val newAnimationArray = IntArray(size)
-        System.arraycopy(arrays.vertexArray, 0, newVertexArray, 0,
-                min(arrays.vertexArray.size, newVertexArray.size))
-        System.arraycopy(arrays.colorArray, 0, newColorArray, 0,
-                min(arrays.colorArray.size, newColorArray.size))
-        System.arraycopy(arrays.textureArray, 0, newTextureArray, 0,
-                min(arrays.textureArray.size, newTextureArray.size))
-        System.arraycopy(arrays.normalArray, 0, newNormalArray, 0,
-                min(arrays.normalArray.size, newNormalArray.size))
-        System.arraycopy(arrays.lightArray, 0, newLightArray, 0,
-                min(arrays.lightArray.size, newLightArray.size))
-        System.arraycopy(arrays.animationArray, 0, newAnimationArray, 0,
-                min(arrays.animationArray.size,
-                        newAnimationArray.size))
+        copy(arrays.vertexArray, newVertexArray)
+        copy(arrays.colorArray, newColorArray)
+        copy(arrays.textureArray, newTextureArray)
+        copy(arrays.normalArray, newNormalArray)
+        copy(arrays.lightArray, newLightArray)
+        copy(arrays.animationArray, newAnimationArray)
         arrays.vertexArray = newVertexArray
         arrays.colorArray = newColorArray
         arrays.textureArray = newTextureArray

@@ -21,13 +21,13 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.BlockExplosive
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.BlockSimple
 import org.tobi29.scapes.vanilla.basics.util.explosion
 import org.tobi29.scapes.vanilla.basics.util.explosionBlockPush
-import java.util.concurrent.ThreadLocalRandom
 
 class BlockHyperBomb(type: VanillaMaterialType) : BlockSimple(
         type), BlockExplosive {
@@ -52,7 +52,7 @@ class BlockHyperBomb(type: VanillaMaterialType) : BlockSimple(
                                    y: Int,
                                    z: Int,
                                    data: Int) {
-        val random = ThreadLocalRandom.current()
+        val random = threadLocalRandom()
         terrain.world.addEntityNew(
                 materials.plugin.entityTypes.bomb.createServer(
                         terrain.world).apply {
@@ -76,7 +76,7 @@ class BlockHyperBomb(type: VanillaMaterialType) : BlockSimple(
         if (!super.destroy(terrain, x, y, z, data, face, player, item)) {
             return false
         }
-        val random = ThreadLocalRandom.current()
+        val random = threadLocalRandom()
         terrain.world.addEntityNew(
                 materials.plugin.entityTypes.bomb.createServer(
                         terrain.world).apply {

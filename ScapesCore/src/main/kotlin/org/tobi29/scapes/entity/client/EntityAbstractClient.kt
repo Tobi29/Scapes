@@ -17,23 +17,19 @@
 package org.tobi29.scapes.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.utils.ListenerOwnerHandle
-import org.tobi29.scapes.engine.utils.tag.*
+import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.model.EntityModel
 import org.tobi29.scapes.packets.PacketEntityMetaData
-import java.util.*
 
 open class EntityAbstractClient(override val type: EntityType<*, *>,
                                 override val world: WorldClient,
                                 pos: Vector3d) : EntityClient {
     override val registry = world.registry
     protected val pos = MutableVector3d(pos)
-    override val listenerOwner = ListenerOwnerHandle {
-        !world.disposed() && world.hasEntity(this)
-    }
     override var uuid: UUID = UUID.randomUUID()
         protected set
     protected var metaData = MutableTagMap()

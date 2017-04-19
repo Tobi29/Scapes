@@ -17,18 +17,17 @@
 package org.tobi29.scapes.server.connection
 
 import kotlinx.coroutines.experimental.yield
-import mu.KLogging
 import org.tobi29.scapes.engine.server.*
-import org.tobi29.scapes.engine.utils.Algorithm
-import org.tobi29.scapes.engine.utils.ByteBuffer
-import org.tobi29.scapes.engine.utils.equals
+import org.tobi29.scapes.engine.utils.*
 import org.tobi29.scapes.engine.utils.graphics.Image
+import org.tobi29.scapes.engine.utils.io.ByteBuffer
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.engine.utils.io.checksum
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.read
 import org.tobi29.scapes.engine.utils.io.process
 import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.entity.skin.ServerSkin
 import org.tobi29.scapes.packets.*
@@ -37,16 +36,12 @@ import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.extension.event.MessageEvent
 import org.tobi29.scapes.server.extension.event.PlayerJoinEvent
 import org.tobi29.scapes.server.extension.event.PlayerLeaveEvent
-import java.io.IOException
 import java.security.InvalidKeyException
 import java.security.KeyFactory
 import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
 import java.security.spec.InvalidKeySpecException
 import java.security.spec.X509EncodedKeySpec
-import java.util.*
-import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.atomic.AtomicInteger
 import javax.crypto.BadPaddingException
 import javax.crypto.Cipher
 import javax.crypto.IllegalBlockSizeException
@@ -147,9 +142,8 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
             server.server.plugins.registry.writeIDStorage().writeBinary(output)
             channel.queueBundle()
             pingWait = System.currentTimeMillis() + 1000
-            server.events.fireLocal(
-                    PlayerJoinEvent(this@RemotePlayerConnection))
-            server.events.fireLocal(
+            events.fire(PlayerJoinEvent(this@RemotePlayerConnection))
+            events.fire(
                     MessageEvent(this@RemotePlayerConnection,
                             MessageLevel.SERVER_INFO,
                             "Player connected: $id ($nickname) on $channel"))
@@ -186,9 +180,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                     loop@ while (true) {
                         when (channel.process()) {
                             PacketBundleChannel.FetchResult.CLOSED -> {
-                                server.events.fireLocal(PlayerLeaveEvent(
-                                        this@RemotePlayerConnection))
-                                server.events.fireLocal(
+                                events.fire(
                                         MessageEvent(
                                                 this@RemotePlayerConnection,
                                                 MessageLevel.SERVER_INFO,
@@ -219,35 +211,30 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
             }
             channel.aClose()
         } catch (e: ConnectionCloseException) {
-            server.events.fireLocal(
-                    PlayerLeaveEvent(this@RemotePlayerConnection))
-            server.events.fireLocal(
+            events.fire(
                     MessageEvent(this@RemotePlayerConnection,
                             MessageLevel.SERVER_INFO,
                             "Disconnecting player: $nickname"))
             channel.aClose()
         } catch (e: InvalidPacketDataException) {
-            server.events.fireLocal(
-                    PlayerLeaveEvent(this@RemotePlayerConnection))
-            server.events.fireLocal(
+            events.fire(
                     MessageEvent(this@RemotePlayerConnection,
                             MessageLevel.SERVER_INFO,
                             "Disconnecting player: $nickname"))
             channel.aClose()
         } catch (e: IOException) {
-            server.events.fireLocal(
-                    PlayerLeaveEvent(this@RemotePlayerConnection))
-            server.events.fireLocal(
+            events.fire(
                     MessageEvent(this@RemotePlayerConnection,
                             MessageLevel.SERVER_INFO,
                             "Player disconnected: $nickname ($e)"))
         } finally {
+            events.fire(PlayerLeaveEvent(this@RemotePlayerConnection))
             isClosed = true
             if (added) {
                 server.removePlayer(this)
                 added = false
             }
-            removeEntity()
+            close()
             try {
                 channel.close()
             } catch (e: IOException) {

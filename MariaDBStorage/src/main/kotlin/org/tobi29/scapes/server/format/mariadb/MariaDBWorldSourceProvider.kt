@@ -21,7 +21,6 @@ import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.format.spi.WorldSourceProvider
-import java.io.IOException
 
 class MariaDBWorldSourceProvider : WorldSourceProvider {
     override fun available(): Boolean {
@@ -32,7 +31,7 @@ class MariaDBWorldSourceProvider : WorldSourceProvider {
         return "MariaDB"
     }
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     override fun get(path: FilePath,
                      configMap: TagMap,
                      taskExecutor: TaskExecutor): WorldSource {

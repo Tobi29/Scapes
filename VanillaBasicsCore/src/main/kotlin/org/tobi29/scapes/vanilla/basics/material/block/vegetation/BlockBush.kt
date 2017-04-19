@@ -35,7 +35,6 @@ import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
 import org.tobi29.scapes.vanilla.basics.util.dropItems
-import java.util.*
 
 class BlockBush(type: VanillaMaterialType) : VanillaBlock(type) {
     private var textures: Array<Pair<TerrainTexture, TerrainTexture>>? = null

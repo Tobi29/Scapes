@@ -21,8 +21,10 @@ version = "0.0.0"
 dependencies {
     compile project(":ScapesTerrain")
     compile rootProject.ext.scapesEngineEngine
+    compile rootProject.ext.scapesEngineFileSystems
     compile rootProject.ext.scapesEngineServerFramework
     compile rootProject.ext.scapesEngineSQLFramework
+    compile rootProject.ext.scapesEngineTagStructureJSON
     compile rootProject.ext.scapesEngineGenerationUtils
     compile rootProject.ext.commonsCLI
 }

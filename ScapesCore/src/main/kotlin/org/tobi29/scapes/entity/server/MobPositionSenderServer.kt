@@ -17,6 +17,7 @@
 package org.tobi29.scapes.entity.server
 
 import org.tobi29.scapes.block.Registries
+import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.angleDiff
 import org.tobi29.scapes.engine.utils.math.clamp
@@ -24,9 +25,8 @@ import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.minus
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.packets.*
-import java.util.*
-import java.util.concurrent.ThreadLocalRandom
 
 class MobPositionSenderServer(private val registry: Registries,
                               pos: Vector3d,
@@ -49,8 +49,8 @@ class MobPositionSenderServer(private val registry: Registries,
     init {
         sentPosRelative = MutableVector3d(pos)
         sentPosAbsolute = MutableVector3d(pos)
-        nextForce = System.nanoTime() + FORCE_TIME +
-                ThreadLocalRandom.current().nextLong(FORCE_TIME_RANDOM)
+        nextForce = System.nanoTime() + FORCE_TIME + (threadLocalRandom().nextInt(
+                FORCE_TIME_RANDOM).toLong() shl 3)
     }
 
     fun submitUpdate(uuid: UUID,
@@ -84,8 +84,8 @@ class MobPositionSenderServer(private val registry: Registries,
         val time = System.nanoTime()
         if (!force && time >= nextForce) {
             force = true
-            nextForce = time + FORCE_TIME +
-                    ThreadLocalRandom.current().nextLong(FORCE_TIME_RANDOM)
+            nextForce = time + FORCE_TIME + (threadLocalRandom().nextInt(
+                    FORCE_TIME_RANDOM).toLong() shl 3)
         }
         val oldPos: Vector3d?
         if (force) {
@@ -188,7 +188,7 @@ class MobPositionSenderServer(private val registry: Registries,
         private val POSITION_SEND_ABSOLUTE_OFFSET = 1.0
         private val SPEED_SEND_OFFSET = 0.05
         private val DIRECTION_SEND_OFFSET = 12.25
-        private val FORCE_TIME = 10000000000L
-        private val FORCE_TIME_RANDOM = 10000000000L
+        private val FORCE_TIME = 10000000000
+        private val FORCE_TIME_RANDOM = 1250000000
     }
 }

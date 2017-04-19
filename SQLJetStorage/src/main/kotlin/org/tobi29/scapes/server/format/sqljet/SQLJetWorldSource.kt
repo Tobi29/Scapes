@@ -22,13 +22,13 @@ import org.tobi29.scapes.engine.sql.sqljet.SQLJetDatabase
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.graphics.encodePNG
 import org.tobi29.scapes.engine.utils.io.filesystem.*
+import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.format.WorldFormat
 import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.format.newPanorama
 import org.tobi29.scapes.server.format.sql.SQLWorldFormat
 import java.io.File
-import java.io.IOException
 import java.sql.SQLException
 
 class SQLJetWorldSource(private val path: FilePath,

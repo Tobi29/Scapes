@@ -28,7 +28,6 @@ import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.PointerPane
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
-import java.util.*
 
 class BlockAir(type: MaterialType) : BlockType(type) {
 

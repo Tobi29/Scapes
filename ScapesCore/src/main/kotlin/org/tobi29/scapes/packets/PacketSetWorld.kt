@@ -26,10 +26,10 @@ import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
 import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
+import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.server.connection.PlayerConnection
-import java.util.*
 
 class PacketSetWorld : PacketAbstract, PacketClient {
     private lateinit var tag: TagMap

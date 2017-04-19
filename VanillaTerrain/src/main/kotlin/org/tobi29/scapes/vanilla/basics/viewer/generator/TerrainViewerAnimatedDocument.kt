@@ -27,7 +27,7 @@ class TerrainViewerAnimatedDocument(colorSupplier: () -> TerrainViewerCanvas.Col
                           menu: SmartMenuBar,
                           application: MultiDocumentApplication) {
         super.populate(composite, menu, application)
-        application.taskExecutor.addTask({
+        application.loop.addTask({
             canvas.ifPresent {
                 if (!it.isRendering) {
                     progress()

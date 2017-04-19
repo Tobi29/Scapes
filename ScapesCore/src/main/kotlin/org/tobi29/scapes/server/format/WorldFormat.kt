@@ -20,14 +20,13 @@ import org.tobi29.scapes.chunk.EnvironmentServer
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.plugins.Plugins
 import org.tobi29.scapes.server.ScapesServer
-import java.io.IOException
 
 interface WorldFormat {
     val playerData: PlayerData
     val seed: Long
     val plugins: Plugins
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     fun registerWorld(server: ScapesServer,
                       environmentSupplier: Function1<WorldServer, EnvironmentServer>,
                       name: String,
@@ -37,6 +36,6 @@ interface WorldFormat {
 
     fun deleteWorld(name: String): Boolean
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     fun dispose()
 }

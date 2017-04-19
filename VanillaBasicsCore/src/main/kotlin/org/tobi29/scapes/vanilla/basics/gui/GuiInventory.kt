@@ -26,7 +26,6 @@ import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.packets.PacketInventoryInteraction
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
-import java.util.*
 
 open class GuiInventory(name: String,
                         protected val player: MobPlayerClientMainVB,

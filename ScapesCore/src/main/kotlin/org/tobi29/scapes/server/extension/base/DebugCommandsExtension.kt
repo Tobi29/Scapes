@@ -17,11 +17,12 @@
 package org.tobi29.scapes.server.extension.base
 
 import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream
 import org.tobi29.scapes.engine.utils.io.asString
 import org.tobi29.scapes.engine.utils.io.process
-import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.io.tag.json.writeJSON
+import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.command.getInt
@@ -31,7 +32,6 @@ import org.tobi29.scapes.server.command.requireOption
 import org.tobi29.scapes.server.extension.ServerExtension
 import org.tobi29.scapes.server.extension.event.MessageEvent
 import org.tobi29.scapes.server.extension.spi.ServerExtensionProvider
-import java.io.IOException
 
 class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
 
@@ -155,15 +155,13 @@ class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
                                 stream)
                         stream.buffer().flip()
                         val str = process(stream, asString())
-                        executor.events.fireLocal(
-                                MessageEvent(executor,
-                                        MessageLevel.FEEDBACK_INFO,
-                                        str))
+                        executor.events.fire(MessageEvent(executor,
+                                MessageLevel.FEEDBACK_INFO, str, executor))
                     } catch (e: IOException) {
-                        executor.events.fireLocal(
-                                MessageEvent(executor,
-                                        MessageLevel.FEEDBACK_ERROR,
-                                        "Failed to serialize item: ${e.message}"))
+                        executor.events.fire(MessageEvent(executor,
+                                MessageLevel.FEEDBACK_ERROR,
+                                "Failed to serialize item: ${e.message}",
+                                executor))
                     }
                 })
             })

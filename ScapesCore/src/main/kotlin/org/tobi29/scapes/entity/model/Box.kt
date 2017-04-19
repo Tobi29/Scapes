@@ -18,6 +18,7 @@ package org.tobi29.scapes.entity.model
 
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.*
+import org.tobi29.scapes.engine.utils.copy
 
 class Box constructor(engine: ScapesEngine,
                       tbs: Float,
@@ -122,7 +123,7 @@ class Box constructor(engine: ScapesEngine,
                     8, 10, 11, 12, 13, 14, 12, 14, 15, 16, 17, 18, 16, 18, 19,
                     20, 21, 22, 20, 22, 23)
             INDICES_NO_CULL = IntArray(INDICES.size shl 1)
-            System.arraycopy(INDICES, 0, INDICES_NO_CULL, 0, INDICES.size)
+            copy(INDICES, INDICES_NO_CULL)
             for (i in INDICES.indices) {
                 INDICES_NO_CULL[INDICES_NO_CULL.size - i - 1] = INDICES[i]
             }

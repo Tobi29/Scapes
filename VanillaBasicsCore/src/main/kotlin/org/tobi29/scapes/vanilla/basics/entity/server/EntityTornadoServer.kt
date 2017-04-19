@@ -17,21 +17,21 @@ package org.tobi29.scapes.vanilla.basics.entity.server
 
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.filterMap
-import org.tobi29.scapes.engine.utils.tag.ReadWriteTagMap
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.set
-import org.tobi29.scapes.engine.utils.tag.toDouble
 import org.tobi29.scapes.engine.utils.math.cosTable
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.sinTable
 import org.tobi29.scapes.engine.utils.math.toRad
 import org.tobi29.scapes.engine.utils.math.vector.*
+import org.tobi29.scapes.engine.utils.tag.ReadWriteTagMap
+import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.scapes.engine.utils.tag.set
+import org.tobi29.scapes.engine.utils.tag.toDouble
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.entity.server.EntityAbstractServer
 import org.tobi29.scapes.entity.server.MobPositionSenderServer
 import org.tobi29.scapes.entity.server.MobServer
-import java.util.concurrent.ThreadLocalRandom
 
 class EntityTornadoServer(type: EntityType<*, *>,
                           world: WorldServer) : EntityAbstractServer(
@@ -41,7 +41,7 @@ class EntityTornadoServer(type: EntityType<*, *>,
     private var dir = 0.0
 
     init {
-        val random = ThreadLocalRandom.current()
+        val random = threadLocalRandom()
         dir = random.nextDouble() * 360
         time = (random.nextInt(100) + 20).toDouble()
         positionHandler = MobPositionSenderServer(registry, { world.send(it) })
@@ -61,7 +61,7 @@ class EntityTornadoServer(type: EntityType<*, *>,
     }
 
     override fun update(delta: Double) {
-        val random = ThreadLocalRandom.current()
+        val random = threadLocalRandom()
         dir += (random.nextDouble() * 80.0 - 40.0) * delta
         val d = dir.toRad()
         val speed = 2.0 * delta

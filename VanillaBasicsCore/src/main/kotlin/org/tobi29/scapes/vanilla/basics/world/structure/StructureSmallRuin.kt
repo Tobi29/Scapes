@@ -18,9 +18,9 @@ package org.tobi29.scapes.vanilla.basics.world.structure
 
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
-import java.util.*
 
 fun TerrainServer.TerrainMutable.placeRandomRuin(x: Int,
                                                  y: Int,

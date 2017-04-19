@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.client.gui
 
-import mu.KLogging
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiComponentText

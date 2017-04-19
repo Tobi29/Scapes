@@ -64,7 +64,7 @@ class ReconnectDocument(private val address: RemoteAddress,
         text.text = "Reconnecting in $timer..."
         val progress = ProgressBar(pane, SWT.INDETERMINATE)
         progress.layoutData = GridData(SWT.FILL, SWT.CENTER, true, false)
-        application.taskExecutor.addTask({
+        application.loop.addTask({
             if (timer <= 0) {
                 application.access(this) { composite ->
                     application.replaceTab(composite,

@@ -23,12 +23,13 @@ import org.tobi29.scapes.block.models.ItemModelSimple
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.utils.tag.set
-import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.tag.toInt
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.engine.utils.math.tanh
+import org.tobi29.scapes.engine.utils.tag.set
+import org.tobi29.scapes.engine.utils.tag.toDouble
+import org.tobi29.scapes.engine.utils.tag.toInt
 import org.tobi29.scapes.entity.WieldMode
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
@@ -37,7 +38,6 @@ import org.tobi29.scapes.vanilla.basics.material.ItemMetal
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.item.VanillaItem
 import org.tobi29.scapes.vanilla.basics.util.createTool
-import java.util.concurrent.ConcurrentHashMap
 
 abstract class ItemMetalTool(type: VanillaMaterialType) : VanillaItem(
         type), ItemMetal {

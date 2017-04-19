@@ -24,7 +24,6 @@ import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
 import org.tobi29.scapes.vanilla.basics.material.CraftingRecipe
 import org.tobi29.scapes.vanilla.basics.material.CraftingRecipeType
 import org.tobi29.scapes.vanilla.basics.packet.PacketCrafting
-import java.util.*
 
 class GuiCrafting(private val table: Boolean,
                   player: MobPlayerClientMainVB,

@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.block
 
-import java.util.concurrent.ConcurrentHashMap
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 
 class InventoryContainer(private val updateHandler: (String) -> Unit = { }) {
     private val inventories = ConcurrentHashMap<String, Inventory>()

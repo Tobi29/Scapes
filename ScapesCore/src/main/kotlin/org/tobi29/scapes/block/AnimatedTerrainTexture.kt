@@ -18,12 +18,12 @@ package org.tobi29.scapes.block
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Texture
+import org.tobi29.scapes.engine.utils.AtomicInteger
 import org.tobi29.scapes.engine.utils.graphics.generateMipMaps
+import org.tobi29.scapes.engine.utils.io.ByteBuffer
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.engine.utils.math.remP
 import org.tobi29.scapes.engine.utils.toArray
-import java.nio.ByteBuffer
-import java.util.concurrent.atomic.AtomicInteger
 
 class AnimatedTerrainTexture(buffer: ByteBuffer,
                              width: Int,

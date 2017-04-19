@@ -16,11 +16,12 @@
 
 package org.tobi29.scapes.server.format.sql
 
-import mu.KLogging
 import org.tobi29.scapes.chunk.EnvironmentServer
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteServer
 import org.tobi29.scapes.engine.sql.*
+import org.tobi29.scapes.engine.utils.IOException
+import org.tobi29.scapes.engine.utils.io.ByteBuffer
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.isNotHidden
@@ -28,19 +29,17 @@ import org.tobi29.scapes.engine.utils.io.filesystem.isRegularFile
 import org.tobi29.scapes.engine.utils.io.filesystem.listRecursive
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
 import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toMutTag
 import org.tobi29.scapes.engine.utils.tag.toTag
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.plugins.PluginFile
 import org.tobi29.scapes.plugins.Plugins
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.format.PlayerData
 import org.tobi29.scapes.server.format.WorldFormat
-import java.io.IOException
-import java.nio.ByteBuffer
-import java.util.*
-import java.util.concurrent.ThreadLocalRandom
 
 open class SQLWorldFormat(protected val path: FilePath,
                           database: SQLDatabase,
@@ -105,7 +104,7 @@ open class SQLWorldFormat(protected val path: FilePath,
             }
         } else {
             logger.info { "No seed in database, adding a random one in." }
-            seed = ThreadLocalRandom.current().nextLong()
+            seed = threadLocalRandom().nextLong()
             replaceMetaData(arrayOf("Seed", seed))
         }
         rows = getData("IDs")

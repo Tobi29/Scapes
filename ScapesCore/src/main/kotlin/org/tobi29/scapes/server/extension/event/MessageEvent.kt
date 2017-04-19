@@ -16,9 +16,12 @@
 
 package org.tobi29.scapes.server.extension.event
 
+import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.command.Executor
 
 class MessageEvent(val executor: Executor,
                    val level: MessageLevel,
-                   val message: String)
+                   val message: String,
+                   val target: Executor? = null,
+                   val targetWorld: WorldServer? = null)

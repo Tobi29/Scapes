@@ -21,14 +21,14 @@ import org.tobi29.scapes.block.Material
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.terrain.TerrainEntity
 import org.tobi29.scapes.engine.utils.Pool
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
+import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.math.PointerPane
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.Entity
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteBase
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteChunkManager
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 abstract class TerrainInfinite<E : Entity, C : TerrainInfiniteChunk<E>>(
         zSize: Int,

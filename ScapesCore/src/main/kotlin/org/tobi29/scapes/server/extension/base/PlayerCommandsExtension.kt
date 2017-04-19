@@ -40,9 +40,9 @@ class PlayerCommandsExtension(server: ScapesServer) : ServerExtension(server) {
                 server.connection.players.asSequence().map { it.name() }.filter { nickname ->
                     pattern.matches(nickname)
                 }.forEach { message ->
-                    executor.events.fireLocal(
+                    executor.events.fire(
                             MessageEvent(executor, MessageLevel.FEEDBACK_INFO,
-                                    message))
+                                    message, executor))
                 }
             }
         }

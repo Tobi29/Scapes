@@ -17,6 +17,7 @@ package org.tobi29.scapes.vanilla.basics.packet
 
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
+import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.packets.Packet
@@ -30,8 +31,6 @@ import org.tobi29.scapes.vanilla.basics.entity.server.EntityAnvilServer
 import org.tobi29.scapes.vanilla.basics.material.item.ItemIngot
 import org.tobi29.scapes.vanilla.basics.material.item.ItemOreChunk
 import org.tobi29.scapes.vanilla.basics.util.createTool
-import java.io.IOException
-import java.util.*
 
 class PacketAnvil : PacketAbstract, PacketServer {
     private lateinit var uuid: UUID
@@ -52,7 +51,7 @@ class PacketAnvil : PacketAbstract, PacketServer {
             Packet.make(registry, "vanilla.basics.packet.Anvil"), anvil,
             id)
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     override fun sendServer(client: ClientConnection,
                             stream: WritableByteStream) {
         stream.putLong(uuid.mostSignificantBits)
@@ -60,7 +59,7 @@ class PacketAnvil : PacketAbstract, PacketServer {
         stream.putInt(id)
     }
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     override fun parseServer(player: PlayerConnection,
                              stream: ReadableByteStream) {
         uuid = UUID(stream.getLong(), stream.getLong())

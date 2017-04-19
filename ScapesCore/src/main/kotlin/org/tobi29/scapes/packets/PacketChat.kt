@@ -70,12 +70,12 @@ class PacketChat : PacketAbstract, PacketBoth {
         if (text[0] == '/') {
             player.server.server.commandRegistry()[text.substring(
                     1), player].execute().forEach { output ->
-                player.events.fireLocal(
+                player.events.fire(
                         MessageEvent(player, MessageLevel.FEEDBACK_ERROR,
-                                output.toString()))
+                                output.toString(), player))
             }
         } else {
-            player.server.events.fireLocal(
+            player.events.fire(
                     MessageEvent(player, MessageLevel.CHAT,
                             '<' + player.name() + "> " + text))
         }

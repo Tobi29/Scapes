@@ -21,14 +21,13 @@ import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.packets.Packet
 import org.tobi29.scapes.packets.PacketAbstract
 import org.tobi29.scapes.packets.PacketClient
 import org.tobi29.scapes.packets.PacketType
 import org.tobi29.scapes.server.connection.PlayerConnection
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleEmitterLightning
-import java.io.IOException
-import java.util.concurrent.ThreadLocalRandom
 
 class PacketLightning : PacketAbstract, PacketClient {
     private var x = 0.0
@@ -53,7 +52,7 @@ class PacketLightning : PacketAbstract, PacketClient {
             Packet.make(registry, "vanilla.basics.packet.Lightning"), x,
             y, z)
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {
         stream.putDouble(x)
@@ -61,7 +60,7 @@ class PacketLightning : PacketAbstract, PacketClient {
         stream.putDouble(z)
     }
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
         x = stream.getDouble()
@@ -75,13 +74,13 @@ class PacketLightning : PacketAbstract, PacketClient {
             val emitter = mob.world.scene.particles().emitter(
                     ParticleEmitterLightning::class.java)
             emitter.add { instance ->
-                val random = ThreadLocalRandom.current()
+                val random = threadLocalRandom()
                 instance.pos.set(pos)
                 instance.speed.set(Vector3d.ZERO)
                 instance.time = 0.5f
                 instance.vao = random.nextInt(emitter.maxVAO())
             }
-            val random = ThreadLocalRandom.current()
+            val random = threadLocalRandom()
             mob.world.playSound(SOUNDS[random.nextInt(3)], pos, Vector3d.ZERO,
                     1.0f,
                     64.0f)

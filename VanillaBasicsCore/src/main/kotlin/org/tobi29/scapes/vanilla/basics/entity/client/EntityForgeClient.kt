@@ -22,12 +22,12 @@ import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.utils.math.TWO_PI
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.particle.ParticleEmitterTransparent
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.gui.GuiForgeInventory
-import java.util.concurrent.ThreadLocalRandom
 
 class EntityForgeClient(type: EntityType<*, *>,
                         world: WorldClient) : EntityAbstractFurnaceClient(
@@ -53,7 +53,7 @@ class EntityForgeClient(type: EntityType<*, *>,
                 val emitter = world.scene.particles().emitter(
                         ParticleEmitterTransparent::class.java)
                 emitter.add { instance ->
-                    val random = ThreadLocalRandom.current()
+                    val random = threadLocalRandom()
                     instance.pos.set(pos.now())
                     instance.speed.set(Vector3d(random.nextDouble() * 0.8 - 0.4,
                             random.nextDouble() * 0.8 - 0.4,

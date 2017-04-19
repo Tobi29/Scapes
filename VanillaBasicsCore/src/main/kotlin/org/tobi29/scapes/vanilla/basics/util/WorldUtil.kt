@@ -19,8 +19,8 @@ package org.tobi29.scapes.vanilla.basics.util
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
-import java.util.concurrent.ThreadLocalRandom
 
 fun WorldServer.dropItems(items: List<ItemStack>,
                           x: Int,
@@ -45,7 +45,7 @@ fun WorldServer.dropItem(item: ItemStack,
                          pos: Vector3d,
                          despawntime: Double = 600.0) {
     val plugin = plugins.plugin("VanillaBasics") as VanillaBasics
-    val random = ThreadLocalRandom.current()
+    val random = threadLocalRandom()
     val entity = plugin.entityTypes.item.createServer(this).apply {
         setPos(pos)
         setSpeed(Vector3d(-2.0 + random.nextDouble() * 4.0,

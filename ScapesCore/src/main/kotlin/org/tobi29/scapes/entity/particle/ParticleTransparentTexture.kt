@@ -17,7 +17,7 @@ package org.tobi29.scapes.entity.particle
 
 import org.tobi29.scapes.engine.graphics.Texture
 import org.tobi29.scapes.engine.graphics.TextureAtlasEngineEntry
-import java.nio.ByteBuffer
+import org.tobi29.scapes.engine.utils.io.ByteBuffer
 
 class ParticleTransparentTexture(buffer: ByteBuffer,
                                  width: Int,

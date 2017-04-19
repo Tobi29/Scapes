@@ -18,7 +18,7 @@ package org.tobi29.scapes.client.gui
 
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
-import org.tobi29.scapes.engine.utils.io.parseX500
+import org.tobi29.scapes.engine.server.parseX500
 import java.security.cert.X509Certificate
 
 class GuiCertificateWarning(state: GameState,

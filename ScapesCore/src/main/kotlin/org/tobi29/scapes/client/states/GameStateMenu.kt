@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.client.states
 
-import mu.KLogging
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.gui.GuiAccount
 import org.tobi29.scapes.client.gui.GuiGenerateAccount
@@ -30,7 +30,7 @@ import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import java.io.IOException
+import org.tobi29.scapes.engine.utils.IOException
 
 class GameStateMenu(engine: ScapesEngine) : GameState(engine) {
     private val scene = SceneMenu(engine)

@@ -19,10 +19,10 @@ import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
+import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.entity.client.EntityContainerClient
 import org.tobi29.scapes.entity.server.EntityContainerServer
 import org.tobi29.scapes.server.connection.PlayerConnection
-import java.util.*
 
 class PacketOpenGui : PacketAbstract, PacketClient {
     private lateinit var uuid: UUID

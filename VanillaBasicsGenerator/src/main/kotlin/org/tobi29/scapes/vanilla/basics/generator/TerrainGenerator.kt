@@ -16,9 +16,9 @@
 
 package org.tobi29.scapes.vanilla.basics.generator
 
-import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.generation.value.SimplexNoise
-import java.util.*
+import org.tobi29.scapes.engine.utils.Random
+import org.tobi29.scapes.engine.utils.math.*
 
 class TerrainGenerator(random: Random) {
     private val terrainNoise = SimplexNoise(random.nextLong())

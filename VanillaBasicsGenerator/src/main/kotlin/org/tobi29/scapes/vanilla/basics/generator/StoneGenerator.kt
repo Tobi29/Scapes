@@ -16,13 +16,13 @@
 
 package org.tobi29.scapes.vanilla.basics.generator
 
-import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.engine.utils.generation.layer.RandomPermutation
 import org.tobi29.scapes.engine.utils.generation.layer.random
 import org.tobi29.scapes.engine.utils.generation.layer.randomOffset
 import org.tobi29.scapes.engine.utils.generation.value.SimplexNoise
+import org.tobi29.scapes.engine.utils.Random
+import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.engine.utils.toArray
-import java.util.*
 
 class StoneGenerator(random: Random,
                      stoneLayers: Sequence<Sequence<StoneType>>) {

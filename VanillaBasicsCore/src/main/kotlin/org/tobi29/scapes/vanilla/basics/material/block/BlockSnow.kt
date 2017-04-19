@@ -34,7 +34,6 @@ import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.PointerPane
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
-import java.util.*
 
 class BlockSnow(type: VanillaMaterialType) : VanillaBlock(type) {
     private var texture: TerrainTexture? = null

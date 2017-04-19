@@ -30,6 +30,8 @@ application {
     copyright = "© 2012-2016 Tobi29"
     uuid = "1861B0A8-3269-41D8-AD55-4A7DC0DF7190"
     mainClass = "org.tobi29.scapes.desktop.ScapesKt"
+    category = ApplicationType.GAME
+    workingDirectoryInLibrary = true
 }
 
 dependencies {

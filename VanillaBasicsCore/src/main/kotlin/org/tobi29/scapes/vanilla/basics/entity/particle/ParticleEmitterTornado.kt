@@ -23,9 +23,9 @@ import org.tobi29.scapes.engine.utils.math.cosTable
 import org.tobi29.scapes.engine.utils.math.sinTable
 import org.tobi29.scapes.engine.utils.math.toRad
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.entity.particle.*
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
-import java.util.concurrent.ThreadLocalRandom
 
 class ParticleEmitterTornado(system: ParticleSystem) : ParticleEmitter<ParticleInstanceTornado>(
         system, Array(10240, { ParticleInstanceTornado() })) {
@@ -35,7 +35,7 @@ class ParticleEmitterTornado(system: ParticleSystem) : ParticleEmitter<ParticleI
                       speed: Vector3d,
                       texture: ParticleTransparentTexture) {
         emitter.add { instance ->
-            val random = ThreadLocalRandom.current()
+            val random = threadLocalRandom()
             instance.pos.set(pos)
             instance.speed.set(speed)
             instance.time = 1.0f

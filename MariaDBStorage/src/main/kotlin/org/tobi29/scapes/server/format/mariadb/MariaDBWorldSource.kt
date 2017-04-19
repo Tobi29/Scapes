@@ -20,11 +20,11 @@ import org.tobi29.scapes.engine.sql.mysql.MySQLDatabase
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.copy
 import org.tobi29.scapes.engine.utils.io.filesystem.createDirectories
+import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.format.WorldFormat
 import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.format.sql.SQLWorldFormat
-import java.io.IOException
 import java.sql.Connection
 import java.sql.SQLException
 

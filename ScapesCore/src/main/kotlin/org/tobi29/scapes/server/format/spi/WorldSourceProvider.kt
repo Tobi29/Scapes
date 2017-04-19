@@ -20,14 +20,13 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.server.format.WorldSource
-import java.io.IOException
 
 interface WorldSourceProvider {
     fun available(): Boolean
 
     fun configID(): String
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     operator fun get(path: FilePath,
                      configMap: TagMap,
                      taskExecutor: TaskExecutor): WorldSource

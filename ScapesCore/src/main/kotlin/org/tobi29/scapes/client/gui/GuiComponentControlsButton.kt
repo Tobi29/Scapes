@@ -25,7 +25,6 @@ import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.engine.input.ControllerKeyReference
 import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.tag.set
-import java.util.*
 
 class GuiComponentControlsButton(parent: GuiLayoutData,
                                  textSize: Int,

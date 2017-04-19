@@ -16,10 +16,8 @@
 package org.tobi29.scapes.client
 
 import org.tobi29.scapes.engine.utils.EventDispatcher
-import java.util.*
 
-class ChatHistory {
-    val events = EventDispatcher()
+class ChatHistory(private val listenerParent: EventDispatcher) {
     private val lines = ArrayList<ChatLine>()
 
     @Synchronized fun addLine(text: String) {
@@ -28,7 +26,7 @@ class ChatHistory {
         for (line in lines) {
             this.lines.add(0, ChatLine(line))
         }
-        events.fire(ChatChangeEvent(this))
+        listenerParent.fire(ChatChangeEvent(this))
     }
 
     @Synchronized fun update() {
@@ -36,7 +34,7 @@ class ChatHistory {
         val removals = lines.filter { line -> time - line.time > 10000 }
         if (!removals.isEmpty()) {
             lines.removeAll(removals)
-            events.fire(ChatChangeEvent(this))
+            listenerParent.fire(ChatChangeEvent(this))
         }
     }
 

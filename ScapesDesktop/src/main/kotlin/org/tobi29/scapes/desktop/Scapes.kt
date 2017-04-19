@@ -19,12 +19,15 @@ package org.tobi29.scapes.desktop
 import org.apache.commons.cli.*
 import org.tobi29.scapes.Debug
 import org.tobi29.scapes.VERSION
+import org.tobi29.scapes.client.DialogProvider
 import org.tobi29.scapes.client.SaveStorage
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.Container
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.ContainerGLFW
 import org.tobi29.scapes.engine.graphics.GraphicsCheckException
+import org.tobi29.scapes.engine.utils.Crashable
+import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.io.tag.json.readJSON
 import org.tobi29.scapes.engine.utils.io.tag.json.writeJSON
@@ -35,7 +38,6 @@ import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.plugins.Sandbox
 import org.tobi29.scapes.server.format.sqlite.SQLiteSaveStorage
 import org.tobi29.scapes.server.shell.ScapesServerHeadless
-import java.io.IOException
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
@@ -91,8 +93,7 @@ fun main(args: Array<String>) {
     val mode = commandLine.getOptionValue('m', "client")
     val home: FilePath
     if (cmdArgs.isNotEmpty()) {
-        home = path(
-                cmdArgs[0].replace("\$HOME", System.getProperty("user.home")))
+        home = path(cmdArgs[0])
         System.setProperty("user.dir", home.toAbsolutePath().toString())
     } else {
         home = path(System.getProperty("user.dir")).toAbsolutePath()
@@ -103,11 +104,14 @@ fun main(args: Array<String>) {
             val cache = home.resolve("cache")
             val pluginCache = cache.resolve("plugins")
             var engine: ScapesEngine? = null
-            val crashHandler = ScapesEngine.crashHandler(home, { engine })
+            val crashHandler = crashHandler(home, { engine })
             val taskExecutor = TaskExecutor(crashHandler, "Engine")
             val configMap = readConfig(config).toMutTag()
             val saves: (ScapesClient) -> SaveStorage = {
                 SQLiteSaveStorage(home.resolve("saves"))
+            }
+            val dialogs: (ScapesClient) -> DialogProvider = {
+                ScapesDesktop(it, { engine?.container as? ContainerGLFW })
             }
             val useGLES = commandLine.hasOption('s')
             val emulateTouch = commandLine.hasOption('t')
@@ -115,8 +119,8 @@ fun main(args: Array<String>) {
                 ContainerGLFW(it, emulateTouch, useGLES = useGLES)
             }
             engine = ScapesEngine(
-                    { ScapesClient(it, home, pluginCache, saves) }, backend,
-                    taskExecutor, configMap)
+                    { ScapesClient(it, home, pluginCache, saves, dialogs) },
+                    backend, taskExecutor, configMap)
             try {
                 engine.start()
                 try {
@@ -177,3 +181,31 @@ private fun writeConfig(path: FilePath,
         } catch (e: IOException) {
             System.err.println("Failed to store config file: $e")
         }
+
+private fun crashHandler(path: FilePath,
+                         engine: () -> ScapesEngine?) = object : Crashable {
+    override fun crash(e: Throwable): Nothing {
+        try {
+            System.err.println("Engine crashed: $e")
+            e.printStackTrace()
+            crashReport(path, engine, e)
+            ContainerGLFW.openFile(path)
+        } finally {
+            exitProcess(1)
+        }
+    }
+}
+
+private fun crashReport(path: FilePath,
+                        engine: () -> ScapesEngine?,
+                        e: Throwable) {
+    val crashReportFile = file(path)
+    val debug = try {
+        engine()?.debugMap()
+    } catch (e: Throwable) {
+        e.printStackTrace()
+        null
+    } ?: emptyMap<String, String>()
+    writeCrashReport(e, crashReportFile, "ScapesEngine",
+            debug)
+}

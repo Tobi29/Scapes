@@ -30,7 +30,6 @@ import org.tobi29.scapes.engine.utils.math.vector.plus
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
 import org.tobi29.scapes.terrain.VoxelType
-import java.util.*
 
 abstract class BlockType(type: MaterialType) : Material(type), VoxelType {
     fun block(data: Int): Long {

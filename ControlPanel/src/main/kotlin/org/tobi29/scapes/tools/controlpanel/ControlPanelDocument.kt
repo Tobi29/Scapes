@@ -26,7 +26,6 @@ import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
 import org.tobi29.scapes.tools.controlpanel.extensions.*
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
-import java.util.*
 
 class ControlPanelDocument(address: RemoteAddress,
                            private val connection: ControlPanelProtocol,

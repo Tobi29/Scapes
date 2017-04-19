@@ -16,24 +16,23 @@
 
 package org.tobi29.scapes.client.gui
 
-import mu.KLogging
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.graphics.TextureFilter
 import org.tobi29.scapes.engine.graphics.TextureWrap
 import org.tobi29.scapes.engine.gui.*
-import org.tobi29.scapes.engine.input.FileType
 import org.tobi29.scapes.engine.resource.Resource
+import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.io.BufferedReadChannelStream
+import org.tobi29.scapes.engine.utils.io.Channels
 import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.io.process
 import org.tobi29.scapes.engine.utils.io.put
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.use
 import org.tobi29.scapes.plugins.PluginFile
 import org.tobi29.scapes.plugins.Plugins
-import java.io.IOException
-import java.nio.channels.Channels
 
 class GuiPlugins(state: GameState,
                  previous: Gui,
@@ -43,21 +42,19 @@ class GuiPlugins(state: GameState,
     private val scrollPane: GuiComponentScrollPaneViewport
 
     init {
-        val game = engine.game as ScapesClient
-        path = game.home.resolve("plugins")
+        val scapes = engine.game as ScapesClient
+        path = scapes.home.resolve("plugins")
         scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {
             GuiComponentScrollPane(it, 70)
         }.viewport
         updatePlugins()
 
-        save.on(GuiEvent.CLICK_LEFT) { event ->
+        save.on(GuiEvent.CLICK_LEFT) {
             try {
-                state.engine.container.openFileDialog(
-                        FileType("*.jar", "Jar Archive"),
-                        "Import plugin", true) { name, input ->
+                scapes.dialogs.openPluginDialog { _, stream ->
                     val temp = createTempFile("Plugin", ".jar")
                     write(temp) { output ->
-                        process(input, put(output))
+                        process(stream, put(output))
                     }
                     val newPlugin = PluginFile(temp)
                     move(temp, path.resolve(newPlugin.id() + ".jar"))
@@ -69,6 +66,7 @@ class GuiPlugins(state: GameState,
         }
     }
 
+    @Synchronized
     private fun updatePlugins() {
         try {
             scrollPane.removeAll()
@@ -100,7 +98,7 @@ class GuiPlugins(state: GameState,
             selection(delete)
 
             if (plugin.file() != null) {
-                delete.on(GuiEvent.CLICK_LEFT) { event ->
+                delete.on(GuiEvent.CLICK_LEFT) {
                     try {
                         plugin.file()?.let(::delete)
                         scrollPane.remove(this)

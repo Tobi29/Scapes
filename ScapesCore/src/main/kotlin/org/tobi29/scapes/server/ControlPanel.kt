@@ -16,13 +16,14 @@
 
 package org.tobi29.scapes.server
 
-import mu.KLogging
 import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.server.ControlPanelProtocol
 import org.tobi29.scapes.engine.server.PacketBundleChannel
 import org.tobi29.scapes.engine.utils.CPUUtil
-import org.tobi29.scapes.engine.utils.tag.*
+import org.tobi29.scapes.engine.utils.ListenerRegistrar
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.replace
+import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.server.command.Executor
 import org.tobi29.scapes.server.connection.ServerConnection
 import org.tobi29.scapes.server.extension.event.MessageEvent
@@ -30,18 +31,22 @@ import org.tobi29.scapes.server.extension.event.MessageEvent
 class ControlPanel(worker: ConnectionWorker,
                    channel: PacketBundleChannel,
                    private val connection: ServerConnection) : ControlPanelProtocol(
-        worker, channel, connection.events), Executor {
-
+        worker, channel, connection.server.events), Executor {
 
     init {
         initCommands()
-        connection.events.listenerGlobal<MessageEvent>(this) { event ->
+    }
+
+    override fun ListenerRegistrar.listeners() {
+        listen<MessageEvent> { event ->
             val style: String
             when (event.level) {
-                MessageLevel.SERVER_ERROR, MessageLevel.FEEDBACK_ERROR -> style = "color: red;"
+                MessageLevel.SERVER_ERROR,
+                MessageLevel.FEEDBACK_ERROR -> style = "color: red;"
                 else -> style = ""
             }
-            val html = "<span style=\"$style\">${ESCAPE(event.message)}</span>"
+            val html = "<span style=\"$style\">${ControlPanel.Companion.ESCAPE(
+                    event.message)}</span>"
             send("Message", TagMap { this["Message"] = html })
         }
     }
@@ -53,17 +58,17 @@ class ControlPanel(worker: ConnectionWorker,
         addCommand("Command") { payload ->
             payload["Command"]?.toString()?.let { command ->
                 connection.server.commandRegistry()[command, this].execute().forEach { output ->
-                    events.fireLocal(
+                    events.fire(
                             MessageEvent(this, MessageLevel.FEEDBACK_ERROR,
-                                    output.toString()))
+                                    output.toString(), this))
                 }
             }
             payload["Commands"]?.toList()?.asSequence()?.mapNotNull(
                     Tag::toString)?.forEach { command ->
                 connection.server.commandRegistry()[command, this].execute().forEach { output ->
-                    events.fireLocal(
+                    events.fire(
                             MessageEvent(this, MessageLevel.FEEDBACK_ERROR,
-                                    output.toString()))
+                                    output.toString(), this))
                 }
             }
         }

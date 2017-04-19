@@ -22,13 +22,14 @@ import org.tobi29.scapes.terrain.VoxelType
 import org.tobi29.scapes.terrain.lighting.LightingEngine
 import org.tobi29.scapes.terrain.lighting.LightingEngineThreaded
 
-abstract class TerrainInfiniteBase<B : VoxelType, C : TerrainInfiniteBaseChunk<B>>(val zSize: Int,
-                                                                                   taskExecutor: TaskExecutor,
-                                                                                   override val air: B,
-                                                                                   val voidBlock: B,
-                                                                                   override val blocks: Array<out B?>,
-                                                                                   val chunkManager: TerrainInfiniteChunkManager<C>,
-                                                                                   radius: Int = 0x8000000 - 16) : TerrainBase<B> {
+abstract class TerrainInfiniteBase<B : VoxelType, C : TerrainInfiniteBaseChunk<B>>(
+        val zSize: Int,
+        taskExecutor: TaskExecutor,
+        override val air: B,
+        val voidBlock: B,
+        override val blocks: Array<out B?>,
+        val chunkManager: TerrainInfiniteChunkManager<C>,
+        radius: Int = 0x8000000 - 16) : TerrainBase<B> {
     protected val cxMin = -radius + 1
     protected val cxMax = radius
     protected val cyMin = -radius + 1

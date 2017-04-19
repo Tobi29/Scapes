@@ -22,14 +22,17 @@ import org.tobi29.scapes.engine.graphics.FontRenderer
 import org.tobi29.scapes.engine.gui.GuiComponent
 import org.tobi29.scapes.engine.gui.GuiLayoutData
 import org.tobi29.scapes.engine.gui.GuiRenderer
+import org.tobi29.scapes.engine.utils.ListenerRegistrar
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 
 class GuiComponentChat(parent: GuiLayoutData,
                        private val chatHistory: ChatHistory) : GuiComponent(
         parent) {
 
-    init {
-        chatHistory.events.listener<ChatChangeEvent>(this) { dirty() }
+    override fun ListenerRegistrar.listeners() {
+        listen<ChatChangeEvent>({ it.chatHistory == chatHistory }) {
+            dirty()
+        }
     }
 
     override fun ignoresEvents(): Boolean {
@@ -41,8 +44,8 @@ class GuiComponentChat(parent: GuiLayoutData,
         var yy = -16
         chatHistory.lines { line ->
             gui.style.font.render(
-                    FontRenderer.to(renderer, 0.0f, yy.toFloat(), 1.0f, 1.0f,
-                            1.0f, 1.0f), line, 16.0f)
+                    FontRenderer.to(renderer, 0.0f, yy.toFloat(), 1.0f,
+                            1.0f, 1.0f, 1.0f), line, 16.0f)
             yy -= 20
         }
     }

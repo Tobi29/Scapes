@@ -16,21 +16,20 @@
 
 package org.tobi29.scapes.client.gui
 
-import mu.KLogging
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
-import org.tobi29.scapes.engine.input.FileType
+import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.io.process
 import org.tobi29.scapes.engine.utils.io.put
-import java.io.IOException
+import org.tobi29.scapes.engine.utils.logging.KLogging
 
 class GuiPlaylists(state: GameState,
                    previous: Gui,
                    style: GuiStyle) : GuiMenuDouble(
         state, "Playlists", "Add", "Back", previous, style) {
-    private val game = engine.game as ScapesClient
+    private val scapes = engine.game as ScapesClient
     private val scrollPane: GuiComponentScrollPaneViewport
     private var playlist = ""
 
@@ -45,31 +44,29 @@ class GuiPlaylists(state: GameState,
         }.viewport
         updateTitles("day")
 
-        day.on(GuiEvent.CLICK_LEFT) { event -> updateTitles("day") }
-        night.on(GuiEvent.CLICK_LEFT) { event -> updateTitles("night") }
-        battle.on(GuiEvent.CLICK_LEFT) { event -> updateTitles("battle") }
-        save.on(GuiEvent.CLICK_LEFT) { event ->
+        day.on(GuiEvent.CLICK_LEFT) { updateTitles("day") }
+        night.on(GuiEvent.CLICK_LEFT) { updateTitles("night") }
+        battle.on(GuiEvent.CLICK_LEFT) { updateTitles("battle") }
+        save.on(GuiEvent.CLICK_LEFT) {
             try {
-                val directory = game.home.resolve(
+                val directory = scapes.home.resolve(
                         "playlists").resolve(playlist)
-                state.engine.container.openFileDialog(FileType.MUSIC,
-                        "Import music", true) { name, input ->
-                    write(directory.resolve(name)) { output ->
-                        process(input, put(output))
-                    }
+                scapes.dialogs.openMusicDialog { name, stream ->
+                    write(directory.resolve(name)) { process(stream, put(it)) }
+                    updateTitles(playlist)
                 }
-                updateTitles(playlist)
             } catch (e: IOException) {
                 logger.warn { "Failed to import music: $e" }
             }
         }
     }
 
+    @Synchronized
     private fun updateTitles(playlist: String) {
         scrollPane.removeAll()
         this.playlist = playlist
         try {
-            val path = game.home.resolve("playlists").resolve(playlist)
+            val path = scapes.home.resolve("playlists").resolve(playlist)
             listRecursive(path) {
                 filter {
                     isRegularFile(it) && isNotHidden(it)
@@ -104,7 +101,7 @@ class GuiPlaylists(state: GameState,
             }
             selection(play, delete)
 
-            play.on(GuiEvent.CLICK_LEFT) { event ->
+            play.on(GuiEvent.CLICK_LEFT) {
                 state.engine.notifications.add {
                     GuiNotificationSimple(it,
                             state.engine.graphics.textures()["Scapes:image/gui/Playlist"],
@@ -114,7 +111,7 @@ class GuiPlaylists(state: GameState,
                 state.engine.sounds.playMusic(read(path), "music.Playlist",
                         1.0f, 1.0f, true)
             }
-            delete.on(GuiEvent.CLICK_LEFT) { event ->
+            delete.on(GuiEvent.CLICK_LEFT) {
                 try {
                     delete(path)
                     scrollPane.remove(this)

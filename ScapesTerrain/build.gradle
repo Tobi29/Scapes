@@ -19,5 +19,5 @@ apply from: "$rootDir/resources/scapesenginemodulekotlin.gradle"
 version = "0.0.0"
 
 dependencies {
-    compile rootProject.ext.scapesEngineUtils
+    compile rootProject.ext.scapesEngineThreadUtils
 }

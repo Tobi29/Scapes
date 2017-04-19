@@ -33,13 +33,12 @@ import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.PointerPane
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.CropType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
-import java.util.*
-import java.util.concurrent.ThreadLocalRandom
 
 class BlockCrop(type: VanillaMaterialType) : VanillaBlock(type) {
     private val cropRegistry = plugins.registry.get<CropType>("VanillaBasics",
@@ -99,7 +98,7 @@ class BlockCrop(type: VanillaMaterialType) : VanillaBlock(type) {
                        data: Int): List<ItemStack> {
         val dropData = (data / 8).toShort()
         if (data % 8 == 7) {
-            val random = ThreadLocalRandom.current()
+            val random = threadLocalRandom()
             return listOf(
                     ItemStack(materials.cropDrop, dropData.toInt()),
                     ItemStack(materials.seed, dropData.toInt(),

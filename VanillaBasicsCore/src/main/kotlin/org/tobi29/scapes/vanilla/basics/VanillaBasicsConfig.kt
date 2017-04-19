@@ -18,12 +18,11 @@ package org.tobi29.scapes.vanilla.basics
 
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
 import org.tobi29.scapes.vanilla.basics.generator.StoneType
 import org.tobi29.scapes.vanilla.basics.material.*
 import org.tobi29.scapes.vanilla.basics.world.decorator.BiomeDecorator
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 fun VanillaBasics.research(name: String,
                            text: String,
@@ -50,7 +49,7 @@ fun VanillaBasics.metal(metal: MetalTypeCreator.() -> Unit) {
     val metalType = MetalType(creator.id, creator.name,
             creator.meltingPoint, creator.r, creator.g, creator.b)
     val alloyType = AlloyType(creator.id, creator.name, creator.ingotName,
-            Collections.singletonMap(metalType, 1.0), creator.r,
+            mapOf(metalType to 1.0), creator.r,
             creator.g, creator.b, creator.toolEfficiency,
             creator.toolStrength, creator.toolDamage,
             creator.toolLevel)

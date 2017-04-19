@@ -17,9 +17,9 @@
 package org.tobi29.scapes.vanilla.basics.world.tree
 
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
-import java.util.*
 
 class TreePalm : Tree {
 

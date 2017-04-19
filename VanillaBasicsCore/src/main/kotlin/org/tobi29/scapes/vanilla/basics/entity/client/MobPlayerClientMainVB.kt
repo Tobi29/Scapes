@@ -28,7 +28,7 @@ import org.tobi29.scapes.client.input.InputMode
 import org.tobi29.scapes.client.input.keyboard.InputModeKeyboard
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.input.ControllerKey
-import org.tobi29.scapes.engine.utils.ListenerOwner
+import org.tobi29.scapes.engine.utils.ListenerRegistrar
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.direction
@@ -268,40 +268,40 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
         }
     }
 
-    override fun inputMode(input: InputMode,
-                           listenerOwner: ListenerOwner) {
-        input.events.listener<InputDirectionEvent>(listenerOwner) { event ->
+    override fun ListenerRegistrar.inputMode(input: InputMode) {
+        listen<InputDirectionEvent> { event ->
             if (!hasGui()) {
                 rot.setZ((rot.doubleZ() - event.direction.x) % 360)
                 rot.setX(min(89.0,
                         max(-89.0, rot.doubleX() - event.direction.y)))
             }
         }
-        input.events.listener<HotbarChangeLeftEvent>(listenerOwner) { event ->
+        listen<HotbarChangeLeftEvent> { event ->
             setHotbarSelectLeft((inventorySelectLeft + event.delta) remP 10)
             event.success = true
         }
-        input.events.listener<HotbarChangeRightEvent>(listenerOwner) { event ->
+        listen<HotbarChangeRightEvent> { event ->
             setHotbarSelectRight((inventorySelectRight + event.delta) remP 10)
             event.success = true
         }
-        input.events.listener<HotbarSetLeftEvent>(listenerOwner) { event ->
+        listen<HotbarSetLeftEvent> { event ->
             setHotbarSelectLeft(event.value remP 10)
             event.success = true
         }
-        input.events.listener<HotbarSetRightEvent>(listenerOwner) { event ->
+        listen<HotbarSetRightEvent> { event ->
             setHotbarSelectRight(event.value remP 10)
             event.success = true
         }
-        input.events.listener<MenuOpenEvent>(listenerOwner) { event ->
+        listen<MenuOpenEvent> { event ->
             if (currentGui() !is GuiChatWrite) {
                 event.success = true
                 if (!closeGui()) {
-                    openGui(GuiPause(game, this, game.engine.guiStyle))
+                    openGui(GuiPause(game, this@MobPlayerClientMainVB,
+                            game.engine.guiStyle))
                 }
             }
         }
-        input.events.listener<MenuInventoryEvent>(listenerOwner) { event ->
+        listen<MenuInventoryEvent> { event ->
             if (currentGui() !is GuiChatWrite) {
                 event.success = true
                 if (!closeGui()) {
@@ -311,11 +311,12 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
                 }
             }
         }
-        input.events.listener<MenuChatEvent>(listenerOwner) { event ->
+        listen<MenuChatEvent> { event ->
             if (currentGui() !is GuiChatWrite) {
                 event.success = true
                 if (!hasGui()) {
-                    openGui(GuiChatWrite(game, this, game.engine.guiStyle))
+                    openGui(GuiChatWrite(game, this@MobPlayerClientMainVB,
+                            game.engine.guiStyle))
                 }
             }
         }

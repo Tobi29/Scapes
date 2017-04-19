@@ -23,6 +23,10 @@ import org.eclipse.swt.graphics.PaletteData
 import org.eclipse.swt.widgets.Canvas
 import org.eclipse.swt.widgets.Composite
 import org.tobi29.scapes.engine.swt.util.framework.Application
+import org.tobi29.scapes.engine.utils.AtomicBoolean
+import org.tobi29.scapes.engine.utils.AtomicInteger
+import org.tobi29.scapes.engine.utils.AtomicLong
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.graphics.hsvToRGB
 import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.math.max
@@ -30,18 +34,12 @@ import org.tobi29.scapes.engine.utils.math.min
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
-import org.tobi29.scapes.engine.utils.task.TaskExecutor
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.atomic.AtomicLong
 
 class TerrainViewerCanvas(parent: Composite,
                           style: Int,
                           private val application: Application,
                           private val colorSupplier: () -> TerrainViewerCanvas.ColorSupplier,
                           scale: Int) : Canvas(parent, style) {
-    private val taskExecutor: TaskExecutor
     private val chunks = ConcurrentHashMap<Vector2i, Image>()
     private val emptyImage: Image
     private val cache = AtomicLong()
@@ -58,7 +56,6 @@ class TerrainViewerCanvas(parent: Composite,
 
     init {
         this.scale = scale.toDouble()
-        taskExecutor = application.taskExecutor
         val data = ByteArray(3 shl CHUNK_BITS shl CHUNK_BITS) { 0x44.toByte() }
         val palette = PaletteData(0xFF0000, 0xFF00, 0xFF)
         val imageData = ImageData(CHUNK_SIZE, CHUNK_SIZE, 24, palette, 1, data)
@@ -82,7 +79,7 @@ class TerrainViewerCanvas(parent: Composite,
         val scale = this.scale
         val cache = this.cache.get()
         renders.incrementAndGet()
-        taskExecutor.runThread({
+        application.taskExecutor.runThread({
             if (cache == this.cache.get()) {
                 val data = ByteArray(3 shl CHUNK_BITS shl CHUNK_BITS)
                 val output = Output()
@@ -153,7 +150,7 @@ class TerrainViewerCanvas(parent: Composite,
 
     private fun queueDraw() {
         if (!drawQueued.getAndSet(true)) {
-            taskExecutor.addTaskOnce({ redraw() }, "Viewer-Redraw", 100)
+            application.loop.addTaskOnce({ redraw() }, "Viewer-Redraw", 100)
         }
     }
 

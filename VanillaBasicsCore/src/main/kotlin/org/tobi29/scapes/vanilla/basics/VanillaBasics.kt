@@ -23,6 +23,8 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.engine.utils.Checksum
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
+import org.tobi29.scapes.engine.utils.EnumMap
 import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
@@ -43,8 +45,6 @@ import org.tobi29.scapes.vanilla.basics.world.ClimateInfoLayer
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentOverworldClient
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentOverworldServer
 import org.tobi29.scapes.vanilla.basics.world.decorator.BiomeDecorator
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 class VanillaBasics : WorldType {
     private val craftingRecipesMut = ArrayList<CraftingRecipeType>()
@@ -60,8 +60,7 @@ class VanillaBasics : WorldType {
             mapOf(Pair(crapMetal, 1.0)), 0.17, 0.12, 0.1, 0.0, 0.0, 0.0, 0)
     private val oreTypesMut = ArrayList<OreType>()
     val oreTypes = oreTypesMut.readOnly()
-    private val biomeDecorators = EnumMap<BiomeGenerator.Biome, MutableMap<String, BiomeDecorator>>(
-            BiomeGenerator.Biome::class.java)
+    private val biomeDecorators = EnumMap<BiomeGenerator.Biome, MutableMap<String, BiomeDecorator>>()
     private val biomeDecoratorOverlays = ConcurrentHashMap<String, BiomeDecorator.() -> Unit>()
     lateinit var materials: VanillaMaterial
     lateinit var particles: VanillaParticle

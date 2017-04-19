@@ -22,7 +22,6 @@ import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.server.connection.PlayerConnection
-import java.io.IOException
 
 open class PacketBlockChange : PacketAbstract, PacketClient {
     protected var x = 0
@@ -56,7 +55,7 @@ open class PacketBlockChange : PacketAbstract, PacketClient {
             Packet.make(registry, "core.packet.BlockChange"), x, y, z, id,
             data)
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {
         stream.putInt(x)
@@ -66,7 +65,7 @@ open class PacketBlockChange : PacketAbstract, PacketClient {
         stream.putShort(data.toShort())
     }
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
         x = stream.getInt()

@@ -15,19 +15,21 @@
  */
 package org.tobi29.scapes.chunk
 
-import mu.KLogging
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.isTransparent
 import org.tobi29.scapes.client.InputModeChangeEvent
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.client.states.scenes.SceneScapesVoxelWorld
 import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.graphics.BlendingMode
 import org.tobi29.scapes.engine.graphics.GL
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
+import org.tobi29.scapes.engine.utils.EventDispatcher
+import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.graphics.Cam
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
@@ -40,8 +42,6 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.model.EntityModel
 import org.tobi29.scapes.entity.model.MobModel
 import org.tobi29.scapes.packets.PacketServer
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 class WorldClient(val connection: ClientConnection,
                   cam: Cam,
@@ -50,12 +50,17 @@ class WorldClient(val connection: ClientConnection,
                   environmentSupplier: (WorldClient) -> EnvironmentClient,
                   playerTag: TagMap,
                   playerID: UUID) : World<EntityClient>(
-        connection.plugins, connection.game.engine.taskExecutor,
+        connection.plugins, connection.game.engine.loop,
         connection.plugins.registry,
         seed), PlayConnection<PacketServer> {
+    val game = connection.game
+    val events = EventDispatcher(game.engine.events) {
+        listen<InputModeChangeEvent> { event ->
+            player.setInputMode(event.inputMode)
+        }
+    }.apply { enable() }
     val scene: SceneScapesVoxelWorld
     val player: MobPlayerClientMain
-    val game: GameStateGameMP
     val terrain: TerrainClient
     val environment: EnvironmentClient
     val playerModel: MobModel?
@@ -64,7 +69,6 @@ class WorldClient(val connection: ClientConnection,
     private var disposed = false
 
     init {
-        game = connection.game
         environment = environmentSupplier(this)
         player = connection.plugins.worldType.newPlayer(this)
         player.setEntityID(playerID)
@@ -74,11 +78,8 @@ class WorldClient(val connection: ClientConnection,
         playerModel = player.createModel()
         connection.plugins.plugins.forEach { it.worldInit(this) }
 
-        val game = game.engine.game as ScapesClient
-        game.engine.events.listener<InputModeChangeEvent>(player) { event ->
-            player.setInputMode(event.inputMode)
-        }
-        player.setInputMode(game.inputMode)
+        val scapes = game.engine.game as ScapesClient
+        player.setInputMode(scapes.inputMode)
 
         logger.info { "Received player entity: $player with id: $playerID" }
     }
@@ -341,7 +342,9 @@ class WorldClient(val connection: ClientConnection,
     }
 
     fun dispose() {
+        events.disable()
         terrain.dispose()
+        player.setInputMode(null)
         disposed = true
     }
 

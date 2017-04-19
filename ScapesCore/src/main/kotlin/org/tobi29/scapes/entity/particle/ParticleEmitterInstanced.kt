@@ -18,7 +18,7 @@ package org.tobi29.scapes.entity.particle
 
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import java.nio.ByteBuffer
+import org.tobi29.scapes.engine.utils.io.ByteBuffer
 
 abstract class ParticleEmitterInstanced<P : ParticleInstance>(system: ParticleSystem,
                                                               protected val texture: Texture,

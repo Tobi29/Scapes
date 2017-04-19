@@ -19,7 +19,6 @@ package org.tobi29.scapes.chunk.generator
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.block.Update
-import java.util.*
 
 class GeneratorOutput(height: Int) {
     val type = IntArray(height)

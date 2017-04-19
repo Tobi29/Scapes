@@ -23,11 +23,11 @@ import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.plus
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.server.MobLivingEquippedServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
-import java.util.concurrent.ThreadLocalRandom
 
 class MobZombieServer(type: EntityType<*, *>,
                       world: WorldServer) : MobLivingEquippedServer(
@@ -40,7 +40,7 @@ class MobZombieServer(type: EntityType<*, *>,
     private var hitWait = 0.0
 
     init {
-        val random = ThreadLocalRandom.current()
+        val random = threadLocalRandom()
         onNotice("Local") { mob ->
             if (mob is MobPlayerServer && !ai.hasMobTarget()) {
                 ai.setMobTarget(mob, 10.0)
@@ -103,7 +103,7 @@ class MobZombieServer(type: EntityType<*, *>,
         }
         lookWait -= delta
         if (lookWait <= 0.0) {
-            val random = ThreadLocalRandom.current()
+            val random = threadLocalRandom()
             lookWait = random.nextDouble() * 8.0 + 1.0
             rot.setX(random.nextDouble() * 40.0 - 20.0)
         }
@@ -119,7 +119,7 @@ class MobZombieServer(type: EntityType<*, *>,
         speed.plusY(sinTable(rot.doubleZ().toRad()) * walkSpeed)
         soundWait -= delta
         if (soundWait <= 0.0) {
-            val random = ThreadLocalRandom.current()
+            val random = threadLocalRandom()
             soundWait = random.nextDouble() * 12.0 + 3.0
             world.playSound("VanillaBasics:sound/entity/mob/zombie/Calm" +
                     (random.nextInt(2) + 1) + ".ogg", this)
@@ -139,7 +139,7 @@ class MobZombieServer(type: EntityType<*, *>,
     }
 
     private fun findWalkPosition(): Vector3d? {
-        val random = ThreadLocalRandom.current()
+        val random = threadLocalRandom()
         val vector3d = pos.now().plus(
                 Vector3d((random.nextInt(17) - 8).toDouble(),
                         (random.nextInt(17) - 8).toDouble(),

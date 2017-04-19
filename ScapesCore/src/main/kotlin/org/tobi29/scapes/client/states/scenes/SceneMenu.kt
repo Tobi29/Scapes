@@ -20,7 +20,7 @@ import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.resource.Resource
-import org.tobi29.scapes.engine.utils.chain
+import org.tobi29.scapes.engine.utils.*
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurOffset
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurWeight
@@ -28,11 +28,7 @@ import org.tobi29.scapes.engine.utils.math.PI
 import org.tobi29.scapes.engine.utils.math.cos
 import org.tobi29.scapes.engine.utils.math.remP
 import org.tobi29.scapes.engine.utils.math.round
-import org.tobi29.scapes.engine.utils.use
 import org.tobi29.scapes.server.format.WorldSource
-import java.io.IOException
-import java.util.concurrent.ThreadLocalRandom
-import java.util.concurrent.atomic.AtomicReference
 
 open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
     private val textures = arrayOfNulls<Texture>(6)
@@ -43,7 +39,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
 
     init {
         cam = Cam(0.4f, 2.0f)
-        val random = ThreadLocalRandom.current()
+        val random = threadLocalRandom()
         yaw = random.nextFloat() * 360.0f
         loadTextures()
     }
@@ -59,8 +55,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
                 blur(gl, this)
             }
         }
-        val shaderTextured = gl.engine.graphics.loadShader(
-                "Engine:shader/Textured")
+        val shaderTextured = gl.engine.graphics.loadShader(SHADER_TEXTURED)
         val model = engine.graphics.createVTI(
                 floatArrayOf(-1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f,
                         -1.0f, -1.0f, 1.0f, -1.0f, -1.0f),
@@ -133,7 +128,6 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
         processor.supplyProperty("BLUR_LENGTH", blurOffsets.size)
     }
 
-    @Throws(IOException::class)
     fun changeBackground(source: WorldSource) {
         save.set(saveBackground(source))
     }
@@ -145,7 +139,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
     protected open fun loadTextures() {
         val game = engine.game as ScapesClient
         val saves = game.saves
-        val random = ThreadLocalRandom.current()
+        val random = threadLocalRandom()
         try {
             val list = saves.list().toList()
             if (list.isEmpty()) {
@@ -191,7 +185,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
     }
 
     private fun defaultBackground() {
-        val random = ThreadLocalRandom.current()
+        val random = threadLocalRandom()
         val r = random.nextInt(2)
         for (i in 0..5) {
             setBackground(

@@ -27,11 +27,10 @@ import org.tobi29.scapes.engine.utils.math.cos
 import org.tobi29.scapes.engine.utils.math.pow
 import org.tobi29.scapes.engine.utils.math.sin
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.entity.particle.ParticleEmitter
 import org.tobi29.scapes.entity.particle.ParticleInstance
 import org.tobi29.scapes.entity.particle.ParticleSystem
-import java.util.*
-import java.util.concurrent.ThreadLocalRandom
 
 class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<ParticleInstanceLightning>(
         system, Array(256, { ParticleInstanceLightning() })) {
@@ -97,7 +96,7 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
     }
 
     private fun createLighting(): List<Line> {
-        val random = ThreadLocalRandom.current()
+        val random = threadLocalRandom()
         val lines = ArrayList<Line>()
         var x = 0.0
         var y = 0.0
@@ -121,7 +120,7 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
                                   x: Double,
                                   y: Double,
                                   z: Double) {
-        val random = ThreadLocalRandom.current()
+        val random = threadLocalRandom()
         var start = Vector3d(x, y, z)
         var dir = random.nextDouble() * TWO_PI
         var xx = x

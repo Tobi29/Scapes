@@ -38,7 +38,6 @@ import org.tobi29.scapes.vanilla.basics.entity.client.EntityAnvilClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityAnvilServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer
-import java.util.*
 
 class BlockAnvil(type: VanillaMaterialType) : VanillaBlockContainer<EntityAnvilClient, EntityAnvilServer>(
         type, type.materials.plugin.entityTypes.anvil) {

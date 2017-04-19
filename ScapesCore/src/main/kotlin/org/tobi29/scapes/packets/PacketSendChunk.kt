@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.packets
 
-import mu.KLogging
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteChunkServer
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteClient

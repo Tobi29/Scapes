@@ -31,6 +31,7 @@ import org.tobi29.scapes.chunk.terrain.isTransparent
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.CropType
@@ -40,8 +41,6 @@ import org.tobi29.scapes.vanilla.basics.material.update.UpdateGrassGrowth
 import org.tobi29.scapes.vanilla.basics.util.dropItem
 import org.tobi29.scapes.vanilla.basics.world.ClimateInfoLayer
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentClimate
-import java.util.*
-import java.util.concurrent.ThreadLocalRandom
 
 class BlockGrass(type: VanillaMaterialType) : VanillaBlock(type) {
     private val cropRegistry = plugins.registry.get<CropType>("VanillaBasics",
@@ -84,7 +83,7 @@ class BlockGrass(type: VanillaMaterialType) : VanillaBlock(type) {
                             x, y, z + 1)
                     terrain.data(x, y, z, data - 1)
                 }
-                val random = ThreadLocalRandom.current()
+                val random = threadLocalRandom()
                 if (random.nextInt(20) == 0) {
                     terrain.world.dropItem(ItemStack(materials.seed,
                             random.nextInt(cropRegistry.values().size)), x, y,
@@ -265,7 +264,7 @@ class BlockGrass(type: VanillaMaterialType) : VanillaBlock(type) {
         if (terrain.highestTerrainBlockZAt(x,
                 y) > z + 1 && !terrain.hasDelayedUpdate(x, y, z,
                 UpdateGrassGrowth::class.java)) {
-            val random = ThreadLocalRandom.current()
+            val random = threadLocalRandom()
             terrain.addDelayedUpdate(
                     UpdateGrassGrowth(terrain.world.registry).set(x, y, z,
                             random.nextDouble() * 400.0 + 1600.0))

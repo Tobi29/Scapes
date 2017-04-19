@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.server.extension
 
-import mu.KLogging
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.tag.ReadTagMap
 import org.tobi29.scapes.engine.utils.tag.toMap
 import org.tobi29.scapes.server.ScapesServer

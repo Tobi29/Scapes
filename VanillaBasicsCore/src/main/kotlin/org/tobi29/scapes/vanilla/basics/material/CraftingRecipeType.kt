@@ -19,7 +19,6 @@ package org.tobi29.scapes.vanilla.basics.material
 import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.server.MobPlayerServer
-import java.util.*
 
 abstract class CraftingRecipeType {
     private val recipesMut = ArrayList<CraftingRecipe>()

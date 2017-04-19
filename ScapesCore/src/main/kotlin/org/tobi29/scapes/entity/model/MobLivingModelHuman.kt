@@ -25,11 +25,11 @@ import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.*
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.entity.WieldMode
 import org.tobi29.scapes.entity.client.MobLivingEquippedClient
 import org.tobi29.scapes.entity.particle.ParticleEmitterFallenBodyPart
 import org.tobi29.scapes.entity.particle.ParticleSystem
-import java.util.concurrent.ThreadLocalRandom
 
 class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                           private val entity: MobLivingEquippedClient,
@@ -437,7 +437,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
             }
             val rotRender = rot.plus(Vector3d(0.0, 0.0, -90.0))
             val z = rotRender.z.toRad()
-            val random = ThreadLocalRandom.current()
+            val random = threadLocalRandom()
             emitter.add { instance ->
                 instance.pos.set(pos.plus(Vector3d(0.0, 0.0, 0.125)))
                 instance.speed.set(

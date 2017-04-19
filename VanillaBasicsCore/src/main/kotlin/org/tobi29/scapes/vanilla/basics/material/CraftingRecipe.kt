@@ -20,7 +20,6 @@ import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.engine.utils.readOnly
-import java.util.*
 
 class CraftingRecipe(val id: Int,
                      ingredients: List<CraftingRecipe.Ingredient>,

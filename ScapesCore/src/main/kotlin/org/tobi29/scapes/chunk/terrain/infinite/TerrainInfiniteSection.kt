@@ -20,11 +20,11 @@ import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.fill
+import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.math.PointerPane
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.packets.PacketBlockChange
-import java.util.*
 
 class TerrainInfiniteSection : TerrainClient {
     override val air get() = access { it.air }

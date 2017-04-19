@@ -20,10 +20,10 @@ import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.utils.Sync
 import org.tobi29.scapes.engine.utils.chain
 import org.tobi29.scapes.engine.utils.graphics.Cam
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.engine.utils.toArray
-import java.util.concurrent.ConcurrentHashMap
 
 class ParticleSystem(val world: WorldClient,
                      tps: Double) {

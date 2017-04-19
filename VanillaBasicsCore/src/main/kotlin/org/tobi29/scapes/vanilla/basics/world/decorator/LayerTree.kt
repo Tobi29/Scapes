@@ -17,9 +17,9 @@
 package org.tobi29.scapes.vanilla.basics.world.decorator
 
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.world.tree.Tree
-import java.util.*
 
 class LayerTree(private val tree: Tree,
                 private val chance: Int) : BiomeDecorator.Layer {

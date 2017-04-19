@@ -27,7 +27,6 @@ import org.tobi29.scapes.packets.PacketServer
 import org.tobi29.scapes.packets.PacketType
 import org.tobi29.scapes.server.connection.PlayerConnection
 import org.tobi29.scapes.vanilla.basics.material.CraftingRecipe
-import java.io.IOException
 
 class PacketCrafting : PacketAbstract, PacketServer {
     private var id = 0
@@ -43,13 +42,13 @@ class PacketCrafting : PacketAbstract, PacketServer {
                 id: Int) : this(
             Packet.make(registry, "vanilla.basics.packet.Crafting"), id)
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     override fun sendServer(client: ClientConnection,
                             stream: WritableByteStream) {
         stream.putInt(id)
     }
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     override fun parseServer(player: PlayerConnection,
                              stream: ReadableByteStream) {
         id = stream.getInt()

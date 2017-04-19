@@ -16,9 +16,9 @@
 package org.tobi29.scapes.entity
 
 import org.tobi29.scapes.block.Registries
+import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import java.util.*
 
 interface Entity {
     val type: EntityType<*, *>

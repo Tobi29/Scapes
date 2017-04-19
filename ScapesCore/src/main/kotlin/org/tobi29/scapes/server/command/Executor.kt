@@ -17,9 +17,8 @@
 package org.tobi29.scapes.server.command
 
 import org.tobi29.scapes.engine.utils.EventDispatcher
-import org.tobi29.scapes.engine.utils.ListenerOwner
 
-interface Executor : ListenerOwner {
+interface Executor {
     val events: EventDispatcher
 
     fun playerName(): String?

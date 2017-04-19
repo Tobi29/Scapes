@@ -19,9 +19,9 @@ package org.tobi29.scapes.server.command
 import org.apache.commons.cli.CommandLine
 import org.apache.commons.cli.Option
 import org.apache.commons.cli.Options
+import org.tobi29.scapes.engine.utils.PlatformName
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.readOnly
-import java.util.*
 
 object Command {
 
@@ -65,7 +65,7 @@ object Command {
             return commandLine.getOptionValue(option, def)
         }
 
-        @JvmName("optionNullable")
+        @PlatformName("optionNullable")
         fun option(option: Char,
                    def: String?): String? {
             return commandLine.getOptionValue(option, def)

@@ -32,7 +32,6 @@ import org.tobi29.scapes.vanilla.basics.entity.client.EntityBloomeryClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityBloomeryServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer
-import java.util.*
 
 class BlockBloomery(type: VanillaMaterialType) : VanillaBlockContainer<EntityBloomeryClient, EntityBloomeryServer>(
         type, type.materials.plugin.entityTypes.bloomery) {

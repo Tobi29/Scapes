@@ -18,7 +18,7 @@ package org.tobi29.scapes.entity.particle
 
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import java.util.concurrent.ConcurrentLinkedQueue
+import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
 
 abstract class ParticleEmitter<P : ParticleInstance> protected constructor(protected val system: ParticleSystem,
                                                                            protected val instances: Array<P>) {

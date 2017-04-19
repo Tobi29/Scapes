@@ -19,12 +19,12 @@ package org.tobi29.scapes.vanilla.basics.material.block.rock
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.util.dropItem
-import java.util.*
 
 abstract class BlockOre(type: VanillaMaterialType) : BlockStone(type) {
     override fun destroy(terrain: TerrainServer.TerrainMutable,

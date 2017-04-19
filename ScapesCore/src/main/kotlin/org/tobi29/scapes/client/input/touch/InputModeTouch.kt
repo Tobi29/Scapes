@@ -22,18 +22,14 @@ import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.input.ControllerTouch
-import org.tobi29.scapes.engine.utils.EventDispatcher
-import org.tobi29.scapes.engine.utils.ListenerOwnerHandle
 import org.tobi29.scapes.engine.utils.math.angleDiff
 import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f
 import org.tobi29.scapes.engine.utils.math.toDeg
 import org.tobi29.scapes.engine.utils.math.vector.*
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 
-class InputModeTouch(engine: ScapesEngine,
+class InputModeTouch(private val engine: ScapesEngine,
                      private val controller: ControllerTouch) : InputMode {
-    override val events = EventDispatcher()
-    override val listenerOwner = ListenerOwnerHandle()
     private val guiController = GuiControllerTouch(engine, controller)
     private val direction = MutableVector2d()
     private val matrix1 = Matrix4f()
@@ -100,15 +96,15 @@ class InputModeTouch(engine: ScapesEngine,
         padRight.on(GuiEvent.PRESS_LEFT) { event -> walkRight = true }
         padRight.on(GuiEvent.DROP_LEFT) { event -> walkRight = false }
         inventory.on(GuiEvent.CLICK_LEFT) { event ->
-            events.fire(MobPlayerClientMain.MenuInventoryEvent())
+            engine.events.fire(MobPlayerClientMain.MenuInventoryEvent())
         }
         menu.on(GuiEvent.CLICK_LEFT) { event ->
-            events.fire(MobPlayerClientMain.MenuOpenEvent())
+            engine.events.fire(MobPlayerClientMain.MenuOpenEvent())
         }
         swipe.on(GuiEvent.DRAG_LEFT, { event ->
             val dir = Vector2d(event.relativeX / event.size.x * 960.0,
                     event.relativeY / event.size.y * 540.0)
-            events.fire(MobPlayerClientMain.InputDirectionEvent(dir))
+            engine.events.fire(MobPlayerClientMain.InputDirectionEvent(dir))
         })
         swipe.on(GuiEvent.PRESS_LEFT) { event ->
             swipeStart = Vector2d(event.x, event.y)

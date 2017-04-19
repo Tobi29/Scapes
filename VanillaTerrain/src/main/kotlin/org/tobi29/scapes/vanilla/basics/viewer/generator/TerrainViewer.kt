@@ -20,11 +20,11 @@ import org.tobi29.scapes.engine.swt.util.framework.Document
 import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
+import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.engine.utils.version
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator
 import org.tobi29.scapes.vanilla.basics.generator.TerrainGenerator
-import java.util.*
 
 fun main(args: Array<String>) {
     TerrainViewer().run()

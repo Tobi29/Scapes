@@ -24,7 +24,6 @@ import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.server.connection.PlayerConnection
-import java.io.IOException
 
 class PacketItemUse : PacketAbstract, PacketServer {
     private var strength = 0.0
@@ -49,7 +48,7 @@ class PacketItemUse : PacketAbstract, PacketServer {
             Packet.make(registry, "core.packet.ItemUse"),
             strength, side, direction)
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     override fun sendServer(client: ClientConnection,
                             stream: WritableByteStream) {
         stream.putDouble(strength)
@@ -58,7 +57,7 @@ class PacketItemUse : PacketAbstract, PacketServer {
         stream.putDouble(direction.y)
     }
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     override fun parseServer(player: PlayerConnection,
                              stream: ReadableByteStream) {
         strength = stream.getDouble()
@@ -100,7 +99,7 @@ class PacketItemUse : PacketAbstract, PacketServer {
                                 face, mob)
                     }
                     if (!flag && strength > 0.0) {
-                        world.taskExecutor.addTaskOnce({
+                        world.loop.addTaskOnce({
                             terrain.queue { handler ->
                                 mob.inventories().modify("Container") {
                                     val br = item.material().click(mob, item,

@@ -19,17 +19,17 @@ package org.tobi29.scapes.vanilla.basics.entity.client
 import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.gui.Gui
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toBoolean
 import org.tobi29.scapes.engine.utils.math.TWO_PI
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.scapes.engine.utils.tag.toBoolean
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.particle.ParticleEmitterTransparent
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.gui.GuiBloomeryInventory
-import java.util.concurrent.ThreadLocalRandom
 
 class EntityBloomeryClient(type: EntityType<*, *>,
                            world: WorldClient) : EntityAbstractFurnaceClient(
@@ -55,7 +55,7 @@ class EntityBloomeryClient(type: EntityType<*, *>,
                 val emitter = world.scene.particles().emitter(
                         ParticleEmitterTransparent::class.java)
                 emitter.add { instance ->
-                    val random = ThreadLocalRandom.current()
+                    val random = threadLocalRandom()
                     instance.pos.set(pos.now())
                     instance.speed.set(Vector3d(random.nextDouble() * 0.4 - 0.2,
                             random.nextDouble() * 0.4 - 0.2, 0.0))

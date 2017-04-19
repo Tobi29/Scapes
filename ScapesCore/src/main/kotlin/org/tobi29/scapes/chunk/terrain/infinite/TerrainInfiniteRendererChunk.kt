@@ -21,8 +21,8 @@ import org.tobi29.scapes.engine.graphics.Model
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.fill
 import org.tobi29.scapes.engine.utils.graphics.Cam
+import org.tobi29.scapes.engine.utils.AtomicBoolean
 import org.tobi29.scapes.engine.utils.math.sqr
-import java.util.concurrent.atomic.AtomicBoolean
 
 class TerrainInfiniteRendererChunk(private val chunk: TerrainInfiniteChunkClient,
                                    private val renderer: TerrainInfiniteRenderer) {

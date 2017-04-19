@@ -17,12 +17,12 @@
 package org.tobi29.scapes.entity.server
 
 import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.scapes.engine.utils.tag.*
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
+import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.entity.EntityType
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 open class EntityAbstractServer(override val type: EntityType<*, *>,
                                 override val world: WorldServer,

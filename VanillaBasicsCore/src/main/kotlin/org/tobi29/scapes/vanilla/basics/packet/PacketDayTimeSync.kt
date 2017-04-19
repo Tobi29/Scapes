@@ -26,7 +26,6 @@ import org.tobi29.scapes.packets.PacketClient
 import org.tobi29.scapes.packets.PacketType
 import org.tobi29.scapes.server.connection.PlayerConnection
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentClimate
-import java.io.IOException
 
 class PacketDayTimeSync : PacketAbstract, PacketClient {
     private var day = 0L
@@ -47,14 +46,14 @@ class PacketDayTimeSync : PacketAbstract, PacketClient {
             Packet.make(registry, "vanilla.basics.packet.DayTimeSync"),
             dayTime, day)
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {
         stream.putFloat(dayTime.toFloat())
         stream.putLong(day)
     }
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
         dayTime = stream.getFloat().toDouble()

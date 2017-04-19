@@ -22,18 +22,17 @@ import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.Checksum
 import org.tobi29.scapes.engine.utils.filterMap
-import org.tobi29.scapes.engine.utils.tag.*
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.readOnly
+import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.entity.*
 import org.tobi29.scapes.packets.PacketEntityChange
 import org.tobi29.scapes.packets.PacketOpenGui
 import org.tobi29.scapes.packets.PacketUpdateInventory
 import org.tobi29.scapes.server.connection.PlayerConnection
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.set
 
 abstract class MobPlayerServer(type: EntityType<*, *>,

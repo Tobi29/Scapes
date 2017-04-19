@@ -20,9 +20,7 @@ import org.tobi29.scapes.chunk.EnvironmentClient
 import org.tobi29.scapes.chunk.EnvironmentType
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldSkybox
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.tag.toLong
+import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.engine.utils.math.HALF_PI
 import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.math.cosTable
@@ -30,10 +28,12 @@ import org.tobi29.scapes.engine.utils.math.sinTable
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.normalizeSafe
 import org.tobi29.scapes.engine.utils.math.vector.times
+import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.scapes.engine.utils.tag.toDouble
+import org.tobi29.scapes.engine.utils.tag.toLong
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator
 import org.tobi29.scapes.vanilla.basics.generator.TerrainGenerator
-import java.util.*
 
 class EnvironmentOverworldClient(override val type: EnvironmentType,
                                  world: WorldClient) : EnvironmentClient, EnvironmentClimate {
@@ -57,7 +57,7 @@ class EnvironmentOverworldClient(override val type: EnvironmentType,
     }
 
     override fun tick(delta: Double) {
-        climateGenerator.add(0.000277777777778 * delta)
+        climateGenerator.add(0.0277777777778 * delta)
     }
 
     override fun sunLightReduction(x: Double,

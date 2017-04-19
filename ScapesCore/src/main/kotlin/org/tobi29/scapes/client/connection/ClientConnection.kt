@@ -16,13 +16,13 @@
 
 package org.tobi29.scapes.client.connection
 
-import mu.KLogging
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
 import org.tobi29.scapes.engine.server.Connection
 import org.tobi29.scapes.engine.server.RemoteAddress
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.packets.PacketServer
 import org.tobi29.scapes.plugins.Plugins
@@ -53,7 +53,7 @@ abstract class ClientConnection(val game: GameStateGameMP,
 
     fun mob(consumer: (MobPlayerClientMain) -> Unit) {
         entity?.let {
-            it.world.taskExecutor.addTaskOnce({ consumer(it) }, "Player-Mob")
+            it.world.loop.addTaskOnce({ consumer(it) }, "Player-Mob")
         }
     }
 

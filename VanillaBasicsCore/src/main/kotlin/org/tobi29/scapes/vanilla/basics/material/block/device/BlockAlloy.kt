@@ -36,7 +36,6 @@ import org.tobi29.scapes.vanilla.basics.entity.client.EntityAlloyClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityAlloyServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer
-import java.util.*
 
 class BlockAlloy(type: VanillaMaterialType) : VanillaBlockContainer<EntityAlloyClient, EntityAlloyServer>(
         type, type.materials.plugin.entityTypes.alloy) {

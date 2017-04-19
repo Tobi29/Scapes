@@ -16,13 +16,13 @@
 
 package org.tobi29.scapes.client.states
 
-import mu.KLogging
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Scene
+import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.format.WorldSource
-import java.io.IOException
 
 class GameStateGameSP(clientSupplier: (GameStateGameMP) -> ClientConnection,
                       loadScene: Scene,

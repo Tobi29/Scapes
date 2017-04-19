@@ -52,7 +52,7 @@ class ExtensionPlayers(application: Application,
                 }
             }
         }
-        application.taskExecutor.addTask({
+        application.loop.addTask({
             players.ifPresent {
                 connection.send("Players:List", TagMap())
                 return@addTask 1000

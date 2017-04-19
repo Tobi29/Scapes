@@ -16,9 +16,9 @@
 package org.tobi29.scapes.client.connection
 
 import org.tobi29.scapes.engine.utils.computeAbsent
+import org.tobi29.scapes.engine.utils.AtomicLong
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.readOnly
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicLong
 
 class ConnectionProfiler {
     private val bytesMut = ConcurrentHashMap<Class<*>, AtomicLong>()

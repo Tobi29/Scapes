@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.client.states.scenes
 
-import mu.KLogging
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldSkybox
@@ -25,21 +24,22 @@ import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.client.states.GameStateGameSP
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
+import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.engine.utils.Sync
 import org.tobi29.scapes.engine.utils.chain
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurOffset
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurWeight
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.plus
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.particle.*
 import org.tobi29.scapes.entity.skin.ClientSkinStorage
 import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.format.newPanorama
-import java.io.IOException
-import java.util.concurrent.ThreadLocalRandom
 
 class SceneScapesVoxelWorld(private val world: WorldClient,
                             private val cam: Cam) : Scene(
@@ -250,7 +250,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
         flashTime = System.currentTimeMillis() + (ceil(
                 damage) * 10).toLong() + 100
         flashStart = System.currentTimeMillis()
-        val random = ThreadLocalRandom.current()
+        val random = threadLocalRandom()
         flashDir = 1 - (random.nextInt(2) shl 1)
     }
 
@@ -402,8 +402,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                     height: Int): () -> Unit {
         val skyboxFBO = gl.engine.graphics.createFramebuffer(width, height, 1,
                 false, true, false)
-        val shaderTextured = gl.engine.graphics.loadShader(
-                "Engine:shader/Textured")
+        val shaderTextured = gl.engine.graphics.loadShader(SHADER_TEXTURED)
         val renderSkybox = skybox.appendToPipeline(gl, cam)
         val renderBackground = gl.into(skyboxFBO) {
             gl.matrixStack.push { matrix ->

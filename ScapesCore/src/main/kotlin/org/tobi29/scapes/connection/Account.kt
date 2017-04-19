@@ -16,14 +16,18 @@
 
 package org.tobi29.scapes.connection
 
-import mu.KLogging
+import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.scapes.engine.server.extractPublic
+import org.tobi29.scapes.engine.server.readPrivate
+import org.tobi29.scapes.engine.server.writePrivate
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException
-import org.tobi29.scapes.engine.utils.io.*
+import org.tobi29.scapes.engine.utils.io.ByteStreamInputStream
+import org.tobi29.scapes.engine.utils.io.ByteStreamOutputStream
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.exists
 import org.tobi29.scapes.engine.utils.io.filesystem.read
 import org.tobi29.scapes.engine.utils.io.filesystem.write
-import java.io.IOException
+import org.tobi29.scapes.engine.utils.IOException
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.NoSuchAlgorithmException
@@ -33,7 +37,7 @@ import java.util.*
 class Account(private val keyPair: KeyPair,
               private val nickname: String) {
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     fun write(path: FilePath) {
         val properties = Properties()
         properties.setProperty("Key", key(keyPair))
@@ -57,14 +61,14 @@ class Account(private val keyPair: KeyPair,
 
     companion object : KLogging() {
 
-        @Throws(IOException::class)
+        // TODO: @Throws(IOException::class)
         operator fun get(path: FilePath): Account {
             val account = read(path) ?: throw IOException(
                     "No valid account in: " + path)
             return account
         }
 
-        @Throws(IOException::class)
+        // TODO: @Throws(IOException::class)
         fun read(path: FilePath): Account? {
             var key: String? = null
             var nickname = ""
@@ -83,7 +87,7 @@ class Account(private val keyPair: KeyPair,
             return null
         }
 
-        @Throws(IOException::class)
+        // TODO: @Throws(IOException::class)
         fun generate(path: FilePath): Account {
             val account = Account(genKey(), "")
             account.write(path)

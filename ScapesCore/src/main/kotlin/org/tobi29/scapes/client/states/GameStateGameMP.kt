@@ -17,7 +17,6 @@
 package org.tobi29.scapes.client.states
 
 import kotlinx.coroutines.experimental.yield
-import mu.KLogging
 import org.tobi29.scapes.block.Material
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.client.ChatHistory
@@ -33,6 +32,7 @@ import org.tobi29.scapes.engine.graphics.Scene
 import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.entity.model.EntityModelBlockBreakShared
 import org.tobi29.scapes.entity.model.MobLivingModelHumanShared
 import org.tobi29.scapes.entity.particle.ParticleTransparentAtlas
@@ -58,7 +58,7 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
 
     init {
         val game = engine.game as ScapesClient
-        chatHistory = ChatHistory()
+        chatHistory = ChatHistory(engine.events)
         playlist = Playlist(game.home.resolve("playlists"), engine)
         client = clientSupplier(this)
         terrainTextureRegistry = TerrainTextureRegistry(engine)

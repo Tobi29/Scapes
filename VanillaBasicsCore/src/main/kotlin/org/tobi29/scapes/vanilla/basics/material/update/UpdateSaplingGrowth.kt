@@ -21,9 +21,9 @@ import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.block.Update
 import org.tobi29.scapes.block.UpdateType
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.TreeType
-import java.util.*
 
 class UpdateSaplingGrowth(type: UpdateType) : Update(type) {
     constructor(registry: Registries) : this(

@@ -19,10 +19,12 @@ package org.tobi29.scapes.vanilla.basics.world
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.engine.utils.EnumMap
 import org.tobi29.scapes.engine.utils.generation.layer.RandomPermutation
 import org.tobi29.scapes.engine.utils.generation.layer.random
 import org.tobi29.scapes.engine.utils.generation.layer.randomOffset
 import org.tobi29.scapes.engine.utils.generation.value.SimplexNoise
+import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.terrain.TerrainChunk
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
@@ -31,14 +33,12 @@ import org.tobi29.scapes.vanilla.basics.world.decorator.BiomeDecorator
 import org.tobi29.scapes.vanilla.basics.world.structure.genOre
 import org.tobi29.scapes.vanilla.basics.world.structure.genOreRock
 import org.tobi29.scapes.vanilla.basics.world.structure.placeRandomRuin
-import java.util.*
 
 class ChunkPopulatorOverworld(world: WorldServer,
                               private val plugin: VanillaBasics,
                               private val biomeGenerator: BiomeGenerator) : ChunkPopulator {
     private val seedInt: Long
-    private val biomes = EnumMap<BiomeGenerator.Biome, BiomeDecoratorChooser>(
-            BiomeGenerator.Biome::class.java)
+    private val biomes = EnumMap<BiomeGenerator.Biome, BiomeDecoratorChooser>()
 
     init {
         val random = Random(world.seed)

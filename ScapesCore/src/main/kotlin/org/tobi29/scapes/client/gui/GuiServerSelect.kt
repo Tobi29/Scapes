@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.client.gui
 
-import mu.KLogging
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.states.GameStateLoadMP
 import org.tobi29.scapes.client.states.GameStateLoadSocketSP
@@ -30,12 +30,12 @@ import org.tobi29.scapes.engine.graphics.TextureWrap
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.server.*
-import org.tobi29.scapes.engine.utils.ByteBuffer
+import org.tobi29.scapes.engine.utils.io.ByteBuffer
+import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.engine.utils.tag.MutableTagList
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.listMut
 import org.tobi29.scapes.engine.utils.tag.toMap
-import java.io.IOException
 import java.nio.channels.SelectionKey
 
 class GuiServerSelect(state: GameState,

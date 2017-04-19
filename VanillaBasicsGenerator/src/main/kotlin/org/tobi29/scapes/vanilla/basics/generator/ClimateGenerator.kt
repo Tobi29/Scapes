@@ -16,9 +16,9 @@
 
 package org.tobi29.scapes.vanilla.basics.generator
 
+import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.engine.utils.generation.value.SimplexNoise
 import org.tobi29.scapes.engine.utils.math.*
-import java.util.*
 
 class ClimateGenerator private constructor(private val temperatureNoise: SimplexNoise,
                                            private val humidityNoise: SimplexNoise,
@@ -27,7 +27,9 @@ class ClimateGenerator private constructor(private val temperatureNoise: Simplex
     private var day: Long = 0
     private var dayTime = 0.0
     private var sunDeclination = 0.0
-    private var sunHourAngleCos = 0.0
+    private var sunDeclinationSin = 0.0
+    private var sunDeclinationCos = 0.0
+    private var sunHourAngleSin = 0.0
 
     constructor(random: Random,
                 terrainGenerator: TerrainGenerator) : this(
@@ -64,9 +66,10 @@ class ClimateGenerator private constructor(private val temperatureNoise: Simplex
             day++
         }
         val axialTilt = -23.44.toRad()
-        sunDeclination = asin(sin(axialTilt) * sin(
-                season() * TWO_PI))
-        sunHourAngleCos = sin(dayTime * TWO_PI)
+        sunDeclination = asin(sin(axialTilt) * sin(season() * TWO_PI))
+        sunDeclinationSin = sin(sunDeclination)
+        sunDeclinationCos = cos(sunDeclination)
+        sunHourAngleSin = sin(dayTime * TWO_PI)
     }
 
     fun at(day: Long,
@@ -97,17 +100,23 @@ class ClimateGenerator private constructor(private val temperatureNoise: Simplex
     }
 
     fun sunElevationD(latitude: Double): Double {
-        return sunElevationD(sunHourAngleCos, sunDeclination, latitude)
+        return sunElevationD(sunHourAngleSin, sunDeclinationSin,
+                sunDeclinationCos, latitude)
     }
 
     fun sunElevationD(hourAngleCos: Double,
                       declination: Double,
                       latitude: Double): Double {
-        return asinTable(
-                sinTable(latitude) * sinTable(
-                        declination) + cosTable(latitude) *
-                        cosTable(declination) *
-                        hourAngleCos)
+        return asin(sin(latitude) * sin(declination) + cos(latitude) * cos(
+                declination) * hourAngleCos)
+    }
+
+    fun sunElevationD(hourAngleCos: Double,
+                      declinationSin: Double,
+                      declinationCos: Double,
+                      latitude: Double): Double {
+        return asin(sin(latitude) * declinationSin + cos(
+                latitude) * declinationCos * hourAngleCos)
     }
 
     fun sunIntensity(y: Double,
@@ -142,7 +151,7 @@ class ClimateGenerator private constructor(private val temperatureNoise: Simplex
 
     fun sunAzimuthD(elevation: Double,
                     latitude: Double): Double {
-        return sunAzimuthD(sunHourAngleCos, sunDeclination, elevation,
+        return sunAzimuthD(sunHourAngleSin, sunDeclination, elevation,
                 latitude)
     }
 
@@ -150,11 +159,9 @@ class ClimateGenerator private constructor(private val temperatureNoise: Simplex
                     declination: Double,
                     elevation: Double,
                     latitude: Double): Double {
-        var azimuth = sinTable(declination) * cosTable(
-                latitude)
-        azimuth -= hourAngleCos * cosTable(declination) *
-                sinTable(latitude)
-        azimuth /= cosTable(elevation)
+        var azimuth = sin(declination) * cos(latitude)
+        azimuth -= hourAngleCos * cos(declination) * sin(latitude)
+        azimuth /= cos(elevation)
         azimuth = acos(azimuth)
         if (dayTime > 0.25 && dayTime < 0.75) {
             azimuth = -azimuth
@@ -306,7 +313,7 @@ class ClimateGenerator private constructor(private val temperatureNoise: Simplex
     }
 
     fun sunLightReductionD(elevation: Double): Double {
-        return 15.0 - clamp(elevation * 2.0 + 0.6, 0.0, 1.0) * 15.0
+        return 14.0 - clamp(elevation * 1.6 + 0.4, 0.0, 1.0) * 14.0
     }
 
     fun autumnLeaves(y: Double): Double {

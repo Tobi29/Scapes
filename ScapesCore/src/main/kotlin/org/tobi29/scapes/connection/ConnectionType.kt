@@ -16,8 +16,6 @@
 
 package org.tobi29.scapes.connection
 
-import java.util.*
-
 enum class ConnectionType constructor(private val data: Byte) {
     GET_INFO(1.toByte()),
     PLAY(11.toByte()),

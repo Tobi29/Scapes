@@ -19,12 +19,13 @@ import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.Checksum
 import org.tobi29.scapes.engine.utils.filterMap
-import org.tobi29.scapes.engine.utils.tag.map
-import org.tobi29.scapes.engine.utils.tag.toBoolean
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.math.vector.plus
+import org.tobi29.scapes.engine.utils.tag.map
+import org.tobi29.scapes.engine.utils.tag.toBoolean
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.WieldMode
 import org.tobi29.scapes.entity.getEntities
@@ -33,8 +34,6 @@ import org.tobi29.scapes.entity.server.MobServer
 import org.tobi29.scapes.packets.PacketEntityChange
 import org.tobi29.scapes.server.connection.PlayerConnection
 import org.tobi29.scapes.vanilla.basics.util.dropItem
-import java.util.*
-import java.util.concurrent.ThreadLocalRandom
 
 class MobPlayerServerVB(type: EntityType<*, *>,
                         world: WorldServer,
@@ -98,7 +97,7 @@ class MobPlayerServerVB(type: EntityType<*, *>,
             damage(-pos.doubleZ() - 100.0)
         }
         if (health < 10.0) {
-            val random = ThreadLocalRandom.current()
+            val random = threadLocalRandom()
             if (random.nextInt(40) == 0) {
                 push(random.nextDouble() * 2.0 - 1.0, 0.0, 0.0)
             }

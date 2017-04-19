@@ -53,7 +53,7 @@ class BaseCommandsExtension(server: ScapesServer) : ServerExtension(server) {
                 message = "<$name> ${args.args.joinToString(separator = " ")}"
             }
             commands.add {
-                server.events.fireLocal(
+                server.events.fire(
                         MessageEvent(executor, MessageLevel.CHAT, message))
             }
         }
@@ -82,8 +82,9 @@ class BaseCommandsExtension(server: ScapesServer) : ServerExtension(server) {
             commands.add {
                 val target = requireGet({ connection.playerByName(it) },
                         targetName)
-                target.events.fireLocal(
-                        MessageEvent(executor, MessageLevel.CHAT, message))
+                server.events.fire(
+                        MessageEvent(executor, MessageLevel.CHAT, message,
+                                target))
             }
         }
 

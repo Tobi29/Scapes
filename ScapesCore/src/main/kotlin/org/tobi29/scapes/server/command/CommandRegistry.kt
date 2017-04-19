@@ -20,10 +20,9 @@ import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.HelpFormatter
 import org.apache.commons.cli.Options
 import org.apache.commons.cli.ParseException
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import java.io.PrintWriter
 import java.io.StringWriter
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 class CommandRegistry constructor(private val prefix: String = "") {
     private val commands = ConcurrentHashMap<String, (List<String>, Executor) -> Command.Compiled>()

@@ -16,14 +16,14 @@
 
 package org.tobi29.scapes.client.gui
 
-import mu.KLogging
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiStyle
-import java.io.IOException
+import org.tobi29.scapes.engine.utils.IOException
 
 class GuiOptions(state: GameState,
                  previous: Gui,

@@ -28,10 +28,10 @@ import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.InputDialog
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
+import org.tobi29.scapes.engine.utils.AtomicBoolean
+import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.engine.utils.version
 import org.tobi29.scapes.tools.controlpanel.ui.Certificate
-import java.io.IOException
-import java.util.concurrent.atomic.AtomicBoolean
 
 fun main(args: Array<String>) {
     ControlPanel().run()

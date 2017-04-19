@@ -18,15 +18,15 @@ package org.tobi29.scapes.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.terrain.selectBlock
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toDouble
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.*
+import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.scapes.engine.utils.tag.toDouble
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.model.MobLivingModel
 import org.tobi29.scapes.packets.PacketMobDamage
-import java.util.concurrent.ThreadLocalRandom
 
 abstract class MobLivingClient(type: EntityType<*, *>,
                                world: WorldClient,
@@ -99,7 +99,7 @@ abstract class MobLivingClient(type: EntityType<*, *>,
                             world.terrain.data(blockBottom))
                 }
                 if (footStepSound != null) {
-                    val random = ThreadLocalRandom.current()
+                    val random = threadLocalRandom()
                     world.playSound(footStepSound, this,
                             0.9f + random.nextFloat() * 0.2f, 1.0f)
                     footStep = 1.0 / clamp(speed.now().length(), 1.0, 4.0)

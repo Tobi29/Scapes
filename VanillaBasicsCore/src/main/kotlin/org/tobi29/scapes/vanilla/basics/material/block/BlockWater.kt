@@ -30,10 +30,9 @@ import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.PointerPane
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateWaterFlow
-import java.util.*
-import java.util.concurrent.ThreadLocalRandom
 
 class BlockWater(type: VanillaMaterialType) : VanillaBlock(type) {
     private var textureStill: TerrainTexture? = null
@@ -132,7 +131,7 @@ class BlockWater(type: VanillaMaterialType) : VanillaBlock(type) {
                         z: Int,
                         data: Int) {
         if (!terrain.hasDelayedUpdate(x, y, z, UpdateWaterFlow::class.java)) {
-            val random = ThreadLocalRandom.current()
+            val random = threadLocalRandom()
             terrain.addDelayedUpdate(
                     UpdateWaterFlow(terrain.world.registry).set(x, y, z,
                             random.nextDouble() * 0.2 + 0.1))

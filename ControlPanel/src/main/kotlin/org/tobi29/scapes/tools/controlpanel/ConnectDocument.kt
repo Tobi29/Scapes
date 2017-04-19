@@ -28,11 +28,12 @@ import org.tobi29.scapes.engine.swt.util.framework.Document
 import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
+import org.tobi29.scapes.engine.utils.EventDispatcher
+import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.engine.utils.tag.Tag
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toList
 import org.tobi29.scapes.engine.utils.toArray
-import java.io.IOException
 import java.nio.channels.SelectionKey
 
 class ConnectDocument(private val address: RemoteAddress,
@@ -71,7 +72,7 @@ class ConnectDocument(private val address: RemoteAddress,
                 output.put(21)
                 bundleChannel.queueBundle()
                 val controlPanel = ControlPanelProtocol(worker, bundleChannel,
-                        null)
+                        EventDispatcher())
                 try {
                     controlPanel.addCommand("Commands-Send") { payload ->
                         application.accessAsync(document) { composite ->

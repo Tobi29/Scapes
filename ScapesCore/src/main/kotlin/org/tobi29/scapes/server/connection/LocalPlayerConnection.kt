@@ -25,6 +25,8 @@ import org.tobi29.scapes.engine.server.ConnectionCloseException
 import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.server.InvalidPacketDataException
 import org.tobi29.scapes.engine.utils.Algorithm
+import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
+import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.io.checksum
 import org.tobi29.scapes.engine.utils.io.filesystem.exists
@@ -36,8 +38,8 @@ import org.tobi29.scapes.packets.PacketDisconnectSelf
 import org.tobi29.scapes.packets.PacketServer
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.extension.event.MessageEvent
-import java.io.IOException
-import java.util.concurrent.ConcurrentLinkedQueue
+import org.tobi29.scapes.server.extension.event.PlayerJoinEvent
+import org.tobi29.scapes.server.extension.event.PlayerLeaveEvent
 
 class LocalPlayerConnection(private val worker: ConnectionWorker,
                             server: ServerConnection,
@@ -95,6 +97,11 @@ class LocalPlayerConnection(private val worker: ConnectionWorker,
 
     suspend fun run(connection: Connection) {
         try {
+            events.fire(PlayerJoinEvent(this@LocalPlayerConnection))
+            events.fire(
+                    MessageEvent(this@LocalPlayerConnection,
+                            MessageLevel.SERVER_INFO,
+                            "Player connected: $id ($nickname) locally"))
             while (!connection.shouldClose) {
                 connection.increaseTimeout(10000)
                 while (queue.isNotEmpty()) {
@@ -105,32 +112,33 @@ class LocalPlayerConnection(private val worker: ConnectionWorker,
                 yield()
             }
         } catch (e: ConnectionCloseException) {
-            server.events.fireLocal(
+            events.fire(
                     MessageEvent(this@LocalPlayerConnection,
                             MessageLevel.SERVER_INFO,
                             "Disconnecting player: $nickname"))
         } catch (e: InvalidPacketDataException) {
-            server.events.fireLocal(
+            events.fire(
                     MessageEvent(this@LocalPlayerConnection,
                             MessageLevel.SERVER_INFO,
                             "Disconnecting player: $nickname"))
         } catch (e: IOException) {
-            server.events.fireLocal(
+            events.fire(
                     MessageEvent(this@LocalPlayerConnection,
                             MessageLevel.SERVER_INFO,
                             "Player disconnected: $nickname ($e)"))
         } finally {
+            events.fire(PlayerLeaveEvent(this@LocalPlayerConnection))
             isClosed = true
             if (added) {
                 server.removePlayer(this@LocalPlayerConnection)
                 added = false
             }
-            removeEntity()
+            close()
         }
     }
 
     fun error(e: Exception) {
-        server.events.fireLocal(
+        events.fire(
                 MessageEvent(this, MessageLevel.SERVER_INFO,
                         "Player disconnected: $nickname ($e)"))
     }

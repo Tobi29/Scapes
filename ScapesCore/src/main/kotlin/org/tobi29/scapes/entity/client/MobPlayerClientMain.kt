@@ -34,7 +34,6 @@ import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.entity.particle.ParticleEmitterBlock
 import org.tobi29.scapes.packets.PacketInteraction
-import java.util.concurrent.ThreadLocalRandom
 
 abstract class MobPlayerClientMain(type: EntityType<*, *>,
                                    world: WorldClient,
@@ -57,7 +56,7 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
     protected var stepHeight = 1.0
     protected val sendPositionHandler = MobPositionSenderClient(registry,
             this.pos.now()) { world.connection.send(it) }
-    private var inputListenerOwner: InputListenerOwner? = null
+    private var inputEventDispatcherwner: EventDispatcher? = null
 
     fun updatePosition() {
         sendPositionHandler.submitUpdate(uuid, pos.now(), speed.now(),
@@ -139,7 +138,7 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
                             world.terrain.data(blockBottom))
                 }
                 if (footStepSound != null) {
-                    val random = ThreadLocalRandom.current()
+                    val random = threadLocalRandom()
                     game.engine.sounds.playSound(footStepSound, "sound.World",
                             0.9f + random.nextFloat() * 0.2f, 1.0f)
                     footStep = 1.0 / clamp(speed.now().length(), 1.0, 4.0)
@@ -176,7 +175,7 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
                         pane.z, data)
                 for (i in 0..amount - 1) {
                     emitter.add { instance ->
-                        val random = ThreadLocalRandom.current()
+                        val random = threadLocalRandom()
                         val time = 3.0f
                         instance.pos.set(blockPos)
                         instance.pos.plus(Vector3d(random.nextDouble(),
@@ -227,18 +226,23 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
     }
 
     @Synchronized
-    fun setInputMode(input: InputMode) {
-        inputListenerOwner?.invalidate()
-        val inputListenerOwner = InputListenerOwner()
+    fun setInputMode(input: InputMode?) {
+        inputEventDispatcherwner?.disable()
         game.inputGui.removeAll()
+        if (input == null) {
+            inputEventDispatcherwner = null
+            return
+        }
         input.createInGameGUI(game.inputGui, world)
-        inputMode(input, inputListenerOwner)
+        val inputEventDispatcherwner = EventDispatcher(game.engine.events){
+            inputMode(input)
+        }
         this.input = input
-        this.inputListenerOwner = inputListenerOwner
+        this.inputEventDispatcherwner = inputEventDispatcherwner
+        inputEventDispatcherwner.enable()
     }
 
-    protected abstract fun inputMode(input: InputMode,
-                                     listenerOwner: ListenerOwner)
+    protected abstract fun ListenerRegistrar.inputMode(input: InputMode)
 
     class InputDirectionEvent(val direction: Vector2d)
 
@@ -268,17 +272,6 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
 
     class MenuChatEvent {
         var success: Boolean = true
-    }
-
-    private inner class InputListenerOwner : ListenerOwner {
-        private var valid = true
-        override val listenerOwner = ListenerOwnerHandle {
-            valid && this@MobPlayerClientMain.listenerOwner.isValid
-        }
-
-        fun invalidate() {
-            valid = false
-        }
     }
 
     companion object {

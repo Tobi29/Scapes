@@ -33,7 +33,6 @@ import org.tobi29.scapes.vanilla.basics.entity.client.EntityFurnaceClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityFurnaceServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer
-import java.util.*
 
 class BlockFurnace(type: VanillaMaterialType) : VanillaBlockContainer<EntityFurnaceClient, EntityFurnaceServer>(
         type, type.materials.plugin.entityTypes.furnace) {

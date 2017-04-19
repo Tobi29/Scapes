@@ -18,8 +18,8 @@ package org.tobi29.scapes.vanilla.basics.world.decorator
 
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
-import java.util.*
 
 class LayerPatch(private val material: BlockType,
                  private val data: Int,

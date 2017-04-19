@@ -21,11 +21,11 @@ import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
 import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
+import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.server.connection.PlayerConnection
-import java.util.*
 
 class PacketEntityAdd : PacketAbstract, PacketClient {
     private lateinit var uuid: UUID

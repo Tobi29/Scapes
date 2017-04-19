@@ -18,7 +18,7 @@ package org.tobi29.scapes.chunk.terrain
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import java.util.concurrent.ConcurrentHashMap
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 
 interface TerrainRenderer {
     fun renderUpdate(cam: Cam)

@@ -18,11 +18,11 @@ package org.tobi29.scapes.entity.particle
 import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.utils.graphics.Cam
+import org.tobi29.scapes.engine.utils.io.putInto
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f
 import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
 import org.tobi29.scapes.engine.utils.math.vector.length
-import java.util.*
 
 class ParticleEmitterTransparent(system: ParticleSystem,
                                  texture: Texture) : ParticleEmitterInstanced<ParticleInstanceTransparent>(

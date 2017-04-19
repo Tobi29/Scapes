@@ -19,6 +19,7 @@ import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
+import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.tag.map
 import org.tobi29.scapes.engine.utils.tag.mapMut
 import org.tobi29.scapes.engine.utils.tag.set
@@ -29,7 +30,6 @@ import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityResearchTableClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityResearchTableServer
 import org.tobi29.scapes.vanilla.basics.material.ItemResearch
-import java.util.*
 
 class PacketResearch : PacketAbstract, PacketServer {
     private lateinit var uuid: UUID

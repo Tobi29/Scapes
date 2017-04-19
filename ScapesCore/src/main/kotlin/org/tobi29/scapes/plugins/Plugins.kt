@@ -16,17 +16,20 @@
 
 package org.tobi29.scapes.plugins
 
-import mu.KLogging
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.block.*
-import org.tobi29.scapes.engine.utils.io.filesystem.*
-import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathPath
-import org.tobi29.scapes.engine.utils.io.filesystem.classpath.ClasspathResource
-import org.tobi29.scapes.engine.utils.tag.MutableTagMap
+import org.tobi29.scapes.engine.utils.io.FileSystemContainer
+import org.tobi29.scapes.engine.utils.io.classpath.ClasspathPath
+import org.tobi29.scapes.engine.utils.io.classpath.ClasspathResource
+import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
+import org.tobi29.scapes.engine.utils.io.filesystem.isNotHidden
+import org.tobi29.scapes.engine.utils.io.filesystem.isRegularFile
+import org.tobi29.scapes.engine.utils.io.filesystem.listRecursive
+import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.engine.utils.readOnly
+import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.packets.*
-import java.io.IOException
 import java.net.URLClassLoader
-import java.util.*
 
 class Plugins(files: List<PluginFile>,
               idStorage: MutableTagMap) {
@@ -67,7 +70,7 @@ class Plugins(files: List<PluginFile>,
         registry = Registries(idStorage)
     }
 
-    @Throws(IOException::class)
+    // TODO: @Throws(IOException::class)
     private fun load(plugin: Plugin) {
         pluginsMut.add(plugin)
         if (plugin is Dimension) {
@@ -143,7 +146,7 @@ class Plugins(files: List<PluginFile>,
     }
 
     companion object : KLogging() {
-        @Throws(IOException::class)
+        // TODO: @Throws(IOException::class)
         fun installed(path: FilePath): List<PluginFile> {
             val files = ArrayList<PluginFile>()
             listRecursive(path) {
@@ -155,7 +158,7 @@ class Plugins(files: List<PluginFile>,
             return files
         }
 
-        @Throws(IOException::class)
+        // TODO: @Throws(IOException::class)
         fun embedded(): List<PluginFile> {
             val embedded = ClasspathResource(Plugins::class.java.classLoader,
                     "scapes/plugin/Plugin.json")

@@ -16,18 +16,17 @@
 
 package org.tobi29.scapes.client.gui
 
-import mu.KLogging
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
-import org.tobi29.scapes.engine.input.FileType
 import org.tobi29.scapes.engine.utils.Algorithm
+import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.engine.utils.io.checksum
 import org.tobi29.scapes.engine.utils.io.filesystem.write
 import org.tobi29.scapes.engine.utils.io.process
 import org.tobi29.scapes.engine.utils.io.put
-import java.io.IOException
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import java.security.KeyPair
 
 class GuiAccount(state: GameState,
@@ -38,7 +37,7 @@ class GuiAccount(state: GameState,
     private var nickname = ""
 
     init {
-        val game = engine.game as ScapesClient
+        val scapes = engine.game as ScapesClient
         keyPair = account.keyPair()
         nickname = account.nickname()
         pane.addVert(16.0, 5.0, -1.0, 18.0) { GuiComponentText(it, "Key:") }
@@ -109,10 +108,9 @@ consist of letters and digits.
         }
         skin.on(GuiEvent.CLICK_LEFT) {
             try {
-                val path = game.home.resolve("Skin.png")
-                state.engine.container.openFileDialog(FileType.IMAGE,
-                        "Import skin", false) { _, input ->
-                    write(path) { process(input, put(it)) }
+                val path = scapes.home.resolve("Skin.png")
+                scapes.dialogs.openSkinDialog { _, stream ->
+                    write(path) { process(stream, put(it)) }
                 }
             } catch (e: IOException) {
                 logger.warn { "Failed to import skin: $e" }
@@ -128,7 +126,7 @@ consist of letters and digits.
             }
             try {
                 Account(keyPair, this.nickname).write(
-                        game.home.resolve("Account.properties"))
+                        scapes.home.resolve("Account.properties"))
             } catch (e: IOException) {
                 logger.error { "Failed to write account file: $e" }
             }

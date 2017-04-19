@@ -15,10 +15,9 @@
  */
 package org.tobi29.scapes.block
 
-import org.tobi29.scapes.engine.utils.tag.*
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.readOnly
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
+import org.tobi29.scapes.engine.utils.tag.*
 
 open class Registries(private val idStorage: MutableTagMap) {
     private val registries = ConcurrentHashMap<Pair<String, String>, Registry<*>>()

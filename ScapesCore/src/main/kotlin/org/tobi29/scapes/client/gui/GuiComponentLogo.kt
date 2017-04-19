@@ -18,8 +18,9 @@ package org.tobi29.scapes.client.gui
 import org.threeten.bp.LocalDate
 import org.threeten.bp.Month
 import org.tobi29.scapes.engine.gui.*
+import org.tobi29.scapes.engine.sound.CLICK
 import org.tobi29.scapes.engine.utils.math.round
-import java.util.concurrent.ThreadLocalRandom
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 
 class GuiComponentLogo(parent: GuiLayoutData,
                        height: Int,
@@ -42,9 +43,7 @@ class GuiComponentLogo(parent: GuiLayoutData,
             GuiComponentText(it, splash(), 1.0f, 1.0f, 0.0f, 1.0f)
         }
         on(GuiEvent.CLICK_LEFT) { event ->
-            engine.sounds.playSound("Engine:sound/Click.ogg",
-                    "sound.GUI", 1.0f,
-                    1.0f)
+            engine.sounds.playSound(CLICK, "sound.GUI", 1.0f, 1.0f)
             splash.text = splash()
         }
     }
@@ -73,7 +72,7 @@ class GuiComponentLogo(parent: GuiLayoutData,
             } else if (date.dayOfMonth == 3 && date.month == Month.MARCH) {
                 text = "${String(CharArray(1024, { ' ' }))}Aspect ratio!?!"
             } else {
-                val random = ThreadLocalRandom.current()
+                val random = threadLocalRandom()
                 text = SPLASHES[random.nextInt(SPLASHES.size)]
             }
             return text

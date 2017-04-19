@@ -16,23 +16,23 @@
 
 package org.tobi29.scapes.client.gui
 
-import mu.KLogging
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.graphics.TextureFilter
 import org.tobi29.scapes.engine.graphics.TextureWrap
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.resource.Resource
+import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.hash
 import org.tobi29.scapes.engine.utils.io.BufferedReadChannelStream
+import org.tobi29.scapes.engine.utils.io.Channels
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.zipFile
+import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.engine.utils.use
 import org.tobi29.scapes.plugins.PluginFile
-import java.io.IOException
-import java.nio.channels.Channels
-import java.util.*
 
 class GuiCreateWorld(state: GameState,
                      previous: GuiSaveSelect,
@@ -91,7 +91,7 @@ class GuiCreateWorld(state: GameState,
                     return@on
                 }
                 val randomSeed = if (seed.text().isEmpty()) {
-                    Random().nextLong()
+                    threadLocalRandom().nextLong()
                 } else {
                     try {
                         seed.text().toLong()

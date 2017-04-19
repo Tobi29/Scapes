@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
-import mu.KLogging
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.Update
 import org.tobi29.scapes.chunk.MobSpawner
@@ -25,21 +25,20 @@ import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.generator.GeneratorOutput
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
+import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.*
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.task.ThreadJoiner
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.server.format.TerrainInfiniteFormat
 import org.tobi29.scapes.terrain.TerrainChunk
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteChunkManagerDynamic
-import java.io.IOException
-import java.util.*
-import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.ThreadLocalRandom
 
 class TerrainInfiniteServer(override val world: WorldServer,
                             zSize: Int,
@@ -227,7 +226,7 @@ class TerrainInfiniteServer(override val world: WorldServer,
             chunkManager.stream().forEach { it.updateServer(delta) }
         }
         profilerSection("Spawning") {
-            val random = ThreadLocalRandom.current()
+            val random = threadLocalRandom()
             for (spawner in spawners) {
                 if (world.mobs(
                         spawner.creatureType()) < chunkManager.chunks * spawner.mobsPerChunk()) {

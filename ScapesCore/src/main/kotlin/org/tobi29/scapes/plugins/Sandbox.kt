@@ -16,8 +16,8 @@
 
 package org.tobi29.scapes.plugins
 
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import java.security.*
-import java.util.concurrent.ThreadLocalRandom
 
 object Sandbox {
     private val whitelist = packageAccess("java.**", "kotlin.**",
@@ -70,7 +70,7 @@ object Sandbox {
 
     fun preload() {
         // Preload these to avoid permission errors when plugins trip into these
-        ThreadLocalRandom.current()
+        threadLocalRandom()
     }
 
     fun packageAccess(vararg str: String): (String) -> Boolean {

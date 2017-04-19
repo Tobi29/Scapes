@@ -15,15 +15,15 @@
  */
 package org.tobi29.scapes.client
 
-import mu.KLogging
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.gui.GuiNotificationSimple
+import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.engine.utils.io.filesystem.*
+import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
-import java.io.IOException
 import java.security.AccessController
 import java.security.PrivilegedAction
-import java.util.concurrent.ThreadLocalRandom
 
 class Playlist(private val path: FilePath,
                private val engine: ScapesEngine) {
@@ -50,7 +50,7 @@ class Playlist(private val path: FilePath,
                     music = Music.DAY
                 }
                 playMusic(music)
-                val random = ThreadLocalRandom.current()
+                val random = threadLocalRandom()
                 musicWait = random.nextDouble() * 4.0 + 4.0
             }
         }
@@ -86,7 +86,7 @@ class Playlist(private val path: FilePath,
                         ::isRegularFile,
                         ::isNotHidden)
                 if (!files.isEmpty()) {
-                    val random = ThreadLocalRandom.current()
+                    val random = threadLocalRandom()
                     val title = files[random.nextInt(files.size)]
                     engine.sounds.stop("music")
                     engine.sounds.playMusic(read(title),
@@ -103,7 +103,7 @@ class Playlist(private val path: FilePath,
     fun setMusic(music: Music) {
         if (music != currentMusic) {
             playMusic(music)
-            val random = ThreadLocalRandom.current()
+            val random = threadLocalRandom()
             musicWait = random.nextDouble() * 20.0 + 4.0
         }
     }

@@ -17,8 +17,8 @@
 package org.tobi29.scapes.terrain.infinite
 
 import org.tobi29.scapes.engine.utils.ThreadLocal
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
-import java.util.concurrent.ConcurrentHashMap
 
 class TerrainInfiniteChunkManagerDynamic<C : TerrainInfiniteBaseChunk<*>> : TerrainInfiniteChunkManager<C> {
     private val map = ConcurrentHashMap<ChunkLabel, C>()

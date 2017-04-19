@@ -32,10 +32,9 @@ import org.tobi29.scapes.engine.input.ControllerDefault
 import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.engine.input.ControllerKeyReference
 import org.tobi29.scapes.engine.input.isDown
+import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.engine.utils.EventDispatcher
-import org.tobi29.scapes.engine.utils.ListenerOwnerHandle
 import org.tobi29.scapes.engine.utils.graphics.encodePNG
-import org.tobi29.scapes.engine.utils.io.filesystem.path
 import org.tobi29.scapes.engine.utils.io.filesystem.write
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.engine.utils.math.vector.times
@@ -44,13 +43,11 @@ import org.tobi29.scapes.engine.utils.tag.mapMut
 import org.tobi29.scapes.engine.utils.tag.set
 import org.tobi29.scapes.engine.utils.tag.toDouble
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
-import java.io.IOException
 
 class InputModeKeyboard(engine: ScapesEngine,
                         val controller: ControllerDefault,
                         configMap: MutableTagMap) : InputMode {
-    override val events = EventDispatcher()
-    override val listenerOwner = ListenerOwnerHandle()
+    val events: EventDispatcher
     private val tagMap: MutableTagMap
     private val guiController: GuiControllerMouse
     private val walkForward: ControllerKeyReference?
@@ -126,186 +123,197 @@ class InputModeKeyboard(engine: ScapesEngine,
             ControllerKeyReference.valueOf(hotbarTag["$it"].toString())
         }
 
-        controller.events.listener<ControllerDefault.MouseDeltaSyncEvent>(
-                this) { event ->
-            val dir = event.delta * cameraSensitivity
-            events.fire(MobPlayerClientMain.InputDirectionEvent(dir))
-        }
-        val references = arrayOf(menu, inventory, chat, hotbarAddRight,
-                hotbarSubtractRight, hotbarAddLeft, hotbarSubtractLeft,
-                hotbarAdd, hotbarSubtract, *hotbarRight, *hotbarLeft, *hotbar)
-        guiController.events.listener<PressEvent>(this) { event ->
-            if (event.muted) {
-                return@listener
+        events = EventDispatcher(engine.events) {
+            listen<ControllerDefault.MouseDeltaSyncEvent>(
+                    { it.controller == controller }) { event ->
+                val dir = event.delta * cameraSensitivity
+                events.fire(MobPlayerClientMain.InputDirectionEvent(dir))
             }
-            val pressed = ControllerKeyReference.isPressed(event.key,
-                    controller, *references)
-            when (pressed) {
-                menu -> {
-                    if (MobPlayerClientMain.MenuOpenEvent().apply {
-                        events.fire(this)
-                    }.success) {
-                        event.muted = true
-                        return@listener
-                    }
+            val references = arrayOf(menu, inventory, chat, hotbarAddRight,
+                    hotbarSubtractRight, hotbarAddLeft, hotbarSubtractLeft,
+                    hotbarAdd, hotbarSubtract, *hotbarRight, *hotbarLeft,
+                    *hotbar)
+            listen<PressEvent>(
+                    { it.controller == guiController }) { event ->
+                if (event.muted) {
+                    return@listen
                 }
-                inventory -> {
-                    if (MobPlayerClientMain.MenuInventoryEvent().apply {
-                        events.fire(this)
-                    }.success) {
-                        event.muted = true
-                        return@listener
+                val pressed = ControllerKeyReference.isPressed(event.key,
+                        controller, *references)
+                when (pressed) {
+                    menu -> {
+                        if (MobPlayerClientMain.MenuOpenEvent().apply {
+                            events.fire(this)
+                        }.success) {
+                            event.muted = true
+                            return@listen
+                        }
                     }
-                }
-                chat -> {
-                    if (MobPlayerClientMain.MenuChatEvent().apply {
-                        events.fire(this)
-                    }.success) {
-                        event.muted = true
-                        return@listener
+                    inventory -> {
+                        if (MobPlayerClientMain.MenuInventoryEvent().apply {
+                            events.fire(this)
+                        }.success) {
+                            event.muted = true
+                            return@listen
+                        }
                     }
-                }
-                hotbarAddRight -> {
-                    if (MobPlayerClientMain.HotbarChangeRightEvent(1).apply {
-                        events.fire(this)
-                    }.success) {
-                        event.muted = true
-                        return@listener
+                    chat -> {
+                        if (MobPlayerClientMain.MenuChatEvent().apply {
+                            events.fire(this)
+                        }.success) {
+                            event.muted = true
+                            return@listen
+                        }
                     }
-                }
-                hotbarSubtractRight -> {
-                    if (MobPlayerClientMain.HotbarChangeRightEvent(-1).apply {
-                        events.fire(this)
-                    }.success) {
-                        event.muted = true
-                        return@listener
+                    hotbarAddRight -> {
+                        if (MobPlayerClientMain.HotbarChangeRightEvent(
+                                1).apply {
+                            events.fire(this)
+                        }.success) {
+                            event.muted = true
+                            return@listen
+                        }
                     }
-                }
-                hotbarAddLeft -> {
-                    if (MobPlayerClientMain.HotbarChangeLeftEvent(1).apply {
-                        events.fire(this)
-                    }.success) {
-                        event.muted = true
-                        return@listener
+                    hotbarSubtractRight -> {
+                        if (MobPlayerClientMain.HotbarChangeRightEvent(
+                                -1).apply {
+                            events.fire(this)
+                        }.success) {
+                            event.muted = true
+                            return@listen
+                        }
                     }
-                }
-                hotbarSubtractLeft -> {
-                    if (MobPlayerClientMain.HotbarChangeLeftEvent(-1).apply {
-                        events.fire(this)
-                    }.success) {
-                        event.muted = true
-                        return@listener
+                    hotbarAddLeft -> {
+                        if (MobPlayerClientMain.HotbarChangeLeftEvent(1).apply {
+                            events.fire(this)
+                        }.success) {
+                            event.muted = true
+                            return@listen
+                        }
                     }
-                }
-                hotbarAdd -> {
-                    if (MobPlayerClientMain.HotbarChangeRightEvent(1).apply {
-                        events.fire(this)
-                    }.success or MobPlayerClientMain.HotbarChangeLeftEvent(
-                            1).apply {
-                        events.fire(this)
-                    }.success) {
-                        event.muted = true
-                        return@listener
+                    hotbarSubtractLeft -> {
+                        if (MobPlayerClientMain.HotbarChangeLeftEvent(
+                                -1).apply {
+                            events.fire(this)
+                        }.success) {
+                            event.muted = true
+                            return@listen
+                        }
                     }
-                }
-                hotbarSubtract -> {
-                    if (MobPlayerClientMain.HotbarChangeRightEvent(-1).apply {
-                        events.fire(this)
-                    }.success or MobPlayerClientMain.HotbarChangeLeftEvent(
-                            -1).apply {
-                        events.fire(this)
-                    }.success) {
-                        event.muted = true
-                        return@listener
+                    hotbarAdd -> {
+                        if (MobPlayerClientMain.HotbarChangeRightEvent(
+                                1).apply {
+                            events.fire(this)
+                        }.success or MobPlayerClientMain.HotbarChangeLeftEvent(
+                                1).apply {
+                            events.fire(this)
+                        }.success) {
+                            event.muted = true
+                            return@listen
+                        }
                     }
-                }
-                else -> {
-                    for (i in 0..9) {
-                        when (pressed) {
-                            hotbarRight[i] -> {
-                                if (MobPlayerClientMain.HotbarSetRightEvent(
-                                        i).apply {
-                                    events.fire(this)
-                                }.success) {
-                                    event.muted = true
-                                    return@listener
+                    hotbarSubtract -> {
+                        if (MobPlayerClientMain.HotbarChangeRightEvent(
+                                -1).apply {
+                            events.fire(this)
+                        }.success or MobPlayerClientMain.HotbarChangeLeftEvent(
+                                -1).apply {
+                            events.fire(this)
+                        }.success) {
+                            event.muted = true
+                            return@listen
+                        }
+                    }
+                    else -> {
+                        for (i in 0..9) {
+                            when (pressed) {
+                                hotbarRight[i] -> {
+                                    if (MobPlayerClientMain.HotbarSetRightEvent(
+                                            i).apply {
+                                        events.fire(this)
+                                    }.success) {
+                                        event.muted = true
+                                        return@listen
+                                    }
                                 }
-                            }
-                            hotbarLeft[i] -> {
-                                if (MobPlayerClientMain.HotbarSetLeftEvent(
-                                        i).apply {
-                                    events.fire(this)
-                                }.success) {
-                                    event.muted = true
-                                    return@listener
+                                hotbarLeft[i] -> {
+                                    if (MobPlayerClientMain.HotbarSetLeftEvent(
+                                            i).apply {
+                                        events.fire(this)
+                                    }.success) {
+                                        event.muted = true
+                                        return@listen
+                                    }
                                 }
-                            }
-                            hotbar[i] -> {
-                                if (MobPlayerClientMain.HotbarSetRightEvent(
-                                        i).apply {
-                                    events.fire(this)
-                                }.success or MobPlayerClientMain.HotbarSetLeftEvent(
-                                        i).apply {
-                                    events.fire(this)
-                                }.success) {
-                                    event.muted = true
-                                    return@listener
+                                hotbar[i] -> {
+                                    if (MobPlayerClientMain.HotbarSetRightEvent(
+                                            i).apply {
+                                        events.fire(this)
+                                    }.success or MobPlayerClientMain.HotbarSetLeftEvent(
+                                            i).apply {
+                                        events.fire(this)
+                                    }.success) {
+                                        event.muted = true
+                                        return@listen
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
-            if (event.key == ControllerKey.KEY_F1) {
-                val state = engine.getState()
-                if (state is GameStateGameMP) {
-                    state.setHudVisible(!state.hud.visible)
-                    event.muted = true
-                    return@listener
+                if (event.key == ControllerKey.KEY_F1) {
+                    val state = engine.getState()
+                    if (state is GameStateGameMP) {
+                        state.setHudVisible(!state.hud.visible)
+                        event.muted = true
+                        return@listen
+                    }
                 }
-            }
-            if (event.key == ControllerKey.KEY_F2) {
-                engine.graphics.requestScreenshot { image ->
-                    engine.taskExecutor.runTask({
-                        val game = engine.game as ScapesClient
-                        val path = game.home.resolve("screenshots").resolve(
-                                "${System.currentTimeMillis()}.png")
-                        try {
-                            write(path) { encodePNG(image, it, 9, false) }
-                        } catch (e: IOException) {
-                            GraphicsSystem.logger.error { "Error saving screenshot: $e" }
-                        }
-                    }, "Write-Screenshot")
-                }
-                event.muted = true
-                return@listener
-            }
-            if (event.key == ControllerKey.KEY_F3) {
-                val shift = controller.isDown(ControllerKey.KEY_SHIFT_LEFT)
-                val control = controller.isDown(ControllerKey.KEY_CONTROL_LEFT)
-                if (shift && control) {
-                    ScapesEngine.crashReport(path("."), { engine },
-                            Throwable("Debug report"))
-                    event.muted = true
-                    return@listener
-                } else if (Debug.enabled()) {
-                    if (shift) {
-                        engine.profiler.visible = !engine.profiler.visible
-                    } else if (control) {
-                        engine.performance.visible = !engine.performance.visible
-                    } else {
-                        engine.debugValues.visible = !engine.debugValues.visible
+                if (event.key == ControllerKey.KEY_F2) {
+                    engine.graphics.requestScreenshot { image ->
+                        engine.taskExecutor.runTask({
+                            val game = engine.game as ScapesClient
+                            val path = game.home.resolve("screenshots").resolve(
+                                    "${System.currentTimeMillis()}.png")
+                            try {
+                                write(path) { encodePNG(image, it, 9, false) }
+                            } catch (e: IOException) {
+                                GraphicsSystem.logger.error { "Error saving screenshot: $e" }
+                            }
+                        }, "Write-Screenshot")
                     }
                     event.muted = true
-                    return@listener
+                    return@listen
                 }
-            }
-            if (Debug.enabled() && event.key == ControllerKey.KEY_F6) {
-                val state = engine.getState()
-                if (state is GameStateGameMP) {
-                    state.debugWidget.visible = !state.debugWidget.visible
-                    event.muted = true
-                    return@listener
+                if (event.key == ControllerKey.KEY_F3) {
+                    val shift = controller.isDown(ControllerKey.KEY_SHIFT_LEFT)
+                    val control = controller.isDown(
+                            ControllerKey.KEY_CONTROL_LEFT)
+                    if (shift && control) {
+                        // TODO: Implement
+                        //ScapesEngine.crashReport(path("."), { engine },
+                        //        Throwable("Debug report"))
+                        event.muted = true
+                        return@listen
+                    } else if (Debug.enabled()) {
+                        if (shift) {
+                            engine.profiler.visible = !engine.profiler.visible
+                        } else if (control) {
+                            engine.performance.visible = !engine.performance.visible
+                        } else {
+                            engine.debugValues.visible = !engine.debugValues.visible
+                        }
+                        event.muted = true
+                        return@listen
+                    }
+                }
+                if (Debug.enabled() && event.key == ControllerKey.KEY_F6) {
+                    val state = engine.getState()
+                    if (state is GameStateGameMP) {
+                        state.debugWidget.visible = !state.debugWidget.visible
+                        event.muted = true
+                        return@listen
+                    }
                 }
             }
         }
@@ -385,6 +393,14 @@ class InputModeKeyboard(engine: ScapesEngine,
         if (!tagMap.containsKey(id)) {
             tagMap[id] = def
         }
+    }
+
+    override fun enabled() {
+        events.enable()
+    }
+
+    override fun disabled() {
+        events.disable()
     }
 
     override fun poll(delta: Double): Boolean {

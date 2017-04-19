@@ -21,9 +21,9 @@ import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.block.Update
 import org.tobi29.scapes.block.UpdateType
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.engine.utils.Random
+import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
-import java.util.*
-import java.util.concurrent.ThreadLocalRandom
 
 class UpdateFlowerGrowth(type: UpdateType) : Update(type) {
     constructor(registry: Registries) : this(
@@ -64,7 +64,7 @@ class UpdateFlowerGrowth(type: UpdateType) : Update(type) {
         } else if (type == materials.snow) {
             if (terrain.sunLight(x, y, z) >= 12 && terrain.type(x, y,
                     z - 1) == materials.grass) {
-                val random = ThreadLocalRandom.current()
+                val random = threadLocalRandom()
                 terrain.addDelayedUpdate(
                         UpdateFlowerGrowth(this.type).set(x, y, z,
                                 random.nextDouble() * 3600.0 + 3600.0))

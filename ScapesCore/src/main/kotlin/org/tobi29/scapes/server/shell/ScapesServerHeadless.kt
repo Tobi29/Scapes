@@ -16,24 +16,29 @@
 
 package org.tobi29.scapes.server.shell
 
-import mu.KLogging
+import org.tobi29.scapes.engine.utils.IOException
+import org.tobi29.scapes.engine.utils.ListenerRegistrar
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.command.Executor
 import org.tobi29.scapes.server.extension.event.MessageEvent
 import java.io.BufferedReader
-import java.io.IOException
 import java.io.InputStreamReader
 
 class ScapesServerHeadless(path: FilePath) : ScapesStandaloneServer(path) {
-    override fun init(executor: Executor): () -> Unit {
-        executor.events.listenerGlobal<MessageEvent>(executor) { event ->
+    override fun ListenerRegistrar.listeners() {
+        listen<MessageEvent> { event ->
             when (event.level) {
-                MessageLevel.SERVER_ERROR, MessageLevel.FEEDBACK_ERROR -> logger.error { event.message }
+                MessageLevel.SERVER_ERROR,
+                MessageLevel.FEEDBACK_ERROR -> logger.error { event.message }
                 else -> logger.info { event.message }
             }
         }
+    }
+
+    override fun init(executor: Executor): () -> Unit {
         val reader = BufferedReader(InputStreamReader(System.`in`))
         return {
             try {
@@ -41,10 +46,10 @@ class ScapesServerHeadless(path: FilePath) : ScapesStandaloneServer(path) {
                     val line = reader.readLine()
                     if (line != null) {
                         server.commandRegistry()[line, executor].execute().forEach { output ->
-                            executor.events.fireLocal(
+                            executor.events.fire(
                                     MessageEvent(executor,
                                             MessageLevel.FEEDBACK_ERROR,
-                                            output.toString()))
+                                            output.toString(), executor))
                         }
                     }
                 }

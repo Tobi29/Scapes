@@ -28,7 +28,6 @@ import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.engine.input.ControllerKeyReference
 import org.tobi29.scapes.engine.input.isDown
 import org.tobi29.scapes.engine.utils.EventDispatcher
-import org.tobi29.scapes.engine.utils.ListenerOwnerHandle
 import org.tobi29.scapes.engine.utils.math.mix
 import org.tobi29.scapes.engine.utils.math.sqrNoAbs
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
@@ -39,8 +38,7 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain
 class InputModeGamepad(engine: ScapesEngine,
                        private val controller: ControllerJoystick,
                        configMap: MutableTagMap) : InputMode {
-    override val events = EventDispatcher()
-    override val listenerOwner = ListenerOwnerHandle()
+    val events: EventDispatcher
     private val tagMap: MutableTagMap
     private val guiController: GuiController
     private val axisWalkX: Int
@@ -111,89 +109,98 @@ class InputModeGamepad(engine: ScapesEngine,
         val references = arrayOf(menu, inventory, chat, hotbarAddRight,
                 hotbarSubtractRight, hotbarAddLeft, hotbarSubtractLeft,
                 hotbarAdd, hotbarSubtract)
-        guiController.events.listener<PressEvent>(this) { event ->
-            if (event.muted) {
-                return@listener
-            }
-            val pressed = ControllerKeyReference.isPressed(event.key,
-                    controller, *references)
-            when (pressed) {
-                menu -> {
-                    if (MobPlayerClientMain.MenuOpenEvent().apply {
-                        events.fire(this)
-                    }.success) {
-                        event.muted = true
-                        return@listener
-                    }
+
+        events = EventDispatcher(engine.events) {
+            listen<PressEvent>(
+                    { it.controller == guiController }) { event ->
+                if (event.muted) {
+                    return@listen
                 }
-                inventory -> {
-                    if (MobPlayerClientMain.MenuInventoryEvent().apply {
-                        events.fire(this)
-                    }.success) {
-                        event.muted = true
-                        return@listener
+                val pressed = ControllerKeyReference.isPressed(event.key,
+                        controller, *references)
+                when (pressed) {
+                    menu -> {
+                        if (MobPlayerClientMain.MenuOpenEvent().apply {
+                            events.fire(this)
+                        }.success) {
+                            event.muted = true
+                            return@listen
+                        }
                     }
-                }
-                chat -> {
-                    if (MobPlayerClientMain.MenuChatEvent().apply {
-                        events.fire(this)
-                    }.success) {
-                        event.muted = true
-                        return@listener
+                    inventory -> {
+                        if (MobPlayerClientMain.MenuInventoryEvent().apply {
+                            events.fire(this)
+                        }.success) {
+                            event.muted = true
+                            return@listen
+                        }
                     }
-                }
-                hotbarAddRight -> {
-                    if (MobPlayerClientMain.HotbarChangeRightEvent(1).apply {
-                        events.fire(this)
-                    }.success) {
-                        event.muted = true
-                        return@listener
+                    chat -> {
+                        if (MobPlayerClientMain.MenuChatEvent().apply {
+                            events.fire(this)
+                        }.success) {
+                            event.muted = true
+                            return@listen
+                        }
                     }
-                }
-                hotbarSubtractRight -> {
-                    if (MobPlayerClientMain.HotbarChangeRightEvent(-1).apply {
-                        events.fire(this)
-                    }.success) {
-                        event.muted = true
-                        return@listener
+                    hotbarAddRight -> {
+                        if (MobPlayerClientMain.HotbarChangeRightEvent(
+                                1).apply {
+                            events.fire(this)
+                        }.success) {
+                            event.muted = true
+                            return@listen
+                        }
                     }
-                }
-                hotbarAddLeft -> {
-                    if (MobPlayerClientMain.HotbarChangeLeftEvent(1).apply {
-                        events.fire(this)
-                    }.success) {
-                        event.muted = true
-                        return@listener
+                    hotbarSubtractRight -> {
+                        if (MobPlayerClientMain.HotbarChangeRightEvent(
+                                -1).apply {
+                            events.fire(this)
+                        }.success) {
+                            event.muted = true
+                            return@listen
+                        }
                     }
-                }
-                hotbarSubtractLeft -> {
-                    if (MobPlayerClientMain.HotbarChangeLeftEvent(-1).apply {
-                        events.fire(this)
-                    }.success) {
-                        event.muted = true
-                        return@listener
+                    hotbarAddLeft -> {
+                        if (MobPlayerClientMain.HotbarChangeLeftEvent(1).apply {
+                            events.fire(this)
+                        }.success) {
+                            event.muted = true
+                            return@listen
+                        }
                     }
-                }
-                hotbarAdd -> {
-                    if (MobPlayerClientMain.HotbarChangeRightEvent(1).apply {
-                        events.fire(this)
-                    }.success or MobPlayerClientMain.HotbarChangeLeftEvent(
-                            1).apply {
-                        events.fire(this)
-                    }.success) {
-                        event.muted = true
-                        return@listener
+                    hotbarSubtractLeft -> {
+                        if (MobPlayerClientMain.HotbarChangeLeftEvent(
+                                -1).apply {
+                            events.fire(this)
+                        }.success) {
+                            event.muted = true
+                            return@listen
+                        }
                     }
-                }
-                hotbarSubtract -> {
-                    if (MobPlayerClientMain.HotbarChangeRightEvent(-1).apply {
-                        events.fire(this)
-                    }.success or MobPlayerClientMain.HotbarChangeLeftEvent(
-                            -1).apply {
-                        events.fire(this)
-                    }.success) {
-                        event.muted = true
-                        return@listener
+                    hotbarAdd -> {
+                        if (MobPlayerClientMain.HotbarChangeRightEvent(
+                                1).apply {
+                            events.fire(this)
+                        }.success or MobPlayerClientMain.HotbarChangeLeftEvent(
+                                1).apply {
+                            events.fire(this)
+                        }.success) {
+                            event.muted = true
+                            return@listen
+                        }
+                    }
+                    hotbarSubtract -> {
+                        if (MobPlayerClientMain.HotbarChangeRightEvent(
+                                -1).apply {
+                            events.fire(this)
+                        }.success or MobPlayerClientMain.HotbarChangeLeftEvent(
+                                -1).apply {
+                            events.fire(this)
+                        }.success) {
+                            event.muted = true
+                            return@listen
+                        }
                     }
                 }
             }
@@ -279,6 +286,14 @@ class InputModeGamepad(engine: ScapesEngine,
 
     override fun toString(): String {
         return controller.name()
+    }
+
+    override fun enabled() {
+        events.enable()
+    }
+
+    override fun disabled() {
+        events.disable()
     }
 
     override fun poll(delta: Double): Boolean {

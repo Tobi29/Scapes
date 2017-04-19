@@ -16,11 +16,11 @@
 
 package org.tobi29.scapes.terrain.infinite
 
+import org.tobi29.scapes.engine.utils.AtomicInteger
 import org.tobi29.scapes.engine.utils.StampLock
 import org.tobi29.scapes.engine.utils.fill
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector2i
-import java.util.concurrent.atomic.AtomicInteger
 
 class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
         private val center: MutableVector2i,
@@ -49,7 +49,7 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
 
     override fun remove(x: Int,
                         y: Int): C? {
-        lock.write {
+        return lock.write {
             val xx = x - this.x.get()
             val yy = y - this.y.get()
             if (xx in 0..(size - 1) && yy >= 0 && yy < size) {
@@ -60,10 +60,13 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
                     assert(chunk.pos.y == y)
                     array[i] = null
                     @Suppress("UNCHECKED_CAST")
-                    return chunk as C
+                    chunk as C
+                } else {
+                    null
                 }
+            } else {
+                null
             }
-            return null
         }
     }
 
