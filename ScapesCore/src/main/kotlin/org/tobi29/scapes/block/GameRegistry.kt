@@ -16,6 +16,7 @@
 package org.tobi29.scapes.block
 
 import org.tobi29.scapes.engine.utils.ConcurrentHashMap
+import org.tobi29.scapes.engine.utils.assert
 import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.engine.utils.tag.*
 
@@ -74,7 +75,7 @@ open class Registries(private val idStorage: MutableTagMap) {
                 throw IllegalStateException("Initializing already ended")
             }
             val i = idSupplier(idStorage.mapMut(module).mapMut(type), name, id)
-            assert(id == null || id == i)
+            assert { id == null || id == i }
             val element = block(i)
             objectsByStr.put(name, element)
             ids.put(element, i)

@@ -19,6 +19,7 @@ package org.tobi29.scapes.entity.server
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.UUID
+import org.tobi29.scapes.engine.utils.assert
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.tag.*
@@ -49,7 +50,7 @@ open class EntityAbstractServer(override val type: EntityType<*, *>,
     }
 
     override fun setPos(pos: Vector3d) {
-        assert(!world.hasEntity(this))
+        assert { !world.hasEntity(this) }
         synchronized(this.pos) {
             this.pos.set(pos)
         }

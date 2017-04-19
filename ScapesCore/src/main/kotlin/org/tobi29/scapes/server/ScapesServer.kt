@@ -22,8 +22,9 @@ import org.tobi29.scapes.connection.ServerInfo
 import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.server.SSLHandle
 import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.engine.utils.EventDispatcher
+import org.tobi29.scapes.engine.utils.IOException
+import org.tobi29.scapes.engine.utils.assert
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toInt
@@ -176,7 +177,7 @@ class ScapesServer(source: WorldSource,
         if (stopped) {
             return
         }
-        assert(shutdownReason != ShutdownReason.RUNNING)
+        assert { shutdownReason != ShutdownReason.RUNNING }
         stopped = true
         worlds.values.forEach { this.stopWorld(it) }
         connections.stop()

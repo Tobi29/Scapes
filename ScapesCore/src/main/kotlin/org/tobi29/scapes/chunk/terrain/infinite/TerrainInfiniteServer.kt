@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
-import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.Update
 import org.tobi29.scapes.chunk.MobSpawner
@@ -27,6 +26,8 @@ import org.tobi29.scapes.chunk.generator.GeneratorOutput
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
 import org.tobi29.scapes.engine.utils.IOException
+import org.tobi29.scapes.engine.utils.assert
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.*
@@ -270,7 +271,11 @@ class TerrainInfiniteServer(override val world: WorldServer,
     }
 
     override fun queue(blockChanges: (TerrainServer.TerrainMutable) -> Unit) {
-        assert(world.checkThread() || Thread.currentThread().let { it == loadJoiner.thread || it == updateJoiner.thread })
+        assert {
+            world.checkThread() || Thread.currentThread().let {
+                it == loadJoiner.thread || it == updateJoiner.thread
+            }
+        }
         this.blockChanges.add(blockChanges)
         updateJoiner.wake()
     }

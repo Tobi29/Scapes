@@ -24,6 +24,7 @@ import org.tobi29.scapes.engine.swt.util.framework.Document
 import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
+import org.tobi29.scapes.engine.utils.assert
 import org.tobi29.scapes.tools.controlpanel.extensions.*
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
 
@@ -52,7 +53,7 @@ class ControlPanelDocument(address: RemoteAddress,
     override fun populate(composite: DocumentComposite,
                           menu: SmartMenuBar,
                           application: MultiDocumentApplication) {
-        assert(extensions.isEmpty())
+        assert { extensions.isEmpty() }
         val connection = menu.menu("Connection")
         connection.action("", { application.closeTab(composite) },
                 Shortcut["Connection.Disconnect", 'D', Shortcut.Modifier.CONTROL])

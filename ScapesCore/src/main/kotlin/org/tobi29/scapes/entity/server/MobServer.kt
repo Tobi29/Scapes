@@ -20,6 +20,7 @@ import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.ThreadLocal
+import org.tobi29.scapes.engine.utils.assert
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
@@ -89,7 +90,7 @@ abstract class MobServer(type: EntityType<*, *>,
     }
 
     open fun setSpeed(speed: Vector3d) {
-        assert(world.checkThread() || !world.hasEntity(this))
+        assert { world.checkThread() || !world.hasEntity(this) }
         this.speed.set(speed)
         positionSender.sendSpeed(uuid, this.speed.now(), true)
     }
@@ -106,13 +107,13 @@ abstract class MobServer(type: EntityType<*, *>,
     open fun push(x: Double,
                   y: Double,
                   z: Double) {
-        assert(world.checkThread() || !world.hasEntity(this))
+        assert { world.checkThread() || !world.hasEntity(this) }
         speed.plusX(x).plusY(y).plusZ(z)
         positionSender.sendSpeed(uuid, speed.now(), true)
     }
 
     override fun setPos(pos: Vector3d) {
-        assert(world.checkThread() || !world.hasEntity(this))
+        assert { world.checkThread() || !world.hasEntity(this) }
         synchronized(this.pos) {
             this.pos.set(pos)
             positionSender.sendPos(uuid, this.pos.now(), true)

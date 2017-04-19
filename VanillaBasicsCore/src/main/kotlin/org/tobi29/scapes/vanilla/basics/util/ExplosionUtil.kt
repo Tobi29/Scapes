@@ -37,7 +37,7 @@ fun WorldServer.explosionEntities(x: Double,
                                   radius: Double,
                                   push: Double,
                                   damage: Double) {
-    assert(checkThread())
+    assert { checkThread() }
     getEntities(Vector3d(x, y, z),
             radius).filterMap<MobServer>().forEach { mob ->
         val relative = mob.getCurrentPos().minus(Vector3d(x, y, z))

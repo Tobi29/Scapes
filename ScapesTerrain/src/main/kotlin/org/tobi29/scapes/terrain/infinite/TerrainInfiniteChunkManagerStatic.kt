@@ -18,6 +18,7 @@ package org.tobi29.scapes.terrain.infinite
 
 import org.tobi29.scapes.engine.utils.AtomicInteger
 import org.tobi29.scapes.engine.utils.StampLock
+import org.tobi29.scapes.engine.utils.assert
 import org.tobi29.scapes.engine.utils.fill
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector2i
@@ -56,8 +57,8 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
                 val i = yy * size + xx
                 val chunk = array[i]
                 if (chunk != null) {
-                    assert(chunk.pos.x == x)
-                    assert(chunk.pos.y == y)
+                    assert { chunk.pos.x == x }
+                    assert { chunk.pos.y == y }
                     array[i] = null
                     @Suppress("UNCHECKED_CAST")
                     chunk as C
@@ -83,8 +84,8 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
             }
         }
         value?.let {
-            assert(value.pos.x == x)
-            assert(value.pos.y == y)
+            assert { value.pos.x == x }
+            assert { value.pos.y == y }
         }
         @Suppress("UNCHECKED_CAST")
         return value as C?

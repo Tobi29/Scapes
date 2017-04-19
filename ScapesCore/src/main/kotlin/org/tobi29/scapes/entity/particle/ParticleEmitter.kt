@@ -17,8 +17,9 @@
 package org.tobi29.scapes.entity.particle
 
 import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
+import org.tobi29.scapes.engine.utils.assert
+import org.tobi29.scapes.engine.utils.graphics.Cam
 
 abstract class ParticleEmitter<P : ParticleInstance> protected constructor(protected val system: ParticleSystem,
                                                                            protected val instances: Array<P>) {
@@ -50,7 +51,7 @@ abstract class ParticleEmitter<P : ParticleInstance> protected constructor(prote
     fun pollRender() {
         while (!activateQueue.isEmpty()) {
             val instance = activateQueue.poll()
-            assert(instance.state == ParticleInstance.State.NEW)
+            assert { instance.state == ParticleInstance.State.NEW }
             instance.state = ParticleInstance.State.ALIVE
             hasAlive = true
         }
