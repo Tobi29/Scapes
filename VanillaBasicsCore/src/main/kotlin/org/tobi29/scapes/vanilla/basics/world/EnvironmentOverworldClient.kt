@@ -57,7 +57,7 @@ class EnvironmentOverworldClient(override val type: EnvironmentType,
     }
 
     override fun tick(delta: Double) {
-        climateGenerator.add(0.0277777777778 * delta)
+        climateGenerator.add(0.000277777777778 * delta)
     }
 
     override fun sunLightReduction(x: Double,
