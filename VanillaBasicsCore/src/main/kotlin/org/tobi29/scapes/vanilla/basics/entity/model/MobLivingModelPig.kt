@@ -20,6 +20,7 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.graphics.Texture
+import org.tobi29.scapes.engine.graphics.push
 import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.*
@@ -96,37 +97,40 @@ class MobLivingModelPig(shared: MobLivingModelPigShared,
                 world.terrain.sunLight(pos.intX(), pos.intY(),
                         pos.intZ()) / 15.0f)
         texture.get().bind(gl)
-        val matrixStack = gl.matrixStack
-        var matrix = matrixStack.push()
-        matrix.translate(posRenderX, posRenderY, posRenderZ)
-        matrix.rotate(yaw - 90, 0f, 0f, 1f)
-        body.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
-        matrix = matrixStack.push()
-        matrix.translate(0f, 0.3125f, 0.0625f)
-        matrix.rotate(pitch, 1f, 0f, 0f)
-        head.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
-        matrixStack.pop()
-        matrix = matrixStack.push()
-        matrix.translate(-0.125f, 0.1875f, -0.3125f)
-        matrix.rotate(swingDir.toFloat() * 30, 1f, 0f, 0f)
-        legFrontLeft.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
-        matrixStack.pop()
-        matrix = matrixStack.push()
-        matrix.translate(0.125f, 0.1875f, -0.3125f)
-        matrix.rotate((-swingDir).toFloat() * 30, 1f, 0f, 0f)
-        legFrontRight.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
-        matrixStack.pop()
-        matrix = matrixStack.push()
-        matrix.translate(-0.125f, -0.1875f, -0.3125f)
-        matrix.rotate((-swingDir).toFloat() * 30, 1f, 0f, 0f)
-        legBackLeft.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
-        matrixStack.pop()
-        matrix = matrixStack.push()
-        matrix.translate(0.125f, -0.1875f, -0.3125f)
-        matrix.rotate(swingDir.toFloat() * 30, 1f, 0f, 0f)
-        legBackRight.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
-        matrixStack.pop()
-        matrixStack.pop()
+        gl.matrixStack.push { matrix ->
+            matrix.translate(posRenderX, posRenderY, posRenderZ)
+            matrix.rotate(yaw - 90, 0f, 0f, 1f)
+            body.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
+            gl.matrixStack.push { matrix ->
+                matrix.translate(0f, 0.3125f, 0.0625f)
+                matrix.rotate(pitch, 1f, 0f, 0f)
+                head.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
+            }
+            gl.matrixStack.push { matrix ->
+                matrix.translate(-0.125f, 0.1875f, -0.3125f)
+                matrix.rotate(swingDir.toFloat() * 30, 1f, 0f, 0f)
+                legFrontLeft.render(1.0f, damageColor, damageColor, 1.0f, gl,
+                        shader)
+            }
+            gl.matrixStack.push { matrix ->
+                matrix.translate(0.125f, 0.1875f, -0.3125f)
+                matrix.rotate((-swingDir).toFloat() * 30, 1f, 0f, 0f)
+                legFrontRight.render(1.0f, damageColor, damageColor, 1.0f, gl,
+                        shader)
+            }
+            gl.matrixStack.push { matrix ->
+                matrix.translate(-0.125f, -0.1875f, -0.3125f)
+                matrix.rotate((-swingDir).toFloat() * 30, 1f, 0f, 0f)
+                legBackLeft.render(1.0f, damageColor, damageColor, 1.0f, gl,
+                        shader)
+            }
+            gl.matrixStack.push { matrix ->
+                matrix.translate(0.125f, -0.1875f, -0.3125f)
+                matrix.rotate(swingDir.toFloat() * 30, 1f, 0f, 0f)
+                legBackRight.render(1.0f, damageColor, damageColor, 1.0f, gl,
+                        shader)
+            }
+        }
     }
 
     override fun pitch(): Double {

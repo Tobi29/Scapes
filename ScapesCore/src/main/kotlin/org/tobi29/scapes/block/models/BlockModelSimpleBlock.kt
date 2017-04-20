@@ -21,10 +21,7 @@ import org.tobi29.scapes.block.TerrainTexture
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.TerrainClient
-import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.graphics.Mesh
-import org.tobi29.scapes.engine.graphics.Model
-import org.tobi29.scapes.engine.graphics.Shader
+import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.utils.graphics.marginX
 import org.tobi29.scapes.engine.utils.graphics.marginY
 import org.tobi29.scapes.engine.utils.math.Face
@@ -75,13 +72,12 @@ class BlockModelSimpleBlock(private val block: BlockType,
     override fun renderInventory(gl: GL,
                                  shader: Shader) {
         registry.texture.bind(gl)
-        val matrixStack = gl.matrixStack
-        val matrix = matrixStack.push()
-        matrix.translate(0.5f, 0.5f, 0.5f)
-        matrix.rotate(57.5f, 1.0f, 0.0f, 0.0f)
-        matrix.rotate(45.0f, 0.0f, 0.0f, 1.0f)
-        modelInventory.render(gl, shader)
-        matrixStack.pop()
+        gl.matrixStack.push { matrix ->
+            matrix.translate(0.5f, 0.5f, 0.5f)
+            matrix.rotate(57.5f, 1.0f, 0.0f, 0.0f)
+            matrix.rotate(45.0f, 0.0f, 0.0f, 1.0f)
+            modelInventory.render(gl, shader)
+        }
     }
 
     private fun addToChunkMesh(mesh: ChunkMesh,

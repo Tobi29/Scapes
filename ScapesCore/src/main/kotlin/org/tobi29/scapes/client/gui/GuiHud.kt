@@ -44,15 +44,14 @@ class GuiHud(state: GameState,
                         delta: Double) {
         super.render(gl, shader, size, pixelSize, delta)
         if (visible) {
-            val matrixStack = gl.matrixStack
-            val matrix = matrixStack.push()
-            matrix.translate((size.x * 0.5).toFloat(), (size.y * 0.5).toFloat(),
-                    0.0f)
-            textureCross.get().bind(gl)
-            gl.setBlending(BlendingMode.INVERT)
-            cross.render(gl, shader)
-            gl.setBlending(BlendingMode.NORMAL)
-            matrixStack.pop()
+            gl.matrixStack.push { matrix ->
+                matrix.translate((size.x * 0.5).toFloat(),
+                        (size.y * 0.5).toFloat(), 0.0f)
+                textureCross.get().bind(gl)
+                gl.setBlending(BlendingMode.INVERT)
+                cross.render(gl, shader)
+                gl.setBlending(BlendingMode.NORMAL)
+            }
         }
     }
 

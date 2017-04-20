@@ -17,10 +17,7 @@
 package org.tobi29.scapes.block.models
 
 import org.tobi29.scapes.block.TerrainTexture
-import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.graphics.Mesh
-import org.tobi29.scapes.engine.graphics.Model
-import org.tobi29.scapes.engine.graphics.Shader
+import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.utils.graphics.marginX
 import org.tobi29.scapes.engine.utils.graphics.marginY
 import org.tobi29.scapes.engine.utils.math.max
@@ -143,11 +140,10 @@ class ItemModelSimple(private val texture: TerrainTexture?,
             return
         }
         texture.texture().bind(gl)
-        val matrixStack = gl.matrixStack
-        val matrix = matrixStack.push()
-        matrix.rotate(315.0f, 0.0f, 1.0f, 0.0f)
-        model.render(gl, shader)
-        matrixStack.pop()
+        gl.matrixStack.push { matrix ->
+            matrix.rotate(315.0f, 0.0f, 1.0f, 0.0f)
+            model.render(gl, shader)
+        }
     }
 
     override fun renderInventory(gl: GL,

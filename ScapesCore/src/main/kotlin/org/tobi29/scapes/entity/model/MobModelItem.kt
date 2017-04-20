@@ -20,6 +20,7 @@ import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
+import org.tobi29.scapes.engine.graphics.push
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.min
@@ -77,12 +78,11 @@ class MobModelItem(private val entity: MobClient,
                 pos.intZ()) / 15.0f,
                 world.terrain.sunLight(pos.intX(), pos.intY(),
                         pos.intZ()) / 15.0f)
-        val matrixStack = gl.matrixStack
-        val matrix = matrixStack.push()
-        matrix.translate(posRenderX, posRenderY, posRenderZ)
-        matrix.scale(0.4f, 0.4f, 0.4f)
-        matrix.rotate(dir, 0.0f, 0.0f, 1.0f)
-        item.material().render(item, gl, shader)
-        matrixStack.pop()
+        gl.matrixStack.push { matrix ->
+            matrix.translate(posRenderX, posRenderY, posRenderZ)
+            matrix.scale(0.4f, 0.4f, 0.4f)
+            matrix.rotate(dir, 0.0f, 0.0f, 1.0f)
+            item.material().render(item, gl, shader)
+        }
     }
 }

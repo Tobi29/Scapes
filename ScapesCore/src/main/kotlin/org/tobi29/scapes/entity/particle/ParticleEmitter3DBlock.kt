@@ -18,6 +18,7 @@ package org.tobi29.scapes.entity.particle
 
 import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.engine.graphics.GL
+import org.tobi29.scapes.engine.graphics.push
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.times
@@ -89,16 +90,15 @@ class ParticleEmitter3DBlock(system: ParticleSystem) : ParticleEmitter<ParticleI
                     val posRenderX = (instance.pos.doubleX() - cam.position.doubleX()).toFloat()
                     val posRenderY = (instance.pos.doubleY() - cam.position.doubleY()).toFloat()
                     val posRenderZ = (instance.pos.doubleZ() - cam.position.doubleZ()).toFloat()
-                    val matrixStack = gl.matrixStack
-                    val matrix = matrixStack.push()
-                    matrix.translate(posRenderX, posRenderY, posRenderZ)
-                    matrix.rotate(instance.rotation.floatZ(), 0f, 0f, 1f)
-                    matrix.rotate(instance.rotation.floatX(), 1f, 0f, 0f)
-                    gl.setAttribute2f(4,
-                            terrain.blockLight(x, y, z) / 15.0f,
-                            terrain.sunLight(x, y, z) / 15.0f)
-                    instance.item.material().render(instance.item, gl, s)
-                    matrixStack.pop()
+                    gl.matrixStack.push { matrix ->
+                        matrix.translate(posRenderX, posRenderY, posRenderZ)
+                        matrix.rotate(instance.rotation.floatZ(), 0f, 0f, 1f)
+                        matrix.rotate(instance.rotation.floatX(), 1f, 0f, 0f)
+                        gl.setAttribute2f(4,
+                                terrain.blockLight(x, y, z) / 15.0f,
+                                terrain.sunLight(x, y, z) / 15.0f)
+                        instance.item.material().render(instance.item, gl, s)
+                    }
                 }
             }
         }

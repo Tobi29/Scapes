@@ -20,6 +20,7 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Model
 import org.tobi29.scapes.engine.graphics.Shader
+import org.tobi29.scapes.engine.graphics.push
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.*
@@ -86,25 +87,25 @@ class EntityModelBlockBreak(shared: EntityModelBlockBreakShared,
                         pos.intZ()) / 15.0f)
         texture[i - 1].get().bind(gl)
         for (pane in pointerPanes) {
-            val matrixStack = gl.matrixStack
-            val matrix = matrixStack.push()
-            matrix.translate(
-                    (posRenderX - 0.5 + (pane.aabb.minX + pane.aabb.maxX) / 2).toFloat(),
-                    (posRenderY - 0.5 + (pane.aabb.minY + pane.aabb.maxY) / 2).toFloat(),
-                    (posRenderZ - 0.5 + (pane.aabb.minZ + pane.aabb.maxZ) / 2).toFloat())
-            matrix.scale((pane.aabb.maxX - pane.aabb.minX).toFloat() + 0.01f,
-                    (pane.aabb.maxY - pane.aabb.minY).toFloat() + 0.01f,
-                    (pane.aabb.maxZ - pane.aabb.minZ).toFloat() + 0.01f)
-            when (pane.face) {
-                Face.DOWN -> matrix.rotate(180f, 1f, 0f, 0f)
-                Face.NORTH -> matrix.rotate(90f, 1f, 0f, 0f)
-                Face.EAST -> matrix.rotate(90f, 0f, 1f, 0f)
-                Face.SOUTH -> matrix.rotate(270f, 1f, 0f, 0f)
-                Face.WEST -> matrix.rotate(270f, 0f, 1f, 0f)
+            gl.matrixStack.push { matrix ->
+                matrix.translate(
+                        (posRenderX - 0.5 + (pane.aabb.minX + pane.aabb.maxX) / 2).toFloat(),
+                        (posRenderY - 0.5 + (pane.aabb.minY + pane.aabb.maxY) / 2).toFloat(),
+                        (posRenderZ - 0.5 + (pane.aabb.minZ + pane.aabb.maxZ) / 2).toFloat())
+                matrix.scale(
+                        (pane.aabb.maxX - pane.aabb.minX).toFloat() + 0.01f,
+                        (pane.aabb.maxY - pane.aabb.minY).toFloat() + 0.01f,
+                        (pane.aabb.maxZ - pane.aabb.minZ).toFloat() + 0.01f)
+                when (pane.face) {
+                    Face.DOWN -> matrix.rotate(180f, 1f, 0f, 0f)
+                    Face.NORTH -> matrix.rotate(90f, 1f, 0f, 0f)
+                    Face.EAST -> matrix.rotate(90f, 0f, 1f, 0f)
+                    Face.SOUTH -> matrix.rotate(270f, 1f, 0f, 0f)
+                    Face.WEST -> matrix.rotate(270f, 0f, 1f, 0f)
+                }
+                gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 0.3f, 0.3f, 0.3f, 0.4f)
+                model.render(gl, shader)
             }
-            gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 0.3f, 0.3f, 0.3f, 0.4f)
-            model.render(gl, shader)
-            matrixStack.pop()
         }
     }
 }

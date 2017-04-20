@@ -58,16 +58,15 @@ class GuiComponentBar(parent: GuiLayoutData,
             value += (clamp(newValue, 0.0, 1.0) - value) * factor
         }
         gl.textures.unbind(gl)
-        val matrixStack = gl.matrixStack
-        var matrix = matrixStack.push()
-        matrix.scale(value.toFloat(), 1.0f, 1.0f)
-        model1?.render(gl, shader)
-        matrixStack.pop()
-        matrix = matrixStack.push()
-        matrix.translate((value * size.x).toFloat(), 0.0f, 0.0f)
-        matrix.scale((1.0 - value).toFloat(), 1.0f, 1.0f)
-        model2?.render(gl, shader)
-        matrixStack.pop()
+        gl.matrixStack.push { matrix ->
+            matrix.scale(value.toFloat(), 1.0f, 1.0f)
+            model1?.render(gl, shader)
+        }
+        gl.matrixStack.push { matrix ->
+            matrix.translate((value * size.x).toFloat(), 0.0f, 0.0f)
+            matrix.scale((1.0 - value).toFloat(), 1.0f, 1.0f)
+            model2?.render(gl, shader)
+        }
     }
 
     override fun updateMesh(renderer: GuiRenderer,

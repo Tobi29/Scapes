@@ -20,6 +20,7 @@ import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.engine.graphics.FontRenderer
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
+import org.tobi29.scapes.engine.graphics.push
 import org.tobi29.scapes.engine.gui.GuiRenderBatch
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 
@@ -55,12 +56,11 @@ object GuiUtils {
             return
         }
         if (item.amount() > 0) {
-            val matrixStack = gl.matrixStack
-            var matrix = matrixStack.push()
-            matrix.translate(x + width / 4.0f, y + height / 4.0f, 4f)
-            matrix.scale(width / 2.0f, height / 2.0f, 4f)
-            item.material().renderInventory(item, gl, shader)
-            matrixStack.pop()
+            gl.matrixStack.push { matrix ->
+                matrix.translate(x + width / 4.0f, y + height / 4.0f, 4f)
+                matrix.scale(width / 2.0f, height / 2.0f, 4f)
+                item.material().renderInventory(item, gl, shader)
+            }
             if (number) {
                 val batch = GuiRenderBatch(pixelSize)
                 font.render(
@@ -68,13 +68,13 @@ object GuiUtils {
                                 1.0f),
                         item.amount().toString(), 16.0f)
                 val text = batch.finish()
-                matrix = matrixStack.push()
-                matrix.translate(x, y + height, 0.0f)
-                text.forEach {
-                    it.second.bind(gl)
-                    it.first.render(gl, shader)
+                gl.matrixStack.push { matrix ->
+                    matrix.translate(x, y + height, 0.0f)
+                    text.forEach {
+                        it.second.bind(gl)
+                        it.first.render(gl, shader)
+                    }
                 }
-                matrixStack.pop()
             }
         }
     }

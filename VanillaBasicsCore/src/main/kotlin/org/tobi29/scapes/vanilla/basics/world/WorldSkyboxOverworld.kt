@@ -388,34 +388,34 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                         1.0f - skyLight - random.nextFloat() * 0.3f, 0.0f)
                 sGlow.setUniform4f(gl, 4, brightness, brightness, brightness,
                         1.0f)
-                val matrix = matrixStack.push()
-                matrix.rotateAccurate(sunAzimuth + 180.0, 0.0f, 0.0f, 1.0f)
-                matrix.rotateAccurate(-sunElevation, 1.0f, 0.0f, 0.0f)
-                starMesh.render(gl, sGlow)
-                matrixStack.pop()
+                gl.matrixStack.push { matrix ->
+                    matrix.rotateAccurate(sunAzimuth + 180.0, 0.0f, 0.0f, 1.0f)
+                    matrix.rotateAccurate(-sunElevation, 1.0f, 0.0f, 0.0f)
+                    starMesh.render(gl, sGlow)
+                }
             }
             // Sun
-            var matrix = matrixStack.push()
-            matrix.rotateAccurate(sunAzimuth + 180.0, 0.0f, 0.0f, 1.0f)
-            matrix.rotateAccurate(-sunElevation, 1.0f, 0.0f, 0.0f)
-            matrix.scale(1.0f, 1.0f, 1.0f)
-            sGlow.setUniform4f(gl, 4, fogR * 1.0f, fogG * 1.1f, fogB * 1.1f,
-                    1.0f)
-            billboardMesh.render(gl, sGlow)
-            matrix.scale(0.2f, 1.0f, 0.2f)
-            sGlow.setUniform4f(gl, 4, fogR * 1.6f, fogG * 1.6f, fogB * 1.3f,
-                    1.0f)
-            billboardMesh.render(gl, sGlow)
-            matrixStack.pop()
+            gl.matrixStack.push { matrix ->
+                matrix.rotateAccurate(sunAzimuth + 180.0, 0.0f, 0.0f, 1.0f)
+                matrix.rotateAccurate(-sunElevation, 1.0f, 0.0f, 0.0f)
+                matrix.scale(1.0f, 1.0f, 1.0f)
+                sGlow.setUniform4f(gl, 4, fogR * 1.0f, fogG * 1.1f, fogB * 1.1f,
+                        1.0f)
+                billboardMesh.render(gl, sGlow)
+                matrix.scale(0.2f, 1.0f, 0.2f)
+                sGlow.setUniform4f(gl, 4, fogR * 1.6f, fogG * 1.6f, fogB * 1.3f,
+                        1.0f)
+                billboardMesh.render(gl, sGlow)
+            }
             // Moon
             textureMoon.get().bind(gl)
-            matrix = matrixStack.push()
-            matrix.rotateAccurate(sunAzimuth, 0.0f, 0.0f, 1.0f)
-            matrix.rotateAccurate(sunElevation, 1.0f, 0.0f, 0.0f)
-            matrix.scale(0.1f, 1.0f, 0.1f)
-            val sTextured = shaderTextured.get()
-            billboardMesh.render(gl, sTextured)
-            matrixStack.pop()
+            gl.matrixStack.push { matrix ->
+                matrix.rotateAccurate(sunAzimuth, 0.0f, 0.0f, 1.0f)
+                matrix.rotateAccurate(sunElevation, 1.0f, 0.0f, 0.0f)
+                matrix.scale(0.1f, 1.0f, 0.1f)
+                val sTextured = shaderTextured.get()
+                billboardMesh.render(gl, sTextured)
+            }
             gl.setBlending(BlendingMode.NORMAL)
             // Clouds
             fbo.texturesColor[0].bind(gl)

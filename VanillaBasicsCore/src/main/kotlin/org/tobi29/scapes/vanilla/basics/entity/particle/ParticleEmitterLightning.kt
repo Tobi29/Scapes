@@ -17,10 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.entity.particle
 
 import org.tobi29.scapes.chunk.terrain.block
-import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.graphics.Model
-import org.tobi29.scapes.engine.graphics.RenderType
-import org.tobi29.scapes.engine.graphics.createVNI
+import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.TWO_PI
 import org.tobi29.scapes.engine.utils.math.cos
@@ -196,11 +193,10 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
                     val posRenderX = (instance.pos.doubleX() - cam.position.doubleX()).toFloat()
                     val posRenderY = (instance.pos.doubleY() - cam.position.doubleY()).toFloat()
                     val posRenderZ = (instance.pos.doubleZ() - cam.position.doubleZ()).toFloat()
-                    val matrixStack = gl.matrixStack
-                    val matrix = matrixStack.push()
-                    matrix.translate(posRenderX, posRenderY, posRenderZ)
-                    models[instance.vao].render(gl, s)
-                    matrixStack.pop()
+                    gl.matrixStack.push { matrix ->
+                        matrix.translate(posRenderX, posRenderY, posRenderZ)
+                        models[instance.vao].render(gl, s)
+                    }
                 }
             }
         }

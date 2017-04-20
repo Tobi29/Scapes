@@ -18,6 +18,7 @@ package org.tobi29.scapes.entity.particle
 
 import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.engine.graphics.GL
+import org.tobi29.scapes.engine.graphics.push
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.times
@@ -90,16 +91,15 @@ class ParticleEmitterFallenBodyPart(system: ParticleSystem) : ParticleEmitter<Pa
                     val posRenderY = (instance.pos.doubleY() - cam.position.doubleY()).toFloat()
                     val posRenderZ = (instance.pos.doubleZ() - cam.position.doubleZ()).toFloat()
                     instance.texture.bind(gl)
-                    val matrixStack = gl.matrixStack
-                    val matrix = matrixStack.push()
-                    matrix.translate(posRenderX, posRenderY, posRenderZ)
-                    matrix.rotate(instance.rotation.floatZ(), 0f, 0f, 1f)
-                    matrix.rotate(instance.rotation.floatX(), 1f, 0f, 0f)
-                    gl.setAttribute2f(4,
-                            world.terrain.blockLight(x, y, z) / 15.0f,
-                            world.terrain.sunLight(x, y, z) / 15.0f)
-                    instance.box.render(1.0f, 1.0f, 1.0f, 1.0f, gl, s)
-                    matrixStack.pop()
+                    gl.matrixStack.push { matrix ->
+                        matrix.translate(posRenderX, posRenderY, posRenderZ)
+                        matrix.rotate(instance.rotation.floatZ(), 0f, 0f, 1f)
+                        matrix.rotate(instance.rotation.floatX(), 1f, 0f, 0f)
+                        gl.setAttribute2f(4,
+                                world.terrain.blockLight(x, y, z) / 15.0f,
+                                world.terrain.sunLight(x, y, z) / 15.0f)
+                        instance.box.render(1.0f, 1.0f, 1.0f, 1.0f, gl, s)
+                    }
                 }
             }
         }

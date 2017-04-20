@@ -19,6 +19,7 @@ package org.tobi29.scapes.vanilla.basics.entity.model
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
+import org.tobi29.scapes.engine.graphics.push
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.Face
@@ -85,37 +86,36 @@ class EntityModelBellows(shared: EntityModelBellowsShared,
                         pos.intZ()) / 15.0f,
                 world.terrain.sunLight(pos.intX(), pos.intY(),
                         pos.intZ()) / 15.0f)
-        val matrixStack = gl.matrixStack
-        var matrix = matrixStack.push()
-        matrix.translate(posRenderX, posRenderY, posRenderZ)
-        matrix = matrixStack.push()
-        matrix.scale(1.0f, 1.0f, scale.toFloat())
-        textureMiddle.get().bind(gl)
-        middle.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader)
-        matrixStack.pop()
-        matrix = matrixStack.push()
-        textureSide.get().bind(gl)
-        matrix.translate(0.0f, 0.0f, scale.toFloat() * 0.5f)
-        side.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader)
-        matrixStack.pop()
-        matrix = matrixStack.push()
-        matrix.translate(0.0f, 0.0f, -scale.toFloat() * 0.5f)
-        side.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader)
-        matrixStack.pop()
-        side.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader)
-        matrix = matrixStack.push()
-        when (entity.face) {
-            Face.DOWN -> matrix.rotate(180f, 1f, 0f, 0f)
-            Face.NORTH -> matrix.rotate(90f, 1f, 0f, 0f)
-            Face.EAST -> matrix.rotate(90f, 0f, 1f, 0f)
-            Face.SOUTH -> matrix.rotate(270f, 1f, 0f, 0f)
-            Face.WEST -> matrix.rotate(270f, 0f, 1f, 0f)
-            Face.UP, Face.NONE -> {
+        gl.matrixStack.push { matrix ->
+            matrix.translate(posRenderX, posRenderY, posRenderZ)
+            gl.matrixStack.push { matrix ->
+                matrix.scale(1.0f, 1.0f, scale.toFloat())
+                textureMiddle.get().bind(gl)
+                middle.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader)
+            }
+            gl.matrixStack.push { matrix ->
+                textureSide.get().bind(gl)
+                matrix.translate(0.0f, 0.0f, scale.toFloat() * 0.5f)
+                side.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader)
+            }
+            gl.matrixStack.push { matrix ->
+                matrix.translate(0.0f, 0.0f, -scale.toFloat() * 0.5f)
+                side.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader)
+            }
+            side.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader)
+            gl.matrixStack.push { matrix ->
+                when (entity.face) {
+                    Face.DOWN -> matrix.rotate(180f, 1f, 0f, 0f)
+                    Face.NORTH -> matrix.rotate(90f, 1f, 0f, 0f)
+                    Face.EAST -> matrix.rotate(90f, 0f, 1f, 0f)
+                    Face.SOUTH -> matrix.rotate(270f, 1f, 0f, 0f)
+                    Face.WEST -> matrix.rotate(270f, 0f, 1f, 0f)
+                    Face.UP, Face.NONE -> {
+                    }
+                }
+                texturePipe.get().bind(gl)
+                pipe.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader)
             }
         }
-        texturePipe.get().bind(gl)
-        pipe.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader)
-        matrixStack.pop()
-        matrixStack.pop()
     }
 }

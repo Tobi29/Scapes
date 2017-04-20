@@ -21,6 +21,7 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.graphics.Texture
+import org.tobi29.scapes.engine.graphics.push
 import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.*
@@ -203,181 +204,186 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                 world.terrain.sunLight(pos.intX(), pos.intY(),
                         pos.intZ()) / 15.0f)
         texture.get().bind(gl)
-        val matrixStack = gl.matrixStack
-        var matrix = matrixStack.push()
-        matrix.translate(posRenderX, posRenderY, posRenderZ)
-        matrix.rotate(yaw - 90.0, 0.0f, 0.0f, 1.0f)
-        body.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
-        matrix = matrixStack.push()
-        matrix.translate(0f, 0f, 0.375f)
-        matrix.rotate(pitch, 1f, 0f, 0f)
-        head.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
-        matrixStack.pop()
-        matrix = matrixStack.push()
-        matrix.translate(-0.125f, 0f, -0.5f)
-        matrix.rotate((swingDir * 30.0).toFloat(), 1f, 0f, 0f)
-        legLeft.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
-        matrixStack.pop()
-        matrix = matrixStack.push()
-        matrix.translate(0.125f, 0f, -0.5f)
-        matrix.rotate((-swingDir * 30.0).toFloat(), 1f, 0f, 0f)
-        legRight.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
-        matrixStack.pop()
-        val wieldMode = entity.wieldMode()
-        matrix = matrixStack.push()
-        matrix.translate(-0.25f, 0f, 0.25f)
-        var rot: Double
-        var charge: Double
-        var charge2: Double
-        var item: ItemStack
-        if (wieldMode == WieldMode.RIGHT) {
-            item = entity.rightWeapon()
-            charge = armDirRightRender
-            charge2 = armDirRight2 * 0.4
-        } else {
-            item = entity.leftWeapon()
-            charge = armDirLeftRender
-            charge2 = armDirLeft2
-        }
-        if (item.material() == world.air) {
-            matrix.rotate((lazyNameDir * 60.0).toFloat(), 0f, 1f, 0f)
-            matrix.rotate((-swingDir * 60.0).toFloat(), 1f, 0f, 0f)
-            rot = sinTable(charge * PI)
-            matrix.rotate((charge2 * -20.0).toFloat(), 0f, 0f, 1f)
-            matrix.rotate(
-                    (rot * 50.0 + charge2 * 90.0 + pitch * charge2).toFloat(),
-                    1f,
-                    0f, 0f)
-        } else {
-            if (wieldMode == WieldMode.DUAL) {
-                matrix.rotate(lazyNameDir.toFloat() * 60, 0f, 1f, 0f)
-                matrix.rotate((-swingDir).toFloat() * 30, 1f, 0f, 0f)
-            } else {
-                matrix.rotate(swingDir.toFloat() * 10, 1f, 0f, 0f)
+        gl.matrixStack.push { matrix ->
+            matrix.translate(posRenderX, posRenderY, posRenderZ)
+            matrix.rotate(yaw - 90.0, 0.0f, 0.0f, 1.0f)
+            body.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
+            gl.matrixStack.push { matrix ->
+                matrix.translate(0f, 0f, 0.375f)
+                matrix.rotate(pitch, 1f, 0f, 0f)
+                head.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
             }
-            if (item.material().isWeapon(item)) {
-                rot = sinTable(-charge * PI)
-                if (rot < 0 && charge > 0.0) {
-                    rot /= 4.0
-                }
+            gl.matrixStack.push { matrix ->
+                matrix.translate(-0.125f, 0f, -0.5f)
+                matrix.rotate((swingDir * 30.0).toFloat(), 1f, 0f, 0f)
+                legLeft.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
+            }
+            gl.matrixStack.push { matrix ->
+                matrix.translate(0.125f, 0f, -0.5f)
+                matrix.rotate((-swingDir * 30.0).toFloat(), 1f, 0f, 0f)
+                legRight.render(1.0f, damageColor, damageColor, 1.0f, gl,
+                        shader)
+            }
+            val wieldMode = entity.wieldMode()
+            gl.matrixStack.push { matrix ->
+                matrix.translate(-0.25f, 0f, 0.25f)
+                var rot: Double
+                val charge: Double
+                val charge2: Double
+                val item: ItemStack
                 if (wieldMode == WieldMode.RIGHT) {
-                    rot = -rot
+                    item = entity.rightWeapon()
+                    charge = armDirRightRender
+                    charge2 = armDirRight2 * 0.4
+                } else {
+                    item = entity.leftWeapon()
+                    charge = armDirLeftRender
+                    charge2 = armDirLeft2
                 }
-                matrix.rotate((rot * -60.0).toFloat(), 0.0f, 0.0f, 1.0f)
-                matrix.rotate((rot * -60.0).toFloat(), 0.0f, 1.0f, 0.0f)
-                matrix.rotate((rot * 10.0 + 40.0 + charge2 * 45.0 +
-                        pitch * charge2).toFloat(), 1.0f, 0.0f, 0.0f)
-            } else {
-                rot = sinTable(charge * PI)
-                matrix.rotate((charge2 * -20.0).toFloat(), 0f, 0f, 1f)
-                matrix.rotate((rot * 50 + 40.0 + charge2 * 45 +
-                        pitch * charge2).toFloat(), 1f, 0f, 0f)
-                if (charge > -1.5f && charge < -0.5f) {
-                    val center = cosTable(charge * PI).toFloat()
-                    matrix.rotate(center * 30.0f, 0.0f, 1.0f, 0.0f)
+                if (item.material() == world.air) {
+                    matrix.rotate((lazyNameDir * 60.0).toFloat(), 0f, 1f, 0f)
+                    matrix.rotate((-swingDir * 60.0).toFloat(), 1f, 0f, 0f)
+                    rot = sinTable(charge * PI)
+                    matrix.rotate((charge2 * -20.0).toFloat(), 0f, 0f, 1f)
+                    matrix.rotate(
+                            (rot * 50.0 + charge2 * 90.0 + pitch * charge2).toFloat(),
+                            1f,
+                            0f, 0f)
+                } else {
+                    if (wieldMode == WieldMode.DUAL) {
+                        matrix.rotate(lazyNameDir.toFloat() * 60, 0f, 1f, 0f)
+                        matrix.rotate((-swingDir).toFloat() * 30, 1f, 0f, 0f)
+                    } else {
+                        matrix.rotate(swingDir.toFloat() * 10, 1f, 0f, 0f)
+                    }
+                    if (item.material().isWeapon(item)) {
+                        rot = sinTable(-charge * PI)
+                        if (rot < 0 && charge > 0.0) {
+                            rot /= 4.0
+                        }
+                        if (wieldMode == WieldMode.RIGHT) {
+                            rot = -rot
+                        }
+                        matrix.rotate((rot * -60.0).toFloat(), 0.0f, 0.0f, 1.0f)
+                        matrix.rotate((rot * -60.0).toFloat(), 0.0f, 1.0f, 0.0f)
+                        matrix.rotate((rot * 10.0 + 40.0 + charge2 * 45.0 +
+                                pitch * charge2).toFloat(), 1.0f, 0.0f, 0.0f)
+                    } else {
+                        rot = sinTable(charge * PI)
+                        matrix.rotate((charge2 * -20.0).toFloat(), 0f, 0f, 1f)
+                        matrix.rotate((rot * 50 + 40.0 + charge2 * 45 +
+                                pitch * charge2).toFloat(), 1f, 0f, 0f)
+                        if (charge > -1.5f && charge < -0.5f) {
+                            val center = cosTable(charge * PI).toFloat()
+                            matrix.rotate(center * 30.0f, 0.0f, 1.0f, 0.0f)
+                        }
+                    }
+                    if (wieldMode == WieldMode.LEFT) {
+                        matrix.rotate(-20.0f, 0f, 1f, 0f)
+                    } else if (wieldMode == WieldMode.RIGHT) {
+                        matrix.rotate(-50.0f, 0f, 1f, 0f)
+                        matrix.rotate(-2.0f, 1f, 0f, 0f)
+                    }
+                }
+                rot = min(rot * 2, 1.0)
+                armLeft.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
+                if (wieldMode !== WieldMode.RIGHT) {
+                    matrix.translate(-0.3f, 0.4f, -0.4f)
+                    if (item.material().isWeapon(item)) {
+                        matrix.translate(0.0f, -0.6f, -0.05f)
+                        matrix.rotate((rot * -60.0).toFloat(), 1.0f, 0.0f, 0.0f)
+                        matrix.rotate((rot * -50.0).toFloat(), 0.0f, 1.0f, 0.0f)
+                        matrix.translate(0.0f, 0.6f, 0.0f)
+                    } else if (!item.material().isTool(item)) {
+                        matrix.translate(0.31f, -0.3f, -0.2f)
+                        matrix.scale(0.3f, 0.3f, 0.3f)
+                    }
+                    matrix.rotate(120.0f, 0.0f, 0.0f, 1.0f)
+                    matrix.rotate(60.0f, 0.0f, 1.0f, 0.0f)
+                    item.material().render(item, gl, shader)
                 }
             }
-            if (wieldMode == WieldMode.LEFT) {
-                matrix.rotate(-20.0f, 0f, 1f, 0f)
-            } else if (wieldMode == WieldMode.RIGHT) {
-                matrix.rotate(-50.0f, 0f, 1f, 0f)
-                matrix.rotate(-2.0f, 1f, 0f, 0f)
-            }
-        }
-        rot = min(rot * 2, 1.0)
-        armLeft.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
-        if (wieldMode !== WieldMode.RIGHT) {
-            matrix.translate(-0.3f, 0.4f, -0.4f)
-            if (item.material().isWeapon(item)) {
-                matrix.translate(0.0f, -0.6f, -0.05f)
-                matrix.rotate((rot * -60.0).toFloat(), 1.0f, 0.0f, 0.0f)
-                matrix.rotate((rot * -50.0).toFloat(), 0.0f, 1.0f, 0.0f)
-                matrix.translate(0.0f, 0.6f, 0.0f)
-            } else if (!item.material().isTool(item)) {
-                matrix.translate(0.31f, -0.3f, -0.2f)
-                matrix.scale(0.3f, 0.3f, 0.3f)
-            }
-            matrix.rotate(120.0f, 0.0f, 0.0f, 1.0f)
-            matrix.rotate(60.0f, 0.0f, 1.0f, 0.0f)
-            item.material().render(item, gl, shader)
-        }
-        matrixStack.pop()
-        matrix = matrixStack.push()
-        matrix.translate(0.25f, 0f, 0.25f)
-        if (wieldMode == WieldMode.LEFT) {
-            item = entity.leftWeapon()
-            charge = armDirLeftRender
-            charge2 = armDirLeft2 * 0.4
-        } else {
-            item = entity.rightWeapon()
-            charge = armDirRightRender
-            charge2 = armDirRight2
-        }
-        if (item.material() == world.air) {
-            matrix.rotate((lazyNameDir * -60.0).toFloat(), 0f, 1f, 0f)
-            matrix.rotate((swingDir * 60.0).toFloat(), 1f, 0f, 0f)
-            rot = sinTable(charge * PI)
-            matrix.rotate((charge2 * -20.0).toFloat(), 0f, 0f, 1f)
-            matrix.rotate(
-                    (rot * 50.0 + charge2 * 90.0 + pitch * charge2).toFloat(),
-                    1f,
-                    0f, 0f)
-        } else {
-            if (wieldMode == WieldMode.DUAL) {
-                matrix.rotate(lazyNameDir.toFloat() * -60, 0f, 1f, 0f)
-                matrix.rotate(swingDir.toFloat() * 30, 1f, 0f, 0f)
-            } else {
-                matrix.rotate(swingDir.toFloat() * 10, 1f, 0f, 0f)
-            }
-            if (item.material().isWeapon(item)) {
-                rot = sinTable(-charge * PI).toFloat().toDouble()
-                if (rot < 0.0f && charge > 0.0) {
-                    rot /= 4.0
-                }
+            gl.matrixStack.push { matrix ->
+                matrix.translate(0.25f, 0f, 0.25f)
+                var rot: Double
+                val charge: Double
+                val charge2: Double
+                val item: ItemStack
                 if (wieldMode == WieldMode.LEFT) {
-                    rot = -rot
+                    item = entity.leftWeapon()
+                    charge = armDirLeftRender
+                    charge2 = armDirLeft2 * 0.4
+                } else {
+                    item = entity.rightWeapon()
+                    charge = armDirRightRender
+                    charge2 = armDirRight2
                 }
-                matrix.rotate((rot * 60.0).toFloat(), 0.0f, 0.0f, 1.0f)
-                matrix.rotate((rot * 60.0).toFloat(), 0.0f, 1.0f, 0.0f)
-                matrix.rotate((rot * 10.0 + 40.0 + charge2 * 45.0 +
-                        pitch * charge2).toFloat(), 1.0f, 0.0f, 0.0f)
-            } else {
-                rot = sinTable(charge * PI).toFloat().toDouble()
-                matrix.rotate((charge2 * -20).toFloat(), 0f, 0f, 1f)
-                matrix.rotate((rot * 50 + 40.0 + charge2 * 45 +
-                        pitch * charge2).toFloat(), 1f, 0f, 0f)
-                if (charge > -1.5f && charge < -0.5f) {
-                    val center = cosTable(charge * PI).toFloat()
-                    matrix.rotate(center * -30.0f, 0.0f, 1.0f, 0.0f)
+                if (item.material() == world.air) {
+                    matrix.rotate((lazyNameDir * -60.0).toFloat(), 0f, 1f, 0f)
+                    matrix.rotate((swingDir * 60.0).toFloat(), 1f, 0f, 0f)
+                    rot = sinTable(charge * PI)
+                    matrix.rotate((charge2 * -20.0).toFloat(), 0f, 0f, 1f)
+                    matrix.rotate(
+                            (rot * 50.0 + charge2 * 90.0 + pitch * charge2).toFloat(),
+                            1f,
+                            0f, 0f)
+                } else {
+                    if (wieldMode == WieldMode.DUAL) {
+                        matrix.rotate(lazyNameDir.toFloat() * -60, 0f, 1f, 0f)
+                        matrix.rotate(swingDir.toFloat() * 30, 1f, 0f, 0f)
+                    } else {
+                        matrix.rotate(swingDir.toFloat() * 10, 1f, 0f, 0f)
+                    }
+                    if (item.material().isWeapon(item)) {
+                        rot = sinTable(-charge * PI).toFloat().toDouble()
+                        if (rot < 0.0f && charge > 0.0) {
+                            rot /= 4.0
+                        }
+                        if (wieldMode == WieldMode.LEFT) {
+                            rot = -rot
+                        }
+                        matrix.rotate((rot * 60.0).toFloat(), 0.0f, 0.0f, 1.0f)
+                        matrix.rotate((rot * 60.0).toFloat(), 0.0f, 1.0f, 0.0f)
+                        matrix.rotate((rot * 10.0 + 40.0 + charge2 * 45.0 +
+                                pitch * charge2).toFloat(), 1.0f, 0.0f, 0.0f)
+                    } else {
+                        rot = sinTable(charge * PI).toFloat().toDouble()
+                        matrix.rotate((charge2 * -20).toFloat(), 0f, 0f, 1f)
+                        matrix.rotate((rot * 50 + 40.0 + charge2 * 45 +
+                                pitch * charge2).toFloat(), 1f, 0f, 0f)
+                        if (charge > -1.5f && charge < -0.5f) {
+                            val center = cosTable(charge * PI).toFloat()
+                            matrix.rotate(center * -30.0f, 0.0f, 1.0f, 0.0f)
+                        }
+                    }
+                    if (wieldMode == WieldMode.RIGHT) {
+                        matrix.rotate(20.0f, 0f, 1f, 0f)
+                    } else if (wieldMode == WieldMode.LEFT) {
+                        matrix.rotate(50.0f, 0f, 1f, 0f)
+                        matrix.rotate(-2.0f, 1f, 0f, 0f)
+                    }
                 }
-            }
-            if (wieldMode == WieldMode.RIGHT) {
-                matrix.rotate(20.0f, 0f, 1f, 0f)
-            } else if (wieldMode == WieldMode.LEFT) {
-                matrix.rotate(50.0f, 0f, 1f, 0f)
-                matrix.rotate(-2.0f, 1f, 0f, 0f)
+                rot = min(rot * 2, 1.0)
+                texture.get().bind(gl)
+                armRight.render(1.0f, damageColor, damageColor, 1.0f, gl,
+                        shader)
+                if (wieldMode !== WieldMode.LEFT) {
+                    matrix.translate(0.3f, 0.4f, -0.4f)
+                    if (item.material().isWeapon(item)) {
+                        matrix.translate(0.0f, -0.6f, -0.05f)
+                        matrix.rotate((rot * -60.0).toFloat(), 1.0f, 0.0f, 0.0f)
+                        matrix.rotate((rot * 50.0).toFloat(), 0.0f, 1.0f, 0.0f)
+                        matrix.translate(0.0f, 0.6f, 0.0f)
+                    } else if (!item.material().isTool(item)) {
+                        matrix.translate(-0.31f, -0.3f, -0.2f)
+                        matrix.scale(0.3f, 0.3f, 0.3f)
+                    }
+                    matrix.rotate(60.0f, 0.0f, 0.0f, 1.0f)
+                    matrix.rotate(60.0f, 0.0f, 1.0f, 0.0f)
+                    item.material().render(item, gl, shader)
+                }
             }
         }
-        rot = min(rot * 2, 1.0)
-        texture.get().bind(gl)
-        armRight.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
-        if (wieldMode !== WieldMode.LEFT) {
-            matrix.translate(0.3f, 0.4f, -0.4f)
-            if (item.material().isWeapon(item)) {
-                matrix.translate(0.0f, -0.6f, -0.05f)
-                matrix.rotate((rot * -60.0).toFloat(), 1.0f, 0.0f, 0.0f)
-                matrix.rotate((rot * 50.0).toFloat(), 0.0f, 1.0f, 0.0f)
-                matrix.translate(0.0f, 0.6f, 0.0f)
-            } else if (!item.material().isTool(item)) {
-                matrix.translate(-0.31f, -0.3f, -0.2f)
-                matrix.scale(0.3f, 0.3f, 0.3f)
-            }
-            matrix.rotate(60.0f, 0.0f, 0.0f, 1.0f)
-            matrix.rotate(60.0f, 0.0f, 1.0f, 0.0f)
-            item.material().render(item, gl, shader)
-        }
-        matrixStack.pop()
-        matrixStack.pop()
     }
 
     override fun pitch(): Double {
