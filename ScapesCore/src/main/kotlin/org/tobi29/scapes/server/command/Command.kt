@@ -16,70 +16,9 @@
 
 package org.tobi29.scapes.server.command
 
-import org.apache.commons.cli.CommandLine
-import org.apache.commons.cli.Option
-import org.apache.commons.cli.Options
-import org.tobi29.scapes.engine.utils.PlatformName
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.readOnly
+import org.tobi29.scapes.engine.args.CommandOption
 
 object Command {
-
-    class CommandOptions(private val options: Options) {
-
-        fun add(opt: String,
-                longOpt: String,
-                hasArg: Boolean,
-                description: String) {
-            options.addOption(opt, longOpt, hasArg, description)
-        }
-
-        fun add(opt: String,
-                longOpt: String,
-                arguments: Int,
-                description: String) {
-            val option = Option(opt, longOpt, true, description)
-            option.args = arguments
-            options.addOption(option)
-        }
-    }
-
-    class Arguments(private val commandLine: CommandLine) {
-
-        val args = commandLine.argList.readOnly()
-
-        fun hasOption(option: Char): Boolean {
-            return commandLine.hasOption(option)
-        }
-
-        fun option(option: Char): String? {
-            return commandLine.getOptionValue(option)
-        }
-
-        fun optionArray(option: Char): Array<String>? {
-            return commandLine.getOptionValues(option)
-        }
-
-        fun option(option: Char,
-                   def: String): String {
-            return commandLine.getOptionValue(option, def)
-        }
-
-        @PlatformName("optionNullable")
-        fun option(option: Char,
-                   def: String?): String? {
-            return commandLine.getOptionValue(option, def)
-        }
-
-        fun arg(i: Int): String? {
-            val args = commandLine.args
-            if (i < 0 || i >= args.size) {
-                return null
-            }
-            return args[i]
-        }
-    }
-
     open class Compiled(private val commands: Collection<() -> Unit>) {
         fun execute(): List<Output> {
             val outputs = ArrayList<Output>(commands.size)
@@ -104,9 +43,7 @@ object Command {
             }
         }
 
-        override fun toString(): String {
-            return "$out ($returnCode)"
-        }
+        override fun toString() = out
     }
 
     class Null(output: Output) : Compiled(
@@ -118,119 +55,29 @@ object Command {
 
         constructor(output: Output) : this(output.returnCode, output.out)
     }
-}
 
-fun getInt(value: String): Int {
-    try {
-        return value.toInt()
-    } catch (e: NumberFormatException) {
-        throw Command.CommandException(253, "Unable to parse int: " + value)
+    fun <O, T> requireGet(supplier: (O) -> T?,
+                          option: O): T {
+        return supplier(option) ?: error("Missing argument: $option")
     }
 
-}
-
-fun getLong(value: String): Long {
-    try {
-        return value.toLong()
-    } catch (e: NumberFormatException) {
-        throw Command.CommandException(253,
-                "Unable to parse long: " + value)
+    fun error(msg: String): Nothing {
+        throw Command.CommandException(253, msg)
     }
 
-}
-
-fun getFloat(value: String): Float {
-    try {
-        return value.toFloat()
-    } catch (e: NumberFormatException) {
-        throw Command.CommandException(253, "Unable to parse float: $value")
+    fun requirePermission(executor: Executor,
+                          level: Int) {
+        if (executor.permissionLevel() < level) {
+            throw Command.CommandException(243, "Missing permissions")
+        }
     }
 
-}
-
-fun getDouble(value: String): Double {
-    try {
-        return value.toDouble()
-    } catch (e: NumberFormatException) {
-        throw Command.CommandException(253, "Unable to parse double: $value")
-    }
-
-}
-
-fun getVector3d(values: Array<String>): Vector3d {
-    if (values.size != 3) {
-        throw Command.CommandException(253,
-                "Unable to parse vector3d: ${values.joinToString(
-                        separator = " ")}")
-    }
-    try {
-        return Vector3d(values[0].toDouble(), values[1].toDouble(),
-                values[2].toDouble())
-    } catch (e: NumberFormatException) {
-        throw Command.CommandException(253,
-                "Unable to parse vector3d: ${values.joinToString(
-                        separator = " ")}")
-    }
-}
-
-fun Command.Arguments.requireOption(option: Char): String {
-    return require(option(option), option)
-}
-
-fun Command.Arguments.requireOptionArray(option: Char): Array<String> {
-    return require(optionArray(option), option)
-}
-
-fun Command.Arguments.requireOption(option: Char,
-                                    def: String?): String {
-    return require(option(option, def), option)
-}
-
-fun require(args: Command.Arguments,
-            name: Char) {
-    if (!args.hasOption(name)) {
-        throw Command.CommandException(253, "Missing argument: $name")
-    }
-}
-
-fun <T> require(value: T?,
-                name: Char): T {
-    if (value == null) {
-        throw Command.CommandException(253, "Missing argument: $name")
-    }
-    return value
-}
-
-fun <T> require(value: T?,
-                name: String): T {
-    if (value == null) {
-        throw Command.CommandException(253, "Missing argument: $name")
-    }
-    return value
-}
-
-fun <O, T> requireGet(supplier: (O) -> T?,
-                      option: O): T {
-    return supplier(option) ?: throw Command.CommandException(253,
-            "Missing argument: $option")
-}
-
-fun error(msg: String) {
-    throw Command.CommandException(253, msg)
-}
-
-fun requirePermission(executor: Executor,
-                      level: Int) {
-    if (executor.permissionLevel() < level) {
-        throw Command.CommandException(243, "Missing permissions")
-    }
-}
-
-fun requirePermission(executor: Executor,
-                      level: Int,
-                      value: Char) {
-    if (executor.permissionLevel() < level) {
-        throw Command.CommandException(243,
-                "Missing permissions for: " + value)
+    fun requirePermission(executor: Executor,
+                          level: Int,
+                          option: CommandOption) {
+        if (executor.permissionLevel() < level) {
+            throw Command.CommandException(243,
+                    "Missing permissions for: ${option.simpleName}")
+        }
     }
 }

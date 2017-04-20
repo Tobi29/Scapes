@@ -16,12 +16,12 @@
 
 package org.tobi29.scapes.server.extension.base
 
+import org.tobi29.scapes.engine.args.CommandOption
+import org.tobi29.scapes.engine.args.getBoolean
+import org.tobi29.scapes.engine.args.require
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.ScapesServer
-import org.tobi29.scapes.server.command.requireGet
-import org.tobi29.scapes.server.command.requireOption
-import org.tobi29.scapes.server.command.requirePermission
 import org.tobi29.scapes.server.extension.ServerExtension
 import org.tobi29.scapes.server.extension.event.MessageEvent
 import org.tobi29.scapes.server.extension.spi.ServerExtensionProvider
@@ -33,67 +33,75 @@ class BaseCommandsExtension(server: ScapesServer) : ServerExtension(server) {
         val registry = server.commandRegistry()
         val serverGroup = registry.group("server")
 
-        registry.register("say MESSAGE...", 0, {
-            add("n", "name", true, "Name used for prefix")
-            add("r", "raw", false, "Disable prefix")
-        }) { args, executor, commands ->
-            val message: String
-            if (args.hasOption('r')) {
-                requirePermission(executor, 8, 'r')
-                message = args.args.joinToString(separator = " ")
-            } else {
-                val name: String
-                val nameOption = args.option('n')
-                if (nameOption != null) {
-                    requirePermission(executor, 8, 'n')
-                    name = nameOption
+        registry.register("say MESSAGE...", 0) {
+            val nameOption = CommandOption(setOf('n'), setOf("name"), 1,
+                    "Name used for prefix").also { add(it) }
+            val rawOption = CommandOption(setOf('r'), setOf("raw"),
+                    "Disable prefix").also { add(it) }
+            return@register { args, executor, commands ->
+                val message: String
+                if (args.getBoolean(rawOption)) {
+                    requirePermission(executor, 8, rawOption)
+                    message = args.arguments.joinToString(separator = " ")
                 } else {
-                    name = executor.name()
+                    val name = args.parameters[nameOption]?.firstOrNull()?.apply {
+                        requirePermission(executor, 8, nameOption)
+                    } ?: executor.name()
+                    message = "<$name> ${args.arguments.joinToString(
+                            separator = " ")}"
                 }
-                message = "<$name> ${args.args.joinToString(separator = " ")}"
-            }
-            commands.add {
-                server.events.fire(
-                        MessageEvent(executor, MessageLevel.CHAT, message))
+                commands.add {
+                    server.events.fire(
+                            MessageEvent(executor, MessageLevel.CHAT, message))
+                }
             }
         }
 
-        registry.register("tell MESSAGE...", 0, {
-            add("t", "target", true, "Target player")
-            add("n", "name", true, "Name used for prefix")
-            add("r", "raw", false, "Disable prefix")
-        }) { args, executor, commands ->
-            val targetName = args.requireOption('t', executor.playerName())
-            val message: String
-            if (args.hasOption('r')) {
-                requirePermission(executor, 8, 'r')
-                message = args.args.joinToString(separator = " ")
-            } else {
-                val name: String
-                val nameOption = args.option('n')
-                if (nameOption != null) {
-                    requirePermission(executor, 8, 'n')
-                    name = nameOption
+        registry.register("tell MESSAGE...", 0) {
+            val targetOption = CommandOption(setOf('t'), setOf("target"), 1,
+                    "Target player").also { add(it) }
+            val nameOption = CommandOption(setOf('n'), setOf("name"), 1,
+                    "Name used for prefix").also { add(it) }
+            val rawOption = CommandOption(setOf('r'), setOf("raw"),
+                    "Disable prefix").also { add(it) }
+            return@register { args, executor, commands ->
+                val targetName = args.require(
+                        targetOption) { it ?: executor.playerName() }
+                val message: String
+                if (args.getBoolean(rawOption)) {
+                    requirePermission(executor, 8, rawOption)
+                    message = args.arguments.joinToString(separator = " ")
                 } else {
-                    name = executor.name()
+                    val name = args.parameters[nameOption]?.firstOrNull()?.apply {
+                        requirePermission(executor, 8, nameOption)
+                    } ?: executor.name()
+                    message = "<$name> ${args.arguments.joinToString(
+                            separator = " ")}"
                 }
-                message = "[$name] ${args.args.joinToString(separator = " ")}"
-            }
-            commands.add {
-                val target = requireGet({ connection.playerByName(it) },
-                        targetName)
-                server.events.fire(
-                        MessageEvent(executor, MessageLevel.CHAT, message,
-                                target))
+                commands.add {
+                    val target = requireGet({ connection.playerByName(it) },
+                            targetName)
+                    server.events.fire(
+                            MessageEvent(executor, MessageLevel.CHAT, message,
+                                    target))
+                }
             }
         }
 
-        serverGroup.register("stop", 10, {}) { args, executor, commands ->
-            server.scheduleStop(ScapesServer.ShutdownReason.STOP)
+        serverGroup.register("stop", 10) {
+            { _, _, commands ->
+                commands.add {
+                    server.scheduleStop(ScapesServer.ShutdownReason.STOP)
+                }
+            }
         }
 
-        serverGroup.register("reload", 10, {}) { args, executor, commands ->
-            server.scheduleStop(ScapesServer.ShutdownReason.RELOAD)
+        serverGroup.register("reload", 10) {
+            { _, _, commands ->
+                commands.add {
+                    server.scheduleStop(ScapesServer.ShutdownReason.RELOAD)
+                }
+            }
         }
     }
 }

@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.desktop
 
-import org.apache.commons.cli.*
 import org.tobi29.scapes.Debug
 import org.tobi29.scapes.VERSION
 import org.tobi29.scapes.client.DialogProvider
@@ -24,6 +23,7 @@ import org.tobi29.scapes.client.SaveStorage
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.Container
 import org.tobi29.scapes.engine.ScapesEngine
+import org.tobi29.scapes.engine.args.*
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.ContainerGLFW
 import org.tobi29.scapes.engine.graphics.GraphicsCheckException
 import org.tobi29.scapes.engine.utils.Crashable
@@ -41,40 +41,55 @@ import org.tobi29.scapes.server.shell.ScapesServerHeadless
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
-    val options = Options()
-    options.run {
-        addOption("h", "help", false, "Print this text and exit")
-        addOption("v", "version", false, "Print version and exit")
-        addOption("m", "mode", true, "Specify which mode to run")
-        addOption("d", "debug", false, "Run in debug mode")
-        addOption("s", "gles", false, "Use OpenGL ES")
-        addOption("r", "socketsp", false, "Use network socket for singleplayer")
-        addOption("t", "touch", false, "Emulate touch interface")
-        addOption("c", "config", true, "Config directory for server")
-        addOption("n", "nosandbox", false, "Disable sandbox")
-    }
-    val parser = DefaultParser()
-    val commandLine: CommandLine
-    try {
-        commandLine = parser.parse(options, args)
-    } catch (e: ParseException) {
+    val optionsList = ArrayList<CommandOption>()
+    val helpOption = CommandOption(setOf('h'), setOf("help"),
+            "Print this text and exit").also { optionsList.add(it) }
+    val versionOption = CommandOption(setOf('v'), setOf("version"),
+            "Print version and exit").also { optionsList.add(it) }
+    val modeOption = CommandOption(setOf('m'), setOf("mode"), 1,
+            "Specify which mode to run").also { optionsList.add(it) }
+    val debugOption = CommandOption(setOf('d'), setOf("debug"),
+            "Run in debug mode").also { optionsList.add(it) }
+    val glesOption = CommandOption(setOf('e'), setOf("gles"),
+            "Use OpenGL ES").also { optionsList.add(it) }
+    val socketspOption = CommandOption(setOf('r'), setOf("socketsp"),
+            "Use network socket for singleplayer").also { optionsList.add(it) }
+    val touchOption = CommandOption(setOf('t'), setOf("touch"),
+            "Emulate touch interface").also { optionsList.add(it) }
+    val configOption = CommandOption(setOf('c'), setOf("config"), 1,
+            "Config directory for server").also { optionsList.add(it) }
+    val nosandboxOption = CommandOption(setOf('n'), setOf("nosandbox"),
+            "Disable sandbox").also { optionsList.add(it) }
+    val options = optionsList.asSequence()
+
+    val commandLine = try {
+        val parser = TokenParser(options)
+        args.forEach { parser.append(it) }
+        val tokens = parser.finish()
+
+        val commandLine = tokens.assemble()
+        commandLine.validate()
+        commandLine
+    } catch (e: InvalidCommandLineException) {
         System.err.println(e.message)
         System.exit(255)
         return
     }
 
-    if (commandLine.hasOption('h')) {
-        val helpFormatter = HelpFormatter()
-        helpFormatter.printHelp("scapes", options)
+    if (commandLine.getBoolean(helpOption)) {
+        val help = StringBuilder()
+        help.append("Usage: scapes\n")
+        options.printHelp(help)
+        println(help)
         System.exit(0)
         return
     }
-    if (commandLine.hasOption('v')) {
+    if (commandLine.getBoolean(versionOption)) {
         println("Scapes $VERSION")
         System.exit(0)
         return
     }
-    if (commandLine.hasOption('n')) {
+    if (commandLine.getBoolean(nosandboxOption)) {
         println("----------------------------------------")
         println("Sandbox disabled by command line option!")
         println("Do NOT connect to untrusted servers with")
@@ -83,17 +98,16 @@ fun main(args: Array<String>) {
     } else {
         Sandbox.sandbox()
     }
-    if (commandLine.hasOption('d')) {
+    if (commandLine.getBoolean(debugOption)) {
         Debug.enable()
     }
-    if (commandLine.hasOption('r')) {
+    if (commandLine.getBoolean(socketspOption)) {
         Debug.socketSingleplayer(true)
     }
-    val cmdArgs = commandLine.args
-    val mode = commandLine.getOptionValue('m', "client")
+    val mode = commandLine.get(modeOption) ?: "client"
     val home: FilePath
-    if (cmdArgs.isNotEmpty()) {
-        home = path(cmdArgs[0])
+    if (commandLine.arguments.isNotEmpty()) {
+        home = path(commandLine.arguments[0])
         System.setProperty("user.dir", home.toAbsolutePath().toString())
     } else {
         home = path(System.getProperty("user.dir")).toAbsolutePath()
@@ -113,8 +127,8 @@ fun main(args: Array<String>) {
             val dialogs: (ScapesClient) -> DialogProvider = {
                 ScapesDesktop(it, { engine?.container as? ContainerGLFW })
             }
-            val useGLES = commandLine.hasOption('s')
-            val emulateTouch = commandLine.hasOption('t')
+            val useGLES = commandLine.getBoolean(glesOption)
+            val emulateTouch = commandLine.getBoolean(touchOption)
             val backend: (ScapesEngine) -> Container = {
                 ContainerGLFW(it, emulateTouch, useGLES = useGLES)
             }
@@ -139,12 +153,11 @@ fun main(args: Array<String>) {
             writeConfig(config, configMap.toTag())
         }
         "server" -> {
-            val config: FilePath
-            if (commandLine.hasOption('c')) {
-                config = home.resolve(
-                        path(commandLine.getOptionValue('c'))).toAbsolutePath()
+            val configPath = commandLine.get(configOption)
+            val config = if (configPath != null) {
+                home.resolve(path(configPath)).toAbsolutePath()
             } else {
-                config = home
+                home
             }
             try {
                 val server = ScapesServerHeadless(config)

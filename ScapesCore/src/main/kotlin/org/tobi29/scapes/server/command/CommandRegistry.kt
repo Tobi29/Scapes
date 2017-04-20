@@ -16,25 +16,26 @@
 
 package org.tobi29.scapes.server.command
 
-import org.apache.commons.cli.DefaultParser
-import org.apache.commons.cli.HelpFormatter
-import org.apache.commons.cli.Options
-import org.apache.commons.cli.ParseException
+import org.tobi29.scapes.engine.args.*
 import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import java.io.PrintWriter
-import java.io.StringWriter
 
 class CommandRegistry constructor(private val prefix: String = "") {
     private val commands = ConcurrentHashMap<String, (List<String>, Executor) -> Command.Compiled>()
 
-    fun register(usage: String,
-                 level: Int,
-                 optionSupplier: Command.CommandOptions.() -> Unit,
-                 compiler: (Command.Arguments, Executor, MutableCollection<() -> Unit>) -> Unit) {
+    fun register(
+            usage: String,
+            level: Int,
+            block: MutableCollection<CommandOption>.() -> Command.(CommandLine, Executor, MutableCollection<() -> Unit>
+            ) -> Unit) {
         val split = usage.split(' ', limit = 2)
         val name = split[0]
-        commands.put(name,
-                compiler(prefix + usage, level, optionSupplier, compiler))
+        val helpOption = CommandOption(
+                setOf('h'), setOf("help"), "Display this help")
+        val options = ArrayList<CommandOption>()
+        options.add(helpOption)
+        val compiler = block(options)
+        commands.put(name, compiler(prefix + usage, level, helpOption,
+                options.asSequence(), compiler))
     }
 
     fun group(name: String): CommandRegistry {
@@ -46,7 +47,7 @@ class CommandRegistry constructor(private val prefix: String = "") {
 
     operator fun get(line: String,
                      executor: Executor): Command.Compiled {
-        return get(line.split(PATTERN), "", executor)
+        return get(line.tokenize(), "", executor)
     }
 
     private operator fun get(split: List<String>,
@@ -73,43 +74,39 @@ class CommandRegistry constructor(private val prefix: String = "") {
         return Pair(name, args)
     }
 
-    private fun compiler(usage: String,
-                         level: Int,
-                         optionSupplier: (Command.CommandOptions) -> Unit,
-                         compiler: (Command.Arguments, Executor, MutableCollection<() -> Unit>) -> Unit): (List<String>, Executor) -> Command.Compiled {
+    private fun compiler(
+            usage: String,
+            level: Int,
+            helpOption: CommandOption,
+            options: Sequence<CommandOption>,
+            compiler: Command.(CommandLine, Executor, MutableCollection<() -> Unit>) -> Unit
+    ): (List<String>, Executor) -> Command.Compiled {
         return { args, executor ->
-            val parser = DefaultParser()
             try {
-                requirePermission(executor, level)
-                val options = Options()
-                options.addOption("h", "help", false, "Display this help")
-                optionSupplier(Command.CommandOptions(options))
-                val commandLine = parser.parse(options, args.toTypedArray())
-                if (commandLine.hasOption('h')) {
-                    val helpFormatter = HelpFormatter()
-                    val writer = StringWriter()
-                    val printWriter = PrintWriter(writer)
-                    helpFormatter.printHelp(printWriter, 74, usage, null,
-                            options, 1, 3, null, false)
-                    val help = writer.toString()
-                    Command.Null(Command.Output(1, help))
+                Command.requirePermission(executor, level)
+                val parser = TokenParser(options)
+                args.forEach { parser.append(it) }
+                val tokens = parser.finish()
+                println(tokens)
+
+                val commandLine = tokens.assemble()
+                commandLine.validate()
+
+                if (commandLine.getBoolean(helpOption)) {
+                    val help = StringBuilder()
+                    help.append("Usage: ").append(usage).append('\n')
+                    options.printHelp(help)
+                    Command.Null(Command.Output(1, help.toString()))
                 } else {
                     val commands = ArrayList<() -> Unit>()
-                    compiler(Command.Arguments(commandLine),
-                            executor, commands)
+                    compiler(Command, commandLine, executor, commands)
                     Command.Compiled(commands)
                 }
-            } catch (e: ParseException) {
-                Command.Null(Command.Output(254,
-                        e::class.java.simpleName + ": " + (e.message ?: "")))
+            } catch (e: InvalidCommandLineException) {
+                Command.Null(Command.Output(255, e.message ?: ""))
             } catch (e: Command.CommandException) {
-                Command.Null(Command.Output(253, e.message ?: ""))
+                Command.Null(Command.Output(254, e.message ?: ""))
             }
         }
-    }
-
-
-    companion object {
-        private val PATTERN = "[ ]+(?=([^\"]*\"[^\"]*\")*[^\"]*$)".toRegex()
     }
 }

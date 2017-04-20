@@ -17,6 +17,7 @@
 package org.tobi29.scapes.server.extension.base
 
 import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.engine.args.*
 import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream
 import org.tobi29.scapes.engine.utils.io.asString
@@ -25,10 +26,6 @@ import org.tobi29.scapes.engine.utils.io.tag.json.writeJSON
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.ScapesServer
-import org.tobi29.scapes.server.command.getInt
-import org.tobi29.scapes.server.command.getVector3d
-import org.tobi29.scapes.server.command.requireGet
-import org.tobi29.scapes.server.command.requireOption
 import org.tobi29.scapes.server.extension.ServerExtension
 import org.tobi29.scapes.server.extension.event.MessageEvent
 import org.tobi29.scapes.server.extension.spi.ServerExtensionProvider
@@ -40,131 +37,145 @@ class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
         val connection = server.connection
         val group = server.commandRegistry().group("debug")
 
-        group.register("give", 8, {
-            add("p", "player", true, "Player that the item will be given to")
-            add("m", "item", true, "Material of item")
-            add("d", "data", true, "Data value of item")
-            add("a", "amount", true, "Amount of item in stack")
-        }) { args, executor, commands ->
-            val playerName = args.requireOption('p', executor.playerName())
-            val materialName = args.requireOption('m')
-            val data = getInt(args.option('d', "0"))
-            val amount = getInt(args.option('a', "1"))
-            commands.add({
-                val player = requireGet({ connection.playerByName(it) },
-                        playerName)
-                val material = requireGet({ plugins.materialResolver[it] },
-                        materialName)
-                val item = ItemStack(material, data, amount)
-                player.mob({ mob ->
-                    mob.inventories().modify("Container",
-                            { inventory -> inventory.add(item) })
-                })
-            })
-        }
-
-        group.register("clear", 8, {}) { args, executor, commands ->
-            args.args.forEach { playerName ->
-                commands.add({
+        group.register("give", 8) {
+            val playerOption = CommandOption(setOf('p'), setOf("player"), 1,
+                    "Player that the item will be given to").also { add(it) }
+            val materialOption = CommandOption(setOf('m'), setOf("material"), 1,
+                    "Material of item").also { add(it) }
+            val dataOption = CommandOption(setOf('d'), setOf("data"), 1,
+                    "Data value of item").also { add(it) }
+            val amountOption = CommandOption(setOf('a'), setOf("amount"), 1,
+                    "Amount of item in stack").also { add(it) }
+            return@register { args, executor, commands ->
+                val playerName = args.require(
+                        playerOption) { it ?: executor.playerName() }
+                val materialName = args.require(materialOption)
+                val data = args.getInt(dataOption) ?: 0
+                val amount = args.getInt(amountOption) ?: 1
+                commands.add {
                     val player = requireGet({ connection.playerByName(it) },
                             playerName)
-                    player.mob({ mob ->
-                        mob.inventories().modify("Container", { it.clear() })
-                    })
-                })
-            }
-        }
-
-        group.register("tp", 8, {
-            add("p", "player", true, "Player who will be teleported")
-            add("t", "target", true,
-                    "Target that the player will be teleported to")
-            add("w", "world", true,
-                    "World that the player will be teleported to")
-            add("l", "location", 3,
-                    "Target that the player will be teleported to")
-        }) { args, executor, commands ->
-            val playerName = args.requireOption('p', executor.playerName())
-            val worldOption = args.option('w')
-            val locationOption = args.optionArray('l')
-            if (locationOption != null) {
-                val location = getVector3d(locationOption)
-                if (worldOption != null) {
-                    commands.add({
-                        val player = requireGet({ connection.playerByName(it) },
-                                playerName)
-                        val world = requireGet({ server.world(it) },
-                                worldOption)
-                        player.setWorld(world, location)
-                    })
-                } else {
-                    commands.add({
-                        val player = requireGet({ connection.playerByName(it) },
-                                playerName)
-                        player.mob({ mob -> mob.setPos(location) })
-                    })
-                }
-            } else {
-                val targetName = args.requireOption('t', executor.playerName())
-                if (worldOption != null) {
-                    commands.add({
-                        val player = requireGet({ connection.playerByName(it) },
-                                playerName)
-                        val target = requireGet({ connection.playerByName(it) },
-                                targetName)
-                        val world = requireGet({ server.world(it) },
-                                worldOption)
-                        target.mob({ mob ->
-                            player.setWorld(world, mob.getCurrentPos())
-                        })
-                    })
-                } else {
-                    commands.add({
-                        val player = requireGet({ connection.playerByName(it) },
-                                playerName)
-                        val target = requireGet({ connection.playerByName(it) },
-                                targetName)
-                        player.mob({ mob ->
-                            target.mob({ targetMob ->
-                                if (mob.world == targetMob.world) {
-                                    mob.setPos(targetMob.getCurrentPos())
-                                } else {
-                                    player.setWorld(targetMob.world,
-                                            targetMob.getCurrentPos())
-                                }
-                            })
-                        })
-                    })
-                }
-            }
-        }
-
-        group.register("item", 8, {
-            add("p", "player", true,
-                    "Player holding the item in the left hand to debug")
-        }) { args, executor, commands ->
-            val playerName = args.requireOption('p',
-                    executor.playerName())
-            commands.add({
-                val player = requireGet({ connection.playerByName(it) },
-                        playerName)
-                player.mob({ mob ->
-                    try {
-                        val stream = ByteBufferStream()
-                        TagMap { mob.leftWeapon().write(this) }.writeJSON(
-                                stream)
-                        stream.buffer().flip()
-                        val str = process(stream, asString())
-                        executor.events.fire(MessageEvent(executor,
-                                MessageLevel.FEEDBACK_INFO, str, executor))
-                    } catch (e: IOException) {
-                        executor.events.fire(MessageEvent(executor,
-                                MessageLevel.FEEDBACK_ERROR,
-                                "Failed to serialize item: ${e.message}",
-                                executor))
+                    val material = requireGet({ plugins.materialResolver[it] },
+                            materialName)
+                    val item = ItemStack(material, data, amount)
+                    player.mob { mob ->
+                        mob.inventories().modify("Container") { it.add(item) }
                     }
-                })
-            })
+                }
+            }
+        }
+
+        group.register("clear", 8) {
+            val playerOption = CommandOption(setOf('p'), setOf("player"), 1,
+                    "Player whose inventory will be cleared").also { add(it) }
+            return@register { args, executor, commands ->
+                val playerName = args.require(
+                        playerOption) { it ?: executor.playerName() }
+                commands.add {
+                    val player = requireGet({ connection.playerByName(it) },
+                            playerName)
+                    player.mob { mob ->
+                        mob.inventories().modify("Container") { it.clear() }
+                    }
+                }
+            }
+        }
+
+        group.register("tp", 8) {
+            val playerOption = CommandOption(setOf('p'), setOf("player"), 1,
+                    "Player who will be teleported").also { add(it) }
+            val targetOption = CommandOption(setOf('t'), setOf("target"), 1,
+                    "Target that will be teleported to").also { add(it) }
+            val worldOption = CommandOption(setOf('w'), setOf("world"), 1,
+                    "World that will be teleported to").also { add(it) }
+            val locationOption = CommandOption(setOf('l'), setOf("location"), 3,
+                    "Location that will be teleported to").also { add(it) }
+            return@register { args, executor, commands ->
+                val playerName = args.require(
+                        playerOption) { it ?: executor.playerName() }
+                val worldName = args.get(worldOption)
+                val locationList = args.getList(locationOption)
+                if (locationList != null) {
+                    val location = getVector3d(locationList)
+                    if (worldName != null) {
+                        commands.add {
+                            val player = requireGet(
+                                    { connection.playerByName(it) }, playerName)
+                            val world = requireGet({ server.world(it) },
+                                    worldName)
+                            player.setWorld(world, location)
+                        }
+                    } else {
+                        commands.add {
+                            val player = requireGet(
+                                    { connection.playerByName(it) }, playerName)
+                            player.mob({ mob -> mob.setPos(location) })
+                        }
+                    }
+                } else {
+                    val targetName = args.require(
+                            targetOption) { it ?: executor.playerName() }
+                    if (worldName != null) {
+                        commands.add {
+                            val player = requireGet(
+                                    { connection.playerByName(it) }, playerName)
+                            val target = requireGet(
+                                    { connection.playerByName(it) }, targetName)
+                            val world = requireGet({ server.world(it) },
+                                    worldName)
+                            target.mob { mob ->
+                                player.setWorld(world, mob.getCurrentPos())
+                            }
+                        }
+                    } else {
+                        commands.add {
+                            val player = requireGet(
+                                    { connection.playerByName(it) }, playerName)
+                            val target = requireGet(
+                                    { connection.playerByName(it) }, targetName)
+                            player.mob { mob ->
+                                target.mob { targetMob ->
+                                    if (mob.world == targetMob.world) {
+                                        mob.setPos(targetMob.getCurrentPos())
+                                    } else {
+                                        player.setWorld(targetMob.world,
+                                                targetMob.getCurrentPos())
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        group.register("item", 8) {
+            val playerOption = CommandOption(setOf('p'), setOf("player"), 1,
+                    "Player holding the item in the left hand").also { add(it) }
+            return@register { args, executor, commands ->
+                val playerName = args.require(
+                        playerOption) { it ?: executor.playerName() }
+                commands.add {
+                    val player = requireGet({ connection.playerByName(it) },
+                            playerName)
+                    player.mob { mob ->
+                        try {
+                            val stream = ByteBufferStream()
+                            TagMap { mob.leftWeapon().write(this) }.writeJSON(
+                                    stream)
+                            stream.buffer().flip()
+                            val str = process(stream, asString())
+                            executor.events.fire(MessageEvent(executor,
+                                    MessageLevel.FEEDBACK_INFO, str, executor))
+                        } catch (e: IOException) {
+                            executor.events.fire(MessageEvent(executor,
+                                    MessageLevel.FEEDBACK_ERROR,
+                                    "Failed to serialize item: ${e.message}",
+                                    executor))
+                        }
+                    }
+                }
+            }
         }
     }
 }
