@@ -16,8 +16,7 @@
 package org.tobi29.scapes.client
 
 import org.tobi29.scapes.VERSION
-import org.tobi29.scapes.client.input.InputMode
-import org.tobi29.scapes.client.input.InputModeDummy
+import org.tobi29.scapes.client.input.InputModeScapes
 import org.tobi29.scapes.client.input.gamepad.InputModeGamepad
 import org.tobi29.scapes.client.input.keyboard.InputModeKeyboard
 import org.tobi29.scapes.client.input.spi.InputModeProvider
@@ -32,7 +31,6 @@ import org.tobi29.scapes.engine.gui.GuiNotificationSimple
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.engine.input.*
 import org.tobi29.scapes.engine.server.ConnectionManager
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.EventDispatcher
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.classpath.ClasspathPath
@@ -56,15 +54,22 @@ class ScapesClient(engine: ScapesEngine,
     override lateinit var defaultGuiStyle: GuiStyle
     val configMap = engine.configMap.mapMut("Scapes")
     val connection = ConnectionManager(engine.taskExecutor, 10)
-    private val inputModesMut = ConcurrentHashMap<Controller, (MutableTagMap) -> InputMode>()
-    var inputModes = emptyList<InputMode>()
-        private set
     lateinit var saves: SaveStorage
         private set
-    private var inputModeMut: InputMode? = null
-    val inputMode get() = inputModeMut ?: throw IllegalStateException(
-            "No input mode is set")
-    private var freezeInputMode = false
+    val inputManager =
+            object : InputManager<InputModeScapes>(engine, configMap) {
+                override fun inputMode(controller: Controller)=
+                        loadService(engine, controller)
+
+                override fun inputModeChanged(inputMode: InputModeScapes) {
+                    events.fire(InputModeChangeEvent(inputMode))
+                    engine.notifications.add {
+                        GuiNotificationSimple(it,
+                                engine.graphics.textures()["Scapes:image/gui/input/Default"],
+                                inputMode.toString())
+                    }
+                }
+            }
     val dialogs = dialogsSupplier(this)
         get() = run {
             val security = System.getSecurityManager()
@@ -82,16 +87,6 @@ class ScapesClient(engine: ScapesEngine,
             if (lightDefaults) 0.5 else 1.0)
 
     override val events = EventDispatcher(engine.events) {
-        listen<ControllerAddEvent> { event ->
-            loadService(engine, event.controller)?.let {
-                inputModesMut[event.controller] = it
-                loadInput()
-            }
-        }
-        listen<ControllerRemoveEvent> { event ->
-            inputModesMut.remove(event.controller)
-            loadInput()
-        }
     }.apply { enable() }
 
     override fun initEarly() {
@@ -103,8 +98,7 @@ class ScapesClient(engine: ScapesEngine,
         createDirectories(home.resolve("screenshots"))
         createDirectories(pluginCache)
         FileCache.check(pluginCache)
-        val files = engine.files
-        files.registerFileSystem("Scapes",
+        engine.files.registerFileSystem("Scapes",
                 ClasspathPath(this::class.java.classLoader,
                         "assets/scapes/tobi29"))
         saves = savesSupplier(this)
@@ -126,67 +120,30 @@ class ScapesClient(engine: ScapesEngine,
                 }
             }
         }
+        inputManager.enable()
         connection.workers(1)
         engine.switchState(GameStateStartup(engine) { GameStateMenu(engine) })
     }
 
     override fun start() {
-        loadInput()
     }
 
     override fun halt() {
     }
 
     override fun step(delta: Double) {
-        var newInputMode: InputMode? = null
-        for (inputMode in inputModes) {
-            if (inputMode.poll(delta)) {
-                newInputMode = inputMode
-            }
-        }
-        if (newInputMode != null && inputMode !== newInputMode &&
-                !freezeInputMode) {
-            logger.info { "Setting input mode to $newInputMode" }
-            changeInput(newInputMode)
-            engine.notifications.add {
-                GuiNotificationSimple(it,
-                        engine.graphics.textures()["Scapes:image/gui/Playlist"],
-                        inputMode.toString())
-            }
-        }
+        inputManager.step(delta)
     }
 
     override fun dispose() {
         super.dispose()
         connection.stop()
-    }
-
-    fun loadInput() {
-        logger.info { "Loading input" }
-        val configMap = configMap.mapMut("Input")
-        inputModes = inputModesMut.values.asSequence().map {
-            it(configMap)
-        }.toList()
-        changeInput(inputModes.firstOrNull() ?: InputModeDummy(engine))
-    }
-
-    private fun changeInput(inputMode: InputMode) {
-        synchronized(inputModesMut) {
-            inputModeMut?.disabled()
-            inputModeMut = inputMode
-            engine.guiController = inputMode.guiController()
-            events.fire(InputModeChangeEvent(inputMode))
-            inputMode.enabled()
-        }
-    }
-
-    fun setFreezeInputMode(freezeInputMode: Boolean) {
-        this.freezeInputMode = freezeInputMode
+        inputManager.disable()
     }
 
     companion object : KLogging() {
         private fun loadService(engine: ScapesEngine,
-                                controller: Controller): ((MutableTagMap) -> InputMode)? {
+                                controller: Controller): ((MutableTagMap) -> InputModeScapes)? {
             for (provider in ServiceLoader.load(
                     InputModeProvider::class.java)) {
                 try {
@@ -207,7 +164,7 @@ class ScapesClient(engine: ScapesEngine,
     }
 }
 
-class InputModeChangeEvent(val inputMode: InputMode)
+class InputModeChangeEvent(val inputMode: InputModeScapes)
 
 interface DialogProvider {
     fun openMusicDialog(result: (String, ReadableByteStream) -> Unit)

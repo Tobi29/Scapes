@@ -17,7 +17,7 @@ package org.tobi29.scapes.client.input.touch
 
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.client.gui.GuiMessage
-import org.tobi29.scapes.client.input.InputMode
+import org.tobi29.scapes.client.input.InputModeScapes
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.gui.*
@@ -29,7 +29,7 @@ import org.tobi29.scapes.engine.utils.math.vector.*
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 
 class InputModeTouch(private val engine: ScapesEngine,
-                     private val controller: ControllerTouch) : InputMode {
+                     private val controller: ControllerTouch) : InputModeScapes {
     private val guiController = GuiControllerTouch(engine, controller)
     private val direction = MutableVector2d()
     private val matrix1 = Matrix4f()

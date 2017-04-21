@@ -21,7 +21,7 @@ import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.scapes.client.input.InputMode
+import org.tobi29.scapes.client.input.InputModeScapes
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.utils.*
@@ -46,7 +46,7 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
                                    nickname: String) : MobPlayerClient(type,
         world, pos, speed, aabb, lives, maxLives, nickname) {
     val game = world.game
-    protected lateinit var input: InputMode
+    protected lateinit var input: InputModeScapes
     protected var flying = false
     protected var gravitationMultiplier = 1.0
     protected var airFriction = 0.2
@@ -226,7 +226,7 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
     }
 
     @Synchronized
-    fun setInputMode(input: InputMode?) {
+    fun setInputMode(input: InputModeScapes?) {
         inputEventDispatcherwner?.disable()
         game.inputGui.removeAll()
         if (input == null) {
@@ -242,7 +242,7 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
         inputEventDispatcherwner.enable()
     }
 
-    protected abstract fun ListenerRegistrar.inputMode(input: InputMode)
+    protected abstract fun ListenerRegistrar.inputMode(input: InputModeScapes)
 
     class InputDirectionEvent(val direction: Vector2d)
 

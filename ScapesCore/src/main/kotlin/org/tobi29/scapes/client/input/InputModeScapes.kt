@@ -21,18 +21,12 @@ import org.tobi29.scapes.client.gui.GuiMessage
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.gui.Gui
-import org.tobi29.scapes.engine.gui.GuiController
 import org.tobi29.scapes.engine.gui.GuiControllerDummy
+import org.tobi29.scapes.engine.input.InputMode
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 
-interface InputMode {
+interface InputModeScapes : InputMode {
     val requiresCameraSmoothing get() = true
-
-    fun enabled() {}
-
-    fun disabled() {}
-
-    fun poll(delta: Double): Boolean
 
     fun createControlsGUI(state: GameState,
                           prev: Gui): Gui
@@ -50,11 +44,9 @@ interface InputMode {
     fun right(): Boolean
 
     fun jump(): Boolean
-
-    fun guiController(): GuiController
 }
 
-class InputModeDummy(private val engine: ScapesEngine) : InputMode {
+class InputModeDummy(private val engine: ScapesEngine) : InputModeScapes {
     override fun poll(delta: Double) = false
 
     override fun createControlsGUI(state: GameState,

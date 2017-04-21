@@ -21,11 +21,11 @@ import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.input.ControllerBasic
 import org.tobi29.scapes.engine.input.ControllerJoystick
+import org.tobi29.scapes.engine.utils.math.pow
+import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.tag.set
 import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.math.pow
-import org.tobi29.scapes.engine.utils.math.round
 
 abstract class GuiControls(state: GameState,
                            previous: Gui,
@@ -35,11 +35,11 @@ abstract class GuiControls(state: GameState,
     protected val scrollPane: GuiComponentScrollPaneViewport
 
     init {
-        game.setFreezeInputMode(true)
+        game.inputManager.freezeInputMode = true
         // This intentionally disable the back action to allow binding ESC
         back.on(GuiEvent.CLICK_LEFT) { event ->
-            game.setFreezeInputMode(false)
-            game.loadInput()
+            game.inputManager.freezeInputMode = false
+            game.inputManager.reloadInput()
             engine.guiStack.swap(this, previous)
         }
         scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {

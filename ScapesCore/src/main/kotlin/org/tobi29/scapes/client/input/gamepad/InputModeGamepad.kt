@@ -17,7 +17,7 @@ package org.tobi29.scapes.client.input.gamepad
 
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.gui.GuiControlsGamepad
-import org.tobi29.scapes.client.input.InputMode
+import org.tobi29.scapes.client.input.InputModeScapes
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.gui.Gui
@@ -37,7 +37,7 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain
 
 class InputModeGamepad(engine: ScapesEngine,
                        private val controller: ControllerJoystick,
-                       configMap: MutableTagMap) : InputMode {
+                       configMap: MutableTagMap) : InputModeScapes {
     val events: EventDispatcher
     private val tagMap: MutableTagMap
     private val guiController: GuiController

@@ -24,7 +24,7 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.client.Playlist
 import org.tobi29.scapes.client.gui.GuiChatWrite
 import org.tobi29.scapes.client.gui.GuiPause
-import org.tobi29.scapes.client.input.InputMode
+import org.tobi29.scapes.client.input.InputModeScapes
 import org.tobi29.scapes.client.input.keyboard.InputModeKeyboard
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.input.ControllerKey
@@ -268,7 +268,7 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
         }
     }
 
-    override fun ListenerRegistrar.inputMode(input: InputMode) {
+    override fun ListenerRegistrar.inputMode(input: InputModeScapes) {
         listen<InputDirectionEvent> { event ->
             if (!hasGui()) {
                 rot.setZ((rot.doubleZ() - event.direction.x) % 360)

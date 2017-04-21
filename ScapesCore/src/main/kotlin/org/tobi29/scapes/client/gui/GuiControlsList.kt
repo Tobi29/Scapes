@@ -27,11 +27,10 @@ class GuiControlsList(state: GameState,
                       style: GuiStyle) : GuiMenuSingle(
         state, "Controls", previous, style) {
     init {
-        (state.engine.game as ScapesClient).inputModes.forEach { inputMode ->
+        (state.engine.game as ScapesClient).inputManager.inputModes.forEach { inputMode ->
             val controls = row(pane) { button(it, inputMode.toString()) }
             selection(controls)
-            controls.on(GuiEvent.CLICK_LEFT
-            ) { event ->
+            controls.on(GuiEvent.CLICK_LEFT) {
                 state.engine.guiStack.swap(this,
                         inputMode.createControlsGUI(state, this))
             }

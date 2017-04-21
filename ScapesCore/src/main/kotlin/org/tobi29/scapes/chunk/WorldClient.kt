@@ -79,7 +79,7 @@ class WorldClient(val connection: ClientConnection,
         connection.plugins.plugins.forEach { it.worldInit(this) }
 
         val scapes = game.engine.game as ScapesClient
-        player.setInputMode(scapes.inputMode)
+        player.setInputMode(scapes.inputManager.inputMode)
 
         logger.info { "Received player entity: $player with id: $playerID" }
     }
