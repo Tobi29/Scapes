@@ -16,7 +16,4 @@
 
 package org.tobi29.scapes.entity.model
 
-interface MobLivingModel : MobModel {
-    fun oi() {
-    }
-}
+interface MobLivingModel : MobModel
