@@ -65,7 +65,6 @@ task wrapper(type: Wrapper) {
 }
 
 ext {
-    kotlinVersion = "1.1.1"
     slf4jVersion = "1.7.25"
     spekVersion = "1.1.0"
     swtVersion = "4.6"
@@ -74,9 +73,7 @@ ext {
     jnaVersion = "4.4.0"
     scapesEngineVersion = "4acdf73734"
 
-    slf4jAPI = "org.slf4j:slf4j-api:$slf4jVersion"
     slf4jSimple = "org.slf4j:slf4j-simple:$slf4jVersion"
-    kotlinSTD = "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     lwjgl = "org.lwjgl:lwjgl:$lwjglVersion"
     lwjglEGL = "org.lwjgl:lwjgl-egl:$lwjglVersion"
     lwjglGLFW = "org.lwjgl:lwjgl-glfw:$lwjglVersion"
@@ -101,8 +98,6 @@ ext {
 
     scapesEngineEngine =
             "com.github.Tobi29.ScapesEngine:Engine:$scapesEngineVersion"
-    scapesEngineUtils =
-            "com.github.Tobi29.ScapesEngine:Utils:$scapesEngineVersion"
     scapesEngineArgumentParser =
             "com.github.Tobi29.ScapesEngine:ArgumentParser:$scapesEngineVersion"
     scapesEngineTagStructureJSON =
