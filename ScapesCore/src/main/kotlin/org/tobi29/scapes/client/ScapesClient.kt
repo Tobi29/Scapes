@@ -31,6 +31,7 @@ import org.tobi29.scapes.engine.gui.GuiNotificationSimple
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.engine.input.*
 import org.tobi29.scapes.engine.server.ConnectionManager
+import org.tobi29.scapes.engine.utils.AtomicBoolean
 import org.tobi29.scapes.engine.utils.EventDispatcher
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.classpath.ClasspathPath
@@ -58,15 +59,19 @@ class ScapesClient(engine: ScapesEngine,
         private set
     val inputManager =
             object : InputManager<InputModeScapes>(engine, configMap) {
-                override fun inputMode(controller: Controller)=
+                private var initialMode = AtomicBoolean(true)
+
+                override fun inputMode(controller: Controller) =
                         loadService(engine, controller)
 
                 override fun inputModeChanged(inputMode: InputModeScapes) {
                     events.fire(InputModeChangeEvent(inputMode))
-                    engine.notifications.add {
-                        GuiNotificationSimple(it,
-                                engine.graphics.textures()["Scapes:image/gui/input/Default"],
-                                inputMode.toString())
+                    if (!initialMode.getAndSet(false)) {
+                        engine.notifications.add {
+                            GuiNotificationSimple(it,
+                                    engine.graphics.textures()["Scapes:image/gui/input/Default"],
+                                    inputMode.toString())
+                        }
                     }
                 }
             }
