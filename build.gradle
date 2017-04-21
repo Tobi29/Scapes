@@ -32,6 +32,8 @@ buildscript {
     }
 }
 
+apply plugin: "idea"
+
 allprojects {
     def env = System.getenv()
     if (env.containsKey("VERSION")) {
@@ -140,4 +142,10 @@ ext {
             "com.github.Tobi29.ScapesEngine:TestAssertions:$scapesEngineVersion"
     scapesEngineOpenALSounds =
             "com.github.Tobi29.ScapesEngine:OpenALSounds:$scapesEngineVersion"
+}
+
+idea {
+    module {
+        excludeDirs += file(".jreCache")
+    }
 }
