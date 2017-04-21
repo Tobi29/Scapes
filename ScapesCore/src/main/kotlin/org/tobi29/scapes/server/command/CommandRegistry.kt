@@ -87,7 +87,6 @@ class CommandRegistry constructor(private val prefix: String = "") {
                 val parser = TokenParser(options)
                 args.forEach { parser.append(it) }
                 val tokens = parser.finish()
-                println(tokens)
 
                 val commandLine = tokens.assemble()
                 commandLine.validate()
