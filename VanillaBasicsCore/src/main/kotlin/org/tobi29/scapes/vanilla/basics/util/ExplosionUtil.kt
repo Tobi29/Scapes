@@ -174,7 +174,7 @@ private class Location {
     }
 
     override fun equals(other: Any?): Boolean {
-        if (this == other) {
+        if (this === other) {
             return true
         }
         if (other !is Location) {
