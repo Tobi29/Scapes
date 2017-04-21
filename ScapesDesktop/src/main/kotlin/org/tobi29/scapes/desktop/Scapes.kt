@@ -147,10 +147,10 @@ fun main(args: Array<String>) {
                             "Unable to initialize graphics:\n${e.message}")
                     exitProcess(1)
                 }
-            } finally {
                 engine.dispose()
+            } finally {
+                writeConfig(config, configMap.toTag())
             }
-            writeConfig(config, configMap.toTag())
         }
         "server" -> {
             val configPath = commandLine.get(configOption)
@@ -169,7 +169,7 @@ fun main(args: Array<String>) {
             }
         }
         else -> {
-            System.err.println("Unknown mode: " + mode)
+            System.err.println("Unknown mode: $mode")
             System.exit(254)
         }
     }
