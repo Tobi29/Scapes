@@ -23,8 +23,8 @@ import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock
 import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.TerrainClient
+import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
-import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
@@ -42,7 +42,7 @@ class BlockFurnace(type: VanillaMaterialType) : VanillaBlockContainer<EntityFurn
     private var textureSide: TerrainTexture? = null
     private var models: Array<BlockModel>? = null
 
-    override fun place(terrain: TerrainServer.TerrainMutable,
+    override fun place(terrain: TerrainMutableServer,
                        x: Int,
                        y: Int,
                        z: Int,

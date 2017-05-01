@@ -72,7 +72,7 @@ class MobFlyingBlockServer(type: EntityType<*, *>,
                 }
             } else if (abs(speed.doubleX()) < 0.1 && abs(
                     speed.doubleY()) < 0.1) {
-                world.terrain.queue { handler ->
+                world.terrain.modify(x, y, z) { handler ->
                     handler.typeData(x, y, z, item.material() as BlockType,
                             item.data())
                 }

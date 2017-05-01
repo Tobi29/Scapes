@@ -125,16 +125,20 @@ class BlockWater(type: VanillaMaterialType) : VanillaBlock(type) {
                 1.0, 1.0, 1.0, lod)
     }
 
-    override fun update(terrain: TerrainServer.TerrainMutable,
+    override fun update(terrain: TerrainServer,
                         x: Int,
                         y: Int,
                         z: Int,
                         data: Int) {
-        if (!terrain.hasDelayedUpdate(x, y, z, UpdateWaterFlow::class.java)) {
-            val random = threadLocalRandom()
-            terrain.addDelayedUpdate(
-                    UpdateWaterFlow(terrain.world.registry).set(x, y, z,
-                            random.nextDouble() * 0.2 + 0.1))
+        val world = terrain.world
+        terrain.modify(x, y, z) { terrain ->
+            if (!terrain.hasDelayedUpdate(x, y, z,
+                    UpdateWaterFlow::class.java)) {
+                val random = threadLocalRandom()
+                terrain.addDelayedUpdate(
+                        UpdateWaterFlow(world.registry).set(x, y, z,
+                                random.nextDouble() * 0.2 + 0.1))
+            }
         }
     }
 

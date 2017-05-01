@@ -23,10 +23,7 @@ import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelComplex
 import org.tobi29.scapes.chunk.ChunkMesh
-import org.tobi29.scapes.chunk.terrain.Terrain
-import org.tobi29.scapes.chunk.terrain.TerrainClient
-import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
-import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.chunk.terrain.*
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.Pool
@@ -80,7 +77,7 @@ class BlockCrop(type: VanillaMaterialType) : VanillaBlock(type) {
         return true
     }
 
-    override fun place(terrain: TerrainServer.TerrainMutable,
+    override fun place(terrain: TerrainMutableServer,
                        x: Int,
                        y: Int,
                        z: Int,
@@ -152,14 +149,15 @@ class BlockCrop(type: VanillaMaterialType) : VanillaBlock(type) {
                 y, z, xx, yy, zz, 1.0, 1.0, 1.0, 1.0, lod)
     }
 
-    override fun update(terrain: TerrainServer.TerrainMutable,
+    override fun update(terrain: TerrainServer,
                         x: Int,
                         y: Int,
                         z: Int,
                         data: Int) {
-        if (terrain.type(x, y, z - 1) !== materials.farmland) {
-            terrain.typeData(x, y, z, terrain.air,
-                    0.toShort().toInt())
+        terrain.modify(x, y, z - 1, 1, 1, 2) { terrain ->
+            if (terrain.type(x, y, z - 1) != materials.farmland) {
+                terrain.typeData(x, y, z, terrain.air, 0)
+            }
         }
     }
 

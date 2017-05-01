@@ -17,11 +17,10 @@
 package org.tobi29.scapes.chunk.terrain.infinite
 
 import org.tobi29.scapes.block.Update
-import org.tobi29.scapes.block.UpdateBlockUpdate
-import org.tobi29.scapes.block.UpdateBlockUpdateUpdateTile
 import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.GeneratorOutput
 import org.tobi29.scapes.engine.utils.andNull
+import org.tobi29.scapes.engine.utils.assert
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
@@ -30,8 +29,6 @@ import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.entity.server.MobServer
-import org.tobi29.scapes.packets.PacketBlockChange
-import org.tobi29.scapes.packets.PacketBlockChangeAir
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteBaseChunk
 import org.tobi29.scapes.terrain.infinite.chunk
 
@@ -100,25 +97,35 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
             }
         }
         if (state.id >= TerrainInfiniteBaseChunk.State.LOADED.id) {
-            synchronized(delayedUpdates) {
+            val updates = ArrayList<Update>(0)
+            lockWrite {
                 var i = 0
                 while (i < delayedUpdates.size) {
                     val update = delayedUpdates[i]
-                    if (update.isValid) {
-                        if (update.delay(delta) <= 0) {
-                            delayedUpdates.removeAt(i--)
-                            if (update.isValidOn(
-                                    typeG(update.x(), update.y(), update.z()),
-                                    terrain)) {
-                                update.run(terrain)
+                    // An update might be paused while getting added to avoid
+                    // serious lock congestion during modify operations
+                    if (!update.isPaused) {
+                        if (update.isValid) {
+                            if (update.delay(delta) <= 0) {
+                                delayedUpdates.removeAt(i)
+                                if (update.isValidOn(
+                                        typeG(update.x(), update.y(),
+                                                update.z()), terrain)) {
+                                    updates.add(update)
+                                }
+                            } else {
+                                i++
                             }
+                        } else {
+                            delayedUpdates.removeAt(i)
                         }
-                        i++
                     } else {
-                        delayedUpdates.removeAt(i)
+                        i++
                     }
                 }
+                null
             }
+            updates.forEach { it.run(terrain) }
             val random = threadLocalRandom()
             if (random.nextInt(16) == 0) {
                 val x = random.nextInt(16)
@@ -137,62 +144,36 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
     }
 
     fun addDelayedUpdate(update: Update) {
-        synchronized(delayedUpdates) {
-            delayedUpdates.add(update)
-        }
+        assert { lock.isHeld() }
+        delayedUpdates.add(update)
     }
 
     fun hasDelayedUpdate(x: Int,
                          y: Int,
                          z: Int,
                          clazz: Class<out Update>): Boolean {
-        synchronized(delayedUpdates) {
+        return lockWrite {
             for (update in delayedUpdates) {
                 if (update.x() == x && update.y() == y && update.z() == z) {
                     if (update.isValidOn(
                             typeG(update.x(), update.y(), update.z()),
                             terrain)) {
                         if (update::class.java == clazz) {
-                            return true
+                            return@lockWrite true
                         }
                     } else {
                         update.markAsInvalid()
                     }
                 }
             }
+            false
         }
-        return false
     }
 
     override fun update(x: Int,
                         y: Int,
                         z: Int,
                         updateTile: Boolean) {
-        if (updateTile) {
-            addDelayedUpdate(
-                    UpdateBlockUpdateUpdateTile(terrain.world.registry).set(
-                            x + posBlock.x, y + posBlock.y, z, 0.0))
-        } else {
-            addDelayedUpdate(UpdateBlockUpdate(terrain.world.registry).set(
-                    x + posBlock.x, y + posBlock.y, z, 0.0))
-        }
-        if (state.id >= TerrainInfiniteBaseChunk.State.SENDABLE.id) {
-            val block = blockL(x, y, z)
-            val type = terrain.type(block)
-            if (type == terrain.air) {
-                terrain.world.send(
-                        PacketBlockChangeAir(terrain.world.registry,
-                                x + posBlock.x, y + posBlock.y, z))
-            } else {
-                val data = terrain.data(block)
-                terrain.world.send(PacketBlockChange(terrain.world.registry,
-                        x + posBlock.x, y + posBlock.y, z, type.id, data))
-            }
-        }
-        if (state.id >= TerrainInfiniteBaseChunk.State.LOADED.id) {
-            terrain.lighting().updateLight(x + posBlock.x,
-                    y + posBlock.y, z)
-        }
     }
 
     override fun updateLight(x: Int,
@@ -203,86 +184,85 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
     fun read(map: TagMap) {
         lockWrite {
             map["BlockID"]?.toList()?.let {
-                (idData.asSequence() zip it.asSequence().mapNotNull(
+                (data.idData.asSequence() zip it.asSequence().mapNotNull(
                         Tag::toMap).andNull()).forEach { (data, tag) ->
                     data.read(tag)
                 }
             }
             map["BlockData"]?.toList()?.let {
-                (dataData.asSequence() zip it.asSequence().mapNotNull(
+                (data.dataData.asSequence() zip it.asSequence().mapNotNull(
                         Tag::toMap).andNull()).forEach { (data, tag) ->
                     data.read(tag)
                 }
             }
             map["BlockLight"]?.toList()?.let {
-                (lightData.asSequence() zip it.asSequence().mapNotNull(
+                (data.lightData.asSequence() zip it.asSequence().mapNotNull(
                         Tag::toMap).andNull()).forEach { (data, tag) ->
                     data.read(tag)
                 }
             }
-        }
-        val oldTick = map["Tick"]?.toLong() ?: 0L
-        map["Entities"]?.toList()?.asSequence()?.mapNotNull(
-                Tag::toMap)?.forEach { tag ->
-            tag["ID"]?.toInt()?.let {
-                val entity = EntityServer.make(it, terrain.world)
-                tag["UUID"]?.toUUID()?.let { entity.setEntityID(it) }
-                tag["Data"]?.toMap()?.let { entity.read(it) }
-                addEntity(entity)
-                val newTick = terrain.world.tick
-                if (newTick > oldTick) {
-                    entity.tickSkip(oldTick, newTick)
+            val oldTick = map["Tick"]?.toLong() ?: 0L
+            map["Entities"]?.toList()?.asSequence()?.mapNotNull(
+                    Tag::toMap)?.forEach { tag ->
+                tag["ID"]?.toInt()?.let {
+                    val entity = EntityServer.make(it, terrain.world)
+                    tag["UUID"]?.toUUID()?.let { entity.setEntityID(it) }
+                    tag["Data"]?.toMap()?.let { entity.read(it) }
+                    addEntity(entity)
+                    val newTick = terrain.world.tick
+                    if (newTick > oldTick) {
+                        entity.tickSkip(oldTick, newTick)
+                    }
                 }
             }
-        }
-        map["Updates"]?.toList()?.asSequence()?.mapNotNull(
-                Tag::toMap)?.forEach { tag ->
-            var xy = tag["PosXY"]?.toInt() ?: 0
-            if (xy < 0) {
-                xy += 256
+            map["Updates"]?.toList()?.asSequence()?.mapNotNull(
+                    Tag::toMap)?.forEach { tag ->
+                var xy = tag["PosXY"]?.toInt() ?: 0
+                if (xy < 0) {
+                    xy += 256
+                }
+                addDelayedUpdate(Update.make(terrain.world.plugins.registry,
+                        (xy and 0xF) + posBlock.x,
+                        (xy ushr 4) + posBlock.y,
+                        tag["PosZ"]?.toInt() ?: 0,
+                        tag["Delay"]?.toDouble() ?: 0.0,
+                        tag["ID"]?.toInt() ?: 0).apply { isPaused = false })
             }
-            addDelayedUpdate(Update.make(terrain.world.plugins.registry,
-                    (xy and 0xF) + posBlock.x,
-                    (xy ushr 4) + posBlock.y,
-                    tag["PosZ"]?.toInt() ?: 0, tag["Delay"]?.toDouble() ?: 0.0,
-                    tag["ID"]?.toInt() ?: 0))
+            if (map["Populated"]?.toBoolean() ?: false) {
+                state = TerrainInfiniteBaseChunk.State.POPULATED
+            }
+            map["MetaData"]?.toMap()?.let { metaData = it.toMutTag() }
+            initHeightMap()
         }
-        if (map["Populated"]?.toBoolean() ?: false) {
-            state = TerrainInfiniteBaseChunk.State.POPULATED
-        }
-        map["MetaData"]?.toMap()?.let { metaData = it.toMutTag() }
-        initHeightMap()
     }
 
     fun write(map: ReadWriteTagMap,
               packet: Boolean) {
         val tick = terrain.world.tick
+        val data = data
         lockWrite {
-            idData.forEach { it.compress() }
-            dataData.forEach { it.compress() }
-            lightData.forEach { it.compress() }
+            data.idData.forEach { it.compress() }
+            data.dataData.forEach { it.compress() }
+            data.lightData.forEach { it.compress() }
             map["BlockID"] =
-                    TagList(idData.asSequence().map { it.toTag() })
+                    TagList(data.idData.asSequence().map { it.toTag() })
             map["BlockData"] =
-                    TagList(dataData.asSequence().map { it.toTag() })
+                    TagList(data.dataData.asSequence().map { it.toTag() })
             map["BlockLight"] =
-                    TagList(lightData.asSequence().map { it.toTag() })
-        }
-        map["MetaData"] = metaData.toTag()
-        if (!packet) {
-            map["Tick"] = tick
-            val registry = terrain.world.registry
-            map["Entities"] = TagList {
-                entitiesMut.values.forEach { entity ->
-                    add(TagMap {
-                        this["UUID"] = entity.getUUID()
-                        this["ID"] = entity.type.id
-                        this["Data"] = TagMap { entity.write(this) }
-                    })
+                    TagList(data.lightData.asSequence().map { it.toTag() })
+            map["MetaData"] = metaData.toTag()
+            if (!packet) {
+                map["Tick"] = tick
+                map["Entities"] = TagList {
+                    entitiesMut.values.forEach { entity ->
+                        add(TagMap {
+                            this["UUID"] = entity.getUUID()
+                            this["ID"] = entity.type.id
+                            this["Data"] = TagMap { entity.write(this) }
+                        })
+                    }
                 }
-            }
-            map["Updates"] = TagList {
-                synchronized(delayedUpdates) {
+                map["Updates"] = TagList {
                     delayedUpdates.asSequence().filter { update ->
                         update.isValidOn(
                                 typeG(update.x(), update.y(), update.z()),
@@ -296,62 +276,61 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                         })
                     }
                 }
+                map["Populated"] = state.id >= TerrainInfiniteBaseChunk.State.POPULATED.id
             }
-            map["Populated"] = state.id >= TerrainInfiniteBaseChunk.State.POPULATED.id
         }
     }
 
     private fun generate(generator: ChunkGenerator,
                          output: GeneratorOutput) {
         generator.seed(posBlock.x, posBlock.y)
-        lockWrite {
-            for (y in 0..15) {
-                val yy = posBlock.y + y
-                for (x in 0..15) {
-                    val xx = posBlock.x + x
-                    generator.makeLand(xx, yy, 0, zSize, output)
-                    for (z in 0..zSize - 1) {
-                        val type = output.type[z]
-                        if (type != 0) {
-                            setID(x, y, z, type)
-                            val data = output.data[z]
-                            if (data != 0) {
-                                setData(x, y, z, data)
-                            }
+        // We do not need to lock here as the chunk is not added anywhere
+        // yet and this might get triggered in a locked context causing
+        // a crash
+        val data = data
+        for (y in 0..15) {
+            val yy = posBlock.y + y
+            for (x in 0..15) {
+                val xx = posBlock.x + x
+                generator.makeLand(xx, yy, 0, zSize, output)
+                for (z in 0..zSize - 1) {
+                    val type = output.type[z]
+                    if (type != 0) {
+                        data.setID(x, y, z, type)
+                        val blockData = output.data[z]
+                        if (blockData != 0) {
+                            data.setData(x, y, z, blockData)
                         }
                     }
-                    val registry = terrain.world.registry
-                    output.updates.forEach { addDelayedUpdate(it(registry)) }
-                    output.updates.clear()
                 }
+                val registry = terrain.world.registry
+                output.updates.forEach { delayedUpdates.add(it(registry)) }
+                output.updates.clear()
             }
         }
     }
 
     fun populate() {
         state = TerrainInfiniteBaseChunk.State.POPULATING
-        terrain.queue({ handle ->
-            terrain.populators.forEach { pop ->
-                pop.populate(handle, this)
-            }
+        terrain.populators.forEach { pop ->
+            pop.populate(terrain, this)
+        }
+        val data = data
+        lockWrite {
             updateSunLight()
-            lockWrite {
-                idData.forEach { it.compress() }
-                dataData.forEach { it.compress() }
-                lightData.forEach { it.compress() }
-            }
-            state = TerrainInfiniteBaseChunk.State.POPULATED
-        })
+            data.idData.forEach { it.compress() }
+            data.dataData.forEach { it.compress() }
+            data.lightData.forEach { it.compress() }
+        }
+        state = TerrainInfiniteBaseChunk.State.POPULATED
     }
 
     fun finish() {
-        terrain.queue({ handle ->
-            terrain.populators.forEach { pop ->
-                pop.load(handle, this)
-            }
-            state = TerrainInfiniteBaseChunk.State.BORDER
-            terrain.updateAdjacent(pos.x, pos.y)
-        })
+        terrain.populators.forEach { pop ->
+            pop.load(terrain, this)
+        }
+        state = TerrainInfiniteBaseChunk.State.BORDER
+        terrain.updateAdjacent(pos.x, pos.y)
     }
 
     val isSendable: Boolean

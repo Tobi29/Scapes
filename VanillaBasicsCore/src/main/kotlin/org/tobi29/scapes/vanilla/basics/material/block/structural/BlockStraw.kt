@@ -17,7 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.material.block.structural
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.entity.server.MobPlayerServer
@@ -26,7 +26,7 @@ import org.tobi29.scapes.vanilla.basics.material.block.BlockSimpleDataTextured
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateStrawDry
 
 class BlockStraw(type: VanillaMaterialType) : BlockSimpleDataTextured(type) {
-    override fun place(terrain: TerrainServer.TerrainMutable,
+    override fun place(terrain: TerrainMutableServer,
                        x: Int,
                        y: Int,
                        z: Int,
@@ -34,7 +34,7 @@ class BlockStraw(type: VanillaMaterialType) : BlockSimpleDataTextured(type) {
                        player: MobPlayerServer): Boolean {
         val random = threadLocalRandom()
         terrain.addDelayedUpdate(
-                UpdateStrawDry(terrain.world.registry).set(x, y, z,
+                UpdateStrawDry(player.world.registry).set(x, y, z,
                         random.nextDouble() * 800.0 + 800.0))
         return true
     }

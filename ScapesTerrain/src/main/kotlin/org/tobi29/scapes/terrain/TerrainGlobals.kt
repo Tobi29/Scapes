@@ -20,6 +20,8 @@ interface TerrainGlobals<out B : VoxelType> {
     val air: B
     val blocks: Array<out B?>
 
+    fun getThreadContext(): TerrainLock
+
     fun sunLightReduction(x: Int,
                           y: Int): Int
 
@@ -33,4 +35,14 @@ interface TerrainGlobals<out B : VoxelType> {
     }
 
     fun type(id: Int): B
+}
+
+interface TerrainLock {
+    val locked: Boolean
+
+    fun getThreadContext() = this
+
+    fun lock()
+
+    fun unlock()
 }

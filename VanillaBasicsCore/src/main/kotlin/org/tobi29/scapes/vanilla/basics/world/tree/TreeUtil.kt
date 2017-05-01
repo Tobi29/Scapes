@@ -17,7 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.world.tree
 
 import org.tobi29.scapes.block.BlockType
-import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.chunk.terrain.TerrainMutable
 import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.engine.utils.math.PI
@@ -26,11 +26,11 @@ import org.tobi29.scapes.engine.utils.math.sinTable
 import org.tobi29.scapes.engine.utils.math.vector.*
 
 object TreeUtil {
-    fun makeBranch(terrain: TerrainServer.TerrainMutable,
+    fun makeBranch(terrain: TerrainMutable,
                    start: Vector3i,
                    end: Vector3i,
                    type: BlockType,
-                   data: Short) {
+                   data: Int) {
         val distance = start distance end
         if (distance > 0.0) {
             val delta = Vector3d(end - start)
@@ -45,12 +45,12 @@ object TreeUtil {
         }
     }
 
-    fun changeBlock(terrain: TerrainServer.TerrainMutable,
+    fun changeBlock(terrain: TerrainMutable,
                     x: Int,
                     y: Int,
                     z: Int,
                     type: BlockType,
-                    data: Short) {
+                    data: Int) {
         if (terrain.block(x, y, z) {
             isReplaceable(terrain, x, y, z) || isTransparent(it)
         }) {
@@ -58,12 +58,12 @@ object TreeUtil {
         }
     }
 
-    fun makeLeaves(terrain: TerrainServer.TerrainMutable,
+    fun makeLeaves(terrain: TerrainMutable,
                    x: Int,
                    y: Int,
                    z: Int,
                    type: BlockType,
-                   data: Short,
+                   data: Int,
                    size: Int) {
         for (xx in -size..size) {
             for (yy in -size..size) {
@@ -77,12 +77,12 @@ object TreeUtil {
         }
     }
 
-    fun makeWillowLeaves(terrain: TerrainServer.TerrainMutable,
+    fun makeWillowLeaves(terrain: TerrainMutable,
                          x: Int,
                          y: Int,
                          z: Int,
                          type: BlockType,
-                         data: Short,
+                         data: Int,
                          size: Int,
                          vineLength: Int,
                          vineLengthRandom: Int,
@@ -110,12 +110,12 @@ object TreeUtil {
         }
     }
 
-    fun makeLayer(terrain: TerrainServer.TerrainMutable,
+    fun makeLayer(terrain: TerrainMutable,
                   x: Int,
                   y: Int,
                   z: Int,
                   type: BlockType,
-                  data: Short,
+                  data: Int,
                   size: Int) {
         val sizeSqr = size * size
         for (yy in -size..size) {
@@ -129,12 +129,12 @@ object TreeUtil {
         }
     }
 
-    fun makeRandomLayer(terrain: TerrainServer.TerrainMutable,
+    fun makeRandomLayer(terrain: TerrainMutable,
                         x: Int,
                         y: Int,
                         z: Int,
                         type: BlockType,
-                        data: Short,
+                        data: Int,
                         size: Int,
                         sizeRandom: Int,
                         random: Random) {
@@ -151,14 +151,14 @@ object TreeUtil {
         }
     }
 
-    fun makePalmLeaves(terrain: TerrainServer.TerrainMutable,
+    fun makePalmLeaves(terrain: TerrainMutable,
                        x: Int,
                        y: Int,
                        z: Int,
                        type: BlockType,
-                       data: Short,
+                       data: Int,
                        logType: BlockType,
-                       logData: Short,
+                       logData: Int,
                        length: Int,
                        height: Int,
                        dirX: Int,
@@ -185,12 +185,12 @@ object TreeUtil {
         }
     }
 
-    fun fillGround(terrain: TerrainServer.TerrainMutable,
+    fun fillGround(terrain: TerrainMutable,
                    x: Int,
                    y: Int,
                    z: Int,
                    type: BlockType,
-                   data: Short,
+                   data: Int,
                    maxDepth: Int) {
         for (i in 0..maxDepth - 1) {
             if (terrain.type(x, y, z - i).isReplaceable(terrain, x, y, z - i)) {

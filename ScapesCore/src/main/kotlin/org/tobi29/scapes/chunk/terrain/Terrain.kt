@@ -56,13 +56,19 @@ interface TerrainServer : TerrainEntity<EntityServer> {
     fun update(delta: Double,
                spawners: Collection<MobSpawner>)
 
-    fun queue(blockChanges: (TerrainServer.TerrainMutable) -> Unit)
+    fun <R> modify(x: Int,
+                   y: Int,
+                   z: Int,
+                   dx: Int,
+                   dy: Int,
+                   dz: Int,
+                   block: (TerrainMutableServer) -> R): R
 
-    fun queue(blockChanges: TerrainServer.BlockChanges) {
-        queue { blockChanges.run(it) }
-    }
-
-    fun addDelayedUpdate(update: Update)
+    fun <R> modify(x: Int,
+                   y: Int,
+                   z: Int,
+                   block: (TerrainMutableServer) -> R): R =
+            modify(x, y, z, 1, 1, 1, block)
 
     fun hasDelayedUpdate(x: Int,
                          y: Int,
@@ -78,33 +84,38 @@ interface TerrainServer : TerrainEntity<EntityServer> {
     fun chunks(consumer: (TerrainChunk) -> Unit)
 
     fun dispose()
+}
 
-    interface BlockChanges {
-        fun run(handler: TerrainMutable)
+interface TerrainMutable : Terrain {
+    fun block(x: Int,
+              y: Int,
+              z: Int,
+              block: Long) {
+        typeData(x, y, z, type(block), data(block))
     }
 
-    interface TerrainMutable : TerrainServer {
-        fun block(x: Int,
-                  y: Int,
-                  z: Int,
-                  block: Long) {
-            typeData(x, y, z, type(block), data(block))
-        }
+    fun type(x: Int,
+             y: Int,
+             z: Int,
+             type: BlockType)
 
-        fun type(x: Int,
+    fun data(x: Int,
+             y: Int,
+             z: Int,
+             data: Int)
+
+    fun typeData(x: Int,
                  y: Int,
                  z: Int,
-                 type: BlockType)
-
-        fun data(x: Int,
-                 y: Int,
-                 z: Int,
+                 type: BlockType,
                  data: Int)
+}
 
-        fun typeData(x: Int,
-                     y: Int,
-                     z: Int,
-                     block: BlockType,
-                     data: Int)
-    }
+interface TerrainMutableServer : TerrainMutable {
+    fun hasDelayedUpdate(x: Int,
+                         y: Int,
+                         z: Int,
+                         clazz: Class<out Update>): Boolean
+
+    fun addDelayedUpdate(update: Update)
 }

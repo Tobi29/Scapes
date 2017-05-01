@@ -40,7 +40,7 @@ class BlockAir(type: MaterialType) : BlockType(type) {
 
     override fun click(entity: MobPlayerServer,
                        item: ItemStack,
-                       terrain: TerrainServer.TerrainMutable,
+                       terrain: TerrainServer,
                        x: Int,
                        y: Int,
                        z: Int,
@@ -78,11 +78,6 @@ class BlockAir(type: MaterialType) : BlockType(type) {
     override fun resistance(item: ItemStack,
                             data: Int): Double {
         return -1.0
-    }
-
-    override fun drops(item: ItemStack,
-                       data: Int): List<ItemStack> {
-        return emptyList()
     }
 
     override fun footStepSound(data: Int) = null

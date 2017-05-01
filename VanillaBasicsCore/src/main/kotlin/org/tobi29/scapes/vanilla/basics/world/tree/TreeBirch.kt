@@ -20,40 +20,39 @@ import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 
-class TreeBirch : Tree {
-
-    companion object {
-        val INSTANCE = TreeBirch()
-    }
-
-    override fun gen(terrain: TerrainServer.TerrainMutable,
+object TreeBirch : Tree {
+    override fun gen(terrain: TerrainServer,
                      x: Int,
                      y: Int,
                      z: Int,
                      materials: VanillaMaterial,
                      random: Random) {
-        if (terrain.type(x, y, z - 1) !== materials.grass) {
+        if (terrain.type(x, y, z - 1) != materials.grass) {
             return
         }
-        if (terrain.type(x, y, z) !== materials.air) {
+        if (terrain.type(x, y, z) != materials.air) {
             return
         }
         val size = random.nextInt(4) + 14
-        var leavesSize = 2.0f
-        TreeUtil.makeRandomLayer(terrain, x, y, z + size, materials.leaves,
-                1.toShort(), 1, 1, random)
-        for (zz in size - 1 downTo 0) {
-            TreeUtil.changeBlock(terrain, x, y, z + zz, materials.log,
-                    1.toShort())
-            if (zz > 6) {
-                leavesSize += 0.25f
-            } else {
-                leavesSize--
-            }
-            if (leavesSize > 0) {
-                TreeUtil.makeRandomLayer(terrain, x, y, z + zz,
-                        materials.leaves, 1.toShort(), leavesSize.toInt(), 1,
-                        random)
+        val range = 3 + ((size - 6) shr 2)
+        val data = materials.plugin.treeTypes.BIRCH.id
+        terrain.modify(x - range, y - range, z, (range shl 1) + 1,
+                (range shl 1) + 1, size + 1) { terrain ->
+            var leavesSize = 2.0
+            TreeUtil.makeRandomLayer(terrain, x, y, z + size, materials.leaves,
+                    data, 1, 1, random)
+            for (zz in size - 1 downTo 0) {
+                TreeUtil.changeBlock(terrain, x, y, z + zz, materials.log, data)
+                if (zz > 6) {
+                    leavesSize += 0.25
+                } else {
+                    leavesSize--
+                }
+                if (leavesSize > 0) {
+                    TreeUtil.makeRandomLayer(terrain, x, y, z + zz,
+                            materials.leaves, data, leavesSize.toInt(), 1,
+                            random)
+                }
             }
         }
     }

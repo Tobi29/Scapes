@@ -18,10 +18,10 @@ package org.tobi29.scapes.vanilla.basics.entity.server
 
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.min
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.server.EntityAbstractServer
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
@@ -73,13 +73,15 @@ class EntityFarmlandServer(type: EntityType<*, *>,
             val materials = plugin.materials
             val cropType = this.cropType
             if (cropType == null) {
-                world.terrain.queue { handler ->
+                world.terrain.modify(pos.intX(), pos.intY(),
+                        pos.intZ() + 1) { handler ->
                     handler.typeData(pos.intX(), pos.intY(), pos.intZ() + 1,
                             materials.air, 0)
                 }
             } else {
                 val stage = this.stage.toInt()
-                world.terrain.queue { handler ->
+                world.terrain.modify(pos.intX(), pos.intY(),
+                        pos.intZ() + 1) { handler ->
                     handler.typeData(pos.intX(), pos.intY(), pos.intZ() + 1,
                             materials.crop,
                             stage + (cropType.id shl 3) - 1)

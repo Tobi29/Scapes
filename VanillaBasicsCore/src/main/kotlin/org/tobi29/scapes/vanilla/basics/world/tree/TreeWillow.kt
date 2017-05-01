@@ -21,77 +21,65 @@ import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 
-class TreeWillow : Tree {
-
-    companion object {
-        val INSTANCE = TreeWillow()
-    }
-
-    override fun gen(terrain: TerrainServer.TerrainMutable,
+object TreeWillow : Tree {
+    override fun gen(terrain: TerrainServer,
                      x: Int,
                      y: Int,
                      z: Int,
                      materials: VanillaMaterial,
                      random: Random) {
-        if (terrain.type(x, y, z - 1) !== materials.grass) {
+        if (terrain.type(x, y, z - 1) != materials.grass) {
             return
         }
-        if (terrain.type(x, y, z) !== materials.air) {
+        if (terrain.type(x, y, z) != materials.air) {
             return
         }
         val size = random.nextInt(2) + 4
-        TreeUtil.fillGround(terrain, x - 1, y - 1, z - 2, materials.log,
-                6.toShort(), 2 + random.nextInt(5))
-        TreeUtil.fillGround(terrain, x - 1, y, z - 1, materials.log,
-                6.toShort(),
-                2 + random.nextInt(5))
-        TreeUtil.fillGround(terrain, x - 1, y + 1, z - 2, materials.log,
-                6.toShort(), 2 + random.nextInt(5))
-        TreeUtil.fillGround(terrain, x, y - 1, z - 1, materials.log,
-                6.toShort(),
-                2 + random.nextInt(5))
-        TreeUtil.fillGround(terrain, x, y, z - 1, materials.log, 6.toShort(),
-                2 + random.nextInt(5))
-        TreeUtil.fillGround(terrain, x, y + 1, z - 1, materials.log,
-                6.toShort(),
-                2 + random.nextInt(5))
-        TreeUtil.fillGround(terrain, x + 1, y - 1, z - 2, materials.log,
-                6.toShort(), 2 + random.nextInt(5))
-        TreeUtil.fillGround(terrain, x + 1, y, z - 1, materials.log,
-                6.toShort(),
-                2 + random.nextInt(5))
-        TreeUtil.fillGround(terrain, x + 1, y + 1, z - 2, materials.log,
-                6.toShort(), 2 + random.nextInt(5))
-        TreeUtil.fillGround(terrain, x - 2, y, z - 3, materials.log,
-                6.toShort(),
-                2 + random.nextInt(5))
-        TreeUtil.fillGround(terrain, x + 2, y, z - 3, materials.log,
-                6.toShort(),
-                2 + random.nextInt(5))
-        TreeUtil.fillGround(terrain, x, y - 2, z - 3, materials.log,
-                6.toShort(),
-                2 + random.nextInt(5))
-        TreeUtil.fillGround(terrain, x, y + 2, z - 3, materials.log,
-                6.toShort(),
-                2 + random.nextInt(5))
-        for (zz in 0..size + 2 - 1) {
-            TreeUtil.makeLayer(terrain, x, y, z + zz, materials.log,
-                    6.toShort(),
-                    1)
-        }
-        val branches = ArrayList<Vector3i>()
-        for (i in 0..random.nextInt(4) + 4 - 1) {
-            branches.add(Vector3i(random.nextInt(9) - 4 + x,
-                    random.nextInt(9) - 4 + y, random.nextInt(2) + z + size))
-        }
-        branches.add(Vector3i(x, y, z + size))
-        val begin = Vector3i(x, y, z + size)
-        for (branch in branches) {
-            TreeUtil.makeBranch(terrain, begin, branch, materials.log,
-                    6.toShort())
-            TreeUtil.makeWillowLeaves(terrain, branch.x, branch.y,
-                    branch.z, materials.leaves, 6.toShort(), 6, 3, 4, 10,
-                    random)
+        val data = materials.plugin.treeTypes.WILLOW.id
+        terrain.modify(x - 11, y - 11, z - 9, 23, 23, size + 16) { terrain ->
+            TreeUtil.fillGround(terrain, x - 1, y - 1, z - 2, materials.log,
+                    data, 2 + random.nextInt(5))
+            TreeUtil.fillGround(terrain, x - 1, y, z - 1, materials.log,
+                    data, 2 + random.nextInt(5))
+            TreeUtil.fillGround(terrain, x - 1, y + 1, z - 2, materials.log,
+                    data, 2 + random.nextInt(5))
+            TreeUtil.fillGround(terrain, x, y - 1, z - 1, materials.log,
+                    data, 2 + random.nextInt(5))
+            TreeUtil.fillGround(terrain, x, y, z - 1, materials.log,
+                    data, 2 + random.nextInt(5))
+            TreeUtil.fillGround(terrain, x, y + 1, z - 1, materials.log,
+                    data, 2 + random.nextInt(5))
+            TreeUtil.fillGround(terrain, x + 1, y - 1, z - 2, materials.log,
+                    data, 2 + random.nextInt(5))
+            TreeUtil.fillGround(terrain, x + 1, y, z - 1, materials.log,
+                    data, 2 + random.nextInt(5))
+            TreeUtil.fillGround(terrain, x + 1, y + 1, z - 2, materials.log,
+                    data, 2 + random.nextInt(5))
+            TreeUtil.fillGround(terrain, x - 2, y, z - 3, materials.log,
+                    data, 2 + random.nextInt(5))
+            TreeUtil.fillGround(terrain, x + 2, y, z - 3, materials.log,
+                    data, 2 + random.nextInt(5))
+            TreeUtil.fillGround(terrain, x, y - 2, z - 3, materials.log,
+                    data, 2 + random.nextInt(5))
+            TreeUtil.fillGround(terrain, x, y + 2, z - 3, materials.log,
+                    data, 2 + random.nextInt(5))
+            for (zz in 0..size + 2 - 1) {
+                TreeUtil.makeLayer(terrain, x, y, z + zz, materials.log, data,
+                        1)
+            }
+            val branches = ArrayList<Vector3i>()
+            for (i in 0..random.nextInt(4) + 4 - 1) {
+                branches.add(Vector3i(random.nextInt(9) - 4 + x,
+                        random.nextInt(9) - 4 + y,
+                        random.nextInt(2) + z + size))
+            }
+            branches.add(Vector3i(x, y, z + size))
+            val begin = Vector3i(x, y, z + size)
+            for (branch in branches) {
+                TreeUtil.makeBranch(terrain, begin, branch, materials.log, data)
+                TreeUtil.makeWillowLeaves(terrain, branch.x, branch.y, branch.z,
+                        materials.leaves, data, 6, 3, 4, 10, random)
+            }
         }
     }
 }

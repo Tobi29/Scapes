@@ -23,6 +23,8 @@ abstract class Update(val type: UpdateType) {
     protected var y = 0
     protected var z = 0
     protected var delay = 0.0
+    var isPaused = true
+        internal set
     var isValid = true
         private set
 
@@ -62,7 +64,7 @@ abstract class Update(val type: UpdateType) {
         return z
     }
 
-    abstract fun run(terrain: TerrainServer.TerrainMutable)
+    abstract fun run(terrain: TerrainServer)
 
     abstract fun isValidOn(type: BlockType,
                            terrain: TerrainServer): Boolean

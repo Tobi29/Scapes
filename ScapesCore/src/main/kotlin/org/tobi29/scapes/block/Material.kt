@@ -39,7 +39,7 @@ abstract class Material(type: MaterialType) {
 
     open fun click(entity: MobPlayerServer,
                    item: ItemStack,
-                   terrain: TerrainServer.TerrainMutable,
+                   terrain: TerrainServer,
                    x: Int,
                    y: Int,
                    z: Int,

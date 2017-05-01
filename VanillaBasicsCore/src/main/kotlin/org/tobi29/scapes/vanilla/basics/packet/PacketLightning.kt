@@ -82,8 +82,7 @@ class PacketLightning : PacketAbstract, PacketClient {
             }
             val random = threadLocalRandom()
             mob.world.playSound(SOUNDS[random.nextInt(3)], pos, Vector3d.ZERO,
-                    1.0f,
-                    64.0f)
+                    1.0, 64.0)
         }
     }
 

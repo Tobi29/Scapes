@@ -18,7 +18,7 @@ package org.tobi29.scapes.vanilla.basics.material.block.rock
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.block.TerrainTextureRegistry
-import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
 import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.toArray
@@ -27,7 +27,7 @@ import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.util.dropItem
 
 abstract class BlockOre(type: VanillaMaterialType) : BlockStone(type) {
-    override fun destroy(terrain: TerrainServer.TerrainMutable,
+    override fun destroy(terrain: TerrainMutableServer,
                          x: Int,
                          y: Int,
                          z: Int,
@@ -41,7 +41,7 @@ abstract class BlockOre(type: VanillaMaterialType) : BlockStone(type) {
         if ("Pickaxe" == item.material().toolType(item) && !canBeBroken(
                 item.material().toolLevel(item), data)) {
             drops(item, data).forEach {
-                terrain.world.dropItem(it, x + face.x, y + face.y, z + face.z)
+                player.world.dropItem(it, x + face.x, y + face.y, z + face.z)
             }
             terrain.type(x, y, z, materials.stoneRaw)
             return false

@@ -45,10 +45,11 @@ class WorldServer(worldFormat: WorldFormat,
                   val id: String,
                   seed: Long,
                   val connection: ServerConnection,
+                  taskExecutor: TaskExecutor,
                   terrainSupplier: (WorldServer) -> TerrainServer,
                   environmentSupplier: (WorldServer) -> EnvironmentServer) : World<EntityServer>(
-        worldFormat.plugins, UpdateLoop(connection.server.taskExecutor),
-        worldFormat.plugins.registry,
+        worldFormat.plugins, UpdateLoop(taskExecutor),
+        taskExecutor, worldFormat.plugins.registry,
         seed), TagMapWrite, PlayConnection<PacketClient> {
     private val entityListeners = ConcurrentHashSet<(EntityServer) -> Unit>()
     private val spawners = ConcurrentHashSet<MobSpawner>()
@@ -241,47 +242,33 @@ class WorldServer(worldFormat: WorldFormat,
         }
     }
 
-    fun dispose() {
-        terrain.dispose()
-    }
-
     fun playSound(audio: String,
                   entity: EntityServer,
-                  pitch: Float = 1.0f,
-                  gain: Float = 1.0f,
-                  range: Float = 16.0f) {
+                  pitch: Double = 1.0,
+                  gain: Double = 1.0,
+                  referenceDistance: Double = 1.0,
+                  rolloffFactor: Double = 1.0) {
         if (entity is MobServer) {
             playSound(audio, entity.getCurrentPos(), entity.speed(), pitch,
-                    gain, range)
+                    gain, referenceDistance, rolloffFactor)
         } else {
             playSound(audio, entity.getCurrentPos(), Vector3d.ZERO, pitch, gain,
-                    range)
+                    referenceDistance, rolloffFactor)
         }
-    }
-
-    fun playSound(name: String,
-                  position: Vector3d,
-                  velocity: Vector3d) {
-        playSound(name, position, velocity, 1.0f, 1.0f)
-    }
-
-    fun playSound(audio: String,
-                  position: Vector3d,
-                  velocity: Vector3d,
-                  range: Float) {
-        playSound(audio, position, velocity, 1.0f, 1.0f, range)
     }
 
     fun playSound(audio: String?,
                   position: Vector3d,
                   velocity: Vector3d,
-                  pitch: Float,
-                  gain: Float,
-                  range: Float = 16.0f) {
+                  pitch: Double = 1.0,
+                  gain: Double = 1.0,
+                  referenceDistance: Double = 1.0,
+                  rolloffFactor: Double = 1.0) {
         if (audio != null) {
             if (!audio.isEmpty()) {
                 send(PacketSoundEffect(plugins.registry, audio, position,
-                        velocity, pitch, gain, range))
+                        velocity, pitch, gain, referenceDistance,
+                        rolloffFactor))
             }
         }
     }
@@ -305,6 +292,8 @@ class WorldServer(worldFormat: WorldFormat,
             }
         }
         joiner?.join()
+        terrain.dispose()
+        taskExecutor.shutdown()
     }
 
     fun start() {

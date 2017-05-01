@@ -69,7 +69,7 @@ abstract class ItemMetalTool(type: VanillaMaterialType) : VanillaItem(
 
     override fun click(entity: MobPlayerServer,
                        item: ItemStack,
-                       terrain: TerrainServer.TerrainMutable,
+                       terrain: TerrainServer,
                        x: Int,
                        y: Int,
                        z: Int,

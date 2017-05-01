@@ -18,6 +18,7 @@ package org.tobi29.scapes.vanilla.basics.material.block.device
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.chunk.WorldClient
+import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
@@ -35,10 +36,7 @@ class BlockHyperBomb(type: VanillaMaterialType) : BlockSimple(
                          x: Int,
                          y: Int,
                          z: Int) {
-        terrain.queue { handle ->
-            handle.explosionBlockPush(x + 0.5, y + 0.5, z + 0.5, 8.0, 0.2,
-                    0.1, 64.0, 48.0)
-        }
+        terrain.explosionBlockPush(x, y, z, 64, 0.0002, 0.0001, 64.0, 48.0)
     }
 
     override fun explodeClient(world: WorldClient,
@@ -65,7 +63,7 @@ class BlockHyperBomb(type: VanillaMaterialType) : BlockSimple(
                 })
     }
 
-    override fun destroy(terrain: TerrainServer.TerrainMutable,
+    override fun destroy(terrain: TerrainMutableServer,
                          x: Int,
                          y: Int,
                          z: Int,
@@ -77,9 +75,9 @@ class BlockHyperBomb(type: VanillaMaterialType) : BlockSimple(
             return false
         }
         val random = threadLocalRandom()
-        terrain.world.addEntityNew(
+        player.world.addEntityNew(
                 materials.plugin.entityTypes.bomb.createServer(
-                        terrain.world).apply {
+                        player.world).apply {
                     setPos(Vector3d(x + 0.5, y + 0.5, z + 0.5))
                     setSpeed(Vector3d(random.nextDouble() * 0.1 - 0.05,
                             random.nextDouble() * 0.1 - 0.05,

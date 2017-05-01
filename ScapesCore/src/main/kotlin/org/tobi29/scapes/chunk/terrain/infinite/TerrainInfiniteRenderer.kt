@@ -20,10 +20,10 @@ import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.TerrainRenderer
 import org.tobi29.scapes.engine.graphics.*
+import org.tobi29.scapes.engine.utils.AtomicBoolean
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.AtomicBoolean
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.min
 import org.tobi29.scapes.engine.utils.math.sqr
@@ -431,7 +431,7 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
     private class ThreadLocalData {
         val arrays = ChunkMesh.VertexArrays()
         val arraysAlpha = ChunkMesh.VertexArrays()
-        val section = TerrainInfiniteSection()
+        val section = TerrainInfiniteRenderSection()
 
         fun process(chunk: TerrainInfiniteRendererChunk,
                     i: Int,
@@ -446,7 +446,9 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
             } else {
                 val terrain = chunk.chunk().terrain
                 val air = terrain.air
-                section.init(terrain, terrainChunk.pos)
+                section.init(terrain, terrainChunk.posBlock.x - 16,
+                        terrainChunk.posBlock.y - 16, 0, 48, 48,
+                        terrainChunk.zSize, true)
                 val bx = terrainChunk.posBlock.x
                 val by = terrainChunk.posBlock.y
                 val bz = i shl 4
@@ -515,8 +517,7 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
                         val vao: Pair<Model, AABB>?
                         val vaoAlpha: Pair<Model, AABB>?
                         if (mesh.size() > 0) {
-                            vao = Pair(mesh.finish(engine),
-                                    AABB(0.0, 0.0, 0.0, 16.0, 16.0, 16.0))
+                            vao = Pair(mesh.finish(engine), mesh.aabb())
                         } else {
                             vao = null
                         }
@@ -526,8 +527,7 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
                         } else {
                             vaoAlpha = null
                         }
-                        model = TerrainInfiniteChunkModel(vao, vaoAlpha,
-                                lod)
+                        model = TerrainInfiniteChunkModel(vao, vaoAlpha, lod)
                     }
                 }
                 section.clear()

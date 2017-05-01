@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.vanilla.basics.world.tree
+package org.tobi29.scapes.chunk.terrain.infinite
 
-import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.Random
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.block.BlockType
+import org.tobi29.scapes.chunk.terrain.Terrain
+import org.tobi29.scapes.terrain.infinite.TerrainInfiniteMutableSection
 
-interface Tree {
-    fun gen(terrain: TerrainServer,
-            x: Int,
-            y: Int,
-            z: Int,
-            materials: VanillaMaterial,
-            random: Random)
-}
+class TerrainInfiniteClientSection : TerrainInfiniteMutableSection<BlockType, TerrainInfiniteChunkClient, TerrainInfiniteClient>(), Terrain

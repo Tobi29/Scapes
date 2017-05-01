@@ -16,8 +16,8 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
-import org.tobi29.scapes.engine.utils.andNull
 import org.tobi29.scapes.engine.utils.AtomicBoolean
+import org.tobi29.scapes.engine.utils.andNull
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.tag.*
@@ -106,24 +106,23 @@ class TerrainInfiniteChunkClient(pos: Vector2i,
     }
 
     fun read(map: TagMap) {
-        lockWrite {
-            map["BlockID"]?.toList()?.let {
-                (idData.asSequence() zip it.asSequence().mapNotNull(
-                        Tag::toMap).andNull()).forEach { (data, tag) ->
-                    data.read(tag)
-                }
+        val data = data
+        map["BlockID"]?.toList()?.let {
+            (data.idData.asSequence() zip it.asSequence().mapNotNull(
+                    Tag::toMap).andNull()).forEach { (data, tag) ->
+                data.read(tag)
             }
-            map["BlockData"]?.toList()?.let {
-                (dataData.asSequence() zip it.asSequence().mapNotNull(
-                        Tag::toMap).andNull()).forEach { (data, tag) ->
-                    data.read(tag)
-                }
+        }
+        map["BlockData"]?.toList()?.let {
+            (data.dataData.asSequence() zip it.asSequence().mapNotNull(
+                    Tag::toMap).andNull()).forEach { (data, tag) ->
+                data.read(tag)
             }
-            map["BlockLight"]?.toList()?.let {
-                (lightData.asSequence() zip it.asSequence().mapNotNull(
-                        Tag::toMap).andNull()).forEach { (data, tag) ->
-                    data.read(tag)
-                }
+        }
+        map["BlockLight"]?.toList()?.let {
+            (data.lightData.asSequence() zip it.asSequence().mapNotNull(
+                    Tag::toMap).andNull()).forEach { (data, tag) ->
+                data.read(tag)
             }
         }
         map["MetaData"]?.toMap()?.let { metaData = it.toMutTag() }

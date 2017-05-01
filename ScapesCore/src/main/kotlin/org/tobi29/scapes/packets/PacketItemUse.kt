@@ -100,17 +100,15 @@ class PacketItemUse : PacketAbstract, PacketServer {
                     }
                     if (!flag && strength > 0.0) {
                         world.loop.addTaskOnce({
-                            terrain.queue { handler ->
-                                mob.inventories().modify("Container") {
-                                    val br = item.material().click(mob, item,
-                                            handler, x, y, z, face)
-                                    if (br > 0.0) {
-                                        val block = handler.block(x, y, z)
-                                        val type = handler.type(block)
-                                        val data = handler.data(block)
-                                        type.punch(handler, x, y, z, data, face,
-                                                mob, item, br, strength)
-                                    }
+                            mob.inventories().modify("Container") {
+                                val br = item.material().click(mob, item,
+                                        terrain, x, y, z, face)
+                                if (br > 0.0) {
+                                    val block = terrain.block(x, y, z)
+                                    val type = terrain.type(block)
+                                    val data = terrain.data(block)
+                                    type.punch(terrain, x, y, z, data, face,
+                                            mob, item, br, strength)
                                 }
                             }
                         }, "Block-Break",

@@ -71,7 +71,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
     private var downfallWait = 0.0
     private var exposure = 0.3
     private var fogBrightness = 0.0f
-    private var rainGain = 0.0f
+    private var rainGain = 0.0
     private var fogR = 0.0f
     private var fogG = 0.0f
     private var fogB = 0.0f
@@ -189,12 +189,11 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                     ParticleEmitterRain::class.java)
             val rainDrops = emitter.andResetRaindrops
             rainGainWait += 0.05
-            rainGain += (rainDrops / 128.0f - rainGain) * 0.04f
-            rainGain = clamp(rainGain, 0.0f, 1.0f)
-            rainAudio?.setGain(rainGain)
+            rainGain += (rainDrops / 128.0 - rainGain) * 0.04
+            rainGain = clamp(rainGain, 0.0, 1.0)
+            rainAudio?.gain = rainGain
         }
-        windAudio?.setGain(
-                clamp(weather * 8.0 - 6.0, 0.0, 1.0).toFloat())
+        windAudio?.gain = clamp(weather * 8.0 - 6.0, 0.0, 1.0)
         downfallWait -= delta
         while (downfallWait <= 0.0) {
             downfallWait += 0.05
@@ -286,10 +285,10 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
         exposureDebug = debugValues["Vanilla-Exposure"]
         rainAudio = engine.sounds.playStaticAudio(
                 "VanillaBasics:sound/entity/particle/rain/Rain1.ogg",
-                "sound.Weather", 1.0f, 0.0f)
+                "sound.Weather", 1.0, 0.0)
         windAudio = engine.sounds.playStaticAudio(
                 "VanillaBasics:sound/entity/particle/rain/Wind1.ogg",
-                "sound.Weather", 1.0f, 0.0f)
+                "sound.Weather", 1.0, 0.0)
         val player = world.player
         if (player is MobPlayerClientMainVB) {
             val hud = player.game.hud.addHori(0.0, 0.0, -1.0, -1.0,

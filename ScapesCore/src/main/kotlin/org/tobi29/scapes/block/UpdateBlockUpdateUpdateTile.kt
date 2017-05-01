@@ -22,7 +22,7 @@ class UpdateBlockUpdateUpdateTile(type: UpdateType) : UpdateBlockUpdate(type) {
     constructor(registry: Registries) : this(
             of(registry, "core.update.BlockUpdateUpdateTile"))
 
-    override fun run(terrain: TerrainServer.TerrainMutable) {
+    override fun run(terrain: TerrainServer) {
         updateBlock(terrain, x, y, z, true)
         updateBlock(terrain, x - 1, y, z, false)
         updateBlock(terrain, x + 1, y, z, false)

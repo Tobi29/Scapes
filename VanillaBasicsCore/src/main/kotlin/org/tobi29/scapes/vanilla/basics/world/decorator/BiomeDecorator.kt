@@ -41,7 +41,7 @@ class BiomeDecorator {
         return weight / weightCount
     }
 
-    fun decorate(terrain: TerrainServer.TerrainMutable,
+    fun decorate(terrain: TerrainServer,
                  x: Int,
                  y: Int,
                  materials: VanillaMaterial,
@@ -50,7 +50,7 @@ class BiomeDecorator {
     }
 
     interface Layer {
-        fun decorate(terrain: TerrainServer.TerrainMutable,
+        fun decorate(terrain: TerrainServer,
                      x: Int,
                      y: Int,
                      materials: VanillaMaterial,

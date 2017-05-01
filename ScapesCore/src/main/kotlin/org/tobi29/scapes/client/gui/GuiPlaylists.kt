@@ -109,7 +109,7 @@ class GuiPlaylists(state: GameState,
                 }
                 state.engine.sounds.stop("music")
                 state.engine.sounds.playMusic(read(path), "music.Playlist",
-                        1.0f, 1.0f, true)
+                        true, 1.0, 1.0)
             }
             delete.on(GuiEvent.CLICK_LEFT) {
                 try {

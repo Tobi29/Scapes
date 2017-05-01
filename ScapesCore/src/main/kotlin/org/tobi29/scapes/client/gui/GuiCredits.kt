@@ -16,10 +16,10 @@
 
 package org.tobi29.scapes.client.gui
 
-import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.utils.IOException
+import org.tobi29.scapes.engine.utils.logging.KLogging
 
 class GuiCredits(state: GameState,
                  previous: Gui,
@@ -58,8 +58,7 @@ class GuiCredits(state: GameState,
 
         engine.sounds.stop("music")
         engine.sounds.playMusic("Scapes:sound/Credits.ogg",
-                "music.Credits", 1.0f,
-                1.0f, true)
+                "music.Credits", true, 1.0, 1.0)
     }
 
     companion object : KLogging()

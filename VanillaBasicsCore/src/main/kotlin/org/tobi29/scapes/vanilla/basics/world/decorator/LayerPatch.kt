@@ -17,6 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.world.decorator
 
 import org.tobi29.scapes.block.BlockType
+import org.tobi29.scapes.chunk.terrain.TerrainMutable
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
@@ -26,9 +27,9 @@ class LayerPatch(private val material: BlockType,
                  private val size: Int,
                  private val density: Int,
                  private val chance: Int,
-                 private val check: (TerrainServer.TerrainMutable, Int, Int, Int) -> Boolean) : BiomeDecorator.Layer {
+                 private val check: (TerrainMutable, Int, Int, Int) -> Boolean) : BiomeDecorator.Layer {
 
-    override fun decorate(terrain: TerrainServer.TerrainMutable,
+    override fun decorate(terrain: TerrainServer,
                           x: Int,
                           y: Int,
                           materials: VanillaMaterial,
@@ -37,9 +38,11 @@ class LayerPatch(private val material: BlockType,
             for (i in 0..density - 1) {
                 val xx = x + random.nextInt(size) - random.nextInt(size)
                 val yy = y + random.nextInt(size) - random.nextInt(size)
-                val z = terrain.highestTerrainBlockZAt(xx, yy)
-                if (check(terrain, xx, yy, z)) {
-                    terrain.typeData(xx, yy, z, material, data)
+                val zz = terrain.highestTerrainBlockZAt(xx, yy)
+                terrain.modify(xx, yy, zz - 1, 1, 1, 2) { terrain ->
+                    if (check(terrain, xx, yy, zz)) {
+                        terrain.typeData(xx, yy, zz, material, data)
+                    }
                 }
             }
         }

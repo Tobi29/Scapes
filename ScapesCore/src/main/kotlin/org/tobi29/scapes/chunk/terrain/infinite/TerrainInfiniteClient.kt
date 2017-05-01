@@ -19,6 +19,8 @@ package org.tobi29.scapes.chunk.terrain.infinite
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.terrain.TerrainClient
+import org.tobi29.scapes.engine.utils.ThreadLocal
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.sqr
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector2i
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
@@ -92,6 +94,8 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
         }, "Chunk-Requests")
     }
 
+    override fun getThreadContext() = SECTION.get()
+
     fun requestedChunks(): Int {
         return requestedChunks
     }
@@ -128,7 +132,9 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
         val y = packet.y()
         val z = packet.z()
         chunkC(x shr 4, y shr 4) { chunk ->
-            chunk.typeDataG(x, y, z, type(packet.id()), packet.data())
+            chunk.lockWrite {
+                chunk.typeDataG(x, y, z, type(packet.id()), packet.data())
+            }
         }
     }
 
@@ -190,5 +196,9 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
             chunk.addEntity(entity)
             true
         }) ?: false
+    }
+
+    companion object : KLogging() {
+        val SECTION = ThreadLocal { TerrainInfiniteClientSection() }
     }
 }

@@ -14,17 +14,29 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.vanilla.basics.world.tree
+package org.tobi29.scapes.terrain
 
-import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.Random
-import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+interface TerrainBaseMutable<B : VoxelType> : TerrainBase<B> {
+    fun block(x: Int,
+              y: Int,
+              z: Int,
+              block: Long) {
+        typeData(x, y, z, type(block), data(block))
+    }
 
-interface Tree {
-    fun gen(terrain: TerrainServer,
-            x: Int,
-            y: Int,
-            z: Int,
-            materials: VanillaMaterial,
-            random: Random)
+    fun type(x: Int,
+             y: Int,
+             z: Int,
+             type: B)
+
+    fun data(x: Int,
+             y: Int,
+             z: Int,
+             data: Int)
+
+    fun typeData(x: Int,
+                 y: Int,
+                 z: Int,
+                 type: B,
+                 data: Int)
 }

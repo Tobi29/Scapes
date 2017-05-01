@@ -21,7 +21,7 @@ open class UpdateBlockUpdate(type: UpdateType) : Update(type) {
     constructor(registry: Registries) : this(
             of(registry, "core.update.BlockUpdate"))
 
-    override fun run(terrain: TerrainServer.TerrainMutable) {
+    override fun run(terrain: TerrainServer) {
         updateBlock(terrain, x, y, z, false)
         updateBlock(terrain, x - 1, y, z, false)
         updateBlock(terrain, x + 1, y, z, false)
@@ -36,7 +36,7 @@ open class UpdateBlockUpdate(type: UpdateType) : Update(type) {
         return true
     }
 
-    protected fun updateBlock(terrain: TerrainServer.TerrainMutable,
+    protected fun updateBlock(terrain: TerrainServer,
                               x: Int,
                               y: Int,
                               z: Int,

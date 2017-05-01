@@ -34,6 +34,7 @@ import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toMutTag
 import org.tobi29.scapes.engine.utils.tag.toTag
+import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.engine.utils.threadLocalRandom
 import org.tobi29.scapes.plugins.PluginFile
 import org.tobi29.scapes.plugins.Plugins
@@ -132,7 +133,8 @@ open class SQLWorldFormat(protected val path: FilePath,
                                              seed: Long): WorldServer {
         val format = SQLTerrainInfiniteFormat(getChunk.supply(name),
                 replaceChunk.supply(name))
-        val world = WorldServer(this, name, seed, server.connection, {
+        val world = WorldServer(this, name, seed, server.connection,
+                TaskExecutor(server.taskExecutor, name), {
             TerrainInfiniteServer(it, 512, format, it.environment.generator(),
                     arrayOf(it.environment.populator()), it.air)
         }, environmentSupplier)

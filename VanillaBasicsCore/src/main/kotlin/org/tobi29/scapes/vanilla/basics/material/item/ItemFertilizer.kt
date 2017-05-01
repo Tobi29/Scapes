@@ -36,16 +36,18 @@ class ItemFertilizer(type: VanillaMaterialType) : VanillaItem(type) {
 
     override fun click(entity: MobPlayerServer,
                        item: ItemStack,
-                       terrain: TerrainServer.TerrainMutable,
+                       terrain: TerrainServer,
                        x: Int,
                        y: Int,
                        z: Int,
                        face: Face): Double {
-        val type = terrain.type(x, y, z)
-        if (type == materials.sapling) {
-            terrain.addDelayedUpdate(
-                    UpdateSaplingGrowth(terrain.world.registry).set(x, y, z,
-                            3.0))
+        terrain.modify(x, y, z) { terrain ->
+            val type = terrain.type(x, y, z)
+            if (type == materials.sapling) {
+                terrain.addDelayedUpdate(
+                        UpdateSaplingGrowth(entity.world.registry).set(x, y, z,
+                                3.0))
+            }
         }
         return 0.0
     }

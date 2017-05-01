@@ -20,6 +20,8 @@ import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.block.Update
 import org.tobi29.scapes.block.UpdateType
+import org.tobi29.scapes.chunk.terrain.Terrain
+import org.tobi29.scapes.chunk.terrain.TerrainMutable
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
@@ -29,7 +31,7 @@ class UpdateWaterFlow(type: UpdateType) : Update(type) {
     constructor(registry: Registries) : this(
             of(registry, "vanilla.basics.update.WaterFlow"))
 
-    private fun flow(terrain: TerrainServer.TerrainMutable,
+    private fun flow(terrain: TerrainMutable,
                      x: Int,
                      y: Int,
                      z: Int,
@@ -66,7 +68,7 @@ class UpdateWaterFlow(type: UpdateType) : Update(type) {
         return true
     }
 
-    private fun data(terrain: TerrainServer,
+    private fun data(terrain: Terrain,
                      x: Int,
                      y: Int,
                      z: Int,
@@ -84,16 +86,18 @@ class UpdateWaterFlow(type: UpdateType) : Update(type) {
         return oldData
     }
 
-    override fun run(terrain: TerrainServer.TerrainMutable) {
+    override fun run(terrain: TerrainServer) {
         val plugin = terrain.world.plugins.plugin(
                 "VanillaBasics") as VanillaBasics
         val materials = plugin.materials
-        flow(terrain, x, y, z, materials)
-        if (flow(terrain, x, y, z - 1, materials)) {
-            flow(terrain, x - 1, y, z, materials)
-            flow(terrain, x + 1, y, z, materials)
-            flow(terrain, x, y - 1, z, materials)
-            flow(terrain, x, y + 1, z, materials)
+        terrain.modify(x - 2, y - 2, z - 2, 5, 5, 5) { terrain ->
+            flow(terrain, x, y, z, materials)
+            if (flow(terrain, x, y, z - 1, materials)) {
+                flow(terrain, x - 1, y, z, materials)
+                flow(terrain, x + 1, y, z, materials)
+                flow(terrain, x, y - 1, z, materials)
+                flow(terrain, x, y + 1, z, materials)
+            }
         }
     }
 

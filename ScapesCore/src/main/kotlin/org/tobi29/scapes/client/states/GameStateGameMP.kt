@@ -104,6 +104,7 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         client.plugins.removeFileSystems(engine.files)
         client.plugins.dispose()
         engine.graphics.textures.clearCache()
+        engine.sounds.clearCache()
         logger.info { "Stopped game!" }
     }
 

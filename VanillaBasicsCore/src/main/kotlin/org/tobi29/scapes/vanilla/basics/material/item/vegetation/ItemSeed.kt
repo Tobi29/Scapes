@@ -33,7 +33,7 @@ class ItemSeed(type: VanillaMaterialType) : ItemSimpleData(
 
     override fun click(entity: MobPlayerServer,
                        item: ItemStack,
-                       terrain: TerrainServer.TerrainMutable,
+                       terrain: TerrainServer,
                        x: Int,
                        y: Int,
                        z: Int,
@@ -42,7 +42,7 @@ class ItemSeed(type: VanillaMaterialType) : ItemSimpleData(
             item.setAmount(item.amount() - 1)
             val random = threadLocalRandom()
             if (random.nextInt(1) == 0) {
-                terrain.world.getEntities(x, y,
+                entity.world.getEntities(x, y,
                         z).filterMap<EntityFarmlandServer>().forEach { farmland ->
                     farmland.seed(materials.plugin.cropTypes.WHEAT)
                 }

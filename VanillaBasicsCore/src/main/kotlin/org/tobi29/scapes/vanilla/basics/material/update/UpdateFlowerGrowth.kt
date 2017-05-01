@@ -29,45 +29,48 @@ class UpdateFlowerGrowth(type: UpdateType) : Update(type) {
     constructor(registry: Registries) : this(
             of(registry, "vanilla.basics.update.FlowerGrowth"))
 
-    override fun run(terrain: TerrainServer.TerrainMutable) {
+    override fun run(terrain: TerrainServer) {
         val plugin = terrain.world.plugins.plugin(
                 "VanillaBasics") as VanillaBasics
         val materials = plugin.materials
-        val type = terrain.type(x, y, z)
-        if (type == materials.air) {
-            if (terrain.sunLight(x, y, z) >= 12 && terrain.type(x, y,
-                    z - 1) == materials.grass) {
-                var flowers = 0
-                val datas = ArrayList<Int>()
-                for (xx in -4..4) {
-                    for (yy in -4..4) {
-                        for (zz in -4..4) {
-                            val searchBlock = terrain.block(x + xx, y + yy,
-                                    z + zz)
-                            if (terrain.type(searchBlock) == materials.flower) {
-                                if (flowers++ > 1) {
-                                    return
+        terrain.modify(x, y, z) { terrain ->
+            val type = terrain.type(x, y, z)
+            if (type == materials.air) {
+                if (terrain.sunLight(x, y, z) >= 12 && terrain.type(x, y,
+                        z - 1) == materials.grass) {
+                    var flowers = 0
+                    val datas = ArrayList<Int>()
+                    for (xx in -4..4) {
+                        for (yy in -4..4) {
+                            for (zz in -4..4) {
+                                val searchBlock = terrain.block(x + xx, y + yy,
+                                        z + zz)
+                                if (terrain.type(
+                                        searchBlock) == materials.flower) {
+                                    if (flowers++ > 1) {
+                                        return@modify
+                                    }
+                                    datas.add(terrain.data(searchBlock))
                                 }
-                                datas.add(terrain.data(searchBlock))
                             }
                         }
                     }
+                    if (datas.isEmpty()) {
+                        terrain.typeData(x, y, z, materials.flower,
+                                Random().nextInt(20).toShort().toInt())
+                    } else {
+                        terrain.typeData(x, y, z, materials.flower,
+                                datas[Random().nextInt(datas.size)])
+                    }
                 }
-                if (datas.isEmpty()) {
-                    terrain.typeData(x, y, z, materials.flower,
-                            Random().nextInt(20).toShort().toInt())
-                } else {
-                    terrain.typeData(x, y, z, materials.flower,
-                            datas[Random().nextInt(datas.size)])
+            } else if (type == materials.snow) {
+                if (terrain.sunLight(x, y, z) >= 12 && terrain.type(x, y,
+                        z - 1) == materials.grass) {
+                    val random = threadLocalRandom()
+                    terrain.addDelayedUpdate(
+                            UpdateFlowerGrowth(this.type).set(x, y, z,
+                                    random.nextDouble() * 3600.0 + 3600.0))
                 }
-            }
-        } else if (type == materials.snow) {
-            if (terrain.sunLight(x, y, z) >= 12 && terrain.type(x, y,
-                    z - 1) == materials.grass) {
-                val random = threadLocalRandom()
-                terrain.addDelayedUpdate(
-                        UpdateFlowerGrowth(this.type).set(x, y, z,
-                                random.nextDouble() * 3600.0 + 3600.0))
             }
         }
     }

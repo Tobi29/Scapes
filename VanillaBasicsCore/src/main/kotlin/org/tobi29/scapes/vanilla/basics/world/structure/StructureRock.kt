@@ -21,27 +21,30 @@ import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.engine.utils.math.ceil
 
-fun TerrainServer.TerrainMutable.genOreRock(x: Int,
-                                            y: Int,
-                                            z: Int,
-                                            stone: BlockType,
-                                            ore: BlockType,
-                                            data: Int,
-                                            oreChance: Int,
-                                            size: Double,
-                                            random: Random) {
+fun TerrainServer.genOreRock(x: Int,
+                             y: Int,
+                             z: Int,
+                             stone: BlockType,
+                             ore: BlockType,
+                             data: Int,
+                             oreChance: Int,
+                             size: Double,
+                             random: Random) {
     val ceilSize = ceil(size)
-    for (xx in -ceilSize..ceilSize) {
-        for (yy in -ceilSize..ceilSize) {
-            for (zz in -ceilSize..ceilSize) {
-                if (xx * xx + yy * yy + zz * zz <= size * size - random.nextDouble() * 3) {
-                    val type: BlockType
-                    if (random.nextInt(oreChance) == 0) {
-                        type = ore
-                    } else {
-                        type = stone
+    modify(x - ceilSize, y - ceilSize, z - ceilSize, (ceilSize shl 1) + 1,
+            (ceilSize shl 1) + 1, (ceilSize shl 1) + 1) { terrain ->
+        for (xx in -ceilSize..ceilSize) {
+            for (yy in -ceilSize..ceilSize) {
+                for (zz in -ceilSize..ceilSize) {
+                    if (xx * xx + yy * yy + zz * zz <= size * size - random.nextDouble() * 3) {
+                        val type: BlockType
+                        if (random.nextInt(oreChance) == 0) {
+                            type = ore
+                        } else {
+                            type = stone
+                        }
+                        terrain.typeData(x + xx, y + yy, z + zz, type, data)
                     }
-                    typeData(x + xx, y + yy, z + zz, type, data)
                 }
             }
         }

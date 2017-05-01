@@ -21,30 +21,33 @@ import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.engine.utils.math.sqr
 
-fun TerrainServer.TerrainMutable.genOre(x: Int,
-                                        y: Int,
-                                        z: Int,
-                                        stone: BlockType,
-                                        ore: BlockType,
-                                        sizeX: Int,
-                                        sizeY: Int,
-                                        sizeZ: Int,
-                                        chance: Int,
-                                        random: Random): Int {
+fun TerrainServer.genOre(x: Int,
+                         y: Int,
+                         z: Int,
+                         stone: BlockType,
+                         ore: BlockType,
+                         sizeX: Int,
+                         sizeY: Int,
+                         sizeZ: Int,
+                         chance: Int,
+                         random: Random): Int {
     var ores = 0
-    for (xx in -sizeX..sizeX) {
-        val xxx = x + xx
-        for (yy in -sizeY..sizeY) {
-            val yyy = y + yy
-            for (zz in -sizeZ..sizeZ) {
-                val zzz = z + zz
-                if (sqr(xx.toDouble() / sizeX) +
-                        sqr(yy.toDouble() / sizeY) +
-                        sqr(zz.toDouble() / sizeZ) < random.nextDouble() * 0.1 + 0.9) {
-                    if (random.nextInt(chance) == 0) {
-                        if (type(xxx, yyy, zzz) == stone) {
-                            type(xxx, yyy, zzz, ore)
-                            ores++
+    modify(x - sizeX, y - sizeY, z - sizeZ, (sizeX shl 1) + 1,
+            (sizeY shl 1) + 1, (sizeZ shl 1) + 1) {
+        for (xx in -sizeX..sizeX) {
+            val xxx = x + xx
+            for (yy in -sizeY..sizeY) {
+                val yyy = y + yy
+                for (zz in -sizeZ..sizeZ) {
+                    val zzz = z + zz
+                    if (sqr(xx.toDouble() / sizeX) +
+                            sqr(yy.toDouble() / sizeY) +
+                            sqr(zz.toDouble() / sizeZ) < random.nextDouble() * 0.1 + 0.9) {
+                        if (random.nextInt(chance) == 0) {
+                            if (type(xxx, yyy, zzz) == stone) {
+                                it.type(xxx, yyy, zzz, ore)
+                                ores++
+                            }
                         }
                     }
                 }

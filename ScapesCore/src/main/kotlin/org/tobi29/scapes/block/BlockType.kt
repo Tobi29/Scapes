@@ -25,8 +25,6 @@ import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.PointerPane
-import org.tobi29.scapes.engine.utils.math.vector.Vector3i
-import org.tobi29.scapes.engine.utils.math.vector.plus
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
 import org.tobi29.scapes.terrain.VoxelType
@@ -56,44 +54,6 @@ abstract class BlockType(type: MaterialType) : Material(type), VoxelType {
                    face: Face,
                    player: MobPlayerServer): Boolean {
         return false
-    }
-
-    override fun click(entity: MobPlayerServer,
-                       item: ItemStack,
-                       terrain: TerrainServer.TerrainMutable,
-                       x: Int,
-                       y: Int,
-                       z: Int,
-                       face: Face): Double {
-        val place = face.delta + Vector3i(x, y, z)
-        if (terrain.type(place.x, place.y,
-                place.z).isReplaceable(terrain, place.x,
-                place.y,
-                place.z)) {
-            val aabbs = collision(item.data(), place.x, place.y,
-                    place.z)
-            var flag = true
-            val coll = entity.getAABB()
-            for (element in aabbs) {
-                if (coll.overlay(
-                        element.aabb) && element.collision.isSolid) {
-                    flag = false
-                }
-            }
-            if (flag) {
-                entity.inventories().modify("Container") {
-                    terrain.data(place.x, place.y, place.z,
-                            item.data())
-                    if (place(terrain, place.x, place.y,
-                            place.z, face, entity)) {
-                        terrain.type(place.x, place.y,
-                                place.z, this)
-                        item.setAmount(item.amount() - 1)
-                    }
-                }
-            }
-        }
-        return 0.0
     }
 
     override fun click(entity: MobPlayerServer,
@@ -133,16 +93,7 @@ abstract class BlockType(type: MaterialType) : Material(type), VoxelType {
         return false
     }
 
-    open fun place(terrain: TerrainServer.TerrainMutable,
-                   x: Int,
-                   y: Int,
-                   z: Int,
-                   face: Face,
-                   player: MobPlayerServer): Boolean {
-        return true
-    }
-
-    open fun punch(terrain: TerrainServer.TerrainMutable,
+    open fun punch(terrain: TerrainServer,
                    x: Int,
                    y: Int,
                    z: Int,
@@ -154,24 +105,8 @@ abstract class BlockType(type: MaterialType) : Material(type), VoxelType {
                    strength: Double) {
     }
 
-    open fun destroy(terrain: TerrainServer.TerrainMutable,
-                     x: Int,
-                     y: Int,
-                     z: Int,
-                     data: Int,
-                     face: Face,
-                     player: MobPlayerServer,
-                     item: ItemStack): Boolean {
-        return true
-    }
-
     abstract fun resistance(item: ItemStack,
                             data: Int): Double
-
-    open fun drops(item: ItemStack,
-                   data: Int): List<ItemStack> {
-        return listOf(ItemStack(this, data))
-    }
 
     abstract fun footStepSound(data: Int): String?
 
@@ -244,7 +179,7 @@ abstract class BlockType(type: MaterialType) : Material(type), VoxelType {
                                 zz: Double,
                                 lod: Boolean)
 
-    open fun update(terrain: TerrainServer.TerrainMutable,
+    open fun update(terrain: TerrainServer,
                     x: Int,
                     y: Int,
                     z: Int,

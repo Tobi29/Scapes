@@ -16,11 +16,11 @@
 
 package org.tobi29.scapes.client.states
 
-import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Scene
 import org.tobi29.scapes.engine.utils.IOException
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.format.WorldSource
 
@@ -34,22 +34,21 @@ class GameStateGameSP(clientSupplier: (GameStateGameMP) -> ClientConnection,
         this.scene?.dispose()
         client.plugins.removeFileSystems(engine.files)
         try {
-            server.stop(ScapesServer.ShutdownReason.STOP)
+            server.stop(ScapesServer.ShutdownReason.ERROR)
         } catch (e: IOException) {
             logger.error(e) { "Error stopping internal server" }
         }
-
         try {
             source.close()
         } catch (e: IOException) {
             logger.error(e) { "Error closing world source" }
         }
-
         logger.info { "Stopped internal server!" }
         client.stop()
         terrainTextureRegistry.texture.markDisposed()
         engine.sounds.stop("music")
         engine.graphics.textures.clearCache()
+        engine.sounds.clearCache()
         logger.info { "Stopped game!" }
     }
 

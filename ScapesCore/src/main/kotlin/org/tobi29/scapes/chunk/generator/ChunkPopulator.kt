@@ -19,9 +19,9 @@ import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.terrain.TerrainChunk
 
 interface ChunkPopulator {
-    fun populate(terrain: TerrainServer.TerrainMutable,
+    fun populate(terrain: TerrainServer,
                  chunk: TerrainChunk)
 
-    fun load(terrain: TerrainServer.TerrainMutable,
+    fun load(terrain: TerrainServer,
              chunk: TerrainChunk)
 }

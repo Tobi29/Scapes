@@ -46,8 +46,9 @@ class MobSkeletonServer(type: EntityType<*, *>,
             }
         }
         onDamage("Local") { damage ->
-            world.playSound("VanillaBasics:sound/entity/mob/skeleton/Hurt" +
-                    (random.nextInt(3) + 1) + ".ogg", this)
+            world.playSound(
+                    "VanillaBasics:sound/entity/mob/skeleton/Hurt${random.nextInt(
+                            3) + 1}.ogg", this)
         }
     }
 

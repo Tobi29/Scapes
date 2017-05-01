@@ -29,15 +29,13 @@ import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.Random
+import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.math.mix
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3i
-import org.tobi29.scapes.engine.utils.math.vector.Vector3i
-import org.tobi29.scapes.engine.utils.math.vector.plus
 import org.tobi29.scapes.engine.utils.toArray
-import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.TreeType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.CollisionLeaves
@@ -73,21 +71,6 @@ class BlockLeaves(type: VanillaMaterialType) : VanillaBlock(type) {
                 (x + 1).toDouble(), (y + 1).toDouble(), (z + 1).toDouble()),
                 CollisionLeaves.INSTANCE))
         return aabbs
-    }
-
-    override fun destroy(terrain: TerrainServer.TerrainMutable,
-                         x: Int,
-                         y: Int,
-                         z: Int,
-                         data: Int,
-                         face: Face,
-                         player: MobPlayerServer,
-                         item: ItemStack): Boolean {
-        if (!super.destroy(terrain, x, y, z, data, face, player, item)) {
-            return false
-        }
-        destroy(terrain, Vector3i(x, y, z), data, 256)
-        return true
     }
 
     override fun resistance(item: ItemStack,
@@ -339,86 +322,96 @@ class BlockLeaves(type: VanillaMaterialType) : VanillaBlock(type) {
         return 16
     }
 
-    private fun destroy(terrain: TerrainServer.TerrainMutable,
-                        pos: Vector3i,
-                        data: Int,
-                        length: Int) {
-        var length = length
-        val block = terrain.block(pos.x, pos.y, pos.z)
-        val type = terrain.type(block)
-        val d = terrain.data(block)
-        if (type != this || d != data) {
-            return
-        }
-        var checks = Pool { MutableVector3i() }
-        var checks2 = Pool { MutableVector3i() }
-        var checksSwap: Pool<MutableVector3i>
-        checks.push().set(pos)
-        var i = 0
-        while (i < 5 && !checks.isEmpty()) {
-            for (check in checks) {
-                val checkBlock = terrain.block(check.x, check.y,
-                        check.z)
-                val checkData = terrain.data(checkBlock)
-                if (checkData == data) {
-                    val checkType = terrain.type(checkBlock)
-                    if (checkType == materials.log) {
-                        return
-                    }
-                    if (i < 10 && checkType == this) {
-                        checks2.push().set(check.x, check.y,
-                                check.z + 1)
-                        checks2.push().set(check.x, check.y,
-                                check.z - 1)
-                        checks2.push().set(check.x, check.y - 1,
-                                check.z)
-                        checks2.push().set(check.x + 1, check.y,
-                                check.z)
-                        checks2.push().set(check.x, check.y + 1,
-                                check.z)
-                        checks2.push().set(check.x - 1, check.y,
-                                check.z)
-                    }
+    override fun update(terrain: TerrainServer,
+                        x: Int,
+                        y: Int,
+                        z: Int,
+                        data: Int) {
+        val decay = DECAY_CHECK.get()
+        try {
+            val baseX = x - 7
+            val baseY = y - 7
+            val baseZ = z - 7
+            val world = terrain.world
+            terrain.modify(baseX, baseY, baseZ, 15, 15, 15) { terrain ->
+                var current = decay.pool1
+                var next = decay.pool2
+                val visited = decay.visited
+                current.addCheck(visited, baseX, baseY, baseZ, x, y, z)
+                val block = terrain.block(x, y, z)
+                val type = terrain.type(block)
+                val d = terrain.data(block)
+                if (type != this || d != data) {
+                    return@modify
                 }
+                var i = 0
+                while (i < 7 && current.isNotEmpty()) {
+                    for (check in current) {
+                        val checkBlock = terrain.block(check.x, check.y,
+                                check.z)
+                        val checkData = terrain.data(checkBlock)
+                        if (checkData == data) {
+                            val checkType = terrain.type(checkBlock)
+                            if (checkType == materials.log) {
+                                return@modify
+                            }
+                            if (checkType == this) {
+                                next.addCheck(visited, baseX, baseY, baseZ,
+                                        check, 0, 0, 1)
+                                next.addCheck(visited, baseX, baseY, baseZ,
+                                        check, 0, 0, -1)
+                                next.addCheck(visited, baseX, baseY, baseZ,
+                                        check, 0, -1, 0)
+                                next.addCheck(visited, baseX, baseY, baseZ,
+                                        check, 1, 0, 0)
+                                next.addCheck(visited, baseX, baseY, baseZ,
+                                        check, 0, 1, 0)
+                                next.addCheck(visited, baseX, baseY, baseZ,
+                                        check, -1, 0, 0)
+                            }
+                        }
+                    }
+                    val checksSwap = current.apply { reset() }
+                    current = next
+                    next = checksSwap
+                    i++
+                }
+                world.dropItems(drops(ItemStack(materials.air, 0), data), x, y,
+                        z)
+                terrain.typeData(x, y, z, materials.air, 0)
             }
-            checks.reset()
-            checksSwap = checks
-            checks = checks2
-            checks2 = checksSwap
-            i++
+        } finally {
+            decay.reset()
         }
-        terrain.world.dropItems(drops(ItemStack(materials.air, 0), d),
-                pos.x, pos.y, pos.z)
-        terrain.typeData(pos.x, pos.y, pos.z, materials.air, 0)
-        if (length-- > 0) {
-            destroy(terrain, pos.plus(Vector3i(-1, -1, -1)), data, length)
-            destroy(terrain, pos.plus(Vector3i(0, -1, -1)), data, length)
-            destroy(terrain, pos.plus(Vector3i(1, -1, -1)), data, length)
-            destroy(terrain, pos.plus(Vector3i(-1, 0, -1)), data, length)
-            destroy(terrain, pos.plus(Vector3i(0, 0, -1)), data, length)
-            destroy(terrain, pos.plus(Vector3i(1, 0, -1)), data, length)
-            destroy(terrain, pos.plus(Vector3i(-1, 1, -1)), data, length)
-            destroy(terrain, pos.plus(Vector3i(0, 1, -1)), data, length)
-            destroy(terrain, pos.plus(Vector3i(1, 1, -1)), data, length)
-            destroy(terrain, pos.plus(Vector3i(-1, -1, 0)), data, length)
-            destroy(terrain, pos.plus(Vector3i(0, -1, 0)), data, length)
-            destroy(terrain, pos.plus(Vector3i(1, -1, 0)), data, length)
-            destroy(terrain, pos.plus(Vector3i(-1, 0, 0)), data, length)
-            destroy(terrain, pos.plus(Vector3i(0, 0, 0)), data, length)
-            destroy(terrain, pos.plus(Vector3i(1, 0, 0)), data, length)
-            destroy(terrain, pos.plus(Vector3i(-1, 1, 0)), data, length)
-            destroy(terrain, pos.plus(Vector3i(0, 1, 0)), data, length)
-            destroy(terrain, pos.plus(Vector3i(1, 1, 0)), data, length)
-            destroy(terrain, pos.plus(Vector3i(-1, -1, 1)), data, length)
-            destroy(terrain, pos.plus(Vector3i(0, -1, 1)), data, length)
-            destroy(terrain, pos.plus(Vector3i(1, -1, 1)), data, length)
-            destroy(terrain, pos.plus(Vector3i(-1, 0, 1)), data, length)
-            destroy(terrain, pos.plus(Vector3i(0, 0, 1)), data, length)
-            destroy(terrain, pos.plus(Vector3i(1, 0, 1)), data, length)
-            destroy(terrain, pos.plus(Vector3i(-1, 1, 1)), data, length)
-            destroy(terrain, pos.plus(Vector3i(0, 1, 1)), data, length)
-            destroy(terrain, pos.plus(Vector3i(1, 1, 1)), data, length)
+    }
+
+    private fun Pool<MutableVector3i>.addCheck(
+            visited: BooleanArray,
+            baseX: Int,
+            baseY: Int,
+            baseZ: Int,
+            check: MutableVector3i,
+            x: Int,
+            y: Int,
+            z: Int) =
+            addCheck(visited, baseX, baseY, baseZ, check.x + x, check.y + y,
+                    check.z + z)
+
+    private fun Pool<MutableVector3i>.addCheck(
+            visited: BooleanArray,
+            baseX: Int,
+            baseY: Int,
+            baseZ: Int,
+            x: Int,
+            y: Int,
+            z: Int): Boolean {
+        val i = ((z - baseZ) * 15 + y - baseY) * 15 + x - baseX
+        if (visited[i]) {
+            return false
         }
+        visited[i] = true
+        push().set(x, y, z)
+        return true
     }
 
     private fun isCovered(terrain: Terrain,
@@ -434,5 +427,21 @@ class BlockLeaves(type: VanillaMaterialType) : VanillaBlock(type) {
             }
         }
         return true
+    }
+
+    companion object {
+        private val DECAY_CHECK = ThreadLocal { DecayCheck() }
+    }
+
+    private class DecayCheck {
+        val pool1 = Pool { MutableVector3i() }
+        val pool2 = Pool { MutableVector3i() }
+        val visited = BooleanArray(15 * 15 * 15)
+
+        fun reset() {
+            pool1.reset()
+            pool2.reset()
+            visited.fill(false)
+        }
     }
 }

@@ -18,7 +18,7 @@ package org.tobi29.scapes.vanilla.basics.entity.server
 
 import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
@@ -28,12 +28,11 @@ class EntityFurnaceServer(type: EntityType<*, *>,
         type, world, Vector3d.ZERO, Inventory(world.plugins, 8), 4, 3, 800.0,
         1.001, 3.0, 0) {
 
-    public override fun isValidOn(terrain: TerrainServer,
+    public override fun isValidOn(terrain: Terrain,
                                   x: Int,
                                   y: Int,
                                   z: Int): Boolean {
-        val plugin = terrain.world.plugins.plugin(
-                "VanillaBasics") as VanillaBasics
+        val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
         val materials = plugin.materials
         return terrain.type(x, y, z) == materials.furnace
     }

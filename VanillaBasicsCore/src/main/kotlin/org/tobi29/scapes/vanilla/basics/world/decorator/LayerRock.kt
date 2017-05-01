@@ -17,23 +17,20 @@
 package org.tobi29.scapes.vanilla.basics.world.decorator
 
 import org.tobi29.scapes.block.BlockType
+import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 
-class LayerRock constructor(private val material: BlockType,
-                            private val stone: BlockType,
-                            private val chance: Int,
-                            private val check: (TerrainServer.TerrainMutable, Int, Int, Int) -> Boolean,
-                            private val depthMin: Int = 4,
-                            depthMax: Int = 24) : BiomeDecorator.Layer {
-    private val depthDelta: Int
+class LayerRock(private val material: BlockType,
+                private val stone: BlockType,
+                private val chance: Int,
+                private val check: (Terrain, Int, Int, Int) -> Boolean,
+                private val depthMin: Int = 4,
+                depthMax: Int = 24) : BiomeDecorator.Layer {
+    private val depthDelta = depthMax - depthMin + 1
 
-    init {
-        depthDelta = depthMax - depthMin + 1
-    }
-
-    override fun decorate(terrain: TerrainServer.TerrainMutable,
+    override fun decorate(terrain: TerrainServer,
                           x: Int,
                           y: Int,
                           materials: VanillaMaterial,
@@ -43,8 +40,11 @@ class LayerRock constructor(private val material: BlockType,
             val zz = z - random.nextInt(depthDelta) - depthMin
             val ground = terrain.block(x, y, zz)
             if (terrain.type(ground) == stone) {
-                if (check(terrain, x, y, z)) {
-                    terrain.typeData(x, y, z, material, terrain.data(ground))
+                terrain.modify(x, y, z - 1, 1, 1, 2) { terrain ->
+                    if (check(terrain, x, y, z)) {
+                        terrain.typeData(x, y, z, material,
+                                terrain.data(ground))
+                    }
                 }
             }
         }

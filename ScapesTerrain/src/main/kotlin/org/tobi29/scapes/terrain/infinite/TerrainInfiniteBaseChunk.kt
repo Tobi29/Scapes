@@ -19,6 +19,7 @@ package org.tobi29.scapes.terrain.infinite
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.StampLock
 import org.tobi29.scapes.engine.utils.ThreadLocal
+import org.tobi29.scapes.engine.utils.assert
 import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.math.lb
 import org.tobi29.scapes.engine.utils.math.max
@@ -28,6 +29,7 @@ import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.tag.mapMut
 import org.tobi29.scapes.terrain.TerrainChunk
 import org.tobi29.scapes.terrain.TerrainGlobals
+import org.tobi29.scapes.terrain.TerrainLock
 import org.tobi29.scapes.terrain.VoxelType
 import org.tobi29.scapes.terrain.data.ChunkArraySection1x16
 import org.tobi29.scapes.terrain.data.ChunkArraySection2x4
@@ -48,15 +50,49 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
         internal set
 
     protected inline fun <R> lockRead(crossinline block: ChunkDatas.() -> R): R {
-        // Accessing data in the lambda causes IllegalAccessError
-        val data = data
+        val threadContext = parentTerrain.getThreadContext()
+        lockRead(threadContext)
         return lock.read { block(data) }
     }
 
-    protected inline fun <R> lockWrite(crossinline block: ChunkDatas.() -> R): R {
-        // Accessing data in the lambda causes IllegalAccessError
-        val data = data
-        return lock.write { block(data) }
+    protected fun lockRead(context: TerrainLock) {
+        if (!lock.isHeld() && context.locked) {
+            throw IllegalStateException("Locking twice on the same thread")
+        }
+    }
+
+    inline fun <R> lockWrite(block: () -> R): R {
+        val threadContext = parentTerrain.getThreadContext()
+        lockWrite(threadContext)
+        try {
+            return block()
+        } finally {
+            unlockWrite(threadContext)
+        }
+    }
+
+    fun lockWrite(context: TerrainLock) {
+        if (!lock.isHeld()) {
+            context.lock()
+        }
+        lock.lock()
+    }
+
+    fun unlockWrite(context: TerrainLock) {
+        lock.unlock()
+        if (!lock.isHeld()) {
+            context.unlock()
+        }
+    }
+
+    fun lockWriteExternal(context: TerrainLock) {
+        assert { context.locked }
+        lock.lock()
+    }
+
+    fun unlockWriteExternal(context: TerrainLock) {
+        assert { !context.locked }
+        lock.unlock()
     }
 
     @Suppress("NOTHING_TO_INLINE")
@@ -100,92 +136,93 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
         val spreadPools = SPREAD_POOLS.get()
         var spreads = spreadPools.first
         var newSpreads = spreadPools.second
-        lockWrite {
-            for (x in 0..15) {
-                for (y in 0..15) {
-                    var sunLight: Byte = 15
-                    var spread: Int
-                    if (x in 1..14 && y > 0 && y < 15) {
-                        spread = heightMap[y shl 4 or x - 1]
-                        spread = max(heightMap[y shl 4 or x + 1], spread)
-                        spread = max(heightMap[y - 1 shl 4 or x], spread)
-                        spread = max(heightMap[y + 1 shl 4 or x], spread)
-                        spread--
-                    } else {
-                        spread = -1
-                    }
-                    val light = heightMap[y shl 4 or x]
-                    for (z in max(light, spread) downTo 0) {
-                        if (z < light) {
-                            val id = id(x, y, z)
-                            if (id != 0) {
-                                val type = type(id)
-                                val data = data(x, y, z)
-                                if (type.isSolid(data) || !type.isTransparent(
-                                        data)) {
-                                    sunLight = clamp(
-                                            sunLight + type.lightTrough(data),
-                                            0, 15).toByte()
-                                }
+        assert { lock.isHeld() }
+        for (x in 0..15) {
+            for (y in 0..15) {
+                var sunLight: Byte = 15
+                var spread: Int
+                if (x in 1..14 && y > 0 && y < 15) {
+                    spread = heightMap[y shl 4 or x - 1]
+                    spread = max(heightMap[y shl 4 or x + 1], spread)
+                    spread = max(heightMap[y - 1 shl 4 or x], spread)
+                    spread = max(heightMap[y + 1 shl 4 or x], spread)
+                    spread--
+                } else {
+                    spread = -1
+                }
+                val light = heightMap[y shl 4 or x]
+                for (z in max(light, spread) downTo 0) {
+                    if (z < light) {
+                        val id = this.data.id(x, y, z)
+                        if (id != 0) {
+                            val type = type(id)
+                            val data = this.data.data(x, y, z)
+                            if (type.isSolid(data) || !type.isTransparent(
+                                    data)) {
+                                sunLight = clamp(
+                                        sunLight + type.lightTrough(data),
+                                        0, 15).toByte()
                             }
-                            setSunLight(x, y, z, sunLight.toInt())
                         }
-                        if (z < spread && sunLight > 0) {
-                            spreads.push().set(x - 1, y, z, sunLight.toInt())
-                            spreads.push().set(x + 1, y, z, sunLight.toInt())
-                            spreads.push().set(x, y - 1, z, sunLight.toInt())
-                            spreads.push().set(x, y + 1, z, sunLight.toInt())
-                        }
+                        this.data.setSunLight(x, y, z, sunLight.toInt())
+                    }
+                    if (z < spread && sunLight > 0) {
+                        spreads.push().set(x - 1, y, z, sunLight.toInt())
+                        spreads.push().set(x + 1, y, z, sunLight.toInt())
+                        spreads.push().set(x, y - 1, z, sunLight.toInt())
+                        spreads.push().set(x, y + 1, z, sunLight.toInt())
                     }
                 }
             }
-            while (spreads.isNotEmpty()) {
-                for (s in spreads) {
-                    if (s.x in 0..15 && s.y >= 0 && s.y < 16 && s.z >= 0 &&
-                            s.z < zSize) {
-                        val type = type(id(s.x, s.y, s.z))
-                        val data = data(s.x, s.y, s.z)
-                        s.l = clamp(s.l + type.lightTrough(data), 0, 15)
-                        if (s.l > sunLight(s.x, s.y, s.z)) {
-                            setSunLight(s.x, s.y, s.z, s.l)
-                            newSpreads.push().set(s.x - 1, s.y, s.z, s.l)
-                            newSpreads.push().set(s.x + 1, s.y, s.z, s.l)
-                            newSpreads.push().set(s.x, s.y - 1, s.z, s.l)
-                            newSpreads.push().set(s.x, s.y + 1, s.z, s.l)
-                            newSpreads.push().set(s.x, s.y, s.z - 1, s.l)
-                            newSpreads.push().set(s.x, s.y, s.z + 1, s.l)
-                        }
+        }
+        while (spreads.isNotEmpty()) {
+            for (s in spreads) {
+                if (s.x in 0..15 && s.y >= 0 && s.y < 16 && s.z >= 0 &&
+                        s.z < zSize) {
+                    val type = type(this.data.id(s.x, s.y, s.z))
+                    val data = this.data.data(s.x, s.y, s.z)
+                    s.l = clamp(s.l + type.lightTrough(data), 0, 15)
+                    if (s.l > this.data.sunLight(s.x, s.y, s.z)) {
+                        this.data.setSunLight(s.x, s.y, s.z, s.l)
+                        newSpreads.push().set(s.x - 1, s.y, s.z, s.l)
+                        newSpreads.push().set(s.x + 1, s.y, s.z, s.l)
+                        newSpreads.push().set(s.x, s.y - 1, s.z, s.l)
+                        newSpreads.push().set(s.x, s.y + 1, s.z, s.l)
+                        newSpreads.push().set(s.x, s.y, s.z - 1, s.l)
+                        newSpreads.push().set(s.x, s.y, s.z + 1, s.l)
                     }
                 }
-                val swapUpdates = spreads
-                swapUpdates.reset()
-                spreads = newSpreads
-                newSpreads = swapUpdates
             }
+            val swapUpdates = spreads
+            swapUpdates.reset()
+            spreads = newSpreads
+            newSpreads = swapUpdates
         }
     }
 
     protected fun initSunLight() {
-        lockWrite {
-            for (x in 0..15) {
-                for (y in 0..15) {
-                    var sunLight: Byte = 15
-                    var z = zSize - 1
-                    while (z >= 0 && sunLight > 0) {
-                        val id = id(x, y, z)
-                        if (id != 0) {
-                            val type = type(id)
-                            val data = data(x, y, z)
-                            if (type.isSolid(data) || !type.isTransparent(
-                                    data)) {
-                                sunLight = clamp(
-                                        sunLight + type.lightTrough(data), 0,
-                                        15).toByte()
-                            }
+        // We do not need to lock here as the chunk is not added anywhere
+        // yet and this might get triggered in a locked context causing
+        // a crash
+        val data = data
+        for (x in 0..15) {
+            for (y in 0..15) {
+                var sunLight: Byte = 15
+                var z = zSize - 1
+                while (z >= 0 && sunLight > 0) {
+                    val id = data.id(x, y, z)
+                    if (id != 0) {
+                        val type = type(id)
+                        val blockData = data.data(x, y, z)
+                        if (type.isSolid(blockData) || !type.isTransparent(
+                                blockData)) {
+                            sunLight = clamp(
+                                    sunLight + type.lightTrough(blockData), 0,
+                                    15).toByte()
                         }
-                        setSunLight(x, y, z, sunLight.toInt())
-                        z--
                     }
+                    data.setSunLight(x, y, z, sunLight.toInt())
+                    z--
                 }
             }
         }
@@ -242,11 +279,45 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
         return 0
     }
 
+    fun blockGLocked(x: Int,
+                     y: Int,
+                     z: Int) = blockLLocked(x - posBlock.x, y - posBlock.y, z)
+
+    fun blockLLocked(x: Int,
+                     y: Int,
+                     z: Int): Long {
+        checkCoords(x, y, z)
+        assert { lock.isHeld() }
+        return (data.id(x, y, z).toLong() shl 32) or data.data(x, y, z).toLong()
+    }
+
+    fun typeGLocked(x: Int,
+                    y: Int,
+                    z: Int) = typeLLocked(x - posBlock.x, y - posBlock.y, z)
+
+    fun typeLLocked(x: Int,
+                    y: Int,
+                    z: Int): B {
+        checkCoords(x, y, z)
+        assert { lock.isHeld() }
+        return type(data.id(x, y, z))
+    }
+
+    fun dataGLocked(x: Int,
+                    y: Int,
+                    z: Int) = dataLLocked(x - posBlock.x, y - posBlock.y, z)
+
+    fun dataLLocked(x: Int,
+                    y: Int,
+                    z: Int): Int {
+        checkCoords(x, y, z)
+        assert { lock.isHeld() }
+        return data.data(x, y, z)
+    }
+
     fun blockG(x: Int,
                y: Int,
-               z: Int): Long {
-        return blockL(x - posBlock.x, y - posBlock.y, z)
-    }
+               z: Int) = blockL(x - posBlock.x, y - posBlock.y, z)
 
     fun blockL(x: Int,
                y: Int,
@@ -259,9 +330,7 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
 
     fun typeG(x: Int,
               y: Int,
-              z: Int): B {
-        return typeL(x - posBlock.x, y - posBlock.y, z)
-    }
+              z: Int) = typeL(x - posBlock.x, y - posBlock.y, z)
 
     fun typeL(x: Int,
               y: Int,
@@ -270,11 +339,20 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
         return type(lockRead { id(x, y, z) })
     }
 
+    fun dataG(x: Int,
+              y: Int,
+              z: Int) = dataL(x - posBlock.x, y - posBlock.y, z)
+
+    fun dataL(x: Int,
+              y: Int,
+              z: Int): Int {
+        checkCoords(x, y, z)
+        return lockRead { data(x, y, z) }
+    }
+
     fun lightG(x: Int,
                y: Int,
-               z: Int): Int {
-        return lightL(x - posBlock.x, y - posBlock.y, z)
-    }
+               z: Int) = lightL(x - posBlock.x, y - posBlock.y, z)
 
     fun lightL(x: Int,
                y: Int,
@@ -316,69 +394,69 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
     fun blockTypeG(x: Int,
                    y: Int,
                    z: Int,
-                   type: B) {
-        blockTypeL(x - posBlock.x, y - posBlock.y, z, type)
-    }
+                   type: B) =
+            blockTypeL(x - posBlock.x, y - posBlock.y, z, type)
 
     fun blockTypeL(x: Int,
                    y: Int,
                    z: Int,
-                   type: B) {
+                   type: B): B? {
         checkCoords(x, y, z)
         val oldType = type(lockRead { id(x, y, z) })
-        if (oldType !== type) {
-            lockWrite { setID(x, y, z, type.id) }
+        if (oldType != type) {
+            assert { lock.isHeld() }
+            data.setID(x, y, z, type.id)
             updateHeightMap(x, y, z, type)
             update(x, y, z, oldType.causesTileUpdate())
+            return oldType
         }
+        return null
     }
 
     fun typeDataG(x: Int,
                   y: Int,
                   z: Int,
                   type: B,
-                  data: Int) {
-        typeDataL(x - posBlock.x, y - posBlock.y, z, type, data)
-    }
+                  data: Int) =
+            typeDataL(x - posBlock.x, y - posBlock.y, z, type, data)
 
     fun typeDataL(x: Int,
                   y: Int,
                   z: Int,
                   type: B,
-                  data: Int) {
+                  data: Int): B? {
         checkCoords(x, y, z)
-        val oldType = type(lockRead { id(x, y, z) })
-        if (oldType !== type || lockRead {
-            data(x, y, z)
-        } != data) {
-            lockWrite {
-                setID(x, y, z, type.id)
-                setData(x, y, z, data)
-            }
+        assert { lock.isHeld() }
+        val oldType = type(this.data.id(x, y, z))
+        if (oldType != type || this.data.data(x, y, z) != data) {
+            this.data.setID(x, y, z, type.id)
+            this.data.setData(x, y, z, data)
             updateHeightMap(x, y, z, type)
             update(x, y, z, oldType.causesTileUpdate())
+            return oldType
         }
+        return null
     }
 
     fun dataG(x: Int,
               y: Int,
               z: Int,
-              data: Int) {
-        dataL(x - posBlock.x, y - posBlock.y, z, data)
-    }
+              data: Int) =
+            dataL(x - posBlock.x, y - posBlock.y, z, data)
 
     fun dataL(x: Int,
               y: Int,
               z: Int,
-              data: Int) {
+              data: Int): B? {
         checkCoords(x, y, z)
-        if (lockRead { data(x, y, z) } != data) {
-            val oldType = type(lockWrite {
-                setData(x, y, z, data)
-                id(x, y, z)
-            })
+        assert { lock.isHeld() }
+        if (this.data.data(x, y, z) != data) {
+            this.data.setData(x, y, z, data)
+            val oldType = type(this.data.id(x, y, z))
             update(x, y, z, oldType.causesTileUpdate())
+            return oldType
         }
+        return null
     }
 
     fun sunLightG(x: Int,
@@ -393,7 +471,8 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
                   z: Int,
                   light: Int) {
         checkCoords(x, y, z)
-        lockWrite { setSunLight(x, y, z, light) }
+        assert { lock.isHeld() }
+        data.setSunLight(x, y, z, light)
         updateLight(x, y, z)
     }
 
@@ -409,17 +488,22 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
                     z: Int,
                     light: Int) {
         checkCoords(x, y, z)
-        lockWrite { setBlockLight(x, y, z, light) }
+        assert { lock.isHeld() }
+        data.setBlockLight(x, y, z, light)
         updateLight(x, y, z)
     }
 
     open fun dispose() {}
 
     protected fun initHeightMap() {
+        // We do not need to lock here as the chunk is not added anywhere
+        // yet and this might get triggered in a locked context causing
+        // a crash
+        val data = data
         for (x in 0..15) {
             for (y in 0..15) {
                 for (z in zSize - 1 downTo 1) {
-                    if (lockRead { id(x, y, z) } != 0) {
+                    if (data.id(x, y, z) != 0) {
                         heightMap[y shl 4 or x] = z
                         break
                     }

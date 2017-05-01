@@ -28,6 +28,7 @@ import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.entity.server.MobServer
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.BlockExplosive
+import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
 
 private val LOCATIONS = ThreadLocal { Pool { Location() } }
 
@@ -53,11 +54,11 @@ fun WorldServer.explosionEntities(x: Double,
     }
 }
 
-fun TerrainServer.TerrainMutable.explosionBlockPush(
-        x: Double,
-        y: Double,
-        z: Double,
-        size: Double,
+fun TerrainServer.explosionBlockPush(
+        x: Int,
+        y: Int,
+        z: Int,
+        size: Int,
         dropChance: Double,
         blockChance: Double,
         push: Double,
@@ -78,11 +79,11 @@ fun TerrainServer.TerrainMutable.explosionBlockPush(
             val deltaX = cosTable(yaw) * sinYaw
             val deltaY = sinTable(yaw) * sinYaw
             var distance = 0.0
-            var blast = size
+            var blast = size.toDouble()
             while (true) {
-                val xxx = floor(x + deltaX * distance)
-                val yyy = floor(y + deltaY * distance)
-                val zzz = floor(z + deltaZ * distance)
+                val xxx = floor(x + 0.5 + deltaX * distance)
+                val yyy = floor(y + 0.5 + deltaY * distance)
+                val zzz = floor(z + 0.5 + deltaZ * distance)
                 val location = locations.push().apply {
                     set(xxx, yyy, zzz)
                 }
@@ -99,7 +100,7 @@ fun TerrainServer.TerrainMutable.explosionBlockPush(
                     type = previous.type
                     data = previous.data
                 }
-                // TODO: Blast resistanceq
+                // TODO: Blast resistance
                 blast -= 1.0
                 distance++
                 if (blast < 0.0) {
@@ -113,38 +114,44 @@ fun TerrainServer.TerrainMutable.explosionBlockPush(
         }
         pitch += step
     }
-    locations.forEach { location ->
-        val xxx = location.x
-        val yyy = location.y
-        val zzz = location.z
-        val type = location.type
-        val data = location.data
-        if (type is BlockExplosive) {
-            type.igniteByExplosion(this, xxx, yyy, zzz, data)
-        } else {
-            if (random.nextDouble() < dropChance) {
-                world.dropItems(type.drops(
-                        ItemStack(world.plugins),
-                        data), xxx, yyy, zzz)
-            } else if (type.isSolid(data) &&
-                    !type.isTransparent(data) &&
-                    random.nextDouble() < blockChance) {
-                entities.add(plugin.entityTypes.flyingBlock.createServer(
-                        world).apply {
-                    setPos(Vector3d(xxx + 0.5, yyy + 0.5, zzz + 0.5))
-                    setSpeed(Vector3d(random.nextDouble() * 0.1 - 0.05,
-                            random.nextDouble() * 0.1 - 0.05,
-                            random.nextDouble() * 1 + 2))
-                    setType(ItemStack(type, data))
-                })
+    modify(x - size, y - size, z - size,
+            size shl 1, size shl 1, size shl 1) { terrain ->
+        locations.forEach { location ->
+            val xxx = location.x
+            val yyy = location.y
+            val zzz = location.z
+            val type = location.type
+            val data = location.data
+            if (type is BlockExplosive) {
+                type.igniteByExplosion(this, xxx, yyy, zzz, data)
+            } else {
+                if (random.nextDouble() < dropChance) {
+                    if (type is VanillaBlock) {
+                        world.dropItems(type.drops(
+                                ItemStack(world.plugins),
+                                data), xxx, yyy, zzz)
+                    }
+                } else if (type.isSolid(data) &&
+                        !type.isTransparent(data) &&
+                        random.nextDouble() < blockChance) {
+                    entities.add(plugin.entityTypes.flyingBlock.createServer(
+                            world).apply {
+                        setPos(Vector3d(xxx + 0.5, yyy + 0.5, zzz + 0.5))
+                        setSpeed(Vector3d(random.nextDouble() * 0.1 - 0.05,
+                                random.nextDouble() * 0.1 - 0.05,
+                                random.nextDouble() * 1 + 2))
+                        setType(ItemStack(type, data))
+                    })
+                }
             }
+            terrain.typeData(xxx, yyy, zzz, air, 0)
         }
-        typeData(xxx, yyy, zzz, air, 0)
     }
     locations.reset()
     world.loop.addTaskOnce({
         entities.forEach { world.addEntityNew(it) }
-        world.explosionEntities(x, y, z, size, push, damage)
+        world.explosionEntities(x + 0.5, y + 0.5, z + 0.5, size.toDouble(),
+                push, damage)
     }, "Explosion-Entities")
 }
 

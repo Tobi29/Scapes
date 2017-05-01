@@ -126,21 +126,23 @@ class BlockAnvil(type: VanillaMaterialType) : VanillaBlockContainer<EntityAnvilC
                 1.0, 1.0, lod)
     }
 
-    override fun update(terrain: TerrainServer.TerrainMutable,
+    override fun update(terrain: TerrainServer,
                         x: Int,
                         y: Int,
                         z: Int,
                         data: Int) {
-        val block = terrain.block(x, y, z - 1)
-        if (!terrain.type(block).isSolid(data)) {
-            val entity = materials.plugin.entityTypes.flyingBlock.createServer(
-                    terrain.world).apply {
-                setPos(Vector3d(x + 0.5, y + 0.5, z + 0.5))
-                setType(ItemStack(this@BlockAnvil, data))
+        val world = terrain.world
+        terrain.modify(x, y, z - 1, 1, 1, 2) { terrain ->
+            val block = terrain.block(x, y, z - 1)
+            if (!terrain.type(block).isSolid(data)) {
+                val entity = materials.plugin.entityTypes.flyingBlock.createServer(
+                        world).apply {
+                    setPos(Vector3d(x + 0.5, y + 0.5, z + 0.5))
+                    setType(ItemStack(this@BlockAnvil, data))
+                }
+                world.addEntityNew(entity)
+                terrain.typeData(x, y, z, terrain.air, 0)
             }
-            terrain.world.addEntityNew(entity)
-            terrain.typeData(x, y, z, terrain.air,
-                    0.toShort().toInt())
         }
     }
 

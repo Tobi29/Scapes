@@ -24,10 +24,7 @@ import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelComplex
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock
 import org.tobi29.scapes.chunk.ChunkMesh
-import org.tobi29.scapes.chunk.terrain.TerrainClient
-import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
-import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.chunk.terrain.isTransparent
+import org.tobi29.scapes.chunk.terrain.*
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
@@ -60,7 +57,7 @@ class BlockGrass(type: VanillaMaterialType) : VanillaBlock(type) {
     private var modelBlockFastSand: BlockModel? = null
     private var modelsTallGrass: Array<BlockModel?>? = null
 
-    override fun destroy(terrain: TerrainServer.TerrainMutable,
+    override fun destroy(terrain: TerrainMutableServer,
                          x: Int,
                          y: Int,
                          z: Int,
@@ -74,24 +71,25 @@ class BlockGrass(type: VanillaMaterialType) : VanillaBlock(type) {
         if ("Hoe" == item.material().toolType(item)) {
             if (data > 0) {
                 if (item.material().toolLevel(item) >= 10) {
-                    terrain.world.dropItem(
+                    player.world.dropItem(
                             ItemStack(materials.grassBundle, 0, data), x, y,
                             z + 1)
                     terrain.data(x, y, z, 0)
                 } else {
-                    terrain.world.dropItem(ItemStack(materials.grassBundle, 0),
+                    player.world.dropItem(ItemStack(materials.grassBundle, 0),
                             x, y, z + 1)
                     terrain.data(x, y, z, data - 1)
                 }
                 val random = threadLocalRandom()
                 if (random.nextInt(20) == 0) {
-                    terrain.world.dropItem(ItemStack(materials.seed,
+                    player.world.dropItem(ItemStack(materials.seed,
                             random.nextInt(cropRegistry.values().size)), x, y,
                             z + 1)
                 }
             } else {
                 terrain.type(x, y, z, materials.farmland)
-                materials.farmland.getEntity(terrain, x, y, z).nourish(0.5)
+                materials.farmland.getEntity(player.world.terrain, x, y,
+                        z).nourish(0.5)
             }
             return false
         }
@@ -252,22 +250,28 @@ class BlockGrass(type: VanillaMaterialType) : VanillaBlock(type) {
         }
     }
 
-    override fun update(terrain: TerrainServer.TerrainMutable,
+    override fun update(terrain: TerrainServer,
                         x: Int,
                         y: Int,
                         z: Int,
                         data: Int) {
-        if (terrain.blockLight(x, y, z + 1) <= 0 && terrain.sunLight(x, y,
-                z + 1) <= 0 || !terrain.isTransparent(x, y, z + 1)) {
-            terrain.typeData(x, y, z, materials.dirt, 0)
+        terrain.modify(x, y, z, 1, 1, 2) { terrain ->
+            if (terrain.blockLight(x, y, z + 1) <= 0 && terrain.sunLight(x, y,
+                    z + 1) <= 0 || !terrain.isTransparent(x, y, z + 1)) {
+                terrain.typeData(x, y, z, materials.dirt, 0)
+            }
         }
-        if (terrain.highestTerrainBlockZAt(x,
-                y) > z + 1 && !terrain.hasDelayedUpdate(x, y, z,
-                UpdateGrassGrowth::class.java)) {
-            val random = threadLocalRandom()
-            terrain.addDelayedUpdate(
-                    UpdateGrassGrowth(terrain.world.registry).set(x, y, z,
-                            random.nextDouble() * 400.0 + 1600.0))
+        if (z >= terrain.highestTerrainBlockZAt(x, y)) {
+            val world = terrain.world
+            terrain.modify(x, y, z) { terrain ->
+                if (!terrain.hasDelayedUpdate(x, y, z,
+                        UpdateGrassGrowth::class.java)) {
+                    val random = threadLocalRandom()
+                    terrain.addDelayedUpdate(
+                            UpdateGrassGrowth(world.registry).set(x, y,
+                                    z, random.nextDouble() * 400.0 + 1600.0))
+                }
+            }
         }
     }
 

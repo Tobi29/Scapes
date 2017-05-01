@@ -140,7 +140,7 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
                 if (footStepSound != null) {
                     val random = threadLocalRandom()
                     game.engine.sounds.playSound(footStepSound, "sound.World",
-                            0.9f + random.nextFloat() * 0.2f, 1.0f)
+                            0.9 + random.nextDouble() * 0.2, 1.0)
                     footStep = 1.0 / clamp(speed.now().length(), 1.0, 4.0)
                 }
             }

@@ -36,6 +36,8 @@ abstract class TerrainInfiniteBase<B : VoxelType, C : TerrainInfiniteBaseChunk<B
     protected val cyMax = radius
     protected val lighting = LightingEngineThreaded(this, taskExecutor)
 
+    override abstract fun getThreadContext(): TerrainInfiniteMutableSection<B, C, *>
+
     override fun sunLight(x: Int,
                           y: Int,
                           z: Int,
@@ -43,7 +45,9 @@ abstract class TerrainInfiniteBase<B : VoxelType, C : TerrainInfiniteBaseChunk<B
         if (z < 0 || z >= zSize) {
             return
         }
-        chunk(x shr 4, y shr 4, { it.sunLightG(x, y, z, light) })
+        chunk(x shr 4, y shr 4) {
+            it.lockWrite { it.sunLightG(x, y, z, light) }
+        }
     }
 
     override fun blockLight(x: Int,
@@ -53,7 +57,9 @@ abstract class TerrainInfiniteBase<B : VoxelType, C : TerrainInfiniteBaseChunk<B
         if (z < 0 || z >= zSize) {
             return
         }
-        chunk(x shr 4, y shr 4, { it.blockLightG(x, y, z, light) })
+        chunk(x shr 4, y shr 4) {
+            it.lockWrite { it.blockLightG(x, y, z, light) }
+        }
     }
 
     override fun block(x: Int,

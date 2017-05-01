@@ -23,10 +23,11 @@ import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.generator.GeneratorOutput
+import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
 import org.tobi29.scapes.engine.utils.IOException
-import org.tobi29.scapes.engine.utils.assert
+import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.max
@@ -49,12 +50,10 @@ class TerrainInfiniteServer(override val world: WorldServer,
                             air: BlockType) : TerrainInfinite<EntityServer, TerrainInfiniteChunkServer>(
         zSize, world.taskExecutor, air, air,
         world.registry,
-        TerrainInfiniteChunkManagerDynamic<TerrainInfiniteChunkServer>()), TerrainServer.TerrainMutable {
-    private val blockChanges = ConcurrentLinkedQueue<(TerrainServer.TerrainMutable) -> Unit>()
+        TerrainInfiniteChunkManagerDynamic<TerrainInfiniteChunkServer>()), TerrainServer {
     private val chunkUnloadQueue = ConcurrentLinkedQueue<TerrainInfiniteChunkServer>()
     private val generatorOutput = GeneratorOutput(zSize)
     private val loadJoiner: ThreadJoiner
-    private val updateJoiner: ThreadJoiner
 
     init {
         loadJoiner = world.taskExecutor.runThread({ joiner ->
@@ -109,9 +108,9 @@ class TerrainInfiniteServer(override val world: WorldServer,
                         chunkManager.stream().filter(
                                 { it.shouldPopulate() }).take(
                                 32).forEach({ it.populate() })
-                        chunkManager.stream().filter(
-                                TerrainInfiniteChunkServer::shouldFinish).forEach(
-                                TerrainInfiniteChunkServer::finish)
+                        chunkManager.stream().filter {
+                            it.shouldFinish() && requiredChunks.contains(it.pos)
+                        }.forEach(TerrainInfiniteChunkServer::finish)
                         val time = System.currentTimeMillis() - 2000
                         chunkManager.stream().filter { chunk ->
                             chunk.lastAccess < time && !requiredChunks.contains(
@@ -127,19 +126,9 @@ class TerrainInfiniteServer(override val world: WorldServer,
                 }
             }
         }, "Chunk-Loading")
-        updateJoiner = world.taskExecutor.runThread({ joiner ->
-            while (!joiner.marked) {
-                var idle = true
-                while (!blockChanges.isEmpty()) {
-                    blockChanges.poll()(this)
-                    idle = false
-                }
-                if (idle) {
-                    joiner.sleep()
-                }
-            }
-        }, "Chunk-Updating")
     }
+
+    override fun getThreadContext() = SECTION.get()
 
     override fun sunLightReduction(x: Int,
                                    y: Int): Int {
@@ -270,19 +259,24 @@ class TerrainInfiniteServer(override val world: WorldServer,
         }
     }
 
-    override fun queue(blockChanges: (TerrainServer.TerrainMutable) -> Unit) {
-        assert {
-            world.checkThread() || Thread.currentThread().let {
-                it == loadJoiner.thread || it == updateJoiner.thread
-            }
+    override fun <R> modify(x: Int,
+                            y: Int,
+                            z: Int,
+                            dx: Int,
+                            dy: Int,
+                            dz: Int,
+                            block: (TerrainMutableServer) -> R): R {
+        val section = SECTION.get()
+        section.init(this, x, y, z, dx, dy, dz)
+        section.lockChunks()
+        try {
+            return block(section)
+        } finally {
+            section.unlockChunks()
+            section.flushPackets()
+            section.flushUpdates()
+            section.clear()
         }
-        this.blockChanges.add(blockChanges)
-        updateJoiner.wake()
-    }
-
-    override fun addDelayedUpdate(update: Update) {
-        chunkS(update.x() shr 4, update.y() shr 4,
-                { chunk -> chunk.addDelayedUpdate(update) })
     }
 
     override fun hasDelayedUpdate(x: Int,
@@ -292,8 +286,9 @@ class TerrainInfiniteServer(override val world: WorldServer,
         if (z < 0 || z >= zSize) {
             return false
         }
-        return chunkS(x shr 4, y shr 4,
-                { chunk -> chunk.hasDelayedUpdate(x, y, z, clazz) }) ?: false
+        return chunkS(x shr 4, y shr 4) {
+            it.hasDelayedUpdate(x, y, z, clazz)
+        } ?: false
     }
 
     override fun isBlockSendable(player: MobPlayerServer,
@@ -330,44 +325,10 @@ class TerrainInfiniteServer(override val world: WorldServer,
 
     override fun dispose() {
         loadJoiner.join()
-        updateJoiner.join()
         lighting.dispose()
         chunkManager.stream().forEach { chunkUnloadQueue.add(it) }
         removeChunks()
         format.dispose()
-    }
-
-    override fun type(x: Int,
-                      y: Int,
-                      z: Int,
-                      type: BlockType) {
-        if (z < 0 || z >= zSize) {
-            return
-        }
-        chunk(x shr 4, y shr 4) { chunk -> chunk.blockTypeG(x, y, z, type) }
-    }
-
-    override fun data(x: Int,
-                      y: Int,
-                      z: Int,
-                      data: Int) {
-        if (z < 0 || z >= zSize) {
-            return
-        }
-        chunk(x shr 4, y shr 4) { chunk -> chunk.dataG(x, y, z, data) }
-    }
-
-    override fun typeData(x: Int,
-                          y: Int,
-                          z: Int,
-                          block: BlockType,
-                          data: Int) {
-        if (z < 0 || z >= zSize) {
-            return
-        }
-        chunk(x shr 4, y shr 4) { chunk ->
-            chunk.typeDataG(x, y, z, block, data)
-        }
     }
 
     fun updateAdjacent(x: Int,
@@ -446,5 +407,7 @@ class TerrainInfiniteServer(override val world: WorldServer,
         return Pair(Vector2i(x, y), tagStructure)
     }
 
-    companion object : KLogging()
+    companion object : KLogging() {
+        val SECTION = ThreadLocal { TerrainInfiniteServerSection() }
+    }
 }

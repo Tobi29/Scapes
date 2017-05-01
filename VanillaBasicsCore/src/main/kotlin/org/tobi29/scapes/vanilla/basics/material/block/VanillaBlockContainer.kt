@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block
 
+import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
@@ -35,7 +36,7 @@ abstract class VanillaBlockEntity<out C : EntityClient, out S : EntityServer>(
         return true
     }
 
-    override fun place(terrain: TerrainServer.TerrainMutable,
+    override fun place(terrain: TerrainMutableServer,
                        x: Int,
                        y: Int,
                        z: Int,
@@ -44,7 +45,7 @@ abstract class VanillaBlockEntity<out C : EntityClient, out S : EntityServer>(
         if (!super.place(terrain, x, y, z, face, player)) {
             return false
         }
-        getEntity(terrain, x, y, z)
+        getEntity(player.world.terrain, x, y, z)
         return true
     }
 

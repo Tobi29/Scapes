@@ -43,7 +43,7 @@ class GuiComponentLogo(parent: GuiLayoutData,
             GuiComponentText(it, splash(), 1.0f, 1.0f, 0.0f, 1.0f)
         }
         on(GuiEvent.CLICK_LEFT) { event ->
-            engine.sounds.playSound(CLICK, "sound.GUI", 1.0f, 1.0f)
+            engine.sounds.playSound(CLICK, "sound.GUI", 1.0, 1.0)
             splash.text = splash()
         }
     }

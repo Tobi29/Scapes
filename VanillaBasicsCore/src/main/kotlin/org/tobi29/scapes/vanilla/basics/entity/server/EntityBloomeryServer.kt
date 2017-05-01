@@ -18,6 +18,7 @@ package org.tobi29.scapes.vanilla.basics.entity.server
 
 import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.chunk.WorldServer
+import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
@@ -57,14 +58,14 @@ class EntityBloomeryServer(type: EntityType<*, *>,
         val blockOn = materials.bloomery.block(1)
         if (temperature > 80.0) {
             if (world.terrain.block(xx, yy, zz) == blockOff) {
-                world.terrain.queue { handle ->
+                world.terrain.modify(xx, yy, zz) { handle ->
                     if (handle.block(xx, yy, zz) == blockOff) {
                         handle.block(xx, yy, zz, blockOn)
                     }
                 }
             }
         } else if (world.terrain.block(xx, yy, zz) == blockOn) {
-            world.terrain.queue { handle ->
+            world.terrain.modify(xx, yy, zz) { handle ->
                 if (handle.block(xx, yy, zz) == blockOn) {
                     handle.block(xx, yy, zz, blockOff)
                 }
@@ -72,12 +73,11 @@ class EntityBloomeryServer(type: EntityType<*, *>,
         }
     }
 
-    override fun isValidOn(terrain: TerrainServer,
+    override fun isValidOn(terrain: Terrain,
                            x: Int,
                            y: Int,
                            z: Int): Boolean {
-        val plugin = terrain.world.plugins.plugin(
-                "VanillaBasics") as VanillaBasics
+        val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
         val materials = plugin.materials
         return terrain.type(x, y, z) == materials.bloomery
     }

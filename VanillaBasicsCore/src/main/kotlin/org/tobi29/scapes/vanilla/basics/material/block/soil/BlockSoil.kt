@@ -34,66 +34,70 @@ abstract class BlockSoil(type: VanillaMaterialType) : VanillaBlock(type) {
         return "VanillaBasics:sound/blocks/Stone.ogg"
     }
 
-    override fun update(terrain: TerrainServer.TerrainMutable,
+    override fun update(terrain: TerrainServer,
                         x: Int,
                         y: Int,
                         z: Int,
                         data: Int) {
-        var sides = 0
-        var xx = 0
-        var yy = 0
-        var flag = false
-        if (terrain.isSolid(x, y, z - 1)) {
-            val random = threadLocalRandom()
-            if (!terrain.isSolid(x - 1, y, z)) {
-                sides++
-                if (!terrain.isSolid(x - 1, y, z - 1)) {
-                    xx = -1
-                    flag = true
-                }
-            }
-            if (!terrain.isSolid(x + 1, y, z)) {
-                sides++
-                if (!terrain.isSolid(x + 1, y, z - 1)) {
-                    if (xx == 0 || random.nextBoolean()) {
-                        xx = 1
+        val world = terrain.world
+        terrain.modify(x - 1, y - 1, z - 1, 3, 3, 3) { terrain ->
+            var sides = 0
+            var xx = 0
+            var yy = 0
+            var flag = false
+            if (terrain.isSolid(x, y, z - 1)) {
+                val random = threadLocalRandom()
+                if (!terrain.isSolid(x - 1, y, z)) {
+                    sides++
+                    if (!terrain.isSolid(x - 1, y, z - 1)) {
+                        xx = -1
+                        flag = true
                     }
-                    flag = true
                 }
-            }
-            if (!terrain.isSolid(x, y - 1, z)) {
-                sides++
-                if (!terrain.isSolid(x, y - 1, z - 1)) {
-                    if (xx == 0 || random.nextBoolean()) {
-                        xx = 0
-                        yy = -1
+                if (!terrain.isSolid(x + 1, y, z)) {
+                    sides++
+                    if (!terrain.isSolid(x + 1, y, z - 1)) {
+                        if (xx == 0 || random.nextBoolean()) {
+                            xx = 1
+                        }
+                        flag = true
                     }
-                    flag = true
                 }
-            }
-            if (!terrain.isSolid(x, y + 1, z)) {
-                sides++
-                if (!terrain.isSolid(x, y + 1, z - 1)) {
-                    if (xx == 0 && yy == 0 || random.nextBoolean()) {
-                        xx = 0
-                        yy = 1
+                if (!terrain.isSolid(x, y - 1, z)) {
+                    sides++
+                    if (!terrain.isSolid(x, y - 1, z - 1)) {
+                        if (xx == 0 || random.nextBoolean()) {
+                            xx = 0
+                            yy = -1
+                        }
+                        flag = true
                     }
-                    flag = true
                 }
+                if (!terrain.isSolid(x, y + 1, z)) {
+                    sides++
+                    if (!terrain.isSolid(x, y + 1, z - 1)) {
+                        if (xx == 0 && yy == 0 || random.nextBoolean()) {
+                            xx = 0
+                            yy = 1
+                        }
+                        flag = true
+                    }
+                }
+            } else {
+                sides = 5
+                flag = true
             }
-        } else {
-            sides = 5
-            flag = true
-        }
-        if (sides > 2 && flag) {
-            terrain.world.addEntityNew(
-                    materials.plugin.entityTypes.flyingBlock.createServer(
-                            terrain.world).apply {
-                        setPos(Vector3d(x + xx + 0.5, y + yy + 0.5, z + 0.5))
-                        setSpeed(Vector3d(0.0, 0.0, -1.0))
-                        setType(ItemStack(this@BlockSoil, data))
-                    })
-            terrain.typeData(x, y, z, terrain.air, 0)
+            if (sides > 2 && flag) {
+                world.addEntityNew(
+                        materials.plugin.entityTypes.flyingBlock.createServer(
+                                world).apply {
+                            setPos(Vector3d(x + xx + 0.5, y + yy + 0.5,
+                                    z + 0.5))
+                            setSpeed(Vector3d(0.0, 0.0, -1.0))
+                            setType(ItemStack(this@BlockSoil, data))
+                        })
+                terrain.typeData(x, y, z, terrain.air, 0)
+            }
         }
     }
 

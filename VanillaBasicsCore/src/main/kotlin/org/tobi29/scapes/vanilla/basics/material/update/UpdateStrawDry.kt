@@ -27,10 +27,12 @@ class UpdateStrawDry(type: UpdateType) : Update(type) {
     constructor(registry: Registries) : this(
             of(registry, "vanilla.basics.update.StrawDry"))
 
-    override fun run(terrain: TerrainServer.TerrainMutable) {
-        val block = terrain.block(x, y, z)
-        if (terrain.data(block) == 0) {
-            terrain.data(x, y, z, 1)
+    override fun run(terrain: TerrainServer) {
+        terrain.modify(x, y, z) { terrain ->
+            val block = terrain.block(x, y, z)
+            if (terrain.data(block) == 0) {
+                terrain.data(x, y, z, 1)
+            }
         }
     }
 

@@ -18,9 +18,9 @@ package org.tobi29.scapes.vanilla.basics.entity.server
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.server.MobServer
 import org.tobi29.scapes.vanilla.basics.material.BlockExplosive
@@ -59,7 +59,7 @@ class MobBombServer(type: EntityType<*, *>,
         time -= delta
         if (time <= 0.0) {
             world.playSound("Scapes:sound/entity/mob/Explosion1.ogg", this,
-                    1.0f, 64.0f)
+                    rolloffFactor = 0.1)
             world.removeEntity(this)
             val x = pos.intX()
             val y = pos.intY()

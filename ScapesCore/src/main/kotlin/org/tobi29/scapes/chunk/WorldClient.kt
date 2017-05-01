@@ -51,7 +51,7 @@ class WorldClient(val connection: ClientConnection,
                   playerTag: TagMap,
                   playerID: UUID) : World<EntityClient>(
         connection.plugins, connection.game.engine.loop,
-        connection.plugins.registry,
+        connection.game.engine.taskExecutor, connection.plugins.registry,
         seed), PlayConnection<PacketServer> {
     val game = connection.game
     val events = EventDispatcher(game.engine.events) {
@@ -310,24 +310,28 @@ class WorldClient(val connection: ClientConnection,
 
     fun playSound(audio: String,
                   entity: EntityClient,
-                  pitch: Float = 1.0f,
-                  gain: Float = 1.0f) {
+                  pitch: Double = 1.0,
+                  gain: Double = 1.0,
+                  referenceDistance: Double = 1.0,
+                  rolloffFactor: Double = 1.0) {
         if (entity is MobClient) {
             playSound(audio, entity.getCurrentPos(), entity.speed(), pitch,
-                    gain)
+                    gain, referenceDistance, rolloffFactor)
         } else {
-            playSound(audio, entity.getCurrentPos(), Vector3d.ZERO, pitch, gain)
+            playSound(audio, entity.getCurrentPos(), Vector3d.ZERO, pitch, gain,
+                    referenceDistance, rolloffFactor)
         }
     }
 
     fun playSound(audio: String,
                   position: Vector3d,
                   velocity: Vector3d,
-                  pitch: Float = 1.0f,
-                  gain: Float = 1.0f) {
+                  pitch: Double = 1.0,
+                  gain: Double = 1.0,
+                  referenceDistance: Double = 1.0,
+                  rolloffFactor: Double = 1.0) {
         game.engine.sounds.playSound(audio, "sound.World", position,
-                velocity, pitch,
-                gain)
+                velocity, pitch, gain, referenceDistance, rolloffFactor)
     }
 
     fun infoLayer(name: String,

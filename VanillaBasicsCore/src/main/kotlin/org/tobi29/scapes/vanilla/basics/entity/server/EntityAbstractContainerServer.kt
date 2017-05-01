@@ -19,6 +19,7 @@ package org.tobi29.scapes.vanilla.basics.entity.server
 import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.block.InventoryContainer
 import org.tobi29.scapes.chunk.WorldServer
+import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.plus
@@ -99,7 +100,7 @@ abstract class EntityAbstractContainerServer(type: EntityType<*, *>,
         }
     }
 
-    protected abstract fun isValidOn(terrain: TerrainServer,
+    protected abstract fun isValidOn(terrain: Terrain,
                                      x: Int,
                                      y: Int,
                                      z: Int): Boolean

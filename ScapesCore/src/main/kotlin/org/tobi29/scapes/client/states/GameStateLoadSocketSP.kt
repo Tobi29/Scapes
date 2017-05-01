@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.client.states
 
-import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.connection.NewClientConnection
 import org.tobi29.scapes.client.connection.RemoteClientConnection
@@ -28,8 +27,9 @@ import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Scene
 import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.server.*
-import org.tobi29.scapes.engine.utils.UnsupportedJVMException
 import org.tobi29.scapes.engine.utils.IOException
+import org.tobi29.scapes.engine.utils.UnsupportedJVMException
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toMap

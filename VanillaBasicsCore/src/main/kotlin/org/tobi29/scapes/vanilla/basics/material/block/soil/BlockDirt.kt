@@ -23,8 +23,8 @@ import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock
 import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.TerrainClient
+import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
-import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
@@ -71,7 +71,7 @@ class BlockDirt(type: VanillaMaterialType) : BlockSoil(type) {
         return "Dirt"
     }
 
-    override fun destroy(terrain: TerrainServer.TerrainMutable,
+    override fun destroy(terrain: TerrainMutableServer,
                          x: Int,
                          y: Int,
                          z: Int,
@@ -84,7 +84,8 @@ class BlockDirt(type: VanillaMaterialType) : BlockSoil(type) {
         }
         if ("Hoe" == item.material().toolType(item)) {
             terrain.type(x, y, z, materials.farmland)
-            materials.farmland.getEntity(terrain, x, y, z).nourish(0.1)
+            materials.farmland.getEntity(player.world.terrain, x, y, z).nourish(
+                    0.1)
             return false
         }
         return true

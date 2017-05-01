@@ -192,7 +192,6 @@ class ScapesServer(source: WorldSource,
     private fun stopWorld(world: WorldServer) {
         logger.info { "Removing world: ${world.id}" }
         world.stop(defaultWorld())
-        world.dispose()
         format.removeWorld(world)
     }
 

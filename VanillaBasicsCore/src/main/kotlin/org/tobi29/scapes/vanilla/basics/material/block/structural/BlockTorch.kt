@@ -69,7 +69,7 @@ class BlockTorch(type: VanillaMaterialType) : VanillaBlock(type) {
         return ArrayList()
     }
 
-    override fun place(terrain: TerrainServer.TerrainMutable,
+    override fun place(terrain: TerrainMutableServer,
                        x: Int,
                        y: Int,
                        z: Int,
@@ -145,18 +145,21 @@ class BlockTorch(type: VanillaMaterialType) : VanillaBlock(type) {
                 1.0, 1.0, lod)
     }
 
-    override fun update(terrain: TerrainServer.TerrainMutable,
+    override fun update(terrain: TerrainServer,
                         x: Int,
                         y: Int,
                         z: Int,
                         data: Int) {
-        val ground = Face[data].opposite.delta + Vector3i(x, y, z)
-        if (terrain.block(ground.x, ground.y, ground.z) {
-            !isSolid(it) || isTransparent(it)
-        }) {
-            terrain.world.dropItems(drops(ItemStack(materials.air, 0), data), x,
-                    y, z)
-            terrain.typeData(x, y, z, terrain.air, 0)
+        val world = terrain.world
+        terrain.modify(x - 1, y - 1, z - 1, 3, 3, 3) { terrain ->
+            val ground = Face[data].opposite.delta + Vector3i(x, y, z)
+            if (terrain.block(ground.x, ground.y, ground.z) {
+                !isSolid(it) || isTransparent(it)
+            }) {
+                world.dropItems(drops(ItemStack(materials.air, 0), data), x, y,
+                        z)
+                terrain.typeData(x, y, z, terrain.air, 0)
+            }
         }
     }
 

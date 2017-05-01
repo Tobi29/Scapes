@@ -15,7 +15,6 @@
  */
 package org.tobi29.scapes.packets
 
-import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteChunkServer
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteClient
@@ -24,6 +23,7 @@ import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
 import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.server.connection.PlayerConnection
 
@@ -67,17 +67,18 @@ class PacketSendChunk : PacketAbstract, PacketClient {
                 terrain.changeRequestedChunks(-1)
                 val chunk = terrain.chunkNoLoad(x, y)
                 if (chunk != null) {
-                    if (chunk.isLoaded) {
-                        logger.warn { "Chunk received twice: $x/$y" }
+                    chunk.lockWrite {
+                        if (chunk.isLoaded) {
+                            logger.warn { "Chunk received twice: $x/$y" }
+                        }
+                        chunk.read(tag)
+                        chunk.setLoaded()
+                        chunk.resetRequest()
                     }
-                    chunk.read(tag)
-                    chunk.setLoaded()
-                    chunk.resetRequest()
                     for (x in -1..1) {
                         for (y in -1..1) {
                             val geomRenderer = terrain.chunkNoLoad(
-                                    chunk.pos.x + x,
-                                    chunk.pos.y + y)
+                                    chunk.pos.x + x, chunk.pos.y + y)
                             if (geomRenderer != null) {
                                 geomRenderer.rendererChunk().setGeometryDirty()
                             }

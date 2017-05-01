@@ -24,7 +24,7 @@ import org.tobi29.scapes.vanilla.basics.world.tree.Tree
 class LayerTree(private val tree: Tree,
                 private val chance: Int) : BiomeDecorator.Layer {
 
-    override fun decorate(terrain: TerrainServer.TerrainMutable,
+    override fun decorate(terrain: TerrainServer,
                           x: Int,
                           y: Int,
                           materials: VanillaMaterial,

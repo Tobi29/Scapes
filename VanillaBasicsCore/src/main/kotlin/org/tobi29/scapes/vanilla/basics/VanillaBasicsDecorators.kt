@@ -68,19 +68,19 @@ internal fun VanillaBasics.registerDecorators() {
     // Tundra
     decorator(BiomeGenerator.Biome.TUNDRA, "Waste", 10) { }
     decorator(BiomeGenerator.Biome.TUNDRA, "SprucePlains", 1) {
-        addLayer(LayerTree(TreeSpruce.INSTANCE, 256))
+        addLayer(LayerTree(TreeSpruce, 256))
     }
 
     // Taiga
     decorator(BiomeGenerator.Biome.TAIGA, "SprucePlains", 10) {
-        addLayer(LayerTree(TreeSpruce.INSTANCE, 64))
+        addLayer(LayerTree(TreeSpruce, 64))
     }
     decorator(BiomeGenerator.Biome.TAIGA, "SpruceForest", 10) {
-        addLayer(LayerTree(TreeSpruce.INSTANCE, 16))
+        addLayer(LayerTree(TreeSpruce, 16))
     }
     decorator(BiomeGenerator.Biome.TAIGA, "SequoiaForest", 2) {
-        addLayer(LayerTree(TreeSequoia.INSTANCE, 256))
-        addLayer(LayerTree(TreeSpruce.INSTANCE, 128))
+        addLayer(LayerTree(TreeSequoia, 256))
+        addLayer(LayerTree(TreeSpruce, 128))
     }
 
     // Wasteland
@@ -92,58 +92,58 @@ internal fun VanillaBasics.registerDecorators() {
     // Steppe
     decorator(BiomeGenerator.Biome.STEPPE, "Waste", 3) { }
     decorator(BiomeGenerator.Biome.STEPPE, "BirchPlains", 5) {
-        addLayer(LayerTree(TreeBirch.INSTANCE, 4096))
+        addLayer(LayerTree(TreeBirch, 4096))
         addShrubs(materials, 128)
     }
     decorator(BiomeGenerator.Biome.STEPPE, "SprucePlains", 10) {
-        addLayer(LayerTree(TreeSpruce.INSTANCE, 2048))
+        addLayer(LayerTree(TreeSpruce, 2048))
         addShrubs(materials, 128)
     }
 
     // Plains
     decorator(BiomeGenerator.Biome.PLAINS, "Waste", 1) { }
     decorator(BiomeGenerator.Biome.PLAINS, "Plains", 10) {
-        addLayer(LayerTree(TreeOak.INSTANCE, 8192))
-        addLayer(LayerTree(TreeBirch.INSTANCE, 8192))
-        addLayer(LayerTree(TreeMaple.INSTANCE, 8192))
+        addLayer(LayerTree(TreeOak, 8192))
+        addLayer(LayerTree(TreeBirch, 8192))
+        addLayer(LayerTree(TreeMaple, 8192))
         addShrubs(materials, 256)
     }
     decorator(BiomeGenerator.Biome.PLAINS, "BirchPlains", 5) {
-        addLayer(LayerTree(TreeBirch.INSTANCE, 1024))
+        addLayer(LayerTree(TreeBirch, 1024))
         addShrubs(materials, 256)
     }
     decorator(BiomeGenerator.Biome.PLAINS, "SprucePlains", 10) {
-        addLayer(LayerTree(TreeSpruce.INSTANCE, 512))
+        addLayer(LayerTree(TreeSpruce, 512))
         addShrubs(materials, 256)
     }
     decorator(BiomeGenerator.Biome.PLAINS, "DeciduousForest", 4) {
-        addLayer(LayerTree(TreeOak.INSTANCE, 256))
-        addLayer(LayerTree(TreeBirch.INSTANCE, 512))
-        addLayer(LayerTree(TreeMaple.INSTANCE, 512))
+        addLayer(LayerTree(TreeOak, 256))
+        addLayer(LayerTree(TreeBirch, 512))
+        addLayer(LayerTree(TreeMaple, 512))
         addShrubs(materials, 256)
     }
 
     // Forest
     decorator(BiomeGenerator.Biome.FOREST, "DeciduousForest", 10) {
-        addLayer(LayerTree(TreeOak.INSTANCE, 96))
-        addLayer(LayerTree(TreeBirch.INSTANCE, 128))
-        addLayer(LayerTree(TreeMaple.INSTANCE, 96))
+        addLayer(LayerTree(TreeOak, 96))
+        addLayer(LayerTree(TreeBirch, 128))
+        addLayer(LayerTree(TreeMaple, 96))
         addShrubs(materials, 128)
     }
     decorator(BiomeGenerator.Biome.FOREST, "BirchForest", 10) {
-        addLayer(LayerTree(TreeBirch.INSTANCE, 48))
+        addLayer(LayerTree(TreeBirch, 48))
         addShrubs(materials, 128)
     }
     decorator(BiomeGenerator.Biome.FOREST, "SpruceForest", 10) {
-        addLayer(LayerTree(TreeSpruce.INSTANCE, 16))
+        addLayer(LayerTree(TreeSpruce, 16))
         addShrubs(materials, 128)
     }
     decorator(BiomeGenerator.Biome.FOREST, "WillowForest", 10) {
-        addLayer(LayerTree(TreeWillow.INSTANCE, 64))
+        addLayer(LayerTree(TreeWillow, 64))
         addShrubs(materials, 128)
     }
     decorator(BiomeGenerator.Biome.FOREST, "SequoiaForest", 2) {
-        addLayer(LayerTree(TreeSequoia.INSTANCE, 256))
+        addLayer(LayerTree(TreeSequoia, 256))
         addShrubs(materials, 64)
     }
 
@@ -164,28 +164,28 @@ internal fun VanillaBasics.registerDecorators() {
 
     // Wet Savanna
     decorator(BiomeGenerator.Biome.WET_SAVANNA, "DeciduousForest", 10) {
-        addLayer(LayerTree(TreeOak.INSTANCE, 256))
-        addLayer(LayerTree(TreeBirch.INSTANCE, 512))
-        addLayer(LayerTree(TreePalm.INSTANCE, 512))
+        addLayer(LayerTree(TreeOak, 256))
+        addLayer(LayerTree(TreeBirch, 512))
+        addLayer(LayerTree(TreePalm, 512))
         addShrubs(materials, 128)
     }
 
     // Oasis
     decorator(BiomeGenerator.Biome.OASIS, "PalmForest", 10) {
-        addLayer(LayerTree(TreePalm.INSTANCE, 128))
+        addLayer(LayerTree(TreePalm, 128))
         addShrubs(materials, 512)
     }
 
     // Rainforest
     decorator(BiomeGenerator.Biome.RAINFOREST, "DeciduousForest", 10) {
-        addLayer(LayerTree(TreeOak.INSTANCE, 48))
-        addLayer(LayerTree(TreeBirch.INSTANCE, 96))
-        addLayer(LayerTree(TreePalm.INSTANCE, 128))
+        addLayer(LayerTree(TreeOak, 48))
+        addLayer(LayerTree(TreeBirch, 96))
+        addLayer(LayerTree(TreePalm, 128))
         addShrubs(materials, 256)
     }
     decorator(BiomeGenerator.Biome.RAINFOREST, "WillowForest", 4) {
-        addLayer(LayerTree(TreeWillow.INSTANCE, 24))
-        addLayer(LayerTree(TreePalm.INSTANCE, 256))
+        addLayer(LayerTree(TreeWillow, 24))
+        addLayer(LayerTree(TreePalm, 256))
         addShrubs(materials, 256)
     }
 }

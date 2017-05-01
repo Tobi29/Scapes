@@ -89,8 +89,8 @@ class Playlist(private val path: FilePath,
                     val random = threadLocalRandom()
                     val title = files[random.nextInt(files.size)]
                     engine.sounds.stop("music")
-                    engine.sounds.playMusic(read(title),
-                            "music.Playlist", 1.0f, 1.0f, false)
+                    engine.sounds.playMusic(read(title), "music.Playlist",
+                            false, 1.0, 1.0)
                     return@PrivilegedAction title
                 }
             } catch (e: IOException) {

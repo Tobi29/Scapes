@@ -44,8 +44,9 @@ class MobPigServer(type: EntityType<*, *>,
         val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
         val materials = plugin.materials
         onDamage("Local") { damage ->
-            world.playSound("VanillaBasics:sound/entity/mob/pig/Hurt" +
-                    (random.nextInt(2) + 1) + ".ogg", this)
+            world.playSound(
+                    "VanillaBasics:sound/entity/mob/pig/Hurt${random.nextInt(
+                            2) + 1}.ogg", this)
         }
         onDeath("Local") {
             world.dropItem(ItemStack(materials.meat, 0, random.nextInt(7) + 10),
@@ -115,8 +116,9 @@ class MobPigServer(type: EntityType<*, *>,
         if (soundWait <= 0.0) {
             val random = threadLocalRandom()
             soundWait = random.nextDouble() * 12.0 + 3.0
-            world.playSound("VanillaBasics:sound/entity/mob/pig/Calm" +
-                    (random.nextInt(2) + 1) + ".ogg", this)
+            world.playSound(
+                    "VanillaBasics:sound/entity/mob/pig/Calm${random.nextInt(
+                            2) + 1}.ogg", this)
         }
     }
 

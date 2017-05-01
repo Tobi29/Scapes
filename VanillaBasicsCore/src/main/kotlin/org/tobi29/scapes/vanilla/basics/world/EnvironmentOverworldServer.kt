@@ -506,41 +506,42 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
         } else {
             val delta = simulationCount - chunkSimulationCount
             val random = threadLocalRandom()
-            if (delta < 180 + random.nextInt(40)) {
+            if (delta < 360 + random.nextInt(80)) {
                 return
             }
-            count = max(10240 / delta.toInt(), 1)
+            count = max(20480 / delta.toInt(), 1)
         }
         tagStructure["SimulationCount"] = simulationCount
-        terrain.queue { handler ->
-            simulateSeason(handler, chunk.posBlock.x,
-                    chunk.posBlock.y, chunk.size.x, chunk.size.y,
-                    count)
-        }
+        simulateSeason(terrain, chunk.posBlock.x,
+                chunk.posBlock.y, chunk.posBlock.z, chunk.size.x, chunk.size.y,
+                chunk.size.z, count)
     }
 
-    private fun simulateSeason(chunk: TerrainServer.TerrainMutable,
+    private fun simulateSeason(terrain: TerrainServer,
                                x: Int,
                                y: Int,
+                               z: Int,
                                dx: Int,
                                dy: Int,
+                               dz: Int,
                                chance: Int) {
         val random = threadLocalRandom()
-        val humidity00 = climateGenerator.humidity(x.toDouble(), y.toDouble())
+        val humidity00 = climateGenerator.humidity(x.toDouble(),
+                y.toDouble())
         val temperature00 = climateGenerator.temperature(x.toDouble(),
                 y.toDouble())
         val humidity10 = climateGenerator.humidity((x + 15).toDouble(),
                 y.toDouble())
-        val temperature10 = climateGenerator.temperature((x + 15).toDouble(),
-                y.toDouble())
+        val temperature10 = climateGenerator.temperature(
+                (x + 15).toDouble(), y.toDouble())
         val humidity01 = climateGenerator.humidity(x.toDouble(),
                 (y + 15).toDouble())
         val temperature01 = climateGenerator.temperature(x.toDouble(),
                 (y + 15).toDouble())
         val humidity11 = climateGenerator.humidity((x + 15).toDouble(),
                 (y + 15).toDouble())
-        val temperature11 = climateGenerator.temperature((x + 15).toDouble(),
-                (y + 15).toDouble())
+        val temperature11 = climateGenerator.temperature(
+                (x + 15).toDouble(), (y + 15).toDouble())
         for (yy in 0..dx - 1) {
             val yyy = yy + y
             val mixY = yy / 15.0
@@ -551,46 +552,52 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
             for (xx in 0..dy - 1) {
                 if (random.nextInt(chance) == 0) {
                     val xxx = xx + x
-                    val z = chunk.highestTerrainBlockZAt(xxx, yyy)
+                    val zz = terrain.highestTerrainBlockZAt(xxx, yyy)
                     val mixX = xx / 15.0
                     val humidity = mix(humidity0, humidity1, mixX)
                     val temperature = climateGenerator.temperatureD(
-                            mix(temperature0, temperature1, mixX), z)
-                    val spaceBlock = chunk.block(xxx, yyy, z)
-                    val spaceType = chunk.type(spaceBlock)
-                    val spaceData = chunk.data(spaceBlock)
-                    val groundType = chunk.type(xxx, yyy, z - 1)
-                    if (humidity > 0.2) {
-                        if (groundType == materials.dirt) {
-                            chunk.typeData(xxx, yyy, z - 1, materials.grass,
-                                    random.nextInt(4))
-                        } else if (groundType == materials.grass && random.nextInt(
-                                20) == 0) {
-                            chunk.data(xxx, yyy, z - 1, random.nextInt(9))
-                        }
-                    } else {
-                        if (groundType == materials.grass) {
-                            chunk.typeData(xxx, yyy, z - 1, materials.dirt, 0)
-                        }
-                    }
-                    if (temperature > 1.0) {
-                        if (spaceType == materials.snow) {
-                            if (spaceData < 8) {
-                                chunk.data(xxx, yyy, z, spaceData + 1)
-                            } else {
-                                chunk.typeData(xxx, yyy, z, materials.air, 0)
+                            mix(temperature0, temperature1, mixX), zz)
+                    terrain.modify(xxx, yyy, zz - 1, 1, 1, 2) { terrain ->
+                        val spaceBlock = terrain.block(xxx, yyy, zz)
+                        val spaceType = terrain.type(spaceBlock)
+                        val spaceData = terrain.data(spaceBlock)
+                        val groundType = terrain.type(xxx, yyy, zz - 1)
+                        if (humidity > 0.2) {
+                            if (groundType == materials.dirt) {
+                                terrain.typeData(xxx, yyy, zz - 1,
+                                        materials.grass, random.nextInt(4))
+                            } else if (groundType == materials.grass && random.nextInt(
+                                    20) == 0) {
+                                terrain.data(xxx, yyy, zz - 1,
+                                        random.nextInt(9))
+                            }
+                        } else {
+                            if (groundType == materials.grass) {
+                                terrain.typeData(xxx, yyy, zz - 1,
+                                        materials.dirt, 0)
                             }
                         }
-                    } else {
-                        val weather = climateGenerator.weather(xxx.toDouble(),
-                                yyy.toDouble())
-                        if (temperature < 0.0 && (weather > 0.5 || chance == 1)) {
-                            if (spaceType == materials.air ||
-                                    spaceType == materials.flower ||
-                                    spaceType == materials.stoneRock) {
-                                chunk.typeData(xxx, yyy, z, materials.snow, 8)
-                            } else if (spaceType == materials.snow && spaceData > 0) {
-                                chunk.data(xxx, yyy, z, spaceData - 1)
+                        if (temperature > 1.0) {
+                            if (spaceType == materials.snow) {
+                                if (spaceData < 8) {
+                                    terrain.data(xxx, yyy, zz, spaceData + 1)
+                                } else {
+                                    terrain.typeData(xxx, yyy, zz,
+                                            materials.air, 0)
+                                }
+                            }
+                        } else {
+                            val weather = climateGenerator.weather(
+                                    xxx.toDouble(), yyy.toDouble())
+                            if (temperature < 0.0 && (weather > 0.5 || chance == 1)) {
+                                if (spaceType == materials.air ||
+                                        spaceType == materials.flower ||
+                                        spaceType == materials.stoneRock) {
+                                    terrain.typeData(xxx, yyy, zz,
+                                            materials.snow, 8)
+                                } else if (spaceType == materials.snow && spaceData > 0) {
+                                    terrain.data(xxx, yyy, zz, spaceData - 1)
+                                }
                             }
                         }
                     }

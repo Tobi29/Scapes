@@ -29,26 +29,29 @@ class UpdateGrassGrowth(type: UpdateType) : Update(type) {
     constructor(registry: Registries) : this(
             of(registry, "vanilla.basics.update.GrassGrowth"))
 
-    override fun run(terrain: TerrainServer.TerrainMutable) {
-        val plugin = terrain.world.plugins.plugin(
+    override fun run(terrain: TerrainServer) {
+        val world = terrain.world
+        val plugin = world.plugins.plugin(
                 "VanillaBasics") as VanillaBasics
+        val environment = world.environment as EnvironmentOverworldServer
         val materials = plugin.materials
-        val type = terrain.type(x, y, z)
-        if (type == materials.grass) {
-            val environment = terrain.world.environment as EnvironmentOverworldServer
-            val climateGenerator = environment.climate()
-            val humidity = climateGenerator.humidity(x, y, z)
-            if (humidity < 0.2) {
-                terrain.type(x, y, z, materials.dirt)
-            }
-        } else if (type == materials.dirt) {
-            val environment = terrain.world.environment as EnvironmentOverworldServer
-            val climateGenerator = environment.climate()
-            val humidity = climateGenerator.humidity(x, y, z)
-            if (humidity > 0.2 && (terrain.blockLight(x, y,
-                    z + 1) > 8 || terrain.sunLight(x, y, z + 1) > 8) &&
-                    terrain.isTransparent(x, y, z + 1)) {
-                terrain.typeData(x, y, z, materials.grass, 0.toShort().toInt())
+        terrain.modify(x, y, z) { terrain ->
+            val type = terrain.type(x, y, z)
+            if (type == materials.grass) {
+                val climateGenerator = environment.climate()
+                val humidity = climateGenerator.humidity(x, y, z)
+                if (humidity < 0.2) {
+                    terrain.type(x, y, z, materials.dirt)
+                }
+            } else if (type == materials.dirt) {
+                val climateGenerator = environment.climate()
+                val humidity = climateGenerator.humidity(x, y, z)
+                if (humidity > 0.2 && (terrain.blockLight(x, y,
+                        z + 1) > 8 || terrain.sunLight(x, y, z + 1) > 8) &&
+                        terrain.isTransparent(x, y, z + 1)) {
+                    terrain.typeData(x, y, z, materials.grass,
+                            0.toShort().toInt())
+                }
             }
         }
     }

@@ -75,7 +75,7 @@ class BlockSapling(type: VanillaMaterialType) : VanillaBlock(type) {
         return ArrayList()
     }
 
-    override fun place(terrain: TerrainServer.TerrainMutable,
+    override fun place(terrain: TerrainMutableServer,
                        x: Int,
                        y: Int,
                        z: Int,
@@ -87,7 +87,7 @@ class BlockSapling(type: VanillaMaterialType) : VanillaBlock(type) {
         if (terrain.isSolid(x, y, z - 1)) {
             val random = threadLocalRandom()
             terrain.addDelayedUpdate(
-                    UpdateSaplingGrowth(terrain.world.registry).set(x, y, z,
+                    UpdateSaplingGrowth(player.world.registry).set(x, y, z,
                             random.nextDouble() * 3600.0 + 3600.0))
             return true
         }
@@ -146,15 +146,18 @@ class BlockSapling(type: VanillaMaterialType) : VanillaBlock(type) {
                 1.0, 1.0, lod)
     }
 
-    override fun update(terrain: TerrainServer.TerrainMutable,
+    override fun update(terrain: TerrainServer,
                         x: Int,
                         y: Int,
                         z: Int,
                         data: Int) {
-        if (!terrain.isSolid(x, y, z - 1)) {
-            terrain.world.dropItems(drops(ItemStack(materials.air, 0), data), x,
-                    y, z)
-            terrain.typeData(x, y, z, terrain.air, 0)
+        val world = terrain.world
+        terrain.modify(x, y, z - 1, 1, 1, 2) { terrain ->
+            if (!terrain.isSolid(x, y, z - 1)) {
+                world.dropItems(drops(ItemStack(materials.air, 0), data), x, y,
+                        z)
+                terrain.typeData(x, y, z, terrain.air, 0)
+            }
         }
     }
 

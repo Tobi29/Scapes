@@ -128,15 +128,17 @@ class BlockSnow(type: VanillaMaterialType) : VanillaBlock(type) {
                 1.0, 1.0, lod)
     }
 
-    override fun update(terrain: TerrainServer.TerrainMutable,
+    override fun update(terrain: TerrainServer,
                         x: Int,
                         y: Int,
                         z: Int,
                         data: Int) {
-        val type = terrain.type(x, y, z - 1)
-        if (type == materials.air || type == materials.snow ||
-                type.isLiquid) {
-            terrain.typeData(x, y, z, terrain.air, 0)
+        terrain.modify(x, y, z - 1, 1, 1, 2) { terrain ->
+            val type = terrain.type(x, y, z - 1)
+            if (type == materials.air || type == materials.snow ||
+                    type.isLiquid) {
+                terrain.typeData(x, y, z, terrain.air, 0)
+            }
         }
     }
 

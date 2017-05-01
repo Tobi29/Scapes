@@ -88,7 +88,7 @@ class BlockBloomery(type: VanillaMaterialType) : VanillaBlockContainer<EntityBlo
                 1.0, 1.0, lod)
     }
 
-    override fun update(terrain: TerrainServer.TerrainMutable,
+    override fun update(terrain: TerrainServer,
                         x: Int,
                         y: Int,
                         z: Int,

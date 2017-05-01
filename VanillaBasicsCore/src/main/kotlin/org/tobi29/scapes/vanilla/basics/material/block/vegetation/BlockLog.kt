@@ -23,13 +23,12 @@ import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock
 import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.TerrainClient
+import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
-import org.tobi29.scapes.engine.utils.math.vector.Vector3i
-import org.tobi29.scapes.engine.utils.math.vector.plus
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.ItemFuel
@@ -44,7 +43,7 @@ class BlockLog(type: VanillaMaterialType) : VanillaBlock(type), ItemFuel {
     private var textures: Array<Pair<TerrainTexture, TerrainTexture>?>? = null
     private var models: Array<BlockModel?>? = null
 
-    override fun destroy(terrain: TerrainServer.TerrainMutable,
+    override fun destroy(terrain: TerrainMutableServer,
                          x: Int,
                          y: Int,
                          z: Int,
@@ -56,7 +55,27 @@ class BlockLog(type: VanillaMaterialType) : VanillaBlock(type), ItemFuel {
             return false
         }
         if ("Axe" == item.material().toolType(item)) {
-            destroy(terrain, Vector3i(x, y, z), data, 512, player, z)
+            player.world.taskExecutor.runTask({
+                val imTerrain = player.world.terrain
+                destroy(imTerrain, x - 1, y - 1, z + 0, data, 512, player, z)
+                destroy(imTerrain, x + 0, y - 1, z + 0, data, 512, player, z)
+                destroy(imTerrain, x + 1, y - 1, z + 0, data, 512, player, z)
+                destroy(imTerrain, x - 1, y + 0, z + 0, data, 512, player, z)
+                destroy(imTerrain, x + 0, y + 0, z + 0, data, 512, player, z)
+                destroy(imTerrain, x + 1, y + 0, z + 0, data, 512, player, z)
+                destroy(imTerrain, x - 1, y + 1, z + 0, data, 512, player, z)
+                destroy(imTerrain, x + 0, y + 1, z + 0, data, 512, player, z)
+                destroy(imTerrain, x + 1, y + 1, z + 0, data, 512, player, z)
+                destroy(imTerrain, x - 1, y - 1, z + 1, data, 512, player, z)
+                destroy(imTerrain, x + 0, y - 1, z + 1, data, 512, player, z)
+                destroy(imTerrain, x + 1, y - 1, z + 1, data, 512, player, z)
+                destroy(imTerrain, x - 1, y + 0, z + 1, data, 512, player, z)
+                destroy(imTerrain, x + 0, y + 0, z + 1, data, 512, player, z)
+                destroy(imTerrain, x + 1, y + 0, z + 1, data, 512, player, z)
+                destroy(imTerrain, x - 1, y + 1, z + 1, data, 512, player, z)
+                destroy(imTerrain, x + 0, y + 1, z + 1, data, 512, player, z)
+                destroy(imTerrain, x + 1, y + 1, z + 1, data, 512, player, z)
+            }, "Destroy-Logs")
         }
         return true
     }
@@ -160,84 +179,58 @@ class BlockLog(type: VanillaMaterialType) : VanillaBlock(type), ItemFuel {
         return 16
     }
 
-    private fun destroy(terrain: TerrainServer.TerrainMutable,
-                        pos: Vector3i,
+    private fun destroy(terrain: TerrainServer,
+                        x: Int,
+                        y: Int,
+                        z: Int,
                         data: Int,
                         length: Int,
                         player: MobPlayerServer,
                         minZ: Int) {
-        val block = terrain.block(pos.x, pos.y, pos.z)
-        val type = terrain.type(block)
-        val d = terrain.data(block)
-        if (type == materials.leaves && d == data) {
-            type.destroy(terrain, pos.x, pos.y, pos.z, d,
-                    Face.NONE, player, ItemStack(materials.air, 0))
-        }
-        if (type !== this || d != data) {
+        if (!terrain.modify(x, y, z) { terrain ->
+            val block = terrain.block(x, y, z)
+            val type = terrain.type(block)
+            val d = terrain.data(block)
+            if (type != this || d != data) {
+                return@modify false
+            }
+            terrain.typeData(x, y, z, materials.air, 0)
+            true
+        }) {
             return
         }
-        terrain.world.dropItem(ItemStack(this, data), pos.x, pos.y,
-                pos.z)
-        terrain.typeData(pos.x, pos.y, pos.z, materials.air,
-                0.toShort().toInt())
+        terrain.world.dropItem(ItemStack(this, data), x, y, z)
         if (length > 0) {
             val i = length - 1
-            if (pos.z > minZ) {
-                destroy(terrain, pos.plus(Vector3i(-1, -1, -1)), data,
-                        i, player, minZ)
-                destroy(terrain, pos.plus(Vector3i(0, -1, -1)), data,
-                        i, player, minZ)
-                destroy(terrain, pos.plus(Vector3i(1, -1, -1)), data,
-                        i, player, minZ)
-                destroy(terrain, pos.plus(Vector3i(-1, 0, -1)), data,
-                        i, player, minZ)
-                destroy(terrain, pos.plus(Vector3i(0, 0, -1)), data, i,
-                        player, minZ)
-                destroy(terrain, pos.plus(Vector3i(1, 0, -1)), data, i,
-                        player, minZ)
-                destroy(terrain, pos.plus(Vector3i(-1, 1, -1)), data,
-                        i, player, minZ)
-                destroy(terrain, pos.plus(Vector3i(0, 1, -1)), data, i,
-                        player, minZ)
-                destroy(terrain, pos.plus(Vector3i(1, 1, -1)), data, i,
-                        player, minZ)
+            if (z > minZ) {
+                destroy(terrain, x - 1, y - 1, z - 1, data, i, player, minZ)
+                destroy(terrain, x + 0, y - 1, z - 1, data, i, player, minZ)
+                destroy(terrain, x + 1, y - 1, z - 1, data, i, player, minZ)
+                destroy(terrain, x - 1, y + 0, z - 1, data, i, player, minZ)
+                destroy(terrain, x + 0, y + 0, z - 1, data, i, player, minZ)
+                destroy(terrain, x + 1, y + 0, z - 1, data, i, player, minZ)
+                destroy(terrain, x - 1, y + 1, z - 1, data, i, player, minZ)
+                destroy(terrain, x + 0, y + 1, z - 1, data, i, player, minZ)
+                destroy(terrain, x + 1, y + 1, z - 1, data, i, player, minZ)
             }
-            destroy(terrain, pos.plus(Vector3i(-1, -1, 0)), data, i,
-                    player, minZ)
-            destroy(terrain, pos.plus(Vector3i(0, -1, 0)), data, i,
-                    player, minZ)
-            destroy(terrain, pos.plus(Vector3i(1, -1, 0)), data, i,
-                    player, minZ)
-            destroy(terrain, pos.plus(Vector3i(-1, 0, 0)), data, i,
-                    player, minZ)
-            destroy(terrain, pos.plus(Vector3i(0, 0, 0)), data, i,
-                    player, minZ)
-            destroy(terrain, pos.plus(Vector3i(1, 0, 0)), data, i,
-                    player, minZ)
-            destroy(terrain, pos.plus(Vector3i(-1, 1, 0)), data, i,
-                    player, minZ)
-            destroy(terrain, pos.plus(Vector3i(0, 1, 0)), data, i,
-                    player, minZ)
-            destroy(terrain, pos.plus(Vector3i(1, 1, 0)), data, i,
-                    player, minZ)
-            destroy(terrain, pos.plus(Vector3i(-1, -1, 1)), data, i,
-                    player, minZ)
-            destroy(terrain, pos.plus(Vector3i(0, -1, 1)), data, i,
-                    player, minZ)
-            destroy(terrain, pos.plus(Vector3i(1, -1, 1)), data, i,
-                    player, minZ)
-            destroy(terrain, pos.plus(Vector3i(-1, 0, 1)), data, i,
-                    player, minZ)
-            destroy(terrain, pos.plus(Vector3i(0, 0, 1)), data, i,
-                    player, minZ)
-            destroy(terrain, pos.plus(Vector3i(1, 0, 1)), data, i,
-                    player, minZ)
-            destroy(terrain, pos.plus(Vector3i(-1, 1, 1)), data, i,
-                    player, minZ)
-            destroy(terrain, pos.plus(Vector3i(0, 1, 1)), data, i,
-                    player, minZ)
-            destroy(terrain, pos.plus(Vector3i(1, 1, 1)), data, i,
-                    player, minZ)
+            destroy(terrain, x - 1, y - 1, z + 0, data, i, player, minZ)
+            destroy(terrain, x + 0, y - 1, z + 0, data, i, player, minZ)
+            destroy(terrain, x + 1, y - 1, z + 0, data, i, player, minZ)
+            destroy(terrain, x - 1, y + 0, z + 0, data, i, player, minZ)
+            destroy(terrain, x + 0, y + 0, z + 0, data, i, player, minZ)
+            destroy(terrain, x + 1, y + 0, z + 0, data, i, player, minZ)
+            destroy(terrain, x - 1, y + 1, z + 0, data, i, player, minZ)
+            destroy(terrain, x + 0, y + 1, z + 0, data, i, player, minZ)
+            destroy(terrain, x + 1, y + 1, z + 0, data, i, player, minZ)
+            destroy(terrain, x - 1, y - 1, z + 1, data, i, player, minZ)
+            destroy(terrain, x + 0, y - 1, z + 1, data, i, player, minZ)
+            destroy(terrain, x + 1, y - 1, z + 1, data, i, player, minZ)
+            destroy(terrain, x - 1, y + 0, z + 1, data, i, player, minZ)
+            destroy(terrain, x + 0, y + 0, z + 1, data, i, player, minZ)
+            destroy(terrain, x + 1, y + 0, z + 1, data, i, player, minZ)
+            destroy(terrain, x - 1, y + 1, z + 1, data, i, player, minZ)
+            destroy(terrain, x + 0, y + 1, z + 1, data, i, player, minZ)
+            destroy(terrain, x + 1, y + 1, z + 1, data, i, player, minZ)
         }
     }
 

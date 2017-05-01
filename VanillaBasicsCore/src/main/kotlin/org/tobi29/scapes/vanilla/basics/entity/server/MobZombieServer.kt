@@ -47,8 +47,9 @@ class MobZombieServer(type: EntityType<*, *>,
             }
         }
         onDamage("Local") { damage ->
-            world.playSound("VanillaBasics:sound/entity/mob/zombie/Hurt" +
-                    (random.nextInt(3) + 1) + ".ogg", this)
+            world.playSound(
+                    "VanillaBasics:sound/entity/mob/zombie/Hurt${random.nextInt(
+                            1) + 1}.ogg", this)
         }
     }
 
@@ -121,8 +122,9 @@ class MobZombieServer(type: EntityType<*, *>,
         if (soundWait <= 0.0) {
             val random = threadLocalRandom()
             soundWait = random.nextDouble() * 12.0 + 3.0
-            world.playSound("VanillaBasics:sound/entity/mob/zombie/Calm" +
-                    (random.nextInt(2) + 1) + ".ogg", this)
+            world.playSound(
+                    "VanillaBasics:sound/entity/mob/zombie/Calm${random.nextInt(
+                            2) + 1}.ogg", this)
         }
         if (world.terrain.light(pos.intX(), pos.intY(),
                 floor(pos.doubleZ() + 0.7)) > 10) {

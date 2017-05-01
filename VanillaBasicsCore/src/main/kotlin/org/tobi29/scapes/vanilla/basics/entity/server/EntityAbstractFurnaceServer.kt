@@ -19,12 +19,12 @@ package org.tobi29.scapes.vanilla.basics.entity.server
 import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
+import org.tobi29.scapes.engine.utils.math.max
+import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.tag.ReadWriteTagMap
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.set
 import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.math.max
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.packets.PacketEntityChange
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
@@ -120,9 +120,12 @@ abstract class EntityAbstractFurnaceServer(
                 }
             }
             if (temperature > maximumTemperature) {
-                world.terrain.queue { handler ->
-                    handler.typeData(pos.intX(), pos.intY(), pos.intZ(),
-                            materials.air, 0)
+                world.terrain.modify(pos.intX(), pos.intY(),
+                        pos.intZ()) { terrain ->
+                    if (isValidOn(terrain, pos.intX(), pos.intY(), pos.intZ())) {
+                        terrain.typeData(pos.intX(), pos.intY(), pos.intZ(),
+                                materials.air, 0)
+                    }
                 }
             }
         }

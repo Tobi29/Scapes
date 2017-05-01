@@ -17,25 +17,28 @@
 package org.tobi29.scapes.vanilla.basics.world.decorator
 
 import org.tobi29.scapes.block.BlockType
+import org.tobi29.scapes.chunk.terrain.TerrainMutable
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 
 class LayerGround(private val material: BlockType,
-                  private val data: (TerrainServer.TerrainMutable, Int, Int, Int, Random) -> Int,
+                  private val data: (TerrainMutable, Int, Int, Int, Random) -> Int,
                   private val chance: Int,
-                  private val check: (TerrainServer.TerrainMutable, Int, Int, Int) -> Boolean) : BiomeDecorator.Layer {
+                  private val check: (TerrainMutable, Int, Int, Int) -> Boolean) : BiomeDecorator.Layer {
 
-    override fun decorate(terrain: TerrainServer.TerrainMutable,
+    override fun decorate(terrain: TerrainServer,
                           x: Int,
                           y: Int,
                           materials: VanillaMaterial,
                           random: Random) {
         if (random.nextInt(chance) == 0) {
             val z = terrain.highestTerrainBlockZAt(x, y)
-            if (check(terrain, x, y, z)) {
-                terrain.typeData(x, y, z, material,
-                        data(terrain, x, y, z, random))
+            terrain.modify(x, y, z - 1, 1, 1, 2) { terrain ->
+                if (check(terrain, x, y, z)) {
+                    terrain.typeData(x, y, z, material,
+                            data(terrain, x, y, z, random))
+                }
             }
         }
     }

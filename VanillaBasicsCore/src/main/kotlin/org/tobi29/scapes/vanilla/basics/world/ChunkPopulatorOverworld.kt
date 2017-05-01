@@ -20,11 +20,11 @@ import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.EnumMap
+import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.engine.utils.generation.layer.RandomPermutation
 import org.tobi29.scapes.engine.utils.generation.layer.random
 import org.tobi29.scapes.engine.utils.generation.layer.randomOffset
 import org.tobi29.scapes.engine.utils.generation.value.SimplexNoise
-import org.tobi29.scapes.engine.utils.Random
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.terrain.TerrainChunk
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
@@ -50,7 +50,7 @@ class ChunkPopulatorOverworld(world: WorldServer,
         }
     }
 
-    override fun populate(terrain: TerrainServer.TerrainMutable,
+    override fun populate(terrain: TerrainServer,
                           chunk: TerrainChunk) {
         val x = chunk.posBlock.x
         val y = chunk.posBlock.y
@@ -87,11 +87,10 @@ class ChunkPopulatorOverworld(world: WorldServer,
                 val ore = gen.randomOreType(plugin, data, random)
                 if (ore != null) {
                     val ores = terrain.genOre(xx, yy, zz, materials.stoneRaw,
-                            ore.type,
+                            ore.type, ceil(random.nextDouble() * ore.size),
                             ceil(random.nextDouble() * ore.size),
-                            ceil(random.nextDouble() * ore.size),
-                            ceil(random.nextDouble() * ore.size),
-                            ore.chance, random)
+                            ceil(random.nextDouble() * ore.size), ore.chance,
+                            random)
                     if (ores > 0 && random.nextInt(ore.rockChance) == 0) {
                         val xxx = xx + random.nextInt(21) - 10
                         val yyy = yy + random.nextInt(21) - 10
@@ -133,7 +132,7 @@ class ChunkPopulatorOverworld(world: WorldServer,
         }
     }
 
-    override fun load(terrain: TerrainServer.TerrainMutable,
+    override fun load(terrain: TerrainServer,
                       chunk: TerrainChunk) {
         (terrain.world.environment as EnvironmentOverworldServer).simulateSeason(
                 terrain, chunk)
