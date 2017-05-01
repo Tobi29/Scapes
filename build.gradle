@@ -15,7 +15,7 @@
  */
 
 buildscript {
-    def kotlinVersion = "1.1.1"
+    def kotlinVersion = "1.1.2"
     def dokkaVersion = "0.9.13"
     def junitPlatformVersion = "1.0.0-M3"
     def shadowVersion = "1.2.4"
