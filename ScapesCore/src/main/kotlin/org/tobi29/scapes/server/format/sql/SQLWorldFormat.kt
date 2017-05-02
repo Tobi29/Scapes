@@ -35,7 +35,7 @@ import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toMutTag
 import org.tobi29.scapes.engine.utils.tag.toTag
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
-import org.tobi29.scapes.engine.utils.threadLocalRandom
+import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.plugins.PluginFile
 import org.tobi29.scapes.plugins.Plugins
 import org.tobi29.scapes.server.ScapesServer

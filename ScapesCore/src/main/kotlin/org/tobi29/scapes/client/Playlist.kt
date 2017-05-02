@@ -20,7 +20,7 @@ import org.tobi29.scapes.engine.gui.GuiNotificationSimple
 import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.threadLocalRandom
+import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import java.security.AccessController
 import java.security.PrivilegedAction

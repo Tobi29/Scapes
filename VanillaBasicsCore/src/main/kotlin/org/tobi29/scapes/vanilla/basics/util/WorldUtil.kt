@@ -19,7 +19,7 @@ package org.tobi29.scapes.vanilla.basics.util
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.threadLocalRandom
+import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 
 fun WorldServer.dropItems(items: List<ItemStack>,

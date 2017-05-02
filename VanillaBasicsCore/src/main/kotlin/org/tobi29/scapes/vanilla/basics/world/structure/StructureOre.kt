@@ -18,7 +18,7 @@ package org.tobi29.scapes.vanilla.basics.world.structure
 
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.Random
+import org.tobi29.scapes.engine.utils.math.Random
 import org.tobi29.scapes.engine.utils.math.sqr
 
 fun TerrainServer.genOre(x: Int,

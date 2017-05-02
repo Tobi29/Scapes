@@ -24,10 +24,7 @@ import org.tobi29.scapes.engine.utils.*
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurOffset
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurWeight
-import org.tobi29.scapes.engine.utils.math.PI
-import org.tobi29.scapes.engine.utils.math.cos
-import org.tobi29.scapes.engine.utils.math.remP
-import org.tobi29.scapes.engine.utils.math.round
+import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.server.format.WorldSource
 
 open class SceneMenu(engine: ScapesEngine) : Scene(engine) {

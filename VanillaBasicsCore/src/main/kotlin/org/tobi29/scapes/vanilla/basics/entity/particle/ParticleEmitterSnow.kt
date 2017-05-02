@@ -19,7 +19,6 @@ package org.tobi29.scapes.vanilla.basics.entity.particle
 import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.io.putInto
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.HALF_PI
 import org.tobi29.scapes.engine.utils.math.atan2Fast

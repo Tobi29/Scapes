@@ -30,7 +30,7 @@ import org.tobi29.scapes.engine.utils.io.Channels
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.zipFile
 import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.threadLocalRandom
+import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.engine.utils.use
 import org.tobi29.scapes.plugins.PluginFile
 

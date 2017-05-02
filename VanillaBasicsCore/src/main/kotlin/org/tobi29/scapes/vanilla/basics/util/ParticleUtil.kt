@@ -19,7 +19,7 @@ package org.tobi29.scapes.vanilla.basics.util
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.threadLocalRandom
+import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleEmitterExplosion
 
 fun WorldClient.explosion(pos: Vector3d,

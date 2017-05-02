@@ -26,7 +26,7 @@ import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.*
-import org.tobi29.scapes.engine.utils.threadLocalRandom
+import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.entity.WieldMode
 import org.tobi29.scapes.entity.client.MobLivingEquippedClient
 import org.tobi29.scapes.entity.particle.ParticleEmitterFallenBodyPart

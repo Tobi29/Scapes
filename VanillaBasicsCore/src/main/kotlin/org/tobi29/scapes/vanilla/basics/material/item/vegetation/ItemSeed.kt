@@ -19,7 +19,7 @@ import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.filterMap
 import org.tobi29.scapes.engine.utils.math.Face
-import org.tobi29.scapes.engine.utils.threadLocalRandom
+import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityFarmlandServer
 import org.tobi29.scapes.vanilla.basics.material.CropType

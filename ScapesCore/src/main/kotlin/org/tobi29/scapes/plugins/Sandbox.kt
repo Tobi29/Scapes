@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.plugins
 
-import org.tobi29.scapes.engine.utils.threadLocalRandom
+import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import java.security.*
 
 object Sandbox {

@@ -20,7 +20,7 @@ import org.tobi29.scapes.chunk.EnvironmentClient
 import org.tobi29.scapes.chunk.EnvironmentType
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldSkybox
-import org.tobi29.scapes.engine.utils.Random
+import org.tobi29.scapes.engine.utils.math.Random
 import org.tobi29.scapes.engine.utils.math.HALF_PI
 import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.math.cosTable

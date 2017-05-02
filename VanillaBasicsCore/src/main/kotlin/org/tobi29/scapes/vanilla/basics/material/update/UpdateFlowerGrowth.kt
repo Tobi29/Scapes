@@ -21,8 +21,8 @@ import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.block.Update
 import org.tobi29.scapes.block.UpdateType
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.Random
-import org.tobi29.scapes.engine.utils.threadLocalRandom
+import org.tobi29.scapes.engine.utils.math.Random
+import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 
 class UpdateFlowerGrowth(type: UpdateType) : Update(type) {

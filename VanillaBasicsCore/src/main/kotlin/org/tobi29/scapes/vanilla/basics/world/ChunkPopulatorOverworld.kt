@@ -20,7 +20,7 @@ import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.EnumMap
-import org.tobi29.scapes.engine.utils.Random
+import org.tobi29.scapes.engine.utils.math.Random
 import org.tobi29.scapes.engine.utils.generation.layer.RandomPermutation
 import org.tobi29.scapes.engine.utils.generation.layer.random
 import org.tobi29.scapes.engine.utils.generation.layer.randomOffset

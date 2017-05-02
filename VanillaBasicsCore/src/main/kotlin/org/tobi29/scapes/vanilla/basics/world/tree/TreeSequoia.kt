@@ -17,7 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.world.tree
 
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.Random
+import org.tobi29.scapes.engine.utils.math.Random
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial

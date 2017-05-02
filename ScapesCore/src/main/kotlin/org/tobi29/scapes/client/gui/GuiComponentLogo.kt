@@ -20,7 +20,7 @@ import org.threeten.bp.Month
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.sound.CLICK
 import org.tobi29.scapes.engine.utils.math.round
-import org.tobi29.scapes.engine.utils.threadLocalRandom
+import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 
 class GuiComponentLogo(parent: GuiLayoutData,
                        height: Int,

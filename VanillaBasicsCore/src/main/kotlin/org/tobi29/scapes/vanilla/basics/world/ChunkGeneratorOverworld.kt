@@ -19,7 +19,7 @@ package org.tobi29.scapes.vanilla.basics.world
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.GeneratorOutput
-import org.tobi29.scapes.engine.utils.Random
+import org.tobi29.scapes.engine.utils.math.Random
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.reduceOrNull
@@ -32,7 +32,7 @@ import org.tobi29.scapes.vanilla.basics.material.update.UpdateLavaFlow
 class ChunkGeneratorOverworld(random: Random,
                               private val terrainGenerator: TerrainGenerator,
                               private val materials: VanillaMaterial) : ChunkGenerator {
-    private val random = Random()
+    private var random = Random()
     private val generator = TerrainGenerator.TerrainGeneratorOutput()
     private val layer = TerrainGenerator.TerrainGeneratorLayer()
     private val beachGenerator = BeachGenerator(random)
@@ -116,7 +116,7 @@ class ChunkGeneratorOverworld(random: Random,
         var hash = 17
         hash = 31 * hash + x
         hash = 31 * hash + y
-        random.setSeed(hash + seedInt)
+        random = Random(hash + seedInt)
     }
 
     override fun makeLand(x: Int,

@@ -18,7 +18,7 @@ package org.tobi29.scapes.entity.particle
 import org.tobi29.scapes.block.TerrainTexture
 import org.tobi29.scapes.engine.utils.graphics.marginX
 import org.tobi29.scapes.engine.utils.graphics.marginY
-import org.tobi29.scapes.engine.utils.Random
+import org.tobi29.scapes.engine.utils.math.Random
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector2d
 

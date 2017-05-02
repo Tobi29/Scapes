@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.generator
 
-import org.tobi29.scapes.engine.utils.Random
+import org.tobi29.scapes.engine.utils.math.Random
 import org.tobi29.scapes.engine.utils.generation.value.SimplexNoise
 import org.tobi29.scapes.engine.utils.math.*
 

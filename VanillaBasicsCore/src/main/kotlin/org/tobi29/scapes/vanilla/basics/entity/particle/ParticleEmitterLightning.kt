@@ -24,7 +24,7 @@ import org.tobi29.scapes.engine.utils.math.cos
 import org.tobi29.scapes.engine.utils.math.pow
 import org.tobi29.scapes.engine.utils.math.sin
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.threadLocalRandom
+import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.entity.particle.ParticleEmitter
 import org.tobi29.scapes.entity.particle.ParticleInstance
 import org.tobi29.scapes.entity.particle.ParticleSystem
