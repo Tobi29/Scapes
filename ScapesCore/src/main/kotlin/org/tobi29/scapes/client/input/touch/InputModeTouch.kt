@@ -22,6 +22,7 @@ import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.input.ControllerTouch
+import org.tobi29.scapes.engine.utils.EventDispatcher
 import org.tobi29.scapes.engine.utils.math.angleDiff
 import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f
 import org.tobi29.scapes.engine.utils.math.toDeg
@@ -30,6 +31,7 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain
 
 class InputModeTouch(private val engine: ScapesEngine,
                      private val controller: ControllerTouch) : InputModeScapes {
+    val events: EventDispatcher
     private val guiController = GuiControllerTouch(engine, controller)
     private val direction = MutableVector2d()
     private val matrix1 = Matrix4f()
@@ -43,8 +45,20 @@ class InputModeTouch(private val engine: ScapesEngine,
     private var rightHand = false
     private var lastTouch = 0L
 
+    init {
+        events = EventDispatcher(engine.events) {}
+    }
+
+    override fun enabled() {
+        events.enable()
+    }
+
+    override fun disabled() {
+        events.disable()
+    }
+
     override fun poll(delta: Double): Boolean {
-        controller.poll()
+        controller.poll(events)
         return controller.isActive
     }
 

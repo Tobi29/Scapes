@@ -297,7 +297,7 @@ class InputModeGamepad(engine: ScapesEngine,
     }
 
     override fun poll(delta: Double): Boolean {
-        controller.poll()
+        controller.poll(events)
         val dir = run {
             var x = controller.axis(axisCameraX)
             var y = controller.axis(axisCameraY)
