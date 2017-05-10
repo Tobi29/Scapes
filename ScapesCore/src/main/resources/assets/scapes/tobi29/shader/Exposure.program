@@ -1,10 +1,14 @@
+property Int BLUR_LENGTH;
+property Float[BLUR_LENGTH] BLUR_WEIGHT;
+property Float[BLUR_LENGTH] BLUR_OFFSET;
+
 uniform 1 Matrix4 uniform_ModelViewProjectionMatrix;
 uniform 3 Texture2 uniform_Texture;
 uniform 4 Float uniform_Alpha;
 
 const Vector3 lumcoeff = vector3(0.299, 0.587, 0.114);
-const Float[] blurWeight = $BLUR_WEIGHT;
-const Float[] blurOffset = $BLUR_OFFSET;
+const Float[BLUR_LENGTH] blurWeight = BLUR_WEIGHT;
+const Float[BLUR_LENGTH] blurOffset = BLUR_OFFSET;
 
 shader vertex(0 Vector4 attribute_Position) {
     out_Position = uniform_ModelViewProjectionMatrix * attribute_Position;
@@ -12,10 +16,10 @@ shader vertex(0 Vector4 attribute_Position) {
 
 shader fragment() {
     Vector3 color = vector3(0.0);
-    for (i in 0 ... $BLUR_LENGTH) {
+    for (i in 0 ... BLUR_LENGTH) {
         Float currentOffset = blurOffset[i];
         Float currentWeight = blurWeight[i];
-        for (j in 0 ... $BLUR_LENGTH) {
+        for (j in 0 ... BLUR_LENGTH) {
             color += texture(uniform_Texture, vector2(blurOffset[j], currentOffset)).rgb * blurWeight[j] * currentWeight;
         }
     }

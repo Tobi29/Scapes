@@ -35,6 +35,8 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.readOnly
+import org.tobi29.scapes.engine.utils.shader.BooleanExpression
+import org.tobi29.scapes.engine.utils.shader.IntegerExpression
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.entity.client.MobClient
@@ -187,32 +189,26 @@ class WorldClient(val connection: ClientConnection,
         val animations = scapes.animations
 
         val shaderTerrain1 = gl.engine.graphics.loadShader(
-                "Scapes:shader/Terrain") {
-            supplyPreCompile {
-                supplyProperty("SCENE_WIDTH", width)
-                supplyProperty("SCENE_HEIGHT", height)
-                supplyProperty("ENABLE_ANIMATIONS", animations)
-                supplyProperty("LOD_LOW", false)
-                supplyProperty("LOD_HIGH", true)
-            }
-        }
+                "Scapes:shader/Terrain", mapOf(
+                "SCENE_WIDTH" to IntegerExpression(width),
+                "SCENE_HEIGHT" to IntegerExpression(height),
+                "ENABLE_ANIMATIONS" to BooleanExpression(animations),
+                "LOD_LOW" to BooleanExpression(false),
+                "LOD_HIGH" to BooleanExpression(true)
+        ))
         val shaderTerrain2 = gl.engine.graphics.loadShader(
-                "Scapes:shader/Terrain") {
-            supplyPreCompile {
-                supplyProperty("SCENE_WIDTH", width)
-                supplyProperty("SCENE_HEIGHT", height)
-                supplyProperty("ENABLE_ANIMATIONS", false)
-                supplyProperty("LOD_LOW", true)
-                supplyProperty("LOD_HIGH", false)
-            }
-        }
+                "Scapes:shader/Terrain", mapOf(
+                "SCENE_WIDTH" to IntegerExpression(width),
+                "SCENE_HEIGHT" to IntegerExpression(height),
+                "ENABLE_ANIMATIONS" to BooleanExpression(false),
+                "LOD_LOW" to BooleanExpression(true),
+                "LOD_HIGH" to BooleanExpression(false)
+        ))
         val shaderEntity = gl.engine.graphics.loadShader(
-                "Scapes:shader/Entity") {
-            supplyPreCompile {
-                supplyProperty("SCENE_WIDTH", width)
-                supplyProperty("SCENE_HEIGHT", height)
-            }
-        }
+                "Scapes:shader/Entity", mapOf(
+                "SCENE_WIDTH" to IntegerExpression(width),
+                "SCENE_HEIGHT" to IntegerExpression(height)
+        ))
 
         val renderParticles = scene.particles().addToPipeline(gl, width, height,
                 cam)

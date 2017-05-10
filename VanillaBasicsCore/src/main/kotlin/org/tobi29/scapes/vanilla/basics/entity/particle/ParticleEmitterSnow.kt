@@ -25,6 +25,7 @@ import org.tobi29.scapes.engine.utils.math.atan2Fast
 import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.length
+import org.tobi29.scapes.engine.utils.shader.IntegerExpression
 import org.tobi29.scapes.entity.particle.ParticleEmitterInstanced
 import org.tobi29.scapes.entity.particle.ParticleInstance
 import org.tobi29.scapes.entity.particle.ParticlePhysics
@@ -73,12 +74,10 @@ class ParticleEmitterSnow(system: ParticleSystem,
                                height: Int,
                                cam: Cam): ((Shader) -> Unit) -> Unit {
         val shader = gl.engine.graphics.loadShader(
-                "VanillaBasics:shader/ParticleSnow") {
-            supplyPreCompile {
-                supplyProperty("SCENE_WIDTH", width)
-                supplyProperty("SCENE_HEIGHT", height)
-            }
-        }
+                "VanillaBasics:shader/ParticleSnow", mapOf(
+                "SCENE_WIDTH" to IntegerExpression(width),
+                "SCENE_HEIGHT" to IntegerExpression(height)
+        ))
         val world = system.world
         val scene = world.scene
         val player = world.player

@@ -20,11 +20,16 @@ import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.resource.Resource
-import org.tobi29.scapes.engine.utils.*
+import org.tobi29.scapes.engine.utils.AtomicReference
+import org.tobi29.scapes.engine.utils.IOException
+import org.tobi29.scapes.engine.utils.chain
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurOffset
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurWeight
 import org.tobi29.scapes.engine.utils.math.*
+import org.tobi29.scapes.engine.utils.shader.ArrayExpression
+import org.tobi29.scapes.engine.utils.shader.IntegerExpression
+import org.tobi29.scapes.engine.utils.use
 import org.tobi29.scapes.server.format.WorldSource
 
 open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
@@ -42,16 +47,24 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
     }
 
     override fun appendToPipeline(gl: GL): () -> Unit {
-        val shaderBlur1 = gl.engine.graphics.loadShader("Scapes:shader/Menu1") {
-            supplyPreCompile { gl ->
-                blur(gl, this)
-            }
-        }
-        val shaderBlur2 = gl.engine.graphics.loadShader("Scapes:shader/Menu2") {
-            supplyPreCompile { gl ->
-                blur(gl, this)
-            }
-        }
+        val space = gl.contentSpace() / 8.0
+        val blurSamples = round(space * 8.0) + 8
+        val shaderBlur1 = gl.engine.graphics.loadShader(
+                "Scapes:shader/Menu1", mapOf(
+                "BLUR_LENGTH" to IntegerExpression(blurSamples),
+                "BLUR_OFFSET" to ArrayExpression(
+                        gaussianBlurOffset(blurSamples, 0.04)),
+                "BLUR_WEIGHT" to ArrayExpression(
+                        gaussianBlurWeight(blurSamples) { cos(it * PI) })
+        ))
+        val shaderBlur2 = gl.engine.graphics.loadShader(
+                "Scapes:shader/Menu2", mapOf(
+                "BLUR_LENGTH" to IntegerExpression(blurSamples),
+                "BLUR_OFFSET" to ArrayExpression(
+                        gaussianBlurOffset(blurSamples, 0.04)),
+                "BLUR_WEIGHT" to ArrayExpression(
+                        gaussianBlurWeight(blurSamples) { cos(it * PI) })
+        ))
         val shaderTextured = gl.engine.graphics.loadShader(SHADER_TEXTURED)
         val model = engine.graphics.createVTI(
                 floatArrayOf(-1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f,
@@ -112,17 +125,6 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
         val pp2 = gl.into(f3, postProcess(gl, shaderBlur2, f2))
         val upscale = postProcess(gl, shaderTextured, f3)
         return chain(render, pp1, pp2, upscale)
-    }
-
-    private fun blur(gl: GL,
-                     processor: ShaderPreprocessor) {
-        val space = gl.contentSpace() / 8.0
-        val samples = round(space * 8.0) + 8
-        val blurOffsets = gaussianBlurOffset(samples, 0.04f)
-        val blurWeights = gaussianBlurWeight(samples) { cos(it * PI) }
-        processor.supplyProperty("BLUR_OFFSET", blurOffsets.joinToString())
-        processor.supplyProperty("BLUR_WEIGHT", blurWeights.joinToString())
-        processor.supplyProperty("BLUR_LENGTH", blurOffsets.size)
     }
 
     fun changeBackground(source: WorldSource) {

@@ -19,12 +19,9 @@ package org.tobi29.scapes.vanilla.basics.entity.particle
 import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.TWO_PI
-import org.tobi29.scapes.engine.utils.math.cos
-import org.tobi29.scapes.engine.utils.math.pow
-import org.tobi29.scapes.engine.utils.math.sin
+import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
+import org.tobi29.scapes.engine.utils.shader.IntegerExpression
 import org.tobi29.scapes.entity.particle.ParticleEmitter
 import org.tobi29.scapes.entity.particle.ParticleInstance
 import org.tobi29.scapes.entity.particle.ParticleSystem
@@ -166,12 +163,10 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
                                height: Int,
                                cam: Cam): () -> Unit {
         val shader = gl.engine.graphics.loadShader(
-                "VanillaBasics:shader/ParticleLightning") {
-            supplyPreCompile {
-                supplyProperty("SCENE_WIDTH", width)
-                supplyProperty("SCENE_HEIGHT", height)
-            }
-        }
+                "VanillaBasics:shader/ParticleLightning", mapOf(
+                "SCENE_WIDTH" to IntegerExpression(width),
+                "SCENE_HEIGHT" to IntegerExpression(height)
+        ))
         return render@ {
             if (!hasAlive) {
                 return@render

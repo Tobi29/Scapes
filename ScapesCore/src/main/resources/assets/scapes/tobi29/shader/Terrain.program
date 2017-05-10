@@ -1,3 +1,9 @@
+property Int SCENE_WIDTH;
+property Int SCENE_HEIGHT;
+property Boolean LOD_LOW;
+property Boolean LOD_HIGH;
+property Boolean ENABLE_ANIMATIONS;
+
 uniform 0 Matrix4 uniform_ModelViewMatrix;
 uniform 1 Matrix4 uniform_ModelViewProjectionMatrix;
 uniform 2 Matrix3 uniform_NormalMatrix;
@@ -13,7 +19,7 @@ uniform 10 Float uniform_CamLight;
 const Float PI = 3.14159;
 const Float DEG2RAD = PI / 180.0;
 const Vector3 BLOCKLIGHT_NORMAL = vector3(0.3, 0.1, 0.6);
-const Vector2 SCREEN_SIZE = vector2(float($SCENE_WIDTH), float($SCENE_HEIGHT));
+const Vector2 SCREEN_SIZE = vector2(float(SCENE_WIDTH), float(SCENE_HEIGHT));
 const Float ANIMATION_DISTANCE = 32.0;
 const Int ANIMATION_NONE = 0;
 const Int ANIMATION_LEAVES = 1;
@@ -30,8 +36,8 @@ shader vertex(0 Vector4 attribute_Position,
     varying_Color = attribute_Color;
     Vector4 vertex = attribute_Position;
     varying_Depth = length((uniform_ModelViewMatrix * vertex).xyz);
-    if ($LOD_HIGH) {
-        if ($ENABLE_ANIMATIONS) {
+    if (LOD_HIGH) {
+        if (ENABLE_ANIMATIONS) {
             if (attribute_Animation != ANIMATION_NONE) {
                 if (varying_Depth < ANIMATION_DISTANCE) {
                     Vector3 animPos;
@@ -69,7 +75,7 @@ shader vertex(0 Vector4 attribute_Position,
             }
         }
     }
-    if ($LOD_LOW) {
+    if (LOD_LOW) {
         if (attribute_Animation == ANIMATION_WATER) {
             // Water Transparency
             varying_Color.a = 1.0;

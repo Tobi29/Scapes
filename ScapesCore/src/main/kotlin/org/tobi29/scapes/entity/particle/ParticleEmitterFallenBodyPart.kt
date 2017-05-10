@@ -22,6 +22,7 @@ import org.tobi29.scapes.engine.graphics.push
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.times
+import org.tobi29.scapes.engine.utils.shader.IntegerExpression
 
 class ParticleEmitterFallenBodyPart(system: ParticleSystem) : ParticleEmitter<ParticleInstanceFallenBodyPart>(
         system, Array(256, { ParticleInstanceFallenBodyPart() })) {
@@ -64,12 +65,11 @@ class ParticleEmitterFallenBodyPart(system: ParticleSystem) : ParticleEmitter<Pa
                                width: Int,
                                height: Int,
                                cam: Cam): () -> Unit {
-        val shader = gl.engine.graphics.loadShader("Scapes:shader/Entity") {
-            supplyPreCompile {
-                supplyProperty("SCENE_WIDTH", width)
-                supplyProperty("SCENE_HEIGHT", height)
-            }
-        }
+        val shader = gl.engine.graphics.loadShader(
+                "Scapes:shader/Entity", mapOf(
+                "SCENE_WIDTH" to IntegerExpression(width),
+                "SCENE_HEIGHT" to IntegerExpression(height)
+        ))
         return render@ {
             if (!hasAlive) {
                 return@render

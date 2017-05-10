@@ -1,9 +1,12 @@
+property Int SCENE_WIDTH;
+property Int SCENE_HEIGHT;
+
 uniform 1 Matrix4 uniform_ModelViewProjectionMatrix;
 uniform 3 Texture2 uniform_Texture;
 uniform 4 Texture2 uniform_Noise;
 
 const Vector3 LUMA = vector3(0.299, 0.587, 0.114);
-const Vector2 SCREEN_SIZE = vector2(float($SCENE_WIDTH), float($SCENE_HEIGHT));
+const Vector2 SCREEN_SIZE = vector2(float(SCENE_WIDTH), float(SCENE_HEIGHT));
 const Float FXAA_REDUCE_MIN = 1.0 / 128.0;
 const Float FXAA_REDUCE_MUL = 0.25 / 8.0;
 const Float FXAA_SPAN_MAX = 8.0;

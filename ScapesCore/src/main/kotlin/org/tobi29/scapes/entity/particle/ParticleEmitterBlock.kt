@@ -24,6 +24,7 @@ import org.tobi29.scapes.engine.utils.math.atan2Fast
 import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.length
+import org.tobi29.scapes.engine.utils.shader.IntegerExpression
 
 class ParticleEmitterBlock(system: ParticleSystem,
                            texture: Texture) : ParticleEmitterInstanced<ParticleInstanceBlock>(
@@ -67,12 +68,10 @@ class ParticleEmitterBlock(system: ParticleSystem,
                                height: Int,
                                cam: Cam): ((Shader) -> Unit) -> Unit {
         val shader = gl.engine.graphics.loadShader(
-                "Scapes:shader/ParticleBlock") {
-            supplyPreCompile {
-                supplyProperty("SCENE_WIDTH", width)
-                supplyProperty("SCENE_HEIGHT", height)
-            }
-        }
+                "Scapes:shader/ParticleBlock", mapOf(
+                "SCENE_WIDTH" to IntegerExpression(width),
+                "SCENE_HEIGHT" to IntegerExpression(height)
+        ))
         val world = system.world
         val scene = world.scene
         val player = world.player

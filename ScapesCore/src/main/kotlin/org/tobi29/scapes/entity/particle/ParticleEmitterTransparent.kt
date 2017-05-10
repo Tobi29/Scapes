@@ -22,6 +22,7 @@ import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f
 import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
 import org.tobi29.scapes.engine.utils.math.vector.length
+import org.tobi29.scapes.engine.utils.shader.IntegerExpression
 
 class ParticleEmitterTransparent(system: ParticleSystem,
                                  texture: Texture) : ParticleEmitterInstanced<ParticleInstanceTransparent>(
@@ -40,12 +41,10 @@ class ParticleEmitterTransparent(system: ParticleSystem,
                                height: Int,
                                cam: Cam): ((Shader) -> Unit) -> Unit {
         val shader = gl.engine.graphics.loadShader(
-                "Scapes:shader/ParticleTransparent") {
-            supplyPreCompile {
-                supplyProperty("SCENE_WIDTH", width)
-                supplyProperty("SCENE_HEIGHT", height)
-            }
-        }
+                "Scapes:shader/ParticleTransparent", mapOf(
+                "SCENE_WIDTH" to IntegerExpression(width),
+                "SCENE_HEIGHT" to IntegerExpression(height)
+        ))
         val world = system.world
         val scene = world.scene
         val player = world.player

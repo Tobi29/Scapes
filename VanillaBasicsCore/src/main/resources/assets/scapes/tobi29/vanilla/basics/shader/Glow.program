@@ -20,7 +20,7 @@ shader fragment(Vector4 varying_Color,
     }
     a *= a;
     a *= a;
-    out_Color.rgb = varying_Color.rgb * vector3(uniform_Brightness);
+    out_Color.rgb = varying_Color.rgb * uniform_Brightness.xyz;
     out_Color.a = a * a * varying_Color.a;
 }
 

@@ -1,3 +1,9 @@
+property Int BLUR_LENGTH;
+property Float[BLUR_LENGTH] BLUR_WEIGHT;
+property Float[BLUR_LENGTH] BLUR_OFFSET;
+property Boolean ENABLE_EXPOSURE;
+property Boolean ENABLE_BLOOM;
+
 uniform 1 Matrix4 uniform_ModelViewProjectionMatrix;
 uniform 3 Texture2 uniform_Texture;
 uniform 6 Float uniform_Brightness;
@@ -6,29 +12,29 @@ uniform 8 Texture2 uniform_Luminance;
 uniform 9 Texture2 uniform_AutoExposure;
 
 const Vector3 lumcoeff = vector3(0.299, 0.587, 0.114);
-const Float[] blurWeight = $BLUR_WEIGHT;
-const Float[] blurOffset = $BLUR_OFFSET;
+const Float[BLUR_LENGTH] blurWeight = BLUR_WEIGHT;
+const Float[BLUR_LENGTH] blurOffset = BLUR_OFFSET;
 
 shader vertex(0 Vector4 attribute_Position,
               2 Vector2 attribute_Texture) {
     varying_Texture = attribute_Texture;
-    if ($ENABLE_BLOOM) {
-        for (i in 0 ... $BLUR_LENGTH) {
+    if (ENABLE_BLOOM) {
+        for (i in 0 ... BLUR_LENGTH) {
             varying_TextureOffset[i] = vector2(attribute_Texture.x, attribute_Texture.y + blurOffset[i]);
         }
     }
-    if ($ENABLE_EXPOSURE) {
+    if (ENABLE_EXPOSURE) {
         varying_AutoExposure = texture(uniform_AutoExposure, vector2(0.0)).r;
     }
     out_Position = uniform_ModelViewProjectionMatrix * attribute_Position;
 }
 
 shader fragment(Vector2 varying_Texture,
-                if ($ENABLE_EXPOSURE) Float varying_AutoExposure,
-                if ($ENABLE_BLOOM) Vector2[$BLUR_LENGTH] varying_TextureOffset) {
+                if (ENABLE_EXPOSURE) Float varying_AutoExposure,
+                if (ENABLE_BLOOM) Vector2[BLUR_LENGTH] varying_TextureOffset) {
     Vector3 color = texture(uniform_Texture, varying_Texture).rgb;
     Float exposure;
-    if ($ENABLE_EXPOSURE) {
+    if (ENABLE_EXPOSURE) {
         exposure = uniform_Exposure + varying_AutoExposure;
     } else {
         exposure = uniform_Exposure;
@@ -40,9 +46,9 @@ shader fragment(Vector2 varying_Texture,
     color = (color * (6.2 * color + 0.5)) / (color * (6.2 * color + 1.7) + 0.06);
     color *= color;
     Float luminance = dot(color, lumcoeff);
-    if ($ENABLE_BLOOM) {
+    if (ENABLE_BLOOM) {
         Vector3 bloom = vector3(0.0);
-        for (i in 0 ... $BLUR_LENGTH) {
+        for (i in 0 ... BLUR_LENGTH) {
             bloom += texture(uniform_Luminance, varying_TextureOffset[i]).rgb * blurWeight[i];
         }
         bloom *= vector3(exposure);

@@ -1,3 +1,6 @@
+property Int SCENE_WIDTH;
+property Int SCENE_HEIGHT;
+
 uniform 0 Matrix4 uniform_ModelViewMatrix;
 uniform 1 Matrix4 uniform_ModelViewProjectionMatrix;
 uniform 3 Texture2 uniform_Texture;
@@ -5,7 +8,7 @@ uniform 4 Vector3 uniform_FogColor;
 uniform 5 Float uniform_FogEnd;
 uniform 6 Texture2 uniform_BackgroundTexture;
 
-const Vector2 SCREEN_SIZE = vector2(float($SCENE_WIDTH), float($SCENE_HEIGHT));
+const Vector2 SCREEN_SIZE = vector2(float(SCENE_WIDTH), float(SCENE_HEIGHT));
 
 shader vertex(0 Vector4 attribute_Position,
               1 Vector4 attribute_Color,
@@ -13,7 +16,7 @@ shader vertex(0 Vector4 attribute_Position,
     varying_Texture = attribute_Texture;
     varying_Color = attribute_Color;
     Vector4 vertex = attribute_Position;
-    varying_Depth = length(vector3(uniform_ModelViewMatrix * vertex));
+    varying_Depth = length((uniform_ModelViewMatrix * vertex).xyz);
     out_Position = uniform_ModelViewProjectionMatrix * vertex;
 }
 

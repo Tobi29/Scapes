@@ -7,8 +7,8 @@ uniform 6 Vector2 uniform_CamPos;
 const Vector4 pParam = vector4( 17.0*17.0, 34.0, 1.0, 7.0);
 
 fun Vector4 permute(Vector4 x0,Vector3 p) {
-  Vector4 x1 = mod(x0 * p.y, p.x);
-  return(floor(  mod( (x1 + p.z) *x0, p.x )));
+  Vector4 x1 = x0 * p.y % p.x;
+  return(floor((x1 + p.z) * x0 % p.x));
 }
 
 fun Float taylorInvSqrt(Float r) {
@@ -35,7 +35,7 @@ fun Float simplexNoise3(Vector3 v) {
   Vector3 x3 = x0 - 1.0 + 3.0 * C.xxx;
 
 // Permutations
-  i = mod(i, pParam.x );
+  i = i % pParam.x;
   Vector4 p = permute( permute( permute(
              i.z + vector4(0.0, i1.z, i2.z, 1.0 ), pParam.xyz)
            + i.y + vector4(0.0, i1.y, i2.y, 1.0 ), pParam.xyz)

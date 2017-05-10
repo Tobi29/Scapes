@@ -34,7 +34,9 @@ import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.plus
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
+import org.tobi29.scapes.engine.utils.shader.ArrayExpression
+import org.tobi29.scapes.engine.utils.shader.BooleanExpression
+import org.tobi29.scapes.engine.utils.shader.IntegerExpression
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.particle.*
 import org.tobi29.scapes.entity.skin.ClientSkinStorage
@@ -110,12 +112,10 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
         val renderScene = render(gl)
         val render = if (fxaa) {
             val shaderFXAA = gl.engine.graphics.loadShader(
-                    "Scapes:shader/FXAA") {
-                supplyPreCompile {
-                    supplyProperty("SCENE_WIDTH", width)
-                    supplyProperty("SCENE_HEIGHT", height)
-                }
-            }
+                    "Scapes:shader/FXAA", mapOf(
+                    "SCENE_WIDTH" to IntegerExpression(width),
+                    "SCENE_HEIGHT" to IntegerExpression(height)
+            ))
             val fxaaBuffer = gl.engine.graphics.createFramebuffer(
                     width, height, 1, true, true, false,
                     TextureFilter.LINEAR)
@@ -143,24 +143,29 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
             null
         }
         val pp = if (bloom) {
+            val blurSamples = 5
             val shaderComposite1 = gl.engine.graphics.loadShader(
-                    "Scapes:shader/Composite1") {
-                supplyPreCompile {
-                    supplyProperty("BLUR_OFFSET", BLUR_OFFSET)
-                    supplyProperty("BLUR_WEIGHT", BLUR_WEIGHT)
-                    supplyProperty("BLUR_LENGTH", BLUR_LENGTH)
-                }
-            }
+                    "Scapes:shader/Composite1", mapOf(
+                    "BLUR_LENGTH" to IntegerExpression(blurSamples),
+                    "BLUR_OFFSET" to ArrayExpression(
+                            gaussianBlurOffset(blurSamples, 0.01)),
+                    "BLUR_WEIGHT" to ArrayExpression(
+                            gaussianBlurWeight(blurSamples) {
+                                pow(cos(it * PI), 0.1)
+                            })
+            ))
             val shaderComposite2 = gl.engine.graphics.loadShader(
-                    "Scapes:shader/Composite2") {
-                supplyPreCompile {
-                    supplyProperty("ENABLE_BLOOM", true)
-                    supplyProperty("ENABLE_EXPOSURE", exposure)
-                    supplyProperty("BLUR_OFFSET", BLUR_OFFSET)
-                    supplyProperty("BLUR_WEIGHT", BLUR_WEIGHT)
-                    supplyProperty("BLUR_LENGTH", BLUR_LENGTH)
-                }
-            }
+                    "Scapes:shader/Composite2", mapOf(
+                    "BLUR_LENGTH" to IntegerExpression(blurSamples),
+                    "BLUR_OFFSET" to ArrayExpression(
+                            gaussianBlurOffset(blurSamples, 0.01)),
+                    "BLUR_WEIGHT" to ArrayExpression(
+                            gaussianBlurWeight(blurSamples) {
+                                pow(cos(it * PI), 0.1)
+                            }),
+                    "ENABLE_BLOOM" to BooleanExpression(true),
+                    "ENABLE_EXPOSURE" to BooleanExpression(exposure)
+            ))
             val compositeBuffer = gl.engine.graphics.createFramebuffer(
                     width, height, 2, true, true, false,
                     TextureFilter.LINEAR)
@@ -181,16 +186,19 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
             }
             chain(pp1, pp2)
         } else {
+            val blurSamples = 5
             val shaderComposite = gl.engine.graphics.loadShader(
-                    "Scapes:shader/Composite2") {
-                supplyPreCompile {
-                    supplyProperty("ENABLE_BLOOM", false)
-                    supplyProperty("ENABLE_EXPOSURE", exposure)
-                    supplyProperty("BLUR_OFFSET", BLUR_OFFSET)
-                    supplyProperty("BLUR_WEIGHT", BLUR_WEIGHT)
-                    supplyProperty("BLUR_LENGTH", BLUR_LENGTH)
-                }
-            }
+                    "Scapes:shader/Composite2", mapOf(
+                    "BLUR_LENGTH" to IntegerExpression(blurSamples),
+                    "BLUR_OFFSET" to ArrayExpression(
+                            gaussianBlurOffset(blurSamples, 0.01)),
+                    "BLUR_WEIGHT" to ArrayExpression(
+                            gaussianBlurWeight(blurSamples) {
+                                pow(cos(it * PI), 0.1)
+                            }),
+                    "ENABLE_BLOOM" to BooleanExpression(false),
+                    "ENABLE_EXPOSURE" to BooleanExpression(exposure)
+            ))
             postProcess(gl, shaderComposite, sceneBuffer) {
                 if (exposureFBO != null) {
                     gl.activeTexture(3)
@@ -206,14 +214,21 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
         }
         if (exposureFBO != null) {
             exposureSync.init()
+            val blurSamples = 11
             val shaderExposure = gl.engine.graphics.loadShader(
-                    "Scapes:shader/Exposure") {
-                supplyPreCompile {
-                    supplyProperty("BLUR_OFFSET", SAMPLE_OFFSET)
-                    supplyProperty("BLUR_WEIGHT", SAMPLE_WEIGHT)
-                    supplyProperty("BLUR_LENGTH", SAMPLE_LENGTH)
-                }
-            }
+                    "Scapes:shader/Exposure", mapOf(
+                    "BLUR_LENGTH" to IntegerExpression(blurSamples),
+                    "BLUR_OFFSET" to ArrayExpression(
+                            gaussianBlurOffset(blurSamples, 0.5).also {
+                                for (i in it.indices) {
+                                    it[i] += 0.5
+                                }
+                            }),
+                    "BLUR_WEIGHT" to ArrayExpression(
+                            gaussianBlurWeight(blurSamples) {
+                                pow(cos(it * PI), 0.1)
+                            })
+            ))
             val exp = gl.into(exposureFBO, postProcess(gl, shaderExposure,
                     sceneBuffer) {
                 exposureSync.tick()
@@ -466,32 +481,5 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
         return skybox
     }
 
-    companion object : KLogging() {
-        private val BLUR_OFFSET: String
-        private val BLUR_WEIGHT: String
-        private val SAMPLE_OFFSET: String
-        private val SAMPLE_WEIGHT: String
-        private val BLUR_LENGTH: Int
-        private val SAMPLE_LENGTH: Int
-
-        init {
-            val blurOffset = gaussianBlurOffset(5, 0.01f)
-            val blurWeight = gaussianBlurWeight(5) {
-                pow(cos(it * PI), 0.1)
-            }
-            BLUR_LENGTH = blurOffset.size
-            BLUR_OFFSET = blurOffset.joinToString()
-            BLUR_WEIGHT = blurWeight.joinToString()
-            val sampleOffset = gaussianBlurOffset(11, 0.5f)
-            val sampleWeight = gaussianBlurWeight(11) {
-                pow(cos(it * PI), 0.1)
-            }
-            for (i in sampleOffset.indices) {
-                sampleOffset[i] = sampleOffset[i] + 0.5f
-            }
-            SAMPLE_LENGTH = sampleOffset.size
-            SAMPLE_OFFSET = sampleOffset.joinToString()
-            SAMPLE_WEIGHT = sampleWeight.joinToString()
-        }
-    }
+    companion object : KLogging()
 }

@@ -1,3 +1,6 @@
+property Int SCENE_WIDTH;
+property Int SCENE_HEIGHT;
+
 uniform 0 Matrix4 uniform_ModelViewMatrix;
 uniform 1 Matrix4 uniform_ModelViewProjectionMatrix;
 uniform 3 Texture2 uniform_Texture;
@@ -7,7 +10,7 @@ uniform 6 Texture2 uniform_BackgroundTexture;
 uniform 7 Float uniform_Sunlight;
 uniform 8 Float uniform_CamLight;
 
-const Vector2 SCREEN_SIZE = vector2(float($SCENE_WIDTH), float($SCENE_HEIGHT));
+const Vector2 SCREEN_SIZE = vector2(float(SCENE_WIDTH), float(SCENE_HEIGHT));
 
 shader vertex(0 Vector4 attribute_Position,
               1 Vector4 attribute_Color,
@@ -17,7 +20,7 @@ shader vertex(0 Vector4 attribute_Position,
     varying_Texture = attribute_Texture;
     varying_Color = attribute_Color;
     Vector4 vertex = attribute_MatrixOffset * attribute_Position;
-    varying_Depth = length(vector3(uniform_ModelViewMatrix * vertex));
+    varying_Depth = length((uniform_ModelViewMatrix * vertex).xyz);
     Float lightSunLevel = max(attribute_Light.y - uniform_Sunlight, 0.0);
     Vector3 lightSun = vector3(lightSunLevel);
     Vector3 lightBlock = vector3(attribute_Light.x);
