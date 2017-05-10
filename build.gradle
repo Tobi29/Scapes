@@ -18,7 +18,7 @@ buildscript {
     def kotlinVersion = "1.1.2-2"
     def dokkaVersion = "0.9.13"
     def junitPlatformVersion = "1.0.0-M4"
-    def shadowVersion = "1.2.4"
+    def shadowVersion = "2.0.0"
 
     repositories {
         jcenter()
