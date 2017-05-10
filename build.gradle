@@ -17,7 +17,7 @@
 buildscript {
     def kotlinVersion = "1.1.2-2"
     def dokkaVersion = "0.9.13"
-    def junitPlatformVersion = "1.0.0-M3"
+    def junitPlatformVersion = "1.0.0-M4"
     def shadowVersion = "1.2.4"
 
     repositories {
@@ -68,12 +68,12 @@ task wrapper(type: Wrapper) {
 
 ext {
     slf4jVersion = "1.7.25"
-    spekVersion = "1.1.0"
+    spekVersion = "1.1.1"
     swtVersion = "4.6"
     lwjglVersion = "3.1.1"
     log4jVersion = "2.8.1"
     jnaVersion = "4.4.0"
-    scapesEngineVersion = "fe3cfe4248"
+    scapesEngineVersion = "4f630526c7"
 
     slf4jSimple = "org.slf4j:slf4j-simple:$slf4jVersion"
     lwjgl = "org.lwjgl:lwjgl:$lwjglVersion"
