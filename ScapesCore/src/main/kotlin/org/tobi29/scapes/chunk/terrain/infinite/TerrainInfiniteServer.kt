@@ -31,11 +31,11 @@ import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.max
+import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.engine.utils.math.vector.*
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.task.ThreadJoiner
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.server.format.TerrainInfiniteFormat
@@ -128,7 +128,7 @@ class TerrainInfiniteServer(override val world: WorldServer,
         }, "Chunk-Loading")
     }
 
-    override fun getThreadContext() = SECTION.get()
+    override fun getThreadContext(): TerrainInfiniteServerSection = SECTION.get()
 
     override fun sunLightReduction(x: Int,
                                    y: Int): Int {

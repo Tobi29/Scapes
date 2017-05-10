@@ -19,8 +19,8 @@ package org.tobi29.scapes.vanilla.basics.world.tree
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainMutable
 import org.tobi29.scapes.chunk.terrain.block
-import org.tobi29.scapes.engine.utils.math.Random
 import org.tobi29.scapes.engine.utils.math.PI
+import org.tobi29.scapes.engine.utils.math.Random
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.math.sinTable
 import org.tobi29.scapes.engine.utils.math.vector.*
@@ -54,7 +54,7 @@ object TreeUtil {
         if (terrain.block(x, y, z) {
             isReplaceable(terrain, x, y, z) || isTransparent(it)
         }) {
-            terrain.typeData(x, y, z, type, data.toInt())
+            terrain.typeData(x, y, z, type, data)
         }
     }
 
@@ -194,7 +194,7 @@ object TreeUtil {
                    maxDepth: Int) {
         for (i in 0..maxDepth - 1) {
             if (terrain.type(x, y, z - i).isReplaceable(terrain, x, y, z - i)) {
-                terrain.typeData(x, y, z - i, type, data.toInt())
+                terrain.typeData(x, y, z - i, type, data)
             } else {
                 return
             }

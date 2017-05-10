@@ -24,20 +24,14 @@ import org.tobi29.scapes.engine.utils.Checksum
 import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
 import org.tobi29.scapes.engine.utils.graphics.Image
-import org.tobi29.scapes.engine.utils.io.ByteBuffer
 import org.tobi29.scapes.packets.PacketSkin
 
 class ClientSkinStorage(private val engine: ScapesEngine,
                         private val defaultTexture: Resource<Texture>) {
     private val skins = ConcurrentHashMap<Checksum, ClientSkin>()
     private val skinRequests = ConcurrentLinkedQueue<Checksum>()
-    private val defaultSkin: ByteBuffer
-
-    init {
-        defaultSkin = defaultTexture.get().buffer(
-                0) ?: throw IllegalArgumentException(
-                "Default skin texture is empty")
-    }
+    private val defaultSkin = defaultTexture.get().buffer(0)
+            ?: throw IllegalArgumentException("Default skin texture is empty")
 
     fun update(connection: ClientConnection) {
         val oldSkins = skins.values.filter { it.increaseTicks() > 1200 }

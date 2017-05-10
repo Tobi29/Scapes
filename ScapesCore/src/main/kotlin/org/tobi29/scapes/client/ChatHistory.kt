@@ -43,11 +43,7 @@ class ChatHistory(private val listenerParent: EventDispatcher) {
     }
 
     private class ChatLine(val text: String) {
-        val time: Long
-
-        init {
-            time = System.currentTimeMillis()
-        }
+        val time = System.currentTimeMillis()
     }
 }
 

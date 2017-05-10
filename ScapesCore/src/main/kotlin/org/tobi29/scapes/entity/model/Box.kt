@@ -115,17 +115,13 @@ class Box constructor(engine: ScapesEngine,
     }
 
     companion object {
-        private val INDICES: IntArray
-        private val INDICES_NO_CULL: IntArray
-
-        init {
-            INDICES = intArrayOf(0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10,
-                    8, 10, 11, 12, 13, 14, 12, 14, 15, 16, 17, 18, 16, 18, 19,
-                    20, 21, 22, 20, 22, 23)
-            INDICES_NO_CULL = IntArray(INDICES.size shl 1)
-            copy(INDICES, INDICES_NO_CULL)
+        private val INDICES = intArrayOf(0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8,
+                9, 10, 8, 10, 11, 12, 13, 14, 12, 14, 15, 16, 17, 18, 16, 18,
+                19, 20, 21, 22, 20, 22, 23)
+        private val INDICES_NO_CULL = IntArray(INDICES.size shl 1).also {
+            copy(INDICES, it)
             for (i in INDICES.indices) {
-                INDICES_NO_CULL[INDICES_NO_CULL.size - i - 1] = INDICES[i]
+                it[it.size - i - 1] = INDICES[i]
             }
         }
     }

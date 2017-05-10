@@ -94,7 +94,7 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
         }, "Chunk-Requests")
     }
 
-    override fun getThreadContext() = SECTION.get()
+    override fun getThreadContext(): TerrainInfiniteClientSection = SECTION.get()
 
     fun requestedChunks(): Int {
         return requestedChunks

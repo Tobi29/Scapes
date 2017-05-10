@@ -26,12 +26,9 @@ import org.tobi29.scapes.engine.utils.io.ByteBuffer
 class ClientSkin(engine: ScapesEngine,
                  buffer: ByteBuffer,
                  private val checksum: Checksum) {
-    private val texture: Resource<Texture>
+    private val texture = Resource(
+            engine.graphics.createTexture(64, 64, buffer))
     private var unusedTicks = 0
-
-    init {
-        texture = Resource(engine.graphics.createTexture(64, 64, buffer))
-    }
 
     fun setImage(buffer: ByteBuffer) {
         texture.get().setBuffer(buffer)
