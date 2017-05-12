@@ -18,7 +18,10 @@ package org.tobi29.scapes.server.connection
 
 import kotlinx.coroutines.experimental.yield
 import org.tobi29.scapes.engine.server.*
-import org.tobi29.scapes.engine.utils.*
+import org.tobi29.scapes.engine.utils.Algorithm
+import org.tobi29.scapes.engine.utils.AtomicInteger
+import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
+import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.engine.utils.graphics.Image
 import org.tobi29.scapes.engine.utils.io.ByteBuffer
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
@@ -104,7 +107,8 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
             while (length-- > 0) {
                 requests.add(input.getInt())
             }
-            val response2 = generateResponse(challengeReceived equals challenge)
+            val response2 = generateResponse(
+                    challengeReceived contentEquals challenge)
             if (response2 != null) {
                 output.putBoolean(true)
                 output.putString(response2)
