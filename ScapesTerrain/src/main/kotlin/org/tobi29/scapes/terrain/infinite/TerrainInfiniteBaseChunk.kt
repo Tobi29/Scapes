@@ -50,15 +50,8 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
         internal set
 
     protected inline fun <R> lockRead(crossinline block: ChunkDatas.() -> R): R {
-        val threadContext = parentTerrain.getThreadContext()
-        lockRead(threadContext)
+        assert { lock.isHeld() || !parentTerrain.getThreadContext().locked }
         return lock.read { block(data) }
-    }
-
-    protected fun lockRead(context: TerrainLock) {
-        if (!lock.isHeld() && context.locked) {
-            throw IllegalStateException("Locking twice on the same thread")
-        }
     }
 
     inline fun <R> lockWrite(block: () -> R): R {
