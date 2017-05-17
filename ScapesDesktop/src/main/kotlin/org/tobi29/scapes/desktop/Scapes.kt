@@ -31,6 +31,7 @@ import org.tobi29.scapes.engine.utils.IOException
 import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.io.tag.json.readJSON
 import org.tobi29.scapes.engine.utils.io.tag.json.writeJSON
+import org.tobi29.scapes.engine.utils.printerrln
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toMutTag
 import org.tobi29.scapes.engine.utils.tag.toTag
@@ -71,9 +72,8 @@ fun main(args: Array<String>) {
         commandLine.validate()
         commandLine
     } catch (e: InvalidCommandLineException) {
-        System.err.println(e.message)
-        System.exit(255)
-        return
+        printerrln(e.message)
+        exitProcess(255)
     }
 
     if (commandLine.getBoolean(helpOption)) {
@@ -81,12 +81,10 @@ fun main(args: Array<String>) {
         help.append("Usage: scapes\n")
         options.printHelp(help)
         println(help)
-        System.exit(0)
         return
     }
     if (commandLine.getBoolean(versionOption)) {
         println("Scapes $VERSION")
-        System.exit(0)
         return
     }
     if (commandLine.getBoolean(nosandboxOption)) {
@@ -164,13 +162,12 @@ fun main(args: Array<String>) {
                 server.run(home)
             } catch (e: IOException) {
                 e.printStackTrace()
-                System.exit(200)
-                return
+                exitProcess(200)
             }
         }
         else -> {
-            System.err.println("Unknown mode: $mode")
-            System.exit(254)
+            printerrln("Unknown mode: $mode")
+            exitProcess(254)
         }
     }
 }
@@ -183,7 +180,7 @@ private fun readConfig(path: FilePath) =
                 TagMap()
             }
         } catch (e: IOException) {
-            System.err.println("Failed to load config file: $e")
+            printerrln("Failed to load config file: $e")
             TagMap()
         }
 
@@ -192,14 +189,14 @@ private fun writeConfig(path: FilePath,
         try {
             write(path) { config.writeJSON(it) }
         } catch (e: IOException) {
-            System.err.println("Failed to store config file: $e")
+            printerrln("Failed to store config file: $e")
         }
 
 private fun crashHandler(path: FilePath,
                          engine: () -> ScapesEngine?) = object : Crashable {
     override fun crash(e: Throwable): Nothing {
         try {
-            System.err.println("Engine crashed: $e")
+            printerrln("Engine crashed: $e")
             e.printStackTrace()
             crashReport(path, engine, e)
             ContainerGLFW.openFile(path)
@@ -219,6 +216,5 @@ private fun crashReport(path: FilePath,
         e.printStackTrace()
         null
     } ?: emptyMap<String, String>()
-    writeCrashReport(e, crashReportFile, "ScapesEngine",
-            debug)
+    writeCrashReport(e, crashReportFile, "ScapesEngine", debug)
 }
