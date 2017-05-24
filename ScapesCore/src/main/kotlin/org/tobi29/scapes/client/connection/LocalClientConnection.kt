@@ -25,7 +25,7 @@ import org.tobi29.scapes.engine.server.Connection
 import org.tobi29.scapes.engine.server.ConnectionEndException
 import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.server.RemoteAddress
-import org.tobi29.scapes.engine.utils.IOException
+import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.packets.PacketDisconnectSelf
 import org.tobi29.scapes.packets.PacketServer
 import org.tobi29.scapes.plugins.Plugins

@@ -25,7 +25,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.isNotHidden
 import org.tobi29.scapes.engine.utils.io.filesystem.isRegularFile
 import org.tobi29.scapes.engine.utils.io.filesystem.listRecursive
-import org.tobi29.scapes.engine.utils.IOException
+import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.packets.*

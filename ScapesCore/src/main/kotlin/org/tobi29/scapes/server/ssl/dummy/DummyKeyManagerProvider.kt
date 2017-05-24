@@ -19,7 +19,7 @@ package org.tobi29.scapes.server.ssl.dummy
 import org.tobi29.scapes.engine.server.keyManagers
 import org.tobi29.scapes.engine.server.keyStore
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.IOException
+import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.server.ssl.spi.KeyManagerProvider
 import java.security.KeyStoreException

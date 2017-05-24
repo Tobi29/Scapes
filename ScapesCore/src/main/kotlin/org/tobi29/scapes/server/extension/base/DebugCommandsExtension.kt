@@ -18,7 +18,7 @@ package org.tobi29.scapes.server.extension.base
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.engine.args.*
-import org.tobi29.scapes.engine.utils.IOException
+import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream
 import org.tobi29.scapes.engine.utils.io.asString
 import org.tobi29.scapes.engine.utils.io.process

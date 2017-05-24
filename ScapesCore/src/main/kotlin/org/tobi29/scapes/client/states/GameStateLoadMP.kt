@@ -32,7 +32,7 @@ import org.tobi29.scapes.engine.server.RemoteAddress
 import org.tobi29.scapes.engine.server.SSLProvider
 import org.tobi29.scapes.engine.server.connect
 import org.tobi29.scapes.engine.utils.AtomicBoolean
-import org.tobi29.scapes.engine.utils.IOException
+import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.task.Joiner
 import java.nio.channels.SelectionKey

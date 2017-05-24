@@ -16,7 +16,7 @@
 package org.tobi29.scapes.server.format.sql
 
 import org.tobi29.scapes.engine.sql.*
-import org.tobi29.scapes.engine.utils.IOException
+import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.ByteBuffer
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary

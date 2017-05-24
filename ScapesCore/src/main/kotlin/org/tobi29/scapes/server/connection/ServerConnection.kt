@@ -20,6 +20,7 @@ import org.tobi29.scapes.connection.ConnectionInfo
 import org.tobi29.scapes.connection.ConnectionType
 import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.utils.*
+import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toInt
 import org.tobi29.scapes.entity.skin.ServerSkin

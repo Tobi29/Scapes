@@ -30,7 +30,7 @@ import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.IOException
+import org.tobi29.scapes.engine.utils.io.IOException
 
 class GameStateMenu(engine: ScapesEngine) : GameState(engine) {
     private val scene = SceneMenu(engine)

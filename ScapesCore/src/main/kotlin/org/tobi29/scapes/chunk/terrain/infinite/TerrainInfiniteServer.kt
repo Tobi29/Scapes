@@ -26,7 +26,7 @@ import org.tobi29.scapes.chunk.generator.GeneratorOutput
 import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
-import org.tobi29.scapes.engine.utils.IOException
+import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.abs
@@ -267,15 +267,21 @@ class TerrainInfiniteServer(override val world: WorldServer,
                             dz: Int,
                             block: (TerrainMutableServer) -> R): R {
         val section = SECTION.get()
-        section.init(this, x, y, z, dx, dy, dz)
-        section.lockChunks()
+        profilerSection("Terrain-Modify-Init") {
+            section.init(this, x, y, z, dx, dy, dz)
+            section.lockChunks()
+        }
         try {
-            return block(section)
+            profilerSection("Terrain-Modify-Block") {
+                return block(section)
+            }
         } finally {
-            section.unlockChunks()
-            section.flushPackets()
-            section.flushUpdates()
-            section.clear()
+            profilerSection("Terrain-Modify-Flush") {
+                section.unlockChunks()
+                section.flushPackets()
+                section.flushUpdates()
+                section.clear()
+            }
         }
     }
 
