@@ -19,6 +19,8 @@ package org.tobi29.scapes.client.gui
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.utils.io.IOException
+import org.tobi29.scapes.engine.utils.io.asString
+import org.tobi29.scapes.engine.utils.io.process
 import org.tobi29.scapes.engine.utils.logging.KLogging
 
 class GuiCredits(state: GameState,
@@ -29,12 +31,8 @@ class GuiCredits(state: GameState,
     init {
         val credits = StringBuilder(200)
         try {
-            state.engine.files["Scapes:Readme.txt"].get().reader().use { reader ->
-                var line: String? = reader.readLine()
-                while (line != null) {
-                    credits.append(line).append('\n')
-                    line = reader.readLine()
-                }
+            state.engine.files["Scapes:Readme.txt"].get().read {
+                process(it, asString())
             }
         } catch (e: IOException) {
             logger.error { "Error reading Readme.txt: $e" }
