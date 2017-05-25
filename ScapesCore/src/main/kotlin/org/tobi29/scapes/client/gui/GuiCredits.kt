@@ -30,7 +30,7 @@ class GuiCredits(state: GameState,
 
     init {
         val credits = try {
-            state.engine.files["Scapes:Readme.txt"].get().read {
+            state.engine.files["Scapes:Readme.txt"].read {
                 process(it, asString())
             }
         } catch (e: IOException) {

@@ -26,8 +26,8 @@ import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.server.InvalidPacketDataException
 import org.tobi29.scapes.engine.utils.Algorithm
 import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
-import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
+import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.checksum
 import org.tobi29.scapes.engine.utils.io.filesystem.exists
 import org.tobi29.scapes.engine.utils.io.filesystem.read
@@ -73,7 +73,7 @@ class LocalPlayerConnection(private val worker: ConnectionWorker,
         val image = if (exists(path)) {
             read(path) { decodePNG(it) }
         } else {
-            engine.files["Scapes:image/entity/mob/Player.png"].get().read {
+            engine.files["Scapes:image/entity/mob/Player.png"].read {
                 decodePNG(it)
             }
         }

@@ -26,16 +26,12 @@ import org.tobi29.scapes.engine.server.PacketBundleChannel
 import org.tobi29.scapes.engine.server.receive
 import org.tobi29.scapes.engine.utils.*
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
-import org.tobi29.scapes.engine.utils.io.ByteBufferStream
-import org.tobi29.scapes.engine.utils.io.WritableByteStream
+import org.tobi29.scapes.engine.utils.io.*
 import org.tobi29.scapes.engine.utils.io.filesystem.FileCache
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.exists
 import org.tobi29.scapes.engine.utils.io.filesystem.read
-import org.tobi29.scapes.engine.utils.io.process
-import org.tobi29.scapes.engine.utils.io.put
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
-import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.tag.toMutTag
 import org.tobi29.scapes.plugins.PluginFile
 import org.tobi29.scapes.plugins.Plugins
@@ -189,7 +185,7 @@ object NewClientConnection {
         val image = if (exists(path)) {
             read(path) { decodePNG(it) }
         } else {
-            engine.files["Scapes:image/entity/mob/Player.png"].get().read {
+            engine.files["Scapes:image/entity/mob/Player.png"].read {
                 decodePNG(it)
             }
         }

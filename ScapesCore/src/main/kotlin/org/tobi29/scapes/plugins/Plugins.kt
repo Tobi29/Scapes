@@ -16,16 +16,15 @@
 
 package org.tobi29.scapes.plugins
 
-import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.block.*
 import org.tobi29.scapes.engine.utils.io.FileSystemContainer
+import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.classpath.ClasspathPath
-import org.tobi29.scapes.engine.utils.io.classpath.ClasspathResource
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.isNotHidden
 import org.tobi29.scapes.engine.utils.io.filesystem.isRegularFile
 import org.tobi29.scapes.engine.utils.io.filesystem.listRecursive
-import org.tobi29.scapes.engine.utils.io.IOException
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.packets.*
@@ -56,7 +55,7 @@ class Plugins(files: List<PluginFile>,
             classLoader = null
             val classLoader = Plugins::class.java.classLoader
             val file = PluginFile(
-                    ClasspathResource(classLoader, "scapes/plugin/Plugin.json"))
+                    ClasspathPath(classLoader, "scapes/plugin/Plugin.json"))
             load(file.plugin(classLoader))
         } else {
             classLoader = PluginClassLoader(paths)
@@ -160,7 +159,7 @@ class Plugins(files: List<PluginFile>,
 
         // TODO: @Throws(IOException::class)
         fun embedded(): List<PluginFile> {
-            val embedded = ClasspathResource(Plugins::class.java.classLoader,
+            val embedded = ClasspathPath(Plugins::class.java.classLoader,
                     "scapes/plugin/Plugin.json")
             if (embedded.exists()) {
                 return listOf(PluginFile(embedded))

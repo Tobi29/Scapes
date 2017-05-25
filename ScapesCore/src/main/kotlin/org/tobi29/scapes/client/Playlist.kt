@@ -18,7 +18,10 @@ package org.tobi29.scapes.client
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.gui.GuiNotificationSimple
 import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.filesystem.*
+import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
+import org.tobi29.scapes.engine.utils.io.filesystem.isNotHidden
+import org.tobi29.scapes.engine.utils.io.filesystem.isRegularFile
+import org.tobi29.scapes.engine.utils.io.filesystem.listRecursive
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
@@ -89,8 +92,8 @@ class Playlist(private val path: FilePath,
                     val random = threadLocalRandom()
                     val title = files[random.nextInt(files.size)]
                     engine.sounds.stop("music")
-                    engine.sounds.playMusic(read(title), "music.Playlist",
-                            false, 1.0, 1.0)
+                    engine.sounds.playMusic(title, "music.Playlist", false, 1.0,
+                            1.0)
                     return@PrivilegedAction title
                 }
             } catch (e: IOException) {
