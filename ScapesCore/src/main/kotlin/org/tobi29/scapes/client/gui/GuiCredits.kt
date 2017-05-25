@@ -29,18 +29,17 @@ class GuiCredits(state: GameState,
         state, style) {
 
     init {
-        val credits = StringBuilder(200)
-        try {
+        val credits = try {
             state.engine.files["Scapes:Readme.txt"].get().read {
                 process(it, asString())
             }
         } catch (e: IOException) {
             logger.error { "Error reading Readme.txt: $e" }
+            "Failed to load credits"
         }
 
         addHori(0.0, 0.0, 120.0, -1.0, ::GuiComponentGroup)
-        addHori(0.0, 0.0, -1.0, 18.0
-        ) { GuiComponentCredits(it, credits.toString()) }
+        addHori(0.0, 0.0, -1.0, 18.0) { GuiComponentCredits(it, credits) }
         val pane = addHori(0.0, 0.0, 96.0, -1.0, ::GuiComponentVisiblePane)
         val back = pane.addVert(13.0, 64.0, -1.0, 30.0) {
             button(it, "Back")
