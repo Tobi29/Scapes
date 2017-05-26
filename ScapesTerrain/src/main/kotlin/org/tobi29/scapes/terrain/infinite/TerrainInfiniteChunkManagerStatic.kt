@@ -19,7 +19,6 @@ package org.tobi29.scapes.terrain.infinite
 import org.tobi29.scapes.engine.utils.AtomicInteger
 import org.tobi29.scapes.engine.utils.StampLock
 import org.tobi29.scapes.engine.utils.assert
-import org.tobi29.scapes.engine.utils.fill
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector2i
 
@@ -111,11 +110,15 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
         if (xx != this.x.get() || yy != this.y.get()) {
             lock.write {
                 var xDiff = this.x.get() - xx
+                var yDiff = this.y.get() - yy
                 val xDiffAbs = abs(xDiff)
-                if (xDiffAbs > 0) {
-                    if (xDiffAbs > size) {
-                        clear()
-                    } else {
+                val yDiffAbs = abs(yDiff)
+                if (xDiffAbs > size || yDiffAbs > size) {
+                    clear()
+                    this.x.set(xx)
+                    this.y.set(yy)
+                } else {
+                    if (xDiffAbs > 0) {
                         for (i in 0..xDiff - 1) {
                             shiftXPositive()
                         }
@@ -123,15 +126,9 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
                         for (i in 0..xDiff - 1) {
                             shiftXNegative()
                         }
+                        this.x.set(xx)
                     }
-                    this.x.set(xx)
-                }
-                var yDiff = this.y.get() - yy
-                val yDiffAbs = abs(yDiff)
-                if (yDiffAbs > 0) {
-                    if (yDiffAbs > size) {
-                        clear()
-                    } else {
+                    if (yDiffAbs > 0) {
                         for (i in 0..yDiff - 1) {
                             shiftYPositive()
                         }
@@ -139,8 +136,8 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
                         for (i in 0..yDiff - 1) {
                             shiftYNegative()
                         }
+                        this.y.set(yy)
                     }
-                    this.y.set(yy)
                 }
             }
             return true
@@ -149,7 +146,10 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
     }
 
     private fun clear() {
-        array.fill { null }
+        for (i in array.indices) {
+            array[i]?.dispose()
+            array[i] = null
+        }
     }
 
     private fun shiftXPositive() {
