@@ -129,13 +129,12 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
             this["Server"] = TagMap {
                 this["ServerName"] = "My Superb Server"
                 this["ServerIcon"] = "ServerIcon.png"
-                this["MaxLoadingRadius"] = 256
-            }
-            this["Socket"] = TagMap {
-                this["MaxPlayers"] = 20
-                this["ControlPassword"] = ""
-                this["WorkerCount"] = 2
-
+                this["MaxLoadingRadius"] = 288
+                this["Socket"] = TagMap {
+                    this["MaxPlayers"] = 20
+                    this["WorkerCount"] = 2
+                    this["ControlPassword"] = ""
+                }
             }
             this["WorldSource"] = TagMap {
                 this["ID"] = "SQLite"
