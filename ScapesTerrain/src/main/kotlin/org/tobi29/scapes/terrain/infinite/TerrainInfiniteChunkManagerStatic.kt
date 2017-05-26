@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.terrain.infinite
 
+import org.tobi29.scapes.engine.utils.Array2
 import org.tobi29.scapes.engine.utils.AtomicInteger
 import org.tobi29.scapes.engine.utils.StampLock
 import org.tobi29.scapes.engine.utils.assert
@@ -25,24 +26,20 @@ import org.tobi29.scapes.engine.utils.math.vector.MutableVector2i
 class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
         private val center: MutableVector2i,
         private val radius: Int) : TerrainInfiniteChunkManager<C> {
-    private val size: Int
-    private val array: Array<TerrainInfiniteBaseChunk<*>?>
+    private val size = (radius shl 1) + 1
+    private val arrayFlat =
+            arrayOfNulls<TerrainInfiniteBaseChunk<*>?>(size * size)
+    private val array = Array2(size, size, arrayFlat)
     private val lock = StampLock()
     private val x = AtomicInteger()
     private val y = AtomicInteger()
-
-    init {
-        size = (radius shl 1) + 1
-        array = arrayOfNulls(size * size)
-    }
 
     override fun add(chunk: C) {
         lock.write {
             val xx = chunk.pos.x - x.get()
             val yy = chunk.pos.y - y.get()
-            if (xx in 0..(size - 1) && yy >= 0 && yy < size) {
-                val i = yy * size + xx
-                array[i] = chunk
+            if (xx in 0..array.width - 1 && yy in 0..array.height - 1) {
+                array[xx, yy] = chunk
             }
         }
     }
@@ -52,13 +49,12 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
         return lock.write {
             val xx = x - this.x.get()
             val yy = y - this.y.get()
-            if (xx in 0..(size - 1) && yy >= 0 && yy < size) {
-                val i = yy * size + xx
-                val chunk = array[i]
+            if (xx in 0..array.width - 1 && yy in 0..array.height - 1) {
+                val chunk = array[xx, yy]
                 if (chunk != null) {
                     assert { chunk.pos.x == x }
                     assert { chunk.pos.y == y }
-                    array[i] = null
+                    array[xx, yy] = null
                     @Suppress("UNCHECKED_CAST")
                     chunk as C
                 } else {
@@ -75,9 +71,8 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
         val value = lock.read {
             val xx = x - this.x.get()
             val yy = y - this.y.get()
-            if (xx in 0..(size - 1) && yy >= 0 && yy < size) {
-                val i = yy * size + xx
-                array[i]
+            if (xx in 0..array.width - 1 && yy in 0..array.height - 1) {
+                array[xx, yy]
             } else {
                 null
             }
@@ -146,65 +141,65 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
     }
 
     private fun clear() {
-        for (i in array.indices) {
-            array[i]?.dispose()
-            array[i] = null
+        for (i in arrayFlat.indices) {
+            arrayFlat[i]?.dispose()
+            arrayFlat[i] = null
         }
     }
 
     private fun shiftXPositive() {
         var i = 0
-        while (i < array.size) {
-            val chunk = array[i]
-            chunk?.let { it.dispose(); array[i] = null }
+        while (i < arrayFlat.size) {
+            val chunk = arrayFlat[i]
+            chunk?.let { it.dispose(); arrayFlat[i] = null }
             i += size
         }
         i = size - 1
-        while (i < array.size) {
-            val chunk = array[i]
-            chunk?.let { it.dispose(); array[i] = null }
+        while (i < arrayFlat.size) {
+            val chunk = arrayFlat[i]
+            chunk?.let { it.dispose(); arrayFlat[i] = null }
             i += size
         }
-        System.arraycopy(array, 0, array, 1, array.size - 1)
+        System.arraycopy(arrayFlat, 0, arrayFlat, 1, arrayFlat.size - 1)
     }
 
     private fun shiftXNegative() {
         var i = 0
-        while (i < array.size) {
-            val chunk = array[i]
-            chunk?.let { it.dispose(); array[i] = null }
+        while (i < arrayFlat.size) {
+            val chunk = arrayFlat[i]
+            chunk?.let { it.dispose(); arrayFlat[i] = null }
             i += size
         }
         i = size - 1
-        while (i < array.size) {
-            val chunk = array[i]
-            chunk?.let { it.dispose(); array[i] = null }
+        while (i < arrayFlat.size) {
+            val chunk = arrayFlat[i]
+            chunk?.let { it.dispose(); arrayFlat[i] = null }
             i += size
         }
-        System.arraycopy(array, 1, array, 0, array.size - 1)
+        System.arraycopy(arrayFlat, 1, arrayFlat, 0, arrayFlat.size - 1)
     }
 
     private fun shiftYPositive() {
         for (i in 0..size - 1) {
-            val chunk = array[i]
-            chunk?.let { it.dispose(); array[i] = null }
+            val chunk = arrayFlat[i]
+            chunk?.let { it.dispose(); arrayFlat[i] = null }
         }
-        for (i in array.size - size..array.size - 1) {
-            val chunk = array[i]
-            chunk?.let { it.dispose(); array[i] = null }
+        for (i in arrayFlat.size - size..arrayFlat.size - 1) {
+            val chunk = arrayFlat[i]
+            chunk?.let { it.dispose(); arrayFlat[i] = null }
         }
-        System.arraycopy(array, 0, array, size, array.size - size)
+        System.arraycopy(arrayFlat, 0, arrayFlat, size, arrayFlat.size - size)
     }
 
     private fun shiftYNegative() {
         for (i in 0..size - 1) {
-            val chunk = array[i]
-            chunk?.let { it.dispose(); array[i] = null }
+            val chunk = arrayFlat[i]
+            chunk?.let { it.dispose(); arrayFlat[i] = null }
         }
-        for (i in array.size - size..array.size - 1) {
-            val chunk = array[i]
-            chunk?.let { it.dispose(); array[i] = null }
+        for (i in arrayFlat.size - size..arrayFlat.size - 1) {
+            val chunk = arrayFlat[i]
+            chunk?.let { it.dispose(); arrayFlat[i] = null }
         }
-        System.arraycopy(array, size, array, 0, array.size - size)
+        System.arraycopy(arrayFlat, size, arrayFlat, 0, arrayFlat.size - size)
     }
 }
