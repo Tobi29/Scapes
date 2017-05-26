@@ -19,6 +19,7 @@ package org.tobi29.scapes.chunk.terrain.infinite
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.terrain.TerrainClient
+import org.tobi29.scapes.engine.utils.ConcurrentHashSet
 import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.sqr
@@ -27,10 +28,12 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
 import org.tobi29.scapes.engine.utils.math.vector.lengthSqr
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
+import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.packets.PacketBlockChange
+import org.tobi29.scapes.packets.PacketRequestChunk
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteChunkManagerStatic
 import kotlin.coroutines.experimental.buildSequence
 
@@ -46,7 +49,7 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
     override val renderer: TerrainInfiniteRenderer
     private val sortedLocations: List<Vector2i>
     private val joiner: Joiner
-    private var requestedChunks = 0
+    private val chunkRequests = ConcurrentHashSet<Vector2i>()
 
     constructor(world: WorldClient,
                 loadingRadius: Int,
@@ -68,24 +71,32 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
         val loadingRadiusSqr = sqr(loadingRadius)
         joiner = taskExecutor.runThread({ joiner ->
             while (!joiner.marked) {
-                var active = false
+                var isLoading = false
                 val playerPos = world.player.getCurrentPos()
                 val x = playerPos.intX() shr 4
                 val y = playerPos.intY() shr 4
                 for (pos in sortedLocations) {
-                    var chunk = chunkManager[pos.x + x, pos.y + y]
+                    val xx = pos.x + x
+                    val yy = pos.y + y
+                    val chunk = chunkManager[xx, yy]
                     if (pos.lengthSqr() < loadingRadiusSqr) {
-                        if (chunk == null) {
-                            chunk = addChunk(pos.x + x, pos.y + y)
-                        }
-                        if (chunk != null && chunk.checkLoaded()) {
-                            active = true
+                        if (chunk == null && !isLoading) {
+                            val p = Vector2i(xx, yy)
+                            if (chunkRequests.size < 3
+                                    && !chunkRequests.contains(p)) {
+                                chunkRequests.add(p)
+                                world.send(
+                                        PacketRequestChunk(
+                                                world.plugins.registry, xx, yy))
+                            } else {
+                                isLoading = true
+                            }
                         }
                     } else if (chunk != null) {
                         removeChunk(chunk)
                     }
                 }
-                if (active) {
+                if (isLoading) {
                     joiner.sleep(10)
                 } else {
                     joiner.sleep()
@@ -95,14 +106,6 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
     }
 
     override fun getThreadContext(): TerrainInfiniteClientSection = SECTION.get()
-
-    fun requestedChunks(): Int {
-        return requestedChunks
-    }
-
-    fun changeRequestedChunks(add: Int) {
-        requestedChunks += add
-    }
 
     override fun update(delta: Double) {
         profilerSection("Chunks") {
@@ -156,30 +159,44 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
     }
 
     override fun addChunk(x: Int,
-                          y: Int): TerrainInfiniteChunkClient? {
-        if (x < cxMin || x > cxMax || y < cyMin || y > cyMax) {
-            return null
-        }
-        profilerSection("Allocate Chunk") {
-            var chunk: TerrainInfiniteChunkClient? = null
-            synchronized(chunkManager) {
-                chunk = chunkManager[x, y]
-                if (chunk == null) {
-                    val chunk2 = TerrainInfiniteChunkClient(Vector2i(x, y),
-                            this,
-                            zSize, renderer)
-                    chunkManager.add(chunk2)
-                    chunk = chunk2
-                }
+                          y: Int) = null
+
+    fun loadChunk(x: Int,
+                  y: Int,
+                  tagMap: TagMap) {
+        synchronized(chunkManager) {
+            if (chunkManager[x, y] != null) {
+                logger.warn { "Chunk received twice: $x/$y" }
+                chunkManager.remove(x, y)
             }
-            return chunk
+            val chunk = TerrainInfiniteChunkClient(Vector2i(x, y), this, zSize,
+                    renderer)
+            chunk.lockWrite {
+                chunk.read(tagMap)
+                chunk.setLoaded()
+            }
+            chunkManager.add(chunk)
         }
+        for (xx in -1..1) {
+            val xxx = x + xx
+            for (yy in -1..1) {
+                val yyy = y + yy
+                chunkNoLoad(xxx, yyy)?.rendererChunk()?.setGeometryDirty()
+            }
+        }
+        chunkRequests.remove(Vector2i(x, y))
+    }
+
+    fun failedChunk(x: Int,
+                    y: Int) {
+        chunkRequests.remove(Vector2i(x, y))
     }
 
     private fun removeChunk(chunk: TerrainInfiniteChunkClient) {
         val x = chunk.pos.x
         val y = chunk.pos.y
-        chunkManager.remove(x, y)?.dispose()
+        chunkManager.remove(x, y)
+        chunk.dispose()
     }
 
     override fun sunLightReduction(x: Int,

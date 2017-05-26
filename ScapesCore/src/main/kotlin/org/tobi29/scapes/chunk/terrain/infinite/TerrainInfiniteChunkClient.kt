@@ -16,14 +16,12 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
-import org.tobi29.scapes.engine.utils.AtomicBoolean
 import org.tobi29.scapes.engine.utils.andNull
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.entity.client.MobClient
-import org.tobi29.scapes.packets.PacketRequestChunk
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteBaseChunk
 
 class TerrainInfiniteChunkClient(pos: Vector2i,
@@ -32,22 +30,6 @@ class TerrainInfiniteChunkClient(pos: Vector2i,
                                  renderer: TerrainInfiniteRenderer) : TerrainInfiniteChunk<EntityClient>(
         pos, terrain, zSize) {
     private val rendererChunk = TerrainInfiniteRendererChunk(this, renderer)
-    private val requested = AtomicBoolean(false)
-
-    fun checkLoaded(): Boolean {
-        if (state.id < TerrainInfiniteBaseChunk.State.LOADED.id) {
-            val terrainClient = terrain
-            if (!requested.get() && terrainClient.requestedChunks() < 3) {
-                requested.set(true)
-                terrainClient.changeRequestedChunks(1)
-                terrain.world.send(
-                        PacketRequestChunk(terrain.world.plugins.registry,
-                                pos.x, pos.y))
-            }
-            return true
-        }
-        return false
-    }
 
     fun setLoaded() {
         state = TerrainInfiniteBaseChunk.State.LOADED
@@ -99,10 +81,6 @@ class TerrainInfiniteChunkClient(pos: Vector2i,
 
     fun rendererChunk(): TerrainInfiniteRendererChunk {
         return rendererChunk
-    }
-
-    fun resetRequest() {
-        requested.set(false)
     }
 
     fun read(map: TagMap) {

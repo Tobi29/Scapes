@@ -86,9 +86,7 @@ class PacketRequestChunk : PacketAbstract, PacketBoth {
         client.mob { mob ->
             val terrain = mob.world.terrain
             if (terrain is TerrainInfiniteClient) {
-                terrain.changeRequestedChunks(-1)
-                val chunk = terrain.chunkNoLoad(x, y)
-                chunk?.resetRequest()
+                terrain.failedChunk(x, y)
             }
         }
     }

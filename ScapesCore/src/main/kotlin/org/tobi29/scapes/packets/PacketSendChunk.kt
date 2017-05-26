@@ -64,27 +64,7 @@ class PacketSendChunk : PacketAbstract, PacketClient {
         client.mob { mob ->
             val terrain = mob.world.terrain
             if (terrain is TerrainInfiniteClient) {
-                terrain.changeRequestedChunks(-1)
-                val chunk = terrain.chunkNoLoad(x, y)
-                if (chunk != null) {
-                    chunk.lockWrite {
-                        if (chunk.isLoaded) {
-                            logger.warn { "Chunk received twice: $x/$y" }
-                        }
-                        chunk.read(tag)
-                        chunk.setLoaded()
-                        chunk.resetRequest()
-                    }
-                    for (x in -1..1) {
-                        for (y in -1..1) {
-                            val geomRenderer = terrain.chunkNoLoad(
-                                    chunk.pos.x + x, chunk.pos.y + y)
-                            if (geomRenderer != null) {
-                                geomRenderer.rendererChunk().setGeometryDirty()
-                            }
-                        }
-                    }
-                }
+                terrain.loadChunk(x, y, tag)
             }
         }
     }
