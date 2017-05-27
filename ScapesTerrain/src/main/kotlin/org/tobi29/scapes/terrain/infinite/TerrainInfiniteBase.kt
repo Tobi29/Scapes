@@ -26,7 +26,6 @@ abstract class TerrainInfiniteBase<B : VoxelType, C : TerrainInfiniteBaseChunk<B
         val zSize: Int,
         taskExecutor: TaskExecutor,
         override val air: B,
-        val voidBlock: B,
         override val blocks: Array<out B?>,
         val chunkManager: TerrainInfiniteChunkManager<C>,
         radius: Int = 0x8000000 - 16) : TerrainBase<B> {
@@ -66,20 +65,20 @@ abstract class TerrainInfiniteBase<B : VoxelType, C : TerrainInfiniteBaseChunk<B
                        y: Int,
                        z: Int): Long {
         if (z < 0 || z >= zSize) {
-            return voidBlock.id.toLong() shl 32
+            return -1L
         }
         return chunk(x shr 4, y shr 4) {
             it.blockG(x, y, z)
-        } ?: (voidBlock.id.toLong() shl 32)
+        } ?: -1L
     }
 
     override fun type(x: Int,
                       y: Int,
                       z: Int): B {
         if (z < 0 || z >= zSize) {
-            return voidBlock
+            return air
         }
-        return chunk(x shr 4, y shr 4) { it.typeG(x, y, z) } ?: voidBlock
+        return chunk(x shr 4, y shr 4) { it.typeG(x, y, z) } ?: air
     }
 
     override fun light(x: Int,

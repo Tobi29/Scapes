@@ -26,6 +26,71 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.distance
 import org.tobi29.scapes.engine.utils.math.vector.plus
 
+inline fun <R> TerrainServer.modify(
+        crossinline predicate: (TerrainMutableServer) -> Boolean,
+        x: Int,
+        y: Int,
+        z: Int,
+        dx: Int,
+        dy: Int,
+        dz: Int,
+        crossinline block: (TerrainMutableServer) -> R) =
+        modify(x, y, z, dx, dy, dz) {
+            if (predicate(it)) {
+                block(it)
+            } else {
+                null
+            }
+        }
+
+inline fun <R> TerrainServer.modify(
+        crossinline predicate: (TerrainMutableServer) -> Boolean,
+        x: Int,
+        y: Int,
+        z: Int,
+        crossinline block: (TerrainMutableServer) -> R) =
+        modify(x, y, z) {
+            if (predicate(it)) {
+                block(it)
+            } else {
+                null
+            }
+        }
+
+inline fun <R> TerrainServer.modify(
+        onType: BlockType,
+        x: Int,
+        y: Int,
+        z: Int,
+        crossinline block: (TerrainMutableServer) -> R) =
+        modify({ it.type(x, y, z) == onType }, x, y, z, block)
+
+inline fun <R> TerrainServer.modify(
+        onType: BlockType,
+        x: Int,
+        y: Int,
+        z: Int,
+        dxm: Int,
+        dym: Int,
+        dzm: Int,
+        dxp: Int,
+        dyp: Int,
+        dzp: Int,
+        crossinline block: (TerrainMutableServer) -> R) =
+        modify({ it.type(x, y, z) == onType }, x - dxm, y - dym, z - dzm,
+                dxm + dxp + 1, dym + dyp + 1, dzm + dzp + 1, block)
+
+inline fun <R> TerrainServer.modify(
+        onType: BlockType,
+        x: Int,
+        y: Int,
+        z: Int,
+        rx: Int,
+        ry: Int,
+        rz: Int,
+        crossinline block: (TerrainMutableServer) -> R) =
+        modify(onType, x, y, z, rx, ry, rz, rx, ry, rz, block)
+
 fun Terrain.selectBlock(pos: Vector3d,
                         distance: Double,
                         direction: Vector2d): PointerPane? {

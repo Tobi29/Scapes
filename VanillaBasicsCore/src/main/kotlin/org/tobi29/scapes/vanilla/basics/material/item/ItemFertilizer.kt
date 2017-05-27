@@ -22,6 +22,7 @@ import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.block.models.ItemModel
 import org.tobi29.scapes.block.models.ItemModelSimple
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.chunk.terrain.modify
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
@@ -41,13 +42,10 @@ class ItemFertilizer(type: VanillaMaterialType) : VanillaItem(type) {
                        y: Int,
                        z: Int,
                        face: Face): Double {
-        terrain.modify(x, y, z) { terrain ->
-            val type = terrain.type(x, y, z)
-            if (type == materials.sapling) {
-                terrain.addDelayedUpdate(
-                        UpdateSaplingGrowth(entity.world.registry).set(x, y, z,
-                                3.0))
-            }
+        terrain.modify(materials.sapling, x, y, z) { terrain ->
+            terrain.addDelayedUpdate(
+                    UpdateSaplingGrowth(entity.world.registry).set(x, y, z,
+                            3.0))
         }
         return 0.0
     }

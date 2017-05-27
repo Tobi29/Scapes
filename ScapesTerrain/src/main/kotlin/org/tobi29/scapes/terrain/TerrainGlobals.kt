@@ -16,6 +16,8 @@
 
 package org.tobi29.scapes.terrain
 
+import org.tobi29.scapes.engine.utils.assert
+
 interface TerrainGlobals<out B : VoxelType> {
     val air: B
     val blocks: Array<out B?>
@@ -25,13 +27,23 @@ interface TerrainGlobals<out B : VoxelType> {
     fun sunLightReduction(x: Int,
                           y: Int): Int
 
-    fun type(block: Long): B {
-        val id = (block shr 32).toInt()
+    fun type(block: Long) = typeOrNull(block) ?: air
+
+    fun typeOrNull(block: Long): B? {
+        val id = (block and 0xFFFFFFFF).toInt()
+        if (id == -1) {
+            return null
+        }
         return type(id)
     }
 
     fun data(block: Long): Int {
-        return (block and 0xFFFFFFFF).toInt()
+        return (block ushr 32).toInt()
+    }
+
+    fun dataSafe(block: Long): Int {
+        assert { block != -1L }
+        return (block ushr 32).toInt()
     }
 
     fun type(id: Int): B

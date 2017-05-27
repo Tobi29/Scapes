@@ -23,10 +23,7 @@ import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelLiquid
 import org.tobi29.scapes.chunk.ChunkMesh
-import org.tobi29.scapes.chunk.terrain.Terrain
-import org.tobi29.scapes.chunk.terrain.TerrainClient
-import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
-import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.chunk.terrain.*
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.Pool
@@ -136,7 +133,7 @@ class BlockLava(type: VanillaMaterialType) : VanillaBlock(type) {
                         z: Int,
                         data: Int) {
         val world = terrain.world
-        terrain.modify(x, y, z) { terrain ->
+        terrain.modify(this, x, y, z) { terrain ->
             if (!terrain.hasDelayedUpdate(x, y, z,
                     UpdateLavaFlow::class.java)) {
                 val random = threadLocalRandom()

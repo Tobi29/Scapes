@@ -211,7 +211,7 @@ open class TerrainInfiniteSection<B : VoxelType, C : TerrainInfiniteBaseChunk<B>
                 } else {
                     it.blockG(x, y, z)
                 }
-            } ?: 0L
+            } ?: -1L
 
     override fun type(x: Int,
                       y: Int,

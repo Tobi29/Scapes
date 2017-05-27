@@ -31,8 +31,7 @@ class UpdateGrassGrowth(type: UpdateType) : Update(type) {
 
     override fun run(terrain: TerrainServer) {
         val world = terrain.world
-        val plugin = world.plugins.plugin(
-                "VanillaBasics") as VanillaBasics
+        val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
         val environment = world.environment as EnvironmentOverworldServer
         val materials = plugin.materials
         terrain.modify(x, y, z) { terrain ->

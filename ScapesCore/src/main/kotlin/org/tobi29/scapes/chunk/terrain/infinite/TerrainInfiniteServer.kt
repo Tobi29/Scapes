@@ -26,8 +26,8 @@ import org.tobi29.scapes.chunk.generator.GeneratorOutput
 import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
-import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.ThreadLocal
+import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.max
@@ -48,8 +48,7 @@ class TerrainInfiniteServer(override val world: WorldServer,
                             override val generator: ChunkGenerator,
                             internal val populators: Array<ChunkPopulator>,
                             air: BlockType) : TerrainInfinite<EntityServer, TerrainInfiniteChunkServer>(
-        zSize, world.taskExecutor, air, air,
-        world.registry,
+        zSize, world.taskExecutor, air, world.registry,
         TerrainInfiniteChunkManagerDynamic<TerrainInfiniteChunkServer>()), TerrainServer {
     private val chunkUnloadQueue = ConcurrentLinkedQueue<TerrainInfiniteChunkServer>()
     private val generatorOutput = GeneratorOutput(zSize)

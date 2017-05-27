@@ -33,13 +33,17 @@ class UpdateSaplingGrowth(type: UpdateType) : Update(type) {
         val plugin = terrain.world.plugins.plugin(
                 "VanillaBasics") as VanillaBasics
         val materials = plugin.materials
-        val data = terrain.modify(x, y, z) { terrain ->
+        terrain.modify(x, y, z) { terrain ->
             val block = terrain.block(x, y, z)
+            if (terrain.type(block) != materials.sapling) {
+                return@modify null
+            }
             terrain.typeData(x, y, z, materials.air, 0)
             terrain.data(block)
+        }?.let { data ->
+            TreeType[materials.plugins.registry, data].generator.gen(terrain, x,
+                    y, z, materials, Random())
         }
-        TreeType[materials.plugins.registry, data].generator.gen(terrain, x,
-                y, z, materials, Random())
     }
 
     override fun isValidOn(type: BlockType,

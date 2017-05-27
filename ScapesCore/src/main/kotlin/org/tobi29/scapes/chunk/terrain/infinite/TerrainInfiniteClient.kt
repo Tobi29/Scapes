@@ -43,7 +43,7 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
                                                 taskExecutor: TaskExecutor,
                                                 air: BlockType,
                                                 private val center: MutableVector2i) : TerrainInfinite<EntityClient, TerrainInfiniteChunkClient>(
-        zSize, taskExecutor, air, air, world.registry,
+        zSize, taskExecutor, air, world.registry,
         TerrainInfiniteChunkManagerStatic<TerrainInfiniteChunkClient>(
                 center, loadingRadius)), TerrainClient {
     override val renderer: TerrainInfiniteRenderer

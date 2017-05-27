@@ -281,7 +281,7 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
                      z: Int): Long {
         checkCoords(x, y, z)
         assert { lock.isHeld() }
-        return (data.id(x, y, z).toLong() shl 32) or data.data(x, y, z).toLong()
+        return data.id(x, y, z).toLong() or (data.data(x, y, z).toLong() shl 32)
     }
 
     fun typeGLocked(x: Int,
@@ -317,7 +317,7 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
                z: Int): Long {
         checkCoords(x, y, z)
         return lockRead {
-            (id(x, y, z).toLong() shl 32) or data(x, y, z).toLong()
+            id(x, y, z).toLong() or (data(x, y, z).toLong() shl 32)
         }
     }
 

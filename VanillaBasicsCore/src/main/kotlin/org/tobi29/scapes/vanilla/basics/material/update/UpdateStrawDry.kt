@@ -21,6 +21,7 @@ import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.block.Update
 import org.tobi29.scapes.block.UpdateType
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.chunk.terrain.modify
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 
 class UpdateStrawDry(type: UpdateType) : Update(type) {
@@ -28,7 +29,10 @@ class UpdateStrawDry(type: UpdateType) : Update(type) {
             of(registry, "vanilla.basics.update.StrawDry"))
 
     override fun run(terrain: TerrainServer) {
-        terrain.modify(x, y, z) { terrain ->
+        val world = terrain.world
+        val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
+        val materials = plugin.materials
+        terrain.modify(materials.straw, x, y, z) { terrain ->
             val block = terrain.block(x, y, z)
             if (terrain.data(block) == 0) {
                 terrain.data(x, y, z, 1)

@@ -20,8 +20,8 @@ import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.Material
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.terrain.TerrainEntity
-import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.ConcurrentHashMap
+import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.math.PointerPane
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
@@ -34,14 +34,13 @@ abstract class TerrainInfinite<E : Entity, C : TerrainInfiniteChunk<E>>(
         zSize: Int,
         taskExecutor: TaskExecutor,
         air: BlockType,
-        voidBlock: BlockType,
         registry: Registries,
         chunkManager: TerrainInfiniteChunkManager<C>,
-        radius: Int = 0x8000000 - 16) : TerrainInfiniteBase<BlockType, C>(
-        zSize, taskExecutor, air, voidBlock,
-        registry.get<Material>("Core", "Material").values.asSequence()
-                .map { it as? BlockType }.toArray(), chunkManager,
-        radius), TerrainEntity<E> {
+        radius: Int = 0x8000000 - 16
+) : TerrainInfiniteBase<BlockType, C>(zSize, taskExecutor, air,
+        registry.get<Material>("Core",
+                "Material").values.asSequence().map { it as? BlockType }.toArray(),
+        chunkManager, radius), TerrainEntity<E> {
     protected val materials = registry.get<Material>("Core", "Material")
     override val blocks: Array<out BlockType?> = materials.values.asSequence()
             .map { it as? BlockType }.toArray()

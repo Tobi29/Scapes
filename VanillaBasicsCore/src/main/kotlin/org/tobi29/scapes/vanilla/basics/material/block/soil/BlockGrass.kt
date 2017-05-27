@@ -255,7 +255,7 @@ class BlockGrass(type: VanillaMaterialType) : VanillaBlock(type) {
                         y: Int,
                         z: Int,
                         data: Int) {
-        terrain.modify(x, y, z, 1, 1, 2) { terrain ->
+        terrain.modify(this, x, y, z, 0, 0, 0, 0, 0, 1) { terrain ->
             if (terrain.blockLight(x, y, z + 1) <= 0 && terrain.sunLight(x, y,
                     z + 1) <= 0 || !terrain.isTransparent(x, y, z + 1)) {
                 terrain.typeData(x, y, z, materials.dirt, 0)
@@ -263,7 +263,7 @@ class BlockGrass(type: VanillaMaterialType) : VanillaBlock(type) {
         }
         if (z >= terrain.highestTerrainBlockZAt(x, y)) {
             val world = terrain.world
-            terrain.modify(x, y, z) { terrain ->
+            terrain.modify(this, x, y, z) { terrain ->
                 if (!terrain.hasDelayedUpdate(x, y, z,
                         UpdateGrassGrowth::class.java)) {
                     val random = threadLocalRandom()
