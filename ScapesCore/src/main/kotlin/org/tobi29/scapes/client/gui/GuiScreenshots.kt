@@ -19,9 +19,8 @@ package org.tobi29.scapes.client.gui
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
-import org.tobi29.scapes.engine.resource.Resource
-import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
+import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.logging.KLogging
 
@@ -41,21 +40,9 @@ class GuiScreenshots(state: GameState,
             val files = listRecursive(path,
                     { isRegularFile(it) && isNotHidden(it) })
             files.asSequence().sorted().forEach { file ->
-                val element = scrollPane.addVert(0.0, 0.0, -1.0,
-                        70.0) { Element(it, file, this) }
-                state.engine.taskExecutor.runTask({
-                    try {
-                        val texture = read(file) {
-                            val image = decodePNG(it) {
-                                state.engine.allocate(it)
-                            }
-                            state.engine.graphics.createTexture(image, 0)
-                        }
-                        element.icon.texture = Resource(texture)
-                    } catch (e: IOException) {
-                        logger.warn { "Failed to load screenshot: $e" }
-                    }
-                }, "Load-Screenshot")
+                scrollPane.addVert(0.0, 0.0, -1.0, 70.0) {
+                    Element(it, file, this)
+                }
             }
         } catch (e: IOException) {
             logger.warn { "Failed to read screenshots: $e" }
@@ -69,8 +56,22 @@ class GuiScreenshots(state: GameState,
         val icon: GuiComponentIcon
 
         init {
-            icon = addHori(15.0, 20.0, 40.0,
-                    -1.0) { parent: GuiLayoutData -> GuiComponentIcon(parent) }
+            val resource = engine.resources.load {
+                try {
+                    read(path) {
+                        val image = decodePNG(it) {
+                            state.engine.allocate(it)
+                        }
+                        state.engine.graphics.createTexture(image, 0)
+                    }
+                } catch (e: IOException) {
+                    logger.warn { "Failed to load screenshot: $e" }
+                    engine.graphics.textureEmpty()
+                }
+            }
+            icon = addHori(15.0, 20.0, 40.0, -1.0) {
+                GuiComponentIcon(it, resource)
+            }
             val save = addHori(5.0, 20.0, -1.0, -1.0) { button(it, "Save") }
             val delete = addHori(5.0, 20.0, 100.0, -1.0) {
                 button(it, "Delete")
