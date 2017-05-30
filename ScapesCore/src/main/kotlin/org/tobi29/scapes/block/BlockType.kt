@@ -31,7 +31,7 @@ import org.tobi29.scapes.terrain.VoxelType
 
 abstract class BlockType(type: MaterialType) : Material(type), VoxelType {
     fun block(data: Int): Long {
-        return (id.toLong() shl 32) or data.toLong()
+        return id.toLong() or (data.toLong() shl 32)
     }
 
     open fun addPointerCollision(data: Int,
