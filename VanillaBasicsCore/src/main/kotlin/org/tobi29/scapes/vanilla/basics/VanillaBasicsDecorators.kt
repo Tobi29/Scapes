@@ -23,43 +23,44 @@ import org.tobi29.scapes.vanilla.basics.world.tree.*
 internal fun VanillaBasics.registerDecorators() {
     // Overlays
     decorator("Rocks") {
-        addLayer(LayerRock(materials.stoneRock, materials.stoneRaw, 256, {
-            terrain, x, y, z ->
-            terrain.type(x, y, z - 1) == materials.grass && terrain.type(x, y,
-                    z) == materials.air
-        }))
+        addLayer(LayerRock(materials.stoneRock, materials.stoneRaw, 256,
+                { terrain, x, y, z ->
+                    terrain.type(x, y,
+                            z - 1) == materials.grass && terrain.type(x, y,
+                            z) == materials.air
+                }))
     }
     decorator("Flint") {
         val data = stoneTypes.FLINT.id
         addLayer(LayerGround(materials.stoneRock,
-                { terrain, x, y, z, random -> data }, 1024, {
-            terrain, x, y, z ->
-            terrain.type(x, y, z - 1) == materials.grass && terrain.type(x, y,
-                    z) == materials.air
-        }))
+                { _, _, _, _, _ -> data }, 1024,
+                { terrain, x, y, z ->
+                    terrain.type(x, y,
+                            z - 1) == materials.grass && terrain.type(x, y,
+                            z) == materials.air
+                }))
     }
     decorator("Gravel") {
         val data = stoneTypes.DIRT_STONE.id
         val flintData = stoneTypes.FLINT.id
         val gravelBlock = materials.sand.block(1)
         val airBlock = materials.air.block(0)
-        addLayer(LayerRock(materials.stoneRock, materials.stoneRaw, 8
-                , { terrain, x, y, z ->
+        addLayer(LayerRock(materials.stoneRock, materials.stoneRaw, 8,
+                { terrain, x, y, z ->
+                    terrain.block(x, y, z - 1) == gravelBlock && terrain.block(
+                            x, y, z) == airBlock
+                }))
+        addLayer(LayerGround(materials.stoneRock,
+                { _, _, _, _, _ -> data }, 4, { terrain, x, y, z ->
             terrain.block(x, y, z - 1) == gravelBlock && terrain.block(x, y,
                     z) == airBlock
         }))
         addLayer(LayerGround(materials.stoneRock,
-                { terrain, x, y, z, random -> data }, 4
-                , { terrain, x, y, z ->
-            terrain.block(x, y, z - 1) == gravelBlock && terrain.block(x, y,
-                    z) == airBlock
-        }))
-        addLayer(LayerGround(materials.stoneRock,
-                { terrain, x, y, z, random -> flintData }, 12
-                , { terrain, x, y, z ->
-            terrain.block(x, y, z - 1) == gravelBlock && terrain.block(x, y,
-                    z) == airBlock
-        }))
+                { _, _, _, _, _ -> flintData }, 12,
+                { terrain, x, y, z ->
+                    terrain.block(x, y, z - 1) == gravelBlock && terrain.block(
+                            x, y, z) == airBlock
+                }))
     }
 
     // Polar
