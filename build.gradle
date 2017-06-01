@@ -70,10 +70,10 @@ ext {
     slf4jVersion = "1.7.25"
     spekVersion = "1.1.1"
     swtVersion = "4.6"
-    lwjglVersion = "3.1.1"
+    lwjglVersion = "3.1.2"
     log4jVersion = "2.8.1"
     jnaVersion = "4.4.0"
-    scapesEngineVersion = "f479146c83"
+    scapesEngineVersion = "1b7d9554b1"
 
     slf4jSimple = "org.slf4j:slf4j-simple:$slf4jVersion"
     lwjgl = "org.lwjgl:lwjgl:$lwjglVersion"
