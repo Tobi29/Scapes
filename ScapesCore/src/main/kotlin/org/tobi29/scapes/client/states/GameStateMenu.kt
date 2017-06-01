@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.client.states
 
-import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.gui.GuiAccount
 import org.tobi29.scapes.client.gui.GuiGenerateAccount
@@ -29,8 +28,10 @@ import org.tobi29.scapes.engine.graphics.busyPipeline
 import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
+import org.tobi29.scapes.engine.resource.awaitDone
 import org.tobi29.scapes.engine.utils.io.IOException
+import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
+import org.tobi29.scapes.engine.utils.logging.KLogging
 
 class GameStateMenu(engine: ScapesEngine) : GameState(engine) {
     private val scene = SceneMenu(engine)
@@ -49,16 +50,29 @@ class GameStateMenu(engine: ScapesEngine) : GameState(engine) {
             logger.error { "Failed to read account file: $e" }
             null
         }
-        engine.guiStack.add("10-Menu", menu(account, file, style))
+        val menu = menu(account, file, style)
+        menu.visible = false
+        engine.guiStack.add("10-Menu", menu)
         switchPipeline { gl ->
-            val busy = busyPipeline(gl);
-            {
-                gl.clear(0.0f, 0.0f, 0.0f, 1.0f)
-                busy()
-            }
+            val busy = busyPipeline(gl)
+            ;{
+            val busyRender = busy()
+            ;{ _ ->
+            gl.clear(0.0f, 0.0f, 0.0f, 1.0f)
+            busyRender()
+        }
+        }
         }
         switchPipelineWhenLoaded { gl ->
-            renderScene(gl, scene)
+            val scene = renderScene(gl, scene)
+            ;{
+            val sceneRender = scene()
+            engine.resources.awaitDone()
+            menu.visible = true
+            ;{ delta ->
+            sceneRender(delta)
+        }
+        }
         }
     }
 

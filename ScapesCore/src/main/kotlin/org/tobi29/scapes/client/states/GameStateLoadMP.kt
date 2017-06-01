@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.client.states
 
-import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.connection.NewClientConnection
 import org.tobi29.scapes.client.connection.RemoteClientConnection
@@ -33,6 +32,7 @@ import org.tobi29.scapes.engine.server.SSLProvider
 import org.tobi29.scapes.engine.server.connect
 import org.tobi29.scapes.engine.utils.AtomicBoolean
 import org.tobi29.scapes.engine.utils.io.IOException
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.task.Joiner
 import java.nio.channels.SelectionKey

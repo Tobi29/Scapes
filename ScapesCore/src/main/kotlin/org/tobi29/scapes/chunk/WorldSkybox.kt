@@ -28,7 +28,7 @@ interface WorldSkybox {
                      delta: Double)
 
     fun appendToPipeline(gl: GL,
-                         cam: Cam): () -> Unit
+                         cam: Cam): suspend () -> (Double) -> Unit
 
     fun dispose()
 

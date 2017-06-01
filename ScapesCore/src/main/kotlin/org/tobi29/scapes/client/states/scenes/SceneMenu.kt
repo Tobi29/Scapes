@@ -21,11 +21,11 @@ import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.AtomicReference
-import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.chain
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurOffset
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurWeight
+import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.shader.ArrayExpression
 import org.tobi29.scapes.engine.utils.shader.IntegerExpression
@@ -46,9 +46,20 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
         loadTextures()
     }
 
-    override fun appendToPipeline(gl: GL): () -> Unit {
+    override fun appendToPipeline(gl: GL): suspend () -> (Double) -> Unit {
         val space = gl.contentSpace() / 8.0
         val blurSamples = round(space * 8.0) + 8
+        val width = gl.contentWidth() / 8
+        val height = gl.contentHeight() / 8
+
+        // Background box pane
+        val model = engine.graphics.createVTI(
+                floatArrayOf(-1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f,
+                        -1.0f, -1.0f, 1.0f, -1.0f, -1.0f),
+                floatArrayOf(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f),
+                intArrayOf(0, 1, 2, 2, 1, 3), RenderType.TRIANGLES)
+
+        // Shaders
         val shaderBlur1 = gl.engine.graphics.loadShader(
                 "Scapes:shader/Menu1", mapOf(
                 "BLUR_LENGTH" to IntegerExpression(blurSamples),
@@ -66,65 +77,72 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
                         gaussianBlurWeight(blurSamples) { cos(it * PI) })
         ))
         val shaderTextured = gl.engine.graphics.loadShader(SHADER_TEXTURED)
-        val model = engine.graphics.createVTI(
-                floatArrayOf(-1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f,
-                        -1.0f, -1.0f, 1.0f, -1.0f, -1.0f),
-                floatArrayOf(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f),
-                intArrayOf(0, 1, 2, 2, 1, 3), RenderType.TRIANGLES)
 
-        val width = gl.contentWidth() / 8
-        val height = gl.contentHeight() / 8
-        val f1 = gl.engine.graphics.createFramebuffer(width, height, 1, false,
-                false, false)
-        val f2 = gl.engine.graphics.createFramebuffer(width, height, 1, false,
-                false, false)
-        val f3 = gl.engine.graphics.createFramebuffer(width, height, 1, false,
-                false, false, TextureFilter.LINEAR)
-        val render = gl.into(f1) {
-            gl.clearDepth()
-            val save = save.getAndSet(null)
-            if (save != null) {
-                changeBackground(save)
-            }
-            cam.setPerspective(gl.aspectRatio().toFloat(), 90.0f)
-            cam.setView(0.0f, yaw, 0.0f)
-            gl.matrixStack.push { matrix ->
-                gl.enableCulling()
-                gl.enableDepthTest()
-                gl.setBlending(BlendingMode.NORMAL)
-                matrix.identity()
-                matrix.modelViewProjection().perspective(cam.fov,
-                        gl.aspectRatio().toFloat(), cam.near, cam.far)
-                matrix.modelViewProjection().camera(cam)
-                matrix.modelView().camera(cam)
-                for (i in 0..5) {
-                    val texture = textures[i]
-                    if (texture != null) {
-                        gl.matrixStack.push { matrix ->
-                            if (i == 1) {
-                                matrix.rotate(90.0f, 0.0f, 0.0f, 1.0f)
-                            } else if (i == 2) {
-                                matrix.rotate(180.0f, 0.0f, 0.0f, 1.0f)
-                            } else if (i == 3) {
-                                matrix.rotate(270.0f, 0.0f, 0.0f, 1.0f)
-                            } else if (i == 4) {
-                                matrix.rotate(90.0f, 1.0f, 0.0f, 0.0f)
-                            } else if (i == 5) {
-                                matrix.rotate(-90.0f, 1.0f, 0.0f, 0.0f)
+        // Framebuffers
+        val f1 = gl.engine.graphics.createFramebuffer(width, height, 1,
+                false, false, false)
+        val f2 = gl.engine.graphics.createFramebuffer(width, height, 1,
+                false, false, false)
+        val f3 = gl.engine.graphics.createFramebuffer(width, height, 1,
+                false, false, false, TextureFilter.LINEAR)
+
+        // Render steps
+        val render: suspend () -> (Double) -> Unit = {
+            val s = shaderTextured.getAsync()
+            gl.into(f1) {
+                gl.clearDepth()
+                val save = save.getAndSet(null)
+                if (save != null) {
+                    changeBackground(save)
+                }
+                cam.setPerspective(gl.aspectRatio().toFloat(), 90.0f)
+                cam.setView(0.0f, yaw, 0.0f)
+                gl.matrixStack.push { matrix ->
+                    gl.enableCulling()
+                    gl.enableDepthTest()
+                    gl.setBlending(BlendingMode.NORMAL)
+                    matrix.identity()
+                    matrix.modelViewProjection().perspective(cam.fov,
+                            gl.aspectRatio().toFloat(), cam.near, cam.far)
+                    matrix.modelViewProjection().camera(cam)
+                    matrix.modelView().camera(cam)
+                    for (i in 0..5) {
+                        textures[i]?.let { texture ->
+                            gl.matrixStack.push { matrix ->
+                                if (i == 1) {
+                                    matrix.rotate(90.0f, 0.0f, 0.0f, 1.0f)
+                                } else if (i == 2) {
+                                    matrix.rotate(180.0f, 0.0f, 0.0f, 1.0f)
+                                } else if (i == 3) {
+                                    matrix.rotate(270.0f, 0.0f, 0.0f, 1.0f)
+                                } else if (i == 4) {
+                                    matrix.rotate(90.0f, 1.0f, 0.0f, 0.0f)
+                                } else if (i == 5) {
+                                    matrix.rotate(-90.0f, 1.0f, 0.0f, 0.0f)
+                                }
+                                texture.bind(gl)
+                                gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f,
+                                        1.0f, 1.0f, 1.0f)
+                                model.render(gl, s)
                             }
-                            texture.bind(gl)
-                            gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 1.0f,
-                                    1.0f, 1.0f)
-                            model.render(gl, shaderTextured.get())
                         }
                     }
                 }
             }
         }
-        val pp1 = gl.into(f2, postProcess(gl, shaderBlur1, f1))
-        val pp2 = gl.into(f3, postProcess(gl, shaderBlur2, f2))
-        val upscale = postProcess(gl, shaderTextured, f3)
-        return chain(render, pp1, pp2, upscale)
+        val pp1Render: suspend () -> (Double) -> Unit = {
+            gl.into(f2, postProcess(gl, shaderBlur1.getAsync(), f1))
+        }
+        val pp2Render: suspend () -> (Double) -> Unit = {
+            gl.into(f3, postProcess(gl, shaderBlur2.getAsync(), f2))
+        }
+        val upscaleRender: suspend () -> (Double) -> Unit = {
+            postProcess(gl, shaderTextured.getAsync(), f3)
+        }
+
+        return {
+            chain(render(), pp1Render(), pp2Render(), upscaleRender())
+        }
     }
 
     fun changeBackground(source: WorldSource) {

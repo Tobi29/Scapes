@@ -181,7 +181,7 @@ class WorldClient(val connection: ClientConnection,
 
     fun addToPipeline(gl: GL,
                       cam: Cam,
-                      debug: Boolean): () -> Unit {
+                      debug: Boolean): suspend () -> (Double) -> Unit {
         val scapes = game.engine.game as ScapesClient
         val resolutionMultiplier = scapes.resolutionMultiplier
         val width = round(gl.contentWidth() * resolutionMultiplier)
@@ -214,6 +214,10 @@ class WorldClient(val connection: ClientConnection,
                 cam)
 
         return {
+            val sTerrain1 = shaderTerrain1.getAsync()
+            val sTerrain2 = shaderTerrain2.getAsync()
+            val sEntity = shaderEntity.getAsync()
+            ;{
             val time = System.currentTimeMillis() % 10000000 / 1000.0f
             val sunLightReduction = environment.sunLightReduction(
                     cam.position.doubleX(),
@@ -226,7 +230,6 @@ class WorldClient(val connection: ClientConnection,
             val sunlightNormal = environment.sunLightNormal(
                     cam.position.doubleX(),
                     cam.position.doubleY())
-            val sTerrain1 = shaderTerrain1.get()
             sTerrain1.setUniform3f(gl, 4, scene.fogR(), scene.fogG(),
                     scene.fogB())
             sTerrain1.setUniform1f(gl, 5,
@@ -237,7 +240,6 @@ class WorldClient(val connection: ClientConnection,
             sTerrain1.setUniform3f(gl, 9, sunlightNormal.floatX(),
                     sunlightNormal.floatY(), sunlightNormal.floatZ())
             sTerrain1.setUniform1f(gl, 10, playerLight)
-            val sTerrain2 = shaderTerrain2.get()
             sTerrain2.setUniform3f(gl, 4, scene.fogR(), scene.fogG(),
                     scene.fogB())
             sTerrain2.setUniform1f(gl, 5,
@@ -248,7 +250,6 @@ class WorldClient(val connection: ClientConnection,
             sTerrain2.setUniform3f(gl, 9, sunlightNormal.floatX(),
                     sunlightNormal.floatY(), sunlightNormal.floatZ())
             sTerrain2.setUniform1f(gl, 10, playerLight)
-            val sEntity = shaderEntity.get()
             sEntity.setUniform3f(gl, 4, scene.fogR(), scene.fogG(),
                     scene.fogB())
             sEntity.setUniform1f(gl, 5,
@@ -261,8 +262,7 @@ class WorldClient(val connection: ClientConnection,
             sEntity.setUniform1f(gl, 10, playerLight)
             gl.setBlending(BlendingMode.NONE)
             scene.terrainTextureRegistry().texture.bind(gl)
-            terrain.renderer.render(gl, sTerrain1, sTerrain2, cam,
-                    debug)
+            terrain.renderer.render(gl, sTerrain1, sTerrain2, cam, debug)
             gl.setBlending(BlendingMode.NORMAL)
             if (game.hud.visible) {
                 playerModel?.render(gl, this, cam, sEntity)
@@ -275,9 +275,9 @@ class WorldClient(val connection: ClientConnection,
                 it.render(gl, this, cam, sEntity)
             }
             scene.terrainTextureRegistry().texture.bind(gl)
-            terrain.renderer.renderAlpha(gl, sTerrain1, sTerrain2,
-                    cam)
+            terrain.renderer.renderAlpha(gl, sTerrain1, sTerrain2, cam)
             renderParticles()
+        }
         }
     }
 

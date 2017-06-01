@@ -27,8 +27,8 @@ import org.tobi29.scapes.engine.graphics.Scene
 import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.server.SSLHandle
 import org.tobi29.scapes.engine.server.SSLProvider
-import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.UnsupportedJVMException
+import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.tag.TagMap

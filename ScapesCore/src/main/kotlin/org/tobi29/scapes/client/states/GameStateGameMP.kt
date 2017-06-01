@@ -32,6 +32,7 @@ import org.tobi29.scapes.engine.graphics.Scene
 import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
+import org.tobi29.scapes.engine.resource.awaitDone
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.entity.model.EntityModelBlockBreakShared
 import org.tobi29.scapes.entity.model.MobLivingModelHumanShared
@@ -84,11 +85,18 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
     }
 
     @Synchronized
-    fun switchScene(scene: SceneScapesVoxelWorld) {
-        this.scene?.dispose()
-        this.scene = scene
+    fun switchScene(newScene: SceneScapesVoxelWorld) {
+        scene?.dispose()
+        scene = newScene
         switchPipelineWhenLoaded { gl ->
-            renderScene(gl, scene)
+            val scene = renderScene(gl, newScene)
+            ;{
+            val sceneRender = scene()
+            engine.resources.awaitDone()
+            ;{ delta ->
+            sceneRender(delta)
+        }
+        }
         }
     }
 
