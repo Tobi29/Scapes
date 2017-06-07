@@ -25,7 +25,6 @@ import org.eclipse.swt.widgets.MenuItem
 import org.eclipse.swt.widgets.ProgressBar
 import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.server.RemoteAddress
-import org.tobi29.scapes.engine.server.SSLHandle
 import org.tobi29.scapes.engine.swt.util.framework.Document
 import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
@@ -34,7 +33,6 @@ import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
 
 class ReconnectDocument(private val address: RemoteAddress,
                         private val password: String,
-                        private val ssl: SSLHandle,
                         private val connection: ConnectionManager) : Document {
     private var timer = 5
 
@@ -68,8 +66,8 @@ class ReconnectDocument(private val address: RemoteAddress,
             if (timer <= 0) {
                 application.access(this) { composite ->
                     application.replaceTab(composite,
-                            ConnectDocument(address, password, ssl,
-                                    this.connection, application))
+                            ConnectDocument(address, password, this.connection,
+                                    application))
                 }
                 return@addTask -1
             } else {

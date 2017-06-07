@@ -33,7 +33,7 @@ class PacketPingServer : PacketPing {
 
     override fun runServer(player: PlayerConnection) {
         if (player is RemotePlayerConnection) {
-            player.updatePing(timestamp)
+            player.updatePing(System.currentTimeMillis() - timestamp)
         }
     }
 

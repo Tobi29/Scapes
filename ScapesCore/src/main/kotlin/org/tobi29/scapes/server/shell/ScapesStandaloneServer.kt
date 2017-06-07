@@ -17,7 +17,6 @@ package org.tobi29.scapes.server.shell
 
 import org.tobi29.scapes.connection.ServerInfo
 import org.tobi29.scapes.engine.server.SSLHandle
-import org.tobi29.scapes.engine.server.SSLProvider
 import org.tobi29.scapes.engine.utils.*
 import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.filesystem.*
@@ -54,8 +53,7 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
                 val keyManagerConfig = configMap["KeyManager"]?.toMap() ?: TagMap()
                 val keyManagerProvider = loadKeyManager(
                         keyManagerConfig["ID"].toString())
-                val ssl = SSLProvider.sslHandle(
-                        keyManagerProvider[config, keyManagerConfig])
+                val ssl = SSLHandle(keyManagerProvider[config, keyManagerConfig])
                 val worldSourceConfig = configMap["WorldSource"]?.toMap() ?: TagMap()
                 val worldSourceProvider = loadWorldSource(
                         worldSourceConfig["ID"].toString())

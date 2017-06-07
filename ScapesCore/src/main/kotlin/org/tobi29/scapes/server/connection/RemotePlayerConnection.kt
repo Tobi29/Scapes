@@ -21,14 +21,10 @@ import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.utils.Algorithm
 import org.tobi29.scapes.engine.utils.AtomicInteger
 import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
-import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.graphics.Image
-import org.tobi29.scapes.engine.utils.io.ByteBuffer
-import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.utils.io.checksum
+import org.tobi29.scapes.engine.utils.io.*
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.read
-import org.tobi29.scapes.engine.utils.io.process
 import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.clamp
@@ -60,7 +56,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
     private var pingHandler: (Long) -> Unit = {}
 
     suspend fun run(connection: Connection) {
-        pingHandler = { connection.increaseTimeout(10000L + it) }
+        pingHandler = { connection.increaseTimeout(10000L - it) }
         try {
             val output = channel.outputStream
             val input = channel.inputStream
@@ -155,7 +151,6 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                 if (connection.shouldClose) {
                     send(PacketDisconnect(registry, "Server closed", 5.0))
                     channel.queueBundle()
-                    channel.aClose()
                     return
                 }
                 try {
@@ -213,24 +208,22 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                 }
                 yield()
             }
-            channel.aClose()
         } catch (e: ConnectionCloseException) {
             events.fire(
                     MessageEvent(this@RemotePlayerConnection,
                             MessageLevel.SERVER_INFO,
                             "Disconnecting player: $nickname"))
-            channel.aClose()
         } catch (e: InvalidPacketDataException) {
             events.fire(
                     MessageEvent(this@RemotePlayerConnection,
                             MessageLevel.SERVER_INFO,
                             "Disconnecting player: $nickname"))
-            channel.aClose()
         } catch (e: IOException) {
             events.fire(
                     MessageEvent(this@RemotePlayerConnection,
                             MessageLevel.SERVER_INFO,
                             "Player disconnected: $nickname ($e)"))
+            throw e
         } finally {
             events.fire(PlayerLeaveEvent(this@RemotePlayerConnection))
             isClosed = true

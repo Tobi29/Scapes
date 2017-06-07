@@ -18,7 +18,6 @@ package org.tobi29.scapes.client.connection
 
 import kotlinx.coroutines.experimental.yield
 import org.tobi29.scapes.client.states.GameStateGameMP
-import org.tobi29.scapes.client.states.GameStateMenu
 import org.tobi29.scapes.client.states.GameStateServerDisconnect
 import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
@@ -31,32 +30,35 @@ import org.tobi29.scapes.plugins.Plugins
 
 class RemoteClientConnection(private val worker: ConnectionWorker,
                              game: GameStateGameMP,
+                             private val address: RemoteAddress,
                              private val channel: PacketBundleChannel,
+                             private val rateChannel: SSLChannel,
                              plugins: Plugins,
                              loadingDistance: Int) : ClientConnection(game,
         plugins, loadingDistance) {
     private val sendQueue = ConcurrentLinkedQueue<PacketServer>()
     private var isClosed = false
+    private var close = false
     private var pingHandler: (Long) -> Unit = {}
 
     override fun start() {
         game.engine.loop.addTask({
             send(PacketPingClient(plugins.registry,
                     System.currentTimeMillis()))
-            downloadDebug.setValue(channel.inputRate / 128.0)
-            uploadDebug.setValue(channel.outputRate / 128.0)
+            downloadDebug.setValue(rateChannel.inputRate / 128.0)
+            uploadDebug.setValue(rateChannel.outputRate / 128.0)
             if (isClosed) -1 else 1000
         }, "Connection-Rate", 1000)
     }
 
     override fun stop() {
-        channel.requestClose()
+        close = true
     }
 
     override suspend fun run(connection: Connection) {
-        pingHandler = { connection.increaseTimeout(10000L + it) }
+        pingHandler = { connection.increaseTimeout(10000L - it) }
         try {
-            while (!connection.shouldClose) {
+            while (!connection.shouldClose && !close) {
                 while (!sendQueue.isEmpty()) {
                     val packet = sendQueue.poll()
                     val output = channel.outputStream
@@ -71,12 +73,7 @@ class RemoteClientConnection(private val worker: ConnectionWorker,
                 }
                 loop@ while (true) {
                     when (channel.process()) {
-                        PacketBundleChannel.FetchResult.CLOSED -> {
-                            logger.info { "Closed client connection!" }
-                            game.engine.switchState(
-                                    GameStateMenu(game.engine))
-                            return
-                        }
+                        PacketBundleChannel.FetchResult.CLOSED -> return
                         PacketBundleChannel.FetchResult.YIELD -> break@loop
                         PacketBundleChannel.FetchResult.BUNDLE -> {
                             val bundle = channel.inputStream
@@ -99,7 +96,6 @@ class RemoteClientConnection(private val worker: ConnectionWorker,
                 }
                 yield()
             }
-            channel.aClose()
         } catch (e: ConnectionEndException) {
             logger.info { "Closed client connection: $e" }
         } catch (e: IOException) {
@@ -109,7 +105,6 @@ class RemoteClientConnection(private val worker: ConnectionWorker,
                             game.engine))
         } finally {
             isClosed = true
-            channel.close()
         }
     }
 
@@ -120,13 +115,11 @@ class RemoteClientConnection(private val worker: ConnectionWorker,
         }
     }
 
-    override fun address(): RemoteAddress? {
-        return channel.remoteAddress?.let(::RemoteAddress)
-    }
+    override fun address() = address
 
     fun updatePing(ping: Long) {
         pingHandler(ping)
-        pingDebug.setValue(System.currentTimeMillis() - ping)
+        pingDebug.setValue(ping)
     }
 
     internal enum class State {

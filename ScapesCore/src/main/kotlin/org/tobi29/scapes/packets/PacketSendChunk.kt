@@ -45,6 +45,8 @@ class PacketSendChunk : PacketAbstract, PacketClient {
                 chunk: TerrainInfiniteChunkServer) : this(
             Packet.make(registry, "core.packet.SendChunk"), chunk)
 
+    override val isImmediate get() = true
+
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {
         stream.putInt(x)

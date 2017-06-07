@@ -16,10 +16,8 @@
 
 package org.tobi29.scapes.client.gui
 
-import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.states.GameStateLoadMP
-import org.tobi29.scapes.client.states.GameStateLoadSocketSP
 import org.tobi29.scapes.client.states.scenes.SceneMenu
 import org.tobi29.scapes.connection.ConnectionInfo
 import org.tobi29.scapes.connection.ConnectionType
@@ -32,6 +30,7 @@ import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.utils.io.ByteBuffer
 import org.tobi29.scapes.engine.utils.io.IOException
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.tag.MutableTagList
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.listMut
@@ -119,10 +118,10 @@ class GuiServerSelect(state: GameState,
                     label.setText("Fetching info...")
                     // Ignore invalid certificates because worst case
                     // server name and icon get faked
-                    val ssl = SSLProvider.sslHandle { true }
-                    val bundleChannel = PacketBundleChannel(address,
-                            channel,
-                            state.engine.taskExecutor, ssl, true)
+                    val ssl = SSLHandle.insecure()
+                    val secureChannel = ssl.newSSLChannel(address, channel,
+                            state.engine.taskExecutor, true)
+                    val bundleChannel = PacketBundleChannel(secureChannel)
                     val output = bundleChannel.outputStream
                     output.put(ConnectionInfo.header())
                     output.put(ConnectionType.GET_INFO.data())
@@ -143,15 +142,17 @@ class GuiServerSelect(state: GameState,
                             TextureWrap.CLAMP,
                             TextureWrap.CLAMP)
                     icon.texture = Resource(texture)
-                    bundleChannel.aClose()
+                    bundleChannel.flushAsync()
+                    secureChannel.requestClose()
+                    bundleChannel.finishAsync()
+                    secureChannel.finishAsync()
                 } catch (e: Exception) {
                     label.setText(error(e))
                 } finally {
                     try {
                         channel.close()
                     } catch (e: IOException) {
-                        GameStateLoadSocketSP.logger.warn(
-                                e) { "Failed to close socket" }
+                        logger.warn(e) { "Failed to close socket" }
                     }
                 }
             }

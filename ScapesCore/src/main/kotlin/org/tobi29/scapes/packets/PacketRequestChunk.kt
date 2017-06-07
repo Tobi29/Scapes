@@ -41,6 +41,8 @@ class PacketRequestChunk : PacketAbstract, PacketBoth {
                 y: Int) : this(
             Packet.make(registry, "core.packet.RequestChunk"), x, y)
 
+    override val isImmediate get() = true
+
     override fun sendServer(client: ClientConnection,
                             stream: WritableByteStream) {
         stream.putInt(x)

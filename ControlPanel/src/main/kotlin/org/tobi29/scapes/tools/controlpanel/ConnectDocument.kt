@@ -19,26 +19,25 @@ package org.tobi29.scapes.tools.controlpanel
 import org.eclipse.swt.SWT
 import org.eclipse.swt.layout.GridData
 import org.eclipse.swt.layout.GridLayout
-import org.eclipse.swt.widgets.Composite
-import org.eclipse.swt.widgets.Label
-import org.eclipse.swt.widgets.MenuItem
-import org.eclipse.swt.widgets.ProgressBar
+import org.eclipse.swt.widgets.*
 import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.swt.util.framework.Document
 import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
+import org.tobi29.scapes.engine.swt.util.widgets.InputDialog
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
 import org.tobi29.scapes.engine.utils.EventDispatcher
 import org.tobi29.scapes.engine.utils.io.IOException
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.tag.Tag
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toList
 import org.tobi29.scapes.engine.utils.toArray
+import org.tobi29.scapes.tools.controlpanel.ui.Certificate
 import java.nio.channels.SelectionKey
 
 class ConnectDocument(private val address: RemoteAddress,
                       private val password: String,
-                      private val ssl: SSLHandle,
                       private val connections: ConnectionManager,
                       private val application: MultiDocumentApplication) : Document {
     private var document: Document = this
@@ -49,74 +48,59 @@ class ConnectDocument(private val address: RemoteAddress,
     init {
         val fail = { e: Exception ->
             application.accessAsync(document) { composite ->
-                application.message(composite, SWT.ICON_ERROR,
-                        "Unable to connect",
-                        "Failed to connect:\n" + e.message)
-                application.closeTab(composite)
+                if (application.message(composite,
+                        SWT.ICON_ERROR or SWT.YES or SWT.NO,
+                        "Connection lost",
+                        "Lost connection:\n" + e.message +
+                                "\n\nTry to reconnect?") == SWT.YES) {
+                    application.replaceTab(composite,
+                            ReconnectDocument(address, password, connections))
+                } else {
+                    application.closeTab(composite)
+                }
             }
         }
         connections.addConnection { worker, connection ->
-            val channel = try {
-                connect(worker, address)
-            } catch (e: Exception) {
-                fail(e)
-                return@addConnection
-            }
+            val ssl = SSLHandle()
             try {
-                channel.register(worker.joiner.selector,
-                        SelectionKey.OP_READ)
-                val bundleChannel = PacketBundleChannel(address, channel,
-                        connections.taskExecutor, ssl, true)
-                val output = bundleChannel.outputStream
-                output.put(ConnectionInfo.header())
-                output.put(21)
-                bundleChannel.queueBundle()
-                val controlPanel = ControlPanelProtocol(worker, bundleChannel,
-                        EventDispatcher())
-                try {
-                    controlPanel.addCommand("Commands-Send") { payload ->
-                        application.accessAsync(document) { composite ->
-                            payload["Commands"]?.toList()?.let {
-                                val commands = it.asSequence().map(
-                                        Tag::toString).toArray()
-                                document = ControlPanelDocument(address,
-                                        controlPanel, commands,
-                                        { connection.requestClose() })
-                                application.replaceTab(composite, document)
-                            }
+                connect(worker, connection, ssl)
+            } catch(e: SSLCertificateException) {
+                application.accessAsync(this@ConnectDocument) { composite ->
+                    val certificates = e.certificates
+                    for (certificate in certificates) {
+                        val dialog = InputDialog(composite.shell,
+                                "Untrusted certificate", "Disconnect")
+                        dialog.add("Certificate details", {
+                            Certificate(it, SWT.BORDER, certificate)
+                        })
+                        val ignore = dialog.add("", { Button(it, SWT.NONE) })
+                        ignore.text = "Ignore"
+                        ignore.layoutData = GridData(SWT.CENTER, SWT.CENTER,
+                                true, false, 1, 1)
+                        var ignored = false
+                        ignore.addListener(SWT.Selection) { event ->
+                            ignored = true
+                            dialog.dismiss()
+                        }
+                        dialog.open()
+                        if (!ignored) {
+                            application.closeTab(composite)
+                            return@accessAsync
                         }
                     }
-                    controlPanel.send("Commands-List", TagMap())
-                    controlPanel.disconnectHook { e ->
-                        application.accessAsync(document) { composite ->
-                            if (application.message(composite,
-                                    SWT.ICON_ERROR or SWT.YES or SWT.NO,
-                                    "Connection lost",
-                                    "Lost connection:\n" + e.message +
-                                            "\n\nTry to reconnect?") == SWT.YES) {
-                                application.replaceTab(composite,
-                                        ReconnectDocument(address, password,
-                                                ssl, connections))
-                            } else {
-                                application.closeTab(composite)
-                            }
+
+                    val sslForce = SSLHandle.fromCertificates(certificates)
+
+                    connections.addConnection { worker, connection ->
+                        try {
+                            connect(worker, connection, sslForce)
+                        } catch (e: IOException) {
+                            fail(e)
                         }
-                    }
-                    controlPanel.runClient(connection, "Control Panel",
-                            ControlPanelProtocol.passwordAuthentication(
-                                    password))
-                } finally {
-                    application.accessAsync(document) { composite ->
-                        application.closeTab(composite)
                     }
                 }
-            } catch (e: Exception) {
+            } catch (e: IOException) {
                 fail(e)
-            } finally {
-                try {
-                    channel.close()
-                } catch (e: IOException) {
-                }
             }
         }
     }
@@ -146,4 +130,53 @@ class ConnectDocument(private val address: RemoteAddress,
         progress.layoutData = GridData(SWT.FILL, SWT.CENTER, true, false)
         text.text = "Connecting..."
     }
+
+    private suspend fun connect(worker: ConnectionWorker,
+                                connection: Connection,
+                                ssl: SSLHandle) {
+        val channel = connect(worker, address)
+        try {
+            channel.register(worker.joiner.selector, SelectionKey.OP_READ)
+            val secureChannel = ssl.newSSLChannel(address, channel,
+                    worker.connection.taskExecutor, true)
+            val bundleChannel = PacketBundleChannel(secureChannel)
+            val output = bundleChannel.outputStream
+            output.put(ConnectionInfo.header())
+            output.put(21)
+            bundleChannel.queueBundle()
+            val controlPanel = ControlPanelProtocol(worker, bundleChannel,
+                    EventDispatcher())
+            controlPanel.addCommand("Commands-Send") { payload ->
+                application.accessAsync(document) { composite ->
+                    payload["Commands"]?.toList()?.let {
+                        val commands = it.asSequence().map(
+                                Tag::toString).toArray()
+                        document = ControlPanelDocument(address,
+                                controlPanel, commands,
+                                { connection.requestClose() })
+                        application.replaceTab(composite, document)
+                    }
+                }
+            }
+            controlPanel.send("Commands-List", TagMap())
+            controlPanel.runClient(connection, "Control Panel",
+                    ControlPanelProtocol.passwordAuthentication(
+                            password))
+            bundleChannel.flushAsync()
+            secureChannel.requestClose()
+            bundleChannel.finishAsync()
+            secureChannel.finishAsync()
+            application.accessAsync(document) { composite ->
+                application.closeTab(composite)
+            }
+        } finally {
+            try {
+                channel.close()
+            } catch (e: IOException) {
+                logger.warn(e) { "Failed to close socket" }
+            }
+        }
+    }
+
+    companion object : KLogging()
 }

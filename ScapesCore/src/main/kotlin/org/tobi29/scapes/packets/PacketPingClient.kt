@@ -37,7 +37,7 @@ class PacketPingClient : PacketPing {
 
     override fun runClient(client: ClientConnection) {
         if (client is RemoteClientConnection) {
-            client.updatePing(timestamp)
+            client.updatePing(System.currentTimeMillis() - timestamp)
         }
     }
 }

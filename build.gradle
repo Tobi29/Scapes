@@ -73,7 +73,7 @@ ext {
     lwjglVersion = "3.1.2"
     log4jVersion = "2.8.1"
     jnaVersion = "4.4.0"
-    scapesEngineVersion = "1b7d9554b1"
+    scapesEngineVersion = "9189093d21"
 
     slf4jSimple = "org.slf4j:slf4j-simple:$slf4jVersion"
     lwjgl = "org.lwjgl:lwjgl:$lwjglVersion"
@@ -112,8 +112,6 @@ ext {
             "com.github.Tobi29.ScapesEngine:SQLFramework:$scapesEngineVersion"
     scapesEngineNIOFileSystem =
             "com.github.Tobi29.ScapesEngine:NIOFileSystem:$scapesEngineVersion"
-    scapesEngineJVMSSLProvider =
-            "com.github.Tobi29.ScapesEngine:JVMSSLProvider:$scapesEngineVersion"
     scapesEngineSQLite =
             "com.github.Tobi29.ScapesEngine:SQLite:$scapesEngineVersion"
     scapesEngineSQLJet =

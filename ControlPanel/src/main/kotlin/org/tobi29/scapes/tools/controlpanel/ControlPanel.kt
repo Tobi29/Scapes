@@ -16,22 +16,17 @@
 package org.tobi29.scapes.tools.controlpanel
 
 import org.eclipse.swt.SWT
-import org.eclipse.swt.layout.GridData
-import org.eclipse.swt.widgets.Button
 import org.eclipse.swt.widgets.Spinner
 import org.eclipse.swt.widgets.Text
 import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.server.RemoteAddress
-import org.tobi29.scapes.engine.server.SSLProvider
 import org.tobi29.scapes.engine.swt.util.Shortcut
 import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.InputDialog
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
-import org.tobi29.scapes.engine.utils.AtomicBoolean
 import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.version
-import org.tobi29.scapes.tools.controlpanel.ui.Certificate
 
 fun main(args: Array<String>) {
     ControlPanel().run()
@@ -55,40 +50,6 @@ class ControlPanel : MultiDocumentApplication("Scapes Control Panel",
         val connection = menu.menu("Connection")
         connection.action("Connect...", {
             try {
-                val ssl = SSLProvider.sslHandle { certificates ->
-                    val output = AtomicBoolean(true)
-                    access {
-                        val shell = activeShell
-                        if (shell == null) {
-                            output.set(false)
-                            return@access
-                        }
-                        for (certificate in certificates) {
-                            val dialog = InputDialog(shell,
-                                    "Untrusted certificate", "Disconnect")
-                            dialog.add("Certificate details", {
-                                Certificate(it, SWT.BORDER, certificate)
-                            })
-                            val ignore = dialog.add("",
-                                    { Button(it, SWT.NONE) })
-                            ignore.text = "Ignore"
-                            ignore.layoutData = GridData(SWT.CENTER, SWT.CENTER,
-                                    true,
-                                    false, 1, 1)
-                            var ignored = false
-                            ignore.addListener(SWT.Selection) { event ->
-                                ignored = true
-                                dialog.dismiss()
-                            }
-                            dialog.open()
-                            if (!ignored) {
-                                output.set(false)
-                                return@access
-                            }
-                        }
-                    }
-                    output.get()
-                }
                 val dialog = InputDialog(composite.shell, "Connect...",
                         "Connect")
                 val addressField = dialog.add("Address",
@@ -101,7 +62,7 @@ class ControlPanel : MultiDocumentApplication("Scapes Control Panel",
                     openNewTab(composite, ConnectDocument(
                             RemoteAddress(addressField.text,
                                     portField.selection), passwordField.text,
-                            ssl, this.connection, this))
+                            this.connection, this))
                 }
             } catch (e: IOException) {
                 message(SWT.ERROR, "Failed to initialize SSL",

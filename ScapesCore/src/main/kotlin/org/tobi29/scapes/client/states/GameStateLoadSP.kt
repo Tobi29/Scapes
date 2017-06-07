@@ -26,8 +26,6 @@ import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Scene
 import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.server.SSLHandle
-import org.tobi29.scapes.engine.server.SSLProvider
-import org.tobi29.scapes.engine.utils.UnsupportedJVMException
 import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.round
@@ -88,14 +86,7 @@ class GameStateLoadSP(private var source: WorldSource?,
                     } else {
                         serverInfo = ServerInfo("Local Server")
                     }
-                    val ssl: SSLHandle
-                    try {
-                        ssl = SSLProvider.sslHandle(
-                                DummyKeyManagerProvider.get())
-                    } catch (e: IOException) {
-                        throw UnsupportedJVMException(e)
-                    }
-
+                    val ssl = SSLHandle(DummyKeyManagerProvider.get())
                     server = ScapesServer(source, serverConfigMap, serverInfo,
                             ssl, engine.taskExecutor)
                     step++

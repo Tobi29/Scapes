@@ -23,8 +23,8 @@ import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.server.SSLHandle
 import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.EventDispatcher
-import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.assert
+import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toInt
@@ -72,7 +72,7 @@ class ScapesServer(source: WorldSource,
         val serverTag = configMap["Server"]?.toMap()
         val socketTag = serverTag?.get("Socket")?.toMap() ?: TagMap()
         maxLoadingRadius = serverTag?.get("MaxLoadingRadius")?.toInt() ?: 0
-        connections = ConnectionManager(taskExecutor, 10)
+        connections = ConnectionManager(this.taskExecutor, 10)
         connections.workers(socketTag["WorkerCount"]?.toInt() ?: 1)
         connection = ServerConnection(this, socketTag, ssl)
         extensions.init()

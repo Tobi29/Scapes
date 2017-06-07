@@ -19,8 +19,11 @@ package org.tobi29.scapes.server.connection
 import org.tobi29.scapes.connection.ConnectionInfo
 import org.tobi29.scapes.connection.ConnectionType
 import org.tobi29.scapes.engine.server.*
-import org.tobi29.scapes.engine.utils.*
+import org.tobi29.scapes.engine.utils.Checksum
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
+import org.tobi29.scapes.engine.utils.ConcurrentHashSet
 import org.tobi29.scapes.engine.utils.io.IOException
+import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toInt
 import org.tobi29.scapes.entity.skin.ServerSkin
@@ -30,7 +33,6 @@ import org.tobi29.scapes.server.ControlPanel
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.command.Executor
 import org.tobi29.scapes.server.extension.event.NewConnectionEvent
-import java.nio.channels.SelectionKey
 import java.nio.channels.SocketChannel
 
 class ServerConnection(val server: ScapesServer,
@@ -138,11 +140,9 @@ class ServerConnection(val server: ScapesServer,
                                    connection: Connection) {
         when (ConnectionType[id]) {
             ConnectionType.GET_INFO -> {
-                channel.register(worker.joiner, SelectionKey.OP_READ)
                 val output = channel.outputStream
                 output.put(server.serverInfo.getBuffer())
                 channel.queueBundle()
-                channel.aClose()
             }
             ConnectionType.PLAY -> {
                 RemotePlayerConnection(worker, channel, this).run(connection)

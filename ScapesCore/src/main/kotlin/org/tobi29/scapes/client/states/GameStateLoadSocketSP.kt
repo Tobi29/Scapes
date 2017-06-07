@@ -27,7 +27,6 @@ import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Scene
 import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.server.*
-import org.tobi29.scapes.engine.utils.UnsupportedJVMException
 import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.round
@@ -90,14 +89,7 @@ class GameStateLoadSocketSP(private var source: WorldSource?,
                     } else {
                         serverInfo = ServerInfo("Local Server")
                     }
-                    val ssl: SSLHandle
-                    try {
-                        ssl = SSLProvider.sslHandle(
-                                DummyKeyManagerProvider.get())
-                    } catch (e: IOException) {
-                        throw UnsupportedJVMException(e)
-                    }
-
+                    val ssl = SSLHandle(DummyKeyManagerProvider.get())
                     this.server = ScapesServer(source, serverConfigMap,
                             serverInfo, ssl, engine.taskExecutor)
                     step++
@@ -135,11 +127,12 @@ class GameStateLoadSocketSP(private var source: WorldSource?,
                             channel.register(worker.joiner.selector,
                                     SelectionKey.OP_READ)
                             gui?.setProgress("Logging in...", 0.6)
-                            val bundleChannel: PacketBundleChannel
-                            val ssl = SSLProvider.sslHandle { true }
-                            bundleChannel = PacketBundleChannel(
+                            val ssl = SSLHandle.insecure()
+                            val secureChannel = ssl.newSSLChannel(
                                     RemoteAddress(address), channel,
-                                    engine.taskExecutor, ssl, true)
+                                    engine.taskExecutor, true)
+                            val bundleChannel = PacketBundleChannel(
+                                    secureChannel)
                             val loadingRadius = round(
                                     scapes.renderDistance) + 16
                             val account = Account[scapes.home.resolve(
@@ -147,14 +140,14 @@ class GameStateLoadSocketSP(private var source: WorldSource?,
                             val (plugins, loadingDistanceServer) = NewClientConnection.run(
                                     bundleChannel, engine, account,
                                     loadingRadius, { status ->
-                                gui?.setProgress(status,
-                                        0.8)
+                                gui?.setProgress(status, 0.8)
                             }) ?: return@addConnection
 
                             gui?.setProgress("Loading world...", 1.0)
                             val game = GameStateGameSP({ state ->
                                 RemoteClientConnection(worker, state,
-                                        bundleChannel, plugins,
+                                        RemoteAddress(address),
+                                        bundleChannel, secureChannel, plugins,
                                         loadingDistanceServer)
                             }, scene, source, server, engine)
                             this@GameStateLoadSocketSP.server = null
@@ -162,14 +155,19 @@ class GameStateLoadSocketSP(private var source: WorldSource?,
                             engine.switchState(game)
                             game.awaitInit()
                             game.client.run(connection)
+                            bundleChannel.flushAsync()
+                            secureChannel.requestClose()
+                            bundleChannel.finishAsync()
+                            secureChannel.finishAsync()
+                            logger.info { "Closed client connection!" }
+                            engine.switchState(GameStateMenu(engine))
                         } catch (e: Exception) {
                             fail(e)
                         } finally {
                             try {
                                 channel.close()
                             } catch (e: IOException) {
-                                logger.warn(
-                                        e) { "Failed to close socket" }
+                                logger.warn(e) { "Failed to close socket" }
                             }
                         }
                     }

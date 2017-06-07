@@ -40,7 +40,6 @@ dependencies {
     compile rootProject.ext.scapesEngineGLFWBackend
 
     runtime rootProject.ext.scapesEngineNIOFileSystem
-    runtime rootProject.ext.scapesEngineJVMSSLProvider
     runtime rootProject.ext.scapesEngineMBeansCPUReader
     runtime rootProject.ext.scapesEngineCodecOGG
     runtime rootProject.ext.scapesEngineCodecMP3
