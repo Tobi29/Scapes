@@ -19,8 +19,8 @@ package org.tobi29.scapes.vanilla.basics
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.engine.args.*
 import org.tobi29.scapes.engine.utils.hash
-import org.tobi29.scapes.engine.utils.tag.set
 import org.tobi29.scapes.engine.utils.tag.syncMapMut
+import org.tobi29.scapes.engine.utils.tag.toTag
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.vanilla.basics.util.createIngot
 import org.tobi29.scapes.vanilla.basics.util.createTool
@@ -99,7 +99,7 @@ internal fun registerCommands(server: ScapesServer,
                     player.mob { mob ->
                         mob.metaData("Vanilla").syncMapMut(
                                 "Condition") { conditionTag ->
-                            conditionTag["Wake"] = wake
+                            conditionTag["Wake"] = wake.toTag()
                         }
                     }
                 }
@@ -111,7 +111,7 @@ internal fun registerCommands(server: ScapesServer,
                     player.mob { mob ->
                         mob.metaData("Vanilla").syncMapMut(
                                 "Condition") { conditionTag ->
-                            conditionTag["Hunger"] = saturation
+                            conditionTag["Hunger"] = saturation.toTag()
                         }
                     }
                 }
@@ -123,7 +123,7 @@ internal fun registerCommands(server: ScapesServer,
                     player.mob { mob ->
                         mob.metaData("Vanilla").syncMapMut(
                                 "Condition") { conditionTag ->
-                            conditionTag["Thirst"] = thirst
+                            conditionTag["Thirst"] = thirst.toTag()
                         }
                     }
                 }
@@ -155,7 +155,7 @@ internal fun registerCommands(server: ScapesServer,
                 val alloyType = requireGet({ plugin.alloyType(metal) }, metal)
                 val item = ItemStack(materials.ingot, data, amount)
                 createIngot(item, alloyType)
-                item.metaData("Vanilla")["Temperature"] = temperature
+                item.metaData("Vanilla")["Temperature"] = temperature.toTag()
                 player.mob { mob ->
                     mob.inventories().modify("Container") { it.add(item) }
                 }
@@ -190,7 +190,7 @@ internal fun registerCommands(server: ScapesServer,
                 val alloyType = requireGet({ plugin.alloyType(metal) }, metal)
                 val item = ItemStack(materials.ingot, data, amount)
                 createIngot(item, alloyType)
-                item.metaData("Vanilla")["Temperature"] = temperature
+                item.metaData("Vanilla")["Temperature"] = temperature.toTag()
                 if (!createTool(plugin, item, kind)) {
                     error("Unknown tool kind: " + kind)
                 }

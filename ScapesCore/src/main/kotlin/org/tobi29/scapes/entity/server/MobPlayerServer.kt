@@ -21,8 +21,8 @@ import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.Checksum
-import org.tobi29.scapes.engine.utils.filterMap
 import org.tobi29.scapes.engine.utils.ConcurrentHashMap
+import org.tobi29.scapes.engine.utils.filterMap
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
@@ -252,15 +252,15 @@ abstract class MobPlayerServer(type: EntityType<*, *>,
     fun write(map: ReadWriteTagMap,
               packet: Boolean) {
         super.write(map)
-        map["HealWait"] = healWait
+        map["HealWait"] = healWait.toTag()
         map["Inventory"] = TagMap {
             inventories.forEach { id, inventory ->
                 this[id] = TagMap { inventory.write(this) }
             }
         }
         if (packet) {
-            map["Nickname"] = nickname
-            map["SkinChecksum"] = skin.array()
+            map["Nickname"] = nickname.toTag()
+            map["SkinChecksum"] = skin.array().toTag()
         }
     }
 

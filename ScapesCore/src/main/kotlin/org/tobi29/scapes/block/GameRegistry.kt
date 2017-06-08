@@ -141,6 +141,6 @@ fun ReadWriteTagMutableMap.getID(name: String,
         !containsValue(it.toTag())
     }.firstOrNull() ?: throw IllegalStateException(
             "Overflowed IDs for: $name")
-    this[name] = i
+    this[name] = i.toTag()
     return i
 }

@@ -108,9 +108,9 @@ class ChunkArraySection1x16(private val xSizeBits: Int,
     override fun write(map: ReadWriteTagMap) {
         val data = this.data
         if (data == null) {
-            map["Default"] = defaultValue
+            map["Default"] = defaultValue.toTag()
         } else {
-            map["Array"] = data
+            map["Array"] = data.toTag()
         }
     }
 

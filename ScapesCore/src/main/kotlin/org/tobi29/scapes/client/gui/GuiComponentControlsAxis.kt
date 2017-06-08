@@ -22,8 +22,8 @@ import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiLayoutData
 import org.tobi29.scapes.engine.input.ControllerJoystick
 import org.tobi29.scapes.engine.utils.tag.MutableTagMap
-import org.tobi29.scapes.engine.utils.tag.set
 import org.tobi29.scapes.engine.utils.tag.toInt
+import org.tobi29.scapes.engine.utils.tag.toTag
 
 class GuiComponentControlsAxis(parent: GuiLayoutData,
                                textSize: Int,
@@ -85,7 +85,7 @@ class GuiComponentControlsAxis(parent: GuiLayoutData,
                 if (controller.axis(i) > 0.5) {
                     if (!blacklisted) {
                         axis = i
-                        tagMap[id] = axis
+                        tagMap[id] = axis.toTag()
                         editing = 0
                         updateText()
                         break

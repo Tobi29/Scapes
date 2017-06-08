@@ -24,11 +24,12 @@ import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.tag.ReadWriteTagMap
 import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.set
 import org.tobi29.scapes.engine.utils.tag.toBoolean
+import org.tobi29.scapes.engine.utils.tag.toTag
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.packets.PacketEntityChange
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
+import kotlin.collections.set
 
 class EntityBloomeryServer(type: EntityType<*, *>,
                            world: WorldServer) : EntityAbstractFurnaceServer(
@@ -38,7 +39,7 @@ class EntityBloomeryServer(type: EntityType<*, *>,
 
     override fun write(map: ReadWriteTagMap) {
         super.write(map)
-        map["Bellows"] = hasBellows
+        map["Bellows"] = hasBellows.toTag()
     }
 
     override fun read(map: TagMap) {

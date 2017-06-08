@@ -17,13 +17,13 @@ package org.tobi29.scapes.vanilla.basics.packet
 
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
+import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.tag.map
 import org.tobi29.scapes.engine.utils.tag.mapMut
-import org.tobi29.scapes.engine.utils.tag.set
 import org.tobi29.scapes.engine.utils.tag.toBoolean
+import org.tobi29.scapes.engine.utils.tag.toTag
 import org.tobi29.scapes.packets.*
 import org.tobi29.scapes.server.connection.PlayerConnection
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
@@ -72,13 +72,13 @@ class PacketResearch : PacketAbstract, PacketServer {
                                 for (identifier in material.identifiers(item)) {
                                     mob.metaData("Vanilla").mapMut(
                                             "Research").mapMut(
-                                            "Items")[identifier] = true
+                                            "Items")[identifier] = true.toTag()
                                 }
                             } else {
                                 mob.metaData("Vanilla").mapMut(
                                         "Research").mapMut(
                                         "Items")[Integer.toHexString(
-                                        material.id)] = true
+                                        material.id)] = true.toTag()
                             }
                             plugin.researchRecipes.forEach { recipe ->
                                 if (!(mob.metaData("Vanilla").map(
@@ -92,7 +92,7 @@ class PacketResearch : PacketAbstract, PacketServer {
                                     }.any()) {
                                         mob.metaData("Vanilla").mapMut(
                                                 "Research").mapMut(
-                                                "Finished")[recipe.name] = true
+                                                "Finished")[recipe.name] = true.toTag()
                                         mob.world.send(PacketEntityMetaData(
                                                 player.server.plugins.registry,
                                                 mob, "Vanilla"))

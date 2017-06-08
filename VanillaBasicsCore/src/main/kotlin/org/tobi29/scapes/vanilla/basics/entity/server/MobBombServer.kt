@@ -46,7 +46,7 @@ class MobBombServer(type: EntityType<*, *>,
     override fun write(map: ReadWriteTagMap) {
         super.write(map)
         map["Block"] = TagMap { item.write(this) }
-        map["Time"] = time
+        map["Time"] = time.toTag()
     }
 
     override fun read(map: TagMap) {

@@ -40,13 +40,13 @@ class EntityFarmlandServer(type: EntityType<*, *>,
 
     override fun write(map: ReadWriteTagMap) {
         super.write(map)
-        map["NutrientA"] = nutrientA
-        map["NutrientB"] = nutrientB
-        map["NutrientC"] = nutrientC
-        map["Time"] = time
-        map["Stage"] = stage
+        map["NutrientA"] = nutrientA.toTag()
+        map["NutrientB"] = nutrientB.toTag()
+        map["NutrientC"] = nutrientC.toTag()
+        map["Time"] = time.toTag()
+        map["Stage"] = stage.toTag()
         cropType?.let {
-            map["CropType"] = it.id
+            map["CropType"] = it.id.toTag()
         }
     }
 

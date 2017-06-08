@@ -23,8 +23,8 @@ import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.tag.ReadWriteTagMap
 import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.set
 import org.tobi29.scapes.engine.utils.tag.toDouble
+import org.tobi29.scapes.engine.utils.tag.toTag
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.packets.PacketEntityChange
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
@@ -54,12 +54,12 @@ abstract class EntityAbstractFurnaceServer(
     override fun write(map: ReadWriteTagMap) {
         super.write(map)
         for (i in fuel.indices) {
-            map["Fuel$i"] = fuel[i]
+            map["Fuel$i"] = fuel[i].toTag()
         }
         for (i in fuelTemperature.indices) {
-            map["FuelTemperature$i"] = fuelTemperature[i]
+            map["FuelTemperature$i"] = fuelTemperature[i].toTag()
         }
-        map["Temperature"] = temperature
+        map["Temperature"] = temperature.toTag()
     }
 
     override fun read(map: TagMap) {

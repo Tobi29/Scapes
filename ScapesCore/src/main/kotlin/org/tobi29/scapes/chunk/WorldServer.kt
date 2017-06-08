@@ -78,7 +78,7 @@ class WorldServer(worldFormat: WorldFormat,
     }
 
     override fun write(map: ReadWriteTagMap) {
-        map["Tick"] = tick
+        map["Tick"] = tick.toTag()
         map["Environment"] = environment.toTag()
     }
 

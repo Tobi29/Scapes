@@ -122,23 +122,23 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
             return read(path, ::readJSON)
         }
         val map = TagMap {
-            this["ServerPort"] = 12345
-            this["AllowAccountCreation"] = true
+            this["ServerPort"] = 12345.toTag()
+            this["AllowAccountCreation"] = true.toTag()
             this["Server"] = TagMap {
-                this["ServerName"] = "My Superb Server"
-                this["ServerIcon"] = "ServerIcon.png"
-                this["MaxLoadingRadius"] = 288
+                this["ServerName"] = "My Superb Server".toTag()
+                this["ServerIcon"] = "ServerIcon.png".toTag()
+                this["MaxLoadingRadius"] = 288.toTag()
                 this["Socket"] = TagMap {
-                    this["MaxPlayers"] = 20
-                    this["WorkerCount"] = 2
-                    this["ControlPassword"] = ""
+                    this["MaxPlayers"] = 20.toTag()
+                    this["WorkerCount"] = 2.toTag()
+                    this["ControlPassword"] = "".toTag()
                 }
             }
             this["WorldSource"] = TagMap {
-                this["ID"] = "SQLite"
+                this["ID"] = "SQLite".toTag()
             }
             this["KeyManager"] = TagMap {
-                this["ID"] = "Dummy"
+                this["ID"] = "Dummy".toTag()
             }
         }
         write(path) { map.writeJSON(it) }

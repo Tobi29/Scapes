@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Group
 import org.tobi29.scapes.engine.server.ControlPanelProtocol
 import org.tobi29.scapes.engine.swt.util.framework.Application
 import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.set
+import org.tobi29.scapes.engine.utils.tag.toTag
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConsole
 
@@ -54,7 +54,7 @@ class ExtensionConsole(application: Application,
 
     fun consoleCommandLineReturn() {
         connection.send("Command", TagMap {
-            this["Command"] = console.input.text
+            this["Command"] = console.input.text.toTag()
         })
         console.input.text = ""
     }

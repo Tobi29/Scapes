@@ -21,9 +21,9 @@ import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.abs
+import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.tag.*
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.server.MobServer
 
@@ -41,7 +41,7 @@ class MobFlyingBlockServer(type: EntityType<*, *>,
     override fun write(map: ReadWriteTagMap) {
         super.write(map)
         map["Block"] = TagMap { item.write(this) }
-        map["Time"] = time
+        map["Time"] = time.toTag()
     }
 
     override fun read(map: TagMap) {

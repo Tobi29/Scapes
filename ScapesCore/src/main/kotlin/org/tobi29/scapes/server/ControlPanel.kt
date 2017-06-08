@@ -47,7 +47,7 @@ class ControlPanel(worker: ConnectionWorker,
             }
             val html = "<span style=\"$style\">${ControlPanel.Companion.ESCAPE(
                     event.message)}</span>"
-            send("Message", TagMap { this["Message"] = html })
+            send("Message", TagMap { this["Message"] = html.toTag() })
         }
     }
 
@@ -79,15 +79,15 @@ class ControlPanel(worker: ConnectionWorker,
             val cpu = cpuSupplier()
             val memory = runtime.totalMemory() - runtime.freeMemory()
             send("Stats", TagMap {
-                this["CPU"] = cpu
-                this["Memory"] = memory
+                this["CPU"] = cpu.toTag()
+                this["Memory"] = memory.toTag()
             })
         }
         addCommand("Players-List") {
             send("Players-List", TagMap {
                 this["Players"] = TagList {
                     connection.players.asSequence().map { it.name() }.map {
-                        TagMap { this["Name"] = it }
+                        TagMap { this["Name"] = it.toTag() }
                     }.forEach { add(it) }
                 }
             })

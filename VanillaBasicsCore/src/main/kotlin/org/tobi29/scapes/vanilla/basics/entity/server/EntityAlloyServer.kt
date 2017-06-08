@@ -38,7 +38,7 @@ class EntityAlloyServer(type: EntityType<*, *>,
     override fun write(map: ReadWriteTagMap) {
         super.write(map)
         map["Alloy"] = TagMap { writeAlloy(metals, this) }
-        map["Temperature"] = temperature
+        map["Temperature"] = temperature.toTag()
     }
 
     override fun read(map: TagMap) {
@@ -87,7 +87,7 @@ class EntityAlloyServer(type: EntityType<*, *>,
                     temperature = max(temperature, it)
                 }
                 output.setMaterial(materials.ingot, 0)
-                output.metaData("Vanilla")["Temperature"] = temperature
+                output.metaData("Vanilla")["Temperature"] = temperature.toTag()
                 materials.ingot.setAlloy(output, metals.drain(1.0))
                 world.send(PacketEntityChange(registry, this))
             }

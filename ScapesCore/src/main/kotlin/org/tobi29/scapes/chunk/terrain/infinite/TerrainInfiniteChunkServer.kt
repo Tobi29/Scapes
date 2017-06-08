@@ -21,11 +21,11 @@ import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.GeneratorOutput
 import org.tobi29.scapes.engine.utils.andNull
 import org.tobi29.scapes.engine.utils.assert
+import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.tag.*
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.entity.server.MobServer
@@ -252,12 +252,12 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                     TagList(data.lightData.asSequence().map { it.toTag() })
             map["MetaData"] = metaData.toTag()
             if (!packet) {
-                map["Tick"] = tick
+                map["Tick"] = tick.toTag()
                 map["Entities"] = TagList {
                     entitiesMut.values.forEach { entity ->
                         add(TagMap {
-                            this["UUID"] = entity.getUUID()
-                            this["ID"] = entity.type.id
+                            this["UUID"] = entity.getUUID().toTag()
+                            this["ID"] = entity.type.id.toTag()
                             this["Data"] = TagMap { entity.write(this) }
                         })
                     }
@@ -269,14 +269,14 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                                 terrain)
                     }.forEach { update ->
                         add(TagMap {
-                            this["ID"] = update.type.id
-                            this["Delay"] = update.delay()
-                            this["PosXY"] = (update.x() - posBlock.x or (update.y() - posBlock.y shl 4)).toByte()
-                            this["PosZ"] = update.z()
+                            this["ID"] = update.type.id.toTag()
+                            this["Delay"] = update.delay().toTag()
+                            this["PosXY"] = (update.x() - posBlock.x or (update.y() - posBlock.y shl 4)).toByte().toTag()
+                            this["PosZ"] = update.z().toTag()
                         })
                     }
                 }
-                map["Populated"] = state.id >= TerrainInfiniteBaseChunk.State.POPULATED.id
+                map["Populated"] = (state.id >= TerrainInfiniteBaseChunk.State.POPULATED.id).toTag()
             }
         }
     }

@@ -24,11 +24,9 @@ import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.chunk.terrain.block
-import org.tobi29.scapes.engine.utils.math.Random
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.*
 import org.tobi29.scapes.engine.utils.tag.*
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.WieldMode
 import org.tobi29.scapes.entity.server.EntityContainerServer
@@ -261,11 +259,11 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                 entity.onSpawn("VanillaBasics:Condition", {
                     entity.metaData("Vanilla").syncMapMut(
                             "Condition") { conditionTag ->
-                        conditionTag["Stamina"] = 1.0
-                        conditionTag["Wake"] = 1.0
-                        conditionTag["Hunger"] = 1.0
-                        conditionTag["Thirst"] = 1.0
-                        conditionTag["BodyTemperature"] = 37.0
+                        conditionTag["Stamina"] = 1.0.toTag()
+                        conditionTag["Wake"] = 1.0.toTag()
+                        conditionTag["Hunger"] = 1.0.toTag()
+                        conditionTag["Thirst"] = 1.0.toTag()
+                        conditionTag["BodyTemperature"] = 37.0.toTag()
                     }
                 })
                 entity.onJump("VanillaBasics:Condition", {
@@ -273,8 +271,8 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                             "Condition") { conditionTag ->
                         val stamina = conditionTag["Stamina"]?.toDouble() ?: 0.0
                         val bodyTemperature = conditionTag["BodyTemperature"]?.toDouble() ?: 0.0
-                        conditionTag["Stamina"] = stamina - 0.15
-                        conditionTag["BodyTemperature"] = bodyTemperature + 0.1
+                        conditionTag["Stamina"] = (stamina - 0.15).toTag()
+                        conditionTag["BodyTemperature"] = (bodyTemperature + 0.1).toTag()
                     }
                 })
                 entity.onPunch("VanillaBasics:Condition", { strength ->
@@ -286,8 +284,8 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                             "Condition") { conditionTag ->
                         val stamina = conditionTag["Stamina"]?.toDouble() ?: 0.0
                         val bodyTemperature = conditionTag["BodyTemperature"]?.toDouble() ?: 0.0
-                        conditionTag["Stamina"] = stamina - 0.04 * attackStrength
-                        conditionTag["BodyTemperature"] = bodyTemperature + 0.03 * attackStrength
+                        conditionTag["Stamina"] = (stamina - 0.04 * attackStrength).toTag()
+                        conditionTag["BodyTemperature"] = (bodyTemperature + 0.03 * attackStrength).toTag()
                     }
                 })
                 entity.onDeath("VanillaBasics:DeathMessage", {
@@ -336,9 +334,9 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
     }
 
     override fun write(map: ReadWriteTagMap) {
-        map["DayTime"] = climateGenerator.dayTime()
-        map["Day"] = climateGenerator.day()
-        map["SimulationCount"] = simulationCount
+        map["DayTime"] = climateGenerator.dayTime().toTag()
+        map["Day"] = climateGenerator.day().toTag()
+        map["SimulationCount"] = simulationCount.toTag()
     }
 
     override fun tick(delta: Double) {
@@ -424,12 +422,12 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                     wake = clamp(wake, 0.0, 1.0)
                     hunger = clamp(hunger, 0.0, 1.0)
                     thirst = clamp(thirst, 0.0, 1.0)
-                    conditionTag["Stamina"] = stamina
-                    conditionTag["Wake"] = wake
-                    conditionTag["Hunger"] = hunger
-                    conditionTag["Thirst"] = thirst
-                    conditionTag["BodyTemperature"] = bodyTemperature
-                    conditionTag["Sleeping"] = sleeping
+                    conditionTag["Stamina"] = stamina.toTag()
+                    conditionTag["Wake"] = wake.toTag()
+                    conditionTag["Hunger"] = hunger.toTag()
+                    conditionTag["Thirst"] = thirst.toTag()
+                    conditionTag["BodyTemperature"] = bodyTemperature.toTag()
+                    conditionTag["Sleeping"] = sleeping.toTag()
                 }
                 it.connection().send(
                         PacketEntityMetaData(world.registry, it, "Vanilla"))
@@ -511,7 +509,7 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
             }
             count = max(20480 / delta.toInt(), 1)
         }
-        tagStructure["SimulationCount"] = simulationCount
+        tagStructure["SimulationCount"] = simulationCount.toTag()
         simulateSeason(terrain, chunk.posBlock.x,
                 chunk.posBlock.y, chunk.posBlock.z, chunk.size.x, chunk.size.y,
                 chunk.size.z, count)

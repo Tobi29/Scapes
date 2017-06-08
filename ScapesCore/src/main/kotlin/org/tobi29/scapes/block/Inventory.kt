@@ -109,6 +109,8 @@ class Inventory(private val plugins: Plugins,
     }
 
     fun write(map: ReadWriteTagMap) {
-        map["Items"] = items.asSequence().map { TagMap { it.write(this) } }
+        map["Items"] = items.asSequence().map {
+            TagMap { it.write(this) }
+        }.toTag()
     }
 }

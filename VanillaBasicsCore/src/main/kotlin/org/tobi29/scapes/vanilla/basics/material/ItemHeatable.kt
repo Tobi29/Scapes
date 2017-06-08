@@ -17,8 +17,9 @@
 package org.tobi29.scapes.vanilla.basics.material
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.tag.set
 import org.tobi29.scapes.engine.utils.tag.toDouble
+import org.tobi29.scapes.engine.utils.tag.toTag
+import kotlin.collections.set
 
 interface ItemHeatable {
     fun heat(item: ItemStack,
@@ -44,9 +45,9 @@ interface ItemDefaultHeatable : ItemHeatable {
         val factor = heatTransferFactor(item).toFloat() * transferFactor
         val newTemperature = currentTemperature * (1.0 - factor) + temperature * factor
         if (newTemperature < 1.0 && newTemperature < currentTemperature) {
-            item.metaData("Vanilla")["Temperature"] = 0.0
+            item.metaData("Vanilla")["Temperature"] = 0.0.toTag()
         } else {
-            item.metaData("Vanilla")["Temperature"] = newTemperature
+            item.metaData("Vanilla")["Temperature"] = newTemperature.toTag()
         }
         beforeUpdate(item)
         temperatureUpdated(item)

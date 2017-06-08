@@ -22,8 +22,8 @@ import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.engine.utils.reduceOrNull
 import org.tobi29.scapes.engine.utils.tag.ReadWriteTagMap
 import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.set
 import org.tobi29.scapes.engine.utils.tag.toDouble
+import org.tobi29.scapes.engine.utils.tag.toTag
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.AlloyType
 import org.tobi29.scapes.vanilla.basics.material.MetalType
@@ -41,7 +41,7 @@ fun readAlloy(plugin: VanillaBasics,
 
 fun writeAlloy(alloy: Alloy,
                map: ReadWriteTagMap) {
-    alloy.metals.forEach { (key, value) -> map[key.id] = value }
+    alloy.metals.forEach { (key, value) -> map[key.id] = value.toTag() }
 }
 
 class Alloy {

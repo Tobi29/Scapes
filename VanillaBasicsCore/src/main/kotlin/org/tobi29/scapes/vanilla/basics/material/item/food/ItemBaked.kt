@@ -17,9 +17,9 @@
 package org.tobi29.scapes.vanilla.basics.material.item.food
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.tag.set
 import org.tobi29.scapes.engine.utils.tag.syncMapMut
 import org.tobi29.scapes.engine.utils.tag.toDouble
+import org.tobi29.scapes.engine.utils.tag.toTag
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.CropType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
@@ -35,9 +35,9 @@ class ItemBaked(type: VanillaMaterialType) : ItemSimpleData(type) {
             val stamina = conditionTag["Stamina"]?.toDouble() ?: 0.0
             val hunger = conditionTag["Hunger"]?.toDouble() ?: 0.0
             val thirst = conditionTag["Thirst"]?.toDouble() ?: 0.0
-            conditionTag["Stamina"] = stamina - 0.1
-            conditionTag["Hunger"] = hunger + 0.1
-            conditionTag["Thirst"] = thirst - 0.1
+            conditionTag["Stamina"] = (stamina - 0.1).toTag()
+            conditionTag["Hunger"] = (hunger + 0.1).toTag()
+            conditionTag["Thirst"] = (thirst - 0.1).toTag()
         }
         item.setAmount(item.amount() - 1)
     }

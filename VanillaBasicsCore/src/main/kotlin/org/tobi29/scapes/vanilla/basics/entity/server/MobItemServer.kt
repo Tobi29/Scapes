@@ -19,9 +19,9 @@ package org.tobi29.scapes.vanilla.basics.entity.server
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.filterMap
-import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.entity.server.MobServer
@@ -42,8 +42,8 @@ class MobItemServer(type: EntityType<*, *>,
     override fun write(map: ReadWriteTagMap) {
         super.write(map)
         map["Inventory"] = TagMap { item.write(this) }
-        map["Pickupwait"] = pickupwait
-        map["Despawntime"] = despawntime
+        map["Pickupwait"] = pickupwait.toTag()
+        map["Despawntime"] = despawntime.toTag()
     }
 
     override fun read(map: TagMap) {

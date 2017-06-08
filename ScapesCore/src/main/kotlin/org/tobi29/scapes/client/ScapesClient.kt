@@ -117,10 +117,10 @@ class ScapesClient(engine: ScapesEngine,
         if (!configMap.containsKey("IntegratedServer")) {
             configMap["IntegratedServer"] = TagMap {
                 this["Server"] = TagMap {
-                    this["MaxLoadingRadius"] = 288
+                    this["MaxLoadingRadius"] = 288.toTag()
                     this["Socket"] = TagMap {
-                        this["MaxPlayers"] = 5
-                        this["WorkerCount"] = 1
+                        this["MaxPlayers"] = 5.toTag()
+                        this["WorkerCount"] = 1.toTag()
                     }
                 }
             }

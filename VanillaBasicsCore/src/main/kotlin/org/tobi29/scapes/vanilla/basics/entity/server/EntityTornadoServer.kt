@@ -17,21 +17,18 @@ package org.tobi29.scapes.vanilla.basics.entity.server
 
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.engine.utils.filterMap
-import org.tobi29.scapes.engine.utils.math.cosTable
-import org.tobi29.scapes.engine.utils.math.max
-import org.tobi29.scapes.engine.utils.math.sinTable
-import org.tobi29.scapes.engine.utils.math.toRad
+import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.*
 import org.tobi29.scapes.engine.utils.tag.ReadWriteTagMap
 import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.set
 import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
+import org.tobi29.scapes.engine.utils.tag.toTag
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.entity.server.EntityAbstractServer
 import org.tobi29.scapes.entity.server.MobPositionSenderServer
 import org.tobi29.scapes.entity.server.MobServer
+import kotlin.collections.set
 
 class EntityTornadoServer(type: EntityType<*, *>,
                           world: WorldServer) : EntityAbstractServer(
@@ -49,8 +46,8 @@ class EntityTornadoServer(type: EntityType<*, *>,
 
     override fun write(map: ReadWriteTagMap) {
         super.write(map)
-        map["Dir"] = dir
-        map["Time"] = time
+        map["Dir"] = dir.toTag()
+        map["Time"] = time.toTag()
     }
 
     override fun read(map: TagMap) {

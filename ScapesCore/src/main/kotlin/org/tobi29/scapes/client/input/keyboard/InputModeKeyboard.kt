@@ -33,16 +33,17 @@ import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.engine.input.ControllerKeyReference
 import org.tobi29.scapes.engine.input.isDown
 import org.tobi29.scapes.engine.utils.EventDispatcher
-import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.graphics.encodePNG
+import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.filesystem.write
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.engine.utils.math.vector.times
 import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.tag.mapMut
-import org.tobi29.scapes.engine.utils.tag.set
 import org.tobi29.scapes.engine.utils.tag.toDouble
+import org.tobi29.scapes.engine.utils.tag.toTag
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
+import kotlin.collections.set
 
 class InputModeKeyboard(engine: ScapesEngine,
                         val controller: ControllerDefault,
@@ -375,7 +376,7 @@ class InputModeKeyboard(engine: ScapesEngine,
                       def: ControllerKey,
                       tagMap: MutableTagMap) {
         if (!tagMap.containsKey(id)) {
-            tagMap[id] = def.toString()
+            tagMap[id] = def.toString().toTag()
         }
     }
 
@@ -383,7 +384,7 @@ class InputModeKeyboard(engine: ScapesEngine,
                       def: ControllerKeyReference,
                       tagMap: MutableTagMap) {
         if (!tagMap.containsKey(id)) {
-            tagMap[id] = def.toString()
+            tagMap[id] = def.toString().toTag()
         }
     }
 
@@ -391,7 +392,7 @@ class InputModeKeyboard(engine: ScapesEngine,
                       def: Double,
                       tagMap: MutableTagMap) {
         if (!tagMap.containsKey(id)) {
-            tagMap[id] = def
+            tagMap[id] = def.toTag()
         }
     }
 

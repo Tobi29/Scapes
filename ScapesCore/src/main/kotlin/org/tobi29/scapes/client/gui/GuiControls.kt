@@ -24,8 +24,9 @@ import org.tobi29.scapes.engine.input.ControllerJoystick
 import org.tobi29.scapes.engine.utils.math.pow
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.tag.MutableTagMap
-import org.tobi29.scapes.engine.utils.tag.set
 import org.tobi29.scapes.engine.utils.tag.toDouble
+import org.tobi29.scapes.engine.utils.tag.toTag
+import kotlin.collections.set
 
 abstract class GuiControls(state: GameState,
                            previous: Gui,
@@ -101,7 +102,7 @@ abstract class GuiControls(state: GameState,
         }
         selection(slider)
         slider.on(GuiEvent.CHANGE) { event ->
-            tagMap[id] = sensitivity(slider.value())
+            tagMap[id] = sensitivity(slider.value()).toTag()
         }
     }
 }

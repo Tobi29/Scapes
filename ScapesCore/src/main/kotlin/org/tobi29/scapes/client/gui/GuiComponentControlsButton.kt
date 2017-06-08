@@ -24,7 +24,8 @@ import org.tobi29.scapes.engine.input.ControllerBasic
 import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.engine.input.ControllerKeyReference
 import org.tobi29.scapes.engine.utils.tag.MutableTagMap
-import org.tobi29.scapes.engine.utils.tag.set
+import org.tobi29.scapes.engine.utils.tag.toTag
+import kotlin.collections.set
 
 class GuiComponentControlsButton(parent: GuiLayoutData,
                                  textSize: Int,
@@ -89,7 +90,7 @@ class GuiComponentControlsButton(parent: GuiLayoutData,
                     .firstOrNull()
             if (keyEvent != null && !keys.isEmpty()) {
                 key = ControllerKeyReference(keys)
-                tagMap[id] = key.toString()
+                tagMap[id] = key.toString().toTag()
                 editing = 0
                 keys.clear()
             }

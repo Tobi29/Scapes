@@ -124,9 +124,9 @@ class ItemStack(private var material: Material,
     }
 
     fun write(map: ReadWriteTagMap) {
-        map["Type"] = material.id
-        map["Data"] = data
-        map["Amount"] = amount
+        map["Type"] = material.id.toTag()
+        map["Data"] = data.toTag()
+        map["Amount"] = amount.toTag()
         map["MetaData"] = metaData.toTag()
     }
 

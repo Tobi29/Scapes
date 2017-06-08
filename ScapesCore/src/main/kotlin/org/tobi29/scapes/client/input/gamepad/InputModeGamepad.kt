@@ -256,7 +256,7 @@ class InputModeGamepad(engine: ScapesEngine,
                       def: ControllerKey,
                       tagMap: MutableTagMap) {
         if (!tagMap.containsKey(id)) {
-            tagMap[id] = def.toString()
+            tagMap[id] = def.toString().toTag()
         }
     }
 
@@ -264,7 +264,7 @@ class InputModeGamepad(engine: ScapesEngine,
                       def: ControllerKeyReference,
                       tagMap: MutableTagMap) {
         if (!tagMap.containsKey(id)) {
-            tagMap[id] = def.toString()
+            tagMap[id] = def.toString().toTag()
         }
     }
 
@@ -272,7 +272,7 @@ class InputModeGamepad(engine: ScapesEngine,
                       def: Double,
                       tagMap: MutableTagMap) {
         if (!tagMap.containsKey(id)) {
-            tagMap[id] = def
+            tagMap[id] = def.toTag()
         }
     }
 
@@ -280,7 +280,7 @@ class InputModeGamepad(engine: ScapesEngine,
                       def: Int,
                       tagMap: MutableTagMap) {
         if (!tagMap.containsKey(id)) {
-            tagMap[id] = def
+            tagMap[id] = def.toTag()
         }
     }
 

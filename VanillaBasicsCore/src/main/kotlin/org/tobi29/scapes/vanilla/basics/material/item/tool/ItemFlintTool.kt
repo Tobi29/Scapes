@@ -26,9 +26,9 @@ import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.engine.utils.math.tanh
-import org.tobi29.scapes.engine.utils.tag.set
 import org.tobi29.scapes.engine.utils.tag.toDouble
 import org.tobi29.scapes.engine.utils.tag.toInt
+import org.tobi29.scapes.engine.utils.tag.toTag
 import org.tobi29.scapes.entity.WieldMode
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
@@ -73,8 +73,8 @@ abstract class ItemFlintTool(type: VanillaMaterialType) : VanillaItem(type) {
                     "ToolDamage"]?.toDouble() ?: 0.0
             val modifier = if (entity.wieldMode() == WieldMode.DUAL) 1.0 else 2.1
             item.metaData("Vanilla")["ToolDamage"] =
-                    damage + (item.metaData("Vanilla")[
-                            "ToolDamageAdd"]?.toDouble() ?: 0.0)
+                    (damage + (item.metaData("Vanilla")[
+                            "ToolDamageAdd"]?.toDouble() ?: 0.0)).toTag()
             return (item.metaData("Vanilla")[
                     "ToolEfficiency"]?.toDouble() ?: 0.0) *
                     (1.0 - tanh(damage)) * modifier
@@ -90,7 +90,7 @@ abstract class ItemFlintTool(type: VanillaMaterialType) : VanillaItem(type) {
             val damage = item.metaData(
                     "Vanilla")["ToolDamage"]?.toDouble() ?: 0.0
             val modifier = if (entity.wieldMode() == WieldMode.DUAL) 1.0 else 2.1
-            item.metaData("Vanilla")["ToolDamage"] = damage
+            item.metaData("Vanilla")["ToolDamage"] = damage.toTag()
             return (item.metaData(
                     "Vanilla")["ToolStrength"]?.toDouble() ?: 0.0) *
                     (1.0 - tanh(damage)) * modifier

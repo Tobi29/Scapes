@@ -26,7 +26,6 @@ import org.tobi29.scapes.engine.utils.math.vector.plus
 import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.engine.utils.tag.ReadWriteTagMap
 import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.set
 import org.tobi29.scapes.engine.utils.tag.toMap
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.server.EntityAbstractServer
