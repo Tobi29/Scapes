@@ -22,8 +22,8 @@ import org.tobi29.scapes.engine.server.PacketBundleChannel
 import org.tobi29.scapes.engine.utils.CPUUtil
 import org.tobi29.scapes.engine.utils.ListenerRegistrar
 import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.replace
 import org.tobi29.scapes.engine.utils.tag.*
+import org.tobi29.scapes.engine.utils.toReplace
 import org.tobi29.scapes.server.command.Executor
 import org.tobi29.scapes.server.connection.ServerConnection
 import org.tobi29.scapes.server.extension.event.MessageEvent
@@ -107,7 +107,11 @@ class ControlPanel(worker: ConnectionWorker,
     }
 
     companion object : KLogging() {
-        private val ESCAPE = replace("&", "&amp;", ">", "&gt;", "<",
-                "&lt;", "'", "&apos;", "\"", "&quot;")
+        private val ESCAPE = listOf(
+                "&" to "&amp",
+                ">" to "&gt;",
+                "<" to "&lt;",
+                "'" to "&apos;",
+                "\"" to "&quot;").toReplace()
     }
 }
