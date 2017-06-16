@@ -73,7 +73,7 @@ ext {
     lwjglVersion = "3.1.2"
     log4jVersion = "2.8.1"
     jnaVersion = "4.4.0"
-    scapesEngineVersion = "62d5b772c8"
+    scapesEngineVersion = "6d1cc03dc1"
 
     slf4jSimple = "org.slf4j:slf4j-simple:$slf4jVersion"
     lwjgl = "org.lwjgl:lwjgl:$lwjglVersion"
