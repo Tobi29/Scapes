@@ -22,17 +22,17 @@ import org.tobi29.scapes.engine.graphics.TextureFilter
 import org.tobi29.scapes.engine.graphics.TextureWrap
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.resource.Resource
-import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.hash
 import org.tobi29.scapes.engine.utils.io.BufferedReadChannelStream
 import org.tobi29.scapes.engine.utils.io.Channels
+import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.io.filesystem.zipFile
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.engine.utils.use
 import org.tobi29.scapes.plugins.PluginFile
+import java.util.zip.ZipFile
 
 class GuiCreateWorld(state: GameState,
                      previous: GuiSaveSelect,
@@ -158,7 +158,7 @@ class GuiCreateWorld(state: GameState,
                 }
                 try {
                     addon.file()?.let {
-                        zipFile(it).use { zip ->
+                        ZipFile(it.toFile()).use { zip ->
                             val stream = BufferedReadChannelStream(
                                     Channels.newChannel(zip.getInputStream(
                                             zip.getEntry(

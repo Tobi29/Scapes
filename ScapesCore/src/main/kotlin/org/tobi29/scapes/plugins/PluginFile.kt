@@ -24,9 +24,9 @@ import org.tobi29.scapes.engine.utils.io.ReadSource
 import org.tobi29.scapes.engine.utils.io.checksum
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.read
-import org.tobi29.scapes.engine.utils.io.filesystem.zipFile
 import org.tobi29.scapes.engine.utils.io.tag.json.readJSON
 import java.lang.reflect.InvocationTargetException
+import java.util.zip.ZipFile
 
 class PluginFile {
     private val path: FilePath?
@@ -42,7 +42,7 @@ class PluginFile {
         this.path = path
         checksum = read(path) { checksum(it) }
         try {
-            val pluginMap = zipFile(path).use { zip ->
+            val pluginMap = ZipFile(path.toFile()).use { zip ->
                 readJSON(
                         BufferedReadChannelStream(Channels.newChannel(
                                 zip.getInputStream(zip.getEntry(

@@ -21,8 +21,8 @@ import org.tmatesoft.sqljet.core.table.SqlJetDb
 import org.tobi29.scapes.engine.sql.sqljet.SQLJetDatabase
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.graphics.encodePNG
-import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.io.IOException
+import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.format.WorldFormat
 import org.tobi29.scapes.server.format.WorldSource
@@ -43,7 +43,8 @@ class SQLJetWorldSource(private val path: FilePath,
         val pluginsDir = path.resolve("plugins")
         createDirectories(pluginsDir)
         for (plugin in plugins) {
-            copy(plugin, pluginsDir.resolve(plugin.fileName))
+            copy(plugin,
+                    pluginsDir.resolve(plugin.fileName ?: path("Plugin.jar")))
         }
     }
 

@@ -86,7 +86,7 @@ class Playlist(private val path: FilePath,
         return AccessController.doPrivileged(PrivilegedAction {
             try {
                 val files = listRecursive(path,
-                        ::isRegularFile,
+                        { isRegularFile(it) },
                         ::isNotHidden)
                 if (!files.isEmpty()) {
                     val random = threadLocalRandom()
