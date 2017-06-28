@@ -35,7 +35,7 @@ import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.engine.utils.math.vector.*
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.task.ThreadJoiner
+import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.server.format.TerrainInfiniteFormat
@@ -52,7 +52,7 @@ class TerrainInfiniteServer(override val world: WorldServer,
         TerrainInfiniteChunkManagerDynamic<TerrainInfiniteChunkServer>()), TerrainServer {
     private val chunkUnloadQueue = ConcurrentLinkedQueue<TerrainInfiniteChunkServer>()
     private val generatorOutput = GeneratorOutput(zSize)
-    private val loadJoiner: ThreadJoiner
+    private val loadJoiner: Joiner
 
     init {
         loadJoiner = world.taskExecutor.runThread({ joiner ->
