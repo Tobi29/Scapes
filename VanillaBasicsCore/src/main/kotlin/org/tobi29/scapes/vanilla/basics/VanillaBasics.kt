@@ -233,10 +233,10 @@ class VanillaBasics : WorldType {
                 ParticleEmitterExplosion(world.scene.particles()))
         world.scene.particles().register(
                 ParticleEmitterRain(world.scene.particles(),
-                        world.game.engine.graphics.textures().empty()))
+                        world.game.engine.graphics.textureEmpty()))
         world.scene.particles().register(
                 ParticleEmitterSnow(world.scene.particles(),
-                        world.game.engine.graphics.textures().empty()))
+                        world.game.engine.graphics.textureEmpty()))
         world.scene.particles().register(
                 ParticleEmitterLightning(world.scene.particles()))
         world.scene.particles().register(
