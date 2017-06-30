@@ -190,7 +190,7 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
         }
         chunks.forEach { it.render(gl, shader1, shader2, cam) }
         if (debug) {
-            gl.textures.unbind(gl)
+            gl.engine.graphics.textureEmpty().bind(gl)
             chunks.forEach { it.renderFrame(gl, frame, shader1, cam) }
         }
     }

@@ -173,7 +173,7 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
             }
             val world = system.world
             val terrain = world.terrain
-            gl.textures.unbind(gl)
+            gl.engine.graphics.textureEmpty().bind(gl)
             val s = shader.get()
             for (instance in instances) {
                 if (instance.state != ParticleInstance.State.ALIVE) {

@@ -373,7 +373,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                         1.0).toFloat()
                 val skyboxLight = skyLight * fogBrightness
                 // Sky
-                gl.textures.unbind(gl)
+                gl.engine.graphics.textureEmpty().bind(gl)
                 gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f)
                 sSkybox.setUniform3f(gl, 4, scene.fogR(), scene.fogG(),
                         scene.fogB())
@@ -425,7 +425,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                 // Clouds
                 fbo.texturesColor[0].bind(gl)
                 cloudMesh.render(gl, sSkybox)
-                gl.textures.unbind(gl)
+                gl.engine.graphics.textureEmpty().bind(gl)
                 // Bottom
                 skyboxBottomMesh.render(gl, sSkybox)
             }
