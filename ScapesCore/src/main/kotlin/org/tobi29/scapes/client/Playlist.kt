@@ -76,7 +76,7 @@ class Playlist(private val path: FilePath,
             }
             engine.notifications.add {
                 GuiNotificationSimple(it,
-                        engine.graphics.textures()["Scapes:image/gui/Playlist"],
+                        engine.graphics.textures["Scapes:image/gui/Playlist"],
                         name)
             }
         }
@@ -85,9 +85,10 @@ class Playlist(private val path: FilePath,
     private fun playMusic(path: FilePath): FilePath? {
         return AccessController.doPrivileged(PrivilegedAction {
             try {
-                val files = listRecursive(path,
-                        { isRegularFile(it) },
-                        ::isNotHidden)
+                val files = listRecursive(path) {
+                    filter { isRegularFile(it) }
+                            .filter { isNotHidden(it) }.toList()
+                }
                 if (!files.isEmpty()) {
                     val random = threadLocalRandom()
                     val title = files[random.nextInt(files.size)]

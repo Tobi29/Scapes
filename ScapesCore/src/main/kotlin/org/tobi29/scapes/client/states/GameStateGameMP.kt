@@ -58,9 +58,9 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
     private var init = false
 
     init {
-        val game = engine.game as ScapesClient
+        val scapes = engine.component(ScapesClient.COMPONENT)
         chatHistory = ChatHistory(engine.events)
-        playlist = Playlist(game.home.resolve("playlists"), engine)
+        playlist = Playlist(scapes.home.resolve("playlists"), engine)
         client = clientSupplier(this)
         terrainTextureRegistry = TerrainTextureRegistry(engine)
         particleTransparentAtlas = ParticleTransparentAtlas(engine)

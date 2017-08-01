@@ -15,16 +15,24 @@
  */
 package org.tobi29.scapes.server.shell
 
+import org.threeten.bp.LocalDateTime
+import org.threeten.bp.OffsetDateTime
+import org.threeten.bp.format.DateTimeFormatter
 import org.tobi29.scapes.connection.ServerInfo
 import org.tobi29.scapes.engine.server.SSLHandle
-import org.tobi29.scapes.engine.utils.*
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.filesystem.*
+import org.tobi29.scapes.engine.utils.Crashable
+import org.tobi29.scapes.engine.utils.EventDispatcher
+import org.tobi29.scapes.engine.utils.ListenerRegistrar
+import org.tobi29.scapes.engine.utils.io.*
+import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
+import org.tobi29.scapes.engine.utils.io.filesystem.exists
+import org.tobi29.scapes.engine.utils.io.filesystem.read
+import org.tobi29.scapes.engine.utils.io.filesystem.write
 import org.tobi29.scapes.engine.utils.io.tag.json.readJSON
 import org.tobi29.scapes.engine.utils.io.tag.json.writeJSON
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.tag.*
-import org.tobi29.scapes.engine.utils.task.Joiner
+import org.tobi29.scapes.engine.utils.task.BasicJoinable
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.command.Executor
@@ -36,7 +44,7 @@ import kotlin.system.exitProcess
 
 abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashable {
     protected val taskExecutor = TaskExecutor(this, "Server-Shell")
-    private val joinable = Joiner.BasicJoinable()
+    private val joinable = BasicJoinable()
     private val shutdownHook = Thread { joinable.joiner.join() }
     protected lateinit var server: ScapesServer
 
@@ -53,7 +61,8 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
                 val keyManagerConfig = configMap["KeyManager"]?.toMap() ?: TagMap()
                 val keyManagerProvider = loadKeyManager(
                         keyManagerConfig["ID"].toString())
-                val ssl = SSLHandle(keyManagerProvider[config, keyManagerConfig])
+                val ssl = SSLHandle(
+                        keyManagerProvider[config, keyManagerConfig])
                 val worldSourceConfig = configMap["WorldSource"]?.toMap() ?: TagMap()
                 val worldSourceProvider = loadWorldSource(
                         worldSourceConfig["ID"].toString())
@@ -147,9 +156,8 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
 
     override fun crash(e: Throwable): Nothing {
         logger.error(e) { "Stopping due to a crash" }
-        val debugValues = ConcurrentHashMap<String, String>()
         try {
-            writeCrashReport(e, file(config), "ScapesServer", debugValues)
+            crashReport(config, e)
         } catch (e1: IOException) {
             logger.warn { "Failed to write crash report: $e1" }
         }
@@ -192,5 +200,23 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
             }
             throw IOException("No key manager found for: $id")
         }
+    }
+}
+
+private val FORMATTER = DateTimeFormatter.ISO_DATE_TIME
+private val FILE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
+
+private fun crashReport(path: FilePath,
+                        e: Throwable) {
+    val time = OffsetDateTime.now()
+    val crashReportFile = path.resolve(
+            crashReportName(time.format(FILE_FORMATTER)))
+    write(crashReportFile) {
+        it.writeCrashReport(e, "Scapes Server",
+                crashReportSectionStacktrace(e),
+                crashReportSectionActiveThreads(),
+                crashReportSectionSystemProperties(),
+                crashReportSectionTime(
+                        LocalDateTime.from(time).format(FORMATTER)))
     }
 }

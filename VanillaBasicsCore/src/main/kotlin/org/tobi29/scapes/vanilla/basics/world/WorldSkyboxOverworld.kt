@@ -18,6 +18,7 @@ package org.tobi29.scapes.vanilla.basics.world
 
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldSkybox
+import org.tobi29.scapes.client.loadShader
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.gui.GuiComponentGroup
 import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab

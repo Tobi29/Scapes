@@ -78,6 +78,6 @@ class ReconnectDocument(private val address: RemoteAddress,
                 return@addTask 1000
             }
             -1
-        }, "Reconnect-Timer", 1000)
+        }, "Reconnect-Timer", 1000, false)
     }
 }

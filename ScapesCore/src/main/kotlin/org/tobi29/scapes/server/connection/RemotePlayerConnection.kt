@@ -160,7 +160,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                         send(PacketPingServer(registry, currentTime))
                     }
                     while (!sendQueue.isEmpty()) {
-                        val packet = sendQueue.poll()
+                        val packet = sendQueue.poll() ?: continue
                         sendQueueSize.decrementAndGet()
                         // This packet is not registered as it is just for
                         // internal use

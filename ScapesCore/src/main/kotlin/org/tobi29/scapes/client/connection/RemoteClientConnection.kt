@@ -48,7 +48,7 @@ class RemoteClientConnection(private val worker: ConnectionWorker,
             downloadDebug.setValue(rateChannel.inputRate / 128.0)
             uploadDebug.setValue(rateChannel.outputRate / 128.0)
             if (isClosed) -1 else 1000
-        }, "Connection-Rate", 1000)
+        }, "Connection-Rate", 1000, false)
     }
 
     override fun stop() {
@@ -60,7 +60,7 @@ class RemoteClientConnection(private val worker: ConnectionWorker,
         try {
             while (!connection.shouldClose && !close) {
                 while (!sendQueue.isEmpty()) {
-                    val packet = sendQueue.poll()
+                    val packet = sendQueue.poll() ?: continue
                     val output = channel.outputStream
                     val pos = output.position()
                     output.putShort(packet.type.id.toShort())

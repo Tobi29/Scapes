@@ -37,7 +37,7 @@ class GuiAccount(state: GameState,
     private var nickname = ""
 
     init {
-        val scapes = engine.game as ScapesClient
+        val scapes = engine.component(ScapesClient.COMPONENT)
         keyPair = account.keyPair()
         nickname = account.nickname()
         pane.addVert(16.0, 5.0, -1.0, 18.0) { GuiComponentText(it, "Key:") }

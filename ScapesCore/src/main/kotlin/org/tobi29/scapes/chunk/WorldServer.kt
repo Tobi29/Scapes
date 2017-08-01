@@ -48,7 +48,7 @@ class WorldServer(worldFormat: WorldFormat,
                   taskExecutor: TaskExecutor,
                   terrainSupplier: (WorldServer) -> TerrainServer,
                   environmentSupplier: (WorldServer) -> EnvironmentServer) : World<EntityServer>(
-        worldFormat.plugins, UpdateLoop(taskExecutor),
+        worldFormat.plugins, UpdateLoop(taskExecutor, null),
         taskExecutor, worldFormat.plugins.registry,
         seed), TagMapWrite, PlayConnection<PacketClient> {
     private val entityListeners = ConcurrentHashSet<(EntityServer) -> Unit>()

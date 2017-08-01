@@ -58,7 +58,7 @@ class ExtensionPlayers(application: Application,
                 return@addTask 1000
             }
             -1
-        }, "Extension-Ping")
+        }, "Extension-Ping", 0, false)
     }
 
     companion object {

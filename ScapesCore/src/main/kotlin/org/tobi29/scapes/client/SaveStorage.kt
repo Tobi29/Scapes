@@ -20,7 +20,7 @@ import org.tobi29.scapes.server.format.WorldSource
 
 interface SaveStorage {
     // TODO: @Throws(IOException::class)
-    fun list(): Sequence<String>
+    fun list(): List<String>
 
     // TODO: @Throws(IOException::class)
     fun exists(name: String): Boolean

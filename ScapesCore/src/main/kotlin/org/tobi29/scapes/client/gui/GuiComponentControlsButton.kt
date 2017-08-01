@@ -81,12 +81,12 @@ class GuiComponentControlsButton(parent: GuiLayoutData,
     override fun updateComponent(delta: Double) {
         if (editing > 1) {
             controller.pressEvents()
-                    .filter { it.state() == ControllerBasic.PressState.PRESS }
-                    .map { it.key() }.forEach {
+                    .filter { it.state == ControllerBasic.PressState.PRESS }
+                    .map { it.key }.forEach {
                 keys.add(it)
             }
             val keyEvent = controller.pressEvents()
-                    .filter { it.state() == ControllerBasic.PressState.RELEASE }
+                    .filter { it.state == ControllerBasic.PressState.RELEASE }
                     .firstOrNull()
             if (keyEvent != null && !keys.isEmpty()) {
                 key = ControllerKeyReference(keys)

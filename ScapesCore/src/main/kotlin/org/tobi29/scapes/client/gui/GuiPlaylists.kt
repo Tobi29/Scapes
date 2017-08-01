@@ -29,7 +29,7 @@ class GuiPlaylists(state: GameState,
                    previous: Gui,
                    style: GuiStyle) : GuiMenuDouble(
         state, "Playlists", "Add", "Back", previous, style) {
-    private val scapes = engine.game as ScapesClient
+    private val scapes = engine.component(ScapesClient.COMPONENT)
     private val scrollPane: GuiComponentScrollPaneViewport
     private var playlist = ""
 
@@ -104,7 +104,7 @@ class GuiPlaylists(state: GameState,
             play.on(GuiEvent.CLICK_LEFT) {
                 state.engine.notifications.add {
                     GuiNotificationSimple(it,
-                            state.engine.graphics.textures()["Scapes:image/gui/Playlist"],
+                            state.engine.graphics.textures["Scapes:image/gui/Playlist"],
                             name)
                 }
                 state.engine.sounds.stop("music")

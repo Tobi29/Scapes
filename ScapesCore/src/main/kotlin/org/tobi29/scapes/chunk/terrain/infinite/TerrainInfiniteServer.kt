@@ -385,7 +385,7 @@ class TerrainInfiniteServer(override val world: WorldServer,
         val chunks = ArrayList<Pair<Vector2i, TagMap>>()
         while (!chunkUnloadQueue.isEmpty()) {
             synchronized(this) {
-                chunks.add(removeChunk(chunkUnloadQueue.poll()))
+                chunkUnloadQueue.poll()?.let { chunks.add(removeChunk(it)) }
             }
         }
         if (chunks.isEmpty()) {

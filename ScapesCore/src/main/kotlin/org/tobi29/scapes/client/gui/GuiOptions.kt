@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.client.gui
 
-import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.GameState
@@ -24,6 +23,7 @@ import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.engine.utils.io.IOException
+import org.tobi29.scapes.engine.utils.logging.KLogging
 
 class GuiOptions(state: GameState,
                  previous: Gui,
@@ -31,7 +31,7 @@ class GuiOptions(state: GameState,
         state, "Options", previous, style) {
 
     init {
-        val game = engine.game as ScapesClient
+        val scapes = engine.component(ScapesClient.COMPONENT)
         val musicVolume = row(pane) {
             slider(it, "Music",
                     state.engine.config.volume("music"))
@@ -68,7 +68,7 @@ class GuiOptions(state: GameState,
         }
         account.on(GuiEvent.CLICK_LEFT) { event ->
             try {
-                val account1 = Account[game.home.resolve(
+                val account1 = Account[scapes.home.resolve(
                         "Account.properties")]
                 state.engine.guiStack.swap(this,
                         GuiAccount(state, this, account1, style))

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-apply from: "$rootDir/resources/scapesengineapplication.gradle"
-apply plugin: ScapesEngineApplicationLinux
-apply plugin: ScapesEngineApplicationMacOSX
-apply plugin: ScapesEngineApplicationWindows
+apply from: "$rootDir/resources/scapesenginemodulekotlinjvm.gradle"
+apply plugin: "idea"
+apply plugin: "scapes-engine-application"
+apply plugin: "scapes-engine-application-linux"
+apply plugin: "scapes-engine-application-macosx"
+apply plugin: "scapes-engine-application-windows"
 
 version = "0.0.0"
 

@@ -31,7 +31,7 @@ class MobSkeletonClient(type: EntityType<*, *>,
         AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 20.0, 30.0) {
 
     override fun onDeath() {
-        val texture = world.game.engine.graphics.textures()["VanillaBasics:image/entity/mob/Skeleton"]
+        val texture = world.game.engine.graphics.textures["VanillaBasics:image/entity/mob/Skeleton"]
         MobLivingModelHuman.particles(world.game.modelHumanShared(),
                 world.scene.particles(), pos.now(), speed.now(), rot.now(),
                 texture.get(), true, false)
@@ -46,7 +46,7 @@ class MobSkeletonClient(type: EntityType<*, *>,
     }
 
     override fun createModel(): MobLivingModelHuman? {
-        val texture = world.game.engine.graphics.textures()["VanillaBasics:image/entity/mob/Skeleton"]
+        val texture = world.game.engine.graphics.textures["VanillaBasics:image/entity/mob/Skeleton"]
         return MobLivingModelHuman(world.game.modelHumanShared(), this, texture,
                 true, false)
     }

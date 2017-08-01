@@ -27,6 +27,7 @@ import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.InputDialog
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
 import org.tobi29.scapes.engine.utils.EventDispatcher
+import org.tobi29.scapes.engine.utils.newEventDispatcher
 import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.tag.Tag
@@ -145,7 +146,7 @@ class ConnectDocument(private val address: RemoteAddress,
             output.put(21)
             bundleChannel.queueBundle()
             val controlPanel = ControlPanelProtocol(worker, bundleChannel,
-                    EventDispatcher())
+                    newEventDispatcher())
             controlPanel.addCommand("Commands-Send") { payload ->
                 application.accessAsync(document) { composite ->
                     payload["Commands"]?.toList()?.let {

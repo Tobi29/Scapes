@@ -26,7 +26,6 @@ import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.io.*
 import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.use
 import org.tobi29.scapes.plugins.PluginFile
 import org.tobi29.scapes.plugins.Plugins
 import java.util.zip.ZipFile
@@ -39,7 +38,7 @@ class GuiPlugins(state: GameState,
     private val scrollPane: GuiComponentScrollPaneViewport
 
     init {
-        val scapes = engine.game as ScapesClient
+        val scapes = engine.component(ScapesClient.COMPONENT)
         path = scapes.home.resolve("plugins")
         scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {
             GuiComponentScrollPane(it, 70)
@@ -83,8 +82,7 @@ class GuiPlugins(state: GameState,
                                 plugin: PluginFile) : GuiComponentGroupSlab(
             parent) {
         init {
-            val icon = addHori(15.0, 15.0, 40.0,
-                    -1.0) { parent: GuiLayoutData -> GuiComponentIcon(parent) }
+            val icon = addHori(15.0, 15.0, 40.0, -1.0) { GuiComponentIcon(it) }
             val label = addHori(5.0, 20.0, -1.0, -1.0) {
                 button(it, "Invalid plugin")
             }
@@ -97,7 +95,7 @@ class GuiPlugins(state: GameState,
             if (plugin.file() != null) {
                 delete.on(GuiEvent.CLICK_LEFT) {
                     try {
-                        plugin.file()?.let(::delete)
+                        plugin.file()?.let { delete(it) }
                         scrollPane.remove(this)
                     } catch (e: IOException) {
                         logger.warn { "Failed to delete plugin: $e" }
@@ -111,9 +109,7 @@ class GuiPlugins(state: GameState,
                                     Channels.newChannel(zip.getInputStream(
                                             zip.getEntry(
                                                     "scapes/plugin/Icon.png"))))
-                            val image = decodePNG(stream) {
-                                state.engine.allocate(it)
-                            }
+                            val image = decodePNG(stream, state.engine)
                             val texture = state.engine.graphics.createTexture(
                                     image, 0, TextureFilter.LINEAR,
                                     TextureFilter.LINEAR, TextureWrap.CLAMP,

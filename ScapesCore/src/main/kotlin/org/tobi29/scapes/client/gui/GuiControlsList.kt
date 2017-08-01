@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.client.gui
 
-import org.tobi29.scapes.client.ScapesClient
+import org.tobi29.scapes.client.InputManagerScapes
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiEvent
@@ -27,7 +27,8 @@ class GuiControlsList(state: GameState,
                       style: GuiStyle) : GuiMenuSingle(
         state, "Controls", previous, style) {
     init {
-        (state.engine.game as ScapesClient).inputManager.inputModes.forEach { inputMode ->
+        engine.component(
+                InputManagerScapes.COMPONENT).inputModes.forEach { inputMode ->
             val controls = row(pane) { button(it, inputMode.toString()) }
             selection(controls)
             controls.on(GuiEvent.CLICK_LEFT) {

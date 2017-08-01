@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-apply from: "$rootDir/resources/scapesenginemodulekotlin.gradle"
+apply from: "$rootDir/resources/scapesenginemodulekotlinjvm.gradle"
 
 version = "0.0.0"
 
@@ -24,7 +24,9 @@ dependencies {
     compile rootProject.ext.scapesEngineFileSystems
     compile rootProject.ext.scapesEngineArgumentParser
     compile rootProject.ext.scapesEngineServerFramework
+    compile rootProject.ext.scapesEngineShaderCLike
     compile rootProject.ext.scapesEngineSQLFramework
     compile rootProject.ext.scapesEngineTagStructureJSON
     compile rootProject.ext.scapesEngineGenerationUtils
+    compile rootProject.ext.threeten
 }

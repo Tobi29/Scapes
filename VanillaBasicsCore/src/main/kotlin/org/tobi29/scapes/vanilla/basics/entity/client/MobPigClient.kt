@@ -39,7 +39,7 @@ class MobPigClient(type: EntityType<*, *>,
     }
 
     override fun createModel(): MobLivingModelPig? {
-        val texture = world.game.engine.graphics.textures()["VanillaBasics:image/entity/mob/Pig"]
+        val texture = world.game.engine.graphics.textures["VanillaBasics:image/entity/mob/Pig"]
         val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
         return MobLivingModelPig(plugin.modelPigShared(), this, texture)
     }

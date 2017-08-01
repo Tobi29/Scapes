@@ -39,7 +39,7 @@ import org.tobi29.scapes.server.ssl.dummy.DummyKeyManagerProvider
 class GameStateLoadSP(private var source: WorldSource?,
                       engine: ScapesEngine,
                       private val scene: Scene) : GameState(engine) {
-    private val scapes = engine.game as ScapesClient
+    private val scapes = engine.component(ScapesClient.COMPONENT)
     private var step = 0
     private var server: ScapesServer? = null
     private var gui: GuiLoading? = null

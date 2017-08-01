@@ -33,8 +33,8 @@ class GuiControllerGamepad(engine: ScapesEngine,
 
     override fun update(delta: Double) {
         controller.pressEvents().forEach { event ->
-            when (event.state()) {
-                ControllerBasic.PressState.PRESS -> handlePress(event.key())
+            when (event.state) {
+                ControllerBasic.PressState.PRESS -> handlePress(event.key)
             }
         }
     }

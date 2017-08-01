@@ -39,7 +39,7 @@ class GameStateLoadMP(private val address: RemoteAddress,
     private var gui: GuiLoading? = null
 
     override fun init() {
-        val scapes = engine.game as ScapesClient
+        val scapes = engine.component(ScapesClient.COMPONENT)
         gui = GuiLoading(this, engine.guiStyle).apply {
             setProgress("Connecting...", 0.0)
             engine.guiStack.add("20-Progress", this)
@@ -96,7 +96,7 @@ class GameStateLoadMP(private val address: RemoteAddress,
     private suspend fun connect(worker: ConnectionWorker,
                                 connection: Connection,
                                 ssl: SSLHandle) {
-        val scapes = engine.game as ScapesClient
+        val scapes = engine.component(ScapesClient.COMPONENT)
 
         val channel = connect(worker, address)
         try {

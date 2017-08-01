@@ -131,7 +131,7 @@ class ItemModelSimple(private val texture: TerrainTexture?,
             mesh.texture(texMaxX, texMaxY)
             mesh.vertex(0.5, -halfPixel, -0.5)
         }
-        return mesh.finish(texture.texture().engine)
+        return mesh.finish(texture.getTexture().engine)
     }
 
     override fun render(gl: GL,
@@ -139,7 +139,7 @@ class ItemModelSimple(private val texture: TerrainTexture?,
         if (texture == null || model == null) {
             return
         }
-        texture.texture().bind(gl)
+        texture.getTexture().bind(gl)
         gl.matrixStack.push { matrix ->
             matrix.rotate(315.0f, 0.0f, 1.0f, 0.0f)
             model.render(gl, shader)
@@ -151,7 +151,7 @@ class ItemModelSimple(private val texture: TerrainTexture?,
         if (texture == null || modelInventory == null) {
             return
         }
-        texture.texture().bind(gl)
+        texture.getTexture().bind(gl)
         modelInventory.render(gl, shader)
     }
 }

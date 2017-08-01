@@ -65,7 +65,7 @@ abstract class PlayerConnection(val server: ServerConnection) : PlayConnection<P
 
     fun mob(consumer: (MobPlayerServer) -> Unit) {
         entity?.let {
-            it.world.loop.addTaskOnce({ consumer(it) }, "Player-Mob")
+            it.world.loop.addTaskOnce({ consumer(it) }, "Player-Mob", 0, false)
         }
     }
 

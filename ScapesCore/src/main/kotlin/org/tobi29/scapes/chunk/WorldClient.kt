@@ -18,9 +18,11 @@ package org.tobi29.scapes.chunk
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.isTransparent
+import org.tobi29.scapes.client.InputManagerScapes
 import org.tobi29.scapes.client.InputModeChangeEvent
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.connection.ClientConnection
+import org.tobi29.scapes.client.loadShader
 import org.tobi29.scapes.client.states.scenes.SceneScapesVoxelWorld
 import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.graphics.BlendingMode
@@ -80,8 +82,8 @@ class WorldClient(val connection: ClientConnection,
         playerModel = player.createModel()
         connection.plugins.plugins.forEach { it.worldInit(this) }
 
-        val scapes = game.engine.game as ScapesClient
-        player.setInputMode(scapes.inputManager.inputMode)
+        player.setInputMode(
+                game.engine.component(InputManagerScapes.COMPONENT).inputMode)
 
         logger.info { "Received player entity: $player with id: $playerID" }
     }
@@ -182,10 +184,10 @@ class WorldClient(val connection: ClientConnection,
     fun addToPipeline(gl: GL,
                       cam: Cam,
                       debug: Boolean): suspend () -> (Double) -> Unit {
-        val scapes = game.engine.game as ScapesClient
+        val scapes = game.engine.component(ScapesClient.COMPONENT)
         val resolutionMultiplier = scapes.resolutionMultiplier
-        val width = round(gl.contentWidth() * resolutionMultiplier)
-        val height = round(gl.contentHeight() * resolutionMultiplier)
+        val width = round(gl.contentWidth * resolutionMultiplier)
+        val height = round(gl.contentHeight * resolutionMultiplier)
         val animations = scapes.animations
 
         val shaderTerrain1 = gl.engine.graphics.loadShader(

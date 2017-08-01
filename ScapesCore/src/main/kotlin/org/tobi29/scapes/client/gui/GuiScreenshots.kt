@@ -28,7 +28,7 @@ class GuiScreenshots(state: GameState,
                      previous: Gui,
                      style: GuiStyle) : GuiMenuSingle(
         state, "Screenshots", previous, style) {
-    private val scapes = engine.game as ScapesClient
+    private val scapes = engine.component(ScapesClient.COMPONENT)
     private val scrollPane: GuiComponentScrollPaneViewport
 
     init {
@@ -37,8 +37,10 @@ class GuiScreenshots(state: GameState,
         }.viewport
         try {
             val path = scapes.home.resolve("screenshots")
-            val files = listRecursive(path,
-                    { isRegularFile(it) && isNotHidden(it) })
+            val files = listRecursive(path) {
+                filter { isRegularFile(it) }
+                        .filter { isNotHidden(it) }.toList()
+            }
             files.asSequence().sorted().forEach { file ->
                 scrollPane.addVert(0.0, 0.0, -1.0, 70.0) {
                     Element(it, file, this)
@@ -59,9 +61,7 @@ class GuiScreenshots(state: GameState,
             val resource = engine.resources.load {
                 try {
                     read(path) {
-                        val image = decodePNG(it) {
-                            state.engine.allocate(it)
-                        }
+                        val image = decodePNG(it, state.engine)
                         state.engine.graphics.createTexture(image, 0)
                     }
                 } catch (e: IOException) {

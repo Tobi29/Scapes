@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-apply plugin: "kotlin"
+apply plugin: "kotlin-platform-jvm"
 apply plugin: "maven"
 apply plugin: "org.junit.platform.gradle.plugin"
 apply plugin: "org.jetbrains.dokka"
@@ -33,6 +33,13 @@ task sourcesJar(type: Jar) {
 
 artifacts {
     archives sourcesJar
+}
+
+ext.implementCommon = { Project project ->
+    dependencies.implement project
+    dependencies.compileOnly project
+    dependencies.testCompileOnly project
+    tasks.sourcesJar.from project.sourceSets.main.allSource
 }
 
 dependencies {

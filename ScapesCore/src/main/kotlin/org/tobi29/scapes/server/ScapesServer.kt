@@ -26,6 +26,7 @@ import org.tobi29.scapes.engine.utils.EventDispatcher
 import org.tobi29.scapes.engine.utils.assert
 import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.scapes.engine.utils.newEventDispatcher
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toInt
 import org.tobi29.scapes.engine.utils.tag.toMap
@@ -51,7 +52,7 @@ class ScapesServer(source: WorldSource,
     val plugins: Plugins
     val seed: Long
     val extensions: ServerExtensions
-    val events = EventDispatcher()
+    val events = newEventDispatcher()
     private val format: WorldFormat
     private val playerData: PlayerData
     private val commandRegistry: CommandRegistry

@@ -46,7 +46,7 @@ class GuiServerSelect(state: GameState,
     private val scrollPane: GuiComponentScrollPaneViewport
 
     init {
-        val scapes = state.engine.game as ScapesClient
+        val scapes = engine.component(ScapesClient.COMPONENT)
         servers = scapes.configMap.listMut("Servers")
 
         scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {
@@ -81,6 +81,7 @@ class GuiServerSelect(state: GameState,
         val address: RemoteAddress
 
         init {
+            val scapes = engine.component(ScapesClient.COMPONENT)
             icon = addHori(15.0, 15.0, 40.0,
                     -1.0) { parent: GuiLayoutData -> GuiComponentIcon(parent) }
             label = addHori(5.0, 20.0, -1.0, -1.0) {
@@ -105,7 +106,7 @@ class GuiServerSelect(state: GameState,
             val fail = { e: Exception ->
                 label.setText(error(e))
             }
-            (state.engine.game as ScapesClient).connection.addConnection { worker, connection ->
+            scapes.connection.addConnection { worker, connection ->
                 val channel = try {
                     connect(worker, address)
                 } catch (e: Exception) {

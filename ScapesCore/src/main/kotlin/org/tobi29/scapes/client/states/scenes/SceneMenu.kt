@@ -17,6 +17,7 @@
 package org.tobi29.scapes.client.states.scenes
 
 import org.tobi29.scapes.client.ScapesClient
+import org.tobi29.scapes.client.loadShader
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.resource.Resource
@@ -26,10 +27,10 @@ import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurOffset
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurWeight
 import org.tobi29.scapes.engine.utils.io.IOException
+import org.tobi29.scapes.engine.utils.io.use
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.shader.ArrayExpression
 import org.tobi29.scapes.engine.utils.shader.IntegerExpression
-import org.tobi29.scapes.engine.utils.use
 import org.tobi29.scapes.server.format.WorldSource
 
 open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
@@ -49,8 +50,8 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
     override fun appendToPipeline(gl: GL): suspend () -> (Double) -> Unit {
         val space = gl.contentSpace() / 8.0
         val blurSamples = round(space * 8.0) + 8
-        val width = gl.contentWidth() / 8
-        val height = gl.contentHeight() / 8
+        val width = gl.contentWidth / 8
+        val height = gl.contentHeight / 8
 
         // Background box pane
         val model = engine.graphics.createVTI(
@@ -154,8 +155,8 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
     }
 
     protected open fun loadTextures() {
-        val game = engine.game as ScapesClient
-        val saves = game.saves
+        val scapes = engine.component(ScapesClient.COMPONENT)
+        val saves = scapes.saves
         val random = threadLocalRandom()
         try {
             val list = saves.list().toList()
@@ -206,7 +207,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
         val r = random.nextInt(2)
         for (i in 0..5) {
             setBackground(
-                    engine.graphics.textures()["Scapes:image/gui/panorama/$r/Panorama$i"],
+                    engine.graphics.textures["Scapes:image/gui/panorama/$r/Panorama$i"],
                     i)
         }
     }

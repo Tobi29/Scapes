@@ -16,18 +16,46 @@
 
 package org.tobi29.scapes.desktop
 
+import org.tobi29.scapes.VERSION
 import org.tobi29.scapes.client.DialogProvider
-import org.tobi29.scapes.client.ScapesClient
+import org.tobi29.scapes.client.InputManagerScapes
+import org.tobi29.scapes.engine.Game
+import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.ContainerGLFW
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.PlatformDialogs
 import org.tobi29.scapes.engine.input.FileType
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
+import org.tobi29.scapes.engine.utils.io.filesystem.FileCache
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
+import org.tobi29.scapes.engine.utils.io.filesystem.createDirectories
 
-internal class ScapesDesktop(private val scapes: ScapesClient,
-                             private val container: () -> ContainerGLFW?) : DialogProvider {
+internal class ScapesDesktop(
+        val engine: ScapesEngine,
+        val home: FilePath,
+        val pluginCache: FilePath,
+        private val container: ContainerGLFW?
+) : Game, DialogProvider {
+    override val name = "Scapes"
+    override val id = "Scapes"
+    override val version = VERSION
+
+    override fun init() {
+        val playlistsPath = home.resolve("playlists")
+        createDirectories(playlistsPath.resolve("day"))
+        createDirectories(playlistsPath.resolve("night"))
+        createDirectories(playlistsPath.resolve("battle"))
+        createDirectories(home.resolve("plugins"))
+        createDirectories(home.resolve("screenshots"))
+        createDirectories(pluginCache)
+        FileCache.check(pluginCache)
+    }
+
+    override fun dispose() {
+        engine.unregisterComponent(InputManagerScapes.COMPONENT)
+    }
+
     override fun openMusicDialog(result: (String, ReadableByteStream) -> Unit) {
-        container()?.let { container ->
+        container?.let { container ->
             container.exec {
                 PlatformDialogs.openFileDialog(container,
                         FileType.MUSIC.extensions, true, result)
@@ -36,7 +64,7 @@ internal class ScapesDesktop(private val scapes: ScapesClient,
     }
 
     override fun openPluginDialog(result: (String, ReadableByteStream) -> Unit) {
-        container()?.let { container ->
+        container?.let { container ->
             container.exec {
                 PlatformDialogs.openFileDialog(container,
                         FileType("*.jar", "Jar Archive").extensions, true,
@@ -46,7 +74,7 @@ internal class ScapesDesktop(private val scapes: ScapesClient,
     }
 
     override fun openSkinDialog(result: (String, ReadableByteStream) -> Unit) {
-        container()?.let { container ->
+        container?.let { container ->
             container.exec {
                 PlatformDialogs.openFileDialog(container,
                         FileType.IMAGE.extensions, false, result)
@@ -55,7 +83,7 @@ internal class ScapesDesktop(private val scapes: ScapesClient,
     }
 
     override fun saveScreenshotDialog(result: (FilePath) -> Unit) {
-        container()?.let { container ->
+        container?.let { container ->
             container.exec {
                 PlatformDialogs.saveFileDialog(container,
                         arrayOf(Pair("*.png", "PNG Picture")))?.let {

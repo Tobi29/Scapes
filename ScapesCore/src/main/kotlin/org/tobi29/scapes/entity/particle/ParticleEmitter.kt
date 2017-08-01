@@ -39,7 +39,7 @@ abstract class ParticleEmitter<P : ParticleInstance> protected constructor(prote
 
     fun poll() {
         while (!queue.isEmpty()) {
-            val consumer = queue.poll()
+            val consumer = queue.poll() ?: continue
             if (!findInstance(consumer)) {
                 // Drain queue and exit because no particles left
                 queue.clear()
@@ -50,7 +50,7 @@ abstract class ParticleEmitter<P : ParticleInstance> protected constructor(prote
 
     fun pollRender() {
         while (!activateQueue.isEmpty()) {
-            val instance = activateQueue.poll()
+            val instance = activateQueue.poll() ?: continue
             assert { instance.state == ParticleInstance.State.NEW }
             instance.state = ParticleInstance.State.ALIVE
             hasAlive = true

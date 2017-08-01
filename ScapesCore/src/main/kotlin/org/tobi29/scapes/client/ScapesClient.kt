@@ -15,72 +15,41 @@
  */
 package org.tobi29.scapes.client
 
-import org.tobi29.scapes.VERSION
+import org.tobi29.scapes.client.input.InputModeDummy
 import org.tobi29.scapes.client.input.InputModeScapes
 import org.tobi29.scapes.client.input.gamepad.InputModeGamepad
 import org.tobi29.scapes.client.input.keyboard.InputModeKeyboard
 import org.tobi29.scapes.client.input.spi.InputModeProvider
 import org.tobi29.scapes.client.input.touch.InputModeTouch
-import org.tobi29.scapes.client.states.GameStateMenu
-import org.tobi29.scapes.engine.Game
-import org.tobi29.scapes.engine.GameStateStartup
+import org.tobi29.scapes.engine.ComponentLifecycle
+import org.tobi29.scapes.engine.ComponentStep
 import org.tobi29.scapes.engine.ScapesEngine
-import org.tobi29.scapes.engine.graphics.FontRenderer
-import org.tobi29.scapes.engine.gui.GuiBasicStyle
 import org.tobi29.scapes.engine.gui.GuiNotificationSimple
-import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.engine.input.*
 import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.utils.AtomicBoolean
-import org.tobi29.scapes.engine.utils.EventDispatcher
+import org.tobi29.scapes.engine.utils.ComponentTypeRegistered
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
-import org.tobi29.scapes.engine.utils.io.classpath.ClasspathPath
-import org.tobi29.scapes.engine.utils.io.filesystem.FileCache
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.io.filesystem.createDirectories
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.tag.*
 import java.util.*
 
-class ScapesClient(engine: ScapesEngine,
+class ScapesClient(val engine: ScapesEngine,
                    val home: FilePath,
                    val pluginCache: FilePath,
-                   private val savesSupplier: (ScapesClient) -> SaveStorage,
-                   dialogsSupplier: (ScapesClient) -> DialogProvider,
-                   lightDefaults: Boolean = false) : Game(
-        engine) {
-    override val name = "Scapes"
-    override val id = "Scapes"
-    override val version = VERSION
-    override lateinit var defaultGuiStyle: GuiStyle
+                   savesSupplier: (ScapesClient) -> SaveStorage,
+                   dialogs: DialogProvider,
+                   lightDefaults: Boolean = false) : ComponentLifecycle, ComponentStep {
     val configMap = engine.configMap.mapMut("Scapes")
     val connection = ConnectionManager(engine.taskExecutor, 10)
-    lateinit var saves: SaveStorage
-        private set
-    val inputManager =
-            object : InputManager<InputModeScapes>(engine, configMap) {
-                private var initialMode = AtomicBoolean(true)
-
-                override fun inputMode(controller: Controller) =
-                        loadService(engine, controller)
-
-                override fun inputModeChanged(inputMode: InputModeScapes) {
-                    events.fire(InputModeChangeEvent(inputMode))
-                    if (!initialMode.getAndSet(false)) {
-                        engine.notifications.add {
-                            GuiNotificationSimple(it,
-                                    engine.graphics.textures()["Scapes:image/gui/input/Default"],
-                                    inputMode.toString())
-                        }
-                    }
-                }
-            }
-    val dialogs = dialogsSupplier(this)
+    val dialogs = dialogs
         get() = run {
             val security = System.getSecurityManager()
             security?.checkPermission(RuntimePermission("scapes.dialogs"))
             field
         }
+    val saves = savesSupplier(this)
 
     var animations by configMap.tagBoolean("Animations", !lightDefaults)
     var bloom by configMap.tagBoolean("Bloom", !lightDefaults)
@@ -90,28 +59,6 @@ class ScapesClient(engine: ScapesEngine,
             if (lightDefaults) 64.0 else 128.0)
     var resolutionMultiplier by configMap.tagDouble("ResolutionMultiplier",
             if (lightDefaults) 0.5 else 1.0)
-
-    override val events = EventDispatcher(engine.events) {
-    }.apply { enable() }
-
-    override fun initEarly() {
-        val playlistsPath = home.resolve("playlists")
-        createDirectories(playlistsPath.resolve("day"))
-        createDirectories(playlistsPath.resolve("night"))
-        createDirectories(playlistsPath.resolve("battle"))
-        createDirectories(home.resolve("plugins"))
-        createDirectories(home.resolve("screenshots"))
-        createDirectories(pluginCache)
-        FileCache.check(pluginCache)
-        engine.files.registerFileSystem("Scapes",
-                ClasspathPath(this::class.java.classLoader,
-                        "assets/scapes/tobi29"))
-        saves = savesSupplier(this)
-        val font = FontRenderer(engine, engine.container.loadFont(
-                "Scapes:font/QuicksandPro-Regular") ?: throw IllegalStateException(
-                "Failed to load default font"))
-        defaultGuiStyle = GuiBasicStyle(engine, font)
-    }
 
     override fun init() {
         if (!configMap.containsKey("IntegratedServer")) {
@@ -125,28 +72,42 @@ class ScapesClient(engine: ScapesEngine,
                 }
             }
         }
-        inputManager.enable()
         connection.workers(1)
-        engine.switchState(GameStateStartup(engine) { GameStateMenu(engine) })
-    }
-
-    override fun start() {
-    }
-
-    override fun halt() {
-    }
-
-    override fun step(delta: Double) {
-        inputManager.step(delta)
     }
 
     override fun dispose() {
-        super.dispose()
         connection.stop()
-        inputManager.disable()
     }
 
     companion object : KLogging() {
+        val COMPONENT = ComponentTypeRegistered<ScapesClient>()
+    }
+}
+
+class InputManagerScapes(
+        engine: ScapesEngine,
+        configMap: MutableTagMap
+) : InputManager<InputModeScapes>(engine, configMap,
+        InputModeDummy(engine)) {
+    private var initialMode = AtomicBoolean(true)
+
+    override fun inputMode(controller: Controller) =
+            loadService(engine, controller)
+
+    override fun inputModeChanged(inputMode: InputModeScapes) {
+        events.fire(InputModeChangeEvent(inputMode))
+        if (!initialMode.getAndSet(false)) {
+            engine.notifications.add {
+                GuiNotificationSimple(it,
+                        engine.graphics.textures["Scapes:image/gui/input/Default"],
+                        inputMode.toString())
+            }
+        }
+    }
+
+    companion object : KLogging() {
+        val COMPONENT = ComponentTypeRegistered<InputManagerScapes>()
+
         private fun loadService(engine: ScapesEngine,
                                 controller: Controller): ((MutableTagMap) -> InputModeScapes)? {
             for (provider in ServiceLoader.load(
@@ -154,7 +115,7 @@ class ScapesClient(engine: ScapesEngine,
                 try {
                     provider.get(engine, controller)?.let { return it }
                 } catch (e: ServiceConfigurationError) {
-                    logger.warn { "Unable to load input mode provider: $e" }
+                    ScapesClient.logger.warn { "Unable to load input mode provider: $e" }
                 }
             }
             if (controller is ControllerDefault) {

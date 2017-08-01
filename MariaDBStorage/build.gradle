@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-apply from: "$rootDir/resources/scapesengineextension.gradle"
-apply plugin: ScapesEngineExtensionLinux
+apply from: "$rootDir/resources/scapesenginemodulekotlinjvm.gradle"
+apply plugin: "idea"
+apply plugin: "scapes-engine-extension"
+apply plugin: "scapes-engine-extension-linux"
 
 version = "0.0.0"
 

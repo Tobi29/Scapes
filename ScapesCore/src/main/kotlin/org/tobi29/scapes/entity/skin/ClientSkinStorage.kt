@@ -37,8 +37,10 @@ class ClientSkinStorage(private val engine: ScapesEngine,
         val oldSkins = skins.values.filter { it.increaseTicks() > 1200 }
         oldSkins.forEach { skin -> skins.remove(skin.checksum()) }
         while (!skinRequests.isEmpty()) {
-            connection.send(PacketSkin(connection.plugins.registry,
-                    skinRequests.poll()))
+            skinRequests.poll()?.let { request ->
+                connection.send(
+                        PacketSkin(connection.plugins.registry, request))
+            }
         }
     }
 

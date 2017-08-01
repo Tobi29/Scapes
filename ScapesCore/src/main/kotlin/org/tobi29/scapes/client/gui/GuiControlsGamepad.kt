@@ -29,8 +29,7 @@ class GuiControlsGamepad(state: GameState,
                          game: ScapesClient,
                          tagMap: MutableTagMap,
                          controller: ControllerJoystick,
-                         style: GuiStyle) : GuiControls(state, previous, game,
-        style) {
+                         style: GuiStyle) : GuiControls(state, previous, style) {
     init {
         val movementTag = tagMap.mapMut("Movement")
         addText("Movement")

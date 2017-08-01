@@ -263,7 +263,7 @@ class InputModeKeyboard(engine: ScapesEngine,
                     }
                 }
                 if (event.key == ControllerKey.KEY_F1) {
-                    val state = engine.getState()
+                    val state = engine.state
                     if (state is GameStateGameMP) {
                         state.setHudVisible(!state.hud.visible)
                         event.muted = true
@@ -273,8 +273,10 @@ class InputModeKeyboard(engine: ScapesEngine,
                 if (event.key == ControllerKey.KEY_F2) {
                     engine.graphics.requestScreenshot { image ->
                         engine.taskExecutor.runTask({
-                            val game = engine.game as ScapesClient
-                            val path = game.home.resolve("screenshots").resolve(
+                            val scapes = engine.component(
+                                    ScapesClient.COMPONENT)
+                            val path = scapes.home.resolve(
+                                    "screenshots").resolve(
                                     "${System.currentTimeMillis()}.png")
                             try {
                                 write(path) { encodePNG(image, it, 9, false) }
@@ -309,7 +311,7 @@ class InputModeKeyboard(engine: ScapesEngine,
                     }
                 }
                 if (Debug.enabled() && event.key == ControllerKey.KEY_F6) {
-                    val state = engine.getState()
+                    val state = engine.state
                     if (state is GameStateGameMP) {
                         state.debugWidget.visible = !state.debugWidget.visible
                         event.muted = true
@@ -412,8 +414,8 @@ class InputModeKeyboard(engine: ScapesEngine,
     override fun createControlsGUI(state: GameState,
                                    prev: Gui): Gui {
         return GuiControlsDefault(state, prev,
-                state.engine.game as ScapesClient, tagMap, controller,
-                prev.style)
+                state.engine.component(ScapesClient.COMPONENT), tagMap,
+                controller, prev.style)
     }
 
     override fun walk(): Vector2d {

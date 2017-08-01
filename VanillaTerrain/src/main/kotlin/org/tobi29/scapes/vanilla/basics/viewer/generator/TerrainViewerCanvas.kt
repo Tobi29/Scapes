@@ -150,7 +150,8 @@ class TerrainViewerCanvas(parent: Composite,
 
     private fun queueDraw() {
         if (!drawQueued.getAndSet(true)) {
-            application.loop.addTaskOnce({ redraw() }, "Viewer-Redraw", 100)
+            application.loop.addTaskOnce({ redraw() }, "Viewer-Redraw", 100,
+                    false)
         }
     }
 

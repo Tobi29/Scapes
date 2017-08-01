@@ -22,7 +22,7 @@ class SceneError(engine: ScapesEngine) : SceneMenu(engine) {
     override fun loadTextures() {
         for (i in 0..5) {
             setBackground(
-                    engine.graphics.textures()["Scapes:image/gui/panorama/error/Panorama$i"],
+                    engine.graphics.textures["Scapes:image/gui/panorama/error/Panorama$i"],
                     i)
         }
     }

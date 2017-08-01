@@ -41,9 +41,9 @@ class GameStateMenu(engine: ScapesEngine) : GameState(engine) {
     }
 
     override fun init() {
-        val game = engine.game as ScapesClient
+        val scapes = engine.component(ScapesClient.COMPONENT)
         val style = engine.guiStyle
-        val file = game.home.resolve("Account.properties")
+        val file = scapes.home.resolve("Account.properties")
         val account = try {
             Account.read(file)
         } catch (e: IOException) {

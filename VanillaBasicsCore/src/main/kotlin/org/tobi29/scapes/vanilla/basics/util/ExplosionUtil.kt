@@ -152,7 +152,7 @@ fun TerrainServer.explosionBlockPush(
         entities.forEach { world.addEntityNew(it) }
         world.explosionEntities(x + 0.5, y + 0.5, z + 0.5, size.toDouble(),
                 push, damage)
-    }, "Explosion-Entities")
+    }, "Explosion-Entities", 0, false)
 }
 
 private class Location {

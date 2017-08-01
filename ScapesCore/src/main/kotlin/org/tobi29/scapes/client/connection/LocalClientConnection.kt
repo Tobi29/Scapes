@@ -62,8 +62,8 @@ class LocalClientConnection(private val worker: ConnectionWorker,
                                     "Disconnected"))
                     break
                 }
-                while (player.queueClient.isNotEmpty()) {
-                    val packet = player.queueClient.poll()
+                while (!player.queueClient.isEmpty()) {
+                    val packet = player.queueClient.poll() ?: continue
                     packet.localClient()
                     packet.runClient(this@LocalClientConnection)
                 }

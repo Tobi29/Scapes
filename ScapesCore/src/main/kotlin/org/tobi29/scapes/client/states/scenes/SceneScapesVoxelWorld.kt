@@ -21,6 +21,7 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldSkybox
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.gui.GuiComponentChat
+import org.tobi29.scapes.client.loadShader
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.client.states.GameStateGameSP
 import org.tobi29.scapes.engine.graphics.*
@@ -74,7 +75,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
         particles = ParticleSystem(world, 60.0)
         terrainTextureRegistry = world.game.terrainTextureRegistry()
         skinStorage = ClientSkinStorage(world.game.engine,
-                world.game.engine.graphics.textures()["Scapes:image/entity/mob/Player"])
+                world.game.engine.graphics.textures["Scapes:image/entity/mob/Player"])
         val debugValues = world.game.engine.debugValues
         cameraPositionXDebug = debugValues["Camera-Position-X"]
         cameraPositionYDebug = debugValues["Camera-Position-Y"]
@@ -99,10 +100,10 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
     }
 
     override fun appendToPipeline(gl: GL): suspend () -> (Double) -> Unit {
-        val scapes = engine.game as ScapesClient
+        val scapes = engine.component(ScapesClient.COMPONENT)
         val resolutionMultiplier = scapes.resolutionMultiplier
-        val width = round(gl.contentWidth() * resolutionMultiplier)
-        val height = round(gl.contentHeight() * resolutionMultiplier)
+        val width = round(gl.contentWidth * resolutionMultiplier)
+        val height = round(gl.contentHeight * resolutionMultiplier)
         val fxaa = scapes.fxaa
         val bloom = scapes.bloom
         val exposure = scapes.autoExposure
@@ -301,10 +302,10 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
     }
 
     fun render(gl: GL): suspend () -> (Double) -> Unit {
-        val resolutionMultiplier =
-                (engine.game as ScapesClient).resolutionMultiplier
-        val width = round(gl.contentWidth() * resolutionMultiplier)
-        val height = round(gl.contentHeight() * resolutionMultiplier)
+        val scapes = engine.component(ScapesClient.COMPONENT)
+        val resolutionMultiplier = scapes.resolutionMultiplier
+        val width = round(gl.contentWidth * resolutionMultiplier)
+        val height = round(gl.contentHeight * resolutionMultiplier)
         val renderWorld = renderWorld(gl, cam, width, height)
         return {
             val render = renderWorld()

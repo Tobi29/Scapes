@@ -21,13 +21,15 @@ import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.server.format.WorldSource
 
 class SQLJetSaveStorage(private val path: FilePath) : SaveStorage {
-    override fun list(): Sequence<String> {
+    override fun list(): List<String> {
         if (!exists(path)) {
-            return emptySequence()
+            return emptyList()
         }
-        return list(path, {
-            isDirectory(path) && isNotHidden(path)
-        }).asSequence().map { it.fileName.toString() }
+        return list(path) {
+            filter { isDirectory(it) }
+                    .filter { isNotHidden(it) }
+                    .map { it.fileName.toString() }.toList()
+        }
     }
 
     override fun exists(name: String): Boolean {

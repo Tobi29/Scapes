@@ -17,6 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.entity.particle
 
 import org.tobi29.scapes.chunk.terrain.block
+import org.tobi29.scapes.client.loadShader
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.AABB

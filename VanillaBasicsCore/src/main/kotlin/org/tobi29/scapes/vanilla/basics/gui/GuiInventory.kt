@@ -110,8 +110,8 @@ open class GuiInventory(name: String,
         gl.matrixStack.push { matrix ->
             matrix.identity()
             matrix.modelViewProjection().orthogonal(0.0f, 0.0f,
-                    gl.contentWidth().toFloat(),
-                    gl.contentHeight().toFloat())
+                    gl.contentWidth.toFloat(),
+                    gl.contentHeight.toFloat())
             player.inventories().access("Hold") { inventory ->
                 GuiUtils.items(cursorX.toFloat(), cursorY.toFloat(), 60.0f,
                         60.0f, inventory.item(0), gl, shader, style.font,

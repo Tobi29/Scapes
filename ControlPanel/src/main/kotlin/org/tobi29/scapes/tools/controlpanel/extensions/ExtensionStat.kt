@@ -54,7 +54,7 @@ class ExtensionStat(application: Application,
                 return@addTask 250
             }
             -1
-        }, "Extension-Ping")
+        }, "Extension-Ping", 0, false)
     }
 
     companion object {

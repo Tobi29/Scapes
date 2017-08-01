@@ -36,6 +36,6 @@ class TerrainViewerAnimatedDocument(colorSupplier: () -> TerrainViewerCanvas.Col
                 return@addTask 250
             }
             -1
-        }, "Animation-Progress")
+        }, "Animation-Progress", 0, false)
     }
 }

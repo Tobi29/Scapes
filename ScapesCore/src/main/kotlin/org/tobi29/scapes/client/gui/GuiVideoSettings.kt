@@ -29,7 +29,7 @@ class GuiVideoSettings(state: GameState,
                        style: GuiStyle) : GuiMenuSingle(
         state, "Video Settings", previous, style) {
     init {
-        val scapes = state.engine.game as ScapesClient
+        val scapes = engine.component(ScapesClient.COMPONENT)
         val viewDistance = row(pane) {
             slider(it, "View distance",
                     (scapes.renderDistance - 10.0) / 246.0) { text, value ->

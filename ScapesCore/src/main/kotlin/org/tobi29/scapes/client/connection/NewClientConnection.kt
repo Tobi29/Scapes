@@ -48,7 +48,7 @@ object NewClientConnection {
                     account: Account,
                     loadingDistance: Int,
                     progress: (String) -> Unit): Pair<Plugins, Int>? {
-        val game = engine.game as ScapesClient
+        val scapes = engine.component(ScapesClient.COMPONENT)
 
         // Send header
         channel.outputStream.put(ConnectionInfo.header())
@@ -109,7 +109,7 @@ object NewClientConnection {
                 plugins.add(embedded)
             } else {
                 val location = FileCache.Location(checksum)
-                val file = FileCache.retrieve(game.pluginCache, location)
+                val file = FileCache.retrieve(scapes.pluginCache, location)
                 if (file != null) {
                     plugins.add(PluginFile(file))
                 } else {
@@ -145,8 +145,8 @@ object NewClientConnection {
             val request = pluginRequests[0]
             if (channel.inputStream.getBoolean()) {
                 pluginStream.buffer().flip()
-                val file = FileCache.retrieve(game.pluginCache,
-                        FileCache.store(game.pluginCache, pluginStream))
+                val file = FileCache.retrieve(scapes.pluginCache,
+                        FileCache.store(scapes.pluginCache, pluginStream))
                 pluginStream.buffer().clear()
                 if (file == null) {
                     throw IllegalStateException(
@@ -160,7 +160,7 @@ object NewClientConnection {
             }
         }
         channel.outputStream.putInt(loadingDistance)
-        sendSkin(game.home.resolve("Skin.png"), channel.outputStream, engine)
+        sendSkin(scapes.home.resolve("Skin.png"), channel.outputStream, engine)
         channel.queueBundle()
 
         // Receive server info

@@ -314,8 +314,8 @@ class InputModeGamepad(engine: ScapesEngine,
     override fun createControlsGUI(state: GameState,
                                    prev: Gui): Gui {
         return GuiControlsGamepad(state, prev,
-                state.engine.game as ScapesClient, tagMap, controller,
-                prev.style)
+                state.engine.component(ScapesClient.COMPONENT), tagMap,
+                controller, prev.style)
     }
 
     override fun walk(): Vector2d {

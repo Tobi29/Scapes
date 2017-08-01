@@ -16,23 +16,34 @@
 
 package org.tobi29.scapes.desktop
 
+import org.threeten.bp.LocalDateTime
+import org.threeten.bp.OffsetDateTime
+import org.threeten.bp.format.DateTimeFormatter
 import org.tobi29.scapes.Debug
 import org.tobi29.scapes.VERSION
 import org.tobi29.scapes.client.DialogProvider
+import org.tobi29.scapes.client.InputManagerScapes
 import org.tobi29.scapes.client.SaveStorage
 import org.tobi29.scapes.client.ScapesClient
+import org.tobi29.scapes.client.states.GameStateMenu
 import org.tobi29.scapes.engine.Container
+import org.tobi29.scapes.engine.GameStateStartup
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.args.*
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.ContainerGLFW
+import org.tobi29.scapes.engine.graphics.FontRenderer
 import org.tobi29.scapes.engine.graphics.GraphicsCheckException
+import org.tobi29.scapes.engine.gui.GuiBasicStyle
+import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.engine.utils.Crashable
-import org.tobi29.scapes.engine.utils.io.IOException
+import org.tobi29.scapes.engine.utils.io.*
+import org.tobi29.scapes.engine.utils.io.classpath.ClasspathPath
 import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.io.tag.json.readJSON
 import org.tobi29.scapes.engine.utils.io.tag.json.writeJSON
 import org.tobi29.scapes.engine.utils.printerrln
 import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.scapes.engine.utils.tag.mapMut
 import org.tobi29.scapes.engine.utils.tag.toMutTag
 import org.tobi29.scapes.engine.utils.tag.toTag
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
@@ -122,17 +133,38 @@ fun main(args: Array<String>) {
             val saves: (ScapesClient) -> SaveStorage = {
                 SQLiteSaveStorage(home.resolve("saves"))
             }
-            val dialogs: (ScapesClient) -> DialogProvider = {
-                ScapesDesktop(it, { engine?.container as? ContainerGLFW })
+            val game: (ScapesEngine) -> ScapesDesktop = { engine ->
+                ScapesDesktop(engine, home, pluginCache,
+                        engine.container as? ContainerGLFW)
             }
             val useGLES = commandLine.getBoolean(glesOption)
             val emulateTouch = commandLine.getBoolean(touchOption)
             val backend: (ScapesEngine) -> Container = {
                 ContainerGLFW(it, emulateTouch, useGLES = useGLES)
             }
-            engine = ScapesEngine(
-                    { ScapesClient(it, home, pluginCache, saves, dialogs) },
-                    backend, taskExecutor, configMap)
+            val defaultGuiStyle: (ScapesEngine) -> GuiStyle = { engine ->
+                val font = FontRenderer(engine, engine.container.loadFont(
+                        ClasspathPath(ScapesClient::class.java.classLoader,
+                                "assets/scapes/tobi29/font/QuicksandPro-Regular.ttf")) ?:
+                        engine.container.loadFont(ClasspathPath(
+                                ScapesClient::class.java.classLoader,
+                                "assets/scapes/tobi29/font/QuicksandPro-Regular.otf")) ?:
+                        throw IllegalStateException(
+                                "Failed to load default font"))
+                GuiBasicStyle(engine, font)
+            }
+            engine = ScapesEngine(game, backend, defaultGuiStyle,
+                    taskExecutor, configMap)
+            engine.files.registerFileSystem("Scapes",
+                    ClasspathPath(ScapesClient::class.java.classLoader,
+                            "assets/scapes/tobi29"))
+            engine.registerComponent(InputManagerScapes.COMPONENT,
+                    InputManagerScapes(engine, configMap.mapMut("Scapes")))
+            val client = ScapesClient(engine, home, pluginCache, saves,
+                    engine.game as DialogProvider)
+            engine.registerComponent(ScapesClient.COMPONENT, client)
+            engine.switchState(
+                    GameStateStartup(engine) { GameStateMenu(engine!!) })
             try {
                 engine.start()
                 try {
@@ -206,15 +238,30 @@ private fun crashHandler(path: FilePath,
     }
 }
 
+private val FORMATTER = DateTimeFormatter.ISO_DATE_TIME
+private val FILE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
+
 private fun crashReport(path: FilePath,
                         engine: () -> ScapesEngine?,
                         e: Throwable) {
-    val crashReportFile = file(path)
+    val time = OffsetDateTime.now()
+    val crashReportFile = path.resolve(
+            crashReportName(time.format(FILE_FORMATTER)))
     val debug = try {
-        engine()?.debugMap()
+        engine()?.debugMap()?.let {
+            arrayOf(Pair("Debug values", crashReportSectionProperties(it)))
+        }
     } catch (e: Throwable) {
         e.printStackTrace()
         null
-    } ?: emptyMap<String, String>()
-    writeCrashReport(e, crashReportFile, "ScapesEngine", debug)
+    } ?: emptyArray()
+    write(crashReportFile) {
+        it.writeCrashReport(e, "Scapes",
+                crashReportSectionStacktrace(e),
+                crashReportSectionActiveThreads(),
+                crashReportSectionSystemProperties(),
+                *debug,
+                crashReportSectionTime(
+                        LocalDateTime.from(time).format(FORMATTER)))
+    }
 }

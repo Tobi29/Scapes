@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.client.gui
 
-import org.tobi29.scapes.client.ScapesClient
+import org.tobi29.scapes.client.InputManagerScapes
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.input.ControllerBasic
@@ -30,17 +30,17 @@ import kotlin.collections.set
 
 abstract class GuiControls(state: GameState,
                            previous: Gui,
-                           game: ScapesClient,
                            style: GuiStyle) : GuiMenuSingle(
         state, "Controls", "Save", style) {
     protected val scrollPane: GuiComponentScrollPaneViewport
 
     init {
-        game.inputManager.freezeInputMode = true
+        val inputManager = engine.component(InputManagerScapes.COMPONENT)
+        inputManager.freezeInputMode = true
         // This intentionally disable the back action to allow binding ESC
         back.on(GuiEvent.CLICK_LEFT) { event ->
-            game.inputManager.freezeInputMode = false
-            game.inputManager.reloadInput()
+            inputManager.freezeInputMode = false
+            inputManager.reloadInput()
             engine.guiStack.swap(this, previous)
         }
         scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {

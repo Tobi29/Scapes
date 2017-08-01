@@ -16,7 +16,6 @@
 
 package org.tobi29.scapes.client.gui
 
-import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.Debug
 import org.tobi29.scapes.client.SaveStorage
 import org.tobi29.scapes.client.ScapesClient
@@ -29,7 +28,8 @@ import org.tobi29.scapes.engine.graphics.TextureWrap
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.use
+import org.tobi29.scapes.engine.utils.io.use
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.plugins.Plugins
 
 class GuiSaveSelect(state: GameState,
@@ -41,8 +41,8 @@ class GuiSaveSelect(state: GameState,
     private val scrollPane: GuiComponentScrollPaneViewport
 
     init {
-        val game = engine.game as ScapesClient
-        saves = game.saves
+        val scapes = engine.component(ScapesClient.COMPONENT)
+        saves = scapes.saves
 
         scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {
             GuiComponentScrollPane(it, 70)
@@ -51,7 +51,7 @@ class GuiSaveSelect(state: GameState,
 
         save.on(GuiEvent.CLICK_LEFT) { event ->
             try {
-                val path = game.home.resolve("plugins")
+                val path = scapes.home.resolve("plugins")
                 val plugins = Plugins.installed(path)
                 val worldTypes = plugins.asSequence()
                         .filter { plugin -> "WorldType" == plugin.parent() }

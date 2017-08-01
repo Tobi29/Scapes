@@ -34,8 +34,8 @@ class InventoryContainer(private val updateHandler: (String) -> Unit = { }) {
     fun <R> access(id: String,
                    consumer: (Inventory) -> R): R {
         inventories[id]?.let {
-            synchronized(it) {
-                return consumer(it)
+            return synchronized(it) {
+                consumer(it)
             }
         }
         throw IllegalArgumentException("Unknown inventory")

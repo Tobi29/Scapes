@@ -53,7 +53,7 @@ abstract class ClientConnection(val game: GameStateGameMP,
 
     fun mob(consumer: (MobPlayerClientMain) -> Unit) {
         entity?.let {
-            it.world.loop.addTaskOnce({ consumer(it) }, "Player-Mob")
+            it.world.loop.addTaskOnce({ consumer(it) }, "Player-Mob", 0, false)
         }
     }
 

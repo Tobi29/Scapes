@@ -28,9 +28,9 @@ import org.tobi29.scapes.engine.utils.io.BufferedReadChannelStream
 import org.tobi29.scapes.engine.utils.io.Channels
 import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
+import org.tobi29.scapes.engine.utils.io.use
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.threadLocalRandom
-import org.tobi29.scapes.engine.utils.use
 import org.tobi29.scapes.plugins.PluginFile
 import java.util.zip.ZipFile
 
@@ -44,8 +44,8 @@ class GuiCreateWorld(state: GameState,
     private var environmentID = 0
 
     init {
-        val game = state.engine.game as ScapesClient
-        val saves = game.saves
+        val scapes = engine.component(ScapesClient.COMPONENT)
+        val saves = scapes.saves
         pane.addVert(16.0, 5.0, -1.0, 18.0) {
             GuiComponentText(it, "Name:")
         }
@@ -163,9 +163,7 @@ class GuiCreateWorld(state: GameState,
                                     Channels.newChannel(zip.getInputStream(
                                             zip.getEntry(
                                                     "scapes/plugin/Icon.png"))))
-                            val image = decodePNG(stream) {
-                                state.engine.allocate(it)
-                            }
+                            val image = decodePNG(stream, state.engine)
                             val texture = state.engine.graphics.createTexture(
                                     image, 0,
                                     TextureFilter.LINEAR,

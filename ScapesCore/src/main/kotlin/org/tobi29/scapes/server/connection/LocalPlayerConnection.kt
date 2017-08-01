@@ -68,8 +68,8 @@ class LocalPlayerConnection(private val worker: ConnectionWorker,
               account: Account): String? {
         this.workerClient = workerClient
         val engine = client.game.engine
-        val game = engine.game as ScapesClient
-        val path = game.home.resolve("Skin.png")
+        val scapes = engine.component(ScapesClient.COMPONENT)
+        val path = scapes.home.resolve("Skin.png")
         val image = if (exists(path)) {
             read(path) { decodePNG(it) }
         } else {
@@ -105,7 +105,7 @@ class LocalPlayerConnection(private val worker: ConnectionWorker,
             while (!connection.shouldClose) {
                 connection.increaseTimeout(10000)
                 while (queue.isNotEmpty()) {
-                    val packet = queue.poll()
+                    val packet = queue.poll() ?: continue
                     packet.localServer()
                     packet.runServer(this@LocalPlayerConnection)
                 }

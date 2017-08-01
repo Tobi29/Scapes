@@ -112,7 +112,8 @@ class PacketItemUse : PacketAbstract, PacketServer {
                                 }
                             }
                         }, "Block-Break",
-                                (item.material().hitWait(item) * 0.05).toLong())
+                                (item.material().hitWait(item) * 0.05).toLong(),
+                                false)
                     }
                 }
             }
