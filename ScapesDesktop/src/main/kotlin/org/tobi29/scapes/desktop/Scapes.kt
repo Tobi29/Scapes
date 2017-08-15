@@ -171,8 +171,8 @@ fun main(args: Array<String>) {
             engine.registerComponent(ConnectionManager.COMPONENT,
                     ConnectionManager(engine.taskExecutor, 10)
                             .apply { workers(1) })
-            val client = ScapesClient(engine, home, pluginCache, saves)
-            engine.registerComponent(ScapesClient.COMPONENT, client)
+            engine.registerComponent(ScapesClient.COMPONENT,
+                    ScapesClient(engine, home, pluginCache, saves))
             engine.switchState(
                     GameStateStartup(engine) { GameStateMenu(engine!!) })
             try {
