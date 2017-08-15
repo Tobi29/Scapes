@@ -38,7 +38,7 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
         lock.write {
             val xx = chunk.pos.x - x.get()
             val yy = chunk.pos.y - y.get()
-            if (xx in 0..array.width - 1 && yy in 0..array.height - 1) {
+            if (xx in 0 until array.width && yy in 0 until array.height) {
                 array[xx, yy] = chunk
             }
         }
@@ -49,7 +49,7 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
         return lock.write {
             val xx = x - this.x.get()
             val yy = y - this.y.get()
-            if (xx in 0..array.width - 1 && yy in 0..array.height - 1) {
+            if (xx in 0 until array.width && yy in 0 until array.height) {
                 val chunk = array[xx, yy]
                 if (chunk != null) {
                     assert { chunk.pos.x == x }
@@ -71,7 +71,7 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
         val value = lock.read {
             val xx = x - this.x.get()
             val yy = y - this.y.get()
-            if (xx in 0..array.width - 1 && yy in 0..array.height - 1) {
+            if (xx in 0 until array.width && yy in 0 until array.height) {
                 array[xx, yy]
             } else {
                 null
@@ -114,21 +114,21 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
                     this.y.set(yy)
                 } else {
                     if (xDiffAbs > 0) {
-                        for (i in 0..xDiff - 1) {
+                        for (i in 0 until xDiff) {
                             shiftXPositive()
                         }
                         xDiff = -xDiff
-                        for (i in 0..xDiff - 1) {
+                        for (i in 0 until xDiff) {
                             shiftXNegative()
                         }
                         this.x.set(xx)
                     }
                     if (yDiffAbs > 0) {
-                        for (i in 0..yDiff - 1) {
+                        for (i in 0 until yDiff) {
                             shiftYPositive()
                         }
                         yDiff = -yDiff
-                        for (i in 0..yDiff - 1) {
+                        for (i in 0 until yDiff) {
                             shiftYNegative()
                         }
                         this.y.set(yy)
@@ -180,11 +180,11 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
     }
 
     private fun shiftYPositive() {
-        for (i in 0..size - 1) {
+        for (i in 0 until size) {
             val chunk = arrayFlat[i]
             chunk?.let { it.dispose(); arrayFlat[i] = null }
         }
-        for (i in arrayFlat.size - size..arrayFlat.size - 1) {
+        for (i in arrayFlat.size - size until arrayFlat.size) {
             val chunk = arrayFlat[i]
             chunk?.let { it.dispose(); arrayFlat[i] = null }
         }
@@ -192,11 +192,11 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
     }
 
     private fun shiftYNegative() {
-        for (i in 0..size - 1) {
+        for (i in 0 until size) {
             val chunk = arrayFlat[i]
             chunk?.let { it.dispose(); arrayFlat[i] = null }
         }
-        for (i in arrayFlat.size - size..arrayFlat.size - 1) {
+        for (i in arrayFlat.size - size until arrayFlat.size) {
             val chunk = arrayFlat[i]
             chunk?.let { it.dispose(); arrayFlat[i] = null }
         }

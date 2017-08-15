@@ -17,12 +17,13 @@ package org.tobi29.scapes.entity.particle
 
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.utils.Sync
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.chain
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
+import org.tobi29.scapes.engine.utils.sleepNanos
 import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
+import org.tobi29.scapes.engine.utils.task.Timer
 import org.tobi29.scapes.engine.utils.toArray
 
 class ParticleSystem(val world: WorldClient,
@@ -32,11 +33,12 @@ class ParticleSystem(val world: WorldClient,
 
     init {
         joiner = world.game.engine.taskExecutor.runThread({ joiner ->
-            val sync = Sync(tps, 0, false, "Particles")
-            sync.init()
+            val timer = Timer()
+            val maxDiff = Timer.toDiff(tps)
+            timer.init()
             while (!joiner.marked) {
-                update(sync.delta())
-                sync.cap(joiner)
+                val tickDiff = timer.cap(maxDiff, ::sleepNanos)
+                update(Timer.toDelta(tickDiff).coerceIn(0.0001, 0.1))
             }
         }, "Particles", TaskExecutor.Priority.MEDIUM)
     }

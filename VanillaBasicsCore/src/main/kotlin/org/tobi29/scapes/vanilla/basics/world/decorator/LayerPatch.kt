@@ -35,7 +35,7 @@ class LayerPatch(private val material: BlockType,
                           materials: VanillaMaterial,
                           random: Random) {
         if (random.nextInt(chance) == 0) {
-            for (i in 0..density - 1) {
+            for (i in 0 until density) {
                 val xx = x + random.nextInt(size) - random.nextInt(size)
                 val yy = y + random.nextInt(size) - random.nextInt(size)
                 val zz = terrain.highestTerrainBlockZAt(xx, yy)

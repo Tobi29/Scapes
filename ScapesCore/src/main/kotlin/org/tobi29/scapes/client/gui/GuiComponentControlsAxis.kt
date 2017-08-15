@@ -45,7 +45,7 @@ class GuiComponentControlsAxis(parent: GuiLayoutData,
             if (editing.toInt() == 0) {
                 blacklist.clear()
                 val axes = controller.axes()
-                for (i in 0..axes - 1) {
+                for (i in 0 until axes) {
                     if (controller.axis(i) > 0.5) {
                         blacklist.add(i)
                     }
@@ -80,7 +80,7 @@ class GuiComponentControlsAxis(parent: GuiLayoutData,
     override fun updateComponent(delta: Double) {
         if (editing > 1) {
             val axes = controller.axes()
-            for (i in 0..axes - 1) {
+            for (i in 0 until axes) {
                 val blacklisted = blacklist.contains(i)
                 if (controller.axis(i) > 0.5) {
                     if (!blacklisted) {

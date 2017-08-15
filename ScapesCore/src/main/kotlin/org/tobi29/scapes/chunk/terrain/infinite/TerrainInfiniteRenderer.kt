@@ -99,7 +99,7 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
         }
         terrain.world.game.engine.taskExecutor.runTask({
             val threadData = THREAD_DATA.get()
-            for (i in 0..chunk.zSections() - 1) {
+            for (i in 0 until chunk.zSections()) {
                 threadData.process(chunk, i, this)
             }
         }, taskLock, "Update-Chunk-Geometry")

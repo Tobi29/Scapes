@@ -68,7 +68,7 @@ class LocalPlayerConnection(private val worker: ConnectionWorker,
               account: Account): String? {
         this.workerClient = workerClient
         val engine = client.game.engine
-        val scapes = engine.component(ScapesClient.COMPONENT)
+        val scapes = engine[ScapesClient.COMPONENT]
         val path = scapes.home.resolve("Skin.png")
         val image = if (exists(path)) {
             read(path) { decodePNG(it) }

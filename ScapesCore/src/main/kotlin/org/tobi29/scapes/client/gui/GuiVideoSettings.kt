@@ -18,6 +18,8 @@ package org.tobi29.scapes.client.gui
 
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
+import org.tobi29.scapes.engine.ScapesEngineConfig
+import org.tobi29.scapes.engine.fullscreen
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton
 import org.tobi29.scapes.engine.gui.GuiEvent
@@ -29,7 +31,8 @@ class GuiVideoSettings(state: GameState,
                        style: GuiStyle) : GuiMenuSingle(
         state, "Video Settings", previous, style) {
     init {
-        val scapes = engine.component(ScapesClient.COMPONENT)
+        val config = state.engine[ScapesEngineConfig.COMPONENT]
+        val scapes = engine[ScapesClient.COMPONENT]
         val viewDistance = row(pane) {
             slider(it, "View distance",
                     (scapes.renderDistance - 10.0) / 246.0) { text, value ->
@@ -38,7 +41,7 @@ class GuiVideoSettings(state: GameState,
         }
         val shader = row(pane) { button(it, "Shaders") }
         val fullscreen: GuiComponentTextButton
-        if (state.engine.config.fullscreen) {
+        if (config.fullscreen) {
             fullscreen = row(pane) { button(it, "Fullscreen: ON") }
         } else {
             fullscreen = row(pane) { button(it, "Fullscreen: OFF") }
@@ -63,12 +66,12 @@ class GuiVideoSettings(state: GameState,
                     GuiShaderSettings(state, this, style))
         }
         fullscreen.on(GuiEvent.CLICK_LEFT) {
-            if (!state.engine.config.fullscreen) {
+            if (!config.fullscreen) {
                 fullscreen.setText("Fullscreen: ON")
-                state.engine.config.fullscreen = true
+                config.fullscreen = true
             } else {
                 fullscreen.setText("Fullscreen: OFF")
-                state.engine.config.fullscreen = false
+                config.fullscreen = false
             }
             state.engine.container.updateContainer()
         }

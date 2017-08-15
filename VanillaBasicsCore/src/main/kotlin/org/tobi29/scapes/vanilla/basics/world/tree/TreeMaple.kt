@@ -47,16 +47,16 @@ object TreeMaple : Tree {
                     2 + random.nextInt(5))
             TreeUtil.fillGround(terrain, x + 1, y, z - 1, materials.log, data,
                     2 + random.nextInt(5))
-            for (zz in 0..size + 2 - 1) {
+            for (zz in 0 until size + 2) {
                 TreeUtil.changeBlock(terrain, x, y, z + zz, materials.log, data)
             }
             val branches = ArrayList<Vector3i>()
-            for (i in 0..random.nextInt(2) + 5 - 1) {
+            for (i in 0 until random.nextInt(2) + 5) {
                 branches.add(Vector3i(random.nextInt(5) - 2 + x,
                         random.nextInt(5) - 2 + y,
                         random.nextInt(2) + 1 + z + size))
             }
-            for (i in 0..random.nextInt(3) + 3 - 1) {
+            for (i in 0 until random.nextInt(3) + 3) {
                 branches.add(Vector3i(random.nextInt(3) - 1 + x,
                         random.nextInt(3) - 1 + y,
                         random.nextInt(4) + 3 + z + size))

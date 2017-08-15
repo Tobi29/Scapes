@@ -103,7 +103,7 @@ class BlockSnow(type: VanillaMaterialType) : VanillaBlock(type) {
 
     override fun isTransparent(data: Int) = true
 
-    override fun lightTrough(data: Int) = -2
+    override fun lightTrough(data: Int) = (-2).toByte()
 
     override fun connectStage(terrain: TerrainClient,
                               x: Int,

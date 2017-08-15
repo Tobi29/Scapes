@@ -25,6 +25,7 @@ import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Scene
 import org.tobi29.scapes.engine.graphics.renderScene
+import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.server.SSLHandle
 import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.logging.KLogging
@@ -39,7 +40,7 @@ import org.tobi29.scapes.server.ssl.dummy.DummyKeyManagerProvider
 class GameStateLoadSP(private var source: WorldSource?,
                       engine: ScapesEngine,
                       private val scene: Scene) : GameState(engine) {
-    private val scapes = engine.component(ScapesClient.COMPONENT)
+    private val scapes = engine[ScapesClient.COMPONENT]
     private var step = 0
     private var server: ScapesServer? = null
     private var gui: GuiLoading? = null
@@ -103,7 +104,7 @@ class GameStateLoadSP(private var source: WorldSource?,
                     server.connections.addConnection { worker, connection ->
                         val player = LocalPlayerConnection(worker,
                                 server.connection, loadingRadius)
-                        scapes.connection.addConnection { worker, connection ->
+                        engine[ConnectionManager.COMPONENT].addConnection { worker, connection ->
                             val game = GameStateGameSP({
                                 LocalClientConnection(worker, it,
                                         player, server.plugins, loadingRadius,

@@ -52,7 +52,7 @@ fun TerrainServer.placeRuinType1(x: Int,
     val size = random.nextDouble() * 10 + 6
     val pillars = random.nextInt(12) + 6
     var d: Double
-    for (i in 0..pillars - 1) {
+    for (i in 0 until pillars) {
         d = i.toDouble() / pillars * TWO_PI
         val xx = x + floor(cosTable(d) * size)
         val yy = y + floor(sinTable(d) * size)
@@ -119,7 +119,7 @@ private fun TerrainMutable.placePillar(x: Int,
                                        type: BlockType,
                                        data: Int,
                                        height: Int) {
-    for (i in 0..height - 1) {
+    for (i in 0 until height) {
         typeData(x, y, z + i, type, data)
     }
 }
@@ -130,7 +130,7 @@ private fun TerrainMutable.fillGround(x: Int,
                                       type: BlockType,
                                       data: Int,
                                       maxDepth: Int) {
-    for (i in 0..maxDepth - 1) {
+    for (i in 0 until maxDepth) {
         if (type(x, y, z - i).isReplaceable(this, x, y, z - i)) {
             typeData(x, y, z - i, type, data)
         } else {

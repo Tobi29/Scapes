@@ -95,7 +95,7 @@ class ItemModelSimple(private val texture: TerrainTexture?,
                 mesh.texture(xTex, texMinY)
                 mesh.vertex(pos, -halfPixel, 0.5)
             }
-            for (y in 0..pixelCountY - 1) {
+            for (y in 0 until pixelCountY) {
                 var pos = y.toDouble() / pixelCountY
                 val yTex = texture.marginY(pos + 0.5 / pixelCountY)
                 pos = 0.5 - pos

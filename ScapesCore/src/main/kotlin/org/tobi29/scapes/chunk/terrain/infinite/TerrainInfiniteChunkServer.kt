@@ -293,7 +293,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
             for (x in 0..15) {
                 val xx = posBlock.x + x
                 generator.makeLand(xx, yy, 0, zSize, output)
-                for (z in 0..zSize - 1) {
+                for (z in 0 until zSize) {
                     val type = output.type[z]
                     if (type != 0) {
                         data.setID(x, y, z, type)

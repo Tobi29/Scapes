@@ -27,8 +27,7 @@ class GuiControlsList(state: GameState,
                       style: GuiStyle) : GuiMenuSingle(
         state, "Controls", previous, style) {
     init {
-        engine.component(
-                InputManagerScapes.COMPONENT).inputModes.forEach { inputMode ->
+        engine[InputManagerScapes.COMPONENT].inputModes.forEach { inputMode ->
             val controls = row(pane) { button(it, inputMode.toString()) }
             selection(controls)
             controls.on(GuiEvent.CLICK_LEFT) {

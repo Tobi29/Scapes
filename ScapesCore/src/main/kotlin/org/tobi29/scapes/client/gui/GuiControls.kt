@@ -35,7 +35,7 @@ abstract class GuiControls(state: GameState,
     protected val scrollPane: GuiComponentScrollPaneViewport
 
     init {
-        val inputManager = engine.component(InputManagerScapes.COMPONENT)
+        val inputManager = engine[InputManagerScapes.COMPONENT]
         inputManager.freezeInputMode = true
         // This intentionally disable the back action to allow binding ESC
         back.on(GuiEvent.CLICK_LEFT) { event ->

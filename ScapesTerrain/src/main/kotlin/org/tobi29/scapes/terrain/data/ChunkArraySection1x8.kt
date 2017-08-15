@@ -53,7 +53,7 @@ class ChunkArraySection1x8(private val xSizeBits: Int,
                 return
             }
             val newData = ByteArray(size)
-            for (i in 0..size - 1) {
+            for (i in 0 until size) {
                 newData[i] = defaultValue
             }
             data = newData
@@ -77,7 +77,7 @@ class ChunkArraySection1x8(private val xSizeBits: Int,
             return false
         }
         var flag = true
-        for (i in 1..data.size - 1) {
+        for (i in 1 until data.size) {
             if (data[i] != data[0]) {
                 flag = false
                 break

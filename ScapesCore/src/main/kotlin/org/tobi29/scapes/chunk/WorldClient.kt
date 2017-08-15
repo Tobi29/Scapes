@@ -82,8 +82,7 @@ class WorldClient(val connection: ClientConnection,
         playerModel = player.createModel()
         connection.plugins.plugins.forEach { it.worldInit(this) }
 
-        player.setInputMode(
-                game.engine.component(InputManagerScapes.COMPONENT).inputMode)
+        player.setInputMode(game.engine[InputManagerScapes.COMPONENT].inputMode)
 
         logger.info { "Received player entity: $player with id: $playerID" }
     }
@@ -184,7 +183,7 @@ class WorldClient(val connection: ClientConnection,
     fun addToPipeline(gl: GL,
                       cam: Cam,
                       debug: Boolean): suspend () -> (Double) -> Unit {
-        val scapes = game.engine.component(ScapesClient.COMPONENT)
+        val scapes = game.engine[ScapesClient.COMPONENT]
         val resolutionMultiplier = scapes.resolutionMultiplier
         val width = round(gl.contentWidth * resolutionMultiplier)
         val height = round(gl.contentHeight * resolutionMultiplier)

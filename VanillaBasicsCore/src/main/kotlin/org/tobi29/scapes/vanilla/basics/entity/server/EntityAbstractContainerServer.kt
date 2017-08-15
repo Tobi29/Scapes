@@ -90,7 +90,7 @@ abstract class EntityAbstractContainerServer(type: EntityType<*, *>,
         val world = terrain.world
         if (!isValidOn(terrain, x, y, z)) {
             inventories.forEach { inventory ->
-                for (i in 0..inventory.size() - 1) {
+                for (i in 0 until inventory.size()) {
                     world.dropItem(inventory.item(i),
                             pos.now() + Vector3d(0.5, 0.5, 0.5))
                 }

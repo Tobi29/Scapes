@@ -26,9 +26,9 @@ import org.tobi29.scapes.engine.ComponentStep
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.gui.GuiNotificationSimple
 import org.tobi29.scapes.engine.input.*
-import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.utils.AtomicBoolean
 import org.tobi29.scapes.engine.utils.ComponentTypeRegistered
+import org.tobi29.scapes.engine.utils.ComponentTypeRegisteredPermission
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.logging.KLogging
@@ -39,16 +39,8 @@ class ScapesClient(val engine: ScapesEngine,
                    val home: FilePath,
                    val pluginCache: FilePath,
                    savesSupplier: (ScapesClient) -> SaveStorage,
-                   dialogs: DialogProvider,
                    lightDefaults: Boolean = false) : ComponentLifecycle, ComponentStep {
-    val configMap = engine.configMap.mapMut("Scapes")
-    val connection = ConnectionManager(engine.taskExecutor, 10)
-    val dialogs = dialogs
-        get() = run {
-            val security = System.getSecurityManager()
-            security?.checkPermission(RuntimePermission("scapes.dialogs"))
-            field
-        }
+    val configMap = engine[ScapesEngine.CONFIG_MAP_COMPONENT].mapMut("Scapes")
     val saves = savesSupplier(this)
 
     var animations by configMap.tagBoolean("Animations", !lightDefaults)
@@ -72,11 +64,6 @@ class ScapesClient(val engine: ScapesEngine,
                 }
             }
         }
-        connection.workers(1)
-    }
-
-    override fun dispose() {
-        connection.stop()
     }
 
     companion object : KLogging() {
@@ -140,4 +127,9 @@ interface DialogProvider {
     fun openSkinDialog(result: (String, ReadableByteStream) -> Unit)
 
     fun saveScreenshotDialog(result: (FilePath) -> Unit)
+
+    companion object {
+        val COMPONENT = ComponentTypeRegisteredPermission<DialogProvider>(
+                "scapes.dialogs")
+    }
 }

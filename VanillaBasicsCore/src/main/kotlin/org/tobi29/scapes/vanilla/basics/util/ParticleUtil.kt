@@ -29,7 +29,7 @@ fun WorldClient.explosion(pos: Vector3d,
             ParticleEmitterExplosion::class.java)
     val count = (size * 80).toInt()
     val speedFactor = sqrt(size)
-    for (i in 0..count - 1) {
+    for (i in 0 until count) {
         emitter.add { instance ->
             val random = threadLocalRandom()
             val dirZ = random.nextDouble() * TWO_PI

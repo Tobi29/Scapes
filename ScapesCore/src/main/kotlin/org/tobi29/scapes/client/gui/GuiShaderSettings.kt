@@ -28,7 +28,7 @@ class GuiShaderSettings(state: GameState,
                         style: GuiStyle) : GuiMenuSingle(
         state, "Shader Settings", previous, style) {
     init {
-        val scapes = engine.component(ScapesClient.COMPONENT)
+        val scapes = engine[ScapesClient.COMPONENT]
         val animations: GuiComponentTextButton
         if (scapes.animations) {
             animations = row(pane) { button(it, "Animations: ON") }

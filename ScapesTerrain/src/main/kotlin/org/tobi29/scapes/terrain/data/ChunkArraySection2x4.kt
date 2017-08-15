@@ -99,7 +99,7 @@ class ChunkArraySection2x4(private val xSizeBits: Int,
             return false
         }
         var flag = true
-        for (i in 1..data.size - 1) {
+        for (i in 1 until data.size) {
             if (data[i] != data[0]) {
                 flag = false
                 break

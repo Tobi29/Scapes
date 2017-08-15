@@ -42,7 +42,7 @@ class ControlPanel : MultiDocumentApplication("Scapes Control Panel",
     }
 
     override fun dispose() {
-        connection.stop()
+        connection.dispose()
     }
 
     override fun populate(composite: DocumentComposite,

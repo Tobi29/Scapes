@@ -67,17 +67,17 @@ object TreeOak : Tree {
                     data, 2 + random.nextInt(5))
             TreeUtil.fillGround(terrain, x, y + 2, z - 3, materials.log,
                     data, 2 + random.nextInt(5))
-            for (zz in 0..size + 2 - 1) {
+            for (zz in 0 until size + 2) {
                 TreeUtil.makeLayer(terrain, x, y, z + zz, materials.log, data,
                         trunkSize - 1)
             }
             val branches = ArrayList<Vector3i>()
-            for (i in 0..random.nextInt(4) + 4 * trunkSize - 1) {
+            for (i in 0 until random.nextInt(4) + 4 * trunkSize) {
                 branches.add(Vector3i(random.nextInt(7) - 3 + x,
                         random.nextInt(7) - 3 + y,
                         random.nextInt(2) + 2 + z + size))
             }
-            for (i in 0..random.nextInt(3) + trunkSize - 1) {
+            for (i in 0 until random.nextInt(3) + trunkSize) {
                 branches.add(Vector3i(random.nextInt(3) - 1 + x,
                         random.nextInt(3) - 1 + y,
                         random.nextInt(2) + 4 + z + size))

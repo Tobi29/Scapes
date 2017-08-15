@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.client.gui
 
+import org.tobi29.scapes.client.DialogProvider
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.graphics.TextureFilter
@@ -38,7 +39,7 @@ class GuiPlugins(state: GameState,
     private val scrollPane: GuiComponentScrollPaneViewport
 
     init {
-        val scapes = engine.component(ScapesClient.COMPONENT)
+        val scapes = engine[ScapesClient.COMPONENT]
         path = scapes.home.resolve("plugins")
         scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {
             GuiComponentScrollPane(it, 70)
@@ -47,7 +48,7 @@ class GuiPlugins(state: GameState,
 
         save.on(GuiEvent.CLICK_LEFT) {
             try {
-                scapes.dialogs.openPluginDialog { _, stream ->
+                state.engine[DialogProvider.COMPONENT].openPluginDialog { _, stream ->
                     val temp = createTempFile("Plugin", ".jar")
                     write(temp) { output ->
                         process(stream, put(output))

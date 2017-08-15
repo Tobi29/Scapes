@@ -69,7 +69,7 @@ class CommandRegistry constructor(private val prefix: String = "") {
         if (split.size == 1) {
             args = emptyList()
         } else {
-            args = (0..split.lastIndex - 1).map { split[it + 1] }
+            args = (0 until split.lastIndex).map { split[it + 1] }
         }
         return Pair(name, args)
     }

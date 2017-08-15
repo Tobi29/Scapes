@@ -19,11 +19,14 @@ package org.tobi29.scapes.client.gui
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.GameState
+import org.tobi29.scapes.engine.ScapesEngineConfig
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiStyle
+import org.tobi29.scapes.engine.setVolume
 import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.scapes.engine.volume
 
 class GuiOptions(state: GameState,
                  previous: Gui,
@@ -31,14 +34,13 @@ class GuiOptions(state: GameState,
         state, "Options", previous, style) {
 
     init {
-        val scapes = engine.component(ScapesClient.COMPONENT)
+        val config = state.engine[ScapesEngineConfig.COMPONENT]
+        val scapes = engine[ScapesClient.COMPONENT]
         val musicVolume = row(pane) {
-            slider(it, "Music",
-                    state.engine.config.volume("music"))
+            slider(it, "Music", config.volume("music"))
         }
         val soundVolume = row(pane) {
-            slider(it, "Sound",
-                    state.engine.config.volume("sound"))
+            slider(it, "Sound", config.volume("sound"))
         }
         val controls = row(pane) { button(it, "Controls") }
         val graphics = row(pane) { button(it, "Video settings") }
@@ -53,10 +55,10 @@ class GuiOptions(state: GameState,
         selection(plugins)
 
         musicVolume.on(GuiEvent.CHANGE) { event ->
-            state.engine.config.setVolume("music", musicVolume.value())
+            config.setVolume("music", musicVolume.value())
         }
         soundVolume.on(GuiEvent.CHANGE) { event ->
-            state.engine.config.setVolume("sound", soundVolume.value())
+            config.setVolume("sound", soundVolume.value())
         }
         controls.on(GuiEvent.CLICK_LEFT) { event ->
             state.engine.guiStack.add("10-Menu",

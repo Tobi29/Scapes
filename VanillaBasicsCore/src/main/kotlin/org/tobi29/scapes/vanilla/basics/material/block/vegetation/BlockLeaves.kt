@@ -28,12 +28,8 @@ import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.utils.math.Random
 import org.tobi29.scapes.engine.utils.ThreadLocal
-import org.tobi29.scapes.engine.utils.math.AABB
-import org.tobi29.scapes.engine.utils.math.Face
-import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.math.mix
+import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3i
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.vanilla.basics.material.TreeType
@@ -197,7 +193,7 @@ class BlockLeaves(type: VanillaMaterialType) : VanillaBlock(type) {
 
     override fun isTransparent(data: Int) = true
 
-    override fun lightTrough(data: Int) = -2
+    override fun lightTrough(data: Int) = (-2).toByte()
 
     override fun connectStage(terrain: TerrainClient,
                               x: Int,

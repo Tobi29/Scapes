@@ -21,7 +21,7 @@ interface VoxelType {
 
     fun lightEmit(data: Int) = 0.toByte()
 
-    fun lightTrough(data: Int) = -15.toByte()
+    fun lightTrough(data: Int) = (-15).toByte()
 
     fun isSolid(data: Int) = true
 

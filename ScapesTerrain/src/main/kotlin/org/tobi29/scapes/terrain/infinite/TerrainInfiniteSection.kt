@@ -84,14 +84,14 @@ open class TerrainInfiniteSection<B : VoxelType, C : TerrainInfiniteBaseChunk<B>
 
     fun lockChunks() {
         lock()
-        for (i in 0..chunksLength - 1) {
+        for (i in 0 until chunksLength) {
             chunks[i]?.lockWriteExternal(this)
         }
     }
 
     fun unlockChunks() {
         unlock()
-        for (i in 0..chunksLength - 1) {
+        for (i in 0 until chunksLength) {
             chunks[i]?.unlockWriteExternal(this)
         }
     }

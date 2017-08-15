@@ -41,7 +41,7 @@ class GuiSaveSelect(state: GameState,
     private val scrollPane: GuiComponentScrollPaneViewport
 
     init {
-        val scapes = engine.component(ScapesClient.COMPONENT)
+        val scapes = engine[ScapesClient.COMPONENT]
         saves = scapes.saves
 
         scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {

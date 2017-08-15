@@ -43,9 +43,9 @@ object ChunkDataTests : Spek({
             val xSize = 1 shl xSizeBits + xSectionBits
             val ySize = 1 shl ySizeBits + ySectionBits
             val zSize = 1 shl zSizeBits + zSectionBits
-            for (z in 0..zSize - 1) {
-                for (y in 0..ySize - 1) {
-                    for (x in 0..xSize - 1) {
+            for (z in 0 until zSize) {
+                for (y in 0 until ySize) {
+                    for (x in 0 until xSize) {
                         val value1 = random.nextInt(0x10)
                         val value2 = random.nextInt(0x10)
                         if (random.nextBoolean()) {
@@ -64,9 +64,9 @@ object ChunkDataTests : Spek({
             }
             it("should contain the same values") {
                 val random = Random(0)
-                for (z in 0..zSize - 1) {
-                    for (y in 0..ySize - 1) {
-                        for (x in 0..xSize - 1) {
+                for (z in 0 until zSize) {
+                    for (y in 0 until ySize) {
+                        for (x in 0 until xSize) {
                             val requirement1 = random.nextInt(0x10)
                             val value1 = struct.getSection(data, x, y,
                                     z) { x, y, z -> getData(x, y, z, false) }
@@ -99,9 +99,9 @@ object ChunkDataTests : Spek({
             val xSize = 1 shl xSizeBits + xSectionBits
             val ySize = 1 shl ySizeBits + ySectionBits
             val zSize = 1 shl zSizeBits + zSectionBits
-            for (z in 0..zSize - 1) {
-                for (y in 0..ySize - 1) {
-                    for (x in 0..xSize - 1) {
+            for (z in 0 until zSize) {
+                for (y in 0 until ySize) {
+                    for (x in 0 until xSize) {
                         val value = random.nextInt(0x100).toByte()
                         struct.getSection(data, x, y, z) { x, y, z ->
                             setData(x, y, z, value.toInt())
@@ -111,9 +111,9 @@ object ChunkDataTests : Spek({
             }
             it("should contain the same values") {
                 val random = Random(0)
-                for (z in 0..zSize - 1) {
-                    for (y in 0..ySize - 1) {
-                        for (x in 0..xSize - 1) {
+                for (z in 0 until zSize) {
+                    for (y in 0 until ySize) {
+                        for (x in 0 until xSize) {
                             val requirement = random.nextInt(0x100).toByte()
                             val value = struct.getSection(data, x, y,
                                     z) { x, y, z ->
@@ -141,9 +141,9 @@ object ChunkDataTests : Spek({
             val xSize = 1 shl xSizeBits + xSectionBits
             val ySize = 1 shl ySizeBits + ySectionBits
             val zSize = 1 shl zSizeBits + zSectionBits
-            for (z in 0..zSize - 1) {
-                for (y in 0..ySize - 1) {
-                    for (x in 0..xSize - 1) {
+            for (z in 0 until zSize) {
+                for (y in 0 until ySize) {
+                    for (x in 0 until xSize) {
                         val value = random.nextInt(0x10000).toShort()
                         struct.getSection(data, x, y, z) { x, y, z ->
                             setData(x, y, z, value.toInt())
@@ -153,9 +153,9 @@ object ChunkDataTests : Spek({
             }
             it("should contain the same values") {
                 val random = Random(0)
-                for (z in 0..zSize - 1) {
-                    for (y in 0..ySize - 1) {
-                        for (x in 0..xSize - 1) {
+                for (z in 0 until zSize) {
+                    for (y in 0 until ySize) {
+                        for (x in 0 until xSize) {
                             val requirement = random.nextInt(0x10000).toShort()
                             val value = struct.getSection(data, x, y,
                                     z) { x, y, z ->

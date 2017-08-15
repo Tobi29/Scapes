@@ -26,7 +26,6 @@ import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.client.states.GameStateGameSP
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
-import org.tobi29.scapes.engine.utils.Sync
 import org.tobi29.scapes.engine.utils.chain
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurOffset
@@ -39,6 +38,7 @@ import org.tobi29.scapes.engine.utils.math.vector.plus
 import org.tobi29.scapes.engine.utils.shader.ArrayExpression
 import org.tobi29.scapes.engine.utils.shader.BooleanExpression
 import org.tobi29.scapes.engine.utils.shader.IntegerExpression
+import org.tobi29.scapes.engine.utils.task.Timer
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.particle.*
 import org.tobi29.scapes.entity.skin.ClientSkinStorage
@@ -60,7 +60,6 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
     private val particles: ParticleSystem
     private val skybox: WorldSkybox
     private val textureNoise = engine.graphics.textures["Scapes:image/Noise"]
-    private val exposureSync = Sync(1.0, 0L, false, "Exposure")
     private var brightness = 0.0f
     private var renderDistance = 0.0f
     private var fov = 0.0f
@@ -100,7 +99,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
     }
 
     override fun appendToPipeline(gl: GL): suspend () -> (Double) -> Unit {
-        val scapes = engine.component(ScapesClient.COMPONENT)
+        val scapes = engine[ScapesClient.COMPONENT]
         val resolutionMultiplier = scapes.resolutionMultiplier
         val width = round(gl.contentWidth * resolutionMultiplier)
         val height = round(gl.contentHeight * resolutionMultiplier)
@@ -222,7 +221,6 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
             }
         }
         if (exposureFBO != null) {
-            exposureSync.init()
             val blurSamples = 11
             val shaderExposure = gl.engine.graphics.loadShader(
                     "Scapes:shader/Exposure", mapOf(
@@ -238,11 +236,13 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                                 pow(cos(it * PI), 0.1)
                             })
             ))
+            val exposureTimer = Timer()
+            exposureTimer.init()
             val exp: suspend () -> (Double) -> Unit = {
                 gl.into(exposureFBO, postProcess(gl, shaderExposure.getAsync(),
                         sceneBuffer) {
-                    exposureSync.tick()
-                    val delta = exposureSync.delta()
+                    val tickDiff = exposureTimer.tick()
+                    val delta = Timer.toDelta(tickDiff).coerceIn(0.0001, 0.1)
                     setUniform1f(gl, 4, (delta * 0.5).toFloat())
                 })
             }
@@ -302,7 +302,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
     }
 
     fun render(gl: GL): suspend () -> (Double) -> Unit {
-        val scapes = engine.component(ScapesClient.COMPONENT)
+        val scapes = engine[ScapesClient.COMPONENT]
         val resolutionMultiplier = scapes.resolutionMultiplier
         val width = round(gl.contentWidth * resolutionMultiplier)
         val height = round(gl.contentHeight * resolutionMultiplier)

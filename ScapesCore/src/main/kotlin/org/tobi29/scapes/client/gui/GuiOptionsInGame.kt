@@ -17,25 +17,28 @@
 package org.tobi29.scapes.client.gui
 
 import org.tobi29.scapes.client.states.GameStateGameMP
+import org.tobi29.scapes.engine.ScapesEngineConfig
+import org.tobi29.scapes.engine.fullscreen
 import org.tobi29.scapes.engine.gui.GuiAction
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton
 import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiStyle
+import org.tobi29.scapes.engine.setVolume
+import org.tobi29.scapes.engine.volume
 
 class GuiOptionsInGame(state: GameStateGameMP,
                        style: GuiStyle) : GuiMenuSingle(state,
         "Options", style) {
     init {
+        val config = state.engine[ScapesEngineConfig.COMPONENT]
         val musicVolume = row(pane) {
-            slider(it, "Music",
-                    state.engine.config.volume("music"))
+            slider(it, "Music", config.volume("music"))
         }
         val soundVolume = row(pane) {
-            slider(it, "Sound",
-                    state.engine.config.volume("sound"))
+            slider(it, "Sound", config.volume("sound"))
         }
         val fullscreen: GuiComponentTextButton
-        if (state.engine.config.fullscreen) {
+        if (config.fullscreen) {
             fullscreen = row(pane) { button(it, "Fullscreen: ON") }
         } else {
             fullscreen = row(pane) { button(it, "Fullscreen: OFF") }
@@ -46,18 +49,18 @@ class GuiOptionsInGame(state: GameStateGameMP,
         selection(fullscreen)
 
         musicVolume.on(GuiEvent.CHANGE) { event ->
-            state.engine.config.setVolume("music", musicVolume.value())
+            config.setVolume("music", musicVolume.value())
         }
         soundVolume.on(GuiEvent.CHANGE) { event ->
-            state.engine.config.setVolume("sound", soundVolume.value())
+            config.setVolume("sound", soundVolume.value())
         }
         fullscreen.on(GuiEvent.CLICK_LEFT) { event ->
-            if (!state.engine.config.fullscreen) {
+            if (!config.fullscreen) {
                 fullscreen.setText("Fullscreen: ON")
-                state.engine.config.fullscreen = true
+                config.fullscreen = true
             } else {
                 fullscreen.setText("Fullscreen: OFF")
-                state.engine.config.fullscreen = false
+                config.fullscreen = false
             }
             state.engine.container.updateContainer()
         }

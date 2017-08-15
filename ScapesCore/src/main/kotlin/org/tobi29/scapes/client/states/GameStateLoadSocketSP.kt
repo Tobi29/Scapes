@@ -42,7 +42,7 @@ class GameStateLoadSocketSP(private var source: WorldSource?,
                             engine: ScapesEngine,
                             private val scene: Scene) : GameState(
         engine) {
-    private val scapes = engine.component(ScapesClient.COMPONENT)
+    private val scapes = engine[ScapesClient.COMPONENT]
     private var step = 0
     private var server: ScapesServer? = null
     private var gui: GuiLoading? = null
@@ -116,7 +116,7 @@ class GameStateLoadSocketSP(private var source: WorldSource?,
                                         e.message ?: "", engine))
                     }
 
-                    scapes.connection.addConnection { worker, connection ->
+                    engine[ConnectionManager.COMPONENT].addConnection { worker, connection ->
                         val channel = try {
                             connect(worker, address)
                         } catch (e: Exception) {

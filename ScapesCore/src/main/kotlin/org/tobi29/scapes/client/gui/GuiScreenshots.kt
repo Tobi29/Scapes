@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.client.gui
 
+import org.tobi29.scapes.client.DialogProvider
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
@@ -28,7 +29,7 @@ class GuiScreenshots(state: GameState,
                      previous: Gui,
                      style: GuiStyle) : GuiMenuSingle(
         state, "Screenshots", previous, style) {
-    private val scapes = engine.component(ScapesClient.COMPONENT)
+    private val scapes = engine[ScapesClient.COMPONENT]
     private val scrollPane: GuiComponentScrollPaneViewport
 
     init {
@@ -87,7 +88,9 @@ class GuiScreenshots(state: GameState,
             }
             save.on(GuiEvent.CLICK_LEFT) {
                 try {
-                    scapes.dialogs.saveScreenshotDialog { copy(path, it) }
+                    state.engine[DialogProvider.COMPONENT].saveScreenshotDialog {
+                        copy(path, it)
+                    }
                 } catch (e: IOException) {
                     logger.warn { "Failed to export screenshot: $e" }
                 }

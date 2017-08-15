@@ -32,7 +32,7 @@ class GuiChestInventory(container: EntityChestClient,
             var xx: Int
             var yy = 91
             val buttons = ArrayList<GuiComponent>(10)
-            for (i in 0..inventory.size() - 1) {
+            for (i in 0 until inventory.size()) {
                 if (++x >= 10) {
                     y++
                     yy = y * 35 + 91

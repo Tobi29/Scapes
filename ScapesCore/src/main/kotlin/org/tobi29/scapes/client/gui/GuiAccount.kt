@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.client.gui
 
+import org.tobi29.scapes.client.DialogProvider
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.GameState
@@ -37,7 +38,7 @@ class GuiAccount(state: GameState,
     private var nickname = ""
 
     init {
-        val scapes = engine.component(ScapesClient.COMPONENT)
+        val scapes = engine[ScapesClient.COMPONENT]
         keyPair = account.keyPair()
         nickname = account.nickname()
         pane.addVert(16.0, 5.0, -1.0, 18.0) { GuiComponentText(it, "Key:") }
@@ -109,7 +110,7 @@ consist of letters and digits.
         skin.on(GuiEvent.CLICK_LEFT) {
             try {
                 val path = scapes.home.resolve("Skin.png")
-                scapes.dialogs.openSkinDialog { _, stream ->
+                state.engine[DialogProvider.COMPONENT].openSkinDialog { _, stream ->
                     write(path) { process(stream, put(it)) }
                 }
             } catch (e: IOException) {

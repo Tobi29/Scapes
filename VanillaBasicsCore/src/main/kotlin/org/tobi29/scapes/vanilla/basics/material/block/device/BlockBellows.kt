@@ -79,7 +79,7 @@ class BlockBellows(type: VanillaMaterialType) : VanillaBlockEntity<EntityBellows
 
     override fun isTransparent(data: Int) = true
 
-    override fun lightTrough(data: Int) = -1
+    override fun lightTrough(data: Int) = (-1).toByte()
 
     override fun connectStage(terrain: TerrainClient,
                               x: Int,

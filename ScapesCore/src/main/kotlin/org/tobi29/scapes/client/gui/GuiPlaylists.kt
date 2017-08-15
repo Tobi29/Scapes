@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.client.gui
 
+import org.tobi29.scapes.client.DialogProvider
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
@@ -29,7 +30,7 @@ class GuiPlaylists(state: GameState,
                    previous: Gui,
                    style: GuiStyle) : GuiMenuDouble(
         state, "Playlists", "Add", "Back", previous, style) {
-    private val scapes = engine.component(ScapesClient.COMPONENT)
+    private val scapes = engine[ScapesClient.COMPONENT]
     private val scrollPane: GuiComponentScrollPaneViewport
     private var playlist = ""
 
@@ -51,7 +52,7 @@ class GuiPlaylists(state: GameState,
             try {
                 val directory = scapes.home.resolve(
                         "playlists").resolve(playlist)
-                scapes.dialogs.openMusicDialog { name, stream ->
+                state.engine[DialogProvider.COMPONENT].openMusicDialog { name, stream ->
                     write(directory.resolve(name)) { process(stream, put(it)) }
                     updateTitles(playlist)
                 }

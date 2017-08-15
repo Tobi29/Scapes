@@ -16,44 +16,16 @@
 
 package org.tobi29.scapes.desktop
 
-import org.tobi29.scapes.VERSION
 import org.tobi29.scapes.client.DialogProvider
-import org.tobi29.scapes.client.InputManagerScapes
-import org.tobi29.scapes.engine.Game
-import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.ContainerGLFW
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.PlatformDialogs
 import org.tobi29.scapes.engine.input.FileType
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
-import org.tobi29.scapes.engine.utils.io.filesystem.FileCache
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.io.filesystem.createDirectories
 
-internal class ScapesDesktop(
-        val engine: ScapesEngine,
-        val home: FilePath,
-        val pluginCache: FilePath,
+internal class DialogProviderDesktop(
         private val container: ContainerGLFW?
-) : Game, DialogProvider {
-    override val name = "Scapes"
-    override val id = "Scapes"
-    override val version = VERSION
-
-    override fun init() {
-        val playlistsPath = home.resolve("playlists")
-        createDirectories(playlistsPath.resolve("day"))
-        createDirectories(playlistsPath.resolve("night"))
-        createDirectories(playlistsPath.resolve("battle"))
-        createDirectories(home.resolve("plugins"))
-        createDirectories(home.resolve("screenshots"))
-        createDirectories(pluginCache)
-        FileCache.check(pluginCache)
-    }
-
-    override fun dispose() {
-        engine.unregisterComponent(InputManagerScapes.COMPONENT)
-    }
-
+) : DialogProvider {
     override fun openMusicDialog(result: (String, ReadableByteStream) -> Unit) {
         container?.let { container ->
             container.exec {

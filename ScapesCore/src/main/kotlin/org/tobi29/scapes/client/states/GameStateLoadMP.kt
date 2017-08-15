@@ -39,7 +39,7 @@ class GameStateLoadMP(private val address: RemoteAddress,
     private var gui: GuiLoading? = null
 
     override fun init() {
-        val scapes = engine.component(ScapesClient.COMPONENT)
+        val scapes = engine[ScapesClient.COMPONENT]
         gui = GuiLoading(this, engine.guiStyle).apply {
             setProgress("Connecting...", 0.0)
             engine.guiStack.add("20-Progress", this)
@@ -55,11 +55,11 @@ class GameStateLoadMP(private val address: RemoteAddress,
                     GameStateServerDisconnect(e.message ?: "", engine))
         }
 
-        scapes.connection.addConnection { worker, connection ->
+        engine[ConnectionManager.COMPONENT].addConnection { worker, connection ->
             val ssl = SSLHandle()
             try {
                 connect(worker, connection, ssl)
-            } catch(e: SSLCertificateException) {
+            } catch (e: SSLCertificateException) {
                 val certificates = e.certificates
                 gui?.let { gui ->
                     engine.guiStack.remove(gui)
@@ -96,7 +96,7 @@ class GameStateLoadMP(private val address: RemoteAddress,
     private suspend fun connect(worker: ConnectionWorker,
                                 connection: Connection,
                                 ssl: SSLHandle) {
-        val scapes = engine.component(ScapesClient.COMPONENT)
+        val scapes = engine[ScapesClient.COMPONENT]
 
         val channel = connect(worker, address)
         try {

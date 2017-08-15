@@ -17,7 +17,6 @@
 package org.tobi29.scapes.vanilla.basics.world.tree
 
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.math.Random
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
@@ -81,7 +80,7 @@ object TreeSequoia : Tree {
                 }
                 if (leavesSize > 1) {
                     val branchCount = leavesSize.toInt() / 3
-                    for (i in -1..branchCount - 1) {
+                    for (i in -1 until branchCount) {
                         val dir = random.nextDouble() * TWO_PI
                         val distance = (1.0 - sqr(
                                 1.0 - random.nextDouble())) * leavesSize
@@ -100,12 +99,10 @@ object TreeSequoia : Tree {
             val yy = floor(sinTable(dir) * 2.0f)
             branches.add(Pair(Vector3i(x, y, z + size),
                     Vector3i(x + xx, y + yy, z + size + 1)))
-            for (branch in branches) {
-                TreeUtil.makeBranch(terrain, branch.first, branch.second,
-                        materials.log, data)
-                TreeUtil.makeLeaves(terrain, branch.second.x, branch.second.y,
-                        branch.second.z, materials.leaves, data,
-                        random.nextInt(3) + 4)
+            for ((start, end) in branches) {
+                TreeUtil.makeBranch(terrain, start, end, materials.log, data)
+                TreeUtil.makeLeaves(terrain, end.x, end.y, end.z,
+                        materials.leaves, data, random.nextInt(3) + 4)
             }
         }
     }

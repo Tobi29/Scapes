@@ -48,7 +48,7 @@ object NewClientConnection {
                     account: Account,
                     loadingDistance: Int,
                     progress: (String) -> Unit): Pair<Plugins, Int>? {
-        val scapes = engine.component(ScapesClient.COMPONENT)
+        val scapes = engine[ScapesClient.COMPONENT]
 
         // Send header
         channel.outputStream.put(ConnectionInfo.header())
@@ -86,7 +86,7 @@ object NewClientConnection {
         val length = channel.inputStream.getInt()
         val plugins = ArrayList<PluginFile?>(length)
         val pluginRequests = ArrayList<Int>(length)
-        for (i in 0..length - 1) {
+        for (i in 0 until length) {
             val id = channel.inputStream.getString()
             val version: Version
             val scapesVersion: Version

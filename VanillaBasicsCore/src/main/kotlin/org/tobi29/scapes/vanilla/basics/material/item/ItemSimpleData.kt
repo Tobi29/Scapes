@@ -35,7 +35,7 @@ abstract class ItemSimpleData(type: VanillaMaterialType) : VanillaItem(type) {
     protected abstract fun texture(data: Int): String?
 
     override fun registerTextures(registry: TerrainTextureRegistry) {
-        textures = (0..types() - 1).asSequence().map {
+        textures = (0 until types()).asSequence().map {
             val texture = texture(it) ?: return@map null
             registry.registerTexture(texture)
         }.toArray()

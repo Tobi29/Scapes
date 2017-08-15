@@ -124,7 +124,7 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
         val xs = cos(dir)
         val ys = sin(dir)
         dir = pow(random.nextDouble(), 6.0) * 20.0 + 0.2
-        for (i in 0..random.nextInt(30) + 4 - 1) {
+        for (i in 0 until random.nextInt(30) + 4) {
             xx += xs * random.nextDouble() * dir
             yy += ys * random.nextDouble() * dir
             val end = Vector3d(xx, yy, zz)

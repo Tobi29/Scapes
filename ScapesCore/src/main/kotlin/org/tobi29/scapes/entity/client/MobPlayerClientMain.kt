@@ -173,7 +173,7 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
                         pane.z, data)
                 val b = type.particleColorB(pane.face, terrain, pane.x, pane.y,
                         pane.z, data)
-                for (i in 0..amount - 1) {
+                for (i in 0 until amount) {
                     emitter.add { instance ->
                         val random = threadLocalRandom()
                         val time = 3.0f

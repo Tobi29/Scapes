@@ -273,8 +273,7 @@ class InputModeKeyboard(engine: ScapesEngine,
                 if (event.key == ControllerKey.KEY_F2) {
                     engine.graphics.requestScreenshot { image ->
                         engine.taskExecutor.runTask({
-                            val scapes = engine.component(
-                                    ScapesClient.COMPONENT)
+                            val scapes = engine[ScapesClient.COMPONENT]
                             val path = scapes.home.resolve(
                                     "screenshots").resolve(
                                     "${System.currentTimeMillis()}.png")
@@ -414,8 +413,8 @@ class InputModeKeyboard(engine: ScapesEngine,
     override fun createControlsGUI(state: GameState,
                                    prev: Gui): Gui {
         return GuiControlsDefault(state, prev,
-                state.engine.component(ScapesClient.COMPONENT), tagMap,
-                controller, prev.style)
+                state.engine[ScapesClient.COMPONENT], tagMap, controller,
+                prev.style)
     }
 
     override fun walk(): Vector2d {

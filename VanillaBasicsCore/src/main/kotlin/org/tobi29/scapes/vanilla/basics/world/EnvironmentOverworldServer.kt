@@ -225,7 +225,7 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                                 pos.intX(), pos.intY(), pos.intZ())
                         inventories.forEachModify { id, inventory ->
                             var flag = false
-                            for (i in 0..inventory.size() - 1) {
+                            for (i in 0 until inventory.size()) {
                                 val type = inventory.item(i).material()
                                 if (type is ItemHeatable) {
                                     type.heat(inventory.item(i), temperature)
@@ -540,14 +540,14 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                 (y + 15).toDouble())
         val temperature11 = climateGenerator.temperature(
                 (x + 15).toDouble(), (y + 15).toDouble())
-        for (yy in 0..dx - 1) {
+        for (yy in 0 until dx) {
             val yyy = yy + y
             val mixY = yy / 15.0
             val humidity0 = mix(humidity00, humidity01, mixY)
             val humidity1 = mix(humidity10, humidity11, mixY)
             val temperature0 = mix(temperature00, temperature01, mixY)
             val temperature1 = mix(temperature10, temperature11, mixY)
-            for (xx in 0..dy - 1) {
+            for (xx in 0 until dy) {
                 if (random.nextInt(chance) == 0) {
                     val xxx = xx + x
                     val zz = terrain.highestTerrainBlockZAt(xxx, yyy)

@@ -38,7 +38,7 @@ class AnimatedTerrainTexture(buffer: ByteBuffer,
 
     init {
         val frameSize = width * width shl 2
-        frames = (0..height / width - 1).asSequence().map {
+        frames = (0 until height / width).asSequence().map {
             buffer.position(it * frameSize)
             buffer.limit(buffer.position() + frameSize)
             generateMipMaps(buffer, engine, width, width, 4,

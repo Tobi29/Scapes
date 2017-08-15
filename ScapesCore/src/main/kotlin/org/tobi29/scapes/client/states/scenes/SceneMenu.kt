@@ -155,7 +155,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
     }
 
     protected open fun loadTextures() {
-        val scapes = engine.component(ScapesClient.COMPONENT)
+        val scapes = engine[ScapesClient.COMPONENT]
         val saves = scapes.saves
         val random = threadLocalRandom()
         try {

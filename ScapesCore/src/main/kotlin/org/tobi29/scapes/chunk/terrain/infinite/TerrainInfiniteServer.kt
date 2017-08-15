@@ -222,7 +222,7 @@ class TerrainInfiniteServer(override val world: WorldServer,
                     for (chunk in chunkManager.stream()) {
                         if (random.nextInt(
                                 spawner.chunkChance()) == 0 && chunk.isLoaded) {
-                            for (i in 0..spawner.spawnAttempts() - 1) {
+                            for (i in 0 until spawner.spawnAttempts()) {
                                 val x = random.nextInt(chunk.size.x)
                                 val y = random.nextInt(chunk.size.y)
                                 val z = random.nextInt(chunk.size.z)

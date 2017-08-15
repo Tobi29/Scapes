@@ -58,7 +58,7 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
     private var init = false
 
     init {
-        val scapes = engine.component(ScapesClient.COMPONENT)
+        val scapes = engine[ScapesClient.COMPONENT]
         chatHistory = ChatHistory(engine.events)
         playlist = Playlist(scapes.home.resolve("playlists"), engine)
         client = clientSupplier(this)

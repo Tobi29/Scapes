@@ -63,7 +63,7 @@ class ChunkPopulatorOverworld(world: WorldServer,
         val gen = terrain.generator as ChunkGeneratorOverworld
         val materials = plugin.materials
         val passes = dx * dy / 64
-        for (i in 0..passes - 1) {
+        for (i in 0 until passes) {
             if (random.nextInt(400) == 0) {
                 val xx = random.nextInt(dx) + x
                 val yy = random.nextInt(dy) + y
@@ -122,9 +122,9 @@ class ChunkPopulatorOverworld(world: WorldServer,
         val biome = biomes[biomeGenerator.get((x + (dx shr 1)).toDouble(),
                 (y + (dy shr 1)).toDouble())]
         biome?.biomeDecorator(x + dx / 2, y + dy / 2)?.let { decorator ->
-            for (yyy in 0..dy - 1) {
+            for (yyy in 0 until dy) {
                 val yyyy = yyy + y
-                for (xxx in 0..dx - 1) {
+                for (xxx in 0 until dx) {
                     val xxxx = xxx + x
                     decorator.decorate(terrain, xxxx, yyyy, materials, random)
                 }
@@ -148,7 +148,7 @@ class ChunkPopulatorOverworld(world: WorldServer,
         init {
             val decorators = ArrayList<BiomeDecorator>()
             collection.forEach { decorator ->
-                for (i in 0..decorator.weight() - 1) {
+                for (i in 0 until decorator.weight()) {
                     decorators.add(decorator)
                 }
             }

@@ -28,5 +28,5 @@ dependencies {
     compile rootProject.ext.scapesEngineSQLFramework
     compile rootProject.ext.scapesEngineTagStructureJSON
     compile rootProject.ext.scapesEngineGenerationUtils
-    compile rootProject.ext.threeten
+    compile rootProject.ext.scapesEngineChronoUtils
 }

@@ -138,7 +138,7 @@ abstract class BlockSimpleDataTextured(type: VanillaMaterialType) : BlockSimpleD
     protected abstract fun texture(data: Int): String
 
     override fun registerTextures(registry: TerrainTextureRegistry) {
-        textures = (0..types() - 1).asSequence().map {
+        textures = (0 until types()).asSequence().map {
             registry.registerTexture(texture(it))
         }.toArray()
     }

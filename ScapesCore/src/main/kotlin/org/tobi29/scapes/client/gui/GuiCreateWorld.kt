@@ -44,7 +44,7 @@ class GuiCreateWorld(state: GameState,
     private var environmentID = 0
 
     init {
-        val scapes = engine.component(ScapesClient.COMPONENT)
+        val scapes = engine[ScapesClient.COMPONENT]
         val saves = scapes.saves
         pane.addVert(16.0, 5.0, -1.0, 18.0) {
             GuiComponentText(it, "Name:")

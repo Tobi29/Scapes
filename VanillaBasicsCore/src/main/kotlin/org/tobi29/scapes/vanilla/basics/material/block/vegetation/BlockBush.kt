@@ -109,7 +109,7 @@ class BlockBush(type: VanillaMaterialType) : VanillaBlock(type) {
 
     override fun isTransparent(data: Int) = true
 
-    override fun lightTrough(data: Int) = -3
+    override fun lightTrough(data: Int) = (-3).toByte()
 
     override fun connectStage(terrain: TerrainClient,
                               x: Int,

@@ -53,7 +53,7 @@ class ControlPanelGraph(parent: Composite,
         val colorRed = display.getSystemColor(SWT.COLOR_RED)
         canvas.addPaintListener { event ->
             val size = canvas.size
-            for (i in 1..data.size - 1) {
+            for (i in 1 until data.size) {
                 var x = i - this.i
                 if (x < 1) {
                     x += data.size

@@ -15,12 +15,13 @@
  */
 package org.tobi29.scapes.client.gui
 
-import org.threeten.bp.LocalDate
 import org.threeten.bp.Month
+import org.tobi29.scapes.engine.chrono.timeZoneLocal
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.sound.CLICK
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.math.threadLocalRandom
+import org.tobi29.scapes.engine.utils.systemClock
 
 class GuiComponentLogo(parent: GuiLayoutData,
                        height: Int,
@@ -60,16 +61,16 @@ class GuiComponentLogo(parent: GuiLayoutData,
 
         private fun splash(): String {
             val text: String
-            val date = LocalDate.now()
-            if (date.dayOfMonth == 1 && date.month == Month.APRIL) {
+            val (date, _) = timeZoneLocal.encode(systemClock()).first()
+            if (date.day == 1 && date.month == Month.APRIL) {
                 text = "COMIC\nSANS!!!"
-            } else if (date.dayOfMonth == 29 && date.month == Month.FEBRUARY) {
+            } else if (date.day == 29 && date.month == Month.FEBRUARY) {
                 text = "Best day\never!"
-            } else if (date.dayOfMonth == 24 && date.month == Month.DECEMBER) {
+            } else if (date.day == 24 && date.month == Month.DECEMBER) {
                 text = "Merry\nChristmas!"
-            } else if (date.dayOfMonth == 1 && date.month == Month.JANUARY) {
+            } else if (date.day == 1 && date.month == Month.JANUARY) {
                 text = "Happy new\nyear!"
-            } else if (date.dayOfMonth == 3 && date.month == Month.MARCH) {
+            } else if (date.day == 3 && date.month == Month.MARCH) {
                 text = "${String(CharArray(1024, { ' ' }))}Aspect ratio!?!"
             } else {
                 val random = threadLocalRandom()

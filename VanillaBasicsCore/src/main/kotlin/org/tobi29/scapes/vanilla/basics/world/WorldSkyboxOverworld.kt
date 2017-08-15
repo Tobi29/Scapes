@@ -207,7 +207,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                 val amount = round(downfallIntensity * 32.0)
                 val emitter = world.scene.particles().emitter(
                         ParticleEmitterRain::class.java)
-                for (i in 0..amount - 1) {
+                for (i in 0 until amount) {
                     emitter.add { instance ->
                         val random = threadLocalRandom()
                         instance.pos.set(random.nextFloat() * 32.0f - 16.0f,
@@ -223,7 +223,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                 val amount = round(downfallIntensity * 12.0)
                 val emitter = world.scene.particles().emitter(
                         ParticleEmitterSnow::class.java)
-                for (i in 0..amount - 1) {
+                for (i in 0 until amount) {
                     emitter.add { instance ->
                         val random = threadLocalRandom()
                         instance.pos.set(random.nextFloat() * 32.0f - 16.0f,

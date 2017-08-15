@@ -58,7 +58,7 @@ class BlockStraw(type: VanillaMaterialType) : BlockSimpleDataTextured(type) {
         return "VanillaBasics:sound/blocks/Foliage.ogg"
     }
 
-    override fun lightTrough(data: Int) = -5
+    override fun lightTrough(data: Int) = (-5).toByte()
 
     override fun name(item: ItemStack): String {
         when (item.data()) {

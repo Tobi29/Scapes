@@ -50,7 +50,7 @@ class MobPlayerServerVB(type: EntityType<*, *>,
             inventories.modify<List<ItemStack>>(
                     "Container") { inventory ->
                 val items = ArrayList<ItemStack>()
-                for (i in 0..inventory.size() - 1) {
+                for (i in 0 until inventory.size()) {
                     inventory.item(i).take()?.let { items.add(it) }
                 }
                 items

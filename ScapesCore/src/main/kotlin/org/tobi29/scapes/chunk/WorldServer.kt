@@ -19,6 +19,7 @@ import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.chunk.terrain.isTransparent
 import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.utils.*
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.engine.utils.math.sqrt
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
@@ -27,6 +28,7 @@ import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.engine.utils.task.Joiner
 import org.tobi29.scapes.engine.utils.task.TaskExecutor
+import org.tobi29.scapes.engine.utils.task.Timer
 import org.tobi29.scapes.engine.utils.task.UpdateLoop
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.server.EntityServer
@@ -55,7 +57,6 @@ class WorldServer(worldFormat: WorldFormat,
     private val spawners = ConcurrentHashSet<MobSpawner>()
     val terrain: TerrainServer
     val environment: EnvironmentServer
-    private val sync = Sync(20.0, 5000000000L, true, "Server-Update")
     private val players = ConcurrentHashMap<String, MobPlayerServer>()
     private var joiner: Joiner? = null
     private val entityCounts: Map<CreatureType, AtomicInteger> = EnumMap<CreatureType, AtomicInteger>().apply {
@@ -168,7 +169,8 @@ class WorldServer(worldFormat: WorldFormat,
         entityAdded(player)
     }
 
-    @Synchronized fun removePlayer(player: MobPlayerServer) {
+    @Synchronized
+    fun removePlayer(player: MobPlayerServer) {
         players.remove(player.nickname())
         entityRemoved(player)
     }
@@ -299,17 +301,23 @@ class WorldServer(worldFormat: WorldFormat,
     fun start() {
         joiner = taskExecutor.runThread({ joiner ->
             thread = Thread.currentThread()
-            sync.init()
+            val timer = Timer()
+            val maxDiff = Timer.toDiff(20.0)
+            timer.init()
             while (!joiner.marked) {
-                if (!players.isEmpty()) {
+                val freewheel = if (!players.isEmpty()) {
                     profilerSection("Tick") { update(0.05) }
-                    if (players.values.asSequence().filter { it.isActive() }.any()) {
-                        sync.cap()
-                    } else {
-                        sync.tick()
-                    }
+                    !players.values.asSequence().filter { it.isActive() }.any()
                 } else {
-                    sync.cap()
+                    false
+                }
+                if (freewheel) {
+                    timer.tick()
+                } else {
+                    timer.cap(maxDiff, ::sleepNanos, 5000000000L,
+                            logSkip = { skip ->
+                                logger.warn { "World $id is skipping $skip nanoseconds!" }
+                            })
                 }
             }
             thread = null
@@ -326,4 +334,6 @@ class WorldServer(worldFormat: WorldFormat,
             !exceptions.contains(it)
         }.forEach { it.send(packet) }
     }
+
+    companion object : KLogging()
 }

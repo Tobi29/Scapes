@@ -89,9 +89,9 @@ class TerrainViewerCanvas(parent: Composite,
                 val maxx = minx + CHUNK_SIZE
                 val maxy = miny + CHUNK_SIZE
                 var i = 0
-                for (y in miny..maxy - 1) {
+                for (y in miny until maxy) {
                     val yy = y * scale
-                    for (x in minx..maxx - 1) {
+                    for (x in minx until maxx) {
                         val xx = x * scale
                         supplier.color(xx, yy, output)
                         val h = clamp(output.h, 0.0, 1.0)

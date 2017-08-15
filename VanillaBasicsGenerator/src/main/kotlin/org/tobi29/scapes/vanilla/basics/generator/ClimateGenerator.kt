@@ -65,7 +65,7 @@ class ClimateGenerator private constructor(private val temperatureNoise: Simplex
             dayTime -= 1.0
             day++
         }
-        val axialTilt = -23.44.toRad()
+        val axialTilt = (-23.44).toRad()
         sunDeclination = asin(sin(axialTilt) * sin(season() * TWO_PI))
         sunDeclinationSin = sin(sunDeclination)
         sunDeclinationCos = cos(sunDeclination)

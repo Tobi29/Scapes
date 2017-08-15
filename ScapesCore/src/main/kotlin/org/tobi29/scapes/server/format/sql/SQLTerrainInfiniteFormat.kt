@@ -19,9 +19,9 @@ package org.tobi29.scapes.server.format.sql
 import org.tobi29.scapes.engine.sql.SQLQuery
 import org.tobi29.scapes.engine.sql.SQLReplace
 import org.tobi29.scapes.engine.sql.invoke
-import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.ByteBuffer
 import org.tobi29.scapes.engine.utils.io.ByteBufferStream
+import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
 import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
 import org.tobi29.scapes.engine.utils.logging.KLogging
@@ -49,13 +49,13 @@ class SQLTerrainInfiniteFormat(private val getChunk: SQLQuery,
     @Synchronized override fun putChunkTags(
             chunks: List<Pair<Vector2i, TagMap>>) {
         val values = ArrayList<Array<Any>>(chunks.size)
-        for (chunk in chunks) {
+        for ((pos, map) in chunks) {
             stream.buffer().clear()
-            chunk.second.writeBinary(stream, 1)
+            map.writeBinary(stream, 1)
             stream.buffer().flip()
             val array = ByteArray(stream.buffer().remaining())
             stream.buffer().get(array)
-            values.add(arrayOf(chunk.first.x, chunk.first.y, array))
+            values.add(arrayOf(pos.x, pos.y, array))
             if (values.size >= 64) {
                 replaceChunk(*values.toTypedArray())
                 values.clear()

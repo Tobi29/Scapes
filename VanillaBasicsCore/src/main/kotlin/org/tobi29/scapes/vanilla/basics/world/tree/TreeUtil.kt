@@ -165,7 +165,7 @@ object TreeUtil {
                        dirY: Int) {
         var xx = x
         var yy = y
-        for (i in 0..length - 1) {
+        for (i in 0 until length) {
             val h = round(sinTable(i / length * PI) * height)
             changeBlock(terrain, xx, yy, z + h, logType, logData)
             xx += dirX
@@ -173,7 +173,7 @@ object TreeUtil {
         }
         xx = x
         yy = y
-        for (i in 0..length - 1) {
+        for (i in 0 until length) {
             val h = round(sinTable(i / length * PI) * height)
             changeBlock(terrain, xx, yy, z + h + 1, type, data)
             changeBlock(terrain, xx - 1, yy, z + h, type, data)
@@ -192,7 +192,7 @@ object TreeUtil {
                    type: BlockType,
                    data: Int,
                    maxDepth: Int) {
-        for (i in 0..maxDepth - 1) {
+        for (i in 0 until maxDepth) {
             if (terrain.type(x, y, z - i).isReplaceable(terrain, x, y, z - i)) {
                 terrain.typeData(x, y, z - i, type, data)
             } else {

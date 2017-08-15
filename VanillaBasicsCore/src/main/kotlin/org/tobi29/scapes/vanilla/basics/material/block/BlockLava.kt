@@ -102,7 +102,7 @@ class BlockLava(type: VanillaMaterialType) : VanillaBlock(type) {
 
     override fun lightEmit(data: Int) = 15.toByte()
 
-    override fun lightTrough(data: Int) = -4
+    override fun lightTrough(data: Int) = (-4).toByte()
 
     override fun connectStage(terrain: TerrainClient,
                               x: Int,
